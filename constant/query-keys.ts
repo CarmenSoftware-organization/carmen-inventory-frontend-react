@@ -1,0 +1,190 @@
+export const QUERY_KEYS = {
+  ACTIVITY_LOGS: "activity-logs",
+  NOTIFICATIONS: "notifications",
+  NOTIFICATION_DETAIL: "notification-detail",
+  NOTIFICATION_TEMPLATES: "notification-templates",
+  USER_ACTIVITY: "user-activity",
+  ADJUSTMENT_TYPES: "adjustment-types",
+  APPROVAL_PENDING: "approval-pending",
+  APPROVAL_PENDING_SUMMARY: "approval-pending-summary",
+  APPLICATION_ROLES: "application-roles",
+  BUSINESS_TYPES: "business-types",
+  CERTIFICATIONS: "vendor-master-certificates",
+  VENDOR_CERTIFICATES: "vendor-certificates",
+  CN_REASONS: "cn-reasons",
+  CN_REASONS_CONFIG: "cn-reasons-config",
+  CREDIT_NOTES: "credit-notes",
+  CREDIT_NOTE_COMMENTS: "credit-note-comments",
+  CREDIT_TERMS: "credit-terms",
+  CUISINES: "cuisines",
+  CURRENCIES: "currencies",
+  DASHBOARD_DATASETS: "dashboard-datasets",
+  DASHBOARD_WIDGETS: "dashboard-widgets",
+  MY_DASHBOARD_WIDGETS: "my-dashboard-widgets",
+  RECIPE_CATEGORIES: "recipe-categories",
+  RECIPE_EQUIPMENT: "recipe-equipment",
+  EQUIPMENT_CATEGORIES: "equipment-categories",
+  RECIPE_EQUIPMENT_CATEGORIES: "recipe-equipment-categories",
+  RECIPES: "recipes",
+  DELIVERY_POINTS: "delivery-points",
+  DEPARTMENTS: "departments",
+  DOCUMENTS: "documents",
+  EXCHANGE_RATES: "exchange-rates",
+  EXTRA_COSTS: "extra-costs",
+  GOODS_RECEIVE_NOTES: "goods-receive-notes",
+  GOODS_RECEIVE_NOTES_BY_VENDOR: "goods-receive-notes-by-vendor",
+  GOODS_RECEIVE_NOTES_BY_VENDOR_FOR_CN:
+    "goods-receive-notes-by-vendor-for-cn",
+  GOODS_RECEIVE_NOTE_PRODUCTS: "goods-receive-note-products",
+  GOODS_RECEIVE_NOTE_PRODUCT_LOCATIONS:
+    "goods-receive-note-product-locations",
+  GOODS_RECEIVE_NOTE_LOCATIONS: "goods-receive-note-locations",
+  GOODS_RECEIVE_NOTE_LOCATION_PRODUCTS:
+    "goods-receive-note-location-products",
+  GOODS_RECEIVE_NOTE_COMMENTS: "goods-receive-note-comments",
+  INVENTORY_ADJUSTMENTS: "inventory-adjustments",
+  TRANSACTIONS: "transactions",
+  LOCATIONS: "locations",
+  LOCATIONS_BY_PRODUCT: "locations-by-product",
+  MY_PENDING_PURCHASE_ORDERS: "my-pending-purchase-orders",
+  MY_PENDING_PURCHASE_ORDERS_COUNT: "my-pending-purchase-orders-count",
+  MY_PENDING_PURCHASE_REQUESTS: "my-pending-purchase-requests",
+  MY_PENDING_PURCHASE_REQUESTS_COUNT: "my-pending-purchase-requests-count",
+  MY_PENDING_STORE_REQUISITIONS: "my-pending-store-requisitions",
+  MY_PENDING_STORE_REQUISITIONS_COUNT: "my-pending-store-requisitions-count",
+  PERIODS: "periods",
+  PERIOD_ENDS: "period-ends",
+  PERMISSIONS: "permissions",
+  PHYSICAL_COUNTS: "physical-counts",
+  PHYSICAL_COUNT_DETAIL_COMMENTS: "physical-count-detail-comments",
+  PHYSICAL_COUNT_PERIODS: "physical-count-periods",
+  PHYSICAL_COUNT_PERIOD_CURRENT: "physical-count-period-current",
+  PRICE_LISTS: "price-lists",
+  PRICE_LIST_ACTIVE_BY_VENDOR: "price-list-active-by-vendor",
+  PRICE_LIST_ACTIVE_VENDORS: "price-list-active-vendors",
+  PRICE_LIST_COMPARE: "price-list-compare",
+  PRICE_LIST_TEMPLATES: "price-list-templates",
+  PRODUCTS: "products",
+  PRODUCTS_BY_LOCATION: "products-by-location",
+  LOCATION_PAIR_PRODUCTS: "location-pair-products",
+  PRODUCT_INVENTORY: "product-inventory",
+  PRODUCT_ON_ORDER: "product-on-order",
+  PRODUCT_COST_BY_LOCATION_QTY: "product-cost-by-location-qty",
+  PRODUCT_LAST_RECEIVING: "product-last-receiving",
+  PRODUCT_INVENTORY_MOVEMENT: "product-inventory-movement",
+  PRODUCTS_WITH_MOVEMENT: "products-with-movement",
+  LOCATIONS_WITH_MOVEMENT: "locations-with-movement",
+  PRODUCT_ON_HAND: "product-on-hand",
+  LOCATIONS_WITH_ANY_MOVEMENT: "locations-with-any-movement",
+  PRODUCTS_WITH_MOVEMENT_AT_LOCATION: "products-with-movement-at-location",
+  PRODUCT_UNITS: "product-units",
+  PRODUCT_CATEGORIES: "product-categories",
+  PRODUCT_IMAGES: "product-images",
+  PRODUCT_MASTER_ECO_LABELS: "product-master-eco-labels",
+  PRODUCT_ECO_LABELS: "product-eco-labels",
+  PRODUCT_ITEM_GROUPS: "product-item-groups",
+  PRODUCT_SUB_CATEGORIES: "product-sub-categories",
+  PROFILE: "profile",
+  PURCHASE_ORDERS: "purchase-orders",
+  PURCHASE_ORDERS_GRN: "purchase-orders-grn",
+  PURCHASE_ORDERS_GRN_VENDORS: "purchase-orders-grn-vendors",
+  PURCHASE_ORDER_COMMENTS: "purchase-order-comments",
+  PURCHASE_ORDER_PREVIOUS_STAGES: "purchase-order-previous-stages",
+  PURCHASE_REQUESTS: "purchase-requests",
+  PURCHASE_REQUESTS_FOR_PO: "purchase-requests-for-po",
+  PURCHASE_REQUEST_COMMENTS: "purchase-request-comments",
+  PURCHASE_REQUEST_TEMPLATES: "purchase-request-templates",
+  PURCHASE_REQUEST_WORKFLOW_STAGES: "purchase-request-workflow-stages",
+  PURCHASE_REQUEST_PREVIOUS_STAGES: "purchase-request-previous-stages",
+  REPORTS: "reports",
+  REPORT_HISTORY: "report-history",
+  REPORT_TEMPLATES: "report-templates",
+  REPORT_LOOKUPS: "report-lookups",
+  REPORT_SCHEDULES: "report-schedules",
+  RUNNING_CODES: "running-codes",
+  REQUEST_PRICE_LISTS: "request-price-lists",
+  SPOT_CHECKS: "spot-checks",
+  SPOT_CHECK_CURRENT: "spot-check-current",
+  SPOT_CHECK_COMMENTS: "spot-check-comments",
+  SPOT_CHECK_DETAIL_COMMENTS: "spot-check-detail-comments",
+  STOCK_REPLENISHMENT: "stock-replenishment",
+  STORE_REQUISITIONS: "store-requisitions",
+  STORE_REQUISITION_COMMENTS: "store-requisition-comments",
+  TAX_PROFILES: "tax-profiles",
+  UNITS: "units",
+  USER_LOCATIONS: "user-locations",
+  USERS: "users",
+  VENDORS: "vendors",
+  WASTAGE_REPORTS: "wastage-reports",
+  APP_CONFIGS: "app-configs",
+  WORKFLOWS: "workflows",
+  // External
+  PRICE_LIST_EXTERNAL: "price-list-external",
+} as const;
+
+export const BU_SWITCH_CHANNEL = "bu-switch";
+
+// Type-safe query key factories
+import type { ParamsDto } from "@/types/params";
+
+export const queryKeys = {
+  purchaseRequests: {
+    all: () => [QUERY_KEYS.PURCHASE_REQUESTS] as const,
+    lists: () => [...queryKeys.purchaseRequests.all(), "list"] as const,
+    list: (buCode: string, params?: ParamsDto) =>
+      [...queryKeys.purchaseRequests.lists(), buCode, params] as const,
+    details: () => [...queryKeys.purchaseRequests.all(), "detail"] as const,
+    detail: (buCode: string, id: string) =>
+      [...queryKeys.purchaseRequests.details(), buCode, id] as const,
+    comments: (buCode: string, prId: string) =>
+      [QUERY_KEYS.PURCHASE_REQUEST_COMMENTS, buCode, prId] as const,
+  },
+  purchaseOrders: {
+    all: () => [QUERY_KEYS.PURCHASE_ORDERS] as const,
+    list: (buCode: string, params?: ParamsDto) =>
+      [...queryKeys.purchaseOrders.all(), "list", buCode, params] as const,
+    detail: (buCode: string, id: string) =>
+      [...queryKeys.purchaseOrders.all(), "detail", buCode, id] as const,
+    comments: (buCode: string, poId: string) =>
+      [QUERY_KEYS.PURCHASE_ORDER_COMMENTS, buCode, poId] as const,
+  },
+  vendors: {
+    all: () => [QUERY_KEYS.VENDORS] as const,
+    list: (buCode: string, params?: ParamsDto) =>
+      [...queryKeys.vendors.all(), "list", buCode, params] as const,
+    detail: (buCode: string, id: string) =>
+      [...queryKeys.vendors.all(), "detail", buCode, id] as const,
+  },
+  products: {
+    all: () => [QUERY_KEYS.PRODUCTS] as const,
+    list: (buCode: string, params?: ParamsDto) =>
+      [...queryKeys.products.all(), "list", buCode, params] as const,
+    detail: (buCode: string, id: string) =>
+      [...queryKeys.products.all(), "detail", buCode, id] as const,
+  },
+  goodsReceiveNotes: {
+    all: () => [QUERY_KEYS.GOODS_RECEIVE_NOTES] as const,
+    list: (buCode: string, params?: ParamsDto) =>
+      [...queryKeys.goodsReceiveNotes.all(), "list", buCode, params] as const,
+    detail: (buCode: string, id: string) =>
+      [...queryKeys.goodsReceiveNotes.all(), "detail", buCode, id] as const,
+    comments: (buCode: string, grnId: string) =>
+      [QUERY_KEYS.GOODS_RECEIVE_NOTE_COMMENTS, buCode, grnId] as const,
+  },
+  creditNotes: {
+    all: () => [QUERY_KEYS.CREDIT_NOTES] as const,
+    list: (buCode: string, params?: ParamsDto) =>
+      [...queryKeys.creditNotes.all(), "list", buCode, params] as const,
+    detail: (buCode: string, id: string) =>
+      [...queryKeys.creditNotes.all(), "detail", buCode, id] as const,
+    comments: (buCode: string, cnId: string) =>
+      [QUERY_KEYS.CREDIT_NOTE_COMMENTS, buCode, cnId] as const,
+  },
+  storeRequisitions: {
+    all: () => [QUERY_KEYS.STORE_REQUISITIONS] as const,
+    list: (buCode: string, params?: ParamsDto) =>
+      [...queryKeys.storeRequisitions.all(), "list", buCode, params] as const,
+    detail: (buCode: string, id: string) =>
+      [...queryKeys.storeRequisitions.all(), "detail", buCode, id] as const,
+  },
+} as const;

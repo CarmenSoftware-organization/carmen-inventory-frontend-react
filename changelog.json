@@ -1,0 +1,1994 @@
+{
+  "current": "1.0.1",
+  "generated_at": "2026-05-27T23:15:57.107Z",
+  "versions": [
+    {
+      "version": "1.0.1",
+      "build": "1.0.1-build.20260527.dbf5ae2b",
+      "date": "2026-05-27",
+      "commit": "dbf5ae2b",
+      "changes": {
+        "added": [
+          {
+            "scope": null,
+            "summary": "make footer version open What's New dialog, visible on mobile",
+            "hash": "5b6ef3c1",
+            "author": "Thammanoon Semapru",
+            "pr": 3
+          },
+          {
+            "scope": null,
+            "summary": "add What's New dialog with clean user-facing changelog",
+            "hash": "3d6370ce",
+            "author": "Thammanoon Semapru",
+            "pr": 3
+          },
+          {
+            "scope": null,
+            "summary": "add useWhatsNew hook tracking last-seen version",
+            "hash": "ec4a145a",
+            "author": "Thammanoon Semapru",
+            "pr": 3
+          },
+          {
+            "scope": null,
+            "summary": "add typed changelog accessor over changelog.json",
+            "hash": "b9a79b94",
+            "author": "Thammanoon Semapru",
+            "pr": 3
+          },
+          {
+            "scope": null,
+            "summary": "add changelog generator + version bump/init scripts",
+            "hash": "42ae4595",
+            "author": "Thammanoon Semapru",
+            "pr": 3
+          }
+        ],
+        "fixed": [
+          {
+            "scope": null,
+            "summary": "correct physical-count-period detail endpoint, drop dead API endpoints",
+            "hash": "6ae7a5e3",
+            "author": "Thammanoon Semapru",
+            "pr": 3
+          }
+        ],
+        "changed": []
+      }
+    },
+    {
+      "version": "1.0.0",
+      "build": "1.0.0-build.20260527.42ae4595",
+      "date": "2026-05-27",
+      "commit": "42ae4595",
+      "note": "init",
+      "changes": {
+        "added": [
+          {
+            "scope": null,
+            "summary": "add changelog generator + version bump/init scripts",
+            "hash": "42ae4595",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "dashboard",
+            "summary": "personal widget CRUD endpoints + hooks",
+            "hash": "8b1d420a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "procurement",
+            "summary": "dashboard widgets with KPI tiles",
+            "hash": "7e710b72",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "in-app AI research with mock streaming endpoint (phase 3)",
+            "hash": "17207514",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "bulk AI research dialog for selected items (phase 2.4)",
+            "hash": "776dff99",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "prompt history with LocalStorage in AI dialog (phase 2.3)",
+            "hash": "2e3d5550",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "save AI research notes back to row comment (phase 2.2)",
+            "hash": "995e7078",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "category-based prompt presets in AI dialog (phase 2.1)",
+            "hash": "d41c2dd0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "add AI research dialog on product click (phase 1)",
+            "hash": "69041873",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement spot check review workflow including details page and component updates",
+            "hash": "536128c2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement spot check review workflow with variance analysis and submission functionality",
+            "hash": "1b107258",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement comment and attachment persistence for spot check items using new hooks and API integration",
+            "hash": "330303ad",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add high_value spot check method with configuration for items and minimum value threshold",
+            "hash": "a5ee9af5",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement spot check location details page with entry and review modes",
+            "hash": "17d61946",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update spot check UI to use SearchInput, rename location ID field, and add countable status indicators",
+            "hash": "bc1c380a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enhance workflow management with improved audit tracking, visual flow indicators, and expanded row-level actions.",
+            "hash": "2a126fcc",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement automatic scroll to the first invalid form field on submission across all modules",
+            "hash": "b58ce625",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement GRN form dialogs and logic for managing GRN state and actions",
+            "hash": "37639c73",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement export functionality for period and activity log modules",
+            "hash": "b4722d6b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement export functionality for configuration list templates across all modules",
+            "hash": "09042065",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement CSV export functionality for data grids across inventory, vendor, and product management modules",
+            "hash": "41dc5036",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enable data export and print functionality across purchase order and goods receive note modules",
+            "hash": "22084032",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement print functionality for purchase request table with optimized print styles",
+            "hash": "42f37e7d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement purchase request export functionality and add global print styles",
+            "hash": "210d9e81",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add logo upload and management to BU section and clean up JSDoc comments in store requisition hooks",
+            "hash": "67932458",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement retrieval and display of existing physical count product comments with image attachment support",
+            "hash": "69fa888b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add credit note submission action and improve comment sheet attachment URLs and timestamps",
+            "hash": "7cdc47b7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement duplicate selection prevention and scroll-to-error validation for credit note forms",
+            "hash": "15e558de",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add image lightbox and direct file upload support to comment component",
+            "hash": "92eee402",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add product images component and integrate field validation error displays across product management forms",
+            "hash": "f5b5b747",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add component playground pages for buttons and status badges with documentation examples",
+            "hash": "de828799",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "modularize inventory adjustment components and implement structured form handling for creation and management",
+            "hash": "4df14168",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add delivery_point_name to type and update location form to support view-only mode and configurable status badge visibility",
+            "hash": "1515ba37",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "internationalize data grid pagination and update module landing UI layout",
+            "hash": "dd97bc74",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "auto-expand table rows containing validation errors on form submission failure",
+            "hash": "87028b8d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement store requisition comment system with new UI component and API integrations",
+            "hash": "77a25836",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add physical count submission functionality to review component",
+            "hash": "d07e856e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement physical count review module with variance tracking and submission interface",
+            "hash": "1c59a064",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add submit for review button and corresponding localization keys to physical count component",
+            "hash": "8f208324",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add physical count bulk import functionality with Excel/CSV support",
+            "hash": "73da7459",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "optimize inventory list performance with virtualization, debounced search, and a new row entry component.",
+            "hash": "5f99eb91",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update home page content for F&B specialization and add parallax hero effect",
+            "hash": "f7c8a70e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add bulk action management and selection UI for store requisition items",
+            "hash": "aacdc488",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement role-based item status management with action controls and conditional field access in store requisition table",
+            "hash": "3152aa2c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement enhanced, localized loading and error states for ProfileGate using premium UI design",
+            "hash": "9edcf552",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement ProfileGate to manage loading and error states for user profile in root layout",
+            "hash": "f78a3314",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add skeleton loader to BU switcher and update navbar layout and styling",
+            "hash": "32cdfca9",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement store requisition summary view, add status/type badges, and enhance requisition table and form components",
+            "hash": "a5f0ec4e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "refactor form skeleton components to support new soft sheet layout with hero and sidebar sections",
+            "hash": "030f74fe",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement request price list workflow and enhance vendor management UI with localized messaging and improved data handling.",
+            "hash": "6bcc7d84",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add UI components for Price List Template including hero stat card, product card, and validity stepper",
+            "hash": "586833c8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement modular price list UI components and layout enhancements for vendor management",
+            "hash": "d90d4779",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement price list creation workflow with new UI components and updated background gradients",
+            "hash": "c278514a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign inventory adjustment form layout with sidebar and add posting information summary",
+            "hash": "bd5c58b3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement automated product cost calculation for stock adjustments using new hooks and API endpoints",
+            "hash": "b621be21",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add auto-setting of default adjustment date based on current period end date",
+            "hash": "53f97cc1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add InventoryTooltip component and implement read-only states for inventory adjustments",
+            "hash": "2be17590",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign sidebar navigation with premium UI patterns and update inventory adjustment action buttons",
+            "hash": "d12cba44",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign category management dialog and optimize form layout for better usability",
+            "hash": "f2b56fa6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement AdjustmentTypeDialog for CRUD operations and remove legacy page-based forms",
+            "hash": "3c3082a8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add PoFromPriceListDialog to allow creating purchase orders from vendor price lists",
+            "hash": "25ee3153",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "overhaul PO creation dialog with new price list source and modern design system",
+            "hash": "589b03d0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enhance procurement dialogs with templates, validation details, and updated interface context in playground",
+            "hash": "67b5a506",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add notification playground page and enable close button on global toaster",
+            "hash": "de0cbd85",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add read-only mode to credit note item table and update input component UI",
+            "hash": "aa9e7929",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement GRN-scoped lookup components and integrate them into credit note item fields",
+            "hash": "98146626",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "integrate useSaveGoodsReceiveNote into GRN form submission and update status badge rendering logic",
+            "hash": "da1c30ed",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update GRN comment API endpoints and schema defaults, and adjust header styling",
+            "hash": "40ac19ae",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "migrate GRN commit and void actions to form toolbar and update default sort order",
+            "hash": "2a604f45",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement dynamic decimal precision for currency inputs in purchase requests",
+            "hash": "0d34bed8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "integrate QuantityInput and useQuantityFormatter for formatted quantity display in purchase request cells",
+            "hash": "de4ac639",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add on-hand and on-order detail dialogs with hooks and API endpoints, and update PR item status filter",
+            "hash": "3747b649",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enhance product form toolbar UI, rename reorder_qty to re_order_qty, and improve field validation handling",
+            "hash": "b592290a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add search, delete functionality, and improved currency formatting to exchange rate management",
+            "hash": "628d331d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add FieldInputGroup component and create input playground page for form testing",
+            "hash": "a77ced59",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add validation and error UI for workflow selection in purchase request form",
+            "hash": "eee69052",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add error prop to lookup components and refactor form fields to use FieldInput and FieldSelect components",
+            "hash": "014a89a3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "introduce StatusSwitch component and integrate into delivery point dialog",
+            "hash": "da5c0a8c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add confirmation dialog to purchase order submission and implement auto-save functionality before submission",
+            "hash": "b7d2506e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add normalizePoItemStatus helper to map API status aliases to canonical values in PO item table",
+            "hash": "8678d43a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement manual PO type logic to conditionally enable form fields and validation",
+            "hash": "1c561a0a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "validate required fields for purchase role before bulk approval",
+            "hash": "df9f4642",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add denormalizeStageStatus utility and integrate into purchase request form payload mapping",
+            "hash": "dadfc1e2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add _initial_stage_status tracking to lock PR items once approved or rejected",
+            "hash": "53f46f6b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add status reset functionality to PR items and disable resizing for selection columns",
+            "hash": "9d8da9ec",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement PR playground components including form header, workflow selection, and actor management sheet",
+            "hash": "dc09f452",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "introduce Switch component and FieldInput with error tooltips, and update delivery point dialog UI",
+            "hash": "1bf4020a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement multi-currency support in purchase request items and optimize tooltip rendering in lookup components",
+            "hash": "00856e6e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add reusable Stepper component and update purchase request workflow UI with localized status labels",
+            "hash": "019196e8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "lock purchase request items when approved or rejected and add validation for purchase approval",
+            "hash": "2761ea90",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement mutation logic for reject and send-back actions in purchase request form",
+            "hash": "2dcb8777",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add creation timestamp to workflow history and disable workflow selection when using templates",
+            "hash": "72f21312",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update pricelist UI with scale icon and rename manual label to override",
+            "hash": "29f1625d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement end-to-end testing suite for vendor management using Playwright",
+            "hash": "0d1735f2",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add PO type badge configurations and a new playground utility for color schema management",
+            "hash": "1bc79c26",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add business type multi-select filter to vendor management list",
+            "hash": "b7c39653",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add multi-select filters for categories and recipes and configure Claude project settings",
+            "hash": "d91da5d4",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add multi-select category filtering to equipment list via URL state",
+            "hash": "1a59b8ba",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement Timeline component and integrate it into PR workflow history view",
+            "hash": "30b2b086",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add workflow and date range filters to purchase request list view",
+            "hash": "c1ac1aa7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement batch approval and rejection for purchase requests using new API endpoints and dedicated hooks.",
+            "hash": "e6f90bd9",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement store requisition workflow management with history and add item unit information.",
+            "hash": "bdc59932",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "introduce dedicated module color palette and its visualization in the color playground.",
+            "hash": "0d4c363b",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Apply new 'ERP Professional' theme with updated color palettes and shadow styles, and fix workflow step list keys.",
+            "hash": "3f900681",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement a new 'Space theme' with updated color palettes and gradient utilities across core UI components.",
+            "hash": "de79164d",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add template selector, filters, recipients to schedule form",
+            "hash": "ed2d1a27",
+            "author": "Danai Gingpho",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement user location management with a transfer component, new API endpoints, and corresponding hooks in the user assignment form.",
+            "hash": "ed6e03d9",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add Transfer component for user-location assignments with correct API endpoints",
+            "hash": "4e84f104",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Display user assigned locations in the admin form by adding a new hook and API endpoint.",
+            "hash": "7c29c8db",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Add collapsible icon styling to sidebar sub-modules and remove unnecessary fragment.",
+            "hash": "055702d4",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Add document type filtering, running code initialization, and localize user management UI.",
+            "hash": "e03eab08",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement active filter badges with clear functionality for data grid components.",
+            "hash": "50164655",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement time formatting in date utility and standardize data grid column alignments.",
+            "hash": "ce70267b",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement interactive document type filtering for approval items and adjust layout padding.",
+            "hash": "da09e6bf",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement client-side filtering and pagination for approval items within the `useApprovalPending` hook.",
+            "hash": "b66902d7",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Hide data grid pagination when no records or only one page.",
+            "hash": "7e1bfe57",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Refactor font scaling to use body zoom instead of font-size, inherit text size in cell actions, and add compact styling for DataGrid badges.",
+            "hash": "afb908a1",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Add a font scale switcher component and hook, integrating it into the navbar.",
+            "hash": "827de05d",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement standardized amount formatting for purchase requests using new `amountFormat` configuration and `base_total_amount`.",
+            "hash": "8a98699e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Add item-level status tracking and bulk approval/rejection/review for Purchase Order items.",
+            "hash": "315130b2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Introduce detailed credit note item fields, GRN, and CN reason, supported by a new item details sheet.",
+            "hash": "89b9eaaa",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement a grid view for purchase orders using new `PoCard` and `PoCardList` components, and enhance the table with skeleton loading and a status column.",
+            "hash": "ed8f46c8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Add module separators to the navbar for improved visual organization and reorder modules.",
+            "hash": "8e3417f1",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "open FastReport Web Viewer on report click",
+            "hash": "73df2fd1",
+            "author": "Danai Gingpho",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Add dedicated profile link to navbar dropdown, update HOD department type and display, and refine module app and user profile styling.",
+            "hash": "d0b80a3f",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Add draft status for inventory adjustments, refine SR form submission flow, and apply various UI/table improvements.",
+            "hash": "5880c2a3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Extract purchase order summary and action buttons into a new `PoFooterAction` component and integrate it into the purchase order form.",
+            "hash": "fd3f5ba2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add Strict-Transport-Security header to Next.js security policies",
+            "hash": "fe75bb0f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement proportional column width calculation for data grid headers and refine table layout in the price list component.",
+            "hash": "2030fbd4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Refactor price list detail handling, add date validation, and improve form layout with textareas.",
+            "hash": "f175ccbd",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Introduce `InputCustom` component with enhanced features and integrate it into the login form, along with refactoring host state management and form submission.",
+            "hash": "24dda90f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Introduce price list detail view, form schema, and a hook for managing detail tables.",
+            "hash": "451aead7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement horizontal scrolling and explicit column widths for the price list table, and remove unused status and currency utilities from the recipe table hook.",
+            "hash": "621b1dcc",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enhance PO item unit handling by flattening product inventory unit type and improving unit selection logic.",
+            "hash": "85572482",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Enhance lookup empty states with `EmptyComponent`, improve badge removal accessibility, and apply minor refactors to error boundary and recipe category filtering.",
+            "hash": "0876d444",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Implement the new report page, introducing combobox and input group UI components, and refining existing button and input components.",
+            "hash": "ddadce20",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Introduce Zod schema for recipe forms, add time, yield, and compliance fields, and refactor related components.",
+            "hash": "38af1ec6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Allow null department in profile types and provide user feedback for missing department data in UI and forms.",
+            "hash": "6c45c3ec",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          }
+        ],
+        "fixed": [
+          {
+            "scope": null,
+            "summary": "read activity log timestamp from audit.created.at",
+            "hash": "e3ccfa9c",
+            "author": "Thammanoon Semapru",
+            "pr": 2
+          },
+          {
+            "scope": null,
+            "summary": "correct physical-count-period detail endpoint, drop dead API endpoints",
+            "hash": "6ae7a5e3",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "lookup รับ error มาแล้วต้องโชว์ อย่ากลืนเงียบ",
+            "hash": "d706c66f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "permission",
+            "summary": "ปิด save button ใน config dialog เมื่อไม่มี update permission",
+            "hash": "fb382920",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "perf",
+            "summary": "บอก browser ว่า BU logo/avatar above-the-fold อย่าขี้เกียจโหลด",
+            "hash": "8a5ebf3e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "lookup",
+            "summary": "หยุดสับ Tooltip ระหว่าง controlled กับ uncontrolled — Radix ด่า",
+            "hash": "1047feea",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "security",
+            "summary": "resolve CodeQL code scanning alerts",
+            "hash": "f62a1fc3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "address accessibility warnings by updating interactive elements and adding necessary linting overrides",
+            "hash": "939c4684",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "optimize component re-renders by adding use no memo directives, conditional form updates, and proper memoization of lookup dependencies.",
+            "hash": "5897503e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "prevent store requisition comment submission when srId is missing",
+            "hash": "bd7ed622",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "handle loading and error states for user profile and business unit components to prevent null reference errors",
+            "hash": "d12e490c",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update GRN form payload handling, add required label to received_at, and correct item field registration paths",
+            "hash": "2cf8d677",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "cast useInfiniteScroll to boolean in config list template hook parameters",
+            "hash": "a4357cd1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update totalRecords to use items length instead of pagination metadata",
+            "hash": "4ce87f30",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "use string items for Combobox recipient selector",
+            "hash": "a21f3426",
+            "author": "Danai Gingpho",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add location_type to GoodsReceiveNoteDetail type",
+            "hash": "d27a9a0c",
+            "author": "Danai Gingpho",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "handle undefined buCode in schedule component",
+            "hash": "cf547853",
+            "author": "Danai Gingpho",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add From/To sub-labels for range fields in report dialog",
+            "hash": "c4d5f122",
+            "author": "Danai Gingpho",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "harden external proxy and isolate rate limit buckets per endpoint",
+            "hash": "b8214b61",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          }
+        ],
+        "changed": [
+          {
+            "scope": null,
+            "summary": "เปลี่ยนชื่อ use-subcategory เป็น use-sub-category ให้เข้าพวก",
+            "hash": "7fc75ca3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "เลิกกาง useMemo เอง ปล่อย React Compiler ทำงานแทน",
+            "hash": "b3b61391",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "รีด gradient ออกจาก hero/banner panels (Phase 3 — 12 ตัว)",
+            "hash": "fd42c036",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "รีด gradient ออกจาก dialog module-specific (21 ตัว)",
+            "hash": "26fad2d1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "config",
+            "summary": "รีด gradient ออกจาก dialog ในโมดูล config (8 ตัว)",
+            "hash": "dfcd45af",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "รีด gradient ออกจาก shared dialog 6 ตัว — ERP ไม่ต้อง marketing card",
+            "hash": "736b41c3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "navbar",
+            "summary": "ขัด user-profile UI รอบสอง — สวยขึ้น flat ขึ้น",
+            "hash": "eb36cc01",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "navbar",
+            "summary": "ขัด user-profile.tsx ตามรีวิว — DRY + LCP + ลบจุดเขียวปลอม",
+            "hash": "ac1721c1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "ตัด avatar ของ requester ทิ้ง backend ไม่มีอยู่แล้ว อย่าโชว์เถอะ",
+            "hash": "ac999079",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "ลาก mutations/dialogs ออกจาก sr-form.tsx เพราะมันบวมเป็นไส้กรอก",
+            "hash": "bab046f8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "จับ helper functions ออกไปอยู่ไฟล์ของมัน ก่อนจะหลุดแสกน",
+            "hash": "b3dfc311",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "sr",
+            "summary": "แยก readOnly กับ disabled ใน SrRequestDetails สักที",
+            "hash": "dd736d19",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "make AI dialogs wider with sticky header/footer + scrollable body",
+            "hash": "0766d522",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "extract shared review component and list layout helpers for PC/SC",
+            "hash": "edb18ad8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "consolidate shared UI components into a centralized glass-card module and clean up unused code comments.",
+            "hash": "fd95e07b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "clean up shared components and move animation utilities to global shared location",
+            "hash": "124f673f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "consolidate shared components for inventory entry, variance grids, and review tiles into a centralized shared directory.",
+            "hash": "7dc8f68d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "move dialog components to shared folder and consolidate import/calculator logic",
+            "hash": "1d623b2e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "migrate inventory adjustment badge styles to component variants",
+            "hash": "8e410adb",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enable server-side rendering for dashboard components by removing ssr: false constraint",
+            "hash": "44f10300",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "optimize bundle size by lazily loading XLSX and dashboard components",
+            "hash": "69ff32e0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "clean up comments, fix ESLint comment syntax, and update analyze script for webpack compatibility",
+            "hash": "1893919b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "streamline ScReviewComponent to use SpotCheckReviewData and remove ScResumeCard",
+            "hash": "73c63248",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "simplify ExternalLayout component props and remove unnecessary comments",
+            "hash": "07dd1592",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "standardize product status and GRN document type labeling using centralized label getters",
+            "hash": "fdbc4558",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement new spot check item entry row, notes dialog, and entry components while removing legacy table and card views",
+            "hash": "1435281f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "reorganize spot check listing to support resume and not-started workflows with dedicated card components",
+            "hash": "58de8d59",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enforce Readonly type for id prop in inventory management components and update JSDoc documentation",
+            "hash": "5d97d976",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "reorganize physical count route structure and update navigation paths accordingly",
+            "hash": "a53d5093",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update physical count routing structure to use id-based path segments",
+            "hash": "e63fa2fe",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "move auto-focus hook before early return, replace state reset effect with handler, and update Claude settings",
+            "hash": "8e66b495",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove unnecessary useCallback and useMemo hooks to improve code simplicity and performance",
+            "hash": "b27663f0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace product group card view with table-based product layout in price list template form",
+            "hash": "be1885e2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "extract workflow filtering logic and row mutation handlers into dedicated modules",
+            "hash": "5dc0157a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "improve workflow UI responsiveness, standardize text sizes, increase name length limits, and enhance visual feedback.",
+            "hash": "758f1a09",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "move form default logic to schema, remove unused interface, and update dev port to 3000",
+            "hash": "addcbd23",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "modularize price list template form components and localization logic",
+            "hash": "eae3a65a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "extract PR form logic and dialogs into separate files for better maintainability",
+            "hash": "38fe0376",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "modularize purchase request item cells into individual component files for better maintainability",
+            "hash": "0e4570ef",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement reusable XLSX export utility and normalize data grid action columns",
+            "hash": "1a7ce0dc",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove global print view styles and associated translation keys",
+            "hash": "db8b15f2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "migrate ImageLightbox to Radix UI and update comment API endpoints to support resource-specific routes",
+            "hash": "945531af",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update product form to use dynamic internationalized Zod validation schemas and standardize input components",
+            "hash": "514367b4",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "decompose inventory adjustment form into modular components and centralize table logic",
+            "hash": "8558f39e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove redundant JSDoc comments and introduce SkeletonRow component to CommentSheet",
+            "hash": "214fb76e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "migrate department form to unified FormToolbar component and improve layout consistency",
+            "hash": "1a1961ee",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "modularize page content into separate _content.tsx files across system routes",
+            "hash": "bb415470",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "modularize button logic, internationalize Transfer component labels, and update metadata generation",
+            "hash": "ad850463",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement global scroll-to-error form validation and centralize animation components",
+            "hash": "73741b65",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "modernize inventory transaction UI with glassmorphism, updated filter styling, and improved decimal handling for currency animations",
+            "hash": "78937c83",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "standardize location card components with shared UI and update spot check and physical count forms",
+            "hash": "855d3f0f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "modularize status logic, update types, and optimize form components in store requisition module",
+            "hash": "e4018953",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "centralize store requisition workflow logic and cleanup unused components",
+            "hash": "998b719b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "improve SR form navigation, add status translation, update UI components, and refine workflow step visuals",
+            "hash": "c69969e8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "simplify SR submission flow by redirecting to list and removing redundant UI in submit dialog",
+            "hash": "4a1c2ed6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove vendor-contact-table component and refactor vendor info section to use glass cards",
+            "hash": "8d731f2e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "apply consistent code formatting and clean up UI component styles across inventory and procurement modules",
+            "hash": "d6d0798a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enhance UI components, centralize date utilities, and update PriceList type definitions",
+            "hash": "9cf6b51b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "modernize StoreRequisitionForm with improved state management, ref-based item handling, and enhanced status visualization.",
+            "hash": "0b09422f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update inventory adjustment module with improved form validation, table interactivity, and optimized item management structures",
+            "hash": "74a73092",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "upgrade PoActionDialog to a premium visual design with theme-based styling and improved workflow interaction support",
+            "hash": "d087729e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enhance GRN purchase order wizard UI with improved step-based navigation and styling",
+            "hash": "ff8eb83a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update notification and dialog components with enhanced data structures, categorization, and ERP-grade design presets",
+            "hash": "1d367c6e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "standardize form field validation and error messaging using FieldInput and fieldState across procurement components",
+            "hash": "2a8d9e7d",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "standardize form validation by integrating Field components with error handling and updating form trigger modes.",
+            "hash": "09b7a7be",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace legacy input components with standardized InputQty, InputAmount, and InputRecipe fields and integrate form validation.",
+            "hash": "351b8075",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement reactive row amount calculations and form synchronization for credit note items",
+            "hash": "a32f9e67",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "clean up JSDoc comments, standardize PO field naming, and update GRN UI components for improved consistency and layout.",
+            "hash": "3cd5d9d2",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign product form toolbar and update unit conversion UI components",
+            "hash": "11d802b8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign GRN product cards and pricing tab UI for improved layout and clarity",
+            "hash": "137539e0",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update status badge color palette to align with brand design system tokens",
+            "hash": "e06f23c6",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "standardize GRN status terminology, normalize extra cost field naming, and optimize update payload generation",
+            "hash": "d1a35ae1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "standardize numeric input components to derive decimal precision from user profile configuration",
+            "hash": "d58c1ee7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "introduce specialized AmountInput and RecipeInput components and extract PR item summary into a dedicated component",
+            "hash": "62e3ecad",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redirect to list view on PR actions, update date formatting to ISO, and refine confirmation messages",
+            "hash": "668571ec",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "introduce safe-storage utility to encapsulate session and local storage operations with error handling",
+            "hash": "ea97217b",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "move PR detail preparation logic from component to schema file and clean up imports",
+            "hash": "bd1c1e28",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "improve credit note form responsiveness, UI consistency, and field validation logic",
+            "hash": "72ff3462",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "improve GRN form layout, styling, and UI component consistency",
+            "hash": "da794727",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove automatic session-expired event dispatching on 401 errors and add missing department dialog support",
+            "hash": "fddccb53",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "enhance PR item table with base currency display, improved read-only states, and refined quantity/unit input handling",
+            "hash": "38a3364f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update data grid state management to support default sorting and simplify pagination hook configuration",
+            "hash": "25af5b06",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "standardize form layouts using Card components and update price list template status configuration",
+            "hash": "bc3c312e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update price list table UI, add status configuration, and enhance form layout with new sections and status badges.",
+            "hash": "b9bbbdf3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace manual error styling with FieldInput component and pass error messages to table cells",
+            "hash": "e5cdf87a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace Checkbox with StatusSwitch and migrate Input to FieldInput in configuration dialogs",
+            "hash": "5b3b0fb9",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "migrate form components to unified FieldInput, FieldDatePicker, and FieldSelect patterns across configuration modules",
+            "hash": "78888f9a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "switch PO form to view mode instead of refreshing and add product/location exclusion logic to item selectors",
+            "hash": "ede30cf1",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement per-item review messaging in purchase order workflows and update dialog state handling.",
+            "hash": "d31e6982",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement read-only mode for PO form and optimize workflow step visualization and payload generation",
+            "hash": "9e0b7477",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace hardcoded string statuses with PR_ITEM_STAGE_STATUS and PR_STATUS enums across purchase request components",
+            "hash": "b2b837bd",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "simplify purchase request item status tracking using current_stage_status and update action dialog to support per-item messages",
+            "hash": "2579959f",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove playground directory and consolidate purchase request components",
+            "hash": "c08f7382",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove pagination from approval hook, delete unused mock data, and optimize dashboard component rendering",
+            "hash": "69816295",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "improve PR creation UI, fix column visibility logic, and add readonly types to component props",
+            "hash": "90e20c5e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "simplify purchase request item table by removing FOC and tax/discount adjustment fields",
+            "hash": "16cdd521",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove redundant delivery_point_name from schema and simplify locationType hook with minor UI styling adjustments",
+            "hash": "517e0eba",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace DisplayTemplate with custom layout and add export/print buttons across procurement modules",
+            "hash": "c0299f08",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove skeleton loading states from user profile and business unit switcher components",
+            "hash": "77010dab",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace DisplayTemplate with custom layout and add active filter support across vendor management modules",
+            "hash": "591d2690",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace static table headers with DataGridColumnHeader component across all modules",
+            "hash": "96cf3293",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove redundant text-sm class from input and textarea components across the application",
+            "hash": "96f4b8ed",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update recipe category form layout to responsive grid and consolidate cost settings sections",
+            "hash": "04058ac0",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove period deletion functionality, including the `onDelete` prop, `useDeletePeriod` hook, and `DeleteDialog` component.",
+            "hash": "b16d4cbd",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "restructure DataGrid components to correctly wrap table and pagination within DataGridContainer.",
+            "hash": "d4e7237e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Adjust DataGrid pagination placement and update styling for headers, rows, and borders across various components.",
+            "hash": "7aa526d0",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "replace `DisplayTemplate` with direct layout elements and `Separator` in system admin components.",
+            "hash": "ebcdce58",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Restructure config list pages by removing DisplayTemplate and compacting data grid pagination.",
+            "hash": "931328e9",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "reorder DataGridContainer and ScrollArea component nesting",
+            "hash": "2cb93e53",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "reimplement data grid pagination logic and adjust scroll area bottom padding.",
+            "hash": "04f9a229",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Introduce generic `ConfigListTemplate` and apply it to all configuration list components.",
+            "hash": "1c999365",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Remove explicit `tableClassNames` prop for base text sizing from multiple data grid components.",
+            "hash": "7a2ae320",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove `headerSeparator` prop from DataGrid components to standardize table layout.",
+            "hash": "6fe8dbcc",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "reimplement EmptyComponent with direct styling and update empty message cell height in DataGridTable.",
+            "hash": "13d10fa8",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Simplify GRN data structures, add discount fields, and introduce new lookup components for PO and extra costs.",
+            "hash": "b3be35e8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Replace generic report dialog and mock with a dedicated report parameter dialog and XML mock, updating related types and components.",
+            "hash": "b7e4cb67",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "Rename Request Price List (RPL) components and schemas to Request for Proposal (RFP).",
+            "hash": "28692685",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          }
+        ]
+      }
+    }
+  ]
+}

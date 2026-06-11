@@ -1,0 +1,101 @@
+export type StoreRequisitionStatus =
+  | "draft"
+  | "in_progress"
+  | "completed"
+  | "cancelled"
+  | "voided";
+
+export interface WorkflowHistoryEntry {
+  user: { id: string; name: string };
+  action: string;
+  datetime: Record<string, unknown>;
+  next_stage: string;
+  current_stage?: string;
+}
+
+export interface StoreRequisitionDetail {
+  id: string;
+  sequence_no: number;
+  product_id: string;
+  product_name: string;
+  product_local_name: string;
+  inventory_unit_name: string;
+  description: string;
+  requested_qty: number;
+  approved_qty: number;
+  issued_qty: number;
+  current_stage_status: string;
+  info: Record<string, unknown>;
+  dimension: string;
+  doc_version: number;
+}
+
+export enum SR_TYPE {
+  TRANSFER = "transfer",
+  ISSUE = "issue",
+}
+
+export type StoreRequisitionType = `${SR_TYPE}`;
+
+export interface StoreRequisition {
+  id: string;
+  sr_no: string;
+  sr_type: StoreRequisitionType;
+  role?: string;
+  sr_date: string;
+  expected_date: string;
+  description: string;
+  doc_status: StoreRequisitionStatus;
+  workflow_id: string;
+  workflow_name: string;
+  workflow_current_stage?: string;
+  workflow_previous_stage?: string;
+  workflow_next_stage?: string;
+  workflow_history: WorkflowHistoryEntry[];
+  requestor_id: string;
+  requestor_name: string;
+  department_id: string;
+  department_code: string;
+  department_name: string;
+  from_location_id: string;
+  from_location_code: string;
+  from_location_name: string;
+  to_location_id: string;
+  to_location_code: string;
+  to_location_name: string;
+  store_requisition_detail: StoreRequisitionDetail[];
+  info: Record<string, unknown>;
+  dimension: string;
+  doc_version: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SrDetailPayload {
+  product_id: string;
+  description: string;
+  requested_qty: number;
+  approved_qty: number;
+  issued_qty: number;
+  current_stage_status: string;
+}
+
+export interface CreateStoreRequisitionDto {
+  stage_role: string;
+  details: {
+    sr_date: string;
+    expected_date: string;
+    description: string;
+    requestor_id: string;
+    workflow_id: string;
+    department_id: string;
+    from_location_id: string;
+    to_location_id: string;
+    doc_version: number;
+    store_requisition_detail: {
+      add?: SrDetailPayload[];
+      update?: (SrDetailPayload & { id: string })[];
+      remove?: { id: string }[];
+    };
+  };
+}
