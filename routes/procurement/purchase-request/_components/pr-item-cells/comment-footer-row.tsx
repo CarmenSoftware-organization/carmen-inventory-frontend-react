@@ -1,0 +1,54 @@
+"use no memo";
+
+import {
+  useWatch,
+  type FieldArrayWithId,
+  type UseFormReturn,
+} from "react-hook-form";
+import { memo } from "react";
+import { Input } from "@/components/ui/input";
+import type { PrFormValues } from "../pr-form-schema";
+import { useIsRowLocked } from "./helpers";
+
+export const CommentFooterRow = memo(function CommentFooterRow({
+  form,
+  itemFields,
+  item,
+  isDisabled,
+  placeholder,
+}: {
+  form: UseFormReturn<PrFormValues>;
+  itemFields: FieldArrayWithId<PrFormValues, "items", "id">[];
+  item: FieldArrayWithId<PrFormValues, "items", "id">;
+  isDisabled: boolean;
+  placeholder: string;
+}) {
+  const index = itemFields.findIndex((f) => f.id === item.id);
+  const isRowLocked = useIsRowLocked(form.control, index === -1 ? 0 : index);
+  const comment =
+    useWatch({
+      control: form.control,
+      name: `items.${index === -1 ? 0 : index}.comment`,
+    }) ?? "";
+  if (index === -1) return null;
+  const isReadOnly = isDisabled || isRowLocked;
+  if (isReadOnly) {
+    if (!comment) return null;
+    return (
+      <div className="px-2 py-1.5">
+        <p className="text-xs wrap-break-word whitespace-pre-wrap">{comment}</p>
+      </div>
+    );
+  }
+  return (
+    <div className="px-2 py-1.5">
+      <Input
+        id={`items-${index}-comment`}
+        placeholder={placeholder}
+        maxLength={256}
+        className="resize-none text-xs"
+        {...form.register(`items.${index}.comment`)}
+      />
+    </div>
+  );
+});

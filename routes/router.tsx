@@ -63,7 +63,10 @@ export const router = createBrowserRouter([
               { path: "purchase-order/new", lazy: () => import("./procurement/purchase-order/new/page") },
               { path: "purchase-order/from-price-list", lazy: () => import("./procurement/purchase-order/from-price-list/page") },
               { path: "purchase-order/:id", lazy: () => import("./procurement/purchase-order/[id]/page") },
-              // ── procurement modules ถูกเพิ่มต่อท้ายตรงนี้ใน Batch E-F ──
+              { path: "purchase-request", lazy: () => import("./procurement/purchase-request/page") },
+              { path: "purchase-request/new", lazy: () => import("./procurement/purchase-request/new/page") },
+              { path: "purchase-request/:id", lazy: () => import("./procurement/purchase-request/[id]/page") },
+              // ── approval ถูกเพิ่มตรงนี้ใน Batch F ──
             ],
           },
         ],
