@@ -37,7 +37,12 @@ export const router = createBrowserRouter([
               { path: "exchange-rate", lazy: () => import("./config/exchange-rate/page") },
               { path: "extra-cost", lazy: () => import("./config/extra-cost/page") },
               { path: "tax-profile", lazy: () => import("./config/tax-profile/page") },
-              // ── department/location (page-based) ถูกเพิ่มตรงนี้ใน Batch C ──
+              { path: "department", lazy: () => import("./config/department/page") },
+              { path: "department/new", lazy: () => import("./config/department/new/page") },
+              { path: "department/:id", lazy: () => import("./config/department/[id]/page") },
+              { path: "location", lazy: () => import("./config/location/page") },
+              { path: "location/new", lazy: () => import("./config/location/new/page") },
+              { path: "location/:id", lazy: () => import("./config/location/[id]/page") },
             ],
           },
         ],
