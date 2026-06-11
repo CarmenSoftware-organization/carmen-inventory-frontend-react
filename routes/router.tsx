@@ -53,7 +53,10 @@ export const router = createBrowserRouter([
               { path: "purchase-request-template", lazy: () => import("./procurement/purchase-request-template/page") },
               { path: "purchase-request-template/new", lazy: () => import("./procurement/purchase-request-template/new/page") },
               { path: "purchase-request-template/:id", lazy: () => import("./procurement/purchase-request-template/[id]/page") },
-              // ── procurement modules ถูกเพิ่มต่อท้ายตรงนี้ใน Batch B-F ──
+              { path: "credit-note", lazy: () => import("./procurement/credit-note/page") },
+              { path: "credit-note/new", lazy: () => import("./procurement/credit-note/new/page") },
+              { path: "credit-note/:id", lazy: () => import("./procurement/credit-note/[id]/page") },
+              // ── procurement modules ถูกเพิ่มต่อท้ายตรงนี้ใน Batch C-F ──
             ],
           },
         ],
