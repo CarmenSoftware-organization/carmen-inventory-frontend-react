@@ -27,7 +27,17 @@ export const router = createBrowserRouter([
               { index: true, lazy: () => import("./config/page") },
               { path: "unit", lazy: () => import("./config/unit/page") },
               { path: "currency", lazy: () => import("./config/currency/page") },
-              // ── config modules ถูกเพิ่มต่อท้ายตรงนี้ใน Batch B/C ──
+              { path: "adjustment-type", lazy: () => import("./config/adjustment-type/page") },
+              { path: "business-type", lazy: () => import("./config/business-type/page") },
+              { path: "certification", lazy: () => import("./config/certification/page") },
+              { path: "credit-note-reason", lazy: () => import("./config/credit-note-reason/page") },
+              { path: "credit-term", lazy: () => import("./config/credit-term/page") },
+              { path: "delivery-point", lazy: () => import("./config/delivery-point/page") },
+              { path: "eco", lazy: () => import("./config/eco/page") },
+              { path: "exchange-rate", lazy: () => import("./config/exchange-rate/page") },
+              { path: "extra-cost", lazy: () => import("./config/extra-cost/page") },
+              { path: "tax-profile", lazy: () => import("./config/tax-profile/page") },
+              // ── department/location (page-based) ถูกเพิ่มตรงนี้ใน Batch C ──
             ],
           },
         ],
