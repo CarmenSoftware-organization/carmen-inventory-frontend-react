@@ -80,7 +80,7 @@ pkill -f "vite.*3131"; rm /tmp/p2-probe.mjs
 - Create: `routes/procurement/page.tsx`, `routes/procurement/procurement-dashboard.tsx`, `routes/procurement/purchase-request-template/**`
 - Modify: `routes/router.tsx`
 
-- [ ] **Step 1: Copy:**
+- [x] **Step 1: Copy:**
 
 ```bash
 SRC=/Users/samutpra/GitHub/carmensoftware-organize/carmen-inventory-frontend
@@ -92,7 +92,7 @@ cp -R "$SRC/app/(root)/procurement/purchase-request-template" routes/procurement
 
 (Do NOT copy `error.tsx` if present — the adapter replaces it. Check whether `$SRC/app/(root)/procurement/error.tsx` exists; skip it.)
 
-- [ ] **Step 2: Codemods:**
+- [x] **Step 2: Codemods:**
 
 ```bash
 scripts/codemods/next-to-vite.sh routes
@@ -103,9 +103,9 @@ scripts/codemods/nextpage-to-route.sh routes/procurement/page.tsx \
 
 Expected: no WARN. Fix any `next/dynamic` stragglers the next-to-vite report lists, per the currency-component reference (lazy + Suspense fallback null); document each file.
 
-- [ ] **Step 3: Hand-convert** `routes/procurement/purchase-request-template/[id]/page.tsx` — replace ENTIRELY using the template at the top with `<X>` = `PurchaseRequestTemplate`.
+- [x] **Step 3: Hand-convert** `routes/procurement/purchase-request-template/[id]/page.tsx` — replace ENTIRELY using the template at the top with `<X>` = `PurchaseRequestTemplate`.
 
-- [ ] **Step 4: Register routes.** In `routes/router.tsx`, after the closing brace of the `config` route object (same children level), add:
+- [x] **Step 4: Register routes.** In `routes/router.tsx`, after the closing brace of the `config` route object (same children level), add:
 
 ```tsx
           {
@@ -121,11 +121,11 @@ Expected: no WARN. Fix any `next/dynamic` stragglers the next-to-vite report lis
           },
 ```
 
-- [ ] **Step 5: Gates:** `bunx tsc --noEmit && bun run lint && bun run test:run && bun run build` — all green. Cross-section import failures (imports of `@/app/(root)/<other-section>` paths): if the target is a self-contained leaf file, copy it to its exact source path and document; otherwise report DONE_WITH_CONCERNS.
+- [x] **Step 5: Gates:** `bunx tsc --noEmit && bun run lint && bun run test:run && bun run build` — all green. Cross-section import failures (imports of `@/app/(root)/<other-section>` paths): if the target is a self-contained leaf file, copy it to its exact source path and document; otherwise report DONE_WITH_CONCERNS.
 
-- [ ] **Step 6: Probe** with `PROBE_PATHS="/procurement,/procurement/purchase-request-template,/procurement/purchase-request-template/new"` using the harness above. Expected: landing dashboard renders; PRT list renders (table or empty-state, not 404/blank); new page renders a form; detail click-through loads a document if rows exist. Report verbatim incl. console errors.
+- [x] **Step 6: Probe** with `PROBE_PATHS="/procurement,/procurement/purchase-request-template,/procurement/purchase-request-template/new"` using the harness above. Expected: landing dashboard renders; PRT list renders (table or empty-state, not 404/blank); new page renders a form; detail click-through loads a document if rows exist. Report verbatim incl. console errors.
 
-- [ ] **Step 7: Commit:** `git add routes/ && git commit -m "feat: migrate procurement landing and purchase-request-template"`
+- [x] **Step 7: Commit:** `git add routes/ && git commit -m "feat: migrate procurement landing and purchase-request-template"`
 
 ---
 
@@ -133,9 +133,9 @@ Expected: no WARN. Fix any `next/dynamic` stragglers the next-to-vite report lis
 
 **Files:** Create `routes/procurement/credit-note/**`; modify `routes/router.tsx`.
 
-- [ ] **Step 1: Copy:** `cp -R "$SRC/app/(root)/procurement/credit-note" routes/procurement/credit-note`
+- [x] **Step 1: Copy:** `cp -R "$SRC/app/(root)/procurement/credit-note" routes/procurement/credit-note`
 
-- [ ] **Step 2: Codemods:**
+- [x] **Step 2: Codemods:**
 
 ```bash
 scripts/codemods/next-to-vite.sh routes
@@ -144,9 +144,9 @@ scripts/codemods/nextpage-to-route.sh routes/procurement/credit-note/page.tsx ro
 
 Fix `next/dynamic` stragglers per reference; document.
 
-- [ ] **Step 3: Hand-convert** `routes/procurement/credit-note/[id]/page.tsx` with the template, `<X>` = `CreditNote`.
+- [x] **Step 3: Hand-convert** `routes/procurement/credit-note/[id]/page.tsx` with the template, `<X>` = `CreditNote`.
 
-- [ ] **Step 4: Register** (replace the Batch B-F marker, keep marker below):
+- [x] **Step 4: Register** (replace the Batch B-F marker, keep marker below):
 
 ```tsx
               { path: "credit-note", lazy: () => import("./procurement/credit-note/page") },
@@ -154,11 +154,11 @@ Fix `next/dynamic` stragglers per reference; document.
               { path: "credit-note/:id", lazy: () => import("./procurement/credit-note/[id]/page") },
 ```
 
-- [ ] **Step 5: Gates:** `bunx tsc --noEmit && bun run lint && bun run test:run && bun run build` — all green (cross-section import rule as Task 1).
+- [x] **Step 5: Gates:** `bunx tsc --noEmit && bun run lint && bun run test:run && bun run build` — all green (cross-section import rule as Task 1).
 
-- [ ] **Step 6: Probe** with `PROBE_PATHS="/procurement/credit-note,/procurement/credit-note/new"`. Report verbatim.
+- [x] **Step 6: Probe** with `PROBE_PATHS="/procurement/credit-note,/procurement/credit-note/new"`. Report verbatim.
 
-- [ ] **Step 7: Commit:** `git add routes/ && git commit -m "feat: migrate credit-note module"`
+- [x] **Step 7: Commit:** `git add routes/ && git commit -m "feat: migrate credit-note module"`
 
 ---
 
@@ -166,9 +166,9 @@ Fix `next/dynamic` stragglers per reference; document.
 
 **Files:** Create `routes/procurement/goods-receive-note/**`; modify `routes/router.tsx`.
 
-- [ ] **Step 1: Copy:** `cp -R "$SRC/app/(root)/procurement/goods-receive-note" routes/procurement/goods-receive-note`
+- [x] **Step 1: Copy:** `cp -R "$SRC/app/(root)/procurement/goods-receive-note" routes/procurement/goods-receive-note`
 
-- [ ] **Step 2: Codemods:**
+- [x] **Step 2: Codemods:**
 
 ```bash
 scripts/codemods/next-to-vite.sh routes
@@ -177,9 +177,9 @@ scripts/codemods/nextpage-to-route.sh routes/procurement/goods-receive-note/page
 
 Fix `next/dynamic` stragglers per reference; document.
 
-- [ ] **Step 3: Hand-convert** `routes/procurement/goods-receive-note/[id]/page.tsx` with the template, `<X>` = `GoodsReceiveNote`.
+- [x] **Step 3: Hand-convert** `routes/procurement/goods-receive-note/[id]/page.tsx` with the template, `<X>` = `GoodsReceiveNote`.
 
-- [ ] **Step 4: Register:**
+- [x] **Step 4: Register:**
 
 ```tsx
               { path: "goods-receive-note", lazy: () => import("./procurement/goods-receive-note/page") },
@@ -187,11 +187,11 @@ Fix `next/dynamic` stragglers per reference; document.
               { path: "goods-receive-note/:id", lazy: () => import("./procurement/goods-receive-note/[id]/page") },
 ```
 
-- [ ] **Step 5: Gates:** same four commands, all green.
+- [x] **Step 5: Gates:** same four commands, all green.
 
-- [ ] **Step 6: Probe** with `PROBE_PATHS="/procurement/goods-receive-note,/procurement/goods-receive-note/new"`. Report verbatim.
+- [x] **Step 6: Probe** with `PROBE_PATHS="/procurement/goods-receive-note,/procurement/goods-receive-note/new"`. Report verbatim.
 
-- [ ] **Step 7: Commit:** `git add routes/ && git commit -m "feat: migrate goods-receive-note module"`
+- [x] **Step 7: Commit:** `git add routes/ && git commit -m "feat: migrate goods-receive-note module"`
 
 ---
 
@@ -199,9 +199,9 @@ Fix `next/dynamic` stragglers per reference; document.
 
 **Files:** Create `routes/procurement/purchase-order/**`; modify `routes/router.tsx`.
 
-- [ ] **Step 1: Copy:** `cp -R "$SRC/app/(root)/procurement/purchase-order" routes/procurement/purchase-order`
+- [x] **Step 1: Copy:** `cp -R "$SRC/app/(root)/procurement/purchase-order" routes/procurement/purchase-order`
 
-- [ ] **Step 2: Codemods:**
+- [x] **Step 2: Codemods:**
 
 ```bash
 scripts/codemods/next-to-vite.sh routes
@@ -212,9 +212,9 @@ scripts/codemods/nextpage-to-route.sh routes/procurement/purchase-order/page.tsx
 
 Fix `next/dynamic` stragglers per reference; document.
 
-- [ ] **Step 3: Hand-convert** `routes/procurement/purchase-order/[id]/page.tsx` with the template, `<X>` = `PurchaseOrder`.
+- [x] **Step 3: Hand-convert** `routes/procurement/purchase-order/[id]/page.tsx` with the template, `<X>` = `PurchaseOrder`.
 
-- [ ] **Step 4: Register:**
+- [x] **Step 4: Register:**
 
 ```tsx
               { path: "purchase-order", lazy: () => import("./procurement/purchase-order/page") },
@@ -225,11 +225,11 @@ Fix `next/dynamic` stragglers per reference; document.
 
 (`from-price-list` MUST be registered before `:id`? React Router ranks static segments above dynamic automatically — order in the array does not matter for matching, but keep this order for readability.)
 
-- [ ] **Step 5: Gates:** same four commands, all green.
+- [x] **Step 5: Gates:** same four commands, all green.
 
-- [ ] **Step 6: Probe** with `PROBE_PATHS="/procurement/purchase-order,/procurement/purchase-order/new,/procurement/purchase-order/from-price-list"`. Report verbatim.
+- [x] **Step 6: Probe** with `PROBE_PATHS="/procurement/purchase-order,/procurement/purchase-order/new,/procurement/purchase-order/from-price-list"`. Report verbatim.
 
-- [ ] **Step 7: Commit:** `git add routes/ && git commit -m "feat: migrate purchase-order module"`
+- [x] **Step 7: Commit:** `git add routes/ && git commit -m "feat: migrate purchase-order module"`
 
 ---
 
@@ -237,9 +237,9 @@ Fix `next/dynamic` stragglers per reference; document.
 
 **Files:** Create `routes/procurement/purchase-request/**`; modify `routes/router.tsx`.
 
-- [ ] **Step 1: Copy:** `cp -R "$SRC/app/(root)/procurement/purchase-request" routes/procurement/purchase-request`
+- [x] **Step 1: Copy:** `cp -R "$SRC/app/(root)/procurement/purchase-request" routes/procurement/purchase-request`
 
-- [ ] **Step 2: Codemods:**
+- [x] **Step 2: Codemods:**
 
 ```bash
 scripts/codemods/next-to-vite.sh routes
@@ -248,9 +248,9 @@ scripts/codemods/nextpage-to-route.sh routes/procurement/purchase-request/page.t
 
 Fix `next/dynamic` stragglers per reference; document.
 
-- [ ] **Step 3: Hand-convert** `routes/procurement/purchase-request/[id]/page.tsx` with the template, `<X>` = `PurchaseRequest`.
+- [x] **Step 3: Hand-convert** `routes/procurement/purchase-request/[id]/page.tsx` with the template, `<X>` = `PurchaseRequest`.
 
-- [ ] **Step 4: Register:**
+- [x] **Step 4: Register:**
 
 ```tsx
               { path: "purchase-request", lazy: () => import("./procurement/purchase-request/page") },
@@ -260,11 +260,11 @@ Fix `next/dynamic` stragglers per reference; document.
 
 NOTE: keep these LISTED BEFORE any future `purchase-request-template` conflicts? No conflict — `purchase-request-template` is a distinct static segment; React Router matches exactly. No action needed.
 
-- [ ] **Step 5: Gates:** same four commands, all green. PR is the largest module (52 files) — expect possible `app/` leaf-file needs (Phase 0 pre-copied `mock-data.ts` etc. under `app/(root)/...` paths — they already exist; rsync/cp must NOT overwrite them: after copying, run `git status app/` — it must show NO changes. If the module's `_components` import more `@/app/...` leaves that don't exist yet, copy those specific files and document).
+- [x] **Step 5: Gates:** same four commands, all green. PR is the largest module (52 files) — expect possible `app/` leaf-file needs (Phase 0 pre-copied `mock-data.ts` etc. under `app/(root)/...` paths — they already exist; rsync/cp must NOT overwrite them: after copying, run `git status app/` — it must show NO changes. If the module's `_components` import more `@/app/...` leaves that don't exist yet, copy those specific files and document).
 
-- [ ] **Step 6: Probe** with `PROBE_PATHS="/procurement/purchase-request,/procurement/purchase-request/new"` — the click-through MUST land on a PR document detail (workflow/approval state visible) if rows exist. Report verbatim.
+- [x] **Step 6: Probe** with `PROBE_PATHS="/procurement/purchase-request,/procurement/purchase-request/new"` — the click-through MUST land on a PR document detail (workflow/approval state visible) if rows exist. Report verbatim.
 
-- [ ] **Step 7: Commit:** `git add routes/ app/ && git commit -m "feat: migrate purchase-request module"`
+- [x] **Step 7: Commit:** `git add routes/ app/ && git commit -m "feat: migrate purchase-request module"`
 
 ---
 
@@ -274,7 +274,7 @@ NOTE: keep these LISTED BEFORE any future `purchase-request-template` conflicts?
 - Create: `routes/procurement/approval/**`, `e2e/authenticated-procurement.spec.ts`
 - Modify: `routes/router.tsx`, `CLAUDE.md`
 
-- [ ] **Step 1: Copy + codemod approval:**
+- [x] **Step 1: Copy + codemod approval:**
 
 ```bash
 cp -R "$SRC/app/(root)/procurement/approval" routes/procurement/approval
@@ -282,13 +282,13 @@ scripts/codemods/next-to-vite.sh routes
 scripts/codemods/nextpage-to-route.sh routes/procurement/approval/page.tsx
 ```
 
-- [ ] **Step 2: Register** (replacing the Batch B-F marker):
+- [x] **Step 2: Register** (replacing the Batch B-F marker):
 
 ```tsx
               { path: "approval", lazy: () => import("./procurement/approval/page") },
 ```
 
-- [ ] **Step 3: Write `e2e/authenticated-procurement.spec.ts`:**
+- [x] **Step 3: Write `e2e/authenticated-procurement.spec.ts`:**
 
 ```ts
 import { expect, test } from "@playwright/test";
@@ -335,9 +335,9 @@ test("login and browse procurement modules", async ({ page }) => {
 
 (Adjust selectors to the real DOM if a list renders empty-state without a table — switch that path's assertion to the visible empty-state text while keeping intent: real UI, not 404/blank. Document adjustments.)
 
-- [ ] **Step 4: Update CLAUDE.md:** in the Routing bullet, extend: `/config/*` and `/procurement/*` are migrated (routes/config/, routes/procurement/). Add any new open items found during Phase 2 probes to "Known open items".
+- [x] **Step 4: Update CLAUDE.md:** in the Routing bullet, extend: `/config/*` and `/procurement/*` are migrated (routes/config/, routes/procurement/). Add any new open items found during Phase 2 probes to "Known open items".
 
-- [ ] **Step 5: Final verification:**
+- [x] **Step 5: Final verification:**
 
 ```bash
 bun run lint && bun run test:run && bun run build && bunx playwright test
@@ -351,7 +351,7 @@ E2E_EMAIL=<from controller> E2E_PASSWORD=<from controller> bunx playwright test
 
 Expected: 3 passed (static + authenticated-config + authenticated-procurement). Report all summary lines honestly.
 
-- [ ] **Step 6: Commit:** `git add routes/ e2e/ CLAUDE.md && git commit -m "feat: migrate approval module and add procurement e2e"`
+- [x] **Step 6: Commit:** `git add routes/ e2e/ CLAUDE.md && git commit -m "feat: migrate approval module and add procurement e2e"`
 
 ---
 
