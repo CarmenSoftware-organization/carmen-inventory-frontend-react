@@ -7,7 +7,10 @@ import {
 
 describe("runtime-config", () => {
   beforeEach(() => setRuntimeConfigForTests(null));
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
 
   it("loads and normalizes config.json (strips trailing slash)", async () => {
     vi.stubGlobal(
@@ -40,6 +43,14 @@ describe("runtime-config", () => {
       vi.fn().mockResolvedValue(new Response(JSON.stringify({ BACKEND_URL: "x" }))),
     );
     await expect(loadRuntimeConfig()).rejects.toThrow(/X_APP_ID/);
+  });
+
+  it("throws with status code when fetch returns a non-ok response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(null, { status: 404 })),
+    );
+    await expect(loadRuntimeConfig()).rejects.toThrow(/config\.json \(404\)/);
   });
 
   it("getRuntimeConfig throws before load", () => {

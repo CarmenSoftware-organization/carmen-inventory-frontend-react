@@ -13,13 +13,13 @@ let config: RuntimeConfig | null = null;
 
 export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
   const res = await fetch("/config.json", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to load /config.json");
+  if (!res.ok) throw new Error(`Failed to load /config.json (${res.status})`);
   const json = (await res.json()) as Partial<RuntimeConfig>;
   if (typeof json.BACKEND_URL !== "string") {
     throw new Error("config.json missing BACKEND_URL");
   }
   if (typeof json.X_APP_ID !== "string" || !json.X_APP_ID) {
-    throw new Error("config.json missing X_APP_ID");
+    throw new Error("config.json missing or empty X_APP_ID");
   }
   config = {
     BACKEND_URL: json.BACKEND_URL.replace(/\/+$/, ""),
