@@ -1,0 +1,48 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  getRuntimeConfig,
+  loadRuntimeConfig,
+  setRuntimeConfigForTests,
+} from "@/lib/runtime-config";
+
+describe("runtime-config", () => {
+  beforeEach(() => setRuntimeConfigForTests(null));
+  afterEach(() => vi.restoreAllMocks());
+
+  it("loads and normalizes config.json (strips trailing slash)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({ BACKEND_URL: "https://api.example.com/", X_APP_ID: "app-1" }),
+        ),
+      ),
+    );
+    const config = await loadRuntimeConfig();
+    expect(config.BACKEND_URL).toBe("https://api.example.com");
+    expect(getRuntimeConfig().X_APP_ID).toBe("app-1");
+  });
+
+  it("accepts empty BACKEND_URL (dev proxy mode)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ BACKEND_URL: "", X_APP_ID: "app-1" })),
+      ),
+    );
+    const config = await loadRuntimeConfig();
+    expect(config.BACKEND_URL).toBe("");
+  });
+
+  it("throws when config.json is missing keys", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(JSON.stringify({ BACKEND_URL: "x" }))),
+    );
+    await expect(loadRuntimeConfig()).rejects.toThrow(/X_APP_ID/);
+  });
+
+  it("getRuntimeConfig throws before load", () => {
+    expect(() => getRuntimeConfig()).toThrow(/not loaded/);
+  });
+});
