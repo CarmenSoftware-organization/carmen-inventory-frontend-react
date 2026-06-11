@@ -1,0 +1,363 @@
+
+import {
+  Background,
+  BackgroundVariant,
+  Controls,
+  Handle,
+  Position,
+  ReactFlow,
+  ReactFlowProvider,
+  type Edge,
+  type Node,
+  type NodeProps,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import {
+  CheckCircle2,
+  Clock,
+  Crown,
+  GripVertical,
+  Play,
+  Users,
+} from "lucide-react";
+import { useTranslations } from "use-intl";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import type { RoutingRule, Stage } from "@/types/workflows";
+import { cn } from "@/lib/utils";
+import { formatCycleTime, totalSlaMinutes } from "./wf-sla-utils";
+import {
+  ROLE_LABEL_COLOR,
+  ROLE_NODE_BORDER,
+} from "./wf-role-colors";
+
+interface WfDiagramProps {
+  readonly stages: Stage[];
+  readonly routingRules?: RoutingRule[];
+  readonly selectedIndex?: number;
+  readonly onSelectStage?: (index: number) => void;
+  readonly onMoveStage?: (from: number, to: number) => void;
+  readonly className?: string;
+  readonly headerActions?: React.ReactNode;
+}
+
+interface StageNodeData extends Record<string, unknown> {
+  readonly stage: Stage;
+  readonly index: number;
+  readonly isFirst: boolean;
+  readonly isLast: boolean;
+  readonly isSelected: boolean;
+  readonly userCount: number;
+  readonly isHod: boolean;
+  readonly slaLabel: string;
+  readonly canDrag: boolean;
+}
+
+function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
+  const t = useTranslations("systemAdmin.workflow");
+  const {
+    stage,
+    isFirst,
+    isLast,
+    isSelected,
+    userCount,
+    isHod,
+    slaLabel,
+    canDrag,
+  } = data;
+
+  const containerClass = isLast
+    ? "border-success/60 bg-success/10"
+    : (ROLE_NODE_BORDER[stage.role] ?? ROLE_NODE_BORDER.approve);
+  const labelClass = isLast
+    ? "text-success-foreground"
+    : (ROLE_LABEL_COLOR[stage.role] ?? ROLE_LABEL_COLOR.approve);
+
+  const renderStepIcon = () => {
+    if (isLast) {
+      return <CheckCircle2 className="text-success-foreground size-3" />;
+    }
+    if (isFirst) {
+      return <Play className="text-primary size-3 fill-current" />;
+    }
+    return (
+      <span className="text-[0.6875rem] font-semibold tabular-nums">
+        {data.index}
+      </span>
+    );
+  };
+
+  return (
+    <div
+      className={cn(
+        "group bg-card relative flex w-44 flex-col gap-1 rounded-lg border-2 px-3 py-2 shadow-sm transition-all",
+        containerClass,
+        isSelected &&
+          "ring-primary ring-offset-background ring-2 ring-offset-2",
+        canDrag && "cursor-grab hover:shadow-md active:cursor-grabbing",
+      )}
+    >
+      {!isFirst && (
+        <Handle
+          type="target"
+          position={Position.Left}
+          className="border-background! bg-muted-foreground! size-2! border-2! opacity-0! transition-opacity group-hover:opacity-100!"
+        />
+      )}
+      {!isLast && (
+        <Handle
+          type="source"
+          position={Position.Right}
+          className="border-background! bg-muted-foreground! size-2! border-2! opacity-0! transition-opacity group-hover:opacity-100!"
+        />
+      )}
+
+      <div className="flex items-center gap-1.5">
+        {canDrag && (
+          <GripVertical
+            className="text-muted-foreground size-3 shrink-0"
+            aria-hidden="true"
+          />
+        )}
+        <span
+          className={cn(
+            "inline-flex size-5 shrink-0 items-center justify-center rounded-full",
+            containerClass,
+          )}
+        >
+          {renderStepIcon()}
+        </span>
+        <span
+          className={cn("flex-1 truncate text-xs font-semibold", labelClass)}
+          title={stage.name}
+        >
+          {stage.name}
+        </span>
+        {isHod && !isLast && (
+          <Crown
+            className="text-warning-foreground size-3 shrink-0"
+            aria-label={t("isHod")}
+          />
+        )}
+      </div>
+
+      {!isLast && (
+        <div className="text-muted-foreground flex items-center gap-2 text-[0.625rem]">
+          <span className="capitalize">{stage.role}</span>
+          {userCount > 0 && !isHod && (
+            <span className="inline-flex items-center gap-0.5 tabular-nums">
+              <Users className="size-2.5" />
+              {userCount}
+            </span>
+          )}
+          {slaLabel && <span className="ml-auto tabular-nums">{slaLabel}</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const nodeTypes = { stage: StageNode };
+
+const HORIZONTAL_GAP = 240;
+const VERTICAL_BASE = 80;
+
+function buildGraph(
+  stages: Stage[],
+  routingRules: RoutingRule[],
+  selectedIndex: number | undefined,
+  draggable: boolean,
+): { nodes: Node[]; edges: Edge[] } {
+  const nodes: Node[] = stages.map((stage, index) => {
+    const isFirst = index === 0;
+    const isLast = index === stages.length - 1;
+    const userCount = stage.assigned_users?.length ?? 0;
+    const isHod = stage.is_hod ?? false;
+    const slaLabel =
+      stage.sla && stage.sla !== "0"
+        ? `${stage.sla}${stage.sla_unit?.[0] ?? "h"}`
+        : "";
+
+    const canDrag = draggable && !isFirst && !isLast;
+
+    return {
+      id: `stage-${index}`,
+      type: "stage",
+      position: { x: index * HORIZONTAL_GAP, y: VERTICAL_BASE },
+      data: {
+        stage,
+        index,
+        isFirst,
+        isLast,
+        isSelected: selectedIndex === index,
+        userCount,
+        isHod,
+        slaLabel,
+        canDrag,
+      } satisfies StageNodeData,
+      draggable: canDrag,
+      selectable: true,
+    };
+  });
+
+  const sequenceEdges: Edge[] = stages.slice(0, -1).map((_, index) => ({
+    id: `seq-${index}`,
+    source: `stage-${index}`,
+    target: `stage-${index + 1}`,
+    type: "smoothstep",
+    animated: false,
+    style: {
+      stroke: "var(--border)",
+      strokeOpacity: 0.9,
+      strokeWidth: 1.5,
+    },
+  }));
+
+  const routingEdges: Edge[] = routingRules
+    .map((rule, ruleIdx): Edge | null => {
+      if (!rule.trigger_stage || !rule.action?.parameters?.target_stage) {
+        return null;
+      }
+      const triggerIdx = stages.findIndex((s) => s.name === rule.trigger_stage);
+      const targetIdx = stages.findIndex(
+        (s) => s.name === rule.action.parameters.target_stage,
+      );
+      if (triggerIdx < 0 || targetIdx < 0) return null;
+
+      return {
+        id: `rule-${ruleIdx}-${triggerIdx}-${targetIdx}`,
+        source: `stage-${triggerIdx}`,
+        target: `stage-${targetIdx}`,
+        type: "smoothstep",
+        animated: true,
+        label: rule.name,
+        style: {
+          stroke: "var(--info)",
+          strokeWidth: 1.5,
+          strokeDasharray: "4 3",
+        },
+        labelStyle: {
+          fill: "var(--info-foreground)",
+          fontSize: 10,
+          fontWeight: 500,
+        },
+        labelBgStyle: {
+          fill: "var(--card)",
+          fillOpacity: 0.9,
+        },
+        labelBgPadding: [4, 2],
+        labelBgBorderRadius: 4,
+      };
+    })
+    .filter((e): e is Edge => e !== null);
+
+  return { nodes, edges: [...sequenceEdges, ...routingEdges] };
+}
+
+export default function WfDiagram({
+  stages,
+  routingRules = [],
+  selectedIndex,
+  onSelectStage,
+  onMoveStage,
+  className,
+  headerActions,
+}: WfDiagramProps) {
+  const t = useTranslations("systemAdmin.workflow");
+
+  const { nodes, edges } = buildGraph(stages, routingRules, selectedIndex, !!onMoveStage);
+
+  if (!stages || stages.length === 0) return null;
+
+  const middleCount = Math.max(0, stages.length - 2);
+  const totalMinutes = totalSlaMinutes(stages);
+  const cycleTime = formatCycleTime(totalMinutes);
+  const totalHours = Math.round((totalMinutes / 60) * 10) / 10;
+
+  return (
+    <div className={cn("space-y-1.5", className)}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[0.6875rem]">
+          <span className="inline-flex items-center gap-1 tabular-nums">
+            <span className="text-foreground font-medium">{stages.length}</span>
+            {t("stages").toLowerCase()}
+          </span>
+          {middleCount > 0 && (
+            <span className="inline-flex items-center gap-1 tabular-nums">
+              <Users className="size-3" aria-hidden="true" />
+              {middleCount} {middleCount === 1 ? t("approver") : t("approvers")}
+            </span>
+          )}
+          {cycleTime && (
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <span className="inline-flex cursor-help items-center gap-1 tabular-nums">
+                  <Clock className="size-3" aria-hidden="true" />
+                  {t("cycleTime")}:{" "}
+                  <span className="font-medium">{cycleTime}</span>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {totalHours} {t("slaHours").toLowerCase()} (
+                {totalMinutes.toLocaleString()} {t("slaMinutes").toLowerCase()})
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+        {headerActions && (
+          <div className="flex shrink-0 items-center">{headerActions}</div>
+        )}
+      </div>
+
+      <div className="bg-muted/20 h-56 w-full overflow-hidden rounded border">
+        <ReactFlowProvider>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            fitView
+            fitViewOptions={{ padding: 0.2, includeHiddenNodes: false }}
+            minZoom={0.4}
+            maxZoom={1.5}
+            proOptions={{ hideAttribution: true }}
+            nodesDraggable={!!onMoveStage}
+            nodesConnectable={false}
+            edgesFocusable={false}
+            onNodeClick={(_event, node) => {
+              const idx = Number((node.data as StageNodeData).index);
+              if (Number.isFinite(idx)) onSelectStage?.(idx);
+            }}
+            onNodeDragStop={(_event, node) => {
+              if (!onMoveStage) return;
+              const data = node.data as StageNodeData;
+              const fromIndex = data.index;
+              if (data.isFirst || data.isLast) return;
+
+              const lastMovableIndex = stages.length - 2;
+              const rawIndex = Math.round(node.position.x / HORIZONTAL_GAP);
+              const toIndex = Math.min(Math.max(rawIndex, 1), lastMovableIndex);
+
+              if (toIndex !== fromIndex) {
+                onMoveStage(fromIndex, toIndex);
+              }
+            }}
+          >
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={16}
+              size={1}
+              color="var(--border)"
+            />
+            <Controls
+              showInteractive={false}
+              className="border-border! bg-card! rounded-lg! border! shadow-sm!"
+            />
+          </ReactFlow>
+        </ReactFlowProvider>
+      </div>
+    </div>
+  );
+}
