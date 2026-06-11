@@ -74,17 +74,18 @@ Backend: must allow CORS from CDN origin, refresh cookie SameSite=None; Secure, 
 
 Today auth/refresh runs server-side (`/api/auth/*`). With no server, this moves entirely into the browser.
 
-- **Token storage:** access token in **memory** (`lib/auth-store.ts`, module-level) — not in localStorage, so XSS cannot exfiltrate it. Refresh token lives in the backend **httpOnly cookie**, sent automatically with `credentials: "include"`.
-- **Boot / reload:** on app start, call `POST {BACKEND}/auth/refresh` (cookie attaches automatically) → new access token into memory before first render. Success → logged-in; failure → redirect `/login`.
-- **http-client (ported from source):** keep the mutex refresh + client-side sliding-window rate-limiter. Drop the SSRF guard (base URL is now fixed). Change `refreshToken()` to hit `{BACKEND}/auth/refresh` instead of `/api/auth/refresh`. Attach `Authorization: Bearer <token>` from auth-store. Set `credentials: "include"`. Base URL from runtime config.
+> **Amended 2026-06-11 after source-code investigation:** the backend does **not** set cookies today — it returns `access_token` + `refresh_token` in the JSON body on login, and the refresh endpoint is `POST {BACKEND}/api/auth/refresh-token` taking `{ refresh_token }` in the **request body** (the Next server was the one managing httpOnly cookies on its own origin). Waiting for backend cookie support would block Phase 0, so the refresh token is stored in **localStorage** (matches the persistence UX of the old 7-day cookie). Storage sits behind a small adapter module so it can swap to httpOnly-cookie mode later if the backend adds support.
+
+- **Token storage:** access token in **memory** (`lib/auth/token-store.ts`, module-level). Refresh token in **localStorage** behind `lib/auth/refresh-token-storage.ts` (single swap point for future cookie mode).
+- **Boot / reload:** on app start, read refresh token from storage → `POST {BACKEND}/api/auth/refresh-token` → new access token into memory before first render. Success → logged-in; failure → redirect `/login`.
+- **http-client (ported from source):** keep the mutex refresh + client-side sliding-window rate-limiter. Drop the SSRF guard (base URL is now fixed). URL rewrite: `/api/proxy/<rest>` and `/api/external/<rest>` → `${BACKEND_URL}/<rest>` — so `API_ENDPOINTS` and all entity hooks are reused unchanged. Attach `Authorization: Bearer <token>` from token-store + `x-app-id` header. Base URL from runtime config.
 - **401 flow:** request gets 401 → refresh (shared mutex promise) → success retries the request; failure clears the store and triggers logout/redirect. http-client stays decoupled from the router via an event/observer (not a direct router import).
 - **Route guard:** the `(root)` layout route checks auth-store; no token → `<Navigate to="/login" />`.
 
 ### Backend requirements (must be coordinated)
 
-- CORS allow the CloudFront origin.
-- Refresh cookie set as `SameSite=None; Secure`.
-- Respond `Access-Control-Allow-Credentials: true`.
+- CORS allow the CloudFront origin (and `localhost` dev origins), including the `Authorization` and `x-app-id` request headers.
+- *(Optional future hardening)* httpOnly-cookie refresh flow: backend sets refresh cookie `SameSite=None; Secure` + `Access-Control-Allow-Credentials: true`; the SPA then swaps `refresh-token-storage.ts` to cookie mode.
 
 ---
 
@@ -117,7 +118,7 @@ Today auth/refresh runs server-side (`/api/auth/*`). With no server, this moves 
 
 - Target stack: **Vite + React Router 7 SPA** (leave Next.js entirely).
 - Backend access: **direct browser → backend via CORS** (no server/edge proxy).
-- Token: **access in memory + refresh in backend httpOnly cookie**.
+- Token: **access in memory + refresh in localStorage** (amended — backend has no cookie support today; storage behind an adapter so cookie mode can swap in later).
 - i18n: **use-intl** (not a heavier rewrite to react-i18next) to minimize churn across 624 files.
 - env: **runtime `config.json`** (single artifact, all environments).
 - Folder layout: **keep `@/*` → repo root and original folder names** to reuse import paths; `app/` → `routes/`.
