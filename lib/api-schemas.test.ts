@@ -129,7 +129,7 @@ describe("purchaseRequestSchema (real fixture)", () => {
   });
 
   it("rejects missing required field (id)", () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructure to omit `id`
+    // destructure to omit `id` (_ ignored via varsIgnorePattern)
     const { id: _, ...noId } = fixture;
     const result = purchaseRequestSchema.safeParse(noId);
     expect(result.success).toBe(false);
