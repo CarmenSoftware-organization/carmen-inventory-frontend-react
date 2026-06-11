@@ -147,6 +147,17 @@ export const router = createBrowserRouter([
               { path: "equipment-category", lazy: () => import("./operation-plan/equipment-category/page") },
             ],
           },
+          {
+            path: "product-management",
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+            children: [
+              { index: true, lazy: () => import("./product-management/page") },
+              { path: "category", lazy: () => import("./product-management/category/page") },
+              { path: "product", lazy: () => import("./product-management/product/page") },
+              { path: "product/new", lazy: () => import("./product-management/product/new/page") },
+              { path: "product/:id", lazy: () => import("./product-management/product/[id]/page") },
+            ],
+          },
         ],
       },
       { path: "*", lazy: () => import("./not-found/page") },

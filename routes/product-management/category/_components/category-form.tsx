@@ -1,0 +1,333 @@
+
+import { useEffect, useState } from "react";
+import { useForm, Controller, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Percent } from "lucide-react";
+import { useTranslations } from "use-intl";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { StatusSwitch } from "@/components/ui/status-switch";
+import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
+import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
+import type { CategoryNode, CategoryType } from "@/types/category";
+import type { FormMode } from "@/types/form";
+import {
+  categorySchema,
+  type CategoryFormValues,
+} from "./category-form-schema";
+
+interface CategoryFormProps {
+  readonly type: CategoryType;
+  readonly mode: FormMode;
+  readonly selectedNode?: CategoryNode;
+  readonly parentNode?: CategoryNode;
+  readonly onSubmit: (data: CategoryFormValues) => void;
+  readonly onCancel: () => void;
+  readonly isPending?: boolean;
+}
+
+export function CategoryForm({
+  type,
+  mode,
+  selectedNode,
+  parentNode,
+  onSubmit,
+  onCancel,
+  isPending,
+}: CategoryFormProps) {
+  const t = useTranslations("productManagement.category");
+  const tc = useTranslations("common");
+  const tfl = useTranslations("field");
+  const tf = useTranslations("form");
+  const tp = useTranslations("productManagement.product");
+
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingData, setPendingData] = useState<CategoryFormValues | null>(
+    null,
+  );
+
+  const parentDisplay =
+    type === "category" ? "" : parentNode ? `${parentNode.code} - ${parentNode.name}` : "";
+
+  const defaultValues = ((): CategoryFormValues => {
+    const base: CategoryFormValues = {
+      code: selectedNode?.code ?? "",
+      name: selectedNode?.name ?? "",
+      description: selectedNode?.description ?? "",
+      is_active: selectedNode?.is_active ?? true,
+      cascade_deviation: selectedNode?.cascade_deviation ?? true,
+      price_deviation_limit:
+        selectedNode?.price_deviation_limit ??
+        parentNode?.price_deviation_limit ??
+        0,
+      qty_deviation_limit:
+        selectedNode?.qty_deviation_limit ??
+        parentNode?.qty_deviation_limit ??
+        0,
+      is_used_in_recipe:
+        selectedNode?.is_used_in_recipe ??
+        parentNode?.is_used_in_recipe ??
+        false,
+      is_sold_directly:
+        selectedNode?.is_sold_directly ?? parentNode?.is_sold_directly ?? false,
+      tax_profile_id:
+        selectedNode?.tax_profile_id ?? parentNode?.tax_profile_id ?? "",
+      tax_rate: selectedNode?.tax_rate ?? parentNode?.tax_rate ?? 0,
+    };
+    if (type === "subcategory")
+      base.product_category_id =
+        selectedNode?.product_category_id ?? parentNode?.id ?? "";
+    if (type === "itemgroup")
+      base.product_subcategory_id =
+        selectedNode?.product_subcategory_id ?? parentNode?.id ?? "";
+    return base;
+  })();
+
+  const form = useForm<CategoryFormValues>({
+    resolver: zodResolver(categorySchema) as Resolver<CategoryFormValues>,
+    defaultValues,
+  });
+
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [defaultValues, form]);
+
+  const handleFormSubmit = (data: CategoryFormValues) => {
+    if (
+      mode === "edit" &&
+      selectedNode &&
+      (selectedNode.is_used_in_recipe !== data.is_used_in_recipe ||
+        selectedNode.is_sold_directly !== data.is_sold_directly)
+    ) {
+      setPendingData(data);
+      setShowConfirm(true);
+      return;
+    }
+    onSubmit(data);
+  };
+
+  const PARENT_LABELS: Record<CategoryType, string> = {
+    category: "",
+    subcategory: tfl("category"),
+    itemgroup: tfl("subCategory"),
+  };
+  const parentLabel = PARENT_LABELS[type];
+
+  return (
+    <>
+      <form
+        onSubmit={form.handleSubmit(handleFormSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
+        className="space-y-3"
+      >
+        {/* Parent reference */}
+        {type !== "category" && (
+          <Field>
+            <FieldLabel>{parentLabel}</FieldLabel>
+            <Input
+              value={parentDisplay}
+              disabled
+              className="bg-muted/50 text-xs"
+            />
+          </Field>
+        )}
+
+        {/* Code + Name + Tax Profile row */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[6.25rem_1fr_1fr]">
+          <Field>
+            <FieldLabel htmlFor="code" required>
+              {tfl("code")}
+            </FieldLabel>
+            <FieldInput
+              id="code"
+              className="text-xs"
+              maxLength={10}
+              disabled={isPending}
+              error={form.formState.errors.code?.message}
+              {...form.register("code")}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="name" required>
+              {tfl("name")}
+            </FieldLabel>
+            <FieldInput
+              id="name"
+              className="text-xs"
+              maxLength={100}
+              disabled={isPending}
+              error={form.formState.errors.name?.message}
+              {...form.register("name")}
+            />
+          </Field>
+        </div>
+        <Field>
+          <FieldLabel required>{tfl("taxProfile")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="tax_profile_id"
+            render={({ field }) => (
+              <LookupTaxProfile
+                value={field.value ?? ""}
+                onValueChange={(id, taxRate) => {
+                  field.onChange(id);
+                  form.setValue("tax_rate", taxRate);
+                }}
+                disabled={isPending}
+                className="w-full"
+                error={form.formState.errors.tax_profile_id?.message}
+              />
+            )}
+          />
+        </Field>
+
+        {/* Deviation limits */}
+        <div className="grid grid-cols-2 gap-3">
+          <Field>
+            <FieldLabel htmlFor="qty_deviation_limit">
+              {tfl("qtyDeviation")}
+            </FieldLabel>
+            <div className="relative">
+              <Input
+                id="qty_deviation_limit"
+                type="number"
+                inputMode="decimal"
+                className="pr-6 text-right text-xs tabular-nums"
+                min={0}
+                max={100}
+                disabled={isPending}
+                {...form.register("qty_deviation_limit", {
+                  valueAsNumber: true,
+                })}
+              />
+              <Percent className="text-muted-foreground/50 absolute top-1/2 right-1.5 h-2.5 w-2.5 -translate-y-1/2" />
+            </div>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="price_deviation_limit">
+              {tfl("priceDeviation")}
+            </FieldLabel>
+            <div className="relative">
+              <Input
+                id="price_deviation_limit"
+                type="number"
+                inputMode="decimal"
+                className="pr-6 text-right text-xs tabular-nums"
+                min={0}
+                max={100}
+                disabled={isPending}
+                {...form.register("price_deviation_limit", {
+                  valueAsNumber: true,
+                })}
+              />
+              <Percent className="text-muted-foreground/50 absolute top-1/2 right-1.5 h-2.5 w-2.5 -translate-y-1/2" />
+            </div>
+          </Field>
+        </div>
+
+        {/* Flags — 2-col grid to reduce vertical space */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <Controller
+            control={form.control}
+            name="is_used_in_recipe"
+            render={({ field }) => (
+              <StatusSwitch
+                id="is_used_in_recipe"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                disabled={isPending}
+                label={tp("usedInRecipe")}
+                activeText={tp("usedInRecipe")}
+                inactiveText={tp("notUsedInRecipe")}
+                description={tp("usedInRecipeDesc")}
+              />
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="is_sold_directly"
+            render={({ field }) => (
+              <StatusSwitch
+                id="is_sold_directly"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                disabled={isPending}
+                label={tp("soldDirectly")}
+                activeText={tp("soldDirectly")}
+                inactiveText={tp("notSoldDirectly")}
+                description={tp("soldDirectlyDesc")}
+              />
+            )}
+          />
+        </div>
+
+        <Controller
+          control={form.control}
+          name="is_active"
+          render={({ field }) => (
+            <StatusSwitch
+              id="is_active"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              disabled={isPending}
+            />
+          )}
+        />
+
+        {/* Description */}
+        <Field>
+          <FieldLabel htmlFor="description">{tfl("description")}</FieldLabel>
+          <Textarea
+            id="description"
+            className="resize-none text-xs"
+            rows={2}
+            maxLength={256}
+            disabled={isPending}
+            {...form.register("description")}
+          />
+        </Field>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+            disabled={isPending}
+          >
+            {tc("cancel")}
+          </Button>
+          <Button type="submit" size="sm" disabled={isPending}>
+            {isPending && (mode === "edit" ? tf("saving") : tf("creating"))}
+            {!isPending && mode === "edit" && tc("save")}
+            {!isPending && mode !== "edit" && tc("create")}
+          </Button>
+        </div>
+      </form>
+
+      <DeleteDialog
+        open={showConfirm}
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowConfirm(false);
+            setPendingData(null);
+          }
+        }}
+        title={t("confirmChanges")}
+        description={t("confirmFlagsChange")}
+        onConfirm={() => {
+          if (pendingData) {
+            onSubmit(pendingData);
+            setShowConfirm(false);
+            setPendingData(null);
+          }
+        }}
+      />
+    </>
+  );
+}
