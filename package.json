@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "test": "vitest",
     "test:run": "vitest run",
-    "clear": "rm -rf dist node_modules bun.lock"
+    "clear": "rm -rf dist node_modules"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
