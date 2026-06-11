@@ -45,6 +45,17 @@ export const router = createBrowserRouter([
               { path: "location/:id", lazy: () => import("./config/location/[id]/page") },
             ],
           },
+          {
+            path: "procurement",
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+            children: [
+              { index: true, lazy: () => import("./procurement/page") },
+              { path: "purchase-request-template", lazy: () => import("./procurement/purchase-request-template/page") },
+              { path: "purchase-request-template/new", lazy: () => import("./procurement/purchase-request-template/new/page") },
+              { path: "purchase-request-template/:id", lazy: () => import("./procurement/purchase-request-template/[id]/page") },
+              // ── procurement modules ถูกเพิ่มต่อท้ายตรงนี้ใน Batch B-F ──
+            ],
+          },
         ],
       },
       { path: "*", lazy: () => import("./not-found/page") },
