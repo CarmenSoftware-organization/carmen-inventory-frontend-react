@@ -29,6 +29,9 @@ const authenticatedWebServers = hasCreds
 export default defineConfig({
   testDir: "./e2e",
   timeout: 30_000,
+  // Authenticated specs ทุกตัว login ด้วยบัญชีเดียวกัน — รันขนานแล้ว backend
+  // rate-limit ชน (flake) จึงบังคับ 1 worker เมื่อมี creds (suite เล็ก ไม่กระทบเวลา)
+  workers: hasCreds ? 1 : undefined,
   projects: [
     {
       name: "static",
