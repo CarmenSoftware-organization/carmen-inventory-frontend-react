@@ -15,6 +15,7 @@ const authenticatedProjects: Project[] = hasCreds
     ]
   : [];
 
+// reuseExistingServer: dev server ที่รันค้างบนพอร์ต 3132 อาจชี้ proxy คนละ backend — kill ก่อนรัน หรือ set CI=1
 const authenticatedWebServers = hasCreds
   ? [
       {

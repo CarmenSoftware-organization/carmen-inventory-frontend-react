@@ -15,12 +15,14 @@ test("login and browse config modules", async ({ page }) => {
   // Dialog-based module list renders
   await page.goto("/config/unit");
   await expect(page.getByRole("table").first()).toBeVisible({ timeout: 10_000 });
+  expect(await page.getByRole("row").count()).toBeGreaterThan(1); // header + ≥1 data row
 
   // Page-based module list + new form
   await page.goto("/config/department");
   await expect(page.getByRole("table").first()).toBeVisible({
     timeout: 10_000,
   });
+  expect(await page.getByRole("row").count()).toBeGreaterThan(1); // header + ≥1 data row
   await page.goto("/config/department/new");
   // department/new renders DepartmentForm which contains a real <form> element
   // nested inside Reveal animation wrappers — wait for the form element itself.
