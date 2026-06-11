@@ -1,0 +1,352 @@
+/* ── Status Badge Color Palette ──
+   Dedicated colors for document/item status badges.
+   Each status has its own unique color — NOT tied to semantic variants.
+   Edit these values to customize badge colors across the entire app.
+   All values use oklch color space.
+
+   Color logic (ERP conventions):
+   ┌──────────────────┬────────┬──────────────────────────────────────┐
+   │ Category         │ Hue    │ Meaning                              │
+   ├──────────────────┼────────┼──────────────────────────────────────┤
+   │ Gray             │ 265    │ Inactive / not started               │
+   │ Light blue       │ 250    │ Awaiting — pending                   │
+   │ Blue             │ 260    │ Submitted — sent for review          │
+   │ Cyan             │ 200    │ Sent / dispatched                    │
+   │ Sky              │ 230    │ Open / available                     │
+   │ Yellow           │ 95     │ In progress / review                 │
+   │ Orange           │ 45-75  │ Partial / saved                      │
+   │ Green            │ 145    │ Approved                             │
+   │ Indigo           │ 275    │ Completed / finalized                │
+   │ Dark teal        │ 195    │ Committed                            │
+   │ Red              │ 28     │ Rejected                             │
+   │ Rose-purple      │ 340    │ Cancelled                            │
+   │ Purple-gray      │ 290    │ Closed (neutral-dark)                │
+   │ Dark amber       │ 60     │ Locked (no changes allowed)          │
+   │ Dark red         │ 20     │ Voided                               │
+   │                  │        │                                      │
+   │ Cuisine regions  │        │                                      │
+   │ Crimson          │ 15     │ Asia                                 │
+   │ Sapphire         │ 240    │ Europe                               │
+   │ Emerald          │ 155    │ Americas                             │
+   │ Amber            │ 70     │ Africa                               │
+   │ Sand             │ 50     │ Middle East                          │
+   │ Teal             │ 190    │ Oceania                              │
+   └──────────────────┴────────┴──────────────────────────────────────┘ */
+
+/* ═══════════════════════════════════
+   LIGHT MODE
+   ═══════════════════════════════════ */
+
+:root {
+  /* ── Gray: ยังไม่เริ่ม ── */
+  --status-draft: oklch(0.92 0.01 258.7);            /* Light gray (brand neutral) */
+  --status-draft-fg: oklch(0.40 0 0);
+
+  /* ── Blue tones: รอดำเนินการ / ส่งแล้ว ── */
+  --status-pending: oklch(0.62 0.14 253.27);         /* Brand Blue */
+  --status-pending-fg: oklch(0.98 0 0);
+
+  --status-submitted: oklch(0.55 0.19 258.7);        /* Brand Primary Blue */
+  --status-submitted-fg: oklch(0.98 0 0);
+
+  --status-sent: oklch(0.58 0.16 188.43);            /* Brand Teal */
+  --status-sent-fg: oklch(0.98 0 0);
+
+  --status-open: oklch(0.60 0.14 229.05);            /* Brand Light Blue */
+  --status-open-fg: oklch(0.98 0 0);
+
+  /* ── Yellow-Orange: กำลังดำเนินการ / ต้องตรวจสอบ ── */
+  --status-in-progress: oklch(0.85 0.17 90);         /* Olive bridge */
+  --status-in-progress-fg: oklch(0.25 0 0);
+
+  --status-review: oklch(0.88 0.18 90);              /* Olive bridge (bright) */
+  --status-review-fg: oklch(0.25 0 0);
+
+  --status-partial: oklch(0.64 0.18 45);             /* Orange bridge (red↔amber) */
+  --status-partial-fg: oklch(0.98 0 0);
+
+  --status-save: oklch(0.66 0.16 75);                /* Brand Amber */
+  --status-save-fg: oklch(0.98 0 0);
+
+  /* ── Green: ผ่าน / อนุมัติ ── */
+  --status-approved: oklch(0.58 0.19 155);           /* Green bridge (amber↔teal) */
+  --status-approved-fg: oklch(0.98 0 0);
+
+  /* ── Indigo / Teal: เสร็จสิ้น / จบกระบวนการ ── */
+  --status-completed: oklch(0.52 0.16 290.03);       /* Brand Purple */
+  --status-completed-fg: oklch(0.98 0 0);
+
+  --status-committed: oklch(0.52 0.15 188.43);       /* Brand Teal (deep) */
+  --status-committed-fg: oklch(0.98 0 0);
+
+  /* ── Red: ปฏิเสธ ── */
+  --status-rejected: oklch(0.55 0.22 24.11);         /* Brand Red */
+  --status-rejected-fg: oklch(0.98 0 0);
+
+  /* ── Negative terminal: ยกเลิก / โมฆะ / ปิด ── */
+  --status-cancelled: oklch(0.54 0.16 348.79);       /* Brand Pink */
+  --status-cancelled-fg: oklch(0.98 0 0);
+
+  --status-closed: oklch(0.48 0.05 290.03);          /* Muted purple-gray (brand hue) */
+  --status-closed-fg: oklch(0.92 0 0);
+
+  --status-locked: oklch(0.52 0.12 75);              /* Dark amber (brand) */
+  --status-locked-fg: oklch(0.98 0 0);
+
+  --status-voided: oklch(0.58 0.18 348.79);          /* Brand Pink (deep) */
+  --status-voided-fg: oklch(0.98 0 0);
+
+  /* ── Workflow action badges ── */
+  --status-wf-submitted: oklch(0.55 0.19 258.7);     /* Brand Primary Blue */
+  --status-wf-submitted-fg: oklch(0.98 0 0);
+
+  --status-wf-approved: oklch(0.58 0.19 155);        /* Green bridge — approved */
+  --status-wf-approved-fg: oklch(0.98 0 0);
+
+  --status-wf-rejected: oklch(0.55 0.22 24.11);      /* Brand Red */
+  --status-wf-rejected-fg: oklch(0.98 0 0);
+
+  --status-wf-sent-back: oklch(0.75 0.17 75);        /* Brand Amber (bright) */
+  --status-wf-sent-back-fg: oklch(0.20 0 0);
+
+  --status-wf-reviewed: oklch(0.58 0.06 258.7);      /* Muted brand blue-gray */
+  --status-wf-reviewed-fg: oklch(0.98 0 0);
+
+  /* ── Type badges (Inventory Adjustment) ── */
+  --status-stock-in: oklch(0.58 0.17 155);           /* Green bridge */
+  --status-stock-in-fg: oklch(0.98 0 0);
+
+  --status-stock-out: oklch(0.60 0.18 24.11);        /* Brand Red */
+  --status-stock-out-fg: oklch(0.98 0 0);
+
+  /* ── Type badges (Credit Note) ── */
+  --status-quantity-return: oklch(0.64 0.15 24.11);  /* Brand Red (warm) */
+  --status-quantity-return-fg: oklch(0.98 0 0);
+
+  --status-amount-discount: oklch(0.56 0.14 188.43); /* Brand Teal */
+  --status-amount-discount-fg: oklch(0.98 0 0);
+
+  /* ── Type badges (Goods Receive Note) ── */
+  --status-grn-po: oklch(0.54 0.18 290.03);          /* Brand Purple */
+  --status-grn-po-fg: oklch(0.98 0 0);
+
+  --status-grn-manual: oklch(0.69 0.18 45);          /* Orange bridge */
+  --status-grn-manual-fg: oklch(0.98 0 0);
+
+  /* ── Cuisine region badges ── */
+  --status-cuisine-asia: oklch(0.55 0.22 24.11);     /* Brand Red — Asia */
+  --status-cuisine-asia-fg: oklch(0.98 0 0);
+
+  --status-cuisine-europe: oklch(0.52 0.20 258.7);   /* Brand Primary Blue — Europe */
+  --status-cuisine-europe-fg: oklch(0.98 0 0);
+
+  --status-cuisine-americas: oklch(0.58 0.20 155);   /* Green bridge — Americas */
+  --status-cuisine-americas-fg: oklch(0.98 0 0);
+
+  --status-cuisine-africa: oklch(0.72 0.18 75);      /* Brand Amber — Africa */
+  --status-cuisine-africa-fg: oklch(0.20 0 0);
+
+  --status-cuisine-middle-east: oklch(0.60 0.20 45); /* Orange bridge — Middle East */
+  --status-cuisine-middle-east-fg: oklch(0.98 0 0);
+
+  --status-cuisine-oceania: oklch(0.55 0.18 188.43); /* Brand Teal — Oceania */
+  --status-cuisine-oceania-fg: oklch(0.98 0 0);
+}
+
+/* ═══════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════ */
+
+.dark {
+  /* ── Gray ── */
+  --status-draft: oklch(0.55 0.02 258.7);
+  --status-draft-fg: oklch(0.92 0 0);
+
+  /* ── Blue tones ── */
+  --status-pending: oklch(0.58 0.12 253.27);
+  --status-pending-fg: oklch(0.95 0 0);
+
+  --status-submitted: oklch(0.52 0.17 258.7);
+  --status-submitted-fg: oklch(0.95 0 0);
+
+  --status-sent: oklch(0.55 0.14 188.43);
+  --status-sent-fg: oklch(0.95 0 0);
+
+  --status-open: oklch(0.56 0.12 229.05);
+  --status-open-fg: oklch(0.95 0 0);
+
+  /* ── Yellow-Orange ── */
+  --status-in-progress: oklch(0.74 0.15 90);
+  --status-in-progress-fg: oklch(0.20 0 0);
+
+  --status-review: oklch(0.78 0.16 90);
+  --status-review-fg: oklch(0.20 0 0);
+
+  --status-partial: oklch(0.60 0.16 45);
+  --status-partial-fg: oklch(0.95 0 0);
+
+  --status-save: oklch(0.62 0.14 75);
+  --status-save-fg: oklch(0.95 0 0);
+
+  /* ── Green ── */
+  --status-approved: oklch(0.55 0.17 155);
+  --status-approved-fg: oklch(0.95 0 0);
+
+  /* ── Indigo / Teal ── */
+  --status-completed: oklch(0.50 0.14 290.03);
+  --status-completed-fg: oklch(0.95 0 0);
+
+  --status-committed: oklch(0.50 0.13 188.43);
+  --status-committed-fg: oklch(0.95 0 0);
+
+  /* ── Red ── */
+  --status-rejected: oklch(0.52 0.20 24.11);
+  --status-rejected-fg: oklch(0.95 0 0);
+
+  /* ── Negative terminal ── */
+  --status-cancelled: oklch(0.51 0.14 348.79);
+  --status-cancelled-fg: oklch(0.95 0 0);
+
+  --status-closed: oklch(0.46 0.04 290.03);
+  --status-closed-fg: oklch(0.88 0 0);
+
+  --status-locked: oklch(0.50 0.10 75);
+  --status-locked-fg: oklch(0.95 0 0);
+
+  --status-voided: oklch(0.55 0.16 348.79);
+  --status-voided-fg: oklch(0.95 0 0);
+
+  /* ── Workflow action badges ── */
+  --status-wf-submitted: oklch(0.52 0.17 258.7);
+  --status-wf-submitted-fg: oklch(0.95 0 0);
+
+  --status-wf-approved: oklch(0.55 0.17 155);
+  --status-wf-approved-fg: oklch(0.95 0 0);
+
+  --status-wf-rejected: oklch(0.52 0.20 24.11);
+  --status-wf-rejected-fg: oklch(0.95 0 0);
+
+  --status-wf-sent-back: oklch(0.72 0.15 75);
+  --status-wf-sent-back-fg: oklch(0.20 0 0);
+
+  --status-wf-reviewed: oklch(0.55 0.05 258.7);
+  --status-wf-reviewed-fg: oklch(0.95 0 0);
+
+  /* ── Type badges ── */
+  --status-stock-in: oklch(0.55 0.15 155);
+  --status-stock-in-fg: oklch(0.95 0 0);
+
+  --status-stock-out: oklch(0.57 0.16 24.11);
+  --status-stock-out-fg: oklch(0.95 0 0);
+
+  /* ── Type badges (Credit Note) ── */
+  --status-quantity-return: oklch(0.60 0.13 24.11);
+  --status-quantity-return-fg: oklch(0.95 0 0);
+
+  --status-amount-discount: oklch(0.53 0.12 188.43);
+  --status-amount-discount-fg: oklch(0.95 0 0);
+
+  /* ── Type badges (Goods Receive Note) ── */
+  --status-grn-po: oklch(0.51 0.16 290.03);
+  --status-grn-po-fg: oklch(0.95 0 0);
+
+  --status-grn-manual: oklch(0.78 0.16 45);
+  --status-grn-manual-fg: oklch(0.95 0 0);
+
+  /* ── Cuisine region badges ── */
+  --status-cuisine-asia: oklch(0.52 0.20 24.11);
+  --status-cuisine-asia-fg: oklch(0.95 0 0);
+
+  --status-cuisine-europe: oklch(0.50 0.18 258.7);
+  --status-cuisine-europe-fg: oklch(0.95 0 0);
+
+  --status-cuisine-americas: oklch(0.55 0.18 155);
+  --status-cuisine-americas-fg: oklch(0.95 0 0);
+
+  --status-cuisine-africa: oklch(0.68 0.16 75);
+  --status-cuisine-africa-fg: oklch(0.20 0 0);
+
+  --status-cuisine-middle-east: oklch(0.57 0.18 45);
+  --status-cuisine-middle-east-fg: oklch(0.95 0 0);
+
+  --status-cuisine-oceania: oklch(0.52 0.16 188.43);
+  --status-cuisine-oceania-fg: oklch(0.95 0 0);
+}
+
+/* ═══════════════════════════════════
+   TAILWIND THEME REGISTRATION
+   ═══════════════════════════════════ */
+
+@theme inline {
+  /* Background colors */
+  --color-status-draft: var(--status-draft);
+  --color-status-pending: var(--status-pending);
+  --color-status-submitted: var(--status-submitted);
+  --color-status-sent: var(--status-sent);
+  --color-status-open: var(--status-open);
+  --color-status-in-progress: var(--status-in-progress);
+  --color-status-review: var(--status-review);
+  --color-status-partial: var(--status-partial);
+  --color-status-save: var(--status-save);
+  --color-status-approved: var(--status-approved);
+  --color-status-completed: var(--status-completed);
+  --color-status-committed: var(--status-committed);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-closed: var(--status-closed);
+  --color-status-locked: var(--status-locked);
+  --color-status-voided: var(--status-voided);
+  --color-status-wf-submitted: var(--status-wf-submitted);
+  --color-status-wf-approved: var(--status-wf-approved);
+  --color-status-wf-rejected: var(--status-wf-rejected);
+  --color-status-wf-sent-back: var(--status-wf-sent-back);
+  --color-status-wf-reviewed: var(--status-wf-reviewed);
+  --color-status-stock-in: var(--status-stock-in);
+  --color-status-stock-out: var(--status-stock-out);
+  --color-status-quantity-return: var(--status-quantity-return);
+  --color-status-amount-discount: var(--status-amount-discount);
+  --color-status-grn-po: var(--status-grn-po);
+  --color-status-grn-manual: var(--status-grn-manual);
+  --color-status-cuisine-asia: var(--status-cuisine-asia);
+  --color-status-cuisine-europe: var(--status-cuisine-europe);
+  --color-status-cuisine-americas: var(--status-cuisine-americas);
+  --color-status-cuisine-africa: var(--status-cuisine-africa);
+  --color-status-cuisine-middle-east: var(--status-cuisine-middle-east);
+  --color-status-cuisine-oceania: var(--status-cuisine-oceania);
+
+  /* Foreground (text) colors */
+  --color-status-draft-fg: var(--status-draft-fg);
+  --color-status-pending-fg: var(--status-pending-fg);
+  --color-status-submitted-fg: var(--status-submitted-fg);
+  --color-status-sent-fg: var(--status-sent-fg);
+  --color-status-open-fg: var(--status-open-fg);
+  --color-status-in-progress-fg: var(--status-in-progress-fg);
+  --color-status-review-fg: var(--status-review-fg);
+  --color-status-partial-fg: var(--status-partial-fg);
+  --color-status-save-fg: var(--status-save-fg);
+  --color-status-approved-fg: var(--status-approved-fg);
+  --color-status-completed-fg: var(--status-completed-fg);
+  --color-status-committed-fg: var(--status-committed-fg);
+  --color-status-rejected-fg: var(--status-rejected-fg);
+  --color-status-cancelled-fg: var(--status-cancelled-fg);
+  --color-status-closed-fg: var(--status-closed-fg);
+  --color-status-locked-fg: var(--status-locked-fg);
+  --color-status-voided-fg: var(--status-voided-fg);
+  --color-status-wf-submitted-fg: var(--status-wf-submitted-fg);
+  --color-status-wf-approved-fg: var(--status-wf-approved-fg);
+  --color-status-wf-rejected-fg: var(--status-wf-rejected-fg);
+  --color-status-wf-sent-back-fg: var(--status-wf-sent-back-fg);
+  --color-status-wf-reviewed-fg: var(--status-wf-reviewed-fg);
+  --color-status-stock-in-fg: var(--status-stock-in-fg);
+  --color-status-stock-out-fg: var(--status-stock-out-fg);
+  --color-status-quantity-return-fg: var(--status-quantity-return-fg);
+  --color-status-amount-discount-fg: var(--status-amount-discount-fg);
+  --color-status-grn-po-fg: var(--status-grn-po-fg);
+  --color-status-grn-manual-fg: var(--status-grn-manual-fg);
+  --color-status-cuisine-asia-fg: var(--status-cuisine-asia-fg);
+  --color-status-cuisine-europe-fg: var(--status-cuisine-europe-fg);
+  --color-status-cuisine-americas-fg: var(--status-cuisine-americas-fg);
+  --color-status-cuisine-africa-fg: var(--status-cuisine-africa-fg);
+  --color-status-cuisine-middle-east-fg: var(--status-cuisine-middle-east-fg);
+  --color-status-cuisine-oceania-fg: var(--status-cuisine-oceania-fg);
+}

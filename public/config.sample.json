@@ -1,0 +1,4 @@
+{
+  "BACKEND_URL": "https://backend.example.com",
+  "X_APP_ID": "<copy from ../carmen-inventory-frontend/.env>"
+}
