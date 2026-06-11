@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 
 // Dev mode: เซ็ต VITE_DEV_PROXY_TARGET=https://<uat-backend> แล้วใช้ BACKEND_URL=""
 // ใน public/config.json — request จะวิ่งผ่าน Vite proxy (เลี่ยงปัญหา CORS ระหว่างรอ backend เปิด CORS)
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   plugins: [
     react({ babel: { plugins: ["babel-plugin-react-compiler"] } }),
     tailwindcss(),
