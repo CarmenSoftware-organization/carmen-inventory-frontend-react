@@ -76,4 +76,4 @@ mod 's{from "next/link"}{from "@/lib/compat/link"}g' 'from "next/link"'
   done
 
 echo "── Remaining Next imports (must be fixed manually): ──"
-grep -rn --include='*.ts' --include='*.tsx' 'from "next' "${EXISTING_DIRS[@]}" 2>/dev/null || echo "  (none)"
+grep -rn --include='*.ts' --include='*.tsx' -E 'from "(next/|next"|next-intl|nextjs-toploader)' "${EXISTING_DIRS[@]}" 2>/dev/null || echo "  (none)"
