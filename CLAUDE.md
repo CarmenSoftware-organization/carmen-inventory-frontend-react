@@ -53,10 +53,10 @@ scripts/deploy-s3.sh <bucket> <cf-id>   # Deploy (see docs/deploy.md)
 
 - `/api/exchange-rate` + `/api/time` were Next routes — stubbed/deferred (see plan).
 - Backend CORS required before production (dev uses Vite proxy).
-- Live-backend smoke: verified against the local gateway (`carmen-turborepo-backend-v2`
-  on :4000) — UI→proxy→backend round-trip, 401 error path, and 429 RATE_LIMITED
-  countdown all confirmed end-to-end. Remaining: success-path login → dashboard shell
-  (needs real credentials; UAT host needs VPN).
+- Live-backend smoke: **fully verified** against the local gateway
+  (`carmen-turborepo-backend-v2` on :4000) — login → dashboard shell (sidebar/navbar/
+  profile/BU), reload session-restore, 401 error path, 429 RATE_LIMITED countdown,
+  access token never persisted. Zero console errors. (UAT still needs VPN.)
 - Local dev against the local backend: `VITE_DEV_PROXY_TARGET=http://localhost:4000 bun dev`.
 - A few leaf files live under `app/` (schemas/mock-data/change-password-dialog) — imported
   by hooks/components; reconcile when their module routes migrate.
