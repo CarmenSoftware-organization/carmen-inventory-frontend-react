@@ -84,6 +84,15 @@ describe("auth-api", () => {
     expect(refreshTokenStorage.get()).toBeNull();
   });
 
+  it("refreshTokens returns false on network error WITHOUT clearing the session", async () => {
+    refreshTokenStorage.set("rt-1");
+    tokenStore.set("at-1");
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("fetch failed")));
+    expect(await refreshTokens()).toBe(false);
+    expect(tokenStore.get()).toBe("at-1");
+    expect(refreshTokenStorage.get()).toBe("rt-1");
+  });
+
   it("concurrent refreshTokens calls share one network request (mutex)", async () => {
     refreshTokenStorage.set("rt-1");
     const fetchMock = vi.fn().mockResolvedValue(
