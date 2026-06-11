@@ -33,8 +33,8 @@ scripts/deploy-s3.sh <bucket> <cf-id>   # Deploy (see docs/deploy.md)
   `RequireAuth` redirects to `/login` whenever the token store empties.
 - **Routing:** React Router 7 data router in `routes/router.tsx`. Pages live in
   `routes/<module>/page.tsx` and must `export const Component`. Add new module routes
-  under the `ProtectedShell` children. `/config/*` is fully migrated and lives in
-  `routes/config/` — use it as the reference module set.
+  under the `ProtectedShell` children. `/config/*` and `/procurement/*` are migrated
+  (`routes/config/`, `routes/procurement/`) — use them as reference module sets.
 - **Next compat:** `next/navigation` → `@/lib/compat/navigation`, `next/link` →
   `@/lib/compat/link`, `next-intl` → `use-intl`. ESLint blocks direct `next*` imports.
   New code should import `react-router` directly.
@@ -70,3 +70,4 @@ scripts/deploy-s3.sh <bucket> <cf-id>   # Deploy (see docs/deploy.md)
 - Local dev against the local backend: `VITE_DEV_PROXY_TARGET=http://localhost:4000 bun dev`.
 - A few leaf files live under `app/` (schemas/mock-data/change-password-dialog) — imported
   by hooks/components; reconcile when their module routes migrate.
+- PO from-price-list flow depends on price-list data (vendor-management phase) — page renders; full flow testable after that phase migrates.
