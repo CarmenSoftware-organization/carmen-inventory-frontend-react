@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { describe, expect, it } from "vitest";
 import Link from "@/lib/compat/link";
-import { usePathname, useRouter, useSearchParams } from "@/lib/compat/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "@/lib/compat/navigation";
+
+function ParamsProbe() {
+  const { id } = useParams<{ id: string }>();
+  return <span data-testid="id">{id}</span>;
+}
 
 function Probe() {
   const pathname = usePathname();
@@ -56,5 +61,18 @@ describe("compat/link", () => {
     expect(anchor).toHaveAttribute("href", "/b");
     await userEvent.click(anchor);
     expect(screen.getByText("page B")).toBeInTheDocument();
+  });
+});
+
+describe("compat/navigation — useParams", () => {
+  it("extracts route param :id", () => {
+    render(
+      <MemoryRouter initialEntries={["/item/42"]}>
+        <Routes>
+          <Route path="/item/:id" element={<ParamsProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(screen.getByTestId("id")).toHaveTextContent("42");
   });
 });

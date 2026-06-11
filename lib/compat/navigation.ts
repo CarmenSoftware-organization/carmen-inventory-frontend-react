@@ -16,8 +16,12 @@ export function usePathname(): string {
   return useLocation().pathname;
 }
 
-/** อ่านอย่างเดียวเหมือน next/navigation (การเขียน URL ใช้ useURL/useSetSearchParams เดิม) */
-export function useSearchParams(): URLSearchParams {
+/**
+ * อ่านอย่างเดียวเหมือน next/navigation (การเขียน URL ใช้ useURL/useSetSearchParams เดิม)
+ *
+ * WARNING: Mutating the returned object will NOT update the router URL — use react-router's setSearchParams or the app's useURL hook for writes.
+ */
+export function useSearchParams(): Readonly<URLSearchParams> {
   const [searchParams] = useRouterSearchParams();
   return searchParams;
 }
