@@ -22,6 +22,9 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: "dashboard", lazy: () => import("./dashboard/page") },
+          { path: "profile", lazy: () => import("./profile/page") },
+          { path: "profile/setting", lazy: () => import("./profile/setting/page") },
+          { path: "notifications", lazy: () => import("./notifications/page") },
           {
             path: "config",
             ErrorBoundary: RouteErrorBoundaryAdapter,
@@ -182,6 +185,16 @@ export const router = createBrowserRouter([
               { path: "running-code", lazy: () => import("./system-admin/running-code/page") },
               { path: "config-email", lazy: () => import("./system-admin/config-email/page") },
               { path: "dashboard-dataset", lazy: () => import("./system-admin/dashboard-dataset/page") },
+            ],
+          },
+          {
+            path: "report",
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+            children: [
+              { index: true, lazy: () => import("./report/page") },
+              { path: "list", lazy: () => import("./report/list/page") },
+              { path: "schedules", lazy: () => import("./report/schedules/page") },
+              { path: "history", lazy: () => import("./report/history/page") },
             ],
           },
         ],
