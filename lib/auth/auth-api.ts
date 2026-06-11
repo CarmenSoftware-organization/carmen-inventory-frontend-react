@@ -34,10 +34,24 @@ export async function login(email: string, password: string): Promise<LoginResul
   const json = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    const retryAfter: number | undefined =
+      typeof json?.retry_after === "number"
+        ? json.retry_after
+        : (() => {
+            const h = res.headers.get("Retry-After");
+            const n = h !== null ? Number(h) : NaN;
+            return isNaN(n) ? undefined : n;
+          })();
     throw new ApiError(
-      res.status === 401 ? ERROR_CODES.UNAUTHORIZED : ERROR_CODES.INTERNAL_ERROR,
+      res.status === 401
+        ? ERROR_CODES.UNAUTHORIZED
+        : res.status === 429
+          ? ERROR_CODES.RATE_LIMITED
+          : ERROR_CODES.INTERNAL_ERROR,
       json?.message ?? "Login failed",
       res.status,
+      false,
+      retryAfter !== undefined ? { retryAfter } : undefined,
     );
   }
 

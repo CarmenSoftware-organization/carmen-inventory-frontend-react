@@ -3,6 +3,7 @@ import { login, logout, refreshTokens } from "@/lib/auth/auth-api";
 import { refreshTokenStorage } from "@/lib/auth/refresh-token-storage";
 import { tokenStore } from "@/lib/auth/token-store";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
+import { ERROR_CODES } from "@/lib/api-error";
 
 const okJson = (body: unknown) =>
   new Response(JSON.stringify(body), { status: 200 });
@@ -50,6 +51,18 @@ describe("auth-api", () => {
     );
     await expect(login("a@b.com", "bad")).rejects.toThrow("Invalid credentials");
     expect(tokenStore.get()).toBeNull();
+  });
+
+  it("login maps 429 to RATE_LIMITED with retryAfter detail", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ message: "Too many attempts", retry_after: 30 }), { status: 429 }),
+      ),
+    );
+    const error = await login("a@b.com", "x").catch((e) => e);
+    expect(error.code).toBe(ERROR_CODES.RATE_LIMITED);
+    expect(error.details).toEqual({ retryAfter: 30 });
   });
 
   it("refreshTokens returns false without stored refresh token (no network call)", async () => {
