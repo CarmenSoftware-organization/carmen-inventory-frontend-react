@@ -70,10 +70,10 @@ export function useUploadProductImages() {
   >({
     mutationFn: async ({ product_id, ...data }) => {
       if (!buCode) throw new ApiError("MISSING_REQUIRED_FIELD", "Missing buCode");
-      const res = await fetch(API_ENDPOINTS.PRODUCT_IMAGES(buCode, product_id), {
-        method: "POST",
-        body: buildProductImageFormData(data),
-      });
+      const res = await httpClient.post(
+        API_ENDPOINTS.PRODUCT_IMAGES(buCode, product_id),
+        buildProductImageFormData(data),
+      );
       if (!res.ok) {
         let serverMessage: string | undefined;
         try {

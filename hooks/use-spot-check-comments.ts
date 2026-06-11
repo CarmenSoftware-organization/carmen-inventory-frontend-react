@@ -55,13 +55,9 @@ export function useSaveSpotCheckDetailComment(detailId: string) {
       for (const file of payload.files) {
         formData.append("files", file, file.name);
       }
-      const res = await fetch(
+      const res = await httpClient.post(
         API_ENDPOINTS.SPOT_CHECK_DETAIL_COMMENT(buCode, detailId),
-        {
-          method: "POST",
-          body: formData,
-          credentials: "include",
-        },
+        formData,
       );
       if (!res.ok) {
         const text = await res.text().catch(() => "");

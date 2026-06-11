@@ -7,10 +7,19 @@ import type {
   CreateEquipmentVars,
   UpdateEquipmentVars,
 } from "@/types/equipment";
+import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 
 vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => ({ buCode: "BU001" }),
 }));
+
+vi.mock("@/lib/auth/auth-api", () => ({ refreshTokens: vi.fn() }));
+
+// httpClient resolves URLs via runtime config; BACKEND_URL "" keeps the
+// /api/proxy/... prefix stripped to /api/... so the URL assertions hold.
+beforeEach(() => {
+  setRuntimeConfigForTests({ BACKEND_URL: "", X_APP_ID: "app-test" });
+});
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -68,8 +77,11 @@ describe("useCreateEquipment (multipart)", () => {
     const { url, init, body } = partsOf(fetchMock);
     expect(url).toContain("/api/config/BU001/recipe-equipment");
     expect(init.method).toBe("POST");
-    // Must not set Content-Type — the browser adds the multipart boundary.
-    expect(init.headers).toBeUndefined();
+    // Must not set Content-Type — the browser adds the multipart boundary
+    // (httpClient only attaches the x-app-id auth header).
+    expect(
+      (init.headers as Record<string, string>)["Content-Type"],
+    ).toBeUndefined();
 
     const metadata = JSON.parse(body.get("metadata") as string);
     expect(metadata).toMatchObject({ code: "EQ-1", name: "Oven" });

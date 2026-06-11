@@ -57,10 +57,10 @@ export function useUploadDocument() {
       if (!buCode) throw new Error("Missing buCode");
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch(`${API_ENDPOINTS.DOCUMENTS(buCode)}/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await httpClient.post(
+        `${API_ENDPOINTS.DOCUMENTS(buCode)}/upload`,
+        formData,
+      );
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.message || "Failed to upload document");

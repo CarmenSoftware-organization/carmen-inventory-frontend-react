@@ -142,10 +142,10 @@ export function createCommentCrud({
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch(attachmentEndpoint(buCode, entityId), {
-      method: "POST",
-      body: formData,
-    });
+    const res = await httpClient.post(
+      attachmentEndpoint(buCode, entityId),
+      formData,
+    );
 
     if (!res.ok) throw new Error("Failed to upload attachment");
     const json = await res.json();

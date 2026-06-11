@@ -207,12 +207,12 @@ export function useCreateStoreRequisitionComment() {
       for (const file of data.files) {
         formData.append("files", file);
       }
-      return fetch(
+      return httpClient.post(
         API_ENDPOINTS.STORE_REQUISITION_COMMENT(
           buCode,
           data.store_requisition_id,
         ),
-        { method: "POST", body: formData },
+        formData,
       );
     },
     invalidateKeys: SR_COMMENT_INVALIDATE_KEYS,

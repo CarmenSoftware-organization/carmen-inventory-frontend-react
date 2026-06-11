@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createConfigCrud } from "@/hooks/use-config-crud";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { ApiError } from "@/lib/api-error";
+import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import type {
@@ -84,7 +85,10 @@ async function sendRecipeMultipart(
   form: FormData,
   fallbackMessage: string,
 ): Promise<unknown> {
-  const res = await fetch(url, { method, body: form });
+  const res =
+    method === "POST"
+      ? await httpClient.post(url, form)
+      : await httpClient.patch(url, form);
   if (!res.ok) {
     let serverMessage: string | undefined;
     try {

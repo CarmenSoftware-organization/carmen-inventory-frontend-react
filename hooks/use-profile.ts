@@ -153,10 +153,7 @@ export function useUploadUserAvatar() {
       // Adjust if backend rejects with a different field-name expectation.
       const formData = new FormData();
       formData.append("avatar", file);
-      const res = await fetch(API_ENDPOINTS.PROFILE_AVATAR, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await httpClient.post(API_ENDPOINTS.PROFILE_AVATAR, formData);
       if (!res.ok) {
         let serverMessage: string | undefined;
         try {
@@ -182,9 +179,7 @@ export function useDeleteUserAvatar() {
   const queryClient = useQueryClient();
   return useMutation<unknown, ApiError, void>({
     mutationFn: async () => {
-      const res = await fetch(API_ENDPOINTS.PROFILE_AVATAR, {
-        method: "DELETE",
-      });
+      const res = await httpClient.delete(API_ENDPOINTS.PROFILE_AVATAR);
       if (!res.ok) {
         let serverMessage: string | undefined;
         try {
@@ -214,10 +209,10 @@ export function useUploadBuLogo() {
       // accepts jpeg/png/webp.
       const formData = new FormData();
       formData.append("logo", file);
-      const res = await fetch(API_ENDPOINTS.BUSINESS_UNIT_LOGO(buId), {
-        method: "POST",
-        body: formData,
-      });
+      const res = await httpClient.post(
+        API_ENDPOINTS.BUSINESS_UNIT_LOGO(buId),
+        formData,
+      );
       if (!res.ok) {
         let serverMessage: string | undefined;
         try {
@@ -243,9 +238,9 @@ export function useDeleteBuLogo() {
   const queryClient = useQueryClient();
   return useMutation<unknown, ApiError, string>({
     mutationFn: async (buId) => {
-      const res = await fetch(API_ENDPOINTS.BUSINESS_UNIT_LOGO(buId), {
-        method: "DELETE",
-      });
+      const res = await httpClient.delete(
+        API_ENDPOINTS.BUSINESS_UNIT_LOGO(buId),
+      );
       if (!res.ok) {
         let serverMessage: string | undefined;
         try {
@@ -274,10 +269,10 @@ export function useUploadBuAvatar() {
       // Backend expects field name `avatar` — mirrors `useUploadUserAvatar`.
       const formData = new FormData();
       formData.append("avatar", file);
-      const res = await fetch(API_ENDPOINTS.BUSINESS_UNIT_AVATAR(buId), {
-        method: "POST",
-        body: formData,
-      });
+      const res = await httpClient.post(
+        API_ENDPOINTS.BUSINESS_UNIT_AVATAR(buId),
+        formData,
+      );
       if (!res.ok) {
         let serverMessage: string | undefined;
         try {
@@ -303,9 +298,9 @@ export function useDeleteBuAvatar() {
   const queryClient = useQueryClient();
   return useMutation<unknown, ApiError, string>({
     mutationFn: async (buId) => {
-      const res = await fetch(API_ENDPOINTS.BUSINESS_UNIT_AVATAR(buId), {
-        method: "DELETE",
-      });
+      const res = await httpClient.delete(
+        API_ENDPOINTS.BUSINESS_UNIT_AVATAR(buId),
+      );
       if (!res.ok) {
         let serverMessage: string | undefined;
         try {
