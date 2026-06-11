@@ -13,5 +13,7 @@ export function RouteErrorBoundaryAdapter() {
   const error =
     rawError instanceof Error ? rawError : new Error(String(rawError));
 
+  // navigate(0) = history.go(0) → full reload โดยเจตนา: เคลียร์ error state +
+  // re-fetch chunk ที่โหลดพลาด (อย่าเปลี่ยนเป็น revalidate() — มันไม่เคลียร์ error boundary)
   return <ModuleError error={error} reset={() => void navigate(0)} />;
 }
