@@ -3,7 +3,7 @@ import { ThemeProvider } from "next-themes";
 import { PermissionDeniedDialog } from "@/components/permission-denied-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-const makeQueryClient = () =>
+export const makeQueryClient = () =>
   new QueryClient({
     defaultOptions: {
       queries: {
