@@ -21,8 +21,7 @@ import {
 } from "lucide-react";
 import { profileQueryKey } from "@/hooks/use-profile";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
-import { httpClient } from "@/lib/http-client";
-import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { login } from "@/lib/auth/auth-api";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -99,15 +98,7 @@ export default function LoginForm() {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginFormValues) => {
       try {
-        const res = await httpClient.post(API_ENDPOINTS.LOGIN, credentials);
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          if (res.status === 401) {
-            throw new Error(t("errors.invalidCredentials"));
-          }
-          throw new Error(data.message || t("errors.loginFailed"));
-        }
-        return res.json();
+        return await login(credentials.email, credentials.password);
       } catch (err) {
         if (err instanceof ApiError && err.code === ERROR_CODES.UNAUTHORIZED) {
           throw new Error(t("errors.invalidCredentials"));
@@ -123,10 +114,9 @@ export default function LoginForm() {
         throw err;
       }
     },
-    onSuccess: (data) => {
-      if (data.profile) {
-        queryClient.setQueryData(profileQueryKey, data.profile);
-      }
+    // Profile is no longer returned by login(); it loads via ProfileGate /
+    // use-profile after redirect, so we no longer seed the profile cache here.
+    onSuccess: () => {
       router.push(resolveNextPath(searchParams.get("next")));
     },
   });
