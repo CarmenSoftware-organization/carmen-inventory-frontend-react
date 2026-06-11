@@ -27,7 +27,7 @@ export function useErrorToast() {
 
   return (err: unknown) => {
     // Log ให้ dev เห็นเสมอ (console เป็น sentry แบบลูกทุ่ง)
-    if (process.env.NODE_ENV === "development") {
+    if (import.meta.env.DEV) {
       console.error("[error-toast]", err);
     }
 

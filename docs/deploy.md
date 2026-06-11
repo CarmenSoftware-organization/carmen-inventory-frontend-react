@@ -18,7 +18,7 @@
    ```
    Shape (see `public/config.sample.json`):
    ```json
-   { "BACKEND_URL": "https://<backend-host>", "X_APP_ID": "<app id>" }
+   { "BACKEND_URL": "https://<backend-host>", "X_APP_ID": "<app id>", "WS_URL": "wss://<backend-host>/ws" }
    ```
 
 ## Backend prerequisites (see spec §4)

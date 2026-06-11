@@ -48,4 +48,32 @@ export default tseslint.config(
       ],
     },
   },
+  // App source รันในเบราว์เซอร์เท่านั้น — ห้ามอ้าง `process` (ReferenceError ตอน runtime;
+  // tsc มอง @types/node เลยจับไม่ได้, vitest รันใน Node เลยไม่ crash → ต้องกันที่ lint)
+  // ใช้ import.meta.env.* หรือ lib/runtime-config แทน
+  {
+    files: [
+      "components/**/*.{ts,tsx}",
+      "hooks/**/*.{ts,tsx}",
+      "lib/**/*.{ts,tsx}",
+      "routes/**/*.{ts,tsx}",
+      "utils/**/*.{ts,tsx}",
+      "constant/**/*.{ts,tsx}",
+      "types/**/*.{ts,tsx}",
+      "i18n/**/*.{ts,tsx}",
+      "app/**/*.{ts,tsx}",
+      "main.tsx",
+    ],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "process",
+          message:
+            "Browser-only SPA — `process` does not exist at runtime. Use import.meta.env.* or lib/runtime-config.",
+        },
+      ],
+    },
+  },
 );

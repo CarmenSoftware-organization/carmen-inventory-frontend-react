@@ -8,8 +8,20 @@ import { CACHE_DYNAMIC, CACHE_NORMAL } from "@/lib/cache-config";
 import { ApiError } from "@/lib/api-error";
 import { httpClient } from "@/lib/http-client";
 import type { Notification } from "@/types/notification";
+import { getRuntimeConfig } from "@/lib/runtime-config";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL;
+/**
+ * อ่าน WS_URL จาก runtime config แบบ lazy — ห้ามอ่านระดับ module
+ * (config ยังไม่โหลดตอน module evaluate; เดิมคือ process.env.NEXT_PUBLIC_WS_URL
+ * ซึ่งไม่มีในเบราว์เซอร์และทำให้ boot พังทั้งแอป)
+ */
+const getWsUrl = (): string | undefined => {
+  try {
+    return getRuntimeConfig().WS_URL;
+  } catch {
+    return undefined; // config ยังไม่โหลด (เช่นใน unit tests) — ปิด real-time
+  }
+};
 
 /**
  * Hook เชื่อมต่อ WebSocket เพื่อรับ notification แบบ real-time
@@ -43,7 +55,9 @@ export function useNotification(userId: string | undefined) {
   const reconnectTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
-    if (!userId || !WS_URL) return;
+    const maybeWsUrl = getWsUrl();
+    if (!userId || !maybeWsUrl) return;
+    const wsUrl: string = maybeWsUrl; // narrow ก่อนใช้ใน hoisted connect()
 
     let unmounted = false;
     let activeWs: WebSocket | null = null;
@@ -53,7 +67,7 @@ export function useNotification(userId: string | undefined) {
      * สร้างการเชื่อมต่อ WebSocket และผูก event handler พร้อม reconnect logic
      */
     function connect() {
-      const ws = new WebSocket(WS_URL!);
+      const ws = new WebSocket(wsUrl);
       activeWs = ws;
 
       ws.onopen = () => {

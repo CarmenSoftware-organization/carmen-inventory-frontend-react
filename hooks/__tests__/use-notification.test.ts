@@ -43,11 +43,6 @@ class MockWebSocket {
   }
 }
 
-// Set env and WebSocket mock BEFORE module evaluation
-vi.hoisted(() => {
-  process.env.NEXT_PUBLIC_WS_URL = "ws://localhost:3001";
-});
-
 globalThis.WebSocket = MockWebSocket as unknown as typeof WebSocket;
 
 // Mock httpClient
@@ -61,6 +56,7 @@ vi.mock("@/lib/http-client", () => ({
 }));
 
 import { httpClient } from "@/lib/http-client";
+import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import { useNotification } from "../use-notification";
 
 /**
@@ -77,6 +73,12 @@ describe("useNotification", () => {
     vi.clearAllMocks();
     MockWebSocket.instances = [];
     vi.useFakeTimers();
+    // WS_URL มาจาก runtime config แล้ว (เดิมคือ NEXT_PUBLIC_WS_URL env)
+    setRuntimeConfigForTests({
+      BACKEND_URL: "",
+      X_APP_ID: "app-test",
+      WS_URL: "ws://localhost:3001",
+    });
   });
 
   afterEach(() => {

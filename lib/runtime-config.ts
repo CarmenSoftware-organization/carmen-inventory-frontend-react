@@ -7,6 +7,8 @@ export interface RuntimeConfig {
   BACKEND_URL: string;
   /** ค่า x-app-id header ที่ backend ต้องการ */
   X_APP_ID: string;
+  /** WebSocket URL ของ notification (optional — ไม่ตั้ง = ปิด real-time) */
+  WS_URL?: string;
 }
 
 let config: RuntimeConfig | null = null;
@@ -24,6 +26,9 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
   config = {
     BACKEND_URL: json.BACKEND_URL.replace(/\/+$/, ""),
     X_APP_ID: json.X_APP_ID,
+    ...(typeof json.WS_URL === "string" && json.WS_URL
+      ? { WS_URL: json.WS_URL }
+      : {}),
   };
   return config;
 }

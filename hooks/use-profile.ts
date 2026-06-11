@@ -84,7 +84,7 @@ export function useProfile() {
   const hasDepartment = defaultBu?.department != null;
   const isProfileReady = query.isSuccess && !!buCode && !!defaultBu;
 
-  if (process.env.NODE_ENV === "development" && query.isSuccess && query.data) {
+  if (import.meta.env.DEV && query.isSuccess && query.data) {
     if (query.data.business_unit.length === 0) {
       console.warn("[useProfile] business_unit array is empty");
     }
