@@ -45,6 +45,8 @@ Object.defineProperty(globalThis, "sessionStorage", {
 // wire cleanup here to stop rendered components (e.g. dialogs) leaking across tests.
 afterEach(() => {
   cleanup();
+  localStorage.clear();
+  sessionStorage.clear();
 });
 
 // Polyfill ResizeObserver for Radix UI components
