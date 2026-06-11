@@ -25,7 +25,7 @@
 - Create: `styles/globals.css`, `styles/badge-status.css`, `styles/module-colors.css` (copied from source)
 - Create: `public/config.sample.json`, `public/config.json` (gitignored)
 
-- [ ] **Step 1: Write `package.json`**
+- [x] **Step 1: Write `package.json`**
 
 Mirror the source dependency list, dropping Next-only packages (`next`, `next-intl`, `nextjs-toploader`, `eslint-config-next`, `@next/bundle-analyzer`) and adding the Vite/React Router stack:
 
@@ -111,7 +111,7 @@ Mirror the source dependency list, dropping Next-only packages (`next`, `next-in
 
 Note: `next-themes` works in plain React (it only needs a React tree); keep it.
 
-- [ ] **Step 2: Write `tsconfig.json`**
+- [x] **Step 2: Write `tsconfig.json`**
 
 ```json
 {
@@ -138,7 +138,7 @@ Note: `next-themes` works in plain React (it only needs a React tree); keep it.
 }
 ```
 
-- [ ] **Step 3: Write `vite.config.ts`**
+- [x] **Step 3: Write `vite.config.ts`**
 
 ```ts
 import path from "node:path";
@@ -170,7 +170,7 @@ export default defineConfig(({ mode }) => ({
 }));
 ```
 
-- [ ] **Step 4: Write `eslint.config.mjs`**
+- [x] **Step 4: Write `eslint.config.mjs`**
 
 ```js
 import js from "@eslint/js";
@@ -208,7 +208,7 @@ export default tseslint.config(
 );
 ```
 
-- [ ] **Step 5: Write `index.html`**
+- [x] **Step 5: Write `index.html`**
 
 ```html
 <!doctype html>
@@ -228,7 +228,7 @@ export default tseslint.config(
 
 (The favicon data-URI from `components/icons/carmen-logo.tsx` is wired in Task 13 once components are ported.)
 
-- [ ] **Step 6: Copy global styles and define font variables**
+- [x] **Step 6: Copy global styles and define font variables**
 
 ```bash
 cp "$SRC/app/globals.css" styles/globals.css
@@ -246,7 +246,7 @@ Then in `styles/globals.css`: fix the import path `@import "./module-colors.css"
 }
 ```
 
-- [ ] **Step 7: Write placeholder `main.tsx`** (replaced by the real boot in Task 13)
+- [x] **Step 7: Write placeholder `main.tsx`** (replaced by the real boot in Task 13)
 
 ```tsx
 import "@fontsource-variable/geist";
@@ -263,7 +263,7 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-- [ ] **Step 8: Write `public/config.sample.json`, `public/config.json`, `.gitignore`, `.prettierrc.json`**
+- [x] **Step 8: Write `public/config.sample.json`, `public/config.json`, `.gitignore`, `.prettierrc.json`**
 
 `public/config.sample.json`:
 
@@ -299,7 +299,7 @@ playwright-report/
 
 `.prettierrc.json`: copy verbatim — `cp "$SRC/.prettierrc.json" .`
 
-- [ ] **Step 9: Install and verify dev + build**
+- [x] **Step 9: Install and verify dev + build**
 
 Run: `bun install && bun run build`
 Expected: tsc passes, Vite build emits `dist/index.html` + assets with no errors.
@@ -307,7 +307,7 @@ Expected: tsc passes, Vite build emits `dist/index.html` + assets with no errors
 Run: `bun run dev` (briefly) and open http://localhost:3000
 Expected: "Carmen SPA scaffold OK" renders with Geist font.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add -A && git commit -m "feat: scaffold Vite + React 19 + Tailwind 4 SPA foundation"
@@ -320,7 +320,7 @@ git add -A && git commit -m "feat: scaffold Vite + React 19 + Tailwind 4 SPA fou
 **Files:**
 - Create: `vitest.config.ts`, `vitest.setup.ts`, `lib/__tests__/sanity.test.tsx`
 
-- [ ] **Step 1: Write `vitest.config.ts`** (mirrors source, alias `@` → root)
+- [x] **Step 1: Write `vitest.config.ts`** (mirrors source, alias `@` → root)
 
 ```ts
 import path from "node:path";
@@ -342,9 +342,9 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 2: Copy `vitest.setup.ts`** — `cp "$SRC/vitest.setup.ts" .` and remove any Next-specific mocks if present (inspect the file; keep `@testing-library/jest-dom` import).
+- [x] **Step 2: Copy `vitest.setup.ts`** — `cp "$SRC/vitest.setup.ts" .` and remove any Next-specific mocks if present (inspect the file; keep `@testing-library/jest-dom` import).
 
-- [ ] **Step 3: Write a sanity test** `lib/__tests__/sanity.test.tsx`
+- [x] **Step 3: Write a sanity test** `lib/__tests__/sanity.test.tsx`
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -358,9 +358,9 @@ describe("vitest setup", () => {
 });
 ```
 
-- [ ] **Step 4: Run** `bun run test:run` — Expected: 1 test PASS.
+- [x] **Step 4: Run** `bun run test:run` — Expected: 1 test PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A && git commit -m "test: add Vitest + Testing Library infrastructure"
@@ -374,7 +374,7 @@ git add -A && git commit -m "test: add Vitest + Testing Library infrastructure"
 - Create: `lib/runtime-config.ts`
 - Test: `lib/__tests__/runtime-config.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -427,9 +427,9 @@ describe("runtime-config", () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure** — `bun run test:run lib/__tests__/runtime-config.test.ts` — Expected: FAIL (module not found).
+- [x] **Step 2: Run to verify failure** — `bun run test:run lib/__tests__/runtime-config.test.ts` — Expected: FAIL (module not found).
 
-- [ ] **Step 3: Implement `lib/runtime-config.ts`**
+- [x] **Step 3: Implement `lib/runtime-config.ts`**
 
 ```ts
 /**
@@ -475,9 +475,9 @@ export function setRuntimeConfigForTests(value: RuntimeConfig | null): void {
 }
 ```
 
-- [ ] **Step 4: Run tests** — Expected: 4 PASS.
+- [x] **Step 4: Run tests** — Expected: 4 PASS.
 
-- [ ] **Step 5: Commit** — `git add -A && git commit -m "feat: add runtime config loader (config.json per environment)"`
+- [x] **Step 5: Commit** — `git add -A && git commit -m "feat: add runtime config loader (config.json per environment)"`
 
 ---
 
@@ -487,7 +487,7 @@ export function setRuntimeConfigForTests(value: RuntimeConfig | null): void {
 - Create: `lib/auth/token-store.ts`, `lib/auth/refresh-token-storage.ts`
 - Test: `lib/auth/__tests__/token-store.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -537,9 +537,9 @@ describe("refreshTokenStorage (localStorage adapter)", () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure** — Expected: FAIL (modules not found).
+- [x] **Step 2: Run to verify failure** — Expected: FAIL (modules not found).
 
-- [ ] **Step 3: Implement `lib/auth/token-store.ts`**
+- [x] **Step 3: Implement `lib/auth/token-store.ts`**
 
 ```ts
 /**
@@ -571,7 +571,7 @@ export const tokenStore = {
 };
 ```
 
-- [ ] **Step 4: Implement `lib/auth/refresh-token-storage.ts`**
+- [x] **Step 4: Implement `lib/auth/refresh-token-storage.ts`**
 
 ```ts
 /**
@@ -606,9 +606,9 @@ export const refreshTokenStorage = {
 };
 ```
 
-- [ ] **Step 5: Run tests** — Expected: 5 PASS.
+- [x] **Step 5: Run tests** — Expected: 5 PASS.
 
-- [ ] **Step 6: Commit** — `git add -A && git commit -m "feat: add in-memory access token store and localStorage refresh token adapter"`
+- [x] **Step 6: Commit** — `git add -A && git commit -m "feat: add in-memory access token store and localStorage refresh token adapter"`
 
 ---
 
@@ -624,7 +624,7 @@ Backend contract (verified against `$SRC/app/api/auth/*/route.ts`):
 - `POST {BACKEND}/api/auth/logout` Bearer + body `{ refresh_token }`
 - All requests need header `x-app-id`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -735,9 +735,9 @@ describe("auth-api", () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure** — Expected: FAIL (module not found).
+- [x] **Step 2: Run to verify failure** — Expected: FAIL (module not found).
 
-- [ ] **Step 3: Implement `lib/auth/auth-api.ts`**
+- [x] **Step 3: Implement `lib/auth/auth-api.ts`**
 
 ```ts
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
@@ -863,7 +863,7 @@ function clearSession(): void {
 }
 ```
 
-- [ ] **Step 4: Copy `api-error.ts` (dependency)**
+- [x] **Step 4: Copy `api-error.ts` (dependency)**
 
 ```bash
 mkdir -p lib && cp "$SRC/lib/api-error.ts" "$SRC/lib/api-error.test.ts" lib/
@@ -871,9 +871,9 @@ mkdir -p lib && cp "$SRC/lib/api-error.ts" "$SRC/lib/api-error.test.ts" lib/
 
 (`api-error.ts` is framework-agnostic — no modification needed. If `ERROR_CODES.SERVER_ERROR` does not exist in it, use the closest existing code, e.g. `ERROR_CODES.UNKNOWN` — check the file and keep the test + implementation consistent.)
 
-- [ ] **Step 5: Run tests** — `bun run test:run lib/auth lib/api-error.test.ts` — Expected: all PASS.
+- [x] **Step 5: Run tests** — `bun run test:run lib/auth lib/api-error.test.ts` — Expected: all PASS.
 
-- [ ] **Step 6: Commit** — `git add -A && git commit -m "feat: add client-side auth API (login/refresh/logout with mutex)"`
+- [x] **Step 6: Commit** — `git add -A && git commit -m "feat: add client-side auth API (login/refresh/logout with mutex)"`
 
 ---
 
@@ -883,13 +883,13 @@ mkdir -p lib && cp "$SRC/lib/api-error.ts" "$SRC/lib/api-error.test.ts" lib/
 - Create: `lib/http-client.ts` (ported + modified from `$SRC/lib/http-client.ts`)
 - Test: `lib/http-client.test.ts` (ported + extended)
 
-- [ ] **Step 1: Copy the source files**
+- [x] **Step 1: Copy the source files**
 
 ```bash
 cp "$SRC/lib/http-client.ts" "$SRC/lib/http-client.test.ts" lib/
 ```
 
-- [ ] **Step 2: Apply modifications to `lib/http-client.ts`**
+- [x] **Step 2: Apply modifications to `lib/http-client.ts`**
 
 (a) Replace the imports + delete the local `refreshToken` mutex block (auth-api owns it now):
 
@@ -968,7 +968,7 @@ const safeFetch = async (url: string, init: RequestInit): Promise<Response> => {
 
 (e) In `request()`, remove the server-side branch: `if (globalThis.window !== undefined)` wrapper — always call `handleClientErrors` (this is browser-only code now). Same for `checkRateLimit`'s server-side skip — remove the `if (globalThis.window === undefined) return;` line.
 
-- [ ] **Step 3: Adapt `lib/http-client.test.ts`**
+- [x] **Step 3: Adapt `lib/http-client.test.ts`**
 
 Read the ported test file. Apply:
 - In a top-level `beforeEach`: `setRuntimeConfigForTests({ BACKEND_URL: "https://api.test", X_APP_ID: "app-1" })` and `tokenStore.clear()`.
@@ -976,7 +976,7 @@ Read the ported test file. Apply:
 - Update URL expectations: requests to `/api/proxy/api/x` now hit `https://api.test/api/x`.
 - Delete tests that covered `assertSafeUrl`/SSRF internals that no longer exist; keep rate-limit + error-normalization tests.
 
-- [ ] **Step 4: Add new tests** (append to `lib/http-client.test.ts`)
+- [x] **Step 4: Add new tests** (append to `lib/http-client.test.ts`)
 
 ```ts
 describe("SPA URL rewrite + auth", () => {
@@ -1035,9 +1035,9 @@ describe("SPA URL rewrite + auth", () => {
 });
 ```
 
-- [ ] **Step 5: Run** `bun run test:run lib/http-client.test.ts` — Expected: all PASS (iterate on adaptation until green; do not weaken the new tests).
+- [x] **Step 5: Run** `bun run test:run lib/http-client.test.ts` — Expected: all PASS (iterate on adaptation until green; do not weaken the new tests).
 
-- [ ] **Step 6: Commit** — `git add -A && git commit -m "feat: port http-client with direct-backend URL rewrite and bearer injection"`
+- [x] **Step 6: Commit** — `git add -A && git commit -m "feat: port http-client with direct-backend URL rewrite and bearer injection"`
 
 ---
 
@@ -1047,7 +1047,7 @@ describe("SPA URL rewrite + auth", () => {
 - Create: `lib/compat/navigation.ts`, `lib/compat/link.tsx`
 - Test: `lib/compat/__tests__/compat.test.tsx`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -1112,9 +1112,9 @@ describe("compat/link", () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure** — Expected: FAIL (modules not found).
+- [x] **Step 2: Run to verify failure** — Expected: FAIL (modules not found).
 
-- [ ] **Step 3: Implement `lib/compat/navigation.ts`**
+- [x] **Step 3: Implement `lib/compat/navigation.ts`**
 
 ```ts
 import { useMemo } from "react";
@@ -1174,7 +1174,7 @@ export function useRouter(): CompatRouter {
 }
 ```
 
-- [ ] **Step 4: Implement `lib/compat/link.tsx`**
+- [x] **Step 4: Implement `lib/compat/link.tsx`**
 
 ```tsx
 import type { ComponentProps } from "react";
@@ -1192,9 +1192,9 @@ export default function Link({ href, prefetch: _prefetch, ...rest }: CompatLinkP
 }
 ```
 
-- [ ] **Step 5: Run tests** — Expected: 3 PASS.
+- [x] **Step 5: Run tests** — Expected: 3 PASS.
 
-- [ ] **Step 6: Commit** — `git add -A && git commit -m "feat: add next/navigation and next/link compat layer over react-router"`
+- [x] **Step 6: Commit** — `git add -A && git commit -m "feat: add next/navigation and next/link compat layer over react-router"`
 
 ---
 
@@ -1204,7 +1204,7 @@ export default function Link({ href, prefetch: _prefetch, ...rest }: CompatLinkP
 - Create: `components/i18n-provider.tsx`, `hooks/use-locale-switch.ts`, `i18n/config.ts`, `messages/en.json`, `messages/th.json`
 - Test: `components/__tests__/i18n-provider.test.tsx`
 
-- [ ] **Step 1: Copy locale assets**
+- [x] **Step 1: Copy locale assets**
 
 ```bash
 mkdir -p i18n messages
@@ -1214,7 +1214,7 @@ cp "$SRC/messages/en.json" "$SRC/messages/th.json" messages/
 
 (`i18n/config.ts` is pure constants — no changes. Do NOT copy `i18n/request.ts` — that was next-intl server config.)
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 ```tsx
 import { render, screen, waitFor } from "@testing-library/react";
@@ -1246,9 +1246,9 @@ describe("I18nProvider", () => {
 
 (Before finalizing: open `messages/en.json`, pick a real shallow key for the probe, and adjust both the component and assertion.)
 
-- [ ] **Step 3: Run to verify failure** — Expected: FAIL.
+- [x] **Step 3: Run to verify failure** — Expected: FAIL.
 
-- [ ] **Step 4: Implement `components/i18n-provider.tsx`**
+- [x] **Step 4: Implement `components/i18n-provider.tsx`**
 
 ```tsx
 import {
@@ -1331,7 +1331,7 @@ export function I18nProvider({ children }: { readonly children: React.ReactNode 
 }
 ```
 
-- [ ] **Step 5: Write `hooks/use-locale-switch.ts`** (same return shape as the original so the navbar language switcher ports untouched)
+- [x] **Step 5: Write `hooks/use-locale-switch.ts`** (same return shape as the original so the navbar language switcher ports untouched)
 
 ```ts
 import { useSwitchLocale } from "@/components/i18n-provider";
@@ -1350,9 +1350,9 @@ export function useLocaleSwitch() {
 }
 ```
 
-- [ ] **Step 6: Run tests** — `bun run test:run components/__tests__/i18n-provider.test.tsx` — Expected: PASS.
+- [x] **Step 6: Run tests** — `bun run test:run components/__tests__/i18n-provider.test.tsx` — Expected: PASS.
 
-- [ ] **Step 7: Commit** — `git add -A && git commit -m "feat: add use-intl provider with localStorage locale persistence"`
+- [x] **Step 7: Commit** — `git add -A && git commit -m "feat: add use-intl provider with localStorage locale persistence"`
 
 ---
 
@@ -1361,7 +1361,7 @@ export function useLocaleSwitch() {
 **Files:**
 - Create: `scripts/codemods/next-to-vite.sh`
 
-- [ ] **Step 1: Write the script**
+- [x] **Step 1: Write the script**
 
 ```bash
 #!/usr/bin/env bash
@@ -1399,12 +1399,12 @@ echo "── Remaining Next imports (must be fixed manually): ──"
 grep -rn --include='*.ts' --include='*.tsx' 'from "next' "${DIRS[@]}" 2>/dev/null || echo "  (none)"
 ```
 
-- [ ] **Step 2: Make executable + syntax check**
+- [x] **Step 2: Make executable + syntax check**
 
 Run: `chmod +x scripts/codemods/next-to-vite.sh && bash -n scripts/codemods/next-to-vite.sh`
 Expected: no output (syntax OK).
 
-- [ ] **Step 3: Smoke-test on a scratch dir**
+- [x] **Step 3: Smoke-test on a scratch dir**
 
 ```bash
 mkdir -p /tmp/codemod-test && cat > /tmp/codemod-test/sample.tsx <<'EOF'
@@ -1427,7 +1427,7 @@ import { useRouter } from "@/lib/compat/navigation";
 import Link from "@/lib/compat/link";
 ```
 
-- [ ] **Step 4: Commit** — `git add -A && git commit -m "feat: add next-to-vite codemod script"`
+- [x] **Step 4: Commit** — `git add -A && git commit -m "feat: add next-to-vite codemod script"`
 
 ---
 
@@ -1436,13 +1436,13 @@ import Link from "@/lib/compat/link";
 **Files:**
 - Create: `types/*` (67 files), `constant/*` (28 files), `utils/*`, remaining `lib/*` (copied)
 
-- [ ] **Step 1: Copy framework-agnostic directories**
+- [x] **Step 1: Copy framework-agnostic directories**
 
 ```bash
 cp -R "$SRC/types" "$SRC/constant" "$SRC/utils" .
 ```
 
-- [ ] **Step 2: Copy `lib/` excluding server-only + already-ported files**
+- [x] **Step 2: Copy `lib/` excluding server-only + already-ported files**
 
 ```bash
 rsync -a "$SRC/lib/" lib/ \
@@ -1459,7 +1459,7 @@ rsync -a "$SRC/lib/" lib/ \
 
 Rationale: `cookies/env/rate-limit/failed-login-limit/security-headers` were Next-server-only; `http-client`/`api-error` were already ported in Tasks 5-6.
 
-- [ ] **Step 3: Run the codemod**
+- [x] **Step 3: Run the codemod**
 
 ```bash
 scripts/codemods/next-to-vite.sh types constant utils lib i18n
@@ -1469,17 +1469,17 @@ Expected: "Remaining Next imports" section lists few or no files. Fix any listed
 - Imports of `@/lib/env` → replace with `getRuntimeConfig()` from `@/lib/runtime-config`.
 - Imports of removed server files → delete the importing file too if it is itself server-only (decide per file; record in commit message).
 
-- [ ] **Step 4: Type-check gate**
+- [x] **Step 4: Type-check gate**
 
 Run: `bunx tsc --noEmit`
 Expected: errors only from missing `hooks/`/`components/` imports (those land in Task 11) — record the error count. Errors *within* `types/ constant/ utils/ lib/` must be fixed now (typical causes: `process.env` references → runtime config; `server-only` imports → delete).
 
-- [ ] **Step 5: Run ported lib tests**
+- [x] **Step 5: Run ported lib tests**
 
 Run: `bun run test:run lib utils`
 Expected: PASS (fix individual test files that assumed Next runtime; delete tests of excluded server files if rsync pulled their specs inside `lib/__tests__/`).
 
-- [ ] **Step 6: Commit** — `git add -A && git commit -m "feat: port types, constants, utils and lib from Next app"`
+- [x] **Step 6: Commit** — `git add -A && git commit -m "feat: port types, constants, utils and lib from Next app"`
 
 ---
 
@@ -1488,7 +1488,7 @@ Expected: PASS (fix individual test files that assumed Next runtime; delete test
 **Files:**
 - Create: `hooks/*` (~115 files), `components/*` (all subdirs)
 
-- [ ] **Step 1: Copy**
+- [x] **Step 1: Copy**
 
 ```bash
 rsync -a "$SRC/hooks/" hooks/ --exclude use-locale-switch.ts
@@ -1497,13 +1497,13 @@ rsync -a "$SRC/components/" components/ --exclude providers.tsx
 
 (`use-locale-switch.ts` and `i18n-provider.tsx` already written in Task 8; `providers.tsx` is rewritten in Task 13.)
 
-- [ ] **Step 2: Run the codemod**
+- [x] **Step 2: Run the codemod**
 
 ```bash
 scripts/codemods/next-to-vite.sh hooks components
 ```
 
-- [ ] **Step 3: Fix the known mechanical leftovers** (the codemod's "Remaining Next imports" list + these known cases):
+- [x] **Step 3: Fix the known mechanical leftovers** (the codemod's "Remaining Next imports" list + these known cases):
 
 (a) **`next/image` (4 files)** — `grep -rln 'next/image' components hooks`. In each file replace:
 
@@ -1538,12 +1538,12 @@ async function fetchServerTime(): Promise<{ now: string; offset: number }> {
 
 (d) **Anything else the codemod lists** — fix per the same patterns; if a component is irreparably server-bound, delete it and note it in the commit message.
 
-- [ ] **Step 4: Type-check until clean**
+- [x] **Step 4: Type-check until clean**
 
 Run: `bunx tsc --noEmit`
 Expected: 0 errors. Iterate on stragglers; typical fixes are the patterns from Step 3. Do not change component logic.
 
-- [ ] **Step 5: Run the full ported test suite**
+- [x] **Step 5: Run the full ported test suite**
 
 Run: `bun run test:run`
 Expected: PASS. For hook tests that wrapped components in `NextIntlClientProvider`, the codemod renamed the import to use-intl's `IntlProvider`-compatible export — if a test imported `NextIntlClientProvider` *by name*, switch it to:
@@ -1555,7 +1555,7 @@ import { IntlProvider } from "use-intl";
 
 Tests that mocked `next/navigation` should now mock `@/lib/compat/navigation` (same shape).
 
-- [ ] **Step 6: Commit** — `git add -A && git commit -m "feat: port hooks and components with next-to-vite codemod"`
+- [x] **Step 6: Commit** — `git add -A && git commit -m "feat: port hooks and components with next-to-vite codemod"`
 
 ---
 
@@ -1564,7 +1564,7 @@ Tests that mocked `next/navigation` should now mock `@/lib/compat/navigation` (s
 **Files:**
 - Create: `components/providers.tsx` (adapted), `components/top-loader.tsx`, `routes/app-root.tsx`
 
-- [ ] **Step 1: Write `components/providers.tsx`** — port of the source minus the CSP `nonce` prop (no per-request nonce on static hosting):
+- [x] **Step 1: Write `components/providers.tsx`** — port of the source minus the CSP `nonce` prop (no per-request nonce on static hosting):
 
 ```tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -1611,7 +1611,7 @@ export default function Providers({
 }
 ```
 
-- [ ] **Step 2: Write `components/top-loader.tsx`** — replaces `nextjs-toploader`, driven by react-router navigation state (covers lazy-chunk loading):
+- [x] **Step 2: Write `components/top-loader.tsx`** — replaces `nextjs-toploader`, driven by react-router navigation state (covers lazy-chunk loading):
 
 ```tsx
 import { useNavigation } from "react-router";
@@ -1639,7 +1639,7 @@ export function TopLoader() {
 }
 ```
 
-- [ ] **Step 3: Write `routes/app-root.tsx`** — port of `$SRC/app/layout.tsx` (minus server APIs):
+- [x] **Step 3: Write `routes/app-root.tsx`** — port of `$SRC/app/layout.tsx` (minus server APIs):
 
 ```tsx
 import { Outlet } from "react-router";
@@ -1675,9 +1675,9 @@ export default function AppRoot() {
 }
 ```
 
-- [ ] **Step 4: Type-check** — `bunx tsc --noEmit` — Expected: 0 errors.
+- [x] **Step 4: Type-check** — `bunx tsc --noEmit` — Expected: 0 errors.
 
-- [ ] **Step 5: Commit** — `git add -A && git commit -m "feat: add providers, app root and top loader"`
+- [x] **Step 5: Commit** — `git add -A && git commit -m "feat: add providers, app root and top loader"`
 
 ---
 
@@ -1688,7 +1688,7 @@ export default function AppRoot() {
 - Modify: `main.tsx`, `index.html`
 - Test: `components/auth/__tests__/require-auth.test.tsx`
 
-- [ ] **Step 1: Write the failing guard test**
+- [x] **Step 1: Write the failing guard test**
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -1729,9 +1729,9 @@ describe("RequireAuth", () => {
 });
 ```
 
-- [ ] **Step 2: Run to verify failure** — Expected: FAIL.
+- [x] **Step 2: Run to verify failure** — Expected: FAIL.
 
-- [ ] **Step 3: Implement `components/auth/require-auth.tsx`**
+- [x] **Step 3: Implement `components/auth/require-auth.tsx`**
 
 ```tsx
 import { useSyncExternalStore } from "react";
@@ -1754,9 +1754,9 @@ export function RequireAuth({ children }: { readonly children: React.ReactNode }
 }
 ```
 
-- [ ] **Step 4: Run guard tests** — Expected: 2 PASS.
+- [x] **Step 4: Run guard tests** — Expected: 2 PASS.
 
-- [ ] **Step 5: Write `routes/root-layout.tsx`** — port of `$SRC/app/(root)/layout.tsx` with `<Outlet/>`:
+- [x] **Step 5: Write `routes/root-layout.tsx`** — port of `$SRC/app/(root)/layout.tsx` with `<Outlet/>`:
 
 ```tsx
 import { Outlet } from "react-router";
@@ -1797,7 +1797,7 @@ export default function RootLayout() {
 }
 ```
 
-- [ ] **Step 6: Write the smoke pages**
+- [x] **Step 6: Write the smoke pages**
 
 `routes/login/page.tsx` — port `$SRC/app/login/page.tsx`: copy its JSX/component usage, strip `export const metadata`, append the route export. Shape:
 
@@ -1844,7 +1844,7 @@ export const Component = NotFoundPage;
 
 (Check the real export name in `components/not-found-component.tsx` and match it.)
 
-- [ ] **Step 7: Write `routes/router.tsx`**
+- [x] **Step 7: Write `routes/router.tsx`**
 
 ```tsx
 import { createBrowserRouter, Navigate } from "react-router";
@@ -1877,7 +1877,7 @@ export const router = createBrowserRouter([
 ]);
 ```
 
-- [ ] **Step 8: Replace `main.tsx` with the real boot sequence**
+- [x] **Step 8: Replace `main.tsx` with the real boot sequence**
 
 ```tsx
 import "@fontsource-variable/geist";
@@ -1910,9 +1910,9 @@ async function boot() {
 void boot();
 ```
 
-- [ ] **Step 9: Wire the favicon in `index.html`** — import the data URI constant value from `components/icons/carmen-logo.tsx` (open the file, copy the literal `CARMEN_ICON_DATA_URI` string) into a `<link rel="icon" href="data:image/...">` tag.
+- [x] **Step 9: Wire the favicon in `index.html`** — import the data URI constant value from `components/icons/carmen-logo.tsx` (open the file, copy the literal `CARMEN_ICON_DATA_URI` string) into a `<link rel="icon" href="data:image/...">` tag.
 
-- [ ] **Step 10: Verify**
+- [x] **Step 10: Verify**
 
 Run: `bunx tsc --noEmit && bun run test:run`
 Expected: clean + all tests PASS.
@@ -1920,7 +1920,7 @@ Expected: clean + all tests PASS.
 Run: `bun run dev`, open http://localhost:3000
 Expected: redirected to `/login`; login form renders with translations, theme and fonts.
 
-- [ ] **Step 11: Commit** — `git add -A && git commit -m "feat: add router, auth guard, root layout and smoke pages"`
+- [x] **Step 11: Commit** — `git add -A && git commit -m "feat: add router, auth guard, root layout and smoke pages"`
 
 ---
 
@@ -1929,7 +1929,7 @@ Expected: redirected to `/login`; login form renders with translations, theme an
 **Files:**
 - Modify: `components/login-form.tsx`
 
-- [ ] **Step 1: Replace the mutation's API call**
+- [x] **Step 1: Replace the mutation's API call**
 
 In `components/login-form.tsx`, the mutation currently does (around line 100):
 
@@ -1951,9 +1951,9 @@ mutationFn: async (credentials: LoginFormValues) =>
 
 Remove now-unused imports (`httpClient`, `API_ENDPOINTS`) if nothing else in the file uses them.
 
-- [ ] **Step 2: Type-check + tests** — `bunx tsc --noEmit && bun run test:run` — Expected: clean/PASS.
+- [x] **Step 2: Type-check + tests** — `bunx tsc --noEmit && bun run test:run` — Expected: clean/PASS.
 
-- [ ] **Step 3: Manual end-to-end smoke against a real backend**
+- [x] **Step 3: Manual end-to-end smoke against a real backend**
 
 ```bash
 VITE_DEV_PROXY_TARGET="<BACKEND_URL from $SRC/.env.uat or .env>" bun run dev
@@ -1967,25 +1967,25 @@ With `public/config.json` `BACKEND_URL: ""`. In the browser:
 
 Record the result honestly. If backend connectivity is unavailable, mark this step blocked and continue — but it must pass before Phase 0 is called done.
 
-- [ ] **Step 4: Commit** — `git add -A && git commit -m "feat: wire login form to client-side auth API"`
+- [x] **Step 4: Commit** — `git add -A && git commit -m "feat: wire login form to client-side auth API"`
 
 ---
 
 ### Task 15: Production build verification
 
-- [ ] **Step 1: Full build** — `bun run build` — Expected: success.
+- [x] **Step 1: Full build** — `bun run build` — Expected: success.
 
-- [ ] **Step 2: Inspect chunking**
+- [x] **Step 2: Inspect chunking**
 
 Run: `ls -lh dist/assets | head -30`
 Expected: separate chunks exist for `login`, `dashboard`, `not-found` routes (lazy imports), plus vendor chunks. `messages/en.json`/`th.json` appear as separate chunks (import.meta.glob).
 
-- [ ] **Step 3: Preview smoke**
+- [x] **Step 3: Preview smoke**
 
 Run: `bun run preview` then open the printed URL.
 Expected: app boots, redirects to `/login`, form renders. Navigate to a deep URL (e.g. `/dashboard`) directly — Vite preview serves the SPA fallback and the app redirects to login (full S3 fallback behavior is configured in Task 16).
 
-- [ ] **Step 4: Commit any fixes** — `git add -A && git commit -m "chore: production build fixes"` (skip if no changes).
+- [x] **Step 4: Commit any fixes** — `git add -A && git commit -m "chore: production build fixes"` (skip if no changes).
 
 ---
 
@@ -1994,7 +1994,7 @@ Expected: app boots, redirects to `/login`, form renders. Navigate to a deep URL
 **Files:**
 - Create: `scripts/deploy-s3.sh`, `docs/deploy.md`
 
-- [ ] **Step 1: Write `scripts/deploy-s3.sh`**
+- [x] **Step 1: Write `scripts/deploy-s3.sh`**
 
 ```bash
 #!/usr/bin/env bash
@@ -2032,7 +2032,7 @@ echo "Deployed to s3://${BUCKET} and invalidated /index.html"
 
 Run: `chmod +x scripts/deploy-s3.sh && bash -n scripts/deploy-s3.sh` — Expected: syntax OK.
 
-- [ ] **Step 2: Write `docs/deploy.md`**
+- [x] **Step 2: Write `docs/deploy.md`**
 
 ```markdown
 # Deploy — S3 + CloudFront
@@ -2073,7 +2073,7 @@ scripts/deploy-s3.sh <bucket> <distribution-id>
 new releases on next navigation.
 ```
 
-- [ ] **Step 3: Commit** — `git add -A && git commit -m "feat: add S3/CloudFront deploy script and documentation"`
+- [x] **Step 3: Commit** — `git add -A && git commit -m "feat: add S3/CloudFront deploy script and documentation"`
 
 ---
 
@@ -2082,7 +2082,7 @@ new releases on next navigation.
 **Files:**
 - Create: `playwright.config.ts`, `e2e/login-page.spec.ts`
 
-- [ ] **Step 1: Write `playwright.config.ts`**
+- [x] **Step 1: Write `playwright.config.ts`**
 
 ```ts
 import { defineConfig } from "@playwright/test";
@@ -2101,7 +2101,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 2: Write `e2e/login-page.spec.ts`** — boots the real bundle with no session and asserts the auth redirect + form render (no backend needed: with no stored refresh token, `refreshTokens()` short-circuits without a network call):
+- [x] **Step 2: Write `e2e/login-page.spec.ts`** — boots the real bundle with no session and asserts the auth redirect + form render (no backend needed: with no stored refresh token, `refreshTokens()` short-circuits without a network call):
 
 ```ts
 import { expect, test } from "@playwright/test";
@@ -2116,12 +2116,12 @@ test("unauthenticated visitor is redirected to the login form", async ({ page })
 
 (Adjust the button-name regex to the actual login button label from `messages/en.json` during implementation.)
 
-- [ ] **Step 3: Build + run**
+- [x] **Step 3: Build + run**
 
 Run: `bun run build && bunx playwright test`
 Expected: 1 PASS. (`bunx playwright install chromium` first if browsers are missing.)
 
-- [ ] **Step 4: Commit** — `git add -A && git commit -m "test: add Playwright login smoke e2e"`
+- [x] **Step 4: Commit** — `git add -A && git commit -m "test: add Playwright login smoke e2e"`
 
 ---
 
@@ -2130,7 +2130,7 @@ Expected: 1 PASS. (`bunx playwright install chromium` first if browsers are miss
 **Files:**
 - Create: `CLAUDE.md`, `README.md`
 
-- [ ] **Step 1: Write `CLAUDE.md`**
+- [x] **Step 1: Write `CLAUDE.md`**
 
 ```markdown
 # CLAUDE.md
@@ -2185,7 +2185,7 @@ scripts/deploy-s3.sh <bucket> <cf-id>   # Deploy (see docs/deploy.md)
 4. `bunx tsc --noEmit && bun test:run` must be clean.
 ```
 
-- [ ] **Step 2: Write `README.md`** (short: project intent, dev quickstart copying `config.sample.json` → `config.json`, link to `docs/deploy.md` and the spec).
+- [x] **Step 2: Write `README.md`** (short: project intent, dev quickstart copying `config.sample.json` → `config.json`, link to `docs/deploy.md` and the spec).
 
 ```markdown
 # carmen-inventory-frontend-react
@@ -2206,7 +2206,7 @@ VITE_DEV_PROXY_TARGET=https://<backend> bun dev
 - Deploy: `docs/deploy.md`
 ```
 
-- [ ] **Step 3: Final verification — run everything**
+- [x] **Step 3: Final verification — run everything**
 
 ```bash
 bun run lint && bun run test:run && bun run build && bunx playwright test
@@ -2214,7 +2214,7 @@ bun run lint && bun run test:run && bun run build && bunx playwright test
 
 Expected: all four green. Report actual output.
 
-- [ ] **Step 4: Commit** — `git add -A && git commit -m "docs: add CLAUDE.md and README for the SPA port"`
+- [x] **Step 4: Commit** — `git add -A && git commit -m "docs: add CLAUDE.md and README for the SPA port"`
 
 ---
 

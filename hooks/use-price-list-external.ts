@@ -1,0 +1,143 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { httpClient } from "@/lib/http-client";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
+import { QUERY_KEYS } from "@/constant/query-keys";
+import type { PricelistExternalDto } from "../types/price-list-external";
+
+/**
+ * แปลงข้อมูลฟอร์ม price list ภายนอกเป็น payload สำหรับส่ง API
+ * @param formData - ข้อมูลฟอร์มจาก vendor
+ * @returns payload ที่จัด structure แบบ products + moqs แล้ว
+ */
+const buildPayload = (formData: PricelistExternalDto) => {
+  return {
+    products: formData.tb_pricelist_detail.map((item) => ({
+      id: item.product_id,
+      moqs: (item.moq_tiers || []).map((tier) => ({
+        minQuantity: tier.minimum_quantity,
+        unit: item.unit_name || "",
+        price: tier.price,
+        leadTimeDays: tier.lead_time_days ?? 0,
+      })),
+    })),
+  };
+};
+
+/**
+ * Error class สำหรับข้อผิดพลาดจาก HTTP พร้อม status code
+ */
+export class HttpError extends Error {
+  status: number;
+  /**
+   * สร้าง HttpError พร้อมข้อความและ status code
+   * @param message - ข้อความ error
+   * @param status - HTTP status code
+   */
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/**
+ * แปลง Response เป็น JSON หรือโยน HttpError หาก response ไม่ ok
+ * @param res - Fetch Response
+ * @param errorMessage - ข้อความ fallback เมื่อ parse error message ไม่ได้
+ * @returns ข้อมูล JSON ที่ parse แล้ว
+ */
+async function handleResponse<T = unknown>(
+  res: Response,
+  errorMessage: string,
+): Promise<T> {
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new HttpError(json.message || errorMessage, res.status);
+  }
+  return res.json();
+}
+
+/**
+ * Hook ดึงข้อมูล price list สำหรับ vendor ภายนอกผ่าน url token
+ * ใช้ POST /check เพื่อ validate token และคืน price list payload
+ * Retry สูงสุด 3 ครั้ง ยกเว้น 401 (unauthorized) จะหยุดทันที
+ * @param urlToken - token สำหรับยืนยันสิทธิ์ของ vendor
+ * @returns React Query ของข้อมูล PricelistExternalDto
+ * @example
+ * const { data, isLoading } = usePriceListExternal(urlToken);
+ */
+export function usePriceListExternal(urlToken: string) {
+  return useQuery({
+    queryKey: [QUERY_KEYS.PRICE_LIST_EXTERNAL, urlToken],
+    queryFn: async () => {
+      const res = await httpClient.post(
+        API_ENDPOINTS.PRICE_LIST_EXTERNAL_CHECK(urlToken),
+      );
+      const json = await handleResponse<{ data: PricelistExternalDto }>(
+        res,
+        "Failed to fetch price list",
+      );
+      return json.data;
+    },
+    enabled: !!urlToken,
+    retry: (failureCount, error) => {
+      if (error instanceof HttpError && error.status === 401) return false;
+      return failureCount < 3;
+    },
+  });
+}
+
+/**
+ * Hook บันทึก price list ของ vendor ภายนอก (save draft)
+ * แปลงฟอร์มเป็น payload products+moqs แล้ว PATCH และ invalidate cache
+ * @param urlToken - token สำหรับยืนยันสิทธิ์ของ vendor
+ * @returns Mutation สำหรับบันทึกข้อมูล
+ * @example
+ * const save = useUpdatePriceListExternal(urlToken);
+ * save.mutate(formValues);
+ */
+export function useUpdatePriceListExternal(urlToken: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (formData: PricelistExternalDto) => {
+      const res = await httpClient.patch(
+        API_ENDPOINTS.PRICE_LIST_EXTERNAL(urlToken),
+        buildPayload(formData),
+      );
+      return handleResponse(res, "Failed to save changes");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PRICE_LIST_EXTERNAL, urlToken],
+      });
+    },
+  });
+}
+
+/**
+ * Hook ส่ง (submit) price list ของ vendor ภายนอกให้ระบบ
+ * POST ไปยัง endpoint /submit ซึ่งจะ finalize price list และ invalidate cache
+ * @param urlToken - token สำหรับยืนยันสิทธิ์ของ vendor
+ * @returns Mutation สำหรับ submit ข้อมูล
+ * @example
+ * const submit = useSubmitPriceListExternal(urlToken);
+ * submit.mutate(formValues);
+ */
+export function useSubmitPriceListExternal(urlToken: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (formData: PricelistExternalDto) => {
+      const res = await httpClient.post(
+        `${API_ENDPOINTS.PRICE_LIST_EXTERNAL(urlToken)}/submit`,
+        buildPayload(formData),
+      );
+      return handleResponse(res, "Failed to submit price list");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PRICE_LIST_EXTERNAL, urlToken],
+      });
+    },
+  });
+}
