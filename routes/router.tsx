@@ -15,6 +15,8 @@ export const router = createBrowserRouter([
     Component: AppRoot,
     children: [
       { path: "/login", lazy: () => import("./login/page") },
+      // Public price-list route — vendor ภายนอกเปิดจากลิงก์ในอีเมล (ไม่ต้อง auth)
+      { path: "/pl/:url_token", lazy: () => import("./external/pl/page") },
       {
         Component: ProtectedShell,
         children: [
@@ -89,6 +91,25 @@ export const router = createBrowserRouter([
               { path: "spot-check/:id/review", lazy: () => import("./inventory-management/spot-check/[id]/review/page") },
               { path: "period-end", lazy: () => import("./inventory-management/period-end/page") },
               { path: "period-end/review", lazy: () => import("./inventory-management/period-end/review/page") },
+            ],
+          },
+          {
+            path: "vendor-management",
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+            children: [
+              { index: true, lazy: () => import("./vendor-management/page") },
+              { path: "vendor", lazy: () => import("./vendor-management/vendor/page") },
+              { path: "vendor/new", lazy: () => import("./vendor-management/vendor/new/page") },
+              { path: "vendor/:id", lazy: () => import("./vendor-management/vendor/[id]/page") },
+              { path: "price-list", lazy: () => import("./vendor-management/price-list/page") },
+              { path: "price-list/new", lazy: () => import("./vendor-management/price-list/new/page") },
+              { path: "price-list/:id", lazy: () => import("./vendor-management/price-list/[id]/page") },
+              { path: "price-list-template", lazy: () => import("./vendor-management/price-list-template/page") },
+              { path: "price-list-template/new", lazy: () => import("./vendor-management/price-list-template/new/page") },
+              { path: "price-list-template/:id", lazy: () => import("./vendor-management/price-list-template/[id]/page") },
+              { path: "request-price-list", lazy: () => import("./vendor-management/request-price-list/page") },
+              { path: "request-price-list/new", lazy: () => import("./vendor-management/request-price-list/new/page") },
+              { path: "request-price-list/:id", lazy: () => import("./vendor-management/request-price-list/[id]/page") },
             ],
           },
         ],
