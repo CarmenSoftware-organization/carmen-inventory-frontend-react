@@ -346,7 +346,8 @@ export default function PrtComponent() {
       <div className="mt-3 space-y-3">
         {/* Content */}
         {isGridMode &&
-          ((useInfiniteScroll ? grid.isLoading : isLoading) ? (
+          useInfiniteScroll &&
+          (grid.isLoading ? (
             <CardSkeletonGrid />
           ) : templates.length === 0 ? (
             <EmptyComponent />
@@ -366,7 +367,7 @@ export default function PrtComponent() {
                   />
                 ))}
               </div>
-              {useInfiniteScroll && grid.hasMore && (
+              {grid.hasMore && (
                 <div
                   ref={grid.sentinelRef}
                   className="flex justify-center py-4"
@@ -378,6 +379,48 @@ export default function PrtComponent() {
               )}
             </>
           ))}
+
+        {isGridMode && !useInfiniteScroll && (
+          <DataGrid
+            table={table}
+            recordCount={totalRecords}
+            isLoading={isLoading}
+            tableLayout={{ headerSticky: true }}
+          >
+            <DataGridContainer
+              className={cn(
+                "flex flex-col",
+                activeFilters.length > 0
+                  ? "max-h-[calc(100vh-13rem-3rem)]"
+                  : "max-h-[calc(100vh-10rem-3rem)]",
+              )}
+            >
+              <div className="flex-1 overflow-auto p-3">
+                {isLoading ? (
+                  <CardSkeletonGrid />
+                ) : templates.length === 0 ? (
+                  <EmptyComponent />
+                ) : (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {templates.map((item, i) => (
+                      <PrtCard
+                        key={item.id}
+                        item={item}
+                        index={i}
+                        onEdit={(t) =>
+                          router.push(
+                            `/procurement/purchase-request-template/${t.id}`,
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              <DataGridPagination />
+            </DataGridContainer>
+          </DataGrid>
+        )}
         {!isGridMode && (
           <DataGrid
             table={table}
