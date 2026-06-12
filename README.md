@@ -50,6 +50,7 @@ bun run lint         # ESLint          bun test            # Vitest watch
 bun test:run         # Run all tests   bun test:run <path> # Single file
 scripts/deploy-s3.sh <bucket> <cloudfront-id>       # Deploy to S3/CloudFront (docs/deploy.md)
 scripts/deploy-gcs.sh <bucket> [url-map]            # Deploy to GCS/Cloud CDN (docs/deploy.md)
+scripts/deploy-docker.sh [tag] [registry]           # Build/push Docker image (nginx + /api proxy)
 ```
 
 ## Architecture in one minute

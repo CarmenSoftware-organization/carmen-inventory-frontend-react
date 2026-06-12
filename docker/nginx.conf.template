@@ -1,0 +1,53 @@
+# Rendered by the nginx image's envsubst entrypoint — ${BACKEND_URL} มาจาก env
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript image/svg+xml;
+    gzip_min_length 1024;
+
+    # Hashed assets — immutable (ชื่อไฟล์มี hash เปลี่ยนทุก build)
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    # Runtime config + index.html — no-cache เพื่อให้ deploy ใหม่มีผลทันที
+    location = /config.json {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+
+    location = /healthz {
+        access_log off;
+        return 200 "ok";
+    }
+
+    # Proxy ทุก /api/* ไป backend (แทน Next server proxy เดิม — browser ไม่ต้องข้าม origin)
+    location /api/ {
+        proxy_pass ${BACKEND_URL};
+        proxy_http_version 1.1;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # TLS verify เปิดเป็นค่า default (ปลอดภัย) — UAT ที่ใช้ self-signed cert
+        # ค่อย override ด้วย env PROXY_SSL_VERIFY=off ตอน run (อย่าใช้ off ใน production;
+        # ทางที่ถูกคือใส่ CA เข้า trust store หรือใช้ cert ที่ออกถูกต้อง)
+        proxy_ssl_verify ${PROXY_SSL_VERIFY};
+        proxy_ssl_trusted_certificate /etc/ssl/certs/ca-certificates.crt;
+        proxy_ssl_server_name on;
+        proxy_read_timeout 120s;
+        client_max_body_size 25m;
+    }
+
+    # SPA fallback — ทุก path ที่ไม่ใช่ไฟล์จริง ให้ index.html (client-side routing)
+    location / {
+        add_header Cache-Control "no-cache";
+        try_files $uri /index.html;
+    }
+}

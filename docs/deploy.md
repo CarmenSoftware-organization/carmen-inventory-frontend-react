@@ -70,6 +70,46 @@ scripts/deploy-gcs.sh <bucket> <url-map>    # behind HTTPS LB + Cloud CDN
 
 ---
 
+## Docker — nginx + built-in /api proxy
+
+The image serves the static bundle with nginx and **proxies `/api/*` to the backend
+inside the container** (same model as the original Next server) — so the backend
+needs **no CORS** for Docker deployments. `config.json` is rendered from env at
+container start (`BACKEND_URL` in it stays `""` = same-origin).
+
+### Build / push
+
+```bash
+scripts/deploy-docker.sh                 # build, tag = git short SHA + latest
+scripts/deploy-docker.sh v1.0.0 <registry>   # build + push (e.g. ECR/GCR/Docker Hub)
+```
+
+### Run
+
+```bash
+docker run -d -p 3000:80 \
+  -e BACKEND_URL=https://<backend-host> \
+  -e X_APP_ID=<app id> \
+  -e WS_URL=wss://<backend-host>/ws \
+  carmen-inventory-frontend-react:latest
+# หรือ: BACKEND_URL=.. X_APP_ID=.. docker compose up -d --build
+```
+
+Runtime env:
+
+| Var | Required | Meaning |
+|---|---|---|
+| `BACKEND_URL` | yes | backend origin the nginx `/api/*` proxy targets |
+| `X_APP_ID` | yes | rendered into `config.json` |
+| `WS_URL` | no | rendered into `config.json` (notifications) |
+| `PROXY_SSL_VERIFY` | no (default `on`) | set `off` ONLY for UAT self-signed backends — never in production; prefer adding the CA to the trust store |
+
+Endpoints: `/healthz` (used by the image HEALTHCHECK), SPA fallback for all
+non-file paths, immutable caching on `/assets/*`, no-cache on `index.html` +
+`config.json`.
+
+---
+
 ## Shared notes
 
 - `config.json` shape (see `public/config.sample.json`):

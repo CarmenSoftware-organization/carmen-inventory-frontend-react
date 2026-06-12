@@ -1,0 +1,21 @@
+# docker-compose.yml — Carmen Inventory SPA (nginx + /api proxy)
+#
+# Usage:
+#   BACKEND_URL=https://<backend> X_APP_ID=<id> docker compose up -d --build
+#   # UAT self-signed cert เท่านั้น: เพิ่ม PROXY_SSL_VERIFY=off (อย่าใช้ใน production)
+
+services:
+  carmen-inventory-frontend-react:
+    image: ${REGISTRY:-local}/carmen-inventory-frontend-react:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: carmen-inventory-frontend-react
+    ports:
+      - "127.0.0.1:3000:80"
+    environment:
+      - BACKEND_URL=${BACKEND_URL:?set BACKEND_URL}
+      - X_APP_ID=${X_APP_ID:?set X_APP_ID}
+      - WS_URL=${WS_URL:-}
+      - PROXY_SSL_VERIFY=${PROXY_SSL_VERIFY:-on}
+    restart: unless-stopped
