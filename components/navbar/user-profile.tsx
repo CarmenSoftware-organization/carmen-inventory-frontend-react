@@ -26,7 +26,7 @@ import { useIsMutating } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/use-profile";
 import { useLogout } from "@/hooks/use-logout";
 import { SWITCH_BU_MUTATION_KEY } from "@/hooks/use-switch-bu";
-import ChangePasswordDialog from "@/app/(root)/profile/_components/change-password-dialog";
+import ChangePasswordDialog from "@/routes/profile/_components/change-password-dialog";
 import { formatName } from "@/lib/name";
 import { cn } from "@/lib/utils";
 import { LangSwitch } from "./lang-switch";
