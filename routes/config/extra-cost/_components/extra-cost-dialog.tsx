@@ -171,7 +171,7 @@ export function ExtraCostDialog({
               variant="outline"
               size="sm"
               onClick={() => onOpenChange(false)}
-              disabled={isPending || readOnly}
+              disabled={isPending}
             >
               {readOnly ? tc("close") : tc("cancel")}
             </Button>
