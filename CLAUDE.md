@@ -17,7 +17,7 @@ bun dev              # Dev server (VITE_DEV_PROXY_TARGET=<backend> to proxy /api
 bun run build        # tsc + vite build → dist/
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
-scripts/deploy-s3.sh <bucket> <cf-id>   # Deploy (see docs/deploy.md)
+scripts/deploy-s3.sh <bucket> <cf-id>   # Deploy S3/CloudFront · deploy-gcs.sh <bucket> [url-map] = GCS (docs/deploy.md)
 # e2e: moved to ../carmen-inventory-frontend-e2e (E2E_FRONTEND_DIR=../carmen-inventory-frontend-react bun e2e)
 ```
 

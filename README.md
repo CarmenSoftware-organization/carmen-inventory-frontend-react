@@ -48,7 +48,8 @@ bun run build        # tsc + vite build → dist/
 bun run preview      # Serve the production build locally
 bun run lint         # ESLint          bun test            # Vitest watch
 bun test:run         # Run all tests   bun test:run <path> # Single file
-scripts/deploy-s3.sh <bucket> <cloudfront-id>       # Deploy (see docs/deploy.md)
+scripts/deploy-s3.sh <bucket> <cloudfront-id>       # Deploy to S3/CloudFront (docs/deploy.md)
+scripts/deploy-gcs.sh <bucket> [url-map]            # Deploy to GCS/Cloud CDN (docs/deploy.md)
 ```
 
 ## Architecture in one minute
