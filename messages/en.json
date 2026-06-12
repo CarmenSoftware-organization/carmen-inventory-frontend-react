@@ -675,17 +675,6 @@
       "deleteConfirm": "Are you sure you want to delete extra cost type \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. Shipping, Insurance"
     },
-    "certification": {
-      "entity": "Certification",
-      "title": "Certification",
-      "desc": "Manage product and vendor certifications (HACCP, ISO, organic, etc.).",
-      "add": "Add Certification",
-      "edit": "Edit Certification",
-      "deleteTitle": "Delete Certification",
-      "deleteConfirm": "Are you sure you want to delete certification \"{name}\"? This action cannot be undone.",
-      "codePlaceholder": "e.g. HACCP, ISO22000",
-      "namePlaceholder": "e.g. HACCP Food Safety, ISO 22000"
-    },
     "eco": {
       "entity": "Eco Certification",
       "title": "Eco Certification",
@@ -2669,7 +2658,6 @@
       "noProductsSelectedDesc": "Browse the vendor's active price list to add products and assign locations.",
       "browseFromPriceList": "Browse from price list",
       "browseFromPriceListDesc": "Pick products from the vendor's active price lists. You can configure locations after adding.",
-      "addLocation": "Add location",
       "removeLocation": "Remove location",
       "removeLocationConfirm": "Are you sure you want to remove this delivery location?",
       "removeProduct": "Remove product",

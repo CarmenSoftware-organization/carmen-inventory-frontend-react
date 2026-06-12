@@ -675,17 +675,6 @@
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบประเภทค่าใช้จ่ายเพิ่มเติม \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
       "namePlaceholder": "เช่น ค่าขนส่ง, ค่าประกัน"
     },
-    "certification": {
-      "entity": "ใบรับรอง",
-      "title": "ใบรับรอง",
-      "desc": "จัดการใบรับรองของสินค้าและผู้ขาย (HACCP, ISO, ออร์แกนิก ฯลฯ)",
-      "add": "เพิ่มใบรับรอง",
-      "edit": "แก้ไขใบรับรอง",
-      "deleteTitle": "ลบใบรับรอง",
-      "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบใบรับรอง \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
-      "codePlaceholder": "เช่น HACCP, ISO22000",
-      "namePlaceholder": "เช่น HACCP, ISO 22000"
-    },
     "eco": {
       "entity": "ใบรับรองสิ่งแวดล้อม",
       "title": "ใบรับรองสิ่งแวดล้อม",
@@ -2664,7 +2653,6 @@
       "noProductsSelectedDesc": "เลือกสินค้าจาก price list ของผู้ขาย แล้วกำหนด location ต่อ",
       "browseFromPriceList": "เลือกจาก price list",
       "browseFromPriceListDesc": "เลือกสินค้าจาก price list ของผู้ขาย สามารถระบุ location ต่อหลังเพิ่ม",
-      "addLocation": "เพิ่ม location",
       "removeLocation": "ลบ location",
       "removeLocationConfirm": "ยืนยันลบ location จัดส่งนี้?",
       "removeProduct": "ลบสินค้า",
