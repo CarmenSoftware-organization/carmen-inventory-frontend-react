@@ -1,6 +1,6 @@
 "use no memo";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Controller,
   useFieldArray,
@@ -117,6 +117,31 @@ export function VendorForm({ vendor }: VendorFormProps) {
 
   const [removedAddressIds, setRemovedAddressIds] = useState<string[]>([]);
   const [removedContactIds, setRemovedContactIds] = useState<string[]>([]);
+
+  // After a successful edit-save the byId query is invalidated and refetches,
+  // so the `vendor` prop returns with server-assigned ids for any newly added
+  // address/contact rows. Re-sync the form to it in view mode so a second
+  // consecutive edit does not re-send those rows as new (buildNestedPayload
+  // keys add-vs-update on id presence → would create duplicates server-side).
+  //
+  // Keyed on a signature of the address/contact ids (the GET response carries
+  // no top-level updated_at — the timestamp lives under `audit`, which is not
+  // on the typed shape), NOT on `mode`: the signature changes exactly when rows
+  // are added/removed (the cases the stale-id bug bites), and keying off mode
+  // would fire on the edit→view transition before the refetch lands, resetting
+  // to the stale prop and momentarily dropping the just-added rows.
+  const vendorSyncKey = [
+    ...(vendor?.vendor_address ?? []).map((a) => a.id ?? ""),
+    ...(vendor?.vendor_contact ?? []).map((c) => c.id ?? ""),
+  ].join("|");
+  useEffect(() => {
+    if (mode === "view" && vendor) {
+      form.reset(getDefaultValues(vendor));
+      setRemovedAddressIds([]);
+      setRemovedContactIds([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode read intentionally without retriggering
+  }, [vendorSyncKey, vendor?.id]);
 
   const handleRemoveAddress = (index: number) => {
     const id = form.getValues(`vendor_address.${index}.id`);

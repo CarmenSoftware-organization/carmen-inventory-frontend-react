@@ -91,6 +91,24 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     }
   }, [isAdd, defaultCurrencyId, form]);
 
+  // After a successful edit-save the byId query is invalidated and refetches,
+  // so the `priceList` prop returns with server-assigned ids for any newly
+  // added pricelist_detail rows. Re-sync the form to it in view mode so a
+  // second consecutive edit does not re-send those rows as new (which would
+  // duplicate them server-side). PriceList has no version field, so key on a
+  // signature of the detail ids — it changes exactly when rows are added or
+  // removed (the cases where the stale-id bug bites). NOT keyed on `mode`, so
+  // it cannot fire on the edit→view transition before the refetch lands.
+  const detailIdsKey = (priceList?.pricelist_detail ?? [])
+    .map((d) => d.id)
+    .join(",");
+  useEffect(() => {
+    if (mode === "view" && priceList) {
+      form.reset(getDefaultValues(priceList, { defaultCurrencyId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode/defaultCurrencyId read intentionally without retriggering
+  }, [detailIdsKey, priceList?.id]);
+
   const {
     fields: detailFields,
     prepend: prependDetail,
