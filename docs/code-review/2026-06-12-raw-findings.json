@@ -118,7 +118,8 @@
       "reason": "Verified in lib/http-client.ts: line 224 returns the retry via safeFetch, which only attaches headers and catches network errors (lines 130-141), so a second 401 leaves tokenStore populated (no RequireAuth redirect), a 403 on retry skips the permission-denied dispatch (a realistic path: expired token + insufficient permission), a 429 skips RATE_LIMITED normalization, and http-client.test.ts indeed only tests retry-success and refresh-failure."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "/Users/samutpra/GitHub/carmensoftware-organize/carmen-inventory-frontend-react/lib/safe-storage.ts",
@@ -143,7 +144,8 @@
       "reason": "Confirmed by execution: with a throwing storage getter (real Chrome 'block all cookies'/sandboxed-iframe behavior), getSessionItem/setSessionItem/removeSessionItem/getLocalItem all propagate SecurityError because getStore() dereferences globalThis.sessionStorage outside any try/catch (lib/safe-storage.ts:9-10, and the getStore() calls at lines 17/29 precede the try blocks), while refreshTokenStorage degrades gracefully in the same run \u2014 and the path manifests during render via the useState initializer at routes/procurement/goods-receive-note/_components/grn-form.tsx:48."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "/Users/samutpra/GitHub/carmensoftware-organize/carmen-inventory-frontend-react/lib/date-utils.ts",
@@ -168,7 +170,8 @@
       "reason": "Not refuted: the real path manifests the off-by-one \u2014 pr-form-schema.ts:229 seeds the edit form with isoToDateInput's UTC date while pr-table/pr-card/pr-header display the local date via formatDate, and 17:00Z+ pr_date values genuinely exist (backend duplicate-PR writes new Date().toISOString()); worse, use-pr-form-actions.ts:118 persists the UTC date back as UTC midnight, so saving an edit silently shifts the displayed date back one day (the only inaccuracy is that pr_date is a hidden form value plus read-only ribbon, not a visible <input type=\\\"date\\\">)."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    }
   ],
   "rejected": [],
@@ -394,7 +397,9 @@
       "reason": "Confirmed, not refuted: resolveAttachmentUrl's '/api/proxy/...' output feeds bare <img src>/<a href> in comment-sheet.tsx (lines 538, 550, 612), the prefix rewrite exists only in lib/http-client.ts fetch wrapper (PROXY_PREFIX, line 81), and all three deployment layers pass the URL through unrewritten \u2014 Vite dev proxy and Docker nginx forward '/api/proxy/api/...' verbatim to a backend with no such route (404), S3/GCS static hosting falls back to index.html \u2014 exactly matching the migration-leftover from the Next.js app's real app/api/proxy/[...path] server route."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "attachment <img>/<a> use the dead /api/proxy path; correct fix needs an authed-blob fetch hook across multiple call sites (thumbnails, lightbox, downloads) AND live backend verification (download endpoint auth/presign behavior unknown)"
    },
    {
     "file": "components/ui/comment-sheet.tsx",
@@ -419,7 +424,8 @@
       "reason": "Confirmed, not refuted: the Enter handlers call handleSubmit/handleUpdate with no pending guard, message/editMessage are only cleared after the awaited mutation resolves so the empty-check passes on repeat Enter, the textareas stay enabled while pending, and consumers wire onSubmit/onUpdate to react-query mutateAsync which fires a real duplicate request per call \u2014 so repeated Enter during an in-flight mutation does post the same comment multiple times."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "components/ui/tree-product-lookup.tsx",
@@ -444,7 +450,9 @@
       "reason": "Not refuted: the Product type explicitly allows null category/sub_category/item_group (types/product.ts:47-49), buildTree creates distinct sibling nodes that share the literal id \"uncategorized\" across different parents, and leafIdsMap's depth-first map.set(node.id, ids) (line 127) lets the last such node overwrite the earlier one \u2014 so getCheckState/toggleGroup on one category's Uncategorized node provably operate on the other's products, and expandedIds.has(node.id) toggles all Uncategorized nodes at once."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [
@@ -696,7 +704,8 @@
       "reason": "Confirmed: NotificationDetailDialog uses useTranslations(\"navbar\") (notification.tsx:259) and calls t(\"open\") (line 313), but neither messages/en.json nor messages/th.json defines navbar.open (only navbar.shortcutOpen), and with no custom onError/getMessageFallback in components/i18n-provider.tsx, use-intl will log MISSING_MESSAGE and render the raw \"navbar.open\" label whenever a notification has a valid external link."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "components/navbar/path-breadcrumb.tsx",
@@ -721,7 +730,8 @@
       "reason": "Confirmed at runtime: BreadcrumbLink without asChild renders a raw <a> (breadcrumb.tsx:45) that React Router does not intercept, so clicking any non-last breadcrumb segment triggers a full document reload, wiping the in-memory token and re-running the refreshTokens boot \u2014 the only inaccuracy is the \"regression\" framing, since the Next.js source app used the same plain <a> (never next/link) and also full-reloaded."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "components/keyboard-shortcuts-dialog.tsx",
@@ -746,7 +756,9 @@
       "reason": "The finding holds: KeyboardShortcutsDialog (mounted globally via routes/root-layout.tsx:32) lists \"g d/p/o/r\" and \"n\" in SHORTCUTS (components/keyboard-shortcuts-dialog.tsx:20-24), but its only keydown handler covers \"?\" and \"/\" (lines 50-62), and an exhaustive grep of components/routes/hooks/lib finds no other handler for these keys \u2014 the only other global keydown listeners are Cmd/Ctrl+K in components/navbar/module-app.tsx and Cmd/Ctrl+B in components/ui/sidebar.tsx, plus form/lightbox-local ones \u2014 so pressing the advertised sequences does nothing at runtime, and the dialog strings are indeed hardcoded English unlike the rest of the use-intl app."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "components/i18n-provider.tsx",
@@ -771,7 +783,8 @@
       "reason": "Verified, not refuted: the message chunks are real separate hashed network fetches (dist/assets/en-C9vAFmP0.js, th-CtTMW-wR.js from non-eager import.meta.glob), the boot-time load() at i18n-provider.tsx:45 has no .catch/retry, deploy-s3.sh uses `aws s3 sync --delete` (old chunks vanish on redeploy), and I18nProvider is the outermost wrapper in routes/app-root.tsx, so a rejected boot import leaves messages null and the whole app permanently blank \u2014 the only caveat is that a failed mid-session locale switch would not blank (previous messages persist), so the blank-screen case is limited to the initial load."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    }
   ],
   "rejected": [
@@ -973,7 +986,8 @@
       "reason": "Confirmed at runtime: useLogout (hooks/use-logout.ts) never clears tokenStore/refreshTokenStorage and posts /api/auth/logout with no body, while the backend (carmen-turborepo-backend-v2 gateway + micro-business AuthService) revokes only the refresh_token supplied in the body \u2014 so nothing is revoked, the refresh token survives in localStorage, and main.tsx's boot-time refreshTokens() silently restores the session on the next page load; the proper logout() in lib/auth/auth-api.ts has no UI callers."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "hooks/use-thai-address.ts",
@@ -998,7 +1012,8 @@
       "reason": "Confirmed: hooks/use-thai-address.ts fetches /data/thai-{provinces,districts,subdistricts}.json but public/data/ does not exist in this repo (only config.json/config.sample.json), vite.config.ts has no publicDir override/copy step and proxies only /api, and the consumer chain is live (router \u2192 vendor/new & vendor/:id \u2192 vendor-form.tsx:401 \u2192 VendorAddress \u2192 lookup-thai components), so Thai address lookups fail at runtime exactly as described."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "hooks/use-exchange-rate.ts",
@@ -1023,7 +1038,8 @@
       "reason": "Confirmed, not refuted: hooks/use-exchange-rate.ts:134 raw-fetches /api/exchange-rate (no httpClient/BACKEND_URL rewrite, endpoint absent per the line-133 TODO and CLAUDE.md), the hook runs unconditionally on the exchange-rate page (baseCurrency defaults to \"THB\" in exchange-rate-component.tsx:72) and in currency-dialog.tsx:69, and docs/deploy.md prescribes CloudFront 403/404\u2192index.html with response code 200, so res.ok is true, res.json() throws, and retry: 3 yields 4 wasted request cycles per mount exactly as described (GCS differs only in failing via 404 status rather than parse error, still retried)."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "hooks/use-navigation-guard.ts",
@@ -1048,7 +1064,9 @@
       "reason": "Confirmed, not refuted: the effect pushes a {__navGuard} sentinel on every enabled=true transition (line 70) while the cleanup (lines 84-87) only removes listeners, and the hook's one live consumer (wf-detail.tsx, guardEnabled = isEditing && isDirty) toggles it on each edit/save cycle, so each cycle leaks one same-URL history entry that makes the next Back press a no-op under React Router 7's popstate handling; the \"Next.js's popstate handler\" comment is likewise stale."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [
@@ -1240,7 +1258,8 @@
       "reason": "Confirmed, not refuted: new location rows initialize min_qty/max_qty/re_order_qty/par_qty to null (pd-location-tab.tsx:113), zodResolver without raw:true passes the parsed output to onSubmit (pd-form.tsx:228), the preprocess at types/product.ts:137 converts null to 0 (verified empirically against the project's zod 4.4.3: parse(null) -> 0), and buildItemChanges + mapLocationToPayload (`0 ?? null` keeps 0) submit that 0 to the backend in locations.add/update \u2014 so empty thresholds really are sent as explicit 0 instead of null at runtime."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "constant/api-endpoints.ts",
@@ -1265,7 +1284,8 @@
       "reason": "Confirmed real: the public /pl/:url_token param is decoded by React Router's useParams and passed unsanitized into PRICE_LIST_EXTERNAL/PRICE_LIST_EXTERNAL_CHECK, where resolveUrl strips the /api/external/ prefix by string-slice (no normalization) and hands the path with literal ../ segments to fetch(), whose URL parser collapses them to reach arbitrary BACKEND_URL paths \u2014 the existing toSafePathSegment guard is applied only to the notification endpoints, not here."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    }
   ],
   "rejected": [],
@@ -1471,7 +1491,8 @@
       "reason": "Confirmed, not refuted: readOnly mode is reachable at runtime (ConfigListTemplate passes readOnly=true when a non-admin user lacking the update permission opens an entity via the ungated CellAction link), and the footer button at currency-dialog.tsx:272 then renders as a natively disabled \"Close\" button (disabled:pointer-events-none), leaving only X/ESC to close \u2014 with the identical pattern verified in all 8 sibling dialogs."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/config/location/_components/location-form.tsx",
@@ -1496,7 +1517,8 @@
       "reason": "Not refuted: update onSuccess (location-form.tsx:201-207, department-form.tsx:177-181) only toasts and setMode(\"view\") with no form.reset, the form never remounts (no key prop, and the invalidation-triggered byId refetch keeps isLoading false so FormSkeleton never swaps in), so the transferHandler/handleProductSelectionChange deltas stored in form values persist and onSubmit unconditionally re-sends them (users/products at lines 193-194) on the next edit-save."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    }
   ],
   "rejected": [
@@ -1788,7 +1810,8 @@
       "reason": "Confirmed: the wizard's location handlers (step-select-items.tsx:136-179) only mutate items[i].locations and never recompute the item-level qty/amount fields seeded from moq in detailToItem(); PoItemComputedSync \u2014 the sole writer of those derived fields \u2014 is mounted only in po-items-grid.tsx (regular PO form) and appears nowhere in from-price-list/, so handleConfirm's buildPoPayload/mapItemToPayload (po-form-schema.ts:261-272) sends stale moq-based order_qty/base_qty/sub_total_price/net_amount/tax_amount/total_price that contradict the edited locations, while StepSummary recomputes from locations for display only."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx",
@@ -1813,7 +1836,9 @@
       "reason": "Confirmed at runtime: the wizard never sets exchange_rate anywhere (grep of from-price-list/ shows no setValue(\"exchange_rate\")), the BrowseDialog currency payload is only {id, code, name} (types/price-list.ts:59), validation (min(0)) passes with the EMPTY_FORM default of 1, and buildPoPayload (build-po-payload.ts:46) unconditionally submits exchange_rate: 1 \u2014 while the manual PO form proves the client must supply the rate via LookupCurrency onItemChange (po-general-fields.tsx:85, 210)."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "routes/procurement/purchase-order/_components/use-po-form-handlers.ts",
@@ -1838,7 +1863,9 @@
       "reason": "Confirmed, not refuted: the creator role can add/remove detail rows and click Submit in edit mode (po-footer-action.tsx canSubmit + po-item-fields.tsx Add Item both gate on STAGE_ROLE.CREATE), and after `await updatePo.mutateAsync(...)` discards the response, runSubmitPo (use-po-form-handlers.ts:164) builds submit details from the render-time closure prop `purchaseOrder.purchase_order_detail`, so newly created detail ids are omitted and deleted rows are still sent \u2014 unlike doSaveAndSubmitPr (use-pr-form-actions.ts:203-219) which correctly uses the update response's detail ids."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [
@@ -2150,7 +2177,8 @@
       "reason": "Confirmed at runtime by tracing the full path: the backend gateway (my-approve.service.ts) genuinely paginates each PR/PO/SR section with the page/perpage the frontend sends, useApprovalPending discards each section's paginate.total and returns only the current page's items, and approval-component.tsx:74 sets totalRecords = items.length, so approve-queue-list's pageCount (= ceil(items.length/pageSize), driving getCanNextPage in DataGridPagination) caps at 1 whenever a single section dominates or a doc_type card filter is active \u2014 e.g. 25 pending PRs / perpage 10 yields 10 items, pageCount 1, items 11-25 unreachable and the record count wrong; the only nitpick is that with all three sections populated items.length can reach 3x perpage so pageCount is not literally always <= 1, but the core defect manifests exactly as described."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/procurement/purchase-request-template/_components/prt-item-table.tsx",
@@ -2175,7 +2203,8 @@
       "reason": "Confirmed real: setValue without shouldDirty (prt-item-table.tsx:42) leaves no dirtyFields.items entry for a product-only-changed row, and buildItemChanges (lib/form-helpers.ts:249-252) excludes such rows from the update payload whenever dirtyFields.items is defined by any other item edit (qty/location/unit all go through register/field.onChange, or a row append), so the product change is silently lost on save \u2014 exactly the pattern cn-item-table.tsx fixes with shouldDirty: true."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/procurement/goods-receive-note/_components/grn-product-cards.tsx",
@@ -2200,7 +2229,8 @@
       "reason": "Confirmed via trace: edit mode loads multi-row manual groups (shared _group_key=product_id, rows with ids) into ManualProductCell, sibling setValue calls (grn-product-cards.tsx:102-105) omit shouldDirty, and buildItemChanges (lib/form-helpers.ts:249-252) takes the dirtyFields branch (defined because the primary row's field.onChange dirtied it), so id-bearing sibling rows are excluded from the PATCH update array and keep the old product on the backend."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/procurement/credit-note/_components/cn-form.tsx",
@@ -2225,7 +2255,9 @@
       "reason": "Confirmed, not refuted: CnForm has no key/remount, no values: option, and no reset on update success (onSuccess only toasts + setMode(\"view\") at cn-form.tsx:118-121), so a second consecutive save sends mount-time doc_version (line 92) and stale per-item doc_versions via mapItemToPayload (cn-form-schema.ts:228); the GRN edit path likewise sends stale item doc_versions and drops header doc_version because it is absent from headerKeys (use-grn-form-actions.ts:129-148)."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "routes/procurement/credit-note/_components/cn-component.tsx",
@@ -2250,7 +2282,9 @@
       "reason": "Confirmed: on desktop grid mode in cn-component.tsx, useInfiniteScroll=false so CnCardList renders only the single server-paginated page (useCreditNote with page/perpage params) with neither DataGridPagination (only in the !isGridMode branch, line 454) nor a sentinel (gated on useInfiniteScroll, line 466), while grn-component.tsx (routes/procurement/goods-receive-note/_components/grn-component.tsx lines 487-514) has the missing third branch \u2014 desktop grid users genuinely cannot navigate past page 1."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "routes/procurement/purchase-request-template/_components/prt-component.tsx",
@@ -2275,7 +2309,9 @@
       "reason": "Confirmed at runtime: on desktop grid mode useInfiniteScroll is false (prt-component.tsx:81), so templates is only the current server page (perpage default 10) from usePrt, the infinite-scroll sentinel (line 369) is mobile-gated, and DataGridPagination (line 400) renders only in the !isGridMode table branch \u2014 leaving no UI to reach records beyond page 1 in desktop grid view."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [],
@@ -2471,7 +2507,9 @@
       "reason": "Confirmed, not refuted: the /api/proxy-prefixed image URLs from resolveServerImageUrl (entry-notes-dialog.tsx:388) are used as raw <img src> which bypasses the only place the prefix is rewritten (lib/http-client.ts resolveUrl), and all three deployment paths (S3 no /api route, Vite proxy and nginx location /api/ both forwarding the path verbatim to a backend that doesn't serve /api/proxy/*) plus the in-memory-only Bearer token mean relative-fileUrl/fileToken evidence images cannot render in this SPA."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "same /api/proxy <img> class as comment-sheet; needs authed-blob fetch + live backend verification"
    },
    {
     "file": "routes/inventory-management/spot-check/_components/sc-entry-component.tsx",
@@ -2496,7 +2534,9 @@
       "reason": "Confirmed by code trace: handleSetUncountedToZero sets counts to 0 but isCountedFn requires eff > 0 (and actual_qty is non-nullable number, defaulting 0), so uncountedCount/progress never change and the Submit-for-review gate (uncountedCount === 0, line 422) is unreachable for any zero-stock item \u2014 though note this is a faithful port of identical logic in the source Next.js app, not a migration regression."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "spot-check counted-semantics change is behavior-altering and needs a product decision (is 0 a valid count?)"
    },
    {
     "file": "routes/inventory-management/inventory-adjustment/_components/ia-item-table.tsx",
@@ -2521,7 +2561,9 @@
       "reason": "Not refutable: the disabled branch of ProductCell unconditionally renders the cost probes, the queries are enabled by document-hydrated product_id/location_id/qty with no mode gating, the effects setValue cost_per_unit/total_cost with shouldDirty:true (marking rows dirty whenever live cost differs from saved), TotalCostCell watches and displays the overwritten value even for completed/voided docs, buildItemChanges then includes those dirty untouched rows in the update payload via mapItemToPayload, and StockOutCostProbe indeed copies the qty-independent last-receiving document total over the saved/recalculated line total."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [],
@@ -2737,7 +2779,8 @@
       "reason": "Confirmed, not refuted: useRole is server-paginated (page/perpage sent, manualPagination: true), so items.length is capped at perpage, making useRoleTable's pageCount = ceil(items.length/perpage) always 1; DataGridPagination hides page buttons when pageCount <= 1 and disables next via getCanNextPage(), so users cannot reach page 2 when roles exceed one page, and the badge shows page row count \u2014 all sibling system-admin modules correctly use data?.paginate?.total ?? 0."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/system-admin/workflow/_components/wf-routing.tsx",
@@ -2762,7 +2805,8 @@
       "reason": "Confirmed at runtime path /system-admin/workflow/:id \u2192 routing tab: wf-routing.tsx:58 binds tfl to the \"field\" namespace and line 245 unconditionally renders tfl(\"field\") in the rule editor, but neither messages/en.json nor messages/th.json contains a field.field key, and the IntlProvider in components/i18n-provider.tsx has no onError/getMessageFallback override, so use-intl will log an error and render the raw \"field.field\" fallback exactly as the finding claims."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/system-admin/role/_components/role-component.tsx",
@@ -2787,7 +2831,9 @@
       "reason": "Confirmed at runtime: on mobile the desktop query is disabled so `error` is always null, useGridPagination (hooks/use-grid-pagination.ts:58,119-126) destructures only data/isLoading and exposes no error/refetch, there is no global QueryCache onError (components/providers.tsx) and http-client only surfaces 401/403 permission dialogs, so a failed list fetch (e.g., 500/network) yields isLoading=false + empty items and renders EmptyComponent with no retry in role-component.tsx:109-137 and identically in the other seven system-admin list components."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "routes/system-admin/workflow/[id]/_content.tsx",
@@ -2812,7 +2858,8 @@
       "reason": "Confirmed end-to-end: useUser()/useProduct() with no params produce requests without page/perpage (buildUrl drops undefined params), the backend defaults perpage to 10 (auth.service.ts:1887 `paginate?.perpage || 10` for users; paginate.query.ts:269 `Number(perpage) || 10` with `take` applied for products), and wf-stage-users.tsx/wf-products.tsx only filter the passed arrays client-side, so the workflow detail's user picker and product tree really do show just the first 10 users/products \u2014 the repo even has useAllUsers ({ perpage: -1 }) created precisely to avoid this."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    }
   ],
   "rejected": [
@@ -3074,7 +3121,8 @@
       "reason": "Confirmed: public/ contains only config.json/config.sample.json with no thai-*.json anywhere in the repo and no copy step in vite.config/scripts/package.json, so fetch(\"/data/thai-*.json\") (vendor-address.tsx:140-156, no res.ok check; use-thai-address.ts hooks defeated by the 200-OK index.html SPA fallback) parses HTML as JSON and throws, breaking postal-code autofill and the Thai address dropdowns exactly as claimed (only nit: the unhandled rejection fires at 5-digit postal codes, not every keystroke)."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/vendor-management/request-price-list/_components/rfp-form.tsx",
@@ -3099,7 +3147,8 @@
       "reason": "Traced end-to-end and confirmed: form.reset(values) at rfp-form.tsx:223 preserves vendors.add/remove deltas, useApiMutation's onSettled prefix-invalidation of [\"request-price-lists\"] refetches the active useById query (key [\"request-price-lists\", buCode, id]) whose data flows back in as the requestPriceList prop without remounting the form, and displayVendors concatenates existingVendors + addedVendors with no dedup \u2014 so newly added vendors render twice in view mode and a second Edit\u2192Save re-sends them in vendors.add."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/vendor-management/vendor/_components/vendor-form.tsx",
@@ -3124,7 +3173,9 @@
       "reason": "Confirmed, not refuted: after update success form.reset(values) at routes/vendor-management/vendor/_components/vendor-form.tsx:207 bakes id-less new rows into form state, the byId refetch (triggered by prefix invalidation) only updates the vendor prop without remount (no key, no useEffect re-init), and on the next edit+save buildNestedPayload's filter(!item.id) re-classifies those rows as add \u2014 duplicating them on the backend even on a no-change save."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "routes/vendor-management/price-list/_components/pl-form.tsx",
@@ -3149,7 +3200,9 @@
       "reason": "Not refutable: useUpdatePriceList's onSettled invalidation prefix-matches the mounted byId query, which refetches and re-renders the still-mounted PriceListForm with server-id detail rows in recomputed defaultValues, while form.reset(values) at pl-form.tsx:151 keeps the id-less rows in form state \u2014 so a second edit-save's buildItemChanges (add = !item.id rows, remove = default ids missing from form) really does emit add+remove for the same rows."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "routes/vendor-management/price-list-template/_components/use-plt-form-actions.ts",
@@ -3174,7 +3227,9 @@
       "reason": "Verified against the actual backend (carmen-turborepo-backend-v2 price-list-template.service.ts:582-626): update() handles products.add as a plain per-item create (append, no dedup, no replace) and deletes only via a products.remove id channel the frontend never sends, so editing details duplicates every existing product row and clearing the list (products: {} because shouldSendProducts is false at length 0) silently removes nothing."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=large \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "routes/vendor-management/price-list-template/_components/plt-product-table.tsx",
@@ -3199,7 +3254,9 @@
       "reason": "The finding manifests: plt-form.tsx:82 calls getDefaultValues which flattens product.moq into multiple details rows sharing one product_id; ProductCell's index-based filter (plt-product-table.tsx:222-225) still puts that shared id into excludeIds via the sibling row's index, LookupProduct removes it from items (lookup-product.tsx:65), and LookupCombobox resolves the selected label only via items.find with no defaultLabel fallback (lookup-combobox.tsx:157-167), so every duplicate-tier row in edit mode shows the placeholder instead of the product and the product cannot be picked for a new tier row."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [],
@@ -3365,7 +3422,8 @@
       "reason": "Traced the real path: on /operation-plan/equipment/new the equipment prop is undefined and create onSuccess (eq-form.tsx:124-128) only toasts/resetImage/setMode(\"view\") with no navigation or form.reset, so the toolbar's Edit button (eq-toolbar.tsx:100) leads back into onSubmit where the isEdit && equipment guard fails and createEquipment.mutate runs again, creating a duplicate; isDirty also stays true so the discard dialog fires spuriously \u2014 the finding manifests at runtime as described."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/operation-plan/recipe/_components/recipe-form-schema.ts",
@@ -3390,7 +3448,9 @@
       "reason": "Confirmed, not refuted: getDefaultValues hardcodes info/dimension to \"\" (recipe-form-schema.ts:197-198) with no UI field bound to either, textToObject(\"\") returns null per the project's own test (form-helpers.test.ts:54), and useUpdateRecipe JSON-stringifies the full payload including those nulls into the multipart `data` part of the PATCH (use-recipe.ts:72-73,154-160), so every edit-save deterministically sends explicit info:null/dimension:null under a payload contract that uses explicit nulls to clear fields (e.g. description || null)."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "finding assumed Recipe carries info/dimension, but those live on CreateRecipeDto not the Recipe GET type \u2014 cannot round-trip as suggested; needs backend null-vs-omit semantics confirmed"
    }
   ],
   "rejected": [],
@@ -3576,7 +3636,8 @@
       "reason": "Confirmed at runtime: on desktop both hooks are enabled (sr-component.tsx:128-133) with distinct endpoints/query keys (use-store-requisition.ts:20-85), so every search/filter/page change creates two fresh query keys and fires two network requests while only the viewMode-matching result is consumed (lines 135-136); the only caveat is the wasted request doubles as a prefetch making viewMode toggles instant, which may be an intentional trade-off but does not refute the finding."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "/Users/samutpra/GitHub/carmensoftware-organize/carmen-inventory-frontend-react/routes/store-operation/store-requisition/_components/sr-component.tsx",
@@ -3601,7 +3662,9 @@
       "reason": "Confirmed, not refuted: on mobile, viewMode toggle swaps the query hook (both are structurally identical useQuery wrappers, so no crash/remount) while queryParams and thus paramsKey (hooks/use-grid-pagination.ts:45) stay byte-identical, so page/allItems never reset; with page=N>1 the new view's page N resolves and the append effect (lines 63-81) does [...prev, ...newItems], mixing the old view's pages 1..N with the new view's page N and never fetching the new view's pages 1..N-1 \u2014 the suggested viewMode-aware reset key is the correct fix."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "/Users/samutpra/GitHub/carmensoftware-organize/carmen-inventory-frontend-react/hooks/use-wastage-report.ts",
@@ -3626,7 +3689,9 @@
       "reason": "Confirmed at the code level: all wastage-report hooks operate on wrMockData, create/update/delete mutations discard the payload and return {success:true} after a 500ms sleep, and wr-form.tsx shows a success toast then navigates back to the unchanged mock-backed list \u2014 exactly the silent-data-loss behavior claimed (only mitigating context: the source Next.js app has the identical mock implementation, so this is intentional source-app parity pending a backend, not a migration regression, though it is indeed absent from CLAUDE.md's known open items)."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=large \u2014 deferred (not fixed in this pass)"
    },
    {
     "file": "/Users/samutpra/GitHub/carmensoftware-organize/carmen-inventory-frontend-react/routes/store-operation/stock-replenishment/_components/stock-repl-component.tsx",
@@ -3651,7 +3716,9 @@
       "reason": "Confirmed at runtime-path level: handleCreatePR/handleCreateSR (lines 145-151) call the side-effect-free getSelectedProducts() and discard the result, the Create PR/SR buttons (lines 167-187) wire onClick straight to these no-ops so clicks do nothing, and use-stock-replenishment.ts returns mockData with an explicit TODO \u2014 the finding is fully accurate."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=large \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [
@@ -3873,7 +3940,8 @@
       "reason": "Cannot refute \u2014 a runtime repro (RTL + real react-hook-form 7.75/React 19) shows the lines 94-96 effect is even worse than claimed: because the IIFE-built defaultValues has new identity every render and the component subscribes to form.formState.errors, form.reset fires on every render and the reset\u2192formState-notify\u2192re-render cycle infinite-loops on bare mount (\"Maximum update depth exceeded\" via the Input maxLength-counter ref at components/ui/input.tsx:25); deleting only the useEffect makes the identical mount test pass, confirming the effect is destructive and the suggested fix (remove it; CategoryForm is freshly mounted via `{open && <CategoryForm/>}` in category-dialog.tsx:94) is sound."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/product-management/product/_components/pd-component.tsx",
@@ -3898,7 +3966,8 @@
       "reason": "Confirmed, not refuted: the three MultiSelectFilters call raw useURL setters (pd-component.tsx:89-91) with no onUpdate, the stale page from the URL flows into combinedParams via useDataGridState's pageNumber, and manualPagination with fully controlled state means nothing resets pageIndex \u2014 so changing category/sub_category/item_group while on page > 1 re-queries with the old page and can render an empty list, unlike status/search which reset page via use-list-page-state.ts:40-48."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/product-management/product/_components/pd-component.tsx",
@@ -3923,7 +3992,9 @@
       "reason": "Confirmed: in grid/mobile mode useProduct is disabled (enabled: !isGridMode) so the line-269 error guard never fires, useGridPagination destructures only {data, isLoading} and exposes no error/refetch, there is no global query error handler (providers.tsx QueryClient has none; http-client only intercepts 401/403/429), so a failed fetch leaves grid.items=[] and isLoading=false, hitting the line-518 branch that renders EmptyComponent \u2014 exactly the misleading silent-failure the finding describes."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [],
@@ -4164,7 +4235,8 @@
       "reason": "Confirmed, not refuted: handleClientErrors() in lib/http-client.ts intercepts 401s on /api/external/* too, and for an unauthenticated external vendor refreshTokens() returns false (no refresh token), so the client throws ApiError(\"Session expired\", 401) before the hook's handleResponse can ever throw HttpError \u2014 making the component's `error instanceof HttpError` expired-link branch unreachable and the retry predicate non-matching (3 retries, each invoking the refresh flow); the only path that could produce HttpError(401) is when a valid refresh token exists and the post-refresh retry returns a raw 401, which does not apply to the external-vendor scenario the finding describes."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/report/list/_components/report-param-dialog.tsx",
@@ -4189,7 +4261,8 @@
       "reason": "Not refuted \u2014 the race is real: the lookups query is disabled until the report is selected (so periods are always {} on the dialog's first-open render), DateControlInner locks the calendar-month fallback via useState(initial) at routes/report/list/_components/report-param-dialog.tsx:148 with no key or syncing effect (Field key is the stable field name), and the stale value flows through the hidden input into FormData and onRun, so first-open runs of @current_period/@previous_period reports use the fallback date instead of the backend period start."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "fixed"
    },
    {
     "file": "routes/external/pl/_components/price-list-external-product-table.tsx",
@@ -4214,7 +4287,9 @@
       "reason": "Verified end-to-end: edit mode renders editable Inputs for moq_qty/price/price_without_tax/tax_amt/lead_time_days wired to handleItemFieldChange (useFieldArray update marks form dirty), but buildPayload in hooks/use-price-list-external.ts sends only product_id plus moq_tiers-derived moqs, and handleSave's success path toasts success and form.reset(formData) clears the dirty flag \u2014 so item-level edits are silently dropped at runtime exactly as the finding claims."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [
@@ -4456,7 +4531,9 @@
       "reason": "Verified end-to-end: package.json line 48 pins xlsx to a cdn.sheetjs.com URL tarball, bun.lock line 1093 is the only entry without a sha512 integrity hash, the Dockerfile's `bun install --frozen-lockfile` re-downloads it unverified on every clean build, and lib/xlsx-utils.ts:28 dynamically imports xlsx into the production bundle (used by ~20 export hooks) in the same JS context as the in-memory auth token \u2014 so a tampered tarball would manifest at runtime with no checkpoint to catch it."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "xlsx pinned via cdn.sheetjs.com tarball with no integrity hash \u2014 fix is a CI/supply-chain change (vendor the tarball or add checksum verification), out of scope for a code PR"
    },
    {
     "file": "scripts/deploy-s3.sh",
@@ -4481,7 +4558,9 @@
       "reason": "Verified, not refuted: deploy-s3.sh:23-28 (`--delete`) and deploy-gcs.sh:21-24 (`--delete-unmatched-destination-objects`) do delete all prior hashed chunks at deploy time, all routes in routes/router.tsx are `lazy:` dynamic imports, grep confirms zero `vite:preloadError`/`location.reload` recovery handling anywhere in app code, and only `/index.html` is CDN-invalidated \u2014 so an open session navigating to a not-yet-visited route after a deploy hits a dead chunk URL (cache miss at edge, object gone at origin) and lands in the route error boundary until manual reload."
      }
     ],
-    "confirmed": true
+    "confirmed": true,
+    "status": "backlog",
+    "backlog_reason": "effort=medium \u2014 deferred (not fixed in this pass)"
    }
   ],
   "rejected": [],
