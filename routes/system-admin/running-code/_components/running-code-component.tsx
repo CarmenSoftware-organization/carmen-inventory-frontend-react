@@ -235,6 +235,11 @@ export default function RunningCodeComponent() {
         {isMobile ? (
           grid.isLoading ? (
             <CardSkeletonGrid />
+          ) : grid.error ? (
+            <ErrorState
+              message={grid.error.message}
+              onRetry={() => grid.refetch?.()}
+            />
           ) : runningCodes.length > 0 ? (
             <>
               <div className="grid grid-cols-1 gap-3">

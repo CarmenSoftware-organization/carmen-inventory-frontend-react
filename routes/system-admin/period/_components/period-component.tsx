@@ -346,6 +346,11 @@ export default function PeriodComponent() {
         {isMobile ? (
           grid.isLoading ? (
             <CardSkeletonGrid />
+          ) : grid.error ? (
+            <ErrorState
+              message={grid.error.message}
+              onRetry={() => grid.refetch?.()}
+            />
           ) : periods.length > 0 ? (
             <>
               <div className="grid grid-cols-1 gap-3">
