@@ -186,9 +186,9 @@ export const API_ENDPOINTS = {
   PRICE_LIST_COMPARE: (buCode: string) =>
     `/api/proxy/api/${buCode}/pricelists/price-compare`,
   PRICE_LIST_EXTERNAL: (urlToken: string) =>
-    `/api/external/api/pricelist-external/${urlToken}`,
+    `/api/external/api/pricelist-external/${toSafePathSegment(urlToken)}`,
   PRICE_LIST_EXTERNAL_CHECK: (urlToken: string) =>
-    `/api/external/api/check-pricelist/${urlToken}`,
+    `/api/external/api/check-pricelist/${toSafePathSegment(urlToken)}`,
   PRICE_LIST_TEMPLATES: (buCode: string) =>
     `/api/proxy/api/${buCode}/pricelist-templates`,
   PRODUCTS: (buCode: string) => `/api/proxy/api/config/${buCode}/products`,

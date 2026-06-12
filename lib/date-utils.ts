@@ -128,7 +128,13 @@ export function daysBetween(a: string, b: string): number {
 export function isoToDateInput(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toISOString().split("T")[0];
+  // ใช้ local-time getters ให้ตรงกับ formatDate/formatLocalizedDate ในไฟล์เดียวกัน
+  // ถ้าใช้ toISOString() (UTC) บน deployment UTC+7 timestamp ตั้งแต่ 17:00Z จะได้
+  // วันที่คนละวันระหว่าง read view กับ <input type="date"> ของ record เดียวกัน
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }
 
 /**

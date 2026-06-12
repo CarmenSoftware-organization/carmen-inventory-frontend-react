@@ -80,4 +80,13 @@ describe("isoToDateInput", () => {
   it("returns empty string for empty string", () => {
     expect(isoToDateInput("")).toBe("");
   });
+
+  it("uses the local calendar date, not the UTC one (no off-by-one)", () => {
+    // 20:00Z = วันถัดไปตี 3 ใน UTC+7 — ต้องอิง local component ให้ตรงกับ formatDate
+    // คำนวณ expected ด้วยวิธีเดียวกันเพื่อให้ test ไม่ผูกกับ timezone ของ runner
+    const iso = "2026-12-25T20:00:00.000Z";
+    const d = new Date(iso);
+    const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    expect(isoToDateInput(iso)).toBe(expected);
+  });
 });

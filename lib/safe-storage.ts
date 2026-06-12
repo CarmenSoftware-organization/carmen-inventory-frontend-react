@@ -6,11 +6,18 @@ type StorageKind = "session" | "local";
  * gracefully instead of throwing.
  */
 function getStore(kind: StorageKind): Storage | undefined {
-  const store =
-    kind === "session" ? globalThis.sessionStorage : globalThis.localStorage;
-  if (store === undefined) return undefined;
-  if (typeof store.getItem !== "function") return undefined;
-  return store;
+  try {
+    // การ "เข้าถึง property" เองก็ throw SecurityError ได้ (Chrome block all
+    // cookies, sandboxed iframe) จึงต้องครอบ try/catch ตั้งแต่ตรงนี้ ไม่งั้น
+    // getItem/setItem จะโยน exception ขัดกับสัญญาว่า degrade gracefully
+    const store =
+      kind === "session" ? globalThis.sessionStorage : globalThis.localStorage;
+    if (store === undefined) return undefined;
+    if (typeof store.getItem !== "function") return undefined;
+    return store;
+  } catch {
+    return undefined;
+  }
 }
 
 function getItem<T>(kind: StorageKind, key: string): T | undefined {
@@ -44,7 +51,11 @@ export function setSessionItem<T>(key: string, value: T): void {
 }
 
 export function removeSessionItem(key: string): void {
-  getStore("session")?.removeItem(key);
+  try {
+    getStore("session")?.removeItem(key);
+  } catch {
+    // blocked storage — ignore
+  }
 }
 
 export function getLocalItem<T>(key: string): T | undefined {

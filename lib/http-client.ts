@@ -210,6 +210,7 @@ const handleClientErrors = async (
   response: Response,
   url: string,
   init: RequestInit,
+  isRetry = false,
 ): Promise<Response> => {
   // /api/external/* เป็น public endpoint (เช่น price-list ผ่าน url_token) — ไม่มี
   // session ให้ refresh/clear การดัก 401 จะกลืน HttpError ของ hook ทำให้ branch
@@ -226,8 +227,17 @@ const handleClientErrors = async (
       throw new ApiError(ERROR_CODES.FORBIDDEN, message!, 403);
     }
 
-    const refreshed = await refreshTokens();
-    if (refreshed) return safeFetch(url, init);
+    // หลัง refresh แล้ว retry ยังได้ 401 อีก (isRetry) แปลว่า token ที่ refresh มา
+    // ก็ยังถูกปฏิเสธ — เคลียร์ session เลย ไม่ refresh วนซ้ำ (กัน loop)
+    if (!isRetry) {
+      const refreshed = await refreshTokens();
+      if (refreshed) {
+        // ส่ง retry response กลับเข้า handler อีกรอบ (isRetry=true) เพื่อให้
+        // 401/403/429 รอบสองถูกจัดการแทนที่จะคืน response ดิบ
+        const retried = await safeFetch(url, init);
+        return handleClientErrors(retried, url, init, true);
+      }
+    }
 
     tokenStore.clear();
     throw new ApiError(ERROR_CODES.UNAUTHORIZED, "Session expired", 401);
