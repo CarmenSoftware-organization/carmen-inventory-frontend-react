@@ -116,11 +116,17 @@ export async function logout(): Promise<void> {
   const refresh_token = refreshTokenStorage.get() ?? "";
   clearSession();
 
-  if (!accessToken) return;
+  // ยิง revoke เมื่อมี token อย่างใดอย่างหนึ่ง — ถ้า gate ด้วย accessToken อย่างเดียว
+  // กรณี access token ว่าง (mid-refresh / หลัง 401) จะข้าม revoke ทำให้ refresh
+  // token ยัง valid อยู่ฝั่ง server
+  if (!accessToken && !refresh_token) return;
   try {
     await fetch(`${BACKEND_URL}/api/auth/logout`, {
       method: "POST",
-      headers: { ...authHeaders(), Authorization: `Bearer ${accessToken}` },
+      headers: {
+        ...authHeaders(),
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
       body: JSON.stringify({ refresh_token }),
       signal: AbortSignal.timeout(5_000),
     });

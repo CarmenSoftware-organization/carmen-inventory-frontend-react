@@ -42,9 +42,22 @@ export function I18nProvider({
   useEffect(() => {
     let cancelled = false;
     const load = messageLoaders[`../messages/${locale}.json`];
-    void load().then((mod) => {
-      if (!cancelled) setMessages(mod.default);
-    });
+    const fallback = messageLoaders[`../messages/${DEFAULT_LOCALE}.json`];
+    void load()
+      .catch(() => {
+        // chunk โหลดไม่ได้ (stale chunk หลัง redeploy บน CDN / network ล้ม) — ถ้า
+        // ไม่ fallback messages จะค้าง null แล้ว provider คืน null = หน้าจอว่าง
+        // ถาวร ลองโหลด default locale chunk แทน
+        if (load === fallback) throw new Error("default locale chunk failed");
+        return fallback();
+      })
+      .then((mod) => {
+        if (!cancelled) setMessages(mod.default);
+      })
+      .catch(() => {
+        // แม้ default ก็โหลดไม่ได้ — ปล่อยให้ messages ค้าง null (โอกาสเกิดน้อยมาก
+        // เพราะ default chunk มักถูก cache ไว้แล้ว) ดีกว่า render ด้วย key ดิบ
+      });
     document.documentElement.lang = locale;
     return () => {
       cancelled = true;

@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Percent } from "lucide-react";
@@ -91,9 +91,11 @@ export function CategoryForm({
     defaultValues,
   });
 
-  useEffect(() => {
-    form.reset(defaultValues);
-  }, [defaultValues, form]);
+  // หมายเหตุ: ไม่มี useEffect(form.reset(defaultValues)) โดยเจตนา — CategoryForm ถูก
+  // mount ใหม่ทุกครั้งที่ dialog เปิด ({open && <CategoryForm/>}) ดังนั้น defaultValues
+  // ของ useForm ตั้งค่าถูกต้องอยู่แล้ว ส่วน effect แบบเดิม (deps มี defaultValues ซึ่ง
+  // เป็น object ใหม่ทุก render) จะ reset ฟอร์มหลัง re-render ทุกครั้ง ลบ input และ
+  // error ที่ผู้ใช้เพิ่งกรอก/เพิ่งเห็นทิ้ง
 
   const handleFormSubmit = (data: CategoryFormValues) => {
     if (

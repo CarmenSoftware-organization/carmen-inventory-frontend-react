@@ -132,6 +132,48 @@ describe("403 handling", () => {
 });
 
 // =========================================================================
+// 401 retry — second 401 after a refresh clears the session
+// =========================================================================
+describe("401 retry handling", () => {
+  it("clears session and throws when the retried request is also 401", async () => {
+    const { refreshTokens } = await import("@/lib/auth/auth-api");
+    (refreshTokens as ReturnType<typeof vi.fn>).mockResolvedValueOnce(true);
+    tokenStore.set("at-stale");
+    // ครั้งแรก 401 → refresh สำเร็จ → retry → 401 อีกครั้ง
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(401))
+      .mockResolvedValueOnce(jsonResponse(401));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      await httpClient.get("/api/proxy/secure");
+      expect.unreachable("should have thrown");
+    } catch (err) {
+      expect(err).toBeInstanceOf(ApiError);
+      expect((err as ApiError).code).toBe("UNAUTHORIZED");
+    }
+    // ไม่ refresh ซ้ำ (เรียกครั้งเดียว) และ session ถูกเคลียร์
+    expect(refreshTokens).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(tokenStore.get()).toBeNull();
+  });
+});
+
+// =========================================================================
+// External public endpoints — auth interception is skipped
+// =========================================================================
+describe("/api/external/* handling", () => {
+  it("returns the raw 401 response instead of throwing/refreshing", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(401));
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await httpClient.get("/api/external/pl/tok-123");
+    // ไม่ throw ApiError และไม่เรียก refresh/retry — คืน response ดิบให้ hook จัดการ
+    expect(res.status).toBe(401);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+// =========================================================================
 // 429 handling
 // =========================================================================
 describe("429 handling", () => {

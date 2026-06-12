@@ -134,7 +134,13 @@ interface DateControlProps {
 
 function DateControl({ node, periods }: DateControlProps) {
   const initial = resolveDateKeyword(node.value, periods);
-  return <DateControlInner name={node.name} initial={initial} />;
+  // key={initial}: periods มาจาก query async — render แรก periods ว่าง ทำให้ field
+  // ที่ใช้ @current_period/@previous_period ได้ initial = "" เมื่อ periods โหลดเสร็จ
+  // initial เปลี่ยน → remount ด้วยค่าใหม่ (เกิดครั้งเดียวก่อนผู้ใช้แก้ เพราะ periods
+  // นิ่งหลังโหลด) ไม่งั้น useState(initial) จะค้างค่าว่างตลอด
+  return (
+    <DateControlInner key={initial} name={node.name} initial={initial} />
+  );
 }
 
 function DateControlInner({
@@ -145,6 +151,7 @@ function DateControlInner({
   readonly initial: string;
 }) {
   // state drives both <FieldDatePicker> และ hidden input ที่ FormData อ่าน
+  // remount ผ่าน key={initial} ที่ parent ทำให้ค่าเริ่มต้นตรงกับ periods ที่โหลดเสร็จ
   const [value, setValue] = useState(initial);
   return (
     <>

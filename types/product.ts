@@ -134,10 +134,10 @@ function createLocationSchema(tv: TranslationFn, tf: TranslationFn) {
     is_active: z.boolean().nullable().optional(),
     delivery_point_id: z.string().nullable().optional(),
     delivery_point: z.string().nullable().optional(),
-    min_qty: z.preprocess((v) => (v === "" || v === undefined || Number.isNaN(v) ? null : Number(v)), z.number().nullable().optional()),
-    max_qty: z.preprocess((v) => (v === "" || v === undefined || Number.isNaN(v) ? null : Number(v)), z.number().nullable().optional()),
-    re_order_qty: z.preprocess((v) => (v === "" || v === undefined || Number.isNaN(v) ? null : Number(v)), z.number().nullable().optional()),
-    par_qty: z.preprocess((v) => (v === "" || v === undefined || Number.isNaN(v) ? null : Number(v)), z.number().nullable().optional()),
+    min_qty: z.preprocess((v) => (v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v)), z.number().nullable().optional()),
+    max_qty: z.preprocess((v) => (v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v)), z.number().nullable().optional()),
+    re_order_qty: z.preprocess((v) => (v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v)), z.number().nullable().optional()),
+    par_qty: z.preprocess((v) => (v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v)), z.number().nullable().optional()),
   });
 }
 

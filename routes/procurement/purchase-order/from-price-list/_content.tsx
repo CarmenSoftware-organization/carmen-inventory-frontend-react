@@ -43,6 +43,7 @@ import {
 import { StepOrderDetails } from "./_components/step-order-details";
 import { StepSelectVendors } from "./_components/step-select-vendors";
 import { StepSelectItems } from "./_components/step-select-items";
+import { recomputeItemFromLocations } from "./_components/recompute-item-pricing";
 import { StepSummary } from "./_components/step-summary";
 
 type Step = 1 | 2 | 3 | 4;
@@ -239,8 +240,15 @@ export function FromPriceListContent() {
       toast.error(tv("formIncomplete"));
       return;
     }
+    // Sync ค่าระดับ item จาก locations ก่อนสร้าง payload — wizard ไม่มี
+    // PoItemComputedSync คอย sync ให้ ค่า qty/amount ระดับ item จึงอาจค้างค่าเดิม
+    const values = form.getValues();
+    const syncedValues = {
+      ...values,
+      items: (values.items ?? []).map(recomputeItemFromLocations),
+    };
     const payload = buildPoPayload(
-      form.getValues(),
+      syncedValues,
       [],
       form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       { po_type: PO_TYPE.PL },

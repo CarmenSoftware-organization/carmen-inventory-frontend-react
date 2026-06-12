@@ -299,6 +299,7 @@
     "formIncomplete": "Please complete all required fields before confirming"
   },
   "field": {
+    "field": "Field",
     "code": "Code",
     "name": "Name",
     "description": "Description",
@@ -3236,6 +3237,7 @@
     "cancelled": "Cancelled"
   },
   "navbar": {
+    "open": "Open",
     "search": "Search...",
     "noDepartment": "No department",
     "logOut": "Log out",

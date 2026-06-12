@@ -125,11 +125,13 @@ export default function StoreRequisitionComponent() {
     sort: params.sort ?? "sr_date:desc",
   };
 
+  // gate แต่ละ query ตาม viewMode ด้วย — ก่อนหน้านี้ทั้งสอง query ยิงพร้อมกันทุก
+  // ครั้งที่ search/filter/page เปลี่ยน ทั้งที่ render แค่อันเดียว (เปลือง network)
   const myPendingQuery = useMyPendingStoreRequisition(queryParams, {
-    enabled: !useInfiniteScroll,
+    enabled: !useInfiniteScroll && viewMode === "my-pending",
   });
   const allDocumentQuery = useStoreRequisition(queryParams, {
-    enabled: !useInfiniteScroll,
+    enabled: !useInfiniteScroll && viewMode !== "my-pending",
   });
 
   const { data, isLoading, error, refetch } =

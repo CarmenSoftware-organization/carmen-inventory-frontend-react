@@ -112,6 +112,9 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             resetImage();
+            // reset baseline ให้ isDirty กลับเป็น false — ไม่งั้น discard dialog
+            // จะเด้งตอน Cancel ทั้งที่ผู้ใช้ save ไปแล้ว
+            form.reset(values);
             setMode("view");
           },
           onError: (err) => toast.error(err.message),
@@ -124,7 +127,10 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             resetImage();
-            setMode("view");
+            // navigate กลับ list เหมือน form อื่นใน operation-plan — ถ้าค้างที่หน้า
+            // /new toolbar จะโชว์ Edit แล้วกด Save อีกครั้งจะ create ซ้ำ (equipment
+            // prop ยัง undefined)
+            router.push("/operation-plan/equipment");
           },
           onError: (err) => toast.error(err.message),
         },

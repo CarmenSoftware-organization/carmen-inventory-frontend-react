@@ -128,4 +128,20 @@ describe("auth-api", () => {
     expect(refreshTokenStorage.get()).toBeNull();
     expect(fetchMock.mock.calls[0][0]).toBe("https://api.test/api/auth/logout");
   });
+
+  it("logout still revokes server-side when only the refresh token is present", async () => {
+    // access token ว่าง (เช่น mid-refresh / หลัง 401 เคลียร์ tokenStore)
+    refreshTokenStorage.set("rt-1");
+    const fetchMock = vi.fn().mockResolvedValue(okJson({}));
+    vi.stubGlobal("fetch", fetchMock);
+    await logout();
+    expect(refreshTokenStorage.get()).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toBe("https://api.test/api/auth/logout");
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(JSON.parse(init.body as string)).toEqual({ refresh_token: "rt-1" });
+    expect(
+      (init.headers as Record<string, string>).Authorization,
+    ).toBeUndefined();
+  });
 });

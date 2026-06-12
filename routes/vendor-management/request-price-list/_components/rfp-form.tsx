@@ -220,7 +220,10 @@ export function RequestPriceListForm({
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            form.reset(values);
+            // เคลียร์ delta vendors.add/remove หลัง save สำเร็จ — refetch ทำให้
+            // existingVendors มี vendor ที่เพิ่งเพิ่มแล้ว ถ้ายังค้าง add ไว้ใน form
+            // จะ render ซ้ำใน view mode และ Save รอบถัดไปจะ re-send สร้าง vendor ซ้ำ
+            form.reset({ ...values, vendors: { add: [], remove: [] } });
             setMode("view");
           },
           onError: (err) => toast.error(err.message),

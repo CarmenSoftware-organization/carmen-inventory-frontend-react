@@ -71,7 +71,12 @@ export default function ApprovalComponent() {
     useApprovalPendingSummary();
 
   const items = data?.data ?? [];
-  const totalRecords = items.length;
+  // ใช้ total ที่แท้จริงจาก summary endpoint (มี total/pr/po/sr) ตาม activeType แทน
+  // items.length (ความยาวของหน้าปัจจุบัน) — ไม่งั้น pageCount = 1 เสมอ approver เลื่อน
+  // หน้าไม่ได้ ส่วนกรณี search เป็น client-side filter จึงไม่รู้ total จริง ใช้ length
+  const totalRecords = search
+    ? items.length
+    : (summary?.[activeType as keyof ApprovalPendingSummary] ?? items.length);
 
   if (error)
     return <ErrorState message={error.message} onRetry={() => refetch()} />;
