@@ -215,10 +215,16 @@ export default function WorkflowComponent() {
 
       <div className="mt-3 space-y-3">
         {isMobile && grid.isLoading && <CardSkeletonGrid />}
-        {isMobile && !grid.isLoading && workflows.length === 0 && (
+        {isMobile && !grid.isLoading && grid.error && (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
+        )}
+        {isMobile && !grid.isLoading && !grid.error && workflows.length === 0 && (
           <EmptyComponent />
         )}
-        {isMobile && !grid.isLoading && workflows.length > 0 && (
+        {isMobile && !grid.isLoading && !grid.error && workflows.length > 0 && (
           <>
             <div className="grid grid-cols-1 gap-3">
               {workflows.map((wf, i) => (

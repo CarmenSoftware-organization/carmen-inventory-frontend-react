@@ -249,6 +249,11 @@ export default function UserComponent() {
       {isMobile ? (
         grid.isLoading ? (
           <CardSkeletonGrid />
+        ) : grid.error ? (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
         ) : users.length > 0 ? (
           <>
             <div className="grid grid-cols-1 gap-3">

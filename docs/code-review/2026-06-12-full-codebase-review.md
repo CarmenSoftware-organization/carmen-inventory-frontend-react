@@ -4,7 +4,7 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 
 ## Summary
 
-- **Confirmed findings:** 54 — **29 fixed**, 25 backlog
+- **Confirmed findings:** 54 — **33 fixed**, 21 backlog
 - **By severity:** high 12, medium 42
 - **By category:** correctness 50, perf 1, security 3
 - **By effort:** quick-win 29, medium 22, large 3
@@ -67,6 +67,10 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 | 27 | medium | correctness | `routes/system-admin/workflow/[id]/_content.tsx:11` | routes-system-admin | `useUser()` and `useProduct()` are called with no params, so the request goes out without page/perpage and the backend a |
 | 28 | medium | correctness | `types/product.ts:137` | types-utils | createLocationSchema's z.preprocess for min_qty/max_qty/re_order_qty/par_qty checks only `v === "" \|\| v === undefined \|\| |
 | 29 | medium | security | `constant/api-endpoints.ts:188` | types-utils | PRICE_LIST_EXTERNAL and PRICE_LIST_EXTERNAL_CHECK (lines 188-191) interpolate `urlToken` raw into the request path |
+| 30 | medium | correctness | `routes/procurement/credit-note/_components/cn-component.tsx:459` | routes-procurement-b | Desktop grid view had no pagination — split into mobile infinite-scroll + paginated DataGrid grid branch (detail #43) |
+| 31 | medium | correctness | `routes/procurement/purchase-request-template/_components/prt-component.tsx:348` | routes-procurement-b | Same desktop grid-view pagination gap — added paginated DataGrid grid branch (detail #44) |
+| 32 | medium | correctness | `routes/product-management/product/_components/pd-component.tsx:270` | routes-product | Grid/mobile fetch errors swallowed — useGridPagination now surfaces error/refetch; renders ErrorState in grid (detail #45) |
+| 33 | medium | correctness | `routes/system-admin/role/_components/role-component.tsx:67` | routes-system-admin | Grid/mobile fetch errors swallowed across all 8 system-admin lists — each now renders ErrorState with retry (detail #50) |
 
 ## Backlog (not fixed in this pass)
 
@@ -92,14 +96,10 @@ Confirmed but lower priority; left for a follow-up pass.
 | medium | correctness | medium | `routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx:117` | routes-procurement-a | handleAddPicks sets currency_id and currency_code from the picked price list but never sets exchange_rate, which stays at the EMPTY_FORM def |
 | medium | correctness | medium | `routes/procurement/purchase-order/_components/use-po-form-handlers.ts:164` | routes-procurement-a | handleSubmitPo first saves a dirty form via updatePo.mutateAsync (which may add new detail rows), then runSubmitPo builds the submit details |
 | medium | correctness | medium | `routes/procurement/credit-note/_components/cn-form.tsx:92` | routes-procurement-b | After a successful update the form is never reset with the refetched server state (mutation invalidates the query and the `creditNote` prop  |
-| medium | correctness | medium | `routes/procurement/credit-note/_components/cn-component.tsx:459` | routes-procurement-b | On desktop, switching to grid view renders `CnCardList` with only the current page of server-paginated data and no pagination control (`Data |
-| medium | correctness | medium | `routes/procurement/purchase-request-template/_components/prt-component.tsx:348` | routes-procurement-b | Same desktop grid-view pagination gap as the credit-note list: in grid mode the PRT cards render only the current server page (`templates` c |
-| medium | correctness | medium | `routes/product-management/product/_components/pd-component.tsx:270` | routes-product | Error handling only covers desktop list mode: `if (error) return <ErrorState .../>` uses the error from useProduct, which is disabled when i |
 | medium | correctness | medium | `routes/external/pl/_components/price-list-external-product-table.tsx:138` | routes-report | Edit mode lets the vendor edit item-level price, moq_qty, price_without_tax, tax_amt and lead_time_days (handleItemFieldChange marks the for |
 | medium | correctness | medium | `routes/store-operation/store-requisition/_components/sr-component.tsx:138` | routes-store-operation | Mobile infinite scroll mixes the two document lists |
 | medium | correctness | large | `hooks/use-wastage-report.ts:11` | routes-store-operation | The entire wastage-reporting module (routes/store-operation/wastage-reporting list, [id] and new pages) is backed by mock data (`wrMockData` |
 | medium | correctness | large | `routes/store-operation/stock-replenishment/_components/stock-repl-component.tsx:145` | routes-store-operation | `handleCreatePR` and `handleCreateSR` are no-ops: they call `getSelectedProducts()` and discard the result |
-| medium | correctness | medium | `routes/system-admin/role/_components/role-component.tsx:67` | routes-system-admin | On mobile/infinite-scroll, fetch errors are silently swallowed across all system-admin list pages |
 | medium | correctness | medium | `routes/vendor-management/vendor/_components/vendor-form.tsx:207` | routes-vendor | After a successful update, form.reset(values) keeps newly added address/contact rows in form state without ids (the byId refetch updates the |
 | medium | correctness | medium | `routes/vendor-management/price-list/_components/pl-form.tsx:151` | routes-vendor | Same stale-reset pattern as vendor-form/rfp-form: on update success form.reset(values) keeps new pricelist_detail rows without ids while the |
 | medium | correctness | large | `routes/vendor-management/price-list-template/_components/use-plt-form-actions.ts:62` | routes-vendor | Template edit only ever sends products: { add: <entire flattened list> } when details are dirty, and sends products: {} when the user has re |
@@ -427,32 +427,32 @@ After a successful update the form is never reset with the refetched server stat
 
 **Backlog reason:** effort=medium — deferred (not fixed in this pass)
 
-### 43. [MEDIUM/correctness] `routes/procurement/credit-note/_components/cn-component.tsx:459` — 📋 backlog
+### 43. [MEDIUM/correctness] `routes/procurement/credit-note/_components/cn-component.tsx:459` — ✅ fixed
 *zone: routes-procurement-b · effort: medium · confidence: 0.65*
 
 On desktop, switching to grid view renders `CnCardList` with only the current page of server-paginated data and no pagination control (`DataGridPagination` is rendered only in the `!isGridMode` list branch; the sentinel/infinite-scroll only activates on mobile via `useInfiniteScroll = !!isMobile`). Desktop grid users can never see past page 1. The GRN list (grn-component.tsx lines 487-514) implements a third branch wrapping the card list in DataGrid + DataGridPagination for exactly this case, so this looks like an omission rather than a design choice.
 
 **Suggested fix:** Mirror grn-component.tsx: add an `isGridMode && !useInfiniteScroll` branch that wraps CnCardList in DataGrid/DataGridContainer with DataGridPagination.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** Split the grid branch into `isGridMode && useInfiniteScroll` (mobile cards + sentinel) and `isGridMode && !useInfiniteScroll` (DataGrid + DataGridPagination wrapping CnCardList), mirroring grn-component (branch `review/backlog-cluster-fixes`).
 
-### 44. [MEDIUM/correctness] `routes/procurement/purchase-request-template/_components/prt-component.tsx:348` — 📋 backlog
+### 44. [MEDIUM/correctness] `routes/procurement/purchase-request-template/_components/prt-component.tsx:348` — ✅ fixed
 *zone: routes-procurement-b · effort: medium · confidence: 0.6*
 
 Same desktop grid-view pagination gap as the credit-note list: in grid mode the PRT cards render only the current server page (`templates` comes from a paginated query when not on mobile), and the infinite-scroll sentinel only renders when `useInfiniteScroll` (mobile). Desktop grid mode has no DataGridPagination, so records beyond page 1 are unreachable in that view.
 
 **Suggested fix:** Add a paginated desktop grid branch (DataGrid + DataGridPagination wrapping the card grid) as done in grn-component.tsx.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** Added the `isGridMode && !useInfiniteScroll` paginated grid branch wrapping the PRT card grid in DataGrid + DataGridPagination (branch `review/backlog-cluster-fixes`).
 
-### 45. [MEDIUM/correctness] `routes/product-management/product/_components/pd-component.tsx:270` — 📋 backlog
+### 45. [MEDIUM/correctness] `routes/product-management/product/_components/pd-component.tsx:270` — ✅ fixed
 *zone: routes-product · effort: medium · confidence: 0.8*
 
 Error handling only covers desktop list mode: `if (error) return <ErrorState .../>` uses the error from useProduct, which is disabled when isGridMode (mobile or grid toggle). useGridPagination (hooks/use-grid-pagination.ts) never surfaces the underlying query's error — its return object has no error field. So on mobile/grid view a failed product fetch silently renders <EmptyComponent /> ("no products") with no error message or retry, which is misleading.
 
 **Suggested fix:** Extend useGridPagination to pass through error/refetch from the list hook and render ErrorState in grid mode too (grid.error ? <ErrorState .../> : ...). This affects every module using the hook, so fixing it in the hook benefits all list pages.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** `useGridPagination` now returns `error`/`refetch`; pd-component renders ErrorState (with retry) in its grid branch (branch `review/backlog-cluster-fixes`). See also #50 for the system-admin lists sharing the same hook.
 
 ### 46. [MEDIUM/correctness] `routes/external/pl/_components/price-list-external-product-table.tsx:138` — 📋 backlog
 *zone: routes-report · effort: medium · confidence: 0.45*
@@ -490,14 +490,14 @@ The entire wastage-reporting module (routes/store-operation/wastage-reporting li
 
 **Backlog reason:** effort=large — deferred (not fixed in this pass)
 
-### 50. [MEDIUM/correctness] `routes/system-admin/role/_components/role-component.tsx:67` — 📋 backlog
+### 50. [MEDIUM/correctness] `routes/system-admin/role/_components/role-component.tsx:67` — ✅ fixed
 *zone: routes-system-admin · effort: medium · confidence: 0.75*
 
 On mobile/infinite-scroll, fetch errors are silently swallowed across all system-admin list pages. The desktop query is disabled (`enabled: !useInfiniteScroll`) so `error` is always null on mobile, and `useGridPagination` (hooks/use-grid-pagination.ts) does not expose an error at all — it returns only items/isLoading/hasMore. A failed list request on mobile renders EmptyComponent ("no data") with no retry, instead of ErrorState. This affects role, user, workflow, period, document, running-code, activity-log and user-activity components identically.
 
 **Suggested fix:** Surface `error`/`refetch` from the underlying query in useGridPagination and render ErrorState in the mobile branch of each list component (or at least in the shared hook consumers).
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** Wired the grid `error`/`refetch` (from #45's hook change) into all eight system-admin list components — role, user, workflow, period, document, running-code, activity-log and user-activity — each now renders ErrorState with retry in its grid/mobile branch (branch `review/backlog-cluster-fixes`).
 
 ### 51. [MEDIUM/correctness] `routes/vendor-management/vendor/_components/vendor-form.tsx:207` — 📋 backlog
 *zone: routes-vendor · effort: medium · confidence: 0.6*

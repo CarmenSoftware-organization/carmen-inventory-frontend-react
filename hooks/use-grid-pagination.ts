@@ -12,6 +12,8 @@ interface UseGridPaginationOptions<T> {
   ) => {
     data: PaginatedResponse<T> | undefined;
     isLoading: boolean;
+    error?: Error | null;
+    refetch?: () => unknown;
   };
   params: ParamsDto;
   enabled: boolean;
@@ -22,7 +24,7 @@ interface UseGridPaginationOptions<T> {
  * ใช้ IntersectionObserver ตรวจจับ sentinel element เพื่อโหลดหน้าถัดไป
  * รีเซ็ตรายการเมื่อ filter/search เปลี่ยน และ dedupe ตาม id ของ item
  * @param options - object ประกอบด้วย useListHook, params และ enabled
- * @returns object ประกอบด้วย items, totalRecords, isLoading, isLoadingMore, hasMore และ sentinelRef
+ * @returns object ประกอบด้วย items, totalRecords, isLoading, isLoadingMore, hasMore, sentinelRef, error และ refetch
  * @example
  * const { items, hasMore, sentinelRef, isLoadingMore } = useGridPagination({
  *   useListHook: useVendor,
@@ -55,7 +57,7 @@ export function useGridPagination<T>({
     ? { ...params, page, perpage: params.perpage ?? 20 }
     : undefined;
 
-  const { data, isLoading } = useListHook(gridParams, {
+  const { data, isLoading, error, refetch } = useListHook(gridParams, {
     enabled,
   });
 
@@ -123,5 +125,7 @@ export function useGridPagination<T>({
     isLoadingMore: isLoading && page > 1,
     hasMore,
     sentinelRef,
+    error: error ?? null,
+    refetch,
   };
 }

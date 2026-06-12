@@ -456,14 +456,14 @@ export default function CnComponent() {
           </DataGrid>
         )}
 
-        {isGridMode && (
+        {isGridMode && useInfiniteScroll && (
           <>
             <CnCardList
               items={creditNotes}
-              isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
+              isLoading={grid.isLoading}
               onEdit={(cn) => router.push(`/procurement/credit-note/${cn.id}`)}
             />
-            {useInfiniteScroll && grid.hasMore && (
+            {grid.hasMore && (
               <div ref={grid.sentinelRef} className="flex justify-center py-4">
                 {grid.isLoadingMore && (
                   <Loader2 className="text-muted-foreground size-5 animate-spin" />
@@ -471,6 +471,35 @@ export default function CnComponent() {
               </div>
             )}
           </>
+        )}
+
+        {isGridMode && !useInfiniteScroll && (
+          <DataGrid
+            table={table}
+            recordCount={totalRecords}
+            isLoading={isLoading}
+            tableLayout={{ headerSticky: true }}
+          >
+            <DataGridContainer
+              className={cn(
+                "flex flex-col",
+                activeFilters.length > 0
+                  ? "max-h-[calc(100vh-13rem-3rem)]"
+                  : "max-h-[calc(100vh-10rem-3rem)]",
+              )}
+            >
+              <div className="flex-1 overflow-auto p-3">
+                <CnCardList
+                  items={creditNotes}
+                  isLoading={isLoading}
+                  onEdit={(cn) =>
+                    router.push(`/procurement/credit-note/${cn.id}`)
+                  }
+                />
+              </div>
+              <DataGridPagination />
+            </DataGridContainer>
+          </DataGrid>
         )}
       </div>
 

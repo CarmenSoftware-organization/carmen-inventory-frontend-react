@@ -509,7 +509,13 @@ export default function ProductComponent() {
       <div className="mt-3 space-y-3">
         {/* Content */}
         {isGridMode && grid.isLoading && <CardSkeletonGrid />}
-        {isGridMode && !grid.isLoading && products.length > 0 && (
+        {isGridMode && !grid.isLoading && grid.error && (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
+        )}
+        {isGridMode && !grid.isLoading && !grid.error && products.length > 0 && (
           <>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {products.map((item, i) => (
@@ -532,7 +538,7 @@ export default function ProductComponent() {
             )}
           </>
         )}
-        {isGridMode && !grid.isLoading && products.length === 0 && (
+        {isGridMode && !grid.isLoading && !grid.error && products.length === 0 && (
           <EmptyComponent />
         )}
         {!isGridMode && (

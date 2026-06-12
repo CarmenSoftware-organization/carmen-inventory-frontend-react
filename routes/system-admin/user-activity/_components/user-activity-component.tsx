@@ -426,6 +426,11 @@ export default function UserActivityComponent() {
       {useInfiniteScroll &&
         (grid.isLoading ? (
           <ActivityCardSkeletonGrid />
+        ) : grid.error ? (
+          <ErrorState
+            message={grid.error.message}
+            onRetry={() => grid.refetch?.()}
+          />
         ) : logs.length === 0 ? (
           <EmptyComponent />
         ) : (
