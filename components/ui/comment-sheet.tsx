@@ -332,6 +332,9 @@ export function CommentSheet({
   };
 
   const handleSubmit = async () => {
+    // กัน double-submit จากการกด Enter รัว ๆ ระหว่าง mutation ยัง in-flight
+    // (ปุ่ม Send disabled อยู่แล้ว แต่ Enter handler เรียกตรงนี้)
+    if (isSubmitting || isUploading) return;
     const totalFiles = directFileUpload
       ? pendingRawFiles.length
       : pendingFiles.length;
@@ -362,6 +365,7 @@ export function CommentSheet({
   };
 
   const handleUpdate = async (c: CommentItem) => {
+    if (isUpdating) return; // กัน double-submit จาก Enter ใน edit mode
     if (!editMessage.trim()) return;
     try {
       await onUpdate({

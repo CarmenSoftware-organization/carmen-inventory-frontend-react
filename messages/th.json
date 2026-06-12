@@ -299,6 +299,7 @@
     "formIncomplete": "กรุณากรอกข้อมูลให้ครบก่อนยืนยัน"
   },
   "field": {
+    "field": "ฟิลด์",
     "code": "รหัส",
     "name": "ชื่อ",
     "description": "คำอธิบาย",
@@ -3225,6 +3226,7 @@
     "cancelled": "ยกเลิก"
   },
   "navbar": {
+    "open": "เปิด",
     "search": "ค้นหา...",
     "noDepartment": "ไม่มีแผนก",
     "logOut": "ออกจากระบบ",
