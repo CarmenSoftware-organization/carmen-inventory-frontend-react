@@ -53,7 +53,9 @@ export default function RoleComponent() {
   const tt = useTranslations("toast");
 
   const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
-  const totalRecords = useInfiniteScroll ? grid.totalRecords : items.length;
+  const totalRecords = useInfiniteScroll
+    ? grid.totalRecords
+    : (data?.paginate?.total ?? 0);
 
   const table = useRoleTable({
     items,
