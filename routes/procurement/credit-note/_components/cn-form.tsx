@@ -82,22 +82,29 @@ export function CnForm({ creditNote }: CnFormProps) {
 
   // After a successful edit-save the update mutation invalidates the
   // CREDIT_NOTES query prefix, so useCreditNoteById refetches and the
-  // `creditNote` prop comes back with the server's new doc_version (header +
-  // per-item). Re-sync the form to it while in view mode so a second
+  // `creditNote` prop comes back with the server's new doc_version + per-item
+  // ids/doc_versions. Re-sync the form to it while in view mode so a second
   // consecutive edit carries the current doc_version instead of the stale
   // pre-save one (which optimistic locking would reject / mis-merge).
   //
-  // Keyed ONLY on doc_version (+ id), NOT on `mode`: keying on mode would fire
-  // this on the edit→view transition before the refetch lands — resetting to
-  // the still-stale prop and dropping any just-added item from view until the
-  // refetch arrives. doc_version changes only when the server entity actually
-  // updates, so this fires exactly once the fresh data is in.
+  // Keyed on a signature of header doc_version + each item (id:doc_version),
+  // NOT on `mode`. Two reasons: (1) keying on mode would fire on the edit→view
+  // transition before the refetch lands — resetting to the still-stale prop and
+  // dropping any just-added item from view; (2) the item signature also catches
+  // a newly-added item getting its server id even if the header doc_version
+  // stayed put (observed as 0 on the dev backend, so not relied on alone).
+  const cnSyncKey = [
+    creditNote?.doc_version ?? "",
+    ...(creditNote?.credit_note_detail ?? []).map(
+      (d) => `${d.id}:${d.doc_version}`,
+    ),
+  ].join("|");
   useEffect(() => {
     if (mode === "view" && creditNote) {
       form.reset(getDefaultValues(creditNote));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode read intentionally without retriggering
-  }, [creditNote?.doc_version, creditNote?.id]);
+  }, [cnSyncKey, creditNote?.id]);
 
   const onSubmit = (values: CnFormValues) => {
     const items = buildItemChanges(

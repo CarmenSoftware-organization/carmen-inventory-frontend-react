@@ -124,10 +124,16 @@ export function VendorForm({ vendor }: VendorFormProps) {
   // consecutive edit does not re-send those rows as new (buildNestedPayload
   // keys add-vs-update on id presence → would create duplicates server-side).
   //
-  // Keyed ONLY on updated_at (+ id), NOT on `mode`: keying on mode would fire
-  // on the edit→view transition before the refetch lands, resetting to the
-  // stale prop and momentarily dropping the just-added rows. updated_at changes
-  // only when the server entity actually updates.
+  // Keyed on a signature of the address/contact ids (the GET response carries
+  // no top-level updated_at — the timestamp lives under `audit`, which is not
+  // on the typed shape), NOT on `mode`: the signature changes exactly when rows
+  // are added/removed (the cases the stale-id bug bites), and keying off mode
+  // would fire on the edit→view transition before the refetch lands, resetting
+  // to the stale prop and momentarily dropping the just-added rows.
+  const vendorSyncKey = [
+    ...(vendor?.vendor_address ?? []).map((a) => a.id ?? ""),
+    ...(vendor?.vendor_contact ?? []).map((c) => c.id ?? ""),
+  ].join("|");
   useEffect(() => {
     if (mode === "view" && vendor) {
       form.reset(getDefaultValues(vendor));
@@ -135,7 +141,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
       setRemovedContactIds([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode read intentionally without retriggering
-  }, [vendor?.updated_at, vendor?.id]);
+  }, [vendorSyncKey, vendor?.id]);
 
   const handleRemoveAddress = (index: number) => {
     const id = form.getValues(`vendor_address.${index}.id`);
