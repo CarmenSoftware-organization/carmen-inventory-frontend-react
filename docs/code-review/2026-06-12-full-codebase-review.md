@@ -4,7 +4,7 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 
 ## Summary
 
-- **Confirmed findings:** 54 — **42 fixed**, 12 backlog
+- **Confirmed findings:** 54 — **45 fixed**, 9 backlog
 - **By severity:** high 12, medium 42
 - **By category:** correctness 50, perf 1, security 3
 - **By effort:** quick-win 29, medium 22, large 3
@@ -80,6 +80,9 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 | 40 | medium | correctness | `routes/vendor-management/price-list-template/_components/plt-product-table.tsx:222` | routes-vendor | Stop excluding a row's own product_id so loaded multi-tier (duplicate) rows resolve their label instead of a placeholder (detail #54) |
 | 41 | medium | correctness | `routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx:117` | routes-procurement-a | Resolve the picked currency's exchange_rate via useCurrency instead of leaving the default 1 on a foreign-currency PO; reset to 1 when items cleared (detail #40) |
 | 42 | medium | correctness | `routes/inventory-management/inventory-adjustment/_components/ia-item-table.tsx:86` | routes-inventory | Do not mount the cost probe in view mode — it was overwriting an existing adjustment's saved costs (with shouldDirty) on open (detail #38) |
+| 43 | medium | correctness | `routes/procurement/credit-note/_components/cn-form.tsx:92` | routes-procurement-b | View-mode resync effect (keyed on doc_version) so a second consecutive edit carries the current doc_version, not the stale pre-save one (detail #42) |
+| 44 | medium | correctness | `routes/vendor-management/vendor/_components/vendor-form.tsx:207` | routes-vendor | View-mode resync effect (keyed on updated_at) so newly-added address/contact rows pick up server ids and are not re-sent as new on the next edit (detail #51) |
+| 45 | medium | correctness | `routes/vendor-management/price-list/_components/pl-form.tsx:151` | routes-vendor | View-mode resync effect (keyed on a pricelist_detail id signature, since PriceList has no version field) so new detail rows pick up server ids (detail #52) |
 
 ## Backlog (not fixed in this pass)
 
@@ -97,12 +100,9 @@ Confirmed but lower priority; left for a follow-up pass.
 
 | sev | cat | effort | file:line | zone | description |
 |---|---|---|---|---|---|
-| medium | correctness | medium | `routes/procurement/credit-note/_components/cn-form.tsx:92` | routes-procurement-b | After a successful update the form is never reset with the refetched server state (mutation invalidates the query and the `creditNote` prop  |
 | medium | correctness | medium | `routes/external/pl/_components/price-list-external-product-table.tsx:138` | routes-report | Edit mode lets the vendor edit item-level price, moq_qty, price_without_tax, tax_amt and lead_time_days (handleItemFieldChange marks the for |
 | medium | correctness | large | `hooks/use-wastage-report.ts:11` | routes-store-operation | The entire wastage-reporting module (routes/store-operation/wastage-reporting list, [id] and new pages) is backed by mock data (`wrMockData` |
 | medium | correctness | large | `routes/store-operation/stock-replenishment/_components/stock-repl-component.tsx:145` | routes-store-operation | `handleCreatePR` and `handleCreateSR` are no-ops: they call `getSelectedProducts()` and discard the result |
-| medium | correctness | medium | `routes/vendor-management/vendor/_components/vendor-form.tsx:207` | routes-vendor | After a successful update, form.reset(values) keeps newly added address/contact rows in form state without ids (the byId refetch updates the |
-| medium | correctness | medium | `routes/vendor-management/price-list/_components/pl-form.tsx:151` | routes-vendor | Same stale-reset pattern as vendor-form/rfp-form: on update success form.reset(values) keeps new pricelist_detail rows without ids while the |
 | medium | correctness | large | `routes/vendor-management/price-list-template/_components/use-plt-form-actions.ts:62` | routes-vendor | Template edit only ever sends products: { add: <entire flattened list> } when details are dirty, and sends products: {} when the user has re |
 
 ## Finding detail (confirmed)
@@ -418,14 +418,14 @@ handleSubmitPo first saves a dirty form via updatePo.mutateAsync (which may add 
 
 **Fixed:** `runSubmitPo` now accepts the saved detail rows; `handleSubmitPo` passes `saved.data.purchase_order_detail` from the updatePo response, falling back to the prop only when no save happened or the response carries no detail list — so the fix is strictly an improvement even if the backend response shape differs (branch `review/backlog-behavior-fixes`).
 
-### 42. [MEDIUM/correctness] `routes/procurement/credit-note/_components/cn-form.tsx:92` — 📋 backlog
+### 42. [MEDIUM/correctness] `routes/procurement/credit-note/_components/cn-form.tsx:92` — ✅ fixed
 *zone: routes-procurement-b · effort: medium · confidence: 0.5*
 
 After a successful update the form is never reset with the refetched server state (mutation invalidates the query and the `creditNote` prop refreshes, but `useForm` keeps the original values). The payload includes `doc_version: values.doc_version`, which still holds the pre-save version. A second consecutive edit+save in the same session therefore sends a stale doc_version (and stale per-item doc_versions via mapItemToPayload), which will fail or mis-merge if the backend enforces optimistic locking. The same pattern exists in the GRN form (use-grn-form-actions.ts onSubmit edit path sends stale item doc_versions; header doc_version is silently dropped because it is not in headerKeys).
 
 **Suggested fix:** On update success, `form.reset(getDefaultValues(freshData))` once the refetched entity arrives (e.g. useEffect keyed on creditNote.doc_version calling form.reset when in view mode), so subsequent edits carry the current doc_version values.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** Added the suggested view-mode `useEffect` keyed on `creditNote.doc_version` (+ id) that calls `form.reset(getDefaultValues(creditNote))` once the refetch lands. Keyed on doc_version (not `mode`) so it cannot fire on the edit→view transition before the refetch and drop a just-added item. Safe by construction (client-only re-sync); no-op if the backend returns no new doc_version (branch `review/backlog-cluster-c-fixes`). GRN's equivalent stale-version path is separate and left in backlog. Live-backend smoke test of the double-save flow still recommended.
 
 ### 43. [MEDIUM/correctness] `routes/procurement/credit-note/_components/cn-component.tsx:459` — ✅ fixed
 *zone: routes-procurement-b · effort: medium · confidence: 0.65*
@@ -499,23 +499,23 @@ On mobile/infinite-scroll, fetch errors are silently swallowed across all system
 
 **Fixed:** Wired the grid `error`/`refetch` (from #45's hook change) into all eight system-admin list components — role, user, workflow, period, document, running-code, activity-log and user-activity — each now renders ErrorState with retry in its grid/mobile branch (branch `review/backlog-cluster-fixes`).
 
-### 51. [MEDIUM/correctness] `routes/vendor-management/vendor/_components/vendor-form.tsx:207` — 📋 backlog
+### 51. [MEDIUM/correctness] `routes/vendor-management/vendor/_components/vendor-form.tsx:207` — ✅ fixed
 *zone: routes-vendor · effort: medium · confidence: 0.6*
 
 After a successful update, form.reset(values) keeps newly added address/contact rows in form state without ids (the byId refetch updates the vendor prop, but the form is never re-initialized from it). If the user clicks Edit again and saves, buildNestedPayload classifies those rows as add (filter !item.id) and re-sends them, duplicating addresses/contacts on the backend.
 
 **Suggested fix:** After update success, re-initialize the form from the refetched vendor (e.g., useEffect that calls form.reset(getDefaultValues(vendor)) while in view mode), instead of form.reset(values).
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** Added a view-mode `useEffect` keyed on `vendor.updated_at` (+ id) that calls `form.reset(getDefaultValues(vendor))` and clears the removed-id state once the refetch lands. Keyed on updated_at (not `mode`) to avoid resetting to the stale prop on the edit→view transition (branch `review/backlog-cluster-c-fixes`).
 
-### 52. [MEDIUM/correctness] `routes/vendor-management/price-list/_components/pl-form.tsx:151` — 📋 backlog
+### 52. [MEDIUM/correctness] `routes/vendor-management/price-list/_components/pl-form.tsx:151` — ✅ fixed
 *zone: routes-vendor · effort: medium · confidence: 0.55*
 
 Same stale-reset pattern as vendor-form/rfp-form: on update success form.reset(values) keeps new pricelist_detail rows without ids while the byId refetch gives those rows server ids in the priceList prop. On the next edit-save, submitUpdate's buildItemChanges compares form values against freshly recomputed defaultValues (which now include the server rows): the id-less form rows go into add again, and the server-created rows (ids present in defaults but absent from form values) go into remove — so a second save deletes and recreates detail rows (id churn) or duplicates them depending on backend behavior.
 
 **Suggested fix:** Re-initialize the form from the refetched priceList after a successful update (form.reset(getDefaultValues(priceList, ...)) once the query settles) rather than form.reset(values).
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** Added a view-mode `useEffect` that calls `form.reset(getDefaultValues(priceList, { defaultCurrencyId }))` once the refetch lands. PriceList carries no version field, so it is keyed on a signature of the `pricelist_detail` ids — which changes precisely when rows are added/removed (the cases that trigger the id-churn) — not on `mode` (branch `review/backlog-cluster-c-fixes`).
 
 ### 53. [MEDIUM/correctness] `routes/vendor-management/price-list-template/_components/use-plt-form-actions.ts:62` — 📋 backlog
 *zone: routes-vendor · effort: large · confidence: 0.5*
