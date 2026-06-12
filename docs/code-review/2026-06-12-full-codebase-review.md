@@ -4,7 +4,7 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 
 ## Summary
 
-- **Confirmed findings:** 54 — **33 fixed**, 21 backlog
+- **Confirmed findings:** 54 — **37 fixed**, 17 backlog
 - **By severity:** high 12, medium 42
 - **By category:** correctness 50, perf 1, security 3
 - **By effort:** quick-win 29, medium 22, large 3
@@ -71,6 +71,10 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 | 31 | medium | correctness | `routes/procurement/purchase-request-template/_components/prt-component.tsx:348` | routes-procurement-b | Same desktop grid-view pagination gap — added paginated DataGrid grid branch (detail #44) |
 | 32 | medium | correctness | `routes/product-management/product/_components/pd-component.tsx:270` | routes-product | Grid/mobile fetch errors swallowed — useGridPagination now surfaces error/refetch; renders ErrorState in grid (detail #45) |
 | 33 | medium | correctness | `routes/system-admin/role/_components/role-component.tsx:67` | routes-system-admin | Grid/mobile fetch errors swallowed across all 8 system-admin lists — each now renders ErrorState with retry (detail #50) |
+| 34 | medium | correctness | `components/keyboard-shortcuts-dialog.tsx:20` | components-app | Removed advertised g-prefix/n shortcuts that had no handler; kept only the implemented ? / Esc entries (detail #32) |
+| 35 | medium | correctness | `components/ui/tree-product-lookup.tsx:119` | components-ui | Path-qualified sub-category/item-group node ids so the shared "uncategorized" fallback no longer collides across parents (detail #33) |
+| 36 | medium | correctness | `scripts/deploy-s3.sh:24` | config-build | Mitigated via main.tsx `vite:preloadError` reload listener so stale sessions self-heal after a deploy (detail #35) |
+| 37 | medium | correctness | `hooks/use-navigation-guard.ts:70` | hooks | Pop the leaked same-URL sentinel history entry on teardown when still on top; fixed stale Next.js comment (detail #36) |
 
 ## Backlog (not fixed in this pass)
 
@@ -88,10 +92,6 @@ Confirmed but lower priority; left for a follow-up pass.
 
 | sev | cat | effort | file:line | zone | description |
 |---|---|---|---|---|---|
-| medium | correctness | medium | `components/keyboard-shortcuts-dialog.tsx:20` | components-app | The dialog advertises shortcuts that are not implemented anywhere in the codebase: "g d" (Dashboard), "g p" (Purchase Request), "g o" (Purch |
-| medium | correctness | medium | `components/ui/tree-product-lookup.tsx:119` | components-ui | buildTree uses the shared fallback id "uncategorized" for missing category/sub_category/item_group |
-| medium | correctness | medium | `scripts/deploy-s3.sh:24` | config-build | `aws s3 sync --delete` (and `--delete-unmatched-destination-objects` in deploy-gcs.sh:23) removes all previous hashed chunks the moment a ne |
-| medium | correctness | medium | `hooks/use-navigation-guard.ts:70` | hooks | When `enabled` becomes true the effect pushes a sentinel history entry (window.history.pushState({ __navGuard: true }, "")), but the cleanup |
 | medium | correctness | medium | `routes/inventory-management/inventory-adjustment/_components/ia-item-table.tsx:86` | routes-inventory | Cost probes overwrite persisted document values, including in view mode |
 | medium | correctness | medium | `routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx:117` | routes-procurement-a | handleAddPicks sets currency_id and currency_code from the picked price list but never sets exchange_rate, which stays at the EMPTY_FORM def |
 | medium | correctness | medium | `routes/procurement/purchase-order/_components/use-po-form-handlers.ts:164` | routes-procurement-a | handleSubmitPo first saves a dirty form via updatePo.mutateAsync (which may add new detail rows), then runSubmitPo builds the submit details |
@@ -328,23 +328,23 @@ PRICE_LIST_EXTERNAL and PRICE_LIST_EXTERNAL_CHECK (lines 188-191) interpolate `u
 
 **Suggested fix:** Wrap urlToken with the existing toSafePathSegment: `PRICE_LIST_EXTERNAL: (urlToken) => `/api/external/api/pricelist-external/${toSafePathSegment(urlToken)}`` and same for PRICE_LIST_EXTERNAL_CHECK. Consider applying it to other id segments for defense in depth.
 
-### 32. [MEDIUM/correctness] `components/keyboard-shortcuts-dialog.tsx:20` — 📋 backlog
+### 32. [MEDIUM/correctness] `components/keyboard-shortcuts-dialog.tsx:20` — ✅ fixed
 *zone: components-app · effort: medium · confidence: 0.85*
 
 The dialog advertises shortcuts that are not implemented anywhere in the codebase: "g d" (Dashboard), "g p" (Purchase Request), "g o" (Purchase Order), "g r" (GRN) and "n" (Create new). Grep across components/routes/hooks/lib finds no handler for these key sequences — only "?" and "/" are handled in this file, and Cmd/Ctrl+K in module-app.tsx. Users pressing the documented shortcuts get no response. Additionally all dialog strings are hardcoded English while the rest of the app is i18n'd via use-intl.
 
 **Suggested fix:** Either implement the g-prefix navigation and "n" shortcuts (a small useEffect keydown state machine with useNavigate), or remove the unimplemented entries from SHORTCUTS. Move strings to messages/{en,th}.json.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** Removed the five unimplemented entries (g d/p/o/r, n); SHORTCUTS now lists only the live ? / / / Esc handlers (branch `review/backlog-deferred-fixes`). i18n of the dialog strings left as a separate, lower-priority polish item.
 
-### 33. [MEDIUM/correctness] `components/ui/tree-product-lookup.tsx:119` — 📋 backlog
+### 33. [MEDIUM/correctness] `components/ui/tree-product-lookup.tsx:119` — ✅ fixed
 *zone: components-ui · effort: medium · confidence: 0.65*
 
 buildTree uses the shared fallback id "uncategorized" for missing category/sub_category/item_group. leafIdsMap is keyed by node.id only, so when two different categories both contain an "uncategorized" sub-category (or item group), `map.set` overwrites the earlier entry — the group checkbox state (getCheckState) and toggleGroup for one category's Uncategorized node then operate on the OTHER category's products. Expand/collapse state (expandedIds keyed by the same id) also toggles all "uncategorized" nodes at once.
 
 **Suggested fix:** Make node ids path-qualified, e.g. `${catId}/${subCatId}` and `${catId}/${subCatId}/${groupId}`, so fallback ids are unique per parent.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** buildTree now assigns `${catId}/${subCatId}` and `${catId}/${subCatId}/${groupId}` node ids (product leaves keep their real id); the find-by-id lookups use the qualified ids, so checkbox/expand state no longer cross-wires between two Uncategorized buckets (branch `review/backlog-deferred-fixes`).
 
 ### 34. [MEDIUM/security] `package.json:48` — 📋 backlog
 *zone: config-build · effort: quick-win · confidence: 0.85*
@@ -355,23 +355,23 @@ The xlsx dependency is fetched as a raw URL tarball from cdn.sheetjs.com, and it
 
 **Backlog reason:** xlsx pinned via cdn.sheetjs.com tarball with no integrity hash — fix is a CI/supply-chain change (vendor the tarball or add checksum verification), out of scope for a code PR
 
-### 35. [MEDIUM/correctness] `scripts/deploy-s3.sh:24` — 📋 backlog
+### 35. [MEDIUM/correctness] `scripts/deploy-s3.sh:24` — ✅ fixed (mitigated)
 *zone: config-build · effort: medium · confidence: 0.8*
 
 `aws s3 sync --delete` (and `--delete-unmatched-destination-objects` in deploy-gcs.sh:23) removes all previous hashed chunks the moment a new build is synced. Every route in routes/router.tsx is a `lazy:` module, and the app has no stale-chunk recovery (no `vite:preloadError` listener, no reload-on-chunk-failure anywhere in main.tsx/routes/components/lib — verified by grep). So any user with an open session at deploy time gets a hard dynamic-import failure (error boundary at best) on the next navigation to a not-yet-visited route, until they manually reload. For a long-session ERP this will happen on essentially every deploy.
 
 **Suggested fix:** Either keep previous-build assets for a grace period (drop --delete and garbage-collect assets/ older than N days in a separate step), or add a global `window.addEventListener("vite:preloadError", () => window.location.reload())` in main.tsx so stale sessions self-heal; ideally both.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed (mitigated):** Added the `vite:preloadError` listener in main.tsx (reload once, loop-guarded via sessionStorage, flag cleared on successful boot) so a stale session self-heals on the first failed chunk import. The `--delete` in deploy-s3.sh/deploy-gcs.sh was intentionally left as-is — the grace-period/GC half is a separate deploy-infra change; the self-heal listener already removes the user-facing hard failure (branch `review/backlog-deferred-fixes`).
 
-### 36. [MEDIUM/correctness] `hooks/use-navigation-guard.ts:70` — 📋 backlog
+### 36. [MEDIUM/correctness] `hooks/use-navigation-guard.ts:70` — ✅ fixed
 *zone: hooks · effort: medium · confidence: 0.7*
 
 When `enabled` becomes true the effect pushes a sentinel history entry (window.history.pushState({ __navGuard: true }, "")), but the cleanup only removes event listeners — it never pops the sentinel. Every dirty→clean transition (e.g. user edits then saves, or component unmounts while dirty after save) leaks one extra same-URL history entry, so the user's next Back press appears to do nothing, and repeated edit/save cycles accumulate multiple dead entries. The inline comment also still refers to "Next.js's popstate handler", which no longer exists in this React Router 7 app (stale migration comment).
 
 **Suggested fix:** In the effect cleanup, if the current history.state has __navGuard, call history.back() (with a flag to suppress the popstate handler) or use history.replaceState to neutralize the sentinel; update the stale Next.js comment.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** Effect cleanup now calls `window.history.back()` when `history.state?.__navGuard` is still on top (the dirty→clean/save teardown path, where the user has not navigated past the sentinel), removing the leaked same-URL entry; the click/back confirm paths leave it untouched since the user already moved past it. Stale "Next.js's popstate handler" comment updated to React Router (branch `review/backlog-deferred-fixes`).
 
 ### 37. [MEDIUM/correctness] `routes/inventory-management/spot-check/_components/sc-entry-component.tsx:146` — 📋 backlog
 *zone: routes-inventory · effort: quick-win · confidence: 0.5*
