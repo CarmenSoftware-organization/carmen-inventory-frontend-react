@@ -80,8 +80,8 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 | 40 | medium | correctness | `routes/vendor-management/price-list-template/_components/plt-product-table.tsx:222` | routes-vendor | Stop excluding a row's own product_id so loaded multi-tier (duplicate) rows resolve their label instead of a placeholder (detail #54) |
 | 41 | medium | correctness | `routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx:117` | routes-procurement-a | Resolve the picked currency's exchange_rate via useCurrency instead of leaving the default 1 on a foreign-currency PO; reset to 1 when items cleared (detail #40) |
 | 42 | medium | correctness | `routes/inventory-management/inventory-adjustment/_components/ia-item-table.tsx:86` | routes-inventory | Do not mount the cost probe in view mode — it was overwriting an existing adjustment's saved costs (with shouldDirty) on open (detail #38) |
-| 43 | medium | correctness | `routes/procurement/credit-note/_components/cn-form.tsx:92` | routes-procurement-b | View-mode resync effect (keyed on doc_version) so a second consecutive edit carries the current doc_version, not the stale pre-save one (detail #42) |
-| 44 | medium | correctness | `routes/vendor-management/vendor/_components/vendor-form.tsx:207` | routes-vendor | View-mode resync effect (keyed on updated_at) so newly-added address/contact rows pick up server ids and are not re-sent as new on the next edit (detail #51) |
+| 43 | medium | correctness | `routes/procurement/credit-note/_components/cn-form.tsx:92` | routes-procurement-b | View-mode resync effect (keyed on doc_version + per-item id:doc_version signature) so a second consecutive edit carries current versions/ids, not the stale pre-save ones (detail #42) |
+| 44 | medium | correctness | `routes/vendor-management/vendor/_components/vendor-form.tsx:207` | routes-vendor | View-mode resync effect (keyed on the address/contact id signature) so newly-added rows pick up server ids and are not re-sent as new on the next edit (detail #51) |
 | 45 | medium | correctness | `routes/vendor-management/price-list/_components/pl-form.tsx:151` | routes-vendor | View-mode resync effect (keyed on a pricelist_detail id signature, since PriceList has no version field) so new detail rows pick up server ids (detail #52) |
 
 ## Backlog (not fixed in this pass)
@@ -425,7 +425,7 @@ After a successful update the form is never reset with the refetched server stat
 
 **Suggested fix:** On update success, `form.reset(getDefaultValues(freshData))` once the refetched entity arrives (e.g. useEffect keyed on creditNote.doc_version calling form.reset when in view mode), so subsequent edits carry the current doc_version values.
 
-**Fixed:** Added the suggested view-mode `useEffect` keyed on `creditNote.doc_version` (+ id) that calls `form.reset(getDefaultValues(creditNote))` once the refetch lands. Keyed on doc_version (not `mode`) so it cannot fire on the edit→view transition before the refetch and drop a just-added item. Safe by construction (client-only re-sync); no-op if the backend returns no new doc_version (branch `review/backlog-cluster-c-fixes`). GRN's equivalent stale-version path is separate and left in backlog. Live-backend smoke test of the double-save flow still recommended.
+**Fixed:** Added a view-mode `useEffect` that calls `form.reset(getDefaultValues(creditNote))` once the refetch lands. Keyed on a composite of header `doc_version` + each item `id:doc_version` (not `mode`) so it cannot fire on the edit→view transition before the refetch and drop a just-added item. **Live-backend smoke test (local gateway :4000, T02)** showed the CN GET returns header `doc_version: 0` and may not increment it — hence the composite key, which also resyncs when a newly-added item picks up its server id. Safe by construction (client-only re-sync); no-op if the entity does not change (branch `review/backlog-cluster-c-fixes`). GRN's equivalent stale-version path is separate and left in backlog.
 
 ### 43. [MEDIUM/correctness] `routes/procurement/credit-note/_components/cn-component.tsx:459` — ✅ fixed
 *zone: routes-procurement-b · effort: medium · confidence: 0.65*
@@ -506,7 +506,7 @@ After a successful update, form.reset(values) keeps newly added address/contact 
 
 **Suggested fix:** After update success, re-initialize the form from the refetched vendor (e.g., useEffect that calls form.reset(getDefaultValues(vendor)) while in view mode), instead of form.reset(values).
 
-**Fixed:** Added a view-mode `useEffect` keyed on `vendor.updated_at` (+ id) that calls `form.reset(getDefaultValues(vendor))` and clears the removed-id state once the refetch lands. Keyed on updated_at (not `mode`) to avoid resetting to the stale prop on the edit→view transition (branch `review/backlog-cluster-c-fixes`).
+**Fixed:** Added a view-mode `useEffect` that calls `form.reset(getDefaultValues(vendor))` and clears the removed-id state once the refetch lands. **Live-backend smoke test (local gateway :4000, T02)** revealed the vendor GET response carries NO top-level `updated_at` (the timestamp is under `audit.updated.at`, off the typed shape) — an initial `updated_at`-keyed effect would have been a silent no-op. Re-keyed on a signature of the `vendor_address` + `vendor_contact` ids (both present in the response and typed), which changes exactly when rows are added/removed; not on `mode` (branch `review/backlog-cluster-c-fixes`).
 
 ### 52. [MEDIUM/correctness] `routes/vendor-management/price-list/_components/pl-form.tsx:151` — ✅ fixed
 *zone: routes-vendor · effort: medium · confidence: 0.55*
