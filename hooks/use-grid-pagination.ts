@@ -17,6 +17,13 @@ interface UseGridPaginationOptions<T> {
   };
   params: ParamsDto;
   enabled: boolean;
+  /**
+   * Extra value folded into the reset signature. Use when the same params drive
+   * two different list hooks (e.g. a my-pending vs all-document toggle): the
+   * accumulated items/page reset to 1 when this changes, so the new list does
+   * not get appended onto the previous one's pages.
+   */
+  resetKey?: unknown;
 }
 
 /**
@@ -36,6 +43,7 @@ export function useGridPagination<T>({
   useListHook,
   params,
   enabled,
+  resetKey,
 }: UseGridPaginationOptions<T>) {
   const [page, setPage] = useState(1);
   const [allItems, setAllItems] = useState<T[]>([]);
@@ -43,8 +51,9 @@ export function useGridPagination<T>({
   const observerRef = useRef<IntersectionObserver | null>(null);
   const isLoadingRef = useRef(false);
 
-  // Reset when filters/search change
-  const paramsKey = JSON.stringify({ ...params, page: undefined });
+  // Reset when filters/search change — or when resetKey changes (same params,
+  // different list hook).
+  const paramsKey = JSON.stringify({ ...params, page: undefined, resetKey });
   useEffect(() => {
     if (prevParamsRef.current !== paramsKey) {
       prevParamsRef.current = paramsKey;
