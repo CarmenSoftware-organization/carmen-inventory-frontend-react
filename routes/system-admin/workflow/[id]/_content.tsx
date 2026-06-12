@@ -13,8 +13,12 @@ export function EditWorkflowContent({ id }: { id: string }) {
     error: wfError,
     refetch: wfRefetch,
   } = useWorkflowById(id);
-  const { data: userData, isLoading: userLoading } = useUser();
-  const { data: productData, isLoading: productLoading } = useProduct();
+  // perpage: -1 ดึงทั้งหมด — ไม่งั้น picker เห็นแค่ user/product หน้าแรก (default
+  // pagination ของ backend) ทำให้เลือกคนหรือสินค้าที่อยู่หน้าถัด ๆ ไปไม่ได้
+  const { data: userData, isLoading: userLoading } = useUser({ perpage: -1 });
+  const { data: productData, isLoading: productLoading } = useProduct({
+    perpage: -1,
+  });
 
   const isLoading = wfLoading || userLoading || productLoading;
 

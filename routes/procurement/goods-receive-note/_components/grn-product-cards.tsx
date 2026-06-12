@@ -95,13 +95,21 @@ const ManualProductCell = memo(function ManualProductCell({
           onValueChange={(value, product) => {
             field.onChange(value);
             if (product) {
-              form.setValue(`items.${primaryIndex}.product_name`, product.name);
+              form.setValue(`items.${primaryIndex}.product_name`, product.name, {
+                shouldDirty: true,
+              });
             }
+            // sibling rows ต้อง shouldDirty: true ด้วย — ไม่งั้น dirtyFields ไม่ครบ
+            // ตอนแก้ GRN เดิม การเปลี่ยน product ของแถวรองจะไม่ถูกส่งไป backend
             for (const idx of indices) {
               if (idx === primaryIndex) continue;
-              form.setValue(`items.${idx}.product_id`, value);
+              form.setValue(`items.${idx}.product_id`, value, {
+                shouldDirty: true,
+              });
               if (product) {
-                form.setValue(`items.${idx}.product_name`, product.name);
+                form.setValue(`items.${idx}.product_name`, product.name, {
+                  shouldDirty: true,
+                });
               }
             }
           }}

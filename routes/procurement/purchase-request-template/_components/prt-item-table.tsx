@@ -39,25 +39,32 @@ const setProductToItem = (
   product?: Product,
 ) => {
   const current = form.getValues(`items.${index}`);
-  form.setValue(`items.${index}`, {
-    ...current,
-    product_id: value,
-    ...(product
-      ? {
-          product_name: product.name,
-          inventory_unit_id: product.inventory_unit.id,
-          inventory_unit_name: product.inventory_unit.name,
-          requested_unit_id: product.inventory_unit.id,
-          requested_unit_name: product.inventory_unit.name,
-        }
-      : {
-          product_name: "",
-          inventory_unit_id: null,
-          inventory_unit_name: "",
-          requested_unit_id: null,
-          requested_unit_name: "",
-        }),
-  });
+  // shouldDirty: true จำเป็น — setValue ทั้ง object เลี่ยง field.onChange ของ
+  // Controller ทำให้ dirtyFields ไม่อัปเดต buildItemChanges (ที่ใช้ dirtyFields)
+  // จะมองข้ามแถวนี้ตอน submit
+  form.setValue(
+    `items.${index}`,
+    {
+      ...current,
+      product_id: value,
+      ...(product
+        ? {
+            product_name: product.name,
+            inventory_unit_id: product.inventory_unit.id,
+            inventory_unit_name: product.inventory_unit.name,
+            requested_unit_id: product.inventory_unit.id,
+            requested_unit_name: product.inventory_unit.name,
+          }
+        : {
+            product_name: "",
+            inventory_unit_id: null,
+            inventory_unit_name: "",
+            requested_unit_id: null,
+            requested_unit_name: "",
+          }),
+    },
+    { shouldDirty: true },
+  );
 };
 
 const ProductCell = ({

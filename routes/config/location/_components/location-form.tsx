@@ -200,6 +200,14 @@ export function LocationForm({ location }: LocationFormProps) {
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
+            // เคลียร์ transfer deltas หลัง save — ไม่งั้น users.add/remove และ
+            // products.add/remove ยังค้าง ถ้าเข้า edit แล้ว save อีกครั้งจะ re-send
+            // การเพิ่ม/ลบเดิมซ้ำ
+            form.reset({
+              ...values,
+              users: { add: [], remove: [] },
+              products: { add: [], remove: [] },
+            });
             setMode("view");
             requestAnimationFrame(() => {
               containerRef.current?.focus();

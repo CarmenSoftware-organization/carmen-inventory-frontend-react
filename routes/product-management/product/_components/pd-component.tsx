@@ -86,9 +86,26 @@ export default function ProductComponent() {
   const { exportProduct, isExporting } = useExportProduct();
   const { params, search, setSearch, filter, setFilter, tableConfig } =
     useDataGridState();
-  const [categoryFilter, setCategoryFilter] = useURL("category");
-  const [subCategoryFilter, setSubCategoryFilter] = useURL("sub_category");
-  const [itemGroupFilter, setItemGroupFilter] = useURL("item_group");
+  const [categoryFilter, setCategoryFilterRaw] = useURL("category");
+  const [subCategoryFilter, setSubCategoryFilterRaw] = useURL("sub_category");
+  const [itemGroupFilter, setItemGroupFilterRaw] = useURL("item_group");
+  const [, setPage] = useURL("page");
+
+  // ห่อ setter ให้ reset page ด้วย (เหมือน status filter/search ที่ผ่าน
+  // useListPageState) ไม่งั้นถ้าผู้ใช้อยู่ page > 1 แล้วเปลี่ยน filter จะค้างหน้า
+  // เดิมซึ่งอาจไม่มีข้อมูล
+  const setCategoryFilter = (v: string) => {
+    setCategoryFilterRaw(v);
+    setPage("");
+  };
+  const setSubCategoryFilter = (v: string) => {
+    setSubCategoryFilterRaw(v);
+    setPage("");
+  };
+  const setItemGroupFilter = (v: string) => {
+    setItemGroupFilterRaw(v);
+    setPage("");
+  };
 
   const isGridMode = isMobile || displayMode === "grid";
 
