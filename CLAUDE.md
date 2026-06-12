@@ -17,9 +17,8 @@ bun dev              # Dev server (VITE_DEV_PROXY_TARGET=<backend> to proxy /api
 bun run build        # tsc + vite build → dist/
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
-bunx playwright test # e2e (needs build)
-E2E_EMAIL=.. E2E_PASSWORD=.. bunx playwright test   # authenticated e2e (needs local backend :4000)
 scripts/deploy-s3.sh <bucket> <cf-id>   # Deploy (see docs/deploy.md)
+# e2e: moved to ../carmen-inventory-frontend-e2e (E2E_FRONTEND_DIR=../carmen-inventory-frontend-react bun e2e)
 ```
 
 ## Architecture (deltas from the source app — its CLAUDE.md still describes module patterns)

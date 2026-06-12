@@ -27,7 +27,7 @@ Not ported by design: `playground` (dev-only fixtures); `/` redirects to `/dashb
 
 Vite 7 · React 19 (React Compiler) · TypeScript 5 (strict) · React Router 7 (lazy data
 routes) · Tailwind CSS 4 + shadcn/ui · TanStack Query 5 + Table 8 · react-hook-form 7 +
-zod 4 · use-intl (en/th) · Vitest + Testing Library · Playwright · **Bun** runtime
+zod 4 · use-intl (en/th) · Vitest + Testing Library · **Bun** runtime
 
 ## Quickstart
 
@@ -48,8 +48,6 @@ bun run build        # tsc + vite build → dist/
 bun run preview      # Serve the production build locally
 bun run lint         # ESLint          bun test            # Vitest watch
 bun test:run         # Run all tests   bun test:run <path> # Single file
-bunx playwright test                   # e2e (static; needs build)
-E2E_EMAIL=.. E2E_PASSWORD=.. bunx playwright test   # + authenticated e2e (needs backend)
 scripts/deploy-s3.sh <bucket> <cloudfront-id>       # Deploy (see docs/deploy.md)
 ```
 
@@ -82,6 +80,8 @@ Step-by-step: [docs/deploy.md](docs/deploy.md).
 
 - **288 unit/integration tests** (Vitest + Testing Library) — auth flows (refresh mutex,
   401 retry), http-client URL rewrite, route guards, i18n, compat layer, ported module tests.
-- **Playwright e2e**: a static project (no backend needed) plus an authenticated project
-  that only activates when `E2E_EMAIL`/`E2E_PASSWORD` are set — covering login → dashboard,
-  config, procurement (detail click-through), and shell pages against a real backend.
+- **Playwright e2e** lives in the dedicated suite
+  [carmen-inventory-frontend-e2e](../carmen-inventory-frontend-e2e) (191+ TC-annotated
+  tests, frontend-agnostic). Run it against this SPA with:
+  `E2E_FRONTEND_DIR=../carmen-inventory-frontend-react VITE_DEV_PROXY_TARGET=<backend> bun e2e`
+  — `002-spa-smoke.spec.ts` there covers the SPA-specific boot/auth-guard behavior.

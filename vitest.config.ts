@@ -9,7 +9,7 @@ export default defineConfig({
     environmentOptions: { jsdom: { url: "http://localhost" } },
     setupFiles: ["./vitest.setup.ts"],
     include: ["**/*.test.{ts,tsx}"],
-    exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**"],
+    exclude: ["**/node_modules/**", "**/dist/**"],
   },
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, ".") },
