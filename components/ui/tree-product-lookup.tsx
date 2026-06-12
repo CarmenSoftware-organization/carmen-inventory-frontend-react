@@ -25,6 +25,12 @@ const buildTree = (products: Product[]): TreeNode[] => {
     const groupId = p.product_item_group?.id ?? "uncategorized";
     const groupName = p.product_item_group?.name ?? "Uncategorized";
 
+    // Path-qualify sub-category / item-group node ids so the shared
+    // "uncategorized" fallback does not collide across parents (two different
+    // categories each with an Uncategorized sub-category must stay distinct).
+    const subCatNodeId = `${catId}/${subCatId}`;
+    const groupNodeId = `${catId}/${subCatId}/${groupId}`;
+
     if (!categoryMap.has(catId)) {
       categoryMap.set(catId, {
         id: catId,
@@ -35,10 +41,10 @@ const buildTree = (products: Product[]): TreeNode[] => {
     }
     const catNode = categoryMap.get(catId)!;
 
-    let subCatNode = catNode.children.find((c) => c.id === subCatId);
+    let subCatNode = catNode.children.find((c) => c.id === subCatNodeId);
     if (!subCatNode) {
       subCatNode = {
-        id: subCatId,
+        id: subCatNodeId,
         name: subCatName,
         type: "sub_category",
         children: [],
@@ -46,10 +52,10 @@ const buildTree = (products: Product[]): TreeNode[] => {
       catNode.children.push(subCatNode);
     }
 
-    let groupNode = subCatNode.children.find((c) => c.id === groupId);
+    let groupNode = subCatNode.children.find((c) => c.id === groupNodeId);
     if (!groupNode) {
       groupNode = {
-        id: groupId,
+        id: groupNodeId,
         name: groupName,
         type: "item_group",
         children: [],

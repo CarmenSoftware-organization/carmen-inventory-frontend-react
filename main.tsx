@@ -6,6 +6,25 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router/dom";
 
+const PRELOAD_RELOAD_KEY = "carmen.preload-reload";
+
+/**
+ * Self-heal stale lazy-chunk imports after a deploy that removed old hashed
+ * assets. Every route is a `lazy:` module, so a deploy mid-session makes the
+ * next navigation to an unvisited route fail its dynamic import — Vite fires
+ * `vite:preloadError`. Reload once (guarded against reload loops) so the
+ * session picks up the new asset manifest instead of hitting an error boundary.
+ */
+window.addEventListener("vite:preloadError", () => {
+  try {
+    if (sessionStorage.getItem(PRELOAD_RELOAD_KEY)) return;
+    sessionStorage.setItem(PRELOAD_RELOAD_KEY, "1");
+  } catch {
+    // sessionStorage unavailable — reload anyway (worst case: one extra reload)
+  }
+  window.location.reload();
+});
+
 /**
  * Boot ลำดับ: config → restore session → render
  * refresh ก่อน render ตัดปัญหา flash ของ login page ตอน reload ขณะ logged-in
@@ -24,6 +43,12 @@ async function boot() {
         <RouterProvider router={router} />
       </StrictMode>,
     );
+    // Successful boot — clear the reload guard so a future deploy can self-heal.
+    try {
+      sessionStorage.removeItem(PRELOAD_RELOAD_KEY);
+    } catch {
+      // ignore
+    }
   } catch (error) {
     console.error("[boot] failed", error);
     document.getElementById("root")!.innerHTML =

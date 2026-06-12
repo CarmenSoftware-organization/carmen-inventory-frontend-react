@@ -65,8 +65,8 @@ export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
     };
 
     // Pre-push a sentinel history entry at the SAME URL. The first back-press
-    // pops this sentinel (URL stays unchanged → Next.js's popstate handler
-    // won't trigger a route transition), giving us a clean window to intercept.
+    // pops this sentinel (URL stays unchanged → React Router won't trigger a
+    // route transition), giving us a clean window to intercept.
     window.history.pushState({ __navGuard: true }, "");
 
     const popHandler = () => {
@@ -84,6 +84,15 @@ export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
     return () => {
       document.removeEventListener("click", clickHandler, true);
       window.removeEventListener("popstate", popHandler);
+      // Neutralize the leaked sentinel: when the guard is torn down without a
+      // back-press (e.g. the form went dirty → clean after save), the sentinel
+      // is still the top entry. Pop it so it doesn't accumulate as a dead
+      // same-URL entry that makes the user's next Back press appear to do
+      // nothing. Only pop when the sentinel is actually on top — in the
+      // click/back confirm paths the user has already navigated past it.
+      if (window.history.state?.__navGuard) {
+        window.history.back();
+      }
     };
   }, [enabled]);
 

@@ -13,15 +13,14 @@ interface Shortcut {
   description: string;
 }
 
+// Only shortcuts with a live handler are listed (the g-prefix navigation and
+// "n" entries were advertised but never wired, so they were removed). "?" and
+// "/" are handled by the keydown listener below; "Esc" closes the dialog via
+// Radix.
 const SHORTCUTS: Shortcut[] = [
   { keys: ["?"], description: "Show this dialog" },
   { keys: ["/"], description: "Focus search input on current page" },
   { keys: ["Esc"], description: "Close dialog / clear focus" },
-  { keys: ["g", "d"], description: "Go to Dashboard" },
-  { keys: ["g", "p"], description: "Go to Purchase Request" },
-  { keys: ["g", "o"], description: "Go to Purchase Order" },
-  { keys: ["g", "r"], description: "Go to GRN" },
-  { keys: ["n"], description: "Create new (on list pages)" },
 ];
 
 function Key({ children }: { children: React.ReactNode }) {
