@@ -71,12 +71,19 @@ the app): **CLAUDE.md**. Design history: `docs/superpowers/specs/` + `docs/super
 
 ## Deploying
 
-Single static artifact → S3 (private + OAC) behind CloudFront with 403/404 → `/index.html`
-SPA fallback. Per-environment `config.json` lives on the bucket, not in the bundle.
-Step-by-step: [docs/deploy.md](docs/deploy.md).
+Three supported targets — step-by-step in [docs/deploy.md](docs/deploy.md):
 
-> Backend prerequisite: CORS must allow the CloudFront origin (headers `Authorization`,
-> `Content-Type`, `x-app-id`). Dev doesn't need CORS thanks to the Vite proxy.
+| Target | Model | Backend CORS needed? |
+|---|---|---|
+| **AWS S3 + CloudFront** | private bucket + OAC, 403/404 → `/index.html` fallback | yes |
+| **GCS (+ Cloud CDN)** | bucket website fallback or LB backend bucket | yes |
+| **Docker** | nginx serves `dist/` and **proxies `/api/*` to the backend itself** | **no** |
+
+For the static-CDN targets the per-environment `config.json` lives on the bucket; the
+Docker image renders it from env (`BACKEND_URL`, `X_APP_ID`, `WS_URL`) at container start.
+
+> CORS (S3/GCS only): allow the CDN origin, headers `Authorization`, `Content-Type`,
+> `x-app-id`. Dev never needs CORS thanks to the Vite proxy.
 
 ## Testing
 

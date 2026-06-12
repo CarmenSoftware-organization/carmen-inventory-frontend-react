@@ -1,7 +1,7 @@
 # Phase 1 — Config Modules Migration
 
 **Date:** 2026-06-11
-**Status:** Approved scope (all config modules); design pending user review
+**Status:** ✅ Implemented & merged (PR #1, 2026-06-11)
 **Depends on:** Phase 0 foundation (merged via PR #1 branch `phase0-foundation`)
 **Source:** `../carmen-inventory-frontend/app/(root)/config/` — 88 files, ~8.4k LOC
 

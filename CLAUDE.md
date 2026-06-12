@@ -67,7 +67,8 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
 - Exchange-rate live-rates fetch needs a backend endpoint (`GET /api/exchange-rate?base=XXX`,
   same shape as the old Next route, which held the provider API key server-side). Config
   CRUD works; the live-rates panel degrades gracefully until then.
-- Backend CORS required before production (dev uses Vite proxy).
+- Backend CORS required before production on S3/GCS static hosting (dev uses the Vite
+  proxy; the **Docker image needs no CORS** — its nginx proxies `/api/*` itself).
 - Live-backend smoke: **fully verified** against the local gateway
   (`carmen-turborepo-backend-v2` on :4000) — login → dashboard shell (sidebar/navbar/
   profile/BU), reload session-restore, 401 error path, 429 RATE_LIMITED countdown,
@@ -81,4 +82,6 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
   copy). The duplication is intentional and harmless — keeping `app/` untouched preserves
   the `git status app/` clean invariant; consolidate onto the `routes/` copies in a later
   cleanup if desired.
-- PO from-price-list flow depends on price-list data (vendor-management phase) — page renders; full flow testable after that phase migrates.
+- Backend bug (not frontend): `GET /api/me/dashboard-widgets?bu_code=T02` returns 500
+  from the gateway itself (verified identical direct vs proxied). Dashboard degrades
+  gracefully; report to the carmen-turborepo-backend-v2 team.

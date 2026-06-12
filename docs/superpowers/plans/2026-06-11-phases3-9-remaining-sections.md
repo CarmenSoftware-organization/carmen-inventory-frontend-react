@@ -1,5 +1,7 @@
 # Phases 3-9 — Remaining Sections Migration Plan (Autonomous Run)
 
+> **Status: ✅ completed** — phases 3-9 merged via PRs #3-#9 (2026-06-12); migration complete.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: superpowers:subagent-driven-development. The migration recipe is canonical in CLAUDE.md ("Migrating a module") — proven across Phases 1-2 (config + procurement, 36 routes, zero new patterns). This plan covers the rest of the app.
 
 **Goal:** Migrate every remaining section to complete the SPA port: inventory-management, vendor-management (+ public price-list), store-operation, operation-plan, product-management, system-admin, report, dashboard (real), profile, notifications.

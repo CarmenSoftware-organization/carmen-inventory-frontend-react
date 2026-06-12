@@ -1,5 +1,7 @@
 # Phase 0 Foundation — Next.js → Vite + React Router SPA Implementation Plan
 
+> **Status: ✅ completed** — merged via PR #1.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the complete foundation of the Carmen inventory SPA — Vite + React Router 7 scaffold, client-side auth, ported http-client, use-intl i18n, compat layer, bulk-ported shared code, login → dashboard-shell smoke path, and S3/CloudFront deploy artifacts.

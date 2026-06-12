@@ -1,7 +1,7 @@
 # Carmen Inventory Frontend — Next.js → Vite + React Router SPA (Static / S3+CDN)
 
 **Date:** 2026-06-11
-**Status:** Approved design (Phase 0 only)
+**Status:** ✅ Implemented — all phases (0-9) merged to `main` 2026-06-12; migration complete (125 routes)
 **Source app:** `../carmen-inventory-frontend/` (Next.js 16 App Router, ~134 routes, ~179k LOC)
 **Target repo:** `carmen-inventory-frontend-react`
 

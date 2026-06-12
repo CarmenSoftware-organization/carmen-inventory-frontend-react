@@ -116,9 +116,9 @@ non-file paths, immutable caching on `/assets/*`, no-cache on `index.html` +
   ```json
   { "BACKEND_URL": "https://<backend-host>", "X_APP_ID": "<app id>", "WS_URL": "wss://<backend-host>/ws" }
   ```
-- **Backend prerequisite (see spec §4)** — CORS: allow the CDN/bucket origin,
+- **Backend prerequisite for S3/GCS (see spec §4)** — CORS: allow the CDN/bucket origin,
   methods GET/POST/PUT/PATCH/DELETE, headers `Authorization`, `Content-Type`,
-  `x-app-id`.
+  `x-app-id`. (The Docker target is exempt — its nginx proxies `/api/*` same-origin.)
 - `index.html` is no-cache; hashed assets are immutable — returning users pick up
   new releases on next navigation.
 - Both deploy scripts delete the dev `config.json` from `dist/` before syncing and

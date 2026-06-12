@@ -1,5 +1,7 @@
 # Phase 2 — Procurement Modules Migration Implementation Plan
 
+> **Status: ✅ completed** — merged via PR #2.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Migrate the entire procurement section (157 files, ~28.6k LOC: landing, PRT, CN, GRN, PO, PR, approval) into the SPA using the Phase 1 recipe, ending with an authenticated procurement e2e.

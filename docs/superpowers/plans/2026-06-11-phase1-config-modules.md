@@ -1,5 +1,7 @@
 # Phase 1 — Config Modules Migration Implementation Plan
 
+> **Status: ✅ completed** — merged via PR #1.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Migrate all 15 config modules + the config landing page from the source Next app into the SPA, proving the per-module migration recipe end-to-end with an authenticated e2e.
