@@ -4,7 +4,7 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 
 ## Summary
 
-- **Confirmed findings:** 54 — **37 fixed**, 17 backlog
+- **Confirmed findings:** 54 — **42 fixed**, 12 backlog
 - **By severity:** high 12, medium 42
 - **By category:** correctness 50, perf 1, security 3
 - **By effort:** quick-win 29, medium 22, large 3
@@ -75,6 +75,11 @@ Multi-agent workflow review of the entire Vite + React Router SPA (~168k LOC, ~1
 | 35 | medium | correctness | `components/ui/tree-product-lookup.tsx:119` | components-ui | Path-qualified sub-category/item-group node ids so the shared "uncategorized" fallback no longer collides across parents (detail #33) |
 | 36 | medium | correctness | `scripts/deploy-s3.sh:24` | config-build | Mitigated via main.tsx `vite:preloadError` reload listener so stale sessions self-heal after a deploy (detail #35) |
 | 37 | medium | correctness | `hooks/use-navigation-guard.ts:70` | hooks | Pop the leaked same-URL sentinel history entry on teardown when still on top; fixed stale Next.js comment (detail #36) |
+| 38 | medium | correctness | `routes/store-operation/store-requisition/_components/sr-component.tsx:138` | routes-store-operation | useGridPagination got an optional resetKey; SR passes viewMode so toggling my-pending/all-document resets the infinite-scroll list instead of mixing both (detail #47) |
+| 39 | medium | correctness | `routes/procurement/purchase-order/_components/use-po-form-handlers.ts:164` | routes-procurement-a | Submit-after-save uses the detail ids from the updatePo response, not the stale prop, so rows added/removed during edit submit correctly (detail #41) |
+| 40 | medium | correctness | `routes/vendor-management/price-list-template/_components/plt-product-table.tsx:222` | routes-vendor | Stop excluding a row's own product_id so loaded multi-tier (duplicate) rows resolve their label instead of a placeholder (detail #54) |
+| 41 | medium | correctness | `routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx:117` | routes-procurement-a | Resolve the picked currency's exchange_rate via useCurrency instead of leaving the default 1 on a foreign-currency PO; reset to 1 when items cleared (detail #40) |
+| 42 | medium | correctness | `routes/inventory-management/inventory-adjustment/_components/ia-item-table.tsx:86` | routes-inventory | Do not mount the cost probe in view mode — it was overwriting an existing adjustment's saved costs (with shouldDirty) on open (detail #38) |
 
 ## Backlog (not fixed in this pass)
 
@@ -92,18 +97,13 @@ Confirmed but lower priority; left for a follow-up pass.
 
 | sev | cat | effort | file:line | zone | description |
 |---|---|---|---|---|---|
-| medium | correctness | medium | `routes/inventory-management/inventory-adjustment/_components/ia-item-table.tsx:86` | routes-inventory | Cost probes overwrite persisted document values, including in view mode |
-| medium | correctness | medium | `routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx:117` | routes-procurement-a | handleAddPicks sets currency_id and currency_code from the picked price list but never sets exchange_rate, which stays at the EMPTY_FORM def |
-| medium | correctness | medium | `routes/procurement/purchase-order/_components/use-po-form-handlers.ts:164` | routes-procurement-a | handleSubmitPo first saves a dirty form via updatePo.mutateAsync (which may add new detail rows), then runSubmitPo builds the submit details |
 | medium | correctness | medium | `routes/procurement/credit-note/_components/cn-form.tsx:92` | routes-procurement-b | After a successful update the form is never reset with the refetched server state (mutation invalidates the query and the `creditNote` prop  |
 | medium | correctness | medium | `routes/external/pl/_components/price-list-external-product-table.tsx:138` | routes-report | Edit mode lets the vendor edit item-level price, moq_qty, price_without_tax, tax_amt and lead_time_days (handleItemFieldChange marks the for |
-| medium | correctness | medium | `routes/store-operation/store-requisition/_components/sr-component.tsx:138` | routes-store-operation | Mobile infinite scroll mixes the two document lists |
 | medium | correctness | large | `hooks/use-wastage-report.ts:11` | routes-store-operation | The entire wastage-reporting module (routes/store-operation/wastage-reporting list, [id] and new pages) is backed by mock data (`wrMockData` |
 | medium | correctness | large | `routes/store-operation/stock-replenishment/_components/stock-repl-component.tsx:145` | routes-store-operation | `handleCreatePR` and `handleCreateSR` are no-ops: they call `getSelectedProducts()` and discard the result |
 | medium | correctness | medium | `routes/vendor-management/vendor/_components/vendor-form.tsx:207` | routes-vendor | After a successful update, form.reset(values) keeps newly added address/contact rows in form state without ids (the byId refetch updates the |
 | medium | correctness | medium | `routes/vendor-management/price-list/_components/pl-form.tsx:151` | routes-vendor | Same stale-reset pattern as vendor-form/rfp-form: on update success form.reset(values) keeps new pricelist_detail rows without ids while the |
 | medium | correctness | large | `routes/vendor-management/price-list-template/_components/use-plt-form-actions.ts:62` | routes-vendor | Template edit only ever sends products: { add: <entire flattened list> } when details are dirty, and sends products: {} when the user has re |
-| medium | correctness | medium | `routes/vendor-management/price-list-template/_components/plt-product-table.tsx:222` | routes-vendor | ProductCell excludes every product_id selected in other rows from LookupProduct |
 
 ## Finding detail (confirmed)
 
@@ -382,14 +382,14 @@ Inconsistent counted semantics make the spot-check flow uncompletable for zero-s
 
 **Backlog reason:** spot-check counted-semantics change is behavior-altering and needs a product decision (is 0 a valid count?)
 
-### 38. [MEDIUM/correctness] `routes/inventory-management/inventory-adjustment/_components/ia-item-table.tsx:86` — 📋 backlog
+### 38. [MEDIUM/correctness] `routes/inventory-management/inventory-adjustment/_components/ia-item-table.tsx:86` — ✅ fixed (view-mode part)
 *zone: routes-inventory · effort: medium · confidence: 0.45*
 
 Cost probes overwrite persisted document values, including in view mode. ProductCell renders StockInCostProbe/StockOutCostProbe even when disabled (view mode, lines 143-150). StockInCostProbe's effect (lines 86-96) writes cost_per_unit/total_cost from the live cost API with shouldDirty: true, so opening an existing stock-in adjustment silently replaces its saved costs with the current average cost and marks those fields dirty — buildItemChanges in ia-form.tsx then treats untouched rows as edited on update, and TotalCostCell displays the recomputed value instead of the stored one. StockOutCostProbe (lines 112-117) is worse: it sets the line's total_cost to the product's *last receiving* total (qty-independent, per hooks/use-product-cost.ts useProductLastReceiving), clobbering the qty x cost recalcTotal whenever its query resolves. Behavior is inherited from the source app, but it makes saved totals unstable and qty-insensitive for stock-out lines.
 
 **Suggested fix:** Render the probes only when !disabled (i.e., add/edit), gate the setValue calls so they don't run for rows hydrated from an existing document (e.g., skip when the row has an id and the user hasn't changed qty/product), and for stock-out derive total_cost = qty * unit cost from the last-receiving unit price rather than copying its document total.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed (view-mode part):** The cost probe is no longer mounted in view mode (`disabled`), so opening an existing adjustment no longer overwrites its saved cost_per_unit/total_cost or marks untouched rows dirty (branch `review/backlog-behavior-fixes`). The edit-mode re-probe gating and the stock-out `qty * unit` derivation were left as-is — they alter add/edit auto-fill behavior and want a product call on whether re-probing existing rows is intended.
 
 ### 39. [MEDIUM/correctness] `routes/operation-plan/recipe/_components/recipe-form-schema.ts:197` — 📋 backlog
 *zone: routes-operation-plan · effort: quick-win · confidence: 0.65*
@@ -400,23 +400,23 @@ getDefaultValues() hardcodes `info: ""` and `dimension: ""` even when the loaded
 
 **Backlog reason:** finding assumed Recipe carries info/dimension, but those live on CreateRecipeDto not the Recipe GET type — cannot round-trip as suggested; needs backend null-vs-omit semantics confirmed
 
-### 40. [MEDIUM/correctness] `routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx:117` — 📋 backlog
+### 40. [MEDIUM/correctness] `routes/procurement/purchase-order/from-price-list/_components/step-select-items.tsx:117` — ✅ fixed
 *zone: routes-procurement-a · effort: medium · confidence: 0.55*
 
 handleAddPicks sets currency_id and currency_code from the picked price list but never sets exchange_rate, which stays at the EMPTY_FORM default of 1. from-price-list-form-schema.ts:40 explicitly documents 'currency_id/code/exchange_rate = set ใน Step 3 ตอน pick PL', confirming the omission. A PO created from a foreign-currency price list is submitted with exchange_rate: 1 (the manual PO form sets it via LookupCurrency.onItemChange; the wizard has no equivalent). The BrowseDialog currency object only carries {id, code, name}, so the rate is not even available to pass through.
 
 **Suggested fix:** Include exchange_rate in the currency data returned by BrowseDialog onAdd (from the price list payload) and set form.setValue("exchange_rate", ...) alongside currency_id/currency_code, or look it up from useCurrency by currency_id before building the payload.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** step-select-items now calls `useCurrency({ perpage: 30 })` (same as LookupCurrency) and, when the picked PL currency is set, writes its `exchange_rate` into the form; cleared back to 1 when all items are removed (branch `review/backlog-behavior-fixes`).
 
-### 41. [MEDIUM/correctness] `routes/procurement/purchase-order/_components/use-po-form-handlers.ts:164` — 📋 backlog
+### 41. [MEDIUM/correctness] `routes/procurement/purchase-order/_components/use-po-form-handlers.ts:164` — ✅ fixed
 *zone: routes-procurement-a · effort: medium · confidence: 0.5*
 
 handleSubmitPo first saves a dirty form via updatePo.mutateAsync (which may add new detail rows), then runSubmitPo builds the submit details from the stale closure prop purchaseOrder.purchase_order_detail. Detail rows added during the edit session are missing from the submit payload, and rows deleted during the edit are still sent. The equivalent PR flow (use-pr-form-actions.ts doSaveAndSubmitPr) correctly uses the detail ids from the update response — the PO flow does not.
 
 **Suggested fix:** Use the detail list from the updatePo response (mirroring doSaveAndSubmitPr in use-pr-form-actions.ts): const saved = await updatePo.mutateAsync(...); then build details from saved.data.purchase_order_detail before calling submitPo.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** `runSubmitPo` now accepts the saved detail rows; `handleSubmitPo` passes `saved.data.purchase_order_detail` from the updatePo response, falling back to the prop only when no save happened or the response carries no detail list — so the fix is strictly an improvement even if the backend response shape differs (branch `review/backlog-behavior-fixes`).
 
 ### 42. [MEDIUM/correctness] `routes/procurement/credit-note/_components/cn-form.tsx:92` — 📋 backlog
 *zone: routes-procurement-b · effort: medium · confidence: 0.5*
@@ -463,14 +463,14 @@ Edit mode lets the vendor edit item-level price, moq_qty, price_without_tax, tax
 
 **Backlog reason:** effort=medium — deferred (not fixed in this pass)
 
-### 47. [MEDIUM/correctness] `routes/store-operation/store-requisition/_components/sr-component.tsx:138` — 📋 backlog
+### 47. [MEDIUM/correctness] `routes/store-operation/store-requisition/_components/sr-component.tsx:138` — ✅ fixed
 *zone: routes-store-operation · effort: medium · confidence: 0.7*
 
 Mobile infinite scroll mixes the two document lists. `activeListHook` (my-pending vs all-document) is swapped into useGridPagination when viewMode changes (reachable on mobile via the filter Sheet buttons), but useGridPagination only resets its accumulated `allItems`/`page` when `params` change (`paramsKey` at hooks/use-grid-pagination.ts:45). queryParams are identical for both views, so after scrolling to page N and toggling viewMode, items already accumulated from the previous view remain in the list, the new view's page N is appended onto them, and pages 1..N-1 of the new view are never fetched.
 
 **Suggested fix:** Include viewMode in the reset key — e.g. pass a `resetKey` option to useGridPagination (or fold viewMode into params used for paramsKey) so allItems/page reset to 1 when the list hook changes.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed:** useGridPagination gained an optional `resetKey` folded into the reset signature; sr-component passes `viewMode`, so toggling my-pending/all-document (identical params) resets the accumulated list/page instead of appending the new view onto the old (branch `review/backlog-behavior-fixes`).
 
 ### 48. [MEDIUM/correctness] `hooks/use-wastage-report.ts:11` — 📋 backlog
 *zone: routes-store-operation · effort: large · confidence: 0.95*
@@ -526,14 +526,14 @@ Template edit only ever sends products: { add: <entire flattened list> } when de
 
 **Backlog reason:** effort=large — deferred (not fixed in this pass)
 
-### 54. [MEDIUM/correctness] `routes/vendor-management/price-list-template/_components/plt-product-table.tsx:222` — 📋 backlog
+### 54. [MEDIUM/correctness] `routes/vendor-management/price-list-template/_components/plt-product-table.tsx:222` — ✅ fixed (resolve part)
 *zone: routes-vendor · effort: medium · confidence: 0.5*
 
 ProductCell excludes every product_id selected in other rows from LookupProduct. But multi-tier templates are a legitimate state: plt-form-schema getDefaultValues flattens product.moq into multiple rows with the same product_id, and groupDetailsToProducts re-groups them on submit. For a loaded multi-tier template, each duplicate row's own selected product is in its excludeIds, so LookupProduct filters it from the items list and cannot resolve the selected label (shows placeholder); the user also cannot add a second MOQ tier for an existing product.
 
 **Suggested fix:** Either drop the exclusion (duplicates are valid for MOQ tiers) or exclude by (product_id, unit_id) pair; at minimum keep the row's own current value resolvable by not filtering an id that equals the row's selected value.
 
-**Backlog reason:** effort=medium — deferred (not fixed in this pass)
+**Fixed (resolve part):** excludeIds now also drops the row's own selected `product_id`, so a loaded multi-tier template's duplicate rows resolve their label instead of showing a placeholder (branch `review/backlog-behavior-fixes`). Adding a *new* tier for an already-used product via a fresh empty row is still blocked by the cross-row exclusion — fully allowing that needs the (product_id, unit_id) semantics confirmed, so it was left out.
 
 ## Rejected by verification
 

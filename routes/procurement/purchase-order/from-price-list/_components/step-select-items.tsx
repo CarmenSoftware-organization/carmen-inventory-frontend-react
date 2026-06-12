@@ -9,6 +9,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import EmptyComponent from "@/components/empty-component";
 import { formatDate } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
+import { useCurrency } from "@/hooks/use-currency";
 import type { PriceListDetailItem } from "@/types/price-list";
 import {
   WIZARD_ITEM_TEMPLATE,
@@ -80,6 +81,13 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
 
   const [browseOpen, setBrowseOpen] = useState(false);
 
+  // Resolve the picked price-list currency's exchange_rate the same way the
+  // manual PO form does (LookupCurrency uses perpage: 30). The BrowseDialog
+  // currency object only carries {id, code, name}, so without this lookup a
+  // foreign-currency PO would submit with the EMPTY_FORM default exchange_rate 1.
+  const { data: currencyData } = useCurrency({ perpage: 30 });
+  const currencies = currencyData?.data ?? [];
+
   const existingProductIds = new Set(
     items.map((i) => i.product_id ?? "").filter((id): id is string => !!id),
   );
@@ -117,6 +125,10 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     if (currency && !form.getValues("currency_id")) {
       form.setValue("currency_id", currency.id, { shouldDirty: true });
       form.setValue("currency_code", currency.code, { shouldDirty: true });
+      const rate = currencies.find((c) => c.id === currency.id)?.exchange_rate;
+      if (rate != null) {
+        form.setValue("exchange_rate", rate, { shouldDirty: true });
+      }
     }
   };
 
@@ -130,6 +142,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
     if (next.length === 0) {
       form.setValue("currency_id", "", { shouldDirty: true });
       form.setValue("currency_code", "", { shouldDirty: true });
+      form.setValue("exchange_rate", 1, { shouldDirty: true });
     }
   };
 

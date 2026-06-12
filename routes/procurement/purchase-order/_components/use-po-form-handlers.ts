@@ -155,13 +155,17 @@ export function usePoFormHandlers({
     }
   };
 
-  const runSubmitPo = () => {
+  const runSubmitPo = (savedDetails?: { id: string }[]) => {
     if (!purchaseOrder) return;
+    // Prefer the detail rows from the just-saved update response (which reflect
+    // rows added/removed during the edit session); fall back to the prop only
+    // when no save happened or the response carried no detail list.
+    const detailRows = savedDetails ?? purchaseOrder.purchase_order_detail ?? [];
     submitPo.mutate(
       {
         id: purchaseOrder.id,
         stage_role: "create",
-        details: (purchaseOrder.purchase_order_detail ?? []).map((d) => ({
+        details: detailRows.map((d) => ({
           id: d.id,
           stage_status: "submit",
           stage_message: null,
@@ -194,9 +198,17 @@ export function usePoFormHandlers({
           | undefined,
       );
       try {
-        await updatePo.mutateAsync({ id: purchaseOrder.id, ...payload });
+        const saved = await updatePo.mutateAsync({
+          id: purchaseOrder.id,
+          ...payload,
+        });
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setMode("view");
+        const savedDetails = (
+          saved as { data?: { purchase_order_detail?: { id: string }[] } }
+        )?.data?.purchase_order_detail;
+        runSubmitPo(savedDetails);
+        return;
       } catch (err) {
         toast.error((err as Error).message);
         return;

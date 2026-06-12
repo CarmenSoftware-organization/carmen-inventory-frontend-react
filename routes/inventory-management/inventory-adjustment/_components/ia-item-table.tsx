@@ -141,11 +141,14 @@ const ProductCell = memo(function ProductCell({
   const CostProbe =
     adjustmentType === "stock-out" ? StockOutCostProbe : StockInCostProbe;
   if (disabled) {
+    // View mode: do NOT mount the cost probe. Its effect writes cost_per_unit /
+    // total_cost with shouldDirty:true from the live cost API, which would
+    // silently overwrite the saved costs of an existing adjustment (and mark
+    // untouched rows dirty). The probe is only for auto-filling during add/edit.
     return (
       <div className="flex items-center justify-between gap-1.5 text-xs">
         <span className="truncate">{productName || "—"}</span>
         <ProductInventoryTooltip control={control} index={index} />
-        <CostProbe form={form} index={index} />
       </div>
     );
   }

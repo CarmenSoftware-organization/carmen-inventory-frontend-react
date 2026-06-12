@@ -146,6 +146,9 @@ export default function StoreRequisitionComponent() {
     useListHook: activeListHook,
     params: queryParams,
     enabled: useInfiniteScroll,
+    // my-pending and all-document share identical queryParams; without this the
+    // accumulated items from one view would carry over when toggling to the other.
+    resetKey: viewMode,
   });
 
   const items = useInfiniteScroll ? grid.items : (data?.data ?? []);

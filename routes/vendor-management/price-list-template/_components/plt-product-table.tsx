@@ -219,9 +219,18 @@ function ProductCell({
   // exclude product ที่ row อื่นเลือก (filter by index — ไม่ใช่ by id)
   // ทำให้ค่าที่ row นี้ตัวเองเลือกอยู่ ยังเห็นใน dropdown ได้ปกติ
   // และกัน duplicate แม้ data ที่ load มามีซ้ำ
+  //
+  // multi-tier template มี product_id ซ้ำได้ตามปกติ (getDefaultValues คลี่
+  // product.moq เป็นหลาย row ที่ product_id เดียวกัน) ดังนั้นห้าม exclude id ที่
+  // เท่ากับค่าที่ row นี้เลือกอยู่ — ไม่งั้น row คู่แฝดจะดัน id นั้นเข้า excludeIds
+  // แล้ว LookupProduct resolve label ของตัวเองไม่ได้ (โชว์ placeholder)
+  const ownId = productIdsByIndex[index];
   const excludeIds = useMemo(
-    () => productIdsByIndex.filter((id, i) => i !== index && id !== ""),
-    [productIdsByIndex, index],
+    () =>
+      productIdsByIndex.filter(
+        (id, i) => i !== index && id !== "" && id !== ownId,
+      ),
+    [productIdsByIndex, index, ownId],
   );
   if (isView) return <PlainProduct name={productRef?.product_name} />;
   return (
