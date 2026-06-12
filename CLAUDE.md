@@ -74,14 +74,10 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
   profile/BU), reload session-restore, 401 error path, 429 RATE_LIMITED countdown,
   access token never persisted. Zero console errors. (UAT still needs VPN.)
 - Local dev against the local backend: `VITE_DEV_PROXY_TARGET=http://localhost:4000 bun dev`.
-- A few Phase-0 pre-copied leaf files still live under `app/` (workflow/wastage/stock-
-  replenishment schemas + `profile/_components/{change-password-dialog,profile-form-schema}`)
-  — imported by `components/navbar/user-profile.tsx` and a couple of hooks. The migrated
-  `routes/profile/_components/` now also contains its own copies of those two profile
-  leaves (the route tree imports the `routes/` copy; the navbar still imports the `app/`
-  copy). The duplication is intentional and harmless — keeping `app/` untouched preserves
-  the `git status app/` clean invariant; consolidate onto the `routes/` copies in a later
-  cleanup if desired.
+- `app/` is gone (2026-06-12 consolidation): the five Phase-0 pre-copied leaves
+  (workflow/wastage/stock-replenishment schemas + the two profile leaves) now live only
+  under `routes/`; `components/navbar/user-profile.tsx` and the hooks import the
+  `routes/` copies directly.
 - Backend bug (not frontend): `GET /api/me/dashboard-widgets?bu_code=T02` returns 500
   from the gateway itself (verified identical direct vs proxied). Dashboard degrades
   gracefully; report to the carmen-turborepo-backend-v2 team.

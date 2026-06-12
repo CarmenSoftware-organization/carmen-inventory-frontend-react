@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
-import { mockData } from "@/app/(root)/store-operation/stock-replenishment/mock-data";
+import { mockData } from "@/routes/store-operation/stock-replenishment/mock-data";
 import type { Locations } from "@/types/stock-replenishment";
 
 // TODO: เปลี่ยนเป็นเรียก API จริง เมื่อ backend พร้อม

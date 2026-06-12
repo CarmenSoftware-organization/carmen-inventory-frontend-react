@@ -61,7 +61,6 @@ export default tseslint.config(
       "constant/**/*.{ts,tsx}",
       "types/**/*.{ts,tsx}",
       "i18n/**/*.{ts,tsx}",
-      "app/**/*.{ts,tsx}",
       "main.tsx",
     ],
     ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
