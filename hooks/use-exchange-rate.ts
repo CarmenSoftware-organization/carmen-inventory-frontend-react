@@ -136,6 +136,12 @@ export function useExternalExchangeRates(baseCurrency: string) {
       );
       if (!res.ok)
         throw new Error(`Failed to fetch exchange rates: ${res.status}`);
+      // บน static hosting (S3/GCS) endpoint นี้ยังไม่มี — SPA fallback คืน index.html
+      // ด้วย status 200 ทำให้ res.json() throw SyntaxError ที่สื่อความหมายไม่ได้
+      // ตรวจ Content-Type ก่อน เพื่อ degrade gracefully จนกว่า backend จะมี endpoint
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json"))
+        throw new Error("Exchange rate endpoint is not available");
       const data: ExternalRateResponse = await res.json();
       if (data.result !== "success")
         throw new Error("Exchange rate API returned an error");
