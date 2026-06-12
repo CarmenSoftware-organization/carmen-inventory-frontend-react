@@ -1,9 +1,8 @@
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { lazy, Suspense } from "react";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { PO_STATUS, PO_TYPE } from "@/types/purchase-order";
 import type { FormMode } from "@/types/form";
@@ -28,7 +27,6 @@ import { usePoDialogState } from "./use-po-dialog-state";
 import { usePoProfileSync } from "./use-po-profile-sync";
 import { usePoFormHandlers } from "./use-po-form-handlers";
 
-// next/dynamic → lazy+Suspense (Batch D hand-fix)
 const PoCommentSheet = lazy(() =>
   import("./po-comment-sheet").then((mod) => ({ default: mod.PoCommentSheet })),
 );
@@ -92,6 +90,29 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
 
   usePoProfileSync({ form, profileData, purchaseOrder });
 
+  // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand row ที่
+  // location ติด error (location field อยู่ใน expanded row เท่านั้น) + scroll
+  // bump จากทั้ง 2 path: Save (handleSubmit onInvalid) และ Submit (handleSubmitPo trigger)
+  const [revealErrorSignal, setRevealErrorSignal] = useState(0);
+  const revealErrors = () => {
+    setRevealErrorSignal((c) => c + 1);
+    scrollToFirstInvalidField();
+    // order_qty ของ item = ยอดรวมจาก locations แสดงแบบ read-only (ไม่มี aria-invalid
+    // ให้ scroll หา) — ถ้า item ติด error เฉพาะ order_qty ให้ scroll ไปที่แถวนั้นแทน
+    // เพื่อให้ user เห็น row ที่ถูก auto-expand (กรอก qty ของ location ได้)
+    const itemErrors = form.formState.errors.items;
+    const rollupIdx = itemErrors
+      ? Object.keys(itemErrors)
+          .map(Number)
+          .filter((n) => !Number.isNaN(n))
+          .sort((a, b) => a - b)
+          .find((i) => !!itemErrors[i]?.order_qty && !itemErrors[i]?.locations)
+      : undefined;
+    if (rollupIdx != null) {
+      scrollToFirstInvalidField({ selector: `#po-item-row-${rollupIdx}` });
+    }
+  };
+
   const {
     deletePo,
     rejectPo,
@@ -116,6 +137,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     role,
     setShowReject: dialogs.setShowReject,
     setShowClose: dialogs.setShowClose,
+    revealErrors,
   });
 
   const isDisabled = (isView && role !== STAGE_ROLE.APPROVE) || isPending;
@@ -157,9 +179,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
       />
       <form
         id="po-form"
-        onSubmit={form.handleSubmit(onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
+        onSubmit={form.handleSubmit(onSubmit, revealErrors)}
         className="flex flex-1 flex-col gap-4"
       >
         <section className="space-y-3">
@@ -195,6 +215,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           </div>
           <PoItemFields
             form={form}
+            revealErrorSignal={revealErrorSignal}
             disabled={fieldsDisabled}
             locationsDisabled={isDisabled}
             role={role}

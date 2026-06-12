@@ -204,9 +204,15 @@ export function SrHeader({
     </DocumentRibbon>
   );
 
+  const subtitle =
+    storeRequisition?.doc_version != null
+      ? `${tfl("version")} ${storeRequisition.doc_version}`
+      : undefined;
+
   return (
     <DocFormHeader
       title={storeRequisition?.sr_no ?? t("title")}
+      subtitle={subtitle}
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}

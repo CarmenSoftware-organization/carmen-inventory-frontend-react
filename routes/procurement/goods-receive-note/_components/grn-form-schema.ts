@@ -10,6 +10,7 @@ import type {
 function createGrnDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    doc_version: z.coerce.number().optional(),
     _group_key: z.string(),
     purchase_order_id: z.string().nullable(),
     purchase_order_no: z.string(),
@@ -74,6 +75,7 @@ function createExtraCostDetailSchema(tv: TranslationFn, tf: TranslationFn) {
 
 export function createGrnSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
+    doc_version: z.coerce.number().optional(),
     grn_date: z.string().min(1, tv("required", { field: tf("grnDate") })),
     expired_date: z.string().nullable(),
     invoice_no: z.string().min(1, tv("required", { field: tf("invoiceNo") })),
@@ -208,6 +210,7 @@ export function getDefaultValues(grn?: GoodsReceiveNote): GrnFormValues {
   }
 
   return {
+    doc_version: grn.doc_version,
     grn_date: grn.grn_date ?? "",
     expired_date: grn.expired_date ?? null,
     invoice_no: grn.invoice_no ?? "",
@@ -238,6 +241,7 @@ export function getDefaultValues(grn?: GoodsReceiveNote): GrnFormValues {
       grn.good_received_note_detail?.flatMap((detail) =>
         detail.items.map((item) => ({
           id: item.id,
+          doc_version: item.doc_version,
           _group_key: detail.product_id,
           purchase_order_id: detail.purchase_order_id,
           purchase_order_no: detail.po_no ?? "",
@@ -289,6 +293,7 @@ export function mapDetailToPayload(
   item: GrnFormValues["items"][number],
 ): GrnDetailPayload {
   return {
+    ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     purchase_order_detail_id: item.purchase_order_detail_id,
     product_id: item.product_id || "",
     location_id: item.location_id,

@@ -37,6 +37,7 @@ export const ItemRow = memo(function ItemRow({
 
   return (
     <tr
+      id={`po-item-row-${index}`}
       className={cn(
         "border-border/40 hover:bg-primary/3 border-t align-middle transition-colors",
         isOpen && "bg-muted/20",

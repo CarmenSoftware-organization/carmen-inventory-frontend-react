@@ -81,9 +81,15 @@ export function PrHeader({
     />
   ) : undefined;
 
+  const subtitle =
+    purchaseRequest?.doc_version != null
+      ? `${tfl("version")} ${purchaseRequest.doc_version}`
+      : undefined;
+
   return (
     <DocFormHeader
       title={purchaseRequest?.pr_no ?? t("title")}
+      subtitle={subtitle}
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}

@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 
 interface DocFormHeaderProps {
   readonly title: string;
+  /** บรรทัดย่อยใต้ title (เช่น document version) */
+  readonly subtitle?: ReactNode;
   readonly backLabel: string;
   readonly onBack: () => void;
   readonly badges?: ReactNode;
@@ -17,6 +19,7 @@ interface DocFormHeaderProps {
 
 export function DocFormHeader({
   title,
+  subtitle,
   backLabel,
   onBack,
   badges,
@@ -44,6 +47,11 @@ export function DocFormHeader({
             </h1>
             {badges}
           </div>
+          {subtitle && (
+            <div className="text-muted-foreground mt-0.5 text-xs">
+              {subtitle}
+            </div>
+          )}
         </div>
         {actions && (
           <div className="flex flex-wrap items-center gap-2">{actions}</div>

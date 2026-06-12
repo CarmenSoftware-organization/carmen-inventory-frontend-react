@@ -13,6 +13,10 @@ import type { PoFormValues } from "./po-form-schema";
 interface PoItemsGridProps {
   readonly form: UseFormReturn<PoFormValues>;
   readonly itemCount: number;
+  /** counter ที่เพิ่มทุกครั้งที่ add item — trigger auto-expand row บนสุด (index 0) */
+  readonly addSignal: number;
+  /** counter ที่เพิ่มทุกครั้งที่ validation ไม่ผ่าน — trigger auto-expand row ที่ location ติด error */
+  readonly revealErrorSignal: number;
   readonly disabled: boolean;
   /** disabled แยกสำหรับ location editor (PO จาก price list ปล่อยให้แก้ได้) */
   readonly locationsDisabled: boolean;
@@ -27,6 +31,8 @@ interface PoItemsGridProps {
 export const PoItemsGrid = memo(function PoItemsGrid({
   form,
   itemCount,
+  addSignal,
+  revealErrorSignal,
   disabled,
   locationsDisabled,
   readOnly,
@@ -38,6 +44,8 @@ export const PoItemsGrid = memo(function PoItemsGrid({
 }: PoItemsGridProps) {
   const tfl = useTranslations("field");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [handledReveal, setHandledReveal] = useState(revealErrorSignal);
+  const [handledAdd, setHandledAdd] = useState(addSignal);
 
   // stable open-toggle — กัน memo ของ ItemRow/ItemCard แตกตอน grid re-render
   const handleToggleOpen = useCallback(
@@ -45,6 +53,34 @@ export const PoItemsGrid = memo(function PoItemsGrid({
       setOpenIndex((prev) => (prev === index ? null : index)),
     [],
   );
+
+  // add item ใหม่ → prepend อยู่ index 0 → เปิด row นั้นทันทีให้กรอก location ได้เลย
+  // (set state ระหว่าง render ตาม pattern ที่ React แนะนำแทน effect)
+  if (addSignal !== handledAdd) {
+    setHandledAdd(addSignal);
+    setOpenIndex(0);
+  }
+
+  // validation ไม่ผ่าน: location field อยู่ใน expanded row เท่านั้น ถ้า row หุบอยู่
+  // scroll หาไม่เจอ — auto-expand row แรกที่ location ติด error
+  // revealErrorSignal bump จากทั้ง path Save (handleSubmit) และ Submit (trigger)
+  // ที่ระดับฟอร์ม → prop เปลี่ยน → grid re-render → อ่าน errors สด ๆ หา target
+  // (set state ระหว่าง render ตาม pattern ที่ React แนะนำแทน effect; scroll ระดับ
+  //  ฟอร์ม retry ข้ามเฟรมจน field ใน expanded row mount แล้วค่อย scroll)
+  if (revealErrorSignal !== handledReveal) {
+    setHandledReveal(revealErrorSignal);
+    const itemErrors = form.formState.errors.items;
+    // เปิด row ที่ field ในส่วน expanded ติด error — locations หรือ order_qty
+    // (order_qty = ยอดรวมจาก locations, read-only ในแถวหลัก แก้ได้แค่ใน location editor)
+    const target = itemErrors
+      ? Object.keys(itemErrors)
+          .map(Number)
+          .filter((n) => !Number.isNaN(n))
+          .sort((a, b) => a - b)
+          .find((i) => !!itemErrors[i]?.locations || !!itemErrors[i]?.order_qty)
+      : undefined;
+    if (target != null) setOpenIndex(target);
+  }
 
   if (itemCount === 0) return null;
 

@@ -2,6 +2,7 @@ import type { AuditInfo } from "@/types/workflows";
 
 export interface CreditNoteItem {
   id: string;
+  doc_version?: number;
   sequence_no?: number;
   location_id: string | null;
   location_code: string | null;
@@ -37,6 +38,7 @@ export interface CreditNoteItem {
 export type CreditNoteType = "quantity_return" | "amount_discount";
 
 export interface CnItemPayload {
+  doc_version?: number;
   location_id: string;
   location_name: string;
   product_id: string;
@@ -57,6 +59,7 @@ export interface CnItemPayload {
 }
 
 export interface CreateCnDto {
+  doc_version?: number;
   credit_note_type: CreditNoteType;
   grn_id: string;
   grn_date: string;
@@ -91,6 +94,7 @@ export enum CN_STATUS {
 
 export interface CreditNote {
   id: string;
+  doc_version?: number;
   cn_no: string;
   cn_date: string;
   doc_status: CN_STATUS;

@@ -237,9 +237,15 @@ export function GrnHeader({
     </DocumentRibbon>
   );
 
+  const subtitle =
+    goodsReceiveNote?.doc_version != null
+      ? `${tfl("version")} ${goodsReceiveNote.doc_version}`
+      : undefined;
+
   return (
     <DocFormHeader
       title={goodsReceiveNote?.grn_no ?? t("entity")}
+      subtitle={subtitle}
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}

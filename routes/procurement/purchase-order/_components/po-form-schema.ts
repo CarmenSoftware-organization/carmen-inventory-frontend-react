@@ -23,6 +23,7 @@ const prDetailSchema = z.object({
 export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    doc_version: z.coerce.number().optional(),
     description: z.string(),
     product_id: z
       .string()
@@ -69,6 +70,7 @@ export function createPoSchema(
   isManual = true,
 ) {
   return z.object({
+    doc_version: z.coerce.number().optional(),
     workflow_id: isManual
       ? z.string().min(1, tv("required", { field: tf("workflow") }))
       : z.string(),
@@ -166,6 +168,7 @@ export function getDefaultValues(
 ): PoFormValues {
   if (po) {
     return {
+      doc_version: po.doc_version,
       workflow_id: po.workflow_id ?? "",
       vendor_id: po.vendor_id ?? "",
       vendor_name: po.vendor_name ?? "",
@@ -186,6 +189,7 @@ export function getDefaultValues(
       items:
         po.purchase_order_detail?.map((d) => ({
           id: d.id,
+          doc_version: d.doc_version,
           description: d.description ?? "",
           product_id: d.product_id,
           product_code: d.product_code ?? "",
@@ -244,6 +248,7 @@ export function mapItemToPayload(
   index: number,
 ): PoDetailPayload {
   return {
+    ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     sequence: index + 1,
     product_id: item.product_id || "",
     product_code: item.product_code ?? "",

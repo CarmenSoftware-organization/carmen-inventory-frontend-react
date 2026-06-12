@@ -56,6 +56,7 @@ export interface GrnDetailItem
   base_net_amount: number;
   base_total_price: number;
   note: string | null;
+  doc_version?: number;
 }
 
 // --- Detail Group (product + location) ---
@@ -173,6 +174,7 @@ export interface GoodsReceiveNote {
 // --- Payloads ---
 
 export interface GrnDetailPayload {
+  doc_version?: number;
   purchase_order_detail_id?: string | null;
   product_id: string;
   location_id?: string | null;
@@ -206,6 +208,7 @@ export interface ExtraCostDetailPayload {
 }
 
 export interface CreateGrnDto {
+  doc_version?: number;
   note?: string | null;
   grn_date: string | null;
   invoice_no?: string | null;

@@ -72,6 +72,7 @@ export interface StoreRequisition {
 }
 
 export interface SrDetailPayload {
+  doc_version?: number;
   product_id: string;
   description: string;
   requested_qty: number;

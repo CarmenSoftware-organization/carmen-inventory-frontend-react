@@ -527,6 +527,7 @@
     "exchangeRateDate": "Exchange Rate Date",
     "document": "Document",
     "requester": "Requester",
+    "version": "Edition",
     "addressType": "Address Type",
     "city": "City",
     "alias": "Alias",

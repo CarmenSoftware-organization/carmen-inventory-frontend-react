@@ -75,8 +75,7 @@ export function useGrnFormActions({
     const detail = buildItemChanges(
       values.items,
       defaultValues.items,
-      // cast: RHF 7.78 type drift — DeepMap elem includes undefined which Record<string,unknown> excludes
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
+      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       (item) => {
         const payload = mapDetailToPayload(item);
         if (isManual) {
@@ -91,12 +90,12 @@ export function useGrnFormActions({
     const extraCostDetail = buildItemChanges(
       values.extra_cost_details,
       defaultValues.extra_cost_details,
-      // cast: RHF 7.78 type drift — DeepMap elem includes undefined which Record<string,unknown> excludes
-      form.formState.dirtyFields.extra_cost_details as Record<string, unknown>[] | undefined,
+      form.formState.dirtyFields.extra_cost_details as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       mapExtraCostToPayload,
     );
 
     const raw: Record<string, unknown> = {
+      doc_version: values.doc_version ?? undefined,
       note: values.note || undefined,
       grn_date: values.grn_date || undefined,
       invoice_no: values.invoice_no || undefined,

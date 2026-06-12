@@ -17,6 +17,7 @@ import type { CreditNote, CnItemPayload } from "@/types/credit-note";
 function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    doc_version: z.coerce.number().optional(),
     location_id: z
       .string()
       .nullable()
@@ -59,6 +60,7 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
  */
 export function createCnSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
+    doc_version: z.coerce.number().optional(),
     credit_note_type: z.enum(["quantity_return", "amount_discount"], {
       error: tv("creditNoteTypeRequired"),
     }),
@@ -159,6 +161,7 @@ export const EMPTY_FORM: CnFormValues = {
 export function getDefaultValues(cn?: CreditNote): CnFormValues {
   if (cn) {
     return {
+      doc_version: cn.doc_version,
       credit_note_type: cn.credit_note_type ?? "quantity_return",
       grn_id: cn.grn_id ?? "",
       grn_date: cn.grn_date ?? "",
@@ -180,6 +183,7 @@ export function getDefaultValues(cn?: CreditNote): CnFormValues {
       items:
         cn.credit_note_detail?.map((d) => ({
           id: d.id,
+          doc_version: d.doc_version,
           location_id: d.location_id ?? null,
           location_name: d.location_name ?? "",
           item_id: d.product_id,
@@ -221,6 +225,7 @@ export function mapItemToPayload(
   item: CnFormValues["items"][number],
 ): CnItemPayload {
   return {
+    ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     location_id: item.location_id || "",
     location_name: item.location_name,
     product_id: item.item_id || "",

@@ -527,6 +527,7 @@
     "exchangeRateDate": "วันที่อัตราแลกเปลี่ยน",
     "document": "เอกสาร",
     "requester": "ผู้ขอ",
+    "version": "ฉบับที่",
     "addressType": "ประเภทที่อยู่",
     "city": "เมือง",
     "alias": "ชื่อย่อ",

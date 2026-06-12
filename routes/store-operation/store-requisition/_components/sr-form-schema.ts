@@ -14,6 +14,7 @@ import type { TranslationFn } from "@/lib/i18n-schema";
 function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    doc_version: z.coerce.number().optional(),
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     product_name: z.string(),
     unit_name: z.string(),
@@ -41,6 +42,7 @@ function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
 export function createSrSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
+      doc_version: z.coerce.number().optional(),
       sr_date: z.string().min(1, tv("required", { field: tf("srDate") })),
       expected_date: z.string().min(1, tv("required", { field: tf("expectedDate") })),
       description: z.string(),

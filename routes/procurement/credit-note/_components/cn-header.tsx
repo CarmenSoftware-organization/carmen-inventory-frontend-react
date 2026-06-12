@@ -216,9 +216,15 @@ export function CnHeader({
     </DocumentRibbon>
   );
 
+  const subtitle =
+    creditNote?.doc_version != null
+      ? `${tfl("version")} ${creditNote.doc_version}`
+      : undefined;
+
   return (
     <DocFormHeader
       title={creditNote?.cn_no ?? t("entity")}
+      subtitle={subtitle}
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}

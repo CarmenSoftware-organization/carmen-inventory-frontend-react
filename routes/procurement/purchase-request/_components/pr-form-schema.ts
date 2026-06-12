@@ -21,6 +21,7 @@ import { round2 } from "@/lib/currency-utils";
 function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    doc_version: z.coerce.number().optional(),
     product_id: z
       .string()
       .nullable()
@@ -94,6 +95,7 @@ export function createPrSchema(
   const isPurchase = role === STAGE_ROLE.PURCHASE;
 
   return z.object({
+    doc_version: z.coerce.number().optional(),
     pr_date: z.string().min(1, tv("required", { field: tf("prDate") })),
     description: z.string(),
     workflow_id: z.string().min(1, tv("required", { field: tf("workflow") })),
@@ -223,6 +225,7 @@ export function getDefaultValues(
 ): PrFormValues {
   if (purchaseRequest) {
     return {
+      doc_version: purchaseRequest.doc_version,
       pr_date: isoToDateInput(purchaseRequest.pr_date),
       description: purchaseRequest.description ?? "",
       workflow_id: purchaseRequest.workflow_id ?? "",
@@ -231,6 +234,7 @@ export function getDefaultValues(
       items:
         purchaseRequest.purchase_request_detail?.map((d) => ({
           id: d.id,
+          doc_version: d.doc_version,
           product_id: d.product_id,
           product_code: d.product_code ?? "",
           product_name: d.product_name,
@@ -573,6 +577,7 @@ export function mapItemToPayload(
   item: PrFormValues["items"][number],
 ): PurchaseRequestDetailPayload {
   return {
+    ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     product_id: item.product_id || null,
     description: item.description,
     requested_qty: item.requested_qty,

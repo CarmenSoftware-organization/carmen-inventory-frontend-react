@@ -17,6 +17,8 @@ import { getDeleteDescription } from "@/lib/form-utils";
 
 interface PoItemFieldsProps {
   form: UseFormReturn<PoFormValues>;
+  /** counter จากฟอร์ม — เพิ่มทุกครั้งที่ validation ไม่ผ่าน เพื่อ auto-expand row ที่ location error */
+  revealErrorSignal: number;
   disabled: boolean;
   /** disabled แยกสำหรับ location editor — ปกติเท่ากับ `disabled` แต่ PO
    *  จาก price list จะล็อก field อื่นหมดแล้วปล่อยให้แก้ location ได้ */
@@ -31,6 +33,7 @@ interface PoItemFieldsProps {
 
 export function PoItemFields({
   form,
+  revealErrorSignal,
   disabled,
   locationsDisabled = disabled,
   role,
@@ -45,6 +48,9 @@ export function PoItemFields({
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [bulkAction, setBulkAction] = useState<"close" | "reject" | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  // signal นับครั้ง add — เพิ่มทีละ 1 ทุกครั้งที่ prepend item ใหม่
+  // ส่งให้ grid auto-expand row ที่ index 0 (item ใหม่อยู่บนสุดเพราะ prepend)
+  const [addSignal, setAddSignal] = useState(0);
 
   const {
     fields: itemFields,
@@ -54,6 +60,7 @@ export function PoItemFields({
 
   const handleAddItem = () => {
     prependItem({ ...PO_ITEM });
+    setAddSignal((c) => c + 1);
   };
 
   const readOnly = role === STAGE_ROLE.APPROVE;
@@ -257,6 +264,8 @@ export function PoItemFields({
         <PoItemsGrid
           form={form}
           itemCount={itemFields.length}
+          addSignal={addSignal}
+          revealErrorSignal={revealErrorSignal}
           disabled={disabled}
           locationsDisabled={locationsDisabled}
           readOnly={readOnly}

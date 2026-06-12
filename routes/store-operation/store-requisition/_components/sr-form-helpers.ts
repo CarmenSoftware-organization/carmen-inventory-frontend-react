@@ -25,6 +25,7 @@ export function buildSrDefaultValues(
     };
   }
   return {
+    doc_version: storeRequisition.doc_version,
     sr_date: storeRequisition.sr_date ?? "",
     expected_date: storeRequisition.expected_date ?? "",
     description: storeRequisition.description ?? "",
@@ -36,6 +37,7 @@ export function buildSrDefaultValues(
     items:
       storeRequisition.store_requisition_detail?.map((d) => ({
         id: d.id,
+        doc_version: d.doc_version,
         product_id: d.product_id,
         product_name: d.product_name,
         unit_name: d.inventory_unit_name ?? "",
@@ -55,6 +57,7 @@ export function buildSrDefaultValues(
  */
 export function mapSrItemToPayload(item: SrFormValues["items"][number]) {
   return {
+    ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     product_id: item.product_id,
     description: item.description,
     requested_qty: item.requested_qty,

@@ -209,9 +209,15 @@ export function PoHeader({
     />
   ) : undefined;
 
+  const subtitle =
+    purchaseOrder?.doc_version != null
+      ? `${tfl("version")} ${purchaseOrder.doc_version}`
+      : undefined;
+
   return (
     <DocFormHeader
       title={headerTitle}
+      subtitle={subtitle}
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}

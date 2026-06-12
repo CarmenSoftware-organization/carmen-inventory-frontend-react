@@ -29,6 +29,8 @@ interface UsePoFormHandlersOptions {
   role: string | undefined;
   setShowReject: Dispatch<SetStateAction<boolean>>;
   setShowClose: Dispatch<SetStateAction<boolean>>;
+  /** เรียกเมื่อ validation ไม่ผ่าน — auto-expand row ที่ location error + scroll */
+  revealErrors: () => void;
 }
 
 /**
@@ -61,6 +63,7 @@ export function usePoFormHandlers({
   role,
   setShowReject,
   setShowClose,
+  revealErrors,
 }: UsePoFormHandlersOptions) {
   const router = useRouter();
   const t = useTranslations("procurement.purchaseOrder");
@@ -100,7 +103,7 @@ export function usePoFormHandlers({
     const payload = buildPoPayload(
       values,
       defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
+      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
     );
 
     if (mode === "edit" && purchaseOrder) {
@@ -178,12 +181,15 @@ export function usePoFormHandlers({
     if (!purchaseOrder) return;
     if (form.formState.isDirty) {
       const valid = await form.trigger();
-      if (!valid) return;
+      if (!valid) {
+        revealErrors();
+        return;
+      }
       const values = form.getValues();
       const payload = buildPoPayload(
         values,
         defaultValues.items,
-        form.formState.dirtyFields.items as // RHF 7.78 type drift
+        form.formState.dirtyFields.items as
           | Record<string, unknown>[]
           | undefined,
       );

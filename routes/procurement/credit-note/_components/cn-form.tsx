@@ -1,5 +1,5 @@
 
-import { useState, lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@/lib/compat/navigation";
@@ -8,7 +8,6 @@ import {
   buildItemChanges,
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
-
 import { toast } from "sonner";
 import {
   useCreateCreditNote,
@@ -37,7 +36,6 @@ import {
   mapItemToPayload,
 } from "./cn-form-schema";
 
-// แทน next/dynamic ด้วย React.lazy (code-split comment-sheet chunk เหมือนเดิม)
 const CnCommentSheet = lazy(() =>
   import("./cn-comment-sheet").then((mod) => ({ default: mod.CnCommentSheet })),
 );
@@ -86,11 +84,12 @@ export function CnForm({ creditNote }: CnFormProps) {
     const items = buildItemChanges(
       values.items,
       defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // pre-approved cast: react-hook-form 7.78 type drift vs buildItemChanges signature
+      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       mapItemToPayload,
     );
 
     const payload: CreateCnDto = {
+      ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
       credit_note_type: values.credit_note_type,
       grn_id: values.grn_id,
       grn_date: values.grn_date,

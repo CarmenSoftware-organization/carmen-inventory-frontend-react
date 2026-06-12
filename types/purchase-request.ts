@@ -237,6 +237,7 @@ export interface CreatePrtDto {
 }
 
 export interface PurchaseRequestDetailPayload {
+  doc_version?: number;
   product_id: string | null;
   description: string;
   current_stage_status: string;
@@ -268,6 +269,7 @@ export interface PurchaseRequestDetailPayload {
 export interface CreatePurchaseRequestDto {
   stage_role: string;
   details: {
+    doc_version?: number;
     pr_date: string;
     description: string;
     requestor_id: string;

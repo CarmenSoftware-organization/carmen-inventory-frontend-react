@@ -114,6 +114,7 @@ export function usePrFormActions({
   const buildCreateDetails = (
     values: PrFormValues,
   ): CreatePurchaseRequestDto["details"] => ({
+    ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
     pr_date: new Date(values.pr_date).toISOString(),
     description: values.description,
     requestor_id: values.requestor_id,

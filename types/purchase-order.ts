@@ -28,6 +28,7 @@ export interface PoDetailLocation {
 
 export interface PurchaseOrderDetail extends ItemMoneyFields {
   id: string;
+  doc_version?: number;
   stage_status: string | null;
   current_stage_status: string;
   description: string;
@@ -64,6 +65,7 @@ export interface PrDetailRef {
 }
 
 export interface PoDetailPayload {
+  doc_version?: number;
   sequence: number;
   product_id: string;
   product_code: string;
@@ -102,6 +104,7 @@ export interface PoDetailPayloadLocation {
 export interface CreatePoDto {
   stage_role: string;
   details: {
+    doc_version?: number;
     po_type?: PO_TYPE;
     workflow_id: string;
     vendor_id: string;
