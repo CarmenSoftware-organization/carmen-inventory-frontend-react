@@ -211,6 +211,12 @@ const handleClientErrors = async (
   url: string,
   init: RequestInit,
 ): Promise<Response> => {
+  // /api/external/* เป็น public endpoint (เช่น price-list ผ่าน url_token) — ไม่มี
+  // session ให้ refresh/clear การดัก 401 จะกลืน HttpError ของ hook ทำให้ branch
+  // "ลิงก์หมดอายุ" กลายเป็น dead code และ retry วน refresh บนหน้า public ปล่อยให้
+  // raw response ไปถึง handleResponse ของ hook เอง
+  if (url.startsWith(EXTERNAL_PREFIX)) return response;
+
   if (response.status === 401) {
     const message = await readErrorMessage(response);
     const isPermission = message?.toLowerCase().includes("permission");

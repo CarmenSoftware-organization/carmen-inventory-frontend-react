@@ -132,6 +132,20 @@ describe("403 handling", () => {
 });
 
 // =========================================================================
+// External public endpoints — auth interception is skipped
+// =========================================================================
+describe("/api/external/* handling", () => {
+  it("returns the raw 401 response instead of throwing/refreshing", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(401));
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await httpClient.get("/api/external/pl/tok-123");
+    // ไม่ throw ApiError และไม่เรียก refresh/retry — คืน response ดิบให้ hook จัดการ
+    expect(res.status).toBe(401);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+// =========================================================================
 // 429 handling
 // =========================================================================
 describe("429 handling", () => {
