@@ -9,6 +9,38 @@ talks to the backend gateway directly. There is **no application server** of our
 > see `docs/modules/`. For the migration spec see
 > `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migration-design.md`.
 
+## System context
+
+How this SPA sits in the wider Carmen system. Service names and ports match the
+backend's `carmen-turborepo-backend-v2/docs/architecture-system.md`. There is no
+frontend application server: the static bundle runs in the browser and calls the
+backend gateway directly.
+
+```mermaid
+flowchart TD
+    Browser["Browser SPA\ncarmen-inventory-frontend-react\n(Vite + React 19 + React Router 7)\nstatic bundle — no app server"]
+    Edge["Static hosting / edge\nS3 + CloudFront · GCS + Cloud CDN ·\nDocker nginx (Port 3000, proxies /api/*)"]
+    Config["public/config.json\nBACKEND_URL · X_APP_ID"]
+    Gateway["backend-gateway\nAPI Gateway\nHTTP: 4000 / HTTPS: 4001"]
+    Business["micro-business\nauth · master data ·\ninventory · procurement · recipes"]
+    FileSvc["micro-file\nfile storage"]
+    Notify["micro-notification\nSocket.io"]
+    Keycloak["micro-keycloak → Keycloak Server\nauth / tokens"]
+
+    Browser -->|"served from"| Edge
+    Browser -->|"fetched at boot"| Config
+    Browser -->|"HTTPS · Bearer + x-app-id\n(/api/* → BACKEND_URL)"| Gateway
+    Gateway --> Business
+    Gateway --> FileSvc
+    Gateway --> Notify
+    Gateway --> Keycloak
+```
+
+In static-hosting modes (S3/CloudFront, GCS/Cloud CDN) the browser reaches the
+gateway directly and the backend **must** send CORS headers; in the Docker nginx
+mode the image proxies `/api/*` itself, so no backend CORS is required. See
+**Build & deploy** below.
+
 ## Boot sequence
 
 `main.tsx` boots in a fixed order before anything renders:
