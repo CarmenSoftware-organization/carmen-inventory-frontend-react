@@ -22,6 +22,7 @@ import {
 import { profileQueryKey } from "@/hooks/use-profile";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { login } from "@/lib/auth/auth-api";
+import { resolveNextPath } from "@/lib/auth/resolve-next-path";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -41,14 +42,6 @@ class RateLimitError extends Error {
     this.name = "RateLimitError";
   }
 }
-
-const resolveNextPath = (next: string | null): string => {
-  const fallback = "/dashboard";
-  if (!next) return fallback;
-  if (!next.startsWith("/")) return fallback;
-  if (next.startsWith("//") || next.startsWith("/\\")) return fallback;
-  return next;
-};
 
 export default function LoginForm() {
   const router = useRouter();
