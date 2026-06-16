@@ -83,6 +83,7 @@ function getPinningStyles<TData>(column: Column<TData>): CSSProperties {
  * ```
  */
 function DataGridTableBase({ children }: { children: ReactNode }) {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { props, table } = useDataGrid();
 
   return (
@@ -367,6 +368,7 @@ function DataGridTableBody({ children }: { children: ReactNode }) {
  * ```
  */
 function DataGridTableBodyRowSkeleton({ children }: { children: ReactNode }) {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, props } = useDataGrid();
 
   return (
@@ -415,6 +417,7 @@ function DataGridTableBodyRowSkeletonCell<TData>({
   children: ReactNode;
   column: Column<TData>;
 }) {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { props, table } = useDataGrid();
   const bodyCellSpacing = bodyCellSpacingVariants({
     size: props.tableLayout?.dense ? "dense" : "default",
@@ -479,6 +482,7 @@ function DataGridTableBodyRow<TData>({
   dndRef?: React.Ref<HTMLTableRowElement>;
   dndStyle?: CSSProperties;
 }) {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { props, table } = useDataGrid();
 
   return (
@@ -539,6 +543,7 @@ function DataGridTableBodyRow<TData>({
  * ```
  */
 function DataGridTableBodyRowExpandded<TData>({ row }: { row: Row<TData> }) {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { props, table } = useDataGrid();
 
   return (
@@ -698,6 +703,7 @@ function DataGridTableBodyRowCell<TData>({
  * ```
  */
 function DataGridTableEmpty() {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, props } = useDataGrid();
   const totalColumns = table.getAllColumns().length;
 
@@ -792,6 +798,7 @@ function DataGridTableRowSelect<TData>({
  * ```
  */
 function DataGridTableRowSelectAll() {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, recordCount, isLoading } = useDataGrid();
 
   const isAllSelected = table.getIsAllPageRowsSelected();
@@ -828,6 +835,7 @@ function DataGridTableRowSelectAll() {
  * ```
  */
 function DataGridTable<TData>() {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, isLoading, props } = useDataGrid();
   const pagination = table.getState().pagination;
   const showCheckbox = !!props.tableLayout?.checkbox;

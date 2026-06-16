@@ -38,6 +38,7 @@ function DataGridColumnVisibility<TData>({
   table: Table<TData>
   trigger: ReactElement<Record<string, unknown>>
 }) {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
