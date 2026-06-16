@@ -73,6 +73,7 @@ function DataGridColumnHeaderInner<TData, TValue>({
   filter,
   visibility = false,
 }: DataGridColumnHeaderProps<TData, TValue>) {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { isLoading, table, props } = useDataGrid();
 
   const columnOrder = table.getState().columnOrder;

@@ -101,6 +101,14 @@ function DataGridPagination({
   className,
   siblings = 1,
 }: DataGridPaginationProps): React.JSX.Element {
+  // "use no memo" opts out of React Compiler's automatic memoization.
+  // The TanStack `table` instance is referentially stable but internally
+  // mutable, so the compiler would freeze derived reads like
+  // `table.getState().pagination.pageIndex` at their first value — leaving the
+  // active page / "showing X–Y" stale after a page change. Same reason
+  // `use-config-table.ts` opts out.
+  "use no memo";
+
   const { table, recordCount, isLoading } = useDataGrid();
   const t = useTranslations("pagination");
 

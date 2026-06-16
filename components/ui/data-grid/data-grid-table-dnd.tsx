@@ -184,6 +184,7 @@ function DataGridTableDnd<TData>({
 }: {
   handleDragEnd: (event: DragEndEvent) => void
 }) {
+  "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { table, isLoading, props } = useDataGrid()
   const pagination = table.getState().pagination
   const containerRef = useRef<HTMLDivElement>(null)
