@@ -98,7 +98,9 @@ export function UnitDialog({
 
     if (isEdit) {
       updateUnit.mutate(
-        { id: unit.id, ...payload },
+        // doc_version round-trips the loaded record's version — the backend
+        // requires it on update for optimistic concurrency (omitting it → 400).
+        { id: unit.id, doc_version: unit.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
