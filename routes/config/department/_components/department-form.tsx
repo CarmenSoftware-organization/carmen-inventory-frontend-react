@@ -172,7 +172,9 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
 
     if (isEdit && department) {
       updateDepartment.mutate(
-        { id: department.id, ...payload },
+        // doc_version round-trips the loaded record's version — the backend
+        // requires it on PATCH for optimistic concurrency (omitting it → 400).
+        { id: department.id, doc_version: department.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
