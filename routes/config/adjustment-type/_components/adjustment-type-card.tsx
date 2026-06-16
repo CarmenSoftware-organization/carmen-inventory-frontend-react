@@ -44,7 +44,7 @@ export default function AdjustmentTypeCard({
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-sm">{item.name}</CardTitle>
+            <CardTitle className="truncate text-sm">{item.name || "..."}</CardTitle>
             <p className="text-muted-foreground text-xs">{item.code}</p>
           </div>
         </div>

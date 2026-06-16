@@ -35,7 +35,7 @@ export function usePrtTable({
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
-          {row.original.name}
+          {row.original.name || "..."}
         </CellAction>
       ),
       meta: { headerTitle: tfl("name") },

@@ -83,7 +83,7 @@ export function useWfTable({
                   inactive && "decoration-muted-foreground/40 line-through",
                 )}
               >
-                {row.getValue("name")}
+                {row.getValue("name") || "..."}
               </span>
             </span>
           </CellAction>

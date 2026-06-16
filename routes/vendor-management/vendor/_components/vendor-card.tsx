@@ -49,7 +49,7 @@ export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
               {index + 1}
             </span>
           )}
-          <CardTitle className="text-sm flex-1 min-w-0 break-words">{item.name}</CardTitle>
+          <CardTitle className="text-sm flex-1 min-w-0 break-words">{item.name || "..."}</CardTitle>
         </div>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-xs">{item.code}</p>

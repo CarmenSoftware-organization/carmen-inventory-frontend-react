@@ -71,7 +71,7 @@ export function useRecipeTable({
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
-          {row.original.name}
+          {row.original.name || "..."}
         </CellAction>
       ),
       size: 200,

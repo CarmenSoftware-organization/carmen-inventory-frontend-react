@@ -130,7 +130,7 @@ export function ProductTable({ products, className }: ProductTableProps) {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => (
-          <HighlightText text={row.original.name ?? ""} query={search} />
+          <HighlightText text={row.original.name || "..."} query={search} />
         ),
       },
       {

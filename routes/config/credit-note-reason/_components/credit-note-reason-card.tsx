@@ -53,7 +53,7 @@ export default function CreditNoteReasonCard({
             </span>
           )}
           <CardTitle className="min-w-0 flex-1 truncate text-sm">
-            {item.name}
+            {item.name || "..."}
           </CardTitle>
         </div>
         <CardAction>

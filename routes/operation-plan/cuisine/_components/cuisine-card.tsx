@@ -50,7 +50,7 @@ export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
             </span>
           )}
           <CardTitle className="text-sm flex-1 min-w-0 break-words leading-tight">
-            {item.name}
+            {item.name || "..."}
           </CardTitle>
         </div>
         <CardAction>
