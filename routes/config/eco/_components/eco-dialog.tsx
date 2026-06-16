@@ -66,7 +66,10 @@ export function EcoLabelDialog({
   }, [open, ecoLabel, form]);
 
   const onSubmit = (values: EcoLabelFormValues) => {
-    const payload = {
+    // This endpoint wraps the record fields under `metadata` (it reads code /
+    // name / is_active — and on update, doc_version — from inside metadata, not
+    // the top level). Fields are also sent top-level for forward-compat.
+    const fields = {
       code: values.code,
       name: values.name,
       description: values.description ?? "",
@@ -75,7 +78,14 @@ export function EcoLabelDialog({
 
     if (isEdit) {
       updateEcoLabel.mutate(
-        { id: ecoLabel.id, ...payload },
+        {
+          id: ecoLabel.id,
+          doc_version: ecoLabel.doc_version,
+          ...fields,
+          // doc_version is the optimistic-concurrency token; the backend reads
+          // it from metadata on PATCH (omitting it → 400 "doc_version: Required").
+          metadata: { ...fields, doc_version: ecoLabel.doc_version },
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -85,7 +95,7 @@ export function EcoLabelDialog({
         },
       );
     } else {
-      createEcoLabel.mutate(payload, {
+      createEcoLabel.mutate({ ...fields, metadata: { ...fields } }, {
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           onOpenChange(false);
