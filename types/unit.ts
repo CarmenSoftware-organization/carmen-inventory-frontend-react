@@ -6,6 +6,8 @@ export interface UnitDimension {
 
 export interface Unit {
   id: string;
+  /** Optimistic-concurrency token — the backend requires it back on update (PUT). */
+  doc_version: number;
   name: string;
   description: string;
   is_active: boolean;
@@ -19,4 +21,6 @@ export interface CreateUnitDto {
   name: string;
   description: string;
   is_active: boolean;
+  /** Only sent on update for optimistic concurrency; absent on create. */
+  doc_version?: number;
 }
