@@ -85,7 +85,9 @@ export function ExtraCostDialog({
 
     if (isEdit) {
       updateExtraCost.mutate(
-        { id: extraCost.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires
+        // it on PATCH for optimistic concurrency (omitting it → 400).
+        { id: extraCost.id, doc_version: extraCost.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
