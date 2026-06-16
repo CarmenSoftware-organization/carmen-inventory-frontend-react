@@ -90,7 +90,9 @@ export function TaxProfileDialog({
 
     if (isEdit) {
       updateTaxProfile.mutate(
-        { id: taxProfile.id, ...payload },
+        // doc_version round-trips the loaded record's version — the backend
+        // uses it for optimistic concurrency and rejects the PATCH (400) if omitted
+        { id: taxProfile.id, doc_version: taxProfile.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
