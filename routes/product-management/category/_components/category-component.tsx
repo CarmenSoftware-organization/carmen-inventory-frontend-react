@@ -158,7 +158,13 @@ export default function CategoryComponent() {
     });
 
     if (isEdit && selectedNode) {
-      const payload = { id: selectedNode.id, ...data };
+      // doc_version round-trips the loaded record's version — backend requires
+      // it on update for optimistic concurrency (omitting it returns 400).
+      const payload = {
+        id: selectedNode.id,
+        doc_version: selectedNode.doc_version,
+        ...data,
+      };
       const label = NODE_LABELS[selectedNode.type];
       const actions = {
         [NODE_TYPE.CATEGORY]: () => updateCategory.mutate(payload, opts(label)),
