@@ -63,6 +63,7 @@ export function useCategoryTree({
           tax_profile_name: ig.tax_profile_name,
           tax_rate: Number(ig.tax_rate ?? 0),
           cascade_deviation: ig.cascade_deviation,
+          doc_version: ig.doc_version,
         }));
     };
 
@@ -89,6 +90,7 @@ export function useCategoryTree({
           tax_profile_name: sub.tax_profile_name,
           tax_rate: Number(sub.tax_rate ?? 0),
           cascade_deviation: sub.cascade_deviation,
+          doc_version: sub.doc_version,
         }));
     };
 
@@ -108,6 +110,7 @@ export function useCategoryTree({
       tax_profile_name: cat.tax_profile_name,
       tax_rate: Number(cat.tax_rate ?? 0),
       cascade_deviation: false,
+      doc_version: cat.doc_version,
     }));
   })();
 

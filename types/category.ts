@@ -27,6 +27,8 @@ export interface CategoryNode {
   product_subcategory_id?: string;
   itemCount?: number;
   cascade_deviation: boolean;
+  /** Optimistic-concurrency token — backend requires it back on update. */
+  doc_version?: number;
 }
 
 export interface CategoryDto {
@@ -42,6 +44,8 @@ export interface CategoryDto {
   tax_profile_id?: string;
   tax_profile_name?: string;
   tax_rate?: number;
+  /** Optimistic-concurrency token — backend requires it back on update. */
+  doc_version?: number;
 }
 
 export interface SubCategoryDto {
@@ -59,6 +63,8 @@ export interface SubCategoryDto {
   tax_profile_name?: string;
   tax_rate?: number;
   cascade_deviation: boolean;
+  /** Optimistic-concurrency token — backend requires it back on update. */
+  doc_version?: number;
 }
 
 export interface ItemGroupDto {
@@ -78,6 +84,8 @@ export interface ItemGroupDto {
   cascade_deviation: boolean;
   sub_category?: { id: string; code: string; name: string };
   category?: { id: string; code: string; name: string };
+  /** Optimistic-concurrency token — backend requires it back on update. */
+  doc_version?: number;
 }
 
 export interface CreateCategoryDto {
@@ -92,6 +100,8 @@ export interface CreateCategoryDto {
   tax_profile_id?: string;
   tax_profile_name?: string;
   tax_rate?: number;
+  /** Only sent on update for optimistic concurrency; absent on create. */
+  doc_version?: number;
 }
 
 export interface CreateSubCategoryDto {
@@ -107,6 +117,8 @@ export interface CreateSubCategoryDto {
   tax_profile_id?: string;
   tax_profile_name?: string;
   tax_rate?: number;
+  /** Only sent on update for optimistic concurrency; absent on create. */
+  doc_version?: number;
 }
 
 export interface CreateItemGroupDto {
@@ -122,4 +134,6 @@ export interface CreateItemGroupDto {
   tax_profile_id?: string;
   tax_profile_name?: string;
   tax_rate?: number;
+  /** Only sent on update for optimistic concurrency; absent on create. */
+  doc_version?: number;
 }
