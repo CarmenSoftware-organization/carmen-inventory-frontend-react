@@ -1,8 +1,10 @@
 import z from "zod";
 
 export enum ADJUSTMENT_TYPE {
-  STOCK_IN = "STOCK_IN",
-  STOCK_OUT = "STOCK_OUT",
+  // Backend persists/validates these as lowercase enum values
+  // ('stock_in' | 'stock_out'); sending uppercase yields a 400 on create/update.
+  STOCK_IN = "stock_in",
+  STOCK_OUT = "stock_out",
 }
 
 export const ADJUSTMENT_TYPE_OPTIONS = [
@@ -23,6 +25,7 @@ export type AdjustmentTypeFormValues = z.infer<typeof adjustmentTypeSchema>;
 
 export interface AdjustmentType extends AdjustmentTypeFormValues {
   id: string;
+  doc_version?: number;
 }
 
 export interface CreateAdjustmentTypeDto {
@@ -32,4 +35,6 @@ export interface CreateAdjustmentTypeDto {
   description: string;
   note: string;
   is_active: boolean;
+  // Optimistic-concurrency token; required by the backend on update (PUT).
+  doc_version?: number;
 }

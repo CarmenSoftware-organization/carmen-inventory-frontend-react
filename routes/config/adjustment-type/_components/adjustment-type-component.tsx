@@ -8,7 +8,7 @@ import {
   useDeleteAdjustmentType,
 } from "@/hooks/use-adjustment-type";
 import { useURL } from "@/hooks/use-url";
-import type { AdjustmentType } from "@/types/adjustment-type";
+import { ADJUSTMENT_TYPE, type AdjustmentType } from "@/types/adjustment-type";
 import { useAdjustmentTypeTable } from "./use-adjustment-type-table";
 import { AdjustmentTypeDialog } from "./adjustment-type-dialog";
 import AdjustmentTypeCard from "./adjustment-type-card";
@@ -19,8 +19,8 @@ export default function AdjustmentTypeComponent() {
   const [adjType, setAdjType] = useURL("adj_type");
 
   const TYPE_OPTIONS = [
-    { label: tfl("stockIn"), value: "type|string:STOCK_IN" },
-    { label: tfl("stockOut"), value: "type|string:STOCK_OUT" },
+    { label: tfl("stockIn"), value: `type|string:${ADJUSTMENT_TYPE.STOCK_IN}` },
+    { label: tfl("stockOut"), value: `type|string:${ADJUSTMENT_TYPE.STOCK_OUT}` },
   ];
 
   const extraActiveFilters: ActiveFilter[] = !adjType

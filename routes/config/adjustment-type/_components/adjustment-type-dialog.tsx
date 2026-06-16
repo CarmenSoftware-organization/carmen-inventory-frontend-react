@@ -109,7 +109,9 @@ export function AdjustmentTypeDialog({
 
     if (isEdit) {
       updateAdjustmentType.mutate(
-        { id: adjustmentType.id, ...payload },
+        // doc_version is the optimistic-concurrency token the backend requires
+        // on update; omitting it yields a 400 "doc_version: Required".
+        { id: adjustmentType.id, doc_version: adjustmentType.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
