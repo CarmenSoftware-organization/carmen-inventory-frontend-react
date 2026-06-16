@@ -88,7 +88,9 @@ export function BusinessTypeDialog({
 
     if (isEdit) {
       updateBusinessType.mutate(
-        { id: businessType.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires
+        // it on PATCH for optimistic concurrency (omitting it → 400).
+        { id: businessType.id, doc_version: businessType.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
