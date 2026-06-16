@@ -69,7 +69,7 @@ export function useNotiTmplTable({
           href={`/system-admin/notification-template/${row.original.id}`}
           className="focus-visible:ring-ring/50 font-medium text-blue-600 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-none dark:text-blue-400"
         >
-          {row.original.name}
+          {row.original.name || "..."}
         </Link>
       ),
       meta: { headerTitle: t("colName"), skeleton: columnSkeletons.text },

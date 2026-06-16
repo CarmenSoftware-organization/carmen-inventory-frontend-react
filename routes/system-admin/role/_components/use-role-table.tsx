@@ -46,7 +46,7 @@ export function useRoleTable({
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
-          {row.getValue("name")}
+          {row.getValue("name") || "..."}
         </CellAction>
       ),
       meta: { skeleton: columnSkeletons.text },

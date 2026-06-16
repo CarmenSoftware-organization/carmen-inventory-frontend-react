@@ -91,7 +91,7 @@ export function ScLocationCard({
                 href={`/config/location/${item.location_id}`}
                 className="text-foreground text-sm leading-tight font-semibold tracking-tight hover:underline"
               >
-                {item.name}
+                {item.name || "..."}
               </Link>
               <Link
                 href={`/config/location/${item.location_id}`}

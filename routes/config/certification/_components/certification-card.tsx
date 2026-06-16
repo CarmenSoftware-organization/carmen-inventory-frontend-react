@@ -49,7 +49,7 @@ export default function CertificationCard({
           </div>
           <div className="min-w-0 flex-1">
             <CardTitle className="line-clamp-2 min-h-10 text-sm leading-snug font-semibold">
-              {item.name}
+              {item.name || "..."}
             </CardTitle>
             <Badge variant="secondary" size="xs" className="mt-1 font-normal">
               {item.code}

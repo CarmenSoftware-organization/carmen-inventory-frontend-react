@@ -51,7 +51,7 @@ export default function UnitCard({ item, index, onEdit }: UnitCardProps) {
               {index + 1}
             </span>
           )}
-          <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name}</CardTitle>
+          <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name || "..."}</CardTitle>
         </div>
         <CardAction>
           <Badge

@@ -52,7 +52,7 @@ export function usePriceListTemplateTable({
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
-          {row.getValue("name")}
+          {row.getValue("name") || "..."}
         </CellAction>
       ),
       meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },

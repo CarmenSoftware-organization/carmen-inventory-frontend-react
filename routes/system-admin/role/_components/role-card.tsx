@@ -50,7 +50,7 @@ export default function RoleCard({ item, index, onEdit }: RoleCardProps) {
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-sm">{item.name}</CardTitle>
+            <CardTitle className="truncate text-sm">{item.name || "..."}</CardTitle>
           </div>
         </div>
         <CardAction>

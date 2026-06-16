@@ -45,7 +45,7 @@ export function useEcoLabelTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("name")} />
       ),
-      cell: ({ row }) => <span>{row.getValue("name")}</span>,
+      cell: ({ row }) => <span>{row.getValue("name") || "..."}</span>,
       meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },
     },
   ];

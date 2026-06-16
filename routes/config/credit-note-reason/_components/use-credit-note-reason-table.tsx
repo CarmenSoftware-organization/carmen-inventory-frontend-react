@@ -40,7 +40,7 @@ export function useCreditNoteReasonTable({
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
-          {row.getValue("name")}
+          {row.getValue("name") || "..."}
         </CellAction>
       ),
       meta: { headerTitle: "Name", skeleton: columnSkeletons.text },

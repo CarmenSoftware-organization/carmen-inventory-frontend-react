@@ -36,7 +36,7 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
               {index + 1}
             </span>
           )}
-          <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name}</CardTitle>
+          <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name || "..."}</CardTitle>
         </div>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground truncate text-xs">

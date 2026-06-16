@@ -55,7 +55,7 @@ export default function RecipeCategoryCard({
           )}
           <div className="min-w-0 flex-1">
             <CardTitle className="text-sm break-words leading-tight">
-              {item.name}
+              {item.name || "..."}
             </CardTitle>
             <p className="text-muted-foreground mt-0.5 text-xs">{item.code}</p>
           </div>

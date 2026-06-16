@@ -85,7 +85,7 @@ export default function WfCard({
                   inactive && "decoration-muted-foreground/40 line-through",
                 )}
               >
-                {item.name}
+                {item.name || "..."}
               </span>
             </CardTitle>
             <p className="text-muted-foreground text-xs">

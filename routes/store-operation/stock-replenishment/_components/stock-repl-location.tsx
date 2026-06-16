@@ -126,7 +126,7 @@ export function StockReplLocation({
     {
       accessorKey: "name",
       header: tfl("product"),
-      cell: ({ row }) => row.getValue("name"),
+      cell: ({ row }) => row.getValue("name") || "...",
       enableSorting: false,
     },
     {

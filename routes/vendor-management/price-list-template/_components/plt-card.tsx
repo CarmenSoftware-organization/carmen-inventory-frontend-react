@@ -56,7 +56,7 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
             </span>
           )}
           <CardTitle className="text-sm flex-1 min-w-0 break-words leading-tight">
-            {item.name}
+            {item.name || "..."}
           </CardTitle>
         </div>
         {item.description && (
