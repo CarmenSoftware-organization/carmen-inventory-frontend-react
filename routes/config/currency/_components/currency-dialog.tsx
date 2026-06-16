@@ -85,8 +85,10 @@ export function CurrencyDialog({
               name: currency.name,
               symbol: currency.symbol,
               exchange_rate: currency.exchange_rate,
-              description: currency.description,
-              decimal_places: currency.decimal_places,
+              description: currency.description ?? "",
+              // backend may omit decimal_places — fall back so zod coercion
+              // (z.coerce.number().int()) doesn't see NaN and block submit.
+              decimal_places: currency.decimal_places ?? 2,
               is_active: currency.is_active,
             }
           : EMPTY_FORM,
@@ -120,7 +122,9 @@ export function CurrencyDialog({
 
     if (isEdit) {
       updateCurrency.mutate(
-        { id: currency.id, ...payload },
+        // doc_version round-trips the loaded record's version — the backend
+        // requires it on PATCH for optimistic concurrency (omitting it → 400).
+        { id: currency.id, doc_version: currency.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
