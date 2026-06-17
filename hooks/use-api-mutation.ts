@@ -36,6 +36,33 @@ export function removeFromListById<T extends { id: string }>(
   };
 }
 
+/**
+ * ทำความสะอาด error message จาก server โดยตัด placeholder ที่ backend ไม่ได้
+ * substitute (เช่น `"Validation failed: {errors}"` → `"Validation failed"`)
+ *
+ * บาง endpoint คืน message template ที่ยังมี `{...}` ค้างอยู่ frontend แสดง
+ * server message ตรง ๆ จึงต้อง strip ออกกัน toast โชว์ literal `{errors}`
+ * ถ้าตัดแล้วเหลือว่างให้ fallback เป็นข้อความสำรอง
+ *
+ * @param message - ข้อความจาก server (อาจมี placeholder ค้าง)
+ * @param fallback - ข้อความสำรองเมื่อไม่มี message หรือเหลือว่างหลัง strip
+ * @returns ข้อความที่สะอาดแล้ว
+ * @example
+ * ```ts
+ * cleanServerMessage("Validation failed: {errors}", "Request failed"); // "Validation failed"
+ * cleanServerMessage("{errors}", "Request failed"); // "Request failed"
+ * ```
+ */
+export function cleanServerMessage(
+  message: string | undefined,
+  fallback: string,
+): string {
+  if (!message) return fallback;
+  // ตัด placeholder `{...}` ที่ค้าง พร้อม separator นำหน้า (": ", " - ", " ")
+  const cleaned = message.replace(/\s*[:-]?\s*\{[^}]*\}/g, "").trim();
+  return cleaned || fallback;
+}
+
 interface UseApiMutationOptions<TVariables> {
   mutationFn: (variables: TVariables, buCode: string) => Promise<Response>;
   invalidateKeys?: readonly unknown[];
@@ -103,7 +130,10 @@ export function useApiMutation<TVariables, TResponse = unknown>({
         } catch {
           // JSON parse failed — use fallback
         }
-        throw ApiError.fromResponse(res, serverMessage || errorMessage);
+        throw ApiError.fromResponse(
+          res,
+          cleanServerMessage(serverMessage, errorMessage),
+        );
       }
       const data = await res.json();
       if (
@@ -114,7 +144,7 @@ export function useApiMutation<TVariables, TResponse = unknown>({
       ) {
         throw new ApiError(
           "VALIDATION_ERROR",
-          data.message || errorMessage,
+          cleanServerMessage(data.message, errorMessage),
           data.status,
         );
       }
