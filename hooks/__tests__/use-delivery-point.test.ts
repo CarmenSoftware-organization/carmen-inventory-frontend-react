@@ -36,6 +36,7 @@ import { httpClient } from "@/lib/http-client";
 const mockDeliveryPoints: DeliveryPoint[] = [
   {
     id: "1",
+    doc_version: 1,
     name: "Main Warehouse",
     is_active: true,
     created_at: "2024-01-01T00:00:00Z",
@@ -43,6 +44,7 @@ const mockDeliveryPoints: DeliveryPoint[] = [
   },
   {
     id: "2",
+    doc_version: 1,
     name: "Back Office",
     is_active: false,
     created_at: "2024-01-02T00:00:00Z",

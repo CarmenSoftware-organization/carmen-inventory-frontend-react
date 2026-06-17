@@ -100,7 +100,9 @@ export function DeliveryPointDialog({
 
     if (isEdit) {
       updateDeliveryPoint.mutate(
-        { id: deliveryPoint.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend
+        // requires it for optimistic-concurrency checks on update
+        { id: deliveryPoint.id, doc_version: deliveryPoint.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
