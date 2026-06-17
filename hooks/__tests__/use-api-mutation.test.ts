@@ -9,7 +9,7 @@ vi.mock("@/hooks/use-bu-code", () => ({
 }));
 
 import { useBuCode } from "@/hooks/use-bu-code";
-import { useApiMutation } from "../use-api-mutation";
+import { useApiMutation, cleanServerMessage } from "../use-api-mutation";
 
 /**
  * สร้าง Response แบบ JSON สำหรับ mock httpClient ในเทสต์
@@ -202,5 +202,28 @@ describe("useApiMutation", () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error?.message).toBe("Request failed");
+  });
+});
+
+describe("cleanServerMessage", () => {
+  it("strips an unsubstituted placeholder with its separator", () => {
+    expect(cleanServerMessage("Validation failed: {errors}", "Request failed")).toBe(
+      "Validation failed",
+    );
+    expect(cleanServerMessage("Failed - {detail}", "Request failed")).toBe(
+      "Failed",
+    );
+  });
+
+  it("falls back when the message is empty or only a placeholder", () => {
+    expect(cleanServerMessage("{errors}", "Request failed")).toBe("Request failed");
+    expect(cleanServerMessage(undefined, "Request failed")).toBe("Request failed");
+    expect(cleanServerMessage("", "Request failed")).toBe("Request failed");
+  });
+
+  it("leaves a clean message untouched", () => {
+    expect(cleanServerMessage("Location already exists", "Request failed")).toBe(
+      "Location already exists",
+    );
   });
 });
