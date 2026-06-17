@@ -26,6 +26,7 @@ export interface ProductLocation {
 
 export interface Location {
   id: string;
+  doc_version: number;
   code: string;
   name: string;
   location_type: INVENTORY_TYPE;
@@ -40,6 +41,7 @@ export interface Location {
 }
 
 export interface CreateLocationDto {
+  doc_version?: number;
   code: string;
   name: string;
   location_type: INVENTORY_TYPE;

@@ -196,7 +196,9 @@ export function LocationForm({ location }: LocationFormProps) {
 
     if (isEdit && location) {
       updateLocation.mutate(
-        { id: location.id, ...payload },
+        // doc_version round-trips the loaded record's version — the backend
+        // requires it for optimistic-concurrency checks on update
+        { id: location.id, doc_version: location.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
