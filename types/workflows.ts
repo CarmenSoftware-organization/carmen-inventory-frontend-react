@@ -171,6 +171,7 @@ export interface WorkflowDto {
 
 export interface Workflow {
   id: string;
+  doc_version?: number;
   name: string;
   workflow_type: string;
   data: WorkflowData;

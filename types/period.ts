@@ -2,6 +2,7 @@ export type PeriodStatus = "open" | "closed" | "locked";
 
 export interface Period {
   id: string;
+  doc_version?: number;
   period: string;
   fiscal_year: number;
   fiscal_month: number;
@@ -13,6 +14,7 @@ export interface Period {
 }
 
 export interface CreatePeriodDto {
+  doc_version?: number;
   fiscal_year: number;
   fiscal_month: number;
   start_at: string;

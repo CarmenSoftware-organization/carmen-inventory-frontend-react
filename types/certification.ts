@@ -1,5 +1,6 @@
 export interface Certification {
   id: string;
+  doc_version: number;
   code: string;
   name: string;
   description: string;
@@ -9,6 +10,7 @@ export interface Certification {
 }
 
 export interface CreateCertificationDto {
+  doc_version?: number;
   code: string;
   name: string;
   description: string;

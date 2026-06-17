@@ -1,5 +1,6 @@
 export interface CreditTerm {
   id: string;
+  doc_version: number;
   name: string;
   description: string;
   value: number;
@@ -9,6 +10,7 @@ export interface CreditTerm {
 }
 
 export interface CreateCreditTermDto {
+  doc_version?: number;
   name: string;
   description: string;
   value: number;

@@ -92,6 +92,8 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       updateRecipe.mutate(
         {
           id: recipe.id,
+          // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+          doc_version: recipe.doc_version,
           ...payload,
           ...(galleryDirty ? { images: files, gallery: manifest } : {}),
         },

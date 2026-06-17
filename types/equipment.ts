@@ -61,6 +61,7 @@ export interface UpdateEquipmentVars extends CreateEquipmentDto {
 }
 
 export interface CreateEquipmentDto {
+  doc_version?: number;
   code: string;
   name: string;
   description: string | null;

@@ -103,7 +103,8 @@ export function CreditTermDialog({
 
     if (isEdit) {
       updateCreditTerm.mutate(
-        { id: creditTerm.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+        { id: creditTerm.id, doc_version: creditTerm.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

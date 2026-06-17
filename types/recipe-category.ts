@@ -1,5 +1,6 @@
 export interface RecipeCategory {
   id: string;
+  doc_version: number;
   code: string;
   name: string;
   description: string | null;
@@ -16,6 +17,7 @@ export interface RecipeCategory {
 }
 
 export interface CreateRecipeCategoryDto {
+  doc_version?: number;
   code: string;
   name: string;
   description: string | null;

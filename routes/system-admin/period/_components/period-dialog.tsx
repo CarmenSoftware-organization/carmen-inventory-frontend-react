@@ -87,7 +87,8 @@ export function PeriodDialog({
 
     if (isEdit) {
       updatePeriod.mutate(
-        { id: period.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+        { id: period.id, doc_version: period.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

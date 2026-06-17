@@ -117,6 +117,8 @@ export function RoleForm({ role }: RoleFormProps) {
       updateRole.mutate(
         {
           id: role.id,
+          // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+          doc_version: role.doc_version,
           application_role_name: values.application_role_name,
           permissions: { add, remove },
         },

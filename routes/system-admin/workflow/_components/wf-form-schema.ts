@@ -92,6 +92,7 @@ const actionSchema = z.object({
 
 export const wfFormSchema = z.object({
   id: z.uuid().optional(),
+  doc_version: z.number().optional(),
   name: z.string().min(1).max(100),
   workflow_type: z.string(),
   is_active: z.boolean(),

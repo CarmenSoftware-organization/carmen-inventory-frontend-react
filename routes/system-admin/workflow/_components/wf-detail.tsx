@@ -86,7 +86,8 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
 
   const onSubmit = (values: WorkflowCreateModel) => {
     updateWorkflow.mutate(
-      { id: workflow.id, ...values },
+      // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+      { id: workflow.id, doc_version: workflow.doc_version, ...values },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));

@@ -90,7 +90,8 @@ export function NotificationTemplateForm({
     const payload = mapToPayload(values);
     if (isEdit && template) {
       updateMut.mutate(
-        { id: template.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+        { id: template.id, doc_version: template.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

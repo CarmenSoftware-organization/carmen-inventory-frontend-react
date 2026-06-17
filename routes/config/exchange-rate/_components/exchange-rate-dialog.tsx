@@ -111,7 +111,8 @@ function EditForm({
   const onSubmit = (values: ExchangeRateFormValues) => {
     if (!item) return;
     updateRate.mutate(
-      { id: item.id, exchange_rate: values.exchange_rate },
+      // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+      { id: item.id, doc_version: item.doc_version, exchange_rate: values.exchange_rate },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
