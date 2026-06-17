@@ -425,7 +425,7 @@ export function LocationForm({ location }: LocationFormProps) {
                 <Field>
                   <FieldLabel required>{tfl("deliveryPoint")}</FieldLabel>
                   {isView ? (
-                    <PlainText value={location?.delivery_point_name} />
+                    <PlainText value={location?.delivery_point?.name} />
                   ) : (
                     <Controller
                       control={form.control}
@@ -434,6 +434,12 @@ export function LocationForm({ location }: LocationFormProps) {
                         <LookupDeliveryPoint
                           value={field.value}
                           onValueChange={field.onChange}
+                          onItemChange={(item) =>
+                            form.setValue("delivery_point_name", item.name)
+                          }
+                          // โชว์ชื่อ delivery point เดิมได้แม้ inactive (ไม่อยู่ใน
+                          // lookup list ที่กรองเฉพาะ active) แทนการตก placeholder
+                          defaultLabel={location?.delivery_point?.name}
                           disabled={isDisabled}
                           error={
                             form.formState.errors.delivery_point_id?.message

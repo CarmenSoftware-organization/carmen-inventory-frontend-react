@@ -15,6 +15,8 @@ interface LookupDeliveryPointProps {
   readonly disableTooltip?: boolean;
   readonly error?: string;
   readonly readOnly?: boolean;
+  /** ป้ายสำรองเมื่อ value resolve ไม่เจอใน list (เช่น delivery point ที่ inactive) */
+  readonly defaultLabel?: string;
 }
 
 export function LookupDeliveryPoint({
@@ -27,6 +29,7 @@ export function LookupDeliveryPoint({
   disableTooltip,
   error,
   readOnly,
+  defaultLabel,
 }: LookupDeliveryPointProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -67,6 +70,7 @@ export function LookupDeliveryPoint({
       searchPlaceholder={tl("search", { entity: tfl("deliveryPoint") })}
       disabled={disabled}
       className={className}
+      defaultLabel={defaultLabel}
       isLoading={isLoading}
       serverSideSearch
       onSearchChange={setSearch}
