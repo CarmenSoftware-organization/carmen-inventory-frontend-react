@@ -95,7 +95,8 @@ export function RunningCodeDialog({
 
     if (isEdit) {
       updateRunningCode.mutate(
-        { id: runningCode.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+        { id: runningCode.id, doc_version: runningCode.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

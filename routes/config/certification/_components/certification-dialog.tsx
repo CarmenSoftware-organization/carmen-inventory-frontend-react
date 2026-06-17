@@ -81,7 +81,8 @@ export function CertificationDialog({
 
     if (isEdit) {
       updateCertification.mutate(
-        { id: certification.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+        { id: certification.id, doc_version: certification.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

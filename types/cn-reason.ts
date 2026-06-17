@@ -1,5 +1,6 @@
 export interface CnReason {
   id: string;
+  doc_version: number;
   name: string;
   description: string;
   is_active: boolean;
@@ -8,6 +9,7 @@ export interface CnReason {
 }
 
 export interface CreateCnReasonDto {
+  doc_version?: number;
   name: string;
   description: string;
 }

@@ -37,6 +37,7 @@ import { httpClient } from "@/lib/http-client";
 const mockCnReasons: CnReason[] = [
   {
     id: "1",
+    doc_version: 1,
     name: "Damaged Goods",
     description: "Items received in damaged condition",
     is_active: true,
@@ -45,6 +46,7 @@ const mockCnReasons: CnReason[] = [
   },
   {
     id: "2",
+    doc_version: 1,
     name: "Wrong Item",
     description: "Incorrect item delivered",
     is_active: true,

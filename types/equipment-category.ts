@@ -1,5 +1,6 @@
 export interface EquipmentCategory {
   id: string;
+  doc_version: number;
   name: string;
   description: string | null;
   is_active: boolean;
@@ -8,6 +9,7 @@ export interface EquipmentCategory {
 }
 
 export interface CreateEquipmentCategoryDto {
+  doc_version?: number;
   name: string;
   description: string | null;
   is_active: boolean;

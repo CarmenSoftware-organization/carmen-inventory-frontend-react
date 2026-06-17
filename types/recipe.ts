@@ -45,6 +45,7 @@ export interface RecipeAudit {
 
 export interface Recipe {
   id: string;
+  doc_version: number;
   code: string;
   name: string;
   description: string | null;
@@ -88,6 +89,7 @@ export interface Recipe {
 }
 
 export interface CreateRecipeDto {
+  doc_version?: number;
   code: string;
   name: string;
   description: string | null;

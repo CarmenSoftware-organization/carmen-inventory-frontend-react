@@ -18,16 +18,19 @@ export interface Role {
 /** Detail shape from Get By ID — uses `application_role_name` instead of `name` */
 export interface RoleDetail {
   id: string;
+  doc_version?: number;
   application_role_name: string;
   permissions: RolePermission[];
 }
 
 export interface CreateRoleDto {
+  doc_version?: number;
   application_role_name: string;
   permissions: { add: string[] };
 }
 
 export interface UpdateRoleDto {
+  doc_version?: number;
   application_role_name: string;
   permissions: { add: string[]; remove: string[] };
 }

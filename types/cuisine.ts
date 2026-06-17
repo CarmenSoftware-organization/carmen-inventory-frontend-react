@@ -1,5 +1,6 @@
 export interface Cuisine {
   id: string;
+  doc_version: number;
   name: string;
   description: string | null;
   note: string | null;
@@ -14,6 +15,7 @@ export interface Cuisine {
 }
 
 export interface CreateCuisineDto {
+  doc_version?: number;
   name: string;
   description: string | null;
   note: string | null;

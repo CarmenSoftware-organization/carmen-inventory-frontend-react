@@ -80,7 +80,8 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
 
     if (isEdit && category) {
       updateCategory.mutate(
-        { id: category.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
+        { id: category.id, doc_version: category.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

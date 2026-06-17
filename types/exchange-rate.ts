@@ -1,5 +1,6 @@
 export interface ExchangeRateItem {
   id: string;
+  doc_version: number;
   currency_id: string;
   currency_code: string;
   exchange_rate: number;

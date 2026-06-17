@@ -71,7 +71,7 @@ export function useExchangeRateMutation() {
  * update.mutate({ id: rate.id, exchange_rate: 36.0 });
  */
 export function useExchangeRateUpdate() {
-  return useApiMutation<{ id: string; exchange_rate: number }>({
+  return useApiMutation<{ id: string; doc_version?: number; exchange_rate: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.patch(
         `${API_ENDPOINTS.EXCHANGE_RATES(buCode)}/${id}`,
