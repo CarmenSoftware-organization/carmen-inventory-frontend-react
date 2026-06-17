@@ -70,6 +70,7 @@ vi.mock("use-intl", () => {
 
 const mockDeliveryPoint: DeliveryPoint = {
   id: "1",
+  doc_version: 3,
   name: "Main Warehouse",
   is_active: true,
   created_at: "2024-01-01T00:00:00Z",
@@ -194,7 +195,7 @@ describe("DeliveryPointDialog", () => {
 
     await waitFor(() => {
       expect(mockUpdate).toHaveBeenCalledWith(
-        { id: "1", name: "Updated Warehouse", is_active: true },
+        { id: "1", doc_version: 3, name: "Updated Warehouse", is_active: true },
         expect.objectContaining({
           onSuccess: expect.any(Function),
           onError: expect.any(Function),
