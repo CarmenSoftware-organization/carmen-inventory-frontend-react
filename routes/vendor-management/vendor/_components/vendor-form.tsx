@@ -225,7 +225,9 @@ export function VendorForm({ vendor }: VendorFormProps) {
 
     if (isEdit && vendor) {
       updateVendor.mutate(
-        { id: vendor.id, ...payload },
+        // doc_version round-trips the loaded record's version — backend requires
+        // it for optimistic concurrency on PATCH (same as the config modules).
+        { id: vendor.id, doc_version: vendor.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

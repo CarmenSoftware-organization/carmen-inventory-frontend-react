@@ -40,6 +40,8 @@ export interface Vendor {
   tb_vendor_contact?: VendorContact[];
   created_at: string;
   updated_at: string;
+  /** Optimistic-concurrency version; required when PATCHing the record. */
+  doc_version: number;
 }
 
 export interface VendorDetail extends Vendor {
@@ -54,6 +56,8 @@ interface VendorAddressPayload extends VendorAddressData {
 }
 
 export interface CreateVendorDto {
+  /** Sent on update only — backend requires it for optimistic concurrency. */
+  doc_version?: number;
   name: string;
   code: string;
   description: string;
