@@ -239,6 +239,7 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/units/order/product/${productId}`,
   PROFILE: "/api/proxy/api/user/profile",
   PROFILE_AVATAR: "/api/proxy/api/user/profile/avatar",
+  PROFILE_SIGNATURE: "/api/proxy/api/user/profile/signature",
   PROFILE_CHANGE_PASSWORD: "/api/proxy/api/auth/change-password",
   PROFILE_UPDATE: "/api/proxy/api/user/profile",
   PURCHASE_ORDER: (buCode: string) =>

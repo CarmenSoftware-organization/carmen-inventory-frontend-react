@@ -27,6 +27,8 @@ export interface UserProfile {
   business_unit: BusinessUnit[];
   /** Pre-signed avatar URL (S3 / object storage). Expires — re-fetch profile to refresh */
   avatar_url: string | null;
+  /** Pre-signed signature URL (transparent PNG). Expires — re-fetch profile to refresh. Null when unset. */
+  signature_url: string | null;
 }
 
 export interface CurrentPeriod {

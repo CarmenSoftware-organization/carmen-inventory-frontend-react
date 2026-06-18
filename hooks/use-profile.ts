@@ -66,6 +66,7 @@ export function useProfile() {
         .join(" ")
     : "";
   const avatarUrl = query.data?.avatar_url ?? null;
+  const signatureUrl = query.data?.signature_url ?? null;
   const buCode = defaultBu?.code;
   const buLogoUrl = defaultBu?.logo_url ?? null;
 
@@ -112,6 +113,7 @@ export function useProfile() {
     aliasName,
     fullName,
     avatarUrl,
+    signatureUrl,
     buLogoUrl,
     currentPeriod,
     isProfileReady,
@@ -312,6 +314,63 @@ export function useDeleteBuAvatar() {
         throw ApiError.fromResponse(
           res,
           serverMessage || "Failed to remove BU avatar",
+        );
+      }
+      return res.json().catch(() => ({}));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: profileQueryKey });
+    },
+  });
+}
+
+export function useUploadUserSignature() {
+  const queryClient = useQueryClient();
+  return useMutation<unknown, ApiError, File>({
+    mutationFn: async (file) => {
+      const formData = new FormData();
+      formData.append("signature", file);
+      const res = await httpClient.post(
+        API_ENDPOINTS.PROFILE_SIGNATURE,
+        formData,
+      );
+      if (!res.ok) {
+        let serverMessage: string | undefined;
+        try {
+          const err = await res.json();
+          serverMessage = err.message;
+        } catch {
+          // JSON parse failed
+        }
+        throw ApiError.fromResponse(
+          res,
+          serverMessage || "Failed to upload signature",
+        );
+      }
+      return res.json().catch(() => ({}));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: profileQueryKey });
+    },
+  });
+}
+
+export function useDeleteUserSignature() {
+  const queryClient = useQueryClient();
+  return useMutation<unknown, ApiError, void>({
+    mutationFn: async () => {
+      const res = await httpClient.delete(API_ENDPOINTS.PROFILE_SIGNATURE);
+      if (!res.ok) {
+        let serverMessage: string | undefined;
+        try {
+          const err = await res.json();
+          serverMessage = err.message;
+        } catch {
+          // JSON parse failed
+        }
+        throw ApiError.fromResponse(
+          res,
+          serverMessage || "Failed to remove signature",
         );
       }
       return res.json().catch(() => ({}));
