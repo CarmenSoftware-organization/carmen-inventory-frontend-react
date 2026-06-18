@@ -18,6 +18,8 @@ import {
   useProfile,
   useUpdateProfile,
   useUploadUserAvatar,
+  useUploadUserSignature,
+  useDeleteUserSignature,
 } from "@/hooks/use-profile";
 import {
   AlertDialog,
@@ -47,6 +49,7 @@ import {
 } from "./profile-form-schema";
 import ChangePasswordDialog from "./change-password-dialog";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
+import { SignatureDialog } from "./signature-dialog";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   IMAGE_MAX_BYTES,
@@ -66,6 +69,12 @@ export default function UserProfileSetting() {
   const deleteAvatar = useDeleteUserAvatar();
   const isUploadingAvatar = uploadAvatar.isPending;
   const isDeletingAvatar = deleteAvatar.isPending;
+  const uploadSignature = useUploadUserSignature();
+  const deleteSignature = useDeleteUserSignature();
+  const isUploadingSignature = uploadSignature.isPending;
+  const isDeletingSignature = deleteSignature.isPending;
+  const [signatureDialogOpen, setSignatureDialogOpen] = useState(false);
+  const [removeSignatureOpen, setRemoveSignatureOpen] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [removeAvatarOpen, setRemoveAvatarOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -152,6 +161,26 @@ export default function UserProfileSetting() {
         toast.error(err.message || t("avatarRemoveFailed"));
         // Keep dialog open so user can retry
       },
+    });
+  };
+
+  const handleConfirmSignature = (file: File) => {
+    uploadSignature.mutate(file, {
+      onSuccess: () => {
+        toast.success(t("signatureUpdated"));
+        setSignatureDialogOpen(false);
+      },
+      onError: (err) => toast.error(err.message || t("signatureUploadFailed")),
+    });
+  };
+
+  const handleConfirmRemoveSignature = () => {
+    deleteSignature.mutate(undefined, {
+      onSuccess: () => {
+        toast.success(t("signatureRemoved"));
+        setRemoveSignatureOpen(false);
+      },
+      onError: (err) => toast.error(err.message || t("signatureRemoveFailed")),
     });
   };
 
@@ -402,9 +431,67 @@ export default function UserProfileSetting() {
         </form>
       </section>
 
+      {/* Signature */}
+      <section className="bg-card rounded-xl border shadow-sm">
+        <header className="flex items-center justify-between border-b px-2 py-2">
+          <h2 className="text-sm font-semibold">{t("signature")}</h2>
+          <div className="flex gap-2">
+            {profile.signature_url && !isUploadingSignature && (
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                disabled={isDeletingSignature}
+                onClick={() => setRemoveSignatureOpen(true)}
+              >
+                {isDeletingSignature ? (
+                  <Loader2
+                    className="size-3.5 animate-spin"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <Trash2 className="size-3.5" aria-hidden="true" />
+                )}
+                {t("removeSignature")}
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isUploadingSignature}
+              onClick={() => setSignatureDialogOpen(true)}
+            >
+              {profile.signature_url ? t("editSignature") : t("addSignature")}
+            </Button>
+          </div>
+        </header>
+        <div className="flex min-h-24 items-center justify-center p-3">
+          {profile.signature_url ? (
+            <img
+              key={profile.signature_url}
+              src={profile.signature_url}
+              alt={t("signature")}
+              className="max-h-32 max-w-full object-contain"
+            />
+          ) : (
+            <p className="text-muted-foreground text-xs">
+              {t("signatureUploadHint")}
+            </p>
+          )}
+        </div>
+      </section>
+
       <ChangePasswordDialog
         open={passwordOpen}
         onOpenChange={setPasswordOpen}
+      />
+
+      <SignatureDialog
+        open={signatureDialogOpen}
+        isSubmitting={isUploadingSignature}
+        onOpenChange={setSignatureDialogOpen}
+        onConfirm={handleConfirmSignature}
       />
 
       <AvatarCropDialog
@@ -446,6 +533,46 @@ export default function UserProfileSetting() {
                 <Trash2 className="size-3" aria-hidden="true" />
               )}
               {isDeletingAvatar ? t("removingAvatar") : t("removeAvatar")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={removeSignatureOpen}
+        onOpenChange={(o) =>
+          !o && !isDeletingSignature && setRemoveSignatureOpen(false)
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("removeSignatureConfirmTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("removeSignatureConfirmDesc")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingSignature}>
+              {t("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={isDeletingSignature}
+              onClick={(e) => {
+                e.preventDefault();
+                handleConfirmRemoveSignature();
+              }}
+            >
+              {isDeletingSignature ? (
+                <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+              ) : (
+                <Trash2 className="size-3" aria-hidden="true" />
+              )}
+              {isDeletingSignature
+                ? t("removingSignature")
+                : t("removeSignature")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

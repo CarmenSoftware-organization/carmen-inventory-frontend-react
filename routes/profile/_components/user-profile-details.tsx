@@ -162,6 +162,26 @@ export default function UserProfileDetails() {
         </dl>
       </section>
 
+      {/* Signature */}
+      {profile.signature_url && (
+        <section className="bg-card rounded-xl border shadow-sm">
+          <header className="flex items-center gap-2 border-b px-2 py-2">
+            <span className="bg-primary/10 flex size-7 items-center justify-center rounded-md">
+              <IdCard className="text-primary size-4" aria-hidden="true" />
+            </span>
+            <h3 className="text-sm font-semibold">{t("signature")}</h3>
+          </header>
+          <div className="flex min-h-20 items-center justify-center p-3">
+            <img
+              key={profile.signature_url}
+              src={profile.signature_url}
+              alt={t("signature")}
+              className="max-h-28 max-w-full object-contain"
+            />
+          </div>
+        </section>
+      )}
+
       {/* Business Units */}
       <section className="bg-card rounded-xl border shadow-sm">
         <header className="flex items-center gap-2 border-b px-2 py-2">
