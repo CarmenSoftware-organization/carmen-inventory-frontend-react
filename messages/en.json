@@ -2797,6 +2797,8 @@
       "grnDateLabel": "GRN Date",
       "invoiceDate": "Invoice Date",
       "expiredDate": "Expired Date",
+      "postType": "Post Type",
+      "ap": "AP",
       "consignment": "Consignment",
       "cash": "Cash",
       "descriptionPlaceholder": "Enter description...",

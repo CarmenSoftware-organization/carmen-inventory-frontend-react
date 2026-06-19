@@ -8,9 +8,10 @@ import {
   FieldDatePicker,
   FieldInput,
   FieldLabel,
+  FieldSelect,
 } from "@/components/ui/field";
+import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
@@ -200,41 +201,30 @@ export function GrnFormHeader({
           />
         </Field>
 
-        <div className="flex h-9 flex-wrap items-center gap-4 sm:col-span-2">
-          <Field orientation="horizontal" className="items-center">
-            <Controller
-              control={form.control}
-              name="is_consignment"
-              render={({ field }) => (
-                <Checkbox
-                  id="grn-consignment"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={disabled}
-                />
-              )}
-            />
-            <FieldLabel htmlFor="grn-consignment">
-              {t("consignment")}
-            </FieldLabel>
-          </Field>
-
-          <Field orientation="horizontal" className="items-center">
-            <Controller
-              control={form.control}
-              name="is_cash"
-              render={({ field }) => (
-                <Checkbox
-                  id="grn-cash"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={disabled}
-                />
-              )}
-            />
-            <FieldLabel htmlFor="grn-cash">{t("cash")}</FieldLabel>
-          </Field>
-        </div>
+        <Field>
+          <FieldLabel>{t("postType")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="post_type"
+            render={({ field }) => (
+              <FieldSelect
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={disabled}
+                className="h-9 w-full text-xs"
+                error={errors.post_type?.message}
+              >
+                <SelectContent>
+                  <SelectItem value="ap">{t("ap")}</SelectItem>
+                  <SelectItem value="consignment">
+                    {t("consignment")}
+                  </SelectItem>
+                  <SelectItem value="cash">{t("cash")}</SelectItem>
+                </SelectContent>
+              </FieldSelect>
+            )}
+          />
+        </Field>
       </div>
 
       <Field>

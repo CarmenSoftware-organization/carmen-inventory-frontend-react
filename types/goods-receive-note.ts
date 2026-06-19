@@ -111,6 +111,9 @@ export interface GrnExtraCost {
 
 // --- Main GRN ---
 
+/** GRN posting type — mirrors backend `enum_good_received_note_post_type`. */
+export type GrnPostType = "ap" | "consignment" | "cash";
+
 export interface GoodsReceiveNote {
   id: string;
   grn_no: string;
@@ -122,8 +125,7 @@ export interface GoodsReceiveNote {
   note: string | null;
   doc_status: string;
   doc_type: string;
-  is_consignment: boolean;
-  is_cash: boolean;
+  post_type: GrnPostType | null;
   signature_image_url: string | null;
   received_by_id: string | null;
   received_by_name: string | null;
@@ -216,8 +218,7 @@ export interface CreateGrnDto {
   description?: string | null;
   doc_status: string;
   doc_type: string;
-  is_consignment: boolean;
-  is_cash: boolean;
+  post_type?: GrnPostType;
   received_by_id?: string | null;
   received_by_name?: string | null;
   received_at?: string | null;

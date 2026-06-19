@@ -2792,6 +2792,8 @@
       "grnDateLabel": "วันที่ GRN",
       "invoiceDate": "วันที่ใบแจ้งหนี้",
       "expiredDate": "วันหมดอายุ",
+      "postType": "ประเภทการลงบัญชี",
+      "ap": "เจ้าหนี้ (AP)",
       "consignment": "ฝากขาย",
       "cash": "เงินสด",
       "descriptionPlaceholder": "ระบุคำอธิบาย...",
