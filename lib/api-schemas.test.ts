@@ -92,7 +92,12 @@ describe("purchaseRequestSchema (real fixture)", () => {
     workflow_current_stage: "Manager Approval",
     workflow_next_stage: "Director Approval",
     workflow_previous_stage: null,
-    last_action: null,
+    last_action: {
+      state: "submitted",
+      at: "2025-06-01T10:00:00Z",
+      id: "user-1",
+      name: "John Doe",
+    },
     department_name: "Procurement",
     created_at: "2025-06-01T10:00:00Z",
     purchase_request_detail: [
