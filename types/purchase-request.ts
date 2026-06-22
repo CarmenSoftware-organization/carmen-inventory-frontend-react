@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { lastActionSchema } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
 
 export type PurchaseRequestStatus =
@@ -197,7 +198,7 @@ export const purchaseRequestSchema = z.looseObject({
   workflow_current_stage: z.string(),
   workflow_next_stage: z.string().nullable(),
   workflow_previous_stage: z.string().nullable(),
-  last_action: z.string().nullable(),
+  last_action: lastActionSchema.nullable(),
   department_name: z.string(),
   created_at: z.string(),
   purchase_request_detail: z.array(purchaseRequestDetailSummarySchema),

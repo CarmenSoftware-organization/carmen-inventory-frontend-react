@@ -1,3 +1,5 @@
+import type { LastAction } from "./last-action";
+
 export type ApprovalDocType = "pr" | "po" | "sr";
 
 /** Summary of a purchase-request detail returned in the approval list */
@@ -20,7 +22,7 @@ export interface ApprovalItem {
   workflow_current_stage: string;
   workflow_next_stage: string | null;
   workflow_previous_stage: string | null;
-  last_action: string | null;
+  last_action: LastAction | null;
   // PR-specific
   requestor_name: string;
   department_name: string;
@@ -52,7 +54,7 @@ export interface RawApprovalPR {
   workflow_current_stage: string;
   workflow_next_stage: string | null;
   workflow_previous_stage: string | null;
-  last_action: string | null;
+  last_action: LastAction | null;
   requestor_name: string;
   department_name: string;
   purchase_request_detail: ApprovalItemDetail[];
@@ -70,7 +72,7 @@ export interface RawApprovalPO {
   workflow_current_stage: string;
   workflow_next_stage: string | null;
   workflow_previous_stage: string | null;
-  last_action: string | null;
+  last_action: LastAction | null;
   vendor_name: string;
   total_amount: number;
   delivery_date: string | null;
@@ -88,7 +90,7 @@ export interface RawApprovalSR {
   workflow_current_stage: string;
   workflow_next_stage: string | null;
   workflow_previous_stage: string | null;
-  last_action: string | null;
+  last_action: LastAction | null;
   requestor_name: string;
   department_name: string;
 }
