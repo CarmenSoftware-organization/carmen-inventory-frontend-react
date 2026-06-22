@@ -767,6 +767,7 @@ function DataGridTableRowSelect<TData>({
   row: Row<TData>;
   disabled?: boolean;
 }) {
+  "use no memo"; // reads row.getIsSelected() (mutable TanStack state); opt out of React Compiler
   const isSelected = row.getIsSelected();
   return (
     <>
