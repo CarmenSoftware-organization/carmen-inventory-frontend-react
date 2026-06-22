@@ -1,3 +1,4 @@
+import type { LastAction } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
 
 // --- Workflow ---
@@ -154,10 +155,7 @@ export interface GoodsReceiveNote {
   workflow_next_stage: string | null;
   // Action
   user_action: Record<string, unknown> | null;
-  last_action: string | null;
-  last_action_at_date: string | null;
-  last_action_by_id: string | null;
-  last_action_by_name: string | null;
+  last_action: LastAction | null;
   // Audit
   doc_version?: number;
   created_at: string;
