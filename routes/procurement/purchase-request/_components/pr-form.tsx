@@ -75,9 +75,27 @@ export function PurchaseRequestForm({
       createPrSchema(tv, tfl, role),
     ) as Resolver<PrFormValues>,
     defaultValues,
-    mode: "onChange",
+    // Purchase stage บังคับ vendor/price/tax ผ่าน schema — ถ้า validate แบบ
+    // onChange จะขึ้น error แดงทันทีที่แตะฟอร์ม ทำให้ตอน "send back" เหมือนถูก
+    // บังคับกรอกทั้งที่ไม่ต้อง จึง validate เฉพาะตอนกด action (onSubmit) สำหรับ
+    // purchase role ส่วน role อื่นคง live validation เดิมไว้
+    mode: role === STAGE_ROLE.PURCHASE ? "onSubmit" : "onChange",
     reValidateMode: "onChange",
   });
+
+  // validate เฉพาะตอนกด "Purchase Approve" เท่านั้น (action-aware) — send back
+  // จะไม่เรียกตัวนี้จึงไม่บังคับกรอก vendor/price/tax. ใช้ handleSubmit เพื่อให้
+  // submitCount เพิ่มและ reValidateMode:onChange ช่วยล้าง error ทันทีที่แก้ field
+  const validatePurchase = () =>
+    new Promise<boolean>((resolve) => {
+      form.handleSubmit(
+        () => resolve(true),
+        () => {
+          scrollToFirstInvalidField();
+          resolve(false);
+        },
+      )();
+    });
 
   // Re-validate เมื่อ role เปลี่ยน (schema change → ต้อง trigger ใหม่)
   useEffect(() => {
@@ -276,6 +294,7 @@ export function PurchaseRequestForm({
         onReject={actions.handleReject}
         onReview={actions.handleReview}
         onPurchaseApprove={actions.handlePurchaseApprove}
+        onValidatePurchase={validatePurchase}
       />
     </div>
   );

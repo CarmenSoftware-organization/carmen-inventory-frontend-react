@@ -25,6 +25,7 @@ interface PrFooterActionProps {
   readonly onReject?: () => void;
   readonly onReview?: (messages: Record<number, string>, desStage: string) => void;
   readonly onPurchaseApprove?: () => void;
+  readonly onValidatePurchase?: () => Promise<boolean>;
 }
 
 type ConfirmConfig = {
@@ -106,6 +107,7 @@ export function PrFooterAction({
   onReject,
   onReview,
   onPurchaseApprove,
+  onValidatePurchase,
 }: PrFooterActionProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
@@ -318,8 +320,12 @@ export function PrFooterAction({
                   size="sm"
                   variant="success"
                   disabled={isPending}
-                  onClick={() => {
-                    if (!allItemsReadyForPurchase) {
+                  onClick={async () => {
+                    // validate เฉพาะตอนกด approve (action-aware): trigger schema
+                    // เพื่อโชว์กรอบแดงที่ field ที่ขาด แล้วค่อยเปิด confirm
+                    const valid =
+                      (await onValidatePurchase?.()) ?? allItemsReadyForPurchase;
+                    if (!valid) {
                       toast.warning(t("purchaseIncomplete"));
                       return;
                     }
