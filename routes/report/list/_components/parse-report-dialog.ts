@@ -12,6 +12,7 @@ export interface LookupNode {
   items: string[];
   values: string[];
   value: string;
+  multi: boolean; // Multi="true" → render as checkbox group, submit comma-joined values
 }
 
 export interface DateNode {
@@ -121,6 +122,7 @@ const parseNodes = (dialogEl: Element): DialogNode[] => {
         items: rawItems ? rawItems.split("~") : [],
         values: rawValues ? rawValues.split("~") : [],
         value: attr(child, "Value"),
+        multi: attr(child, "Multi") === "true",
       });
     } else if (tag === "Date") {
       nodes.push({

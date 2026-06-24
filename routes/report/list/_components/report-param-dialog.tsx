@@ -17,6 +17,7 @@ import {
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useReportListLookups } from "@/hooks/use-report";
 import type {
   ReportPeriodMap,
@@ -83,6 +84,13 @@ function resolveDateKeyword(value: string, periods?: ReportPeriodMap): string {
         periods?.["previous-period"]?.start_at ??
         new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString()
       );
+    case "@blank":
+    case "@empty":
+    case "@none":
+      // Opt-out of the today-default: control starts empty (no date filter).
+      // Used by reports with several optional date ranges (e.g. Store Requisition
+      // Detail) so the user only fills the ranges they care about.
+      return "";
     default:
       return value || now.toISOString();
   }
@@ -124,6 +132,44 @@ function LookupControl({ node, id }: LookupControlProps) {
     >
       <SelectContent className="max-h-[min(60vh,400px)]" position="popper" />
     </FieldSelect>
+  );
+}
+
+function MultiLookupControl({
+  node,
+  id,
+}: {
+  readonly node: LookupNode;
+  readonly id: string;
+}) {
+  const options = node.items
+    .map((item, idx) => ({ item, value: node.values[idx] || item }))
+    .filter((o) => o.value !== "");
+  // empty selection = no filter (all). Submitted as a comma-joined string;
+  // micro-data splits it into an IN (...) predicate.
+  const [selected, setSelected] = useState<string[]>([]);
+  const toggle = (value: string, checked: boolean) =>
+    setSelected((prev) =>
+      checked ? [...prev, value] : prev.filter((v) => v !== value),
+    );
+  return (
+    <>
+      <input type="hidden" name={id} value={selected.join(",")} readOnly />
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 rounded-md border p-2">
+        {options.map(({ item, value }) => (
+          <label
+            key={value}
+            className="flex cursor-pointer items-center gap-1.5 text-sm"
+          >
+            <Checkbox
+              checked={selected.includes(value)}
+              onCheckedChange={(c) => toggle(value, c === true)}
+            />
+            {item}
+          </label>
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -173,7 +219,11 @@ interface ControlProps {
 
 function Control({ node, periods }: ControlProps) {
   if (node.type === "lookup") {
-    return <LookupControl node={node} id={node.name} />;
+    return node.multi ? (
+      <MultiLookupControl node={node} id={node.name} />
+    ) : (
+      <LookupControl node={node} id={node.name} />
+    );
   }
   return <DateControl node={node} periods={periods} />;
 }
