@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useForm,
   type Resolver,
@@ -47,7 +47,6 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const t = useTranslations("auth");
-  const orbsRef = useRef<HTMLDivElement | null>(null);
   const [retryAfter, setRetryAfter] = useState<number | null>(null);
 
   const loginSchema = z.object({
@@ -73,19 +72,6 @@ export default function LoginForm() {
   useEffect(() => {
     queryClient.removeQueries({ queryKey: profileQueryKey });
   }, [queryClient]);
-
-  // Mouse parallax on orbs (subtle ±0.75rem shift)
-  useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      if (!orbsRef.current) return;
-      const x = (e.clientX / globalThis.innerWidth - 0.5) * 12;
-      const y = (e.clientY / globalThis.innerHeight - 0.5) * 12;
-      orbsRef.current.style.setProperty("--mx", `${x}px`);
-      orbsRef.current.style.setProperty("--my", `${y}px`);
-    };
-    globalThis.addEventListener("mousemove", handle);
-    return () => globalThis.removeEventListener("mousemove", handle);
-  }, []);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginFormValues) => {
@@ -142,11 +128,8 @@ export default function LoginForm() {
 
   return (
     <div className="bg-background relative isolate min-h-svh overflow-hidden">
-      {/* Inline keyframes for slow orb drift */}
+      {/* Inline keyframes */}
       <style>{`
-        @keyframes orb-drift-1 { 0%, 100% { transform: translate(var(--mx, 0), var(--my, 0)); } 50% { transform: translate(calc(var(--mx, 0) + 1.5rem), calc(var(--my, 0) - 2rem)); } }
-        @keyframes orb-drift-2 { 0%, 100% { transform: translate(var(--mx, 0), var(--my, 0)); } 50% { transform: translate(calc(var(--mx, 0) - 2rem), calc(var(--my, 0) + 1.5rem)); } }
-        @keyframes orb-drift-3 { 0%, 100% { transform: translate(var(--mx, 0), var(--my, 0)); } 50% { transform: translate(calc(var(--mx, 0) + 2.5rem), calc(var(--my, 0) + 1rem)); } }
         @keyframes shine-sweep { 0% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(250%) skewX(-20deg); } }
         @keyframes title-reveal {
           0% { opacity: 0; transform: translateY(0.75rem); filter: blur(0.25rem); }
@@ -157,46 +140,6 @@ export default function LoginForm() {
           100% { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-
-      {/* ── Background orbs (parallax + drift) ───────────── */}
-      <div
-        ref={orbsRef}
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-      >
-        <div
-          className="absolute top-[-20%] left-[-10%] h-160 w-160 rounded-full opacity-70 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle, color-mix(in oklch, var(--primary), transparent 60%) 0%, transparent 70%)",
-            animation: "orb-drift-1 18s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute top-[10%] right-[-15%] h-144 w-xl rounded-full opacity-60 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle, color-mix(in oklch, var(--chart-3), transparent 65%) 0%, transparent 70%)",
-            animation: "orb-drift-2 22s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute bottom-[-15%] left-[20%] h-176 w-176 rounded-full opacity-50 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle, color-mix(in oklch, var(--chart-2), transparent 70%) 0%, transparent 70%)",
-            animation: "orb-drift-3 26s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute right-[8%] bottom-[10%] h-112 w-md rounded-full opacity-50 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle, color-mix(in oklch, var(--primary), transparent 65%) 0%, transparent 70%)",
-            animation: "orb-drift-2 20s ease-in-out infinite reverse",
-          }}
-        />
-      </div>
 
       {/* Subtle grain overlay */}
       <div
@@ -234,10 +177,6 @@ export default function LoginForm() {
               />
 
               <div className="relative">
-                <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.5625rem] font-bold tracking-widest uppercase backdrop-blur-sm">
-                  <Sparkles className="size-2.5" />
-                  {t("eyebrow")}
-                </span>
                 <h1
                   className="mt-2 text-2xl leading-[1.05] font-semibold tracking-tight sm:text-[1.75rem]"
                   style={{ animation: "title-reveal 0.7s ease-out 0.2s both" }}
