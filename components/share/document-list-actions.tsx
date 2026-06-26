@@ -8,29 +8,33 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface PrDocumentActionsProps {
+interface DocumentListActionsProps {
   onExport: () => void;
   isExporting: boolean;
   onAdd: () => void;
+  /** ป้ายปุ่มเพิ่มเอกสาร — ส่งจาก namespace ของแต่ละโมดูล เช่น `t("add")` */
+  addLabel: string;
 }
 
 /**
- * แถบปุ่ม document-level ของหน้ารายการ PR: export / print / add
+ * แถบปุ่ม document-level ที่ใช้ร่วมกันในหน้ารายการเอกสาร procurement
+ * (PR / GRN / CN / PO): export / print / add
  *
  * Desktop แสดงเป็นปุ่มเรียงกัน ส่วน mobile ยุบ export/print ลงใน dropdown
- * ดึงออกจาก `PurchaseRequestComponent` เพื่อรวม export/print ที่เดิมเขียนซ้ำ
- * 2 ที่ (ปุ่ม + dropdown) ไว้ที่เดียว และลดขนาด component หลัก
+ * export/print เหมือนกันทุกโมดูล จึง centralize ไว้ที่นี่ — ส่วนปุ่ม add
+ * ต่างกันแค่ handler (`onAdd`) กับป้าย (`addLabel`)
  *
  * @param onExport - เรียกเมื่อกด export
  * @param isExporting - กำลัง export อยู่ (disable ปุ่ม + แสดง spinner)
  * @param onAdd - เรียกเมื่อกดเพิ่มเอกสารใหม่
+ * @param addLabel - ป้ายปุ่มเพิ่ม (แปลจาก namespace ของโมดูล)
  */
-export function PrDocumentActions({
+export function DocumentListActions({
   onExport,
   isExporting,
   onAdd,
-}: PrDocumentActionsProps) {
-  const t = useTranslations("procurement.purchaseRequest");
+  addLabel,
+}: DocumentListActionsProps) {
   const tc = useTranslations("common");
 
   return (
@@ -60,7 +64,7 @@ export function PrDocumentActions({
       </Button>
       <Button size="sm" onClick={onAdd}>
         <Plus aria-hidden="true" />
-        {t("add")}
+        {addLabel}
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

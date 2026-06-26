@@ -4,23 +4,13 @@ import { useRouter } from "@/lib/compat/navigation";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
-  Download,
   Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
-  MoreHorizontal,
-  Plus,
-  Printer,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -53,11 +43,12 @@ import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { useCnTable } from "./use-cn-table";
 import CnCardList from "./cn-card-list";
 import EmptyComponent from "@/components/empty-component";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 import { useCnActiveFilters } from "./cn-active-filters";
 
 export default function CnComponent() {
@@ -173,16 +164,6 @@ export default function CnComponent() {
     }
   };
 
-  const newCnBtn = (
-    <Button
-      size="sm"
-      onClick={() => router.push("/procurement/credit-note/new")}
-    >
-      <Plus aria-hidden="true" />
-      {t("add")}
-    </Button>
-  );
-
   const table = useCnTable({
     creditNotes,
     totalRecords,
@@ -199,76 +180,17 @@ export default function CnComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-              {totalRecords > 0 && (
-                <Badge
-                  variant="secondary"
-                  size="sm"
-                  className="text-xs tabular-nums"
-                >
-                  {totalRecords.toLocaleString()}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              {t("desc")}
-            </p>
-          </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleExport}
-              disabled={isExporting}
-              className="hidden sm:inline-flex"
-            >
-              {isExporting ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Download aria-hidden="true" />
-              )}
-              {isExporting ? tc("exporting") : tc("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => globalThis.print()}
-              className="hidden sm:inline-flex"
-            >
-              <Printer aria-hidden="true" />
-              {tc("print")}
-            </Button>
-            {newCnBtn}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.moreActions")}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
-                  {isExporting ? (
-                    <Loader2 className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Download aria-hidden="true" />
-                  )}
-                  {isExporting ? tc("exporting") : tc("export")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => globalThis.print()}>
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+            count={totalRecords}
+          />
+          <DocumentListActions
+            onExport={handleExport}
+            isExporting={isExporting}
+            onAdd={() => router.push("/procurement/credit-note/new")}
+            addLabel={t("add")}
+          />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
