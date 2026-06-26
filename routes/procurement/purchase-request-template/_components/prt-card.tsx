@@ -27,7 +27,7 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -63,7 +63,7 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
             />
             <div className="min-w-0">
               <p className="text-muted-foreground text-xs">Workflow</p>
-              <p className="truncate font-medium">{item.workflow_name}</p>
+              <p className="truncate font-semibold">{item.workflow_name}</p>
             </div>
           </div>
         )}
@@ -75,7 +75,7 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
             />
             <div className="min-w-0">
               <p className="text-muted-foreground text-xs">Department</p>
-              <p className="truncate font-medium">{item.department_name}</p>
+              <p className="truncate font-semibold">{item.department_name}</p>
             </div>
           </div>
         )}

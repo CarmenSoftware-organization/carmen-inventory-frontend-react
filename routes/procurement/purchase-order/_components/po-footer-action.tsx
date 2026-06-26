@@ -92,7 +92,7 @@ export function PoFooterAction({
 
   return (
     <>
-      <div className="bg-card sticky bottom-0 z-20 mt-auto flex flex-wrap items-center justify-between gap-3 border-t py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-2px_14px_oklch(0.10_0.04_258.7/0.06)] sm:flex-nowrap sm:gap-4 sm:px-8">
+      <div className="bg-card sticky bottom-0 z-20 mt-auto flex flex-wrap items-center justify-between gap-3 border-t py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-nowrap sm:gap-4 sm:px-8">
         {isEditMode && (
           <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
             <Info className="size-3.5" aria-hidden="true" />

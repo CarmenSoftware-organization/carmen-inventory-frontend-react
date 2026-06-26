@@ -27,14 +27,14 @@ export function CnFooterAction({ control }: CnFooterActionProps) {
       <div className="flex items-center gap-4 text-xs tabular-nums">
         <div className="flex items-center gap-1.5">
           <span className="text-muted-foreground">{tfl("netAmount")}</span>
-          <span className="font-medium">
+          <span className="font-semibold">
             {formatCurrency(summary.totalNet)}
           </span>
         </div>
         <span className="text-border">|</span>
         <div className="flex items-center gap-1.5">
           <span className="text-muted-foreground">{tfl("tax")}</span>
-          <span className="font-medium">
+          <span className="font-semibold">
             {formatCurrency(summary.totalTax)}
           </span>
         </div>

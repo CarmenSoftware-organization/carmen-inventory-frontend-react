@@ -55,7 +55,7 @@ export default function CnCard({ item, index, onEdit }: CnCardProps) {
           onEdit(item);
         }
       }}
-      className="cursor-pointer gap-0 py-0 transition-all hover:border-primary/30 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -94,7 +94,7 @@ export default function CnCard({ item, index, onEdit }: CnCardProps) {
             <p className="text-muted-foreground text-xs">
               {tfl("vendor")}
             </p>
-            <p className="truncate font-medium">{item.vendor_name}</p>
+            <p className="truncate font-semibold">{item.vendor_name}</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
@@ -120,7 +120,7 @@ export default function CnCard({ item, index, onEdit }: CnCardProps) {
             <p className="text-muted-foreground text-xs">
               {tfl("currency")}
             </p>
-            <p className="truncate font-medium">{item.currency_code}</p>
+            <p className="truncate font-semibold">{item.currency_code}</p>
           </div>
         </div>
       </CardContent>
@@ -128,7 +128,7 @@ export default function CnCard({ item, index, onEdit }: CnCardProps) {
       {item.total_amount != null && !Number.isNaN(Number(item.total_amount)) && (
         <>
           <Separator />
-          <CardFooter className="justify-between px-4 py-2.5">
+          <CardFooter className="justify-between px-4 py-2">
             <span className="text-muted-foreground text-xs">
               {tfl("totalAmount")}
             </span>

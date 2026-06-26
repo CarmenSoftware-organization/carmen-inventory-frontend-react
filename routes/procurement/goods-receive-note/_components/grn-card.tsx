@@ -47,7 +47,7 @@ export default function GrnCard({ item, index, onEdit }: GrnCardProps) {
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -84,7 +84,7 @@ export default function GrnCard({ item, index, onEdit }: GrnCardProps) {
           />
           <div className="min-w-0">
             <p className="text-muted-foreground text-xs">{tfl("vendor")}</p>
-            <p className="truncate font-medium">{item.vendor_name}</p>
+            <p className="truncate font-semibold">{item.vendor_name}</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
@@ -94,7 +94,7 @@ export default function GrnCard({ item, index, onEdit }: GrnCardProps) {
           />
           <div className="min-w-0">
             <p className="text-muted-foreground text-xs">{tfl("invoiceNo")}</p>
-            <p className="truncate font-medium">{item.invoice_no || "-"}</p>
+            <p className="truncate font-semibold">{item.invoice_no || "-"}</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
@@ -117,7 +117,7 @@ export default function GrnCard({ item, index, onEdit }: GrnCardProps) {
       {totalAmount != null && !Number.isNaN(totalAmount) && (
         <>
           <Separator />
-          <CardFooter className="justify-between px-4 py-2.5">
+          <CardFooter className="justify-between px-4 py-2">
             <span className="text-muted-foreground text-xs">
               {tfl("totalAmount")}
             </span>

@@ -188,7 +188,7 @@ export function PrFooterAction({
           <div className="flex items-center gap-4 text-xs tabular-nums">
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground">{tfl("subtotal")}</span>
-              <span className="font-medium">
+              <span className="font-semibold">
                 {formatCurrency(summary.subtotal)}
               </span>
             </div>
@@ -198,8 +198,8 @@ export function PrFooterAction({
               <span
                 className={
                   summary.totalDiscount > 0
-                    ? "text-destructive font-medium"
-                    : "font-medium"
+                    ? "text-destructive font-semibold"
+                    : "font-semibold"
                 }
               >
                 {summary.totalDiscount > 0
@@ -210,14 +210,14 @@ export function PrFooterAction({
             <span className="text-border">|</span>
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground">{tfl("net")}</span>
-              <span className="font-medium">
+              <span className="font-semibold">
                 {formatCurrency(summary.totalNet)}
               </span>
             </div>
             <span className="text-border">|</span>
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground">{tfl("tax")}</span>
-              <span className="font-medium">
+              <span className="font-semibold">
                 {formatCurrency(summary.totalTax)}
               </span>
             </div>

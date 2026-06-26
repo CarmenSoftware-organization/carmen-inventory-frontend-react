@@ -43,8 +43,8 @@ interface SectionProps {
 
 function Section({ icon, title, editLabel, onEdit, children }: SectionProps) {
   return (
-    <section className="border-border/60 bg-card overflow-hidden rounded-lg border shadow-sm">
-      <header className="bg-muted/30 flex items-center justify-between border-b px-4 py-2.5">
+    <section className="border-border/60 bg-card overflow-hidden rounded-lg border">
+      <header className="bg-muted/30 flex items-center justify-between border-b px-4 py-2">
         <div className="text-foreground flex items-center gap-2 text-sm font-semibold">
           <span className="text-muted-foreground" aria-hidden="true">
             {icon}
@@ -198,7 +198,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
         {values.vendor_id ? (
           <dl>
             <DataRow label={tfl("vendor")}>
-              <span className="text-foreground font-medium">
+              <span className="text-foreground font-semibold">
                 {values.vendor_name}
               </span>
             </DataRow>
@@ -280,19 +280,19 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                       <tr className="text-muted-foreground bg-muted/5 border-b">
                         <th
                           scope="col"
-                          className="px-3 py-1 text-left text-[0.625rem] font-medium tracking-wide uppercase"
+                          className="px-3 py-1 text-left text-[0.625rem] font-semibold tracking-wide uppercase"
                         >
                           {tfl("location")}
                         </th>
                         <th
                           scope="col"
-                          className="w-20 px-3 py-1 text-right text-[0.625rem] font-medium tracking-wide uppercase"
+                          className="w-20 px-3 py-1 text-right text-[0.625rem] font-semibold tracking-wide uppercase"
                         >
                           {tfl("qty")}
                         </th>
                         <th
                           scope="col"
-                          className="w-24 px-3 py-1 text-right text-[0.625rem] font-medium tracking-wide uppercase"
+                          className="w-24 px-3 py-1 text-right text-[0.625rem] font-semibold tracking-wide uppercase"
                         >
                           {tfl("total")}
                         </th>
@@ -350,13 +350,13 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                   <dt className="text-muted-foreground">
                     {t("summarySubtotal")}
                   </dt>
-                  <dd className="font-medium tabular-nums">
+                  <dd className="font-semibold tabular-nums">
                     {totals.subTotal.toLocaleString()}
                   </dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">{t("summaryTax")}</dt>
-                  <dd className="font-medium tabular-nums">
+                  <dd className="font-semibold tabular-nums">
                     {totals.tax.toLocaleString()}
                   </dd>
                 </div>

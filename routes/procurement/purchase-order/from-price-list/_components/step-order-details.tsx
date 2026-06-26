@@ -97,7 +97,7 @@ const InfoCell = ({ label, value }: InfoCellProps) => {
   return (
     <div>
       <span className="text-muted-foreground text-xs">{label}</span>
-      <p className="truncate text-sm font-medium">{value || "—"}</p>
+      <p className="truncate text-sm font-semibold">{value || "—"}</p>
     </div>
   );
 };

@@ -44,14 +44,10 @@ export function PrItemSummary({
 
   return (
     <Collapsible defaultOpen>
-      <div className="border-primary/20 bg-card group relative overflow-hidden rounded-lg border shadow-xs transition-shadow hover:shadow-sm">
+      <div className="border-primary/20 bg-card group relative overflow-hidden rounded-lg border transition-colors hover:border-primary/40">
         <span
           aria-hidden="true"
           className="bg-primary absolute inset-x-0 top-0 h-0.5"
-        />
-        <div
-          aria-hidden="true"
-          className="bg-primary/20 pointer-events-none absolute -top-12 -right-10 size-32 rounded-full opacity-40 blur-2xl"
         />
 
         <CollapsibleTrigger className="hover:bg-muted/40 relative flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold [&[data-state=open]>div:first-child>svg]:rotate-180">
@@ -153,7 +149,7 @@ function SummaryCard({
 }: SummaryCardProps) {
   const palette = CARD_TONE[tone];
   return (
-    <div className="border-border/60 bg-background/40 space-y-1 rounded-md border px-2.5 py-2">
+    <div className="border-border/60 bg-background/40 space-y-1 rounded-md border px-2 py-2">
       <div className="flex items-center justify-between gap-2">
         <span
           aria-hidden="true"
@@ -165,7 +161,7 @@ function SummaryCard({
         >
           <Icon className="size-3.5" />
         </span>
-        <span className="text-muted-foreground text-[0.625rem] font-medium tracking-wide uppercase">
+        <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
           {label}
         </span>
       </div>

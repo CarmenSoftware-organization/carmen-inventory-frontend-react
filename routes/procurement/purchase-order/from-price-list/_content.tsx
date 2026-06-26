@@ -302,7 +302,7 @@ export function FromPriceListContent() {
                 <StepperIndicator className={INDICATOR_ACCENT}>
                   {s}
                 </StepperIndicator>
-                <StepperTitle className="text-[0.625rem] font-medium">
+                <StepperTitle className="text-[0.625rem] font-semibold">
                   {t(labelKey)}
                 </StepperTitle>
               </StepperTrigger>
@@ -343,7 +343,7 @@ export function FromPriceListContent() {
               step={s}
               className="relative items-start not-last:flex-1"
             >
-              <StepperTrigger className="items-start gap-2.5 pb-10 last:pb-0">
+              <StepperTrigger className="items-start gap-3 pb-10 last:pb-0">
                 <StepperIndicator className={INDICATOR_ACCENT}>
                   {s}
                 </StepperIndicator>

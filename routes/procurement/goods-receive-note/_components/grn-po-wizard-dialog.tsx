@@ -92,7 +92,7 @@ export function GrnPoWizardDialog({
                 <PackageCheck className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium">
+                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
                   {t("entity")}
                 </div>
                 <DialogTitle className="text-base">
@@ -111,7 +111,7 @@ export function GrnPoWizardDialog({
                     >
                       {selectedVendor.vendor_code}
                     </Badge>
-                    <span className="text-xs font-medium">
+                    <span className="text-xs font-semibold">
                       {selectedVendor.vendor_name}
                     </span>
                   </div>
@@ -191,7 +191,7 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
               </div>
               <span
                 className={cn(
-                  "text-[0.625rem] font-medium whitespace-nowrap",
+                  "text-[0.625rem] font-semibold whitespace-nowrap",
                   isCurrent && "text-foreground",
                   !isCurrent && "text-muted-foreground",
                 )}
@@ -278,7 +278,7 @@ function VendorStep({
                 key={vendor.vendor_id}
                 type="button"
                 onClick={() => onSelect(vendor)}
-                className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 relative flex cursor-pointer items-start gap-3 overflow-hidden rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2"
+                className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 relative flex cursor-pointer items-start gap-3 overflow-hidden rounded-xl border p-3 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
               >
                 <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                   <Building2 className="size-4" />
@@ -439,7 +439,7 @@ function PoStep({
           }
           onCheckedChange={toggleAll}
         />
-        <span className="text-xs font-medium">{tfl("selectAll")}</span>
+        <span className="text-xs font-semibold">{tfl("selectAll")}</span>
         <span className="text-muted-foreground text-[0.6875rem]">
           · {poList.length} PO · {allDetailIds.length} items
         </span>
@@ -467,7 +467,7 @@ function PoStep({
                   : "hover:border-primary/30 bg-card"
               }`}
             >
-              <label className="bg-muted/30 flex cursor-pointer items-center gap-2 border-b px-3 py-2.5">
+              <label className="bg-muted/30 flex cursor-pointer items-center gap-2 border-b px-3 py-2">
                 <Checkbox
                   checked={checked}
                   onCheckedChange={() => togglePo(po)}
@@ -545,7 +545,7 @@ function PoStep({
                       <span className="w-20 shrink-0 text-right text-xs tabular-nums">
                         {formatCurrency(d.price)}
                       </span>
-                      <span className="w-24 shrink-0 text-right text-xs font-medium tabular-nums">
+                      <span className="w-24 shrink-0 text-right text-xs font-semibold tabular-nums">
                         {formatCurrency(d.net_amount)}
                       </span>
                     </label>

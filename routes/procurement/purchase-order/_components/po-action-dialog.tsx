@@ -212,7 +212,7 @@ export function PoActionDialog({
                         <Label
                           key={s.key}
                           htmlFor={`stage-${s.key}`}
-                          className={`flex cursor-pointer items-center gap-2.5 rounded-lg border p-2.5 text-xs transition-colors ${
+                          className={`flex cursor-pointer items-center gap-3 rounded-lg border p-2 text-xs transition-colors ${
                             selected
                               ? "border-primary bg-primary/5 ring-primary/20 ring-2"
                               : "hover:bg-muted/40 hover:border-primary/30 bg-card"
@@ -222,7 +222,7 @@ export function PoActionDialog({
                             value={s.name}
                             id={`stage-${s.key}`}
                           />
-                          <span className="font-medium">{s.name}</span>
+                          <span className="font-semibold">{s.name}</span>
                         </Label>
                       );
                     })}
@@ -238,17 +238,17 @@ export function PoActionDialog({
                   {tfl("reason")}
                 </div>
                 <ScrollArea className="max-h-72">
-                  <div className="space-y-2.5 pr-2">
+                  <div className="space-y-2 pr-2">
                     {items.map((item, i) => (
                       <div
                         key={item.index}
-                        className="bg-muted/30 space-y-1.5 rounded-lg border p-2.5"
+                        className="bg-muted/30 space-y-1.5 rounded-lg border p-2"
                       >
                         <div className="flex items-start gap-2">
                           <div className="bg-background text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md border text-[0.625rem] font-semibold tabular-nums">
                             {i + 1}
                           </div>
-                          <p className="min-w-0 flex-1 truncate text-xs font-medium leading-snug">
+                          <p className="min-w-0 flex-1 truncate text-xs font-semibold leading-snug">
                             {item.productName || "—"}
                           </p>
                         </div>

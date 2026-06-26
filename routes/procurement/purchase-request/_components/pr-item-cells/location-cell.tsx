@@ -56,7 +56,7 @@ export const LocationCell = memo(function LocationCell({
 
   if (isDisabled || isRowLocked) {
     return (
-      <p className="text-xs font-medium">
+      <p className="text-xs font-semibold">
         {locationName || <span className="text-muted-foreground">—</span>}
       </p>
     );
@@ -113,13 +113,13 @@ export const LocationCell = memo(function LocationCell({
             {hasLocation && (
               <TooltipContent
                 side="top"
-                className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2.5 shadow-md"
+                className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
               >
                 <div className="space-y-1">
                   <p className="text-foreground/60 text-[0.6875rem] font-semibold">
                     {locationCode}
                   </p>
-                  <p className="text-xs leading-snug font-medium">
+                  <p className="text-xs leading-snug font-semibold">
                     {locationName}
                   </p>
                 </div>

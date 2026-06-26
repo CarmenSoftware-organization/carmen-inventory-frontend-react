@@ -319,7 +319,7 @@ export default function GrnTabPricing({
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">{tfl("netAmount")}</span>
-          <span className="font-medium">{formatCurrency(netAmount)}</span>
+          <span className="font-semibold">{formatCurrency(netAmount)}</span>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">

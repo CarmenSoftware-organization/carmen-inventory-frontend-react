@@ -217,7 +217,7 @@ const TotalAmountCell = memo(function TotalAmountCell({
 }) {
   const { total } = useRowAmounts(control, index);
   return (
-    <span className="text-xs font-medium tabular-nums">
+    <span className="text-xs font-semibold tabular-nums">
       {formatCurrency(total)}
     </span>
   );

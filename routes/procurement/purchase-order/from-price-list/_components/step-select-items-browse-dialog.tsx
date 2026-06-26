@@ -355,7 +355,7 @@ export function BrowseDialog({
                                 <span className="text-muted-foreground">
                                   {detail.product_code}
                                 </span>
-                                <span className="font-medium">
+                                <span className="font-semibold">
                                   {detail.product_name}
                                 </span>
                                 {isExisting && (

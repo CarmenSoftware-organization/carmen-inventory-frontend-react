@@ -19,7 +19,7 @@ interface CnCardListProps {
  */
 function CnCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-xl border bg-card shadow-sm">
+    <div className="animate-pulse rounded-xl border bg-card">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="space-y-1.5">
           <div className="h-4 w-28 rounded bg-muted" />
@@ -52,7 +52,7 @@ function CnCardSkeleton() {
         </div>
       </div>
       <div className="border-t" />
-      <div className="flex items-center justify-between px-4 py-2.5">
+      <div className="flex items-center justify-between px-4 py-2">
         <div className="h-3 w-14 rounded bg-muted" />
         <div className="h-4 w-24 rounded bg-muted" />
       </div>

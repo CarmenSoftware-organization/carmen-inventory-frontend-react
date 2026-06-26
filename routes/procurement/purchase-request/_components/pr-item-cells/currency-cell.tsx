@@ -33,7 +33,7 @@ export const CurrencyCell = memo(function CurrencyCell({
   );
   if (isDisabled || isRowLocked) {
     return (
-      <p className="text-xs font-medium">
+      <p className="text-xs font-semibold">
         {selected ? (
           selected.code
         ) : (

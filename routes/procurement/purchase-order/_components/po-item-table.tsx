@@ -35,7 +35,7 @@ const ProductCellDisplay = memo(function ProductCellDisplay({
     useWatch({ control, name: `items.${index}.description` }) ?? "";
   return (
     <div className="group w-full text-left">
-      <p className="truncate font-medium">{productName || "—"}</p>
+      <p className="truncate font-semibold">{productName || "—"}</p>
       {description && (
         <p className="text-muted-foreground truncate text-[0.625rem]">
           {description}

@@ -50,7 +50,7 @@ export function PrSelectDialog({
                 <ListChecks className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium">
+                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
                   {t("bulkAction")}
                 </div>
                 <DialogTitle className="text-base">
@@ -67,12 +67,8 @@ export function PrSelectDialog({
             <button
               type="button"
               onClick={onSelectAll}
-              className="group hover:border-warning/40 bg-card focus-visible:ring-warning/40 relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2"
+              className="group hover:border-warning/40 bg-card focus-visible:ring-warning/40 relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
             >
-              <div
-                className="bg-warning/40 pointer-events-none absolute -top-10 -right-10 size-32 rounded-full opacity-50 blur-3xl transition-opacity group-hover:opacity-80"
-                aria-hidden="true"
-              />
               <div className="bg-warning/10 text-warning flex size-10 items-center justify-center rounded-lg">
                 <ListChecks className="size-5" />
               </div>
@@ -89,7 +85,7 @@ export function PrSelectDialog({
                     {allCount}
                   </Badge>
                 </div>
-                <p className="text-muted-foreground text-[0.6875rem] font-medium">
+                <p className="text-muted-foreground text-[0.6875rem] font-semibold">
                   {t("selectAllSubtitle")}
                 </p>
                 <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
@@ -101,12 +97,8 @@ export function PrSelectDialog({
             <button
               type="button"
               onClick={onSelectPending}
-              className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2"
+              className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
             >
-              <div
-                className="bg-primary/40 pointer-events-none absolute -top-10 -right-10 size-32 rounded-full opacity-50 blur-3xl transition-opacity group-hover:opacity-80"
-                aria-hidden="true"
-              />
               <span className="bg-primary/10 text-primary absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
                 <Sparkles className="size-2.5" />
                 {t("recommended")}
@@ -127,7 +119,7 @@ export function PrSelectDialog({
                     {pendingCount}
                   </Badge>
                 </div>
-                <p className="text-muted-foreground text-[0.6875rem] font-medium">
+                <p className="text-muted-foreground text-[0.6875rem] font-semibold">
                   {t("selectPendingSubtitle")}
                 </p>
                 <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">

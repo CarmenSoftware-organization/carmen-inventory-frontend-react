@@ -136,7 +136,7 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
                 side="top"
                 className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
               >
-                <p className="text-xs font-medium">{selectedUnit.name}</p>
+                <p className="text-xs font-semibold">{selectedUnit.name}</p>
                 {selectedUnit.conversion !== 1 && (
                   <p className="text-foreground/60 text-[0.6875rem]">
                     1 = {selectedUnit.conversion} base

@@ -50,8 +50,8 @@ export function ModeToggle({
               "inline-flex h-7 items-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors",
               active
                 ? k === "edit"
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-foreground text-background shadow-sm"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground",
               disabled && "cursor-not-allowed",
             )}
@@ -130,7 +130,7 @@ export function OrderSummaryCard({
         ))}
       </dl>
       {discount > 0 && (
-        <div className="bg-success/10 text-success mt-2 flex items-center justify-between rounded-md px-2.5 py-1.5">
+        <div className="bg-success/10 text-success mt-2 flex items-center justify-between rounded-md px-2 py-1.5">
           <span className="text-xs font-semibold">{tfl("discountSaved")}</span>
           <span className="text-xs font-bold tabular-nums">
             −

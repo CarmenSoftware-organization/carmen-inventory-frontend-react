@@ -65,7 +65,7 @@ const buildColumns = (
       size: 200,
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <span className="truncate font-medium">
+          <span className="truncate font-semibold">
             {row.original.vendor_name}
           </span>
           {row.original.is_preferred && (
@@ -122,7 +122,7 @@ const buildColumns = (
               </Badge>
             )}
             <span
-              className={`tabular-nums ${isBest ? "text-success font-bold" : "font-medium"}`}
+              className={`tabular-nums ${isBest ? "text-success font-bold" : "font-semibold"}`}
             >
               {formatCurrency(price)}
             </span>
@@ -294,7 +294,7 @@ export function PrPricelistDialog({
                 <Tag className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium">
+                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
                   {t("priceListComparison")}
                 </div>
                 <DialogTitle className="truncate text-base">
@@ -307,7 +307,7 @@ export function PrPricelistDialog({
                   <span className="inline-flex items-center gap-1">
                     <Package className="size-3" />
                     {tfl("requested")}:{" "}
-                    <span className="text-foreground font-medium tabular-nums">
+                    <span className="text-foreground font-semibold tabular-nums">
                       {requestedQty} {requestedUnitName}
                     </span>
                   </span>
@@ -317,7 +317,7 @@ export function PrPricelistDialog({
                       <span className="inline-flex items-center gap-1">
                         <Receipt className="size-3" />
                         {tfl("approved")}:{" "}
-                        <span className="text-foreground font-medium tabular-nums">
+                        <span className="text-foreground font-semibold tabular-nums">
                           {approvedQty} {approvedUnitName}
                         </span>
                       </span>

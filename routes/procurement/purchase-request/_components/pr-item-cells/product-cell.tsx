@@ -45,7 +45,7 @@ export const ProductCell = memo(function ProductCell({
     return (
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-0.5">
-          <p className="min-w-0 flex-1 truncate text-left text-xs font-medium">
+          <p className="min-w-0 flex-1 truncate text-left text-xs font-semibold">
             {productName || <span className="text-muted-foreground">—</span>}
           </p>
           <InventoryTooltipCell control={control} index={index} buCode={buCode} />
@@ -102,13 +102,13 @@ export const ProductCell = memo(function ProductCell({
               {(productCode || productName) && (
                 <TooltipContent
                   side="top"
-                  className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2.5 shadow-md"
+                  className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
                 >
                   <div className="space-y-1">
                     <p className="text-foreground/60 text-[0.6875rem] font-semibold">
                       {productCode}
                     </p>
-                    <p className="text-xs leading-snug font-medium">
+                    <p className="text-xs leading-snug font-semibold">
                       {productName}
                     </p>
                   </div>
@@ -119,7 +119,7 @@ export const ProductCell = memo(function ProductCell({
                         <span aria-hidden="true">·</span>
                       )}
                       {unitName && (
-                        <span className="font-medium">{unitName}</span>
+                        <span className="font-semibold">{unitName}</span>
                       )}
                     </div>
                   )}

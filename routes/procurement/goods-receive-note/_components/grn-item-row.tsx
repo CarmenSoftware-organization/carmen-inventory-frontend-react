@@ -117,7 +117,7 @@ export const GrnItemRow = memo(function GrnItemRow({
               )}
               <span
                 className={cn(
-                  "truncate text-[0.6875rem] font-medium",
+                  "truncate text-[0.6875rem] font-semibold",
                   locationError && "text-destructive",
                 )}
               >

@@ -102,7 +102,7 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
         header: () => tfl("quantity"),
         cell: ({ row }) => {
           const qty = Number(row.original.on_hand_qty ?? 0);
-          return <span className="font-medium">{qty}</span>;
+          return <span className="font-semibold">{qty}</span>;
         },
         size: 160,
         meta: {
@@ -131,7 +131,7 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
                 <Warehouse className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-info/10 text-info-foreground mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium">
+                <div className="bg-info/10 text-info-foreground mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
                   {t("inventoryInfo")}
                 </div>
                 <DialogTitle className="text-base">{t("onHand")}</DialogTitle>
@@ -145,7 +145,7 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
                       >
                         {data?.product_code ?? "—"}
                       </Badge>
-                      <span className="text-foreground text-sm font-medium">
+                      <span className="text-foreground text-sm font-semibold">
                         {data?.product_name ?? "—"}
                       </span>
                     </div>

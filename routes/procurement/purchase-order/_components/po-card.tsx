@@ -62,7 +62,7 @@ export default function PoCard({ item, index, onEdit }: PoCardProps) {
           onEdit(item);
         }
       }}
-      className="cursor-pointer gap-0 py-0 transition-all hover:border-primary/30 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -100,7 +100,7 @@ export default function PoCard({ item, index, onEdit }: PoCardProps) {
             <p className="text-muted-foreground text-xs">
               {tfl("vendor")}
             </p>
-            <p className="truncate font-medium">{item.vendor_name}</p>
+            <p className="truncate font-semibold">{item.vendor_name}</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
@@ -112,7 +112,7 @@ export default function PoCard({ item, index, onEdit }: PoCardProps) {
             <p className="text-muted-foreground text-xs">
               {tfl("deliveryDate")}
             </p>
-            <p className="truncate font-medium">
+            <p className="truncate font-semibold">
               {formatDate(item.delivery_date, dateFormat)}
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function PoCard({ item, index, onEdit }: PoCardProps) {
             <p className="text-muted-foreground text-xs">
               {tfl("creditTerm")}
             </p>
-            <p className="truncate font-medium">{item.credit_term_value} {tfl("creditTermDays")}</p>
+            <p className="truncate font-semibold">{item.credit_term_value} {tfl("creditTermDays")}</p>
           </div>
         </div>
       </CardContent>
@@ -134,7 +134,7 @@ export default function PoCard({ item, index, onEdit }: PoCardProps) {
       {item.total_amount != null && !Number.isNaN(item.total_amount) && (
         <>
           <Separator />
-          <CardFooter className="justify-between px-4 py-2.5">
+          <CardFooter className="justify-between px-4 py-2">
             <span className="text-muted-foreground text-xs">
               {tfl("totalAmount")}
             </span>

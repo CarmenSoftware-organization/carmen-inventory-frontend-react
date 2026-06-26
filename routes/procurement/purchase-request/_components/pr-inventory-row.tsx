@@ -87,7 +87,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
     <Collapsible defaultOpen>
       <div
         className={cn(
-          "group bg-card relative overflow-hidden rounded-lg border shadow-xs transition-shadow hover:shadow-sm",
+          "group bg-card relative overflow-hidden rounded-lg border transition-colors hover:border-primary/40",
           statusTheme.border,
         )}
       >
@@ -98,13 +98,6 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
             statusTheme.accentBar,
           )}
         />
-        <div
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none absolute -top-12 -right-10 size-32 rounded-full opacity-40 blur-2xl",
-            statusTheme.glow,
-          )}
-        />
 
         <CollapsibleTrigger className="hover:bg-muted/40 relative flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold [&[data-state=open]>div:first-child>svg]:rotate-180">
           <div className="flex items-center gap-1.5">
@@ -113,7 +106,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
           </div>
           <div className="flex items-center gap-2">
             <Badge
-              className={cn("text-[0.625rem] font-medium", statusTheme.badge)}
+              className={cn("text-[0.625rem] font-semibold", statusTheme.badge)}
               size="xs"
             >
               {t(`stockStatus.${status}`)}
@@ -170,7 +163,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
               />
               <div className="flex items-center justify-between text-[0.625rem]">
                 {needsReorder ? (
-                  <span className="text-destructive inline-flex items-center gap-1 font-medium">
+                  <span className="text-destructive inline-flex items-center gap-1 font-semibold">
                     <AlertTriangle className="size-3" aria-hidden="true" />
                     {t("needsReorder")}
                   </span>
@@ -274,8 +267,8 @@ function InventoryCard({
   return (
     <div
       className={cn(
-        "border-border/60 bg-background/40 group/card relative space-y-1 rounded-md border px-2.5 py-2 transition-all",
-        clickable && "hover:border-primary/30 hover:shadow-xs",
+        "border-border/60 bg-background/40 group/card relative space-y-1 rounded-md border px-2 py-2 transition-colors",
+        clickable && "hover:border-primary/30",
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -293,12 +286,12 @@ function InventoryCard({
           <button
             type="button"
             onClick={onLabelClick}
-            className="text-primary text-[0.625rem] font-medium tracking-wide uppercase underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+            className="text-primary text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
           >
             {label}
           </button>
         ) : (
-          <span className="text-muted-foreground text-[0.625rem] font-medium tracking-wide uppercase">
+          <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
             {label}
           </span>
         )}

@@ -22,7 +22,7 @@ export const DeliveryDateCell = memo(function DeliveryDateCell({
 
   if (isDisabled || isRowLocked) {
     return (
-      <p className="text-xs font-medium">
+      <p className="text-xs font-semibold">
         {value ? (
           new Date(value).toLocaleDateString()
         ) : (

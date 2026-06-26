@@ -140,7 +140,7 @@ export function GrnPoSelectDialog({
                 <PackageCheck className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium">
+                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
                   {t("entity")}
                 </div>
                 <DialogTitle className="text-base">{t("selectPo")}</DialogTitle>
@@ -190,7 +190,7 @@ export function GrnPoSelectDialog({
                   }
                   onCheckedChange={toggleAll}
                 />
-                <span className="text-xs font-medium">{tfl("selectAll")}</span>
+                <span className="text-xs font-semibold">{tfl("selectAll")}</span>
                 <span className="text-muted-foreground text-[0.6875rem]">
                   · {poList.length} PO · {allDetailIds.length} items
                 </span>
@@ -210,7 +210,7 @@ export function GrnPoSelectDialog({
                     }`}
                   >
                     {/* PO header */}
-                    <label className="bg-muted/30 flex cursor-pointer items-center gap-2 border-b px-3 py-2.5">
+                    <label className="bg-muted/30 flex cursor-pointer items-center gap-2 border-b px-3 py-2">
                       <Checkbox
                         checked={checked}
                         onCheckedChange={() => togglePo(po)}
@@ -301,7 +301,7 @@ export function GrnPoSelectDialog({
                             <span className="w-20 shrink-0 text-right text-xs tabular-nums">
                               {formatCurrency(d.price)}
                             </span>
-                            <span className="w-24 shrink-0 text-right text-xs font-medium tabular-nums">
+                            <span className="w-24 shrink-0 text-right text-xs font-semibold tabular-nums">
                               {formatCurrency(d.net_amount)}
                             </span>
                           </label>

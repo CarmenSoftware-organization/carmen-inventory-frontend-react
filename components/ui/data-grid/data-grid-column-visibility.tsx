@@ -44,7 +44,7 @@ function DataGridColumnVisibility<TData>({
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[150px]">
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="font-medium">
+          <DropdownMenuLabel className="font-semibold">
             Toggle Columns
           </DropdownMenuLabel>
           {table

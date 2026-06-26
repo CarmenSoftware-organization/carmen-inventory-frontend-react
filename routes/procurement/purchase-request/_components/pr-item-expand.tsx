@@ -206,7 +206,7 @@ export function PrItemExpand({
             {tfl("vendor")}
           </FieldLabel>
           {isFieldDisabled ? (
-            <p className="mt-1 h-7 truncate text-xs leading-7 font-medium">
+            <p className="mt-1 h-7 truncate text-xs leading-7 font-semibold">
               {vendorName || "—"}
             </p>
           ) : (
@@ -242,7 +242,7 @@ export function PrItemExpand({
           </FieldLabel>
           {isFieldDisabled ? (
             <p
-              className={`mt-1 h-7 text-xs leading-7 font-medium tabular-nums ${price ? "text-right" : "text-left"}`}
+              className={`mt-1 h-7 text-xs leading-7 font-semibold tabular-nums ${price ? "text-right" : "text-left"}`}
             >
               {price ? formatCurrency(price) : "—"}
             </p>
@@ -309,7 +309,7 @@ export function PrItemExpand({
               {tfl("taxProfile")}
             </FieldLabel>
             {isFieldDisabled ? (
-              <p className="mt-1 h-6 truncate text-xs leading-6 font-medium">
+              <p className="mt-1 h-6 truncate text-xs leading-6 font-semibold">
                 {taxProfileName || "—"}
               </p>
             ) : (
@@ -342,7 +342,7 @@ export function PrItemExpand({
             >
               {tfl("taxPercent")}
             </FieldLabel>
-            <p className="mt-1 h-6 text-right text-xs leading-6 font-medium tabular-nums">
+            <p className="mt-1 h-6 text-right text-xs leading-6 font-semibold tabular-nums">
               {taxRate}
             </p>
           </Field>
@@ -374,7 +374,7 @@ export function PrItemExpand({
               )}
             </div>
             {isFieldDisabled ? (
-              <p className="h-6 text-right text-xs leading-6 font-medium tabular-nums">
+              <p className="h-6 text-right text-xs leading-6 font-semibold tabular-nums">
                 {formatCurrency(taxAmount)}
               </p>
             ) : (
@@ -407,7 +407,7 @@ export function PrItemExpand({
               {tfl("discPercent")}
             </FieldLabel>
             {isFieldDisabled ? (
-              <p className="mt-1 h-6 text-right text-xs leading-6 font-medium tabular-nums">
+              <p className="mt-1 h-6 text-right text-xs leading-6 font-semibold tabular-nums">
                 {discRate}
               </p>
             ) : (
@@ -460,7 +460,7 @@ export function PrItemExpand({
               )}
             </div>
             {isFieldDisabled ? (
-              <p className="h-6 text-right text-xs leading-6 font-medium tabular-nums">
+              <p className="h-6 text-right text-xs leading-6 font-semibold tabular-nums">
                 {formatCurrency(discountAmount)}
               </p>
             ) : (

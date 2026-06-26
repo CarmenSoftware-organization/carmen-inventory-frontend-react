@@ -69,7 +69,7 @@ export const ItemCard = memo(function ItemCard({
 
   return (
     <div className="border-border/60 overflow-hidden rounded-lg border text-xs">
-      <div className="flex items-start gap-2.5 p-3">
+      <div className="flex items-start gap-3 p-3">
         {showApproveCheckbox && (
           <Checkbox
             checked={isSelected}

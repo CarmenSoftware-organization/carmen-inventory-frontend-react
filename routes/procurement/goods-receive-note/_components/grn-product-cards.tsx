@@ -280,7 +280,7 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
           {groupedItems.map((group, groupIdx) => (
             <div
               key={group.key}
-              className="overflow-hidden rounded-lg border shadow-sm"
+              className="overflow-hidden rounded-lg border"
             >
               {/* Card header */}
               <div className="bg-muted/50 flex items-center justify-between gap-3 border-b px-3 py-2">
@@ -304,7 +304,7 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
                       return (
                         <span
                           className={cn(
-                            "truncate text-xs font-medium",
+                            "truncate text-xs font-semibold",
                             productErr && "text-destructive",
                           )}
                         >

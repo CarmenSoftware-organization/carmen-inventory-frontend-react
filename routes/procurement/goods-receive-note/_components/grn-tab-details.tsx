@@ -127,7 +127,7 @@ export default function GrnTabDetails({
       {isPo && (
         <div className="bg-muted/40 flex items-center justify-between rounded-md px-3 py-2">
           <span className="text-muted-foreground text-xs">{tfl("poNo")}</span>
-          <span className="text-xs font-medium">{poNumber || "—"}</span>
+          <span className="text-xs font-semibold">{poNumber || "—"}</span>
         </div>
       )}
 

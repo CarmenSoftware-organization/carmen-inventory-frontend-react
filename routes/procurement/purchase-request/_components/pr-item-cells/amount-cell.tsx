@@ -25,7 +25,7 @@ export const AmountCell = memo(function AmountCell({
   const baseAmount = round2(Number(totalPrice) * Number(exchangeRate));
   return (
     <div className="flex flex-col items-end gap-0.5">
-      <span className="font-medium tabular-nums">
+      <span className="font-semibold tabular-nums">
         {formatCurrency(Number(totalPrice))}
       </span>
       {isForeignCurrency && (

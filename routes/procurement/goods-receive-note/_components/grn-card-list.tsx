@@ -10,7 +10,7 @@ interface GrnCardListProps {
 
 function GrnCardSkeleton() {
   return (
-    <div className="bg-card animate-pulse rounded-xl border shadow-sm">
+    <div className="bg-card animate-pulse rounded-xl border">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="space-y-1.5">
           <div className="bg-muted h-4 w-28 rounded" />
@@ -43,7 +43,7 @@ function GrnCardSkeleton() {
         </div>
       </div>
       <div className="border-t" />
-      <div className="flex items-center justify-between px-4 py-2.5">
+      <div className="flex items-center justify-between px-4 py-2">
         <div className="bg-muted h-3 w-14 rounded" />
         <div className="bg-muted h-4 w-24 rounded" />
       </div>

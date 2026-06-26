@@ -119,7 +119,7 @@ export function PrWorkflowHistory({
           </div>
           <div className="text-center">
             <p className="text-muted-foreground text-xs">{tfl("requester")}</p>
-            <p className="text-sm font-medium">{requestorName}</p>
+            <p className="text-sm font-semibold">{requestorName}</p>
             {createdAt && (
               <p className="text-muted-foreground text-xs">
                 {formatDate(createdAt, `${dateFormat} HH:mm`)}

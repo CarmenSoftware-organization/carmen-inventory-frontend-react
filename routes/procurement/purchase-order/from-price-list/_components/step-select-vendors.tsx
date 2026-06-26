@@ -106,7 +106,7 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
                     field.onChange("");
                     form.setValue("vendor_name", "");
                   }}
-                  className="text-muted-foreground hover:text-foreground text-[0.6875rem] font-medium"
+                  className="text-muted-foreground hover:text-foreground text-[0.6875rem] font-semibold"
                 >
                   {tc("clear")}
                 </button>
@@ -174,7 +174,7 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
                         <span className="text-muted-foreground">
                           {vendor.code}
                         </span>
-                        <span className="flex-1 font-medium">
+                        <span className="flex-1 font-semibold">
                           {vendor.name}
                         </span>
                         {!vendor.is_active && (

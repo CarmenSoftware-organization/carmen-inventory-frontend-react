@@ -153,11 +153,11 @@ function DataGridPagination({
       <div className="flex items-center gap-3">
         <p className="text-muted-foreground text-xs tabular-nums">
           {t("showing")}{" "}
-          <span className="text-foreground font-medium">
+          <span className="text-foreground font-semibold">
             {from}–{to}
           </span>{" "}
           {t("of")}{" "}
-          <span className="text-foreground font-medium">{recordCount}</span>
+          <span className="text-foreground font-semibold">{recordCount}</span>
         </p>
 
         <span className="bg-border hidden h-3.5 w-px sm:block" />
@@ -175,7 +175,7 @@ function DataGridPagination({
           >
             <SelectTrigger
               id="page-size-select"
-              className="h-6 w-fit text-xs font-medium"
+              className="h-6 w-fit text-xs font-semibold"
               size="sm"
               aria-label={t("rowsPerPage")}
             >
@@ -237,7 +237,7 @@ function DataGridPagination({
                   key={page}
                   type="button"
                   className={cn(
-                    "inline-flex h-6 min-w-6 items-center justify-center rounded px-1.5 text-xs font-medium cursor-pointer transition-all duration-150",
+                    "inline-flex h-6 min-w-6 items-center justify-center rounded px-1.5 text-xs font-semibold cursor-pointer transition-all duration-150",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",

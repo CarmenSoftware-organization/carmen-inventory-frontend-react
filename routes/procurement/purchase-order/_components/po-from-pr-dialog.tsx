@@ -179,7 +179,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
                 <FileInput className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium">
+                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
                   {t("fromPr")}
                 </div>
                 <DialogTitle className="text-base">
@@ -208,7 +208,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
               <div className="flex items-center gap-2">
                 <Workflow className="text-muted-foreground size-4 shrink-0" />
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium">
+                  <span className="text-xs font-semibold">
                     {t("workflowLabel")}
                   </span>
                   <span className="text-muted-foreground text-[0.625rem]">
@@ -341,7 +341,7 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
               </div>
               <span
                 className={cn(
-                  "text-[0.625rem] font-medium whitespace-nowrap",
+                  "text-[0.625rem] font-semibold whitespace-nowrap",
                   isCurrent && "text-foreground",
                   !isCurrent && "text-muted-foreground",
                 )}
@@ -633,16 +633,16 @@ const ExpandedProducts = ({
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-muted/60 text-foreground border-b text-left">
-            <th scope="col" className="pb-1 font-medium">
+            <th scope="col" className="pb-1 font-semibold">
               {tfl("product")}
             </th>
-            <th scope="col" className="pb-1 text-right font-medium">
+            <th scope="col" className="pb-1 text-right font-semibold">
               {tfl("quantity")}
             </th>
-            <th scope="col" className="pb-1 text-right font-medium">
+            <th scope="col" className="pb-1 text-right font-semibold">
               {tfl("price")}
             </th>
-            <th scope="col" className="pb-1 text-right font-medium">
+            <th scope="col" className="pb-1 text-right font-semibold">
               {tfl("total")}
             </th>
           </tr>

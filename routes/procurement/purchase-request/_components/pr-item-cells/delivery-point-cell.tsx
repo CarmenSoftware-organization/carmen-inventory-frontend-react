@@ -27,7 +27,7 @@ export const DeliveryPointCell = memo(function DeliveryPointCell({
   const isRowLocked = useIsRowLocked(control, index);
   if (isDisabled || isRowLocked) {
     return (
-      <p className="text-xs font-medium">
+      <p className="text-xs font-semibold">
         {dpName || <span className="text-muted-foreground">—</span>}
       </p>
     );

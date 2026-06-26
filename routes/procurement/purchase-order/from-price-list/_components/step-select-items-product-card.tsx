@@ -57,8 +57,8 @@ export const ProductCard = memo(function ProductCard({
   const locErrors = Array.isArray(errors?.locations) ? errors.locations : [];
 
   return (
-    <div className="border-border/60 bg-card overflow-hidden rounded-lg border shadow-sm">
-      <div className="bg-muted/30 border-b px-4 py-2.5">
+    <div className="border-border/60 bg-card overflow-hidden rounded-lg border">
+      <div className="bg-muted/30 border-b px-4 py-2">
         <div className="flex items-start gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -96,7 +96,7 @@ export const ProductCard = memo(function ProductCard({
       </div>
 
       <div className="divide-border/40 divide-y">
-        <div className="text-muted-foreground bg-muted/10 grid grid-cols-[1fr_8rem_2rem] gap-2 px-4 py-1 text-[0.625rem] font-medium tracking-wide uppercase">
+        <div className="text-muted-foreground bg-muted/10 grid grid-cols-[1fr_8rem_2rem] gap-2 px-4 py-1 text-[0.625rem] font-semibold tracking-wide uppercase">
           <span>{tfl("location")}</span>
           <span className="text-right">{tfl("qty")}</span>
           <span />

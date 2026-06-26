@@ -85,7 +85,7 @@ export default function ApprovalQueueList({
         return (
           <Link
             href={href}
-            className="text-primary text-left text-xs font-medium hover:underline"
+            className="text-primary text-left text-xs font-semibold hover:underline"
           >
             {item.doc_no}
           </Link>

@@ -32,7 +32,7 @@ export const ApprovedCell = memo(function ApprovedCell({
     <div className="flex flex-col gap-0.5">
       <div className="flex h-7 items-center justify-end">
         {qtyDisabled ? (
-          <p className="text-xs font-medium tabular-nums">
+          <p className="text-xs font-semibold tabular-nums">
             {qty === null ? (
               <span className="text-muted-foreground">—</span>
             ) : (

@@ -83,7 +83,7 @@ export default function PrCard({
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
-      className="cursor-pointer gap-0 py-0 transition-all hover:border-primary/30 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -119,7 +119,7 @@ export default function PrCard({
             <p className="text-muted-foreground text-xs">
               {tfl("requester")}
             </p>
-            <p className="truncate font-medium">{item.requestor_name}</p>
+            <p className="truncate font-semibold">{item.requestor_name}</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
@@ -131,7 +131,7 @@ export default function PrCard({
             <p className="text-muted-foreground text-xs">
               {tfl("department")}
             </p>
-            <p className="truncate font-medium">{item.department_name}</p>
+            <p className="truncate font-semibold">{item.department_name}</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
@@ -143,7 +143,7 @@ export default function PrCard({
             <p className="text-muted-foreground text-xs">
               {tfl("type")} / {tfl("stage")}
             </p>
-            <p className="truncate font-medium">
+            <p className="truncate font-semibold">
               {item.workflow_name}
               {item.workflow_current_stage && (
                 <span className="text-muted-foreground">
@@ -159,7 +159,7 @@ export default function PrCard({
       {totalAmount != null && !Number.isNaN(Number(totalAmount)) && (
         <>
           <Separator />
-          <CardFooter className="justify-between px-4 py-2.5">
+          <CardFooter className="justify-between px-4 py-2">
             <span className="text-muted-foreground text-xs">
               {tfl("totalAmount")}
             </span>
@@ -178,7 +178,7 @@ export default function PrCard({
       {(showApproveReject || showDelete) && (
         <>
           <Separator />
-          <div className="flex gap-2 px-4 py-2.5">
+          <div className="flex gap-2 px-4 py-2">
             {showApproveReject && (
               <>
                 {onApprove && (

@@ -128,7 +128,7 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
         accessorKey: "pending_qty",
         header: () => tfl("quantity"),
         cell: ({ row }) => (
-          <span className="font-medium tabular-nums">
+          <span className="font-semibold tabular-nums">
             {row.original.pending_qty}
           </span>
         ),
@@ -196,7 +196,7 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
                 <Truck className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-warning/10 text-warning-foreground mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium">
+                <div className="bg-warning/10 text-warning-foreground mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
                   {t("onOrder")}
                 </div>
                 <DialogTitle className="text-base">{t("onOrder")}</DialogTitle>
@@ -210,7 +210,7 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
                       >
                         {data?.product_code ?? "—"}
                       </Badge>
-                      <span className="text-foreground text-sm font-medium">
+                      <span className="text-foreground text-sm font-semibold">
                         {data?.product_name ?? "—"}
                       </span>
                     </div>

@@ -268,7 +268,7 @@ export function CnSheet({
                   value={formatCurrency(totalAmount)}
                   disabled
                   readOnly
-                  className="h-8 text-right text-sm font-medium"
+                  className="h-8 text-right text-sm font-semibold"
                 />
               </Field>
             </div>
