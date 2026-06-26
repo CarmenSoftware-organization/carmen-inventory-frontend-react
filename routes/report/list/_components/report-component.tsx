@@ -25,7 +25,7 @@ import {
 import { useTranslations } from "use-intl";
 import SearchInput from "@/components/search-input";
 import { Badge } from "@/components/ui/badge";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
@@ -145,24 +145,11 @@ export default function ReportComponent() {
       <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
           {/* Header */}
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-              {filteredReports.length > 0 && (
-                <Badge
-                  variant="secondary"
-                  size="sm"
-                  className="text-xs tabular-nums"
-                >
-                  {filteredReports.length.toLocaleString()}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              {t("desc")}
-            </p>
-          </div>
+          <DocumentListHeader
+            title={t("title")}
+            description={t("desc")}
+            count={filteredReports.length}
+          />
 
           {/* Toolbar */}
           <div className="flex w-full items-center gap-2">
