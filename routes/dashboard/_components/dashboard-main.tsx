@@ -457,7 +457,7 @@ function PrPipelineCard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4">
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {prPipeline.map((item) => {
             const cfg = PIPELINE_CONFIG[item.status];
             const barWidth = Math.round(

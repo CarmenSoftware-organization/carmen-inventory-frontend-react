@@ -48,6 +48,24 @@ export function getBadgeVariant(type: string): NotificationBadgeVariant {
   return "info-light";
 }
 
+export interface NotificationTileRef {
+  /** SubTile glyph key (submodule name in module-list) */
+  readonly name: string;
+  /** Parent module name → drives the tile palette */
+  readonly parent: string;
+}
+
+/**
+ * Illustrated app-tile (SubTile) per entity type — the same squircle tiles used
+ * in the sidebar / dashboard, so a notification's icon matches its module
+ * exactly (palette, glyph, and all).
+ */
+export const NOTIFICATION_TILE: Record<string, NotificationTileRef> = {
+  PR: { name: "purchaseRequest", parent: "procurement" },
+  PO: { name: "purchaseOrder", parent: "procurement" },
+  SR: { name: "storeRequisition", parent: "storeOperations" },
+};
+
 /**
  * Map entity type → metadata key ที่ backend ใช้เก็บ entity id
  * (backend ใส่ key เป็น `{type}_id` lowercase แทน generic `id`)

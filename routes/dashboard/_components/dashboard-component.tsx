@@ -278,20 +278,8 @@ function EmptyState() {
   ];
 
   return (
-    <div className="from-muted/40 via-muted/20 relative overflow-hidden rounded-2xl border border-dashed bg-linear-to-br to-transparent px-6 py-10 text-center sm:px-10">
-      {/* decorative blobs */}
-      <span
-        aria-hidden="true"
-        className="absolute -top-6 -left-6 size-24 rounded-full opacity-30 blur-3xl"
-        style={{ backgroundColor: "var(--chart-1)" }}
-      />
-      <span
-        aria-hidden="true"
-        className="absolute -right-6 -bottom-6 size-24 rounded-full opacity-30 blur-3xl"
-        style={{ backgroundColor: "var(--chart-4)" }}
-      />
-
-      <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-5 sm:text-left">
+    <div className="bg-card rounded-2xl border border-dashed px-6 py-8 text-center sm:px-8">
+      <div className="mx-auto flex max-w-2xl flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-5 sm:text-left">
         <AppTile name="dashboard" size={48} />
         <div className="flex min-w-0 flex-col items-center gap-2 sm:items-start">
           <h3 className="text-foreground text-base font-semibold tracking-tight sm:text-lg">
@@ -305,7 +293,7 @@ function EmptyState() {
             {hints.map((h) => (
               <li
                 key={h.label}
-                className="bg-card/80 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium shadow-sm backdrop-blur-sm"
+                className="bg-muted inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-medium"
               >
                 <h.Icon
                   className="size-3"

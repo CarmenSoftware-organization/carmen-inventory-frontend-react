@@ -1,8 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "use-intl";
 import Link from "@/lib/compat/link";
-import { CarmenLogo } from "@/components/icons/carmen-logo-v1";
 import { Button } from "@/components/ui/button";
+import { CarmenLogo } from "./icons/carmen-logo";
 
 // next-intl/server getTranslations (async server component) → use-intl
 // useTranslations client hook (SPA has no server components)

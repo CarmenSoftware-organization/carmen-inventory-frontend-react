@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Bell,
@@ -78,7 +77,7 @@ const NotificationItem = ({
   return (
     <div
       className={cn(
-        "group hover:bg-muted/50 relative flex items-start gap-3 p-4 transition-colors",
+        "group hover:bg-muted relative flex gap-2.5 pr-3 transition-colors",
         isUnread && "bg-primary/[0.07]",
       )}
     >
@@ -90,7 +89,7 @@ const NotificationItem = ({
             onNavigate();
           }}
           aria-label={safeTitle}
-          className="absolute inset-0 z-10 border-b"
+          className="absolute inset-0 z-10"
         />
       ) : (
         <button
@@ -100,7 +99,7 @@ const NotificationItem = ({
             onShowDetail(notification.id);
           }}
           aria-label={safeTitle}
-          className="absolute inset-0 z-10 cursor-pointer border-b"
+          className="absolute inset-0 z-10 cursor-pointer"
         />
       )}
       <NotificationItemContent
@@ -111,7 +110,7 @@ const NotificationItem = ({
       />
       <button
         onClick={() => onMarkAsRead(notification.id)}
-        className="text-muted-foreground hover:text-foreground relative z-20 mt-1 opacity-0 transition-opacity group-hover:opacity-100"
+        className="text-muted-foreground hover:text-foreground relative z-20 self-center opacity-0 transition-opacity group-hover:opacity-100"
         type="button"
         title={dismissLabel}
         aria-label={dismissLabel}
@@ -162,14 +161,12 @@ export default function Notification() {
       >
         <div className="flex items-center justify-between border-b px-3 py-2">
           <div className="flex items-center gap-2">
-            <span className="bg-primary text-primary-foreground flex size-7 shrink-0 items-center justify-center rounded-md">
-              <Bell className="size-3.5" />
-            </span>
+            <Bell className="text-muted-foreground size-4 shrink-0" />
             <span className="text-sm font-semibold tracking-tight">
               {t("notifications")}
             </span>
             {notificationCount > 0 && (
-              <span className="bg-primary/10 text-primary inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.625rem] font-semibold">
+              <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.625rem] font-semibold tabular-nums">
                 {notificationCount}
               </span>
             )}
@@ -207,7 +204,7 @@ export default function Notification() {
           </div>
         </div>
 
-        <div className="max-h-112 divide-y overflow-y-auto">
+        <div className="max-h-112 overflow-y-auto">
           {notifications.length === 0 ? (
             <EmptyComponent
               icon={BellOff}

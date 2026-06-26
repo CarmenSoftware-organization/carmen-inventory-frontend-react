@@ -268,7 +268,7 @@ function ApprovalSection({
       {!isLoading && items.length === 0 && <EmptyComponent />}
 
       {!isLoading && items.length > 0 && (
-        <div className="bg-card rounded-md border shadow-sm">{table}</div>
+        <div className="bg-card rounded-md border">{table}</div>
       )}
     </div>
   );

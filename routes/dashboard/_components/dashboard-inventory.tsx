@@ -136,7 +136,7 @@ function InventoryPipeline() {
           return (
             <div key={item.key} className="flex items-center lg:flex-1">
               <div
-                className="flex flex-1 flex-col gap-1 rounded-lg px-3 py-2.5 text-white"
+                className="flex flex-1 flex-col gap-1 rounded-lg px-3 py-3 text-white"
                 style={{ backgroundColor: item.bg }}
               >
                 <div className="flex items-center gap-1.5">

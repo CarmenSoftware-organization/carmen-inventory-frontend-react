@@ -70,7 +70,7 @@ export function DashboardMyPending() {
           <Link
             key={item.href}
             href={item.href}
-            className="group bg-card hover:bg-accent flex items-start gap-3 rounded-md border p-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            className="group bg-card hover:bg-accent hover:border-primary/40 flex items-start gap-3 rounded-md border p-3 transition-colors"
             style={{ borderLeftColor: item.color, borderLeftWidth: "3px" }}
           >
             <div

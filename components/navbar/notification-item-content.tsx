@@ -1,5 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import { formatMessage, getBadgeVariant } from "@/lib/notification-helpers";
+import { Bell } from "lucide-react";
+import { SubTile } from "@/components/icons/tiles";
+import { formatMessage, NOTIFICATION_TILE } from "@/lib/notification-helpers";
 import { cn, sanitizeText } from "@/lib/utils";
 import type { Notification } from "@/types/notification";
 
@@ -33,27 +34,35 @@ export function NotificationItemContent({
     hour: "2-digit",
     minute: "2-digit",
   });
+  const tile = NOTIFICATION_TILE[notification.type];
 
   return (
     <>
-      {/* Unread dot — reserves space on read rows so content stays aligned */}
+      {/* Unread rail — blue dot to the left of the icon (iOS style) */}
       <span
-        className="mt-1.5 flex w-2 shrink-0 justify-center"
+        className="flex w-1.5 shrink-0 items-center justify-center"
         aria-hidden="true"
       >
-        {isUnread && <span className="bg-primary size-2 rounded-full" />}
+        {isUnread && <span className="bg-primary size-1.5 rounded-full" />}
       </span>
 
-      <div className="min-w-0 flex-1">
-        {/* Top line: badge + title (left) · time (right) */}
+      {/* Leading app tile — same illustrated squircle as the sidebar/dashboard,
+          so a notification's icon matches its module exactly. Non-entity types
+          fall back to a flat primary Bell tile. */}
+      <span className="flex shrink-0 items-center">
+        {tile ? (
+          <SubTile name={tile.name} parentName={tile.parent} size={36} />
+        ) : (
+          <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-xl">
+            <Bell className="size-4.5" />
+          </span>
+        )}
+      </span>
+
+      {/* Content + inset bottom border (divider stops short of the icon) */}
+      <div className="min-w-0 flex-1 border-b py-2.5">
+        {/* Top line: type + title (left) · time (right) */}
         <div className="flex items-center gap-2">
-          <Badge
-            variant={getBadgeVariant(notification.type)}
-            size="xs"
-            className="shrink-0"
-          >
-            {notification.type}
-          </Badge>
           {isUnread && <span className="sr-only">{unreadLabel}</span>}
           <p
             className={cn(
@@ -63,7 +72,7 @@ export function NotificationItemContent({
           >
             {sanitizeText(notification.title)}
           </p>
-          <span className="text-muted-foreground shrink-0 whitespace-nowrap text-[0.6875rem] tabular-nums">
+          <span className="text-muted-foreground shrink-0 text-[0.6875rem] whitespace-nowrap tabular-nums">
             {time}
           </span>
         </div>

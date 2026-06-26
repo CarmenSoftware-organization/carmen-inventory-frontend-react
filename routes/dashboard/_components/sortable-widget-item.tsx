@@ -182,7 +182,7 @@ function UnsupportedCard({
   const t = useTranslations("dashboard.savedWidget");
   return (
     <Card className="border-warning/30 bg-warning/5 gap-2 py-4">
-      <CardContent className="flex items-start gap-2.5 px-4">
+      <CardContent className="flex items-start gap-3 px-4">
         <span className="bg-warning/15 text-warning-foreground inline-flex size-8 shrink-0 items-center justify-center rounded-lg">
           <CircleAlert className="size-4" aria-hidden="true" />
         </span>
