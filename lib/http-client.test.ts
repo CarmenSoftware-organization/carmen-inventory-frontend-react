@@ -221,6 +221,61 @@ describe("error normalization", () => {
 });
 
 // =========================================================================
+// Default request timeout — every request gets an abort signal so a hung
+// backend can never freeze the call forever
+// =========================================================================
+describe("default request timeout", () => {
+  it("attaches a default abort signal when the caller provides none", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(200));
+    vi.stubGlobal("fetch", fetchMock);
+    await httpClient.get("/api/proxy/data");
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("uses the caller-provided signal instead of the default timeout", async () => {
+    const timeoutSpy = vi.spyOn(AbortSignal, "timeout");
+    const controller = new AbortController();
+    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(200));
+    vi.stubGlobal("fetch", fetchMock);
+    await httpClient.get("/api/proxy/data", { signal: controller.signal });
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.signal).toBe(controller.signal);
+    expect(timeoutSpy).not.toHaveBeenCalled();
+  });
+
+  it("maps a fired timeout (TimeoutError) to a TIMEOUT ApiError", async () => {
+    // จำลอง AbortSignal.timeout ด้วย controller ที่เราสั่ง abort เองได้
+    const controller = new AbortController();
+    const timeoutSpy = vi
+      .spyOn(AbortSignal, "timeout")
+      .mockReturnValueOnce(controller.signal);
+    // fetch ที่เคารพ signal: reject ด้วย TimeoutError เมื่อถูก abort
+    const fetchMock = vi.fn(
+      (_url: string, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener("abort", () =>
+            reject(new DOMException("timed out", "TimeoutError")),
+          );
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const pending = httpClient.get("/api/proxy/slow");
+    controller.abort(); // จำลองว่า timeout ครบกำหนด
+    try {
+      await pending;
+      expect.unreachable("should have thrown");
+    } catch (err) {
+      expect(err).toBeInstanceOf(ApiError);
+      expect((err as ApiError).code).toBe("TIMEOUT");
+      expect((err as ApiError).retryable).toBe(true);
+    }
+    expect(timeoutSpy).toHaveBeenCalledWith(30_000);
+  });
+});
+
+// =========================================================================
 // Normal responses pass through
 // =========================================================================
 describe("normal responses", () => {

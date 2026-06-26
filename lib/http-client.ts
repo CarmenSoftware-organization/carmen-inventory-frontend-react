@@ -66,8 +66,10 @@ const checkRateLimit = (): void => {
  */
 const toApiError = (error: unknown): ApiError => {
   if (error instanceof ApiError) return error;
+  // AbortController.abort() → "AbortError"; AbortSignal.timeout() → "TimeoutError"
   const isTimeout =
-    error instanceof DOMException && error.name === "AbortError";
+    error instanceof DOMException &&
+    (error.name === "AbortError" || error.name === "TimeoutError");
   return new ApiError(
     isTimeout ? ERROR_CODES.TIMEOUT : ERROR_CODES.NETWORK_ERROR,
     isTimeout
@@ -80,6 +82,11 @@ const toApiError = (error: unknown): ApiError => {
 
 const PROXY_PREFIX = "/api/proxy/";
 const EXTERNAL_PREFIX = "/api/external/";
+
+// timeout เริ่มต้นของทุก request ที่ caller ไม่ได้ส่ง signal มาเอง — กัน request
+// ค้างถาวรเมื่อ backend ไม่ตอบ caller ที่มี operation ยาว (export/report ใหญ่)
+// ส่ง signal ของตัวเองมา override ได้ (เช่น AbortSignal.timeout ที่นานกว่านี้)
+const DEFAULT_TIMEOUT_MS = 30_000;
 
 /**
  * แปลง path เดิมของ Next server ให้ชี้ backend ตรง:
@@ -131,6 +138,8 @@ const safeFetch = async (url: string, init: RequestInit): Promise<Response> => {
   const target = resolveUrl(url);
   const finalInit: RequestInit = {
     ...init,
+    // signal สดต่อ attempt — retry หลัง refresh ได้ timeout window ใหม่ของตัวเอง
+    signal: init.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
     headers: { ...buildAuthHeaders(), ...(init.headers as Record<string, string>) },
   };
   try {
