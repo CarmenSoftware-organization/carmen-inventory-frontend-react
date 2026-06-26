@@ -189,7 +189,7 @@ function AttachmentImage({ src, fileName, size = "md" }: AttachmentImageProps) {
   if (errored) {
     return (
       <div
-        className={`${dimension} from-muted to-muted/40 text-muted-foreground/70 flex flex-col items-center justify-center gap-0.5 rounded bg-linear-to-br p-1`}
+        className={`${dimension} bg-muted text-muted-foreground/70 flex flex-col items-center justify-center gap-0.5 rounded p-1`}
         title={fileName}
       >
         <ImageIcon className="size-4 shrink-0" aria-hidden="true" />

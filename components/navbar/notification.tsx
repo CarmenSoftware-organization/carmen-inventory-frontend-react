@@ -148,11 +148,7 @@ export default function Notification() {
           <Bell className="h-3.5 w-3.5 transition-transform group-hover:-rotate-12" />
           {notificationCount > 0 && (
             <>
-              <span
-                aria-hidden="true"
-                className="bg-destructive/40 absolute -inset-e-1 -top-1 size-4 rounded-full"
-              />
-              <span className="from-destructive to-destructive/80 ring-background absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-linear-to-br px-1 text-[0.5625rem] font-semibold text-white shadow-sm ring-2">
+              <span className="bg-destructive ring-background absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[0.5625rem] font-semibold text-white ring-2">
                 {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             </>
@@ -164,14 +160,10 @@ export default function Notification() {
         align="end"
         sideOffset={6}
       >
-        <div className="from-primary/5 relative flex items-center justify-between border-b bg-linear-to-br via-transparent to-transparent px-3 py-2.5">
+        <div className="flex items-center justify-between border-b px-3 py-2">
           <div className="flex items-center gap-2">
-            <span className="from-primary to-primary/70 text-primary-foreground relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-linear-to-br shadow-sm">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/20 to-transparent"
-              />
-              <Bell className="relative size-3.5" />
+            <span className="bg-primary text-primary-foreground flex size-7 shrink-0 items-center justify-center rounded-md">
+              <Bell className="size-3.5" />
             </span>
             <span className="text-sm font-semibold tracking-tight">
               {t("notifications")}

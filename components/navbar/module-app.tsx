@@ -109,7 +109,7 @@ const LauncherTile = ({
   onNavigate,
 }: LauncherTileProps) => {
   const tileClass = cn(
-    "group/tile flex min-h-22.5 flex-col items-center justify-start gap-2 rounded-xl px-1 pt-3 pb-2.5",
+    "group/tile flex min-h-22.5 flex-col items-center justify-start gap-2 rounded-xl px-1 pt-3 pb-2",
     "hover:bg-muted/60 focus-visible:bg-muted/60 transition-colors",
     "focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none",
     denied && "opacity-50",

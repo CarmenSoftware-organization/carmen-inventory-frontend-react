@@ -72,7 +72,8 @@ export function NotificationItemContent({
         <p
           className={cn(
             "text-muted-foreground mt-1 text-xs leading-snug",
-            clampMessage && "line-clamp-2",
+            // page list → 2 lines; navbar dropdown → single line + ellipsis
+            clampMessage ? "line-clamp-2" : "truncate",
           )}
         >
           {formatMessage(notification.message)}
