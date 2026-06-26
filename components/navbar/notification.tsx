@@ -77,7 +77,7 @@ const NotificationItem = ({
   return (
     <div
       className={cn(
-        "group hover:bg-muted relative flex gap-2.5 pr-3 transition-colors",
+        "group hover:bg-muted relative flex gap-3 pr-3 transition-colors",
         isUnread && "bg-primary/[0.07]",
       )}
     >

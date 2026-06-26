@@ -60,14 +60,14 @@ export function NotificationItemContent({
       </span>
 
       {/* Content + inset bottom border (divider stops short of the icon) */}
-      <div className="min-w-0 flex-1 border-b py-2.5">
+      <div className="min-w-0 flex-1 border-b py-2">
         {/* Top line: type + title (left) · time (right) */}
         <div className="flex items-center gap-2">
           {isUnread && <span className="sr-only">{unreadLabel}</span>}
           <p
             className={cn(
               "min-w-0 flex-1 truncate text-sm leading-snug group-hover:underline",
-              isUnread ? "text-foreground font-semibold" : "font-medium",
+              isUnread ? "text-foreground font-semibold" : "font-semibold",
             )}
           >
             {sanitizeText(notification.title)}

@@ -94,7 +94,7 @@ export default function BuSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="group data-[state=open]:border-border/60 data-[state=open]:bg-muted/60 h-8 gap-2 rounded-lg border border-transparent px-2 text-xs font-medium hover:border-none hover:bg-none"
+          className="group data-[state=open]:border-border/60 data-[state=open]:bg-muted/60 h-8 gap-2 rounded-lg border border-transparent px-2 text-xs font-semibold hover:border-none hover:bg-none"
         >
           <BuAvatar
             avatarUrl={currentDept.avatar_url}

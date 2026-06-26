@@ -24,7 +24,7 @@ export function CardLabel({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="text-muted-foreground mb-2.5 text-[0.5625rem] font-semibold tracking-[0.14em] uppercase">
+    <div className="text-muted-foreground mb-2 text-[0.5625rem] font-semibold tracking-[0.14em] uppercase">
       {children}
     </div>
   );
@@ -109,7 +109,7 @@ export function MetaChip({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold",
         empty
           ? "border-primary/40 bg-primary/5 text-primary/80 border-dashed italic"
           : "border-border bg-muted text-foreground",
@@ -183,7 +183,7 @@ export function InfoRow({
       ) : (
         <span
           className={cn(
-            "text-right font-medium",
+            "text-right font-semibold",
             muted ? "text-muted-foreground/70" : "text-foreground",
           )}
         >

@@ -13,7 +13,7 @@ export function OfflineBanner() {
     <div
       role="status"
       aria-live="polite"
-      className="bg-warning text-warning-foreground border-warning/40 sticky top-0 z-50 flex items-center justify-center gap-2 border-b px-3 py-1.5 text-xs font-medium shadow-sm"
+      className="bg-warning text-warning-foreground border-warning/40 sticky top-0 z-50 flex items-center justify-center gap-2 border-b px-3 py-1.5 text-xs font-semibold"
     >
       <WifiOff className="size-3.5" aria-hidden="true" />
       <span className="font-semibold">{t("offlineTitle")}</span>

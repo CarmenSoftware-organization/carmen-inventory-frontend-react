@@ -98,7 +98,7 @@ export function VoidDialog({
             </p>
           </section>
 
-          <div className="bg-destructive/5 border-destructive/20 flex items-start gap-2 rounded-md border p-2.5 text-xs">
+          <div className="bg-destructive/5 border-destructive/20 flex items-start gap-2 rounded-md border p-2 text-xs">
             <ShieldAlert className="text-destructive mt-0.5 size-3.5 shrink-0" />
             <span className="text-muted-foreground">
               การกระทำนี้จะถูกบันทึกใน audit log · ไม่สามารถย้อนกลับได้

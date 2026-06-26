@@ -122,7 +122,7 @@ export function SideMain() {
                               size={20}
                             />
                           </span>
-                          <span className="text-xs font-medium group-data-[collapsible=icon]:hidden">
+                          <span className="text-xs font-semibold group-data-[collapsible=icon]:hidden">
                             {t(sub.name)}
                           </span>
                         </button>
@@ -135,7 +135,7 @@ export function SideMain() {
                               size={20}
                             />
                           </span>
-                          <span className="text-xs font-medium group-data-[collapsible=icon]:hidden">
+                          <span className="text-xs font-semibold group-data-[collapsible=icon]:hidden">
                             {t(sub.name)}
                           </span>
                         </Link>

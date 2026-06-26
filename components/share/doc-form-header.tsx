@@ -41,7 +41,7 @@ export function DocFormHeader({
           <ArrowLeft />
         </Button>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
               {title}
             </h1>
@@ -97,7 +97,7 @@ export function RibbonCell({
   return (
     <div
       className={cn(
-        "border-border/40 min-w-0 border-r px-4 py-2.5 last:border-r-0",
+        "border-border/40 min-w-0 border-r px-4 py-2 last:border-r-0",
         className,
       )}
     >
