@@ -55,7 +55,7 @@ function HeroSkeleton() {
  */
 function GlassCardSkeleton({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="border-border/60 bg-card/70 rounded-xl border p-4 backdrop-blur-xl">
+    <div className="bg-card rounded-xl border p-4">
       <Skeleton className="mb-3 h-3 w-20" />
       {children ?? (
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -106,7 +106,7 @@ function ItemsSectionSkeleton() {
 function SidebarSkeleton() {
   return (
     <aside className="hidden flex-col gap-3 self-start lg:flex">
-      <div className="border-border/60 bg-card/70 rounded-xl border p-4 backdrop-blur-xl">
+      <div className="bg-card rounded-xl border p-4">
         <Skeleton className="mb-3 h-3 w-16" />
         <div className="flex items-start gap-2.5">
           <Skeleton className="size-9 rounded-xl" />
@@ -116,7 +116,7 @@ function SidebarSkeleton() {
           </div>
         </div>
       </div>
-      <div className="border-border/60 bg-card/70 rounded-xl border p-4 backdrop-blur-xl">
+      <div className="bg-card rounded-xl border p-4">
         <Skeleton className="mb-3 h-3 w-20" />
         <div className="space-y-2">
           <SummaryRowSkeleton />

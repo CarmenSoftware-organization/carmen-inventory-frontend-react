@@ -247,8 +247,6 @@
   /* Apple-style system stack — SF Pro on Apple platforms, Inter/system fallback */
   --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  /* spacing — Apple "md" 17px (DESIGN.md); enables p-md / m-md / gap-md / size-md */
-  --spacing-md: 1.0625rem;
   /* radius */
   --radius-sm: calc(var(--radius) - 0.25rem);
   --radius-md: calc(var(--radius) - 0.125rem);

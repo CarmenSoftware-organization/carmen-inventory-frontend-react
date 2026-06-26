@@ -168,6 +168,16 @@ rounded:
   full: 9999px
 
 spacing:
+  # ── Project constraint (Carmen / Tailwind v4) ───────────────
+  # "md: 17px" is NOT a live Tailwind spacing token — do NOT add it.
+  # In Tailwind v4 the `md` key is SHARED by the spacing scale AND the
+  # container/max-width scale, so defining `--spacing-md` shadows `max-w-md`
+  # (28rem → 17px) and collapses every `max-w-md` / `w-md` / `min-w-md` in the
+  # app (login card, panels… text wraps one-word-per-line). Same trap for the
+  # t-shirt names sm / lg / xl / 2xl.
+  # → For 17px use the arbitrary value `p-[1.0625rem]`, or a non-colliding
+  #   token name (e.g. `--spacing-17` → `p-17`). Never name a spacing token md.
+  # Everything else maps cleanly to Tailwind's 4px scale (4/8/12/24/32/48/80).
   xxs: 4px
   xs: 8px
   sm: 12px

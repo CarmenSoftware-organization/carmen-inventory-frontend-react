@@ -4,14 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-/** Glass-style card container — backdrop blur, soft shadow */
+/** Card container — flat surface, neutral border */
 export function GlassCard({
   children,
 }: {
   readonly children: React.ReactNode;
 }) {
   return (
-    <Card className="border-border/60 bg-card/70 gap-0 rounded-xl px-4 py-3.5 shadow-[0_0.25rem_1.5rem_-0.5rem_rgba(0,0,0,0.06),0_0.0625rem_0.125rem_rgba(0,0,0,0.04)] backdrop-blur-xl">
+    <Card className="bg-card gap-0 rounded-xl px-4 py-3.5">
       {children}
     </Card>
   );
@@ -112,7 +112,7 @@ export function MetaChip({
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium",
         empty
           ? "border-primary/40 bg-primary/5 text-primary/80 border-dashed italic"
-          : "border-border/60 bg-card/60 text-foreground",
+          : "border-border bg-muted text-foreground",
       )}
     >
       <Icon
@@ -146,7 +146,7 @@ export function DateCard({
         filled
           ? highlight
             ? "border-primary/30 bg-primary/5"
-            : "border-border/60 bg-background/60"
+            : "border-border bg-background"
           : "border-primary/40 border-dashed bg-transparent",
       )}
     >

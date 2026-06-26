@@ -128,12 +128,11 @@ export default function LoginForm() {
 
   return (
     <div className="bg-background relative isolate min-h-svh overflow-hidden">
-      {/* Inline keyframes */}
+      {/* Inline keyframes — subtle entrance motion only */}
       <style>{`
-        @keyframes shine-sweep { 0% { transform: translateX(-150%) skewX(-20deg); } 100% { transform: translateX(250%) skewX(-20deg); } }
         @keyframes title-reveal {
-          0% { opacity: 0; transform: translateY(0.75rem); filter: blur(0.25rem); }
-          100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+          0% { opacity: 0; transform: translateY(0.75rem); }
+          100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes fade-up-soft {
           0% { opacity: 0; transform: translateY(0.5rem); }
@@ -141,17 +140,7 @@ export default function LoginForm() {
         }
       `}</style>
 
-      {/* Subtle grain overlay */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.015] mix-blend-overlay"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
-        }}
-      />
-
-      {/* ── 50/50 cinematic split ────────────────────────── */}
+      {/* ── 50/50 split ──────────────────────────────────── */}
       <div className="relative grid h-svh lg:grid-cols-2">
         {/* ╔══ LEFT — Form (focused glass card) ═══════════════════╗ */}
         <div className="flex items-center justify-center px-5 py-6 sm:px-8">
@@ -164,19 +153,9 @@ export default function LoginForm() {
               <BrandMark size="sm" />
             </div>
 
-            {/* Glass card */}
-            <div className="border-border/40 bg-card/50 relative overflow-hidden rounded-2xl border p-5 shadow-[0_2rem_4rem_-1rem_color-mix(in_oklch,var(--primary),transparent_82%),0_0.5rem_1.5rem_-0.5rem_rgba(0,0,0,0.05)] backdrop-blur-2xl sm:p-6">
-              {/* Inner highlight */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-2xl"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%)",
-                }}
-              />
-
-              <div className="relative">
+            {/* Card */}
+            <div className="bg-card rounded-2xl border p-5 sm:p-6">
+              <div>
                 <h1
                   className="mt-2 text-2xl leading-[1.05] font-semibold tracking-tight sm:text-[1.75rem]"
                   style={{ animation: "title-reveal 0.7s ease-out 0.2s both" }}
@@ -231,24 +210,23 @@ export default function LoginForm() {
                       </div>
                     )}
 
-                    <ShineButton
+                    <Button
                       type="submit"
+                      className="group mt-0.5 h-10 w-full"
                       disabled={loginMutation.isPending || retryAfter !== null}
                     >
                       {loginMutation.isPending ? (
                         <>
-                          <span className="border-primary-foreground/30 border-t-primary-foreground text-foreground inline-block size-4 animate-spin rounded-full border-2" />
-                          <span className="text-background">
-                            {t("signingIn")}
-                          </span>
+                          <span className="border-primary-foreground/30 border-t-primary-foreground inline-block size-4 animate-spin rounded-full border-2" />
+                          {t("signingIn")}
                         </>
                       ) : (
                         <>
-                          <span className="text-background">{t("signIn")}</span>
+                          {t("signIn")}
                           <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                         </>
                       )}
-                    </ShineButton>
+                    </Button>
                   </FieldGroup>
                 </form>
 
@@ -288,17 +266,8 @@ export default function LoginForm() {
               style={{ animation: "title-reveal 0.9s ease-out 0.35s both" }}
             >
               {t("heroHeadlineStart")}{" "}
-              <span
-                className="from-primary via-primary to-chart-3 inline-block bg-linear-to-r bg-clip-text text-transparent"
-                style={{
-                  backgroundSize: "200% 100%",
-                  animation: "shimmer 8s ease-in-out infinite alternate",
-                }}
-              >
-                {t("heroHeadlineEmphasis")}
-              </span>
+              <span className="text-primary">{t("heroHeadlineEmphasis")}</span>
             </h2>
-            <style>{`@keyframes shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }`}</style>
 
             <p
               className="text-muted-foreground/90 mt-3 max-w-md text-[0.8125rem] leading-relaxed"
@@ -371,9 +340,9 @@ function BrandMark({ size = "sm" }: { readonly size?: "sm" | "lg" }) {
 /* ── Floating-label input ────────────────────────────── */
 
 const FLOATING_INPUT_CLASS = cn(
-  "border-border/40 bg-background/40 hover:border-foreground/40 focus-visible:border-primary",
-  "h-12 rounded-lg border px-3 pt-4 pb-1 text-sm shadow-none transition-all",
-  "focus-visible:shadow-[0_0_0_3px_color-mix(in_oklch,var(--primary),transparent_88%)] focus-visible:ring-0",
+  "border-border bg-background hover:border-foreground/40 focus-visible:border-primary",
+  "h-12 rounded-lg border px-3 pt-4 pb-1 text-sm shadow-none transition-colors",
+  "focus-visible:ring-primary/30 focus-visible:ring-2",
 );
 
 function FloatingLabel({
@@ -538,31 +507,6 @@ function FieldErrorText({
   );
 }
 
-/* ── Submit button with shine sweep ─────────────────── */
-
-function ShineButton({
-  children,
-  ...props
-}: React.ComponentProps<typeof Button>) {
-  return (
-    <Button
-      {...props}
-      className="from-primary to-primary/85 hover:to-primary group relative mt-0.5 h-10 w-full overflow-hidden rounded-lg bg-linear-to-br text-sm font-semibold shadow-[0_0.5rem_1.25rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_55%)] transition-all hover:shadow-[0_0.75rem_1.75rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_45%)] hover:brightness-105"
-    >
-      <span className="relative z-10 inline-flex items-center justify-center gap-2">
-        {children}
-      </span>
-      <span
-        aria-hidden
-        className="pointer-events-none absolute top-0 left-0 h-full w-1/3 bg-linear-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100"
-        style={{
-          animation: "shine-sweep 1.2s ease-out infinite",
-        }}
-      />
-    </Button>
-  );
-}
-
 /* ── Bento card for feature grid ────────────────────── */
 
 function BentoCard({
@@ -575,22 +519,16 @@ function BentoCard({
   readonly desc: string;
 }) {
   return (
-    <div className="border-border/40 bg-card/40 hover:border-primary/30 hover:bg-card/60 group relative overflow-hidden rounded-xl border p-3 backdrop-blur-xl transition-all">
-      <div
-        aria-hidden
-        className="from-primary/10 absolute -top-10 -right-10 size-24 rounded-full bg-linear-to-br to-transparent opacity-0 blur-2xl transition-opacity group-hover:opacity-100"
-      />
-      <div className="relative">
-        <div className="bg-primary/10 text-primary mb-2 flex size-7 items-center justify-center rounded-lg">
-          <Icon className="size-3.5" />
-        </div>
-        <div className="text-foreground text-xs font-semibold tracking-tight">
-          {title}
-        </div>
-        <p className="text-muted-foreground mt-0.5 text-[0.6875rem] leading-snug">
-          {desc}
-        </p>
+    <div className="border-border bg-card hover:border-primary/40 rounded-xl border p-3 transition-colors">
+      <div className="bg-primary/10 text-primary mb-2 flex size-7 items-center justify-center rounded-lg">
+        <Icon className="size-3.5" />
       </div>
+      <div className="text-foreground text-xs font-semibold tracking-tight">
+        {title}
+      </div>
+      <p className="text-muted-foreground mt-0.5 text-[0.6875rem] leading-snug">
+        {desc}
+      </p>
     </div>
   );
 }
