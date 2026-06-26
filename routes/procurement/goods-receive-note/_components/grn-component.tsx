@@ -62,10 +62,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { setSessionItem } from "@/lib/safe-storage";
 import { ModuleTileIcon } from "@/components/ui/module-tile";
@@ -73,6 +70,7 @@ import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-co
 import { useGrnTable } from "./use-grn-table";
 import GrnCardList from "./grn-card-list";
 import EmptyComponent from "@/components/empty-component";
+import { useGrnActiveFilters } from "./grn-active-filters";
 import { GrnPoWizardDialog } from "./grn-po-wizard-dialog";
 import { mapPoDetailToItems } from "./grn-product-cards";
 import type { PoForGrn } from "@/types/purchase-order";
@@ -126,11 +124,15 @@ export default function GrnComponent() {
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
-  const clearAllFilters = () => {
-    setFilter("");
-    setSearch("");
-    setGrnStatus("");
-  };
+  const { activeFilters, clearAllFilters } = useGrnActiveFilters({
+    filter,
+    setFilter,
+    grnStatus,
+    setGrnStatus,
+    search,
+    setSearch,
+    statusOptions: grnStatusOptions,
+  });
 
   const handleExport = async () => {
     try {
@@ -181,40 +183,6 @@ export default function GrnComponent() {
       toast.error(err instanceof Error ? err.message : tc("exportFailed"));
     }
   };
-
-  const activeFilters: ActiveFilter[] = [];
-  if (filter) {
-    activeFilters.push({
-      key: `filter-${filter}`,
-      label: filter,
-      onRemove: () => setFilter(""),
-    });
-  }
-  if (grnStatus) {
-    for (const v of grnStatus.split(",")) {
-      const opt = grnStatusOptions.find((o) => o.value === v);
-      if (opt) {
-        activeFilters.push({
-          key: `status-${v}`,
-          label: `${t("status")}: ${opt.label}`,
-          onRemove: () => {
-            const next = grnStatus
-              .split(",")
-              .filter((x) => x !== v)
-              .join(",");
-            setGrnStatus(next);
-          },
-        });
-      }
-    }
-  }
-  if (search) {
-    activeFilters.push({
-      key: `search-${search}`,
-      label: `"${search}"`,
-      onRemove: () => setSearch(""),
-    });
-  }
 
   const handleSelectDocType = (docType: string) => {
     setShowDocTypeDialog(false);

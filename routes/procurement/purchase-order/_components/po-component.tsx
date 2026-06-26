@@ -53,15 +53,13 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { ModuleTileIcon } from "@/components/ui/module-tile";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { usePoTable } from "./use-po-table";
 import PoCardList from "./po-card-list";
+import { usePoActiveFilters } from "./po-active-filters";
 import { lazy, Suspense } from "react";
 
 // next/dynamic → lazy+Suspense (Batch D hand-fix)
@@ -125,11 +123,15 @@ export default function PoComponent() {
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
-  const clearAllFilters = () => {
-    setFilter("");
-    setSearch("");
-    setPoType("");
-  };
+  const { activeFilters, clearAllFilters } = usePoActiveFilters({
+    filter,
+    setFilter,
+    poType,
+    setPoType,
+    search,
+    setSearch,
+    typeOptions: poTypeOptions,
+  });
 
   const handleExport = async () => {
     try {
@@ -173,40 +175,6 @@ export default function PoComponent() {
       toast.error(err instanceof Error ? err.message : tc("exportFailed"));
     }
   };
-
-  const activeFilters: ActiveFilter[] = [];
-  if (filter) {
-    activeFilters.push({
-      key: `filter-${filter}`,
-      label: filter,
-      onRemove: () => setFilter(""),
-    });
-  }
-  if (poType) {
-    for (const v of poType.split(",")) {
-      const opt = poTypeOptions.find((o) => o.value === v);
-      if (opt) {
-        activeFilters.push({
-          key: `type-${v}`,
-          label: `Type: ${opt.label}`,
-          onRemove: () => {
-            const next = poType
-              .split(",")
-              .filter((x) => x !== v)
-              .join(",");
-            setPoType(next);
-          },
-        });
-      }
-    }
-  }
-  if (search) {
-    activeFilters.push({
-      key: `search-${search}`,
-      label: `"${search}"`,
-      onRemove: () => setSearch(""),
-    });
-  }
 
   const table = usePoTable({
     purchaseOrders,

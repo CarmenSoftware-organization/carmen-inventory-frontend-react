@@ -42,7 +42,6 @@ import {
 } from "@/hooks/use-purchase-request";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useURL } from "@/hooks/use-url";
-import { useDepartment } from "@/hooks/use-department";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -55,21 +54,13 @@ import { usePurchaseRequestTable } from "./pr-table";
 import PrCardList from "./pr-card-list";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { PrFilterSheet } from "./pr-filter-sheet";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
-import { PURCHASE_REQUEST_STATUS_OPTIONS } from "@/constant/purchase-request";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
-import { useAllUsers } from "@/hooks/use-all-users";
-import { getUserFullName } from "@/components/lookup/lookup-user";
 import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
-import { useWorkflowTypeQuery } from "@/hooks/use-workflow";
-import { WORKFLOW_TYPE } from "@/types/workflows";
 import { FilterStage } from "@/components/filter/filter-stage";
 import { PrFilterStatus } from "./pr-filter-status";
+import { usePrActiveFilters } from "./pr-active-filters";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const CreatePRDialog = lazy(() =>
@@ -90,7 +81,7 @@ export default function PurchaseRequestComponent() {
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const router = useRouter();
-  const { dateFormat, defaultCurrencyCode } = useProfile();
+  const { defaultCurrencyCode } = useProfile();
   const [deleteTarget, setDeleteTarget] = useState<PurchaseRequest | null>(
     null,
   );
@@ -134,10 +125,6 @@ export default function PurchaseRequestComponent() {
   const [prDate, setPrDate] = useURL("pr_date");
 
   const { data: stages } = usePurchaseRequestWorkflowStages();
-  const { data: allUsers = [] } = useAllUsers();
-  const { data: departmentsData } = useDepartment({ perpage: -1 });
-  const { data: workflows = [] } = useWorkflowTypeQuery(WORKFLOW_TYPE.PR);
-  const departments = departmentsData?.data ?? [];
   const filterStr =
     [params.filter, departmentId, workflowId, prDate]
       .filter(Boolean)
@@ -219,151 +206,20 @@ export default function PurchaseRequestComponent() {
     enabled: useInfiniteScroll,
   });
 
-  // Parse active filters
-  const selectedUserIds = userId?.includes("requester_id|string:")
-    ? (userId.split("requester_id|string:")[1] || "").split(",").filter(Boolean)
-    : [];
-
-  const selectedUserNames = selectedUserIds
-    .map((id) => {
-      const user = allUsers.find((u) => u.user_id === id);
-      return user ? getUserFullName(user) : null;
-    })
-    .filter(Boolean);
-
-  const selectedDepartmentIds = departmentId?.includes("department_id|string:")
-    ? (departmentId.split("department_id|string:")[1] || "")
-        .split(",")
-        .filter(Boolean)
-    : [];
-
-  const selectedDepartmentNames = selectedDepartmentIds
-    .map((id) => {
-      const dept = departments.find((d) => d.id === id);
-      return dept ? dept.name : null;
-    })
-    .filter(Boolean);
-
-  const selectedStages = stage?.includes("workflow_current_stage|string:")
-    ? (stage.split("workflow_current_stage|string:")[1] || "")
-        .split(",")
-        .filter(Boolean)
-    : [];
-
-  const selectedWorkflowIds = workflowId?.includes("workflow_id|string:")
-    ? (workflowId.split("workflow_id|string:")[1] || "")
-        .split(",")
-        .filter(Boolean)
-    : [];
-
-  const selectedWorkflowNames = selectedWorkflowIds
-    .map((id) => {
-      const wf = workflows.find((w) => w.id === id);
-      return wf ? wf.name : null;
-    })
-    .filter(Boolean);
-
-  const selectedStatuses = filter?.startsWith("pr_status|string:")
-    ? filter.slice("pr_status|string:".length).split(",").filter(Boolean)
-    : [];
-
-  const selectedStatusLabels = selectedStatuses
-    .map((key) => {
-      const opt = PURCHASE_REQUEST_STATUS_OPTIONS.find(
-        (o) => o.value === `pr_status|string:${key}`,
-      );
-      return opt?.label ?? null;
-    })
-    .filter(Boolean);
-
-  const dateFilterLabel = (() => {
-    if (!prDate) return null;
-    const rangeMatch = /pr_date\|date_range:(.+),(.+)/.exec(prDate);
-    if (rangeMatch) {
-      return `${tfl("prDate")}: ${formatDate(rangeMatch[1], dateFormat)} - ${formatDate(rangeMatch[2], dateFormat)}`;
-    }
-    return null;
-  })();
-
-  const clearAllFilters = () => {
-    setFilter("");
-    setStage("");
-    setUserId("");
-    setDepartmentId("");
-    setWorkflowId("");
-    setPrDate("");
-  };
-
-  const buildMultiBadges = (
-    keys: string[],
-    labels: (string | null)[],
-    prefix: string,
-    fieldPrefix: string,
-    setter: (v: string) => void,
-  ): ActiveFilter[] =>
-    labels
-      .map((label, i) =>
-        label
-          ? {
-              key: `${prefix}-${keys[i]}`,
-              label,
-              onRemove: () => {
-                const next = keys.filter((_, j) => j !== i);
-                setter(
-                  next.length > 0 ? `${fieldPrefix}${next.join(",")}` : "",
-                );
-              },
-            }
-          : null,
-      )
-      .filter(Boolean) as ActiveFilter[];
-
-  const activeFilters: ActiveFilter[] = [
-    ...buildMultiBadges(
-      selectedStatuses,
-      selectedStatusLabels,
-      "status",
-      "pr_status|string:",
-      setFilter,
-    ),
-    ...buildMultiBadges(
-      selectedStages,
-      selectedStages,
-      "stage",
-      "workflow_current_stage|string:",
-      setStage,
-    ),
-    ...buildMultiBadges(
-      selectedUserIds,
-      selectedUserNames,
-      "user",
-      "requester_id|string:",
-      setUserId,
-    ),
-    ...buildMultiBadges(
-      selectedDepartmentIds,
-      selectedDepartmentNames,
-      "dept",
-      "department_id|string:",
-      setDepartmentId,
-    ),
-    ...buildMultiBadges(
-      selectedWorkflowIds,
-      selectedWorkflowNames,
-      "workflow",
-      "workflow_id|string:",
-      setWorkflowId,
-    ),
-    ...(dateFilterLabel
-      ? [
-          {
-            key: "prDate",
-            label: dateFilterLabel,
-            onRemove: () => setPrDate(""),
-          },
-        ]
-      : []),
-  ];
+  const { activeFilters, clearAllFilters } = usePrActiveFilters({
+    filter,
+    setFilter,
+    stage,
+    setStage,
+    userId,
+    setUserId,
+    departmentId,
+    setDepartmentId,
+    workflowId,
+    setWorkflowId,
+    prDate,
+    setPrDate,
+  });
 
   const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
   const totalRecords = useInfiniteScroll

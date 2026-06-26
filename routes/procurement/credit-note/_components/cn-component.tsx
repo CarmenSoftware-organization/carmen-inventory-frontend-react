@@ -51,16 +51,14 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { ModuleTileIcon } from "@/components/ui/module-tile";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { useCnTable } from "./use-cn-table";
 import CnCardList from "./cn-card-list";
 import EmptyComponent from "@/components/empty-component";
+import { useCnActiveFilters } from "./cn-active-filters";
 
 export default function CnComponent() {
   const t = useTranslations("procurement.creditNote");
@@ -112,12 +110,18 @@ export default function CnComponent() {
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
-  const clearAllFilters = () => {
-    setFilter("");
-    setSearch("");
-    setCnType("");
-    setCnStatus("");
-  };
+  const { activeFilters, clearAllFilters } = useCnActiveFilters({
+    filter,
+    setFilter,
+    cnType,
+    setCnType,
+    cnStatus,
+    setCnStatus,
+    search,
+    setSearch,
+    typeOptions: cnTypeOptions,
+    statusOptions: cnStatusOptions,
+  });
 
   const handleExport = async () => {
     try {
@@ -168,61 +172,6 @@ export default function CnComponent() {
       toast.error(err instanceof Error ? err.message : tc("exportFailed"));
     }
   };
-
-  const activeFilters: ActiveFilter[] = (() => {
-    const result: ActiveFilter[] = [];
-    if (filter) {
-      result.push({
-        key: `filter-${filter}`,
-        label: filter,
-        onRemove: () => setFilter(""),
-      });
-    }
-    if (cnType) {
-      for (const v of cnType.split(",")) {
-        const opt = cnTypeOptions.find((o) => o.value === v);
-        if (opt) {
-          result.push({
-            key: `type-${v}`,
-            label: `${t("type")}: ${opt.label}`,
-            onRemove: () => {
-              const next = cnType
-                .split(",")
-                .filter((x) => x !== v)
-                .join(",");
-              setCnType(next);
-            },
-          });
-        }
-      }
-    }
-    if (cnStatus) {
-      for (const v of cnStatus.split(",")) {
-        const opt = cnStatusOptions.find((o) => o.value === v);
-        if (opt) {
-          result.push({
-            key: `status-${v}`,
-            label: `${t("status")}: ${opt.label}`,
-            onRemove: () => {
-              const next = cnStatus
-                .split(",")
-                .filter((x) => x !== v)
-                .join(",");
-              setCnStatus(next);
-            },
-          });
-        }
-      }
-    }
-    if (search) {
-      result.push({
-        key: `search-${search}`,
-        label: `"${search}"`,
-        onRemove: () => setSearch(""),
-      });
-    }
-    return result;
-  })();
 
   const newCnBtn = (
     <Button
