@@ -79,8 +79,10 @@ export default function PriceListExternalComponent({
       await updateMutation.mutateAsync(formData);
       toast.success("Changes saved successfully");
       form.reset(formData);
-    } catch {
-      toast.error("Failed to save changes");
+    } catch (err) {
+      // surface ข้อความจริงจาก backend (เช่น validation / ลิงก์หมดอายุ) ให้ vendor
+      // ภายนอกเห็น แทนข้อความ generic — invalidate/refetch จัดการ reset เอง
+      toast.error(err instanceof HttpError ? err.message : "Failed to save changes");
     }
   };
 
@@ -95,8 +97,10 @@ export default function PriceListExternalComponent({
     try {
       await submitMutation.mutateAsync(formData);
       toast.success("Price list submitted successfully");
-    } catch {
-      toast.error("Failed to submit price list");
+    } catch (err) {
+      toast.error(
+        err instanceof HttpError ? err.message : "Failed to submit price list",
+      );
     }
   };
 
