@@ -337,7 +337,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
               onSearch={setSearchInput}
               onInputChange={setSearchInput}
               containerClassName="w-full"
-              inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card/40 h-9 rounded-lg border pr-9 text-sm shadow-none backdrop-blur-sm transition-colors focus-visible:ring-0"
+              inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card h-9 rounded-lg border pr-9 text-sm shadow-none transition-colors focus-visible:ring-0"
             />
           </div>
           <Button
@@ -346,7 +346,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
             aria-label={t("refreshProducts")}
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="border-border/40 bg-card/40 hover:bg-card/80 size-9 rounded-lg backdrop-blur-sm"
+            className="border-border/40 bg-card hover:bg-card/80 size-9 rounded-lg"
           >
             <RefreshCw
               className={cn("size-4", isRefreshing && "animate-spin")}
@@ -370,7 +370,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
         <div className="flex-1">
           {isLoading && <ItemListSkeleton count={5} />}
           {!isLoading && filtered.length === 0 && totalItems > 0 && (
-            <div className="border-border/40 bg-card/40 flex items-center justify-center gap-2 rounded-xl border border-dashed py-8 backdrop-blur-sm">
+            <div className="border-border/40 bg-card flex items-center justify-center gap-2 rounded-xl border border-dashed py-8">
               <Package className="text-muted-foreground/60 size-4" />
               <span className="text-muted-foreground text-xs">
                 {t("noItemsMatch")}
@@ -438,7 +438,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
                       size="sm"
                       onClick={handleSubmitReview}
                       disabled={reviewPhysicalCount.isPending}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-[0_0.5rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_60%)]"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
                     >
                       <SendHorizontal className="size-3.5" aria-hidden="true" />
                       {reviewPhysicalCount.isPending
@@ -462,7 +462,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-[0_0.5rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_60%)]"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
                     onClick={handleSave}
                     disabled={savePhysicalCount.isPending}
                   >

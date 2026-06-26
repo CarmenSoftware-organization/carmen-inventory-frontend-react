@@ -33,8 +33,8 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
 
   return (
     <div className="max-w-2xl pt-3">
-      <FieldGroup className="gap-2.5">
-        <div className="grid grid-cols-2 gap-2.5">
+      <FieldGroup className="gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Field data-invalid={!!form.formState.errors.name}>
             <FieldLabel htmlFor="wf-name">{t("workflowName")}</FieldLabel>
             <Input

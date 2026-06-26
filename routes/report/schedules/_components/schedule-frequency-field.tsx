@@ -105,7 +105,7 @@ export function ScheduleFrequencyField({
                         field.onChange(next);
                       }}
                       className={cn(
-                        "rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
+                        "rounded-md border px-2 py-1 text-xs font-semibold transition-colors",
                         "focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-none",
                         isActive
                           ? "bg-primary text-primary-foreground border-primary"

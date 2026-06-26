@@ -350,7 +350,7 @@ const InfoCell = ({
   return (
     <div>
       <span className="text-muted-foreground">{label}</span>
-      <p className="font-medium truncate">{value || "—"}</p>
+      <p className="font-semibold truncate">{value || "—"}</p>
     </div>
   );
 };

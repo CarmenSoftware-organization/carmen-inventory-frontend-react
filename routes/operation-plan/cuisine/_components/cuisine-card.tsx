@@ -40,7 +40,7 @@ export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -67,7 +67,7 @@ export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
       {item.region && (
         <>
           <Separator />
-          <CardContent className="flex items-center gap-1.5 px-4 py-2.5 text-xs">
+          <CardContent className="flex items-center gap-1.5 px-4 py-2 text-xs">
             <Globe
               className="text-muted-foreground size-3 shrink-0"
               aria-hidden="true"

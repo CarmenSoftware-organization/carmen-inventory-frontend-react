@@ -50,7 +50,7 @@ function RolesViz({ tint }: { readonly tint: string }) {
   ];
   return (
     <div className={VIZ_WRAP}>
-      <div className="bg-card border-border rounded-sm border p-2.5">
+      <div className="bg-card border-border rounded-sm border p-2">
         <div className="grid grid-cols-[3.75rem_repeat(4,1fr)] gap-1">
           <span />
           {perms.map((p) => (
@@ -168,7 +168,7 @@ function PeriodViz({ tint }: { readonly tint: string }) {
   ];
   return (
     <div className={VIZ_WRAP}>
-      <div className="bg-card border-border rounded-sm border p-2.5">
+      <div className="bg-card border-border rounded-sm border p-2">
         <div className="text-muted-foreground mb-1.5 text-[0.5625rem] font-bold tracking-wider uppercase">
           FY 2026 · Months
         </div>
@@ -395,7 +395,7 @@ function MonitorViz({ tint }: { readonly tint: string }) {
   const lastY = h - (points[points.length - 1] / max) * h;
   return (
     <div className={VIZ_WRAP}>
-      <div className="bg-card border-border rounded-sm border p-2.5">
+      <div className="bg-card border-border rounded-sm border p-2">
         <div className="mb-1 flex items-center justify-between">
           <span className="text-muted-foreground text-[0.5625rem] font-bold tracking-wider uppercase">
             CPU · last 30m
@@ -432,7 +432,7 @@ function MonitorViz({ tint }: { readonly tint: string }) {
 function EmailViz({ tint }: { readonly tint: string }) {
   return (
     <div className={VIZ_WRAP}>
-      <div className="bg-card border-border rounded-sm border p-2.5">
+      <div className="bg-card border-border rounded-sm border p-2">
         <div className="mb-1.5 flex items-center justify-between">
           <span className="text-foreground text-[0.5625rem] font-bold">
             mail.aureliabay.com
@@ -535,7 +535,7 @@ function CodeViz({ tint }: { readonly tint: string }) {
   ];
   return (
     <div className={VIZ_WRAP}>
-      <div className="bg-foreground rounded-sm p-2.5">
+      <div className="bg-foreground rounded-sm p-2">
         <div className="mb-1.5 flex gap-1" aria-hidden>
           <span
             className="inline-block size-1.5 rounded-full"
@@ -568,7 +568,7 @@ function CodeViz({ tint }: { readonly tint: string }) {
 function QueryViz({ tint }: { readonly tint: string }) {
   return (
     <div className={VIZ_WRAP}>
-      <div className="bg-card border-border rounded-sm border p-2.5">
+      <div className="bg-card border-border rounded-sm border p-2">
         <div className="text-foreground text-[0.5625rem] leading-relaxed">
           <div>
             <span className="font-bold" style={{ color: tint }}>

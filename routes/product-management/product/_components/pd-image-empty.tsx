@@ -48,7 +48,7 @@ export function EmptyImage({ onAddFiles }: Props) {
       >
         <ImageIcon className="size-10 opacity-70" aria-hidden="true" />
         <div className="space-y-0.5 text-center">
-          <p className="text-sm font-medium">
+          <p className="text-sm font-semibold">
             {isDragging ? "Drop to upload" : "Add product images"}
           </p>
           <p className="text-[0.6875rem] opacity-80">

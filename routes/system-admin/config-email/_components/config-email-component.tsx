@@ -144,7 +144,7 @@ export default function ConfigEmailComponent() {
         className="mt-6 max-w-2xl space-y-6"
       >
         <div className="rounded-lg border p-4">
-          <h2 className="mb-4 font-medium">SMTP Server</h2>
+          <h2 className="mb-4 font-semibold">SMTP Server</h2>
           <FieldGroup>
             <div className="grid grid-cols-3 gap-4">
               <Field className="col-span-2">
@@ -186,7 +186,7 @@ export default function ConfigEmailComponent() {
         </div>
 
         <div className="rounded-lg border p-4">
-          <h2 className="mb-4 font-medium">Recipients</h2>
+          <h2 className="mb-4 font-semibold">Recipients</h2>
           <FieldGroup>
             <Field>
               <FieldLabel>To (comma-separated)</FieldLabel>

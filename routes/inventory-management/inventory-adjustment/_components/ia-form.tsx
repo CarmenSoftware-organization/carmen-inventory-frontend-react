@@ -257,7 +257,7 @@ export function InventoryAdjustmentForm({
 
           {/* ── Line items ── */}
           <Reveal delay={140}>
-            <Card className="border-border/60 bg-card/70 gap-0 overflow-hidden py-0 shadow-xs backdrop-blur-xl">
+            <Card className="border-border/60 bg-card gap-0 overflow-hidden py-0">
               <CardContent className="px-5 py-4">
                 <AdjItemFields
                   form={form}

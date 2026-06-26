@@ -11,7 +11,7 @@ interface IaCardListProps {
 
 function IaCardSkeleton() {
   return (
-    <div className="bg-card rounded-lg border shadow-sm">
+    <div className="bg-card rounded-lg border">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="space-y-1.5">
           <Skeleton className="h-4 w-28" />
@@ -40,7 +40,7 @@ function IaCardSkeleton() {
         </div>
       </div>
       <div className="border-t" />
-      <div className="flex items-center justify-between px-4 py-2.5">
+      <div className="flex items-center justify-between px-4 py-2">
         <Skeleton className="h-3 w-14" />
         <Skeleton className="h-4 w-24" />
       </div>

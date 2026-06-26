@@ -106,7 +106,7 @@ export function IaFormHero({
         {/* Type icon block */}
         <div
           className={cn(
-            "ring-background flex size-14 shrink-0 items-center justify-center rounded-2xl shadow-md ring-4 ring-inset",
+            "ring-background flex size-14 shrink-0 items-center justify-center rounded-2xl ring-4 ring-inset",
             isStockIn
               ? "bg-success/10 text-success ring-success/20"
               : "bg-destructive/10 text-destructive ring-destructive/20",

@@ -71,7 +71,7 @@ function MethodCard({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "group relative flex items-start gap-2.5 rounded-lg border p-3 text-left transition-colors",
+        "group relative flex items-start gap-3 rounded-lg border p-3 text-left transition-colors",
         active
           ? "border-primary bg-primary/5"
           : "bg-card hover:border-primary/40 hover:bg-muted/30",
@@ -104,7 +104,7 @@ function MethodCard({
         </p>
       </div>
       {active && (
-        <span className="bg-primary text-primary-foreground ring-background absolute top-2 right-2 inline-flex size-4 items-center justify-center rounded-full shadow-sm ring-2">
+        <span className="bg-primary text-primary-foreground ring-background absolute top-2 right-2 inline-flex size-4 items-center justify-center rounded-full ring-2">
           <Check className="size-2.5" strokeWidth={3} aria-hidden="true" />
         </span>
       )}

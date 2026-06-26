@@ -206,7 +206,7 @@ function SortableSignatureCard({
         >
           <GripVertical className="size-4" />
         </button>
-        <span className="text-xs text-muted-foreground font-medium">
+        <span className="text-xs text-muted-foreground font-semibold">
           #{index + 1}
         </span>
         <Button
@@ -429,7 +429,7 @@ export default function SignatureConfig({
         className="mt-6 space-y-6"
       >
         <div className="max-w-2xl rounded-lg border p-4">
-          <h2 className="mb-4 font-medium">Print Settings</h2>
+          <h2 className="mb-4 font-semibold">Print Settings</h2>
           <Field>
             <FieldLabel>Orientation</FieldLabel>
             <Select
@@ -451,7 +451,7 @@ export default function SignatureConfig({
 
         {workflowType && (
           <div className="max-w-2xl rounded-lg border p-4">
-            <h2 className="mb-2 font-medium">Import from Workflow</h2>
+            <h2 className="mb-2 font-semibold">Import from Workflow</h2>
             <p className="text-muted-foreground mb-4 text-xs">
               Select a workflow to pull its stages as signature entries. Stage
               name becomes the signature label; assigned user (if any) becomes
@@ -560,7 +560,7 @@ export default function SignatureConfig({
             ) : (
               <p className="text-muted-foreground text-xs rounded-md border border-dashed p-3">
                 No workflows found for this document type. Create a workflow in{" "}
-                <span className="font-medium text-foreground">
+                <span className="font-semibold text-foreground">
                   System Admin &gt; Workflow
                 </span>{" "}
                 first, or add signatures manually below.
@@ -571,7 +571,7 @@ export default function SignatureConfig({
 
         <div className="rounded-lg border p-4">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-medium">Signatures</h2>
+            <h2 className="font-semibold">Signatures</h2>
             <Button
               type="button"
               size="sm"
@@ -630,7 +630,7 @@ export default function SignatureConfig({
                 <div className="flex flex-col items-center gap-1 rounded-lg border bg-background p-4 shadow-lg">
                   <GripVertical className="size-4 text-muted-foreground" />
                   <div className="mb-1 h-px w-24 border-b border-dashed border-foreground/40" />
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-semibold">
                     {form.getValues(`signatures.${activeDragIndex}.label`) ||
                       `Signature ${activeDragIndex + 1}`}
                   </span>
@@ -641,7 +641,7 @@ export default function SignatureConfig({
 
           {/* Report preview */}
           <div className="mt-6 rounded-lg border border-dashed p-4">
-            <p className="mb-3 text-xs font-medium text-muted-foreground">
+            <p className="mb-3 text-xs font-semibold text-muted-foreground">
               Report Preview
             </p>
             <div
@@ -657,7 +657,7 @@ export default function SignatureConfig({
                 >
                   <div className="h-10" />
                   <div className="h-px w-full border-b border-foreground/30" />
-                  <p className="text-xs font-medium">
+                  <p className="text-xs font-semibold">
                     {form.watch(`signatures.${index}.label`) || "—"}
                   </p>
                   <p className="text-[10px] text-muted-foreground">

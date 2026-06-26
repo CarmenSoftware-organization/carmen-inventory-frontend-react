@@ -41,7 +41,7 @@ export default function TaxProfileCard({ item, index, onEdit }: TaxProfileCardPr
           onEdit(item);
         }
       }}
-      className="cursor-pointer gap-0 py-0 transition-all hover:border-primary/30 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -65,7 +65,7 @@ export default function TaxProfileCard({ item, index, onEdit }: TaxProfileCardPr
 
       <Separator />
 
-      <CardContent className="flex items-center justify-between px-4 py-2.5">
+      <CardContent className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
           <Percent
             className="text-muted-foreground size-3 shrink-0"

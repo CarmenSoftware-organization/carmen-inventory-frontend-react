@@ -113,7 +113,7 @@ export function WfRouting({
       {/* Left: Rule list */}
       <div className="w-48 shrink-0 space-y-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium">{t("rules")}</span>
+          <span className="text-xs font-semibold">{t("rules")}</span>
           {!isDisabled && (
             <Button
               type="button"
@@ -230,7 +230,7 @@ export function WfRouting({
 
             {/* Condition section */}
             <div className="space-y-2">
-              <span className="text-xs font-medium">{t("condition")}</span>
+              <span className="text-xs font-semibold">{t("condition")}</span>
 
               <FieldGroup className="gap-2">
                 <div
@@ -367,7 +367,7 @@ export function WfRouting({
 
             {/* Action section */}
             <div className="space-y-2">
-              <span className="text-xs font-medium">{t("actionLabel")}</span>
+              <span className="text-xs font-semibold">{t("actionLabel")}</span>
 
               <div className="grid grid-cols-2 gap-2">
                 <Field>

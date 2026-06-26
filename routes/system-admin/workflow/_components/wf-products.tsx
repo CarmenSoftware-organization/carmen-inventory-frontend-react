@@ -316,7 +316,7 @@ const TreeNodeRow = ({
           className="flex flex-1 cursor-pointer items-center gap-1.5 text-left"
           onClick={() => onToggleExpand(node.id)}
         >
-          <span className="text-xs font-medium">{node.name}</span>
+          <span className="text-xs font-semibold">{node.name}</span>
           <span className="text-muted-foreground text-[0.5625rem]">
             ({leafIdsMap.get(node.id)?.length ?? 0})
           </span>

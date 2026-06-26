@@ -131,7 +131,7 @@ export function TreeNode({
             {highlight(node.code)}
           </Badge>
 
-          <span className="text-xs font-medium truncate">
+          <span className="text-xs font-semibold truncate">
             {highlight(node.name)}
           </span>
 

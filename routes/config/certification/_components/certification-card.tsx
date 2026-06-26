@@ -40,7 +40,7 @@ export default function CertificationCard({
           onEdit(item);
         }
       }}
-      className="group hover:border-primary/40 focus-visible:ring-ring flex h-full cursor-pointer flex-col gap-0 overflow-hidden py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="group hover:border-primary/40 focus-visible:ring-ring flex h-full cursor-pointer flex-col gap-0 overflow-hidden py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 pt-4 pb-3">
         <div className="flex items-start gap-3">

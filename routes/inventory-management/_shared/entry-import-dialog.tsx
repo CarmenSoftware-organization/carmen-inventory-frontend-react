@@ -253,7 +253,7 @@ export function EntryImportDialog({
           />
 
           {file ? (
-            <div className="border-border/60 bg-card/70 relative flex items-start gap-3 rounded-xl border p-3">
+            <div className="border-border/60 bg-card relative flex items-start gap-3 rounded-xl border p-3">
               <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <FileSpreadsheet className="size-5" aria-hidden="true" />
               </div>
@@ -305,7 +305,7 @@ export function EntryImportDialog({
           )}
 
           {result && result.missing.length > 0 && (
-            <div className="border-destructive/40 bg-destructive/5 flex items-start gap-2 rounded-xl border p-2.5">
+            <div className="border-destructive/40 bg-destructive/5 flex items-start gap-2 rounded-xl border p-2">
               <AlertCircle
                 className="text-destructive mt-0.5 size-4 shrink-0"
                 aria-hidden="true"
@@ -369,7 +369,7 @@ export function EntryImportDialog({
             size="sm"
             disabled={!canApply || isParsing}
             onClick={handleApply}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-[0_0.5rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_60%)]"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
           >
             <CheckCircle2 className="size-3.5" aria-hidden="true" />
             {t("importApply")}
@@ -398,7 +398,7 @@ function PreviewStat({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-xl border px-2 py-2.5",
+        "flex flex-col items-center justify-center rounded-xl border px-2 py-2",
         toneMap[tone],
       )}
     >

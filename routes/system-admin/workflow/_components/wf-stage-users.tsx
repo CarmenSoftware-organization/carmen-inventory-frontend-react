@@ -167,7 +167,7 @@ export function WfStageUsers({
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-xs leading-tight font-medium">
+                        <p className="text-xs leading-tight font-semibold">
                           {user.firstname} {user.lastname}
                         </p>
                         <p className="text-muted-foreground text-[0.625rem] leading-tight">

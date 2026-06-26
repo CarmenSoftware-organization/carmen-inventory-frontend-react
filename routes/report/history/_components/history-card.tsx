@@ -70,23 +70,12 @@ export default function HistoryCard({ item }: HistoryCardProps) {
           : undefined
       }
       className={cn(
-        "group border-border/60 bg-card/70 relative flex flex-col overflow-hidden rounded-2xl border backdrop-blur-xl transition-all",
-        "shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)]",
+        "group border-border/60 bg-card relative flex flex-col overflow-hidden rounded-2xl border transition-colors",
         "focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none",
         hasUrl &&
-          "cursor-pointer hover:-translate-y-0.5 hover:shadow-[0_0.625rem_1.5rem_-0.5rem_color-mix(in_oklch,var(--primary),transparent_82%)]",
+          "cursor-pointer hover:-translate-y-0.5 hover:border-primary/40",
       )}
     >
-      {/* Inner highlight overlay (top-left sheen) */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-2xl"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 45%)",
-        }}
-      />
-
       {/* Status accent bar — widens on hover */}
       <span
         aria-hidden
@@ -94,32 +83,15 @@ export default function HistoryCard({ item }: HistoryCardProps) {
         style={{ backgroundColor: accent }}
       />
 
-      {/* Corner accent glow (top-right, status-tinted) */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-8 -right-8 size-24 rounded-full opacity-0 transition-opacity group-hover:opacity-40"
-        style={{
-          background: `radial-gradient(circle, color-mix(in oklch, ${accent}, transparent 70%) 0%, transparent 70%)`,
-        }}
-      />
-
       {/* Header — icon tile + title */}
-      <div className="relative flex items-start gap-3 px-4 pt-4 pb-2.5">
+      <div className="relative flex items-start gap-3 px-4 pt-4 pb-2">
         {/* Icon tile — gradient per status */}
         <div
-          className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-sm"
+          className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl"
           style={{
             background: `linear-gradient(135deg, color-mix(in oklch, ${accent}, transparent 75%) 0%, color-mix(in oklch, ${accent}, transparent 88%) 100%)`,
           }}
         >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%)",
-            }}
-          />
           <FileText
             className="relative size-4"
             style={{ color: accent }}
@@ -140,7 +112,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
             )}
           </div>
           <div className="text-muted-foreground mt-1 flex items-center gap-1.5 text-[0.6875rem]">
-            <span className="font-medium tracking-wide uppercase">
+            <span className="font-semibold tracking-wide uppercase">
               {item.report_type}
             </span>
             <span aria-hidden className="text-border">
@@ -152,7 +124,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
       </div>
 
       {/* Footer — rows + status pill */}
-      <div className="border-border/40 relative mt-auto flex items-center justify-between gap-2 border-t px-4 py-2.5">
+      <div className="border-border/40 relative mt-auto flex items-center justify-between gap-2 border-t px-4 py-2">
         <div className="text-muted-foreground inline-flex items-center gap-1.5 text-[0.6875rem]">
           {item.row_count != null ? (
             <>

@@ -53,7 +53,7 @@ function LocationRow({ loc }: { readonly loc: UserLocationItem }) {
   return (
     <div
       className={cn(
-        "border-border/60 bg-card hover:bg-muted/40 flex items-center gap-2 rounded-lg border border-l-[3px] p-2.5 text-xs transition-colors",
+        "border-border/60 bg-card hover:bg-muted/40 flex items-center gap-2 rounded-lg border border-l-[3px] p-2 text-xs transition-colors",
         LOCATION_TYPE_BORDER[loc.location_type],
       )}
     >

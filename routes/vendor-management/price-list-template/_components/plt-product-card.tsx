@@ -60,9 +60,9 @@ export function PltProductCard({
   const tierWord = tierCount === 1 ? labels.tierSingular : labels.tierPlural;
 
   return (
-    <div className="border-border/60 bg-card/70 hover:border-primary/40 relative rounded-xl border p-3 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all hover:shadow-[0_0.25rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_85%)]">
+    <div className="border-border/60 bg-card hover:border-primary/40 relative rounded-xl border p-3 transition-colors">
       {/* Header */}
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-3">
         <div className="relative shrink-0">
           <ProductThumb name={productRef?.product_name} />
           <div className="bg-foreground text-background absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full text-[0.5625rem] font-semibold">
@@ -279,7 +279,7 @@ function ProductThumb({ name }: { readonly name?: string | null }) {
   const letter = (name?.trim()[0] || "?").toUpperCase();
   return (
     <div
-      className="relative size-9 overflow-hidden rounded-lg shadow-[inset_0_0_0_0.0625rem_rgba(0,0,0,0.06)]"
+      className="relative size-9 overflow-hidden rounded-lg"
       style={{
         background: "linear-gradient(135deg, #e8d9a0 0%, #c8b97f 100%)",
       }}
@@ -293,7 +293,7 @@ function ProductThumb({ name }: { readonly name?: string | null }) {
         <circle cx="6" cy="34" r="10" fill="#000" />
       </svg>
       <div
-        className="absolute inset-0 flex items-center justify-center font-serif text-base font-medium"
+        className="absolute inset-0 flex items-center justify-center font-serif text-base font-semibold"
         style={{ color: "#1a1814", letterSpacing: "-0.02em" }}
       >
         {letter}

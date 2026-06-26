@@ -51,7 +51,7 @@ export function DbObjectTree({ onSelect, loadingKey }: DbObjectTreeProps) {
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2 border-b px-3 py-2">
         <Database className="text-muted-foreground size-4" />
-        <span className="text-sm font-medium">Database Objects</span>
+        <span className="text-sm font-semibold">Database Objects</span>
       </div>
       <div className="border-b p-2">
         <div className="relative">
@@ -165,7 +165,7 @@ function Section({
       <button
         type="button"
         onClick={onToggle}
-        className="text-muted-foreground hover:bg-muted/50 flex w-full items-center gap-1 px-2 py-1 text-xs font-medium"
+        className="text-muted-foreground hover:bg-muted/50 flex w-full items-center gap-1 px-2 py-1 text-xs font-semibold"
       >
         {open ? (
           <ChevronDown className="size-3.5" />
@@ -213,7 +213,7 @@ function ItemRow({
         {name}
       </span>
       {badge && (
-        <span className="bg-muted text-muted-foreground ml-auto rounded px-1 py-0.5 text-[9px] font-medium">
+        <span className="bg-muted text-muted-foreground ml-auto rounded px-1 py-0.5 text-[9px] font-semibold">
           {badge}
         </span>
       )}

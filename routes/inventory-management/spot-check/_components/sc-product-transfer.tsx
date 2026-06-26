@@ -103,7 +103,7 @@ export function ScProductTransfer({
             );
 
             return (
-              <div className="flex items-stretch gap-2.5">
+              <div className="flex items-stretch gap-3">
                 <ProductPanel
                   title={t("productsSelected")}
                   totalLabel={String(selectedItems.length)}

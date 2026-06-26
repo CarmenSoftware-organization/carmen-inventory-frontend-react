@@ -43,7 +43,7 @@ export function DepartmentsSection({
               Member of
             </p>
             {memberDepartment ? (
-              <div className="border-border/60 bg-muted/20 flex items-center gap-2 rounded-lg border p-2.5 text-xs">
+              <div className="border-border/60 bg-muted/20 flex items-center gap-2 rounded-lg border p-2 text-xs">
                 <Building2
                   className="text-muted-foreground size-3.5 shrink-0"
                   aria-hidden="true"
@@ -82,7 +82,7 @@ export function DepartmentsSection({
                 {hodDepartments.map((dept) => (
                   <div
                     key={dept.id}
-                    className="border-border/60 bg-muted/20 flex items-center gap-2 rounded-lg border p-2.5 text-xs"
+                    className="border-border/60 bg-muted/20 flex items-center gap-2 rounded-lg border p-2 text-xs"
                   >
                     <Crown
                       className="text-warning size-3.5 shrink-0"

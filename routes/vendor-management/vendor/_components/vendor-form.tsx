@@ -446,8 +446,8 @@ export function VendorForm({ vendor }: VendorFormProps) {
             <GlassCard>
               <CardLabel>{t("primaryContactTitle")}</CardLabel>
               {primaryContact && primaryContact.name ? (
-                <div className="flex items-start gap-2.5">
-                  <div className="from-primary to-primary/70 text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br font-serif text-base font-medium">
+                <div className="flex items-start gap-3">
+                  <div className="text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary font-serif text-base font-semibold">
                     {primaryContact.name[0]?.toUpperCase() ?? "?"}
                   </div>
                   <div className="min-w-0 flex-1">

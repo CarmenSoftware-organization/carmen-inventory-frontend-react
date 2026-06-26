@@ -193,7 +193,7 @@ export function PermissionMatrix({
       <table className="w-full border-separate border-spacing-0 text-xs">
         <thead className="bg-muted sticky top-0 z-10">
           <tr className="bg-muted/60 text-foreground border-b">
-            <th className="min-w-45 p-2 text-left font-medium">
+            <th className="min-w-45 p-2 text-left font-semibold">
               <div className="flex items-center gap-2">
                 <Checkbox
                   checked={getCheckedState(allChecked, someChecked)}
@@ -213,7 +213,7 @@ export function PermissionMatrix({
                 selectedSet.has(id),
               );
               return (
-                <th key={action} className="w-20 p-2 text-center font-medium">
+                <th key={action} className="w-20 p-2 text-center font-semibold">
                   <div className="flex flex-col items-center gap-1">
                     <span>{ACTION_LABELS[action]}</span>
                     <Checkbox

@@ -160,20 +160,12 @@ export function PeDocumentsDialog({
           className="absolute inset-x-0 top-0 z-20 h-0.5"
           style={{ background: color }}
         />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0.5 h-32"
-          style={{
-            backgroundImage: `linear-gradient(to bottom, color-mix(in oklch, ${color}, transparent 92%), transparent)`,
-          }}
-        />
-
         <div className="relative space-y-4 px-6 pt-10 pb-6">
           <DialogHeader>
             <div className="flex items-start gap-3">
               <div
                 aria-hidden="true"
-                className="flex size-10 shrink-0 items-center justify-center rounded-xl shadow-sm"
+                className="flex size-10 shrink-0 items-center justify-center rounded-xl"
                 style={{
                   background: `color-mix(in oklch, ${color}, transparent 82%)`,
                   color,
@@ -183,7 +175,7 @@ export function PeDocumentsDialog({
               </div>
               <div className="min-w-0 flex-1">
                 <div
-                  className="mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-medium"
+                  className="mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold"
                   style={{
                     background: `color-mix(in oklch, ${color}, transparent 88%)`,
                     color,

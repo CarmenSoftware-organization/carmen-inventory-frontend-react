@@ -100,23 +100,23 @@ export function ProductEcoLabelSection({
               <tr>
                 <th
                   scope="col"
-                  className="w-10 px-3 py-2 text-center font-medium"
+                  className="w-10 px-3 py-2 text-center font-semibold"
                 >
                   #
                 </th>
-                <th scope="col" className="px-3 py-2 text-left font-medium">
+                <th scope="col" className="px-3 py-2 text-left font-semibold">
                   {tfl("certificateNo")}
                 </th>
-                <th scope="col" className="px-3 py-2 text-left font-medium">
+                <th scope="col" className="px-3 py-2 text-left font-semibold">
                   {tfl("ecoLabel")}
                 </th>
-                <th scope="col" className="px-3 py-2 text-left font-medium">
+                <th scope="col" className="px-3 py-2 text-left font-semibold">
                   {tfl("issuedDate")}
                 </th>
-                <th scope="col" className="px-3 py-2 text-left font-medium">
+                <th scope="col" className="px-3 py-2 text-left font-semibold">
                   {tfl("expiryDate")}
                 </th>
-                <th scope="col" className="px-3 py-2 text-center font-medium">
+                <th scope="col" className="px-3 py-2 text-center font-semibold">
                   {tfl("status")}
                 </th>
                 {!readOnly && <th scope="col" className="w-16 px-3 py-2" />}
@@ -131,7 +131,7 @@ export function ProductEcoLabelSection({
                   <td className="text-muted-foreground px-3 py-1.5">
                     {item.certificate_no}
                   </td>
-                  <td className="px-3 py-1.5 font-medium">
+                  <td className="px-3 py-1.5 font-semibold">
                     {masterMap.get(item.master_eco_label_id)?.name ??
                       item.master_eco_label_id}
                   </td>

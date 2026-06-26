@@ -137,18 +137,18 @@ function ContactCard({
   return (
     <div
       className={cn(
-        "border-border/60 bg-card/70 hover:border-primary/40 relative rounded-xl border p-3 backdrop-blur-xl transition-all",
+        "border-border/60 bg-card hover:border-primary/40 relative rounded-xl border p-3 transition-colors",
         isPrimary && "border-primary/40 bg-primary/5",
       )}
     >
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-start gap-3">
         {/* Avatar */}
         <div className="relative shrink-0">
-          <div className="from-primary to-primary/70 text-primary-foreground flex size-9 items-center justify-center rounded-lg bg-linear-to-br font-serif text-base font-medium">
+          <div className="text-primary-foreground flex size-9 items-center justify-center rounded-lg bg-primary font-serif text-base font-semibold">
             {initial}
           </div>
           {isPrimary && (
-            <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full shadow-sm">
+            <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full">
               <Star className="size-2.5 fill-current" />
             </div>
           )}
@@ -324,7 +324,7 @@ function EmptyContacts({
 }) {
   return (
     <div className="border-primary/35 bg-primary/5 rounded-xl border border-dashed p-6 text-center">
-      <div className="from-primary to-primary/70 text-primary-foreground mx-auto mb-2.5 flex size-9 items-center justify-center rounded-xl bg-linear-to-br">
+      <div className="text-primary-foreground mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-primary">
         <User className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
@@ -336,7 +336,7 @@ function EmptyContacts({
           type="button"
           size="xs"
           onClick={onAdd}
-          className="mt-2.5 rounded-full"
+          className="mt-2 rounded-full"
         >
           <Plus />
           {addLabel}

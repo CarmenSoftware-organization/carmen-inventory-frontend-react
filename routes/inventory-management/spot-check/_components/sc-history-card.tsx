@@ -31,8 +31,7 @@ export function ScHistoryCard({ spotCheck, onClick }: ScHistoryCardProps) {
       type="button"
       onClick={() => onClick(spotCheck)}
       className={cn(
-        "border-border/60 bg-card/70 hover:border-primary/40 group relative w-full overflow-hidden rounded-xl border p-3 text-left transition-colors",
-        "backdrop-blur-xl",
+        "border-border/60 bg-card hover:border-primary/40 group relative w-full overflow-hidden rounded-xl border p-3 text-left transition-colors",
       )}
     >
       <ScDocStatusRow
@@ -44,7 +43,7 @@ export function ScHistoryCard({ spotCheck, onClick }: ScHistoryCardProps) {
       {/* Location */}
       <div className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-[0.6875rem]">
         <MapPin className="size-2.5 shrink-0" aria-hidden="true" />
-        <span className="text-foreground/85 font-medium">
+        <span className="text-foreground/85 font-semibold">
           {spotCheck.location_name}
         </span>
         <span className="text-muted-foreground/80 text-[0.625rem] uppercase">
@@ -53,16 +52,16 @@ export function ScHistoryCard({ spotCheck, onClick }: ScHistoryCardProps) {
       </div>
 
       {/* Footer meta */}
-      <div className="border-border/40 text-muted-foreground mt-2.5 flex flex-wrap items-center gap-3 border-t pt-2 text-[0.6875rem]">
+      <div className="border-border/40 text-muted-foreground mt-2 flex flex-wrap items-center gap-3 border-t pt-2 text-[0.6875rem]">
         <span className="inline-flex items-center gap-1">
           <Calendar className="size-2.5" aria-hidden="true" />
-          <span className="font-medium">{tfl("startDate")}</span>
+          <span className="font-semibold">{tfl("startDate")}</span>
           <span>{formatDate(spotCheck.start_date, dateFormat)}</span>
         </span>
         {spotCheck.end_date && (
           <span className="inline-flex items-center gap-1">
             <CalendarCheck className="size-2.5" aria-hidden="true" />
-            <span className="font-medium">{tfl("endDate")}</span>
+            <span className="font-semibold">{tfl("endDate")}</span>
             <span>{formatDate(spotCheck.end_date, dateFormat)}</span>
           </span>
         )}

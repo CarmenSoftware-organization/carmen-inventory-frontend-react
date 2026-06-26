@@ -173,7 +173,7 @@ function EmptyInfo({
 }) {
   return (
     <div className="border-primary/35 bg-primary/5 rounded-xl border border-dashed p-6 text-center">
-      <div className="from-primary to-primary/70 text-primary-foreground mx-auto mb-2.5 flex size-9 items-center justify-center rounded-xl bg-linear-to-br">
+      <div className="text-primary-foreground mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-primary">
         <Info className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
@@ -185,7 +185,7 @@ function EmptyInfo({
           type="button"
           size="xs"
           onClick={onAdd}
-          className="mt-2.5 rounded-full"
+          className="mt-2 rounded-full"
         >
           <Plus />
           {addLabel}

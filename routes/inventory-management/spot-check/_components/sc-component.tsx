@@ -9,7 +9,6 @@ import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { useSpotCheckCurrent } from "@/hooks/use-spot-check-current";
 import { useSpotCheck } from "@/hooks/use-spot-check";
 import { ErrorState } from "@/components/ui/error-state";
-import { cn } from "@/lib/utils";
 import {
   SPOT_CHECK_METHODS,
   getSpotCheckMethodLabel,
@@ -251,7 +250,7 @@ export default function ScComponent() {
               onSearch={setSearch}
               extras={
                 isLocationsView ? (
-                  <label className="border-border/40 bg-card/40 hover:border-foreground/40 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium backdrop-blur-sm select-none">
+                  <label className="border-border/40 bg-card hover:border-foreground/40 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold select-none">
                     <Checkbox
                       checked={includeNotCount}
                       onCheckedChange={(v) => setIncludeNotCount(v === true)}
@@ -393,17 +392,13 @@ function ViewToggle({
   readonly t: (key: string) => string;
 }) {
   return (
-    <div className="border-border/40 bg-card/40 inline-flex items-center gap-0.5 rounded-full border p-0.5 backdrop-blur-sm">
+    <div className="border-border/40 bg-card inline-flex items-center gap-0.5 rounded-full border p-0.5">
       <Button
         type="button"
         size="sm"
         variant={view === "locations" ? "default" : "ghost"}
         onClick={() => setView("locations")}
-        className={cn(
-          "h-7 rounded-full px-3 text-[0.6875rem] font-semibold tracking-wide",
-          view === "locations" &&
-            "shadow-[0_0.25rem_0.625rem_-0.125rem_color-mix(in_oklch,var(--primary),transparent_60%)]",
-        )}
+        className="h-7 rounded-full px-3 text-[0.6875rem] font-semibold tracking-wide"
       >
         <MapPin className="size-3" aria-hidden="true" />
         {t("viewLocations")}
@@ -413,11 +408,7 @@ function ViewToggle({
         size="sm"
         variant={view === "history" ? "default" : "ghost"}
         onClick={() => setView("history")}
-        className={cn(
-          "h-7 rounded-full px-3 text-[0.6875rem] font-semibold tracking-wide",
-          view === "history" &&
-            "shadow-[0_0.25rem_0.625rem_-0.125rem_color-mix(in_oklch,var(--primary),transparent_60%)]",
-        )}
+        className="h-7 rounded-full px-3 text-[0.6875rem] font-semibold tracking-wide"
       >
         <History className="size-3" aria-hidden="true" />
         {t("viewHistory")}

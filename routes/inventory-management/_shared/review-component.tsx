@@ -96,7 +96,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
           </div>
         </div>
 
-        <div className="mb-5 grid grid-cols-1 gap-2.5 sm:grid-cols-4">
+        <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-4">
           <ReviewStatTile
             icon={CheckCircle2}
             tone="success"
@@ -163,7 +163,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
               size="sm"
               onClick={onSubmit}
               disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-[0_0.5rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_60%)]"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
             >
               <Send className="size-3.5" aria-hidden="true" />
               {isSubmitting ? submittingLabel : submitLabel}

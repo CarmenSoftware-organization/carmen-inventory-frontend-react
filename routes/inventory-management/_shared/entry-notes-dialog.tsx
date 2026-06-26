@@ -212,7 +212,7 @@ export function EntryNotesDialog({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder={t("notesPlaceholder")}
-              className="border-border/40 focus-visible:border-primary bg-card/40 min-h-20 rounded-lg border text-sm shadow-none focus-visible:ring-0"
+              className="border-border/40 focus-visible:border-primary bg-card min-h-20 rounded-lg border text-sm shadow-none focus-visible:ring-0"
               maxLength={256}
             />
           </div>
@@ -257,7 +257,7 @@ export function EntryNotesDialog({
               )}
             >
               <ImagePlus className="text-primary size-5" aria-hidden="true" />
-              <span className="text-foreground/80 text-[0.6875rem] font-medium">
+              <span className="text-foreground/80 text-[0.6875rem] font-semibold">
                 {t("evidenceHint")}
               </span>
               <span className="text-muted-foreground text-[0.5625rem]">
@@ -342,7 +342,7 @@ function ImageThumb({
 }) {
   const [errored, setErrored] = useState(false);
   return (
-    <div className="border-border/60 bg-card group relative aspect-square overflow-hidden rounded-lg border shadow-sm">
+    <div className="border-border/60 bg-card group relative aspect-square overflow-hidden rounded-lg border">
       {errored ? (
         <div className="bg-muted/40 text-muted-foreground/70 flex size-full flex-col items-center justify-center gap-1 p-1.5">
           <ImageIcon className="size-5 shrink-0" aria-hidden="true" />
@@ -362,7 +362,7 @@ function ImageThumb({
       {/* Gradient overlay + filename */}
       {!errored && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent px-1.5 py-1">
-          <div className="truncate text-[0.5rem] font-medium text-white">
+          <div className="truncate text-[0.5rem] font-semibold text-white">
             {name}
           </div>
           <div className="text-[0.5rem] text-white/80 tabular-nums">{size}</div>
@@ -376,7 +376,7 @@ function ImageThumb({
           size="icon-xs"
           onClick={onRemove}
           aria-label={removeLabel}
-          className="bg-foreground/80 hover:bg-destructive text-background absolute top-1 right-1 size-5 rounded-full opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+          className="bg-foreground/80 hover:bg-destructive text-background absolute top-1 right-1 size-5 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
         >
           <X className="size-3" />
         </Button>

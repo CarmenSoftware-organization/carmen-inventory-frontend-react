@@ -121,7 +121,7 @@ function DatasetCard({ dataset }: { readonly dataset: DashboardDataset }) {
   return (
     <article className="bg-card hover:border-foreground/20 rounded-lg border p-3 transition-colors">
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-sm leading-snug font-medium">{dataset.name}</h3>
+        <h3 className="text-sm leading-snug font-semibold">{dataset.name}</h3>
         <Badge variant="outline" size="sm" className="shrink-0">
           {dataset.shape}
         </Badge>

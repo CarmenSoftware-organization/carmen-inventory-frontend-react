@@ -340,7 +340,7 @@ function GeneralTab({
           </CardSection>
 
           {/* Attributes — merged from former Product Info tab */}
-          <section className="border-border bg-card rounded-lg border shadow-xs">
+          <section className="border-border bg-card rounded-lg border">
             <header className="border-border flex items-center justify-between border-b px-5 py-3">
               <h2 className="text-card-foreground text-sm font-semibold">
                 {t("sectionAttributes")}
@@ -373,7 +373,7 @@ function GeneralTab({
                           key={field._fieldKey}
                           className="flex items-baseline gap-2"
                         >
-                          <span className="text-xs font-medium capitalize">
+                          <span className="text-xs font-semibold capitalize">
                             {label.replaceAll("_", " ")}:
                           </span>
                           <span className="text-muted-foreground text-sm">
@@ -386,7 +386,7 @@ function GeneralTab({
                 )
               ) : infoFields.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-                  <p className="text-sm font-medium">{t("noAdditionalInfo")}</p>
+                  <p className="text-sm font-semibold">{t("noAdditionalInfo")}</p>
                   <p className="text-muted-foreground text-xs">
                     {t.rich("addFirstAttributeHintRich", {
                       code: (chunks) => (
@@ -568,7 +568,7 @@ function CardSection({
   children: React.ReactNode;
 }>) {
   return (
-    <section className="border-border bg-card rounded-lg border shadow-xs">
+    <section className="border-border bg-card rounded-lg border">
       <header className="border-border border-b px-5 py-3">
         <h2 className="text-card-foreground text-sm font-semibold">{title}</h2>
       </header>
@@ -592,7 +592,7 @@ function ToggleRow({
     <div className="flex items-center justify-between gap-3">
       <div className="min-w-0">
         <div
-          className={`text-sm font-medium ${disabled ? "text-muted-foreground" : ""}`}
+          className={`text-sm font-semibold ${disabled ? "text-muted-foreground" : ""}`}
         >
           {title}
         </div>

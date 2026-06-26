@@ -248,7 +248,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
 
       {/* ── Hero ──────────────────────────────────── */}
       <Reveal>
-        <section className="border-border/60 from-card via-card to-muted/30 relative overflow-hidden rounded-2xl border bg-linear-to-br p-5 shadow-sm">
+        <section className="border-border/60 bg-card relative overflow-hidden rounded-2xl border p-5">
           <div className="relative flex flex-wrap items-center gap-4">
             <UserAvatar
               first={user.firstname}

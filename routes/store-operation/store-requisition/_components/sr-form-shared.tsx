@@ -32,7 +32,7 @@ export const SummaryRow = ({
     }`}
   >
     <span className="text-muted-foreground">{label}</span>
-    <span className="font-medium tabular-nums">{value}</span>
+    <span className="font-semibold tabular-nums">{value}</span>
   </div>
 );
 
@@ -49,7 +49,7 @@ export const LocationTile = ({
 }) => (
   <div
     title={name || undefined}
-    className={`flex min-w-0 flex-1 flex-col gap-0.5 rounded-md border px-3 py-2.5 ${
+    className={`flex min-w-0 flex-1 flex-col gap-0.5 rounded-md border px-3 py-2 ${
       highlighted
         ? "border-success/30 bg-success/5"
         : "border-warning bg-warning/40"
@@ -62,7 +62,7 @@ export const LocationTile = ({
     >
       {label}
     </span>
-    <span className="line-clamp-2 text-[0.8125rem] leading-tight font-medium wrap-break-word">
+    <span className="line-clamp-2 text-[0.8125rem] leading-tight font-semibold wrap-break-word">
       {name || "—"}
     </span>
     {code && (

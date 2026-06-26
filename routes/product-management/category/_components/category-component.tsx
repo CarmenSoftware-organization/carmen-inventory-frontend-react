@@ -266,7 +266,7 @@ export default function CategoryComponent() {
         {/* Summary bar */}
         {!isLoading && (
           <div className="text-muted-foreground flex items-center gap-3 px-1 py-1 text-xs">
-            <span className="text-foreground/70 font-medium">
+            <span className="text-foreground/70 font-semibold">
               {t("nItems", { count: stats.total })}
             </span>
             <span className="text-border">|</span>
@@ -281,7 +281,7 @@ export default function CategoryComponent() {
         {/* Tree */}
         <div className="bg-card rounded-md border">
           {/* Header row */}
-          <div className="bg-muted/40 text-muted-foreground flex h-9 items-center justify-between border-b px-2 text-[0.625rem] font-medium tracking-wider uppercase">
+          <div className="bg-muted/40 text-muted-foreground flex h-9 items-center justify-between border-b px-2 text-[0.625rem] font-semibold tracking-wider uppercase">
             <div className="flex items-center">
               <FolderTree className="mr-1.5 h-3 w-3" />
               {t("categoryTree")}

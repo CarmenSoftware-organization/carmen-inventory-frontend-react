@@ -571,8 +571,8 @@ export function RequestPriceListForm({
             <GlassCard>
               <CardLabel>{t("templateSummary")}</CardLabel>
               {requestPriceList?.pricelist_template ? (
-                <div className="flex items-start gap-2.5">
-                  <div className="from-primary to-primary/70 text-primary-foreground flex size-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-sm font-semibold">
+                <div className="flex items-start gap-3">
+                  <div className="text-primary-foreground flex size-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-semibold">
                     <ClipboardList className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -686,9 +686,8 @@ function RfpHeroStatCard({
 }) {
   const isEmpty = !totalVendors;
   return (
-    <div className="from-primary via-primary to-primary/70 text-primary-foreground relative hidden overflow-hidden rounded-2xl bg-gradient-to-br p-4 shadow-[0_1rem_2rem_-0.5rem_color-mix(in_oklch,var(--primary),transparent_60%)] lg:block">
-      <div className="pointer-events-none absolute -top-10 -right-10 size-36 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.22)_0%,transparent_70%)]" />
-      <div className="text-primary-foreground/70 text-[0.5625rem] font-medium tracking-widest uppercase">
+    <div className="text-primary-foreground hidden rounded-2xl bg-primary p-4 lg:block">
+      <div className="text-primary-foreground/70 text-[0.5625rem] font-semibold tracking-widest uppercase">
         {labels.vendorsInvited}
       </div>
       <div className="mt-1 flex items-baseline gap-1.5">
@@ -715,7 +714,7 @@ function RfpHeroStatCard({
         <Cell k={labels.days} v={durationDays || "—"} empty={!durationDays} />
       </div>
 
-      <div className="text-primary-foreground/80 mt-2.5 flex items-center gap-1 text-[0.6875rem]">
+      <div className="text-primary-foreground/80 mt-2 flex items-center gap-1 text-[0.6875rem]">
         <Mail className="size-2.5" />
         {labels.footer}
       </div>

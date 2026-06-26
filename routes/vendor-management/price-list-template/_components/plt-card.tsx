@@ -46,7 +46,7 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -85,7 +85,7 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
               aria-hidden="true"
             />
             <span className="text-muted-foreground">{tfl("currency")}:</span>
-            <span className="truncate font-medium">{item.currency.code}</span>
+            <span className="truncate font-semibold">{item.currency.code}</span>
           </div>
         )}
         {item.validity_period != null && (
@@ -94,7 +94,7 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
               className="text-muted-foreground size-3 shrink-0"
               aria-hidden="true"
             />
-            <span className="truncate font-medium">
+            <span className="truncate font-semibold">
               {t("validityDays", { count: item.validity_period })}
             </span>
           </div>

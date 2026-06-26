@@ -59,7 +59,7 @@ export function useReportTable({
         cell: ({ row }) => (
           <button
             type="button"
-            className="text-left text-xs font-medium text-blue-600 hover:underline focus-visible:outline-none dark:text-blue-400"
+            className="text-left text-xs font-semibold text-blue-600 hover:underline focus-visible:outline-none dark:text-blue-400"
             onClick={(e) => {
               (e.currentTarget as HTMLButtonElement).blur();
               onSelect?.(row.original);

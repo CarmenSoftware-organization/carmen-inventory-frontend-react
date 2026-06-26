@@ -67,7 +67,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
     <LocationCardShell>
       {/* Row 1: Avatar + Name + Action */}
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-1 items-start gap-2.5">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
           <LocationAvatar
             letter={item.name?.[0]?.toUpperCase() ?? "?"}
             index={index}
@@ -121,7 +121,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
           <span className="text-muted-foreground tracking-wide uppercase">
             {t("progress")}
           </span>
-          <span className="text-foreground/80 font-medium tabular-nums">
+          <span className="text-foreground/80 font-semibold tabular-nums">
             {counted}/{total} ({progress}%)
           </span>
         </div>

@@ -46,7 +46,7 @@ function RequiredChecklist({ form }: Props) {
   const complete = doneCount === total;
 
   return (
-    <div className="border-primary/30 bg-primary/5 rounded-md border px-3 py-2.5">
+    <div className="border-primary/30 bg-primary/5 rounded-md border px-3 py-2">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span className="text-primary text-xs font-semibold">
           {t("requiredToSave")}{" "}

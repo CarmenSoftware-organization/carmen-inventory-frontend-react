@@ -53,7 +53,7 @@ export function ReviewStatTile({
   return (
     <div
       className={cn(
-        "bg-card/80 space-y-1.5 rounded-xl border p-3 backdrop-blur-xl",
+        "bg-card space-y-1.5 rounded-xl border p-3",
         tones.ring,
       )}
     >

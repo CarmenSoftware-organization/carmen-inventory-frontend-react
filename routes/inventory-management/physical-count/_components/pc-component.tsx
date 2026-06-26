@@ -102,7 +102,7 @@ function PeriodSelectorCard({
   const emptyText = isLoading ? "" : t("noPeriod");
 
   return (
-    <div className="border-border/60 bg-card/70 hover:border-primary/40 mt-4 flex flex-col gap-3 rounded-xl border p-3 backdrop-blur-xl transition-all sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-border/60 bg-card hover:border-primary/40 mt-4 flex flex-col gap-3 rounded-xl border p-3 transition-all sm:flex-row sm:items-center sm:justify-between">
       {hasPeriod ? (
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -324,7 +324,7 @@ export default function PcComponent() {
                 search={search}
                 onSearch={setSearch}
                 extras={
-                  <label className="border-border/40 bg-card/40 hover:border-foreground/40 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium backdrop-blur-sm select-none">
+                  <label className="border-border/40 bg-card hover:border-foreground/40 flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold select-none">
                     <Checkbox
                       checked={includeNotCount}
                       onCheckedChange={(v) => setIncludeNotCount(v === true)}

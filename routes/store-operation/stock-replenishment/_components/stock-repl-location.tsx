@@ -217,7 +217,7 @@ export function StockReplLocation({
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
-      <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-left text-sm font-medium hover:bg-muted/70 transition-colors">
+      <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-left text-sm font-semibold hover:bg-muted/70 transition-colors">
         <ChevronRight
           className={`size-4 shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
         />

@@ -55,7 +55,7 @@ export default function RecipeCard({ item, index, cuisines, categories, onEdit }
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -98,7 +98,7 @@ export default function RecipeCard({ item, index, cuisines, categories, onEdit }
               className="text-muted-foreground size-3 shrink-0"
               aria-hidden="true"
             />
-            <span className="font-medium truncate">{cuisineName}</span>
+            <span className="font-semibold truncate">{cuisineName}</span>
           </div>
         )}
         {categoryName && (

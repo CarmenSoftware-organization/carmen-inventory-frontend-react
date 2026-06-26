@@ -55,11 +55,11 @@ export default function WfCard({
         }
       }}
       className={cn(
-        "hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2",
+        "hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2",
         inactive && "bg-muted/30 border-dashed opacity-70 hover:opacity-100",
       )}
     >
-      <CardHeader className="px-2.5 py-2">
+      <CardHeader className="px-2 py-2">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
             <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
@@ -115,7 +115,7 @@ export default function WfCard({
         </CardAction>
       </CardHeader>
       <Separator />
-      <CardContent className="space-y-1.5 px-2.5 py-2 text-xs">
+      <CardContent className="space-y-1.5 px-2 py-2 text-xs">
         <div className="flex items-center justify-between gap-3">
           <WfFlowStrip workflow={item} />
           <div className="flex items-center gap-3">

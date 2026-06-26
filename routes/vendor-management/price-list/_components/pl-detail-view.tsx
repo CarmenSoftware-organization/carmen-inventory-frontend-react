@@ -66,31 +66,31 @@ export function PriceListDetailView({ details }: PriceListDetailViewProps) {
           <tr className="bg-muted/60 text-foreground border-b">
             <th
               scope="col"
-              className="h-9 w-9 px-2 text-center align-middle font-medium"
+              className="h-9 w-9 px-2 text-center align-middle font-semibold"
             >
               #
             </th>
             <th
               scope="col"
-              className="h-9 px-2 text-left align-middle font-medium"
+              className="h-9 px-2 text-left align-middle font-semibold"
             >
               {tfl("productName")}
             </th>
             <th
               scope="col"
-              className="h-9 px-2 text-left align-middle font-medium"
+              className="h-9 px-2 text-left align-middle font-semibold"
             >
               {tfl("moq")}
             </th>
             <th
               scope="col"
-              className="h-9 px-2 text-right align-middle font-medium"
+              className="h-9 px-2 text-right align-middle font-semibold"
             >
               {tfl("taxAmt")}{commonTaxRate == null ? "" : ` (${commonTaxRate}%)`}
             </th>
             <th
               scope="col"
-              className="h-9 px-2 text-right align-middle font-medium"
+              className="h-9 px-2 text-right align-middle font-semibold"
             >
               {tfl("totalAmount")}
             </th>
@@ -113,7 +113,7 @@ export function PriceListDetailView({ details }: PriceListDetailViewProps) {
                 )}
                 {i === 0 && (
                   <td
-                    className="border-border px-2 py-1.5 align-middle font-medium"
+                    className="border-border px-2 py-1.5 align-middle font-semibold"
                     rowSpan={group.items.length}
                   >
                     {group.productName}

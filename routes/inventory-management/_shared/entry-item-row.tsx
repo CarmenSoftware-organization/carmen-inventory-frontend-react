@@ -90,8 +90,8 @@ export const EntryItemRow = memo(function EntryItemRow({
     : true;
 
   return (
-    <div className="border-border/60 bg-card/70 hover:border-primary/40 relative space-y-2.5 rounded-xl border p-3 transition-colors">
-      <div className="flex items-start gap-2.5">
+    <div className="border-border/60 bg-card hover:border-primary/40 relative space-y-2 rounded-xl border p-3 transition-colors">
+      <div className="flex items-start gap-3">
         <ProductAvatar
           letter={productName?.[0]?.toUpperCase() ?? "?"}
           index={index}
@@ -147,7 +147,7 @@ export const EntryItemRow = memo(function EntryItemRow({
         )}
       </div>
 
-      <div className="border-border/40 flex items-center gap-2 border-t pt-2.5">
+      <div className="border-border/40 flex items-center gap-2 border-t pt-2">
         <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
           {t("actualCount")}
         </span>
@@ -174,12 +174,12 @@ export const EntryItemRow = memo(function EntryItemRow({
             onKeyDown={(e) => {
               if (e.key === "Enter") (e.target as HTMLInputElement).blur();
             }}
-            className="border-border/40 focus-visible:border-primary bg-card/40 h-8 w-32 rounded-l-lg rounded-r-none border pr-2 text-right text-sm tabular-nums shadow-none backdrop-blur-sm focus-visible:ring-0"
+            className="border-border/40 focus-visible:border-primary bg-card h-8 w-32 rounded-l-lg rounded-r-none border pr-2 text-right text-sm tabular-nums shadow-none focus-visible:ring-0"
           />
           <Button
             variant="outline"
             size="icon-sm"
-            className="border-border/40 hover:bg-card/80 bg-card/40 h-8 w-8 rounded-l-none border border-l-0 backdrop-blur-sm"
+            className="border-border/40 hover:bg-card bg-card h-8 w-8 rounded-l-none border border-l-0"
             onClick={() =>
               onOpenCalc({
                 id,
@@ -202,7 +202,7 @@ export const EntryItemRow = memo(function EntryItemRow({
 
       <button
         type="button"
-        className="text-primary hover:text-primary/80 inline-flex cursor-pointer items-center gap-1 text-[0.6875rem] font-medium transition-colors"
+        className="text-primary hover:text-primary/80 inline-flex cursor-pointer items-center gap-1 text-[0.6875rem] font-semibold transition-colors"
         onClick={() => setNotesOpen(true)}
       >
         <MessageSquarePlus className="size-2.5" aria-hidden="true" />
@@ -223,7 +223,7 @@ export const EntryItemRow = memo(function EntryItemRow({
                 {savedNote.images.slice(0, 4).map((img) => (
                   <div
                     key={img.id}
-                    className="border-border/60 relative size-10 overflow-hidden rounded-md border shadow-sm"
+                    className="border-border/60 relative size-10 overflow-hidden rounded-md border"
                   >
                     <img
                       src={img.url}

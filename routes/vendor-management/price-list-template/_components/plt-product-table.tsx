@@ -189,7 +189,7 @@ export function PltProductTable({
       tableLayout={{ headerSticky: true }}
     >
       <DataGridContainer
-        className="border-border/60 bg-card/70 backdrop-blur-xl"
+        className="border-border/60 bg-card"
         border={false}
       >
         <DataGridTable />
@@ -365,7 +365,7 @@ function PlainText({ value }: { readonly value?: string | null }) {
     return (
       <span className="text-muted-foreground text-[0.6875rem] italic">—</span>
     );
-  return <span className="text-foreground text-xs font-medium">{value}</span>;
+  return <span className="text-foreground text-xs font-semibold">{value}</span>;
 }
 
 function PlainNumber({ value }: { readonly value: number }) {

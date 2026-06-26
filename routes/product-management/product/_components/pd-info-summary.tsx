@@ -153,7 +153,7 @@ function ViewItem({
         {icon}
         <span>{label}</span>
       </div>
-      <p className="truncate text-sm font-medium text-foreground" title={value || undefined}>
+      <p className="truncate text-sm font-semibold text-foreground" title={value || undefined}>
         {value || "—"}
       </p>
     </div>

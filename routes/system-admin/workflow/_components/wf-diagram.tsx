@@ -93,11 +93,11 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
   return (
     <div
       className={cn(
-        "group bg-card relative flex w-44 flex-col gap-1 rounded-lg border-2 px-3 py-2 shadow-sm transition-all",
+        "group bg-card relative flex w-44 flex-col gap-1 rounded-lg border-2 px-3 py-2 transition-colors",
         containerClass,
         isSelected &&
           "ring-primary ring-offset-background ring-2 ring-offset-2",
-        canDrag && "cursor-grab hover:shadow-md active:cursor-grabbing",
+        canDrag && "cursor-grab hover:border-primary/40 active:cursor-grabbing",
       )}
     >
       {!isFirst && (
@@ -282,7 +282,7 @@ export default function WfDiagram({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[0.6875rem]">
           <span className="inline-flex items-center gap-1 tabular-nums">
-            <span className="text-foreground font-medium">{stages.length}</span>
+            <span className="text-foreground font-semibold">{stages.length}</span>
             {t("stages").toLowerCase()}
           </span>
           {middleCount > 0 && (
@@ -297,7 +297,7 @@ export default function WfDiagram({
                 <span className="inline-flex cursor-help items-center gap-1 tabular-nums">
                   <Clock className="size-3" aria-hidden="true" />
                   {t("cycleTime")}:{" "}
-                  <span className="font-medium">{cycleTime}</span>
+                  <span className="font-semibold">{cycleTime}</span>
                 </span>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-xs">
@@ -353,7 +353,7 @@ export default function WfDiagram({
             />
             <Controls
               showInteractive={false}
-              className="border-border! bg-card! rounded-lg! border! shadow-sm!"
+              className="border-border! bg-card! rounded-lg! border!"
             />
           </ReactFlow>
         </ReactFlowProvider>

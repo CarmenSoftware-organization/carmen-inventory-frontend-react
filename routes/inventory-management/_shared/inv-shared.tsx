@@ -43,7 +43,7 @@ export function KpiTile({
       type="button"
       onClick={onClick}
       className={cn(
-        "border-border/40 bg-card/60 hover:bg-card/80 group relative flex items-center gap-2.5 rounded-xl border p-2.5 backdrop-blur-xl transition-all",
+        "border-border/40 bg-card hover:bg-card group relative flex items-center gap-3 rounded-xl border p-2 transition-all",
         active &&
           "border-primary shadow-[0_0_0_3px_color-mix(in_oklch,var(--primary),transparent_88%)]",
       )}
@@ -99,7 +99,7 @@ export function StatusHero({
 
   return (
     <div className="bg-card hidden rounded-lg border p-4 lg:block">
-      <div className="text-muted-foreground text-[0.5625rem] font-medium tracking-widest uppercase">
+      <div className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
         {labels.progressTitle}
       </div>
       <div className="mt-1 flex items-baseline gap-1.5">
@@ -125,7 +125,7 @@ export function StatusHero({
         <HeroCell k={labels.done} v={done} />
       </div>
 
-      <div className="text-muted-foreground mt-2.5 text-[0.6875rem]">
+      <div className="text-muted-foreground mt-2 text-[0.6875rem]">
         {labels.heroFooter}
       </div>
     </div>
@@ -182,7 +182,7 @@ export function SectionEmpty({
   readonly title: string;
 }) {
   return (
-    <div className="border-border/40 bg-card/40 flex items-center justify-center gap-2 rounded-xl border border-dashed py-6 backdrop-blur-sm">
+    <div className="border-border/40 bg-card flex items-center justify-center gap-2 rounded-xl border border-dashed py-6">
       <Icon className="text-muted-foreground/60 size-4" />
       <span className="text-muted-foreground text-xs">{title}</span>
     </div>
@@ -195,9 +195,9 @@ export function LocationCardSkeleton({
   readonly withProgress?: boolean;
 }) {
   return (
-    <div className="border-border/60 bg-card/70 relative space-y-3 rounded-xl border p-3 backdrop-blur-xl">
+    <div className="border-border/60 bg-card relative space-y-3 rounded-xl border p-3">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-1 items-start gap-2.5">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
           <Skeleton className="size-9 shrink-0 rounded-lg" />
           <div className="min-w-0 flex-1 space-y-2">
             <div className="flex items-center gap-1.5">
@@ -258,15 +258,15 @@ export function LocationListSkeleton({
 
 export function ItemCardSkeleton() {
   return (
-    <div className="border-border/60 bg-card/70 relative space-y-2.5 rounded-xl border p-3 backdrop-blur-xl">
-      <div className="flex items-start gap-2.5">
+    <div className="border-border/60 bg-card relative space-y-2 rounded-xl border p-3">
+      <div className="flex items-start gap-3">
         <Skeleton className="size-9 shrink-0 rounded-lg" />
         <div className="min-w-0 flex-1 space-y-1.5">
           <Skeleton className="h-3 w-44 rounded" />
           <Skeleton className="h-2.5 w-24 rounded" />
         </div>
       </div>
-      <div className="border-border/40 flex items-center justify-between gap-2 border-t pt-2.5">
+      <div className="border-border/40 flex items-center justify-between gap-2 border-t pt-2">
         <Skeleton className="h-2.5 w-20 rounded" />
         <div className="flex items-center gap-1.5">
           <Skeleton className="h-7 w-32 rounded-lg" />
@@ -336,7 +336,7 @@ export function LocationAvatar({
           <circle cx="6" cy="34" r="10" fill="#000" />
         </svg>
         <div
-          className="absolute inset-0 flex items-center justify-center font-serif text-base font-medium"
+          className="absolute inset-0 flex items-center justify-center font-serif text-base font-semibold"
           style={{ color: "#1a1814", letterSpacing: "-0.02em" }}
         >
           {letter}
@@ -415,7 +415,7 @@ export function ProductAvatar({
           <circle cx="6" cy="34" r="10" fill="#000" />
         </svg>
         <div
-          className="absolute inset-0 flex items-center justify-center font-serif text-base font-medium"
+          className="absolute inset-0 flex items-center justify-center font-serif text-base font-semibold"
           style={{
             color: "color-mix(in oklch, var(--success), white 70%)",
             letterSpacing: "-0.02em",
@@ -439,7 +439,7 @@ export function LocationCardShell({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="border-border/60 bg-card/70 hover:border-primary/40 relative space-y-3 rounded-xl border p-3 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all hover:shadow-[0_0.25rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_85%)]">
+    <div className="border-border/60 bg-card hover:border-primary/40 relative space-y-3 rounded-xl border p-3 transition-colors">
       {children}
     </div>
   );
@@ -502,7 +502,7 @@ export function InvSearchBar({
           onSearch={onSearch}
           onInputChange={onSearch}
           containerClassName="w-full"
-          inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card/40 h-9 rounded-lg border pr-9 text-sm shadow-none backdrop-blur-sm transition-colors focus-visible:ring-0"
+          inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card h-9 rounded-lg border pr-9 text-sm shadow-none transition-colors focus-visible:ring-0"
         />
       </div>
       {extras}

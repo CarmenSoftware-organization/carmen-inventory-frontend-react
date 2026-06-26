@@ -395,9 +395,9 @@ export function PermissionPicker({
                 aria-selected={active}
                 onClick={() => setFilterMode(m)}
                 className={cn(
-                  "rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold transition-colors",
+                  "rounded-full px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
                   active
-                    ? "bg-foreground text-background shadow-xs"
+                    ? "bg-foreground text-background"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -409,7 +409,7 @@ export function PermissionPicker({
       </div>
 
       {/* Legend */}
-      <div className="border-border/60 bg-muted/30 hidden items-center gap-3 rounded-md border px-3 py-1.5 text-[0.625rem] font-medium md:flex">
+      <div className="border-border/60 bg-muted/30 hidden items-center gap-3 rounded-md border px-3 py-1.5 text-[0.625rem] font-semibold md:flex">
         <span className="text-muted-foreground tracking-widest uppercase">
           {t("legendLabel")}
         </span>
@@ -470,7 +470,7 @@ export function PermissionPicker({
 
       {/* Change preview */}
       {originalIds && filteredGroups.length > 0 && (
-        <div className="border-border/60 bg-card flex items-center gap-3 rounded-xl border p-3 shadow-xs">
+        <div className="border-border/60 bg-card flex items-center gap-3 rounded-xl border p-3">
           <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
             <Activity className="size-4" aria-hidden="true" />
           </div>
@@ -548,7 +548,7 @@ function ModuleMatrix({
   return (
     <section
       className={cn(
-        "bg-card overflow-hidden rounded-xl border shadow-xs",
+        "bg-card overflow-hidden rounded-xl border",
         categoryMeta.borderTint,
       )}
     >
@@ -581,7 +581,7 @@ function ModuleMatrix({
             </h3>
             <span
               className={cn(
-                "truncate text-xs font-medium",
+                "truncate text-xs font-semibold",
                 categoryMeta.headerSubText,
               )}
               aria-hidden="true"
@@ -599,12 +599,12 @@ function ModuleMatrix({
         </div>
         <label
           className={cn(
-            "bg-card inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-semibold transition-colors",
+            "bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
             categoryMeta.borderTint,
             categoryMeta.headerText,
             disabled
               ? "cursor-not-allowed opacity-60"
-              : "cursor-pointer hover:shadow-xs",
+              : "cursor-pointer hover:border-primary/40",
           )}
         >
           <Checkbox
@@ -731,14 +731,14 @@ function MatrixRow({
   return (
     <div
       className={cn(
-        "grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center px-4 py-2.5",
+        "grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center px-4 py-2",
         !isLast && "border-b",
         allOn ? categoryMeta.rowTint : "bg-card",
         categoryMeta.borderTint,
       )}
     >
       {/* Resource label cell */}
-      <div className="flex min-w-0 items-center gap-2.5">
+      <div className="flex min-w-0 items-center gap-3">
         <Checkbox
           checked={getCheckedState(allOn, someOn)}
           onCheckedChange={(c) => onToggleResource(!!c)}
@@ -758,7 +758,7 @@ function MatrixRow({
           />
         </span>
         <div className="min-w-0">
-          <p className="text-foreground truncate text-xs font-medium">
+          <p className="text-foreground truncate text-xs font-semibold">
             {label}
           </p>
           <p className="text-muted-foreground/80 truncate text-[0.625rem]">
@@ -866,9 +866,9 @@ function MobileResourceRow({
               disabled={disabled}
               aria-pressed={on}
               className={cn(
-                "rounded-full border px-2.5 py-1 text-[0.6875rem] font-semibold transition-colors",
+                "rounded-full border px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
                 on
-                  ? "border-primary bg-primary text-primary-foreground shadow-xs"
+                  ? "border-primary bg-primary text-primary-foreground"
                   : "border-border/60 bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                 disabled && "cursor-not-allowed opacity-60",
               )}

@@ -29,7 +29,7 @@ export function VarianceGrid<T extends VarianceGridItem>({
   const t = useTranslations(translationNamespace);
 
   return (
-    <div className="border-border/60 bg-card/70 overflow-hidden rounded-xl border backdrop-blur-xl">
+    <div className="border-border/60 bg-card overflow-hidden rounded-xl border">
       <div className="overflow-x-auto">
         <table className="w-full min-w-160 border-collapse text-xs">
           <thead className="bg-muted/60 text-foreground border-b">
@@ -75,7 +75,7 @@ export function VarianceGrid<T extends VarianceGridItem>({
                   key={item.id}
                   className="border-border/40 hover:bg-muted/30 border-b transition-colors last:border-b-0"
                 >
-                  <td className="px-3 py-2.5 align-top">
+                  <td className="px-3 py-2 align-top">
                     <div className="flex flex-wrap items-baseline gap-1.5">
                       <Badge
                         variant="outline"
@@ -95,13 +95,13 @@ export function VarianceGrid<T extends VarianceGridItem>({
                       )}
                     </div>
                   </td>
-                  <td className="text-foreground/80 px-3 py-2.5 text-right align-middle text-sm tabular-nums">
+                  <td className="text-foreground/80 px-3 py-2 text-right align-middle text-sm tabular-nums">
                     {getSystemQty(item)}
                   </td>
-                  <td className="text-foreground px-3 py-2.5 text-right align-middle text-sm font-semibold tabular-nums">
+                  <td className="text-foreground px-3 py-2 text-right align-middle text-sm font-semibold tabular-nums">
                     {actual ?? "—"}
                   </td>
-                  <td className="px-3 py-2.5 text-right align-middle">
+                  <td className="px-3 py-2 text-right align-middle">
                     <span
                       className={cn(
                         "text-sm font-bold tabular-nums",
@@ -112,7 +112,7 @@ export function VarianceGrid<T extends VarianceGridItem>({
                       {variance > 0 ? `+${variance}` : variance}
                     </span>
                   </td>
-                  <td className="px-3 py-2.5 align-middle">
+                  <td className="px-3 py-2 align-middle">
                     {getUnitName(item)}
                   </td>
                 </tr>

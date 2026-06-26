@@ -118,10 +118,10 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
             alt={active.label}
             className="absolute inset-0 size-full object-cover"
           />
-          <span className="bg-background/80 text-foreground absolute bottom-2 left-2 rounded px-2 py-0.5 text-[0.6875rem] font-medium backdrop-blur-sm">
+          <span className="bg-background text-foreground absolute bottom-2 left-2 rounded px-2 py-0.5 text-[0.6875rem] font-semibold">
             {active.label}
           </span>
-          <span className="bg-background/80 text-muted-foreground absolute right-2 bottom-2 rounded px-2 py-0.5 text-[0.6875rem] tabular-nums backdrop-blur-sm">
+          <span className="bg-background text-muted-foreground absolute right-2 bottom-2 rounded px-2 py-0.5 text-[0.6875rem] tabular-nums">
             {safeIndex + 1} / {total}
           </span>
         </button>

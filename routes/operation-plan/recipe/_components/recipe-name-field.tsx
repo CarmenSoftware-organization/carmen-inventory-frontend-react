@@ -61,7 +61,7 @@ export function RecipeNameField({
         />
         {labels.nameLabel}
         <span className="text-muted-foreground/60 font-semibold">·</span>
-        <span className="text-muted-foreground text-[0.5625rem] font-medium tracking-normal normal-case">
+        <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-normal normal-case">
           {disabled ? "" : labels.tapToEdit}
         </span>
       </div>
@@ -92,7 +92,7 @@ export function RecipeNameField({
         {!disabled && (
           <span
             className={cn(
-              "mb-0.5 flex size-6 flex-shrink-0 items-center justify-center rounded-full transition-all",
+              "mb-0.5 flex size-6 flex-shrink-0 items-center justify-center rounded-full transition-colors",
               pencilTone,
             )}
           >
@@ -104,7 +104,7 @@ export function RecipeNameField({
       <div className="mt-1 flex items-center justify-between text-[0.625rem]">
         <span
           className={cn(
-            "font-medium",
+            "font-semibold",
             focus ? "text-primary" : "text-muted-foreground",
           )}
         >

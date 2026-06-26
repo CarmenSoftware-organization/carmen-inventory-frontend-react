@@ -293,7 +293,7 @@ export function LocationForm({ location }: LocationFormProps) {
 
         {/* ── General Info ─────────── */}
         <Reveal delay={80}>
-          <div className="border-border/60 bg-card/70 mt-4 max-w-3xl rounded-xl border p-4 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+          <div className="border-border/60 bg-card mt-4 max-w-3xl rounded-xl border p-4">
             <SectionLabel icon={MapPin}>{t("entity")}</SectionLabel>
 
             <form
@@ -490,7 +490,7 @@ export function LocationForm({ location }: LocationFormProps) {
         {isView ? (
           location && (
             <Reveal delay={160}>
-              <div className="border-border/60 bg-card/70 mt-4 max-w-5xl rounded-xl border p-4 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+              <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
                 <Tabs defaultValue="users">
                   <TabsList variant="line">
                     <TabsTrigger value="users" className="text-xs">
@@ -515,7 +515,7 @@ export function LocationForm({ location }: LocationFormProps) {
         ) : (
           <>
             <Reveal delay={160}>
-              <div className="border-border/60 bg-card/70 mt-4 max-w-5xl rounded-xl border p-4 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+              <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
                 <SectionLabel icon={Users} count={userTargetKeys.length}>
                   {t("locationUsers")}
                 </SectionLabel>
@@ -533,7 +533,7 @@ export function LocationForm({ location }: LocationFormProps) {
             </Reveal>
 
             <Reveal delay={220}>
-              <div className="border-border/60 bg-card/70 mt-4 max-w-5xl rounded-xl border p-4 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+              <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
                 <SectionLabel icon={Boxes} count={selectedProductIds.size}>
                   {t("products")}
                 </SectionLabel>
@@ -593,7 +593,7 @@ function PlainText({
           "text-foreground",
           multiline
             ? "text-xs leading-relaxed whitespace-pre-wrap"
-            : "text-sm font-medium tracking-tight",
+            : "text-sm font-semibold tracking-tight",
           empty && "text-muted-foreground text-xs font-normal italic",
         )}
       >

@@ -84,7 +84,7 @@ export function ResultPanel({
         ) : (
           <TableIcon className="text-muted-foreground size-4" />
         )}
-        <span className="text-sm font-medium">
+        <span className="text-sm font-semibold">
           {error ? "Error" : isRunning ? "Running…" : "Results"}
         </span>
         {result && (
@@ -156,13 +156,13 @@ export function ResultPanel({
             <table className="w-full border-collapse text-xs">
               <thead className="bg-muted/60 sticky top-0 backdrop-blur">
                 <tr>
-                  <th className="text-muted-foreground w-12 border-r border-b px-2 py-1.5 text-right font-medium">
+                  <th className="text-muted-foreground w-12 border-r border-b px-2 py-1.5 text-right font-semibold">
                     #
                   </th>
                   {result.columns.map((c) => (
                     <th
                       key={c}
-                      className="border-r border-b px-2 py-1.5 text-left font-medium"
+                      className="border-r border-b px-2 py-1.5 text-left font-semibold"
                     >
                       {c}
                     </th>

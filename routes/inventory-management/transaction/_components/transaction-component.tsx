@@ -321,9 +321,8 @@ export default function TransactionComponent() {
               type="button"
               onClick={() => toggleRefType(opt.value)}
               className={cn(
-                "border-border/40 bg-card/40 hover:bg-card/80 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-semibold tracking-wide backdrop-blur-sm transition-all",
-                active &&
-                  "border-primary bg-primary/10 text-primary shadow-[0_0_0_3px_color-mix(in_oklch,var(--primary),transparent_88%)]",
+                "border-border/40 bg-card hover:bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold tracking-wide transition-all",
+                active && "border-primary bg-primary/10 text-primary",
               )}
             >
               {opt.label}
@@ -356,7 +355,7 @@ export default function TransactionComponent() {
                 defaultValue={search}
                 onSearch={setSearch}
                 containerClassName="w-full"
-                inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card/40 h-9 rounded-lg border pr-9 text-sm shadow-none backdrop-blur-sm transition-colors focus-visible:ring-0"
+                inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card h-9 rounded-lg border pr-9 text-sm shadow-none transition-colors focus-visible:ring-0"
               />
             </div>
             <div className="hidden sm:block">
@@ -370,7 +369,7 @@ export default function TransactionComponent() {
                 <Button
                   size="icon"
                   variant="outline"
-                  className="border-border/40 bg-card/40 hover:bg-card/80 relative size-9 shrink-0 rounded-lg backdrop-blur-sm sm:hidden"
+                  className="border-border/40 bg-card hover:bg-card relative size-9 shrink-0 rounded-lg sm:hidden"
                   aria-label={tc("aria.openFilters")}
                 >
                   <FilterIcon aria-hidden="true" />
@@ -445,7 +444,7 @@ export default function TransactionComponent() {
 
         {/* ── Data grid (glass card) ─────────── */}
         <Reveal delay={280}>
-          <div className="border-border/60 bg-card/70 mt-4 overflow-hidden rounded-xl border backdrop-blur-xl">
+          <div className="border-border/60 bg-card mt-4 overflow-hidden rounded-xl border">
             <DataGrid
               table={table}
               recordCount={totalRecords}

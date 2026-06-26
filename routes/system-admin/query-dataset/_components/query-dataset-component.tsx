@@ -242,7 +242,7 @@ export default function QueryDatasetComponent() {
             <div>
               <label
                 htmlFor="qd-object-name"
-                className="mb-1 block text-xs font-medium"
+                className="mb-1 block text-xs font-semibold"
               >
                 Object Name
               </label>
@@ -256,7 +256,7 @@ export default function QueryDatasetComponent() {
             <div>
               <label
                 id="qd-type-label"
-                className="mb-1 block text-xs font-medium"
+                className="mb-1 block text-xs font-semibold"
               >
                 Type
               </label>
@@ -298,7 +298,7 @@ export default function QueryDatasetComponent() {
           <div className="rounded-lg border">
             <div className="flex items-center gap-2 border-b px-4 py-2">
               <Database className="text-muted-foreground size-4" />
-              <span className="text-sm font-medium">SQL Editor</span>
+              <span className="text-sm font-semibold">SQL Editor</span>
               <span className="text-muted-foreground ml-auto text-[10px]">
                 Tip: bare <code>SELECT</code> for view is auto-wrapped with{" "}
                 <code>CREATE OR REPLACE VIEW</code>

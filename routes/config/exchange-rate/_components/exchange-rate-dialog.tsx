@@ -192,7 +192,7 @@ function EditForm({
 
         {/* Delta indicator */}
         <div
-          className={`flex items-center justify-between rounded-lg border p-2.5 transition-colors ${
+          className={`flex items-center justify-between rounded-lg border p-2 transition-colors ${
             !hasChange
               ? "bg-muted/40"
               : isIncrease

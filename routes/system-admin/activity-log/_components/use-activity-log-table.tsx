@@ -126,7 +126,7 @@ export function useActivityLogTable({
         const username = row.original.actor_username;
         return (
           <div className="leading-tight">
-            <p className="text-xs font-medium">{fullName || "—"}</p>
+            <p className="text-xs font-semibold">{fullName || "—"}</p>
             {username && fullName !== username && (
               <p className="text-muted-foreground text-[0.6875rem]">
                 {username}
@@ -171,7 +171,7 @@ export function useActivityLogTable({
             {desc.length > 40 && (
               <TooltipContent
                 side="top"
-                className="bg-popover text-popover-foreground max-w-[20rem] rounded-lg border px-3 py-2.5 shadow-md"
+                className="bg-popover text-popover-foreground max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
               >
                 <p className="text-xs leading-snug">{desc}</p>
               </TooltipContent>

@@ -30,56 +30,27 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
         }
       }}
       className={cn(
-        "group border-border/60 bg-card/70 relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border backdrop-blur-xl transition-all",
-        "shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)]",
+        "group border-border/60 bg-card relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border transition-colors",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-        "hover:-translate-y-0.5 hover:shadow-[0_0.625rem_1.5rem_-0.5rem_color-mix(in_oklch,var(--primary),transparent_82%)]",
+        "hover:-translate-y-0.5 hover:border-primary/40",
       )}
     >
-      {/* Inner highlight overlay */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-2xl"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 45%)",
-        }}
-      />
-
       {/* Left accent bar — widens on hover */}
       <span
         aria-hidden
         className="bg-primary absolute inset-y-2 left-0 w-0.5 rounded-r-full opacity-60 transition-all group-hover:inset-y-0 group-hover:w-1 group-hover:opacity-100"
       />
 
-      {/* Corner glow */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-8 -right-8 size-24 rounded-full opacity-0 transition-opacity group-hover:opacity-40"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in oklch, var(--primary), transparent 70%) 0%, transparent 70%)",
-        }}
-      />
-
       {/* Header */}
-      <div className="relative flex items-start gap-3 px-4 pt-4 pb-2.5">
+      <div className="relative flex items-start gap-3 px-4 pt-4 pb-2">
         {/* Icon tile */}
         <div
-          className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-sm"
+          className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl"
           style={{
             background:
               "linear-gradient(135deg, color-mix(in oklch, var(--primary), transparent 75%) 0%, color-mix(in oklch, var(--primary), transparent 88%) 100%)",
           }}
         >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%)",
-            }}
-          />
           <FileText className="text-primary relative size-4" aria-hidden />
         </div>
 
@@ -94,7 +65,7 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
             />
           </div>
           <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1.5 text-[0.6875rem]">
-            <span className="font-medium tracking-wide uppercase">
+            <span className="font-semibold tracking-wide uppercase">
               {item.ReportGroup}
             </span>
             {item.IsSystem && (
@@ -118,7 +89,7 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
 
       {/* Description */}
       {item.Description && (
-        <div className="border-border/40 relative mt-auto border-t px-4 py-2.5">
+        <div className="border-border/40 relative mt-auto border-t px-4 py-2">
           <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">
             {item.Description}
           </p>

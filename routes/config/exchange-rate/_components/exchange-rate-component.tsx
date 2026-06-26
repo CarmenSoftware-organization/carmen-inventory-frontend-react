@@ -429,7 +429,7 @@ export default function ExchangeRateComponent() {
                     return (
                       <li
                         key={c.id}
-                        className={`flex items-center gap-3 rounded-lg border p-2.5 transition-colors ${
+                        className={`flex items-center gap-3 rounded-lg border p-2 transition-colors ${
                           noChange
                             ? "bg-muted/40"
                             : isIncrease

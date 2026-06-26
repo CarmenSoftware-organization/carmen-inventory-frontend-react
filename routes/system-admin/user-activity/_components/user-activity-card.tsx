@@ -53,7 +53,7 @@ export function UserActivityCard({
           onClick?.();
         }
       }}
-      className="bg-card hover:border-primary/30 focus-visible:ring-ring cursor-pointer space-y-2.5 rounded-lg border p-3 transition-colors hover:shadow-sm focus-visible:ring-2 focus-visible:outline-none"
+      className="bg-card hover:border-primary/30 focus-visible:ring-ring cursor-pointer space-y-2 rounded-lg border p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none"
     >
       {/* Header: action badge + timestamp */}
       <div className="flex items-center justify-between gap-2">
@@ -82,7 +82,7 @@ export function UserActivityCard({
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <span className="truncate text-xs font-medium">{actorName}</span>
+          <span className="truncate text-xs font-semibold">{actorName}</span>
           {log.actor_username && actorName !== log.actor_username && (
             <span className="text-muted-foreground truncate text-[0.6875rem]">
               ({log.actor_username})

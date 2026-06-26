@@ -72,7 +72,7 @@ export function ProductPanel({
   const virtualItems = rowVirtualizer.getVirtualItems();
 
   return (
-    <div className="border-border/60 bg-card/70 flex flex-1 flex-col overflow-hidden rounded-xl border shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+    <div className="border-border/60 bg-card flex flex-1 flex-col overflow-hidden rounded-xl border">
       <div className="border-border/40 bg-muted/40 flex h-9 items-center gap-2 border-b px-3">
         <Checkbox
           checked={headerCheckState}
@@ -87,7 +87,7 @@ export function ProductPanel({
         </span>
       </div>
 
-      <div className="border-border/40 bg-card/40 border-b px-2 py-1.5 backdrop-blur-sm">
+      <div className="border-border/40 bg-card border-b px-2 py-1.5">
         <div className="relative">
           <Search
             className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3 -translate-y-1/2"
@@ -97,7 +97,7 @@ export function ProductPanel({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={tc("search")}
-            className="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card/40 h-7 rounded-md pl-7 text-xs shadow-none focus-visible:ring-0"
+            className="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card h-7 rounded-md pl-7 text-xs shadow-none focus-visible:ring-0"
             disabled={disabled}
           />
         </div>
@@ -147,7 +147,7 @@ export function ProductPanel({
                     className={cn(
                       "truncate",
                       checked
-                        ? "text-foreground font-medium"
+                        ? "text-foreground font-semibold"
                         : "text-foreground/85",
                     )}
                   >

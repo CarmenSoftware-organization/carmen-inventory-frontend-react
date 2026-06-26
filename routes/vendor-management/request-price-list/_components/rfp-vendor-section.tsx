@@ -59,7 +59,7 @@ export default function RfpVendorSection({
 
   return (
     <div>
-      <div className="mb-2.5 flex items-end justify-between gap-3 px-1">
+      <div className="mb-2 flex items-end justify-between gap-3 px-1">
         <div>
           <h3 className="text-foreground text-sm font-semibold tracking-tight">
             {t("vendors.title")}
@@ -159,8 +159,8 @@ function VendorCard({
   };
 
   return (
-    <div className="border-border/60 bg-card/70 hover:border-primary/40 relative rounded-xl border p-3 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all hover:shadow-[0_0.25rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_85%)]">
-      <div className="flex items-start gap-2.5">
+    <div className="border-border/60 bg-card hover:border-primary/40 relative rounded-xl border p-3 transition-colors">
+      <div className="flex items-start gap-3">
         {/* Avatar with sequence badge */}
         <div className="relative shrink-0">
           <VendorAvatar name={vendor.vendor_name} />
@@ -245,7 +245,7 @@ function VendorCard({
 
       {/* Submitted pricelist info */}
       {submittedPricelist && (
-        <div className="border-border/60 bg-primary/5 mt-2 flex items-center justify-between gap-2 rounded-lg border border-dashed px-2.5 py-1.5">
+        <div className="border-border/60 bg-primary/5 mt-2 flex items-center justify-between gap-2 rounded-lg border border-dashed px-2 py-1.5">
           <div className="flex min-w-0 items-center gap-1.5">
             <FileText className="text-primary size-3 shrink-0" />
             <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-widest uppercase">
@@ -313,8 +313,8 @@ function NewVendorRow({
   const tc = useTranslations("common");
 
   return (
-    <div className="border-primary/40 bg-primary/5 relative rounded-xl border border-dashed p-3 backdrop-blur-xl">
-      <div className="flex items-center gap-2.5">
+    <div className="border-primary/40 bg-primary/5 relative rounded-xl border border-dashed p-3">
+      <div className="flex items-center gap-3">
         <div className="relative shrink-0">
           <div
             className="border-primary/40 bg-card/60 flex size-9 items-center justify-center rounded-lg border border-dashed"
@@ -360,7 +360,7 @@ function NewVendorRow({
 function VendorAvatar({ name }: { readonly name: string }) {
   const letter = (name?.trim()[0] || "?").toUpperCase();
   return (
-    <div className="from-primary to-primary/70 text-primary-foreground flex size-9 items-center justify-center rounded-lg bg-gradient-to-br font-serif text-base font-medium">
+    <div className="text-primary-foreground flex size-9 items-center justify-center rounded-lg bg-primary font-serif text-base font-semibold">
       {letter}
     </div>
   );

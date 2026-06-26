@@ -162,7 +162,7 @@ export function PLProductTable({
       tableLayout={{ headerSticky: true }}
     >
       <DataGridContainer
-        className="border-border/60 bg-card/70 backdrop-blur-xl"
+        className="border-border/60 bg-card"
         border={false}
       >
         <DataGridTable />
@@ -232,32 +232,32 @@ function PLProductViewTable({
   );
 
   return (
-    <div className="border-border/60 bg-card/70 overflow-hidden rounded-lg border backdrop-blur-xl">
+    <div className="border-border/60 bg-card overflow-hidden rounded-lg border">
       <table className="w-full text-xs">
         <thead className="bg-muted/60 text-foreground border-b">
           <tr>
-            <th scope="col" className="w-10 px-2 py-2 text-center font-medium">
+            <th scope="col" className="w-10 px-2 py-2 text-center font-semibold">
               #
             </th>
-            <th scope="col" className="px-3 py-2 text-left font-medium">
+            <th scope="col" className="px-3 py-2 text-left font-semibold">
               {tfl("product")}
             </th>
-            <th scope="col" className="w-20 px-3 py-2 text-right font-medium">
+            <th scope="col" className="w-20 px-3 py-2 text-right font-semibold">
               {tfl("moq")}
             </th>
-            <th scope="col" className="px-3 py-2 text-center font-medium">
+            <th scope="col" className="px-3 py-2 text-center font-semibold">
               {tfl("unit")}
             </th>
-            <th scope="col" className="w-24 px-3 py-2 text-right font-medium">
+            <th scope="col" className="w-24 px-3 py-2 text-right font-semibold">
               {tfl("unitPrice")}
             </th>
-            <th scope="col" className="w-20 px-3 py-2 text-right font-medium">
+            <th scope="col" className="w-20 px-3 py-2 text-right font-semibold">
               {tfl("tax")}
             </th>
-            <th scope="col" className="w-24 px-3 py-2 text-right font-medium">
+            <th scope="col" className="w-24 px-3 py-2 text-right font-semibold">
               {tfl("total")}
             </th>
-            <th scope="col" className="w-20 px-3 py-2 text-right font-medium">
+            <th scope="col" className="w-20 px-3 py-2 text-right font-semibold">
               {tfl("leadTime")}
             </th>
           </tr>
@@ -558,7 +558,7 @@ function PlainText({ value }: { readonly value?: string | null }) {
     return (
       <span className="text-muted-foreground text-[0.6875rem] italic">—</span>
     );
-  return <span className="text-foreground text-xs font-medium">{value}</span>;
+  return <span className="text-foreground text-xs font-semibold">{value}</span>;
 }
 
 function PlainProduct({

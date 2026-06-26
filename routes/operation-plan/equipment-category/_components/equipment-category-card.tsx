@@ -39,7 +39,7 @@ export default function EquipmentCategoryCard({
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">

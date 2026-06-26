@@ -160,7 +160,6 @@ export default function PeReview() {
             onClick={() => setConfirmOpen(true)}
             disabled={!canClose || closeMutation.isPending}
             title={!canClose ? t("notReadyToClose") : undefined}
-            className="shadow-sm"
           >
             <Lock aria-hidden="true" />
             {t("closePeriod")}
@@ -179,14 +178,9 @@ export default function PeReview() {
       {!isLoading && data && (
         <>
           <Card
-            className="relative overflow-hidden border-l-4"
+            className="border-l-4"
             style={{ borderLeftColor: "var(--module-inventory)" }}
           >
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute -top-12 -right-10 size-36 rounded-full opacity-10 blur-2xl"
-              style={{ background: "var(--module-inventory)" }}
-            />
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm">
                 <CalendarRange
@@ -261,14 +255,9 @@ export default function PeReview() {
                         setDocsKey(key);
                       }
                     }}
-                    className="animate-fade-in-up group focus-visible:ring-ring relative cursor-pointer overflow-hidden transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="animate-fade-in-up group focus-visible:ring-ring cursor-pointer transition hover:-translate-y-0.5 hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                     style={{ animationDelay: `${index * 60}ms` }}
                   >
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -top-8 -right-6 size-20 rounded-full opacity-10 blur-xl transition-opacity group-hover:opacity-20"
-                      style={{ background: moduleConfig.color }}
-                    />
                     <CardContent className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span
@@ -289,7 +278,7 @@ export default function PeReview() {
                         )}
                       </div>
                       <div>
-                        <p className="text-muted-foreground text-[0.6875rem] font-medium tracking-wide uppercase">
+                        <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wide uppercase">
                           {t(`modules.${key}`)}
                         </p>
                         <p className="text-foreground mt-0.5 text-2xl font-semibold tabular-nums">
@@ -419,7 +408,7 @@ function SummaryStat({ label, value, hint, tone }: SummaryStatProps) {
         {value}
       </p>
       <span
-        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.6875rem] font-medium ${toneClass}`}
+        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${toneClass}`}
       >
         {hint}
       </span>

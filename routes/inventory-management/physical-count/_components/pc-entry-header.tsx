@@ -38,7 +38,7 @@ export function PcEntryHeader({
   const router = useRouter();
 
   return (
-    <div className="border-border/60 bg-card/70 mb-3 rounded-xl border p-3 backdrop-blur-xl">
+    <div className="border-border/60 bg-card mb-3 rounded-xl border p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2">
           <Button
@@ -85,7 +85,7 @@ export function PcEntryHeader({
 
       <Progress value={percent} variant="auto" className="mt-3 h-1" />
 
-      <div className="text-muted-foreground mt-2.5 flex flex-wrap items-center gap-3 text-[0.6875rem]">
+      <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-3 text-[0.6875rem]">
         <span className="flex items-center gap-1">
           <MapPin className="size-2.5" aria-hidden="true" />
           {locationName}

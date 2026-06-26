@@ -261,7 +261,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
 
         {/* ── General Info ─────────── */}
         <Reveal delay={80}>
-          <div className="border-border/60 bg-card/70 mt-4 max-w-3xl rounded-xl border p-4 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+          <div className="border-border/60 bg-card mt-4 max-w-3xl rounded-xl border p-4">
             <SectionLabel icon={Building2}>{t("entity")}</SectionLabel>
 
             <form
@@ -335,7 +335,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
 
         {/* ── Members ─────────── */}
         <Reveal delay={160}>
-          <div className="border-border/60 bg-card/70 mt-4 max-w-5xl rounded-xl border p-4 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+          <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
             <SectionLabel
               icon={Users}
               count={
@@ -365,7 +365,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
 
         {/* ── HOD ─────────── */}
         <Reveal delay={220}>
-          <div className="border-border/60 bg-card/70 mt-4 max-w-5xl rounded-xl border p-4 shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+          <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
             <SectionLabel
               icon={ShieldCheck}
               count={

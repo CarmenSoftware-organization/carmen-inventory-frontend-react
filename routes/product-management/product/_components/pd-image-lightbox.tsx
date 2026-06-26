@@ -108,7 +108,7 @@ export function ImageLightbox({
             onDrop={onAddFiles ? handleDrop : undefined}
           >
             {isDragging && onAddFiles && (
-              <div className="border-primary bg-primary/15 text-primary pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed backdrop-blur-sm">
+              <div className="border-primary bg-primary/15 text-primary pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed">
                 <Upload className="size-10" aria-hidden="true" />
                 <p className="text-sm font-semibold">Drop images to upload</p>
               </div>
@@ -119,10 +119,10 @@ export function ImageLightbox({
                 alt={current.label}
                 className="absolute inset-0 size-full object-contain"
               />
-              <div className="bg-background/80 text-foreground absolute top-3 left-3 rounded-md px-2.5 py-1 text-xs font-medium backdrop-blur-sm">
+              <div className="bg-background text-foreground absolute top-3 left-3 rounded-md px-2 py-1 text-xs font-semibold">
                 {current.label}
               </div>
-              <div className="bg-background/80 text-muted-foreground absolute top-3 right-12 rounded-md px-2.5 py-1 text-xs tabular-nums backdrop-blur-sm">
+              <div className="bg-background text-muted-foreground absolute top-3 right-12 rounded-md px-2 py-1 text-xs tabular-nums">
                 {(index ?? 0) + 1} / {total}
               </div>
               <DialogClose asChild>
@@ -183,7 +183,7 @@ export function ImageLightbox({
                     alt={img.label}
                     className="absolute inset-0 size-full object-cover"
                   />
-                  <span className="bg-background/80 text-foreground relative rounded px-1 py-0.5 backdrop-blur-sm">
+                  <span className="bg-background text-foreground relative rounded px-1 py-0.5">
                     {idx + 1}
                   </span>
                 </button>

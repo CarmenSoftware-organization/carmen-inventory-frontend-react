@@ -70,15 +70,9 @@ export default function PeComponent() {
 
       {!isLoading && data && (
         <Card
-          className="relative overflow-hidden border-l-4"
+          className="border-l-4"
           style={{ borderLeftColor: "var(--module-inventory)" }}
         >
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-16 -right-12 size-44 rounded-full opacity-10 blur-2xl"
-            style={{ background: "var(--module-inventory)" }}
-          />
-
           <CardHeader>
             <CardDescription className="text-[0.6875rem] font-semibold tracking-[0.18em] uppercase">
               {t("fields.period")}
@@ -122,7 +116,7 @@ export default function PeComponent() {
           </CardContent>
 
           <CardFooter className="justify-end border-t">
-            <Button asChild size="sm" className="shadow-sm">
+            <Button asChild size="sm">
               <Link href="/inventory-management/period-end/review">
                 <PlayCircle aria-hidden="true" />
                 {t("startClose")}
@@ -148,13 +142,13 @@ function RangeField({ icon, label, value }: RangeFieldProps) {
     <div className="border-border/60 bg-card rounded-lg border p-3">
       <p
         className={cn(
-          "text-muted-foreground flex items-center gap-1.5 text-[0.6875rem] font-medium tracking-wide uppercase",
+          "text-muted-foreground flex items-center gap-1.5 text-[0.6875rem] font-semibold tracking-wide uppercase",
         )}
       >
         {icon}
         {label}
       </p>
-      <p className="text-foreground mt-1 text-sm font-medium">{value ?? "—"}</p>
+      <p className="text-foreground mt-1 text-sm font-semibold">{value ?? "—"}</p>
     </div>
   );
 }

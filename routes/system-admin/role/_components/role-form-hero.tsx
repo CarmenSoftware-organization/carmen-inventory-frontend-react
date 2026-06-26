@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 function RoleAvatar() {
   return (
     <div
-      className="ring-background from-primary to-primary/70 text-primary-foreground flex size-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br shadow-md ring-4"
+      className="ring-background bg-primary text-primary-foreground flex size-16 shrink-0 items-center justify-center rounded-2xl ring-4"
       aria-hidden="true"
     >
       <Shield className="size-7" strokeWidth={2.25} />
@@ -68,7 +68,7 @@ export function RoleHero({
   };
 
   return (
-    <section className="border-border/60 from-card via-card to-muted/30 relative overflow-hidden rounded-2xl border bg-linear-to-br p-5 shadow-sm">
+    <section className="border-border/60 bg-card relative overflow-hidden rounded-2xl border p-5">
       <div className="relative flex flex-wrap items-center gap-4">
         <Button
           variant="ghost"

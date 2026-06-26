@@ -32,7 +32,7 @@ export function StatTile({
   tone = "default",
 }: StatTileProps) {
   return (
-    <div className="border-border/60 bg-card flex items-center gap-3 rounded-xl border p-3 shadow-xs">
+    <div className="border-border/60 bg-card flex items-center gap-3 rounded-xl border p-3">
       <div
         className={cn(
           "flex size-10 shrink-0 items-center justify-center rounded-lg",
@@ -45,7 +45,7 @@ export function StatTile({
         <div className="text-foreground text-xl leading-none font-semibold tabular-nums">
           {value}
         </div>
-        <div className="text-muted-foreground mt-1 text-[0.625rem] font-medium tracking-widest uppercase">
+        <div className="text-muted-foreground mt-1 text-[0.625rem] font-semibold tracking-widest uppercase">
           {label}
         </div>
       </div>
@@ -78,7 +78,7 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        "border-border/60 bg-card overflow-hidden rounded-xl border shadow-xs",
+        "border-border/60 bg-card overflow-hidden rounded-xl border",
         className,
       )}
     >
@@ -87,7 +87,7 @@ export function SectionCard({
           <Icon className="text-muted-foreground size-3.5" aria-hidden="true" />
           <h2 className="text-foreground text-sm font-semibold">{title}</h2>
           {count !== undefined && (
-            <span className="text-muted-foreground text-xs font-medium">
+            <span className="text-muted-foreground text-xs font-semibold">
               · {count}
             </span>
           )}
@@ -115,7 +115,7 @@ export function EmptyState({ icon: Icon, title, desc }: EmptyStateProps) {
       <div className="bg-muted text-muted-foreground/70 flex size-9 items-center justify-center rounded-full">
         <Icon className="size-4" aria-hidden="true" />
       </div>
-      <p className="text-foreground text-xs font-medium">{title}</p>
+      <p className="text-foreground text-xs font-semibold">{title}</p>
       {desc && (
         <p className="text-muted-foreground max-w-[16rem] text-[0.6875rem]">
           {desc}
@@ -150,7 +150,7 @@ export function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium transition-all",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
         active
           ? "border-primary/40 bg-primary/5 text-foreground"
           : "border-border/60 bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",

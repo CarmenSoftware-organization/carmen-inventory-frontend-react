@@ -47,7 +47,7 @@ const ProductCell = memo(function ProductCell({
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   if (disabled) {
     return (
-      <span className="truncate text-xs font-medium" title={productName}>
+      <span className="truncate text-xs font-semibold" title={productName}>
         {productName || "—"}
       </span>
     );

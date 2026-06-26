@@ -42,7 +42,7 @@ export default function UnitCard({ item, index, onEdit }: UnitCardProps) {
           onEdit(item);
         }
       }}
-      className="cursor-pointer gap-0 py-0 transition-all hover:border-primary/30 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">

@@ -124,7 +124,7 @@ export function useDocumentTable({
       ),
       cell: ({ row }) => (
         <span
-          className="font-medium text-xs block truncate max-w-100"
+          className="font-semibold text-xs block truncate max-w-100"
           title={row.getValue("originalName")}
         >
           {row.getValue("originalName")}

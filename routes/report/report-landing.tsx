@@ -280,7 +280,7 @@ function MenuVisual() {
   ];
 
   return (
-    <div className="bg-card relative rounded-lg border p-5 shadow-sm">
+    <div className="bg-card relative rounded-lg border p-5">
       <FloatNote className="-top-3.5 right-5 rotate-2">
         {t("menuVisualNote")}
       </FloatNote>
@@ -372,7 +372,7 @@ function ScheduleVisual() {
   ];
 
   return (
-    <div className="bg-card relative rounded-lg border p-5 shadow-sm">
+    <div className="bg-card relative rounded-lg border p-5">
       <FloatNote className="-top-3.5 left-5 -rotate-2">
         {t("scheduleVisualNote")}
       </FloatNote>
@@ -497,7 +497,7 @@ function HistoryVisual() {
   } as const;
 
   return (
-    <div className="bg-card relative rounded-lg border p-5 shadow-sm">
+    <div className="bg-card relative rounded-lg border p-5">
       <FloatNote className="-top-3.5 right-5 rotate-2">
         {t("historyVisualNote")}
       </FloatNote>
@@ -536,7 +536,7 @@ function HistoryVisual() {
           <li
             key={`${r.time}-${r.name}`}
             className={cn(
-              "border-border/40 relative py-2.5",
+              "border-border/40 relative py-2",
               i !== runs.length - 1 && "border-b",
             )}
           >
@@ -587,7 +587,7 @@ function FloatNote({
   return (
     <span
       className={cn(
-        "bg-foreground text-background absolute rounded px-2 py-1 text-[0.625rem] font-semibold whitespace-nowrap shadow-md",
+        "bg-foreground text-background absolute rounded px-2 py-1 text-[0.625rem] font-semibold whitespace-nowrap",
         className,
       )}
     >
@@ -601,12 +601,7 @@ function FloatNote({
 function FooterBand() {
   const t = useTranslations("report.intro");
   return (
-    <section className="bg-foreground text-background relative overflow-hidden px-6 py-10 sm:px-12">
-      <span
-        aria-hidden="true"
-        className="absolute -top-12 -right-12 size-60 rounded-full opacity-30 blur-3xl"
-        style={{ backgroundColor: "var(--primary)" }}
-      />
+    <section className="bg-foreground text-background px-6 py-10 sm:px-12">
       <div className="relative grid items-center gap-6 lg:grid-cols-[1fr_auto]">
         <div>
           <EyeBrow>{t("footerKicker")}</EyeBrow>

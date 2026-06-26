@@ -68,7 +68,7 @@ export function WfStageDetail({
     return (
       <div className="flex flex-col items-center justify-center py-6 text-center">
         <CheckCircle2 className="text-success-foreground mb-2 size-8" />
-        <p className="text-xs font-medium">{t("completedStage")}</p>
+        <p className="text-xs font-semibold">{t("completedStage")}</p>
         <p className="text-muted-foreground mt-0.5 text-xs">
           {t("completedStageDesc")}
         </p>
@@ -115,7 +115,7 @@ export function WfStageDetail({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="general" className="space-y-2.5 pt-2.5">
+        <TabsContent value="general" className="space-y-2 pt-2">
           <WfStageGeneral
             form={form}
             index={index}
@@ -124,7 +124,7 @@ export function WfStageDetail({
           />
         </TabsContent>
 
-        <TabsContent value="notifications" className="space-y-2.5 pt-2.5">
+        <TabsContent value="notifications" className="space-y-2 pt-2">
           <WfStageNotifications
             form={form}
             index={index}
@@ -135,7 +135,7 @@ export function WfStageDetail({
           />
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-2 pt-2.5">
+        <TabsContent value="users" className="space-y-2 pt-2">
           <WfStageUsers
             form={form}
             index={index}

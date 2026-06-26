@@ -30,7 +30,7 @@ export function PltFormProductsSection({
 }) {
   return (
     <div>
-      <div className="mb-2.5 flex items-end justify-between gap-3 px-1">
+      <div className="mb-2 flex items-end justify-between gap-3 px-1">
         <div>
           <h3 className="text-foreground text-sm font-semibold tracking-tight">
             {labels.sectionTitle}

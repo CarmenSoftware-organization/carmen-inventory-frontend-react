@@ -122,7 +122,7 @@ export function WfStageList({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium">{t("stages")}</span>
+        <span className="text-xs font-semibold">{t("stages")}</span>
         {!isDisabled && (
           <Button
             type="button"

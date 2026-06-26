@@ -51,7 +51,7 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -85,7 +85,7 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
             />
             <div className="min-w-0">
               <p className="text-muted-foreground text-xs">{tfl("vendor")}</p>
-              <p className="truncate font-medium">{item.vendor.name}</p>
+              <p className="truncate font-semibold">{item.vendor.name}</p>
             </div>
           </div>
         )}
@@ -99,7 +99,7 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
               <p className="text-muted-foreground text-xs">
                 {tfl("effectivePeriod")}
               </p>
-              <p className="truncate font-medium">{formatPeriod(item.effectivePeriod)}</p>
+              <p className="truncate font-semibold">{formatPeriod(item.effectivePeriod)}</p>
             </div>
           </div>
         )}

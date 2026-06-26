@@ -68,25 +68,25 @@ export function PltDetailView({ products }: PltDetailViewProps) {
           <tr className="bg-muted/60 text-foreground border-b">
             <th
               scope="col"
-              className="h-9 w-9 px-2 text-center align-middle font-medium"
+              className="h-9 w-9 px-2 text-center align-middle font-semibold"
             >
               #
             </th>
             <th
               scope="col"
-              className="h-9 px-2 text-left align-middle font-medium"
+              className="h-9 px-2 text-left align-middle font-semibold"
             >
               {tfl("product")}
             </th>
             <th
               scope="col"
-              className="h-9 px-2 text-left align-middle font-medium"
+              className="h-9 px-2 text-left align-middle font-semibold"
             >
               {tfl("unit")}
             </th>
             <th
               scope="col"
-              className="h-9 px-2 text-right align-middle font-medium"
+              className="h-9 px-2 text-right align-middle font-semibold"
             >
               {tfl("moqQty")}
             </th>
@@ -109,7 +109,7 @@ export function PltDetailView({ products }: PltDetailViewProps) {
                 )}
                 {i === 0 && (
                   <td
-                    className="border-border px-2 py-1.5 align-middle font-medium"
+                    className="border-border px-2 py-1.5 align-middle font-semibold"
                     rowSpan={group.rows.length}
                   >
                     {group.productName}

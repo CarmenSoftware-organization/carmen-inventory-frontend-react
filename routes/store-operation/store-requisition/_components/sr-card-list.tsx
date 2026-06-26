@@ -18,7 +18,7 @@ interface SrCardListProps {
  */
 function SrCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-lg border bg-card shadow-sm">
+    <div className="animate-pulse rounded-lg border bg-card">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="space-y-1.5">
           <div className="h-4 w-28 rounded bg-muted" />
@@ -51,7 +51,7 @@ function SrCardSkeleton() {
         </div>
       </div>
       <div className="border-t" />
-      <div className="flex items-center justify-between px-4 py-2.5">
+      <div className="flex items-center justify-between px-4 py-2">
         <div className="h-3 w-14 rounded bg-muted" />
         <div className="h-4 w-8 rounded bg-muted" />
       </div>

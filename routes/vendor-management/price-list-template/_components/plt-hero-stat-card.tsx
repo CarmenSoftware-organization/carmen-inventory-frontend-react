@@ -34,10 +34,8 @@ export function PltHeroStatCard({
   const dayLabel = validity === 1 ? labels.daySingular : labels.dayPlural;
 
   return (
-    <div className="from-primary via-primary to-primary/70 text-primary-foreground relative hidden overflow-hidden rounded-2xl bg-gradient-to-br p-4 shadow-[0_1rem_2rem_-0.5rem_color-mix(in_oklch,var(--primary),transparent_60%)] lg:block">
-      <div className="pointer-events-none absolute -top-10 -right-10 size-36 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.22)_0%,transparent_70%)]" />
-
-      <div className="text-primary-foreground/70 text-[0.5625rem] font-medium tracking-widest uppercase">
+    <div className="text-primary-foreground hidden rounded-2xl bg-primary p-4 lg:block">
+      <div className="text-primary-foreground/70 text-[0.5625rem] font-semibold tracking-widest uppercase">
         {labels.validityPeriod}
       </div>
       <div className="mt-1 flex items-baseline gap-1.5">
@@ -62,7 +60,7 @@ export function PltHeroStatCard({
         />
       </div>
 
-      <div className="text-primary-foreground/80 mt-2.5 flex items-center gap-1 text-[0.6875rem]">
+      <div className="text-primary-foreground/80 mt-2 flex items-center gap-1 text-[0.6875rem]">
         <Copy className="size-2.5" />
         {labels.footer}
       </div>

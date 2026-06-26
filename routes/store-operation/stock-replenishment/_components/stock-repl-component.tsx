@@ -215,7 +215,7 @@ export default function StockReplComponent() {
               {t("nLow", { count: summary.low })}
             </Badge>
             <span className="text-muted-foreground/40">|</span>
-            <span className="font-medium">
+            <span className="font-semibold">
               {t("totalNeed")}{" "}
               <span className="tabular-nums">
                 {summary.totalNeed.toLocaleString()}

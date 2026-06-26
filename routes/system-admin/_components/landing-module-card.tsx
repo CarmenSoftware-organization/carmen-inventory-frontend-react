@@ -26,7 +26,7 @@ export function LandingModuleCard({
         style={{ background: `color-mix(in oklch, ${tint}, var(--card) 88%)` }}
       >
         <ModuleVisual visualKey={mod.visualKey} tint={tint} />
-        <div className="bg-card border-border absolute top-2 left-2 flex size-7 items-center justify-center rounded-md border shadow-xs">
+        <div className="bg-card border-border absolute top-2 left-2 flex size-7 items-center justify-center rounded-md border">
           <Icon aria-hidden style={{ color: tint }} className="size-3.5" />
         </div>
       </div>

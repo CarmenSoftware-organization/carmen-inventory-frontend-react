@@ -26,7 +26,7 @@ export function ScHeroStat({
 }: ScHeroStatProps) {
   return (
     <div className="bg-card hidden rounded-lg border p-4 lg:block">
-      <div className="text-muted-foreground text-[0.5625rem] font-medium tracking-widest uppercase">
+      <div className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
         {labels.productsToCheck}
       </div>
       <div className="mt-1 flex items-baseline gap-2">
@@ -49,7 +49,7 @@ export function ScHeroStat({
         <Cell k={labels.location} v={locationName || "—"} empty={!locationName} />
       </div>
 
-      <div className="text-muted-foreground mt-2.5 text-[0.6875rem]">
+      <div className="text-muted-foreground mt-2 text-[0.6875rem]">
         {labels.footer}
       </div>
     </div>

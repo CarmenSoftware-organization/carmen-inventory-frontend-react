@@ -31,7 +31,7 @@ export function DateRangeFilter({ value, onChange }: DateRangeFilterProps) {
           size="sm"
           variant="ghost"
           className={cn(
-            "h-7 rounded-none border-r px-2.5 text-xs last:border-r-0",
+            "h-7 rounded-none border-r px-2 text-xs last:border-r-0",
             value === val &&
               "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
           )}

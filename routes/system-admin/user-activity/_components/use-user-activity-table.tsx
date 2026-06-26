@@ -101,7 +101,7 @@ export function useUserActivityTable({
         const username = row.original.actor_username;
         return (
           <div className="leading-tight">
-            <p className="text-xs font-medium">{fullName || "—"}</p>
+            <p className="text-xs font-semibold">{fullName || "—"}</p>
             {username && fullName !== username && (
               <p className="text-muted-foreground text-[0.6875rem]">
                 {username}

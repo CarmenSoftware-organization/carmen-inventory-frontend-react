@@ -74,7 +74,7 @@ export default function WfValidationPanel({
         className="border-success/40 bg-success/10 flex items-center gap-2 rounded border px-3 py-2"
       >
         <CheckCircle2 className="text-success-foreground size-4 shrink-0" />
-        <p className="text-success-foreground text-xs font-medium">
+        <p className="text-success-foreground text-xs font-semibold">
           {t("validationReady")}
         </p>
       </div>
@@ -105,7 +105,7 @@ export default function WfValidationPanel({
               />
               <p
                 className={cn(
-                  "text-xs font-medium",
+                  "text-xs font-semibold",
                   isReady ? "text-warning-foreground" : "text-destructive",
                 )}
               >

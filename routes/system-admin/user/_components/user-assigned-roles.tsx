@@ -58,7 +58,7 @@ function RoleToggleCard({
       <div className="min-w-0 flex-1">
         <p
           className={cn(
-            "truncate text-sm font-medium",
+            "truncate text-sm font-semibold",
             checked ? "text-foreground" : "text-foreground/90",
           )}
         >

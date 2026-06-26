@@ -32,15 +32,11 @@ export function RecipeCostHero({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-md p-5 text-primary-foreground shadow-md",
-        "bg-gradient-to-br from-primary via-primary to-primary/80",
+        "rounded-md p-5 text-primary-foreground",
+        "bg-primary",
       )}
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-info/40 blur-2xl"
-      />
-      <div className="relative space-y-4">
+      <div className="space-y-4">
         <div>
           <div className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-primary-foreground/70">
             {t("costPerPortion")}
@@ -79,7 +75,7 @@ export function RecipeCostHero({
             />
           </div>
           {suggested != null && suggested > 0 && (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-2.5 py-1 text-[0.6875rem] font-semibold text-primary-foreground/90">
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-2 py-1 text-[0.6875rem] font-semibold text-primary-foreground/90">
               <Sparkles className="size-2.5" aria-hidden="true" />
               {t("suggestedAtTarget", {
                 price: `฿${suggested.toFixed(2)}`,

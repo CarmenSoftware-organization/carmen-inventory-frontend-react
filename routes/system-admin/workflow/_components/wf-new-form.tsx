@@ -109,8 +109,8 @@ export default function WorkflowNewForm() {
         )}
         className="max-w-2xl"
       >
-        <FieldGroup className="gap-2.5">
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <FieldGroup className="gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field data-invalid={!!form.formState.errors.name}>
               <FieldLabel htmlFor="wf-name">{t("workflowName")}</FieldLabel>
               <Input
@@ -191,7 +191,7 @@ export default function WorkflowNewForm() {
         <div className="flex items-start gap-1.5">
           <Info className="text-info-foreground mt-0.5 size-3.5" />
           <div className="space-y-0.5 text-xs">
-            <p className="text-info-foreground font-medium">
+            <p className="text-info-foreground font-semibold">
               {t("defaultConfig")}
             </p>
             <p className="text-info-foreground/85">{t("defaultConfigDesc")}</p>

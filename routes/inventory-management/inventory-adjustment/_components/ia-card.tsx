@@ -68,19 +68,10 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
       className={cn(
-        "group focus-visible:ring-ring relative cursor-pointer gap-0 overflow-hidden border-l-[3px] py-0 transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:outline-none",
+        "group focus-visible:ring-ring relative cursor-pointer gap-0 overflow-hidden border-l-[3px] py-0 transition-colors hover:-translate-y-0.5 hover:border-primary/40 focus-visible:ring-2 focus-visible:outline-none",
         isStockIn ? "border-l-success" : "border-l-destructive",
       )}
     >
-      {/* Decorative blob — color hints at type without screaming */}
-      <span
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute -top-8 -right-8 size-28 rounded-full opacity-[0.08] blur-2xl transition-opacity group-hover:opacity-[0.16]",
-          isStockIn ? "bg-success" : "bg-destructive",
-        )}
-      />
-
       {/* ── Header ─────────────────────────────── */}
       <CardHeader className="relative space-y-0 px-4 py-3">
         <div className="flex items-start justify-between gap-3">
@@ -88,7 +79,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             {/* Type icon block — replaces the type Badge for stronger visual */}
             <div
               className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-lg shadow-xs ring-1 ring-inset",
+                "flex size-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
                 isStockIn
                   ? "bg-success/10 text-success ring-success/20"
                   : "bg-destructive/10 text-destructive ring-destructive/20",
@@ -151,7 +142,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <span className="text-foreground/90 truncate font-medium">
+          <span className="text-foreground/90 truncate font-semibold">
             {item.adjustment_type_name}
           </span>
         </div>
@@ -169,7 +160,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
       </CardContent>
 
       {/* ── Footer — items count + emphasized total ── */}
-      <CardFooter className="bg-muted/30 border-border/60 relative items-end justify-between gap-2 border-t px-4 py-2.5">
+      <CardFooter className="bg-muted/30 border-border/60 relative items-end justify-between gap-2 border-t px-4 py-2">
         <div className="flex items-center gap-1.5">
           <Package
             className="text-muted-foreground size-3 shrink-0"
@@ -189,7 +180,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             {formatAmount(item.base_total_cost, amountFormat)}
           </p>
           {defaultCurrencyCode && (
-            <p className="text-muted-foreground/70 mt-1 text-[0.625rem] font-medium tracking-widest uppercase">
+            <p className="text-muted-foreground/70 mt-1 text-[0.625rem] font-semibold tracking-widest uppercase">
               {defaultCurrencyCode}
             </p>
           )}

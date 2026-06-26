@@ -40,7 +40,7 @@ export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -96,7 +96,7 @@ export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
                 />
                 <div className="min-w-0">
                   <p className="text-muted-foreground text-xs">{primaryContact.name}</p>
-                  <p className="truncate font-medium">{primaryContact.phone}</p>
+                  <p className="truncate font-semibold">{primaryContact.phone}</p>
                 </div>
               </div>
             )}
@@ -107,7 +107,7 @@ export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
                   aria-hidden="true"
                 />
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{primaryContact.email}</p>
+                  <p className="truncate font-semibold">{primaryContact.email}</p>
                 </div>
               </div>
             )}

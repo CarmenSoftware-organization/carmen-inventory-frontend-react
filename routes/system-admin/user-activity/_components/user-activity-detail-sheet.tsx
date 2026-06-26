@@ -38,7 +38,7 @@ function InfoRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-2.5 py-1.5">
+    <div className="flex items-start gap-3 py-1.5">
       <Icon
         className="text-muted-foreground mt-0.5 size-3.5 shrink-0"
         aria-hidden="true"
@@ -62,7 +62,7 @@ function JsonBlock({ data }: { data: Record<string, unknown> | null }) {
   if (!data || Object.keys(data).length === 0)
     return <span className="text-muted-foreground">—</span>;
   return (
-    <pre className="bg-muted/50 max-h-60 overflow-x-auto rounded-md border p-2.5 text-[0.625rem] leading-relaxed">
+    <pre className="bg-muted/50 max-h-60 overflow-x-auto rounded-md border p-2 text-[0.625rem] leading-relaxed">
       {JSON.stringify(data, null, 2)}
     </pre>
   );
@@ -137,7 +137,7 @@ export function UserActivityDetailSheet({
 
                   <InfoRow icon={User} label={t("user")}>
                     <div>
-                      {actorName && <p className="font-medium">{actorName}</p>}
+                      {actorName && <p className="font-semibold">{actorName}</p>}
                       {log.actor_username && (
                         <p className="text-muted-foreground">
                           {log.actor_username}

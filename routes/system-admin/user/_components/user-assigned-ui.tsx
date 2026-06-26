@@ -37,7 +37,7 @@ interface UserAvatarProps {
 export function UserAvatar({ first, last, seed }: UserAvatarProps) {
   return (
     <div
-      className="ring-background flex size-16 shrink-0 items-center justify-center rounded-full text-lg font-semibold tracking-wide text-white shadow-md ring-4"
+      className="ring-background flex size-16 shrink-0 items-center justify-center rounded-full text-lg font-semibold tracking-wide text-white ring-4"
       style={{ background: getAvatarGradient(seed) }}
       aria-hidden="true"
     >

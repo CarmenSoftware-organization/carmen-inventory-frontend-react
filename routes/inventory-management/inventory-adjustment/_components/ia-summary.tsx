@@ -68,15 +68,15 @@ export function AdjSummarySidebar({
             </Badge>
           </SummaryRow>
           <SummaryRow label={tfl("date")}>
-            <span className="font-medium">
+            <span className="font-semibold">
               {date ? formatDate(date, dateFormat) : "—"}
             </span>
           </SummaryRow>
           <SummaryRow label={tfl("reason")}>
-            <span className="font-medium">{adjTypeName ?? "—"}</span>
+            <span className="font-semibold">{adjTypeName ?? "—"}</span>
           </SummaryRow>
           <SummaryRow label={tfl("location")}>
-            <span className="max-w-[60%] truncate text-right font-medium">
+            <span className="max-w-[60%] truncate text-right font-semibold">
               {locationName}
             </span>
           </SummaryRow>

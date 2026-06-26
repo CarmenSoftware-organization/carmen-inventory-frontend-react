@@ -69,7 +69,7 @@ export function RecipeComplianceFields({
           <div>
             <CardSubLabel className="flex items-center gap-1.5">
               {t("allergens")}
-              <span className="ml-1 font-medium normal-case tracking-normal text-muted-foreground">
+              <span className="ml-1 font-semibold normal-case tracking-normal text-muted-foreground">
                 · {t("allergensFlagged", { count: flaggedCount })}
               </span>
             </CardSubLabel>
@@ -121,7 +121,7 @@ export function RecipeComplianceFields({
                 >
                   <Sparkles className="size-3" aria-hidden="true" />
                   {custom}
-                  <span className="text-[0.625rem] font-medium opacity-70">
+                  <span className="text-[0.625rem] font-semibold opacity-70">
                     {t("customAllergen")}
                   </span>
                 </span>

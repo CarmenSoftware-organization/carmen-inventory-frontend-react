@@ -76,7 +76,7 @@ export function WfStageNotifications({
 
       {isMiddle && (
         <div className="space-y-1.5 rounded border p-2">
-          <span className="text-xs font-medium">{t("slaWarning")}</span>
+          <span className="text-xs font-semibold">{t("slaWarning")}</span>
           <div className="space-y-1">
             <Field orientation="horizontal">
               <Controller
@@ -145,7 +145,7 @@ function NotificationSection({
 
   return (
     <div className="space-y-2 rounded border p-2">
-      <span className="text-xs font-medium">{t(actionKey)}</span>
+      <span className="text-xs font-semibold">{t(actionKey)}</span>
       <div className="space-y-2">
         <RecipientRow
           form={form}
@@ -279,7 +279,7 @@ function ChannelRow({
           />
         )}
       />
-      <span className="text-muted-foreground w-12 shrink-0 text-[0.6875rem] font-medium">
+      <span className="text-muted-foreground w-12 shrink-0 text-[0.6875rem] font-semibold">
         {channelLabel}
       </span>
       <Controller

@@ -45,7 +45,7 @@ export default function CreditTermCard({
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-all hover:shadow-md focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -71,7 +71,7 @@ export default function CreditTermCard({
 
       <Separator />
 
-      <CardContent className="space-y-2 px-4 py-2.5">
+      <CardContent className="space-y-2 px-4 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock

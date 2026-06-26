@@ -63,7 +63,7 @@ function SummaryCard({
   const tones = TONE_MAP[tone];
   const display = useCountUp(target, 800);
   return (
-    <div className="border-border/60 bg-card/70 hover:border-primary/40 group relative space-y-1.5 rounded-xl border p-3 backdrop-blur-xl transition-colors">
+    <div className="border-border/60 bg-card hover:border-primary/40 group relative space-y-1.5 rounded-xl border p-3 transition-colors">
       <div className="flex items-center gap-2">
         <div
           className={cn(
@@ -103,7 +103,7 @@ export function TransactionSummary({ data: s }: TransactionSummaryProps) {
     `${n >= 0 ? "+" : ""}${formatAmount(n, amountFormat)}`;
 
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       <SummaryCard
         tone="primary"
         icon={ArrowRightLeft}

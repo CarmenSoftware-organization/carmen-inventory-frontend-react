@@ -42,7 +42,7 @@ export function SrTransferSummary({
           {t("transferSummary")}
         </header>
         <div className="p-5">
-          <div className="mb-3.5 flex items-stretch gap-2.5">
+          <div className="mb-3.5 flex items-stretch gap-3">
             <LocationTile
               label={t("from")}
               name={fromLocInfo.name}

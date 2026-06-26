@@ -59,7 +59,7 @@ export default function SrCard({ item, index, onEdit }: SrCardProps) {
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
-      className="cursor-pointer gap-0 py-0 transition-all hover:border-primary/30 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
     >
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
@@ -93,7 +93,7 @@ export default function SrCard({ item, index, onEdit }: SrCardProps) {
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <span className="truncate font-medium">
+          <span className="truncate font-semibold">
             {item.from_location_name}
             {item.to_location_name && (
               <span className="text-muted-foreground">
@@ -108,7 +108,7 @@ export default function SrCard({ item, index, onEdit }: SrCardProps) {
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <span className="font-medium">{item.requestor_name}</span>
+          <span className="font-semibold">{item.requestor_name}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <Building2
