@@ -34,10 +34,10 @@ function InfoItem({
         <Icon className="text-muted-foreground size-3.5" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <dt className="text-muted-foreground text-[0.625rem] font-medium tracking-wide uppercase">
+        <dt className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
           {label}
         </dt>
-        <dd className="truncate text-xs font-medium" title={value || undefined}>
+        <dd className="truncate text-xs font-semibold" title={value || undefined}>
           {value || "-"}
         </dd>
       </div>
@@ -71,8 +71,7 @@ export default function UserProfileDetails() {
   return (
     <div className="w-full space-y-3">
       {/* Hero Header */}
-      <div className="from-primary/8 via-primary/3 relative overflow-hidden rounded-xl border bg-linear-to-br to-transparent shadow-sm">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1rem_1rem,var(--primary)_1px,transparent_1px)] bg-size-[1.5rem_1.5rem] opacity-[0.15]" />
+      <div className="relative overflow-hidden rounded-xl border bg-primary/5">
         <div className="relative flex flex-col gap-3 p-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             <Avatar
@@ -131,7 +130,7 @@ export default function UserProfileDetails() {
       </div>
 
       {/* Personal Information */}
-      <section className="bg-card rounded-xl border shadow-sm">
+      <section className="bg-card rounded-xl border">
         <header className="flex items-center gap-2 border-b px-2 py-2">
           <span className="bg-primary/10 flex size-7 items-center justify-center rounded-md">
             <User className="text-primary size-4" aria-hidden="true" />
@@ -164,7 +163,7 @@ export default function UserProfileDetails() {
 
       {/* Signature */}
       {profile.signature_url && (
-        <section className="bg-card rounded-xl border shadow-sm">
+        <section className="bg-card rounded-xl border">
           <header className="flex items-center gap-2 border-b px-2 py-2">
             <span className="bg-primary/10 flex size-7 items-center justify-center rounded-md">
               <IdCard className="text-primary size-4" aria-hidden="true" />
@@ -183,7 +182,7 @@ export default function UserProfileDetails() {
       )}
 
       {/* Business Units */}
-      <section className="bg-card rounded-xl border shadow-sm">
+      <section className="bg-card rounded-xl border">
         <header className="flex items-center gap-2 border-b px-2 py-2">
           <span className="bg-primary/10 flex size-7 items-center justify-center rounded-md">
             <Building2 className="text-primary size-4" aria-hidden="true" />

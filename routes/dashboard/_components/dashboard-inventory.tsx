@@ -142,7 +142,7 @@ function InventoryPipeline() {
                 <div className="flex items-center gap-1.5">
                   {item.icon}
                   <div>
-                    <p className="text-[0.6rem] leading-none font-medium opacity-80">
+                    <p className="text-[0.6rem] leading-none font-semibold opacity-80">
                       {item.label}
                     </p>
                     <p className="text-[0.5625rem] leading-none opacity-70">
@@ -232,19 +232,19 @@ function SlowMovingTable() {
       <table className="w-full min-w-[36rem] text-xs" aria-label="Slow-moving dead stock">
         <thead>
           <tr className="bg-muted/60 border-b">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Item Name
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               SKU
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Location
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
               Days No Movement
             </th>
-            <th scope="col" className="py-1.5 text-right font-medium">
+            <th scope="col" className="py-1.5 text-right font-semibold">
               Est. Value
             </th>
           </tr>
@@ -269,7 +269,7 @@ function SlowMovingTable() {
               <td className="py-1.5 pr-2 text-right tabular-nums">
                 {item.daysNoMovement}
               </td>
-              <td className="py-1.5 text-right font-medium tabular-nums">
+              <td className="py-1.5 text-right font-semibold tabular-nums">
                 {fmtCurrency(item.estValue)}
               </td>
             </tr>
@@ -324,25 +324,25 @@ function ReplenishmentTable() {
       <table className="w-full min-w-[44rem] text-xs" aria-label="Inventory replenishment">
         <thead>
           <tr className="bg-muted/60 border-b">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Item Name
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               SKU
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Location
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
               On Hand
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
               Par Level
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
               Max Level
             </th>
-            <th scope="col" className="py-1.5 text-right font-medium">
+            <th scope="col" className="py-1.5 text-right font-semibold">
               Order Qty
             </th>
           </tr>
@@ -410,19 +410,19 @@ function PstStatusTable() {
       <table className="w-full min-w-[40rem] text-xs" aria-label="Physical stock take status">
         <thead>
           <tr className="bg-muted/60 border-b">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Location
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Dept
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Last Count Date
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               PST Status
             </th>
-            <th scope="col" className="py-1.5 text-left font-medium">
+            <th scope="col" className="py-1.5 text-left font-semibold">
               SVF Name
             </th>
           </tr>
@@ -620,10 +620,10 @@ function ExpiredItemsAlert() {
       <table className="w-full text-xs" aria-label="Expired items alert">
         <thead>
           <tr className="bg-muted/60 border-b">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Item Name
             </th>
-            <th scope="col" className="py-1.5 text-left font-medium">
+            <th scope="col" className="py-1.5 text-left font-semibold">
               Expiry Date
             </th>
           </tr>
@@ -724,17 +724,17 @@ function ConsumptionByCategoryChart() {
       {/* SR Awaiting Receipt */}
       <div className="bg-muted/40 rounded border px-2 py-1">
         <div className="flex items-center justify-between text-[0.6875rem]">
-          <span className="text-muted-foreground font-medium">
+          <span className="text-muted-foreground font-semibold">
             SR# Awaiting Receipt
           </span>
-          <span className="text-muted-foreground font-medium">Details</span>
+          <span className="text-muted-foreground font-semibold">Details</span>
         </div>
         {srAwaitingReceipt.map((sr) => (
           <div
             key={sr.srNumber}
             className="flex items-center justify-between text-[0.6875rem]"
           >
-            <span className="font-medium">{sr.srNumber}</span>
+            <span className="font-semibold">{sr.srNumber}</span>
             <button className="text-primary flex items-center gap-0.5 hover:underline">
               <span>{sr.details}</span>
               <ExternalLink className="size-2.5" aria-hidden="true" />

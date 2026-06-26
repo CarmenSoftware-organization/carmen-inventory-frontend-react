@@ -199,7 +199,7 @@ export default function LoginForm() {
                         role="alert"
                         aria-live="polite"
                       >
-                        <p className="text-destructive text-xs font-medium">
+                        <p className="text-destructive text-xs font-semibold">
                           {loginMutation.error instanceof RateLimitError &&
                           retryAfter !== null
                             ? t("errors.tooManyAttempts", {
@@ -309,7 +309,7 @@ export default function LoginForm() {
               style={{ animation: "fade-up-soft 0.7s ease-out 0.9s both" }}
             >
               <div className="bg-primary size-1 rounded-full" />
-              <p className="text-muted-foreground text-[0.6875rem] font-medium tracking-wide italic">
+              <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wide italic">
                 {t("letsBegin")}
               </p>
             </div>
@@ -500,7 +500,7 @@ function FieldErrorText({
     <p
       id={id}
       role="alert"
-      className="text-destructive mt-1.5 text-xs font-medium"
+      className="text-destructive mt-1.5 text-xs font-semibold"
     >
       {children}
     </p>

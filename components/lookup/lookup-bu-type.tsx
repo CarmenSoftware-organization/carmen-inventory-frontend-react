@@ -165,7 +165,7 @@ export function LookupBuType({
             <TooltipContent
               side="top"
               align="end"
-              className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-medium"
+              className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
             >
               {error}
             </TooltipContent>

@@ -543,16 +543,16 @@ function TopVendorsCard() {
           >
             <thead>
               <tr className="bg-muted/60 text-foreground border-b">
-                <th scope="col" className="py-2 pr-3 text-left font-medium">
+                <th scope="col" className="py-2 pr-3 text-left font-semibold">
                   ชื่อผู้จำหน่าย
                 </th>
-                <th scope="col" className="py-2 pr-3 text-right font-medium">
+                <th scope="col" className="py-2 pr-3 text-right font-semibold">
                   ยอดซื้อ
                 </th>
-                <th scope="col" className="py-2 pr-3 text-right font-medium">
+                <th scope="col" className="py-2 pr-3 text-right font-semibold">
                   จำนวน PO
                 </th>
-                <th scope="col" className="py-2 text-right font-medium">
+                <th scope="col" className="py-2 text-right font-semibold">
                   Avg Delivery Time (Days)
                 </th>
               </tr>

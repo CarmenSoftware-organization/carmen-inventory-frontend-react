@@ -33,15 +33,15 @@ export default function PriceListExternalHeader({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm pt-2">
         <div>
           <span className="text-muted-foreground">Vendor Name:</span>{" "}
-          <span className="font-medium">{data.vendor_name || "-"}</span>
+          <span className="font-semibold">{data.vendor_name || "-"}</span>
         </div>
         <div>
           <span className="text-muted-foreground">Currency:</span>{" "}
-          <span className="font-medium">{data.currency_code}</span>
+          <span className="font-semibold">{data.currency_code}</span>
         </div>
         <div>
           <span className="text-muted-foreground">Date:</span>{" "}
-          <span className="font-medium">
+          <span className="font-semibold">
             {formatDate(data.effective_from_date, DATE_FORMAT)} -{" "}
             {formatDate(data.effective_to_date, DATE_FORMAT)}
           </span>
@@ -49,13 +49,13 @@ export default function PriceListExternalHeader({
         {data.description && (
           <div className="col-span-2 md:col-span-4">
             <span className="text-muted-foreground">Description:</span>{" "}
-            <span className="font-medium">{data.description}</span>
+            <span className="font-semibold">{data.description}</span>
           </div>
         )}
         {data.note && (
           <div className="col-span-2 md:col-span-4">
             <span className="text-muted-foreground">Note:</span>{" "}
-            <span className="font-medium">{data.note}</span>
+            <span className="font-semibold">{data.note}</span>
           </div>
         )}
       </div>

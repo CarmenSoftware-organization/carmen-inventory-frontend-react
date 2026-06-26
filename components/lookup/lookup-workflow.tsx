@@ -100,7 +100,7 @@ export function LookupWorkflow({
               </SelectContent>
             </Select>
             {!!error && (
-              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2.5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2">
                 <CircleAlert
                   className="text-destructive size-4"
                   aria-hidden="true"
@@ -113,7 +113,7 @@ export function LookupWorkflow({
           <TooltipContent
             side="top"
             align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-medium"
+            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
           >
             {error}
           </TooltipContent>
@@ -123,7 +123,7 @@ export function LookupWorkflow({
             side="top"
             className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
           >
-            <p className="text-xs font-medium">{selectedLabel}</p>
+            <p className="text-xs font-semibold">{selectedLabel}</p>
           </TooltipContent>
         )}
       </Tooltip>

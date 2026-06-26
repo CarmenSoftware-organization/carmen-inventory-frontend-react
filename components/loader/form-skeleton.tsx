@@ -85,7 +85,7 @@ function FieldSkeleton() {
 function ItemsSectionSkeleton() {
   return (
     <div>
-      <div className="mb-2.5 flex items-end justify-between gap-3 px-1">
+      <div className="mb-2 flex items-end justify-between gap-3 px-1">
         <div className="space-y-1.5">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-2.5 w-20" />
@@ -108,7 +108,7 @@ function SidebarSkeleton() {
     <aside className="hidden flex-col gap-3 self-start lg:flex">
       <div className="bg-card rounded-xl border p-4">
         <Skeleton className="mb-3 h-3 w-16" />
-        <div className="flex items-start gap-2.5">
+        <div className="flex items-start gap-3">
           <Skeleton className="size-9 rounded-xl" />
           <div className="flex-1 space-y-1.5">
             <Skeleton className="h-3.5 w-full max-w-32" />

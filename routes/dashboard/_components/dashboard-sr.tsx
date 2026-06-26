@@ -144,11 +144,11 @@ function SentBackSrsTable() {
       <table className="w-full min-w-[36rem] text-xs" aria-label="Sent back SRs">
         <thead>
           <tr className="border-b bg-muted/60">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">SR#</th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">Requester</th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">Date Sent</th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">Sender</th>
-            <th scope="col" className="py-1.5 text-left font-medium">Reason</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">SR#</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">Requester</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">Date Sent</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">Sender</th>
+            <th scope="col" className="py-1.5 text-left font-semibold">Reason</th>
           </tr>
         </thead>
         <tbody>
@@ -157,7 +157,7 @@ function SentBackSrsTable() {
               <td className="py-1.5 pr-2">
                 <div className="flex items-center gap-1">
                   <AlertCircle className="size-3 shrink-0 text-warning-foreground" aria-hidden="true" />
-                  <span className="font-medium">{sr.srNumber}</span>
+                  <span className="font-semibold">{sr.srNumber}</span>
                 </div>
               </td>
               <td className="py-1.5 pr-2">{sr.requester}</td>
@@ -190,11 +190,11 @@ function RejectListTable() {
       <table className="w-full min-w-[36rem] text-xs" aria-label="SR reject list">
         <thead>
           <tr className="border-b bg-muted/60">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">SR#</th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">Material Name</th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">Requester</th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">Rejected By</th>
-            <th scope="col" className="py-1.5 text-left font-medium">Reason</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">SR#</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">Material Name</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">Requester</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">Rejected By</th>
+            <th scope="col" className="py-1.5 text-left font-semibold">Reason</th>
           </tr>
         </thead>
         <tbody>
@@ -203,7 +203,7 @@ function RejectListTable() {
               <td className="py-1.5 pr-2">
                 <div className="flex items-center gap-1">
                   <XCircle className="size-3 shrink-0 text-destructive" aria-hidden="true" />
-                  <span className="font-medium">{item.srNumber ?? ""}</span>
+                  <span className="font-semibold">{item.srNumber ?? ""}</span>
                 </div>
               </td>
               <td className="py-1.5 pr-2 max-w-[9rem] truncate">{item.materialName}</td>
@@ -248,16 +248,16 @@ function AwaitingApprovalTable() {
       <table className="w-full min-w-[32rem] text-xs" aria-label="SRs awaiting approval">
         <thead>
           <tr className="border-b bg-muted/60">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">PR No</th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">Description</th>
-            <th scope="col" className="py-1.5 pr-2 text-right font-medium">Amount</th>
-            <th scope="col" className="py-1.5 text-left font-medium">Stage</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">PR No</th>
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">Description</th>
+            <th scope="col" className="py-1.5 pr-2 text-right font-semibold">Amount</th>
+            <th scope="col" className="py-1.5 text-left font-semibold">Stage</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((sr) => (
             <tr key={sr.prNo} className="border-b last:border-0 hover:bg-muted/40">
-              <td className="py-1.5 pr-2 font-medium">{sr.prNo}</td>
+              <td className="py-1.5 pr-2 font-semibold">{sr.prNo}</td>
               <td className="py-1.5 pr-2">{sr.description}</td>
               <td className="py-1.5 pr-2 text-right tabular-nums">{fmtAmount(sr.amount)}</td>
               <td className="py-1.5 text-muted-foreground">{sr.stage}</td>
@@ -361,15 +361,15 @@ function SrAwaitingReceivedTable() {
         <table className="w-full text-xs" aria-label="SR awaiting received">
           <thead className="sticky top-0 bg-muted/90">
             <tr className="border-b">
-              <th scope="col" className="py-1.5 pl-2 pr-2 text-left font-medium">PR No</th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">Description</th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">Amount</th>
+              <th scope="col" className="py-1.5 pl-2 pr-2 text-left font-semibold">PR No</th>
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">Description</th>
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">Amount</th>
             </tr>
           </thead>
           <tbody>
             {srAwaitingReceived.map((sr, i) => (
               <tr key={`${sr.prNo}-${i}`} className="border-b last:border-0 hover:bg-muted/40">
-                <td className="py-1.5 pl-2 pr-2 font-medium">{sr.prNo}</td>
+                <td className="py-1.5 pl-2 pr-2 font-semibold">{sr.prNo}</td>
                 <td className="py-1.5 pr-2">{sr.description}</td>
                 <td className="py-1.5 pr-2 text-right tabular-nums text-muted-foreground">{sr.amount}</td>
               </tr>

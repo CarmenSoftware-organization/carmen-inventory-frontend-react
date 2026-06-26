@@ -167,19 +167,19 @@ function PendingPrsTable() {
       >
         <thead>
           <tr className="bg-muted/60 border-b">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               PR ID
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Requester
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Dept
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Date Approved ↓
             </th>
-            <th scope="col" className="py-1.5 text-left font-medium">
+            <th scope="col" className="py-1.5 text-left font-semibold">
               Status
             </th>
           </tr>
@@ -205,7 +205,7 @@ function PendingPrsTable() {
                         aria-hidden="true"
                       />
                     )}
-                    <span className="font-medium">{pr.prId}</span>
+                    <span className="font-semibold">{pr.prId}</span>
                   </div>
                 </td>
                 <td className="py-1.5 pr-2">{pr.requester}</td>
@@ -244,19 +244,19 @@ function OverdueDeliveriesTable() {
       <table className="w-full min-w-[34rem] text-xs" aria-label="Overdue deliveries">
         <thead>
           <tr className="bg-muted/60 border-b">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               PO ID
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Vendor
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Dept
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Due Date ↓
             </th>
-            <th scope="col" className="py-1.5 text-left font-medium">
+            <th scope="col" className="py-1.5 text-left font-semibold">
               Days Overdue
             </th>
           </tr>
@@ -273,7 +273,7 @@ function OverdueDeliveriesTable() {
                     className="text-destructive size-3 shrink-0"
                     aria-hidden="true"
                   />
-                  <span className="font-medium">{d.poId}</span>
+                  <span className="font-semibold">{d.poId}</span>
                 </div>
               </td>
               <td className="py-1.5 pr-2">{d.vendor}</td>
@@ -392,7 +392,7 @@ function CategorySpendCard() {
                   style={{ backgroundColor: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }}
                 />
                 <div className="flex-1">
-                  <p className="text-xs font-medium leading-tight">{item.name}</p>
+                  <p className="text-xs font-semibold leading-tight">{item.name}</p>
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-[0.6875rem] font-semibold tabular-nums">
@@ -517,28 +517,28 @@ function OverReceivedTable() {
         <table className="w-full min-w-[52rem] text-xs" aria-label="Over-received POs">
           <thead>
             <tr className="bg-muted/60 border-b">
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 PO Number
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Material Name
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Material Code
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Vendor Name
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Ordered Qty
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Received Qty
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Variance
               </th>
-              <th scope="col" className="py-1.5 text-left font-medium">
+              <th scope="col" className="py-1.5 text-left font-semibold">
                 Status
               </th>
             </tr>
@@ -549,7 +549,7 @@ function OverReceivedTable() {
                 key={`${po.poNumber}-${i}`}
                 className="hover:bg-muted/40 border-b last:border-0"
               >
-                <td className="py-1.5 pr-2 font-medium">{po.poNumber}</td>
+                <td className="py-1.5 pr-2 font-semibold">{po.poNumber}</td>
                 <td className="py-1.5 pr-2">{po.materialName}</td>
                 <td className="text-muted-foreground py-1.5 pr-2">
                   {po.materialCode}

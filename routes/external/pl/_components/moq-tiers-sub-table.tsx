@@ -145,7 +145,7 @@ export default function MoqTiersSubTable({
           }
 
           return (
-            <div className="font-medium text-xs">
+            <div className="font-semibold text-xs">
               {value.toLocaleString("en-US", { maximumFractionDigits: 0 })}{" "}
               units
             </div>
@@ -181,7 +181,7 @@ export default function MoqTiersSubTable({
           }
 
           return (
-            <div className="font-medium text-primary text-xs">
+            <div className="font-semibold text-primary text-xs">
               {value.toLocaleString()}
             </div>
           );

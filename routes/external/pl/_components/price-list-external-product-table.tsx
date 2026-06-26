@@ -563,7 +563,7 @@ export default function PriceListExternalProductTable({
           columnsVisibility: true,
         }}
       >
-        <div className="w-full space-y-2.5">
+        <div className="w-full space-y-2">
           <DataGridContainer>
             <ScrollArea>
               <DataGridTable />
@@ -587,7 +587,7 @@ export default function PriceListExternalProductTable({
         columnsVisibility: true,
       }}
     >
-      <div className="w-full space-y-2.5">
+      <div className="w-full space-y-2">
         <DataGridContainer>
           <ScrollArea>
             <DataGridTable />

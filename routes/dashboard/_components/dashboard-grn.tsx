@@ -171,22 +171,22 @@ function PendingPoTable() {
         >
           <thead>
             <tr className="bg-muted/60 border-b">
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 PO ID
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Supplier Name
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Expected Date
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Items Count
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Total Amount
               </th>
-              <th scope="col" className="py-1.5 text-left font-medium">
+              <th scope="col" className="py-1.5 text-left font-semibold">
                 Priority
               </th>
             </tr>
@@ -199,7 +199,7 @@ function PendingPoTable() {
                   key={po.poId}
                   className="hover:bg-muted/40 border-b last:border-0"
                 >
-                  <td className="py-1.5 pr-2 font-medium">{po.poId}</td>
+                  <td className="py-1.5 pr-2 font-semibold">{po.poId}</td>
                   <td className="py-1.5 pr-2">{po.supplierName}</td>
                   <td className="text-muted-foreground py-1.5 pr-2">
                     {po.expectedDate}
@@ -246,22 +246,22 @@ function OverduePoTable() {
         >
           <thead>
             <tr className="bg-muted/60 border-b">
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 PO ID
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Supplier
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Original Due Date
               </th>
               <th
                 scope="col"
-                className="text-destructive py-1.5 pr-2 text-left font-medium"
+                className="text-destructive py-1.5 pr-2 text-left font-semibold"
               >
                 Days Overdue
               </th>
-              <th scope="col" className="py-1.5 text-right font-medium">
+              <th scope="col" className="py-1.5 text-right font-semibold">
                 Items Count
               </th>
             </tr>
@@ -278,7 +278,7 @@ function OverduePoTable() {
                       : "hover:bg-muted/40 border-b last:border-0"
                   }
                 >
-                  <td className="py-1.5 pr-2 font-medium">{po.poId}</td>
+                  <td className="py-1.5 pr-2 font-semibold">{po.poId}</td>
                   <td className="py-1.5 pr-2">{po.supplier}</td>
                   <td className="text-muted-foreground py-1.5 pr-2">
                     {po.originalDueDate}
@@ -326,25 +326,25 @@ function IncompleteGrnsTable() {
         >
           <thead>
             <tr className="bg-muted/60 border-b">
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 GRN ID
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 PO ID
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Supplier
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Qty Ordered
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Qty Received
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Variance
               </th>
-              <th scope="col" className="py-1.5 text-left font-medium">
+              <th scope="col" className="py-1.5 text-left font-semibold">
                 Status
               </th>
             </tr>
@@ -355,7 +355,7 @@ function IncompleteGrnsTable() {
                 key={g.grnId}
                 className="hover:bg-muted/40 border-b last:border-0"
               >
-                <td className="py-1.5 pr-2 font-medium">{g.grnId}</td>
+                <td className="py-1.5 pr-2 font-semibold">{g.grnId}</td>
                 <td className="text-muted-foreground py-1.5 pr-2">{g.poId}</td>
                 <td className="py-1.5 pr-2">{g.supplier}</td>
                 <td className="py-1.5 pr-2 text-right tabular-nums">
@@ -400,25 +400,25 @@ function OverReceivedGrnsTable() {
         >
           <thead>
             <tr className="bg-muted/60 border-b">
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 GRN ID
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 PO ID
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Supplier
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 PO Amount
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 GRN Amount
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-right font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-right font-semibold">
                 Excess Amount
               </th>
-              <th scope="col" className="py-1.5 text-right font-medium">
+              <th scope="col" className="py-1.5 text-right font-semibold">
                 Variance %
               </th>
             </tr>
@@ -438,7 +438,7 @@ function OverReceivedGrnsTable() {
                         className="text-warning-foreground size-3 shrink-0"
                         aria-hidden="true"
                       />
-                      <span className="font-medium">{g.grnId}</span>
+                      <span className="font-semibold">{g.grnId}</span>
                     </div>
                   </td>
                   <td className="text-muted-foreground py-1.5 pr-2">

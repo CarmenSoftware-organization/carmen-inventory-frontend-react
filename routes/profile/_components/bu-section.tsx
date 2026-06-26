@@ -292,11 +292,11 @@ function InfoItem({
         <Icon className="text-muted-foreground size-3.5" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <dt className="text-muted-foreground text-[0.625rem] font-medium tracking-wide uppercase">
+        <dt className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
           {label}
         </dt>
         <dd
-          className="flex items-center gap-1.5 text-xs font-medium"
+          className="flex items-center gap-1.5 text-xs font-semibold"
           title={value || undefined}
         >
           <span className="truncate">{value || "-"}</span>

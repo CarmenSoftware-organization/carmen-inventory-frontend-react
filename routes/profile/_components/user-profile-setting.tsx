@@ -231,9 +231,8 @@ export default function UserProfileSetting() {
       </div>
 
       {/* Account Info — read-only hero */}
-      <div className="from-primary/8 via-primary/3 relative overflow-hidden rounded-xl border bg-linear-to-br to-transparent shadow-sm">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1rem_1rem,var(--primary)_1px,transparent_1px)] bg-size-[1.5rem_1.5rem] opacity-[0.15]" />
-        <div className="relative flex flex-col gap-2.5 px-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative overflow-hidden rounded-xl border bg-primary/5">
+        <div className="relative flex flex-col gap-3 px-2 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
               <button
@@ -317,7 +316,7 @@ export default function UserProfileSetting() {
       </div>
 
       {/* Personal Info Form */}
-      <section className="bg-card rounded-xl border shadow-sm">
+      <section className="bg-card rounded-xl border">
         <header className="border-b px-2 py-2">
           <h2 className="text-sm font-semibold">{t("personalInfo")}</h2>
         </header>
@@ -432,7 +431,7 @@ export default function UserProfileSetting() {
       </section>
 
       {/* Signature */}
-      <section className="bg-card rounded-xl border shadow-sm">
+      <section className="bg-card rounded-xl border">
         <header className="flex items-center justify-between border-b px-2 py-2">
           <h2 className="text-sm font-semibold">{t("signature")}</h2>
           <div className="flex gap-2">

@@ -26,7 +26,7 @@ function ChangeList({ items }: { readonly items: readonly ChangeItem[] }) {
       {items.map((item) => (
         <li key={item.hash} className="flex items-start gap-1.5 text-xs leading-snug">
           {item.scope && (
-            <span className="bg-muted text-muted-foreground shrink-0 rounded px-1 py-0.5 text-[0.625rem] font-medium">
+            <span className="bg-muted text-muted-foreground shrink-0 rounded px-1 py-0.5 text-[0.625rem] font-semibold">
               {item.scope}
             </span>
           )}
@@ -52,7 +52,7 @@ function VersionBlock({ entry }: { readonly entry: VersionEntry }) {
       ) : (
         sections.map(({ key, label, Icon }) => (
           <div key={key} className="space-y-1">
-            <div className="flex items-center gap-1.5 text-xs font-medium">
+            <div className="flex items-center gap-1.5 text-xs font-semibold">
               <Icon aria-hidden="true" className="h-3.5 w-3.5" />
               <span>{label}</span>
             </div>

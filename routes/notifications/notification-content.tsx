@@ -95,7 +95,7 @@ function NotificationRow({
   const isUnread = notification.is_read === false;
 
   const rowClass = cn(
-    "group flex w-full gap-2.5 text-left transition-colors",
+    "group flex w-full gap-3 text-left transition-colors",
     "hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none",
     isUnread && "bg-primary/[0.07]",
   );

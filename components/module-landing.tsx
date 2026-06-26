@@ -50,11 +50,11 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
       </div>
 
       {/* Sub-module grid */}
-      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {visibleSubs.map((sub) => {
           const subColor = getModuleColor(sub.path);
           const cardClass = cn(
-            "group border-border bg-card hover:border-primary/40 relative flex items-center gap-3 overflow-hidden rounded-xl border py-2.5 pr-3 pl-4 text-left transition-colors",
+            "group border-border bg-card hover:border-primary/40 relative flex items-center gap-3 overflow-hidden rounded-xl border py-2 pr-3 pl-4 text-left transition-colors",
             sub.denied && "opacity-50",
           );
 
@@ -83,7 +83,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
 
               {/* Name + optional description */}
               <div className="min-w-0 flex-1">
-                <div className="text-foreground truncate text-sm font-medium tracking-tight">
+                <div className="text-foreground truncate text-sm font-semibold tracking-tight">
                   {t(sub.name)}
                 </div>
               </div>

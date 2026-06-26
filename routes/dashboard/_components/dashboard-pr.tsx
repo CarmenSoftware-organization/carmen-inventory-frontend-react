@@ -183,19 +183,19 @@ function SentBackTable() {
       <table className="w-full min-w-[34rem] text-xs" aria-label="Sent back PRs">
         <thead>
           <tr className="bg-muted/60 border-b">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               PR Number
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Item Name
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Date Sent
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Sender
             </th>
-            <th scope="col" className="py-1.5 text-left font-medium">
+            <th scope="col" className="py-1.5 text-left font-semibold">
               Reason
             </th>
           </tr>
@@ -212,7 +212,7 @@ function SentBackTable() {
                     className="text-muted-foreground size-3 shrink-0"
                     aria-hidden="true"
                   />
-                  <span className="font-medium">{pr.prNumber}</span>
+                  <span className="font-semibold">{pr.prNumber}</span>
                 </div>
               </td>
               <td className="py-1.5 pr-2">{pr.itemName}</td>
@@ -253,19 +253,19 @@ function RejectedTable() {
       <table className="w-full min-w-[34rem] text-xs" aria-label="Rejected PRs">
         <thead>
           <tr className="bg-muted/60 border-b">
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               PR Number/Item ID
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Material Name
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Requester
             </th>
-            <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+            <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
               Rejected By
             </th>
-            <th scope="col" className="py-1.5 text-left font-medium">
+            <th scope="col" className="py-1.5 text-left font-semibold">
               Reason
             </th>
           </tr>
@@ -282,7 +282,7 @@ function RejectedTable() {
                     className="text-destructive size-3 shrink-0"
                     aria-hidden="true"
                   />
-                  <span className="font-medium">{pr.prNumberItemId}</span>
+                  <span className="font-semibold">{pr.prNumberItemId}</span>
                 </div>
               </td>
               <td className="py-1.5 pr-2">{pr.materialName}</td>
@@ -519,25 +519,25 @@ function AwaitingApprovalTable() {
         <table className="w-full min-w-[44rem] text-xs" aria-label="PRs awaiting approval">
           <thead>
             <tr className="bg-muted/60 border-b">
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 PR Number
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Item Name
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Requester
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Dept
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Date Requested ↓
               </th>
-              <th scope="col" className="py-1.5 pr-2 text-left font-medium">
+              <th scope="col" className="py-1.5 pr-2 text-left font-semibold">
                 Status
               </th>
-              <th scope="col" className="py-1.5 text-left font-medium" />
+              <th scope="col" className="py-1.5 text-left font-semibold" />
             </tr>
           </thead>
           <tbody>
@@ -548,7 +548,7 @@ function AwaitingApprovalTable() {
                   key={pr.prNumber}
                   className="hover:bg-muted/40 border-b last:border-0"
                 >
-                  <td className="py-1.5 pr-2 font-medium">{pr.prNumber}</td>
+                  <td className="py-1.5 pr-2 font-semibold">{pr.prNumber}</td>
                   <td className="py-1.5 pr-2">{pr.itemName}</td>
                   <td className="py-1.5 pr-2">{pr.requester}</td>
                   <td className="text-muted-foreground py-1.5 pr-2">

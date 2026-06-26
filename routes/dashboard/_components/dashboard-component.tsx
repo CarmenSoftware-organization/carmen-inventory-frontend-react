@@ -293,7 +293,7 @@ function EmptyState() {
             {hints.map((h) => (
               <li
                 key={h.label}
-                className="bg-muted inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-medium"
+                className="bg-muted inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold"
               >
                 <h.Icon
                   className="size-3"

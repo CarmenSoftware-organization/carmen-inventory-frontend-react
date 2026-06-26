@@ -42,19 +42,19 @@ function SrTable({
     <table className="w-full text-xs">
       <thead>
         <tr className="bg-muted/60 text-foreground border-b">
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("document")}
           </th>
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("requester")}
           </th>
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("department")}
           </th>
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("stage")}
           </th>
-          <th scope="col" className="px-3 py-2 text-right font-medium">
+          <th scope="col" className="px-3 py-2 text-right font-semibold">
             {tfl("date")}
           </th>
         </tr>
@@ -68,7 +68,7 @@ function SrTable({
             <td className="px-3 py-2">
               <Link
                 href={`${DOC_TYPE_HREF.sr}/${item.id}`}
-                className="text-primary font-medium hover:underline"
+                className="text-primary font-semibold hover:underline"
               >
                 {item.doc_no}
               </Link>
@@ -106,19 +106,19 @@ function PrTable({
     <table className="w-full text-xs">
       <thead>
         <tr className="bg-muted/60 text-foreground border-b">
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("document")}
           </th>
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("requester")}
           </th>
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("department")}
           </th>
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("stage")}
           </th>
-          <th scope="col" className="px-3 py-2 text-right font-medium">
+          <th scope="col" className="px-3 py-2 text-right font-semibold">
             {tfl("date")}
           </th>
         </tr>
@@ -132,7 +132,7 @@ function PrTable({
             <td className="px-3 py-2">
               <Link
                 href={`${DOC_TYPE_HREF.pr}/${item.id}`}
-                className="text-primary font-medium hover:underline"
+                className="text-primary font-semibold hover:underline"
               >
                 {item.doc_no}
               </Link>
@@ -170,19 +170,19 @@ function PoTable({
     <table className="w-full text-xs">
       <thead>
         <tr className="bg-muted/60 text-foreground border-b">
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("document")}
           </th>
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("vendor")}
           </th>
-          <th scope="col" className="px-3 py-2 text-right font-medium">
+          <th scope="col" className="px-3 py-2 text-right font-semibold">
             {tfl("amount")}
           </th>
-          <th scope="col" className="px-3 py-2 text-left font-medium">
+          <th scope="col" className="px-3 py-2 text-left font-semibold">
             {tfl("stage")}
           </th>
-          <th scope="col" className="px-3 py-2 text-right font-medium">
+          <th scope="col" className="px-3 py-2 text-right font-semibold">
             {tfl("date")}
           </th>
         </tr>
@@ -196,7 +196,7 @@ function PoTable({
             <td className="px-3 py-2">
               <Link
                 href={`${DOC_TYPE_HREF.po}/${item.id}`}
-                className="text-primary font-medium hover:underline"
+                className="text-primary font-semibold hover:underline"
               >
                 {item.doc_no}
               </Link>

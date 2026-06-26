@@ -93,7 +93,7 @@ export default function EmptyComponent({
       ) : (
         <EmptyIllustration />
       )}
-      <p className="text-muted-foreground text-xs font-medium">
+      <p className="text-muted-foreground text-xs font-semibold">
         {title ?? t("noDataFound")}
       </p>
       {description && (
