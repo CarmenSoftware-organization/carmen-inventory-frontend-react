@@ -100,7 +100,7 @@ export function SideMain() {
                       isActive={isActive}
                       className={cn(
                         "group/sub relative overflow-hidden rounded-lg transition-all",
-                        "data-[active=true]:font-semibold data-[active=true]:shadow-sm",
+                        "data-[active=true]:font-semibold",
                         "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       )}
                     >

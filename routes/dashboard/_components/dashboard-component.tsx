@@ -291,30 +291,32 @@ function EmptyState() {
         style={{ backgroundColor: "var(--chart-4)" }}
       />
 
-      <div className="relative mx-auto flex max-w-md flex-col items-center gap-3">
+      <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:gap-5 sm:text-left">
         <AppTile name="dashboard" size={48} />
-        <h3 className="text-foreground text-base font-semibold tracking-tight sm:text-lg">
-          {t("emptyTitle")}
-        </h3>
-        <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">
-          {t("emptyDescription")}
-        </p>
+        <div className="flex min-w-0 flex-col items-center gap-2 sm:items-start">
+          <h3 className="text-foreground text-base font-semibold tracking-tight sm:text-lg">
+            {t("emptyTitle")}
+          </h3>
+          <p className="text-muted-foreground text-xs leading-relaxed sm:text-sm">
+            {t("emptyDescription")}
+          </p>
 
-        <ul className="mt-3 flex flex-wrap items-center justify-center gap-2">
-          {hints.map((h) => (
-            <li
-              key={h.label}
-              className="bg-card/80 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium shadow-sm backdrop-blur-sm"
-            >
-              <h.Icon
-                className="size-3"
-                style={{ color: h.color }}
-                aria-hidden="true"
-              />
-              <span>{h.label}</span>
-            </li>
-          ))}
-        </ul>
+          <ul className="mt-1 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+            {hints.map((h) => (
+              <li
+                key={h.label}
+                className="bg-card/80 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-medium shadow-sm backdrop-blur-sm"
+              >
+                <h.Icon
+                  className="size-3"
+                  style={{ color: h.color }}
+                  aria-hidden="true"
+                />
+                <span>{h.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );

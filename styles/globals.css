@@ -244,8 +244,11 @@
   --color-selected: var(--selected);
   --color-overlay: var(--overlay);
   /* font — Geist loaded by Next.js layout */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Apple-style system stack — SF Pro on Apple platforms, Inter/system fallback */
+  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* spacing — Apple "md" 17px (DESIGN.md); enables p-md / m-md / gap-md / size-md */
+  --spacing-md: 1.0625rem;
   /* radius */
   --radius-sm: calc(var(--radius) - 0.25rem);
   --radius-md: calc(var(--radius) - 0.125rem);
@@ -271,6 +274,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Apple reading pace: 17px body + faintly tight tracking */
+    font-size: 1.0625rem;
+    letter-spacing: -0.01em;
   }
 
   /* ── Interactive transitions ── */
@@ -415,11 +421,4 @@
   [data-slot="data-grid-table"] thead {
     display: table-header-group;
   }
-}
-
-
-/* next/font replacement — Fontsource variable fonts loaded in main.tsx */
-:root {
-  --font-geist-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-geist-mono: "Geist Mono Variable", ui-monospace, monospace;
 }

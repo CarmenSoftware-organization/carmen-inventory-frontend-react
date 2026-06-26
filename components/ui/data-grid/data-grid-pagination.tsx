@@ -239,7 +239,7 @@ function DataGridPagination({
                   className={cn(
                     "inline-flex h-6 min-w-6 items-center justify-center rounded px-1.5 text-xs font-medium cursor-pointer transition-all duration-150",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                   aria-current={isActive ? "page" : undefined}

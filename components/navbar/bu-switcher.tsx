@@ -32,7 +32,7 @@ function BuAvatar({
   return (
     <Avatar
       className={cn(
-        "size-7 shrink-0 shadow-sm ring-2",
+        "size-7 shrink-0 ring-2",
         isActive
           ? "ring-primary/20"
           : "ring-muted-foreground/15 group-hover/item:ring-primary/30",
