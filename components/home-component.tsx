@@ -25,7 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CarmenLogo } from "@/components/icons/carmen-logo";
+import { CarmenLogo } from "@/components/icons/carmen-logo-v1";
 import { cn } from "@/lib/utils";
 
 /* ── Static data ── */

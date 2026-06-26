@@ -26,7 +26,7 @@ import { resolveNextPath } from "@/lib/auth/resolve-next-path";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { CarmenLogo } from "@/components/icons/carmen-logo";
+import { CarmenLogo } from "@/components/icons/carmen-logo-v1";
 import { cn } from "@/lib/utils";
 
 const PASSWORD_MIN = 6;

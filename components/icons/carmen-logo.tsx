@@ -1,23 +1,5 @@
 import { cn } from "@/lib/utils";
-
-const PETAL_ANGLES = [15, 75, 135, 195, 255, 315] as const;
-
-const PETALS = PETAL_ANGLES.map((angle, i) => {
-  const opacity = i % 2 === 0 ? "" : ' fill-opacity="0.78"';
-  return `<ellipse cx="0" cy="-18" rx="17" ry="26" fill="#ffffff"${opacity} transform="rotate(${angle})"/>`;
-}).join("");
-
-const CARMEN_MARK_INNER =
-  `<path d="M 27 4 H 73 Q 96 4 96 27 V 73 Q 96 96 73 96 H 27 Q 4 96 4 73 V 27 Q 4 4 27 4 Z" fill="#0154BD"/>` +
-  `<path d="M 27 4 H 73 Q 96 4 96 27 V 38 Q 70 28 50 28 T 4 38 V 27 Q 4 4 27 4 Z" fill="#ffffff" opacity="0.10"/>` +
-  `<g transform="translate(50 52) scale(0.8)">${PETALS}` +
-  `<circle r="9" fill="#ffffff" fill-opacity="0.32"/>` +
-  `<circle r="4" fill="#ffffff" fill-opacity="0.55"/>` +
-  `</g>`;
-
-const CARMEN_MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">${CARMEN_MARK_INNER}</svg>`;
-
-export const CARMEN_ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent(CARMEN_MARK_SVG)}`;
+import carmenLogoUrl from "./carmen-logo.svg";
 
 type CarmenLogoProps = {
   readonly variant?: "mark" | "lockup";
@@ -26,19 +8,40 @@ type CarmenLogoProps = {
   readonly title?: string;
 };
 
+/**
+ * โลโก้ Carmen — render จากไฟล์ SVG ของแบรนด์ (`./carmen-logo.svg`)
+ *
+ * - `mark` (default): ไอคอนสี่เหลี่ยมจัตุรัสล้วน — ใช้ใน sidebar / login / favicon-สัดส่วน
+ * - `lockup`: ไอคอน + ตัวอักษร "Carmen"
+ *
+ * @param variant - รูปแบบโลโก้
+ * @param size - ขนาด (px) ทั้งกว้างและสูง (โลโก้เป็นจัตุรัส)
+ * @param className - class เพิ่มเติม (ใส่ที่ img สำหรับ mark, ที่ wrapper สำหรับ lockup)
+ * @param title - ข้อความ alt / aria-label
+ */
 export function CarmenLogo({
   variant = "mark",
   size = 32,
   className,
   title = "Carmen",
 }: CarmenLogoProps) {
+  const mark = (
+    <img
+      src={carmenLogoUrl}
+      width={size}
+      height={size}
+      alt={title}
+      className={variant === "lockup" ? undefined : className}
+    />
+  );
+
   if (variant === "lockup") {
     return (
       <div
         className={cn("inline-flex items-center gap-2", className)}
         aria-label={title}
       >
-        <CarmenMarkSvg size={size} title={title} />
+        {mark}
         <span
           className="text-foreground font-bold tracking-tight"
           style={{
@@ -53,28 +56,5 @@ export function CarmenLogo({
     );
   }
 
-  return <CarmenMarkSvg size={size} title={title} className={className} />;
-}
-
-type CarmenMarkSvgProps = {
-  readonly size: number;
-  readonly title: string;
-  readonly className?: string;
-};
-
-function CarmenMarkSvg({ size, title, className }: CarmenMarkSvgProps) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 100 100"
-      width={size}
-      height={size}
-      role="img"
-      aria-label={title}
-      className={className}
-      dangerouslySetInnerHTML={{
-        __html: `<title>${title}</title>${CARMEN_MARK_INNER}`,
-      }}
-    />
-  );
+  return mark;
 }

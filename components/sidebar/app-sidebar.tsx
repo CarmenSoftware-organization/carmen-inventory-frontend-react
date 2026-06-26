@@ -6,7 +6,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { CarmenLogo } from "@/components/icons/carmen-logo";
+import { CarmenLogo } from "@/components/icons/carmen-logo-v1";
 import { SideMain } from "./side-main";
 import Link from "@/lib/compat/link";
 
