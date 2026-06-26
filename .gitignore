@@ -8,3 +8,4 @@ public/config.prod.json
 test-results/
 playwright-report/
 .vercel
+.env*.local
