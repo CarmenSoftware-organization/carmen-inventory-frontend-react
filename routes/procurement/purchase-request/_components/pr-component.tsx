@@ -2,26 +2,9 @@
 import { useState } from "react";
 import { useRouter } from "@/lib/compat/navigation";
 import { useTranslations } from "use-intl";
-import {
-  Check,
-  Columns3,
-  Download,
-  LayoutGrid,
-  LayoutList,
-  MoreHorizontal,
-  Plus,
-  Printer,
-  X,
-  Loader2,
-} from "lucide-react";
+import { Check, Columns3, LayoutGrid, LayoutList, X, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -61,6 +44,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { FilterStage } from "@/components/filter/filter-stage";
 import { PrFilterStatus } from "./pr-filter-status";
 import { usePrActiveFilters } from "./pr-active-filters";
+import { PrDocumentActions } from "./pr-document-actions";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const CreatePRDialog = lazy(() =>
@@ -274,61 +258,11 @@ export default function PurchaseRequestComponent() {
               {t("desc")}
             </p>
           </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleExport}
-              disabled={isExporting}
-              className="hidden sm:inline-flex"
-            >
-              {isExporting ? (
-                <Loader2 className="animate-spin" aria-hidden="true" />
-              ) : (
-                <Download aria-hidden="true" />
-              )}
-              {isExporting ? tc("exporting") : tc("export")}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => globalThis.print()}
-              className="hidden sm:inline-flex"
-            >
-              <Printer aria-hidden="true" />
-              {tc("print")}
-            </Button>
-            <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
-              <Plus aria-hidden="true" />
-              {t("add")}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.moreActions")}
-                >
-                  <MoreHorizontal aria-hidden="true" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExport} disabled={isExporting}>
-                  {isExporting ? (
-                    <Loader2 className="animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Download aria-hidden="true" />
-                  )}
-                  {isExporting ? tc("exporting") : tc("export")}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => globalThis.print()}>
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <PrDocumentActions
+            onExport={handleExport}
+            isExporting={isExporting}
+            onAdd={() => setCreateDialogOpen(true)}
+          />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">

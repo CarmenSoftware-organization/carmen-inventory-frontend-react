@@ -56,6 +56,28 @@ export default defineConfig(() => ({
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, ".") },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // แยก vendor ที่เสถียร (react ecosystem / tanstack) ออกจาก shared chunk
+        // เพื่อ caching ที่ดีขึ้น — deploy โค้ดแอปใหม่ผู้ใช้เก่าไม่ต้องโหลด vendor
+        // ซ้ำ ไม่ลด first-load bytes แต่ลด re-download ตอนอัปเดต
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (
+            /[\\/]node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/.test(
+              id,
+            )
+          ) {
+            return "react-vendor";
+          }
+          if (id.includes("/@tanstack/")) {
+            return "tanstack";
+          }
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
     proxy: process.env.VITE_DEV_PROXY_TARGET
