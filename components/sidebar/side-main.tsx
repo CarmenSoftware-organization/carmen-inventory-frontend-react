@@ -101,6 +101,8 @@ export function SideMain() {
                       className={cn(
                         "group/sub relative overflow-hidden rounded-lg transition-all",
                         "data-[active=true]:font-semibold",
+                        // active = blue left-bar signal (icon keeps its module color)
+                        "before:bg-primary before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:content-[''] data-[active=true]:before:opacity-100 group-data-[collapsible=icon]:before:hidden",
                         "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       )}
                     >

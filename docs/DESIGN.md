@@ -6,6 +6,14 @@ description: A photography-first interface that turns marketing into a museum ga
 colors:
   # Carmen Inventory ERP — neutral graphite surfaces + Carmen blue accent.
   # Source of truth: styles/globals.css (OKLCH). Hex below are sRGB equivalents.
+  #
+  # USAGE — single accent signal (avoid "neon"): accent & semantic colors
+  # (primary / destructive / success / warning) should appear ONCE per element,
+  # never clustered. Repeating one color across icon-box + icon + chip on a
+  # neutral surface reads as glowing/neon — keep it to a single signal and let
+  # the surrounding box / label / border stay neutral.
+  #   e.g. error state = red icon only; neutral box, muted label, neutral border.
+  #   (Applied in ProfileError — components/share/profile-gate.tsx.)
   # ── Light mode ──
   primary: "#0154bd"            # Carmen Blue — brand accent: buttons, links, focus
   primary-foreground: "#fcfcfc"
