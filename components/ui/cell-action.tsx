@@ -25,7 +25,7 @@ export function CellAction({ className, children, ...props }: CellActionProps) {
     <button
       type="button"
       className={cn(
-        "focus-visible:ring-ring/50 cursor-pointer text-left text-[inherit] font-medium text-blue-600 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-none dark:text-blue-400",
+        "focus-visible:ring-ring/50 cursor-pointer text-left text-[inherit] font-semibold text-blue-600 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-none dark:text-blue-400",
         className,
       )}
       {...props}

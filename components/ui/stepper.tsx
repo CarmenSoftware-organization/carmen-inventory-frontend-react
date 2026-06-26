@@ -373,7 +373,7 @@ function StepperTrigger({
       data-loading={isLoading}
       className={cn(
         "focus-visible:border-ring focus-visible:ring-ring/50 inline-flex cursor-pointer items-center outline-none focus-visible:z-10 focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-60",
-        "gap-2.5 rounded-full",
+        "gap-3 rounded-full",
         className
       )}
       onClick={() => setActiveStep(step)}
@@ -459,7 +459,7 @@ function StepperSeparator({ className }: React.ComponentProps<"div">) {
 }
 
 /**
- * Title ของ StepperItem เป็น h3 สไตล์ text-sm font-medium
+ * Title ของ StepperItem เป็น h3 สไตล์ text-sm font-semibold
  *
  * ใช้ภายใน StepperTrigger เพื่อเป็นชื่อขั้นตอน reflect state ผ่าน
  * data-state attribute
@@ -478,7 +478,7 @@ function StepperTitle({ children, className }: React.ComponentProps<"h3">) {
     <h3
       data-slot="stepper-title"
       data-state={state}
-      className={cn("text-sm leading-none font-medium", className)}
+      className={cn("text-sm leading-none font-semibold", className)}
     >
       {children}
     </h3>

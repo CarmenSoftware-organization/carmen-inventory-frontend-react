@@ -440,7 +440,7 @@ export function CommentSheet({
                     <div className="bg-muted flex size-5 shrink-0 items-center justify-center rounded-full">
                       <User className="text-muted-foreground size-3" />
                     </div>
-                    <span className="truncate text-xs font-medium">
+                    <span className="truncate text-xs font-semibold">
                       {getFullName(c)}
                     </span>
                     <span

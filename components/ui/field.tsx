@@ -68,7 +68,7 @@ function FieldLegend({
       data-slot="field-legend"
       data-variant={variant}
       className={cn(
-        "mb-3 font-medium",
+        "mb-3 font-semibold",
         "data-[variant=legend]:text-base",
         "data-[variant=label]:text-sm",
         className,
@@ -237,7 +237,7 @@ function FieldLabel({
 /**
  * Title ของ Field (ขนาดใหญ่กว่า label)
  *
- * Render `<div>` หัวเรื่อง text-sm font-medium ใช้ข้างใน Field สำหรับ
+ * Render `<div>` หัวเรื่อง text-sm font-semibold ใช้ข้างใน Field สำหรับ
  * section heading ที่ไม่ใช่ label ของ input โดยตรง
  *
  * @param props - props ของ div
@@ -252,7 +252,7 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="field-label"
       className={cn(
-        "flex w-fit items-center gap-2 text-sm leading-snug font-medium group-data-[disabled=true]/field:opacity-50",
+        "flex w-fit items-center gap-2 text-sm leading-snug font-semibold group-data-[disabled=true]/field:opacity-50",
         className,
       )}
       {...props}
@@ -439,7 +439,7 @@ function FieldInput({
           <TooltipContent
             side="top"
             align={isLeft ? "start" : "end"}
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-medium"
+            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
           >
             {error}
           </TooltipContent>
@@ -516,7 +516,7 @@ function FieldSelect({
               {children}
             </Select>
             {!!error && (
-              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2.5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2">
                 <CircleAlert
                   className="text-destructive size-4"
                   aria-hidden="true"
@@ -529,7 +529,7 @@ function FieldSelect({
           <TooltipContent
             side="top"
             align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-medium"
+            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
           >
             {error}
           </TooltipContent>
@@ -564,7 +564,7 @@ function FieldDatePicker({
               {...props}
             />
             {showError && (
-              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2.5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2">
                 <CircleAlert
                   className="text-destructive size-4"
                   aria-hidden="true"
@@ -577,7 +577,7 @@ function FieldDatePicker({
           <TooltipContent
             side="top"
             align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-medium"
+            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
           >
             {error}
           </TooltipContent>
@@ -606,7 +606,7 @@ function FieldInputGroup({
               {children}
             </InputGroup>
             {!!error && (
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
                 <CircleAlert
                   className="text-destructive size-4"
                   aria-hidden="true"
@@ -619,7 +619,7 @@ function FieldInputGroup({
           <TooltipContent
             side="top"
             align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-medium"
+            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
           >
             {error}
           </TooltipContent>

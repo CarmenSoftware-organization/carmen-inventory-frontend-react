@@ -145,7 +145,7 @@ interface TimelineDateProps extends HTMLAttributes<HTMLTimeElement> {
  * แสดงวันที่ของ TimelineItem ใช้ <time> element เป็นค่า default
  *
  * รองรับ asChild เพื่อ render element อื่นผ่าน Radix Slot สไตล์ text-xs
- * font-medium สี muted-foreground
+ * font-semibold สี muted-foreground
  *
  * @param props - asChild, children และ props ของ time
  * @returns JSX element ของวันที่
@@ -164,7 +164,7 @@ function TimelineDate({
   return (
     <Comp
       className={cn(
-        "text-muted-foreground mb-1 block text-xs font-medium group-data-[orientation=vertical]/timeline:max-sm:h-4",
+        "text-muted-foreground mb-1 block text-xs font-semibold group-data-[orientation=vertical]/timeline:max-sm:h-4",
         className
       )}
       data-slot="timeline-date"
@@ -319,7 +319,7 @@ function TimelineSeparator({
 
 // TimelineTitle
 /**
- * Title ของ TimelineItem เป็น h3 สไตล์ text-sm font-medium
+ * Title ของ TimelineItem เป็น h3 สไตล์ text-sm font-semibold
  *
  * ใช้ภายใน TimelineHeader เพื่อเป็นหัวข้อของเหตุการณ์
  *
@@ -337,7 +337,7 @@ function TimelineTitle({
     // heading content provided via children in {...props}; no jsx-a11y plugin in Vite eslint config
   return (
     <h3
-      className={cn("text-sm font-medium", className)}
+      className={cn("text-sm font-semibold", className)}
       data-slot="timeline-title"
       {...props}
     />

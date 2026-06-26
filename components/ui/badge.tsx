@@ -5,7 +5,7 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-lg border border-transparent font-medium w-fit whitespace-nowrap shrink-0 outline-none transition-[color,box-shadow] overflow-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-3",
+  "inline-flex items-center justify-center rounded-lg border border-transparent font-semibold w-fit whitespace-nowrap shrink-0 outline-none transition-[color,box-shadow] overflow-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-3",
   {
     variants: {
       variant: {
@@ -51,8 +51,8 @@ const badgeVariants = cva(
       },
       size: {
         xs: "px-2 py-0.5 text-[0.6875rem] leading-none h-5 min-w-5 gap-1",
-        sm: "px-2.5 py-0.5 text-[0.75rem] leading-none h-5.5 min-w-5.5 gap-1",
-        default: "px-2.5 py-0.5 text-[0.8125rem] h-6 min-w-6 gap-1",
+        sm: "px-2 py-0.5 text-[0.75rem] leading-none h-5.5 min-w-5.5 gap-1",
+        default: "px-2 py-0.5 text-[0.8125rem] h-6 min-w-6 gap-1",
         lg: "px-3 py-0.5 text-[0.875rem] h-6.5 min-w-6.5 gap-1.5",
         xl: "px-3.5 py-1 text-[0.9375rem] h-7.5 min-w-7.5 gap-1.5",
       },

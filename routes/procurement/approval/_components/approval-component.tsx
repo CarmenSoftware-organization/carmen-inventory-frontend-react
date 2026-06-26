@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import {
   ClipboardList,
@@ -42,7 +41,12 @@ export default function ApprovalComponent() {
       color: "primary",
     },
     { key: "pr", label: t("purchaseRequest"), icon: FileText, color: "info" },
-    { key: "po", label: t("purchaseOrder"), icon: ShoppingCart, color: "warning" },
+    {
+      key: "po",
+      label: t("purchaseOrder"),
+      icon: ShoppingCart,
+      color: "warning",
+    },
     {
       key: "sr",
       label: t("storeRequisition"),
@@ -96,13 +100,13 @@ export default function ApprovalComponent() {
       }
     >
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {SUMMARY_CARDS.map((card) => {
           const Icon = card.icon;
           return summaryLoading ? (
             <div
               key={card.key}
-              className="rounded-lg border bg-card p-3 flex items-center gap-3"
+              className="bg-card flex items-center gap-3 rounded-lg border p-3"
             >
               <Skeleton className="size-9 rounded-lg" />
               <div className="space-y-1.5">
@@ -115,9 +119,9 @@ export default function ApprovalComponent() {
               type="button"
               key={card.key}
               className={cn(
-                "rounded-lg border bg-card p-3 flex items-center gap-3 cursor-pointer transition-colors text-left",
+                "bg-card flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-left transition-colors",
                 activeType === card.key
-                  ? "ring-2 ring-primary border-primary"
+                  ? "ring-primary border-primary ring-2"
                   : "hover:bg-accent",
               )}
               onClick={() => handleCardClick(card.key)}
@@ -129,10 +133,10 @@ export default function ApprovalComponent() {
                 <Icon className={`size-4 text-${card.color}`} />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground leading-none">
+                <p className="text-muted-foreground text-xs leading-none">
                   {card.label}
                 </p>
-                <p className="text-lg font-semibold leading-tight tabular-nums">
+                <p className="text-lg leading-tight font-semibold tabular-nums">
                   {summary?.[card.key] ?? 0}
                 </p>
               </div>

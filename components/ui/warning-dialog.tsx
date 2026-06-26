@@ -39,7 +39,7 @@ export function WarningDialog({
         </AlertDialogHeader>
         <AlertDialogFooter className="flex! justify-center!">
           <AlertDialogAction
-            className="bg-warning text-warning-foreground hover:bg-warning/90 font-medium"
+            className="bg-warning text-warning-foreground hover:bg-warning/90 font-semibold"
             onClick={(e) => {
               e.preventDefault();
               onConfirm();

@@ -41,7 +41,7 @@ export function ActiveFilterBar({
   if (filters.length === 0) return null;
 
   return (
-    <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto rounded-md bg-muted/30 px-2.5 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible">
+    <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto rounded-md bg-muted/30 px-2 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible">
       <span className="shrink-0 text-muted-foreground text-[0.625rem] sm:text-[0.6875rem]">
         {tc("activeFilter")}:
       </span>
