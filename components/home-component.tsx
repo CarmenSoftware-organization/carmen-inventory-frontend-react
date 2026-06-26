@@ -25,7 +25,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CarmenLogo } from "@/components/icons/carmen-logo-v1";
+import { CarmenLogo } from "@/components/icons/carmen-logo";
 import { cn } from "@/lib/utils";
 
 /* ── Static data ── */
@@ -995,15 +995,7 @@ function Reveal({
 
 function BrandMark({ size = "sm" }: { readonly size?: "xs" | "sm" }) {
   const pxSize = size === "xs" ? 28 : 32;
-  return (
-    <div className="relative">
-      <CarmenLogo
-        size={pxSize}
-        className="rounded-lg shadow-[0_0.5rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_55%)]"
-      />
-      <div className="from-primary to-chart-3 absolute inset-0 -z-10 rounded-lg bg-linear-to-br opacity-50 blur-md" />
-    </div>
-  );
+  return <CarmenLogo size={pxSize} />;
 }
 
 function Eyebrow({

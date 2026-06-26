@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import {
   useForm,
@@ -26,8 +25,8 @@ import { resolveNextPath } from "@/lib/auth/resolve-next-path";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { CarmenLogo } from "@/components/icons/carmen-logo-v1";
 import { cn } from "@/lib/utils";
+import brandingUrl from "./icons/carmen-branding.svg";
 
 const PASSWORD_MIN = 6;
 
@@ -218,9 +217,8 @@ export default function LoginForm() {
             style={{ animation: "fade-up-soft 0.6s ease-out 0.1s both" }}
           >
             {/* Mobile-only branding */}
-            <div className="mb-5 flex items-center gap-2.5 lg:hidden">
+            <div className="mb-5 lg:hidden">
               <BrandMark size="sm" />
-              <BrandText />
             </div>
 
             {/* Glass card */}
@@ -343,7 +341,6 @@ export default function LoginForm() {
             {/* Brand */}
             <div className="flex items-center gap-3">
               <BrandMark size="lg" />
-              <BrandText large />
             </div>
 
             {/* Cinematic headline — compact */}
@@ -423,39 +420,12 @@ export default function LoginForm() {
 /* ── Brand atoms ─────────────────────────────────────── */
 
 function BrandMark({ size = "sm" }: { readonly size?: "sm" | "lg" }) {
-  const pxSize = size === "lg" ? 36 : 32;
   return (
-    <div className="relative">
-      <CarmenLogo
-        size={pxSize}
-        className="rounded-xl shadow-[0_0.5rem_1.5rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_50%)]"
-      />
-      <div className="from-primary to-chart-3 absolute inset-0 -z-10 rounded-xl bg-linear-to-br opacity-60 blur-md" />
-    </div>
-  );
-}
-
-function BrandText({ large = false }: { readonly large?: boolean }) {
-  const t = useTranslations("auth");
-  return (
-    <div>
-      <p
-        className={cn(
-          "font-bold tracking-tight",
-          large ? "text-base" : "text-[0.9375rem]",
-        )}
-      >
-        Carmen
-      </p>
-      <p
-        className={cn(
-          "text-muted-foreground font-medium tracking-widest uppercase",
-          large ? "text-[0.625rem]" : "text-[0.5625rem]",
-        )}
-      >
-        {t("brandTagline")}
-      </p>
-    </div>
+    <img
+      src={brandingUrl}
+      alt="Carmen"
+      className={size === "lg" ? "h-18 w-auto" : "h-7 w-auto"}
+    />
   );
 }
 
