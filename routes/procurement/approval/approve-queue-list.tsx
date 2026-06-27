@@ -8,7 +8,7 @@ import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import type { ApprovalItem } from "@/types/approval";
 import { formatDate } from "@/lib/date-utils";
 import { Badge } from "@/components/ui/badge";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import {
   columnSkeletons,
   indexColumn,
@@ -84,7 +84,7 @@ export default function ApprovalQueueList({
         const href = DOC_TYPE_CONFIG[item.doc_type]?.href(item.id) ?? "#";
         return (
           <Link
-            href={href}
+            to={href}
             className="text-primary text-left text-xs font-semibold hover:underline"
           >
             {item.doc_no}

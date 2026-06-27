@@ -89,7 +89,7 @@ export const router = createBrowserRouter([
               { path: "purchase-request", lazy: () => import("./procurement/purchase-request/page") },
               { path: "purchase-request/new", lazy: () => import("./procurement/purchase-request/new/page") },
               { path: "purchase-request/:id", lazy: () => import("./procurement/purchase-request/[id]/page") },
-              { path: "approval", lazy: () => import("./procurement/approval/page") },
+              { path: "approval", lazy: () => import("./procurement/approval/approval.route") },
             ],
           },
           {
