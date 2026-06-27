@@ -3,6 +3,7 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import AppRoot from "./app-root";
 import RootLayout from "./root-layout";
 import { RouteErrorBoundaryAdapter } from "./module-error-boundary-adapter";
+import { RootErrorBoundary } from "./root-error-boundary";
 
 const ProtectedShell = () => (
   <RequireAuth>
@@ -13,6 +14,7 @@ const ProtectedShell = () => (
 export const router = createBrowserRouter([
   {
     Component: AppRoot,
+    ErrorBoundary: RootErrorBoundary,
     children: [
       { path: "/login", lazy: () => import("./login/page") },
       // Public price-list route — vendor ภายนอกเปิดจากลิงก์ในอีเมล (ไม่ต้อง auth)
@@ -21,10 +23,26 @@ export const router = createBrowserRouter([
         Component: ProtectedShell,
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
-          { path: "dashboard", lazy: () => import("./dashboard/dashboard.route") },
-          { path: "profile", lazy: () => import("./profile/profile.route") },
-          { path: "profile/setting", lazy: () => import("./profile/profile-setting.route") },
-          { path: "notifications", lazy: () => import("./notifications/page") },
+          {
+            path: "dashboard",
+            lazy: () => import("./dashboard/dashboard.route"),
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+          },
+          {
+            path: "profile",
+            lazy: () => import("./profile/profile.route"),
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+          },
+          {
+            path: "profile/setting",
+            lazy: () => import("./profile/profile-setting.route"),
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+          },
+          {
+            path: "notifications",
+            lazy: () => import("./notifications/page"),
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+          },
           {
             path: "config",
             ErrorBoundary: RouteErrorBoundaryAdapter,
