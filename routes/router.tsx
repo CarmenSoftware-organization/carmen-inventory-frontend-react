@@ -63,9 +63,9 @@ export const router = createBrowserRouter([
               { path: "department", lazy: () => import("./config/department/department.route") },
               { path: "department/new", lazy: () => import("./config/department/department-new.route") },
               { path: "department/:id", lazy: () => import("./config/department/department-edit.route") },
-              { path: "location", lazy: () => import("./config/location/page") },
-              { path: "location/new", lazy: () => import("./config/location/new/page") },
-              { path: "location/:id", lazy: () => import("./config/location/[id]/page") },
+              { path: "location", lazy: () => import("./config/location/location.route") },
+              { path: "location/new", lazy: () => import("./config/location/location-new.route") },
+              { path: "location/:id", lazy: () => import("./config/location/location-edit.route") },
             ],
           },
           {

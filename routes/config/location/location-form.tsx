@@ -2,7 +2,7 @@
 import { lazy, Suspense, useRef, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { Boxes, MapPin, Users } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -63,7 +63,7 @@ interface LocationFormProps {
 
 export function LocationForm({ location }: LocationFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<FormMode>(location ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -223,7 +223,7 @@ export function LocationForm({ location }: LocationFormProps) {
         onSuccess: (res) => {
           const { id } = (res as { data: { id: string } }).data;
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          router.replace(`/config/location/${id}`);
+          navigate(`/config/location/${id}`, { replace: true });
           setMode("view");
         },
         onError: (err) => toast.error(err.message),
@@ -239,16 +239,16 @@ export function LocationForm({ location }: LocationFormProps) {
         setSelectedProductIds(new Set(initialProductIds));
         setMode("view");
       } else {
-        router.push("/config/location");
+        navigate("/config/location");
       }
     });
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => router.push("/config/location"));
+      discard.confirm(() => navigate("/config/location"));
     } else {
-      router.push("/config/location");
+      navigate("/config/location");
     }
   };
 
@@ -564,7 +564,7 @@ export function LocationForm({ location }: LocationFormProps) {
               deleteLocation.mutate(location.id, {
                 onSuccess: () => {
                   toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                  router.push("/config/location");
+                  navigate("/config/location");
                 },
                 onError: (err) => toast.error(err.message),
               });

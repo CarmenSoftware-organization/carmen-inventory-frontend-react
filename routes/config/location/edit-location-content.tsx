@@ -1,6 +1,6 @@
 
 import { useLocationById } from "@/hooks/use-location";
-import { LocationForm } from "../_components/location-form";
+import { LocationForm } from "./location-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
