@@ -1,4 +1,4 @@
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import {
   TONE_COLOR,
@@ -59,7 +59,7 @@ export function LandingModuleCard({
           </div>
         </div>
         <Link
-          href={mod.href}
+          to={mod.href}
           className="text-foreground border-foreground hover:bg-foreground hover:text-background inline-flex shrink-0 items-center gap-1 rounded-sm border px-2 py-1 text-[0.625rem] font-semibold transition-colors"
         >
           {t("cta.open")}

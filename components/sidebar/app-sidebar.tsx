@@ -21,7 +21,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <img
             src={brandingUrl}
             alt="Carmen"
-            className="h-10 w-auto group-data-[collapsible=icon]:hidden"
+            className="h-11 w-auto group-data-[collapsible=icon]:hidden"
           />
           <span className="hidden group-data-[collapsible=icon]:block">
             <CarmenLogo size={32} />

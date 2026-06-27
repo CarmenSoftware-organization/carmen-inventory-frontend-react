@@ -17,7 +17,7 @@ import { usePermission } from "@/hooks/use-permission";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RoleDetail } from "@/types/role";
 import type { FormMode } from "@/types/form";
-import { SectionCard, StatTile } from "../../_shared/admin-ui";
+import { SectionCard, StatTile } from "../../shared/admin-ui";
 import { RoleHero } from "./role-form-hero";
 import { PermissionPicker } from "./permission-picker";
 import {

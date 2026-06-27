@@ -9,7 +9,7 @@ export {
   EmptyState,
   FilterChip,
   type Tone,
-} from "../../_shared/admin-ui";
+} from "../../shared/admin-ui";
 
 /* ------------------------------------------------------------------ */
 /* UserAvatar — user-specific (initials + hashed gradient)             */

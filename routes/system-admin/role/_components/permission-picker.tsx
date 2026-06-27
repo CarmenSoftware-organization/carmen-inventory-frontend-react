@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { usePermission } from "@/hooks/use-permission";
 import { cn } from "@/lib/utils";
-import { EmptyState } from "../../_shared/admin-ui";
+import { EmptyState } from "../../shared/admin-ui";
 
 /* ------------------------------------------------------------------ */
 /* Catalog                                                             */
