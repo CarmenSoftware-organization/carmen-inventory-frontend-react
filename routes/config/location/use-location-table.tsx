@@ -129,7 +129,10 @@ export function useLocationTable({
         <span>{row.original.delivery_point?.name ?? "-"}</span>
       ),
       size: 150,
-      meta: { headerTitle: tfl("deliveryPoint"), skeleton: columnSkeletons.text },
+      meta: {
+        headerTitle: tfl("deliveryPoint"),
+        skeleton: columnSkeletons.text,
+      },
     },
   ];
 

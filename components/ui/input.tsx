@@ -77,7 +77,7 @@ function Input({
         className={cn(
           "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-[0.5625rem] tabular-nums transition-opacity",
           showValue ? "opacity-100" : "opacity-0",
-          nearLimit ? "text-amber-600" : "text-muted-foreground/60",
+          nearLimit ? "text-warning" : "text-muted-foreground/60",
           length >= maxLength! && "text-destructive",
         )}
         aria-live="polite"

@@ -63,7 +63,7 @@ const HighlightText = ({
         i % 2 === 1 ? (
           <mark
             key={`${i}-${part}`}
-            className="rounded-sm bg-yellow-200 font-bold"
+            className="rounded-sm bg-warning/30 text-foreground font-bold"
           >
             {part}
           </mark>

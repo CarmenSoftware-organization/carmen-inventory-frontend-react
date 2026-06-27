@@ -46,9 +46,9 @@ export const InventoryTooltip = memo(function InventoryTooltip({
       ? Math.min(Math.round((on_hand_qty / re_stock_qty) * 1000) / 10, 100)
       : 0;
   const needsReorder = !!data && on_hand_qty < re_order_qty;
-  let progressColor = "bg-emerald-500";
-  if (needsReorder) progressColor = "bg-red-500";
-  else if (on_hand_qty < re_stock_qty) progressColor = "bg-amber-500";
+  let progressColor = "bg-success";
+  if (needsReorder) progressColor = "bg-destructive";
+  else if (on_hand_qty < re_stock_qty) progressColor = "bg-warning";
 
   const Icon = icon === "package" ? Package : BoxIcon;
 
