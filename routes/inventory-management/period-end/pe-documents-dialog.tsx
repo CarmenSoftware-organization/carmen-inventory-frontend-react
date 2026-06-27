@@ -1,6 +1,6 @@
 
 import { useMemo } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { FileText, type LucideIcon } from "lucide-react";
 import {
@@ -99,7 +99,7 @@ export function PeDocumentsDialog({
           if (!basePath) return label;
           return (
             <Link
-              href={`${basePath}/${row.original.id}`}
+              to={`${basePath}/${row.original.id}`}
               onClick={() => onOpenChange(false)}
               className="text-primary hover:underline focus-visible:underline"
             >

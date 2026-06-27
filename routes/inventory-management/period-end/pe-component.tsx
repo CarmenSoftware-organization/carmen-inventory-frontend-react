@@ -6,7 +6,7 @@ import {
   PlayCircle,
   Sparkles,
 } from "lucide-react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -117,7 +117,7 @@ export default function PeComponent() {
 
           <CardFooter className="justify-end border-t">
             <Button asChild size="sm">
-              <Link href="/inventory-management/period-end/review">
+              <Link to="/inventory-management/period-end/review">
                 <PlayCircle aria-hidden="true" />
                 {t("startClose")}
               </Link>

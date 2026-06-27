@@ -14,7 +14,7 @@ import {
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ import type { ReviewTransactionKey } from "@/types/period-end";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import type { PhysicalCountLocation } from "@/types/physical-count";
 import { PeDocumentsDialog } from "./pe-documents-dialog";
-import { PcLocationCard } from "../../shared/pc-location-card";
+import { PcLocationCard } from "../shared/pc-location-card";
 
 interface ModuleConfig {
   readonly icon: LucideIcon;
@@ -55,7 +55,7 @@ const MODULE_CONFIG: Record<ReviewTransactionKey, ModuleConfig> = {
 const TRANSACTION_KEYS = Object.keys(MODULE_CONFIG) as ReviewTransactionKey[];
 
 export default function PeReview() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const locale = useLocale();
   const t = useTranslations("inventoryManagement.periodEnd");
   const tc = useTranslations("common");
@@ -91,7 +91,7 @@ export default function PeReview() {
       onSuccess: () => {
         toast.success(t("closeSuccess"));
         setConfirmOpen(false);
-        router.push("/inventory-management/period-end");
+        navigate("/inventory-management/period-end");
       },
       onError: (err) => toast.error(err.message),
     });
@@ -102,7 +102,7 @@ export default function PeReview() {
      own indicators in PcLocationCard. */
   const handleLocationAction = (item: PhysicalCountLocation) => {
     if (item.physical_count_id) {
-      router.push(
+      navigate(
         `/inventory-management/physical-count/${item.physical_count_id}/entry`,
       );
     }
@@ -115,7 +115,7 @@ export default function PeReview() {
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => router.push("/inventory-management/period-end")}
+            onClick={() => navigate("/inventory-management/period-end")}
             aria-label={tc("goBack")}
           >
             <ArrowLeft />

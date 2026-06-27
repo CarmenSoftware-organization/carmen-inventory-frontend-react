@@ -110,8 +110,8 @@ export const router = createBrowserRouter([
               { path: "spot-check/location/:location_id", lazy: () => import("./inventory-management/spot-check/spot-check-by-location.route") },
               { path: "spot-check/:id", lazy: () => import("./inventory-management/spot-check/spot-check-edit.route") },
               { path: "spot-check/:id/review", lazy: () => import("./inventory-management/spot-check/spot-check-review.route") },
-              { path: "period-end", lazy: () => import("./inventory-management/period-end/page") },
-              { path: "period-end/review", lazy: () => import("./inventory-management/period-end/review/page") },
+              { path: "period-end", lazy: () => import("./inventory-management/period-end/period-end.route") },
+              { path: "period-end/review", lazy: () => import("./inventory-management/period-end/period-end-review.route") },
             ],
           },
           {
