@@ -41,7 +41,7 @@ export default tseslint.config(
           patterns: [
             {
               group: ["next", "next/*", "next-intl", "next-intl/*", "nextjs-toploader"],
-              message: "Use lib/compat/* or use-intl instead — this is a Vite SPA.",
+              message: "Use react-router or use-intl instead — this is a Vite SPA.",
             },
           ],
         },
