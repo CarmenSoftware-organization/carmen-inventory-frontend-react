@@ -72,7 +72,7 @@ export const router = createBrowserRouter([
             path: "procurement",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./procurement/page") },
+              { index: true, lazy: () => import("./procurement/procurement.route") },
               { path: "purchase-request-template", lazy: () => import("./procurement/purchase-request-template/purchase-request-template.route") },
               { path: "purchase-request-template/new", lazy: () => import("./procurement/purchase-request-template/purchase-request-template-new.route") },
               { path: "purchase-request-template/:id", lazy: () => import("./procurement/purchase-request-template/purchase-request-template-edit.route") },

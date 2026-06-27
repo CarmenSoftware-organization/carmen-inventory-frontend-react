@@ -1,7 +1,5 @@
 import ProcurementDashboard from "./procurement-dashboard";
 
-export default function ProcurementPage() {
+export function Component() {
   return <ProcurementDashboard />;
 }
-
-export const Component = ProcurementPage;
