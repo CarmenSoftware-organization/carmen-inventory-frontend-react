@@ -1,7 +1,5 @@
 import { NotFoundComponent } from "@/components/not-found-component";
 
-export default function NotFoundPage() {
+export function Component() {
   return <NotFoundComponent />;
 }
-
-export const Component = NotFoundPage;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Bell, BellOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -113,7 +113,7 @@ function NotificationRow({
   return (
     <li>
       {safeLink ? (
-        <Link href={safeLink} className={rowClass}>
+        <Link to={safeLink} className={rowClass}>
           {body}
         </Link>
       ) : (

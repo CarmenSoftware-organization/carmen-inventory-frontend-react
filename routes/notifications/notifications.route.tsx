@@ -1,7 +1,5 @@
 import NotificationsContent from "./notification-content";
 
-export default function NotificationsPage() {
+export function Component() {
   return <NotificationsContent />;
 }
-
-export const Component = NotificationsPage;
