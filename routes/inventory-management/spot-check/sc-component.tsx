@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { ClipboardCheck, History, MapPin, PauseCircle } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ import {
   StatusHero,
   type InvStatusSection,
   type SectionTone,
-} from "../../shared/inv-shared";
+} from "../shared/inv-shared";
 import { ScHistoryCard } from "./sc-history-card";
 import { ScLocationCard } from "./sc-location-card";
 import { Reveal } from "@/components/share/reveal";
@@ -49,7 +49,7 @@ export default function ScComponent() {
   const t = useTranslations("inventoryManagement.spotCheck");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [view, setView] = useState<ViewMode>("locations");
   const [search, setSearch] = useState("");
   const [includeNotCount, setIncludeNotCount] = useState(false);
@@ -173,7 +173,7 @@ export default function ScComponent() {
   ];
 
   const handleStart = (item: SpotCheckLocation) => {
-    router.push(
+    navigate(
       `/inventory-management/spot-check/location/${item.location_id}`,
     );
   };
@@ -182,11 +182,11 @@ export default function ScComponent() {
     _item: SpotCheckLocation,
     latest: SpotCheckLocationLatest,
   ) => {
-    router.push(`/inventory-management/spot-check/${latest.id}`);
+    navigate(`/inventory-management/spot-check/${latest.id}`);
   };
 
   const handleHistoryClick = (sc: SpotCheck) => {
-    router.push(`/inventory-management/spot-check/${sc.id}`);
+    navigate(`/inventory-management/spot-check/${sc.id}`);
   };
 
   const isLocationsView = view === "locations";

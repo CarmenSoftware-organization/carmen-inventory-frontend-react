@@ -3,7 +3,7 @@ import { useTranslations } from "use-intl";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 import { useLocationById } from "@/hooks/use-location";
-import { ScForm } from "../../_components/sc-form";
+import { ScForm } from "./sc-form";
 
 interface ScByLocationContentProps {
   readonly locationId: string;

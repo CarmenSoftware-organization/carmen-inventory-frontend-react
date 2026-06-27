@@ -1,5 +1,5 @@
 
-import { ScEntryComponent } from "../_components/sc-entry-component";
+import { ScEntryComponent } from "./sc-entry-component";
 
 /**
  * หน้า detail ของ Spot Check ตาม id (entry mode)

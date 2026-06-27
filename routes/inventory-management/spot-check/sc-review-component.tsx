@@ -1,12 +1,12 @@
 
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useErrorToast } from "@/hooks/use-error-toast";
 import { useSubmitSpotCheck } from "@/hooks/use-spot-check";
 import { useUnit } from "@/hooks/use-unit";
 import type { SpotCheckReviewData, SpotCheckReviewItem } from "@/types/spot-check";
-import { ReviewComponent } from "../../shared/review-component";
+import { ReviewComponent } from "../shared/review-component";
 
 interface ScReviewComponentProps {
   /** ข้อมูลที่ได้จาก PATCH /spot-check/{id}/review */
@@ -29,7 +29,7 @@ export function ScReviewComponent({
   onBack,
 }: ScReviewComponentProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
-  const router = useRouter();
+  const navigate = useNavigate();
   const errorToast = useErrorToast();
   const submitSc = useSubmitSpotCheck(review.id);
 
@@ -49,7 +49,7 @@ export function ScReviewComponent({
 
   const handleBack = () => {
     if (onBack) onBack();
-    else router.back();
+    else navigate(-1);
   };
 
   const handleSubmit = () => {
@@ -58,7 +58,7 @@ export function ScReviewComponent({
       {
         onSuccess: () => {
           toast.success(t("submitSuccess"));
-          router.push("/inventory-management/spot-check");
+          navigate("/inventory-management/spot-check");
         },
         onError: errorToast,
       },

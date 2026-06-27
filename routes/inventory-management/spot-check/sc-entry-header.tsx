@@ -1,5 +1,5 @@
 
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { ArrowLeft, Calendar, ClipboardCheck, MapPin } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,7 @@ export function ScEntryHeader({
   const t = useTranslations("inventoryManagement.spotCheck");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
-  const router = useRouter();
+  const navigate = useNavigate();
   const { dateFormat } = useProfile();
 
   const status = STATUS_VISUAL[docStatus ?? "pending"] ?? STATUS_VISUAL.pending;
@@ -51,7 +51,7 @@ export function ScEntryHeader({
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => router.push("/inventory-management/spot-check")}
+            onClick={() => navigate("/inventory-management/spot-check")}
             aria-label={tc("goBack")}
             className="mt-0.5 rounded-full"
           >

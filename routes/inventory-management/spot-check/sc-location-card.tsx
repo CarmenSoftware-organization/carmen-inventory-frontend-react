@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -22,7 +22,7 @@ import { useErrorToast } from "@/hooks/use-error-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { useResetSpotCheck } from "@/hooks/use-spot-check";
 import { getLocationTypeLabel } from "@/constant/location-type";
-import { LocationAvatar, LocationCardShell } from "../../shared/inv-shared";
+import { LocationAvatar, LocationCardShell } from "../shared/inv-shared";
 import { ResumeInfoPanel } from "./sc-resume-info-panel";
 import { ScResetDialog } from "./sc-reset-dialog";
 import type {
@@ -88,13 +88,13 @@ export function ScLocationCard({
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex flex-wrap items-center gap-1.5">
               <Link
-                href={`/config/location/${item.location_id}`}
+                to={`/config/location/${item.location_id}`}
                 className="text-foreground text-sm leading-tight font-semibold tracking-tight hover:underline"
               >
                 {item.name || "..."}
               </Link>
               <Link
-                href={`/config/location/${item.location_id}`}
+                to={`/config/location/${item.location_id}`}
                 className="text-muted-foreground hover:text-foreground shrink-0 text-[0.625rem] tracking-wide uppercase transition-colors"
               >
                 {item.code}

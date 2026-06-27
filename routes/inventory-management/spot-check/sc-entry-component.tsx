@@ -1,6 +1,6 @@
 
 import { useDeferredValue, useEffect, useRef, useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { Package, RefreshCw, Save, SendHorizontal } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -22,14 +22,14 @@ import {
 } from "@/hooks/use-spot-check";
 import { useUnit } from "@/hooks/use-unit";
 import { cn } from "@/lib/utils";
-import { CalculatorDialog } from "../../shared/calculator-dialog";
-import { EntryImportDialog } from "../../shared/entry-import-dialog";
+import { CalculatorDialog } from "../shared/calculator-dialog";
+import { EntryImportDialog } from "../shared/entry-import-dialog";
 import { AnimationStyles } from "@/components/share/reveal";
-import { ItemListSkeleton } from "../../shared/inv-shared";
-import { EntryItemRow } from "../../shared/entry-item-row";
+import { ItemListSkeleton } from "../shared/inv-shared";
+import { EntryItemRow } from "../shared/entry-item-row";
 import { ScEntryHeader } from "./sc-entry-header";
 import { ScEntryNotesDialog } from "./sc-entry-notes-dialog";
-import { EntryToolbar } from "../../shared/entry-toolbar";
+import { EntryToolbar } from "../shared/entry-toolbar";
 
 interface ScEntryComponentProps {
   readonly spotCheckId: string;
@@ -42,7 +42,7 @@ const ROW_GAP = 8; // gap-2
 
 export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -254,7 +254,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
       {
         onSuccess: () => {
           toast.success(t("saveSuccess"));
-          router.push("/inventory-management/spot-check");
+          navigate("/inventory-management/spot-check");
         },
         onError: errorToast,
       },
@@ -276,7 +276,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
           const newId =
             (res as { data?: { id?: string } } | undefined)?.data?.id ??
             spotCheckId;
-          router.push(`/inventory-management/spot-check/${newId}/review`);
+          navigate(`/inventory-management/spot-check/${newId}/review`);
         },
         onError: errorToast,
       },

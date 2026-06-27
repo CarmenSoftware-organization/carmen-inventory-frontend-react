@@ -4,8 +4,8 @@ import {
   useSpotCheckById,
   useSpotCheckReview,
 } from "@/hooks/use-spot-check";
-import { ItemListSkeleton } from "../../../shared/inv-shared";
-import { ScReviewComponent } from "../../_components/sc-review-component";
+import { ItemListSkeleton } from "../shared/inv-shared";
+import { ScReviewComponent } from "./sc-review-component";
 
 /**
  * Client wrapper สำหรับ Spot Check Review page

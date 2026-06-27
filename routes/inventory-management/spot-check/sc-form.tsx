@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -75,7 +75,7 @@ export function ScForm({
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const tform = useTranslations("form");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<FormMode>(spotCheck ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -132,7 +132,7 @@ export function ScForm({
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            router.push("/inventory-management/spot-check");
+            navigate("/inventory-management/spot-check");
           },
           onError: (err) => toast.error(err.message),
         },
@@ -143,7 +143,7 @@ export function ScForm({
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const newId = (res as { data?: { id?: string } } | undefined)?.data
             ?.id;
-          router.push(
+          navigate(
             newId
               ? `/inventory-management/spot-check/${newId}`
               : "/inventory-management/spot-check",
@@ -160,16 +160,16 @@ export function ScForm({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        router.push("/inventory-management/spot-check");
+        navigate("/inventory-management/spot-check");
       }
     });
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => router.back());
+      discard.confirm(() => navigate(-1));
     } else {
-      router.back();
+      navigate(-1);
     }
   };
 
@@ -178,7 +178,7 @@ export function ScForm({
     deleteSc.mutate(spotCheck.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        router.push("/inventory-management/spot-check");
+        navigate("/inventory-management/spot-check");
       },
       onError: (err) => toast.error(err.message),
     });
