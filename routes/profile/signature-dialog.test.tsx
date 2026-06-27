@@ -25,7 +25,7 @@ vi.mock("react-signature-canvas", async () => {
   return { default: FakeSignatureCanvas };
 });
 
-import { SignatureDialog } from "../signature-dialog";
+import { SignatureDialog } from "./signature-dialog";
 import en from "@/messages/en.json";
 
 function renderDialog(

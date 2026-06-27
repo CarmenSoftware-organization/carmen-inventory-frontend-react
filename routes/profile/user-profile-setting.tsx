@@ -1,6 +1,6 @@
 
 import { useRef, useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -58,7 +58,7 @@ import {
 } from "@/lib/image-upload";
 
 export default function UserProfileSetting() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const t = useTranslations("profile");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
@@ -192,7 +192,7 @@ export default function UserProfileSetting() {
     values: defaultValues,
   });
 
-  const handleBack = () => router.push("/profile");
+  const handleBack = () => navigate("/profile");
 
   const onSubmit = (values: ProfileFormValues) => {
     updateProfile.mutate(values, {

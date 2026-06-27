@@ -1,5 +1,5 @@
 
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import {
   AtSign,
   Building2,
@@ -121,7 +121,7 @@ export default function UserProfileDetails() {
             asChild
             className="h-11 w-full sm:h-9 sm:w-auto"
           >
-            <Link href="/profile/setting">
+            <Link to="/profile/setting">
               <Settings className="size-3.5" aria-hidden="true" />
               {t("editProfile")}
             </Link>

@@ -22,8 +22,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: "dashboard", lazy: () => import("./dashboard/page") },
-          { path: "profile", lazy: () => import("./profile/page") },
-          { path: "profile/setting", lazy: () => import("./profile/setting/page") },
+          { path: "profile", lazy: () => import("./profile/profile.route") },
+          { path: "profile/setting", lazy: () => import("./profile/profile-setting.route") },
           { path: "notifications", lazy: () => import("./notifications/page") },
           {
             path: "config",
