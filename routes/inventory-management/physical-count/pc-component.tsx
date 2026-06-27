@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import {
   Calendar,
   CalendarRange,
@@ -44,9 +44,9 @@ import {
   StatusHero,
   type InvStatusSection,
   type SectionTone,
-} from "../../shared/inv-shared";
+} from "../shared/inv-shared";
 import { Reveal } from "@/components/share/reveal";
-import { PcLocationCard } from "../../shared/pc-location-card";
+import { PcLocationCard } from "../shared/pc-location-card";
 
 type StatusKey = PhysicalCountStatus;
 
@@ -137,7 +137,7 @@ export default function PcComponent() {
   const t = useTranslations("inventoryManagement.physicalCount");
   const tc = useTranslations("common");
   const { dateFormat } = useLocale();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [includeNotCount, setIncludeNotCount] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | StatusKey>("all");
@@ -228,7 +228,7 @@ export default function PcComponent() {
     }
 
     if (item.physical_count_id) {
-      router.push(
+      navigate(
         `/inventory-management/physical-count/${item.physical_count_id}/entry`,
       );
       return;
@@ -240,7 +240,7 @@ export default function PcComponent() {
       {
         onSuccess: (res) => {
           const { id } = (res as { data: { id: string } }).data;
-          router.push(`/inventory-management/physical-count/${id}/entry`);
+          navigate(`/inventory-management/physical-count/${id}/entry`);
         },
         onError: errorToast,
       },

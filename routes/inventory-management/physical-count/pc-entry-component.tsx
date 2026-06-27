@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import {
   Save,
   SendHorizontal,
@@ -33,14 +33,14 @@ import {
 } from "@/hooks/use-physical-count";
 import { cn } from "@/lib/utils";
 import SearchInput from "@/components/search-input";
-import { CalculatorDialog } from "../../shared/calculator-dialog";
-import { EntryImportDialog } from "../../shared/entry-import-dialog";
+import { CalculatorDialog } from "../shared/calculator-dialog";
+import { EntryImportDialog } from "../shared/entry-import-dialog";
 import { AnimationStyles } from "@/components/share/reveal";
-import { ItemListSkeleton } from "../../shared/inv-shared";
-import { EntryItemRow } from "../../shared/entry-item-row";
+import { ItemListSkeleton } from "../shared/inv-shared";
+import { EntryItemRow } from "../shared/entry-item-row";
 import { PcEntryHeader } from "./pc-entry-header";
 import { PcEntryNotesDialog } from "./pc-entry-notes-dialog";
-import { EntryToolbar } from "../../shared/entry-toolbar";
+import { EntryToolbar } from "../shared/entry-toolbar";
 
 interface PcEntryComponentProps {
   readonly physicalCountId: string;
@@ -57,7 +57,7 @@ const ROW_GAP = 8; // gap-2
  */
 export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [countFilter, setCountFilter] = useState<CountFilter>("all");
@@ -267,7 +267,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
           const newId =
             (res as { data?: { id?: string } } | undefined)?.data?.id ??
             physicalCountId;
-          router.push(`/inventory-management/physical-count/${newId}/review`);
+          navigate(`/inventory-management/physical-count/${newId}/review`);
         },
         onError: errorToast,
       },

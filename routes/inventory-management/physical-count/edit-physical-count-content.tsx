@@ -1,7 +1,7 @@
 
 import { useTranslations } from "use-intl";
 import { usePhysicalCountById } from "@/hooks/use-physical-count";
-import { PcForm } from "../_components/pc-form";
+import { PcForm } from "./pc-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 import type { PhysicalCount } from "@/types/physical-count";

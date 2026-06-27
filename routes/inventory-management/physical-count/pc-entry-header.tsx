@@ -1,5 +1,5 @@
 
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import {
   ArrowLeft,
   Calendar,
@@ -35,7 +35,7 @@ export function PcEntryHeader({
 }: PcEntryHeaderProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const tc = useTranslations("common");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return (
     <div className="border-border/60 bg-card mb-3 rounded-xl border p-3">
@@ -44,7 +44,7 @@ export function PcEntryHeader({
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => router.push("/inventory-management/physical-count")}
+            onClick={() => navigate("/inventory-management/physical-count")}
             aria-label={tc("goBack")}
             className="mt-0.5 rounded-full"
           >

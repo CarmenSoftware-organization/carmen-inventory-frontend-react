@@ -1,5 +1,5 @@
 
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useErrorToast } from "@/hooks/use-error-toast";
@@ -8,7 +8,7 @@ import type {
   PhysicalCountData,
   PhysicalCountDetail,
 } from "@/types/physical-count";
-import { ReviewComponent } from "../../shared/review-component";
+import { ReviewComponent } from "../shared/review-component";
 
 interface PcReviewComponentProps {
   readonly physicalCountReview: PhysicalCountData;
@@ -18,7 +18,7 @@ export function PcReviewComponent({
   physicalCountReview,
 }: PcReviewComponentProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
-  const router = useRouter();
+  const navigate = useNavigate();
   const errorToast = useErrorToast();
   const submitPhysicalCount = useSubmitPhysicalCount(physicalCountReview.id);
 
@@ -47,7 +47,7 @@ export function PcReviewComponent({
       {
         onSuccess: () => {
           toast.success(t("reviewSubmitSuccess"));
-          router.push("/inventory-management/physical-count");
+          navigate("/inventory-management/physical-count");
         },
         onError: errorToast,
       },
@@ -68,7 +68,7 @@ export function PcReviewComponent({
       getActualQty={(d) => d.actual_qty ?? null}
       getVariance={(d) => d.diff_qty}
       getUnitName={(d) => d.inventory_unit_name}
-      onBack={() => router.back()}
+      onBack={() => navigate(-1)}
       onSubmit={handleSubmit}
       isSubmitting={submitPhysicalCount.isPending}
       submitLabel={t("submitPhysicalCount")}

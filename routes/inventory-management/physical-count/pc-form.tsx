@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { FormToolbar } from "@/components/ui/form-toolbar";
@@ -38,7 +38,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<FormMode>(physicalCount ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -87,7 +87,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
       createPc.mutate(payload, {
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          router.push("/inventory-management/physical-count");
+          navigate("/inventory-management/physical-count");
         },
         onError: errorToast,
       });
@@ -100,7 +100,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
         form.reset(defaultValues);
         setMode("view");
       } else {
-        router.push("/inventory-management/physical-count");
+        navigate("/inventory-management/physical-count");
       }
     });
   };
@@ -108,10 +108,10 @@ export function PcForm({ physicalCount }: PcFormProps) {
   const handleBack = () => {
     if (isEdit || isAdd) {
       discard.confirm(() =>
-        router.push("/inventory-management/physical-count"),
+        navigate("/inventory-management/physical-count"),
       );
     } else {
-      router.push("/inventory-management/physical-count");
+      navigate("/inventory-management/physical-count");
     }
   };
 
@@ -161,7 +161,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
             deletePc.mutate(physicalCount.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                router.push("/inventory-management/physical-count");
+                navigate("/inventory-management/physical-count");
               },
               onError: errorToast,
             });
