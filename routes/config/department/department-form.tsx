@@ -2,7 +2,7 @@
 import { lazy, Suspense, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import {
   Building2,
   ShieldCheck,
@@ -55,7 +55,7 @@ interface DepartmentFormProps {
 }
 
 export function DepartmentForm({ department }: DepartmentFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<FormMode>(department ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -188,7 +188,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         onSuccess: (res) => {
           const { id } = (res as { data: { id: string } }).data;
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          router.replace(`/config/department/${id}`);
+          navigate(`/config/department/${id}`, { replace: true });
           setMode("view");
         },
         onError: (err) => toast.error(err.message),
@@ -213,16 +213,16 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         setHodUserTargetKeys(department.hod_users.map((u) => u.user_id));
         setMode("view");
       } else {
-        router.push("/config/department");
+        navigate("/config/department");
       }
     });
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => router.push("/config/department"));
+      discard.confirm(() => navigate("/config/department"));
     } else {
-      router.push("/config/department");
+      navigate("/config/department");
     }
   };
 
@@ -408,7 +408,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
               deleteDepartment.mutate(department.id, {
                 onSuccess: () => {
                   toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                  router.push("/config/department");
+                  navigate("/config/department");
                 },
                 onError: (err) => toast.error(err.message),
               });

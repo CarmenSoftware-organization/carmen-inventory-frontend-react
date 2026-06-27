@@ -1,6 +1,6 @@
 
 import { useDepartmentById } from "@/hooks/use-department";
-import { DepartmentForm } from "../_components/department-form";
+import { DepartmentForm } from "./department-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
