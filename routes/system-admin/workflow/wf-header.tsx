@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router";
 import { useNavigate } from "react-router";
@@ -60,7 +59,7 @@ export function WfHeader({
   return (
     <>
       <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-1.5">
+        <div className="flex min-w-0 items-center gap-1.5">
           <Button asChild variant="ghost" size="icon-sm" className="mt-0.5">
             <Link to="/system-admin/workflow" aria-label={tc("goBack")}>
               <ArrowLeft className="size-3.5" />
@@ -87,38 +86,6 @@ export function WfHeader({
                     {typeLabels[workflow.workflow_type] ??
                       workflow.workflow_type}
                   </span>
-                  <Separator orientation="vertical" className="mx-0.5 h-3.5" />
-                  <span className="text-muted-foreground text-xs">
-                    {workflow.id.slice(0, 8)}
-                  </span>
-                  {updatedRelative && (
-                    <>
-                      <Separator
-                        orientation="vertical"
-                        className="mx-0.5 h-3.5"
-                      />
-                      <Tooltip delayDuration={150}>
-                        <TooltipTrigger asChild>
-                          <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                            <Clock className="size-3" aria-hidden="true" />
-                            {updatedRelative}
-                            {updated?.name && (
-                              <>
-                                <span aria-hidden="true">·</span>
-                                <span className="max-w-48 truncate">
-                                  {updated.name}
-                                </span>
-                              </>
-                            )}
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="text-xs">
-                          {updatedAbsolute}
-                          {updated?.name && ` · ${updated.name}`}
-                        </TooltipContent>
-                      </Tooltip>
-                    </>
-                  )}
                 </>
               )}
             </div>

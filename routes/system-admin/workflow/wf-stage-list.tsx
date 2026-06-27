@@ -169,6 +169,7 @@ export function WfStageList({
                   userCount={userCount}
                   isHod={isHod}
                   hasWarning={hasWarning}
+                  dragDisabled={isDisabled}
                   onClick={() => onSelect(index)}
                 />
               );

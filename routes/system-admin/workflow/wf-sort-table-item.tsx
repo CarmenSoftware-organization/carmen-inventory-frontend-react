@@ -26,6 +26,8 @@ interface SortableStageItemProps {
   readonly userCount?: number;
   readonly isHod?: boolean;
   readonly hasWarning?: boolean;
+  /** Disable dragging outside edit mode (view mode) */
+  readonly dragDisabled?: boolean;
 }
 
 export default function SortableStageItem({
@@ -39,9 +41,10 @@ export default function SortableStageItem({
   userCount = 0,
   isHod = false,
   hasWarning = false,
+  dragDisabled = false,
 }: SortableStageItemProps) {
   const t = useTranslations("systemAdmin.workflow");
-  const isDragDisabled = isFirst || isLast;
+  const isDragDisabled = isFirst || isLast || dragDisabled;
   const {
     attributes,
     listeners,

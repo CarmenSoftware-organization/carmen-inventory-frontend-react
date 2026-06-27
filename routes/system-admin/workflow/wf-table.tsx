@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { WorkflowDto } from "@/types/workflows";
-import { WF_TYPE_CONFIG, getWorkflowTypeLabels } from "@/constant/workflow";
+import { WF_TYPE_VARIANT, getWorkflowTypeLabels } from "@/constant/workflow";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { formatRelativeTime } from "@/lib/relative-time";
@@ -101,16 +101,12 @@ export function useWfTable({
       ),
       cell: ({ row }) => {
         const wfType = row.getValue("workflow_type") as string;
-        const config = WF_TYPE_CONFIG[wfType];
         const inactive = !row.original.is_active;
         return (
           <Badge
             size="sm"
-            className={cn(
-              config?.className ?? "",
-              "text-xs",
-              inactive && "opacity-60",
-            )}
+            variant={WF_TYPE_VARIANT[wfType]}
+            className={cn(inactive && "opacity-60")}
           >
             {typeLabels[wfType] ?? wfType}
           </Badge>

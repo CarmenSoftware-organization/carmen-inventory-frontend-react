@@ -12,6 +12,7 @@ import {
   type NodeProps,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { useEffect, useState } from "react";
 import {
   CheckCircle2,
   Clock,
@@ -42,6 +43,8 @@ interface WfDiagramProps {
   readonly onMoveStage?: (from: number, to: number) => void;
   readonly className?: string;
   readonly headerActions?: React.ReactNode;
+  /** Node flow direction — "vertical" stacks stages top→bottom (default horizontal) */
+  readonly orientation?: "horizontal" | "vertical";
 }
 
 interface StageNodeData extends Record<string, unknown> {
@@ -54,6 +57,7 @@ interface StageNodeData extends Record<string, unknown> {
   readonly isHod: boolean;
   readonly slaLabel: string;
   readonly canDrag: boolean;
+  readonly isVertical: boolean;
 }
 
 function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
@@ -67,6 +71,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
     isHod,
     slaLabel,
     canDrag,
+    isVertical,
   } = data;
 
   const containerClass = isLast
@@ -103,14 +108,14 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
       {!isFirst && (
         <Handle
           type="target"
-          position={Position.Left}
+          position={isVertical ? Position.Top : Position.Left}
           className="border-background! bg-muted-foreground! size-2! border-2! opacity-0! transition-opacity group-hover:opacity-100!"
         />
       )}
       {!isLast && (
         <Handle
           type="source"
-          position={Position.Right}
+          position={isVertical ? Position.Bottom : Position.Right}
           className="border-background! bg-muted-foreground! size-2! border-2! opacity-0! transition-opacity group-hover:opacity-100!"
         />
       )}
@@ -164,12 +169,32 @@ const nodeTypes = { stage: StageNode };
 
 const HORIZONTAL_GAP = 240;
 const VERTICAL_BASE = 80;
+const VERTICAL_GAP = 96;
+const LG_BREAKPOINT = 1024;
+
+/** True when viewport ≥ Tailwind's `lg` (1024px) — matches the wf-detail grid. */
+function useIsLargeScreen() {
+  const [isLarge, setIsLarge] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia(`(min-width: ${LG_BREAKPOINT}px)`).matches,
+  );
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${LG_BREAKPOINT}px)`);
+    const onChange = () => setIsLarge(mql.matches);
+    mql.addEventListener("change", onChange);
+    onChange();
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  return isLarge;
+}
 
 function buildGraph(
   stages: Stage[],
   routingRules: RoutingRule[],
   selectedIndex: number | undefined,
   draggable: boolean,
+  vertical: boolean,
 ): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = stages.map((stage, index) => {
     const isFirst = index === 0;
@@ -186,7 +211,9 @@ function buildGraph(
     return {
       id: `stage-${index}`,
       type: "stage",
-      position: { x: index * HORIZONTAL_GAP, y: VERTICAL_BASE },
+      position: vertical
+        ? { x: 0, y: index * VERTICAL_GAP }
+        : { x: index * HORIZONTAL_GAP, y: VERTICAL_BASE },
       data: {
         stage,
         index,
@@ -197,6 +224,7 @@ function buildGraph(
         isHod,
         slaLabel,
         canDrag,
+        isVertical: vertical,
       } satisfies StageNodeData,
       draggable: canDrag,
       selectable: true,
@@ -265,10 +293,24 @@ export default function WfDiagram({
   onMoveStage,
   className,
   headerActions,
+  orientation = "horizontal",
 }: WfDiagramProps) {
   const t = useTranslations("systemAdmin.workflow");
 
-  const { nodes, edges } = buildGraph(stages, routingRules, selectedIndex, !!onMoveStage);
+  const isLargeScreen = useIsLargeScreen();
+  // Responsive: caller asks for vertical (desktop left-rail layout); on smaller
+  // screens the diagram is full-width above the form, so render horizontal.
+  const vertical = orientation === "vertical" && isLargeScreen;
+  // Drag (node reorder + canvas pan) is allowed only when editable — i.e. an
+  // onMoveStage handler is supplied (edit mode). View mode is fully static.
+  const editable = !!onMoveStage;
+  const { nodes, edges } = buildGraph(
+    stages,
+    routingRules,
+    selectedIndex,
+    editable,
+    vertical,
+  );
 
   if (!stages || stages.length === 0) return null;
 
@@ -312,9 +354,15 @@ export default function WfDiagram({
         )}
       </div>
 
-      <div className="bg-muted/20 h-56 w-full overflow-hidden rounded border">
+      <div
+        className={cn(
+          "bg-muted/20 w-full overflow-hidden rounded border",
+          vertical ? "h-[32rem]" : "h-56",
+        )}
+      >
         <ReactFlowProvider>
           <ReactFlow
+            key={vertical ? "vertical" : "horizontal"}
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
@@ -323,7 +371,8 @@ export default function WfDiagram({
             minZoom={0.4}
             maxZoom={1.5}
             proOptions={{ hideAttribution: true }}
-            nodesDraggable={!!onMoveStage}
+            nodesDraggable={editable}
+            panOnDrag={editable}
             nodesConnectable={false}
             edgesFocusable={false}
             onNodeClick={(_event, node) => {
@@ -337,7 +386,11 @@ export default function WfDiagram({
               if (data.isFirst || data.isLast) return;
 
               const lastMovableIndex = stages.length - 2;
-              const rawIndex = Math.round(node.position.x / HORIZONTAL_GAP);
+              const rawIndex = Math.round(
+                vertical
+                  ? node.position.y / VERTICAL_GAP
+                  : node.position.x / HORIZONTAL_GAP,
+              );
               const toIndex = Math.min(Math.max(rawIndex, 1), lastMovableIndex);
 
               if (toIndex !== fromIndex) {
