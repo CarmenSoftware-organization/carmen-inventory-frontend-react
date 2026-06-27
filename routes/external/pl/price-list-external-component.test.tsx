@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { UseFormReturn } from "react-hook-form";
-import PriceListExternalComponent from "../price-list-external-component";
+import PriceListExternalComponent from "./price-list-external-component";
 import {
   usePriceListExternal,
   useUpdatePriceListExternal,
@@ -30,10 +30,10 @@ vi.mock("sonner", () => ({
 }));
 
 // header ไม่เกี่ยวกับ flow ที่เทส
-vi.mock("../price-list-external-header", () => ({ default: () => <div /> }));
+vi.mock("./price-list-external-header", () => ({ default: () => <div /> }));
 
 // table จำลอง: register input จริงเพื่อทำให้ form dirty ได้ + ปุ่ม save/submit
-vi.mock("../price-list-external-product-table", () => ({
+vi.mock("./price-list-external-product-table", () => ({
   default: ({
     form,
     onSave,
