@@ -6,7 +6,7 @@ import {
   ExternalLink,
   SquareArrowOutUpRight,
 } from "lucide-react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import {
@@ -83,7 +83,7 @@ const NotificationItem = ({
     >
       {safeLink ? (
         <Link
-          href={safeLink}
+          to={safeLink}
           onClick={() => {
             onMarkAsRead(notification.id);
             onNavigate();
@@ -191,7 +191,7 @@ export default function Notification() {
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <Link
-                    href="/notifications"
+                    to="/notifications"
                     aria-label={t("viewAllTooltip")}
                     onClick={() => setPopoverOpen(false)}
                   >
@@ -297,7 +297,7 @@ export function NotificationDetailDialog({
         <DialogFooter>
           {externalHref && (
             <Button asChild variant="outline" size="sm">
-              <Link href={externalHref} onClick={onClose}>
+              <Link to={externalHref} onClick={onClose}>
                 <ExternalLink className="size-3.5" aria-hidden="true" />
                 {t("open")}
               </Link>

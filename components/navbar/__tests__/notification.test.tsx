@@ -5,16 +5,21 @@ import {
   cleanup,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createElement, type ReactElement, type ReactNode } from "react";
+import { type ReactElement } from "react";
+import { MemoryRouter } from "react-router";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Notification from "../notification";
 import type { Notification as NotificationType } from "@/types/notification";
 
-// Wrap with TooltipProvider — Notification now uses <Tooltip> for the "View
-// all" button. Production app wraps providers in components/providers.tsx;
-// tests need a local wrapper.
+// Wrap with MemoryRouter (Notification renders react-router <Link>) +
+// TooltipProvider (the "View all" button uses <Tooltip>). Production wraps
+// these in providers.tsx / the data router; tests need a local wrapper.
 const render = (ui: ReactElement) =>
-  rtlRender(<TooltipProvider>{ui}</TooltipProvider>);
+  rtlRender(
+    <MemoryRouter>
+      <TooltipProvider>{ui}</TooltipProvider>
+    </MemoryRouter>,
+  );
 
 // Mock hooks
 const mockMarkAsRead = vi.fn();
@@ -52,20 +57,6 @@ vi.mock("@/hooks/use-notification", () => ({
 
 vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => ({ userId: "user-1", buCode: "BU001" }),
-}));
-
-// Mock compat link
-vi.mock("@/lib/compat/link", () => ({
-  default: ({
-    children,
-    href,
-    ...props
-  }: {
-    children: ReactNode;
-    href: string;
-    className?: string;
-    onClick?: (e: React.MouseEvent) => void;
-  }) => createElement("a", { href, ...props }, children),
 }));
 
 function makeNotification(

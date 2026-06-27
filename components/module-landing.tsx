@@ -1,5 +1,5 @@
 
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { getModule } from "@/constant/module-list";
@@ -112,7 +112,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
           }
 
           return (
-            <Link key={sub.path} href={sub.path} className={cardClass}>
+            <Link key={sub.path} to={sub.path} className={cardClass}>
               {cardContent}
             </Link>
           );

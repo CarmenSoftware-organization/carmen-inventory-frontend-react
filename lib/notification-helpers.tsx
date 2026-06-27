@@ -1,4 +1,4 @@
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import type {
   Notification as NotificationType,
   NotificationEntityType,
@@ -113,7 +113,7 @@ export function formatMessage(message: string | null | undefined) {
       return (
         <Link
           key={safeHref}
-          href={safeHref}
+          to={safeHref}
           className="text-primary hover:text-primary/80 font-medium underline underline-offset-2"
           onClick={(e) => e.stopPropagation()}
         >

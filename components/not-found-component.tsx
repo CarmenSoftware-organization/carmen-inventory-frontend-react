@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "use-intl";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { CarmenLogo } from "./icons/carmen-logo";
 
@@ -38,7 +38,7 @@ export function NotFoundComponent() {
 
           <div className="mt-6">
             <Button asChild size="sm">
-              <Link href="/dashboard">
+              <Link to="/dashboard">
                 <ArrowLeft />
                 {t("backToDashboard")}
               </Link>

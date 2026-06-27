@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { ChevronDown, KeyRound, LogOut, User } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
@@ -178,7 +178,7 @@ export function UserProfile() {
           asChild
           className="cursor-pointer gap-2 rounded-md px-2 py-2 text-sm"
         >
-          <Link href="/profile">
+          <Link to="/profile">
             <User className="size-4" />
             {t("profile")}
           </Link>

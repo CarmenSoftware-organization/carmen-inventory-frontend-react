@@ -1,6 +1,6 @@
 
 import { Fragment } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { usePathname } from "@/lib/compat/navigation";
 import { useTranslations } from "use-intl";
 import {
@@ -93,7 +93,7 @@ export default function PathBreadcrumb() {
                   <BreadcrumbPage>{label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link href={href}>{label}</Link>
+                    <Link to={href}>{label}</Link>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>

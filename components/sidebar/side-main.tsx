@@ -1,6 +1,6 @@
 
 import { Fragment } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { usePathname } from "@/lib/compat/navigation";
 import { useTranslations } from "use-intl";
 import { Sparkles } from "lucide-react";
@@ -45,7 +45,7 @@ export function SideMain() {
     <>
       {/* Module header — links to the module landing */}
       <Link
-        href={activeModule.path}
+        to={activeModule.path}
         aria-label={t(activeModule.name)}
         className={cn(
           "relative mx-2 mt-2 mb-1 flex cursor-pointer items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5",
@@ -127,7 +127,7 @@ export function SideMain() {
                           </span>
                         </button>
                       ) : (
-                        <Link href={sub.path}>
+                        <Link to={sub.path}>
                           <span className="shrink-0">
                             <SubTile
                               name={sub.name}

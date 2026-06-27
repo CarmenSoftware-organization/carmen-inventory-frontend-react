@@ -6,7 +6,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { SideMain } from "./side-main";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { CarmenLogo } from "../icons/carmen-logo";
 import brandingUrl from "../icons/carmen-branding.svg";
 
@@ -15,7 +15,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="p-4 group-data-[collapsible=icon]:px-0">
         <Link
-          href="/"
+          to="/"
           className="flex cursor-pointer items-center gap-2 group-data-[collapsible=icon]:justify-center"
         >
           <img

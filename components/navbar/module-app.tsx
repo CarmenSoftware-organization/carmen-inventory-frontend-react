@@ -1,4 +1,4 @@
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useTranslations } from "use-intl";
 import { useEffect, useState } from "react";
 
@@ -141,7 +141,7 @@ const LauncherTile = ({
   }
 
   return (
-    <Link href={path} onClick={onNavigate} className={tileClass}>
+    <Link to={path} onClick={onNavigate} className={tileClass}>
       {content}
     </Link>
   );
