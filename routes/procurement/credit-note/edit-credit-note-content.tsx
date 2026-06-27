@@ -1,6 +1,6 @@
 
 import { useCreditNoteById } from "@/hooks/use-credit-note";
-import { CnForm } from "../_components/cn-form";
+import { CnForm } from "./cn-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 

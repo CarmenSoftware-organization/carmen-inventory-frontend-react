@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
@@ -56,7 +56,7 @@ export default function CnComponent() {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<CreditNote | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -169,7 +169,7 @@ export default function CnComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (cn) => router.push(`/procurement/credit-note/${cn.id}`),
+    onEdit: (cn) => navigate(`/procurement/credit-note/${cn.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -188,7 +188,7 @@ export default function CnComponent() {
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => router.push("/procurement/credit-note/new")}
+            onAdd={() => navigate("/procurement/credit-note/new")}
             addLabel={t("add")}
           />
         </div>
@@ -332,7 +332,7 @@ export default function CnComponent() {
             <CnCardList
               items={creditNotes}
               isLoading={grid.isLoading}
-              onEdit={(cn) => router.push(`/procurement/credit-note/${cn.id}`)}
+              onEdit={(cn) => navigate(`/procurement/credit-note/${cn.id}`)}
             />
             {grid.hasMore && (
               <div ref={grid.sentinelRef} className="flex justify-center py-4">
@@ -364,7 +364,7 @@ export default function CnComponent() {
                   items={creditNotes}
                   isLoading={isLoading}
                   onEdit={(cn) =>
-                    router.push(`/procurement/credit-note/${cn.id}`)
+                    navigate(`/procurement/credit-note/${cn.id}`)
                   }
                 />
               </div>

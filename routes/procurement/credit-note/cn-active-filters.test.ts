@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useCnActiveFilters } from "../cn-active-filters";
+import { useCnActiveFilters } from "./cn-active-filters";
 
 vi.mock("use-intl", () => ({
   useTranslations: () => (key: string) => key,
