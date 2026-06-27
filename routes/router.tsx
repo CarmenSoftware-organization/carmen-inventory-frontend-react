@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
         Component: ProtectedShell,
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
-          { path: "dashboard", lazy: () => import("./dashboard/page") },
+          { path: "dashboard", lazy: () => import("./dashboard/dashboard.route") },
           { path: "profile", lazy: () => import("./profile/profile.route") },
           { path: "profile/setting", lazy: () => import("./profile/profile-setting.route") },
           { path: "notifications", lazy: () => import("./notifications/page") },
