@@ -1,7 +1,5 @@
 import ReportLanding from "./report-landing";
 
-export default function ReportPage() {
+export function Component() {
   return <ReportLanding />;
 }
-
-export const Component = ReportPage;

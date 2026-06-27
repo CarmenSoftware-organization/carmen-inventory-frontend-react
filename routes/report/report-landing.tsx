@@ -1,6 +1,6 @@
 
 import { ArrowRight, Clock, Star } from "lucide-react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { EyeBrow } from "@/components/ui/eye-brow";
@@ -243,7 +243,7 @@ function Chapter({
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Button asChild size="sm" className="gap-2">
-              <Link href={href}>
+              <Link to={href}>
                 {t(ctaKey)}
                 <ArrowRight className="size-3.5" aria-hidden="true" />
               </Link>
