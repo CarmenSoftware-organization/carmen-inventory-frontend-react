@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useTranslations } from "use-intl";
 import { FileText, Warehouse } from "lucide-react";
 import {
@@ -73,7 +73,7 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
           if (!row.original.location_id) return <span>{name}</span>;
           return (
             <Link
-              href={`/config/location/${row.original.location_id}`}
+              to={`/config/location/${row.original.location_id}`}
               onClick={() => onOpenChange(false)}
               className="hover:text-primary focus-visible:text-primary inline-flex items-center hover:underline focus-visible:underline"
             >

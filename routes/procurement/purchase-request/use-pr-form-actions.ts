@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -51,7 +51,7 @@ export function usePrFormActions({
 }: UsePrFormActionsParams) {
   const t = useTranslations("procurement.purchaseRequest");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const isEdit = mode === "edit";
   const isAdd = mode === "add";
@@ -99,7 +99,7 @@ export function usePrFormActions({
 
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    router.push("/procurement/purchase-request");
+    navigate("/procurement/purchase-request");
   };
 
   const toSubmitStageDetails = (
@@ -161,7 +161,7 @@ export function usePrFormActions({
           onSuccess: (data) => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             if (data?.data?.id) {
-              router.replace(`/procurement/purchase-request/${data.data.id}`);
+              navigate(`/procurement/purchase-request/${data.data.id}`, { replace: true });
             }
             setMode("view");
           },
@@ -177,16 +177,16 @@ export function usePrFormActions({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        router.push("/procurement/purchase-request");
+        navigate("/procurement/purchase-request");
       }
     });
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => router.push("/procurement/purchase-request"));
+      discard.confirm(() => navigate("/procurement/purchase-request"));
     } else {
-      router.push("/procurement/purchase-request");
+      navigate("/procurement/purchase-request");
     }
   };
 

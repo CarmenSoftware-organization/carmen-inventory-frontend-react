@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { Check, Columns3, LayoutGrid, LayoutList, X, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -63,7 +63,7 @@ export default function PurchaseRequestComponent() {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
   const { defaultCurrencyCode } = useProfile();
   const [deleteTarget, setDeleteTarget] = useState<PurchaseRequest | null>(
     null,
@@ -214,7 +214,7 @@ export default function PurchaseRequestComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (item) => router.push(`/procurement/purchase-request/${item.id}`),
+    onEdit: (item) => navigate(`/procurement/purchase-request/${item.id}`),
     onDelete: setDeleteTarget,
     onApprove: setApproveTarget,
     onReject: setRejectTarget,
@@ -394,7 +394,7 @@ export default function PurchaseRequestComponent() {
               items={items}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
               onEdit={(item) =>
-                router.push(`/procurement/purchase-request/${item.id}`)
+                navigate(`/procurement/purchase-request/${item.id}`)
               }
               onApprove={setApproveTarget}
               onReject={setRejectTarget}

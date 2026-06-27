@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   ArrowLeft,
@@ -32,7 +32,7 @@ interface CreatePRDialogProps {
 export function CreatePRDialog({ open, onOpenChange }: CreatePRDialogProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [view, setView] = useState<"choice" | "template">("choice");
   const [searchTerm, setSearchTerm] = useState("");
   const { data: templates, isLoading } = usePurchaseRequestTemplates(
@@ -62,12 +62,12 @@ export function CreatePRDialog({ open, onOpenChange }: CreatePRDialogProps) {
 
   const handleBlankPR = () => {
     handleOpenChange(false);
-    router.push("/procurement/purchase-request/new");
+    navigate("/procurement/purchase-request/new");
   };
 
   const handleSelectTemplate = (templateId: string) => {
     handleOpenChange(false);
-    router.push(`/procurement/purchase-request/new?template_id=${templateId}`);
+    navigate(`/procurement/purchase-request/new?template_id=${templateId}`);
   };
 
   const handleBackToChoice = () => {

@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { WarningDialog } from "@/components/ui/warning-dialog";
@@ -56,7 +56,7 @@ export function PrFormDialogs({
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const actionDialogConfig = {
     reject: {
@@ -82,7 +82,7 @@ export function PrFormDialogs({
             deletePr.mutate(purchaseRequest.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                router.push("/procurement/purchase-request");
+                navigate("/procurement/purchase-request");
               },
               onError: (err: Error) => toast.error(err.message),
             });
@@ -115,7 +115,7 @@ export function PrFormDialogs({
       <WarningDialog
         open={showNoDepartment}
         description={t("noDepartment")}
-        onConfirm={() => router.back()}
+        onConfirm={() => navigate(-1)}
       />
 
       <DiscardDialog {...discardDialogProps} variant="warning" />

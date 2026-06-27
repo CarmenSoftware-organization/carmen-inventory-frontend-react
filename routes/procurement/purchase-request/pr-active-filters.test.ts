@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { usePrActiveFilters } from "../pr-active-filters";
+import { usePrActiveFilters } from "./pr-active-filters";
 import { PURCHASE_REQUEST_STATUS_OPTIONS } from "@/constant/purchase-request";
 
 // t(key) → key; formatDate(d) → d ; lookups return one known row each

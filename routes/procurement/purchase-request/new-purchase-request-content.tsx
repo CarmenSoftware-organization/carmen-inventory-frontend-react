@@ -1,12 +1,12 @@
 
 import { Suspense } from "react";
-import { useSearchParams } from "@/lib/compat/navigation";
-import { PurchaseRequestForm } from "../_components/pr-form";
+import { useSearchParams } from "react-router";
+import { PurchaseRequestForm } from "./pr-form";
 import { usePurchaseRequestTemplates } from "@/hooks/use-purchase-request";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 const NewPurchaseRequestInner = () => {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template_id");
 
   const { data: templates, isLoading } = usePurchaseRequestTemplates();

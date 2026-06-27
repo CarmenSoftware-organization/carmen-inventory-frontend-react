@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Building2,
@@ -76,7 +76,7 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
           if (!row.original.po_id) return <span>{label}</span>;
           return (
             <Link
-              href={`/procurement/purchase-order/${row.original.po_id}`}
+              to={`/procurement/purchase-order/${row.original.po_id}`}
               onClick={() => onOpenChange(false)}
               className="hover:underline focus-visible:underline"
             >
