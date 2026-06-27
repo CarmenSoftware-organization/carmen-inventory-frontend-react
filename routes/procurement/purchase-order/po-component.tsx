@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
@@ -63,7 +63,7 @@ export default function PoComponent() {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<PurchaseOrder | null>(null);
   const [viewMode, setViewMode] = useState<"my-pending" | "all-document">(
@@ -172,7 +172,7 @@ export default function PoComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (po) => router.push(`/procurement/purchase-order/${po.id}`),
+    onEdit: (po) => navigate(`/procurement/purchase-order/${po.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -357,7 +357,7 @@ export default function PoComponent() {
               items={purchaseOrders}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
               onEdit={(po) =>
-                router.push(`/procurement/purchase-order/${po.id}`)
+                navigate(`/procurement/purchase-order/${po.id}`)
               }
             />
             {useInfiniteScroll && grid.hasMore && (

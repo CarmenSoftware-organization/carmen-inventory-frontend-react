@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { usePoActiveFilters } from "../po-active-filters";
+import { usePoActiveFilters } from "./po-active-filters";
 
 const TYPE_OPTIONS = [
   { label: "General", value: "po_type|string:general" },

@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { createPoSchema } from "../../_components/po-form-schema";
+import { createPoSchema } from "../po-form-schema";
 import {
   getDefaultValues,
   WIZARD_ITEM_TEMPLATE,
   type FromPriceListFormValues,
-} from "../from-price-list-form-schema";
+} from "./from-price-list-form-schema";
 
 const tv = (key: string, values?: Record<string, string | number>) =>
   values ? `${key}:${JSON.stringify(values)}` : key;

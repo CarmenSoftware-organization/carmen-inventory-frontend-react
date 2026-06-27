@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { recomputeItemFromLocations } from "../_components/recompute-item-pricing";
+import { recomputeItemFromLocations } from "./recompute-item-pricing";
 import {
   WIZARD_ITEM_TEMPLATE,
   type FromPriceListSelectedItem,
-} from "../from-price-list-form-schema";
+} from "./from-price-list-form-schema";
 
 function makeItem(
   overrides: Partial<FromPriceListSelectedItem> = {},

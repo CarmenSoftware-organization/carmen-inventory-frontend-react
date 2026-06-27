@@ -24,7 +24,7 @@ import { round2 } from "@/lib/currency-utils";
 import type {
   FromPriceListFormValues,
   FromPriceListSelectedItem,
-} from "../from-price-list-form-schema";
+} from "./from-price-list-form-schema";
 
 type SummaryStep = 1 | 2 | 3;
 

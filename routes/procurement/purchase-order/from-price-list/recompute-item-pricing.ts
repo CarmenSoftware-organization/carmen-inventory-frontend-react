@@ -1,5 +1,5 @@
 import { round2 } from "@/lib/currency-utils";
-import type { FromPriceListSelectedItem } from "../from-price-list-form-schema";
+import type { FromPriceListSelectedItem } from "./from-price-list-form-schema";
 
 /**
  * Sync ฟิลด์ระดับ item (order_qty/base_qty/sub_total_price/net_amount/tax_amount/

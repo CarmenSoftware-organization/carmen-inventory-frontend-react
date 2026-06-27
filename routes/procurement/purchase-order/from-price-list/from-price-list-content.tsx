@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -34,17 +34,17 @@ import { useProfile } from "@/hooks/use-profile";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useCreatePurchaseOrder } from "@/hooks/use-purchase-order";
 import { PO_TYPE } from "@/types/purchase-order";
-import { createPoSchema } from "../_components/po-form-schema";
-import { buildPoPayload } from "../_components/build-po-payload";
+import { createPoSchema } from "../po-form-schema";
+import { buildPoPayload } from "../build-po-payload";
 import {
   getDefaultValues,
   type FromPriceListFormValues,
 } from "./from-price-list-form-schema";
-import { StepOrderDetails } from "./_components/step-order-details";
-import { StepSelectVendors } from "./_components/step-select-vendors";
-import { StepSelectItems } from "./_components/step-select-items";
-import { recomputeItemFromLocations } from "./_components/recompute-item-pricing";
-import { StepSummary } from "./_components/step-summary";
+import { StepOrderDetails } from "./step-order-details";
+import { StepSelectVendors } from "./step-select-vendors";
+import { StepSelectItems } from "./step-select-items";
+import { recomputeItemFromLocations } from "./recompute-item-pricing";
+import { StepSummary } from "./step-summary";
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -95,7 +95,7 @@ const STEP_2_FIELDS = ["vendor_id"] as const;
 const STEP_3_FIELDS = ["items"] as const;
 
 export function FromPriceListContent() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const t = useTranslations("procurement.purchaseOrder");
   const tc = useTranslations("common");
   const tt = useTranslations("toast");
@@ -135,7 +135,7 @@ export function FromPriceListContent() {
     form.reset(getDefaultValues(profileSeedRef.current));
   }, [profile.isProfileReady, form]);
 
-  const handleCancel = () => router.push(PO_LIST_PATH);
+  const handleCancel = () => navigate(PO_LIST_PATH);
   const handleBack = () => setStep((s) => Math.max(1, s - 1) as Step);
 
   const validateCurrentStep = async (current: Step) => {
@@ -259,9 +259,9 @@ export function FromPriceListContent() {
         const body = res as { data?: { id?: string } } | undefined;
         const newId = body?.data?.id;
         if (newId) {
-          router.push(`${PO_LIST_PATH}/${newId}`);
+          navigate(`${PO_LIST_PATH}/${newId}`);
         } else {
-          router.push(PO_LIST_PATH);
+          navigate(PO_LIST_PATH);
         }
       },
       onError: (err) => toast.error(err.message),

@@ -1,6 +1,6 @@
 
 import type { Dispatch, SetStateAction } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -65,7 +65,7 @@ export function usePoFormHandlers({
   setShowClose,
   revealErrors,
 }: UsePoFormHandlersOptions) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const t = useTranslations("procurement.purchaseOrder");
   const tt = useTranslations("toast");
 
@@ -113,7 +113,6 @@ export function usePoFormHandlers({
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
-            router.refresh();
           },
           onError: (err) => toast.error(err.message),
         },
@@ -125,10 +124,12 @@ export function usePoFormHandlers({
           const body = res as { data?: { id?: string } } | undefined;
           const newId = body?.data?.id;
           if (newId) {
-            router.replace(`/procurement/purchase-order/${newId}`);
+            navigate(`/procurement/purchase-order/${newId}`, {
+              replace: true,
+            });
             setMode("view");
           } else {
-            router.push("/procurement/purchase-order");
+            navigate("/procurement/purchase-order");
           }
         },
         onError: (err) => toast.error(err.message),
@@ -142,16 +143,16 @@ export function usePoFormHandlers({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        router.push("/procurement/purchase-order");
+        navigate("/procurement/purchase-order");
       }
     });
   };
 
   const handleBack = () => {
     if (mode === "edit" || mode === "add") {
-      discard.confirm(() => router.push("/procurement/purchase-order"));
+      discard.confirm(() => navigate("/procurement/purchase-order"));
     } else {
-      router.push("/procurement/purchase-order");
+      navigate("/procurement/purchase-order");
     }
   };
 
@@ -174,7 +175,6 @@ export function usePoFormHandlers({
       {
         onSuccess: () => {
           toast.success(t("submitted"));
-          router.refresh();
         },
         onError: (err) => toast.error(err.message),
       },
@@ -230,7 +230,6 @@ export function usePoFormHandlers({
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setMode("view");
-          router.refresh();
         },
         onError: (err) => toast.error(err.message),
       },
@@ -255,7 +254,6 @@ export function usePoFormHandlers({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setShowReject(false);
           setMode("view");
-          router.refresh();
         },
         onError: (err) => toast.error(err.message),
       },
@@ -283,7 +281,6 @@ export function usePoFormHandlers({
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setMode("view");
-          router.refresh();
         },
         onError: (err) => toast.error(err.message),
       },
@@ -296,7 +293,6 @@ export function usePoFormHandlers({
       onSuccess: () => {
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowClose(false);
-        router.refresh();
       },
       onError: (err) => toast.error(err.message),
     });
@@ -307,7 +303,7 @@ export function usePoFormHandlers({
     deletePo.mutate(purchaseOrder.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        router.push("/procurement/purchase-order");
+        navigate("/procurement/purchase-order");
       },
       onError: (err) => toast.error(err.message),
     });

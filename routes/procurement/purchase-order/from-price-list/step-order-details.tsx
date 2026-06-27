@@ -11,7 +11,7 @@ import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
-import type { FromPriceListFormValues } from "../from-price-list-form-schema";
+import type { FromPriceListFormValues } from "./from-price-list-form-schema";
 
 interface StepOrderDetailsProps {
   readonly form: UseFormReturn<FromPriceListFormValues>;

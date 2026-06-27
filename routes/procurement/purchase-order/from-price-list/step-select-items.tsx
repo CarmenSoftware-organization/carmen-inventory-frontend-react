@@ -16,7 +16,7 @@ import {
   type FromPriceListFormValues,
   type FromPriceListItemLocation,
   type FromPriceListSelectedItem,
-} from "../from-price-list-form-schema";
+} from "./from-price-list-form-schema";
 import { BrowseDialog } from "./step-select-items-browse-dialog";
 import { ProductCard } from "./step-select-items-product-card";
 

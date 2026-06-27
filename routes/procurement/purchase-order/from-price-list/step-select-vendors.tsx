@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { usePriceListActiveVendors } from "@/hooks/use-price-list";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import type { FromPriceListFormValues } from "../from-price-list-form-schema";
+import type { FromPriceListFormValues } from "./from-price-list-form-schema";
 
 interface StepSelectVendorsProps {
   readonly form: UseFormReturn<FromPriceListFormValues>;

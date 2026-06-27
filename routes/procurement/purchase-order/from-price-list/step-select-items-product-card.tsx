@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import type {
   FromPriceListItemLocation,
   FromPriceListSelectedItem,
-} from "../from-price-list-form-schema";
+} from "./from-price-list-form-schema";
 
 interface ProductCardProps {
   readonly item: FromPriceListSelectedItem;

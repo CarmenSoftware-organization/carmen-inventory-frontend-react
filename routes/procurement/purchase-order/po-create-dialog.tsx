@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   ClipboardList,
@@ -44,12 +44,12 @@ interface CreatePODialogProps {
  */
 export function CreatePODialog({ open, onOpenChange }: CreatePODialogProps) {
   const t = useTranslations("procurement.purchaseOrder");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [fromPrOpen, setFromPrOpen] = useState(false);
 
   const handleBlankPO = () => {
     onOpenChange(false);
-    router.push("/procurement/purchase-order/new");
+    navigate("/procurement/purchase-order/new");
   };
 
   const handleFromPR = () => {
@@ -59,7 +59,7 @@ export function CreatePODialog({ open, onOpenChange }: CreatePODialogProps) {
 
   const handleFromPriceList = () => {
     onOpenChange(false);
-    router.push("/procurement/purchase-order/from-price-list");
+    navigate("/procurement/purchase-order/from-price-list");
   };
 
   return (
