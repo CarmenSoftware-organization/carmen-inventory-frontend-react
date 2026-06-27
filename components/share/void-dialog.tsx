@@ -1,4 +1,3 @@
-
 import type React from "react";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
@@ -78,7 +77,7 @@ export function VoidDialog({
 
         <div className="space-y-3 border-t px-5 py-4">
           <section className="space-y-1.5">
-            <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold uppercase tracking-wider">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-wider uppercase">
               <MessageSquare className="size-3" />
               {tfl("voidReason")}
               <span className="text-destructive">*</span>
@@ -119,7 +118,7 @@ export function VoidDialog({
           <Button
             type="button"
             variant="destructive"
-            size="default"
+            size="sm"
             disabled={isPending || !reason.trim()}
             onClick={() => onConfirm(reason.trim())}
           >
