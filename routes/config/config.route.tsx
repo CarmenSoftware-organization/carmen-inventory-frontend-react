@@ -1,7 +1,5 @@
 import ConfigDashboard from "./config-dashboard";
 
-export default function ConfigPage() {
+export function Component() {
   return <ConfigDashboard />;
 }
-
-export const Component = ConfigPage;
