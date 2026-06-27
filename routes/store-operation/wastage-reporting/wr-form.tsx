@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -57,7 +57,7 @@ interface WastageReportFormProps {
  * <WastageReportForm wastageReport={entity} />    // view/edit
  */
 export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const t = useTranslations("storeOperation.wastageReporting");
   const tfl = useTranslations("field");
   const tv = useTranslations("validation");
@@ -136,7 +136,7 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            router.push("/store-operation/wastage-reporting");
+            navigate("/store-operation/wastage-reporting");
           },
           onError: (err) => toast.error(err.message),
         },
@@ -145,7 +145,7 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
       createWr.mutate(payload, {
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          router.push("/store-operation/wastage-reporting");
+          navigate("/store-operation/wastage-reporting");
         },
         onError: (err) => toast.error(err.message),
       });
@@ -157,7 +157,7 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
       form.reset(defaultValues);
       setMode("view");
     } else {
-      router.push("/store-operation/wastage-reporting");
+      navigate("/store-operation/wastage-reporting");
     }
   };
 
@@ -171,7 +171,7 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
             variant="ghost"
             size="icon-sm"
             aria-label={tc("goBack")}
-            onClick={() => router.push("/store-operation/wastage-reporting")}
+            onClick={() => navigate("/store-operation/wastage-reporting")}
           >
             <ArrowLeft />
           </Button>
@@ -318,7 +318,7 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
             deleteWr.mutate(wastageReport.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                router.push("/store-operation/wastage-reporting");
+                navigate("/store-operation/wastage-reporting");
               },
               onError: (err) => toast.error(err.message),
             });

@@ -54,7 +54,7 @@ const filterLocations = (locations: Location[], search: string): Location[] => {
  * @returns คอมโพเนนต์หน้า stock replenishment
  * @example
  * // ใช้ใน app/(root)/store-operation/stock-replenishment/page.tsx
- * import StockReplComponent from "./_components/stock-repl-component";
+ * import StockReplComponent from "./stock-repl-component";
  * export default function Page() { return <StockReplComponent />; }
  */
 export default function StockReplComponent() {

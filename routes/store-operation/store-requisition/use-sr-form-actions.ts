@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -54,7 +54,7 @@ export function useSrFormActions({
 }: UseSrFormActionsParams) {
   const t = useTranslations("storeOperation.storeRequisition");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const isEdit = mode === "edit";
@@ -143,7 +143,7 @@ export function useSrFormActions({
           onSuccess: (res) => {
             const { id } = (res as { data: { id: string } }).data;
             toast.success(tt("createSuccess", { entity: t("entity") }));
-            router.replace(`${SR_LIST_PATH}/${id}`);
+            navigate(`${SR_LIST_PATH}/${id}`, { replace: true });
             setMode("view");
           },
           onError: (err) => toast.error(err.message),
@@ -162,7 +162,7 @@ export function useSrFormActions({
       onSuccess: () => {
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         options?.onDone?.();
-        if (!options?.keepOnPage) router.push(SR_LIST_PATH);
+        if (!options?.keepOnPage) navigate(SR_LIST_PATH);
       },
       onError: (err) => toast.error(err.message),
     });
@@ -262,16 +262,16 @@ export function useSrFormActions({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        router.push(SR_LIST_PATH);
+        navigate(SR_LIST_PATH);
       }
     });
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => router.push(SR_LIST_PATH));
+      discard.confirm(() => navigate(SR_LIST_PATH));
     } else {
-      router.push(SR_LIST_PATH);
+      navigate(SR_LIST_PATH);
     }
   };
 
@@ -280,7 +280,7 @@ export function useSrFormActions({
     deleteSr.mutate(storeRequisition.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        router.push(SR_LIST_PATH);
+        navigate(SR_LIST_PATH);
       },
       onError: (err) => toast.error(err.message),
     });

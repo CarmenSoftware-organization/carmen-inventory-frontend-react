@@ -1,7 +1,7 @@
 
 import { useTranslations } from "use-intl";
 import { useWastageReportById } from "@/hooks/use-wastage-report";
-import { WastageReportForm } from "../_components/wr-form";
+import { WastageReportForm } from "./wr-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 

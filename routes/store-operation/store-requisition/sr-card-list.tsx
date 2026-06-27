@@ -69,7 +69,7 @@ function SrCardSkeleton() {
  * @param props.onEdit - callback เมื่อคลิกการ์ด
  * @returns คอมโพเนนต์ list ของการ์ด SR
  * @example
- * <SrCardList items={items} isLoading={false} onEdit={(it) => router.push(`/.../${it.id}`)} />
+ * <SrCardList items={items} isLoading={false} onEdit={(it) => navigate(`/.../${it.id}`)} />
  */
 export default function SrCardList({
   items,

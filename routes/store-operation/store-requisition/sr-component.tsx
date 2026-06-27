@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
@@ -69,7 +69,7 @@ const SR_TYPE_PREFIX = "sr_type|string:";
  * @returns คอมโพเนนต์หน้ารายการ SR
  * @example
  * // ใช้ใน app/(root)/store-operation/store-requisition/page.tsx
- * import SrComponent from "./_components/sr-component";
+ * import SrComponent from "./sr-component";
  * export default function Page() { return <SrComponent />; }
  */
 export default function StoreRequisitionComponent() {
@@ -78,7 +78,7 @@ export default function StoreRequisitionComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<StoreRequisition | null>(
     null,
   );
@@ -316,7 +316,7 @@ export default function StoreRequisitionComponent() {
     params,
     tableConfig,
     onEdit: (item) =>
-      router.push(`/store-operation/store-requisition/${item.id}`),
+      navigate(`/store-operation/store-requisition/${item.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -336,7 +336,7 @@ export default function StoreRequisitionComponent() {
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => router.push("/store-operation/store-requisition/new")}
+            onAdd={() => navigate("/store-operation/store-requisition/new")}
             addLabel={t("add")}
           />
         </div>
@@ -512,7 +512,7 @@ export default function StoreRequisitionComponent() {
               items={items}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
               onEdit={(item) =>
-                router.push(`/store-operation/store-requisition/${item.id}`)
+                navigate(`/store-operation/store-requisition/${item.id}`)
               }
             />
             {useInfiniteScroll && grid.hasMore && (

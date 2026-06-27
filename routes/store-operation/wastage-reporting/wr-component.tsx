@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -33,11 +33,11 @@ import { useWastageReportTable } from "./use-wr-table";
  * @returns คอมโพเนนต์หน้ารายการ WR
  * @example
  * // ใช้ใน app/(root)/store-operation/wastage-reporting/page.tsx
- * import WrComponent from "./_components/wr-component";
+ * import WrComponent from "./wr-component";
  * export default function Page() { return <WrComponent />; }
  */
 export default function WrComponent() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const t = useTranslations("storeOperation.wastageReporting");
   const tt = useTranslations("toast");
   const [deleteTarget, setDeleteTarget] = useState<WastageReport | null>(null);
@@ -55,7 +55,7 @@ export default function WrComponent() {
     params,
     tableConfig,
     onEdit: (item) =>
-      router.push(`/store-operation/wastage-reporting/${item.id}`),
+      navigate(`/store-operation/wastage-reporting/${item.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -80,7 +80,7 @@ export default function WrComponent() {
         <Button
           size="sm"
           onClick={() =>
-            router.push("/store-operation/wastage-reporting/new")
+            navigate("/store-operation/wastage-reporting/new")
           }
         >
           <Plus aria-hidden="true" />

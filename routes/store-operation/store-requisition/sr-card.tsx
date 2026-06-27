@@ -31,7 +31,7 @@ interface SrCardProps {
  * @param props.onEdit - callback เมื่อคลิกการ์ด
  * @returns คอมโพเนนต์การ์ด SR
  * @example
- * <SrCard item={sr} index={0} onEdit={(it) => router.push(`/.../${it.id}`)} />
+ * <SrCard item={sr} index={0} onEdit={(it) => navigate(`/.../${it.id}`)} />
  */
 export default function SrCard({ item, index, onEdit }: SrCardProps) {
   const tfl = useTranslations("field");

@@ -5,7 +5,7 @@ import type {
   CreateWastageReportDto,
 } from "@/types/wastage-reporting";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
-import { wrMockData } from "@/routes/store-operation/wastage-reporting/_components/wr-mock-data";
+import { wrMockData } from "@/routes/store-operation/wastage-reporting/wr-mock-data";
 import { useMutation } from "@tanstack/react-query";
 
 // ── TODO: เปลี่ยนเป็น API จริงเมื่อ backend พร้อม ──
