@@ -44,9 +44,9 @@ import {
   StatusHero,
   type InvStatusSection,
   type SectionTone,
-} from "../../_shared/inv-shared";
+} from "../../shared/inv-shared";
 import { Reveal } from "@/components/share/reveal";
-import { PcLocationCard } from "../../_shared/pc-location-card";
+import { PcLocationCard } from "../../shared/pc-location-card";
 
 type StatusKey = PhysicalCountStatus;
 

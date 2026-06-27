@@ -1,5 +1,5 @@
 
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnimationStyles, Reveal, useCountUp } from "@/components/share/reveal";
@@ -368,13 +368,13 @@ export function LocationHeading({
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <Link
-        href={href}
+        to={href}
         className="text-foreground text-sm leading-tight font-semibold tracking-tight hover:underline"
       >
         {name}
       </Link>
       <Link
-        href={href}
+        to={href}
         className="text-muted-foreground hover:text-foreground shrink-0 text-[0.625rem] tracking-wide uppercase transition-colors"
       >
         {code}

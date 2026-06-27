@@ -33,14 +33,14 @@ import {
 } from "@/hooks/use-physical-count";
 import { cn } from "@/lib/utils";
 import SearchInput from "@/components/search-input";
-import { CalculatorDialog } from "../../_shared/calculator-dialog";
-import { EntryImportDialog } from "../../_shared/entry-import-dialog";
+import { CalculatorDialog } from "../../shared/calculator-dialog";
+import { EntryImportDialog } from "../../shared/entry-import-dialog";
 import { AnimationStyles } from "@/components/share/reveal";
-import { ItemListSkeleton } from "../../_shared/inv-shared";
-import { EntryItemRow } from "../../_shared/entry-item-row";
+import { ItemListSkeleton } from "../../shared/inv-shared";
+import { EntryItemRow } from "../../shared/entry-item-row";
 import { PcEntryHeader } from "./pc-entry-header";
 import { PcEntryNotesDialog } from "./pc-entry-notes-dialog";
-import { EntryToolbar } from "../../_shared/entry-toolbar";
+import { EntryToolbar } from "../../shared/entry-toolbar";
 
 interface PcEntryComponentProps {
   readonly physicalCountId: string;

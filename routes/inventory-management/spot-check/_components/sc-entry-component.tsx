@@ -22,14 +22,14 @@ import {
 } from "@/hooks/use-spot-check";
 import { useUnit } from "@/hooks/use-unit";
 import { cn } from "@/lib/utils";
-import { CalculatorDialog } from "../../_shared/calculator-dialog";
-import { EntryImportDialog } from "../../_shared/entry-import-dialog";
+import { CalculatorDialog } from "../../shared/calculator-dialog";
+import { EntryImportDialog } from "../../shared/entry-import-dialog";
 import { AnimationStyles } from "@/components/share/reveal";
-import { ItemListSkeleton } from "../../_shared/inv-shared";
-import { EntryItemRow } from "../../_shared/entry-item-row";
+import { ItemListSkeleton } from "../../shared/inv-shared";
+import { EntryItemRow } from "../../shared/entry-item-row";
 import { ScEntryHeader } from "./sc-entry-header";
 import { ScEntryNotesDialog } from "./sc-entry-notes-dialog";
-import { EntryToolbar } from "../../_shared/entry-toolbar";
+import { EntryToolbar } from "../../shared/entry-toolbar";
 
 interface ScEntryComponentProps {
   readonly spotCheckId: string;

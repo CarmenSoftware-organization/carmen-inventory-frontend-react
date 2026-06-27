@@ -37,7 +37,7 @@ import type { ReviewTransactionKey } from "@/types/period-end";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import type { PhysicalCountLocation } from "@/types/physical-count";
 import { PeDocumentsDialog } from "./pe-documents-dialog";
-import { PcLocationCard } from "../../_shared/pc-location-card";
+import { PcLocationCard } from "../../shared/pc-location-card";
 
 interface ModuleConfig {
   readonly icon: LucideIcon;

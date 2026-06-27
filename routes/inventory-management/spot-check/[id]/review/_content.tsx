@@ -4,7 +4,7 @@ import {
   useSpotCheckById,
   useSpotCheckReview,
 } from "@/hooks/use-spot-check";
-import { ItemListSkeleton } from "../../../_shared/inv-shared";
+import { ItemListSkeleton } from "../../../shared/inv-shared";
 import { ScReviewComponent } from "../../_components/sc-review-component";
 
 /**

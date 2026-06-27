@@ -22,7 +22,7 @@ import { useErrorToast } from "@/hooks/use-error-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { useResetSpotCheck } from "@/hooks/use-spot-check";
 import { getLocationTypeLabel } from "@/constant/location-type";
-import { LocationAvatar, LocationCardShell } from "../../_shared/inv-shared";
+import { LocationAvatar, LocationCardShell } from "../../shared/inv-shared";
 import { ResumeInfoPanel } from "./sc-resume-info-panel";
 import { ScResetDialog } from "./sc-reset-dialog";
 import type {

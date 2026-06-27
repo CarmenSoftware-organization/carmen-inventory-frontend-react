@@ -1,7 +1,7 @@
 
 import { ErrorState } from "@/components/ui/error-state";
 import { usePhysicalCountReview } from "@/hooks/use-physical-count";
-import { ItemListSkeleton } from "../../../_shared/inv-shared";
+import { ItemListSkeleton } from "../../../shared/inv-shared";
 import { PcReviewComponent } from "../../_components/pc-review-component";
 
 export function ReviewContent({ id }: Readonly<{ id: string }>) {

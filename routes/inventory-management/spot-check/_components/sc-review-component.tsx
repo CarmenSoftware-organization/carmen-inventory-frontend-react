@@ -6,7 +6,7 @@ import { useErrorToast } from "@/hooks/use-error-toast";
 import { useSubmitSpotCheck } from "@/hooks/use-spot-check";
 import { useUnit } from "@/hooks/use-unit";
 import type { SpotCheckReviewData, SpotCheckReviewItem } from "@/types/spot-check";
-import { ReviewComponent } from "../../_shared/review-component";
+import { ReviewComponent } from "../../shared/review-component";
 
 interface ScReviewComponentProps {
   /** ข้อมูลที่ได้จาก PATCH /spot-check/{id}/review */

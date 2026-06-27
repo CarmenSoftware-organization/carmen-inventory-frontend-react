@@ -31,7 +31,7 @@ import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupCategory } from "@/components/lookup/lookup-category";
 import { cn } from "@/lib/utils";
 import EmptyComponent from "@/components/empty-component";
-import { InvPageHeader } from "../../_shared/inv-shared";
+import { InvPageHeader } from "../shared/inv-shared";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { useTransactionTable } from "./use-transaction-table";
 import { TransactionSummary } from "./transaction-summary";

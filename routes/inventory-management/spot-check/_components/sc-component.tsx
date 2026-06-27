@@ -28,7 +28,7 @@ import {
   StatusHero,
   type InvStatusSection,
   type SectionTone,
-} from "../../_shared/inv-shared";
+} from "../../shared/inv-shared";
 import { ScHistoryCard } from "./sc-history-card";
 import { ScLocationCard } from "./sc-location-card";
 import { Reveal } from "@/components/share/reveal";

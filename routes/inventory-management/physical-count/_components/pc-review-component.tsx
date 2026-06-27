@@ -8,7 +8,7 @@ import type {
   PhysicalCountData,
   PhysicalCountDetail,
 } from "@/types/physical-count";
-import { ReviewComponent } from "../../_shared/review-component";
+import { ReviewComponent } from "../../shared/review-component";
 
 interface PcReviewComponentProps {
   readonly physicalCountReview: PhysicalCountData;
