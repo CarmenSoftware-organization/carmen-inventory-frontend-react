@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   ClipboardList,
@@ -71,7 +71,7 @@ export default function GrnComponent() {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [showDocTypeDialog, setShowDocTypeDialog] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<GoodsReceiveNote | null>(
@@ -180,7 +180,7 @@ export default function GrnComponent() {
     if (docType === "purchase_order") {
       setShowWizard(true);
     } else {
-      router.push(`/procurement/goods-receive-note/new?doc_type=${docType}`);
+      navigate(`/procurement/goods-receive-note/new?doc_type=${docType}`);
     }
   };
 
@@ -206,7 +206,7 @@ export default function GrnComponent() {
       items,
     });
     setShowWizard(false);
-    router.push("/procurement/goods-receive-note/new?doc_type=purchase_order");
+    navigate("/procurement/goods-receive-note/new?doc_type=purchase_order");
   };
 
   const table = useGrnTable({
@@ -214,7 +214,7 @@ export default function GrnComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (grn) => router.push(`/procurement/goods-receive-note/${grn.id}`),
+    onEdit: (grn) => navigate(`/procurement/goods-receive-note/${grn.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -364,7 +364,7 @@ export default function GrnComponent() {
               items={goodsReceiveNotes}
               isLoading={grid.isLoading}
               onEdit={(grn) =>
-                router.push(`/procurement/goods-receive-note/${grn.id}`)
+                navigate(`/procurement/goods-receive-note/${grn.id}`)
               }
             />
             {grid.hasMore && (
@@ -397,7 +397,7 @@ export default function GrnComponent() {
                   items={goodsReceiveNotes}
                   isLoading={isLoading}
                   onEdit={(grn) =>
-                    router.push(`/procurement/goods-receive-note/${grn.id}`)
+                    navigate(`/procurement/goods-receive-note/${grn.id}`)
                   }
                 />
               </div>

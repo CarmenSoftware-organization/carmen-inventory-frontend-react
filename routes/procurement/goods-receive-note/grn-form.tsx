@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearchParams } from "@/lib/compat/navigation";
+import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +39,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   const isCommitted = goodsReceiveNote?.doc_status === "committed";
   const isVoid = goodsReceiveNote?.doc_status === "voided";
 
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const docTypeParam = searchParams.get("doc_type");
 
   const [wizardData] = useState(() =>

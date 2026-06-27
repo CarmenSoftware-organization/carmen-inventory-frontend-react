@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useGrnActiveFilters } from "../grn-active-filters";
+import { useGrnActiveFilters } from "./grn-active-filters";
 
 // t(key) → key, จึง `${t("status")}: ...` = "status: ..."
 vi.mock("use-intl", () => ({

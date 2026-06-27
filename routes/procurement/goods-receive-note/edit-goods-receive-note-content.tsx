@@ -1,7 +1,7 @@
 
 import { useTranslations } from "use-intl";
 import { useGoodsReceiveNoteById } from "@/hooks/use-goods-receive-note";
-import { GrnForm } from "../_components/grn-form";
+import { GrnForm } from "./grn-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 

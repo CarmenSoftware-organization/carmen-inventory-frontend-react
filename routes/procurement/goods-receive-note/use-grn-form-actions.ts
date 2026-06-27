@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -41,7 +41,7 @@ export function useGrnFormActions({
   mode,
   setMode,
 }: UseGrnFormActionsParams) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const t = useTranslations("procurement.goodsReceiveNote");
   const tt = useTranslations("toast");
 
@@ -210,7 +210,9 @@ export function useGrnFormActions({
           const finalize = () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             if (newId) {
-              router.replace(`/procurement/goods-receive-note/${newId}`);
+              navigate(`/procurement/goods-receive-note/${newId}`, {
+                replace: true,
+              });
               setMode("view");
             }
           };
@@ -243,16 +245,16 @@ export function useGrnFormActions({
         form.reset(defaultValues);
         setMode("view");
       } else {
-        router.push("/procurement/goods-receive-note");
+        navigate("/procurement/goods-receive-note");
       }
     });
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => router.push("/procurement/goods-receive-note"));
+      discard.confirm(() => navigate("/procurement/goods-receive-note"));
     } else {
-      router.push("/procurement/goods-receive-note");
+      navigate("/procurement/goods-receive-note");
     }
   };
 
@@ -261,7 +263,7 @@ export function useGrnFormActions({
     deleteGrn.mutate(goodsReceiveNote.id, {
       onSuccess: () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
-        router.push("/procurement/goods-receive-note");
+        navigate("/procurement/goods-receive-note");
       },
       onError: (err) => toast.error(err.message),
     });
@@ -273,7 +275,6 @@ export function useGrnFormActions({
       onSuccess: () => {
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowCommit(false);
-        router.refresh();
       },
       onError: (err) => toast.error(err.message),
     });
@@ -285,7 +286,6 @@ export function useGrnFormActions({
       onSuccess: () => {
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowVoid(false);
-        router.refresh();
       },
       onError: (err) => toast.error(err.message),
     });
