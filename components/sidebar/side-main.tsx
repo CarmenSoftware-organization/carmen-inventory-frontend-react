@@ -1,7 +1,7 @@
 
 import { Fragment } from "react";
 import { Link } from "react-router";
-import { usePathname } from "@/lib/compat/navigation";
+import { useLocation } from "react-router";
 import { useTranslations } from "use-intl";
 import { Sparkles } from "lucide-react";
 
@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
  * @returns JSX element ของเมนู sub-modules หรือ null หาก pathname ไม่ตรงกับโมดูลใด
  */
 export function SideMain() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const t = useTranslations("modules");
 
   const activeModule = moduleList.find((mod) => pathname.startsWith(mod.path));

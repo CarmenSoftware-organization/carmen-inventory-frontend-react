@@ -1,7 +1,7 @@
 
 import { Fragment } from "react";
 import { Link } from "react-router";
-import { usePathname } from "@/lib/compat/navigation";
+import { useLocation } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Breadcrumb,
@@ -54,7 +54,7 @@ for (const mod of moduleList) {
 /**
  * Breadcrumb ของหน้าปัจจุบัน
  *
- * สร้าง breadcrumb จาก `usePathname()` โดยกรอง id segment ออกผ่าน
+ * สร้าง breadcrumb จาก `useLocation().pathname` โดยกรอง id segment ออกผ่าน
  * `isIdSegment` และแปลงแต่ละ segment เป็นคำแปลจาก `moduleList`
  * (fallback เป็น segment ที่แปลง kebab-case → Title Case) รายการสุดท้าย
  * render เป็น `BreadcrumbPage` และรายการอื่นซ่อนบน mobile (แสดงเฉพาะ md ขึ้นไป)
@@ -66,7 +66,7 @@ for (const mod of moduleList) {
  * ```
  */
 export default function PathBreadcrumb() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const t = useTranslations("modules");
   const segments = pathname.split("/").filter((s) => Boolean(s) && !isIdSegment(s));
 

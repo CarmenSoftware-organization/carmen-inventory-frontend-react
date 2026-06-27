@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import {
   Columns3,
   Download,
@@ -140,7 +140,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   onClearExtraFilters,
   permissionPrefix,
 }: Readonly<ConfigListTemplateProps<TEntity>>) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<TEntity | null>(null);
   const deleteMutation = useDelete();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -218,7 +218,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
 
   const handleEdit = (entity: TEntity) => {
     if (getEditPath) {
-      router.push(getEditPath(entity));
+      navigate(getEditPath(entity));
       return;
     }
     setEditEntity(entity);
@@ -227,7 +227,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
 
   const handleAdd = () => {
     if (addPath) {
-      router.push(addPath);
+      navigate(addPath);
       return;
     }
     setEditEntity(null);

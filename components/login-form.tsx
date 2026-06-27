@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
-import { useRouter, useSearchParams } from "@/lib/compat/navigation";
+import { useNavigate, useSearchParams } from "react-router";
 import {
   ArrowRight,
   Eye,
@@ -43,8 +43,8 @@ class RateLimitError extends Error {
 }
 
 export default function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const t = useTranslations("auth");
   const [retryAfter, setRetryAfter] = useState<number | null>(null);
@@ -95,7 +95,7 @@ export default function LoginForm() {
     // Profile is no longer returned by login(); it loads via ProfileGate /
     // use-profile after redirect, so we no longer seed the profile cache here.
     onSuccess: () => {
-      router.push(resolveNextPath(searchParams.get("next")));
+      navigate(resolveNextPath(searchParams.get("next")));
     },
   });
 

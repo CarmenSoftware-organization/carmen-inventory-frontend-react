@@ -1,5 +1,5 @@
 
-import { usePathname, useRouter } from "@/lib/compat/navigation";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { ArrowLeft, ShieldOff } from "lucide-react";
 
@@ -21,7 +21,7 @@ interface RouteGuardProps {
  * วางใน `(root)/layout.tsx` ภายใต้ `ProfileGate` (รอ profile โหลดเสร็จก่อน)
  */
 export function RouteGuard({ children }: RouteGuardProps) {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const { can, isAdmin } = useCan();
 
   const leaf = findRouteLeaf(pathname);
@@ -33,7 +33,7 @@ export function RouteGuard({ children }: RouteGuardProps) {
 
 function AccessDeniedBlock() {
   const t = useTranslations("permissionDenied");
-  const router = useRouter();
+  const navigate = useNavigate();
 
   return (
     <div
@@ -66,7 +66,7 @@ function AccessDeniedBlock() {
           type="button"
           size="sm"
           variant="outline"
-          onClick={() => router.back()}
+          onClick={() => navigate(-1)}
           className="mt-5"
         >
           <ArrowLeft />
