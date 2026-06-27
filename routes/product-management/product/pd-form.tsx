@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useSearchParams } from "@/lib/compat/navigation";
+import { useNavigate, useSearchParams } from "react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -202,8 +202,8 @@ export function ProductForm({ product }: ProductFormProps) {
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const rawReturnUrl = searchParams.get("returnUrl");
   const returnUrl =
     rawReturnUrl &&
@@ -302,9 +302,9 @@ export function ProductForm({ product }: ProductFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const newId = (res as { data?: { id?: string } })?.data?.id;
           if (newId) {
-            router.push(`/product-management/product/${newId}`);
+            navigate(`/product-management/product/${newId}`);
           } else {
-            router.push(returnUrl);
+            navigate(returnUrl);
           }
         },
         onError: (err: Error) => toast.error(err.message),
@@ -347,16 +347,16 @@ export function ProductForm({ product }: ProductFormProps) {
         form.reset(getDefaultValues(product));
         setMode("view");
       } else {
-        router.push(returnUrl);
+        navigate(returnUrl);
       }
     });
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => router.push(returnUrl));
+      discard.confirm(() => navigate(returnUrl));
     } else {
-      router.push(returnUrl);
+      navigate(returnUrl);
     }
   };
 
@@ -450,7 +450,7 @@ export function ProductForm({ product }: ProductFormProps) {
             deleteProduct.mutate(product.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                router.push(returnUrl);
+                navigate(returnUrl);
               },
               onError: (err) => toast.error(err.message),
             });

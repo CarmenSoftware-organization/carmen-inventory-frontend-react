@@ -2,7 +2,7 @@
 import { Suspense } from "react";
 import { useTranslations } from "use-intl";
 import { useProductById } from "@/hooks/use-product";
-import { ProductForm } from "../_components/pd-form";
+import { ProductForm } from "./pd-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 

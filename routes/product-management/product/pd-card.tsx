@@ -21,7 +21,7 @@ interface ProductCardProps {
  * @returns JSX ของ product card
  * @example
  * ```tsx
- * <ProductCard item={product} index={0} onEdit={(p) => router.push(`/product-management/product/${p.id}`)} />
+ * <ProductCard item={product} index={0} onEdit={(p) => navigate(`/product-management/product/${p.id}`)} />
  * ```
  */
 export default function ProductCard({ item, index, onEdit }: ProductCardProps) {

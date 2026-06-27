@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import {
   Columns3,
   Filter as FilterIcon,
@@ -68,7 +68,7 @@ export default function ProductComponent() {
   const tt = useTranslations("toast");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
@@ -271,7 +271,7 @@ export default function ProductComponent() {
     params,
     tableConfig,
     onEdit: (product) =>
-      router.push(`/product-management/product/${product.id}`),
+      navigate(`/product-management/product/${product.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -279,7 +279,7 @@ export default function ProductComponent() {
     return <ErrorState message={error.message} onRetry={() => refetch()} />;
 
   const handleAddItem = () => {
-    router.push("/product-management/product/new");
+    navigate("/product-management/product/new");
   };
 
   return (
@@ -453,7 +453,7 @@ export default function ProductComponent() {
                   item={item}
                   index={i}
                   onEdit={(p) =>
-                    router.push(`/product-management/product/${p.id}`)
+                    navigate(`/product-management/product/${p.id}`)
                   }
                 />
               ))}

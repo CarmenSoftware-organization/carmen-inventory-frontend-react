@@ -172,11 +172,11 @@ export const router = createBrowserRouter([
             path: "product-management",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./product-management/page") },
-              { path: "category", lazy: () => import("./product-management/category/page") },
-              { path: "product", lazy: () => import("./product-management/product/page") },
-              { path: "product/new", lazy: () => import("./product-management/product/new/page") },
-              { path: "product/:id", lazy: () => import("./product-management/product/[id]/page") },
+              { index: true, lazy: () => import("./product-management/product-management.route") },
+              { path: "category", lazy: () => import("./product-management/category/category.route") },
+              { path: "product", lazy: () => import("./product-management/product/product.route") },
+              { path: "product/new", lazy: () => import("./product-management/product/product-new.route") },
+              { path: "product/:id", lazy: () => import("./product-management/product/product-edit.route") },
             ],
           },
           {
