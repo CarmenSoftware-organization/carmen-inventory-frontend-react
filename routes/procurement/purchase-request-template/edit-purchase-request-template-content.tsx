@@ -1,7 +1,7 @@
 
 import { useTranslations } from "use-intl";
 import { usePrtById } from "@/hooks/use-prt";
-import { PrtForm } from "../_components/prt-form";
+import { PrtForm } from "./prt-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 

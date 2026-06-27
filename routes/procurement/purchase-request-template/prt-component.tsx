@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
@@ -66,7 +66,7 @@ export default function PrtComponent() {
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
-  const router = useRouter();
+  const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] =
     useState<PurchaseRequestTemplate | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
@@ -159,7 +159,7 @@ export default function PrtComponent() {
     params,
     tableConfig,
     onEdit: (template) =>
-      router.push(`/procurement/purchase-request-template/${template.id}`),
+      navigate(`/procurement/purchase-request-template/${template.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -216,7 +216,7 @@ export default function PrtComponent() {
             <Button
               size="sm"
               onClick={() =>
-                router.push("/procurement/purchase-request-template/new")
+                navigate("/procurement/purchase-request-template/new")
               }
             >
               <Plus aria-hidden="true" />
@@ -360,7 +360,7 @@ export default function PrtComponent() {
                     item={item}
                     index={i}
                     onEdit={(t) =>
-                      router.push(
+                      navigate(
                         `/procurement/purchase-request-template/${t.id}`,
                       )
                     }
@@ -408,7 +408,7 @@ export default function PrtComponent() {
                         item={item}
                         index={i}
                         onEdit={(t) =>
-                          router.push(
+                          navigate(
                             `/procurement/purchase-request-template/${t.id}`,
                           )
                         }

@@ -73,9 +73,9 @@ export const router = createBrowserRouter([
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
               { index: true, lazy: () => import("./procurement/page") },
-              { path: "purchase-request-template", lazy: () => import("./procurement/purchase-request-template/page") },
-              { path: "purchase-request-template/new", lazy: () => import("./procurement/purchase-request-template/new/page") },
-              { path: "purchase-request-template/:id", lazy: () => import("./procurement/purchase-request-template/[id]/page") },
+              { path: "purchase-request-template", lazy: () => import("./procurement/purchase-request-template/purchase-request-template.route") },
+              { path: "purchase-request-template/new", lazy: () => import("./procurement/purchase-request-template/purchase-request-template-new.route") },
+              { path: "purchase-request-template/:id", lazy: () => import("./procurement/purchase-request-template/purchase-request-template-edit.route") },
               { path: "credit-note", lazy: () => import("./procurement/credit-note/page") },
               { path: "credit-note/new", lazy: () => import("./procurement/credit-note/new/page") },
               { path: "credit-note/:id", lazy: () => import("./procurement/credit-note/[id]/page") },

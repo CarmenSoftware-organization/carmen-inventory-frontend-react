@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
@@ -40,7 +40,7 @@ export function PrtForm({ template }: PrtFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const { defaultBu } = useProfile();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<FormMode>(template ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -98,8 +98,9 @@ export function PrtForm({ template }: PrtFormProps) {
       createPrt.mutate(payload, {
         onSuccess: (data) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          router.replace(
+          navigate(
             `/procurement/purchase-request-template/${data.data.id}`,
+            { replace: true },
           );
           setMode("view");
         },
@@ -114,7 +115,7 @@ export function PrtForm({ template }: PrtFormProps) {
         form.reset(defaultValues);
         setMode("view");
       } else {
-        router.push("/procurement/purchase-request-template");
+        navigate("/procurement/purchase-request-template");
       }
     });
   };
@@ -122,10 +123,10 @@ export function PrtForm({ template }: PrtFormProps) {
   const handleBack = () => {
     if (isEdit || isAdd) {
       discard.confirm(() =>
-        router.push("/procurement/purchase-request-template"),
+        navigate("/procurement/purchase-request-template"),
       );
     } else {
-      router.push("/procurement/purchase-request-template");
+      navigate("/procurement/purchase-request-template");
     }
   };
 
@@ -184,7 +185,7 @@ export function PrtForm({ template }: PrtFormProps) {
             deletePrt.mutate(template.id, {
               onSuccess: () => {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                router.push("/procurement/purchase-request-template");
+                navigate("/procurement/purchase-request-template");
               },
               onError: (err) => toast.error(err.message),
             });
