@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useFormatter, useTranslations } from "use-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -52,7 +52,7 @@ export function InventoryAdjustmentForm({
   adjustmentType,
   inventoryAdjustment,
 }: InventoryAdjustmentFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<FormMode>(
     inventoryAdjustment ? "view" : "add",
   );
@@ -128,7 +128,7 @@ export function InventoryAdjustmentForm({
   const handleMutationSuccess =
     (msgKey: "createSuccess" | "updateSuccess") => () => {
       toast.success(tt(msgKey, { entity: t("entity") }));
-      router.push(INVENTORY_ADJUSTMENT_BASE_PATH);
+      navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
     };
 
   const buildBasePayload = (values: AdjFormValues) => {
@@ -194,15 +194,15 @@ export function InventoryAdjustmentForm({
         setMode("view");
         return;
       }
-      router.push(INVENTORY_ADJUSTMENT_BASE_PATH);
+      navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
     });
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => router.push(INVENTORY_ADJUSTMENT_BASE_PATH));
+      discard.confirm(() => navigate(INVENTORY_ADJUSTMENT_BASE_PATH));
     } else {
-      router.push(INVENTORY_ADJUSTMENT_BASE_PATH);
+      navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
     }
   };
 
@@ -307,7 +307,7 @@ export function InventoryAdjustmentForm({
               {
                 onSuccess: () => {
                   toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                  router.push(INVENTORY_ADJUSTMENT_BASE_PATH);
+                  navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
                 },
                 onError: errorToast,
               },
@@ -338,7 +338,7 @@ export function InventoryAdjustmentForm({
               {
                 onSuccess: () => {
                   toast.success(tt("voidSuccess", { entity: t("entity") }));
-                  router.push(INVENTORY_ADJUSTMENT_BASE_PATH);
+                  navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
                 },
                 onError: errorToast,
               },

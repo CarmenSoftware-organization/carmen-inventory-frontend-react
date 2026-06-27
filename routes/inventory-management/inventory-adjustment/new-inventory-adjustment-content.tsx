@@ -1,14 +1,14 @@
 
 import { Suspense } from "react";
-import { useSearchParams } from "@/lib/compat/navigation";
+import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
-import { InventoryAdjustmentForm } from "../_components/ia-form";
+import { InventoryAdjustmentForm } from "./ia-form";
 import { ErrorState } from "@/components/ui/error-state";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
 
 function NewInventoryAdjustmentInner() {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const type = searchParams.get("type") as InventoryAdjustmentType | null;
 

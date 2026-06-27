@@ -97,9 +97,9 @@ export const router = createBrowserRouter([
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
               { index: true, lazy: () => import("./inventory-management/inventory-management.route") },
-              { path: "inventory-adjustment", lazy: () => import("./inventory-management/inventory-adjustment/page") },
-              { path: "inventory-adjustment/new", lazy: () => import("./inventory-management/inventory-adjustment/new/page") },
-              { path: "inventory-adjustment/:id", lazy: () => import("./inventory-management/inventory-adjustment/[id]/page") },
+              { path: "inventory-adjustment", lazy: () => import("./inventory-management/inventory-adjustment/inventory-adjustment.route") },
+              { path: "inventory-adjustment/new", lazy: () => import("./inventory-management/inventory-adjustment/inventory-adjustment-new.route") },
+              { path: "inventory-adjustment/:id", lazy: () => import("./inventory-management/inventory-adjustment/inventory-adjustment-edit.route") },
               { path: "transaction", lazy: () => import("./inventory-management/transaction/transaction.route") },
               { path: "physical-count", lazy: () => import("./inventory-management/physical-count/page") },
               { path: "physical-count/new", lazy: () => import("./inventory-management/physical-count/new/page") },

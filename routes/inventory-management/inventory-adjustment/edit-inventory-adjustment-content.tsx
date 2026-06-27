@@ -1,15 +1,15 @@
 
 import { Suspense } from "react";
-import { useSearchParams } from "@/lib/compat/navigation";
+import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { useInventoryAdjustmentById } from "@/hooks/use-inventory-adjustment";
-import { InventoryAdjustmentForm } from "../_components/ia-form";
+import { InventoryAdjustmentForm } from "./ia-form";
 import { ErrorState } from "@/components/ui/error-state";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 const EditInventoryAdjustmentInner = ({ id }: { id: string }) => {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const type = searchParams.get("type") as InventoryAdjustmentType | null;
 

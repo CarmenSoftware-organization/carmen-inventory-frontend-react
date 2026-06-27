@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
@@ -65,7 +65,7 @@ import { useInventoryAdjustmentTable } from "./use-ia-table";
 import IaCardList from "./ia-card-list";
 
 export default function InventoryAdjustmentComponent() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const tc = useTranslations("common");
   const tt = useTranslations("toast");
@@ -224,7 +224,7 @@ export default function InventoryAdjustmentComponent() {
     : (data?.paginate?.total ?? 0);
 
   const navigateToItem = (item: InventoryAdjustment) =>
-    router.push(
+    navigate(
       `${INVENTORY_ADJUSTMENT_BASE_PATH}/${item.id}?type=${getAdjustmentType(item)}`,
     );
 
@@ -283,7 +283,7 @@ export default function InventoryAdjustmentComponent() {
                     size="sm"
                     variant="success"
                     onClick={() =>
-                      router.push(
+                      navigate(
                         `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-in`,
                       )
                     }
@@ -295,7 +295,7 @@ export default function InventoryAdjustmentComponent() {
                     size="sm"
                     variant="destructive"
                     onClick={() =>
-                      router.push(
+                      navigate(
                         `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-out`,
                       )
                     }
