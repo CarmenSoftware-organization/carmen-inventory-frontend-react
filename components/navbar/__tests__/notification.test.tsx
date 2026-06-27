@@ -20,6 +20,8 @@ const render = (ui: ReactElement) =>
 const mockMarkAsRead = vi.fn();
 const mockMarkAllAsRead = vi.fn();
 let mockNotifications: NotificationType[] = [];
+// detail ที่ useNotificationDetail จะคืน — ตั้งค่าต่อ test (badge type อยู่ใน dialog)
+let mockDetail: NotificationType | undefined;
 
 const TRANSLATIONS: Record<string, string> = {
   notifications: "Notifications",
@@ -42,7 +44,7 @@ vi.mock("@/hooks/use-notification", () => ({
     markAllAsRead: mockMarkAllAsRead,
   }),
   useNotificationDetail: () => ({
-    data: undefined,
+    data: mockDetail,
     isLoading: false,
     error: null,
   }),
@@ -98,6 +100,7 @@ describe("Notification component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockNotifications = [];
+    mockDetail = undefined;
   });
 
   afterEach(() => {
@@ -157,17 +160,26 @@ describe("Notification component", () => {
     expect(screen.getByText("Second Alert")).toBeInTheDocument();
   });
 
-  it("shows type badge for each notification", async () => {
-    mockNotifications = [
-      makeNotification({ id: "n1", type: "info" }),
-      makeNotification({ id: "n2", type: "error" }),
-    ];
+  it("shows the notification type as a badge in the detail dialog", async () => {
+    // The list row no longer renders the raw type as text — the redesign
+    // (commit 8378979) moved the type into a leading module icon, and the
+    // text type badge now lives only in the detail dialog. Opening an item
+    // with no navigation target opens that dialog.
+    mockNotifications = [makeNotification({ id: "n1", type: "info" })];
+    mockDetail = makeNotification({ id: "n1", type: "info" });
 
     render(<Notification />);
-    await openPopover();
+    const user = await openPopover();
 
-    expect(screen.getByText("info")).toBeInTheDocument();
-    expect(screen.getByText("error")).toBeInTheDocument();
+    // sanity: the list itself does not surface the raw type string
+    expect(screen.queryByText("info")).not.toBeInTheDocument();
+
+    // click the row overlay (no entity / no link → opens the detail dialog)
+    const [overlay] = screen.getAllByRole("button", { name: "Test Title" });
+    await user.click(overlay);
+
+    // the dialog renders the type badge
+    expect(await screen.findByText("info")).toBeInTheDocument();
   });
 
   it("shows Clear all button when there are notifications", async () => {
