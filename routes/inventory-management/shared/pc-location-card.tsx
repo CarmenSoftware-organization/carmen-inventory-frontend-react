@@ -81,7 +81,9 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
                 variant:
                   item.physical_count_type === "yes" ? "outline" : "secondary",
                 label:
-                  item.physical_count_type === "yes" ? "Count" : "Not count",
+                  item.physical_count_type === "yes"
+                    ? t("count")
+                    : t("notCount"),
               }}
             />
             <div className="text-muted-foreground flex items-center gap-1.5 text-[0.6875rem]">

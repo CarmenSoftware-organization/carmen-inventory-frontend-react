@@ -134,7 +134,7 @@ export function useTransactionTable({
     },
     {
       id: "qty_in",
-      header: "Qty In",
+      header: t("qtyIn"),
       cell: ({ row }) => {
         const total = row.original.details.reduce(
           (sum, d) => sum + d.qty_in,
@@ -152,7 +152,7 @@ export function useTransactionTable({
     },
     {
       id: "qty_out",
-      header: "Qty Out",
+      header: t("qtyOut"),
       cell: ({ row }) => {
         const total = row.original.details.reduce(
           (sum, d) => sum + d.qty_out,
