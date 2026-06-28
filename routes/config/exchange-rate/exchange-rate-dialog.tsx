@@ -154,7 +154,7 @@ function EditForm({
         {/* Current rate display */}
         <div className="bg-muted/40 rounded-lg border p-3 text-center">
           <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
-            {t("currencyCode")} · Current
+            {t("currencyCode")} · {t("current")}
           </p>
           <p className="mt-1 text-xl leading-tight font-bold tabular-nums">
             {formatExchangeRate(currentRate)}
@@ -174,7 +174,7 @@ function EditForm({
             <FieldLabel>
               {tfl("exchangeRate")}
               <span className="text-muted-foreground ml-1 font-normal">
-                · New
+                · {t("new")}
               </span>
             </FieldLabel>
             <FieldInput
@@ -190,24 +190,16 @@ function EditForm({
           </Field>
         </FieldGroup>
 
-        {/* Delta indicator */}
-        <div
-          className={`flex items-center justify-between rounded-lg border p-2 transition-colors ${
-            !hasChange
-              ? "bg-muted/40"
-              : isIncrease
-                ? "bg-success/5 border-success/30"
-                : "bg-destructive/5 border-destructive/30"
-          }`}
-        >
+        {/* Delta indicator — single semantic signal on the icon only (neutral box/border/value) */}
+        <div className="bg-muted/40 flex items-center justify-between rounded-lg border p-2">
           <div className="flex items-center gap-2">
             <div
-              className={`flex size-7 items-center justify-center rounded-lg ${
+              className={`bg-muted flex size-7 items-center justify-center rounded-lg ${
                 !hasChange
-                  ? "bg-muted text-muted-foreground"
+                  ? "text-muted-foreground"
                   : isIncrease
-                    ? "bg-success/20 text-success"
-                    : "bg-destructive/20 text-destructive"
+                    ? "text-success"
+                    : "text-destructive"
               }`}
             >
               {!hasChange && <Minus className="size-3.5" />}
@@ -218,25 +210,17 @@ function EditForm({
             </div>
             <div>
               <p className="text-[0.625rem] font-semibold tracking-wider uppercase">
-                {!hasChange && "No change"}
-                {hasChange && isIncrease && "Increase"}
-                {hasChange && !isIncrease && "Decrease"}
+                {!hasChange && t("noChange")}
+                {hasChange && isIncrease && t("increase")}
+                {hasChange && !isIncrease && t("decrease")}
               </p>
               <p className="text-muted-foreground text-[0.625rem]">
-                vs current rate
+                {t("vsCurrentRate")}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p
-              className={`text-sm font-bold tabular-nums ${
-                !hasChange
-                  ? "text-muted-foreground"
-                  : isIncrease
-                    ? "text-success"
-                    : "text-destructive"
-              }`}
-            >
+            <p className="text-sm font-bold tabular-nums">
               {hasChange && isIncrease && "+"}
               {formatExchangeRate(delta)}
             </p>

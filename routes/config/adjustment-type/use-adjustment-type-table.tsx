@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { Badge } from "@/components/ui/badge";
@@ -25,11 +26,12 @@ export function useAdjustmentTypeTable({
   onEdit,
   onDelete,
 }: UseAdjustmentTypeTableOptions) {
+  const tfl = useTranslations("field");
   const columns: ColumnDef<AdjustmentType>[] = [
     {
       accessorKey: "code",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Code" />
+        <DataGridColumnHeader column={column} title={tfl("code")} />
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
@@ -37,21 +39,21 @@ export function useAdjustmentTypeTable({
         </CellAction>
       ),
       size: 120,
-      meta: { headerTitle: "Code", skeleton: columnSkeletons.textShort },
+      meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.textShort },
     },
     {
       accessorKey: "name",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Name" />
+        <DataGridColumnHeader column={column} title={tfl("name")} />
       ),
-      meta: { headerTitle: "Name", skeleton: columnSkeletons.text },
+      meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },
     },
     {
       accessorKey: "type",
       header: ({ column }) => (
         <DataGridColumnHeader
           column={column}
-          title="Type"
+          title={tfl("type")}
           className="justify-center"
         />
       ),
@@ -62,13 +64,15 @@ export function useAdjustmentTypeTable({
             size="lg"
             variant={type === ADJUSTMENT_TYPE.STOCK_IN ? "default" : "warning"}
           >
-            {type === ADJUSTMENT_TYPE.STOCK_IN ? "Stock In" : "Stock Out"}
+            {type === ADJUSTMENT_TYPE.STOCK_IN
+              ? tfl("stockIn")
+              : tfl("stockOut")}
           </Badge>
         );
       },
       size: 120,
       meta: {
-        headerTitle: "Type",
+        headerTitle: tfl("type"),
         cellClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },

@@ -22,6 +22,7 @@ export default function AdjustmentTypeCard({
   onEdit,
 }: AdjustmentTypeCardProps) {
   const tfl = useTranslations("field");
+  const ts = useTranslations("status");
 
   return (
     <Card
@@ -61,11 +62,11 @@ export default function AdjustmentTypeCard({
               : tfl("stockOut")}
           </Badge>
           <Badge
-            variant={item.is_active ? "success" : "destructive"}
+            variant={item.is_active ? "success" : "secondary"}
             size="sm"
             className="text-xs"
           >
-            {item.is_active ? "Active" : "Inactive"}
+            {item.is_active ? ts("active") : ts("inactive")}
           </Badge>
         </CardAction>
       </CardHeader>

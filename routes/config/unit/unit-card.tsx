@@ -55,7 +55,7 @@ export default function UnitCard({ item, index, onEdit }: UnitCardProps) {
         </div>
         <CardAction>
           <Badge
-            variant={item.is_active ? "success" : "destructive"}
+            variant={item.is_active ? "success" : "secondary"}
             size="sm"
             className="text-xs"
           >

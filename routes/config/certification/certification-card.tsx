@@ -56,7 +56,7 @@ export default function CertificationCard({
             </Badge>
           </div>
           <Badge
-            variant={item.is_active ? "success" : "destructive"}
+            variant={item.is_active ? "success" : "secondary"}
             size="sm"
             className="shrink-0 text-xs"
           >

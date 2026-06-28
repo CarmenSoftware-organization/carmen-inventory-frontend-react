@@ -429,21 +429,15 @@ export default function ExchangeRateComponent() {
                     return (
                       <li
                         key={c.id}
-                        className={`flex items-center gap-3 rounded-lg border p-2 transition-colors ${
-                          noChange
-                            ? "bg-muted/40"
-                            : isIncrease
-                              ? "bg-success/5 border-success/30"
-                              : "bg-destructive/5 border-destructive/30"
-                        }`}
+                        className="bg-muted/40 flex items-center gap-3 rounded-lg border p-2"
                       >
                         <div
-                          className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
+                          className={`bg-muted flex size-8 shrink-0 items-center justify-center rounded-lg ${
                             noChange
-                              ? "bg-muted text-muted-foreground"
+                              ? "text-muted-foreground"
                               : isIncrease
-                                ? "bg-success/20 text-success"
-                                : "bg-destructive/20 text-destructive"
+                                ? "text-success"
+                                : "text-destructive"
                           }`}
                         >
                           {noChange && <Minus className="size-3.5" />}
@@ -474,15 +468,7 @@ export default function ExchangeRateComponent() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p
-                            className={`text-xs font-bold tabular-nums ${
-                              noChange
-                                ? "text-muted-foreground"
-                                : isIncrease
-                                  ? "text-success"
-                                  : "text-destructive"
-                            }`}
-                          >
+                          <p className="text-foreground text-xs font-bold tabular-nums">
                             {isIncrease && "+"}
                             {formatExchangeRate(c.diff)}
                           </p>

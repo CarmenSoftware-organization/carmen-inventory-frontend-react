@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
@@ -32,25 +33,26 @@ export function useCreditNoteReasonTable({
   onEdit,
   onDelete,
 }: UseCreditNoteReasonTableOptions) {
+  const tfl = useTranslations("field");
   const columns: ColumnDef<CnReason>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Name" />
+        <DataGridColumnHeader column={column} title={tfl("name")} />
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
           {row.getValue("name") || "..."}
         </CellAction>
       ),
-      meta: { headerTitle: "Name", skeleton: columnSkeletons.text },
+      meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },
     },
     {
       accessorKey: "description",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Description" />
+        <DataGridColumnHeader column={column} title={tfl("description")} />
       ),
-      meta: { headerTitle: "Description", skeleton: columnSkeletons.text },
+      meta: { headerTitle: tfl("description"), skeleton: columnSkeletons.text },
     },
   ];
 

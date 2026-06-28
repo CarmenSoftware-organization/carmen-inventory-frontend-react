@@ -61,7 +61,7 @@ export default function CurrencyCard({
         </div>
         <CardAction>
           <Badge
-            variant={item.is_active ? "success" : "destructive"}
+            variant={item.is_active ? "success" : "secondary"}
             size="sm"
             className="text-xs"
           >

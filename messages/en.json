@@ -666,7 +666,13 @@
       "createDesc": "Add a custom rate for a specific currency and date.",
       "editDesc": "Update the exchange rate for the selected record.",
       "currencyCode": "Currency Code",
-      "bulkUpdateConfirm": "Update {count} currencies with the latest rates from external source? This will affect all future transactions."
+      "bulkUpdateConfirm": "Update {count} currencies with the latest rates from external source? This will affect all future transactions.",
+      "current": "Current",
+      "new": "New",
+      "increase": "Increase",
+      "decrease": "Decrease",
+      "noChange": "No change",
+      "vsCurrentRate": "vs current rate"
     },
     "extraCost": {
       "entity": "Extra Cost Type",
