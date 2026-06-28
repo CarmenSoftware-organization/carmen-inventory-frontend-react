@@ -1,16 +1,13 @@
 import { CircleCheck, CircleX, Tag, Truck } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge, type BadgeProps } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { INVENTORY_TYPE } from "@/constant/location";
+import {
+  INVENTORY_TYPE_LABEL_KEY,
+  LOCATION_TYPE_BADGE_VARIANT,
+} from "@/constant/location";
 import type { Location } from "@/types/location";
-
-const LOCATION_TYPE_VARIANT: Record<INVENTORY_TYPE, BadgeProps["variant"]> = {
-  [INVENTORY_TYPE.INVENTORY]: "info",
-  [INVENTORY_TYPE.DIRECT]: "success",
-  [INVENTORY_TYPE.CONSIGNMENT]: "warning",
-};
 
 interface LocationCardProps {
   readonly item: Location;
@@ -32,7 +29,9 @@ interface LocationCardProps {
  * ```
  */
 export default function LocationCard({ item, index, onEdit }: LocationCardProps) {
+  const t = useTranslations("config.location");
   const tfl = useTranslations("field");
+  const ts = useTranslations("status");
 
   return (
     <Card
@@ -59,11 +58,11 @@ export default function LocationCard({ item, index, onEdit }: LocationCardProps)
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-xs">{item.code}</p>
           <Badge
-            variant={LOCATION_TYPE_VARIANT[item.location_type]}
+            variant={LOCATION_TYPE_BADGE_VARIANT[item.location_type]}
             className="text-xs"
             size="xs"
           >
-            {item.location_type.toUpperCase()}
+            {t(INVENTORY_TYPE_LABEL_KEY[item.location_type])}
           </Badge>
         </div>
       </CardHeader>
@@ -74,7 +73,7 @@ export default function LocationCard({ item, index, onEdit }: LocationCardProps)
         <div className="flex items-center gap-2">
           {item.physical_count_type === "yes" ? (
             <CircleCheck
-              className="size-3 shrink-0 text-green-600 dark:text-green-500"
+              className="text-positive size-3 shrink-0"
               aria-hidden="true"
             />
           ) : (
@@ -108,7 +107,7 @@ export default function LocationCard({ item, index, onEdit }: LocationCardProps)
               aria-hidden="true"
             />
             <Badge variant="secondary" size="sm" className="text-xs">
-              Inactive
+              {ts("inactive")}
             </Badge>
           </div>
         )}

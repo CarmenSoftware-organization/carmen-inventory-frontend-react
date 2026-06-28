@@ -37,6 +37,7 @@ export default function DepartmentCard({
   onEdit,
 }: DepartmentCardProps) {
   const t = useTranslations("config.department");
+  const ts = useTranslations("status");
 
   return (
     <Card
@@ -65,11 +66,11 @@ export default function DepartmentCard({
         </div>
         <CardAction>
           <Badge
-            variant={item.is_active ? "success" : "destructive"}
+            variant={item.is_active ? "success" : "secondary"}
             size="sm"
             className="text-xs"
           >
-            {item.is_active ? "Active" : "Inactive"}
+            {item.is_active ? ts("active") : ts("inactive")}
           </Badge>
         </CardAction>
       </CardHeader>

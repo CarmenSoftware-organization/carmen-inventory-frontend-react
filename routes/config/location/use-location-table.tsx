@@ -8,14 +8,11 @@ import { CircleCheck, CircleX } from "lucide-react";
 import type { Location } from "@/types/location";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import { Badge, type BadgeProps } from "@/components/ui/badge";
-import { INVENTORY_TYPE } from "@/constant/location";
-
-const LOCATION_TYPE_VARIANT: Record<INVENTORY_TYPE, BadgeProps["variant"]> = {
-  [INVENTORY_TYPE.INVENTORY]: "info",
-  [INVENTORY_TYPE.DIRECT]: "success",
-  [INVENTORY_TYPE.CONSIGNMENT]: "warning",
-};
+import { Badge } from "@/components/ui/badge";
+import {
+  INVENTORY_TYPE_LABEL_KEY,
+  LOCATION_TYPE_BADGE_VARIANT,
+} from "@/constant/location";
 
 interface UseLocationTableOptions {
   data: Location[];
@@ -47,6 +44,7 @@ export function useLocationTable({
   onEdit,
   onDelete,
 }: UseLocationTableOptions) {
+  const t = useTranslations("config.location");
   const tfl = useTranslations("field");
   const columns: ColumnDef<Location>[] = [
     {
@@ -86,10 +84,10 @@ export function useLocationTable({
       ),
       cell: ({ row }) => (
         <Badge
-          variant={LOCATION_TYPE_VARIANT[row.original.location_type]}
+          variant={LOCATION_TYPE_BADGE_VARIANT[row.original.location_type]}
           size="lg"
         >
-          {row.original.location_type.toUpperCase()}
+          {t(INVENTORY_TYPE_LABEL_KEY[row.original.location_type])}
         </Badge>
       ),
       size: 120,
@@ -105,7 +103,7 @@ export function useLocationTable({
       cell: ({ row }) =>
         row.original.physical_count_type === "yes" ? (
           <CircleCheck
-            className="mx-auto size-4 text-green-600 dark:text-green-500"
+            className="text-positive mx-auto size-4"
             aria-label="Yes"
           />
         ) : (

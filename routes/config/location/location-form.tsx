@@ -38,7 +38,9 @@ import { useAllProducts } from "@/hooks/use-all-products";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { cn } from "@/lib/utils";
 import {
+  INVENTORY_TYPE_LABEL_KEY,
   INVENTORY_TYPE_OPTIONS,
+  PHYSICAL_COUNT_LABEL_KEY,
   PHYSICAL_COUNT_TYPE_OPTIONS,
 } from "@/constant/location";
 import type { Location } from "@/types/location";
@@ -293,7 +295,7 @@ export function LocationForm({ location }: LocationFormProps) {
 
         {/* ── General Info ─────────── */}
         <Reveal delay={80}>
-          <div className="border-border/60 bg-card mt-4 max-w-3xl rounded-xl border p-4">
+          <Panel>
             <SectionLabel icon={MapPin}>{t("entity")}</SectionLabel>
 
             <form
@@ -352,9 +354,9 @@ export function LocationForm({ location }: LocationFormProps) {
                     {isView ? (
                       <PlainText
                         value={
-                          INVENTORY_TYPE_OPTIONS.find(
-                            (o) => o.value === location?.location_type,
-                          )?.label
+                          location?.location_type
+                            ? t(INVENTORY_TYPE_LABEL_KEY[location.location_type])
+                            : undefined
                         }
                       />
                     ) : (
@@ -373,7 +375,7 @@ export function LocationForm({ location }: LocationFormProps) {
                             <SelectContent>
                               {INVENTORY_TYPE_OPTIONS.map((opt) => (
                                 <SelectItem key={opt.value} value={opt.value}>
-                                  {opt.label}
+                                  {t(INVENTORY_TYPE_LABEL_KEY[opt.value])}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -388,9 +390,13 @@ export function LocationForm({ location }: LocationFormProps) {
                     {isView ? (
                       <PlainText
                         value={
-                          PHYSICAL_COUNT_TYPE_OPTIONS.find(
-                            (o) => o.value === location?.physical_count_type,
-                          )?.label
+                          location?.physical_count_type
+                            ? t(
+                                PHYSICAL_COUNT_LABEL_KEY[
+                                  location.physical_count_type
+                                ],
+                              )
+                            : undefined
                         }
                       />
                     ) : (
@@ -411,7 +417,7 @@ export function LocationForm({ location }: LocationFormProps) {
                             <SelectContent>
                               {PHYSICAL_COUNT_TYPE_OPTIONS.map((opt) => (
                                 <SelectItem key={opt.value} value={opt.value}>
-                                  {opt.label}
+                                  {t(PHYSICAL_COUNT_LABEL_KEY[opt.value])}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -483,14 +489,14 @@ export function LocationForm({ location }: LocationFormProps) {
                 />
               </FieldGroup>
             </form>
-          </div>
+          </Panel>
         </Reveal>
 
         {/* ── Users + Products ─────────── */}
         {isView ? (
           location && (
             <Reveal delay={160}>
-              <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
+              <Panel>
                 <Tabs defaultValue="users">
                   <TabsList variant="line">
                     <TabsTrigger value="users" className="text-xs">
@@ -509,13 +515,13 @@ export function LocationForm({ location }: LocationFormProps) {
                     <ProductTable products={enrichedProducts} />
                   </TabsContent>
                 </Tabs>
-              </div>
+              </Panel>
             </Reveal>
           )
         ) : (
           <>
             <Reveal delay={160}>
-              <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
+              <Panel>
                 <SectionLabel icon={Users} count={userTargetKeys.length}>
                   {t("locationUsers")}
                 </SectionLabel>
@@ -529,11 +535,11 @@ export function LocationForm({ location }: LocationFormProps) {
                     titles={[t("availableUsers"), t("locationUsers")]}
                   />
                 </Suspense>
-              </div>
+              </Panel>
             </Reveal>
 
             <Reveal delay={220}>
-              <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
+              <Panel>
                 <SectionLabel icon={Boxes} count={selectedProductIds.size}>
                   {t("products")}
                 </SectionLabel>
@@ -544,7 +550,7 @@ export function LocationForm({ location }: LocationFormProps) {
                   disabled={isDisabled}
                   loading={isLoadingProducts}
                 />
-              </div>
+              </Panel>
             </Reveal>
           </>
         )}
@@ -572,6 +578,27 @@ export function LocationForm({ location }: LocationFormProps) {
           />
         )}
       </div>
+    </div>
+  );
+}
+
+/* ── Panel surface (shared card chrome) ─────────── */
+
+function Panel({
+  children,
+  className,
+}: {
+  readonly children: React.ReactNode;
+  readonly className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4",
+        className,
+      )}
+    >
+      {children}
     </div>
   );
 }
@@ -615,13 +642,13 @@ function SectionLabel({
   readonly count?: number;
 }) {
   return (
-    <div className="text-muted-foreground mb-3 flex items-center gap-1.5 text-[0.5625rem] font-semibold tracking-widest uppercase">
+    <div className="text-muted-foreground mb-3 flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-widest uppercase">
       <Icon className="size-2.5" aria-hidden="true" />
       <span>{children}</span>
       {typeof count === "number" && (
         <span
           className={cn(
-            "inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-bold tabular-nums tracking-wider",
+            "inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums tracking-wider",
             count > 0
               ? "bg-primary/15 text-primary"
               : "bg-muted text-muted-foreground",

@@ -261,7 +261,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
 
         {/* ── General Info ─────────── */}
         <Reveal delay={80}>
-          <div className="border-border/60 bg-card mt-4 max-w-3xl rounded-xl border p-4">
+          <Panel>
             <SectionLabel icon={Building2}>{t("entity")}</SectionLabel>
 
             <form
@@ -330,12 +330,12 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                 />
               </FieldGroup>
             </form>
-          </div>
+          </Panel>
         </Reveal>
 
         {/* ── Members ─────────── */}
         <Reveal delay={160}>
-          <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
+          <Panel>
             <SectionLabel
               icon={Users}
               count={
@@ -360,12 +360,12 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                 />
               </Suspense>
             )}
-          </div>
+          </Panel>
         </Reveal>
 
         {/* ── HOD ─────────── */}
         <Reveal delay={220}>
-          <div className="border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4">
+          <Panel>
             <SectionLabel
               icon={ShieldCheck}
               count={
@@ -390,7 +390,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                 />
               </Suspense>
             )}
-          </div>
+          </Panel>
         </Reveal>
 
         <DiscardDialog {...discard.dialogProps} variant="warning" />
@@ -420,6 +420,27 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
   );
 }
 
+/* ── Panel surface (shared card chrome) ─────────── */
+
+function Panel({
+  children,
+  className,
+}: {
+  readonly children: React.ReactNode;
+  readonly className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 /* ── Section label atom ─────────── */
 
 function SectionLabel({
@@ -432,13 +453,13 @@ function SectionLabel({
   readonly count?: number;
 }) {
   return (
-    <div className="text-muted-foreground mb-3 flex items-center gap-1.5 text-[0.5625rem] font-semibold tracking-widest uppercase">
+    <div className="text-muted-foreground mb-3 flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-widest uppercase">
       <Icon className="size-2.5" aria-hidden="true" />
       <span>{children}</span>
       {typeof count === "number" && (
         <span
           className={cn(
-            "inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-bold tabular-nums tracking-wider",
+            "inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums tracking-wider",
             count > 0
               ? "bg-primary/15 text-primary"
               : "bg-muted text-muted-foreground",
