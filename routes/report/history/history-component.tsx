@@ -146,6 +146,7 @@ function GridContent({
   sentinelRef,
   totalRecords,
 }: GridContentProps) {
+  const t = useTranslations("reportHistory");
   if (isLoading && items.length === 0) {
     return <CardSkeletonGrid count={6} />;
   }
@@ -171,11 +172,11 @@ function GridContent({
           {isLoadingMore ? (
             <div className="text-muted-foreground inline-flex items-center gap-2 text-xs">
               <Loader2 className="size-4 animate-spin" aria-hidden />
-              <span>Loading more…</span>
+              <span>{t("loadingMore")}</span>
             </div>
           ) : (
             <span className="text-muted-foreground/60 text-[0.6875rem]">
-              Scroll to load more
+              {t("scrollToLoadMore")}
             </span>
           )}
         </div>

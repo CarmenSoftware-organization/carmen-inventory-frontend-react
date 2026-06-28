@@ -102,6 +102,7 @@ interface LookupControlProps {
 }
 
 function LookupControl({ node, id }: LookupControlProps) {
+  const tc = useTranslations("common");
   const options = node.items
     .map((item, idx) => ({ item, value: node.values[idx] || item }))
     .filter((o) => o.value !== "");
@@ -116,7 +117,7 @@ function LookupControl({ node, id }: LookupControlProps) {
         <SelectContent className="max-h-[min(60vh,400px)]" position="popper">
           {options.map(({ item, value }) => (
             <SelectItem key={value} value={value}>
-              {item}
+              {item === "ALL" ? tc("all") : item}
             </SelectItem>
           ))}
         </SelectContent>
@@ -142,6 +143,7 @@ function MultiLookupControl({
   readonly node: LookupNode;
   readonly id: string;
 }) {
+  const tc = useTranslations("common");
   const options = node.items
     .map((item, idx) => ({ item, value: node.values[idx] || item }))
     .filter((o) => o.value !== "");
@@ -165,7 +167,7 @@ function MultiLookupControl({
               checked={selected.includes(value)}
               onCheckedChange={(c) => toggle(value, c === true)}
             />
-            {item}
+            {item === "ALL" ? tc("all") : item}
           </label>
         ))}
       </div>

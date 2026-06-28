@@ -33,6 +33,7 @@ export function ScheduleRecipientsField({
   disabled,
 }: ScheduleRecipientsFieldProps) {
   const t = useTranslations("reportSchedule");
+  const tl = useTranslations("lookup");
   const { data: users = [] } = useAllUsers();
 
   return (
@@ -65,7 +66,7 @@ export function ScheduleRecipientsField({
                       type="button"
                       disabled={disabled}
                       onClick={() => toggle(id)}
-                      aria-label={`Remove ${nameById.get(id) ?? id}`}
+                      aria-label={tl("remove", { name: nameById.get(id) ?? id })}
                       className="disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {nameById.get(id) ?? id}

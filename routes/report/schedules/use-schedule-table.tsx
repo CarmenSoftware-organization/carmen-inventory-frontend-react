@@ -19,37 +19,33 @@ const FORMAT_LABELS: Record<ReportFormat, string> = {
   json: "JSON",
 };
 
-const WEEKDAY_SHORT = [
-  "Sun",
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat",
-] as const;
-
 /**
- * อ่าน `schedule_config` แปลงเป็นข้อความ "Daily/Weekly/Monthly @ HH:mm"
+ * อ่าน `schedule_config` แปลงเป็นข้อความความถี่ (i18n)
  * ถ้าไม่มี config ใช้ cron expression เป็น fallback
  *
  * @param row - one ReportSchedule
+ * @param t - translator (namespace reportSchedule)
+ * @param weekdayShort - localized short weekday names (index 0 = Sunday)
  * @returns label string
  */
-function formatScheduleConfig(row: ReportSchedule): string {
+function formatScheduleConfig(
+  row: ReportSchedule,
+  t: ReturnType<typeof useTranslations>,
+  weekdayShort: readonly string[],
+): string {
   const cfg = row.schedule_config;
   if (!cfg) return row.cron_expression;
   const { frequency, time } = cfg;
-  if (frequency === "daily") return `Daily @ ${time}`;
+  if (frequency === "daily") return t("freqDaily", { time });
   if (frequency === "weekly") {
     const days = (cfg.days_of_week ?? [])
-      .map((d) => WEEKDAY_SHORT[d])
+      .map((d) => weekdayShort[d])
       .join(", ");
-    return `Weekly ${days} @ ${time}`;
+    return t("freqWeekly", { days, time });
   }
   if (frequency === "monthly") {
     const days = (cfg.days_of_month ?? []).join(", ");
-    return `Monthly day ${days} @ ${time}`;
+    return t("freqMonthly", { days, time });
   }
   return row.cron_expression;
 }
@@ -76,6 +72,15 @@ export function useScheduleTableColumns({
   const t = useTranslations("reportSchedule");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
+  const weekdayShort = [
+    t("wdSun"),
+    t("wdMon"),
+    t("wdTue"),
+    t("wdWed"),
+    t("wdThu"),
+    t("wdFri"),
+    t("wdSat"),
+  ];
 
   return [
     {
@@ -89,13 +94,18 @@ export function useScheduleTableColumns({
     {
       accessorKey: "format",
       header: t("format"),
-      cell: ({ getValue }) => FORMAT_LABELS[getValue<ReportFormat>()] ?? "-",
+      cell: ({ getValue }) => {
+        const v = getValue<ReportFormat>();
+        if (v === "REPORT_FORMAT_VIEWER_URL" || v === "viewer_url")
+          return t("formatViewerLink");
+        return FORMAT_LABELS[v] ?? "-";
+      },
       size: 80,
     },
     {
       accessorKey: "cron_expression",
       header: t("frequency"),
-      cell: ({ row }) => formatScheduleConfig(row.original),
+      cell: ({ row }) => formatScheduleConfig(row.original, t, weekdayShort),
       size: 200,
     },
     {

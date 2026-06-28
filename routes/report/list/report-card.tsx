@@ -1,4 +1,5 @@
 import { ArrowUpRight, FileText, Sparkles } from "lucide-react";
+import { useTranslations } from "use-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ interface ReportCardProps {
  * - Click หรือ Enter/Space → เปิด dialog เลือก parameter
  */
 export default function ReportCard({ item, onSelect }: ReportCardProps) {
+  const t = useTranslations("report");
   return (
     <div
       role="button"
@@ -79,7 +81,7 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
                   className="border-primary/30 text-primary inline-flex items-center gap-0.5 px-1.5 py-0 text-[0.5625rem] font-semibold tracking-wide uppercase"
                 >
                   <Sparkles className="size-2" aria-hidden />
-                  System
+                  {t("system")}
                 </Badge>
               </>
             )}
