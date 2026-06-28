@@ -3,6 +3,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import {
@@ -39,6 +40,7 @@ export function useUserTable({
   onDelete,
 }: UseUserTableOptions) {
   "use no memo";
+  const tfl = useTranslations("field");
 
   const columns: ColumnDef<User>[] = [
     selectColumn<User>(),
@@ -46,7 +48,7 @@ export function useUserTable({
     {
       accessorKey: "firstname",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Name" />
+        <DataGridColumnHeader column={column} title={tfl("name")} />
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
@@ -57,7 +59,7 @@ export function useUserTable({
     {
       accessorKey: "email",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Email" />
+        <DataGridColumnHeader column={column} title={tfl("email")} />
       ),
     },
     {
@@ -67,7 +69,7 @@ export function useUserTable({
           ? `${row.department.code} — ${row.department.name}`
           : (row.department?.name ?? ""),
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Department" />
+        <DataGridColumnHeader column={column} title={tfl("department")} />
       ),
     },
     actionColumn<User>(onDelete),

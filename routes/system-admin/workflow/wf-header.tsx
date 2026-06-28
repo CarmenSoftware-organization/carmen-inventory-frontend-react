@@ -72,7 +72,7 @@ export function WfHeader({
               </h1>
               {!isEditing && (
                 <Badge
-                  variant={workflow.is_active ? "success" : "destructive"}
+                  variant={workflow.is_active ? "success" : "secondary"}
                   size="sm"
                   className="text-xs"
                 >

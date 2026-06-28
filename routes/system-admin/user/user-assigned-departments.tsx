@@ -1,5 +1,6 @@
 
 import { Building2, Crown } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DepartmentRef } from "@/types/user";
@@ -18,10 +19,11 @@ export function DepartmentsSection({
   isLoading,
   totalCount,
 }: DepartmentsSectionProps) {
+  const t = useTranslations("systemAdmin.user");
   return (
     <SectionCard
       icon={Building2}
-      title="Departments"
+      title={t("departmentsTitle")}
       count={totalCount || undefined}
     >
       {isLoading ? (
@@ -32,8 +34,8 @@ export function DepartmentsSection({
       ) : !memberDepartment && hodDepartments.length === 0 ? (
         <EmptyState
           icon={Building2}
-          title="Not assigned"
-          desc="User has no department membership"
+          title={t("notAssigned")}
+          desc={t("notAssignedDesc")}
         />
       ) : (
         <div className="space-y-4">

@@ -1,3 +1,4 @@
+import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { usePermission } from "@/hooks/use-permission";
 import EmptyComponent from "@/components/empty-component";
@@ -77,6 +78,7 @@ export function PermissionMatrix({
   onChange,
   disabled,
 }: PermissionMatrixProps) {
+  const t = useTranslations("systemAdmin.role");
   const { data: permData } = usePermission({ perpage: -1 });
   const permissions = permData?.data ?? [];
 
@@ -182,8 +184,8 @@ export function PermissionMatrix({
   if (permissions.length === 0) {
     return (
       <EmptyComponent
-        title="No permissions found"
-        description="You have no permissions to manage."
+        title={t("noPermissions")}
+        description={t("noPermissionsDesc")}
       />
     );
   }

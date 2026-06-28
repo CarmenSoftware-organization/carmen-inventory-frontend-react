@@ -1,5 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import {
@@ -37,11 +38,12 @@ export function useRoleTable({
   onDelete,
 }: UseRoleTableOptions) {
   "use no memo";
+  const tfl = useTranslations("field");
   const dataColumns: ColumnDef<Role>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Name" />
+        <DataGridColumnHeader column={column} title={tfl("name")} />
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
@@ -54,7 +56,7 @@ export function useRoleTable({
       id: "permission_count",
       accessorFn: (row) => row.permissions.length,
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="Permissions" />
+        <DataGridColumnHeader column={column} title={tfl("permissions")} />
       ),
       enableSorting: false,
       cell: ({ row }) => {

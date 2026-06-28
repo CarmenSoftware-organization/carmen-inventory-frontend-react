@@ -1,5 +1,6 @@
 
 import { Controller, type UseFormReturn } from "react-hook-form";
+import { useTranslations } from "use-intl";
 import { Check, Shield, ShieldCheck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -106,8 +107,9 @@ export function RolesSection({
   count,
   onSubmit,
 }: RolesSectionProps) {
+  const t = useTranslations("systemAdmin.user");
   return (
-    <SectionCard icon={Shield} title="Assign Roles" count={count}>
+    <SectionCard icon={Shield} title={t("assignRoles")} count={count}>
       {isLoading ? (
         <div className="space-y-2">
           {[0, 1, 2].map((i) => (
@@ -117,8 +119,8 @@ export function RolesSection({
       ) : roles.length === 0 ? (
         <EmptyState
           icon={Shield}
-          title="No roles available"
-          desc="Create roles in System Admin first"
+          title={t("noRolesAvailable")}
+          desc={t("noRolesAvailableDesc")}
         />
       ) : (
         <form

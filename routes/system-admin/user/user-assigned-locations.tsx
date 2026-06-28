@@ -1,6 +1,7 @@
 
 import { lazy, Suspense, useState } from "react";
 import { MapPin } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TransferItem } from "@/components/ui/transfer";
@@ -102,6 +103,7 @@ export function LocationsSection({
   transferLoading,
   initialLocationCount,
 }: LocationsSectionProps) {
+  const tu = useTranslations("systemAdmin.user");
   const [typeFilter, setTypeFilter] = useState<INVENTORY_TYPE | "all">("all");
 
   const groupedLocations = (() => {
@@ -152,7 +154,7 @@ export function LocationsSection({
   return (
     <SectionCard
       icon={MapPin}
-      title="Locations"
+      title={tu("locationsTitle")}
       count={isView ? initialLocationCount : locationTargetKeys.length}
       action={action}
     >
@@ -197,6 +199,7 @@ function LocationsView({
   visibleGroups,
   groupedLocations,
 }: LocationsViewProps) {
+  const tu = useTranslations("systemAdmin.user");
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -210,8 +213,8 @@ function LocationsView({
     return (
       <EmptyState
         icon={MapPin}
-        title="No locations assigned"
-        desc="Switch to edit mode to assign locations"
+        title={tu("noLocationsAssigned")}
+        desc={tu("noLocationsAssignedDesc")}
       />
     );
   }
@@ -219,8 +222,8 @@ function LocationsView({
     return (
       <EmptyState
         icon={MapPin}
-        title="No locations match filter"
-        desc="Clear filter to see all locations"
+        title={tu("noLocationsMatchFilter")}
+        desc={tu("noLocationsMatchFilterDesc")}
       />
     );
   }

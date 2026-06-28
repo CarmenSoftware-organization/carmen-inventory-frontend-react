@@ -78,7 +78,7 @@ export default function RunningCodeComponent() {
           { header: tfl("type"), value: (r) => r.type, width: 20 },
           { header: tfl("note"), value: (r) => r.note ?? "", width: 32 },
           {
-            header: "Config",
+            header: tfl("config"),
             value: (r) => JSON.stringify(r.config ?? {}),
             width: 40,
           },

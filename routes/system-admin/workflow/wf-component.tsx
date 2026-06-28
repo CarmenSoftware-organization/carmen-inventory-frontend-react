@@ -53,6 +53,11 @@ export default function WorkflowComponent() {
   const t = useTranslations("systemAdmin.workflow");
   const tc = useTranslations("common");
   const tt = useTranslations("toast");
+  const ts = useTranslations("status");
+  const statusOptions = STATUS_OPTIONS.map((o) => ({
+    ...o,
+    label: o.value.endsWith("true") ? ts("active") : ts("inactive"),
+  }));
   const { params, search, setSearch, filter, setFilter, tableConfig } =
     useDataGridState();
   const [wfType, setWfType] = useURL("workflow_type");
@@ -152,7 +157,7 @@ export default function WorkflowComponent() {
             <StatusFilter
               value={filter}
               onChange={setFilter}
-              options={STATUS_OPTIONS}
+              options={statusOptions}
             />
             <MultiSelectFilter
               value={wfType}
@@ -189,7 +194,7 @@ export default function WorkflowComponent() {
                 <StatusFilter
                   value={filter}
                   onChange={setFilter}
-                  options={STATUS_OPTIONS}
+                  options={statusOptions}
                 />
                 <MultiSelectFilter
                   value={wfType}

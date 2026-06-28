@@ -67,7 +67,7 @@ export function useNotiTmplTable({
       cell: ({ row }) => (
         <Link
           to={`/system-admin/notification-template/${row.original.id}`}
-          className="focus-visible:ring-ring/50 font-semibold text-blue-600 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-none dark:text-blue-400"
+          className="focus-visible:ring-ring/50 text-primary font-semibold hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:outline-none"
         >
           {row.original.name || "..."}
         </Link>

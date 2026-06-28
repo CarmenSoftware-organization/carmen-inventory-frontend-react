@@ -905,6 +905,7 @@
       }
     },
     "role": {
+      "noPermissionsDesc": "คุณไม่มีสิทธิ์ให้จัดการ",
       "entity": "บทบาท",
       "title": "บทบาท",
       "desc": "จัดการบทบาทและสิทธิ์การใช้งาน",
@@ -1008,6 +1009,17 @@
       }
     },
     "user": {
+      "assignRoles": "กำหนดบทบาท",
+      "noRolesAvailable": "ไม่มีบทบาท",
+      "noRolesAvailableDesc": "สร้างบทบาทใน System Admin ก่อน",
+      "departmentsTitle": "แผนก",
+      "notAssigned": "ยังไม่ได้กำหนด",
+      "notAssignedDesc": "ผู้ใช้ยังไม่สังกัดแผนก",
+      "locationsTitle": "คลัง",
+      "noLocationsAssigned": "ยังไม่ได้กำหนดคลัง",
+      "noLocationsAssignedDesc": "สลับเป็นโหมดแก้ไขเพื่อกำหนดคลัง",
+      "noLocationsMatchFilter": "ไม่มีคลังตรงตัวกรอง",
+      "noLocationsMatchFilterDesc": "ล้างตัวกรองเพื่อดูคลังทั้งหมด",
       "title": "กำหนดผู้ใช้งาน",
       "add": "เพิ่มผู้ใช้",
       "edit": "แก้ไขผู้ใช้",

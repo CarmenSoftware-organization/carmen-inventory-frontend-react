@@ -905,6 +905,7 @@
       }
     },
     "role": {
+      "noPermissionsDesc": "You have no permissions to manage.",
       "entity": "Role",
       "title": "Roles",
       "desc": "Manage application roles and permissions.",
@@ -1008,6 +1009,17 @@
       }
     },
     "user": {
+      "assignRoles": "Assign Roles",
+      "noRolesAvailable": "No roles available",
+      "noRolesAvailableDesc": "Create roles in System Admin first",
+      "departmentsTitle": "Departments",
+      "notAssigned": "Not assigned",
+      "notAssignedDesc": "User has no department membership",
+      "locationsTitle": "Locations",
+      "noLocationsAssigned": "No locations assigned",
+      "noLocationsAssignedDesc": "Switch to edit mode to assign locations",
+      "noLocationsMatchFilter": "No locations match filter",
+      "noLocationsMatchFilterDesc": "Clear filter to see all locations",
       "title": "User Assign",
       "add": "Add User",
       "edit": "Edit User",
