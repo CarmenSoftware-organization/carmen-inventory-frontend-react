@@ -9,14 +9,13 @@ import type { DiscardDialogProps as DiscardConfirmDialogProps } from "@/hooks/us
 import type { PurchaseRequest } from "@/types/purchase-request";
 import type { useDeletePurchaseRequest } from "@/hooks/use-purchase-request";
 import type { ActionDialogState } from "./use-pr-form-actions";
+// PrActionDialog ถูก static import โดย pr-item-fields / pr-footer-action อยู่แล้ว
+// lazy() จึง split ไม่ได้จริง (Rollup เตือน) — import ตรงเพื่อให้ chunking สอดคล้องกัน
+import { PrActionDialog } from "./workflow/pr-action-dialog";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const PrCommentSheet = lazy(() =>
   import("./workflow/pr-comment-sheet").then((mod) => ({ default: mod.PrCommentSheet })),
-);
-
-const PrActionDialog = lazy(() =>
-  import("./workflow/pr-action-dialog").then((mod) => ({ default: mod.PrActionDialog })),
 );
 
 type DeletePrMutation = ReturnType<typeof useDeletePurchaseRequest>;
@@ -91,17 +90,15 @@ export function PrFormDialogs({
       )}
 
       {actionDialog.type && (
-        <Suspense fallback={null}>
-          <PrActionDialog
-            open={!!actionDialog.type}
-            onOpenChange={(open) => {
-              if (!open) setActionDialog({ type: null });
-            }}
-            isPending={isPending}
-            onConfirm={onActionConfirm}
-            {...actionDialogConfig[actionDialog.type]}
-          />
-        </Suspense>
+        <PrActionDialog
+          open={!!actionDialog.type}
+          onOpenChange={(open) => {
+            if (!open) setActionDialog({ type: null });
+          }}
+          isPending={isPending}
+          onConfirm={onActionConfirm}
+          {...actionDialogConfig[actionDialog.type]}
+        />
       )}
 
       <Suspense fallback={null}>
