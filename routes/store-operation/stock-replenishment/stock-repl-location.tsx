@@ -53,6 +53,7 @@ export function StockReplLocation({
   const t = useTranslations("storeOperation.stockReplenishment");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const tl = useTranslations("lookup");
 
   const STATUS_CONFIG = {
     critical: { variant: "destructive" as const, label: ts("critical") },
@@ -105,7 +106,7 @@ export function StockReplLocation({
           onCheckedChange={(checked) =>
             handleSelectProduct(row.original, checked === true)
           }
-          aria-label={`Select ${row.original.name}`}
+          aria-label={tl("select", { entity: row.original.name })}
         />
       ),
       enableSorting: false,
