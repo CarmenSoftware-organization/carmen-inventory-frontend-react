@@ -415,7 +415,7 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
               <div className="space-y-1">
                 <Input
                   placeholder={t("address.city")}
-                  className={`h-7 text-xs${form.formState.errors.vendor_address?.[index]?.city ? "ring-destructive ring-1" : ""}`}
+                  className={`h-7 text-xs ${form.formState.errors.vendor_address?.[index]?.city ? "ring-destructive ring-1" : ""}`}
                   disabled={isDisabled}
                   maxLength={100}
                   {...form.register(`vendor_address.${index}.city`)}

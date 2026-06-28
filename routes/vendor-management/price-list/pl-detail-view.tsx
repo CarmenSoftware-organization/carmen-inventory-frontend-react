@@ -132,7 +132,7 @@ export function PriceListDetailView({ details }: PriceListDetailViewProps) {
                 <td className="border-border px-2 py-1.5 text-right tabular-nums">
                   {(Number(item.tax_amt) || 0).toFixed(2)}
                 </td>
-                <td className="border-border px-2 py-1.5 text-right tabular-nums font-semibold text-emerald-600">
+                <td className="border-border px-2 py-1.5 text-right tabular-nums font-semibold text-positive">
                   {(Number(item.price) || 0).toFixed(2)}
                 </td>
               </tr>

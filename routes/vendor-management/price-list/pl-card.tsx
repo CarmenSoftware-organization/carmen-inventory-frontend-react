@@ -34,10 +34,10 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
     return `${from} - ${to}`;
   };
 
-  const variantMap: Record<string, "outline" | "success" | "destructive"> = {
+  const variantMap: Record<string, "outline" | "success" | "secondary"> = {
     draft: "outline",
     active: "success",
-    inactive: "destructive",
+    inactive: "secondary",
   };
 
   return (

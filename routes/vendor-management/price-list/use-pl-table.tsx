@@ -58,7 +58,7 @@ export function usePriceListTable({
     {
       accessorKey: "no",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title="No." />
+        <DataGridColumnHeader column={column} title={tfl("no")} />
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
@@ -66,7 +66,7 @@ export function usePriceListTable({
         </CellAction>
       ),
       size: 160,
-      meta: { headerTitle: "No.", skeleton: columnSkeletons.textShort },
+      meta: { headerTitle: tfl("no"), skeleton: columnSkeletons.textShort },
     },
     {
       accessorKey: "name",
@@ -109,11 +109,11 @@ export function usePriceListTable({
         const status = row.getValue<string>("status");
         const variantMap: Record<
           string,
-          "outline" | "success" | "destructive"
+          "outline" | "success" | "secondary"
         > = {
           draft: "outline",
           active: "success",
-          inactive: "destructive",
+          inactive: "secondary",
         };
         return (
           <Badge size="lg" variant={variantMap[status] ?? "outline"}>

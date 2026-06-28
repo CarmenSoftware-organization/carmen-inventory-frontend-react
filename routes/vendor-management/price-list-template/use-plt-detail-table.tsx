@@ -10,6 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { memo, useMemo } from "react";
+import { useTranslations } from "use-intl";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
@@ -89,6 +90,8 @@ export function usePltDetailTable({
   onDelete,
 }: UsePltDetailTableOptions) {
   "use no memo";
+  const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const allColumns = useMemo<ColumnDef<PltDetailField>[]>(() => {
     const indexColumn: ColumnDef<PltDetailField> = {
       id: "index",
@@ -105,7 +108,7 @@ export function usePltDetailTable({
     const dataColumns: ColumnDef<PltDetailField>[] = [
       {
         accessorKey: "product_id",
-        header: "Product",
+        header: tfl("product"),
         cell: ({ row }) => (
           <ProductCell
             form={form}
@@ -117,7 +120,7 @@ export function usePltDetailTable({
       },
       {
         accessorKey: "unit_id",
-        header: "Unit",
+        header: tfl("unit"),
         cell: ({ row }) => (
           <UnitCell
             form={form}
@@ -129,7 +132,7 @@ export function usePltDetailTable({
       },
       {
         accessorKey: "qty",
-        header: "MOQ Qty",
+        header: tfl("moqQty"),
         cell: ({ row }) => (
           <FieldInput
             type="number"
@@ -156,7 +159,7 @@ export function usePltDetailTable({
           type="button"
           variant="ghost"
           size="xs"
-          aria-label="Remove item"
+          aria-label={tc("aria.remove")}
           onClick={() => onDelete(row.index)}
         >
           <Trash2 />
@@ -171,7 +174,7 @@ export function usePltDetailTable({
     };
 
     return [indexColumn, ...dataColumns, actionCol];
-  }, [form, onDelete]);
+  }, [form, onDelete, tfl, tc]);
 
   const table = useReactTable({
     data: detailFields,

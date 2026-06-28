@@ -148,7 +148,7 @@ export function VendorCertificateSection({
                   </td>
                   <td className="px-3 py-1.5 text-center">
                     <Badge
-                      variant={item.is_active ? "success" : "destructive"}
+                      variant={item.is_active ? "success" : "secondary"}
                       size="xs"
                     >
                       {item.is_active ? ts("active") : ts("inactive")}

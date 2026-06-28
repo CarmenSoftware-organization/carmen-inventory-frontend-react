@@ -29,10 +29,10 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
-  const variantMap: Record<string, "outline" | "success" | "destructive"> = {
+  const variantMap: Record<string, "outline" | "success" | "secondary"> = {
     draft: "outline",
     active: "success",
-    inactive: "destructive",
+    inactive: "secondary",
   };
 
   return (

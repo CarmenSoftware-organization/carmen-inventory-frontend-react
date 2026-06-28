@@ -301,6 +301,7 @@
   "field": {
     "field": "Field",
     "code": "Code",
+    "no": "No.",
     "name": "Name",
     "description": "Description",
     "symbol": "Symbol",

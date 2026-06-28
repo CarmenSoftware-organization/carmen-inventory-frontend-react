@@ -96,11 +96,11 @@ export function usePriceListTemplateTable({
         const status = row.getValue<string>("status");
         const variantMap: Record<
           string,
-          "outline" | "success" | "destructive"
+          "outline" | "success" | "secondary"
         > = {
           draft: "outline",
           active: "success",
-          inactive: "destructive",
+          inactive: "secondary",
         };
         const labelMap: Record<string, string> = {
           draft: ts("draft"),
