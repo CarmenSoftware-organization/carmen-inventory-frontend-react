@@ -5,6 +5,7 @@ import {
   type Control,
 } from "react-hook-form";
 import { memo } from "react";
+import { useTranslations } from "use-intl";
 import {
   Tooltip,
   TooltipContent,
@@ -14,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
 import { useUserLocation } from "@/hooks/use-user-location";
+import { inventoryTypeLabelKey } from "@/constant/location";
 import type { PrFormValues } from "../pr-form-schema";
 import { LOCATION_TYPE_VARIANT, useIsRowLocked } from "./helpers";
 
@@ -29,6 +31,7 @@ export const LocationCell = memo(function LocationCell({
   isDisabled: boolean;
 }) {
   "use no memo";
+  const tl = useTranslations("config.location");
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const locationCode =
@@ -130,9 +133,12 @@ export const LocationCell = memo(function LocationCell({
                         variant={
                           LOCATION_TYPE_VARIANT[locationType] ?? "secondary"
                         }
-                        className="h-4 px-1.5 text-[0.5625rem]"
+                        className="h-4 px-1.5 text-[0.625rem]"
                       >
-                        {locationType.toUpperCase()}
+                        {(() => {
+                          const k = inventoryTypeLabelKey(locationType);
+                          return k ? tl(k) : locationType.toUpperCase();
+                        })()}
                       </Badge>
                     )}
                   </div>

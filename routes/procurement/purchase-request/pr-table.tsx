@@ -190,7 +190,7 @@ export function usePurchaseRequestTable({
                 className="cursor-pointer"
                 onClick={() => onApprove(item)}
               >
-                <Check className="size-3 text-green-600" aria-hidden="true" />
+                <Check className="text-positive size-3" aria-hidden="true" />
                 {tc("approve")}
               </DropdownMenuItem>
             )}
@@ -200,7 +200,7 @@ export function usePurchaseRequestTable({
                 className="cursor-pointer"
                 onClick={() => onReject(item)}
               >
-                <X className="size-3 text-red-600" aria-hidden="true" />
+                <X className="text-destructive size-3" aria-hidden="true" />
                 {tc("reject")}
               </DropdownMenuItem>
             )}

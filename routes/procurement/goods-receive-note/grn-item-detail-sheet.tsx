@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
+import { inventoryTypeLabelKey } from "@/constant/location";
 import type { GrnFormValues } from "./grn-form-schema";
 import GrnTabDetails from "./grn-tab-details";
 import GrnTabQty from "./grn-tab-qty";
@@ -35,6 +36,7 @@ export function GrnItemDetailSheet({
   groupIndices,
 }: GrnItemDetailSheetProps) {
   const tfl = useTranslations("field");
+  const tl = useTranslations("config.location");
 
   const productName =
     useWatch({
@@ -88,7 +90,10 @@ export function GrnItemDetailSheet({
             </span>
             {locationType && (
               <Badge size="xs" className="shrink-0">
-                {locationType.toUpperCase()}
+                {(() => {
+                  const k = inventoryTypeLabelKey(locationType);
+                  return k ? tl(k) : locationType.toUpperCase();
+                })()}
               </Badge>
             )}
           </SheetDescription>

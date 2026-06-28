@@ -177,7 +177,10 @@ export function PoActionDialog({
               {hasItems && (
                 <div className="mt-2">
                   <Badge variant="outline" size="xs" className="tabular-nums">
-                    {items.length} {items.length === 1 ? "item" : "items"}
+                    {items.length}{" "}
+                    {items.length === 1
+                      ? tc("itemSingular")
+                      : tc("itemPlural")}
                   </Badge>
                 </div>
               )}
@@ -276,7 +279,7 @@ export function PoActionDialog({
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                   <span className="text-muted-foreground font-normal normal-case">
-                    (optional)
+                    ({tfl("optional")})
                   </span>
                 </div>
                 <Textarea

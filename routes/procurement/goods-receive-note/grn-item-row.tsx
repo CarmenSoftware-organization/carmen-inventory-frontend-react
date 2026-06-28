@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
+import { inventoryTypeLabelKey } from "@/constant/location";
 import type { GrnFormValues } from "./grn-form-schema";
 import { GrnItemDetailSheet } from "./grn-item-detail-sheet";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ export const GrnItemRow = memo(function GrnItemRow({
 }: GrnItemRowProps) {
   "use no memo";
   const tfl = useTranslations("field");
+  const tl = useTranslations("config.location");
   const [open, setOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const productId =
@@ -124,7 +126,10 @@ export const GrnItemRow = memo(function GrnItemRow({
               </span>
               {locationType && (
                 <Badge size="xs" className="text-[0.6875rem]">
-                  {locationType.toUpperCase()}
+                  {(() => {
+                    const k = inventoryTypeLabelKey(locationType);
+                    return k ? tl(k) : locationType.toUpperCase();
+                  })()}
                 </Badge>
               )}
             </div>

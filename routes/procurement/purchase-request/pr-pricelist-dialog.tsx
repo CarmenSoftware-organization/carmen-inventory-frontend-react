@@ -74,7 +74,7 @@ const buildColumns = (
               size="xs"
               className="text-[0.625rem]"
             >
-              ★ Preferred
+              ★ {t("preferred")}
             </Badge>
           )}
         </div>
@@ -118,7 +118,7 @@ const buildColumns = (
                 size="xs"
                 className="text-[0.625rem]"
               >
-                Best
+                {t("best")}
               </Badge>
             )}
             <span
@@ -333,19 +333,19 @@ export function PrPricelistDialog({
               <SummaryTile
                 label={tfl("vendor")}
                 value={lists.length.toString()}
-                unit={lists.length === 1 ? "vendor" : "vendors"}
+                unit={lists.length === 1 ? t("vendorSingular") : t("vendorPlural")}
               />
               <SummaryTile
-                label="Best Price"
+                label={t("bestPrice")}
                 value={formatCurrency(minPrice)}
                 unit={lists[0]?.currency}
                 accent="success"
               />
               {savingPct > 0 && (
                 <SummaryTile
-                  label="Max Savings"
+                  label={t("maxSavings")}
                   value={`${savingPct}%`}
-                  unit={`vs highest`}
+                  unit={t("vsHighest")}
                   accent="primary"
                 />
               )}

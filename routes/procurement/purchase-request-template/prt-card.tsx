@@ -1,4 +1,5 @@
 import { FileText, GitBranch } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +17,8 @@ interface PrtCardProps {
  * @returns React element ของการ์ด PRT
  */
 export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
+  const ts = useTranslations("status");
+  const tfl = useTranslations("field");
   return (
     <Card
       role="button"
@@ -47,7 +50,7 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
             size="xs"
             className="shrink-0 text-xs"
           >
-            {item.is_active ? "Active" : "Inactive"}
+            {item.is_active ? ts("active") : ts("inactive")}
           </Badge>
         </div>
       </CardHeader>
@@ -62,7 +65,7 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
               aria-hidden="true"
             />
             <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">Workflow</p>
+              <p className="text-muted-foreground text-xs">{tfl("workflow")}</p>
               <p className="truncate font-semibold">{item.workflow_name}</p>
             </div>
           </div>
@@ -74,7 +77,7 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
               aria-hidden="true"
             />
             <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">Department</p>
+              <p className="text-muted-foreground text-xs">{tfl("department")}</p>
               <p className="truncate font-semibold">{item.department_name}</p>
             </div>
           </div>
