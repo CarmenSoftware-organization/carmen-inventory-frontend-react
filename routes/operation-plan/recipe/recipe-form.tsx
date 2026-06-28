@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,6 +44,7 @@ interface RecipeFormProps {
 }
 
 export function RecipeForm({ recipe }: RecipeFormProps) {
+  "use no memo";
   const t = useTranslations("operationPlan.recipe");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");

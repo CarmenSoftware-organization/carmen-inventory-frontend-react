@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   Controller,
   useWatch,
@@ -23,6 +21,7 @@ export const CurrencyCell = memo(function CurrencyCell({
   index: number;
   isDisabled: boolean;
 }) {
+  "use no memo";
   const currencyId =
     useWatch({ control, name: `items.${index}.currency_id` }) ?? "";
   const isRowLocked = useIsRowLocked(control, index);

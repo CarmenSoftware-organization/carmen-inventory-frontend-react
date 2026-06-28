@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   Controller,
   useWatch,
@@ -36,6 +34,7 @@ const ProductCell = memo(function ProductCell({
   index: number;
   error?: string;
 }) {
+  "use no memo";
   return (
     <Controller
       control={form.control}
@@ -61,6 +60,7 @@ const UnitCell = memo(function UnitCell({
   index: number;
   error?: string;
 }) {
+  "use no memo";
   const productId =
     useWatch({
       control: form.control,
@@ -88,6 +88,7 @@ export function usePltDetailTable({
   detailFields,
   onDelete,
 }: UsePltDetailTableOptions) {
+  "use no memo";
   const allColumns = useMemo<ColumnDef<PltDetailField>[]>(() => {
     const indexColumn: ColumnDef<PltDetailField> = {
       id: "index",

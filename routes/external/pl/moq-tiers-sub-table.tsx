@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   type ColumnDef,
@@ -42,6 +40,7 @@ export default function MoqTiersSubTable({
   tiers,
   onTiersUpdate,
 }: MoqTiersSubTableProps) {
+  "use no memo";
   const [editingTierIds, setEditingTierIds] = useState<Set<string>>(new Set());
   const [localTiers, setLocalTiers] = useState<MoqTierDto[]>(tiers);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

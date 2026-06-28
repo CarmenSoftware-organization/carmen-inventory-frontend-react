@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo, useMemo, useState } from "react";
 import {
   Controller,
@@ -84,6 +82,7 @@ const ManualProductCell = memo(function ManualProductCell({
   indices: number[];
   disabled: boolean;
 }) {
+  "use no memo";
   const primaryIndex = indices[0];
   return (
     <Controller
@@ -131,6 +130,7 @@ const PoAddButton = memo(function PoAddButton({
   onOpen: () => void;
   hasItems: boolean;
 }) {
+  "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
   const vendorId = useWatch({ control, name: "vendor_id" }) ?? "";
   return (
@@ -154,6 +154,7 @@ interface GrnProductCardsProps {
 }
 
 export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
+  "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
   const tfl = useTranslations("field");
   const docType = useWatch({ control: form.control, name: "doc_type" });

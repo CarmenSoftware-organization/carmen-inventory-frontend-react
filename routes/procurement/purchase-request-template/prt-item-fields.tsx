@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
@@ -36,6 +34,7 @@ export function PrtItemFields({
   readOnly = false,
   defaultBu,
 }: PrtItemFieldsProps) {
+  "use no memo";
   const t = useTranslations("procurement.purchaseRequestTemplate");
   const tfl = useTranslations("field");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);

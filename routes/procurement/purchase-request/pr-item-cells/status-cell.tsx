@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useWatch, type UseFormReturn, type Control } from "react-hook-form";
 import { memo } from "react";
 import { X } from "lucide-react";
@@ -21,6 +19,7 @@ export const StatusCell = memo(function StatusCell({
   index: number;
   role?: string;
 }) {
+  "use no memo";
   const currentStageStatus =
     useWatch({ control, name: `items.${index}.current_stage_status` }) ?? "";
   const initialStageStatus =

@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +28,7 @@ interface GrnFormProps {
 }
 
 export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
+  "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");

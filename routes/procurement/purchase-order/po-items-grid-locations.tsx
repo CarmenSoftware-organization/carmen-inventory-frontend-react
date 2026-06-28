@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -30,6 +28,7 @@ export function LocationsEditor({
   disabled,
   readOnly,
 }: LocationsEditorProps) {
+  "use no memo";
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.purchaseOrder");
   const productId =
@@ -213,6 +212,7 @@ function LocationQtyInput({
   readonly disabled: boolean;
   readonly error?: string;
 }) {
+  "use no memo";
   const name = `items.${itemIndex}.locations.${locIndex}.order_qty` as const;
   const value = useWatch({ control: form.control, name }) ?? 0;
   return (

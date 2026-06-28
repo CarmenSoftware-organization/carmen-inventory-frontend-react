@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { X } from "lucide-react";
@@ -58,6 +56,7 @@ export function usePdInfoColumns({
   isDisabled,
   onDelete,
 }: UsePdInfoColumnsOptions): ColumnDef<InfoField>[] {
+  "use no memo";
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
 

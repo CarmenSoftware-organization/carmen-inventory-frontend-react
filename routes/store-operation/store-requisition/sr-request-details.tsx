@@ -1,5 +1,3 @@
-"use no memo";
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -51,6 +49,7 @@ export function SrRequestDetails({
   onToLocInfoChange,
   role,
 }: SrRequestDetailsProps) {
+  "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
   const tfl = useTranslations("field");
 

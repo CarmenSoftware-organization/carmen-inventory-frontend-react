@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useEffect, useState } from "react";
 import { Controller, type useFieldArray, type useForm } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -50,6 +48,7 @@ export function VendorAddress({
   prependAddress,
   removeAddress,
 }: VendorAddressTabProps) {
+  "use no memo";
   const t = useTranslations("vendorManagement.vendor");
   const isView = isDisabled && !form.formState.isSubmitting;
   const handleAdd = () => prependAddress(EMPTY_VENDOR_ADDRESS);
@@ -116,6 +115,7 @@ interface AddressRowProps {
 }
 
 const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
+  "use no memo";
   const t = useTranslations("vendorManagement.vendor");
   const addressTypeLabels: Record<string, string> = {
     contact_address: t("address.contactAddress"),

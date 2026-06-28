@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -37,6 +35,7 @@ interface CnItemFieldsProps {
  * <CnItemFields form={form} disabled={isView} />
  */
 export function CnItemFields({ form, disabled }: CnItemFieldsProps) {
+  "use no memo";
   const t = useTranslations("procurement.creditNote");
   const tfl = useTranslations("field");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);

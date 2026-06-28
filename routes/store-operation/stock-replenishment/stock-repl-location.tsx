@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
@@ -51,6 +49,7 @@ export function StockReplLocation({
   onOpenChange,
   onSelectionChange,
 }: StockReplLocationProps) {
+  "use no memo";
   const t = useTranslations("storeOperation.stockReplenishment");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
@@ -40,6 +38,7 @@ export function usePriceListTemplateTable({
   onEdit,
   onDelete,
 }: UsePriceListTemplateTableOptions) {
+  "use no memo";
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

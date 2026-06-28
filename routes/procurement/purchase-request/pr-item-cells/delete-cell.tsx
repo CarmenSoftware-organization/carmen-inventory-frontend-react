@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo } from "react";
 import type { Control } from "react-hook-form";
 import { Trash2 } from "lucide-react";
@@ -16,6 +14,7 @@ export const DeleteCell = memo(function DeleteCell({
   index: number;
   onDelete: (index: number) => void;
 }) {
+  "use no memo";
   const isRowLocked = useIsRowLocked(control, index);
 
   return (

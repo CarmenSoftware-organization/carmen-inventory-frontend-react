@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useEffect, useMemo } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -30,6 +28,7 @@ export function GrnFormHeader({
   disabled,
   fromWizard = false,
 }: GrnFormHeaderProps) {
+  "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");

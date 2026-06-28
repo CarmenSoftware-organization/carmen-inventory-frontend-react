@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
@@ -38,6 +36,7 @@ export function useUserActivityTable({
   params,
   tableConfig,
 }: UseUserActivityTableOptions) {
+  "use no memo";
   const t = useTranslations("systemAdmin.userActivity");
   const { dateFormat } = useProfile();
 

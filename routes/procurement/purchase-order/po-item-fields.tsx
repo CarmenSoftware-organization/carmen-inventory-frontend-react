@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
@@ -43,6 +41,7 @@ export function PoItemFields({
   onClose,
   isPending,
 }: PoItemFieldsProps) {
+  "use no memo";
   const t = useTranslations("procurement.purchaseOrder");
   const tc = useTranslations("common");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);

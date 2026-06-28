@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo } from "react";
 import {
   Controller,
@@ -41,6 +39,7 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
   unitField: GrnUnitField;
   disabled: boolean;
 }) {
+  "use no memo";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
 
@@ -91,6 +90,7 @@ export default function GrnTabQty({
   disabled,
   docType,
 }: GrnTabQtyProps) {
+  "use no memo";
   const tfl = useTranslations("field");
   const isPo = docType !== "manual";
   const receivedQtyError =

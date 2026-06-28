@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useEffect, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
@@ -41,6 +39,7 @@ export function CnSheet({
   onOpenChange,
   disabled,
 }: CnSheetProps) {
+  "use no memo";
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.creditNote");
 

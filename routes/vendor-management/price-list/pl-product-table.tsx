@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useMemo } from "react";
 import {
   Controller,
@@ -60,6 +58,7 @@ export function PLProductTable({
   tfl,
   removeLabel,
 }: PLProductTableProps) {
+  "use no memo";
   const columns = useMemo<ColumnDef<DetailField>[]>(() => {
     const cols: ColumnDef<DetailField>[] = [
       {
@@ -224,6 +223,7 @@ function PLProductViewTable({
   readonly detailRefs?: PriceList["pricelist_detail"];
   readonly tfl: (key: string) => string;
 }) {
+  "use no memo";
   const details = useMemo(() => detailRefs ?? [], [detailRefs]);
   const groups = useMemo(() => groupDetailsByProduct(details), [details]);
   const { count, min, max } = useMemo(
@@ -351,6 +351,7 @@ function ProductCell({
   readonly index: number;
   readonly isDisabled: boolean;
 }) {
+  "use no memo";
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
@@ -378,6 +379,7 @@ function UnitCell({
   readonly index: number;
   readonly isDisabled: boolean;
 }) {
+  "use no memo";
   const productId =
     useWatch({
       control: form.control,
@@ -411,6 +413,7 @@ function MoqCell({
   readonly index: number;
   readonly isDisabled: boolean;
 }) {
+  "use no memo";
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <FieldInput
@@ -437,6 +440,7 @@ function LeadCell({
   readonly index: number;
   readonly isDisabled: boolean;
 }) {
+  "use no memo";
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <FieldInput
@@ -463,6 +467,7 @@ function PriceCell({
   readonly index: number;
   readonly isDisabled: boolean;
 }) {
+  "use no memo";
   const priceWithoutTax = useWatch({
     control: form.control,
     name: `pricelist_detail.${index}.price_without_tax`,
@@ -530,6 +535,7 @@ function TaxCell({
   readonly index: number;
   readonly isDisabled: boolean;
 }) {
+  "use no memo";
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
@@ -554,6 +560,7 @@ function TaxCell({
 /* ── Plain text helpers ─────────────────────── */
 
 function PlainText({ value }: { readonly value?: string | null }) {
+  "use no memo";
   if (!value)
     return (
       <span className="text-muted-foreground text-[0.6875rem] italic">—</span>
@@ -568,6 +575,7 @@ function PlainProduct({
   readonly name?: string | null;
   readonly localName?: string | null;
 }) {
+  "use no memo";
   if (!name)
     return (
       <span className="text-muted-foreground text-[0.6875rem] italic">—</span>

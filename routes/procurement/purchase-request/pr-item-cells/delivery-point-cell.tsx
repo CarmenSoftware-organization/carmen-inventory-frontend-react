@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   Controller,
   useWatch,
@@ -22,6 +20,7 @@ export const DeliveryPointCell = memo(function DeliveryPointCell({
   index: number;
   isDisabled: boolean;
 }) {
+  "use no memo";
   const dpName =
     useWatch({ control, name: `items.${index}.delivery_point_name` }) ?? "";
   const isRowLocked = useIsRowLocked(control, index);

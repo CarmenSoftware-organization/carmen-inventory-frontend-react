@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useMemo } from "react";
 import {
   Controller,
@@ -55,6 +53,7 @@ export function PltProductTable({
   onRemove,
   labels,
 }: PltProductTableProps) {
+  "use no memo";
   // เก็บ product_id ของทุก row (รวม "") เพื่อ exclude แบบ index-based
   // (กัน duplicate ทั้งของใหม่และของที่ load มาแล้วซ้ำกัน)
   const watchedDetails = useWatch({
@@ -215,6 +214,7 @@ function ProductCell({
   readonly productRef?: ProductRef;
   readonly productIdsByIndex: readonly string[];
 }) {
+  "use no memo";
   const errors = form.formState.errors.details?.[index];
   // exclude product ที่ row อื่นเลือก (filter by index — ไม่ใช่ by id)
   // ทำให้ค่าที่ row นี้ตัวเองเลือกอยู่ ยังเห็นใน dropdown ได้ปกติ
@@ -262,6 +262,7 @@ function UnitCell({
   readonly isView: boolean;
   readonly isDisabled: boolean;
 }) {
+  "use no memo";
   const productId =
     useWatch({
       control: form.control,
@@ -308,6 +309,7 @@ function QtyCell({
   readonly isView: boolean;
   readonly isDisabled: boolean;
 }) {
+  "use no memo";
   const qty = useWatch({
     control: form.control,
     name: `details.${index}.qty`,
@@ -341,6 +343,7 @@ function NoteCell({
   readonly isDisabled: boolean;
   readonly placeholder: string;
 }) {
+  "use no memo";
   const note = useWatch({
     control: form.control,
     name: `details.${index}.note`,
@@ -361,6 +364,7 @@ function NoteCell({
 /* ── Plain text helpers ─────────────────────── */
 
 function PlainText({ value }: { readonly value?: string | null }) {
+  "use no memo";
   if (!value)
     return (
       <span className="text-muted-foreground text-[0.6875rem] italic">—</span>
@@ -369,6 +373,7 @@ function PlainText({ value }: { readonly value?: string | null }) {
 }
 
 function PlainNumber({ value }: { readonly value: number }) {
+  "use no memo";
   return (
     <span
       className={cn(
@@ -388,6 +393,7 @@ function PlainProduct({
   readonly name?: string | null;
   readonly localName?: string | null;
 }) {
+  "use no memo";
   if (!name)
     return (
       <span className="text-muted-foreground text-[0.6875rem] italic">—</span>

@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
@@ -43,6 +41,7 @@ export function useStoreRequisitionTable({
   onEdit,
   onDelete,
 }: UseStoreRequisitionTableOptions) {
+  "use no memo";
   const { dateFormat } = useProfile();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

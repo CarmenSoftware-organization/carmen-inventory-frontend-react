@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useTranslations } from "use-intl";
 import {
   Controller,
@@ -49,6 +47,7 @@ const ProductCell = memo(function ProductCell({
   disabled: boolean;
   hasError: boolean;
 }) {
+  "use no memo";
   return (
     <Controller
       control={control}
@@ -103,6 +102,7 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
   disabled: boolean;
   hasError: boolean;
 }) {
+  "use no memo";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
 
@@ -144,6 +144,7 @@ const LossValueCell = memo(function LossValueCell({
   form: UseFormReturn<WrFormValues>;
   index: number;
 }) {
+  "use no memo";
   const qty = useWatch({ control, name: `items.${index}.qty` }) ?? 0;
   const unitCost =
     useWatch({ control, name: `items.${index}.unit_cost` }) ?? 0;
@@ -187,6 +188,7 @@ export function useWrItemTable({
   disabled,
   onDelete,
 }: UseWrItemTableOptions) {
+  "use no memo";
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const allColumns = useMemo<ColumnDef<WrItemField>[]>(() => {

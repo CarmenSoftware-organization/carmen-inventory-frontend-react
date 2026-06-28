@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState, useMemo } from "react";
 import {
   useFieldArray,
@@ -53,6 +51,7 @@ export function GrnExtraCostFields({
   form,
   disabled,
 }: GrnExtraCostFieldsProps) {
+  "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
   const tfl = useTranslations("field");
 

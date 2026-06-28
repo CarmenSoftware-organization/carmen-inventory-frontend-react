@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useFieldArray, useWatch } from "react-hook-form";
@@ -51,6 +49,7 @@ interface LocationsTabProps {
 }
 
 function LocationsTab({ form, isDisabled }: LocationsTabProps) {
+  "use no memo";
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

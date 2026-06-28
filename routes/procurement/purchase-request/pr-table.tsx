@@ -1,5 +1,3 @@
-"use no memo";
-
 import type React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
@@ -54,6 +52,7 @@ export function usePurchaseRequestTable({
   onReject,
   isMyPending = true,
 }: UsePurchaseRequestTableOptions) {
+  "use no memo";
   const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
   const tfl = useTranslations("field");
   const tc = useTranslations("common");

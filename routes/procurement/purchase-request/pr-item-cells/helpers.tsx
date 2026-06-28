@@ -1,5 +1,3 @@
-"use no memo";
-
 import { Controller, useWatch, type Control } from "react-hook-form";
 import { memo, useMemo } from "react";
 import {
@@ -33,6 +31,7 @@ export function useIsRowLocked(
   control: Control<PrFormValues>,
   index: number,
 ): boolean {
+  "use no memo";
   const currentStageStatus =
     useWatch({ control, name: `items.${index}.current_stage_status` }) ?? "";
   const initialStageStatus =
@@ -61,6 +60,7 @@ export const InventoryTooltipCell = memo(function InventoryTooltipCell({
   index: number;
   buCode?: string;
 }) {
+  "use no memo";
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const productId =
@@ -92,6 +92,7 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
   isDisabled: boolean;
   onExtraChange?: (value: string) => void;
 }) {
+  "use no memo";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   const unitId =

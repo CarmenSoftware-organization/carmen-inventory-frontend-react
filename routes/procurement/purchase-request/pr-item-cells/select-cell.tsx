@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { Control, FieldArrayWithId } from "react-hook-form";
 import type { Row } from "@tanstack/react-table";
 import { DataGridTableRowSelect } from "@/components/ui/data-grid/data-grid-table";
@@ -17,6 +15,7 @@ export function SelectCell({
   row: Row<FieldArrayWithId<PrFormValues, "items", "id">>;
   isHidden?: boolean;
 }>) {
+  "use no memo";
   const isRowLocked = useIsRowLocked(control, index);
   if (isHidden || isRowLocked) return null;
   return <DataGridTableRowSelect row={row} />;

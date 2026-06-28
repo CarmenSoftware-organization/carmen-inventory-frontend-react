@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   useWatch,
   type FieldArrayWithId,
@@ -23,6 +21,7 @@ export const CommentFooterRow = memo(function CommentFooterRow({
   isDisabled: boolean;
   placeholder: string;
 }) {
+  "use no memo";
   const index = itemFields.findIndex((f) => f.id === item.id);
   const isRowLocked = useIsRowLocked(form.control, index === -1 ? 0 : index);
   const comment =

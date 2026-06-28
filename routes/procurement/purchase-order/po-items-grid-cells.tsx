@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +26,7 @@ export const PriceCell = memo(function PriceCell({
   disabled,
   readOnly,
 }: CellProps) {
+  "use no memo";
   const price =
     useWatch({ control: form.control, name: `items.${index}.price` }) ?? 0;
   if (disabled || readOnly) {
@@ -62,6 +61,7 @@ export const DiscountRateCell = memo(function DiscountRateCell({
   disabled,
   readOnly,
 }: CellProps) {
+  "use no memo";
   const rate =
     useWatch({
       control: form.control,
@@ -111,6 +111,7 @@ export function ProductHeaderCell({
   isFoc,
   showStatusBadge,
 }: ProductHeaderCellProps) {
+  "use no memo";
   const productLocalName =
     useWatch({
       control: form.control,

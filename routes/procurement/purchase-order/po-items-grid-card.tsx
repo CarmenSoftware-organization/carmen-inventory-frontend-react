@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo } from "react";
 import { useTranslations } from "use-intl";
 import { useWatch } from "react-hook-form";
@@ -46,6 +44,7 @@ export const ItemCard = memo(function ItemCard({
   onToggleOpen,
   onDelete,
 }: ItemCardProps) {
+  "use no memo";
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const t = useTranslations("procurement.purchaseOrder");

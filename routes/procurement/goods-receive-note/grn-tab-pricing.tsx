@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useEffect, useMemo } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -34,6 +32,7 @@ export default function GrnTabPricing({
   index,
   disabled,
 }: GrnTabPricingProps) {
+  "use no memo";
   const tfl = useTranslations("field");
 
   const [

@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState, useEffect, useRef } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,6 +45,7 @@ interface LocationInfo {
 export function StoreRequisitionForm({
   storeRequisition,
 }: StoreRequisitionFormProps) {
+  "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
   const tfl = useTranslations("field");
   const tv = useTranslations("validation");

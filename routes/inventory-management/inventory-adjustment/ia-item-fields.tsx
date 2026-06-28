@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -29,6 +27,7 @@ export function AdjItemFields({
   disabled,
   adjustmentType,
 }: AdjItemFieldsProps) {
+  "use no memo";
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const tfl = useTranslations("field");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);

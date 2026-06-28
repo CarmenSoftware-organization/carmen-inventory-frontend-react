@@ -1,5 +1,3 @@
-"use no memo";
-
 import { Fragment, memo, useCallback, useState } from "react";
 import { useTranslations } from "use-intl";
 import { type UseFormReturn } from "react-hook-form";
@@ -42,6 +40,7 @@ export const PoItemsGrid = memo(function PoItemsGrid({
   onToggleSelectAll,
   onDelete,
 }: PoItemsGridProps) {
+  "use no memo";
   const tfl = useTranslations("field");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [handledReveal, setHandledReveal] = useState(revealErrorSignal);
@@ -179,6 +178,7 @@ function ItemsHeader({
   readonly headerCheckState: boolean | "indeterminate";
   readonly onToggleAll: (checked: boolean) => void;
 }) {
+  "use no memo";
   return (
     <thead className="bg-muted/40 text-muted-foreground font-bold tracking-wider uppercase">
       <tr>

@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
@@ -45,6 +43,7 @@ export default function ApprovalQueueList({
   params,
   tableConfig,
 }: ApprovalQueueListProps) {
+  "use no memo";
   const t = useTranslations("procurement.approval");
   const tfl = useTranslations("field");
 

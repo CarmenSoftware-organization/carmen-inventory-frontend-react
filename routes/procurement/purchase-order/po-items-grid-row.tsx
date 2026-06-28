@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -29,6 +27,7 @@ export const ItemRow = memo(function ItemRow({
   isOpen,
   onToggleOpen,
 }: PoItemRowProps) {
+  "use no memo";
   const isFoc = useWatch({
     control: form.control,
     name: `items.${index}.is_foc`,

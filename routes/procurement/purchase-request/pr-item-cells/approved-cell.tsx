@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useWatch, type UseFormReturn, type Control } from "react-hook-form";
 import { memo } from "react";
 import { useTranslations } from "use-intl";
@@ -21,6 +19,7 @@ export const ApprovedCell = memo(function ApprovedCell({
   isQtyDisabled: boolean;
   isUnitDisabled: boolean;
 }) {
+  "use no memo";
   const tfl = useTranslations("field");
   const qty = useWatch({ control, name: `items.${index}.approved_qty` });
   const isRowLocked = useIsRowLocked(control, index);

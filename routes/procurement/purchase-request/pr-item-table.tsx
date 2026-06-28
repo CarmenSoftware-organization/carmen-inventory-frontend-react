@@ -1,5 +1,3 @@
-"use no memo";
-
 import { type UseFormReturn, type FieldArrayWithId } from "react-hook-form";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
@@ -57,6 +55,7 @@ export function usePrItemTable({
   baseCurrencyCode,
   onDelete,
 }: UsePrItemTableOptions) {
+  "use no memo";
   const tfl = useTranslations("field");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 

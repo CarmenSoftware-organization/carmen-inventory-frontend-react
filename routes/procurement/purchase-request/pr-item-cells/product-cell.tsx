@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   Controller,
   useWatch,
@@ -30,6 +28,7 @@ export const ProductCell = memo(function ProductCell({
   isDisabled: boolean;
   buCode?: string;
 }) {
+  "use no memo";
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const productCode =

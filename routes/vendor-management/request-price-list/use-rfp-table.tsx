@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
@@ -36,6 +34,7 @@ export function useRequestPriceListTable({
   onEdit,
   onDelete,
 }: UseRequestPriceListTableOptions) {
+  "use no memo";
   const { dateFormat } = useProfile();
   const tfl = useTranslations("field");
 

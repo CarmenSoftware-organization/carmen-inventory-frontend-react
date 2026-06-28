@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   forwardRef,
   useImperativeHandle,
@@ -42,6 +40,7 @@ export const SrItemFields = forwardRef<SrItemFieldsHandle, SrItemFieldsProps>(
     { form, disabled, disableAdd, fromLocationId, toLocationId, role },
     ref,
   ) {
+    "use no memo";
     const t = useTranslations("storeOperation.storeRequisition");
     const tc = useTranslations("common");
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);

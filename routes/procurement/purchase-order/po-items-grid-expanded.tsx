@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useTranslations } from "use-intl";
 import { type UseFormReturn } from "react-hook-form";
 import { Trash2 } from "lucide-react";
@@ -34,6 +32,7 @@ export function ExpandedRow({
   colSpan,
   onDelete,
 }: ExpandedRowProps) {
+  "use no memo";
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.purchaseOrder");
   return (

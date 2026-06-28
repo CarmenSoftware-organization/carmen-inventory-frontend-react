@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
@@ -52,6 +50,7 @@ export function useTransactionTable({
   params,
   tableConfig,
 }: UseTransactionTableOptions) {
+  "use no memo";
   const { dateFormat, amountFormat } = useProfile();
   const tfl = useTranslations("field");
   const t = useTranslations("inventoryManagement.transaction");

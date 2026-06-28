@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState, useMemo } from "react";
 import {
   useReactTable,
@@ -37,6 +35,7 @@ const HighlightText = ({
   readonly text: string;
   readonly query: string;
 }) => {
+  "use no memo";
   if (!text) return null;
   if (!query.trim()) return <>{text}</>;
 
@@ -62,6 +61,7 @@ const HighlightText = ({
 };
 
 export function UserTable({ users, className }: UserTableProps) {
+  "use no memo";
   const t = useTranslations("common");
   const [search, setSearch] = useState("");
 

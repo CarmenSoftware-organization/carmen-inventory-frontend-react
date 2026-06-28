@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo, useState } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -39,6 +37,7 @@ export const GrnItemRow = memo(function GrnItemRow({
   locationType,
   groupIndices,
 }: GrnItemRowProps) {
+  "use no memo";
   const tfl = useTranslations("field");
   const [open, setOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

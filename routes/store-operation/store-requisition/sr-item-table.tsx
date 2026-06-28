@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   Controller,
   useWatch,
@@ -43,6 +41,7 @@ const ProductCell = memo(function ProductCell({
   fromLocationId: string;
   toLocationId: string;
 }) {
+  "use no memo";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   if (disabled) {
@@ -91,6 +90,7 @@ function SrSelectCell({
   index: number;
   row: Row<SrItemField>;
 }>) {
+  "use no memo";
   const stageStatus =
     useWatch({ control, name: `items.${index}.stage_status` }) ?? "";
   const currentStatus =
@@ -138,6 +138,7 @@ const StatusCell = memo(function StatusCell({
   index: number;
   translate: (value?: string) => string | undefined;
 }) {
+  "use no memo";
   const stageStatus =
     useWatch({ control, name: `items.${index}.stage_status` }) ?? "";
   const currentStatus =
@@ -158,6 +159,7 @@ const UnitCell = memo(function UnitCell({
   control: Control<SrFormValues>;
   index: number;
 }) {
+  "use no memo";
   const unitName =
     useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
   return <span className="text-muted-foreground text-xs">{unitName}</span>;
@@ -184,6 +186,7 @@ export function useSrItemTable({
   toLocationId,
   role,
 }: UseSrItemTableOptions) {
+  "use no memo";
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const ts = useTranslations("status");

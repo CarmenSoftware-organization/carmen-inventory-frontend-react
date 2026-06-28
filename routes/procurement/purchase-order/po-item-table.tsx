@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo, useEffect, useMemo } from "react";
 import {
   Controller,
@@ -29,6 +27,7 @@ const ProductCellDisplay = memo(function ProductCellDisplay({
   control: Control<PoFormValues>;
   index: number;
 }) {
+  "use no memo";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   const description =
@@ -58,6 +57,7 @@ const ProductCellEditable = memo(function ProductCellEditable({
   form: UseFormReturn<PoFormValues>;
   index: number;
 }) {
+  "use no memo";
   const allItems = useWatch({ control, name: "items" });
   const excludeIds = useMemo(
     () =>
@@ -129,6 +129,7 @@ export const ProductCell = function ProductCell({
   disabled: boolean;
   readOnly?: boolean;
 }) {
+  "use no memo";
   if (disabled || readOnly) {
     return <ProductCellDisplay control={control} index={index} />;
   }
@@ -148,6 +149,7 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
   disabled: boolean;
   readOnly?: boolean;
 }) {
+  "use no memo";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
 
@@ -193,6 +195,7 @@ export const TaxProfileCell = memo(function TaxProfileCell({
   disabled: boolean;
   readOnly?: boolean;
 }) {
+  "use no memo";
   if (disabled || readOnly) {
     const taxRate = form.getValues(`items.${index}.tax_rate`) ?? 0;
     return <span className="text-xs tabular-nums">{`${taxRate}%`}</span>;
@@ -225,6 +228,7 @@ export const StatusCell = memo(function StatusCell({
   control: Control<PoFormValues>;
   index: number;
 }) {
+  "use no memo";
   const rawStatus =
     useWatch({ control, name: `items.${index}.current_stage_status` }) ||
     "pending";
@@ -285,6 +289,7 @@ export const OrderQtyCell = function OrderQtyCell({
   control: Control<PoFormValues>;
   index: number;
 }) {
+  "use no memo";
   const locations =
     useWatch({ control, name: `items.${index}.locations` }) ?? [];
   const sum = locations.reduce(
@@ -304,6 +309,7 @@ export const ComputedPricingCell = function ComputedPricingCell({
   index: number;
   field: "net_amount" | "tax_amount" | "total_price";
 }) {
+  "use no memo";
   const item = useWatch({ control, name: `items.${index}` });
   const { netAmount, taxAmount, totalPrice } = computeItemPricing(item);
   const values = {
@@ -332,6 +338,7 @@ export const PoItemComputedSync = memo(function PoItemComputedSync({
   form: UseFormReturn<PoFormValues>;
   index: number;
 }) {
+  "use no memo";
   const item = useWatch({ control, name: `items.${index}` });
   const {
     orderQty,

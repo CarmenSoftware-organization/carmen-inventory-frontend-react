@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useEffect, useMemo, useState } from "react";
 import {
   Controller,
@@ -63,6 +61,7 @@ interface VendorFormProps {
 }
 
 export function VendorForm({ vendor }: VendorFormProps) {
+  "use no memo";
   const navigate = useNavigate();
   const t = useTranslations("vendorManagement.vendor");
   const tt = useTranslations("toast");

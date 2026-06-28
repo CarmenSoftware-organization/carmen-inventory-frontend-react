@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { useWatch, type UseFormReturn } from "react-hook-form";
@@ -18,6 +16,7 @@ interface PoNotesSummaryProps {
 
 /** Plain-text แสดงค่า notes ใน view/locked mode */
 function PlainNote({ value }: { readonly value?: string }) {
+  "use no memo";
   return (
     <p className="min-h-8 text-sm whitespace-pre-wrap">{value || "—"}</p>
   );
@@ -38,6 +37,7 @@ export function PoNotesSummary({
   disabled,
   plainText = false,
 }: PoNotesSummaryProps) {
+  "use no memo";
   const tfl = useTranslations("field");
 
   // Subscribe items + currency_code โดยตรงผ่าน useWatch — pattern เดียวกับ

@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
@@ -55,6 +53,7 @@ export function useWastageReportTable({
   onEdit,
   onDelete,
 }: UseWastageReportTableOptions) {
+  "use no memo";
   const { dateFormat } = useProfile();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");

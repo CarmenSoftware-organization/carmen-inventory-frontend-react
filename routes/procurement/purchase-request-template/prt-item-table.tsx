@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useTranslations } from "use-intl";
 import {
   Controller,
@@ -80,6 +78,7 @@ const ProductCell = ({
   disabled: boolean;
   readOnly: boolean;
 }) => {
+  "use no memo";
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const productError =
@@ -118,6 +117,7 @@ const WatchedProductUnit = ({
   disabled: boolean;
   readOnly: boolean;
 }) => {
+  "use no memo";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   const unitError =
@@ -154,6 +154,7 @@ const QtyCell = ({
   disabled: boolean;
   readOnly: boolean;
 }) => {
+  "use no memo";
   const tfl = useTranslations("field");
   const qty = useWatch({ control, name: `items.${index}.requested_qty` });
   const qtyError = form.formState.errors.items?.[index]?.requested_qty?.message;
@@ -209,6 +210,7 @@ export function usePrtItemTable({
   readOnly = false,
   onDelete,
 }: UsePrtItemTableOptions) {
+  "use no memo";
   const tfl = useTranslations("field");
   const allColumns = useMemo<ColumnDef<PrtItemField>[]>(() => {
     const indexColumn: ColumnDef<PrtItemField> = {

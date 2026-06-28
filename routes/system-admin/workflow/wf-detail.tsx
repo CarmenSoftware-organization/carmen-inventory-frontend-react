@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState } from "react";
 import {
   useForm,
@@ -41,6 +39,7 @@ interface WfDetailProps {
 }
 
 export function WfDetail({ workflow, users, products }: WfDetailProps) {
+  "use no memo";
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
   const [selectedStageIndex, setSelectedStageIndex] = useState(0);

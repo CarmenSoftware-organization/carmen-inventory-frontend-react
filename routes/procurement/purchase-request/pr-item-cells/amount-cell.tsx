@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useWatch, type Control } from "react-hook-form";
 import { memo } from "react";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
@@ -14,6 +12,7 @@ export const AmountCell = memo(function AmountCell({
   index: number;
   baseCurrencyCode?: string;
 }) {
+  "use no memo";
   const totalPrice =
     useWatch({ control, name: `items.${index}.total_price` }) ?? 0;
   const exchangeRate =

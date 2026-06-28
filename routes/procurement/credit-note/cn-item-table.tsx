@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   Controller,
   useWatch,
@@ -55,6 +53,7 @@ const ProductCell = memo(function ProductCell({
   disabled: boolean;
   error?: string;
 }) {
+  "use no memo";
   const grnId = useWatch({ control, name: "grn_id" }) || undefined;
   const itemName = useWatch({ control, name: `items.${index}.item_name` });
   const allItems = useWatch({ control, name: "items" });
@@ -108,6 +107,7 @@ const UnitCell = memo(function UnitCell({
   disabled: boolean;
   error?: string;
 }) {
+  "use no memo";
   const productId = useWatch({ control, name: `items.${index}.item_id` }) ?? "";
   const unitName = useWatch({ control, name: `items.${index}.unit_name` });
   if (disabled) {
@@ -144,6 +144,7 @@ const QuantityDisplayCell = memo(function QuantityDisplayCell({
   control: Control<CnFormValues>;
   index: number;
 }) {
+  "use no memo";
   const qty = useWatch({ control, name: `items.${index}.quantity` });
   return (
     <span className="text-xs tabular-nums">
@@ -160,6 +161,7 @@ const UnitPriceDisplayCell = memo(function UnitPriceDisplayCell({
   control: Control<CnFormValues>;
   index: number;
 }) {
+  "use no memo";
   const price = useWatch({ control, name: `items.${index}.unit_price` });
   return (
     <span className="text-xs tabular-nums">
@@ -169,6 +171,7 @@ const UnitPriceDisplayCell = memo(function UnitPriceDisplayCell({
 });
 
 function useRowAmounts(control: Control<CnFormValues>, index: number) {
+  "use no memo";
   const [rawQty, rawPrice, rawTaxRate] = useWatch({
     control,
     name: [
@@ -197,6 +200,7 @@ const NetAmountCell = memo(function NetAmountCell({
   form: UseFormReturn<CnFormValues>;
   index: number;
 }) {
+  "use no memo";
   const { net, tax, total } = useRowAmounts(control, index);
   useEffect(() => {
     form.setValue(`items.${index}.net_amount`, net);
@@ -215,6 +219,7 @@ const TotalAmountCell = memo(function TotalAmountCell({
   control: Control<CnFormValues>;
   index: number;
 }) {
+  "use no memo";
   const { total } = useRowAmounts(control, index);
   return (
     <span className="text-xs font-semibold tabular-nums">
@@ -236,6 +241,7 @@ const LocationCell = memo(function LocationCell({
   disabled: boolean;
   error?: string;
 }) {
+  "use no memo";
   const grnId = useWatch({ control, name: "grn_id" }) || undefined;
   const productId =
     useWatch({ control, name: `items.${index}.item_id` }) || undefined;
@@ -299,6 +305,7 @@ export function useCnItemTable({
   onDelete,
   onShowDetail,
 }: UseCnItemTableOptions) {
+  "use no memo";
   const tfl = useTranslations("field");
 
   const allColumns = useMemo<ColumnDef<CnItemField>[]>(() => {

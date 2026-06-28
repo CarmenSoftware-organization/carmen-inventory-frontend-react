@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo, useState, useMemo } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -48,6 +46,7 @@ function UnitConversionTab({
   label,
   isDisabled,
 }: UnitConversionTabProps) {
+  "use no memo";
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
   const { fields, prepend, remove } = useFieldArray({

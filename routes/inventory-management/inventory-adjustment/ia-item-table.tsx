@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useEffect } from "react";
 import {
   Controller,
@@ -36,6 +34,7 @@ const ProductInventoryTooltip = memo(function ProductInventoryTooltip({
   control: Control<AdjFormValues>;
   index: number;
 }) {
+  "use no memo";
   const { buCode } = useProfile();
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
   const productId =
@@ -56,6 +55,7 @@ const TotalCostCell = memo(function TotalCostCell({
   control: Control<AdjFormValues>;
   index: number;
 }) {
+  "use no memo";
   const total = useWatch({ control, name: `items.${index}.total_cost` });
   return (
     <span className="block text-right text-xs tabular-nums">
@@ -71,6 +71,7 @@ const StockInCostProbe = memo(function StockInCostProbe({
   form: UseFormReturn<AdjFormValues>;
   index: number;
 }) {
+  "use no memo";
   const { buCode } = useProfile();
   const { control } = form;
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
@@ -104,6 +105,7 @@ const StockOutCostProbe = memo(function StockOutCostProbe({
   form: UseFormReturn<AdjFormValues>;
   index: number;
 }) {
+  "use no memo";
   const { buCode } = useProfile();
   const { control } = form;
   const productId =
@@ -135,6 +137,7 @@ const ProductCell = memo(function ProductCell({
   excludeIds?: string[];
   adjustmentType: InventoryAdjustmentType;
 }) {
+  "use no memo";
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
@@ -202,6 +205,7 @@ export function useAdjItemTable({
   onDelete,
   adjustmentType,
 }: UseAdjItemTableOptions) {
+  "use no memo";
   const tfl = useTranslations("field");
   const allColumns = useMemo<ColumnDef<AdjItemField>[]>(() => {
     const recalcTotal = (

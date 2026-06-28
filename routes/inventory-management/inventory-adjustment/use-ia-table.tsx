@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
@@ -48,6 +46,7 @@ export function useInventoryAdjustmentTable({
   onEdit,
   onDelete,
 }: UseInventoryAdjustmentTableOptions) {
+  "use no memo";
   const { dateFormat, amountFormat } = useProfile();
 
   const tfl = useTranslations("field");

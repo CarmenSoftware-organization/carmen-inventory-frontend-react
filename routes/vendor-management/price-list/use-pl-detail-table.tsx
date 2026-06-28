@@ -1,5 +1,3 @@
-"use no memo";
-
 import {
   Controller,
   useWatch,
@@ -37,6 +35,7 @@ const ProductCell = memo(function ProductCell({
   index: number;
   error?: string;
 }) {
+  "use no memo";
   return (
     <Controller
       control={form.control}
@@ -62,6 +61,7 @@ const UnitCell = memo(function UnitCell({
   index: number;
   error?: string;
 }) {
+  "use no memo";
   const productId =
     useWatch({
       control: form.control,
@@ -93,6 +93,7 @@ const TaxProfileCell = memo(function TaxProfileCell({
   index: number;
   error?: string;
 }) {
+  "use no memo";
   return (
     <Controller
       control={form.control}
@@ -119,6 +120,7 @@ const PriceCell = memo(function PriceCell({
   form: UseFormReturn<PriceListFormValues>;
   index: number;
 }) {
+  "use no memo";
   const raw = useWatch({
     control: form.control,
     name: `pricelist_detail.${index}.price`,
@@ -138,6 +140,7 @@ const TaxCalcCell = memo(function TaxCalcCell({
   form: UseFormReturn<PriceListFormValues>;
   index: number;
 }) {
+  "use no memo";
   const rawPrice = useWatch({
     control: form.control,
     name: `pricelist_detail.${index}.price_without_tax`,
@@ -178,6 +181,7 @@ export function usePriceListDetailTable({
   detailFields,
   onDelete,
 }: UsePriceListDetailTableOptions) {
+  "use no memo";
   const t = useTranslations("vendorManagement.priceList");
   const tfl = useTranslations("field");
 

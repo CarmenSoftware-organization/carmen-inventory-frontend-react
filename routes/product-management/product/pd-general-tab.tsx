@@ -1,5 +1,3 @@
-"use no memo";
-
 import { memo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Percent, Plus } from "lucide-react";
@@ -47,6 +45,7 @@ function GeneralTab({
   product,
   onGroupChange,
 }: GeneralTabProps) {
+  "use no memo";
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
 
@@ -567,6 +566,7 @@ function CardSection({
   title: string;
   children: React.ReactNode;
 }>) {
+  "use no memo";
   return (
     <section className="border-border bg-card rounded-lg border">
       <header className="border-border border-b px-5 py-3">
@@ -588,6 +588,7 @@ function ToggleRow({
   disabled?: boolean;
   children: React.ReactNode;
 }>) {
+  "use no memo";
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="min-w-0">
@@ -619,6 +620,7 @@ interface ReadOnlyValueProps {
  * @returns JSX element
  */
 function ReadOnlyValue({ value, suffix, multiline }: ReadOnlyValueProps) {
+  "use no memo";
   const isEmpty = value === null || value === undefined || value === "";
   if (isEmpty) {
     return <p className="text-muted-foreground text-sm">—</p>;

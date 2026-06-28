@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useTranslations } from "use-intl";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
@@ -12,6 +10,7 @@ interface LineBreakdownProps {
 }
 
 export function LineBreakdown({ form, index }: LineBreakdownProps) {
+  "use no memo";
   const tfl = useTranslations("field");
 
   // Watch wholewide items array — pattern เดียวกับ pr-grand-total.tsx

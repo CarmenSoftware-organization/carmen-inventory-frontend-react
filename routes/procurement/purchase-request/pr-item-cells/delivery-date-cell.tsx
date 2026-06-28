@@ -1,5 +1,3 @@
-"use no memo";
-
 import { Controller, useWatch, type Control } from "react-hook-form";
 import { memo } from "react";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -17,6 +15,7 @@ export const DeliveryDateCell = memo(function DeliveryDateCell({
   isDisabled: boolean;
   today: Date;
 }) {
+  "use no memo";
   const value = useWatch({ control, name: `items.${index}.delivery_date` });
   const isRowLocked = useIsRowLocked(control, index);
 

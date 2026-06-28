@@ -1,5 +1,3 @@
-"use no memo";
-
 import { useState } from "react";
 import { type useFieldArray, type useForm } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -37,6 +35,7 @@ export function VendorContact({
   prependContact,
   removeContact,
 }: VendorContactTabProps) {
+  "use no memo";
   const t = useTranslations("vendorManagement.vendor");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const isView = isDisabled && !form.formState.isSubmitting;
@@ -129,6 +128,7 @@ function ContactCard({
   readonly onRemove: () => void;
   readonly t: (key: string) => string;
 }) {
+  "use no memo";
   const errors = form.formState.errors.vendor_contact?.[index];
   const contact = form.getValues(`vendor_contact.${index}`);
   const isPrimary = contact?.is_primary ?? false;
@@ -260,6 +260,7 @@ function ContactSubField({
   readonly href?: string;
   readonly type?: string;
 }) {
+  "use no memo";
   if (isView) {
     if (!value) {
       return (
@@ -322,6 +323,7 @@ function EmptyContacts({
   readonly addLabel: string;
   readonly onAdd: () => void;
 }) {
+  "use no memo";
   return (
     <div className="border-primary/35 bg-primary/5 rounded-xl border border-dashed p-6 text-center">
       <div className="text-primary-foreground mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-primary">

@@ -1,5 +1,3 @@
-"use no memo";
-
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
@@ -38,6 +36,7 @@ export function useRoleTable({
   onEdit,
   onDelete,
 }: UseRoleTableOptions) {
+  "use no memo";
   const dataColumns: ColumnDef<Role>[] = [
     {
       accessorKey: "name",
