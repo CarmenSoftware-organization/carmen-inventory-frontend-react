@@ -10,6 +10,7 @@ import { Plus, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { inventoryTypeLabelKey } from "@/constant/location";
 import {
   DataGrid,
   DataGridContainer,
@@ -53,6 +54,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const tl = useTranslations("config.location");
 
   const { fields, prepend, remove } = useFieldArray({
     control: form.control,
@@ -151,7 +153,10 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
               variant={TYPE_VARIANT[location_type] ?? "secondary"}
               size="xs"
             >
-              {location_type.toUpperCase()}
+              {(() => {
+                const k = inventoryTypeLabelKey(location_type);
+                return k ? tl(k) : location_type.toUpperCase();
+              })()}
             </Badge>
           ) : null;
 

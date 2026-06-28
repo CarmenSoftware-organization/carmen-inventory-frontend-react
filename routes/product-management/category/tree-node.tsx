@@ -144,9 +144,13 @@ export function TreeNode({
 
         {/* Status indicator */}
         {!node.is_active && (
-          <span className="text-[0.625rem] px-1 py-px rounded bg-red-50 text-red-500 border border-red-200 dark:bg-red-950 dark:text-red-400 dark:border-red-800 mr-1">
+          <Badge
+            variant="secondary"
+            size="xs"
+            className="text-[0.625rem] mr-1 shrink-0"
+          >
             {ts("inactive")}
-          </span>
+          </Badge>
         )}
 
         {/* Actions - visible on hover */}

@@ -430,7 +430,7 @@ function GeneralTab({
         {/* RIGHT — stacked cards */}
         <div className="flex flex-col gap-4">
           {product && (
-            <CardSection title="Images">
+            <CardSection title={t("imgSection")}>
               <ProductImages productId={product?.id} readOnly={isDisabled} />
             </CardSection>
           )}

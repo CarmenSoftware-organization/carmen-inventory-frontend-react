@@ -26,6 +26,7 @@ interface ProductCardProps {
  */
 export default function ProductCard({ item, index, onEdit }: ProductCardProps) {
   const tfl = useTranslations("field");
+  const ts = useTranslations("status");
   const isActive = item.product_status_type === "active";
 
   return (
@@ -57,7 +58,7 @@ export default function ProductCard({ item, index, onEdit }: ProductCardProps) {
             size="xs"
             className="text-xs"
           >
-            {isActive ? "Active" : "Inactive"}
+            {isActive ? ts("active") : ts("inactive")}
           </Badge>
         </div>
       </CardHeader>

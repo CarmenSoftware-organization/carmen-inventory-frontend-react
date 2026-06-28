@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "use-intl";
 import { ChevronLeft, ChevronRight, ImageIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,15 +25,20 @@ interface ProductImagesProps {
 }
 
 /** map รูปจาก API → รูปแบบที่ใช้แสดงผล (url + label) */
-function toDisplayImage(img: ProductImage, index: number): MockImage {
+function toDisplayImage(
+  img: ProductImage,
+  index: number,
+  t: ReturnType<typeof useTranslations>,
+): MockImage {
   return {
     id: img.id,
-    label: img.caption || img.alt_text || `Image ${index + 1}`,
+    label: img.caption || img.alt_text || t("imgFallbackLabel", { n: index + 1 }),
     url: img.url,
   };
 }
 
 export function ProductImages({ productId, readOnly }: ProductImagesProps) {
+  const t = useTranslations("productManagement.product");
   const { data, isLoading } = useProductImages(productId);
   const uploadImages = useUploadProductImages();
   const deleteImage = useDeleteProductImage();
@@ -43,7 +49,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
 
   const images = (data?.data.images ?? [])
     .toSorted((a, b) => a.sort_order - b.sort_order)
-    .map(toDisplayImage);
+    .map((img, i) => toDisplayImage(img, i, t));
   const total = images.length;
   // clamp index กันหลุดช่วงหลัง refetch (จำนวนรูปเปลี่ยน)
   const safeIndex = total === 0 ? 0 : Math.min(activeIndex, total - 1);
@@ -66,7 +72,8 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
     uploadImages.mutate(
       { product_id: productId, images: valid },
       {
-        onSuccess: () => toast.success(`${valid.length} image(s) uploaded`),
+        onSuccess: () =>
+          toast.success(t("imgUploaded", { count: valid.length })),
         onError: (err) => toast.error(err.message),
       },
     );
@@ -78,7 +85,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
       { product_id: productId, imageId: deleteTarget.id },
       {
         onSuccess: () => {
-          toast.success("Image deleted");
+          toast.success(t("imgDeleted"));
           setDeleteTarget(null);
         },
         onError: (err) => toast.error(err.message),
@@ -95,7 +102,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
       return (
         <div className="text-muted-foreground flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed">
           <ImageIcon className="size-10 opacity-60" aria-hidden="true" />
-          <p className="text-xs">No images</p>
+          <p className="text-xs">{t("imgNone")}</p>
         </div>
       );
     }
@@ -110,7 +117,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
         <button
           type="button"
           onClick={() => setDialogIndex(safeIndex)}
-          aria-label={`View ${active.label} in larger view`}
+          aria-label={t("imgViewAria", { label: active.label })}
           className="ring-offset-background focus-visible:ring-ring relative block aspect-square w-full cursor-pointer overflow-hidden rounded-lg border focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           <img
@@ -131,7 +138,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
             type="button"
             size="icon-sm"
             variant="destructive"
-            aria-label="Delete image"
+            aria-label={t("imgDeleteAria")}
             onClick={() => setDeleteTarget(active)}
             disabled={deleteImage.isPending}
             className="absolute top-2 right-2 opacity-0 shadow transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
@@ -146,7 +153,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
               type="button"
               size="icon-sm"
               variant="secondary"
-              aria-label="Previous image"
+              aria-label={t("imgPrevAria")}
               onClick={goPrev}
               className="absolute top-1/2 left-2 -translate-y-1/2 opacity-0 shadow transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
             >
@@ -156,7 +163,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
               type="button"
               size="icon-sm"
               variant="secondary"
-              aria-label="Next image"
+              aria-label={t("imgNextAria")}
               onClick={goNext}
               className="absolute top-1/2 right-2 -translate-y-1/2 opacity-0 shadow transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
             >
@@ -173,7 +180,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
               key={img.id}
               type="button"
               onClick={() => setActiveIndex(idx)}
-              aria-label={`Show ${img.label}`}
+              aria-label={t("imgShowAria", { label: img.label })}
               aria-current={idx === safeIndex}
               className={cn(
                 "ring-offset-background focus-visible:ring-ring relative size-12 shrink-0 cursor-pointer overflow-hidden rounded-md border transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
@@ -204,8 +211,8 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
         onOpenChange={(open) =>
           !open && !deleteImage.isPending && setDeleteTarget(null)
         }
-        title="Delete Image"
-        description="Delete this image? This action cannot be undone."
+        title={t("imgDeleteTitle")}
+        description={t("imgDeleteConfirm")}
         isPending={deleteImage.isPending}
         onConfirm={handleConfirmDelete}
       />

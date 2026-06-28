@@ -138,7 +138,7 @@ export function useProductTable({
         return (
           <Badge
             size="sm"
-            variant={status === "active" ? "success" : "destructive"}
+            variant={status === "active" ? "success" : "secondary"}
           >
             {getProductStatusLabel(ts, status)}
           </Badge>

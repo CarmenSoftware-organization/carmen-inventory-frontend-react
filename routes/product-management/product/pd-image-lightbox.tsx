@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { useTranslations } from "use-intl";
 import { ChevronLeft, ChevronRight, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,8 @@ export function ImageLightbox({
   onIndexChange,
   onAddFiles,
 }: Props) {
+  const t = useTranslations("productManagement.product");
+  const tc = useTranslations("common");
   const open = index !== null;
   const total = images.length;
   const current = open ? images[index] : null;
@@ -81,12 +84,12 @@ export function ImageLightbox({
         className="max-h-[92vh] max-w-[min(56rem,92vw)] overflow-hidden p-0"
       >
         <DialogTitle className="sr-only">
-          {current ? `Image: ${current.label}` : "Image viewer"}
+          {current ? t("imgViewerName", { label: current.label }) : t("imgViewerTitle")}
         </DialogTitle>
 
         {current && (
           <section
-            aria-label="Image viewer (drop images to upload)"
+            aria-label={t("imgViewerAria")}
             className="relative flex flex-col"
             onDragOver={
               onAddFiles
@@ -110,7 +113,7 @@ export function ImageLightbox({
             {isDragging && onAddFiles && (
               <div className="border-primary bg-primary/15 text-primary pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed">
                 <Upload className="size-10" aria-hidden="true" />
-                <p className="text-sm font-semibold">Drop images to upload</p>
+                <p className="text-sm font-semibold">{t("imgDropLightbox")}</p>
               </div>
             )}
             <div className="relative aspect-4/3 w-full bg-black/95">
@@ -130,7 +133,7 @@ export function ImageLightbox({
                   type="button"
                   size="icon-sm"
                   variant="secondary"
-                  aria-label="Close"
+                  aria-label={tc("close")}
                   className="absolute top-3 right-3 shadow"
                 >
                   <X />
@@ -143,7 +146,7 @@ export function ImageLightbox({
                     type="button"
                     size="icon-lg"
                     variant="secondary"
-                    aria-label="Previous image"
+                    aria-label={t("imgPrevAria")}
                     onClick={goPrev}
                     className="absolute top-1/2 left-3 -translate-y-1/2 shadow"
                   >
@@ -153,7 +156,7 @@ export function ImageLightbox({
                     type="button"
                     size="icon-lg"
                     variant="secondary"
-                    aria-label="Next image"
+                    aria-label={t("imgNextAria")}
                     onClick={goNext}
                     className="absolute top-1/2 right-3 -translate-y-1/2 shadow"
                   >
@@ -169,7 +172,7 @@ export function ImageLightbox({
                   key={img.id}
                   type="button"
                   onClick={() => onIndexChange(idx)}
-                  aria-label={`Show ${img.label}`}
+                  aria-label={t("imgShowAria", { label: img.label })}
                   aria-current={idx === index}
                   className={cn(
                     "ring-offset-background focus-visible:ring-ring relative flex size-16 shrink-0 cursor-pointer flex-col items-end justify-end overflow-hidden rounded-md border p-1 text-[0.625rem] transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
@@ -194,11 +197,11 @@ export function ImageLightbox({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    aria-label="Upload images"
+                    aria-label={t("imgUploadAria")}
                     className="text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/5 ring-offset-background focus-visible:ring-ring flex size-16 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed text-[0.625rem] transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                   >
                     <Upload className="size-4" aria-hidden="true" />
-                    <span>Upload</span>
+                    <span>{t("imgUpload")}</span>
                   </button>
 
                   <Input
