@@ -74,6 +74,25 @@ export default defineConfig(() => ({
           if (id.includes("/@tanstack/")) {
             return "tanstack";
           }
+          // แยก vendor หนักที่หลาย route ใช้ร่วมกัน ออกจาก shared (router) chunk
+          // — ทั้งหมดเสถียร เปลี่ยนไม่บ่อย จึง cache ได้ยาว lib ที่ใช้ route เดียว
+          // (xlsx/recharts/@xyflow/monaco) ไม่ต้องแยก เพราะ lazy route แยก chunk ให้แล้ว
+          if (id.includes("/lucide-react/")) {
+            return "icons";
+          }
+          if (
+            /[\\/](radix-ui|@radix-ui|@base-ui|cmdk|sonner|next-themes)[\\/]/.test(
+              id,
+            )
+          ) {
+            return "ui-vendor";
+          }
+          if (/[\\/](react-hook-form|@hookform|zod)[\\/]/.test(id)) {
+            return "form-vendor";
+          }
+          if (/[\\/](date-fns|react-day-picker)[\\/]/.test(id)) {
+            return "date-vendor";
+          }
         },
       },
     },
