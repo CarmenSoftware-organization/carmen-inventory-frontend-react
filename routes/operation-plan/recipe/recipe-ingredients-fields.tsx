@@ -40,6 +40,7 @@ export function RecipeIngredientsFields({
   isDisabled,
 }: RecipeIngredientsFieldsProps) {
   const t = useTranslations("operationPlan.recipe");
+  const tfl = useTranslations("field");
 
   const total = ingredients.reduce((s, i) => s + (Number(i.cost) || 0), 0);
 
@@ -72,7 +73,8 @@ export function RecipeIngredientsFields({
               <span className="text-foreground font-semibold">
                 ฿{total.toFixed(2)}
               </span>
-              {" total"}
+              {" "}
+              {tfl("total")}
             </>
           )}
         </p>

@@ -9,7 +9,10 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CUISINE_REGION_CONFIG } from "@/constant/cuisine";
+import {
+  CUISINE_REGION_CONFIG,
+  CUISINE_REGION_LABEL_KEY,
+} from "@/constant/cuisine";
 import type { Cuisine } from "@/types/cuisine";
 
 interface CuisineCardProps {
@@ -27,6 +30,7 @@ interface CuisineCardProps {
  */
 export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
   const ts = useTranslations("status");
+  const t = useTranslations("operationPlan.cuisine");
   const regionConfig = CUISINE_REGION_CONFIG[item.region];
 
   return (
@@ -74,7 +78,7 @@ export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
             />
             {regionConfig ? (
               <Badge size="xs" className={`${regionConfig.className} text-xs`}>
-                {regionConfig.label}
+                {t(CUISINE_REGION_LABEL_KEY[item.region])}
               </Badge>
             ) : (
               <span className="text-muted-foreground truncate">

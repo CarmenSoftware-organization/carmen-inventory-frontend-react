@@ -7,7 +7,10 @@ import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import type { Cuisine } from "@/types/cuisine";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import { CUISINE_REGION_CONFIG } from "@/constant/cuisine";
+import {
+  CUISINE_REGION_CONFIG,
+  CUISINE_REGION_LABEL_KEY,
+} from "@/constant/cuisine";
 
 interface UseCuisineTableOptions {
   cuisines: Cuisine[];
@@ -35,6 +38,7 @@ export function useCuisineTable({
   onDelete,
 }: UseCuisineTableOptions) {
   const tfl = useTranslations("field");
+  const t = useTranslations("operationPlan.cuisine");
 
   const columns: ColumnDef<Cuisine>[] = [
     {
@@ -59,7 +63,7 @@ export function useCuisineTable({
         const config = CUISINE_REGION_CONFIG[region];
         return config ? (
           <Badge size="sm" className={config.className}>
-            {config.label}
+            {t(CUISINE_REGION_LABEL_KEY[region])}
           </Badge>
         ) : (
           region

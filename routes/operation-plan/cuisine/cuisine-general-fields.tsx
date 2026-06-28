@@ -9,7 +9,10 @@ import {
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CUISINE_REGION_OPTIONS } from "@/constant/cuisine";
+import {
+  CUISINE_REGION_OPTIONS,
+  CUISINE_REGION_LABEL_KEY,
+} from "@/constant/cuisine";
 import { Card } from "./cuisine-card-shell";
 import type { CuisineFormValues } from "./cuisine-form-schema";
 
@@ -63,7 +66,7 @@ export function CuisineGeneralFields({
                 <SelectContent>
                   {CUISINE_REGION_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
+                      {t(CUISINE_REGION_LABEL_KEY[opt.value])}
                     </SelectItem>
                   ))}
                 </SelectContent>

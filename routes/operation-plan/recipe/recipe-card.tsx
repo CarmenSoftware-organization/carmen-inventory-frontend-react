@@ -1,4 +1,5 @@
 import { Clock, ChefHat, Tag } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -40,6 +41,8 @@ interface RecipeCardProps {
  * />
  */
 export default function RecipeCard({ item, index, cuisines, categories, onEdit }: RecipeCardProps) {
+  const t = useTranslations("operationPlan.recipe");
+  const ts = useTranslations("status");
   const cuisineName = cuisines.find((c) => c.id === item.cuisine_id)?.name;
   const categoryName = categories.find((c) => c.id === item.category_id)?.name;
   const totalTime = (item.prep_time ?? 0) + (item.cook_time ?? 0);
@@ -83,7 +86,7 @@ export default function RecipeCard({ item, index, cuisines, categories, onEdit }
           )}
           {!item.is_active && (
             <Badge variant="secondary" size="xs" className="text-xs">
-              Inactive
+              {ts("inactive")}
             </Badge>
           )}
         </CardAction>
@@ -118,7 +121,9 @@ export default function RecipeCard({ item, index, cuisines, categories, onEdit }
               className="text-muted-foreground size-3 shrink-0"
               aria-hidden="true"
             />
-            <span className="text-muted-foreground">{totalTime} min</span>
+            <span className="text-muted-foreground">
+              {totalTime} {t("minShort")}
+            </span>
           </div>
         )}
       </CardContent>

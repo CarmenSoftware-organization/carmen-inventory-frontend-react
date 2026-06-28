@@ -1977,6 +1977,12 @@
       "generalInformation": "ข้อมูลทั่วไป"
     },
     "cuisine": {
+      "regionAsia": "เอเชีย",
+      "regionEurope": "ยุโรป",
+      "regionAmericas": "อเมริกา",
+      "regionAfrica": "แอฟริกา",
+      "regionMiddleEast": "ตะวันออกกลาง",
+      "regionOceania": "โอเชียเนีย",
       "entity": "ประเภทอาหาร",
       "title": "ประเภทอาหาร",
       "desc": "จัดการประเภทอาหารสำหรับสูตร",
@@ -2057,6 +2063,7 @@
       "namePlaceholder": "เช่น อุปกรณ์ทำอาหาร"
     },
     "recipe": {
+      "minShort": "นาที",
       "entity": "สูตรอาหาร",
       "title": "สูตรอาหาร",
       "desc": "จัดการสูตรอาหารสำหรับวางแผนการดำเนินงาน",

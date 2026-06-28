@@ -9,6 +9,16 @@ export const CUISINE_REGION = {
 
 export type CuisineRegion = (typeof CUISINE_REGION)[keyof typeof CUISINE_REGION];
 
+/** i18n key (namespace `operationPlan.cuisine`) ของ label แต่ละภูมิภาค */
+export const CUISINE_REGION_LABEL_KEY: Record<string, string> = {
+  [CUISINE_REGION.ASIA]: "regionAsia",
+  [CUISINE_REGION.EUROPE]: "regionEurope",
+  [CUISINE_REGION.AMERICAS]: "regionAmericas",
+  [CUISINE_REGION.AFRICA]: "regionAfrica",
+  [CUISINE_REGION.MIDDLE_EAST]: "regionMiddleEast",
+  [CUISINE_REGION.OCEANIA]: "regionOceania",
+};
+
 import { createStatusConfig } from "@/constant/status-config";
 
 export const CUISINE_REGION_OPTIONS: { value: CuisineRegion; label: string }[] =

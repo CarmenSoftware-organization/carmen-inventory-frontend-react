@@ -1982,6 +1982,12 @@
       "generalInformation": "General Information"
     },
     "cuisine": {
+      "regionAsia": "Asia",
+      "regionEurope": "Europe",
+      "regionAmericas": "Americas",
+      "regionAfrica": "Africa",
+      "regionMiddleEast": "Middle East",
+      "regionOceania": "Oceania",
       "entity": "Cuisine Type",
       "title": "Cuisine Type",
       "desc": "Manage cuisine types for your recipes.",
@@ -2062,6 +2068,7 @@
       "namePlaceholder": "e.g. Cooking Tools"
     },
     "recipe": {
+      "minShort": "min",
       "entity": "Recipe",
       "title": "Recipe",
       "desc": "Manage recipes for your operational planning.",
