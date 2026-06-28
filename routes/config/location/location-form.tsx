@@ -1,4 +1,3 @@
-
 import { lazy, Suspense, useRef, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -301,9 +300,9 @@ export function LocationForm({ location }: LocationFormProps) {
             <form
               id={FORM_ID}
               onSubmit={(e) =>
-                form.handleSubmit(onSubmit, () =>
-                  scrollToFirstInvalidField(),
-                )(e)
+                form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())(
+                  e,
+                )
               }
               className="space-y-4"
             >
@@ -355,7 +354,11 @@ export function LocationForm({ location }: LocationFormProps) {
                       <PlainText
                         value={
                           location?.location_type
-                            ? t(INVENTORY_TYPE_LABEL_KEY[location.location_type])
+                            ? t(
+                                INVENTORY_TYPE_LABEL_KEY[
+                                  location.location_type
+                                ],
+                              )
                             : undefined
                         }
                       />
@@ -483,7 +486,6 @@ export function LocationForm({ location }: LocationFormProps) {
                       onCheckedChange={field.onChange}
                       disabled={isDisabled}
                       description={t("activeDescription")}
-                      hideBadge
                     />
                   )}
                 />
@@ -648,7 +650,7 @@ function SectionLabel({
       {typeof count === "number" && (
         <span
           className={cn(
-            "inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums tracking-wider",
+            "inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tracking-wider tabular-nums",
             count > 0
               ? "bg-primary/15 text-primary"
               : "bg-muted text-muted-foreground",
