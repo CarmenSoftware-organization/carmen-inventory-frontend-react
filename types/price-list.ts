@@ -60,6 +60,7 @@ export interface PriceList {
   effectivePeriod: string;
   note: string;
   pricelist_detail: PriceListDetailItem[];
+  doc_version?: number;
   audit?: PriceListAudit;
 }
 
