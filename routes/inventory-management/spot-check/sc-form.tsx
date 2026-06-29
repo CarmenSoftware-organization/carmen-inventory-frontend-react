@@ -128,7 +128,7 @@ export function ScForm({
 
     if (isEdit && spotCheck) {
       updateSc.mutate(
-        { id: spotCheck.id, ...payload },
+        { id: spotCheck.id, doc_version: spotCheck.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

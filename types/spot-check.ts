@@ -35,6 +35,7 @@ export interface SpotCheckSaveItem {
 }
 
 export interface SpotCheckSaveDto {
+  doc_version?: number;
   items: SpotCheckSaveItem[];
 }
 
