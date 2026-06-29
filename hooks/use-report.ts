@@ -114,7 +114,12 @@ export function useReportListLookups({
             const rawName = String(item.name ?? "");
             return {
               code,
-              name: code && rawName ? `${code} - ${rawName}` : rawName,
+              // Period (and any source where code === name) submits the value as
+              // both code and name — show it once, not "2026-01 - 2026-01".
+              name:
+                code && rawName && code !== rawName
+                  ? `${code} - ${rawName}`
+                  : rawName,
             };
           },
         );

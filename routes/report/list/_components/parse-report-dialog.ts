@@ -55,7 +55,6 @@ const dataSourceMap: Record<string, string> = {
   "@location_count_list": "location-count",
   "@vendor_list": "vendor",
   "@period_list": "period",
-  "@inventory_period_list": "inventory-period",
 };
 
 /**
