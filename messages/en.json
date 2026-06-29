@@ -129,7 +129,9 @@
       "remove": "Remove",
       "selectAll": "Select all",
       "selectRow": "Select row",
-      "dragToReorder": "Drag to reorder"
+      "dragToReorder": "Drag to reorder",
+      "expandRow": "Expand row",
+      "collapseRow": "Collapse row"
     }
   },
   "pagination": {
@@ -519,6 +521,10 @@
     "pricelist": "Pricelist",
     "requested": "Requested",
     "approved": "Approved",
+    "requestedShort": "Req",
+    "approvedShort": "Apv",
+    "amountShort": "Amt",
+    "currencyShort": "Cur",
     "issued": "Issued",
     "grnDate": "GRN Date",
     "invoiceDate": "Invoice Date",

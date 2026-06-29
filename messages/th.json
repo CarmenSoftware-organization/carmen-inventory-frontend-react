@@ -129,7 +129,9 @@
       "remove": "ลบ",
       "selectAll": "เลือกทั้งหมด",
       "selectRow": "เลือกแถว",
-      "dragToReorder": "ลากเพื่อจัดเรียง"
+      "dragToReorder": "ลากเพื่อจัดเรียง",
+      "expandRow": "ขยายแถว",
+      "collapseRow": "ย่อแถว"
     }
   },
   "pagination": {
@@ -519,6 +521,10 @@
     "pricelist": "รายการราคา",
     "requested": "ร้องขอ",
     "approved": "อนุมัติ",
+    "requestedShort": "Req",
+    "approvedShort": "Apv",
+    "amountShort": "Amt",
+    "currencyShort": "Cur",
     "issued": "จ่าย",
     "grnDate": "วันที่ GRN",
     "invoiceDate": "วันที่ใบแจ้งหนี้",

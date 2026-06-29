@@ -136,7 +136,6 @@ export function PrItemFields({
 }: PrItemFieldsProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
-  const tfl = useTranslations("field");
   const [isAllocating, setIsAllocating] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [bulkAction, setBulkAction] = useState<
@@ -462,113 +461,109 @@ export function PrItemFields({
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h2 className="border-b pb-2 text-sm font-semibold">{tfl("items")}</h2>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-end gap-1.5">
+          <PrAskAiMenu
+            items={selectedRows.map((row) => {
+              const item = form.getValues(`items.${row.index}`);
+              return {
+                productName: item.product_name,
+                productLocalName: item.product_local_name,
+                locationName: item.location_name,
+              };
+            })}
+            disabled={selectedRows.length === 0}
+          />
+          {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              onClick={() =>
+                table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+              }
+            >
+              {table.getIsAllRowsExpanded() ? (
+                <>
+                  <ChevronsDownUp /> {tc("collapseAll")}
+                </>
+              ) : (
+                <>
+                  <ChevronsUpDown /> {tc("expandAll")}
+                </>
+              )}
+            </Button>
+          )}
+          {!isDisabled && role === STAGE_ROLE.CREATE && (
+            <Button
+              type="button"
+              size="xs"
+              disabled={!canAddItem}
+              title={!canAddItem ? t("selectWorkflowFirst") : undefined}
+              onClick={() => handleAddItem()}
+            >
+              <Plus /> {t("addItem")}
+            </Button>
+          )}
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-end gap-1.5">
-            <PrAskAiMenu
-              items={selectedRows.map((row) => {
-                const item = form.getValues(`items.${row.index}`);
-                return {
-                  productName: item.product_name,
-                  productLocalName: item.product_local_name,
-                  locationName: item.location_name,
-                };
-              })}
-              disabled={selectedRows.length === 0}
-            />
-            {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
+          {!isDisabled && role === STAGE_ROLE.PURCHASE && (
+            <Button
+              type="button"
+              size="xs"
+              disabled={isAllocating || itemFields.length === 0}
+              onClick={handleAutoAllocate}
+            >
+              {isAllocating ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <RefreshCcw />
+              )}
+              {t("autoAllocate")}
+            </Button>
+          )}
+        </div>
+        {selectedRows.length > 0 && canBulkAction && (
+          <div className="flex items-center gap-1.5">
+            <Button
+              type="button"
+              variant="success"
+              size="xs"
+              onClick={handleBulkApprove}
+            >
+              <Check />
+              {tc("approve")}
+            </Button>
+            <Button
+              type="button"
+              variant="warning"
+              size="xs"
+              onClick={handleBulkReview}
+            >
+              <Eye />
+              {t("reviewTitle")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="xs"
+              onClick={handleBulkReject}
+            >
+              <X />
+              {tc("reject")}
+            </Button>
+            {prId && (
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="xs"
-                onClick={() =>
-                  table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
-                }
+                onClick={handleBulkSplit}
               >
-                {table.getIsAllRowsExpanded() ? (
-                  <>
-                    <ChevronsDownUp /> {tc("collapseAll")}
-                  </>
-                ) : (
-                  <>
-                    <ChevronsUpDown /> {tc("expandAll")}
-                  </>
-                )}
-              </Button>
-            )}
-            {!isDisabled && role === STAGE_ROLE.CREATE && (
-              <Button
-                type="button"
-                size="xs"
-                disabled={!canAddItem}
-                title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-                onClick={() => handleAddItem()}
-              >
-                <Plus /> {t("addItem")}
-              </Button>
-            )}
-
-            {!isDisabled && role === STAGE_ROLE.PURCHASE && (
-              <Button
-                type="button"
-                size="xs"
-                disabled={isAllocating || itemFields.length === 0}
-                onClick={handleAutoAllocate}
-              >
-                {isAllocating ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  <RefreshCcw />
-                )}
-                {t("autoAllocate")}
+                <Scissors />
+                {t("split")}
               </Button>
             )}
           </div>
-          {selectedRows.length > 0 && canBulkAction && (
-            <div className="flex items-center gap-1.5">
-              <Button
-                type="button"
-                variant="success"
-                size="xs"
-                onClick={handleBulkApprove}
-              >
-                <Check />
-                {tc("approve")}
-              </Button>
-              <Button
-                type="button"
-                variant="warning"
-                size="xs"
-                onClick={handleBulkReview}
-              >
-                <Eye />
-                {t("reviewTitle")}
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="xs"
-                onClick={handleBulkReject}
-              >
-                <X />
-                {tc("reject")}
-              </Button>
-              {prId && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="xs"
-                  onClick={handleBulkSplit}
-                >
-                  <Scissors />
-                  {t("split")}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       <DataGrid

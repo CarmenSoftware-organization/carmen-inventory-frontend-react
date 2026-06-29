@@ -57,6 +57,7 @@ export function usePrItemTable({
 }: UsePrItemTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 
   const allCount = itemFields.length;
@@ -89,7 +90,7 @@ export function usePrItemTable({
                 t.toggleAllPageRowsSelected(false);
               }
             }}
-            aria-label="Select all"
+            aria-label={tc("aria.selectAll")}
             className="align-[inherit]"
           />
         );
@@ -120,7 +121,9 @@ export function usePrItemTable({
           type="button"
           variant="ghost"
           size="icon-xs"
-          aria-label={row.getIsExpanded() ? "Collapse row" : "Expand row"}
+          aria-label={
+            row.getIsExpanded() ? tc("aria.collapseRow") : tc("aria.expandRow")
+          }
           onClick={() => row.toggleExpanded()}
         >
           {row.getIsExpanded() ? (
@@ -212,7 +215,7 @@ export function usePrItemTable({
       },
       {
         id: "requested",
-        header: tfl("requested"),
+        header: tfl("requestedShort"),
         cell: ({ row }) => (
           <RequestedCell
             control={form.control}
@@ -221,14 +224,14 @@ export function usePrItemTable({
             isDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: 90,
         meta: {
           headerClassName: "text-right",
         },
       },
       {
         id: "approved",
-        header: tfl("approved"),
+        header: tfl("approvedShort"),
         cell: ({ row }) => (
           <ApprovedCell
             control={form.control}
@@ -238,7 +241,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: 90,
         meta: {
           headerClassName: "text-right",
         },
@@ -255,14 +258,14 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: 90,
         meta: {
           headerClassName: "text-right",
         },
       },
       {
         id: "amount",
-        header: tfl("amount"),
+        header: tfl("amountShort"),
         cell: ({ row }) => (
           <AmountCell
             control={form.control}
@@ -270,7 +273,7 @@ export function usePrItemTable({
             baseCurrencyCode={baseCurrencyCode}
           />
         ),
-        size: 80,
+        size: 140,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
@@ -279,7 +282,7 @@ export function usePrItemTable({
 
       {
         accessorKey: "currency_id",
-        header: tfl("currency"),
+        header: tfl("currencyShort"),
         cell: ({ row }) => (
           <CurrencyCell
             control={form.control}
@@ -288,7 +291,7 @@ export function usePrItemTable({
             isDisabled={isDisabled}
           />
         ),
-        size: 100,
+        size: 90,
         meta: {
           headerClassName: "text-center",
           cellClassName: "text-center",
@@ -380,7 +383,7 @@ export function usePrItemTable({
       ...col,
       meta: {
         ...col.meta,
-        cellClassName: cn("py-2 align-center", col.meta?.cellClassName),
+        cellClassName: cn("py-2 align-middle", col.meta?.cellClassName),
       },
     }));
 
@@ -398,6 +401,7 @@ export function usePrItemTable({
     today,
     isLockedAfterCreate,
     tfl,
+    tc,
   ]);
 
   const table = useReactTable({

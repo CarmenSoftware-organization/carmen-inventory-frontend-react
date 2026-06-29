@@ -128,7 +128,7 @@ export function usePurchaseRequestTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
-      size: 100,
+      size: 140,
     },
     {
       accessorKey: "requestor_name",
@@ -155,12 +155,14 @@ export function usePurchaseRequestTable({
         const amount = row.original.base_total_amount;
         if (amount == null) return <span></span>;
         return (
-          <span className="font-medium tabular-nums">
-            {formatAmount(amount, amountFormat)}
+          <div className="text-right">
+            <span className="font-medium">
+              {formatAmount(amount, amountFormat)}
+            </span>
             <span className="text-muted-foreground ms-1 text-xs font-normal">
               {defaultCurrencyCode}
             </span>
-          </span>
+          </div>
         );
       },
       meta: {
@@ -169,7 +171,7 @@ export function usePurchaseRequestTable({
         cellClassName: "text-right",
         headerClassName: "text-right",
       },
-      size: 120,
+      size: 150,
     },
   ];
 

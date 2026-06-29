@@ -1,19 +1,11 @@
 import { useState } from "react";
 import { Control, useWatch } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import {
-  AlertTriangle,
-  ChevronDown,
-  Layers3,
-  Package,
-  Truck,
-  type LucideIcon,
-} from "lucide-react";
+import { AlertTriangle, ChevronDown } from "lucide-react";
 import { PrFormValues } from "./pr-form-schema";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   Collapsible,
@@ -57,7 +49,6 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
         <div className="grid grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="space-y-1.5">
-              <Skeleton className="size-7 rounded-lg" />
               <Skeleton className="h-3 w-16" />
               <Skeleton className="h-5 w-full" />
               <Skeleton className="h-3 w-10" />
@@ -85,70 +76,38 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
 
   return (
     <Collapsible defaultOpen>
-      <div
-        className={cn(
-          "group bg-card relative overflow-hidden rounded-lg border transition-colors hover:border-primary/40",
-          statusTheme.border,
-        )}
-      >
-        <span
-          aria-hidden="true"
-          className={cn(
-            "absolute inset-x-0 top-0 h-0.5",
-            statusTheme.accentBar,
-          )}
-        />
-
-        <CollapsibleTrigger className="hover:bg-muted/40 relative flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold [&[data-state=open]>div:first-child>svg]:rotate-180">
+      <div className="bg-card rounded-lg border">
+        <CollapsibleTrigger className="hover:bg-muted/40 flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold hover:cursor-pointer [&[data-state=open]>div:first-child>svg]:rotate-180">
           <div className="flex items-center gap-1.5">
             <ChevronDown className="size-3.5 shrink-0 transition-transform" />
             <span>{t("inventoryInfo")}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge
-              className={cn("text-[0.625rem] font-semibold", statusTheme.badge)}
-              size="xs"
-            >
-              {t(`stockStatus.${status}`)}
-            </Badge>
-            <span className="text-muted-foreground text-[0.6875rem] tabular-nums">
-              {pct.toFixed(1)}%
-            </span>
-          </div>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="relative space-y-3 px-3 pb-3">
+          <div className="space-y-3 px-3 pb-3">
             <div className="grid grid-cols-4 gap-3">
-              <InventoryCard
-                icon={Package}
+              <InventoryStat
                 label={t("onHand")}
                 value={on_hand_qty}
                 unit={unitName}
-                tone={status === "critical" ? "destructive" : "info"}
                 onLabelClick={() => setOnHandOpen(true)}
               />
-              <InventoryCard
-                icon={Truck}
+              <InventoryStat
                 label={t("onOrder")}
                 value={on_order_qty}
                 unit={unitName}
-                tone="info"
                 onLabelClick={() => setOnOrderOpen(true)}
               />
-              <InventoryCard
-                icon={AlertTriangle}
+              <InventoryStat
                 label={t("reorderPt")}
                 value={re_order_qty}
                 unit={unitName}
-                tone="warning"
               />
-              <InventoryCard
-                icon={Layers3}
+              <InventoryStat
                 label={t("restock")}
                 value={re_stock_qty}
                 unit={unitName}
-                tone="muted"
               />
             </div>
 
@@ -193,115 +152,52 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
   );
 }
 
+// Status carries ONE signal each — the badge (trigger) and the progress bar
+// indicator — not stripes/borders/icon tiles (keeps the panel flat per DESIGN.md).
 const STATUS_THEME = {
   healthy: {
-    border: "border-success/30",
-    accentBar: "bg-success",
-    glow: "bg-success/20",
     indicator: "bg-success",
     badge: "bg-success/10 text-success-foreground",
   },
   low: {
-    border: "border-warning/40",
-    accentBar: "bg-warning",
-    glow: "bg-warning/25",
     indicator: "bg-warning",
     badge: "bg-warning/15 text-warning-foreground",
   },
   critical: {
-    border: "border-destructive/40",
-    accentBar: "bg-destructive",
-    glow: "bg-destructive/25",
     indicator: "bg-destructive",
     badge: "bg-destructive/10 text-destructive",
   },
 } as const;
 
-type CardTone = "info" | "warning" | "destructive" | "muted";
-
-const CARD_TONE: Record<
-  CardTone,
-  { iconBg: string; iconText: string; valueText: string }
-> = {
-  info: {
-    iconBg: "bg-info/10",
-    iconText: "text-info",
-    valueText: "text-foreground",
-  },
-  warning: {
-    iconBg: "bg-warning/15",
-    iconText: "text-warning-foreground",
-    valueText: "text-foreground",
-  },
-  destructive: {
-    iconBg: "bg-destructive/10",
-    iconText: "text-destructive",
-    valueText: "text-destructive",
-  },
-  muted: {
-    iconBg: "bg-muted",
-    iconText: "text-muted-foreground",
-    valueText: "text-foreground",
-  },
-};
-
-interface InventoryCardProps {
-  readonly icon: LucideIcon;
+interface InventoryStatProps {
   readonly label: string;
   readonly value: number;
   readonly unit: string;
-  readonly tone: CardTone;
   readonly onLabelClick?: () => void;
 }
 
-function InventoryCard({
-  icon: Icon,
+function InventoryStat({
   label,
   value,
   unit,
-  tone,
   onLabelClick,
-}: InventoryCardProps) {
-  const palette = CARD_TONE[tone];
-  const clickable = !!onLabelClick;
+}: InventoryStatProps) {
   return (
-    <div
-      className={cn(
-        "border-border/60 bg-background/40 group/card relative space-y-1 rounded-md border px-2 py-2 transition-colors",
-        clickable && "hover:border-primary/30",
-      )}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <span
-          aria-hidden="true"
-          className={cn(
-            "inline-flex size-6 items-center justify-center rounded-md",
-            palette.iconBg,
-            palette.iconText,
-          )}
+    <div className="space-y-0.5">
+      {onLabelClick ? (
+        <button
+          type="button"
+          onClick={onLabelClick}
+          className="text-primary text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
         >
-          <Icon className="size-3.5" />
+          {label}
+        </button>
+      ) : (
+        <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
+          {label}
         </span>
-        {clickable ? (
-          <button
-            type="button"
-            onClick={onLabelClick}
-            className="text-primary text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
-          >
-            {label}
-          </button>
-        ) : (
-          <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
-            {label}
-          </span>
-        )}
-      </div>
-      <div
-        className={cn(
-          "text-base leading-5 font-semibold tabular-nums",
-          palette.valueText,
-        )}
-      >
+      )}
+      <div className="text-foreground text-sm font-semibold tabular-nums">
         {value.toLocaleString()}
       </div>
       <span className="text-muted-foreground text-[0.625rem]">{unit}</span>

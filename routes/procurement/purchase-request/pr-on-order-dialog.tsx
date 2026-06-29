@@ -228,7 +228,7 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
                   <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
                     {tfl("total")}
                   </p>
-                  <p className="text-warning text-lg leading-tight font-bold tabular-nums">
+                  <p className="text-warning text-lg leading-tight font-semibold tabular-nums">
                     {totalQty.toLocaleString()}
                   </p>
                   <p className="text-muted-foreground text-[0.625rem]">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +31,9 @@ import { PrHeader } from "./pr-header";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const PrWorkflowHistory = lazy(() =>
-  import("./workflow/pr-workflow-history").then((mod) => ({ default: mod.PrWorkflowHistory })),
+  import("./workflow/pr-workflow-history").then((mod) => ({
+    default: mod.PrWorkflowHistory,
+  })),
 );
 
 interface PurchaseRequestFormProps {

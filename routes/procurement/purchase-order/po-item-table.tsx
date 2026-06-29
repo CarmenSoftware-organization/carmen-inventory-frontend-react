@@ -239,20 +239,6 @@ export const StatusCell = memo(function StatusCell({
   );
 });
 
-/**
- * Read-only display ของ order qty
- *
- * Value มาจาก sum ของ `items[index].locations[*].order_qty` (ไม่ใช่
- * editable input). User แก้ qty ที่ locations sub-table ใน expanded row;
- * cell นี้ sync ค่ารวมกลับเข้า `order_qty` field ของ form เพื่อให้
- * `ComputedPricingCell` คำนวณ subtotal/total ได้ถูก
- */
-/**
- * คำนวณ derived values ของ 1 item — pure function ใช้ร่วมกันระหว่าง
- * display cell และ side-effect sync เพื่อกันสูตร drift กัน
- *
- * qty derive จาก sum ของ locations.order_qty (source of truth)
- */
 function computeItemPricing(item: PoFormValues["items"][number] | undefined) {
   const price = Number(item?.price ?? 0);
   const orderQty = (item?.locations ?? []).reduce(

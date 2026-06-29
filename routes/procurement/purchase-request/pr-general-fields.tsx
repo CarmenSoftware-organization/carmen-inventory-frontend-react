@@ -37,67 +37,57 @@ export function PrGeneralFields({
   const workflowReadOnly = descriptionReadOnly || !!fromTemplate;
 
   return (
-    <div className="max-w-2xl space-y-4">
-      <FieldGroup className="gap-3">
-        <div className="grid grid-cols-2 gap-3">
-          <Field>
-            <FieldLabel
-              required={!workflowReadOnly}
-              className={
-                workflowReadOnly ? "text-muted-foreground" : undefined
-              }
-            >
-              {tfl("workflow")}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="workflow_id"
-              render={({ field }) => (
-                <LookupWorkflow
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  workflowType={WORKFLOW_TYPE.PR}
-                  readOnly={workflowReadOnly}
-                  disabled={disabled}
-                  error={form.formState.errors.workflow_id?.message}
-                  className={workflowReadOnly ? "font-semibold" : undefined}
-                />
-              )}
-            />
-          </Field>
-        </div>
-
-        <Field>
-          <FieldLabel
-            htmlFor="pr-description"
-            className={
-              descriptionReadOnly ? "text-muted-foreground" : undefined
-            }
-          >
-            {tfl("description")}
-          </FieldLabel>
-          {descriptionReadOnly ? (
-            <span className="inline-flex min-h-8 items-center text-sm font-semibold">
-              {watchedDescription?.trim() ? (
-                <span className="whitespace-pre-line">
-                  {watchedDescription}
-                </span>
-              ) : (
-                <span className="text-muted-foreground font-normal">—</span>
-              )}
-            </span>
-          ) : (
-            <Textarea
-              id="pr-description"
-              placeholder={t("descPlaceholder")}
-              rows={2}
-              maxLength={256}
+    <FieldGroup>
+      <Field>
+        <FieldLabel
+          required={!workflowReadOnly}
+          className={workflowReadOnly ? "text-muted-foreground" : undefined}
+        >
+          {tfl("workflow")}
+        </FieldLabel>
+        <Controller
+          control={form.control}
+          name="workflow_id"
+          render={({ field }) => (
+            <LookupWorkflow
+              value={field.value}
+              onValueChange={field.onChange}
+              workflowType={WORKFLOW_TYPE.PR}
+              readOnly={workflowReadOnly}
               disabled={disabled}
-              {...form.register("description")}
+              error={form.formState.errors.workflow_id?.message}
+              className={workflowReadOnly ? "font-semibold" : undefined}
             />
           )}
-        </Field>
-      </FieldGroup>
-    </div>
+        />
+      </Field>
+
+      <Field>
+        <FieldLabel
+          htmlFor="pr-description"
+          className={descriptionReadOnly ? "text-muted-foreground" : undefined}
+        >
+          {tfl("description")}
+        </FieldLabel>
+        {descriptionReadOnly ? (
+          <span className="inline-flex min-h-8 items-center text-sm font-semibold">
+            {watchedDescription?.trim() ? (
+              <span className="whitespace-pre-line">{watchedDescription}</span>
+            ) : (
+              <span className="text-muted-foreground font-normal">—</span>
+            )}
+          </span>
+        ) : (
+          <Textarea
+            id="pr-description"
+            placeholder={t("descPlaceholder")}
+            rows={2}
+            maxLength={256}
+            disabled={disabled}
+            {...form.register("description")}
+          />
+        )}
+      </Field>
+    </FieldGroup>
   );
 }

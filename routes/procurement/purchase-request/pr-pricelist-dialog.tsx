@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "use-intl";
-import { FileText, Package, Receipt, Tag } from "lucide-react";
+import { FileText, Package, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import {
   type ColumnDef,
@@ -122,7 +122,7 @@ const buildColumns = (
               </Badge>
             )}
             <span
-              className={`tabular-nums ${isBest ? "text-success font-bold" : "font-semibold"}`}
+              className={`tabular-nums ${isBest ? "text-success font-semibold" : "font-semibold"}`}
             >
               {formatCurrency(price)}
             </span>
@@ -287,44 +287,34 @@ export function PrPricelistDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] flex-col gap-0 p-0 sm:max-w-5xl">
-        <div className="relative space-y-4 px-6 pt-6 pb-4">
+        <div className="space-y-4 px-6 pt-6 pb-4">
           <DialogHeader>
-            <div className="flex items-start gap-3">
-              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <Tag className="size-4.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                  {t("priceListComparison")}
-                </div>
-                <DialogTitle className="truncate text-base">
-                  {productName}
-                </DialogTitle>
-                <DialogDescription className="sr-only">
-                  {t("priceListComparison")}
-                </DialogDescription>
-                <div className="text-muted-foreground mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem]">
+            <DialogTitle className="truncate text-base">
+              {productName}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              {t("priceListComparison")}
+            </DialogDescription>
+            <div className="text-muted-foreground mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem]">
+              <span className="inline-flex items-center gap-1">
+                <Package className="size-3" />
+                {tfl("requested")}:{" "}
+                <span className="text-foreground font-semibold tabular-nums">
+                  {requestedQty} {requestedUnitName}
+                </span>
+              </span>
+              {approvedQty > 0 && (
+                <>
+                  <span className="bg-border h-3 w-px" />
                   <span className="inline-flex items-center gap-1">
-                    <Package className="size-3" />
-                    {tfl("requested")}:{" "}
+                    <Receipt className="size-3" />
+                    {tfl("approved")}:{" "}
                     <span className="text-foreground font-semibold tabular-nums">
-                      {requestedQty} {requestedUnitName}
+                      {approvedQty} {approvedUnitName}
                     </span>
                   </span>
-                  {approvedQty > 0 && (
-                    <>
-                      <span className="bg-border h-3 w-px" />
-                      <span className="inline-flex items-center gap-1">
-                        <Receipt className="size-3" />
-                        {tfl("approved")}:{" "}
-                        <span className="text-foreground font-semibold tabular-nums">
-                          {approvedQty} {approvedUnitName}
-                        </span>
-                      </span>
-                    </>
-                  )}
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </DialogHeader>
 
