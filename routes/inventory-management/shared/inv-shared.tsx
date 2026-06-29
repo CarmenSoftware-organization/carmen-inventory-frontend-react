@@ -11,14 +11,16 @@ const SKELETON_KEYS = Array.from({ length: 30 }, (_, i) => `skl-${i}`);
 
 type KpiTone = "primary" | "info" | "warning" | "success";
 
+// FLAT (DESIGN.md "avoid neon"): neutral icon box (bg-muted), the tone color
+// appears once — as the icon glyph (single signal), never as a tinted box.
 const KPI_TONE_MAP: Record<KpiTone, { iconBg: string; text: string }> = {
-  primary: { iconBg: "bg-primary/15 text-primary", text: "text-primary" },
-  info: { iconBg: "bg-info/15 text-info", text: "text-info" },
+  primary: { iconBg: "bg-muted text-primary", text: "text-primary" },
+  info: { iconBg: "bg-muted text-info", text: "text-info" },
   warning: {
-    iconBg: "bg-warning/15 text-warning-foreground",
+    iconBg: "bg-muted text-warning",
     text: "text-warning-foreground",
   },
-  success: { iconBg: "bg-success/15 text-success", text: "text-success" },
+  success: { iconBg: "bg-muted text-success", text: "text-success" },
 };
 
 export function KpiTile({
@@ -44,8 +46,7 @@ export function KpiTile({
       onClick={onClick}
       className={cn(
         "border-border/40 bg-card hover:bg-card group relative flex items-center gap-3 rounded-xl border p-2 transition-all",
-        active &&
-          "border-primary shadow-[0_0_0_3px_color-mix(in_oklch,var(--primary),transparent_88%)]",
+        active && "border-primary",
       )}
     >
       <div

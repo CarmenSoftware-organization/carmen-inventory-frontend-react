@@ -140,6 +140,7 @@ export const ProductCard = memo(function ProductCard({
                   inputMode="decimal"
                   min={1}
                   step="any"
+                  size="sm"
                   value={loc.order_qty}
                   onChange={(e) =>
                     onLocationChange(productId, idx, {
@@ -148,7 +149,8 @@ export const ProductCard = memo(function ProductCard({
                   }
                   aria-invalid={!!qtyErr || undefined}
                   className={cn(
-                    "h-7 text-right text-xs tabular-nums",
+                    // size="sm" (h-8) ให้สูงเท่า LookupProductLocation (LookupCombobox sm)
+                    "text-right text-xs tabular-nums",
                     qtyErr && "border-destructive",
                   )}
                 />

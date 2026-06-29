@@ -183,8 +183,8 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         className="flex flex-1 flex-col gap-4"
       >
         <section className="space-y-3">
-          <div className="border-border/60 border-b pb-2">
-            <h2 className="text-sm font-bold tracking-tight">
+          <div className="border-border/60 space-y-0.5 border-b pb-2">
+            <h2 className="text-foreground text-sm font-semibold tracking-tight">
               {t("sectionVendor")}
             </h2>
             <p className="text-muted-foreground text-xs">
@@ -203,7 +203,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         {/* Section 2 — flat (ไม่ห่อ card) ให้ตาราง line items เต็มความกว้าง */}
         <section className="space-y-3">
           <div className="border-border/60 flex items-baseline justify-between gap-2 border-b pb-2">
-            <h2 className="text-sm font-bold tracking-tight">
+            <h2 className="text-foreground text-sm font-semibold tracking-tight">
               {t("sectionItems")}
             </h2>
             <p className="text-muted-foreground text-xs">
@@ -230,8 +230,8 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         </section>
 
         <section className="space-y-3">
-          <div className="border-border/60 border-b pb-2">
-            <h2 className="text-sm font-bold tracking-tight">
+          <div className="border-border/60 space-y-0.5 border-b pb-2">
+            <h2 className="text-foreground text-sm font-semibold tracking-tight">
               {t("sectionNotes")}
             </h2>
             <p className="text-muted-foreground text-xs">

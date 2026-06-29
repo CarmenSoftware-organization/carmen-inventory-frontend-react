@@ -39,11 +39,17 @@ function PlainField({
   readonly value?: string;
   readonly children?: ReactNode;
 }) {
+  // gap-1 (4px) ภายในคู่ label↔value ให้ชิดกันเป็นชุดเดียว — แถวต่อแถวเว้น 16px
+  // (gap-y-4) สร้าง proximity grouping แบบ Apple (intra ชิดกว่า inter มากๆ)
   return (
-    <Field>
-      <FieldLabel>{label}</FieldLabel>
+    <Field className="gap-1">
+      {/* view mode: label เงียบ (เทา/ปกติ) — value เด่น (เข้ม/medium)
+          สร้าง hierarchy ด้วย lightness contrast แบบ Apple ไม่ให้ทั้งคู่เข้มเท่ากัน */}
+      <FieldLabel className="text-muted-foreground font-normal">
+        {label}
+      </FieldLabel>
       {children ?? (
-        <span className="inline-flex min-h-8 items-center text-sm">
+        <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
           {value || "—"}
         </span>
       )}

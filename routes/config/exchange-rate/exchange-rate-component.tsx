@@ -393,7 +393,7 @@ export default function ExchangeRateComponent() {
         <AlertDialogContent className="flex max-h-[85vh] flex-col gap-0 p-0 sm:max-w-lg">
           <AlertDialogHeader className="relative gap-0 px-5 pt-6 pb-4">
             <div className="flex items-start gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <RefreshCw className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">

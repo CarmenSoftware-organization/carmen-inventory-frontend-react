@@ -181,7 +181,7 @@ export function EntryNotesDialog({
         <div className="p-5">
           <DialogHeader className="space-y-2">
             <div className="flex items-start gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <MessageSquarePlus className="size-4.5" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">

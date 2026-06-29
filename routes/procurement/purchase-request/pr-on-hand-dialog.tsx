@@ -127,7 +127,7 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
         <div className="relative space-y-4 px-6 pt-10 pb-6">
           <DialogHeader>
             <div className="flex items-start gap-3">
-              <div className="bg-info/10 text-info flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-info flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Warehouse className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">

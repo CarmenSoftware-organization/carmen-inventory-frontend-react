@@ -213,7 +213,7 @@ export const TaxProfileCell = memo(function TaxProfileCell({
             form.setValue(`items.${index}.tax_rate`, rate);
           }}
           disabled={disabled}
-          className="w-full text-xs"
+          className="h-7 w-full text-xs"
           error={fieldState.error?.message}
         />
       )}

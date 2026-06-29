@@ -97,8 +97,8 @@ export interface PoDetailPayload {
 
 export interface PoDetailPayloadLocation {
   location_id: string;
-  requested_qty: number;
-  received_qty: number;
+  order_qty: number;
+  order_base_qty: number;
 }
 
 export interface CreatePoDto {

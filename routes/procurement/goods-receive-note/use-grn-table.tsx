@@ -10,7 +10,11 @@ import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
-import { GRN_STATUS_CONFIG, GRN_TYPE_CONFIG, GRN_DOC_TYPE_KEY } from "@/constant/goods-receive-note";
+import {
+  GRN_STATUS_CONFIG,
+  GRN_TYPE_CONFIG,
+  GRN_DOC_TYPE_KEY,
+} from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 
 interface UseGrnTableOptions {
@@ -22,22 +26,6 @@ interface UseGrnTableOptions {
   onDelete: (grn: GoodsReceiveNote) => void;
 }
 
-/**
- * Hook สร้าง react-table instance สำหรับหน้ารายการ Goods Receive Note
- * ประกอบด้วยคอลัมน์ grn_no, grn_date, vendor, doc_type, status, total, currency
- * และ action แก้ไข/ลบ
- *
- * @param options - ตัวเลือกของ hook
- * @param options.goodsReceiveNotes - รายการ GRN
- * @param options.totalRecords - จำนวน record ทั้งหมด
- * @param options.params - ParamsDto
- * @param options.tableConfig - config จาก useDataGridState
- * @param options.onEdit - callback เมื่อกดแถว
- * @param options.onDelete - callback ลบ
- * @returns react-table instance
- * @example
- * const { table } = useGrnTable({ goodsReceiveNotes, totalRecords, params, tableConfig, onEdit, onDelete });
- */
 export function useGrnTable({
   goodsReceiveNotes,
   totalRecords,
@@ -97,7 +85,11 @@ export function useGrnTable({
     {
       accessorKey: "doc_status",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("status")} className="justify-center" />
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
       ),
       cell: ({ row }) => {
         const status = row.getValue<string>("doc_status") || "draft";
@@ -117,7 +109,11 @@ export function useGrnTable({
     {
       accessorKey: "doc_type",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("type")} className="justify-center" />
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("type")}
+          className="justify-center"
+        />
       ),
       cell: ({ row }) => {
         const docType = row.original.doc_type;
@@ -139,28 +135,32 @@ export function useGrnTable({
     {
       accessorKey: "total_amount",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("totalAmount")} className="justify-end" />
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("totalAmount")}
+          className="justify-end"
+        />
       ),
       cell: ({ row }) => {
         const amount = row.getValue<number>("total_amount");
-        return <span>{amount == null ? "" : formatCurrency(amount)}</span>;
+        const currency = row.original.currency_code;
+        if (amount == null) return <span></span>;
+        return (
+          <span className="font-medium tabular-nums">
+            {formatCurrency(amount)}
+            {currency && (
+              <span className="text-muted-foreground ms-1 text-xs font-normal">
+                {currency}
+              </span>
+            )}
+          </span>
+        );
       },
       meta: {
         headerTitle: tfl("totalAmount"),
         cellClassName: "text-right",
       },
-      size: 180,
-    },
-    {
-      accessorKey: "currency_code",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("currency")} className="justify-center" />
-      ),
-      size: 160,
-      meta: {
-        headerTitle: tfl("currency"),
-        cellClassName: "text-center",
-      },
+      size: 200,
     },
   ];
 

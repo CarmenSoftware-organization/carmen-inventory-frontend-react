@@ -9,13 +9,13 @@ interface FilterPillProps {
   readonly tone?: "primary" | "warning" | "success";
 }
 
+// FLAT (DESIGN.md "avoid neon"): the active pill carries ONE signal — a
+// colored border — over a neutral box and text. No tinted fill, no colored
+// glow halo (the old `shadow-[0_0_0_3px_color-mix(...)]` read as neon).
 const ACTIVE_TONE_MAP: Record<string, string> = {
-  primary:
-    "border-primary bg-primary/10 text-primary shadow-[0_0_0_3px_color-mix(in_oklch,var(--primary),transparent_88%)]",
-  warning:
-    "border-warning bg-warning/10 text-warning-foreground shadow-[0_0_0_3px_color-mix(in_oklch,var(--warning),transparent_88%)]",
-  success:
-    "border-success bg-success/10 text-success shadow-[0_0_0_3px_color-mix(in_oklch,var(--success),transparent_88%)]",
+  primary: "border-primary text-foreground",
+  warning: "border-warning text-foreground",
+  success: "border-success text-foreground",
 };
 
 export function FilterPill({

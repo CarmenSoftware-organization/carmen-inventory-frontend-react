@@ -68,7 +68,7 @@ export function usePurchaseRequestTable({
           {row.original.pr_no}
         </CellAction>
       ),
-      size: 120,
+      size: 140,
       meta: { headerTitle: tfl("prNo"), skeleton: columnSkeletons.text },
     },
     {
@@ -134,7 +134,7 @@ export function usePurchaseRequestTable({
       accessorKey: "requestor_name",
       header: tfl("requester"),
       meta: { headerTitle: tfl("requester"), skeleton: columnSkeletons.text },
-      size: 160,
+      size: 180,
     },
     {
       accessorKey: "department_name",
@@ -144,9 +144,25 @@ export function usePurchaseRequestTable({
     },
     {
       accessorKey: "base_total_amount",
-      header: tfl("totalAmount"),
-      cell: ({ row }) =>
-        formatAmount(row.original.base_total_amount, amountFormat),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("totalAmount")}
+          className="justify-end"
+        />
+      ),
+      cell: ({ row }) => {
+        const amount = row.original.base_total_amount;
+        if (amount == null) return <span></span>;
+        return (
+          <span className="font-medium tabular-nums">
+            {formatAmount(amount, amountFormat)}
+            <span className="text-muted-foreground ms-1 text-xs font-normal">
+              {defaultCurrencyCode}
+            </span>
+          </span>
+        );
+      },
       meta: {
         headerTitle: tfl("totalAmount"),
         skeleton: columnSkeletons.text,
@@ -154,18 +170,6 @@ export function usePurchaseRequestTable({
         headerClassName: "text-right",
       },
       size: 120,
-    },
-    {
-      id: "currency",
-      header: tfl("currency"),
-      meta: {
-        headerTitle: tfl("currency"),
-        cellClassName: "text-center",
-        headerClassName: "text-center",
-        skeleton: columnSkeletons.text,
-      },
-      cell: () => defaultCurrencyCode,
-      size: 80,
     },
   ];
 

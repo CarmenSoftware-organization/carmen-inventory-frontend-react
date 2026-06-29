@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { CircleAlert } from "lucide-react";
@@ -449,39 +448,6 @@ function FieldInput({
   );
 }
 
-/**
- * Select ที่ฝัง error tooltip
- *
- * Render `Select` + `SelectTrigger` ที่แสดงไอคอน CircleAlert สีแดงเมื่อมี
- * error และเปิด tooltip บอก error message เมื่อ hover/focus เหมาะสำหรับ
- * compact layout เช่นเดียวกับ FieldInput
- *
- * @param props - props ของ component
- * @param props.error - ข้อความ error (ถ้ามี)
- * @param props.placeholder - placeholder ของ SelectValue
- * @param props.size - ขนาดของ SelectTrigger
- * @param props.children - SelectContent ที่มี SelectItem
- * @returns JSX element ของ select wrapper
- * @example
- * ```tsx
- * <Controller
- *   control={form.control}
- *   name="type"
- *   render={({ field }) => (
- *     <FieldSelect
- *       value={field.value}
- *       onValueChange={field.onChange}
- *       error={errors.type?.message}
- *       placeholder="Select type"
- *     >
- *       <SelectContent>
- *         <SelectItem value="a">A</SelectItem>
- *       </SelectContent>
- *     </FieldSelect>
- *   )}
- * />
- * ```
- */
 function FieldSelect({
   error,
   className,

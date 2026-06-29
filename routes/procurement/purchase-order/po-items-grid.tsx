@@ -48,8 +48,7 @@ export const PoItemsGrid = memo(function PoItemsGrid({
 
   // stable open-toggle — กัน memo ของ ItemRow/ItemCard แตกตอน grid re-render
   const handleToggleOpen = useCallback(
-    (index: number) =>
-      setOpenIndex((prev) => (prev === index ? null : index)),
+    (index: number) => setOpenIndex((prev) => (prev === index ? null : index)),
     [],
   );
 
@@ -98,7 +97,12 @@ export const PoItemsGrid = memo(function PoItemsGrid({
       {/* Derived-field sync — 1 ตัวต่อ item, รัน setValue ครั้งเดียว
           (ไม่ซ้ำใน desktop ItemRow + mobile ItemCard ที่ mount พร้อมกัน) */}
       {Array.from({ length: itemCount }, (_, i) => (
-        <PoItemComputedSync key={i} control={form.control} form={form} index={i} />
+        <PoItemComputedSync
+          key={i}
+          control={form.control}
+          form={form}
+          index={i}
+        />
       ))}
 
       {/* Desktop / tablet — HTML table, browser-managed column widths */}
@@ -180,7 +184,7 @@ function ItemsHeader({
 }) {
   "use no memo";
   return (
-    <thead className="bg-muted/40 text-muted-foreground font-bold tracking-wider uppercase">
+    <thead className="bg-muted/40 text-muted-foreground font-semibold tracking-wider uppercase">
       <tr>
         {showApproveCheckbox && (
           <th scope="col" className="w-10 px-2 py-2 text-center">

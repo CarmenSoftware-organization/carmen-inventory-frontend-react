@@ -116,7 +116,9 @@ export function usePoTable({
         const status = row.original.po_status;
         const config = PO_STATUS_CONFIG[status];
         return (
-          <Badge className={config?.className}>{config?.label ?? status}</Badge>
+          <Badge size="sm" className={config?.className}>
+            {config?.label ?? status}
+          </Badge>
         );
       },
       meta: {
@@ -137,23 +139,23 @@ export function usePoTable({
       ),
       cell: ({ row }) => {
         const amount = row.getValue<number>("total_amount");
-        return <span>{amount == null ? "" : formatCurrency(amount)}</span>;
+        const currency = row.original.currency_code;
+        if (amount == null) return <span></span>;
+        return (
+          <span className="font-medium tabular-nums">
+            {formatCurrency(amount)}
+            {currency && (
+              <span className="text-muted-foreground ms-1 text-xs font-normal">
+                {currency}
+              </span>
+            )}
+          </span>
+        );
       },
       meta: {
         headerTitle: tfl("totalAmount"),
         skeleton: columnSkeletons.text,
         cellClassName: "text-right",
-      },
-    },
-    {
-      id: "currency_code",
-      accessorFn: (row) => row.currency_code,
-      header: tfl("currency"),
-      meta: {
-        headerTitle: tfl("currency"),
-        skeleton: columnSkeletons.text,
-        cellClassName: "text-center",
-        headerClassName: "text-center",
       },
     },
   ];

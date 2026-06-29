@@ -30,7 +30,7 @@ colors:
   sidebar: "#f5f5f5"
   destructive: "#f75253"
   success: "#44c5bc"
-  info: "#197cdd"
+  info: "#007eb0"            # Azure — semantic info/comment, distinct from primary blue
   warning: "#efa831"
   positive: "#23a136"
   # ── Dark mode (Supabase-style neutral) ──
@@ -49,7 +49,7 @@ colors:
   dark-sidebar: "#0f0f0f"
   dark-destructive: "#f75253"
   dark-success: "#44c5bc"
-  dark-info: "#197cdd"
+  dark-info: "#0aa0d2"          # Azure (brighter on dark) — distinct from dark-primary
   dark-warning: "#f5b75b"
   dark-positive: "#68cb6e"
 

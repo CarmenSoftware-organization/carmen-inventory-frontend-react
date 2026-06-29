@@ -227,7 +227,7 @@ export function EntryImportDialog({
         <div className="p-5">
           <DialogHeader className="space-y-2">
             <div className="flex items-start gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Upload className="size-4.5" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">
@@ -254,7 +254,7 @@ export function EntryImportDialog({
 
           {file ? (
             <div className="border-border/60 bg-card relative flex items-start gap-3 rounded-xl border p-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <FileSpreadsheet className="size-5" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">

@@ -94,7 +94,7 @@ export const ItemCard = memo(function ItemCard({
             <p className="text-muted-foreground truncate">{productLocalName}</p>
           )}
         </div>
-        <div className="text-primary text-right font-bold tabular-nums">
+        <div className="text-primary text-right font-semibold tabular-nums">
           <ComputedPricingCell
             control={form.control}
             index={index}

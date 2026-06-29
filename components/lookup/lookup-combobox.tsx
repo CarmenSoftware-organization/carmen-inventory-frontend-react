@@ -71,7 +71,7 @@ interface LookupComboboxProps<T> {
   readonly popoverAlign?: "start" | "center" | "end";
   readonly popoverClassName?: string;
   readonly modal?: boolean;
-  readonly size?: "xs" | "sm";
+  readonly size?: "xs" | "sm" | "default";
   readonly onSearchChange?: (search: string) => void;
   readonly serverSideSearch?: boolean;
   readonly onLoadMore?: () => void;
@@ -176,6 +176,7 @@ export function LookupCombobox<T>({
       <span
         className={cn(
           "inline-flex items-center text-sm",
+          size === "default" && "min-h-9",
           size === "sm" && "min-h-8",
           size === "xs" && "min-h-6 text-xs",
           !selectedLabel && "text-muted-foreground",
@@ -207,6 +208,7 @@ export function LookupCombobox<T>({
                 aria-invalid={!!error}
                 className={cn(
                   "flex items-center justify-between pr-1 pl-3 text-sm",
+                  size === "default" && "h-9",
                   size === "sm" && "h-8",
                   size === "xs" && "h-6 gap-1 px-2 text-xs",
                   // important: ชนะ `dark:border-input` ของ Button outline

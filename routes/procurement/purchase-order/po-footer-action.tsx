@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useWatch, type Control } from "react-hook-form";
@@ -92,7 +91,7 @@ export function PoFooterAction({
 
   return (
     <>
-      <div className="bg-card sticky bottom-0 z-20 mt-auto flex flex-wrap items-center justify-between gap-3 border-t py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-nowrap sm:gap-4 sm:px-8">
+      <div className="bg-background sticky bottom-0 z-20 mt-auto flex flex-wrap items-center justify-between gap-3 border-t py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-nowrap sm:gap-4">
         {isEditMode && (
           <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
             <Info className="size-3.5" aria-hidden="true" />
@@ -107,7 +106,6 @@ export function PoFooterAction({
               <Button
                 type="button"
                 size="sm"
-                variant="info"
                 disabled={isPending}
                 onClick={() =>
                   openConfirm({

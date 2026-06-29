@@ -34,7 +34,7 @@ export default function PrSelectTemplate({ template, onSelect }: Props) {
       onClick={() => onSelect(template.id)}
       className="group bg-card hover:border-primary/40 focus-visible:ring-primary/40 relative flex w-full min-w-0 items-start gap-3 overflow-hidden rounded-xl border p-3 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
     >
-      <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+      <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
         <LayoutTemplate className="size-4" />
       </div>
 

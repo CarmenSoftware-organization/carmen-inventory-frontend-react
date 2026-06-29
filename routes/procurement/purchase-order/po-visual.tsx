@@ -107,7 +107,7 @@ export function OrderSummaryCard({
   ];
   return (
     <aside className="border-border/40 bg-muted/20 self-start rounded-xl border p-5">
-      <p className="text-muted-foreground text-[0.625rem] font-bold tracking-wider uppercase">
+      <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
         {tfl("orderSummary")}
       </p>
       <dl className="mt-3 space-y-1">
@@ -132,7 +132,7 @@ export function OrderSummaryCard({
       {discount > 0 && (
         <div className="bg-success/10 text-success mt-2 flex items-center justify-between rounded-md px-2 py-1.5">
           <span className="text-xs font-semibold">{tfl("discountSaved")}</span>
-          <span className="text-xs font-bold tabular-nums">
+          <span className="text-xs font-semibold tabular-nums">
             −
             {discount.toLocaleString(undefined, {
               minimumFractionDigits: 2,
@@ -142,11 +142,11 @@ export function OrderSummaryCard({
         </div>
       )}
       <div className="border-border/60 mt-4 border-t pt-3">
-        <p className="text-primary text-[0.625rem] font-bold tracking-wider uppercase">
+        <p className="text-primary text-[0.625rem] font-semibold tracking-wider uppercase">
           {tfl("grandTotal")}
         </p>
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-primary text-3xl font-extrabold tracking-tight tabular-nums">
+          <span className="text-primary text-3xl font-semibold tracking-tight tabular-nums">
             {grandTotal.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
