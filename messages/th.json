@@ -246,7 +246,8 @@
     "voidSuccess": "ยกเลิก{entity}สำเร็จ",
     "approveSuccess": "อนุมัติ{entity}สำเร็จ",
     "rejectSuccess": "ปฏิเสธ{entity}สำเร็จ",
-    "submitSuccess": "ส่ง{entity}สำเร็จ"
+    "submitSuccess": "ส่ง{entity}สำเร็จ",
+    "validationError": "กรุณาแก้ไขช่องที่ไฮไลต์ก่อน"
   },
   "errors": {
     "title": "เกิดข้อผิดพลาด",

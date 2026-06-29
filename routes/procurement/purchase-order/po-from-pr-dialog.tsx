@@ -579,7 +579,7 @@ const ExpandedProducts = ({
     <div className="max-w-2xl py-2 pl-16">
       <table className="w-full table-fixed text-xs">
         <thead>
-          <tr className="bg-muted/40 text-muted-foreground border-b text-left text-[0.625rem] tracking-wider uppercase">
+          <tr className="bg-muted/40 text-muted-foreground border-b text-left text-xs font-semibold">
             <th scope="col" className="px-2 py-1 font-semibold">
               {tfl("product")}
             </th>

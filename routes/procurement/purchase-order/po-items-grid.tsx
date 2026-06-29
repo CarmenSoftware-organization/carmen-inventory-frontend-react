@@ -184,7 +184,7 @@ function ItemsHeader({
 }) {
   "use no memo";
   return (
-    <thead className="bg-muted/40 text-muted-foreground font-semibold tracking-wider uppercase">
+    <thead className="bg-muted/40 text-muted-foreground font-semibold">
       <tr>
         {showApproveCheckbox && (
           <th scope="col" className="w-10 px-2 py-2 text-center">

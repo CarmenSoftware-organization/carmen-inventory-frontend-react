@@ -15,6 +15,7 @@ import {
   ProductHeaderCell,
 } from "./po-items-grid-cells";
 import { type PoItemRowProps } from "./po-items-grid-shared";
+import { Button } from "@/components/ui/button";
 
 export const ItemRow = memo(function ItemRow({
   form,
@@ -53,19 +54,20 @@ export const ItemRow = memo(function ItemRow({
         </td>
       )}
       <td className="w-8 px-2 py-2 text-right">
-        <button
+        <Button
           type="button"
           onClick={() => onToggleOpen(index)}
           aria-label={isOpen ? "Collapse details" : "Expand details"}
           aria-expanded={isOpen}
-          className="border-border/60 text-muted-foreground hover:bg-muted inline-flex size-6 items-center justify-center rounded-md border bg-transparent transition-colors"
+          variant="ghost"
+          size={"xs"}
         >
           {isOpen ? (
             <ChevronDown className="size-3" aria-hidden="true" />
           ) : (
             <ChevronRight className="size-3" aria-hidden="true" />
           )}
-        </button>
+        </Button>
       </td>
       <td className="text-muted-foreground w-7 px-2 py-2 text-left font-semibold">
         {index + 1}

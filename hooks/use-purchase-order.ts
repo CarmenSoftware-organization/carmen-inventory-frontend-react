@@ -285,6 +285,7 @@ export function useSubmitPurchaseOrder() {
   return useApiMutation<{
     id: string;
     stage_role: string;
+    doc_version: number;
     details: { id: string; stage_status: string; stage_message: string | null }[];
   }>({
     mutationFn: ({ id, ...body }, buCode) =>
@@ -309,6 +310,7 @@ export function useApprovePurchaseOrder() {
   return useApiMutation<{
     id: string;
     stage_role: string;
+    doc_version: number;
     details: { id: string; stage_status: string; stage_message: string | null }[];
   }>({
     mutationFn: ({ id, ...body }, buCode) =>
@@ -333,6 +335,7 @@ export function useRejectPurchaseOrder() {
   return useApiMutation<{
     id: string;
     stage_role: string;
+    doc_version: number;
     details: { id: string; stage_status: string; stage_message: string | null }[];
   }>({
     mutationFn: ({ id, ...body }, buCode) =>
@@ -394,6 +397,7 @@ export function useReviewPurchaseOrder() {
   return useApiMutation<{
     id: string;
     stage_role: string;
+    doc_version: number;
     des_stage?: string;
     details: { id: string; stage_status: string; stage_message: string | null }[];
   }>({

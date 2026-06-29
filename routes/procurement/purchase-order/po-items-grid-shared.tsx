@@ -23,7 +23,7 @@ export interface PoItemRowProps {
  */
 export function SectionMiniLabel({ children }: { readonly children: ReactNode }) {
   return (
-    <p className="text-muted-foreground mb-2 font-semibold tracking-wider uppercase">
+    <p className="text-muted-foreground mb-2 font-semibold">
       {children}
     </p>
   );
@@ -39,7 +39,7 @@ export function MiniField({
 }) {
   return (
     <div>
-      <p className="text-muted-foreground mb-1 font-semibold tracking-wider uppercase">
+      <p className="text-muted-foreground mb-1 font-semibold">
         {label}
       </p>
       {children}

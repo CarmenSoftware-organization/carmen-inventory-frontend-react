@@ -364,6 +364,7 @@ export interface PurchaseApproveDetail {
 export interface PrActionPayload {
   id: string;
   stage_role: string;
+  doc_version?: number;
   details: (WorkflowStageDetail | ApproveDetail | PurchaseApproveDetail)[];
   des_stage?: string;
 }

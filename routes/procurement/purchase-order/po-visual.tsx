@@ -107,7 +107,7 @@ export function OrderSummaryCard({
   ];
   return (
     <aside className="border-border/40 bg-muted/20 self-start rounded-xl border p-5">
-      <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
+      <p className="text-muted-foreground text-[0.625rem] font-semibold">
         {tfl("orderSummary")}
       </p>
       <dl className="mt-3 space-y-1">
@@ -142,7 +142,7 @@ export function OrderSummaryCard({
         </div>
       )}
       <div className="border-border/60 mt-4 border-t pt-3">
-        <p className="text-primary text-[0.625rem] font-semibold tracking-wider uppercase">
+        <p className="text-primary text-[0.625rem] font-semibold">
           {tfl("grandTotal")}
         </p>
         <div className="mt-1 flex items-baseline gap-2">

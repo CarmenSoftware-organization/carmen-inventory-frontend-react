@@ -246,7 +246,8 @@
     "voidSuccess": "{entity} voided successfully",
     "approveSuccess": "{entity} approved successfully",
     "rejectSuccess": "{entity} rejected successfully",
-    "submitSuccess": "{entity} submitted successfully"
+    "submitSuccess": "{entity} submitted successfully",
+    "validationError": "Please fix the highlighted fields first"
   },
   "errors": {
     "title": "Something went wrong",
