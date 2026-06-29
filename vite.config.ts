@@ -56,6 +56,47 @@ export default defineConfig(() => ({
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, ".") },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // แยก vendor ที่เสถียร (react ecosystem / tanstack) ออกจาก shared chunk
+        // เพื่อ caching ที่ดีขึ้น — deploy โค้ดแอปใหม่ผู้ใช้เก่าไม่ต้องโหลด vendor
+        // ซ้ำ ไม่ลด first-load bytes แต่ลด re-download ตอนอัปเดต
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (
+            /[\\/]node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/.test(
+              id,
+            )
+          ) {
+            return "react-vendor";
+          }
+          if (id.includes("/@tanstack/")) {
+            return "tanstack";
+          }
+          // แยก vendor หนักที่หลาย route ใช้ร่วมกัน ออกจาก shared (router) chunk
+          // — ทั้งหมดเสถียร เปลี่ยนไม่บ่อย จึง cache ได้ยาว lib ที่ใช้ route เดียว
+          // (xlsx/recharts/@xyflow/monaco) ไม่ต้องแยก เพราะ lazy route แยก chunk ให้แล้ว
+          if (id.includes("/lucide-react/")) {
+            return "icons";
+          }
+          if (
+            /[\\/](radix-ui|@radix-ui|@base-ui|cmdk|sonner|next-themes)[\\/]/.test(
+              id,
+            )
+          ) {
+            return "ui-vendor";
+          }
+          if (/[\\/](react-hook-form|@hookform|zod)[\\/]/.test(id)) {
+            return "form-vendor";
+          }
+          if (/[\\/](date-fns|react-day-picker)[\\/]/.test(id)) {
+            return "date-vendor";
+          }
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
     proxy: process.env.VITE_DEV_PROXY_TARGET

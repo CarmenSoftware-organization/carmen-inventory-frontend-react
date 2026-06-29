@@ -157,7 +157,7 @@ export function ThemeSwitch() {
 
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger className="cursor-pointer gap-2.5 rounded-md px-2 py-2 text-sm">
+      <DropdownMenuSubTrigger className="cursor-pointer gap-2 rounded-md px-2 py-2 text-sm">
         <ThemeIcon mode={current} />
         {t("theme")}
       </DropdownMenuSubTrigger>
@@ -168,7 +168,7 @@ export function ThemeSwitch() {
             <DropdownMenuItem
               key={mode}
               onClick={() => setTheme(mode)}
-              className="cursor-pointer gap-2.5 rounded-md px-2 py-2 text-sm"
+              className="cursor-pointer gap-2 rounded-md px-2 py-2 text-sm"
               aria-checked={isActive}
             >
               <ThemePreview mode={mode} active={isActive} />

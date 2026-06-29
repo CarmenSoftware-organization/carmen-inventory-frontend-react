@@ -96,7 +96,7 @@ export function LookupExtraCost({
               </SelectContent>
             </Select>
             {!!error && (
-              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2.5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 flex h-8 items-center justify-end pr-2">
                 <CircleAlert
                   className="text-destructive size-4"
                   aria-hidden="true"
@@ -109,7 +109,7 @@ export function LookupExtraCost({
           <TooltipContent
             side="top"
             align="end"
-            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-medium"
+            className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
           >
             {error}
           </TooltipContent>

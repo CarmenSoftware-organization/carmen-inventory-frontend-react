@@ -36,8 +36,8 @@ function Input({
       data-slot="input"
       maxLength={maxLength}
       className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input disabled:bg-muted/60 h-9 w-full min-w-0 rounded-md border bg-background px-3 py-1 text-xs shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-xs file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[0.5px]",
+        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input disabled:bg-muted/60 h-9 w-full min-w-0 rounded-md border bg-background px-3 py-1 text-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-xs file:font-semibold disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-2",
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         type === "number" &&
           "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
@@ -77,7 +77,7 @@ function Input({
         className={cn(
           "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-[0.5625rem] tabular-nums transition-opacity",
           showValue ? "opacity-100" : "opacity-0",
-          nearLimit ? "text-amber-600" : "text-muted-foreground/60",
+          nearLimit ? "text-warning" : "text-muted-foreground/60",
           length >= maxLength! && "text-destructive",
         )}
         aria-live="polite"

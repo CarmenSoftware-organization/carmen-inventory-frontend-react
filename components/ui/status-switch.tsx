@@ -38,7 +38,7 @@ function StatusSwitch({
     <div className="space-y-0.5 rounded-md border p-2">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium">{resolvedLabel}</p>
+          <p className="text-xs font-semibold">{resolvedLabel}</p>
           {resolvedDescription && (
             <p className="text-muted-foreground text-[0.6875rem]">
               {resolvedDescription}

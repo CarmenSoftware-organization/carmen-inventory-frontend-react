@@ -93,7 +93,7 @@ export function Transfer({
   };
 
   return (
-    <div className="flex items-stretch gap-2.5">
+    <div className="flex items-stretch gap-3">
       <TransferPanel
         title={leftTitle}
         items={leftItems}
@@ -113,11 +113,11 @@ export function Transfer({
           disabled={disabled || leftChecked.size === 0}
           aria-label={tc("transferMoveRight")}
           className={cn(
-            "rounded-full transition-all",
+            "rounded-full transition-colors",
             leftChecked.size > 0 &&
-              "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0.25rem_0.625rem_-0.125rem_color-mix(in_oklch,var(--primary),transparent_60%)]",
+              "bg-primary text-primary-foreground hover:bg-primary/90",
             leftChecked.size === 0 &&
-              "border-border/40 bg-card/40 text-muted-foreground border backdrop-blur-sm",
+              "border-border bg-muted text-muted-foreground border",
           )}
         >
           <ChevronRight />
@@ -129,11 +129,11 @@ export function Transfer({
           disabled={disabled || rightChecked.size === 0}
           aria-label={tc("transferMoveLeft")}
           className={cn(
-            "rounded-full transition-all",
+            "rounded-full transition-colors",
             rightChecked.size > 0 &&
-              "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0.25rem_0.625rem_-0.125rem_color-mix(in_oklch,var(--primary),transparent_60%)]",
+              "bg-primary text-primary-foreground hover:bg-primary/90",
             rightChecked.size === 0 &&
-              "border-border/40 bg-card/40 text-muted-foreground border backdrop-blur-sm",
+              "border-border bg-muted text-muted-foreground border",
           )}
         >
           <ChevronLeft />
@@ -212,9 +212,9 @@ const TransferPanel = ({
   const virtualItems = rowVirtualizer.getVirtualItems();
 
   return (
-    <div className="border-border/60 bg-card/70 flex flex-1 flex-col overflow-hidden rounded-xl border shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl">
+    <div className="bg-card flex flex-1 flex-col overflow-hidden rounded-xl border">
       {/* Header */}
-      <div className="border-border/40 bg-muted/40 flex h-9 items-center gap-2 border-b px-3">
+      <div className="bg-muted flex h-9 items-center gap-2 border-b px-3">
         <Checkbox
           checked={getCheckState()}
           onCheckedChange={toggleAll}
@@ -238,7 +238,7 @@ const TransferPanel = ({
       </div>
 
       {/* Search */}
-      <div className="border-border/40 bg-card/40 border-b px-2 py-1.5 backdrop-blur-sm">
+      <div className="bg-card border-b px-2 py-1.5">
         <div className="relative">
           <Search
             className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-3 -translate-y-1/2"
@@ -300,7 +300,7 @@ const TransferPanel = ({
                     className={cn(
                       "truncate",
                       checked
-                        ? "text-foreground font-medium"
+                        ? "text-foreground font-semibold"
                         : "text-foreground/85",
                     )}
                   >

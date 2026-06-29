@@ -108,13 +108,13 @@ export function ImageLightbox({
           aria-describedby={undefined}
           className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 bg-background fixed top-[50%] left-[50%] z-[100] flex max-h-[90vh] w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border shadow-xl duration-150 outline-none"
         >
-          <div className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
+          <div className="flex items-center justify-between gap-2 border-b px-4 py-2">
             <div className="flex min-w-0 items-center gap-2">
-              <DialogPrimitive.Title className="truncate text-sm font-medium">
+              <DialogPrimitive.Title className="truncate text-sm font-semibold">
                 {current.fileName}
               </DialogPrimitive.Title>
               {images.length > 1 && (
-                <span className="bg-muted text-muted-foreground shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums">
+                <span className="bg-muted text-muted-foreground shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold tabular-nums">
                   {currentIndex + 1} / {images.length}
                 </span>
               )}

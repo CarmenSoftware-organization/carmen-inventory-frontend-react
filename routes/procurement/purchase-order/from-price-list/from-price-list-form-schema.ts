@@ -2,7 +2,7 @@ import {
   EMPTY_FORM as PO_EMPTY_FORM,
   PO_ITEM,
   type PoFormValues,
-} from "../_components/po-form-schema";
+} from "../po-form-schema";
 
 /**
  * Shape ของข้อมูลที่ใช้ seed default form values จาก useProfile()

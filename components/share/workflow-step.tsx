@@ -101,11 +101,8 @@ export function WorkflowStep({
                   className={cn(
                     "relative flex shrink-0 items-center justify-center rounded-full transition-all",
                     isPrevious && "bg-success size-5",
-                    currentIsVoided &&
-                      "bg-destructive ring-destructive/30 size-6 shadow-sm ring-4",
-                    isCurrent &&
-                      !currentIsVoided &&
-                      "bg-info ring-info/40 size-6 shadow-sm shadow-info/40 ring-4",
+                    currentIsVoided && "bg-destructive size-6",
+                    isCurrent && !currentIsVoided && "bg-info size-6",
                     !isPrevious &&
                       !isCurrent &&
                       "border-muted-foreground/40 size-5 border-2 border-dashed bg-transparent",

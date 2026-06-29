@@ -30,9 +30,15 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
   localStorage (`lib/auth/refresh-token-storage.ts` — single swap point for future cookie
   mode). Boot order in `main.tsx`: `loadRuntimeConfig()` → `refreshTokens()` → render.
   `RequireAuth` redirects to `/login` whenever the token store empties.
-- **Routing:** React Router 7 data router in `routes/router.tsx`. Pages live in
-  `routes/<module>/page.tsx` and must `export const Component`. Add new module routes
-  under the `ProtectedShell` children. **All sections migrated:**
+- **Routing:** React Router 7 data router in `routes/router.tsx`. Routes are **colocated**:
+  each route is a `routes/<module>/<feature>/<feature>.route.tsx` file that
+  `export function Component`, with its components/hooks/tests living flat beside it (no
+  `page.tsx`, no `_components/`, no `[id]/` folders). Dynamic segments are native
+  React Router (`path: ":id"` + `useParams`); `<feature>-edit.route.tsx` /
+  `<feature>-new.route.tsx` are the list/new/edit trio. A module's shared bits sit in a
+  plain `shared/` sub-folder; large features may keep organizational sub-folders
+  (e.g. `pr-item-cells/`). Add new module routes under the `ProtectedShell` children.
+  **All sections migrated:**
   `routes/{config,procurement,inventory-management,vendor-management,store-operation,operation-plan,product-management,system-admin,report}/`
   (section parents with `RouteErrorBoundaryAdapter`) plus the standalone shell routes
   `dashboard/`, `profile/` (+ `profile/setting`) and `notifications/` registered directly
@@ -40,9 +46,16 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
   `routes/config/` / `routes/procurement/` as reference module sets. The source app's
   `playground` is intentionally NOT ported (dev-only tool); `/` redirects to `/dashboard`
   (the source `HomeComponent` landing is not ported).
-- **Next compat:** `next/navigation` → `@/lib/compat/navigation`, `next/link` →
-  `@/lib/compat/link`, `next-intl` → `use-intl`. ESLint blocks direct `next*` imports.
-  New code should import `react-router` directly.
+- **Error boundaries:** every route is covered. Module section parents and the standalone
+  shell routes carry `RouteErrorBoundaryAdapter` (in-layout error UI); the root route
+  has `RootErrorBoundary` (`routes/root-error-boundary.tsx`) as a full-page catch-all so
+  React Router's default error screen never shows. Both render `ModuleError` → `ErrorState`.
+- **Imports (no compat layer):** import `react-router` directly — `Link` (use `to`, not
+  `href`), `useNavigate` (not `useRouter`; `push`→`navigate`, `replace`→
+  `navigate(x, { replace: true })`, `back`→`navigate(-1)`), `useLocation().pathname` (not
+  `usePathname`), `useParams`, `useSearchParams` (returns a `[params, setParams]` tuple).
+  `next-intl` → `use-intl`. ESLint blocks direct `next*` imports. The former
+  `lib/compat/*` shims have been **removed** — there is no compat layer.
 - **i18n:** `use-intl` + `components/i18n-provider.tsx`; locale persisted in
   localStorage (`carmen.locale`); messages in `messages/{en,th}.json`.
 - **Runtime config:** `public/config.json` (`BACKEND_URL`, `X_APP_ID`) fetched at boot —
@@ -50,15 +63,21 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
 
 ## Migrating a module from the source app
 
-1. Copy the module's `_components/`, hook and types files from `../carmen-inventory-frontend`.
-2. Run `scripts/codemods/next-to-vite.sh <dirs>`.
-3. Run `scripts/codemods/nextpage-to-route.sh routes/<path>/**/page.tsx` (strips Next
-   metadata, appends the `Component` export). `[id]` pages need hand-conversion to
-   `useParams` — see `routes/config/department/[id]/page.tsx` as the reference.
-   `next/dynamic` usages convert to `lazy()` + `<Suspense fallback={null}>` — see
-   `routes/config/currency/_components/currency-component.tsx`.
-4. Create `routes/<path>/page.tsx` re-exporting the page component + `Component` export;
-   register it in `routes/router.tsx` with `lazy:`.
+All sections are already ported **and colocated**. For a new/updated module, follow the
+colocated convention (the `scripts/codemods/*` helpers predate the compat removal and still
+rewrite to `lib/compat/*` — don't rely on them for the import step):
+
+1. Copy the module's components, hooks and types from `../carmen-inventory-frontend` into
+   `routes/<module>/<feature>/` — flat, no `_components/` wrapper.
+2. Rewrite Next APIs to react-router directly (see "Imports" above): `next/link`→`Link`
+   (`to`), `next/navigation`→`useNavigate`/`useLocation`/`useParams`/`useSearchParams`,
+   `next-intl`→`use-intl`. `next/dynamic` → `lazy()` + `<Suspense fallback={null}>` (see
+   `routes/config/currency/currency-component.tsx`). Drop no-op `router.refresh()` calls
+   (data comes from TanStack Query invalidation).
+3. Name each route file `<feature>.route.tsx` exporting `Component`. Dynamic routes use
+   `useParams` + native `:id` (see `routes/config/department/department-edit.route.tsx`).
+4. Register routes in `routes/router.tsx` with `lazy: () => import("./<...>.route")`, under
+   the module's section parent (which carries `RouteErrorBoundaryAdapter`).
 5. `bunx tsc --noEmit && bun test:run` must be clean.
 
 ## Known open items

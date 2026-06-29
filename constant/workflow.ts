@@ -1,5 +1,5 @@
 import { WORKFLOW_TYPE } from "@/types/workflows";
-import { createStatusConfig } from "@/constant/status-config";
+import { createVariantMap } from "@/constant/status-config";
 
 export const workflowTypeField = [
   { label: "Purchase Request", value: WORKFLOW_TYPE.PR },
@@ -7,9 +7,30 @@ export const workflowTypeField = [
   { label: "Purchase Order", value: WORKFLOW_TYPE.PO },
 ];
 
-export const WF_TYPE_CONFIG = createStatusConfig(
-  [WORKFLOW_TYPE.PR, WORKFLOW_TYPE.PO, WORKFLOW_TYPE.SR] as const,
-);
+/**
+ * Workflow type values as they appear in workflow ROW data (short form).
+ * NOTE: the WORKFLOW_TYPE enum holds the long form (`*_workflow`) used by the
+ * workflow-type *query* API; list rows return these short values instead.
+ */
+export const WF_ROW_TYPE = {
+  PR: "purchase_request",
+  PO: "purchase_order",
+  SR: "store_requisition",
+} as const;
+
+/**
+ * Badge variant per workflow type — semantic `-light` tokens (quiet, single
+ * signal per DESIGN.md), distinct color per type: PR=green, PO=amber, SR=blue.
+ * Keyed on the short-form row values, with long-form (enum) aliases for safety.
+ */
+export const WF_TYPE_VARIANT = createVariantMap({
+  [WF_ROW_TYPE.PR]: "info",
+  [WF_ROW_TYPE.PO]: "warning",
+  [WF_ROW_TYPE.SR]: "success",
+  [WORKFLOW_TYPE.PR]: "info",
+  [WORKFLOW_TYPE.PO]: "warning",
+  [WORKFLOW_TYPE.SR]: "success",
+});
 
 type WfI18nFn = (key: string) => string;
 
@@ -26,8 +47,21 @@ export function getWorkflowTypeOptions(t: WfI18nFn) {
   }));
 }
 
+/**
+ * i18n key per workflow_type value — covers both short-form row values and
+ * long-form (enum) query values so labels resolve in every context.
+ */
+const WF_TYPE_I18N_KEY: Record<string, string> = {
+  [WF_ROW_TYPE.PR]: "typePurchaseRequest",
+  [WF_ROW_TYPE.PO]: "typePurchaseOrder",
+  [WF_ROW_TYPE.SR]: "typeStoreRequisition",
+  [WORKFLOW_TYPE.PR]: "typePurchaseRequest",
+  [WORKFLOW_TYPE.PO]: "typePurchaseOrder",
+  [WORKFLOW_TYPE.SR]: "typeStoreRequisition",
+};
+
 export function getWorkflowTypeLabels(t: WfI18nFn): Record<string, string> {
   return Object.fromEntries(
-    WORKFLOW_TYPES.map((tp) => [tp.value, t(tp.i18nKey)]),
+    Object.entries(WF_TYPE_I18N_KEY).map(([value, key]) => [value, t(key)]),
   );
 }

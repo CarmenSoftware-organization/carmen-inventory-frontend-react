@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { z } from "zod";
@@ -102,7 +101,11 @@ export function DeliveryPointDialog({
       updateDeliveryPoint.mutate(
         // doc_version round-trips the loaded record's version — backend
         // requires it for optimistic-concurrency checks on update
-        { id: deliveryPoint.id, doc_version: deliveryPoint.doc_version, ...payload },
+        {
+          id: deliveryPoint.id,
+          doc_version: deliveryPoint.doc_version,
+          ...payload,
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -184,11 +187,7 @@ export function DeliveryPointDialog({
               {readOnly ? tc("close") : tc("cancel")}
             </Button>
             {!readOnly && (
-              <Button
-                type="submit"
-                size="default"
-                disabled={isPending}
-              >
+              <Button type="submit" size="sm" disabled={isPending}>
                 {isPending
                   ? isEdit
                     ? tf("saving")

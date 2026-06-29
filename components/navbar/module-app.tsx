@@ -1,4 +1,4 @@
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useTranslations } from "use-intl";
 import { useEffect, useState } from "react";
 
@@ -52,7 +52,7 @@ export default function ModuleApp() {
       <PopoverContent
         align="end"
         sideOffset={8}
-        className="border-border/70 bg-popover w-80 overflow-hidden rounded-2xl border p-0 shadow-[0_24px_60px_rgba(10,10,10,0.18),0_4px_12px_rgba(10,10,10,0.08)]"
+        className="border-border/70 bg-popover w-80 overflow-hidden rounded-2xl border p-0 shadow-lg"
       >
         {/* Tile grid — 3 cols, no header */}
         <div className="grid grid-cols-3 gap-0 px-1.5 pt-2 pb-3">
@@ -85,7 +85,7 @@ export default function ModuleApp() {
 /** kbd chip for the shortcut hint */
 function HintKey({ children }: { readonly children: React.ReactNode }) {
   return (
-    <kbd className="bg-muted inline-flex h-4 min-w-4 items-center justify-center rounded border px-1.5 text-[0.625rem] font-medium">
+    <kbd className="bg-muted inline-flex h-4 min-w-4 items-center justify-center rounded border px-1.5 text-[0.625rem] font-semibold">
       {children}
     </kbd>
   );
@@ -109,7 +109,7 @@ const LauncherTile = ({
   onNavigate,
 }: LauncherTileProps) => {
   const tileClass = cn(
-    "group/tile flex min-h-22.5 flex-col items-center justify-start gap-2 rounded-xl px-1 pt-3 pb-2.5",
+    "group/tile flex min-h-22.5 flex-col items-center justify-start gap-2 rounded-xl px-1 pt-3 pb-2",
     "hover:bg-muted/60 focus-visible:bg-muted/60 transition-colors",
     "focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none",
     denied && "opacity-50",
@@ -120,7 +120,7 @@ const LauncherTile = ({
       <span className="transition-transform group-hover/tile:scale-105">
         <AppTile name={name} size={44} />
       </span>
-      <span className="text-foreground/80 max-w-full text-center text-xs leading-tight font-medium wrap-break-word">
+      <span className="text-foreground/80 max-w-full text-center text-xs leading-tight font-semibold wrap-break-word">
         {label}
       </span>
     </>
@@ -141,7 +141,7 @@ const LauncherTile = ({
   }
 
   return (
-    <Link href={path} onClick={onNavigate} className={tileClass}>
+    <Link to={path} onClick={onNavigate} className={tileClass}>
       {content}
     </Link>
   );

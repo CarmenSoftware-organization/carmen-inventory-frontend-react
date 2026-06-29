@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "@/lib/compat/navigation";
+import { useNavigate } from "react-router";
 
 interface UseNavigationGuardReturn {
   readonly isOpen: boolean;
@@ -15,11 +15,11 @@ interface UseNavigationGuardReturn {
  * Notes:
  * - Browser-level events (refresh, close tab) are NOT covered — pair this with
  *   `useUnsavedChanges` for those (they get the browser-native dialog).
- * - Programmatic `router.push()` calls are NOT intercepted — only <a> clicks +
+ * - Programmatic `navigate()` calls are NOT intercepted — only <a> clicks +
  *   browser back/forward.
  */
 export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [pendingBack, setPendingBack] = useState(false);
   const skipNextPopstateRef = useRef(false);
@@ -100,7 +100,7 @@ export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
     if (pendingHref) {
       const href = pendingHref;
       setPendingHref(null);
-      router.push(href);
+      navigate(href);
     } else if (pendingBack) {
       setPendingBack(false);
       skipNextPopstateRef.current = true;

@@ -1,7 +1,7 @@
 
 import { Fragment } from "react";
-import Link from "@/lib/compat/link";
-import { usePathname } from "@/lib/compat/navigation";
+import { Link } from "react-router";
+import { useLocation } from "react-router";
 import { useTranslations } from "use-intl";
 import { Sparkles } from "lucide-react";
 
@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
  * @returns JSX element ของเมนู sub-modules หรือ null หาก pathname ไม่ตรงกับโมดูลใด
  */
 export function SideMain() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const t = useTranslations("modules");
 
   const activeModule = moduleList.find((mod) => pathname.startsWith(mod.path));
@@ -45,7 +45,7 @@ export function SideMain() {
     <>
       {/* Module header — links to the module landing */}
       <Link
-        href={activeModule.path}
+        to={activeModule.path}
         aria-label={t(activeModule.name)}
         className={cn(
           "relative mx-2 mt-2 mb-1 flex cursor-pointer items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5",
@@ -100,7 +100,9 @@ export function SideMain() {
                       isActive={isActive}
                       className={cn(
                         "group/sub relative overflow-hidden rounded-lg transition-all",
-                        "data-[active=true]:font-semibold data-[active=true]:shadow-sm",
+                        "data-[active=true]:font-semibold",
+                        // active = blue left-bar signal (icon keeps its module color)
+                        "before:bg-primary before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:content-[''] data-[active=true]:before:opacity-100 group-data-[collapsible=icon]:before:hidden",
                         "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       )}
                     >
@@ -120,12 +122,12 @@ export function SideMain() {
                               size={20}
                             />
                           </span>
-                          <span className="text-xs font-medium group-data-[collapsible=icon]:hidden">
+                          <span className="text-xs font-semibold group-data-[collapsible=icon]:hidden">
                             {t(sub.name)}
                           </span>
                         </button>
                       ) : (
-                        <Link href={sub.path}>
+                        <Link to={sub.path}>
                           <span className="shrink-0">
                             <SubTile
                               name={sub.name}
@@ -133,7 +135,7 @@ export function SideMain() {
                               size={20}
                             />
                           </span>
-                          <span className="text-xs font-medium group-data-[collapsible=icon]:hidden">
+                          <span className="text-xs font-semibold group-data-[collapsible=icon]:hidden">
                             {t(sub.name)}
                           </span>
                         </Link>

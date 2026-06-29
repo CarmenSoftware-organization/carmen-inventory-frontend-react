@@ -32,7 +32,7 @@ function BuAvatar({
   return (
     <Avatar
       className={cn(
-        "size-7 shrink-0 shadow-sm ring-2",
+        "size-7 shrink-0 ring-2",
         isActive
           ? "ring-primary/20"
           : "ring-muted-foreground/15 group-hover/item:ring-primary/30",
@@ -51,17 +51,11 @@ function BuAvatar({
         className={cn(
           "relative",
           isActive
-            ? "from-primary to-primary/70 text-primary-foreground bg-linear-to-br"
+            ? "bg-primary text-primary-foreground"
             : "bg-muted/40 text-muted-foreground group-hover/item:bg-primary/5 group-hover/item:text-primary",
         )}
       >
-        {isActive && (
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/20 to-transparent"
-          />
-        )}
-        <Building2 className="relative size-3.5 shrink-0" />
+        <Building2 className="size-3.5 shrink-0" />
       </AvatarFallback>
     </Avatar>
   );
@@ -100,7 +94,7 @@ export default function BuSwitcher() {
         <Button
           variant="ghost"
           size="sm"
-          className="group data-[state=open]:border-border/60 data-[state=open]:bg-muted/60 h-8 gap-2 rounded-lg border border-transparent px-2 text-xs font-medium hover:border-none hover:bg-none"
+          className="group data-[state=open]:border-border/60 data-[state=open]:bg-muted/60 h-8 gap-2 rounded-lg border border-transparent px-2 text-xs font-semibold hover:border-none hover:bg-none"
         >
           <BuAvatar
             avatarUrl={currentDept.avatar_url}
@@ -146,7 +140,7 @@ export default function BuSwitcher() {
                   setIsSwitching(false);
                 }
               }}
-              className="group/item relative gap-2.5 rounded-md p-2 data-disabled:opacity-100"
+              className="group/item relative gap-2 rounded-md p-2 data-disabled:opacity-100"
             >
               {isActive && (
                 <span

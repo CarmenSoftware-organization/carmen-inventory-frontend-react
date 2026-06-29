@@ -1,5 +1,5 @@
 
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { getModule } from "@/constant/module-list";
@@ -25,18 +25,12 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
       {/* Header */}
       <div className="flex items-start gap-3">
         <div
-          className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-[0_0.5rem_1rem_-0.25rem_rgba(0,0,0,0.08)]"
+          className="flex size-11 shrink-0 items-center justify-center rounded-2xl"
           style={{
-            background: `linear-gradient(135deg, color-mix(in oklch, ${moduleColor}, transparent 75%) 0%, color-mix(in oklch, ${moduleColor}, transparent 88%) 100%)`,
+            backgroundColor: `color-mix(in oklch, ${moduleColor}, transparent 90%)`,
           }}
         >
-          <div
-            className="pointer-events-none absolute -top-3 -right-3 size-8 rounded-full opacity-40"
-            style={{
-              background: `radial-gradient(circle, color-mix(in oklch, ${moduleColor}, transparent 60%) 0%, transparent 70%)`,
-            }}
-          />
-          <Icon className="relative size-5" style={{ color: moduleColor }} />
+          <Icon className="size-5" style={{ color: moduleColor }} />
         </div>
         <div className="min-w-0 flex-1 space-y-0.5">
           <h1 className="text-foreground text-xl leading-tight font-semibold tracking-tight md:text-[1.5rem]">
@@ -56,11 +50,11 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
       </div>
 
       {/* Sub-module grid */}
-      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {visibleSubs.map((sub) => {
           const subColor = getModuleColor(sub.path);
           const cardClass = cn(
-            "group border-border/60 bg-card/70 hover:border-primary/40 relative flex items-center gap-3 overflow-hidden rounded-xl border py-2.5 pr-3 pl-4 text-left shadow-[0_0.125rem_0.5rem_-0.25rem_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:shadow-[0_0.5rem_1.25rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_85%)]",
+            "group border-border bg-card hover:border-primary/40 relative flex items-center gap-3 overflow-hidden rounded-xl border py-2 pr-3 pl-4 text-left transition-colors",
             sub.denied && "opacity-50",
           );
 
@@ -75,7 +69,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
 
               {/* Icon pill — muted by default, color on hover */}
               <div
-                className="bg-muted/60 relative flex size-10 shrink-0 items-center justify-center rounded-xl transition-all group-hover:scale-105"
+                className="relative flex size-10 shrink-0 items-center justify-center rounded-xl"
                 style={{
                   backgroundColor: `color-mix(in oklch, ${subColor}, transparent 90%)`,
                 }}
@@ -89,7 +83,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
 
               {/* Name + optional description */}
               <div className="min-w-0 flex-1">
-                <div className="text-foreground truncate text-sm font-medium tracking-tight">
+                <div className="text-foreground truncate text-sm font-semibold tracking-tight">
                   {t(sub.name)}
                 </div>
               </div>
@@ -118,7 +112,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
           }
 
           return (
-            <Link key={sub.path} href={sub.path} className={cardClass}>
+            <Link key={sub.path} to={sub.path} className={cardClass}>
               {cardContent}
             </Link>
           );

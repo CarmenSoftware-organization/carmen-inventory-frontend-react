@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { z } from "zod";
@@ -141,8 +140,8 @@ export function UnitDialog({
           }}
         >
           <DialogHeader className="gap-0 px-5 py-4">
-            <div className="flex items-start gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Ruler className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -212,7 +211,7 @@ export function UnitDialog({
               {readOnly ? tc("close") : tc("cancel")}
             </Button>
             {!readOnly && (
-              <Button type="submit" size="default" disabled={isPending}>
+              <Button type="submit" size="sm" disabled={isPending}>
                 {submitLabel}
               </Button>
             )}

@@ -25,9 +25,6 @@ vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => ({ buCode: "BU001" }),
 }));
 
-vi.mock("@/lib/compat/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
 
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },

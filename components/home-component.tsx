@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import {
   Activity,
   ArrowRight,
@@ -233,10 +233,10 @@ export default function HomeComponent() {
           </div>
           <div className="flex items-center gap-2">
             <Button asChild variant="ghost" size="sm">
-              <Link href="/login">Sign in</Link>
+              <Link to="/login">Sign in</Link>
             </Button>
             <Button asChild size="sm">
-              <Link href="/login">
+              <Link to="/login">
                 Get started <ArrowRight />
               </Link>
             </Button>
@@ -331,7 +331,7 @@ export default function HomeComponent() {
             style={{ animation: "home-fade-up 0.7s ease-out 0.5s both" }}
           >
             <ShineButton asChild size="lg">
-              <Link href="/login">
+              <Link to="/login">
                 <span>Get started today</span>
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
               </Link>
@@ -612,7 +612,7 @@ export default function HomeComponent() {
                   outlet — all from one platform.&rdquo;
                 </blockquote>
                 <ShineButton asChild size="sm" className="mt-6">
-                  <Link href="/login">
+                  <Link to="/login">
                     <span>Get started</span>
                     <ArrowUpRight className="size-3.5" />
                   </Link>
@@ -841,7 +841,7 @@ export default function HomeComponent() {
                   inventory today.
                 </p>
                 <ShineButton asChild size="lg" className="mt-8">
-                  <Link href="/login">
+                  <Link to="/login">
                     <span>Sign in to Carmen</span>
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                   </Link>
@@ -995,15 +995,7 @@ function Reveal({
 
 function BrandMark({ size = "sm" }: { readonly size?: "xs" | "sm" }) {
   const pxSize = size === "xs" ? 28 : 32;
-  return (
-    <div className="relative">
-      <CarmenLogo
-        size={pxSize}
-        className="rounded-lg shadow-[0_0.5rem_1rem_-0.25rem_color-mix(in_oklch,var(--primary),transparent_55%)]"
-      />
-      <div className="from-primary to-chart-3 absolute inset-0 -z-10 rounded-lg bg-linear-to-br opacity-50 blur-md" />
-    </div>
-  );
+  return <CarmenLogo size={pxSize} />;
 }
 
 function Eyebrow({

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Bell,
@@ -7,7 +6,7 @@ import {
   ExternalLink,
   SquareArrowOutUpRight,
 } from "lucide-react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import {
@@ -78,19 +77,19 @@ const NotificationItem = ({
   return (
     <div
       className={cn(
-        "group hover:bg-muted/50 relative flex items-start gap-3 p-4 transition-colors",
+        "group hover:bg-muted relative flex gap-3 pr-3 transition-colors",
         isUnread && "bg-primary/[0.07]",
       )}
     >
       {safeLink ? (
         <Link
-          href={safeLink}
+          to={safeLink}
           onClick={() => {
             onMarkAsRead(notification.id);
             onNavigate();
           }}
           aria-label={safeTitle}
-          className="absolute inset-0 z-10 border-b"
+          className="absolute inset-0 z-10"
         />
       ) : (
         <button
@@ -100,7 +99,7 @@ const NotificationItem = ({
             onShowDetail(notification.id);
           }}
           aria-label={safeTitle}
-          className="absolute inset-0 z-10 cursor-pointer border-b"
+          className="absolute inset-0 z-10 cursor-pointer"
         />
       )}
       <NotificationItemContent
@@ -111,7 +110,7 @@ const NotificationItem = ({
       />
       <button
         onClick={() => onMarkAsRead(notification.id)}
-        className="text-muted-foreground hover:text-foreground relative z-20 mt-1 opacity-0 transition-opacity group-hover:opacity-100"
+        className="text-muted-foreground hover:text-foreground relative z-20 self-center opacity-0 transition-opacity group-hover:opacity-100"
         type="button"
         title={dismissLabel}
         aria-label={dismissLabel}
@@ -148,11 +147,7 @@ export default function Notification() {
           <Bell className="h-3.5 w-3.5 transition-transform group-hover:-rotate-12" />
           {notificationCount > 0 && (
             <>
-              <span
-                aria-hidden="true"
-                className="bg-destructive/40 absolute -inset-e-1 -top-1 size-4 rounded-full"
-              />
-              <span className="from-destructive to-destructive/80 ring-background absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-linear-to-br px-1 text-[0.5625rem] font-semibold text-white shadow-sm ring-2">
+              <span className="bg-destructive ring-background absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[0.5625rem] font-semibold text-white ring-2">
                 {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             </>
@@ -164,20 +159,14 @@ export default function Notification() {
         align="end"
         sideOffset={6}
       >
-        <div className="from-primary/5 relative flex items-center justify-between border-b bg-linear-to-br via-transparent to-transparent px-3 py-2.5">
+        <div className="flex items-center justify-between border-b px-3 py-2">
           <div className="flex items-center gap-2">
-            <span className="from-primary to-primary/70 text-primary-foreground relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-linear-to-br shadow-sm">
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/20 to-transparent"
-              />
-              <Bell className="relative size-3.5" />
-            </span>
+            <Bell className="text-muted-foreground size-4 shrink-0" />
             <span className="text-sm font-semibold tracking-tight">
               {t("notifications")}
             </span>
             {notificationCount > 0 && (
-              <span className="bg-primary/10 text-primary inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.625rem] font-semibold">
+              <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.625rem] font-semibold tabular-nums">
                 {notificationCount}
               </span>
             )}
@@ -202,7 +191,7 @@ export default function Notification() {
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <Link
-                    href="/notifications"
+                    to="/notifications"
                     aria-label={t("viewAllTooltip")}
                     onClick={() => setPopoverOpen(false)}
                   >
@@ -215,7 +204,7 @@ export default function Notification() {
           </div>
         </div>
 
-        <div className="max-h-112 divide-y overflow-y-auto">
+        <div className="max-h-112 overflow-y-auto">
           {notifications.length === 0 ? (
             <EmptyComponent
               icon={BellOff}
@@ -308,7 +297,7 @@ export function NotificationDetailDialog({
         <DialogFooter>
           {externalHref && (
             <Button asChild variant="outline" size="sm">
-              <Link href={externalHref} onClick={onClose}>
+              <Link to={externalHref} onClick={onClose}>
                 <ExternalLink className="size-3.5" aria-hidden="true" />
                 {t("open")}
               </Link>

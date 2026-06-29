@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  */
 function ActivityCardSkeletonItem() {
   return (
-    <div className="rounded-lg border bg-card p-3 space-y-2.5" aria-hidden="true">
+    <div className="rounded-lg border bg-card p-3 space-y-2" aria-hidden="true">
       {/* Header: action badge + timestamp */}
       <div className="flex items-center justify-between gap-2">
         <Skeleton className="h-5 w-14 rounded-full" />

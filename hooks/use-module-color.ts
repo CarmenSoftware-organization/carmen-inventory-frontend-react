@@ -1,5 +1,5 @@
 
-import { usePathname } from "@/lib/compat/navigation";
+import { useLocation } from "react-router";
 import { getModuleColor } from "@/constant/module-color-map";
 import { moduleList, type ModuleDto } from "@/constant/module-list";
 
@@ -18,7 +18,7 @@ import { moduleList, type ModuleDto } from "@/constant/module-list";
  * ```
  */
 export function useModuleColor(): string {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   return getModuleColor(pathname);
 }
 
@@ -40,7 +40,7 @@ export function useModuleTile(): {
   name?: string;
   parentName?: string;
 } {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const parent = moduleList.find(
     (m) => pathname === m.path || pathname.startsWith(m.path + "/"),
   );

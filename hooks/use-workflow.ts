@@ -10,7 +10,7 @@ import {
   type Workflow,
   WORKFLOW_TYPE,
 } from "@/types/workflows";
-import type { WorkflowCreateModel } from "@/routes/system-admin/workflow/_components/wf-form-schema";
+import type { WorkflowCreateModel } from "@/routes/system-admin/workflow/wf-form-schema";
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 import { CACHE_STATIC } from "@/lib/cache-config";
 

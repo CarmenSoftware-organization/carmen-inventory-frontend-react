@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Bell, BellOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +95,7 @@ function NotificationRow({
   const isUnread = notification.is_read === false;
 
   const rowClass = cn(
-    "group flex w-full items-start gap-2.5 px-3 py-2.5 text-left transition-colors border-b",
+    "group flex w-full gap-3 text-left transition-colors",
     "hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none",
     isUnread && "bg-primary/[0.07]",
   );
@@ -114,7 +113,7 @@ function NotificationRow({
   return (
     <li>
       {safeLink ? (
-        <Link href={safeLink} className={rowClass}>
+        <Link to={safeLink} className={rowClass}>
           {body}
         </Link>
       ) : (

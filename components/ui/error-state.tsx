@@ -36,7 +36,7 @@ export function ErrorState({ message, onRetry, errorId }: ErrorStateProps) {
         <AlertCircle aria-hidden="true" className="size-6" />
       </div>
       <div className="space-y-1">
-        <p className="text-foreground text-sm font-medium">{t("title")}</p>
+        <p className="text-foreground text-sm font-semibold">{t("title")}</p>
         <p className="text-muted-foreground max-w-md text-xs">
           {message ?? t("unexpected")}
         </p>
@@ -47,7 +47,7 @@ export function ErrorState({ message, onRetry, errorId }: ErrorStateProps) {
           type="button"
           onClick={handleCopy}
           aria-label={t("copyErrorId")}
-          className="border-border/60 bg-muted/40 hover:bg-muted text-muted-foreground inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] transition-colors"
+          className="border-border/60 bg-muted/40 hover:bg-muted text-muted-foreground inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[0.6875rem] transition-colors"
         >
           <span className="font-semibold tracking-widest uppercase">
             {t("errorId")}

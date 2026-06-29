@@ -99,12 +99,12 @@ function DataGridColumnHeaderInner<TData, TValue>({
   };
 
   const headerLabelClassName = cn(
-    "text-[length:inherit] text-muted-foreground inline-flex h-full items-center gap-1.5 font-medium [&_svg]:opacity-60 [&_svg]:size-3.5",
+    "text-[length:inherit] text-muted-foreground inline-flex h-full items-center gap-1.5 font-semibold [&_svg]:opacity-60 [&_svg]:size-3.5",
     className,
   );
 
   const headerButtonClassName = cn(
-    "cursor-pointer text-[length:inherit] text-muted-foreground hover:bg-secondary data-[state=open]:bg-secondary hover:text-foreground data-[state=open]:text-foreground -ms-2 font-medium h-6 rounded-lg has-[>svg]:pr-0 has-[>svg]:pl-2",
+    "cursor-pointer text-[length:inherit] text-muted-foreground hover:bg-secondary data-[state=open]:bg-secondary hover:text-foreground data-[state=open]:text-foreground -ms-2 font-semibold h-6 rounded-lg has-[>svg]:pr-0 has-[>svg]:pl-2",
     className,
   );
 

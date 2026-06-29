@@ -249,7 +249,7 @@ function DataGridTableHeadRowCell<TData>({
         isLastLeftPinned ? "left" : isFirstRightPinned ? "right" : undefined
       }
       className={cn(
-        "text-muted-foreground relative h-9 text-left align-middle text-xs font-medium rtl:text-right",
+        "text-muted-foreground relative h-9 text-left align-middle text-xs font-semibold rtl:text-right",
         headerCellSpacing,
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&
@@ -736,7 +736,7 @@ function DataGridTableLoader() {
 
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-      <div className="text-muted-foreground bg-card flex items-center gap-2 rounded-lg border px-4 py-2 text-sm leading-none font-medium">
+      <div className="text-muted-foreground bg-card flex items-center gap-2 rounded-lg border px-4 py-2 text-sm leading-none font-semibold">
         <Spinner className="-ml-1" />
         {props.loadingMessage || "Loading..."}
       </div>

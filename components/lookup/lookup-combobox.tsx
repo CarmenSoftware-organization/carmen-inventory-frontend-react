@@ -248,7 +248,7 @@ export function LookupCombobox<T>({
             <TooltipContent
               side="top"
               align="end"
-              className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-medium"
+              className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
             >
               {error}
             </TooltipContent>
@@ -258,7 +258,7 @@ export function LookupCombobox<T>({
               side="top"
               className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
             >
-              <p className="text-xs font-medium">{selectedLabel}</p>
+              <p className="text-xs font-semibold">{selectedLabel}</p>
             </TooltipContent>
           )}
         </Tooltip>

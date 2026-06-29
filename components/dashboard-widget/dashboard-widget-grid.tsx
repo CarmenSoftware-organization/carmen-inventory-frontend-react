@@ -227,7 +227,7 @@ function WidgetRouter({
 
 function WidgetHeader({ widget, moduleName, subTileFor }: WidgetCardProps) {
   return (
-    <div className="flex items-start gap-2.5">
+    <div className="flex items-start gap-3">
       <span className="shrink-0">
         <SubTile
           name={subTileFor(widget.dataset_id)}
@@ -534,7 +534,7 @@ export function WidgetSkeleton({
   return (
     <Card className={cn("gap-2 py-4", className)}>
       <CardHeader className="px-4">
-        <div className="flex items-start gap-2.5">
+        <div className="flex items-start gap-3">
           <Skeleton className="size-8 shrink-0 rounded-lg" />
           <div className="min-w-0 flex-1 space-y-1.5">
             <Skeleton className="h-4 w-24" />

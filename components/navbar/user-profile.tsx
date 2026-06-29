@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import Link from "@/lib/compat/link";
+import { Link } from "react-router";
 import { ChevronDown, KeyRound, LogOut, User } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
@@ -26,7 +26,7 @@ import { useIsMutating } from "@tanstack/react-query";
 import { useProfile } from "@/hooks/use-profile";
 import { useLogout } from "@/hooks/use-logout";
 import { SWITCH_BU_MUTATION_KEY } from "@/hooks/use-switch-bu";
-import ChangePasswordDialog from "@/routes/profile/_components/change-password-dialog";
+import ChangePasswordDialog from "@/routes/profile/change-password-dialog";
 import { formatName } from "@/lib/name";
 import { cn } from "@/lib/utils";
 import { LangSwitch } from "./lang-switch";
@@ -71,7 +71,7 @@ function UserAvatar({
       )}
       <AvatarFallback
         className={cn(
-          "from-primary to-primary/70 text-primary-foreground bg-linear-to-br font-semibold",
+          "bg-primary text-primary-foreground font-semibold",
           isLarge ? "text-sm" : "text-[0.625rem]",
         )}
       >
@@ -151,7 +151,7 @@ export function UserProfile() {
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-72 p-2" align="end" sideOffset={6}>
-        <div className="flex items-start gap-3 px-2.5 py-2.5">
+        <div className="flex items-start gap-3 px-2 py-2">
           <UserAvatar
             avatarUrl={avatarUrl}
             name={name}
@@ -176,15 +176,15 @@ export function UserProfile() {
         </DropdownMenuLabel>
         <DropdownMenuItem
           asChild
-          className="cursor-pointer gap-2.5 rounded-md px-2 py-2 text-sm"
+          className="cursor-pointer gap-2 rounded-md px-2 py-2 text-sm"
         >
-          <Link href="/profile">
+          <Link to="/profile">
             <User className="size-4" />
             {t("profile")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
-          className="cursor-pointer gap-2.5 rounded-md px-2 py-2 text-sm"
+          className="cursor-pointer gap-2 rounded-md px-2 py-2 text-sm"
           onClick={() => setPasswordOpen(true)}
         >
           <KeyRound className="size-4" />
@@ -197,7 +197,7 @@ export function UserProfile() {
         <ThemeSwitch />
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer gap-2.5 rounded-md px-2 py-2 text-sm"
+          className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer gap-2 rounded-md px-2 py-2 text-sm"
           onSelect={(e) => {
             e.preventDefault();
             setLogoutOpen(true);

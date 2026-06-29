@@ -1,5 +1,5 @@
 
-import { usePathname } from "@/lib/compat/navigation";
+import { useLocation } from "react-router";
 import { findRouteLeaf } from "@/constant/module-list";
 
 /**
@@ -20,7 +20,7 @@ import { findRouteLeaf } from "@/constant/module-list";
  * usePermissionPrefix() // → "configuration.department"
  */
 export function usePermissionPrefix(): string | undefined {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const leaf = findRouteLeaf(pathname);
   const perm = leaf?.permission;
   if (!perm) return undefined;

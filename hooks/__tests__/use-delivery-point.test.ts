@@ -27,9 +27,6 @@ vi.mock("@/lib/http-client", () => ({
 }));
 
 // Mock compat navigation
-vi.mock("@/lib/compat/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
 
 import { httpClient } from "@/lib/http-client";
 
