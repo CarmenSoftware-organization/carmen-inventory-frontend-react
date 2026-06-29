@@ -144,7 +144,7 @@ export function ProductEcoLabelDialog({
     };
 
     if (isEdit) {
-      updateEcoLabel.mutate({ id: ecoLabel.id, ...payload }, handlers);
+      updateEcoLabel.mutate({ id: ecoLabel.id, doc_version: ecoLabel.doc_version, ...payload }, handlers);
     } else {
       createEcoLabel.mutate({ product_id: productId, ...payload }, handlers);
     }

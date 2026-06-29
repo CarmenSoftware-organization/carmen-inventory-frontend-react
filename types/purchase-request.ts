@@ -137,6 +137,7 @@ export interface PurchaseRequestTemplate {
   workflow_name: string;
   info: Record<string, unknown>;
   is_active: boolean;
+  doc_version?: number;
   created_at: string;
   purchase_request_template_detail: PurchaseRequestTemplateDetail[];
 }

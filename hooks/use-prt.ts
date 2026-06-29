@@ -101,7 +101,7 @@ export function useCreatePrt() {
  * update.mutate({ id, ...values });
  */
 export function useUpdatePrt() {
-  return useApiMutation<CreatePrtDto & { id: string }>({
+  return useApiMutation<CreatePrtDto & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.put(
         `${API_ENDPOINTS.PURCHASE_REQUEST_TEMPLATES(buCode)}/${id}`,

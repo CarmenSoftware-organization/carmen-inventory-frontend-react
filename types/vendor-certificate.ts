@@ -5,6 +5,7 @@ export interface VendorCertificate {
   issued_date: string;
   expiry_date: string;
   is_active: boolean;
+  doc_version?: number;
   created_at: string;
   updated_at: string;
 }

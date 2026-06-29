@@ -94,7 +94,7 @@ export function useCreateRole() {
  * update.mutate({ id, ...values });
  */
 export function useUpdateRole() {
-  return useApiMutation<UpdateRoleDto & { id: string }>({
+  return useApiMutation<UpdateRoleDto & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.put(
         `${API_ENDPOINTS.APPLICATION_ROLES(buCode)}/${id}`,

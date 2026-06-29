@@ -70,7 +70,7 @@ export function useCreateProductEcoLabel() {
  * @returns mutation รับ `{ id, ...CreateProductEcoLabelDto }`
  */
 export function useUpdateProductEcoLabel() {
-  return useApiMutation<CreateProductEcoLabelDto & { id: string }>({
+  return useApiMutation<CreateProductEcoLabelDto & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.patch(
         `${API_ENDPOINTS.PRODUCT_ECO_LABELS(buCode)}/${id}`,

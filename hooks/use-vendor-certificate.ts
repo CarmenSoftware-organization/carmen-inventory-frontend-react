@@ -94,7 +94,7 @@ export function useCreateVendorCertificate() {
  * @returns mutation รับ `{ id, ...CreateVendorCertificateDto }`
  */
 export function useUpdateVendorCertificate() {
-  return useApiMutation<CreateVendorCertificateDto & { id: string }>({
+  return useApiMutation<CreateVendorCertificateDto & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.patch(`${API_ENDPOINTS.VENDOR_CERTIFICATES(buCode)}/${id}`, data),
     invalidateKeys: VENDOR_CERTIFICATE_KEYS,

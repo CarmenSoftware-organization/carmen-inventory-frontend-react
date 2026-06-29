@@ -85,7 +85,7 @@ export function PrtForm({ template }: PrtFormProps) {
 
     if (isEdit && template) {
       updatePrt.mutate(
-        { id: template.id, ...payload },
+        { id: template.id, doc_version: template.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
