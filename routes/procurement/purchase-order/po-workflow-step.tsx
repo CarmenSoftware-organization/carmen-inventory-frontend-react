@@ -48,7 +48,7 @@ export function PoWorkflowStep({
             <div className="flex items-center gap-1.5">
               <div
                 className={cn(
-                  "flex size-5 shrink-0 items-center justify-center rounded-full text-[0.625rem] font-semibold text-white",
+                  "flex size-5 shrink-0 items-center justify-center rounded-full text-[0.625rem] font-semibold text-primary-foreground",
                   isCompleted && "bg-success",
                   isCurrent && "bg-info ring-2 ring-info/30",
                   !isCompleted &&

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useWatch, type UseFormReturn } from "react-hook-form";
+import { useWatch, useFormState, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { PackagePlus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -71,7 +71,10 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
   });
   const itemsRaw = useWatch({ control: form.control, name: "items" });
   const items = (itemsRaw ?? []) as FromPriceListSelectedItem[];
-  const itemsError = form.formState.errors.items;
+  // ต้อง subscribe ผ่าน useFormState — อ่าน form.formState.errors ตรง ๆ จะได้ค่า
+  // เก่า (stale) ทำให้ error ของ location แสดงช้าไป 1 จังหวะ (เลือกแล้วเพิ่งแดง)
+  const { errors: formErrors } = useFormState({ control: form.control });
+  const itemsError = formErrors.items;
   const itemsErrorMessage =
     typeof itemsError?.message === "string" ? itemsError.message : undefined;
 

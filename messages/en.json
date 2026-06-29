@@ -2748,6 +2748,8 @@
       "effective": "Effective",
       "workflowLabel": "Target workflow",
       "workflowHint": "PO will be routed through this approval flow",
+      "selectWorkflowFirst": "Select a workflow first",
+      "selectWorkflowFirstDesc": "Pick the target workflow above before choosing purchase requests.",
       "groupPrTitle": "Grouped Purchase Orders",
       "groupPrDesc": "Review grouped purchase orders created from selected PRs.",
       "products": "Products",

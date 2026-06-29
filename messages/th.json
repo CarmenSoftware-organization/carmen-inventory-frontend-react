@@ -2743,6 +2743,8 @@
       "effective": "มีผล",
       "workflowLabel": "Workflow ปลายทาง",
       "workflowHint": "PO จะเดินตาม approval flow นี้",
+      "selectWorkflowFirst": "เลือกเวิร์กโฟลว์ก่อน",
+      "selectWorkflowFirstDesc": "เลือกเวิร์กโฟลว์ปลายทางด้านบนก่อน จึงจะเลือกใบขอซื้อได้",
       "groupPrTitle": "ใบสั่งซื้อที่จัดกลุ่มแล้ว",
       "groupPrDesc": "ตรวจสอบใบสั่งซื้อที่สร้างจาก PR ที่เลือก",
       "products": "สินค้า",

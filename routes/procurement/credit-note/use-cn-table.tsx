@@ -22,23 +22,6 @@ interface UseCnTableOptions {
   onDelete: (cn: CreditNote) => void;
 }
 
-/**
- * Hook สร้าง react-table instance สำหรับหน้ารายการ Credit Note
- * ประกอบด้วยคอลัมน์ cn_no, cn_date, vendor, type, status, total_amount, currency
- * และ action แก้ไข/ลบ
- *
- * @param options - ตัวเลือกของ hook
- * @param options.creditNotes - รายการ CN
- * @param options.totalRecords - จำนวน record ทั้งหมด
- * @param options.params - ParamsDto
- * @param options.tableConfig - config จาก useDataGridState
- * @param options.onEdit - callback เมื่อกดแถว
- * @param options.onDelete - callback ลบ
- * @returns react-table instance
- * @example
- * const { table } = useCnTable({ creditNotes, totalRecords, params, tableConfig, onEdit, onDelete });
- * <DataGrid table={table} ... />
- */
 export function useCnTable({
   creditNotes,
   totalRecords,
@@ -69,7 +52,7 @@ export function useCnTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      size: 200,
+      size: 300,
       meta: { headerTitle: tfl("vendor"), skeleton: columnSkeletons.text },
     },
     {
@@ -90,7 +73,7 @@ export function useCnTable({
           </Badge>
         );
       },
-      size: 200,
+      size: 180,
       meta: {
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.text,
@@ -135,26 +118,6 @@ export function useCnTable({
       },
     },
     {
-      accessorKey: "base_total_amount",
-      header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={tfl("netAmount")}
-          className="justify-end"
-        />
-      ),
-      cell: ({ row }) => {
-        const amount = row.original.base_total_amount;
-        return <span>{amount == null ? "" : formatCurrency(amount)}</span>;
-      },
-      meta: {
-        headerTitle: tfl("netAmount"),
-        skeleton: columnSkeletons.text,
-        cellClassName: "text-right",
-      },
-      size: 180,
-    },
-    {
       accessorKey: "total_amount",
       header: ({ column }) => (
         <DataGridColumnHeader
@@ -165,30 +128,25 @@ export function useCnTable({
       ),
       cell: ({ row }) => {
         const amount = row.original.total_amount;
-        return <span>{amount == null ? "" : formatCurrency(amount)}</span>;
+        const currency = row.original.currency_code;
+        if (amount == null) return <span></span>;
+        return (
+          <span className="font-medium tabular-nums">
+            {formatCurrency(amount)}
+            {currency && (
+              <span className="text-muted-foreground ms-1 text-xs font-normal">
+                {currency}
+              </span>
+            )}
+          </span>
+        );
       },
       meta: {
         headerTitle: tfl("totalAmount"),
         skeleton: columnSkeletons.text,
         cellClassName: "text-right",
       },
-      size: 180,
-    },
-    {
-      accessorKey: "currency_code",
-      header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={tfl("currency")}
-          className="justify-center"
-        />
-      ),
-      size: 160,
-      meta: {
-        headerTitle: tfl("currency"),
-        skeleton: columnSkeletons.text,
-        cellClassName: "text-center",
-      },
+      size: 200,
     },
   ];
 

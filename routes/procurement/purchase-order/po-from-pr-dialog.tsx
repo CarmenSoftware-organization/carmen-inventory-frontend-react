@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -38,11 +37,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import EmptyComponent from "@/components/empty-component";
 import {
+  ArrowLeft,
   ArrowRight,
   Check,
   ChevronRight,
   ClipboardCheck,
-  FileInput,
   FileText,
   Loader2,
   Package,
@@ -63,18 +62,6 @@ interface PoFromPrDialogProps {
   readonly onOpenChange: (open: boolean) => void;
 }
 
-/**
- * Dialog 2 ขั้นตอนสำหรับสร้าง PO จาก PR
- * ขั้นที่ 1 เลือก PR ที่ต้องการ, ขั้นที่ 2 รีวิวกลุ่ม PO ที่ backend จัดให้ตาม vendor/currency
- * จากนั้นยืนยันสร้าง PO หลายใบพร้อมกัน และ invalidate query keys ที่เกี่ยวข้อง
- *
- * @param props - props ของ dialog
- * @param props.open - สถานะเปิด/ปิด
- * @param props.onOpenChange - callback เมื่อเปิด/ปิด
- * @returns React element ของ dialog สร้าง PO จาก PR
- * @example
- * <PoFromPrDialog open={fromPrOpen} onOpenChange={setFromPrOpen} />
- */
 export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
   const t = useTranslations("procurement.purchaseOrder");
   const tc = useTranslations("common");
@@ -172,16 +159,10 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
   return (
     <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
       <DialogContent className="flex flex-col gap-0 p-0 pt-2 sm:max-w-[70vw]!">
-        <div className="relative space-y-4 px-6 pt-6 pb-4">
+        <div className="space-y-4 px-6 pt-6 pb-4">
           <DialogHeader>
             <div className="flex items-start gap-3">
-              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <FileInput className="size-4.5" />
-              </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                  {t("fromPr")}
-                </div>
                 <DialogTitle className="text-base">
                   {step === 1 ? t("selectPr") : t("groupPrTitle")}
                 </DialogTitle>
@@ -191,9 +172,8 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
               </div>
               {selectedCount > 0 && (
                 <Badge
-                  variant="primary-light"
                   size="sm"
-                  className="mt-0.5 shrink-0 tabular-nums"
+                  className="bg-module-procurement mt-0.5 shrink-0 tabular-nums"
                 >
                   {t("nSelected", { count: selectedCount })}
                 </Badge>
@@ -204,9 +184,20 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
           <StepIndicator currentStep={step} />
 
           {step === 1 && (
-            <div className="bg-muted/30 flex flex-col gap-1.5 rounded-lg border p-3 sm:flex-row sm:items-center sm:gap-3">
+            <div
+              className={cn(
+                "flex flex-col gap-1.5 rounded-lg border p-3 transition-colors sm:flex-row sm:items-center sm:gap-3",
+                // ยังไม่เลือก workflow → เน้นกล่องให้ user รู้ว่าต้องทำก่อน
+                workflowId ? "bg-muted/30" : "border-info/50 bg-info/5",
+              )}
+            >
               <div className="flex items-center gap-2">
-                <Workflow className="text-muted-foreground size-4 shrink-0" />
+                <Workflow
+                  className={cn(
+                    "size-4 shrink-0",
+                    workflowId ? "text-muted-foreground" : "text-primary",
+                  )}
+                />
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold">
                     {t("workflowLabel")}
@@ -233,6 +224,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
           {step === 1 && (
             <SelectPrStep
               open={open}
+              hasWorkflow={!!workflowId}
               rowSelection={rowSelection}
               onRowSelectionChange={setRowSelection}
             />
@@ -242,7 +234,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
 
         <DialogFooter className="bg-muted/20 items-center border-t px-6 py-3 sm:justify-between">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => onOpenChange(false)}
             disabled={isPending}
@@ -258,14 +250,16 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
                 onClick={handleBack}
                 disabled={isConfirming}
               >
+                <ArrowLeft className="size-4" aria-hidden="true" />
                 {tc("back")}
               </Button>
             )}
             {step === 1 && (
               <Button
-                size="default"
+                size="sm"
                 disabled={selectedCount === 0 || !workflowId || isGrouping}
                 onClick={handleNext}
+                className="bg-module-procurement! text-primary-foreground hover:bg-module-procurement/90!"
               >
                 {isGrouping ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
@@ -277,10 +271,11 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
             )}
             {step === 2 && (
               <Button
-                size="default"
+                size="sm"
                 variant="success"
                 onClick={handleConfirm}
                 disabled={isConfirming}
+                className="bg-module-procurement! text-primary-foreground hover:bg-module-procurement/90!"
               >
                 {isConfirming ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
@@ -297,20 +292,6 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Step Indicator
-// ---------------------------------------------------------------------------
-
-/**
- * Step indicator แสดงสถานะขั้นตอนปัจจุบันของ PoFromPrDialog
- * แสดงจุดกลมพร้อมเส้นเชื่อมระหว่างขั้น 1 (Select PR) และ 2 (Review)
- *
- * @param props - props
- * @param props.step - step ปัจจุบัน (1 หรือ 2)
- * @returns React element ของ step indicator
- * @example
- * <StepIndicator step={step} />
- */
 const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
   const t = useTranslations("procurement.purchaseOrder");
   const steps = [
@@ -329,9 +310,11 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
               <div
                 className={cn(
                   "flex size-7 shrink-0 items-center justify-center rounded-full text-[0.6875rem] font-semibold transition-colors",
-                  isCompleted && "bg-success text-white",
+                  // module-procurement accent ให้ตรงกับ Stepper ของ from-price-list
+                  isCompleted &&
+                    "bg-module-procurement text-primary-foreground",
                   isCurrent &&
-                    "bg-primary text-primary-foreground ring-primary/20 ring-4",
+                    "bg-module-procurement ring-module-procurement/20 text-primary-foreground ring-4",
                   !isCompleted &&
                     !isCurrent &&
                     "bg-muted text-muted-foreground",
@@ -353,7 +336,7 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
               <div
                 className={cn(
                   "mb-4 h-px flex-1",
-                  isCompleted ? "bg-success" : "bg-border",
+                  isCompleted ? "bg-module-procurement" : "bg-border",
                 )}
                 aria-hidden="true"
               />
@@ -365,28 +348,14 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Step 1 — Select PRs
-// ---------------------------------------------------------------------------
-
-/**
- * ขั้นตอนที่ 1 ของ PoFromPrDialog: เลือก PR ที่ต้องการนำมาสร้าง PO
- * ดึงรายการ PR ที่พร้อมสร้าง PO ของผู้ใช้ปัจจุบัน แสดงใน DataGrid พร้อม row selection
- *
- * @param props - props
- * @param props.open - สถานะเปิด dialog (ใช้ควบคุมการ fetch)
- * @param props.rowSelection - state การเลือก row
- * @param props.setRowSelection - setter ของ row selection
- * @returns React element ของตารางเลือก PR
- * @example
- * <Step1SelectPR open={open} rowSelection={rowSelection} setRowSelection={setRowSelection} />
- */
 const SelectPrStep = ({
   open,
+  hasWorkflow,
   rowSelection,
   onRowSelectionChange,
 }: {
   open: boolean;
+  hasWorkflow: boolean;
   rowSelection: RowSelectionState;
   onRowSelectionChange: (s: RowSelectionState) => void;
 }) => {
@@ -404,7 +373,8 @@ const SelectPrStep = ({
       if (!res.ok) throw new Error("Failed to fetch purchase requests for PO");
       return res.json();
     },
-    enabled: !!buCode && open,
+    // ดึง PR หลังเลือก workflow แล้วเท่านั้น (workflow-first flow)
+    enabled: !!buCode && open && hasWorkflow,
     ...CACHE_DYNAMIC,
   });
   const purchaseRequests = data?.data ?? [];
@@ -459,6 +429,19 @@ const SelectPrStep = ({
     enableRowSelection: true,
   });
 
+  // workflow-first: ยังไม่เลือก workflow → แนะนำให้เลือกก่อน แทนที่จะโชว์ตาราง
+  if (!hasWorkflow) {
+    return (
+      <div className="rounded-lg border border-dashed py-10">
+        <EmptyComponent
+          icon={Workflow}
+          title={t("selectWorkflowFirst")}
+          description={t("selectWorkflowFirstDesc")}
+        />
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -481,28 +464,13 @@ const SelectPrStep = ({
         />
       }
     >
-      <DataGridContainer className="rounded-lg border">
+      <DataGridContainer>
         <DataGridTable />
       </DataGridContainer>
     </DataGrid>
   );
 };
 
-// ---------------------------------------------------------------------------
-// Step 2 — Review Grouped POs
-// ---------------------------------------------------------------------------
-
-/**
- * ขั้นตอนที่ 2 ของ PoFromPrDialog: รีวิวกลุ่ม PO ที่ backend จัดให้
- * แสดงจำนวน vendor/currency ที่ระบบจะสร้างเป็น PO แยกใบ
- * รองรับการขยายแถวเพื่อดูรายการสินค้าของแต่ละ group
- *
- * @param props - props
- * @param props.groups - ข้อมูล GroupPrPo จาก API group endpoint
- * @returns React element ของตาราง grouped PO
- * @example
- * <Step2ReviewGroup groups={groupedData} />
- */
 const ReviewGroupStep = ({ data }: { data: GroupPrPo[] }) => {
   const t = useTranslations("procurement.purchaseOrder");
   const tfl = useTranslations("field");
@@ -538,45 +506,40 @@ const ReviewGroupStep = ({ data }: { data: GroupPrPo[] }) => {
     {
       accessorKey: "po_no",
       header: tfl("poNo"),
-      size: 80,
     },
     {
       accessorKey: "vendor_name",
       header: tfl("vendor"),
     },
     {
+      accessorKey: "pr",
+      header: t("prRef"),
+    },
+    {
       accessorKey: "delivery_date",
       header: tfl("deliveryDate"),
       cell: ({ row }) => formatDate(row.getValue("delivery_date"), dateFormat),
-      size: 110,
-      meta: { cellClassName: "text-center", headerClassName: "text-center" },
-    },
-    {
-      accessorKey: "currency_code",
-      header: tfl("currency"),
-      size: 80,
       meta: { cellClassName: "text-center", headerClassName: "text-center" },
     },
     {
       accessorKey: "total_price",
       header: tfl("total"),
-      cell: ({ row }) => formatCurrency(row.getValue("total_price")),
-      size: 120,
+      cell: ({ row }) => {
+        const amount = row.getValue<number>("total_price");
+        const currency = row.original.currency_code;
+        if (amount == null) return <span></span>;
+        return (
+          <span className="font-medium tabular-nums">
+            {formatCurrency(amount)}
+            {currency && (
+              <span className="text-muted-foreground ms-1 text-xs font-normal">
+                {currency}
+              </span>
+            )}
+          </span>
+        );
+      },
       meta: { cellClassName: "text-right", headerClassName: "text-right" },
-    },
-    {
-      id: "pr",
-      header: t("prRef"),
-      cell: ({ row }) => (
-        <div className="flex flex-wrap gap-1">
-          {row.original.pr.map((prNo) => (
-            <Badge key={prNo} variant="secondary" className="text-[0.625rem]">
-              {prNo}
-            </Badge>
-          ))}
-        </div>
-      ),
-      size: 180,
     },
   ];
 
@@ -595,7 +558,6 @@ const ReviewGroupStep = ({ data }: { data: GroupPrPo[] }) => {
       table={table}
       recordCount={data.length}
       tableLayout={{ checkbox: true, headerSticky: true, rowBorder: true }}
-      tableClassNames={{ headerRow: "h-11", bodyRow: "h-11" }}
     >
       <DataGridContainer>
         <DataGridTable />
@@ -604,21 +566,6 @@ const ReviewGroupStep = ({ data }: { data: GroupPrPo[] }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Expanded Products Sub-table
-// ---------------------------------------------------------------------------
-
-/**
- * ตารางย่อยภายในแถว expand ของ Step2ReviewGroup
- * แสดง product ที่รวมอยู่ใน group พร้อม qty, unit price และ total ในสกุลเงินของ group
- *
- * @param props - props
- * @param props.products - รายการ GroupPrProduct
- * @param props.currencyCode - รหัสสกุลเงินที่แสดง
- * @returns React element ของตารางสินค้า
- * @example
- * <ProductSubTable products={group.products} currencyCode={group.currency_code} />
- */
 const ExpandedProducts = ({
   products,
   currencyCode,
@@ -629,42 +576,42 @@ const ExpandedProducts = ({
   const tfl = useTranslations("field");
 
   return (
-    <div className="max-w-2xl py-2 pl-10">
-      <table className="w-full text-xs">
+    <div className="max-w-2xl py-2 pl-16">
+      <table className="w-full table-fixed text-xs">
         <thead>
-          <tr className="bg-muted/60 text-foreground border-b text-left">
-            <th scope="col" className="pb-1 font-semibold">
+          <tr className="bg-muted/40 text-muted-foreground border-b text-left text-[0.625rem] tracking-wider uppercase">
+            <th scope="col" className="px-2 py-1 font-semibold">
               {tfl("product")}
             </th>
-            <th scope="col" className="pb-1 text-right font-semibold">
+            <th scope="col" className="w-16 px-2 py-1 text-right font-semibold">
               {tfl("quantity")}
             </th>
-            <th scope="col" className="pb-1 text-right font-semibold">
-              {tfl("price")}
+            <th scope="col" className="w-28 px-2 py-1 text-right font-semibold">
+              {tfl("price")} ({currencyCode})
             </th>
-            <th scope="col" className="pb-1 text-right font-semibold">
-              {tfl("total")}
+            <th scope="col" className="w-28 px-2 py-1 text-right font-semibold">
+              {tfl("total")} ({currencyCode})
             </th>
           </tr>
         </thead>
         <tbody>
           {products.map((p) => (
             <tr key={p.product_id} className="border-b last:border-0">
-              <td className="py-1">
-                <div className="flex items-center gap-1.5">
+              <td className="px-2 py-1">
+                <div className="flex min-w-0 items-center gap-1.5">
                   <Package
-                    className="text-muted-foreground size-3"
+                    className="text-muted-foreground size-3 shrink-0"
                     aria-hidden="true"
                   />
-                  {p.product_name}
+                  <span className="truncate">{p.product_name}</span>
                 </div>
               </td>
-              <td className="py-1 text-right">{p.qty}</td>
-              <td className="py-1 text-right">
-                {formatCurrency(p.price_per_unit)} {currencyCode}
+              <td className="px-2 py-1 text-right tabular-nums">{p.qty}</td>
+              <td className="text-muted-foreground px-2 py-1 text-right tabular-nums">
+                {formatCurrency(p.price_per_unit)}
               </td>
-              <td className="py-1 text-right">
-                {formatCurrency(p.total)} {currencyCode}
+              <td className="text-foreground px-2 py-1 text-right font-medium tabular-nums">
+                {formatCurrency(p.total)}
               </td>
             </tr>
           ))}

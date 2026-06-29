@@ -86,7 +86,7 @@ const STEPS: ReadonlyArray<{
 const PO_LIST_PATH = "/procurement/purchase-order";
 const COMPLETED_INDICATOR = <Check className="size-3" aria-hidden="true" />;
 const INDICATOR_ACCENT =
-  "data-[state=active]:bg-[var(--module-procurement)] data-[state=active]:text-white data-[state=completed]:bg-[var(--module-procurement)] data-[state=completed]:text-white";
+  "data-[state=active]:bg-[var(--module-procurement)] data-[state=active]:text-primary-foreground data-[state=completed]:bg-[var(--module-procurement)] data-[state=completed]:text-primary-foreground";
 
 // Only fields the user can edit on Step 1 — order_date, buyer_*, department_* are
 // read-only seeds from useProfile() and never need validation.
@@ -280,8 +280,10 @@ export function FromPriceListContent() {
         >
           <ArrowLeft />
         </Button>
-        <div className="min-w-0 flex-1">
-          <h1 className="text-lg font-semibold">{t("fromPriceList")}</h1>
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <h1 className="text-foreground text-lg font-semibold tracking-tight">
+            {t("fromPriceList")}
+          </h1>
           <p className="text-muted-foreground text-sm">
             {t("fromPriceListDesc")}
           </p>
