@@ -139,6 +139,7 @@ export interface SrStageDetail {
 export interface SrActionPayload {
   id: string;
   stage_role: string;
+  doc_version?: number;
   des_stage?: string;
   details: SrStageDetail[];
 }
