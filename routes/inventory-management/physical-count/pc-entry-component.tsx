@@ -161,7 +161,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
     }
 
     savePhysicalCount.mutate(
-      { items: saveItems },
+      { doc_version: pcData?.doc_version, items: saveItems },
       {
         onSuccess: () => {
           setLastSaved(
@@ -260,7 +260,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
       if (eff != null) items.push({ id: d.id, actual_qty: eff });
     }
     reviewPhysicalCount.mutate(
-      { items },
+      { doc_version: pcData?.doc_version, items },
       {
         onSuccess: (res) => {
           toast.success(t("submitReviewSuccess"));

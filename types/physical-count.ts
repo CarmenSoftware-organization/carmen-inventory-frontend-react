@@ -78,6 +78,7 @@ export interface PhysicalCountData {
   created_by_id?: string | null;
   updated_at: string;
   updated_by_id?: string | null;
+  doc_version?: number;
   details: PhysicalCountDetail[];
 }
 
@@ -87,6 +88,7 @@ export interface PhysicalCount {
   department_id: string;
   department_name: string;
   is_active: boolean;
+  doc_version?: number;
   created_at: string;
   updated_at: string;
 }
@@ -104,5 +106,6 @@ export interface PhysicalCountSaveItemDto {
 }
 
 export interface PhysicalCountSaveDto {
+  doc_version?: number;
   items: PhysicalCountSaveItemDto[];
 }

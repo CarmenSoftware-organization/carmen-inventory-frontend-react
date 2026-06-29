@@ -91,7 +91,7 @@ export function useCreatePhysicalCount() {
  * update.mutate({ id, ...values });
  */
 export function useUpdatePhysicalCount() {
-  return useApiMutation<CreatePhysicalCountDto & { id: string }>({
+  return useApiMutation<CreatePhysicalCountDto & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.put(
         `${API_ENDPOINTS.PHYSICAL_COUNT(buCode)}/${id}`,
