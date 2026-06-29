@@ -39,7 +39,7 @@ export function DeleteDialog({
       <AlertDialogContent className="gap-0 p-0 sm:max-w-md">
         <div className="p-5">
           <div className="flex items-start gap-3">
-            <div className="bg-destructive/10 text-destructive flex size-9 shrink-0 items-center justify-center rounded-lg">
+            <div className="bg-muted text-destructive flex size-9 shrink-0 items-center justify-center rounded-lg">
               <Trash2 className="size-4.5" />
             </div>
             <div className="min-w-0 flex-1">

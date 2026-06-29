@@ -44,7 +44,7 @@ export default function CertificationCard({
     >
       <CardHeader className="px-4 pt-4 pb-3">
         <div className="flex items-start gap-3">
-          <div className="bg-primary/10 text-primary group-hover:bg-primary/15 flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors">
+          <div className="bg-muted text-primary group-hover:bg-accent flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors">
             <Award className="size-4.5" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">

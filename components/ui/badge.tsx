@@ -24,18 +24,15 @@ const badgeVariants = cva(
         ghost: "[a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         link: "text-primary underline-offset-4 [a&]:hover:underline",
         invert: "bg-invert text-invert-foreground",
-        "primary-light":
-          "bg-primary/10 border-none text-primary dark:bg-primary/20 dark:text-primary",
-        "warning-light":
-          "bg-warning/10 border-none text-warning-foreground dark:bg-warning/20 dark:text-warning",
-        "success-light":
-          "bg-success/10 border-none text-success-foreground dark:bg-success/20 dark:text-success",
-        "info-light":
-          "bg-info/10 border-none text-info-foreground dark:bg-info/20 dark:text-info",
-        "destructive-light":
-          "bg-destructive/10 border-none text-destructive dark:bg-destructive/20 dark:text-destructive",
-        "invert-light":
-          "bg-invert/10 border-none text-foreground dark:bg-invert/20",
+        // ── Flat "-light" chips (DESIGN.md "avoid neon") ──
+        // Neutral box (bg-muted) carries no hue; the color appears ONCE, as
+        // the label text — a single signal instead of a tinted glowing block.
+        "primary-light": "bg-muted border-none text-primary",
+        "warning-light": "bg-muted border-none text-warning",
+        "success-light": "bg-muted border-none text-success",
+        "info-light": "bg-muted border-none text-info",
+        "destructive-light": "bg-muted border-none text-destructive",
+        "invert-light": "bg-muted border-none text-foreground",
         "primary-outline":
           "bg-background border-primary/40 text-primary dark:bg-input/30",
         "warning-outline":

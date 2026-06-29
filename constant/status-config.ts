@@ -22,60 +22,70 @@ export type StatusConfig<S extends string = string> = Record<
 // Tailwind scans source for complete class names at build time.
 // Dynamic construction (template literals) won't be detected.
 // Every status className MUST be written out in full here.
+//
+// FLAT design (DESIGN.md "avoid neon"): badges are a NEUTRAL chip
+// (`bg-muted` box, `text-foreground` label) with the status color carried
+// as ONE signal — a small dot rendered via the `::before` pseudo-element.
+// The dot color is the only place the status hue appears, so the chip never
+// reads as a glowing/clustered block. `DOT` holds the shared neutral chip +
+// dot geometry; each entry only appends `before:bg-[var(--status-X)]`.
+
+const DOT =
+  "bg-muted text-foreground border-transparent px-2 gap-1.5 before:size-1.5 before:shrink-0 before:rounded-full before:content-['']";
 
 const STATUS_CLASSNAMES: Record<string, string> = {
   /* Neutral / Initial */
-  draft:       "bg-[var(--status-draft)] text-[var(--status-draft-fg)] border-transparent px-2",
-  pending:     "bg-[var(--status-pending)] text-[var(--status-pending-fg)] border-transparent px-2",
+  draft:       `${DOT} before:bg-[var(--status-draft)]`,
+  pending:     `${DOT} before:bg-[var(--status-pending)]`,
   /* Info / Submitted */
-  submitted:   "bg-[var(--status-submitted)] text-[var(--status-submitted-fg)] border-transparent px-2",
-  sent:        "bg-[var(--status-sent)] text-[var(--status-sent-fg)] border-transparent px-2",
-  open:        "bg-[var(--status-open)] text-[var(--status-open-fg)] border-transparent px-2",
+  submitted:   `${DOT} before:bg-[var(--status-submitted)]`,
+  sent:        `${DOT} before:bg-[var(--status-sent)]`,
+  open:        `${DOT} before:bg-[var(--status-open)]`,
   /* Progress / Active */
-  active:      "bg-[var(--status-approved)] text-[var(--status-approved-fg)] border-transparent px-2",
-  inactive:    "bg-[var(--status-closed)] text-[var(--status-closed-fg)] border-transparent px-2",
-  in_progress: "bg-[var(--status-in-progress)] text-[var(--status-in-progress-fg)] border-transparent px-2",
-  review:      "bg-[var(--status-review)] text-[var(--status-review-fg)] border-transparent px-2",
-  partial:     "bg-[var(--status-partial)] text-[var(--status-partial-fg)] border-transparent px-2",
-  save:        "bg-[var(--status-save)] text-[var(--status-save-fg)] border-transparent px-2",
-  saved:       "bg-[var(--status-save)] text-[var(--status-save-fg)] border-transparent px-2",
+  active:      `${DOT} before:bg-[var(--status-approved)]`,
+  inactive:    `${DOT} before:bg-[var(--status-closed)]`,
+  in_progress: `${DOT} before:bg-[var(--status-in-progress)]`,
+  review:      `${DOT} before:bg-[var(--status-review)]`,
+  partial:     `${DOT} before:bg-[var(--status-partial)]`,
+  save:        `${DOT} before:bg-[var(--status-save)]`,
+  saved:       `${DOT} before:bg-[var(--status-save)]`,
   /* Positive / Complete */
-  approved:    "bg-[var(--status-approved)] text-[var(--status-approved-fg)] border-transparent px-2",
-  completed:   "bg-[var(--status-completed)] text-[var(--status-completed-fg)] border-transparent px-2",
-  committed:   "bg-[var(--status-committed)] text-[var(--status-committed-fg)] border-transparent px-2",
+  approved:    `${DOT} before:bg-[var(--status-approved)]`,
+  completed:   `${DOT} before:bg-[var(--status-completed)]`,
+  committed:   `${DOT} before:bg-[var(--status-committed)]`,
   /* Negative / Terminal */
-  rejected:    "bg-destructive text-destructive-foreground border-transparent px-2",
-  cancelled:   "bg-[var(--status-cancelled)] text-[var(--status-cancelled-fg)] border-transparent px-2",
-  closed:      "bg-[var(--status-closed)] text-[var(--status-closed-fg)] border-transparent px-2",
-  locked:      "bg-[var(--status-locked)] text-[var(--status-locked-fg)] border-transparent px-2",
-  voided:      "bg-destructive text-destructive-foreground border-transparent px-2",
+  rejected:    `${DOT} before:bg-[var(--status-rejected)]`,
+  cancelled:   `${DOT} before:bg-[var(--status-cancelled)]`,
+  closed:      `${DOT} before:bg-[var(--status-closed)]`,
+  locked:      `${DOT} before:bg-[var(--status-locked)]`,
+  voided:      `${DOT} before:bg-[var(--status-voided)]`,
   /* Workflow action badges */
-  reviewed:  "bg-[var(--status-review)] text-[var(--status-review-fg)] border-transparent px-2",
-  sent_back: "bg-[var(--status-review)] text-[var(--status-review-fg)] border-transparent px-2",
+  reviewed:  `${DOT} before:bg-[var(--status-review)]`,
+  sent_back: `${DOT} before:bg-[var(--status-review)]`,
   /* Type badges (Inventory Adjustment) */
-  "stock-in":  "bg-[var(--status-stock-in)] text-[var(--status-stock-in-fg)] border-transparent px-2",
-  "stock-out": "bg-[var(--status-stock-out)] text-[var(--status-stock-out-fg)] border-transparent px-2",
+  "stock-in":  `${DOT} before:bg-[var(--status-stock-in)]`,
+  "stock-out": `${DOT} before:bg-[var(--status-stock-out)]`,
   /* Workflow type badges — uses sub-module colors from module-colors.css */
-  purchase_request_workflow:    "bg-[var(--sub-pr)] text-white border-transparent px-2",
-  purchase_order_workflow:      "bg-[var(--sub-po)] text-white border-transparent px-2",
-  store_requisition_workflow:   "bg-[var(--sub-store-requisition)] text-white border-transparent px-2",
+  purchase_request_workflow:    `${DOT} before:bg-[var(--sub-pr)]`,
+  purchase_order_workflow:      `${DOT} before:bg-[var(--sub-po)]`,
+  store_requisition_workflow:   `${DOT} before:bg-[var(--sub-store-requisition)]`,
   /* CN type badges */
-  quantity_return:   "bg-[var(--status-quantity-return)] text-[var(--status-quantity-return-fg)] border-transparent px-2",
-  amount_discount:   "bg-[var(--status-amount-discount)] text-[var(--status-amount-discount-fg)] border-transparent px-2",
+  quantity_return:   `${DOT} before:bg-[var(--status-quantity-return)]`,
+  amount_discount:   `${DOT} before:bg-[var(--status-amount-discount)]`,
   /* GRN type badges */
-  grn_purchase_order: "bg-[var(--status-grn-po)] text-[var(--status-grn-po-fg)] border-transparent px-2",
-  grn_manual:         "bg-[var(--status-grn-manual)] text-[var(--status-grn-manual-fg)] border-transparent px-2",
+  grn_purchase_order: `${DOT} before:bg-[var(--status-grn-po)]`,
+  grn_manual:         `${DOT} before:bg-[var(--status-grn-manual)]`,
   /* PO type badges — uses sub-module colors */
-  purchase_request:            "bg-[var(--sub-pr)] text-white border-transparent px-2",
-  manual:                      "bg-[var(--sub-po)] text-white border-transparent px-2",
-  pricelist:                   "bg-[var(--sub-price-list)] text-white border-transparent px-2",
+  purchase_request:            `${DOT} before:bg-[var(--sub-pr)]`,
+  manual:                      `${DOT} before:bg-[var(--sub-po)]`,
+  pricelist:                   `${DOT} before:bg-[var(--sub-price-list)]`,
   /* Cuisine region badges */
-  ASIA:        "bg-[var(--status-cuisine-asia)] text-[var(--status-cuisine-asia-fg)] border-transparent px-2",
-  EUROPE:      "bg-[var(--status-cuisine-europe)] text-[var(--status-cuisine-europe-fg)] border-transparent px-2",
-  AMERICAS:    "bg-[var(--status-cuisine-americas)] text-[var(--status-cuisine-americas-fg)] border-transparent px-2",
-  AFRICA:      "bg-[var(--status-cuisine-africa)] text-[var(--status-cuisine-africa-fg)] border-transparent px-2",
-  MIDDLE_EAST: "bg-[var(--status-cuisine-middle-east)] text-[var(--status-cuisine-middle-east-fg)] border-transparent px-2",
-  OCEANIA:     "bg-[var(--status-cuisine-oceania)] text-[var(--status-cuisine-oceania-fg)] border-transparent px-2",
+  ASIA:        `${DOT} before:bg-[var(--status-cuisine-asia)]`,
+  EUROPE:      `${DOT} before:bg-[var(--status-cuisine-europe)]`,
+  AMERICAS:    `${DOT} before:bg-[var(--status-cuisine-americas)]`,
+  AFRICA:      `${DOT} before:bg-[var(--status-cuisine-africa)]`,
+  MIDDLE_EAST: `${DOT} before:bg-[var(--status-cuisine-middle-east)]`,
+  OCEANIA:     `${DOT} before:bg-[var(--status-cuisine-oceania)]`,
 };
 
 // ── Factory functions ──────────────────────────────────────────────────

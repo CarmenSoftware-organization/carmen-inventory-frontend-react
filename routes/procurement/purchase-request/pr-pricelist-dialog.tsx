@@ -290,7 +290,7 @@ export function PrPricelistDialog({
         <div className="relative space-y-4 px-6 pt-6 pb-4">
           <DialogHeader>
             <div className="flex items-start gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Tag className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">

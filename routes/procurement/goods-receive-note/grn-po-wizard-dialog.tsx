@@ -88,7 +88,7 @@ export function GrnPoWizardDialog({
         <div className="relative space-y-4 px-6 pt-6 pb-4">
           <DialogHeader>
             <div className="flex items-start gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <PackageCheck className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -280,7 +280,7 @@ function VendorStep({
                 onClick={() => onSelect(vendor)}
                 className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 relative flex cursor-pointer items-start gap-3 overflow-hidden rounded-xl border p-3 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
               >
-                <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                   <Building2 className="size-4" />
                 </div>
                 <div className="min-w-0 flex-1 space-y-0.5">

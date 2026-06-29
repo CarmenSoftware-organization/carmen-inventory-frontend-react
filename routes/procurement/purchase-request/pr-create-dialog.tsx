@@ -82,7 +82,7 @@ export function CreatePRDialog({ open, onOpenChange }: CreatePRDialogProps) {
           <>            <div className="relative space-y-5 p-6">
               <DialogHeader>
                 <div className="flex items-start gap-3">
-                  <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+                  <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                     <LayoutTemplate className="size-4.5" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -159,7 +159,7 @@ export function CreatePRDialog({ open, onOpenChange }: CreatePRDialogProps) {
                   >
                     <ArrowLeft className="size-4" />
                   </Button>
-                  <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+                  <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                     <LayoutTemplate className="size-4.5" />
                   </div>
                   <div className="min-w-0 flex-1">

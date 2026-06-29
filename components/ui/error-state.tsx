@@ -32,7 +32,7 @@ export function ErrorState({ message, onRetry, errorId }: ErrorStateProps) {
       role="alert"
       className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center"
     >
-      <div className="bg-destructive/10 text-destructive flex size-12 items-center justify-center rounded-full">
+      <div className="bg-muted text-destructive flex size-12 items-center justify-center rounded-full">
         <AlertCircle aria-hidden="true" className="size-6" />
       </div>
       <div className="space-y-1">

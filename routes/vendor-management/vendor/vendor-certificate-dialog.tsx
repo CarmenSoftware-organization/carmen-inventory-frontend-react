@@ -164,7 +164,7 @@ export function VendorCertificateDialog({
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <DialogHeader className="gap-0 px-5 py-4">
             <div className="flex items-center gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Award className="size-4.5" />
               </div>
               <DialogTitle className="text-base">

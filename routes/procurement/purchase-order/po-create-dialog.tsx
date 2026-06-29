@@ -68,7 +68,7 @@ export function CreatePODialog({ open, onOpenChange }: CreatePODialogProps) {
         <DialogContent className="overflow-hidden p-0 sm:max-w-2xl">          <div className="relative space-y-5 p-6">
             <DialogHeader>
               <div className="flex items-start gap-3">
-                <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+                <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                   <Receipt className="size-4.5" />
                 </div>
                 <div className="min-w-0 flex-1">

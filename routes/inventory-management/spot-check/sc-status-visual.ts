@@ -24,12 +24,14 @@ const DESTRUCTIVE: StatusVisual = {
   className: "text-destructive",
 };
 
+// FLAT (DESIGN.md "avoid neon"): no pulse — the pulsing dot read as a glowing
+// "live" signal. The colored dot alone is the single status signal.
 export const STATUS_VISUAL: Record<SpotCheckStatus, StatusVisual> = {
-  pending: { variant: "info-light", dotClass: "bg-info", pulse: true },
+  pending: { variant: "info-light", dotClass: "bg-info", pulse: false },
   in_progress: {
     variant: "warning-light",
     dotClass: "bg-warning",
-    pulse: true,
+    pulse: false,
   },
   completed: {
     variant: "success-light",
