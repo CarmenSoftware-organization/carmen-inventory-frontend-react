@@ -158,6 +158,7 @@ export function InventoryAdjustmentForm({
       {
         id: inventoryAdjustment.id,
         type: adjustmentType,
+        doc_version: inventoryAdjustment.doc_version,
         ...buildBasePayload(values),
         [detailsKey]: details,
       },
@@ -334,6 +335,7 @@ export function InventoryAdjustmentForm({
                 id: inventoryAdjustment.id,
                 type: adjustmentType,
                 void_reason: voidReason,
+                doc_version: inventoryAdjustment.doc_version,
               },
               {
                 onSuccess: () => {
