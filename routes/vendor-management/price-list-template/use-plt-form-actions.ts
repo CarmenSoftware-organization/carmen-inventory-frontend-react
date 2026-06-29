@@ -73,7 +73,7 @@ export function usePltFormActions({
 
     if (isEdit && priceListTemplate) {
       updateTemplate.mutate(
-        { id: priceListTemplate.id, ...payload },
+        { id: priceListTemplate.id, doc_version: priceListTemplate.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
