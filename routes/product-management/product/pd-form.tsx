@@ -286,7 +286,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
     if (isEdit && product) {
       updateProduct.mutate(
-        { id: product.id, ...payload },
+        { id: product.id, doc_version: product.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
