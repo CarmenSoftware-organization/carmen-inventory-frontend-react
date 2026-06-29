@@ -63,7 +63,7 @@ export function LocationsEditor({
       )}
       <div className="border-border/60 bg-card overflow-hidden rounded-lg border text-xs">
         <table className="w-full table-fixed">
-          <thead className="bg-muted/40 text-muted-foreground font-bold tracking-wider uppercase">
+          <thead className="bg-muted/40 text-muted-foreground font-semibold tracking-wider uppercase">
             <tr>
               <th
                 scope="col"

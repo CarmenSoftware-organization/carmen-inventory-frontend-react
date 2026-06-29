@@ -57,7 +57,7 @@ export function LineBreakdown({ form, index }: LineBreakdownProps) {
           </div>
         ))}
       </dl>
-      <div className="border-border/60 mt-2 flex items-baseline justify-between border-t pt-2 font-bold">
+      <div className="border-border/60 mt-2 flex items-baseline justify-between border-t pt-2 font-semibold">
         <span>{tfl("lineTotal")}</span>
         <span className="text-primary tabular-nums">
           {formatCurrency(total)}

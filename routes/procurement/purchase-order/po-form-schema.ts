@@ -6,11 +6,14 @@ import type {
   PrDetailRef,
 } from "@/types/purchase-order";
 
-const locationSchema = z.object({
-  id: z.string().min(1),
-  order_qty: z.coerce.number().min(0),
-  received_qty: z.coerce.number().min(0),
-});
+const createLocationSchema = (tv: TranslationFn, tf: TranslationFn) =>
+  z.object({
+    id: z.string().min(1),
+    order_qty: z.coerce
+      .number()
+      .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
+    received_qty: z.coerce.number().min(0),
+  });
 
 const prDetailSchema = z.object({
   pr_detail_id: z.string(),
@@ -60,7 +63,7 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     stage_status: z.string().optional(),
     stage_message: z.string().optional(),
     pr_detail: z.array(prDetailSchema),
-    locations: z.array(locationSchema),
+    locations: z.array(createLocationSchema(tv, tf)),
   });
 }
 
@@ -129,7 +132,10 @@ export const PO_ITEM: PoFormValues["items"][number] = {
   stage_status: "",
   stage_message: "",
   pr_detail: [] as PrDetailRef[],
-  locations: [] as {
+  // item ใหม่เริ่มด้วย location ว่าง 1 แถวเสมอ — qty ของ item มาจาก locations
+  // ทุก item จึงต้องมีอย่างน้อย 1 location; ทำให้ user เห็นแถวให้กรอกทันที และ
+  // ตอน save แถวนี้ validate แดงเอง (order_qty 0 < min 1) ไม่ใช่แค่ border แดงลอย ๆ
+  locations: [{ id: "", order_qty: 0, received_qty: 0 }] as {
     id: string;
     order_qty: number;
     received_qty: number;
@@ -278,10 +284,9 @@ export function mapItemToPayload(
     locations:
       item.locations?.map((loc) => ({
         location_id: loc.id,
-        // form ใช้ order_qty (consistent กับ item-level field);
-        // payload schema ใช้ requested_qty (backend contract)
-        requested_qty: loc.order_qty,
-        received_qty: loc.received_qty,
+        // backend contract: order_qty (order unit) + order_base_qty (base unit)
+        order_qty: loc.order_qty,
+        order_base_qty: loc.order_qty * (item.order_unit_conversion_factor ?? 1),
       })) ?? [],
   };
 }

@@ -92,8 +92,13 @@ export function PoNotesSummary({
   return (
     <div className="grid gap-6 lg:grid-cols-[1.25fr_0.85fr]">
       <div className="flex flex-col gap-4">
-        <Field>
-          <FieldLabel htmlFor="po-description">{tfl("description")}</FieldLabel>
+        <Field className={plainText ? "gap-1" : undefined}>
+          <FieldLabel
+            htmlFor="po-description"
+            className={plainText ? "text-muted-foreground font-normal" : undefined}
+          >
+            {tfl("description")}
+          </FieldLabel>
           {plainText ? (
             <PlainNote value={form.getValues("description")} />
           ) : (
@@ -108,8 +113,13 @@ export function PoNotesSummary({
             />
           )}
         </Field>
-        <Field>
-          <FieldLabel htmlFor="po-remarks">{tfl("remarks")}</FieldLabel>
+        <Field className={plainText ? "gap-1" : undefined}>
+          <FieldLabel
+            htmlFor="po-remarks"
+            className={plainText ? "text-muted-foreground font-normal" : undefined}
+          >
+            {tfl("remarks")}
+          </FieldLabel>
           {plainText ? (
             <PlainNote value={form.getValues("remarks")} />
           ) : (
@@ -124,8 +134,13 @@ export function PoNotesSummary({
             />
           )}
         </Field>
-        <Field>
-          <FieldLabel htmlFor="po-note">{tfl("note")}</FieldLabel>
+        <Field className={plainText ? "gap-1" : undefined}>
+          <FieldLabel
+            htmlFor="po-note"
+            className={plainText ? "text-muted-foreground font-normal" : undefined}
+          >
+            {tfl("note")}
+          </FieldLabel>
           {plainText ? (
             <PlainNote value={form.getValues("note")} />
           ) : (

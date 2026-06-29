@@ -117,7 +117,7 @@ export const ItemRow = memo(function ItemRow({
           readOnly={readOnly}
         />
       </td>
-      <td className="text-primary px-2 py-2 text-right font-semibold tabular-nums">
+      <td className="px-2 py-2 text-right font-semibold tabular-nums">
         <ComputedPricingCell
           control={form.control}
           index={index}

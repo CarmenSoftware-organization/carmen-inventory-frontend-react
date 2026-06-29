@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Lock, MessageSquare, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -105,10 +104,6 @@ export function PoHeader({
               {tc("close")}
             </Button>
           )}
-          <Button size="sm" variant="info" onClick={onShowComment}>
-            <MessageSquare aria-hidden="true" />
-            {tc("comment")}
-          </Button>
           {isView && (
             <PrintDocumentButton
               documentType="PO"
@@ -121,12 +116,7 @@ export function PoHeader({
             />
           )}
           {isView && canEdit && (
-            <Button
-              size="sm"
-              variant="info"
-              onClick={onEnterEdit}
-              disabled={isPending}
-            >
+            <Button size="sm" onClick={onEnterEdit} disabled={isPending}>
               <Pencil aria-hidden="true" />
               {tc("edit")}
             </Button>
@@ -164,6 +154,10 @@ export function PoHeader({
               )}
             </>
           )}
+          <Button size="sm" variant="info" onClick={onShowComment}>
+            <MessageSquare aria-hidden="true" />
+            {tc("comment")}
+          </Button>
         </>
       )}
       {isAdd && (
@@ -179,7 +173,7 @@ export function PoHeader({
           </Button>
           <Button size="sm" type="submit" form="po-form" disabled={isPending}>
             <Save aria-hidden="true" />
-            {t("add")}
+            {tc("save")}
           </Button>
         </>
       )}
