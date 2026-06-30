@@ -25,6 +25,19 @@
   --module-config: #3D3D3D;          /* Dark gray */
   --module-admin: #171717;           /* Near-black */
 
+  /* ── App/Sub tile system (single-accent, monochrome primary) ──
+     ไทล์ทุก module ใช้โทนเดียวกัน: พื้น primary-tint อ่อน + ภาพสี primary.
+     Derive จาก var(--primary)/var(--card) → auto-adapt dark mode (ไม่ต้องนิยามซ้ำใน .dark).
+     ไอคอนล้วน ไม่มีพื้น/plate (surface = transparent) — ดีเทลในภาพเป็น tint scale
+     ของ primary→ขาว ล้วน (ไม่ผสมดำ/ไม่สร้างเฉดเข้ม):
+     ink = primary เต็ม (เข้มสุด) · shadow = tint กลาง · accent = tint อ่อนสุด
+     NB: ผสม in srgb ไม่ใช่ oklch — เพราะ white เป็น achromatic (hue 0); mix in oklch จะ
+     interpolate hue ของ primary(258°) เข้าหา 0° → เพี้ยนเป็นชมพู */
+  --tile-surface: transparent;
+  --tile-ink: var(--primary);
+  --tile-accent: color-mix(in srgb, var(--primary), white 50%);
+  --tile-shadow: color-mix(in srgb, var(--primary), white 25%);
+
   /* ── Procurement subs ── */
   --sub-approval: oklch(0.50 0.20 290.03);           /* Brand Purple */
   --sub-pr: oklch(0.62 0.14 155);                    /* Green bridge */

@@ -15,9 +15,6 @@ import { SubTiles } from "./sub-tiles";
 
 export { APP_TILE_PALETTE } from "./palette";
 
-const TILE_FILTER =
-  "drop-shadow(0 1px 1px rgba(10,10,10,0.10)) drop-shadow(0 2px 4px rgba(10,10,10,0.08))";
-
 function FallbackTile({ size }: { readonly size: number }) {
   return (
     <span
@@ -44,7 +41,7 @@ export function AppTile({ name, size = 44 }: AppTileProps) {
       height={size}
       viewBox="0 0 40 40"
       aria-hidden
-      style={{ display: "block", filter: TILE_FILTER }}
+      style={{ display: "block", color: "var(--tile-ink)" }}
     >
       <Tile palette={palette} />
     </svg>
@@ -68,10 +65,10 @@ export function SubTile({ name, parentName, size = 44 }: SubTileProps) {
         height={size}
         viewBox="0 0 40 40"
         aria-hidden
-        style={{ display: "block", filter: TILE_FILTER }}
+        style={{ display: "block", color: "var(--tile-ink)" }}
       >
-        <TileBase palette={palette ?? { base: "var(--muted)", accent: "var(--muted)", shadow: "var(--muted)" }} />
-        <circle cx="20" cy="20" r="6" fill="#fff" opacity="0.5" />
+        <TileBase palette={palette ?? { base: "var(--tile-surface)", accent: "var(--tile-accent)", shadow: "var(--tile-shadow)" }} />
+        <circle cx="20" cy="20" r="6" fill="currentColor" opacity="0.5" />
       </svg>
     );
   }
@@ -81,7 +78,7 @@ export function SubTile({ name, parentName, size = 44 }: SubTileProps) {
       height={size}
       viewBox="0 0 40 40"
       aria-hidden
-      style={{ display: "block", filter: TILE_FILTER }}
+      style={{ display: "block", color: "var(--tile-ink)" }}
     >
       <Tile palette={palette} />
     </svg>

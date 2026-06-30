@@ -42,10 +42,6 @@ type SidebarContextProps = {
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
 
-/**
- * Hook เข้าถึง SidebarContext (state, toggle, mobile)
- * @returns SidebarContextProps — จะ throw error หากใช้นอก SidebarProvider
- */
 function useSidebar() {
   const context = React.useContext(SidebarContext);
   if (!context) {
@@ -55,11 +51,6 @@ function useSidebar() {
   return context;
 }
 
-/**
- * Provider ของ sidebar state พร้อม cookie persistence และ keyboard shortcut (Cmd/Ctrl+B)
- * @param props - defaultOpen, controlled open/onOpenChange และ children
- * @returns React element wrapper พร้อม SidebarContext
- */
 function SidebarProvider({
   defaultOpen = true,
   open: openProp,
@@ -100,7 +91,6 @@ function SidebarProvider({
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
   }, [isMobile, setOpen, setOpenMobile]);
 
-  // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -293,7 +283,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <SidebarToggleIcon open={open} className="size-5" />
+      <SidebarToggleIcon open={open} className="size-5 text-primary" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

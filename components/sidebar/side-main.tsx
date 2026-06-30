@@ -1,4 +1,3 @@
-
 import { Fragment } from "react";
 import { Link } from "react-router";
 import { useLocation } from "react-router";
@@ -15,19 +14,9 @@ import { moduleList } from "@/constant/module-list";
 import { getModuleColor } from "@/constant/module-color-map";
 import { useVisibleModules } from "@/hooks/use-visible-modules";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
-import { AppTile, SubTile } from "@/components/icons/tiles";
+import { AppTile } from "@/components/icons/tiles";
 import { cn } from "@/lib/utils";
 
-/**
- * เมนูหลักใน Sidebar — premium ERP design
- *
- * Render Module Header card (gradient icon tile + pill + colored title) ตาม
- * โมดูลปัจจุบันจาก pathname · sub-modules เป็น pill-style button พร้อม left
- * accent bar + colored icon เมื่อ active · รองรับ collapsed icon mode
- * (ซ่อนข้อความ เหลือเฉพาะไอคอน) และ separator ระหว่างกลุ่ม sub-modules
- *
- * @returns JSX element ของเมนู sub-modules หรือ null หาก pathname ไม่ตรงกับโมดูลใด
- */
 export function SideMain() {
   const pathname = useLocation().pathname;
   const t = useTranslations("modules");
@@ -63,9 +52,9 @@ export function SideMain() {
           style={{ backgroundColor: moduleColor }}
         />
 
-        {/* Module tile — illustrated AppTile (squircle + glyph) */}
+        {/* Module icon — illustrated AppTile (module signature) */}
         <div className="shrink-0">
-          <AppTile name={activeModule.name} size={28} />
+          <AppTile name={activeModule.name} size={34} />
         </div>
 
         {/* Title (hidden when collapsed) */}
@@ -102,7 +91,7 @@ export function SideMain() {
                         "group/sub relative overflow-hidden rounded-lg transition-all",
                         "data-[active=true]:font-semibold",
                         // active = blue left-bar signal (icon keeps its module color)
-                        "before:bg-primary before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:content-[''] data-[active=true]:before:opacity-100 group-data-[collapsible=icon]:before:hidden",
+                        "before:bg-primary before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:content-[''] group-data-[collapsible=icon]:before:hidden data-[active=true]:before:opacity-100",
                         "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       )}
                     >
@@ -115,27 +104,41 @@ export function SideMain() {
                           title={t(sub.name)}
                           className="opacity-50"
                         >
-                          <span className="shrink-0">
-                            <SubTile
-                              name={sub.name}
-                              parentName={activeModule.name}
-                              size={20}
-                            />
-                          </span>
-                          <span className="text-xs font-semibold group-data-[collapsible=icon]:hidden">
+                          <sub.icon
+                            aria-hidden="true"
+                            className={cn(
+                              "size-5 shrink-0",
+                              isActive
+                                ? "text-primary"
+                                : "text-muted-foreground",
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              "text-xs font-semibold group-data-[collapsible=icon]:hidden",
+                              isActive && "text-primary",
+                            )}
+                          >
                             {t(sub.name)}
                           </span>
                         </button>
                       ) : (
                         <Link to={sub.path}>
-                          <span className="shrink-0">
-                            <SubTile
-                              name={sub.name}
-                              parentName={activeModule.name}
-                              size={20}
-                            />
-                          </span>
-                          <span className="text-xs font-semibold group-data-[collapsible=icon]:hidden">
+                          <sub.icon
+                            aria-hidden="true"
+                            className={cn(
+                              "size-5 shrink-0",
+                              isActive
+                                ? "text-primary"
+                                : "text-muted-foreground",
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              "text-xs font-semibold group-data-[collapsible=icon]:hidden",
+                              isActive && "text-primary",
+                            )}
+                          >
                             {t(sub.name)}
                           </span>
                         </Link>

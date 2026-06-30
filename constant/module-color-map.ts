@@ -71,21 +71,15 @@ export const MODULE_COLOR_MAP: Record<string, string> = {
 };
 
 /**
- * คืนค่า CSS color variable ของ module ที่ตรงกับ pathname โดยใช้ longest prefix match
+ * คืนค่าสี accent ของ module/sub สำหรับ dot/badge (sidebar, module landing)
  *
- * ถ้าไม่พบ prefix ที่ตรงกันจะ fallback เป็น `var(--primary)`
+ * Single-accent design (ตาม docs/DESIGN.md): เลิกใช้สีประจำ module รายตัว —
+ * จุด/badge ทุกตัวใช้ `var(--primary)` ตัวเดียว ให้ไปทางเดียวกับ branding.
+ * (`MODULE_COLOR_MAP` คงไว้เป็น reference ของ route→module แต่ไม่ถูกใช้ map สีแล้ว.)
  *
- * @param pathname - path ปัจจุบัน (เช่น "/procurement/purchase-request")
- * @returns CSS variable string สำหรับใช้ใน style เช่น `var(--sub-pr)`
- * @example
- * ```ts
- * getModuleColor("/procurement/purchase-request"); // "var(--sub-pr)"
- * getModuleColor("/unknown"); // "var(--primary)"
- * ```
+ * @param _pathname - path ปัจจุบัน (ไม่ถูกใช้แล้ว — คงไว้เพื่อ backward compatibility)
+ * @returns `"var(--primary)"` เสมอ
  */
-export function getModuleColor(pathname: string): string {
-  const match = Object.keys(MODULE_COLOR_MAP)
-    .filter((p) => pathname === p || pathname.startsWith(p + "/"))
-    .sort((a, b) => b.length - a.length)[0];
-  return match ? MODULE_COLOR_MAP[match] : "var(--primary)";
+export function getModuleColor(_pathname: string): string {
+  return "var(--primary)";
 }
