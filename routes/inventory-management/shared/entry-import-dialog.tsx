@@ -1,10 +1,4 @@
-
-import {
-  useRef,
-  useState,
-  type ChangeEvent,
-  type DragEvent,
-} from "react";
+import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -405,7 +399,7 @@ function PreviewStat({
       <div className="text-[0.5rem] font-semibold tracking-widest uppercase opacity-70">
         {label}
       </div>
-      <div className="mt-0.5 text-base font-bold tabular-nums">{value}</div>
+      <div className="mt-0.5 text-base font-semibold tabular-nums">{value}</div>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-
 import { useDeferredValue, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Inbox, Search, SearchX } from "lucide-react";
@@ -82,7 +81,7 @@ export function ProductPanel({
         <span className="text-foreground text-[0.6875rem] font-semibold tracking-widest uppercase">
           {title}
         </span>
-        <span className="bg-primary/15 text-primary ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-bold tracking-wider tabular-nums">
+        <span className="bg-primary/15 text-primary ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-semibold tracking-wider tabular-nums">
           {totalLabel}
         </span>
       </div>

@@ -1,4 +1,3 @@
-
 import type { ComponentType } from "react";
 import { cn } from "@/lib/utils";
 
@@ -52,10 +51,7 @@ export function ReviewStatTile({
   const tones = STAT_TONE[tone];
   return (
     <div
-      className={cn(
-        "bg-card space-y-1.5 rounded-xl border p-3",
-        tones.ring,
-      )}
+      className={cn("bg-card space-y-1.5 rounded-xl border p-3", tones.ring)}
     >
       <div className="flex items-center gap-2">
         <div
@@ -73,7 +69,7 @@ export function ReviewStatTile({
       </div>
       <div
         className={cn(
-          "text-2xl leading-none font-bold tracking-tight tabular-nums",
+          "text-2xl leading-none font-semibold tracking-tight tabular-nums",
           tones.valueText,
         )}
       >

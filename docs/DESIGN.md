@@ -150,6 +150,30 @@ typography:
     fontWeight: 400
     lineHeight: 1.0
     letterSpacing: -0.12px
+  # ── Dense-ERP micro tier (Carmen deviation) ─────────────────
+  # DESIGN.md's ladder is derived from Apple MARKETING pages, which carry no
+  # dense data chips — so it stops at fine-print (12px) / micro-legal (10px).
+  # The Carmen ERP needs a sub-fine-print tier for badge eyebrows, count chips,
+  # inline meta and dense tabular numbers. Used ~382× across the app; these are
+  # the live `text-[0.6875rem]` / `text-[0.5625rem]` / `text-[0.5rem]` values.
+  micro:
+    # 11px — workhorse dense size: count chips, inline meta, tabular numbers
+    # (pair with `tabular-nums`; weight 600 for numbers, 400 for labels).
+    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
+    fontSize: 11px
+    fontWeight: 400
+    lineHeight: 1.0
+    letterSpacing: -0.075px
+  micro-eyebrow:
+    # 9px uppercase caps for badge/chip eyebrows; compresses to 8px in the
+    # tightest micro-grid cells (e.g. HeroCell). Wide tracking + 600 weight
+    # keep tiny caps legible — the one place sub-10px type is sanctioned.
+    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
+    fontSize: 9px
+    fontWeight: 600
+    lineHeight: 1.0
+    letterSpacing: 0.04em
+    textTransform: uppercase
 
 rounded:
   # ── Project deviation (Carmen) ──────────────────────────────
@@ -396,11 +420,14 @@ Store and shop surfaces retain the same chassis but switch modes. The product co
 | `{typography.fine-print}` | 12px | 400 | 1.0 | -0.12px | Fine-print, footer body |
 | `{typography.micro-legal}` | 10px | 400 | 1.3 | -0.08px | Micro legal disclaimers |
 | `{typography.nav-link}` | 12px | 400 | 1.0 | -0.12px | Global nav menu items |
+| `{typography.micro}` | 11px | 400/600 | 1.0 | -0.075px | **Dense-ERP only** — count chips, inline meta, tabular numbers (600 for numbers) |
+| `{typography.micro-eyebrow}` | 9px (→8px) | 600 | 1.0 | +0.04em | **Dense-ERP only** — uppercase badge/chip eyebrows; 8px floor in the tightest grid cells |
 
 ### Principles
 
 - **Negative letter-spacing at display sizes.** Every headline at 17px and up carries a slight tracking tighten (`-0.12 → -0.374px`). This produces the iconic "Apple tight" headline cadence. Never used at 12px or below.
 - **Body copy at 17px, not 16px.** Apple breaks the SaaS convention and runs paragraph text at 17px. The extra pixel gives the page an unmistakable "reading, not scanning" pace.
+- **Dense-ERP micro tier — the one sanctioned sub-10px exception.** This analysis was derived from Apple's marketing surfaces, which never render dense data chips, so the public ladder stops at fine-print (12px) / micro-legal (10px). The Carmen ERP genuinely needs smaller: `{typography.micro}` (11px) for count chips / inline meta / tabular numbers, and `{typography.micro-eyebrow}` (9px, 8px floor) for uppercase badge eyebrows. These are intentional and used ~382× app-wide. Sub-10px type is allowed **only** for `micro-eyebrow` uppercase caps (the 600 weight + wide tracking keep them legible) — never for sentence-case body or reading copy. Do not "snap" these to 10/12px; that would coarsen the entire dense-data layer.
 - **Weight 300 is real and rare.** Used deliberately on a handful of large-size reads (`{typography.button-large}` at 18px/300 and `{typography.lead-airy}` at 24px/300). It's not an accident — it's a light-atmosphere cue reserved for moments where the content should feel airy.
 - **Weight 600, not 700, for headlines.** Apple's headlines sit at weight 600. Weight 700 is used sparingly for `{typography.tagline}` (21px) when a touch more assertion is needed.
 - **Line-height is context-specific.** Display sizes use 1.07–1.19 (tight). Body uses 1.47. Utility link stacks in the footer/store use an unusually relaxed 2.41 (`{typography.dense-link}`). The 2.41 is not a bug — it's how the footer's dense link columns breathe.

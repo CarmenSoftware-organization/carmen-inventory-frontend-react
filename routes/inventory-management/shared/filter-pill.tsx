@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 
 interface FilterPillProps {
@@ -35,7 +34,7 @@ export function FilterPill({
       )}
     >
       <span>{label}</span>
-      <span className="bg-muted/60 text-foreground/70 rounded-full px-1.5 text-[0.5625rem] font-bold tabular-nums">
+      <span className="bg-muted/60 text-foreground/70 rounded-full px-1.5 text-[0.5625rem] font-semibold tabular-nums">
         {count}
       </span>
     </button>

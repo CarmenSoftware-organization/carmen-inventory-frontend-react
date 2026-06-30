@@ -1,4 +1,3 @@
-
 import { memo, useState, type ComponentType } from "react";
 import { Calculator, ImageIcon, MessageSquarePlus, Pencil } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -101,7 +100,7 @@ export const EntryItemRow = memo(function EntryItemRow({
           {detailedHeader ? (
             <>
               <div className="flex flex-wrap items-baseline gap-1.5">
-                <span className="text-muted-foreground/80 text-[0.625rem] font-bold tabular-nums">
+                <span className="text-muted-foreground/80 text-[0.625rem] font-semibold tabular-nums">
                   #{String(sequenceNo).padStart(2, "0")}
                 </span>
                 <h3 className="text-foreground text-sm leading-tight font-semibold tracking-tight">
@@ -233,7 +232,7 @@ export const EntryItemRow = memo(function EntryItemRow({
                   </div>
                 ))}
                 {savedNote.images.length > 4 && (
-                  <div className="border-border/60 bg-muted/60 text-muted-foreground flex size-10 items-center justify-center rounded-md border text-[0.625rem] font-bold tabular-nums">
+                  <div className="border-border/60 bg-muted/60 text-muted-foreground flex size-10 items-center justify-center rounded-md border text-[0.625rem] font-semibold tabular-nums">
                     +{savedNote.images.length - 4}
                   </div>
                 )}

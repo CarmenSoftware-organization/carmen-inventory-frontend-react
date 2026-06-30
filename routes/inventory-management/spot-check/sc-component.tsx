@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { ClipboardCheck, History, MapPin, PauseCircle } from "lucide-react";
@@ -19,9 +18,9 @@ import type {
   SpotCheckLocationLatest,
   SpotCheckStatus,
 } from "@/types/spot-check";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 import {
   InvListShell,
-  InvPageHeader,
   InvSearchBar,
   InvStatusSectionsList,
   KpiTile,
@@ -173,9 +172,7 @@ export default function ScComponent() {
   ];
 
   const handleStart = (item: SpotCheckLocation) => {
-    navigate(
-      `/inventory-management/spot-check/location/${item.location_id}`,
-    );
+    navigate(`/inventory-management/spot-check/location/${item.location_id}`);
   };
 
   const handleResume = (
@@ -198,16 +195,14 @@ export default function ScComponent() {
 
   return (
     <InvListShell>
-      <section className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
+      <section className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
         <div>
           <Reveal>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <InvPageHeader
-                  icon={ClipboardCheck}
-                  eyebrow={t("entity")}
+                <DocumentListHeader
                   title={t("title")}
-                  desc={t("desc")}
+                  description={t("desc")}
                 />
               </div>
               <ViewToggle view={view} setView={setView} t={t} />

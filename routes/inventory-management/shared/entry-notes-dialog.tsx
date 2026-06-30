@@ -1,10 +1,4 @@
-
-import {
-  useRef,
-  useState,
-  type ChangeEvent,
-  type DragEvent,
-} from "react";
+import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { ImageIcon, ImagePlus, MessageSquarePlus, Save, X } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -225,7 +219,7 @@ export function EntryNotesDialog({
                 {t("evidenceLabel")}
               </span>
               {images.length > 0 && (
-                <span className="text-muted-foreground bg-muted/60 rounded-full px-1.5 text-[0.5625rem] font-bold tabular-nums">
+                <span className="text-muted-foreground bg-muted/60 rounded-full px-1.5 text-[0.5625rem] font-semibold tabular-nums">
                   {t("evidenceCount", { count: images.length })}
                 </span>
               )}

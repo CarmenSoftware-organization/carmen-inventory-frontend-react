@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import {
@@ -35,9 +34,9 @@ import type {
   PhysicalCountLocation,
   PhysicalCountStatus,
 } from "@/types/physical-count";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 import {
   InvListShell,
-  InvPageHeader,
   InvSearchBar,
   InvStatusSectionsList,
   KpiTile,
@@ -257,15 +256,10 @@ export default function PcComponent() {
 
   return (
     <InvListShell>
-      <section className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
+      <section className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
         <div>
           <Reveal>
-            <InvPageHeader
-              icon={ClipboardCheck}
-              eyebrow={t("entity")}
-              title={t("title")}
-              desc={t("desc")}
-            />
+            <DocumentListHeader title={t("title")} description={t("desc")} />
           </Reveal>
 
           <Reveal delay={60}>

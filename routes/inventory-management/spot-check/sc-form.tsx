@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -196,7 +195,7 @@ export function ScForm({
         className="relative px-4 pt-4 pb-8 lg:p-4"
       >
         {/* Hero section */}
-        <section className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
+        <section className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
           <div>
             {/* Toolbar */}
             <div className="mb-3 flex flex-wrap items-center justify-between">
@@ -211,7 +210,7 @@ export function ScForm({
                 >
                   <ChevronLeft />
                 </Button>
-                <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-bold tracking-wider uppercase">
+                <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold tracking-wider uppercase">
                   <ClipboardCheck className="size-2.5" />
                   {t("entity")}
                 </span>
@@ -270,7 +269,7 @@ export function ScForm({
             </div>
 
             {/* Title + descriptor */}
-            <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[0.5625rem] font-bold tracking-[0.16em] uppercase">
+            <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[0.5625rem] font-semibold tracking-[0.16em] uppercase">
               <span className="bg-muted-foreground size-0.5 rounded-sm" />
               {t("entity")}
               <span className="text-muted-foreground/60">·</span>
@@ -333,7 +332,7 @@ export function ScForm({
         </section>
 
         {/* Body grid */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
           <div className="flex flex-col gap-4">
             <ScGeneralFields
               form={form}
@@ -422,4 +421,3 @@ export function ScForm({
     </div>
   );
 }
-
