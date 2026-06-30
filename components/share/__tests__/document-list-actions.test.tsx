@@ -55,4 +55,50 @@ describe("DocumentListActions", () => {
     renderActions({ isExporting: true });
     expect(screen.getByRole("button", { name: "exporting" })).toBeDisabled();
   });
+
+  it("hides export and print when hideExportPrint is set", () => {
+    renderActions({ hideExportPrint: true, addLabel: "Add" });
+    expect(screen.queryByRole("button", { name: "export" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "print" })).toBeNull();
+    // overflow trigger ก็หายไปด้วย
+    expect(
+      screen.queryByRole("button", { name: "aria.moreActions" }),
+    ).toBeNull();
+    // ปุ่ม Add ยังอยู่
+    expect(screen.getByRole("button", { name: "Add" })).toBeInTheDocument();
+  });
+
+  it("hides export but keeps print when showExport is false", () => {
+    renderActions({ showExport: false });
+    expect(screen.queryByRole("button", { name: "export" })).toBeNull();
+    expect(screen.getByRole("button", { name: "print" })).toBeInTheDocument();
+  });
+
+  it("omits export when onExport is not provided", () => {
+    render(<DocumentListActions onAdd={vi.fn()} addLabel="Add" />);
+    expect(screen.queryByRole("button", { name: "export" })).toBeNull();
+    expect(screen.getByRole("button", { name: "print" })).toBeInTheDocument();
+  });
+
+  it("marks the add button aria-disabled when addDisabled is set", () => {
+    renderActions({ addDisabled: true, addLabel: "Add" });
+    expect(screen.getByRole("button", { name: "Add" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+  });
+
+  it("still calls onAdd when addDisabled (to dispatch permission-denied)", async () => {
+    const props = renderActions({ addDisabled: true, addLabel: "Add" });
+    await userEvent.click(screen.getByRole("button", { name: "Add" }));
+    expect(props.onAdd).toHaveBeenCalledOnce();
+  });
+
+  it("renders extraActions before the add button", () => {
+    renderActions({
+      addLabel: "Add",
+      extraActions: <button type="button">Extra</button>,
+    });
+    expect(screen.getByRole("button", { name: "Extra" })).toBeInTheDocument();
+  });
 });
