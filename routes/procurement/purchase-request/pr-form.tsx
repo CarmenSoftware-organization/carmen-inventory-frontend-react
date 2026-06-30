@@ -180,35 +180,32 @@ export function PurchaseRequestForm({
   }, []);
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="my-2">
-        <PrHeader
-          purchaseRequest={purchaseRequest}
-          onBack={actions.handleBack}
-          reqName={reqName}
-          departmentName={departmentName ?? ""}
-          prDateDisplay={prDateDisplay}
-          actions={
-            <PrFormActions
-              mode={mode}
-              role={role}
-              prStatus={purchaseRequest?.pr_status}
-              prId={purchaseRequest?.id}
-              prNo={purchaseRequest?.pr_no}
-              isPending={actions.isPending}
-              isDeletePending={actions.deletePr.isPending}
-              hasRecord={!!purchaseRequest}
-              canSave={canSave}
-              saveDisabledTitle={saveDisabledTitle}
-              onEdit={() => setMode("edit")}
-              onCancel={actions.handleCancel}
-              onDelete={() => actions.setShowDelete(true)}
-              onComment={() => actions.setShowComment(true)}
-            />
-          }
-        />
-      </div>
-
+    <div className="flex flex-1 flex-col space-y-4">
+      <PrHeader
+        purchaseRequest={purchaseRequest}
+        onBack={actions.handleBack}
+        reqName={reqName}
+        departmentName={departmentName ?? ""}
+        prDateDisplay={prDateDisplay}
+        actions={
+          <PrFormActions
+            mode={mode}
+            role={role}
+            prStatus={purchaseRequest?.pr_status}
+            prId={purchaseRequest?.id}
+            prNo={purchaseRequest?.pr_no}
+            isPending={actions.isPending}
+            isDeletePending={actions.deletePr.isPending}
+            hasRecord={!!purchaseRequest}
+            canSave={canSave}
+            saveDisabledTitle={saveDisabledTitle}
+            onEdit={() => setMode("edit")}
+            onCancel={actions.handleCancel}
+            onDelete={() => actions.setShowDelete(true)}
+            onComment={() => actions.setShowComment(true)}
+          />
+        }
+      />
       <form
         id="purchase-request-form"
         onSubmit={form.handleSubmit(actions.onSubmit, () =>

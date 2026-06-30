@@ -1,4 +1,3 @@
-
 import { type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -21,11 +20,6 @@ interface PrHeaderProps {
   readonly actions: ReactNode;
 }
 
-/**
- * Header ของฟอร์ม Purchase Request — ใช้ `DocFormHeader` กลางร่วมกับ PO
- * แสดง title + status/workflow badges + document info ribbon (requester/
- * department/date) + workflow step
- */
 export function PrHeader({
   purchaseRequest,
   onBack,

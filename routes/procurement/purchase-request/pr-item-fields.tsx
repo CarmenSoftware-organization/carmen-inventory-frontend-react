@@ -460,7 +460,7 @@ export function PrItemFields({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-end gap-1.5">
           <PrAskAiMenu
@@ -595,21 +595,13 @@ export function PrItemFields({
           />
         }
       >
-        <ScrollArea className="w-full pb-2">
+        <ScrollArea className="w-full">
           <DataGridContainer>
             <DataGridTable />
           </DataGridContainer>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </DataGrid>
-
-      {/* {!isAdd && itemFields.length > 0 && prStatus && prStatus !== "draft" && (
-        <GrandTotal
-          control={form.control}
-          itemCount={itemFields.length}
-          currencyCode={defaultBu?.config?.default_currency?.code ?? ""}
-        />
-      )} */}
 
       <DeleteDialog
         open={deleteIndex !== null}

@@ -34,13 +34,13 @@ export const CommentFooterRow = memo(function CommentFooterRow({
   if (isReadOnly) {
     if (!comment) return null;
     return (
-      <div className="px-2 py-1.5">
+      <div className="px-2 pb-4">
         <p className="text-xs wrap-break-word whitespace-pre-wrap">{comment}</p>
       </div>
     );
   }
   return (
-    <div className="px-2 py-1.5">
+    <div className="px-2 pb-4">
       <Input
         id={`items-${index}-comment`}
         placeholder={placeholder}

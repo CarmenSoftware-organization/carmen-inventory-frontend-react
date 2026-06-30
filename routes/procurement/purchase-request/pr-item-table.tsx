@@ -224,7 +224,7 @@ export function usePrItemTable({
             isDisabled={isLockedAfterCreate}
           />
         ),
-        size: 90,
+        size: 100,
         meta: {
           headerClassName: "text-right",
         },
@@ -241,7 +241,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: 90,
+        size: 100,
         meta: {
           headerClassName: "text-right",
         },
@@ -258,7 +258,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: 90,
+        size: 100,
         meta: {
           headerClassName: "text-right",
         },
@@ -308,7 +308,7 @@ export function usePrItemTable({
             isDisabled={isDisabled}
           />
         ),
-        size: 100,
+        size: 140,
       },
       {
         accessorKey: "delivery_date",
@@ -365,12 +365,19 @@ export function usePrItemTable({
       ...(isDisabled ? [] : [actionColumn]),
     ];
 
-    // location_id column: footer spans from there to end so comment input fills row
+    // Comment footer starts at location_id and spans through the delivery_point
+    // column so the comment input matches the Delivery Point column's right edge
+    // (delivery_date + action keep their own footer cells).
     const locationColIdx = baseCols.findIndex(
       (c) => "accessorKey" in c && c.accessorKey === "location_id",
     );
+    const deliveryPointColIdx = baseCols.findIndex(
+      (c) => "accessorKey" in c && c.accessorKey === "delivery_point_id",
+    );
     const footerSpan =
-      locationColIdx >= 0 ? baseCols.length - locationColIdx : 1;
+      locationColIdx >= 0 && deliveryPointColIdx >= locationColIdx
+        ? deliveryPointColIdx - locationColIdx + 1
+        : 1;
 
     const locationCol = visibleDataColumns.find(
       (c) => "accessorKey" in c && c.accessorKey === "location_id",

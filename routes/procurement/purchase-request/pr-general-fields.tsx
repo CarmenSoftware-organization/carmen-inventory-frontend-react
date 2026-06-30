@@ -1,6 +1,6 @@
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
@@ -37,7 +37,7 @@ export function PrGeneralFields({
   const workflowReadOnly = descriptionReadOnly || !!fromTemplate;
 
   return (
-    <FieldGroup>
+    <>
       <Field>
         <FieldLabel
           required={!workflowReadOnly}
@@ -88,6 +88,6 @@ export function PrGeneralFields({
           />
         )}
       </Field>
-    </FieldGroup>
+    </>
   );
 }

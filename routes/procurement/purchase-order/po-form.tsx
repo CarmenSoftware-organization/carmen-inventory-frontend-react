@@ -158,7 +158,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const departmentName = defaultBu?.department?.name ?? "";
 
   return (
-    <div className="flex min-h-full flex-col space-y-4 p-4">
+    <div className="flex min-h-full flex-col space-y-4">
       <PoHeader
         purchaseOrder={purchaseOrder}
         mode={mode}
