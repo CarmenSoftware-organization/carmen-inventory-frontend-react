@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useFormatter, useTranslations } from "use-intl";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import {
   useCreateInventoryAdjustment,
@@ -25,6 +24,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useErrorToast } from "@/hooks/use-error-toast";
+import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { VoidDialog } from "@/components/share/void-dialog";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import {
@@ -123,7 +123,16 @@ export function InventoryAdjustmentForm({
     inventoryAdjustment?.doc_status === "completed";
 
   const errorToast = useErrorToast();
-  const handleMutationError = (err: unknown) => errorToast(err);
+  const handleMutationError = (err: unknown) => {
+    // backend คืน business error (เช่น "Insufficient stock. Requested: 3,
+    // Available: 1") เป็น HTTP 500 → INTERNAL_ERROR ซึ่ง errorToast จะกลบเป็น
+    // ข้อความ generic — กรณีนี้แสดง message จาก server ตรง ๆ
+    if (err instanceof ApiError && err.code === ERROR_CODES.INTERNAL_ERROR) {
+      toast.error(err.message);
+      return;
+    }
+    errorToast(err);
+  };
 
   const handleMutationSuccess =
     (msgKey: "createSuccess" | "updateSuccess") => () => {
@@ -258,14 +267,12 @@ export function InventoryAdjustmentForm({
 
           {/* ── Line items ── */}
           <Reveal delay={140}>
-            <Card className="border-border/60 bg-card gap-0 overflow-hidden py-0">
-              <CardContent className="px-5 py-4">
-                <AdjItemFields
-                  form={form}
-                  disabled={isDisabled}
-                  adjustmentType={adjustmentType}
-                />
-              </CardContent>
+            <Card className="overflow-hidden">
+              <AdjItemFields
+                form={form}
+                disabled={isDisabled}
+                adjustmentType={adjustmentType}
+              />
             </Card>
           </Reveal>
         </div>
