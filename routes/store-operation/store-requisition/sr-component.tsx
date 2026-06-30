@@ -331,7 +331,6 @@ export default function StoreRequisitionComponent() {
           <DocumentListHeader
             title={t("title")}
             description={t("desc")}
-            count={totalRecords}
           />
           <DocumentListActions
             onExport={handleExport}

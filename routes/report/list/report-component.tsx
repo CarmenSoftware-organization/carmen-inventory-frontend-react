@@ -148,7 +148,6 @@ export default function ReportComponent() {
           <DocumentListHeader
             title={t("title")}
             description={t("desc")}
-            count={filteredReports.length}
           />
 
           {/* Toolbar */}
