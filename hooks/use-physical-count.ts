@@ -77,7 +77,10 @@ export function useCreatePhysicalCount() {
   return useApiMutation<CreatePhysicalCountDto>({
     mutationFn: (data, buCode) =>
       httpClient.post(API_ENDPOINTS.PHYSICAL_COUNT(buCode), data),
-    invalidateKeys: [QUERY_KEYS.PHYSICAL_COUNTS, QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT],
+    invalidateKeys: [
+      QUERY_KEYS.PHYSICAL_COUNTS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
     errorMessage: "Failed to create physical count",
   });
 }
@@ -91,13 +94,15 @@ export function useCreatePhysicalCount() {
  * update.mutate({ id, ...values });
  */
 export function useUpdatePhysicalCount() {
-  return useApiMutation<CreatePhysicalCountDto & { id: string; doc_version?: number }>({
+  return useApiMutation<
+    CreatePhysicalCountDto & { id: string; doc_version?: number }
+  >({
     mutationFn: ({ id, ...data }, buCode) =>
-      httpClient.put(
-        `${API_ENDPOINTS.PHYSICAL_COUNT(buCode)}/${id}`,
-        data,
-      ),
-    invalidateKeys: [QUERY_KEYS.PHYSICAL_COUNTS, QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT],
+      httpClient.put(`${API_ENDPOINTS.PHYSICAL_COUNT(buCode)}/${id}`, data),
+    invalidateKeys: [
+      QUERY_KEYS.PHYSICAL_COUNTS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
     errorMessage: "Failed to update physical count",
   });
 }
@@ -114,7 +119,10 @@ export function useDeletePhysicalCount() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
       httpClient.delete(`${API_ENDPOINTS.PHYSICAL_COUNT(buCode)}/${id}`),
-    invalidateKeys: [QUERY_KEYS.PHYSICAL_COUNTS, QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT],
+    invalidateKeys: [
+      QUERY_KEYS.PHYSICAL_COUNTS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
     errorMessage: "Failed to delete physical count",
   });
 }
@@ -135,7 +143,10 @@ export function useSavePhysicalCount(physicalCountId: string) {
         API_ENDPOINTS.PHYSICAL_COUNT_SAVE(buCode, physicalCountId),
         data,
       ),
-    invalidateKeys: [QUERY_KEYS.PHYSICAL_COUNTS, QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT],
+    invalidateKeys: [
+      QUERY_KEYS.PHYSICAL_COUNTS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
     errorMessage: "Failed to save physical count",
   });
 }
@@ -165,18 +176,22 @@ export function usePhysicalCountReview(id: string | undefined) {
 
 /**
  * Hook submit Physical Count (final approval) — workflow transition
- * PATCH ไปยัง /api/{buCode}/physical-count/:id/submit (ไม่มี body)
+ * PATCH ไปยัง /api/{buCode}/physical-count/:id/submit พร้อม doc_version
+ * (optimistic concurrency)
  *
  * @param physicalCountId - รหัสเอกสารตรวจนับ
  */
 export function useSubmitPhysicalCount(physicalCountId: string) {
-  return useApiMutation<Record<string, never>>({
-    mutationFn: (_data, buCode) =>
+  return useApiMutation<{ doc_version?: number }>({
+    mutationFn: (data, buCode) =>
       httpClient.patch(
         API_ENDPOINTS.PHYSICAL_COUNT_SUBMIT(buCode, physicalCountId),
-        {},
+        data,
       ),
-    invalidateKeys: [QUERY_KEYS.PHYSICAL_COUNTS, QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT],
+    invalidateKeys: [
+      QUERY_KEYS.PHYSICAL_COUNTS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
     errorMessage: "Failed to submit physical count",
   });
 }
@@ -194,7 +209,10 @@ export function useReviewPhysicalCount(physicalCountId: string) {
         API_ENDPOINTS.PHYSICAL_COUNT_REVIEW(buCode, physicalCountId),
         data,
       ),
-    invalidateKeys: [QUERY_KEYS.PHYSICAL_COUNTS, QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT],
+    invalidateKeys: [
+      QUERY_KEYS.PHYSICAL_COUNTS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
     errorMessage: "Failed to submit for review",
   });
 }
@@ -207,11 +225,7 @@ export function usePhysicalCountDetailComments(detailId: string | undefined) {
   const buCode = useBuCode();
 
   return useQuery<CommentItem[]>({
-    queryKey: [
-      QUERY_KEYS.PHYSICAL_COUNT_DETAIL_COMMENTS,
-      buCode,
-      detailId,
-    ],
+    queryKey: [QUERY_KEYS.PHYSICAL_COUNT_DETAIL_COMMENTS, buCode, detailId],
     queryFn: async () => {
       if (!buCode || !detailId)
         throw new Error("Missing buCode or physical count detail id");
@@ -285,7 +299,10 @@ export function useRefreshPhysicalCount(physicalCountId: string) {
         API_ENDPOINTS.PHYSICAL_COUNT_REFRESH(buCode, physicalCountId),
         {},
       ),
-    invalidateKeys: [QUERY_KEYS.PHYSICAL_COUNTS, QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT],
+    invalidateKeys: [
+      QUERY_KEYS.PHYSICAL_COUNTS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
     errorMessage: "Failed to refresh physical count",
   });
 }

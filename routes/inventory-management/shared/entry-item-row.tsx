@@ -4,6 +4,7 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { STATUS_DOT_CHIP } from "@/constant/status-config";
 import { ProductAvatar } from "./inv-shared";
 import type { SavedNotePayload } from "./entry-notes-dialog";
 interface NotesDialogComponentProps {
@@ -136,11 +137,7 @@ export const EntryItemRow = memo(function EntryItemRow({
         </div>
 
         {isCounted && (
-          <Badge
-            variant="success"
-            size="xs"
-            className="text-[0.5625rem] tracking-widest uppercase"
-          >
+          <Badge size="xs" className={`${STATUS_DOT_CHIP} before:bg-success`}>
             {t("counted")}
           </Badge>
         )}

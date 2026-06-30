@@ -30,62 +30,68 @@ export type StatusConfig<S extends string = string> = Record<
 // reads as a glowing/clustered block. `DOT` holds the shared neutral chip +
 // dot geometry; each entry only appends `before:bg-[var(--status-X)]`.
 
-const DOT =
+/**
+ * Flat dotted-chip base (DESIGN.md "avoid neon"): a neutral `bg-muted` box with
+ * a single `::before` dot. Append `before:bg-…` for the dot color. Reusable for
+ * any status/flag chip — not only doc statuses.
+ */
+export const STATUS_DOT_CHIP =
   "bg-muted text-foreground border-transparent px-2 gap-1.5 before:size-1.5 before:shrink-0 before:rounded-full before:content-['']";
+const DOT = STATUS_DOT_CHIP;
 
 const STATUS_CLASSNAMES: Record<string, string> = {
   /* Neutral / Initial */
-  draft:       `${DOT} before:bg-[var(--status-draft)]`,
-  pending:     `${DOT} before:bg-[var(--status-pending)]`,
+  draft: `${DOT} before:bg-[var(--status-draft)]`,
+  pending: `${DOT} before:bg-[var(--status-pending)]`,
   /* Info / Submitted */
-  submitted:   `${DOT} before:bg-[var(--status-submitted)]`,
-  sent:        `${DOT} before:bg-[var(--status-sent)]`,
-  open:        `${DOT} before:bg-[var(--status-open)]`,
+  submitted: `${DOT} before:bg-[var(--status-submitted)]`,
+  sent: `${DOT} before:bg-[var(--status-sent)]`,
+  open: `${DOT} before:bg-[var(--status-open)]`,
   /* Progress / Active */
-  active:      `${DOT} before:bg-[var(--status-approved)]`,
-  inactive:    `${DOT} before:bg-[var(--status-closed)]`,
+  active: `${DOT} before:bg-[var(--status-approved)]`,
+  inactive: `${DOT} before:bg-[var(--status-closed)]`,
   in_progress: `${DOT} before:bg-[var(--status-in-progress)]`,
-  review:      `${DOT} before:bg-[var(--status-review)]`,
-  partial:     `${DOT} before:bg-[var(--status-partial)]`,
-  save:        `${DOT} before:bg-[var(--status-save)]`,
-  saved:       `${DOT} before:bg-[var(--status-save)]`,
+  review: `${DOT} before:bg-[var(--status-review)]`,
+  partial: `${DOT} before:bg-[var(--status-partial)]`,
+  save: `${DOT} before:bg-[var(--status-save)]`,
+  saved: `${DOT} before:bg-[var(--status-save)]`,
   /* Positive / Complete */
-  approved:    `${DOT} before:bg-[var(--status-approved)]`,
-  completed:   `${DOT} before:bg-[var(--status-completed)]`,
-  committed:   `${DOT} before:bg-[var(--status-committed)]`,
+  approved: `${DOT} before:bg-[var(--status-approved)]`,
+  completed: `${DOT} before:bg-[var(--status-completed)]`,
+  committed: `${DOT} before:bg-[var(--status-committed)]`,
   /* Negative / Terminal */
-  rejected:    `${DOT} before:bg-[var(--status-rejected)]`,
-  cancelled:   `${DOT} before:bg-[var(--status-cancelled)]`,
-  closed:      `${DOT} before:bg-[var(--status-closed)]`,
-  locked:      `${DOT} before:bg-[var(--status-locked)]`,
-  voided:      `${DOT} before:bg-[var(--status-voided)]`,
+  rejected: `${DOT} before:bg-[var(--status-rejected)]`,
+  cancelled: `${DOT} before:bg-[var(--status-cancelled)]`,
+  closed: `${DOT} before:bg-[var(--status-closed)]`,
+  locked: `${DOT} before:bg-[var(--status-locked)]`,
+  voided: `${DOT} before:bg-[var(--status-voided)]`,
   /* Workflow action badges */
-  reviewed:  `${DOT} before:bg-[var(--status-review)]`,
+  reviewed: `${DOT} before:bg-[var(--status-review)]`,
   sent_back: `${DOT} before:bg-[var(--status-review)]`,
   /* Type badges (Inventory Adjustment) */
-  "stock-in":  `${DOT} before:bg-[var(--status-stock-in)]`,
+  "stock-in": `${DOT} before:bg-[var(--status-stock-in)]`,
   "stock-out": `${DOT} before:bg-[var(--status-stock-out)]`,
   /* Workflow type badges — uses sub-module colors from module-colors.css */
-  purchase_request_workflow:    `${DOT} before:bg-[var(--sub-pr)]`,
-  purchase_order_workflow:      `${DOT} before:bg-[var(--sub-po)]`,
-  store_requisition_workflow:   `${DOT} before:bg-[var(--sub-store-requisition)]`,
+  purchase_request_workflow: `${DOT} before:bg-[var(--sub-pr)]`,
+  purchase_order_workflow: `${DOT} before:bg-[var(--sub-po)]`,
+  store_requisition_workflow: `${DOT} before:bg-[var(--sub-store-requisition)]`,
   /* CN type badges */
-  quantity_return:   `${DOT} before:bg-[var(--status-quantity-return)]`,
-  amount_discount:   `${DOT} before:bg-[var(--status-amount-discount)]`,
+  quantity_return: `${DOT} before:bg-[var(--status-quantity-return)]`,
+  amount_discount: `${DOT} before:bg-[var(--status-amount-discount)]`,
   /* GRN type badges */
   grn_purchase_order: `${DOT} before:bg-[var(--status-grn-po)]`,
-  grn_manual:         `${DOT} before:bg-[var(--status-grn-manual)]`,
+  grn_manual: `${DOT} before:bg-[var(--status-grn-manual)]`,
   /* PO type badges — uses sub-module colors */
-  purchase_request:            `${DOT} before:bg-[var(--sub-pr)]`,
-  manual:                      `${DOT} before:bg-[var(--sub-po)]`,
-  pricelist:                   `${DOT} before:bg-[var(--sub-price-list)]`,
+  purchase_request: `${DOT} before:bg-[var(--sub-pr)]`,
+  manual: `${DOT} before:bg-[var(--sub-po)]`,
+  pricelist: `${DOT} before:bg-[var(--sub-price-list)]`,
   /* Cuisine region badges */
-  ASIA:        `${DOT} before:bg-[var(--status-cuisine-asia)]`,
-  EUROPE:      `${DOT} before:bg-[var(--status-cuisine-europe)]`,
-  AMERICAS:    `${DOT} before:bg-[var(--status-cuisine-americas)]`,
-  AFRICA:      `${DOT} before:bg-[var(--status-cuisine-africa)]`,
+  ASIA: `${DOT} before:bg-[var(--status-cuisine-asia)]`,
+  EUROPE: `${DOT} before:bg-[var(--status-cuisine-europe)]`,
+  AMERICAS: `${DOT} before:bg-[var(--status-cuisine-americas)]`,
+  AFRICA: `${DOT} before:bg-[var(--status-cuisine-africa)]`,
   MIDDLE_EAST: `${DOT} before:bg-[var(--status-cuisine-middle-east)]`,
-  OCEANIA:     `${DOT} before:bg-[var(--status-cuisine-oceania)]`,
+  OCEANIA: `${DOT} before:bg-[var(--status-cuisine-oceania)]`,
 };
 
 // ── Factory functions ──────────────────────────────────────────────────

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router";
 import { useTranslations } from "use-intl";
@@ -147,7 +146,6 @@ export function ScLocationCard({
               size="sm"
               variant="default"
               onClick={() => onResume(item, latest)}
-              className="rounded-full"
             >
               <Play className="size-3.5" aria-hidden="true" />
               {t("resume")}
@@ -156,12 +154,7 @@ export function ScLocationCard({
           </div>
         ) : (
           <div className="shrink-0">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onStart(item)}
-              className="rounded-full"
-            >
+            <Button size="sm" variant="outline" onClick={() => onStart(item)}>
               <Play className="size-3.5" aria-hidden="true" />
               {t("start")}
               <ChevronRight className="size-3.5" aria-hidden="true" />

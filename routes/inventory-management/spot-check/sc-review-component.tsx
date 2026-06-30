@@ -1,11 +1,13 @@
-
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useErrorToast } from "@/hooks/use-error-toast";
 import { useSubmitSpotCheck } from "@/hooks/use-spot-check";
 import { useUnit } from "@/hooks/use-unit";
-import type { SpotCheckReviewData, SpotCheckReviewItem } from "@/types/spot-check";
+import type {
+  SpotCheckReviewData,
+  SpotCheckReviewItem,
+} from "@/types/spot-check";
 import { ReviewComponent } from "../shared/review-component";
 
 interface ScReviewComponentProps {
@@ -54,7 +56,7 @@ export function ScReviewComponent({
 
   const handleSubmit = () => {
     submitSc.mutate(
-      {},
+      { doc_version: review.doc_version },
       {
         onSuccess: () => {
           toast.success(t("submitSuccess"));

@@ -365,7 +365,7 @@ export function LocationHeading({
   readonly name: string;
   readonly code: string;
   readonly countBadge: {
-    readonly variant: "outline" | "secondary";
+    readonly className: string;
     readonly label: string;
   };
 }) {
@@ -383,11 +383,7 @@ export function LocationHeading({
       >
         {code}
       </Link>
-      <Badge
-        variant={countBadge.variant}
-        size="xs"
-        className="text-[0.5625rem] tracking-widest uppercase"
-      >
+      <Badge size="xs" className={countBadge.className}>
         {countBadge.label}
       </Badge>
     </div>

@@ -1,17 +1,6 @@
-
-import {
-  useDeferredValue,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  Save,
-  SendHorizontal,
-  RefreshCw,
-  Package,
-} from "lucide-react";
+import { Save, SendHorizontal, RefreshCw, Package } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -438,7 +427,6 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
                       size="sm"
                       onClick={handleSubmitReview}
                       disabled={reviewPhysicalCount.isPending}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
                     >
                       <SendHorizontal className="size-3.5" aria-hidden="true" />
                       {reviewPhysicalCount.isPending
@@ -454,7 +442,6 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
                 <>
                   <Button
                     variant="outline"
-                    className="rounded-full"
                     size="sm"
                     onClick={handleSetUncountedToZero}
                   >
@@ -462,7 +449,6 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
                     onClick={handleSave}
                     disabled={savePhysicalCount.isPending}
                   >
@@ -504,4 +490,3 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
     </div>
   );
 }
-

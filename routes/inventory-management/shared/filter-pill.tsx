@@ -29,7 +29,7 @@ export function FilterPill({
       type="button"
       onClick={onClick}
       className={cn(
-        "border-border/40 bg-card hover:bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold tracking-wide transition-all",
+        "border-border/40 bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold tracking-wide transition-all",
         active && ACTIVE_TONE_MAP[tone],
       )}
     >

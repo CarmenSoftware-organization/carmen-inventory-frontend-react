@@ -61,6 +61,7 @@ export interface SpotCheckReviewData {
   matched: number;
   variant: number;
   items: SpotCheckReviewItem[];
+  doc_version?: number;
 }
 
 export type SpotCheckStatus =

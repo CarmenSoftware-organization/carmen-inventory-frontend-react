@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
+import { STATUS_DOT_CHIP } from "@/constant/status-config";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupPhysicalCountPeriod } from "@/components/lookup/lookup-physical-count-period";
@@ -49,11 +51,11 @@ import { PcLocationCard } from "../shared/pc-location-card";
 
 type StatusKey = PhysicalCountStatus;
 
+// periodCode รูปแบบ "YYYY-MM" (เช่น "2026-05")
 const formatPeriodTitle = (periodCode: string): string => {
-  const yy = periodCode.slice(0, 2);
-  const mm = Number.parseInt(periodCode.slice(2), 10);
-  const year = 2000 + Number.parseInt(yy, 10);
-  const date = new Date(year, mm - 1);
+  const [year, month] = periodCode.split("-").map(Number);
+  if (!year || !month) return periodCode;
+  const date = new Date(year, month - 1, 1);
   return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 };
 
@@ -79,22 +81,15 @@ function PeriodSelectorCard({
   const t = useTranslations("inventoryManagement.physicalCount");
   const tfl = useTranslations("field");
 
-  const periodBadge = isPreviousPeriod ? (
+  const periodBadge = (
     <Badge
-      variant="secondary"
       size="xs"
-      className="text-[0.5625rem] tracking-widest uppercase"
+      className={cn(
+        STATUS_DOT_CHIP,
+        isPreviousPeriod ? "before:bg-muted-foreground/40" : "before:bg-info",
+      )}
     >
-      {t("previousPeriod")}
-    </Badge>
-  ) : (
-    <Badge
-      variant="info"
-      size="xs"
-      className="gap-1 text-[0.5625rem] tracking-widest uppercase"
-    >
-      <CheckCircle2 className="size-2.5" aria-hidden="true" />
-      {t("currentPeriod")}
+      {isPreviousPeriod ? t("previousPeriod") : t("currentPeriod")}
     </Badge>
   );
 
@@ -250,13 +245,14 @@ export default function PcComponent() {
     return <ErrorState message={error.message} onRetry={() => refetch()} />;
 
   const periodTitle = period ? formatPeriodTitle(period.tb_period.period) : "";
+
   const periodEndDate = period
     ? formatDateUtil(period.tb_period.end_at, dateFormat)
     : "";
 
   return (
     <InvListShell>
-      <section className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_22rem]">
         <div>
           <Reveal>
             <DocumentListHeader title={t("title")} description={t("desc")} />
