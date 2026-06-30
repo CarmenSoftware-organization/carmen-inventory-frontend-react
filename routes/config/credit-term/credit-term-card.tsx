@@ -1,7 +1,7 @@
 import { Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Card,
   CardHeader,
@@ -31,7 +31,6 @@ export default function CreditTermCard({
   index,
   onEdit,
 }: CreditTermCardProps) {
-  const ts = useTranslations("status");
   const tfl = useTranslations("field");
 
   return (
@@ -59,13 +58,7 @@ export default function CreditTermCard({
           </CardTitle>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
 

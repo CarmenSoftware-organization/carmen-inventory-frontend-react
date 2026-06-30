@@ -1,12 +1,10 @@
-import { useTranslations } from "use-intl";
-
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardAction,
 } from "@/components/ui/card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { ExtraCost } from "@/types/extra-cost";
 
 interface ExtraCostCardProps {
@@ -24,8 +22,6 @@ interface ExtraCostCardProps {
  * <ExtraCostCard item={item} index={0} onEdit={handleEdit} />
  */
 export default function ExtraCostCard({ item, index, onEdit }: ExtraCostCardProps) {
-  const ts = useTranslations("status");
-
   return (
     <Card
       role="button"
@@ -49,13 +45,7 @@ export default function ExtraCostCard({ item, index, onEdit }: ExtraCostCardProp
           <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name || "..."}</CardTitle>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
     </Card>

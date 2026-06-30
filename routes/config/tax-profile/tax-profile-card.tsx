@@ -1,7 +1,6 @@
 import { Percent } from "lucide-react";
 import { useTranslations } from "use-intl";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardHeader,
@@ -10,6 +9,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { TaxProfile } from "@/types/tax-profile";
 
 interface TaxProfileCardProps {
@@ -27,7 +27,6 @@ interface TaxProfileCardProps {
  * <TaxProfileCard item={item} index={0} onEdit={handleEdit} />
  */
 export default function TaxProfileCard({ item, index, onEdit }: TaxProfileCardProps) {
-  const ts = useTranslations("status");
   const tfl = useTranslations("field");
 
   return (
@@ -53,13 +52,7 @@ export default function TaxProfileCard({ item, index, onEdit }: TaxProfileCardPr
           <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name || "..."}</CardTitle>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
 

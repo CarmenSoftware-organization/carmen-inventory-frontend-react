@@ -1,6 +1,4 @@
 import { FolderTree } from "lucide-react";
-import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -9,6 +7,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { RecipeCategory } from "@/types/recipe-category";
 
 interface RecipeCategoryCardProps {
@@ -31,8 +30,6 @@ export default function RecipeCategoryCard({
   parentName,
   onEdit,
 }: RecipeCategoryCardProps) {
-  const ts = useTranslations("status");
-
   return (
     <Card
       role="button"
@@ -61,13 +58,7 @@ export default function RecipeCategoryCard({
           </div>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="xs"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
 

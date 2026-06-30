@@ -1,6 +1,7 @@
 import { Building2, Phone, Mail } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { Vendor } from "@/types/vendor";
@@ -26,7 +27,6 @@ interface VendorCardProps {
  */
 export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
   const tfl = useTranslations("field");
-  const ts = useTranslations("status");
   const primaryContact = item.tb_vendor_contact?.find((c) => c.is_primary);
 
   return (
@@ -53,13 +53,7 @@ export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
         </div>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-xs">{item.code}</p>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="xs"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </div>
       </CardHeader>
 

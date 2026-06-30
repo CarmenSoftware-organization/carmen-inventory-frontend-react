@@ -9,6 +9,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   CUISINE_REGION_CONFIG,
   CUISINE_REGION_LABEL_KEY,
@@ -29,7 +30,6 @@ interface CuisineCardProps {
  * <CuisineCard item={cuisine} index={0} onEdit={setSelected} />
  */
 export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
-  const ts = useTranslations("status");
   const t = useTranslations("operationPlan.cuisine");
   const regionConfig = CUISINE_REGION_CONFIG[item.region];
 
@@ -58,13 +58,7 @@ export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
           </CardTitle>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="xs"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
 

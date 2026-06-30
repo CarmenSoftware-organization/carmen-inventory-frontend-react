@@ -2,6 +2,7 @@ import { useTranslations } from "use-intl";
 import { Award, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +25,6 @@ export default function CertificationCard({
   onEdit,
   onDelete,
 }: CertificationCardProps) {
-  const ts = useTranslations("status");
   const tc = useTranslations("common");
 
   return (
@@ -55,13 +55,7 @@ export default function CertificationCard({
               {item.code}
             </Badge>
           </div>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="shrink-0 text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} className="shrink-0" />
         </div>
       </CardHeader>
 

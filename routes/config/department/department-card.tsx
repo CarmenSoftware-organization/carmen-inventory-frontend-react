@@ -1,7 +1,6 @@
 import { Users } from "lucide-react";
 import { useTranslations } from "use-intl";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardHeader,
@@ -10,6 +9,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { Department } from "@/types/department";
 
 interface DepartmentCardProps {
@@ -37,7 +37,6 @@ export default function DepartmentCard({
   onEdit,
 }: DepartmentCardProps) {
   const t = useTranslations("config.department");
-  const ts = useTranslations("status");
 
   return (
     <Card
@@ -65,13 +64,7 @@ export default function DepartmentCard({
           </div>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
 

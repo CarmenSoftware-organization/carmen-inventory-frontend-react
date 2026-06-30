@@ -1,11 +1,10 @@
-import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { EquipmentCategory } from "@/types/equipment-category";
 
 interface EquipmentCategoryCardProps {
@@ -26,8 +25,6 @@ export default function EquipmentCategoryCard({
   index,
   onEdit,
 }: EquipmentCategoryCardProps) {
-  const ts = useTranslations("status");
-
   return (
     <Card
       role="button"
@@ -53,13 +50,7 @@ export default function EquipmentCategoryCard({
           </CardTitle>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="xs"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
     </Card>

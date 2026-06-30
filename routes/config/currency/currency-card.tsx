@@ -1,7 +1,6 @@
 import { Coins } from "lucide-react";
 import { useTranslations } from "use-intl";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardHeader,
@@ -10,6 +9,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { Currency } from "@/types/currency";
 
 interface CurrencyCardProps {
@@ -31,7 +31,6 @@ export default function CurrencyCard({
   index,
   onEdit,
 }: CurrencyCardProps) {
-  const ts = useTranslations("status");
   const tfl = useTranslations("field");
 
   return (
@@ -60,13 +59,7 @@ export default function CurrencyCard({
           </div>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
 

@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { EcoLabel } from "@/types/eco-label";
 
 interface EcoLabelCardProps {
@@ -24,7 +25,6 @@ export default function EcoLabelCard({
   onEdit,
   onDelete,
 }: EcoLabelCardProps) {
-  const ts = useTranslations("status");
   const tc = useTranslations("common");
 
   return (
@@ -55,13 +55,7 @@ export default function EcoLabelCard({
               {item.code}
             </Badge>
           </div>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="shrink-0 text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} className="shrink-0" />
         </div>
       </CardHeader>
 
