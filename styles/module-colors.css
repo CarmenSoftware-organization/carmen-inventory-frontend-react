@@ -18,12 +18,8 @@
   --module-procurement: #5B5BF6;     /* Purple */
   --module-product: #E08821;         /* Orange */
   --module-vendor: #0FA76B;          /* Green */
-  --module-store: #0FB5A1;           /* Teal */
   --module-inventory: #EF6A1A;       /* Orange-red */
-  --module-operation: #E5365A;       /* Pink-red */
-  --module-report: #5C6B7E;          /* Slate */
   --module-config: #3D3D3D;          /* Dark gray */
-  --module-admin: #171717;           /* Near-black */
 
   /* ── App/Sub tile system (single-accent, monochrome primary) ──
      ไทล์ทุก module ใช้โทนเดียวกัน: พื้น primary-tint อ่อน + ภาพสี primary.
@@ -39,70 +35,17 @@
   --tile-shadow: color-mix(in srgb, var(--primary), white 25%);
 
   /* ── Procurement subs ── */
-  --sub-approval: oklch(0.50 0.20 290.03);           /* Brand Purple */
   --sub-pr: oklch(0.62 0.14 155);                    /* Green bridge */
-  --sub-prt: oklch(0.48 0.18 75);                    /* Brand Amber (deep) */
   --sub-po: oklch(0.69 0.18 45);                     /* Orange bridge (red↔amber) */
   --sub-grn: oklch(0.58 0.20 165);                   /* Teal-green bridge */
   --sub-cn: oklch(0.52 0.16 229.05);                 /* Brand Light Blue */
 
-  /* ── Product Management subs ── */
-  --sub-product-category: oklch(0.54 0.20 310);      /* Purple bridge */
-  --sub-product: oklch(0.62 0.18 155);               /* Green bridge */
-
   /* ── Vendor Management subs ── */
-  --sub-vendor: oklch(0.52 0.22 348.79);             /* Brand Pink */
   --sub-price-list: oklch(0.62 0.16 75);             /* Brand Amber */
-  --sub-price-list-template: oklch(0.54 0.18 165);   /* Teal-green bridge */
-  --sub-request-price-list: oklch(0.58 0.20 253.27); /* Brand Blue */
 
   /* ── Store Operations subs ── */
   --sub-store-requisition: oklch(0.55 0.12 253.27);  /* Brand Blue */
-  --sub-stock-replenishment: oklch(0.60 0.18 155);   /* Green bridge */
-  --sub-wastage-reporting: oklch(0.50 0.22 258.7);   /* Brand Primary Blue */
 
-  /* ── Inventory Management subs ── */
-  --sub-inventory-adjustment: oklch(0.58 0.18 75);   /* Brand Amber */
-  --sub-stock-in: oklch(0.56 0.18 145);              /* Vivid green (incoming) */
-  --sub-stock-out: oklch(0.58 0.20 35);              /* Warm orange-red (outgoing) */
-  --sub-transaction: oklch(0.52 0.20 155);           /* Green bridge */
-  --sub-physical-count: oklch(0.56 0.16 188.43);     /* Brand Teal */
-  --sub-spot-check: oklch(0.60 0.22 290.03);         /* Brand Purple */
-  --sub-period-end: oklch(0.54 0.18 348.79);         /* Brand Pink */
-
-  /* ── Operation Plan subs ── */
-  --sub-recipe: oklch(0.56 0.20 155);                /* Green bridge */
-  --sub-op-category: oklch(0.52 0.16 229.05);        /* Brand Light Blue */
-  --sub-cuisine: oklch(0.60 0.22 290.03);            /* Brand Purple */
-  --sub-equipment: oklch(0.54 0.18 24.11);           /* Brand Red */
-  --sub-equipment-category: oklch(0.62 0.16 75);     /* Brand Amber */
-
-  /* ── Report subs ── */
-  --sub-report-list: oklch(0.54 0.16 188.43);        /* Brand Teal */
-  --sub-report-schedule: oklch(0.58 0.20 290.03);    /* Brand Purple */
-  --sub-report-history: oklch(0.62 0.18 75);         /* Brand Amber (bright) */
-
-  /* ── Config subs ── */
-  --sub-location: oklch(0.52 0.14 229.05);           /* Brand Light Blue */
-  --sub-department: oklch(0.60 0.18 245);            /* Blue bridge */
-  --sub-delivery-point: oklch(0.50 0.20 275);        /* Blue-purple bridge */
-  --sub-unit: oklch(0.58 0.16 305);                  /* Purple bridge */
-  --sub-adjustment-type: oklch(0.54 0.22 335);       /* Pink bridge */
-  --sub-business-type: oklch(0.62 0.18 12);          /* Warm red */
-  --sub-cn-reason: oklch(0.52 0.18 24.11);           /* Brand Red */
-  --sub-currency: oklch(0.60 0.14 75);               /* Brand Amber (gold-like) */
-  --sub-exchange-rate: oklch(0.50 0.18 90);          /* Olive bridge */
-  --sub-tax-profile: oklch(0.58 0.20 155);           /* Green bridge */
-  --sub-credit-term: oklch(0.54 0.16 165);           /* Teal-green bridge */
-  --sub-extra-cost: oklch(0.62 0.14 188.43);         /* Brand Teal */
-
-  /* ── System Admin subs ── */
-  --sub-period: oklch(0.48 0.18 24.11);              /* Brand Red (deep) */
-  --sub-workflow: oklch(0.56 0.16 90);               /* Olive bridge */
-  --sub-role: oklch(0.50 0.20 155);                  /* Green bridge */
-  --sub-user: oklch(0.58 0.18 229.05);               /* Brand Light Blue */
-  --sub-running-code: oklch(0.46 0.22 258.7);        /* Brand Primary Blue */
-  --sub-document: oklch(0.54 0.16 335);              /* Pink bridge */
 }
 
 /* ═══════════════════════════════════
@@ -116,78 +59,21 @@
   --module-procurement: color-mix(in oklch, #5B5BF6, white 22%);
   --module-product: color-mix(in oklch, #E08821, white 22%);
   --module-vendor: color-mix(in oklch, #0FA76B, white 22%);
-  --module-store: color-mix(in oklch, #0FB5A1, white 22%);
   --module-inventory: color-mix(in oklch, #EF6A1A, white 22%);
-  --module-operation: color-mix(in oklch, #E5365A, white 22%);
-  --module-report: color-mix(in oklch, #5C6B7E, white 30%);
   --module-config: color-mix(in oklch, #3D3D3D, white 40%);
-  --module-admin: color-mix(in oklch, #171717, white 45%);
 
   /* ── Procurement subs ── */
-  --sub-approval: oklch(0.68 0.18 290.03);
   --sub-pr: oklch(0.75 0.12 155);
-  --sub-prt: oklch(0.65 0.16 75);
   --sub-po: oklch(0.78 0.16 45);
   --sub-grn: oklch(0.76 0.18 165);
   --sub-cn: oklch(0.70 0.14 229.05);
 
-  /* ── Product Management subs ── */
-  --sub-product-category: oklch(0.72 0.18 310);
-  --sub-product: oklch(0.78 0.16 155);
-
   /* ── Vendor Management subs ── */
-  --sub-vendor: oklch(0.70 0.20 348.79);
   --sub-price-list: oklch(0.78 0.14 75);
-  --sub-price-list-template: oklch(0.72 0.16 165);
-  --sub-request-price-list: oklch(0.76 0.18 253.27);
 
   /* ── Store Operations subs ── */
   --sub-store-requisition: oklch(0.68 0.11 253.27);
-  --sub-stock-replenishment: oklch(0.76 0.16 155);
-  --sub-wastage-reporting: oklch(0.68 0.20 258.7);
 
-  /* ── Inventory Management subs ── */
-  --sub-inventory-adjustment: oklch(0.76 0.16 75);
-  --sub-stock-in: oklch(0.74 0.16 145);              /* Vivid green (incoming) */
-  --sub-stock-out: oklch(0.76 0.18 35);              /* Warm orange-red (outgoing) */
-  --sub-transaction: oklch(0.70 0.18 155);
-  --sub-physical-count: oklch(0.74 0.14 188.43);
-  --sub-spot-check: oklch(0.78 0.20 290.03);
-  --sub-period-end: oklch(0.72 0.16 348.79);
-
-  /* ── Operation Plan subs ── */
-  --sub-recipe: oklch(0.74 0.18 155);
-  --sub-op-category: oklch(0.70 0.14 229.05);
-  --sub-cuisine: oklch(0.78 0.20 290.03);
-  --sub-equipment: oklch(0.72 0.16 24.11);
-  --sub-equipment-category: oklch(0.78 0.14 75);
-
-  /* ── Report subs ── */
-  --sub-report-list: oklch(0.72 0.14 188.43);
-  --sub-report-schedule: oklch(0.76 0.18 290.03);
-  --sub-report-history: oklch(0.78 0.16 75);
-
-  /* ── Config subs ── */
-  --sub-location: oklch(0.70 0.12 229.05);
-  --sub-department: oklch(0.76 0.16 245);
-  --sub-delivery-point: oklch(0.68 0.18 275);
-  --sub-unit: oklch(0.74 0.14 305);
-  --sub-adjustment-type: oklch(0.72 0.20 335);
-  --sub-business-type: oklch(0.78 0.16 12);
-  --sub-cn-reason: oklch(0.70 0.16 24.11);
-  --sub-currency: oklch(0.76 0.12 75);
-  --sub-exchange-rate: oklch(0.68 0.16 90);
-  --sub-tax-profile: oklch(0.74 0.18 155);
-  --sub-credit-term: oklch(0.72 0.14 165);
-  --sub-extra-cost: oklch(0.78 0.12 188.43);
-
-  /* ── System Admin subs ── */
-  --sub-period: oklch(0.66 0.16 24.11);
-  --sub-workflow: oklch(0.74 0.14 90);
-  --sub-role: oklch(0.68 0.18 155);
-  --sub-user: oklch(0.76 0.16 229.05);
-  --sub-running-code: oklch(0.64 0.20 258.7);
-  --sub-document: oklch(0.72 0.14 335);
 }
 
 /* ═══════════════════════════════════
@@ -200,76 +86,7 @@
   --color-module-procurement: var(--module-procurement);
   --color-module-product: var(--module-product);
   --color-module-vendor: var(--module-vendor);
-  --color-module-store: var(--module-store);
   --color-module-inventory: var(--module-inventory);
-  --color-module-operation: var(--module-operation);
-  --color-module-report: var(--module-report);
   --color-module-config: var(--module-config);
-  --color-module-admin: var(--module-admin);
 
-  /* Procurement sub-modules */
-  --color-sub-approval: var(--sub-approval);
-  --color-sub-pr: var(--sub-pr);
-  --color-sub-prt: var(--sub-prt);
-  --color-sub-po: var(--sub-po);
-  --color-sub-grn: var(--sub-grn);
-  --color-sub-cn: var(--sub-cn);
-
-  /* Product Management sub-modules */
-  --color-sub-product-category: var(--sub-product-category);
-  --color-sub-product: var(--sub-product);
-
-  /* Vendor Management sub-modules */
-  --color-sub-vendor: var(--sub-vendor);
-  --color-sub-price-list: var(--sub-price-list);
-  --color-sub-price-list-template: var(--sub-price-list-template);
-  --color-sub-request-price-list: var(--sub-request-price-list);
-
-  /* Store Operations sub-modules */
-  --color-sub-store-requisition: var(--sub-store-requisition);
-  --color-sub-stock-replenishment: var(--sub-stock-replenishment);
-  --color-sub-wastage-reporting: var(--sub-wastage-reporting);
-
-  /* Inventory Management sub-modules */
-  --color-sub-inventory-adjustment: var(--sub-inventory-adjustment);
-  --color-sub-stock-in: var(--sub-stock-in);
-  --color-sub-stock-out: var(--sub-stock-out);
-  --color-sub-transaction: var(--sub-transaction);
-  --color-sub-physical-count: var(--sub-physical-count);
-  --color-sub-spot-check: var(--sub-spot-check);
-  --color-sub-period-end: var(--sub-period-end);
-
-  /* Operation Plan sub-modules */
-  --color-sub-recipe: var(--sub-recipe);
-  --color-sub-op-category: var(--sub-op-category);
-  --color-sub-cuisine: var(--sub-cuisine);
-  --color-sub-equipment: var(--sub-equipment);
-  --color-sub-equipment-category: var(--sub-equipment-category);
-
-  /* Report sub-modules */
-  --color-sub-report-list: var(--sub-report-list);
-  --color-sub-report-schedule: var(--sub-report-schedule);
-  --color-sub-report-history: var(--sub-report-history);
-
-  /* Config sub-modules */
-  --color-sub-location: var(--sub-location);
-  --color-sub-department: var(--sub-department);
-  --color-sub-delivery-point: var(--sub-delivery-point);
-  --color-sub-unit: var(--sub-unit);
-  --color-sub-adjustment-type: var(--sub-adjustment-type);
-  --color-sub-business-type: var(--sub-business-type);
-  --color-sub-cn-reason: var(--sub-cn-reason);
-  --color-sub-currency: var(--sub-currency);
-  --color-sub-exchange-rate: var(--sub-exchange-rate);
-  --color-sub-tax-profile: var(--sub-tax-profile);
-  --color-sub-credit-term: var(--sub-credit-term);
-  --color-sub-extra-cost: var(--sub-extra-cost);
-
-  /* System Admin sub-modules */
-  --color-sub-period: var(--sub-period);
-  --color-sub-workflow: var(--sub-workflow);
-  --color-sub-role: var(--sub-role);
-  --color-sub-user: var(--sub-user);
-  --color-sub-running-code: var(--sub-running-code);
-  --color-sub-document: var(--sub-document);
 }
