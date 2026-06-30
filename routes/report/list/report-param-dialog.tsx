@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { LookupCombobox } from "@/components/lookup/lookup-combobox";
 import { useReportListLookups } from "@/hooks/use-report";
 import type {
   ReportPeriodMap,
@@ -101,11 +102,74 @@ interface LookupControlProps {
   readonly id: string;
 }
 
+interface LookupOption {
+  readonly value: string;
+  readonly label: string;
+}
+
+/**
+ * Searchable single-select lookup for long, data-source-backed lists
+ * (product / location / vendor / category / period ...). Filters on the label
+ * ("code - name") so the user can type either the code or the name.
+ *
+ * Drives a hidden input so the native <form> FormData picks the value up, the
+ * same way DateControlInner does. Defaults to the first option ("ALL") to match
+ * the previous <select> behaviour.
+ *
+ * @param options - resolved value/label options (first is the ALL sentinel)
+ * @param id - form field name submitted in the filters payload
+ * @returns JSX element ของ searchable lookup
+ */
+function SearchableLookupControl({
+  options,
+  id,
+}: {
+  readonly options: LookupOption[];
+  readonly id: string;
+}) {
+  const [value, setValue] = useState(options[0].value);
+  return (
+    <>
+      <input type="hidden" name={id} value={value} readOnly />
+      <LookupCombobox<LookupOption>
+        value={value}
+        onValueChange={(v) => setValue(v)}
+        items={options}
+        getId={(o) => o.value}
+        getLabel={(o) => o.label}
+        getSearchValue={(o) => o.label}
+        // The Product/Location fields sit in a 2-column grid, so the trigger —
+        // and the default trigger-width popover — is too narrow and long
+        // "code - name" labels wrapped and overlapped (fixed-height virtual rows).
+        // Widen the panel and force single-line rows with ellipsis instead.
+        popoverWidth="w-[min(92vw,32rem)]"
+        popoverAlign="start"
+        renderItem={(o) => (
+          <span className="min-w-0 flex-1 truncate text-left">{o.label}</span>
+        )}
+        size="sm"
+        className="w-full"
+        modal
+      />
+    </>
+  );
+}
+
 function LookupControl({ node, id }: LookupControlProps) {
   const tc = useTranslations("common");
-  const options = node.items
-    .map((item, idx) => ({ item, value: node.values[idx] || item }))
+  const options: LookupOption[] = node.items
+    .map((item, idx) => ({
+      value: node.values[idx] || item,
+      label: item === "ALL" ? tc("all") : item,
+    }))
     .filter((o) => o.value !== "");
+
+  // Data-source-backed lookups (product/location/vendor/category/...) can be
+  // long → searchable combobox. Hard-coded enum lookups (Status/GroupBy/Day)
+  // have few options and stay a plain select.
+  if (node.dataSource && options.length > 0) {
+    return <SearchableLookupControl options={options} id={id} />;
+  }
 
   if (options.length > 0) {
     return (
@@ -115,9 +179,9 @@ function LookupControl({ node, id }: LookupControlProps) {
         className="h-8"
       >
         <SelectContent className="max-h-[min(60vh,400px)]" position="popper">
-          {options.map(({ item, value }) => (
-            <SelectItem key={value} value={value}>
-              {item === "ALL" ? tc("all") : item}
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
             </SelectItem>
           ))}
         </SelectContent>
