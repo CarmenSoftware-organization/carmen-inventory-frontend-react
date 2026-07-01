@@ -115,6 +115,14 @@ export function useGrnFormActions({
       },
     );
 
+    // PATCH: backend ต้องการ good_received_note_id (parent ref) ต่อ item ใน update
+    if (isEdit && goodsReceiveNote && detail.update) {
+      detail.update = detail.update.map((u) => ({
+        ...u,
+        good_received_note_id: goodsReceiveNote.id,
+      }));
+    }
+
     const extraCostDetail = buildItemChanges(
       values.extra_cost_details,
       defaultValues.extra_cost_details,
@@ -205,6 +213,9 @@ export function useGrnFormActions({
         setMode("view");
         return;
       }
+
+      // backend ต้องการ doc_version ทุกครั้งตอน PATCH (optimistic lock)
+      patchPayload.doc_version = values.doc_version;
 
       updateGrn.mutate(
         {
