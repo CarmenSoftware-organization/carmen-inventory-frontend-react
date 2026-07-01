@@ -15,7 +15,7 @@ import { PrActionDialog } from "./workflow/pr-action-dialog";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const PrCommentSheet = lazy(() =>
-  import("./workflow/pr-comment-sheet").then((mod) => ({ default: mod.PrCommentSheet })),
+  import("./pr-comment-sheet").then((mod) => ({ default: mod.PrCommentSheet })),
 );
 
 type DeletePrMutation = ReturnType<typeof useDeletePurchaseRequest>;
