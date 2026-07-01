@@ -18,6 +18,7 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
     doc_version: z.coerce.number().optional(),
+    _group_key: z.string(),
     location_id: z
       .string()
       .nullable()
@@ -104,6 +105,7 @@ export type CnFormValues = z.infer<ReturnType<typeof createCnSchema>>;
 // --- Defaults ---
 
 export const CN_ITEM = {
+  _group_key: "",
   location_id: null,
   location_name: "",
   item_id: null,
@@ -184,6 +186,7 @@ export function getDefaultValues(cn?: CreditNote): CnFormValues {
         cn.credit_note_detail?.map((d) => ({
           id: d.id,
           doc_version: d.doc_version,
+          _group_key: d.product_id ?? d.id,
           location_id: d.location_id ?? null,
           location_name: d.location_name ?? "",
           item_id: d.product_id,

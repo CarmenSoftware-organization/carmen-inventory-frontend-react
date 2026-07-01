@@ -946,7 +946,6 @@
       "selectAllCategory": "Select all {category}",
       "selectAllResource": "Select all {resource}",
       "noPermissions": "No permissions found",
-      "noPermissionsDesc": "You have no permissions to manage.",
       "actionView": "View",
       "actionViewDept": "View Dept",
       "actionViewAll": "View All",
@@ -2826,7 +2825,9 @@
       "refNoPlaceholder": "e.g. REF-001",
       "taxAmountLabel": "Tax Amount",
       "discountAmountLabel": "Discount Amount",
-      "taxAdjustment": "Tax Adjustment"
+      "taxAdjustment": "Tax Adjustment",
+      "addLocation": "Add Location",
+      "deleteProduct": "Delete Product"
     },
     "goodsReceiveNote": {
       "entity": "Goods Receive Note",

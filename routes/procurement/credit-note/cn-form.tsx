@@ -27,7 +27,7 @@ import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useProfile } from "@/hooks/use-profile";
 import { CnHeader } from "./cn-header";
 import { CnGeneralFields } from "./cn-general-fields";
-import { CnItemFields } from "./cn-item-fields";
+import { CnProductCards } from "./cn-product-cards";
 import { CnFooterAction } from "./cn-footer-action";
 import {
   createCnSchema,
@@ -234,10 +234,10 @@ export function CnForm({ creditNote }: CnFormProps) {
         onSubmit={form.handleSubmit(onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4"
+        className="space-y-4 px-4"
       >
         <CnGeneralFields form={form} disabled={isDisabled} plainText={isView} />
-        <CnItemFields form={form} disabled={isDisabled} />
+        <CnProductCards form={form} disabled={isDisabled} />
       </form>
 
       <CnFooterAction control={form.control} />

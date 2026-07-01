@@ -915,7 +915,7 @@
       }
     },
     "role": {
-      "noPermissionsDesc": "คุณไม่มีสิทธิ์ให้จัดการ",
+      "noPermissionsDesc": "คุณไม่มีสิทธิ์ที่ต้องจัดการ",
       "entity": "บทบาท",
       "title": "บทบาท",
       "desc": "จัดการบทบาทและสิทธิ์การใช้งาน",
@@ -946,7 +946,6 @@
       "selectAllCategory": "เลือกทั้งหมดใน {category}",
       "selectAllResource": "เลือกทั้งหมดของ {resource}",
       "noPermissions": "ไม่พบสิทธิ์",
-      "noPermissionsDesc": "คุณไม่มีสิทธิ์ที่ต้องจัดการ",
       "actionView": "ดู",
       "actionViewDept": "ดูแผนก",
       "actionViewAll": "ดูทั้งหมด",
@@ -2821,7 +2820,9 @@
       "refNoPlaceholder": "เช่น REF-001",
       "taxAmountLabel": "จำนวนภาษี",
       "discountAmountLabel": "จำนวนส่วนลด",
-      "taxAdjustment": "ปรับปรุงภาษี"
+      "taxAdjustment": "ปรับปรุงภาษี",
+      "addLocation": "เพิ่มสถานที่",
+      "deleteProduct": "ลบสินค้า"
     },
     "goodsReceiveNote": {
       "entity": "ใบรับสินค้า",
