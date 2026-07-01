@@ -1,6 +1,5 @@
-
 import { type ReactNode } from "react";
-import { ArrowLeft, Info } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +11,6 @@ interface DocFormHeaderProps {
   readonly onBack: () => void;
   readonly badges?: ReactNode;
   readonly actions?: ReactNode;
-  readonly infoLabel?: string;
   readonly ribbon?: ReactNode;
   readonly workflowStep?: ReactNode;
 }
@@ -24,7 +22,6 @@ export function DocFormHeader({
   onBack,
   badges,
   actions,
-  infoLabel,
   ribbon,
   workflowStep,
 }: DocFormHeaderProps) {
@@ -61,12 +58,6 @@ export function DocFormHeader({
       {/* ── Document info ribbon ── */}
       {ribbon && (
         <div className="pt-4">
-          {infoLabel && (
-            <p className="text-muted-foreground inline-flex items-center gap-2 text-[0.625rem] font-semibold tracking-wider uppercase">
-              <Info className="size-3" aria-hidden="true" />
-              {infoLabel}
-            </p>
-          )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">{ribbon}</div>
             {workflowStep}
@@ -78,9 +69,7 @@ export function DocFormHeader({
 }
 
 export function DocumentRibbon({ children }: { readonly children: ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-stretch border-y">{children}</div>
-  );
+  return <div className="flex flex-wrap items-stretch">{children}</div>;
 }
 
 export function RibbonCell({
@@ -93,12 +82,7 @@ export function RibbonCell({
   readonly className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "min-w-0 border-l px-4 py-2 first:border-l-0 first:pl-0",
-        className,
-      )}
-    >
+    <div className={cn("min-w-0 px-4", className)}>
       <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
         {label}
       </p>

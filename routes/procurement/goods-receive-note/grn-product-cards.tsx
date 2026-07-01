@@ -328,15 +328,18 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
                       form.formState.errors.items?.[primaryIdx]?.product_id
                         ?.message;
                     return (
-                      <span
-                        className={cn(
-                          "truncate text-sm font-semibold",
-                          productErr && "text-destructive",
-                        )}
-                      >
-                        {group.productName ||
-                          (productErr ? productErr : tfl("product"))}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <Box className="text-muted-foreground size-3 shrink-0" />
+                        <span
+                          className={cn(
+                            "truncate text-sm font-semibold",
+                            productErr && "text-destructive",
+                          )}
+                        >
+                          {group.productName ||
+                            (productErr ? productErr : tfl("product"))}
+                        </span>
+                      </div>
                     );
                   })()
                 )}

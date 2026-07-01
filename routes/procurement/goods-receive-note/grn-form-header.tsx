@@ -60,7 +60,7 @@ export function GrnFormHeader({
 
   return (
     <div className="space-y-3">
-      <h2 className="text-foreground text-sm font-semibold tracking-tight">
+      <h2 className="text-muted-foreground text-sm font-semibold tracking-tight">
         {t("docInfo")}
       </h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -76,8 +76,8 @@ export function GrnFormHeader({
                 onItemChange={(v) => form.setValue("vendor_name", v.name)}
                 defaultLabel={vendorName || undefined}
                 disabled={disabled || isPo}
-                className="h-9"
                 error={errors.vendor_id?.message}
+                className="h-9 text-xs"
               />
             )}
           />
@@ -143,6 +143,7 @@ export function GrnFormHeader({
                 onValueChange={field.onChange}
                 disabled={disabled || fromWizard}
                 error={errors.currency_id?.message}
+                className="h-9 w-full text-xs"
               />
             )}
           />
@@ -179,6 +180,7 @@ export function GrnFormHeader({
                     form.setValue("credit_term_days", creditTerm.value);
                   }
                 }}
+                className="h-9 w-full text-xs"
                 disabled={disabled}
               />
             )}
@@ -196,7 +198,7 @@ export function GrnFormHeader({
                 onValueChange={field.onChange}
                 disabled={disabled}
                 placeholder={tc("selectDate")}
-                className="w-full text-xs"
+                className="h-9 w-full text-xs"
               />
             )}
           />

@@ -217,7 +217,6 @@ export function SrHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      infoLabel={t("documentInfo")}
       ribbon={ribbon}
     />
   );

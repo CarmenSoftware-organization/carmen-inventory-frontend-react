@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -52,7 +51,6 @@ export function LookupCreditTerm({
   disabled,
   placeholder,
   className,
-  size = "sm",
   error,
 }: LookupCreditTermProps) {
   const tl = useTranslations("lookup");
@@ -60,7 +58,8 @@ export function LookupCreditTerm({
   const [selectOpen, setSelectOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const { data } = useCreditTerm({ perpage: 30 });
-  const resolvedPlaceholder = placeholder ?? tl("select", { entity: tfl("creditTerm") });
+  const resolvedPlaceholder =
+    placeholder ?? tl("select", { entity: tfl("creditTerm") });
   const creditTerms = data?.data?.filter((c) => c.is_active) ?? [];
   const selectedLabel = creditTerms.find((c) => c.id === value)?.name;
   const showErrorTooltip = !!error && !selectOpen;
@@ -85,9 +84,8 @@ export function LookupCreditTerm({
             >
               <SelectTrigger
                 aria-invalid={!!error}
-                size={size}
                 className={cn(
-                  className ?? "h-8 w-full text-sm",
+                  className ?? "w-full text-sm",
                   error && "border-destructive pr-7",
                 )}
               >
@@ -123,7 +121,7 @@ export function LookupCreditTerm({
         {showTooltip && (
           <TooltipContent
             side="top"
-            className="rounded-lg border bg-popover px-3 py-2 text-popover-foreground shadow-md [&>svg]:fill-popover [&>svg]:text-border"
+            className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
           >
             <p className="text-xs font-semibold">{selectedLabel}</p>
           </TooltipContent>

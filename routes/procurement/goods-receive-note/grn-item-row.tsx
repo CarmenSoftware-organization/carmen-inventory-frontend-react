@@ -1,5 +1,10 @@
 import { memo, useState } from "react";
-import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
+import {
+  Controller,
+  useFormState,
+  useWatch,
+  type UseFormReturn,
+} from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { ChevronRight, MapPin, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +18,7 @@ import GrnTabQty from "./grn-tab-qty";
 import GrnTabPricing from "./grn-tab-pricing";
 import GrnTabDetails from "./grn-tab-details";
 import { FieldLabel } from "@/components/ui/field";
+import { Badge } from "@/components/ui/badge";
 
 interface GrnItemRowProps {
   readonly index: number;
@@ -74,10 +80,7 @@ export const GrnItemRow = memo(function GrnItemRow({
   const excludeLocationIds = (siblingLocationIds ?? []).filter(
     (v): v is string => !!v,
   );
-  const receivedQty = useWatch({
-    control: form.control,
-    name: `items.${index}.received_qty`,
-  });
+
   const netAmount = useWatch({
     control: form.control,
     name: `items.${index}.net_amount`,
@@ -87,8 +90,17 @@ export const GrnItemRow = memo(function GrnItemRow({
   const [expanded, setExpanded] = useState(isManual && !locationId);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const locationError =
-    form.formState.errors.items?.[index]?.location_id?.message;
+  // subscribe เฉพาะ error ของ item นี้ — รับประกัน re-render เมื่อ validation ของแถวเปลี่ยน
+  const { errors } = useFormState({
+    control: form.control,
+    name: `items.${index}`,
+  });
+  const itemError = errors.items?.[index];
+  const locationError = itemError?.location_id?.message;
+
+  // มี field error ที่ไหนก็ได้ใน item (location/qty/unit/pricing) → บังคับ expand
+  // ให้ field ผิด render เข้า DOM แล้ว scrollToFirstInvalidField (retry ต่อเฟรม) scroll ไปหาเอง
+  const showExpanded = expanded || !!itemError;
 
   const typeLabel = (() => {
     if (!locationType) return "";
@@ -102,17 +114,17 @@ export const GrnItemRow = memo(function GrnItemRow({
       <div
         className={cn(
           "flex items-center gap-2.5 py-3 pr-4 pl-8 transition-colors",
-          expanded ? "bg-muted/20" : "hover:bg-muted/20",
+          showExpanded ? "bg-muted/20" : "hover:bg-muted/20",
         )}
       >
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          aria-expanded={expanded}
-          aria-label={expanded ? tfl("collapse") : tfl("expand")}
+          aria-expanded={showExpanded}
+          aria-label={showExpanded ? tfl("collapse") : tfl("expand")}
           className={cn(
             "-m-1 flex shrink-0 items-center p-1 transition-colors",
-            expanded
+            showExpanded
               ? "text-primary"
               : "text-muted-foreground hover:text-foreground",
           )}
@@ -120,7 +132,7 @@ export const GrnItemRow = memo(function GrnItemRow({
           <ChevronRight
             className={cn(
               "size-4 transition-transform",
-              expanded && "rotate-90",
+              showExpanded && "rotate-90",
             )}
             aria-hidden="true"
           />
@@ -168,19 +180,27 @@ export const GrnItemRow = memo(function GrnItemRow({
             </div>
           ) : (
             <>
-              <span
-                className={cn(
-                  "truncate text-[0.8125rem] font-medium",
-                  locationError ? "text-destructive" : "text-foreground",
-                )}
-              >
-                {locationName || (locationError ? locationError : "—")}
-              </span>
-              {(locationCode || typeLabel) && (
-                <span className="text-muted-foreground shrink-0 text-xs">
-                  {[locationCode, typeLabel].filter(Boolean).join(" · ")}
+              <div className="flex items-center gap-1">
+                <MapPin className="text-muted-foreground size-3 shrink-0" />
+                <span
+                  className={cn(
+                    "truncate text-[0.8125rem] font-medium",
+                    locationError ? "text-destructive" : "text-foreground",
+                  )}
+                >
+                  {locationName || (locationError ? locationError : "—")}
                 </span>
-              )}
+                {(locationCode || typeLabel) && (
+                  <>
+                    <Badge size={"xs"} variant={"secondary"}>
+                      {locationCode}
+                    </Badge>
+                    <Badge size={"xs"} variant={"secondary"}>
+                      {typeLabel}
+                    </Badge>
+                  </>
+                )}
+              </div>
             </>
           )}
         </span>
@@ -202,7 +222,7 @@ export const GrnItemRow = memo(function GrnItemRow({
       </div>
 
       {/* ── Expanded editor (inline, replaces the old sheet) ── */}
-      {expanded && (
+      {showExpanded && (
         <div className="bg-muted/20 space-y-4 px-4 pt-2 pb-4 pl-8">
           <section className="space-y-2">
             <p className={EYEBROW}>{tfl("quantity")}</p>

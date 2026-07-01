@@ -216,7 +216,6 @@ export function PoHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      infoLabel={t("documentInfo")}
       ribbon={ribbon}
       workflowStep={workflowStep}
     />

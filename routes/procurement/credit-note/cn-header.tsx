@@ -229,7 +229,6 @@ export function CnHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      infoLabel={t("documentInfo")}
       ribbon={ribbon}
     />
   );
