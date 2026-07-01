@@ -501,6 +501,8 @@
     "foc": "FOC",
     "focQty": "จำนวน FOC",
     "details": "รายละเอียด",
+    "expand": "ขยาย",
+    "collapse": "ย่อ",
     "quantity": "จำนวน",
     "lastUpdate": "อัปเดตล่าสุด",
     "general": "ทั่วไป",

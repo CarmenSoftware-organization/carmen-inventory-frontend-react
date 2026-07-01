@@ -7,9 +7,9 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { BoxIcon, MapPinPlus, Plus, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Box, BoxIcon, MapPinPlus, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FieldLabel } from "@/components/ui/field";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { GrnPoSelectDialog } from "./grn-po-select-dialog";
 import type { GrnFormValues } from "./grn-form-schema";
@@ -76,48 +76,62 @@ const ManualProductCell = memo(function ManualProductCell({
   form,
   indices,
   disabled,
+  defaultOpen,
 }: {
   control: Control<GrnFormValues>;
   form: UseFormReturn<GrnFormValues>;
   indices: number[];
   disabled: boolean;
+  defaultOpen?: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const primaryIndex = indices[0];
   return (
-    <Controller
-      control={control}
-      name={`items.${primaryIndex}.product_id`}
-      render={({ field, fieldState }) => (
-        <LookupProduct
-          value={field.value ?? ""}
-          onValueChange={(value, product) => {
-            field.onChange(value);
-            if (product) {
-              form.setValue(`items.${primaryIndex}.product_name`, product.name, {
-                shouldDirty: true,
-              });
-            }
-            // sibling rows ต้อง shouldDirty: true ด้วย — ไม่งั้น dirtyFields ไม่ครบ
-            // ตอนแก้ GRN เดิม การเปลี่ยน product ของแถวรองจะไม่ถูกส่งไป backend
-            for (const idx of indices) {
-              if (idx === primaryIndex) continue;
-              form.setValue(`items.${idx}.product_id`, value, {
-                shouldDirty: true,
-              });
+    <div className="w-full max-w-105 space-y-2">
+      <FieldLabel required className="text-xs">
+        <Box className="text-muted-foreground size-3 shrink-0" />
+        {tfl("product")}
+      </FieldLabel>
+      <Controller
+        control={control}
+        name={`items.${primaryIndex}.product_id`}
+        render={({ field, fieldState }) => (
+          <LookupProduct
+            value={field.value ?? ""}
+            onValueChange={(value, product) => {
+              field.onChange(value);
               if (product) {
-                form.setValue(`items.${idx}.product_name`, product.name, {
+                form.setValue(
+                  `items.${primaryIndex}.product_name`,
+                  product.name,
+                  {
+                    shouldDirty: true,
+                  },
+                );
+              }
+              // sibling rows ต้อง shouldDirty: true ด้วย — ไม่งั้น dirtyFields ไม่ครบ
+              // ตอนแก้ GRN เดิม การเปลี่ยน product ของแถวรองจะไม่ถูกส่งไป backend
+              for (const idx of indices) {
+                if (idx === primaryIndex) continue;
+                form.setValue(`items.${idx}.product_id`, value, {
                   shouldDirty: true,
                 });
+                if (product) {
+                  form.setValue(`items.${idx}.product_name`, product.name, {
+                    shouldDirty: true,
+                  });
+                }
               }
-            }
-          }}
-          disabled={disabled}
-          className="w-full max-w-105 text-xs"
-          error={fieldState.error?.message}
-        />
-      )}
-    />
+            }}
+            disabled={disabled}
+            defaultOpen={defaultOpen}
+            className="w-full text-xs"
+            error={fieldState.error?.message}
+          />
+        )}
+      />
+    </div>
   );
 });
 
@@ -161,6 +175,13 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
   const isManual = docType === "manual";
   const [deleteGroup, setDeleteGroup] = useState<ProductGroup | null>(null);
   const [poDialogOpen, setPoDialogOpen] = useState(false);
+  // key ของ group/row ที่เพิ่งเพิ่ม → เปิด lookup อัตโนมัติ (auto-focus)
+  const [autoOpenProductKey, setAutoOpenProductKey] = useState<string | null>(
+    null,
+  );
+  const [autoOpenLocationKey, setAutoOpenLocationKey] = useState<string | null>(
+    null,
+  );
 
   const {
     fields: itemFields,
@@ -187,7 +208,10 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
   };
 
   const handleAddItem = () => {
-    prependItem({ ...EMPTY_DETAIL, _group_key: crypto.randomUUID() });
+    const key = crypto.randomUUID();
+    prependItem({ ...EMPTY_DETAIL, _group_key: key });
+    setAutoOpenProductKey(key); // auto-focus product lookup ของ item ใหม่
+    setAutoOpenLocationKey(null);
   };
 
   const handleAddLocation = (
@@ -207,6 +231,8 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
       product_id: productId,
       product_name: productName,
     });
+    setAutoOpenLocationKey(groupKey); // auto-focus location lookup ของ row ใหม่
+    setAutoOpenProductKey(null);
   };
 
   // Group items by _group_key
@@ -257,7 +283,9 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
   return (
     <div className="space-y-2 pt-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">{tfl("items")}</h2>
+        <h2 className="text-foreground text-sm font-semibold tracking-tight">
+          {tfl("items")}
+        </h2>
         {addAction}
       </div>
 
@@ -279,82 +307,77 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
       {groupedItems.length > 0 && (
         <div className="space-y-3">
           {groupedItems.map((group, groupIdx) => (
-            <div
-              key={group.key}
-              className="overflow-hidden rounded-lg border"
-            >
-              {/* Card header */}
-              <div className="bg-muted/50 flex items-center justify-between gap-3 border-b px-3 py-2">
-                <div className="flex min-w-0 items-center gap-2">
-                  <div className="bg-primary/10 text-primary flex size-5 shrink-0 items-center justify-center rounded text-[0.625rem] font-semibold">
-                    {groupIdx + 1}
-                  </div>
-                  {group.isManual && !disabled ? (
-                    <ManualProductCell
-                      control={form.control}
-                      form={form}
-                      indices={group.indices}
-                      disabled={disabled}
-                    />
-                  ) : (
-                    (() => {
-                      const primaryIdx = group.indices[0];
-                      const productErr =
-                        form.formState.errors.items?.[primaryIdx]?.product_id
-                          ?.message;
-                      return (
-                        <span
-                          className={cn(
-                            "truncate text-xs font-semibold",
-                            productErr && "text-destructive",
-                          )}
+            <div key={group.key} className="overflow-hidden rounded-xl border">
+              {/* Group header — flat, bare number + per-product subtotal */}
+              <div className="flex items-center gap-2.5 border-b px-4 py-3">
+                <span className="text-muted-foreground w-4 shrink-0 text-xs tabular-nums">
+                  {groupIdx + 1}
+                </span>
+                {group.isManual && !disabled ? (
+                  <ManualProductCell
+                    control={form.control}
+                    form={form}
+                    indices={group.indices}
+                    disabled={disabled}
+                    defaultOpen={group.key === autoOpenProductKey}
+                  />
+                ) : (
+                  (() => {
+                    const primaryIdx = group.indices[0];
+                    const productErr =
+                      form.formState.errors.items?.[primaryIdx]?.product_id
+                        ?.message;
+                    return (
+                      <span
+                        className={cn(
+                          "truncate text-sm font-semibold",
+                          productErr && "text-destructive",
+                        )}
+                      >
+                        {group.productName ||
+                          (productErr ? productErr : tfl("product"))}
+                      </span>
+                    );
+                  })()
+                )}
+                <div className="ml-auto flex shrink-0 items-center gap-2">
+                  {!disabled && (
+                    <>
+                      {group.isManual && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="xs"
+                          onClick={() => {
+                            const idx = group.indices[0];
+                            handleAddLocation(
+                              group.key,
+                              form.getValues(`items.${idx}.product_id`),
+                              form.getValues(`items.${idx}.product_name`),
+                            );
+                          }}
+                          className="border-primary"
                         >
-                          {group.productName ||
-                            (productErr ? productErr : tfl("product"))}
-                        </span>
-                      );
-                    })()
-                  )}
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="ml-1 shrink-0 tabular-nums"
-                  >
-                    {group.indices.length} {tfl("location")}
-                  </Badge>
-                </div>
-                {!disabled && (
-                  <div className="flex shrink-0 items-center gap-1">
-                    {group.isManual && (
+                          <MapPinPlus
+                            aria-hidden="true"
+                            className="text-primary"
+                          />
+                          {t("addLocation")}
+                        </Button>
+                      )}
                       <Button
                         type="button"
-                        variant="outline"
-                        size="xs"
-                        onClick={() => {
-                          const idx = group.indices[0];
-                          handleAddLocation(
-                            group.key,
-                            form.getValues(`items.${idx}.product_id`),
-                            form.getValues(`items.${idx}.product_name`),
-                          );
-                        }}
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        aria-label="Remove"
+                        onClick={() => setDeleteGroup(group)}
                       >
-                        <MapPinPlus aria-hidden="true" />
-                        {t("addLocation")}
+                        <Trash2 className="size-3.5" />
                       </Button>
-                    )}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-xs"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      aria-label="Remove"
-                      onClick={() => setDeleteGroup(group)}
-                    >
-                      <Trash2 className="size-3.5" />
-                    </Button>
-                  </div>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Location rows */}
@@ -368,10 +391,8 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
                     isManual={group.isManual}
                     showDelete={!disabled}
                     onDelete={() => removeItem(idx)}
-                    locationName={itemFields[idx].location_name || ""}
-                    locationCode={itemFields[idx].location_code || ""}
-                    locationType={itemFields[idx].location_type || ""}
                     groupIndices={group.indices}
+                    autoOpenLocation={group.key === autoOpenLocationKey}
                   />
                 ))}
               </div>

@@ -1,17 +1,18 @@
 import { memo, useState } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Eye, MapPin, Trash2 } from "lucide-react";
+import { ChevronRight, MapPin, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
-import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { inventoryTypeLabelKey } from "@/constant/location";
+import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
-import { GrnItemDetailSheet } from "./grn-item-detail-sheet";
-import { Badge } from "@/components/ui/badge";
+import GrnTabQty from "./grn-tab-qty";
+import GrnTabPricing from "./grn-tab-pricing";
+import GrnTabDetails from "./grn-tab-details";
+import { FieldLabel } from "@/components/ui/field";
 
 interface GrnItemRowProps {
   readonly index: number;
@@ -20,12 +21,19 @@ interface GrnItemRowProps {
   readonly isManual: boolean;
   readonly showDelete: boolean;
   readonly onDelete: () => void;
-  readonly locationName: string;
-  readonly locationCode: string;
-  readonly locationType: string;
   readonly groupIndices: number[];
+  /** เปิด location lookup อัตโนมัติตอน mount (row ที่เพิ่งเพิ่ม) */
+  readonly autoOpenLocation?: boolean;
 }
 
+const EYEBROW =
+  "text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase";
+
+/**
+ * แถว location ของ GRN item — collapsed = summary อ่านอย่างเดียว,
+ * คลิก chevron เพื่อ expand เผยฟอร์มแก้ไข inline (Quantity / Pricing / Details)
+ * แทนการเปิด sheet แยก. ฟอร์มแต่ละ section reuse GrnTab* เดิม (logic/คำนวณไม่แตะ)
+ */
 export const GrnItemRow = memo(function GrnItemRow({
   index,
   form,
@@ -33,27 +41,30 @@ export const GrnItemRow = memo(function GrnItemRow({
   isManual,
   showDelete,
   onDelete,
-  locationName,
-  locationCode,
-  locationType,
   groupIndices,
+  autoOpenLocation,
 }: GrnItemRowProps) {
   "use no memo";
   const tfl = useTranslations("field");
   const tl = useTranslations("config.location");
-  const [open, setOpen] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const docType = useWatch({ control: form.control, name: "doc_type" }) ?? "";
+  const locationName =
+    useWatch({ control: form.control, name: `items.${index}.location_name` }) ??
+    "";
+  const locationCode =
+    useWatch({ control: form.control, name: `items.${index}.location_code` }) ??
+    "";
+  const locationType =
+    useWatch({ control: form.control, name: `items.${index}.location_type` }) ??
+    "";
+  const locationId =
+    useWatch({ control: form.control, name: `items.${index}.location_id` }) ??
+    "";
   const productId =
     useWatch({ control: form.control, name: `items.${index}.product_id` }) ??
     "";
-
-  const itemErrors = form.formState.errors.items?.[index];
-  const locationError = itemErrors?.location_id?.message;
-  const receivedQtyError = itemErrors?.received_qty?.message;
-  const receivedUnitError = itemErrors?.received_unit_id?.message;
-
-  // Sibling location IDs to exclude — reactive ผ่าน useWatch (recompute เมื่อ
-  // row อื่นใน group เปลี่ยน location → กันเลือกซ้ำได้จริง)
+  // location ของ sibling rows ใน group เดียวกัน — reactive เพื่อกันเลือกซ้ำ
   const siblingLocationIds = useWatch({
     control: form.control,
     name: groupIndices
@@ -63,222 +74,158 @@ export const GrnItemRow = memo(function GrnItemRow({
   const excludeLocationIds = (siblingLocationIds ?? []).filter(
     (v): v is string => !!v,
   );
+  const receivedQty = useWatch({
+    control: form.control,
+    name: `items.${index}.received_qty`,
+  });
+  const netAmount = useWatch({
+    control: form.control,
+    name: `items.${index}.net_amount`,
+  });
+
+  // เริ่ม expand เองถ้าเป็น manual ที่ยังไม่ได้เลือก location (ต้องกรอกก่อน)
+  const [expanded, setExpanded] = useState(isManual && !locationId);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const locationError =
+    form.formState.errors.items?.[index]?.location_id?.message;
+
+  const typeLabel = (() => {
+    if (!locationType) return "";
+    const k = inventoryTypeLabelKey(locationType);
+    return k ? tl(k) : locationType.toUpperCase();
+  })();
 
   return (
-    <div className="hover:bg-muted/20 ml-6 space-y-2 px-3 py-2 transition-colors">
-      {/* Location + Details + Delete */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-1.5">
-          <MapPin className="text-primary/60 size-3.5 shrink-0" />
+    <div>
+      {/* ── Collapsed summary ── */}
+      <div
+        className={cn(
+          "flex items-center gap-2.5 py-3 pr-4 pl-8 transition-colors",
+          expanded ? "bg-muted/20" : "hover:bg-muted/20",
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          aria-label={expanded ? tfl("collapse") : tfl("expand")}
+          className={cn(
+            "-m-1 flex shrink-0 items-center p-1 transition-colors",
+            expanded
+              ? "text-primary"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          <ChevronRight
+            className={cn(
+              "size-4 transition-transform",
+              expanded && "rotate-90",
+            )}
+            aria-hidden="true"
+          />
+        </button>
+
+        <span className="flex min-w-0 flex-1 items-center gap-1.5">
           {isManual && !disabled ? (
-            <Controller
-              control={form.control}
-              name={`items.${index}.location_id`}
-              render={({ field }) => (
-                <LookupProductLocation
-                  productId={productId}
-                  value={field.value ?? ""}
-                  onValueChange={field.onChange}
-                  onItemChange={(location) => {
-                    form.setValue(
-                      `items.${index}.location_name`,
-                      location.name,
-                    );
-                    form.setValue(
-                      `items.${index}.location_code`,
-                      location.code,
-                    );
-                    form.setValue(
-                      `items.${index}.location_type`,
-                      location.location_type,
-                    );
-                  }}
-                  excludeIds={excludeLocationIds}
-                  disabled={disabled || !productId}
-                  className="w-full text-xs"
-                  defaultLabel={
-                    locationCode
-                      ? `${locationCode} — ${locationName}`
-                      : locationName || undefined
-                  }
-                  error={locationError}
-                />
-              )}
-            />
+            <div className="min-w-0 flex-1 space-y-2">
+              <FieldLabel required className="text-xs">
+                <MapPin className="text-muted-foreground size-3 shrink-0" />
+                {tfl("location")}
+              </FieldLabel>
+              <Controller
+                control={form.control}
+                name={`items.${index}.location_id`}
+                render={({ field, fieldState }) => (
+                  <LookupProductLocation
+                    productId={productId}
+                    value={field.value ?? ""}
+                    onValueChange={field.onChange}
+                    onItemChange={(location) => {
+                      form.setValue(
+                        `items.${index}.location_name`,
+                        location.name,
+                      );
+                      form.setValue(
+                        `items.${index}.location_code`,
+                        location.code,
+                      );
+                      form.setValue(
+                        `items.${index}.location_type`,
+                        location.location_type,
+                      );
+                    }}
+                    defaultLabel={locationName || undefined}
+                    excludeIds={excludeLocationIds}
+                    disabled={!productId}
+                    defaultOpen={autoOpenLocation}
+                    className="h-8 w-full text-xs"
+                    modal
+                    error={fieldState.error?.message}
+                  />
+                )}
+              />
+            </div>
           ) : (
-            <div className="flex min-w-0 items-center gap-1.5">
-              {locationCode && (
-                <Badge
-                  size="xs"
-                  variant="secondary"
-                  className="shrink-0 text-[0.6875rem]"
-                >
-                  {locationCode}
-                </Badge>
-              )}
+            <>
               <span
                 className={cn(
-                  "truncate text-[0.6875rem] font-semibold",
-                  locationError && "text-destructive",
+                  "truncate text-[0.8125rem] font-medium",
+                  locationError ? "text-destructive" : "text-foreground",
                 )}
               >
                 {locationName || (locationError ? locationError : "—")}
               </span>
-              {locationType && (
-                <Badge size="xs" className="text-[0.6875rem]">
-                  {(() => {
-                    const k = inventoryTypeLabelKey(locationType);
-                    return k ? tl(k) : locationType.toUpperCase();
-                  })()}
-                </Badge>
+              {(locationCode || typeLabel) && (
+                <span className="text-muted-foreground shrink-0 text-xs">
+                  {[locationCode, typeLabel].filter(Boolean).join(" · ")}
+                </span>
               )}
-            </div>
+            </>
           )}
-        </div>
-        <div className="flex shrink-0 items-center gap-1">
+        </span>
+        <span className="text-foreground w-20 text-right text-[0.8125rem] font-semibold tabular-nums">
+          {formatCurrency(Number(netAmount) || 0)}
+        </span>
+        {showDelete && (
           <Button
             type="button"
-            size="xs"
             variant="ghost"
-            className="text-primary"
-            aria-label={tfl("details")}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setOpen(true);
-            }}
+            size="icon-xs"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive ml-1 shrink-0"
+            aria-label={tfl("deleteLocation")}
+            onClick={() => setShowDeleteConfirm(true)}
           >
-            <Eye className="size-3.5" />
-            {tfl("details")}
+            <Trash2 className="size-3.5" />
           </Button>
-          {showDelete && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-              aria-label={tfl("deleteLocation")}
-              onClick={() => setShowDeleteConfirm(true)}
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* PO reference */}
-      {!isManual && (
-        <div className="flex items-center gap-1.5">
-          <span className="text-muted-foreground text-[0.6875rem]">
-            {tfl("poNo")}:
-          </span>
-          <Badge size="xs" variant="secondary" className="text-[0.6875rem]">
-            {form.getValues(`items.${index}.purchase_order_no`) || "—"}
-          </Badge>
+      {/* ── Expanded editor (inline, replaces the old sheet) ── */}
+      {expanded && (
+        <div className="bg-muted/20 space-y-4 px-4 pt-2 pb-4 pl-8">
+          <section className="space-y-2">
+            <p className={EYEBROW}>{tfl("quantity")}</p>
+            <GrnTabQty
+              form={form}
+              index={index}
+              disabled={disabled}
+              docType={docType}
+            />
+          </section>
+
+          <section className="space-y-2 border-t pt-3">
+            <p className={EYEBROW}>{tfl("pricing")}</p>
+            <GrnTabPricing form={form} index={index} disabled={disabled} />
+          </section>
+
+          <section className="space-y-2 border-t pt-3">
+            <p className={EYEBROW}>{tfl("details")}</p>
+            <GrnTabDetails form={form} index={index} disabled={disabled} />
+          </section>
         </div>
       )}
 
-      {/* Inputs grid */}
-      <div className="bg-muted/30 grid grid-cols-2 gap-2 rounded-md p-2 sm:grid-cols-[1fr_1fr_1fr_1fr]">
-        {/* Received Qty */}
-        <Field className="gap-0.5">
-          <FieldLabel
-            htmlFor={`items-${index}-received-qty`}
-            className="text-muted-foreground text-[0.6875rem]"
-          >
-            {tfl("receivedQty")}
-          </FieldLabel>
-          <FieldInput
-            id={`items-${index}-received-qty`}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            placeholder="0"
-            className={`h-7 text-right text-xs ${receivedQtyError ? "pl-7" : ""}`}
-            disabled={disabled}
-            error={receivedQtyError}
-            errorIconAlign="left"
-            {...form.register(`items.${index}.received_qty`, {
-              valueAsNumber: true,
-            })}
-          />
-        </Field>
-
-        {/* Received Unit */}
-        <Field className="gap-0.5">
-          <FieldLabel className="text-muted-foreground text-[0.6875rem]">
-            <span className="sr-only">{tfl("receivedQty")} </span>
-            {tfl("unit")}
-          </FieldLabel>
-          <Controller
-            control={form.control}
-            name={`items.${index}.received_unit_id`}
-            render={({ field }) => (
-              <LookupProductUnit
-                productId={productId}
-                value={field.value ?? ""}
-                onValueChange={field.onChange}
-                disabled={disabled}
-                className="h-7 w-full text-xs"
-                error={receivedUnitError}
-              />
-            )}
-          />
-        </Field>
-
-        {/* FOC Qty */}
-        <Field className="gap-0.5">
-          <FieldLabel
-            htmlFor={`items-${index}-foc-qty`}
-            className="text-muted-foreground text-[0.6875rem]"
-          >
-            {tfl("focQty")}
-          </FieldLabel>
-          <FieldInput
-            id={`items-${index}-foc-qty`}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            placeholder="0"
-            className="h-7 text-right text-xs"
-            disabled={disabled}
-            {...form.register(`items.${index}.foc_qty`, {
-              valueAsNumber: true,
-            })}
-          />
-        </Field>
-
-        {/* FOC Unit */}
-        <Field className="gap-0.5">
-          <FieldLabel className="text-muted-foreground text-[0.6875rem]">
-            <span className="sr-only">{tfl("focQty")} </span>
-            {tfl("unit")}
-          </FieldLabel>
-          <Controller
-            control={form.control}
-            name={`items.${index}.foc_unit_id`}
-            render={({ field }) => (
-              <LookupProductUnit
-                productId={productId}
-                value={field.value ?? ""}
-                onValueChange={field.onChange}
-                disabled={disabled}
-                className="h-7 w-full text-xs"
-              />
-            )}
-          />
-        </Field>
-      </div>
-
-      {/* Dialogs (rendered outside visible layout) */}
-      <GrnItemDetailSheet
-        open={open}
-        onOpenChange={setOpen}
-        index={index}
-        form={form}
-        disabled={disabled}
-        groupIndices={groupIndices}
-      />
       <DeleteDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}

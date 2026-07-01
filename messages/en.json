@@ -501,6 +501,8 @@
     "foc": "FOC",
     "focQty": "FOC Qty",
     "details": "Details",
+    "expand": "Expand",
+    "collapse": "Collapse",
     "quantity": "Quantity",
     "lastUpdate": "Last Update",
     "general": "General",

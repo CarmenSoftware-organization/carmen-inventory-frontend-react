@@ -15,7 +15,7 @@ interface GrnTabPricingProps {
 }
 
 /**
- * แท็บ Pricing ของ GrnItemDetailSheet
+ * ส่วน Pricing ของ expanded item row
  * ให้กรอก price, discount, tax และคำนวณ subtotal/net/tax/total แบบ real-time
  * รองรับ override tax_amount / discount_amount ผ่าน checkbox is_tax_adjustment
  *
@@ -115,15 +115,20 @@ export default function GrnTabPricing({
       form.setValue(`items.${index}.total_price`, totalPrice);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
-  }, [index, discountAmount, taxAmount, netAmount, totalPrice, isDiscAdj, isTaxAdj]);
+  }, [
+    index,
+    discountAmount,
+    taxAmount,
+    netAmount,
+    totalPrice,
+    isDiscAdj,
+    isTaxAdj,
+  ]);
 
   return (
-    <div className="space-y-4 pt-4">
-      {/* ── Price card ── */}
-      <section className="rounded-lg border p-3 space-y-3">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-          {tfl("price")}
-        </h3>
+    <div className="space-y-4">
+      {/* Unit price + tax profile + rate */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor={`items-${index}-unit-price`} className="text-xs">
             {tfl("unitPrice")}
@@ -142,54 +147,28 @@ export default function GrnTabPricing({
             })}
           />
         </Field>
-      </section>
+        <Field>
+          <FieldLabel className="text-xs">{tfl("taxProfile")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name={`items.${index}.tax_profile_id`}
+            render={({ field }) => (
+              <LookupTaxProfile
+                value={field.value ?? ""}
+                onValueChange={(value, rate) => {
+                  field.onChange(value || null);
+                  form.setValue(`items.${index}.tax_rate`, rate);
+                }}
+                disabled={disabled}
+                className="h-8 w-full text-xs"
+              />
+            )}
+          />
+        </Field>
+      </div>
 
-      {/* ── Adjustment card ── */}
-      <section className="rounded-lg border p-3 space-y-3">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-          {tfl("adjustment")}
-        </h3>
-
-        {/* Tax row */}
-        <div className="grid grid-cols-[1fr_5rem] gap-2">
-          <Field>
-            <FieldLabel className="text-xs">{tfl("taxProfile")}</FieldLabel>
-            <Controller
-              control={form.control}
-              name={`items.${index}.tax_profile_id`}
-              render={({ field }) => (
-                <LookupTaxProfile
-                  value={field.value ?? ""}
-                  onValueChange={(value, rate) => {
-                    field.onChange(value || null);
-                    form.setValue(`items.${index}.tax_rate`, rate);
-                  }}
-                  disabled={disabled}
-                  className="h-8 w-full text-xs"
-                />
-              )}
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`items-${index}-tax-rate`} className="text-xs">
-              %
-            </FieldLabel>
-            <Input
-              id={`items-${index}-tax-rate`}
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="0.01"
-              placeholder="0"
-              className="h-8 text-right text-xs"
-              disabled
-              {...form.register(`items.${index}.tax_rate`, {
-                valueAsNumber: true,
-              })}
-            />
-          </Field>
-        </div>
-
+      {/* Adjustment amounts — tax & discount on one line */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
           <div className="flex items-center justify-between">
             <FieldLabel
@@ -231,8 +210,8 @@ export default function GrnTabPricing({
           />
         </Field>
 
-        {/* Discount row */}
-        <div className="grid grid-cols-[5rem_1fr] gap-2">
+        {/* Discount row — % and amount equal width */}
+        <div className="grid grid-cols-2 gap-2">
           <Field>
             <FieldLabel
               htmlFor={`items-${index}-discount-rate`}
@@ -295,10 +274,10 @@ export default function GrnTabPricing({
             />
           </Field>
         </div>
-      </section>
+      </div>
 
-      {/* ── Summary card (emphasized) ── */}
-      <section className="bg-primary/5 border-primary/20 space-y-2 rounded-lg border p-4 text-sm tabular-nums">
+      {/* ── Summary (live) ── */}
+      <div className="space-y-2 border-t pt-3 text-sm tabular-nums">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">{tfl("subtotal")}</span>
           <span>{formatCurrency(subtotal)}</span>
@@ -329,13 +308,13 @@ export default function GrnTabPricing({
           </span>
           <span>{formatCurrency(taxAmount)}</span>
         </div>
-        <div className="border-primary/20 flex items-center justify-between border-t pt-2">
+        <div className="flex items-center justify-between border-t pt-2">
           <span className="text-sm font-semibold">{tfl("total")}</span>
-          <span className="text-primary text-lg font-bold">
+          <span className="text-foreground text-base font-semibold">
             {formatCurrency(totalPrice)}
           </span>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

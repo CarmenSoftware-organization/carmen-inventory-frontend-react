@@ -42,7 +42,7 @@ export function DocFormHeader({
         </Button>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
               {title}
             </h1>
             {badges}
@@ -62,7 +62,7 @@ export function DocFormHeader({
       {ribbon && (
         <div className="pt-4">
           {infoLabel && (
-            <p className="text-muted-foreground inline-flex items-center gap-2 text-[0.625rem] font-bold tracking-wider uppercase">
+            <p className="text-muted-foreground inline-flex items-center gap-2 text-[0.625rem] font-semibold tracking-wider uppercase">
               <Info className="size-3" aria-hidden="true" />
               {infoLabel}
             </p>
@@ -79,9 +79,7 @@ export function DocFormHeader({
 
 export function DocumentRibbon({ children }: { readonly children: ReactNode }) {
   return (
-    <div className="border-border/40 bg-muted/20 flex flex-wrap items-stretch overflow-hidden rounded-lg border">
-      {children}
-    </div>
+    <div className="flex flex-wrap items-stretch border-y">{children}</div>
   );
 }
 
@@ -97,11 +95,11 @@ export function RibbonCell({
   return (
     <div
       className={cn(
-        "border-border/40 min-w-0 border-r px-4 py-2 last:border-r-0",
+        "min-w-0 border-l px-4 py-2 first:border-l-0 first:pl-0",
         className,
       )}
     >
-      <p className="text-muted-foreground text-[0.625rem] font-bold tracking-wider uppercase">
+      <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
         {label}
       </p>
       <div className="mt-0.5 truncate text-sm font-semibold">{children}</div>

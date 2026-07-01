@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
@@ -21,6 +20,8 @@ interface LookupProductLocationProps {
   readonly defaultLabel?: string;
   readonly error?: string;
   readonly readOnly?: boolean;
+  /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม location ใหม่) */
+  readonly defaultOpen?: boolean;
 }
 
 const TYPE_VARIANT: Record<string, "info" | "warning" | "secondary"> = {
@@ -60,6 +61,7 @@ export function LookupProductLocation({
   defaultLabel,
   error,
   readOnly,
+  defaultOpen,
 }: LookupProductLocationProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -67,19 +69,27 @@ export function LookupProductLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: { search?: string; perpage: number; page?: number }) =>
-    useLocationsByProduct(productId || undefined, params);
+  const useListHook = (params: {
+    search?: string;
+    perpage: number;
+    page?: number;
+  }) => useLocationsByProduct(productId || undefined, params);
 
-  const { items: locations, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Location>({
-      useListHook,
-      search,
-      perpage: 30,
-      filter: (l: Location) => {
-        if (excludedSet && excludedSet.has(l.id)) return false;
-        return true;
-      },
-    });
+  const {
+    items: locations,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<Location>({
+    useListHook,
+    search,
+    perpage: 30,
+    filter: (l: Location) => {
+      if (excludedSet && excludedSet.has(l.id)) return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox
@@ -121,6 +131,7 @@ export function LookupProductLocation({
       defaultLabel={defaultLabel}
       error={error}
       readOnly={readOnly}
+      defaultOpen={defaultOpen}
     />
   );
 }

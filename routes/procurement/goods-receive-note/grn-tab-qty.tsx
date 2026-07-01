@@ -9,6 +9,7 @@ import { useTranslations } from "use-intl";
 import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
+import { cn } from "@/lib/utils";
 import type { GrnFormValues } from "./grn-form-schema";
 
 // --- WatchedProductUnit (same pattern as PR) ---
@@ -53,7 +54,7 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
           value={field.value ?? ""}
           onValueChange={field.onChange}
           disabled={disabled || !productId}
-          className="w-full text-xs"
+          className="h-8 w-full text-xs"
           error={fieldState.error?.message}
         />
       )}
@@ -71,7 +72,7 @@ interface GrnTabQtyProps {
 }
 
 /**
- * แท็บ Quantity ของ GrnItemDetailSheet
+ * ส่วน Quantity ของ expanded item row
  * ให้กรอก approved_qty, received_qty, foc_qty และเลือกหน่วยของแต่ละค่า
  * กรณี GRN manual บาง field อาจ disable ตาม docType
  *
@@ -97,59 +98,61 @@ export default function GrnTabQty({
     form.formState.errors.items?.[index]?.received_qty?.message;
 
   return (
-    <div className="space-y-3 pt-4">
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-3",
+        isPo ? "sm:grid-cols-3" : "sm:grid-cols-2",
+      )}
+    >
       {/* Order Qty + Unit: PO = disabled, Manual = hidden */}
       {isPo && (
-        <div className="grid grid-cols-2 gap-4">
-          <Field>
-            <FieldLabel
-              htmlFor={`items-${index}-order-qty`}
-              className="text-xs"
-            >
-              {tfl("orderQty")}
-            </FieldLabel>
+        <Field className="gap-1">
+          <FieldLabel htmlFor={`items-${index}-order-qty`} className="text-xs">
+            {tfl("orderQty")}
+          </FieldLabel>
+          <div className="grid grid-cols-2 gap-1.5">
             <Input
               id={`items-${index}-order-qty`}
-              type="number" inputMode="decimal"
+              type="number"
+              inputMode="decimal"
               min={0}
               placeholder="0"
-              className="text-right text-xs"
+              className="h-8 w-full text-right text-xs"
               disabled
               {...form.register(`items.${index}.approved_qty`, {
                 valueAsNumber: true,
               })}
             />
-          </Field>
-
-          <Field>
-            <FieldLabel className="text-xs">{tfl("orderUnit")}</FieldLabel>
             <WatchedProductUnit
               control={form.control}
               index={index}
               unitField="approved_unit_id"
               disabled
             />
-          </Field>
-        </div>
+          </div>
+        </Field>
       )}
 
       {/* Received Qty + Unit */}
-      <div className="grid grid-cols-2 gap-4">
-        <Field>
-          <FieldLabel
-            htmlFor={`items-${index}-received-qty`}
-            required
-            className="text-xs"
-          >
-            {tfl("receivedQty")}
-          </FieldLabel>
+      <Field className="gap-1">
+        <FieldLabel
+          htmlFor={`items-${index}-received-qty`}
+          required
+          className="text-xs"
+        >
+          {tfl("receivedQty")}
+        </FieldLabel>
+        <div className="grid grid-cols-2 gap-1.5">
           <FieldInput
             id={`items-${index}-received-qty`}
             type="number"
             inputMode="decimal"
             min={1}
             placeholder="0"
-            className={`text-right text-xs ${receivedQtyError ? "pl-7" : ""}`}
+            className={cn(
+              "h-8 w-full text-right text-xs",
+              receivedQtyError && "pl-7",
+            )}
             disabled={disabled}
             error={receivedQtyError}
             errorIconAlign="left"
@@ -157,48 +160,41 @@ export default function GrnTabQty({
               valueAsNumber: true,
             })}
           />
-        </Field>
-
-        <Field>
-          <FieldLabel required className="text-xs">{tfl("receivedUnit")}</FieldLabel>
           <WatchedProductUnit
             control={form.control}
             index={index}
             unitField="received_unit_id"
             disabled={disabled}
           />
-        </Field>
-      </div>
+        </div>
+      </Field>
 
       {/* FOC Qty + Unit */}
-      <div className="grid grid-cols-2 gap-4">
-        <Field>
-          <FieldLabel htmlFor={`items-${index}-foc-qty`} className="text-xs">
-            {tfl("focQty")}
-          </FieldLabel>
+      <Field className="gap-1">
+        <FieldLabel htmlFor={`items-${index}-foc-qty`} className="text-xs">
+          {tfl("focQty")}
+        </FieldLabel>
+        <div className="grid grid-cols-2 gap-1.5">
           <Input
             id={`items-${index}-foc-qty`}
-            type="number" inputMode="decimal"
+            type="number"
+            inputMode="decimal"
             min={0}
             placeholder="0"
-            className="text-right text-xs"
+            className="h-8 w-full text-right text-xs"
             disabled={disabled}
             {...form.register(`items.${index}.foc_qty`, {
               valueAsNumber: true,
             })}
           />
-        </Field>
-
-        <Field>
-          <FieldLabel className="text-xs">{tfl("focUnit")}</FieldLabel>
           <WatchedProductUnit
             control={form.control}
             index={index}
             unitField="foc_unit_id"
             disabled={disabled}
           />
-        </Field>
-      </div>
+        </div>
+      </Field>
     </div>
   );
 }
