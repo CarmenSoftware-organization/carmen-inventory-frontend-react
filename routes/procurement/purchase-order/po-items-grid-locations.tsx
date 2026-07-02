@@ -43,7 +43,7 @@ export function LocationsEditor({ form, index, disabled, readOnly }: Props) {
   const [deleteLocIndex, setDeleteLocIndex] = useState<number | null>(null);
 
   return (
-    <div className="space-y-2">
+    <div>
       {editable && (
         <div className="text-right">
           <Button
@@ -56,126 +56,121 @@ export function LocationsEditor({ form, index, disabled, readOnly }: Props) {
           </Button>
         </div>
       )}
-      <div className="border-border/60 bg-card overflow-hidden rounded-lg border text-xs">
-        <table className="w-full table-fixed">
-          <thead className="bg-muted/40 text-muted-foreground font-semibold">
+      <table className="w-full table-fixed">
+        <thead className="text-muted-foreground font-semibold">
+          <tr>
+            <th
+              scope="col"
+              className={cn("px-3 text-left", editable ? "w-[53%]" : "w-[60%]")}
+            >
+              {tfl("location")}
+            </th>
+            <th scope="col" className="py-1.2 w-[22 px-3 text-right">
+              {tfl("orderQty")}
+            </th>
+            <th scope="col" className="py-1.2 w-[22 px-3 text-right">
+              {tfl("receivedQty")}
+            </th>
+            {editable && <th scope="col" className="py-1.2-[7%]" />}
+          </tr>
+        </thead>
+        <tbody>
+          {fields.length === 0 && (
             <tr>
-              <th
-                scope="col"
-                className={cn(
-                  "px-3 py-1.5 text-left",
-                  editable ? "w-[53%]" : "w-[60%]",
-                )}
+              <td
+                colSpan={4}
+                className="text-muted-foreground border-border/40 border-t py-3 text-center"
               >
-                {tfl("location")}
-              </th>
-              <th scope="col" className="w-[20%] px-3 py-1.5 text-right">
-                {tfl("orderQty")}
-              </th>
-              <th scope="col" className="w-[20%] px-3 py-1.5 text-right">
-                {tfl("receivedQty")}
-              </th>
-              {editable && <th scope="col" className="w-[7%] py-1.5" />}
+                —
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {fields.length === 0 && (
-              <tr>
-                <td
-                  colSpan={4}
-                  className="text-muted-foreground border-border/40 border-t py-3 text-center"
-                >
-                  —
+          )}
+          {fields.map((loc, locIndex) => {
+            const locErrors =
+              form.formState.errors.items?.[index]?.locations?.[locIndex];
+            const locIdError = locErrors?.id?.message;
+            const reqQtyError = locErrors?.order_qty?.message;
+            return (
+              <tr
+                key={loc.id}
+                className="border-border/40 border-t align-middle"
+              >
+                <td className="px-3">
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <Controller
+                      control={form.control}
+                      name={`items.${index}.locations.${locIndex}.id`}
+                      render={({ field, fieldState }) => (
+                        <LookupProductLocation
+                          productId={productId}
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={!editable}
+                          readOnly={!editable}
+                          excludeIds={(watchedLocations ?? [])
+                            .map((l, i) => (i === locIndex ? null : l?.id))
+                            .filter((id): id is string => !!id)}
+                          className="w-full text-xs"
+                          error={fieldState.error?.message ?? locIdError}
+                        />
+                      )}
+                    />
+                  </div>
                 </td>
-              </tr>
-            )}
-            {fields.map((loc, locIndex) => {
-              const locErrors =
-                form.formState.errors.items?.[index]?.locations?.[locIndex];
-              const locIdError = locErrors?.id?.message;
-              const reqQtyError = locErrors?.order_qty?.message;
-              return (
-                <tr
-                  key={loc.id}
-                  className="border-border/40 border-t align-middle"
-                >
-                  <td className="px-3 py-1.5">
-                    <div className="flex min-w-0 items-center gap-1.5">
-                      <Controller
-                        control={form.control}
-                        name={`items.${index}.locations.${locIndex}.id`}
-                        render={({ field, fieldState }) => (
-                          <LookupProductLocation
-                            productId={productId}
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={!editable}
-                            readOnly={!editable}
-                            excludeIds={(watchedLocations ?? [])
-                              .map((l, i) => (i === locIndex ? null : l?.id))
-                              .filter((id): id is string => !!id)}
-                            className="w-full text-xs"
-                            error={fieldState.error?.message ?? locIdError}
-                          />
-                        )}
-                      />
-                    </div>
-                  </td>
-                  <td className="px-3 py-1.5">
-                    {editable ? (
-                      <LocationQtyInput
-                        form={form}
-                        itemIndex={index}
-                        locIndex={locIndex}
-                        disabled={!editable}
-                        error={reqQtyError}
-                      />
-                    ) : (
-                      <span className="block text-right text-xs tabular-nums">
-                        {watchedLocations?.[locIndex]?.order_qty ?? 0}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-3 py-1.5">
-                    {editable ? (
-                      <Input
-                        type="number"
-                        inputMode="decimal"
-                        min={0}
-                        step="1"
-                        placeholder="0"
-                        className="h-8 text-right"
-                        disabled
-                        {...form.register(
-                          `items.${index}.locations.${locIndex}.received_qty`,
-                          { valueAsNumber: true },
-                        )}
-                      />
-                    ) : (
-                      <span className="block text-right text-xs tabular-nums">
-                        {watchedLocations?.[locIndex]?.received_qty ?? 0}
-                      </span>
-                    )}
-                  </td>
-                  {editable && (
-                    <td className="px-3 py-1.5">
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon-xs"
-                        aria-label={t("removeLocation")}
-                        onClick={() => setDeleteLocIndex(locIndex)}
-                      >
-                        <Trash2 className="size-3" />
-                      </Button>
-                    </td>
+                <td className="px-3">
+                  {editable ? (
+                    <LocationQtyInput
+                      form={form}
+                      itemIndex={index}
+                      locIndex={locIndex}
+                      disabled={!editable}
+                      error={reqQtyError}
+                    />
+                  ) : (
+                    <span className="block text-right text-xs tabular-nums">
+                      {watchedLocations?.[locIndex]?.order_qty ?? 0}
+                    </span>
                   )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                </td>
+                <td className="px-3">
+                  {editable ? (
+                    <Input
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="1"
+                      placeholder="0"
+                      className="h-8 text-right"
+                      disabled
+                      {...form.register(
+                        `items.${index}.locations.${locIndex}.received_qty`,
+                        { valueAsNumber: true },
+                      )}
+                    />
+                  ) : (
+                    <span className="block text-right text-xs tabular-nums">
+                      {watchedLocations?.[locIndex]?.received_qty ?? 0}
+                    </span>
+                  )}
+                </td>
+                {editable && (
+                  <td className="px-3">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon-xs"
+                      aria-label={t("removeLocation")}
+                      onClick={() => setDeleteLocIndex(locIndex)}
+                    >
+                      <Trash2 className="size-3" />
+                    </Button>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       <DeleteDialog
         open={deleteLocIndex !== null}
