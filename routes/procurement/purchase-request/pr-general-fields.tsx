@@ -38,10 +38,12 @@ export function PrGeneralFields({
 
   return (
     <>
-      <Field>
+      <Field className={workflowReadOnly ? "gap-1" : undefined}>
         <FieldLabel
           required={!workflowReadOnly}
-          className={workflowReadOnly ? "text-muted-foreground" : undefined}
+          className={
+            workflowReadOnly ? "text-muted-foreground font-normal" : undefined
+          }
         >
           {tfl("workflow")}
         </FieldLabel>
@@ -56,21 +58,25 @@ export function PrGeneralFields({
               readOnly={workflowReadOnly}
               disabled={disabled}
               error={form.formState.errors.workflow_id?.message}
-              className={workflowReadOnly ? "font-semibold" : undefined}
+              className={workflowReadOnly ? "font-medium" : undefined}
             />
           )}
         />
       </Field>
 
-      <Field>
+      <Field className={descriptionReadOnly ? "gap-1" : undefined}>
         <FieldLabel
           htmlFor="pr-description"
-          className={descriptionReadOnly ? "text-muted-foreground" : undefined}
+          className={
+            descriptionReadOnly
+              ? "text-muted-foreground font-normal"
+              : undefined
+          }
         >
           {tfl("description")}
         </FieldLabel>
         {descriptionReadOnly ? (
-          <span className="inline-flex min-h-8 items-center text-sm font-semibold">
+          <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
             {watchedDescription?.trim() ? (
               <span className="whitespace-pre-line">{watchedDescription}</span>
             ) : (

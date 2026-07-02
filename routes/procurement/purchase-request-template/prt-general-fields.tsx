@@ -40,15 +40,22 @@ export function PrtGeneralFields({
     name: "description",
   });
 
+  // view mode → คู่ label↔value ชิด (gap-1) + label เงียบ (เทา/ปกติ) ให้ value
+  // เด่นกว่า สร้าง proximity grouping + lightness contrast แบบ Apple (เหมือน CN)
+  const viewFieldGap = readOnly ? "gap-1" : undefined;
+  const viewLabelClass = readOnly
+    ? "text-muted-foreground font-normal"
+    : undefined;
+
   return (
     <div className="max-w-3xl">
       <FieldGroup className="gap-3">
         {/* Workflow + Name */}
-        <div className="grid grid-cols-2 gap-3">
-          <Field>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field className={viewFieldGap}>
             <FieldLabel
               required={!readOnly}
-              className={readOnly ? "text-muted-foreground" : undefined}
+              className={viewLabelClass}
             >
               {tfl("workflow")}
             </FieldLabel>
@@ -63,21 +70,21 @@ export function PrtGeneralFields({
                   readOnly={readOnly}
                   disabled={disabled}
                   error={errors.workflow_id?.message}
-                  className={readOnly ? "font-semibold" : undefined}
+                  className={readOnly ? "font-medium" : undefined}
                 />
               )}
             />
           </Field>
-          <Field>
+          <Field className={viewFieldGap}>
             <FieldLabel
               htmlFor="prt-name"
               required={!readOnly}
-              className={readOnly ? "text-muted-foreground" : undefined}
+              className={viewLabelClass}
             >
               {tfl("name")}
             </FieldLabel>
             {readOnly ? (
-              <span className="inline-flex min-h-8 items-center text-sm font-semibold">
+              <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
                 {watchedName?.trim() ? (
                   watchedName
                 ) : (
@@ -98,15 +105,15 @@ export function PrtGeneralFields({
           </Field>
         </div>
 
-        <Field>
+        <Field className={viewFieldGap}>
           <FieldLabel
             htmlFor="prt-description"
-            className={readOnly ? "text-muted-foreground" : undefined}
+            className={viewLabelClass}
           >
             {tfl("description")}
           </FieldLabel>
           {readOnly ? (
-            <span className="inline-flex min-h-8 items-center text-sm font-semibold">
+            <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
               {watchedDescription?.trim() ? (
                 <span className="whitespace-pre-line">
                   {watchedDescription}

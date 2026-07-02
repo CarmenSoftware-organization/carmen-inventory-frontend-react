@@ -34,7 +34,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-const INPUT_CLS = "h-6 text-xs md:text-xs text-right";
+const INPUT_CLS = "h-6 text-xs text-right";
 
 type ExtraCostField = FieldArrayWithId<
   GrnFormValues,
@@ -121,7 +121,7 @@ export function GrnExtraCostFields({
         header: tfl("note"),
         cell: ({ row }) => (
           <Input
-            className="mt-3 h-6 text-xs"
+            className="h-6 text-xs"
             disabled={disabled}
             maxLength={256}
             {...form.register(`extra_cost_details.${row.index}.note`)}
@@ -204,7 +204,9 @@ export function GrnExtraCostFields({
       {/* Extra Cost Details Table */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold">{t("extraCostDetails")}</h2>
+          <h2 className="text-foreground text-sm font-semibold tracking-tight">
+            {t("extraCostDetails")}
+          </h2>
           {!disabled && (
             <Button
               type="button"

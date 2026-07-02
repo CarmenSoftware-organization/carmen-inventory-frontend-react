@@ -1,4 +1,3 @@
-
 import { lazy, Suspense, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -180,7 +179,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
       <form
         id="po-form"
         onSubmit={form.handleSubmit(onSubmit, revealErrors)}
-        className="flex flex-1 flex-col gap-4"
+        className="flex flex-1 flex-col gap-4 px-4"
       >
         <section className="space-y-3">
           <div className="border-border/60 space-y-0.5 border-b pb-2">
@@ -229,7 +228,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           />
         </section>
 
-        <section className="space-y-3">
+        <section className="space-y-4">
           <div className="border-border/60 space-y-0.5 border-b pb-2">
             <h2 className="text-foreground text-sm font-semibold tracking-tight">
               {t("sectionNotes")}

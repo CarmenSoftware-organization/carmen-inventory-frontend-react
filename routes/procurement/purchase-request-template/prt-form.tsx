@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -98,10 +97,9 @@ export function PrtForm({ template }: PrtFormProps) {
       createPrt.mutate(payload, {
         onSuccess: (data) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate(
-            `/procurement/purchase-request-template/${data.data.id}`,
-            { replace: true },
-          );
+          navigate(`/procurement/purchase-request-template/${data.data.id}`, {
+            replace: true,
+          });
           setMode("view");
         },
         onError: (err) => toast.error(err.message),
@@ -122,9 +120,7 @@ export function PrtForm({ template }: PrtFormProps) {
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() =>
-        navigate("/procurement/purchase-request-template"),
-      );
+      discard.confirm(() => navigate("/procurement/purchase-request-template"));
     } else {
       navigate("/procurement/purchase-request-template");
     }
@@ -159,7 +155,7 @@ export function PrtForm({ template }: PrtFormProps) {
         onSubmit={form.handleSubmit(onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4"
+        className="space-y-4 px-4"
       >
         <PrtGeneralFields form={form} readOnly={isView} disabled={isPending} />
         <PrtItemFields

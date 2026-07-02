@@ -157,6 +157,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           form={form}
           disabled={isDisabled}
           fromWizard={fromWizard}
+          plainText={isView}
         />
 
         <Tabs defaultValue="general" className="border-t pt-4">

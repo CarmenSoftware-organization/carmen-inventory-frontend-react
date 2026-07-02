@@ -189,7 +189,7 @@ export default function GrnTabPricing({
                     className="size-3.5"
                   />
                   <span className="text-muted-foreground text-[0.6875rem] select-none">
-                    {tfl("manual")}
+                    {tfl("override")}
                   </span>
                 </label>
               )}
@@ -253,7 +253,7 @@ export default function GrnTabPricing({
                       className="size-3.5"
                     />
                     <span className="text-muted-foreground text-[0.6875rem] select-none">
-                      {tfl("manual")}
+                      {tfl("override")}
                     </span>
                   </label>
                 )}

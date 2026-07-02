@@ -1,4 +1,3 @@
-
 import { useEffect, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
@@ -27,10 +26,11 @@ interface CnGeneralFieldsProps {
   readonly plainText?: boolean;
 }
 
-/** ค่าเป็น plain text (view mode) */
+/** ค่าเป็น plain text (view mode) — value เด่น (เข้ม/medium/sm) ให้เกิด
+ *  lightness+size contrast เหนือ label ที่เงียบ (เหมือน PO/GRN PlainField) */
 function PlainText({ children }: { readonly children: ReactNode }) {
   return (
-    <span className="inline-flex min-h-8 items-center text-sm">
+    <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
       {children || "—"}
     </span>
   );
@@ -79,14 +79,23 @@ export function CnGeneralFields({
     amount_discount: t("amountDiscount"),
   };
 
+  // view mode → คู่ label↔value ชิด (gap-1) + label เงียบ (เทา/ปกติ) ให้ value
+  // เด่นกว่า สร้าง proximity grouping + lightness contrast แบบ Apple (เหมือน PO)
+  const viewFieldGap = plainText ? "gap-1" : undefined;
+  const viewLabelClass = plainText
+    ? "text-muted-foreground font-normal"
+    : undefined;
+
   return (
     <div className="space-y-4">
       {/* ── 1. Credit Note (กรอกเอง) ── */}
       <section className="space-y-2">
         <GroupLabel>{t("groupDetails")}</GroupLabel>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field>
-            <FieldLabel required>{t("cnType")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass} required>
+              {t("cnType")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="credit_note_type"
@@ -98,7 +107,7 @@ export function CnGeneralFields({
                     value={field.value}
                     onValueChange={field.onChange}
                     placeholder={tfl("selectType")}
-                    className="w-full text-sm"
+                    className="w-full text-xs"
                     disabled={disabled}
                     error={errors.credit_note_type?.message}
                     size="sm"
@@ -117,8 +126,10 @@ export function CnGeneralFields({
             />
           </Field>
 
-          <Field>
-            <FieldLabel required>{tfl("vendor")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass} required>
+              {tfl("vendor")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="vendor_id"
@@ -129,13 +140,16 @@ export function CnGeneralFields({
                   disabled={disabled}
                   readOnly={plainText}
                   error={errors.vendor_id?.message}
+                  className="text-xs"
                 />
               )}
             />
           </Field>
 
-          <Field>
-            <FieldLabel required>{tfl("grnNo")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass} required>
+              {tfl("grnNo")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="grn_id"
@@ -154,13 +168,16 @@ export function CnGeneralFields({
                   disabled={disabled}
                   readOnly={plainText}
                   error={errors.grn_id?.message}
+                  className="text-xs"
                 />
               )}
             />
           </Field>
 
-          <Field>
-            <FieldLabel required>{tfl("reason")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass} required>
+              {tfl("reason")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="reason"
@@ -171,6 +188,7 @@ export function CnGeneralFields({
                   disabled={disabled}
                   readOnly={plainText}
                   error={errors.reason?.message}
+                  className="w-full text-xs"
                 />
               )}
             />
@@ -182,8 +200,8 @@ export function CnGeneralFields({
       <section className="space-y-2">
         <GroupLabel hint={t("grnRefHint")}>{t("groupGrnRef")}</GroupLabel>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field>
-            <FieldLabel>{tfl("grnDate")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass}>{tfl("grnDate")}</FieldLabel>
             <Controller
               control={form.control}
               name="grn_date"
@@ -192,7 +210,7 @@ export function CnGeneralFields({
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder={tc("selectDate")}
-                  className="w-full text-sm"
+                  className="text-xs"
                   readOnly
                   error={errors.grn_date?.message}
                 />
@@ -200,13 +218,15 @@ export function CnGeneralFields({
             />
           </Field>
 
-          <Field>
-            <FieldLabel>{tfl("invoiceNo")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass}>{tfl("invoiceNo")}</FieldLabel>
             <PlainText>{invoiceNo}</PlainText>
           </Field>
 
-          <Field>
-            <FieldLabel>{tfl("invoiceDate")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass}>
+              {tfl("invoiceDate")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="invoice_date"
@@ -215,7 +235,7 @@ export function CnGeneralFields({
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder={tc("selectDate")}
-                  className="h-8 w-full text-sm"
+                  className="text-xs"
                   readOnly
                   error={errors.invoice_date?.message}
                 />
@@ -223,8 +243,8 @@ export function CnGeneralFields({
             />
           </Field>
 
-          <Field>
-            <FieldLabel>{tfl("currency")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass}>{tfl("currency")}</FieldLabel>
             <Controller
               control={form.control}
               name="currency_code"
@@ -235,13 +255,16 @@ export function CnGeneralFields({
                   readOnly
                   error={errors.currency_code?.message}
                   size="sm"
+                  className="text-xs"
                 />
               )}
             />
           </Field>
 
-          <Field>
-            <FieldLabel>{tfl("exchangeRate")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass}>
+              {tfl("exchangeRate")}
+            </FieldLabel>
             <PlainText>{formatExchangeRate(exchangeRate)}</PlainText>
           </Field>
         </div>
@@ -251,8 +274,12 @@ export function CnGeneralFields({
       <section className="space-y-2">
         <GroupLabel>{t("groupTaxInvoice")}</GroupLabel>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field>
-            <FieldLabel htmlFor="cn-tax-invoice-no" required>
+          <Field className={viewFieldGap}>
+            <FieldLabel
+              className={viewLabelClass}
+              htmlFor="cn-tax-invoice-no"
+              required
+            >
               {tfl("taxInvoiceNo")}
             </FieldLabel>
             {plainText ? (
@@ -270,8 +297,10 @@ export function CnGeneralFields({
             )}
           </Field>
 
-          <Field>
-            <FieldLabel required>{tfl("taxInvoiceDate")}</FieldLabel>
+          <Field className={viewFieldGap}>
+            <FieldLabel className={viewLabelClass} required>
+              {tfl("taxInvoiceDate")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="tax_invoice_date"
@@ -281,7 +310,7 @@ export function CnGeneralFields({
                   onValueChange={field.onChange}
                   disabled={disabled}
                   placeholder={tc("selectDate")}
-                  className="h-8 w-full text-sm"
+                  className="w-full text-xs"
                   readOnly={plainText}
                   error={errors.tax_invoice_date?.message}
                 />
@@ -328,8 +357,8 @@ function GroupLabel({
   readonly hint?: string;
 }) {
   return (
-    <div className="border-border/40 flex items-baseline gap-2 border-b pb-1">
-      <h3 className="text-foreground/80 text-xs font-semibold tracking-wide">
+    <div className="flex items-baseline gap-2">
+      <h3 className="text-foreground text-sm font-semibold tracking-tight">
         {children}
       </h3>
       {hint && (

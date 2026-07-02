@@ -33,7 +33,6 @@ export default function CnTabPricing({
 }: CnTabPricingProps) {
   "use no memo";
   const tfl = useTranslations("field");
-  const t = useTranslations("procurement.creditNote");
 
   const [watchUnitPrice, watchQty, watchTaxRate] = useWatch({
     control: form.control,
@@ -95,9 +94,31 @@ export default function CnTabPricing({
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor={`items-${index}-tax-rate`} className="text-xs">
-            {tfl("tax")} %
-          </FieldLabel>
+          <div className="flex items-center justify-between">
+            <FieldLabel
+              htmlFor={`items-${index}-tax-rate`}
+              className="text-xs"
+            >
+              {tfl("tax")} %
+            </FieldLabel>
+            <Controller
+              control={form.control}
+              name={`items.${index}.is_tax_adjustment`}
+              render={({ field }) => (
+                <label className="flex cursor-pointer items-center gap-1">
+                  <Checkbox
+                    checked={field.value ?? false}
+                    onCheckedChange={field.onChange}
+                    disabled={disabled}
+                    className="size-3.5"
+                  />
+                  <span className="text-muted-foreground text-[0.6875rem] select-none">
+                    {tfl("override")}
+                  </span>
+                </label>
+              )}
+            />
+          </div>
           <Input
             id={`items-${index}-tax-rate`}
             type="number"
@@ -113,25 +134,6 @@ export default function CnTabPricing({
           />
         </Field>
       </div>
-
-      {/* Tax adjustment flag */}
-      <Controller
-        control={form.control}
-        name={`items.${index}.is_tax_adjustment`}
-        render={({ field }) => (
-          <label className="flex cursor-pointer items-center gap-2">
-            <Checkbox
-              checked={field.value ?? false}
-              onCheckedChange={field.onChange}
-              disabled={disabled}
-              className="size-3.5"
-            />
-            <span className="text-muted-foreground text-xs select-none">
-              {t("taxAdjustment")}
-            </span>
-          </label>
-        )}
-      />
 
       {/* ── Summary (live) ── */}
       <div className="space-y-2 border-t pt-3 text-sm tabular-nums">
