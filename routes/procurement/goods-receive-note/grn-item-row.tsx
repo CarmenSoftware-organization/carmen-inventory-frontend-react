@@ -109,7 +109,7 @@ export const GrnItemRow = memo(function GrnItemRow({
       <div
         className={cn(
           "flex items-center gap-2.5 py-3 pr-4 pl-8 transition-colors",
-          showExpanded ? "bg-muted/40" : "hover:bg-muted/40",
+          "hover:bg-muted/40",
         )}
       >
         <button

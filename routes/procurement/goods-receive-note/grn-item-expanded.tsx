@@ -29,7 +29,7 @@ export function GrnItemExpanded({
   return (
     // pl-[3.625rem] = pl-8 (32px) + chevron (size-4=16px) + gap-2.5 (10px)
     // → indent เนื้อหาให้ตรงแนวเดียวกับ location ในแถว collapsed
-    <div className="bg-muted/40 space-y-4 px-4 pt-2 pb-4 pl-[3.625rem]">
+    <div className="space-y-4 px-4 pt-2 pb-4 pl-[3.625rem]">
       <section className="space-y-2">
         <p className={EYEBROW}>{tfl("quantity")}</p>
         <GrnTabQty
