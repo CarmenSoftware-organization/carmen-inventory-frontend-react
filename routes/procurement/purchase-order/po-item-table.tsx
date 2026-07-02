@@ -1,10 +1,12 @@
 import { memo, useEffect, useMemo } from "react";
 import {
   Controller,
+  useFormState,
   useWatch,
   type UseFormReturn,
   type Control,
 } from "react-hook-form";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { LookupProduct } from "@/components/lookup/lookup-product";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
@@ -278,11 +280,29 @@ export const OrderQtyCell = function OrderQtyCell({
   "use no memo";
   const locations =
     useWatch({ control, name: `items.${index}.locations` }) ?? [];
+  // order_qty ระดับ item = ยอดรวมจาก locations (read-only) — ถ้า zod validate
+  // แล้วยอดรวมไม่ผ่าน (min qty) จะไม่มี input ให้ scroll หา → mark data-invalid
+  // + สีแดงที่เซลล์นี้ ให้ scrollToFirstInvalidField เจอ + user เห็น field ที่ผิด
+  const { errors } = useFormState({
+    control,
+    name: `items.${index}.order_qty`,
+  });
+  const invalid = !!errors.items?.[index]?.order_qty;
   const sum = locations.reduce(
     (acc, l) => acc + (Number(l?.order_qty) || 0),
     0,
   );
-  return <span className="tabular-nums">{sum}</span>;
+  return (
+    <span
+      data-invalid={invalid ? "true" : undefined}
+      className={cn(
+        "tabular-nums",
+        invalid && "text-destructive font-semibold",
+      )}
+    >
+      {sum}
+    </span>
+  );
 };
 
 /** Read-only display ของ net/tax/total — คำนวณ local เพื่อแสดงผล (ไม่เขียน form) */

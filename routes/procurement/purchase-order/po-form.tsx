@@ -95,21 +95,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const [revealErrorSignal, setRevealErrorSignal] = useState(0);
   const revealErrors = () => {
     setRevealErrorSignal((c) => c + 1);
+    // scroll หา field แรกที่ผิด — retry ข้ามเฟรมจน row ที่ auto-expand mount field เสร็จ
+    // (order_qty rollup ระดับ item mark data-invalid ที่ OrderQtyCell ในแถวหลักแล้ว)
     scrollToFirstInvalidField();
-    // order_qty ของ item = ยอดรวมจาก locations แสดงแบบ read-only (ไม่มี aria-invalid
-    // ให้ scroll หา) — ถ้า item ติด error เฉพาะ order_qty ให้ scroll ไปที่แถวนั้นแทน
-    // เพื่อให้ user เห็น row ที่ถูก auto-expand (กรอก qty ของ location ได้)
-    const itemErrors = form.formState.errors.items;
-    const rollupIdx = itemErrors
-      ? Object.keys(itemErrors)
-          .map(Number)
-          .filter((n) => !Number.isNaN(n))
-          .sort((a, b) => a - b)
-          .find((i) => !!itemErrors[i]?.order_qty && !itemErrors[i]?.locations)
-      : undefined;
-    if (rollupIdx != null) {
-      scrollToFirstInvalidField({ selector: `#po-item-row-${rollupIdx}` });
-    }
   };
 
   const {
