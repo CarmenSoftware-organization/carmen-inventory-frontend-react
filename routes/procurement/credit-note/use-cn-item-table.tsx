@@ -288,6 +288,14 @@ export function useCnItemTable({
   "use no memo";
   const tfl = useTranslations("field");
 
+  // indent ของ expanded content ให้ตรงขอบซ้าย column Product — คิดเป็น % ของผลรวม
+  // column size เพราะ table เป็น table-fixed w-full (column scale ตามสัดส่วน)
+  const showAction = !disabled; // action column (ลบ item)
+  const preProductSize = 36 /* expand */ + 36 /* index */;
+  const totalSize =
+    preProductSize + 240 + 200 + 90 + 120 + 110 + (showAction ? 40 : 0);
+  const leftInsetPct = (preProductSize / totalSize) * 100;
+
   const columns = useMemo<ColumnDef<CnItemField>[]>(() => {
     const expandColumn: ColumnDef<CnItemField> = {
       id: "expand",
@@ -319,6 +327,7 @@ export function useCnItemTable({
             form={form}
             itemFields={itemFields}
             disabled={disabled}
+            leftInsetPct={leftInsetPct}
           />
         ),
       },
@@ -436,7 +445,16 @@ export function useCnItemTable({
         cellClassName: cn("py-2 align-middle", col.meta?.cellClassName),
       },
     }));
-  }, [form, disabled, grnId, itemFields, autoOpenIndex, onDelete, tfl]);
+  }, [
+    form,
+    disabled,
+    grnId,
+    itemFields,
+    autoOpenIndex,
+    onDelete,
+    tfl,
+    leftInsetPct,
+  ]);
 
   const table = useReactTable({
     data: itemFields,
