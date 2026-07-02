@@ -1,5 +1,7 @@
+import { lazy, Suspense, useState } from "react";
 import { useTranslations } from "use-intl";
 import {
+  GitBranch,
   MessageSquare,
   Pencil,
   Save,
@@ -7,10 +9,25 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_STATUS } from "@/types/purchase-request";
 import type { FormMode } from "@/types/form";
+import type { WorkflowHistoryEntry } from "@/types/purchase-request";
+
+// แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
+const PrWorkflowHistory = lazy(() =>
+  import("./workflow/pr-workflow-history").then((mod) => ({
+    default: mod.PrWorkflowHistory,
+  })),
+);
 
 interface PrFormActionsProps {
   readonly mode: FormMode;
@@ -23,6 +40,9 @@ interface PrFormActionsProps {
   readonly hasRecord: boolean;
   readonly canSave?: boolean;
   readonly saveDisabledTitle?: string;
+  readonly workflowHistory?: WorkflowHistoryEntry[];
+  readonly requestorName?: string;
+  readonly createdAt?: string;
   readonly onEdit: () => void;
   readonly onCancel: () => void;
   readonly onDelete: () => void;
@@ -72,15 +92,21 @@ export function PrFormActions({
   hasRecord,
   canSave = true,
   saveDisabledTitle,
+  workflowHistory,
+  requestorName,
+  createdAt,
   onEdit,
   onCancel,
   onDelete,
   onComment,
 }: PrFormActionsProps) {
   const tc = useTranslations("common");
+  const t = useTranslations("procurement.purchaseRequest");
   const isView = mode === "view";
   const isVoided = prStatus === PR_STATUS.VOIDED;
   const isViewOnly = role === STAGE_ROLE.VIEW_ONLY;
+  const hasHistory = !!workflowHistory && workflowHistory.length > 0;
+  const [showHistory, setShowHistory] = useState(false);
 
   return (
     <div className="flex items-center gap-2">
@@ -144,6 +170,42 @@ export function PrFormActions({
           documentId={prId}
           filters={prNo ? { DocumentNo: prNo } : undefined}
         />
+      )}
+      {hasHistory && (
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          onClick={() => setShowHistory(true)}
+        >
+          <GitBranch />
+          {t("tabWorkflowHistory")}
+        </Button>
+      )}
+
+      {hasHistory && (
+        <Sheet open={showHistory} onOpenChange={setShowHistory}>
+          <SheetContent
+            side="right"
+            className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
+          >
+            <SheetHeader>
+              <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
+              <SheetDescription className="sr-only">
+                {t("tabWorkflowHistory")}
+              </SheetDescription>
+            </SheetHeader>
+            <div className="px-4 pb-4">
+              <Suspense fallback={null}>
+                <PrWorkflowHistory
+                  history={workflowHistory}
+                  requestorName={requestorName}
+                  createdAt={createdAt}
+                />
+              </Suspense>
+            </div>
+          </SheetContent>
+        </Sheet>
       )}
     </div>
   );

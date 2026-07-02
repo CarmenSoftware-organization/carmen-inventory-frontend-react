@@ -38,7 +38,6 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { BusinessUnit } from "@/types/profile";
 import type { PrFormValues } from "./pr-form-schema";
@@ -595,12 +594,12 @@ export function PrItemFields({
           />
         }
       >
-        <ScrollArea className="w-full">
-          <DataGridContainer>
-            <DataGridTable />
-          </DataGridContainer>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
+            — ไม่ห่อด้วย Radix ScrollArea เพื่อเลี่ยง nested scroll ที่ทำให้ scroll
+            แนวนอนสะดุด (เห็นชัดในโหมด edit ที่ตารางกว้าง/หนักกว่า) */}
+        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+          <DataGridTable />
+        </DataGridContainer>
       </DataGrid>
 
       <DeleteDialog

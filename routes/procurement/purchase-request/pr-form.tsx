@@ -4,14 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { useTranslations } from "use-intl";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { lazy, Suspense } from "react";
 import type {
   PurchaseRequest,
   PurchaseRequestTemplate,
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PrGeneralFields } from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
 import { PrFormActions } from "./pr-form-actions";
@@ -28,13 +26,6 @@ import { useProfile } from "@/hooks/use-profile";
 import { usePrPreviousStages } from "@/hooks/use-purchase-request";
 import { formatDate } from "@/lib/date-utils";
 import { PrHeader } from "./pr-header";
-
-// แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
-const PrWorkflowHistory = lazy(() =>
-  import("./workflow/pr-workflow-history").then((mod) => ({
-    default: mod.PrWorkflowHistory,
-  })),
-);
 
 interface PurchaseRequestFormProps {
   readonly purchaseRequest?: PurchaseRequest;
@@ -199,6 +190,9 @@ export function PurchaseRequestForm({
             hasRecord={!!purchaseRequest}
             canSave={canSave}
             saveDisabledTitle={saveDisabledTitle}
+            workflowHistory={purchaseRequest?.workflow_history}
+            requestorName={purchaseRequest?.requestor_name}
+            createdAt={purchaseRequest?.created_at}
             onEdit={() => setMode("edit")}
             onCancel={actions.handleCancel}
             onDelete={() => actions.setShowDelete(true)}
@@ -221,46 +215,20 @@ export function PurchaseRequestForm({
           fromTemplate={!!template}
         />
 
-        <Tabs defaultValue="items">
-          <TabsList variant="line">
-            <TabsTrigger value="items" className="text-xs">
-              {t("tabItems")}
-            </TabsTrigger>
-            {(purchaseRequest?.workflow_history?.length ?? 0) > 0 && (
-              <TabsTrigger value="history" className="text-xs">
-                {t("tabWorkflowHistory")}
-              </TabsTrigger>
-            )}
-          </TabsList>
-          <TabsContent value="items">
-            <PrItemFields
-              form={form}
-              isDisabled={isDisabled}
-              role={role}
-              prId={purchaseRequest?.id}
-              prStatus={purchaseRequest?.pr_status}
-              buCode={buCode}
-              defaultBu={defaultBu}
-              dateFormat={dateFormat}
-              onSplit={actions.handleSplit}
-              previousStages={previousStages}
-              stagesLoading={stagesLoading}
-              onBulkReview={actions.handleBulkReview}
-            />
-          </TabsContent>
-          {purchaseRequest?.workflow_history &&
-            purchaseRequest.workflow_history.length > 0 && (
-              <TabsContent value="history">
-                <Suspense fallback={null}>
-                  <PrWorkflowHistory
-                    history={purchaseRequest.workflow_history}
-                    requestorName={purchaseRequest.requestor_name}
-                    createdAt={purchaseRequest.created_at}
-                  />
-                </Suspense>
-              </TabsContent>
-            )}
-        </Tabs>
+        <PrItemFields
+          form={form}
+          isDisabled={isDisabled}
+          role={role}
+          prId={purchaseRequest?.id}
+          prStatus={purchaseRequest?.pr_status}
+          buCode={buCode}
+          defaultBu={defaultBu}
+          dateFormat={dateFormat}
+          onSplit={actions.handleSplit}
+          previousStages={previousStages}
+          stagesLoading={stagesLoading}
+          onBulkReview={actions.handleBulkReview}
+        />
       </form>
 
       <PrFormDialogs

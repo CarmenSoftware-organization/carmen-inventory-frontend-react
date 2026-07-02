@@ -78,6 +78,19 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     net_amount: z.coerce.number().optional(),
     total_price: z.coerce.number().optional(),
     comment: z.string(),
+    // ประวัติ workflow ระดับรายการ (display-only passthrough, ไม่ส่งกลับ API)
+    history: z
+      .array(
+        z.object({
+          at: z.string(),
+          seq: z.coerce.number(),
+          name: z.string(),
+          user: z.object({ id: z.string(), name: z.string() }),
+          status: z.string(),
+          message: z.string().nullish(),
+        }),
+      )
+      .optional(),
   });
 }
 
@@ -283,6 +296,7 @@ export function getDefaultValues(
           net_amount: d.net_amount ?? 0,
           total_price: d.total_price ?? 0,
           comment: d.comment ?? "",
+          history: d.history,
         })) ?? [],
     };
   }

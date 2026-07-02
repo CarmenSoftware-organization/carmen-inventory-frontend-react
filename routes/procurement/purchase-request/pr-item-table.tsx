@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { PrFormValues } from "./pr-form-schema";
 import { PrItemExpand } from "./pr-item-expand";
+import { PrItemHistorySheet } from "./workflow/pr-item-history";
 import {
   SelectCell,
   StatusCell,
@@ -332,12 +333,22 @@ export function usePrItemTable({
     const actionColumn: ColumnDef<ItemField> = {
       id: "action",
       header: () => "",
-      cell: ({ row }: { row: { index: number } }) => (
-        <DeleteCell
-          control={form.control}
-          index={row.index}
-          onDelete={onDelete}
-        />
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center gap-0.5">
+          {(row.original.history?.length ?? 0) > 0 && (
+            <PrItemHistorySheet
+              history={row.original.history ?? []}
+              productName={row.original.product_name}
+            />
+          )}
+          {!isDisabled && (
+            <DeleteCell
+              control={form.control}
+              index={row.index}
+              onDelete={onDelete}
+            />
+          )}
+        </div>
       ),
       enableSorting: false,
       enableResizing: false,
@@ -351,6 +362,11 @@ export function usePrItemTable({
     const isDraft = !prStatus || prStatus === PR_STATUS.DRAFT;
     const isCreateRole = role === STAGE_ROLE.CREATE;
     const hiddenInDraft = new Set(["foc", "approved"]);
+    // ในโหมด view (isDisabled) ยังต้องโชว์คอลัมน์ action ถ้ามีรายการที่มีประวัติ
+    // เพื่อให้ปุ่ม history แสดงได้ (ปุ่ม delete จะถูกซ่อนเองภายใน cell)
+    const hasAnyHistory = itemFields.some(
+      (item) => (item.history?.length ?? 0) > 0,
+    );
 
     const visibleDataColumns =
       isDraft || isCreateRole
@@ -362,7 +378,7 @@ export function usePrItemTable({
       ...(isDraft || isCreateRole ? [] : [expandColumn]),
       indexColumn,
       ...visibleDataColumns,
-      ...(isDisabled ? [] : [actionColumn]),
+      ...(isDisabled && !hasAnyHistory ? [] : [actionColumn]),
     ];
 
     // Comment footer starts at location_id and spans through the delivery_point

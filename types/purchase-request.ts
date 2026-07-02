@@ -79,9 +79,20 @@ export interface PurchaseRequestDetail
   state_message: string | null;
   info: Record<string, unknown>;
   dimension: unknown[];
+  history?: PrItemHistoryEntry[];
   doc_version: number;
   created_at: string;
   updated_at: string;
+}
+
+/** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบขอซื้อ */
+export interface PrItemHistoryEntry {
+  at: string;
+  seq: number;
+  name: string;
+  user: { id: string; name: string };
+  status: string;
+  message?: string | null;
 }
 
 export interface PurchaseRequestTemplateDetail
