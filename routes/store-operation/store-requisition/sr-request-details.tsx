@@ -65,17 +65,23 @@ export function SrRequestDetails({
     role === STAGE_ROLE.APPROVE ||
     role === STAGE_ROLE.ISSUE ||
     role === STAGE_ROLE.VIEW_ONLY;
-  const labelMuted = isReadOnly ? "text-muted-foreground" : undefined;
+  const labelMuted = isReadOnly
+    ? "text-muted-foreground font-normal"
+    : undefined;
+  // view mode → คู่ label↔value ชิด (gap-1) แบบ procurement
+  const viewFieldGap = isReadOnly ? "gap-1" : undefined;
 
   return (
-    <section className="bg-background rounded-lg border">
-      <header className="border-b px-5 py-3.5 text-[0.8125rem] font-semibold">
-        {t("requestDetails")}
-      </header>
-      <div className="p-5">
+    <section className="space-y-3">
+      <div className="border-border/60 border-b pb-2">
+        <h2 className="text-foreground text-sm font-semibold tracking-tight">
+          {t("requestDetails")}
+        </h2>
+      </div>
+      <div>
         <FieldGroup className="gap-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field>
+            <Field className={viewFieldGap}>
               <FieldLabel required={!isReadOnly} className={labelMuted}>
                 {tfl("expectedDate")}
               </FieldLabel>
@@ -104,7 +110,7 @@ export function SrRequestDetails({
               )}
             </Field>
 
-            <Field>
+            <Field className={viewFieldGap}>
               <FieldLabel required={!isReadOnly} className={labelMuted}>
                 {tfl("workflow")}
               </FieldLabel>
@@ -129,7 +135,7 @@ export function SrRequestDetails({
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field>
+            <Field className={viewFieldGap}>
               <FieldLabel required={!isReadOnly} className={labelMuted}>
                 {tfl("fromLocation")}
               </FieldLabel>
@@ -170,7 +176,7 @@ export function SrRequestDetails({
               )}
             </Field>
 
-            <Field>
+            <Field className={viewFieldGap}>
               <FieldLabel required={!isReadOnly} className={labelMuted}>
                 {tfl("toLocation")}
               </FieldLabel>
@@ -205,7 +211,7 @@ export function SrRequestDetails({
             </Field>
           </div>
 
-          <Field>
+          <Field className={viewFieldGap}>
             <FieldLabel htmlFor="sr-description" className={labelMuted}>
               {tfl("description")}
             </FieldLabel>

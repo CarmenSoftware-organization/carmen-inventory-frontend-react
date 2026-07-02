@@ -4,6 +4,7 @@ import { MessageCircle, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PrintDocumentButton } from "@/components/print-document-button";
+import { WorkflowStep } from "@/components/share/workflow-step";
 import {
   DocFormHeader,
   DocumentRibbon,
@@ -209,6 +210,22 @@ export function SrHeader({
       ? `${tfl("version")} ${storeRequisition.doc_version}`
       : undefined;
 
+  // workflow stepper ใน header (เหมือน PR) — แสดงเส้นทาง prev → current → next
+  const workflowStep = storeRequisition?.workflow_current_stage ? (
+    <WorkflowStep
+      previousStage={storeRequisition.workflow_previous_stage}
+      currentStage={storeRequisition.workflow_current_stage}
+      nextStage={
+        docStatus === "completed" ||
+        docStatus === "cancelled" ||
+        docStatus === "voided"
+          ? undefined
+          : storeRequisition.workflow_next_stage
+      }
+      terminalState={docStatus === "voided" ? "voided" : undefined}
+    />
+  ) : undefined;
+
   return (
     <DocFormHeader
       title={storeRequisition?.sr_no ?? t("title")}
@@ -218,6 +235,7 @@ export function SrHeader({
       badges={badges}
       actions={actions}
       ribbon={ribbon}
+      workflowStep={workflowStep}
     />
   );
 }
