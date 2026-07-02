@@ -52,7 +52,7 @@ import { DocumentListActions } from "@/components/share/document-list-actions";
 import { useGrnActiveFilters } from "./grn-active-filters";
 import { GrnPoWizardDialog } from "./grn-po-wizard-dialog";
 import { GrnCreateDialog } from "./grn-create-dialog";
-import { mapPoDetailToItems } from "./grn-product-cards";
+import { mapPoDetailToItems } from "./grn-item-table";
 import type { PoForGrn } from "@/types/purchase-order";
 
 export default function GrnComponent() {

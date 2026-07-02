@@ -19,7 +19,7 @@ import { LookupProduct } from "@/components/lookup/lookup-product";
 import { useProductUnits } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
-import { GrnItemRow } from "./grn-item-row";
+import { GrnLocationRow } from "./grn-location-row";
 
 /** 1 product group = 1 แถวใน DataGrid (product + N location indices) */
 export interface GrnGroup {
@@ -103,8 +103,6 @@ function ProductGroupCell({
       control: form.control,
       name: `items.${primaryIdx}.product_name`,
     }) ?? "";
-  const productErr =
-    form.formState.errors.items?.[primaryIdx]?.product_id?.message;
 
   if (group.isManual && !disabled) {
     return (
@@ -117,15 +115,8 @@ function ProductGroupCell({
     );
   }
   return (
-    <div className="flex min-w-0 items-center gap-1.5">
-      <span
-        className={cn(
-          "truncate text-xs font-medium",
-          productErr && "text-destructive",
-        )}
-      >
-        {productName || (productErr ? productErr : "—")}
-      </span>
+    <div className="group w-full text-left">
+      <p className="truncate font-semibold">{productName || "—"}</p>
     </div>
   );
 }
@@ -220,7 +211,7 @@ const GroupAmountSum = memo(function GroupAmountSum({
   );
 });
 
-/** เนื้อหา expand ของแถว product — location rows เดิม (GrnItemRow) + Add Location */
+/** เนื้อหา expand ของแถว product — location rows เดิม (GrnLocationRow) + Add Location */
 function GrnGroupLocations({
   group,
   form,
@@ -244,7 +235,7 @@ function GrnGroupLocations({
   const isPo = docType !== "manual";
   return (
     <div className="w-0 min-w-full overflow-x-auto">
-      {/* section header ของ location (เหมือน PO) — จัดคอลัมน์ตรงกับ GrnItemRow */}
+      {/* section header ของ location (เหมือน PO) — จัดคอลัมน์ตรงกับ GrnLocationRow */}
       <div className="text-muted-foreground flex items-center gap-2.5 py-1.5 pr-4 pl-3 text-xs font-semibold">
         <span className="size-4 shrink-0" aria-hidden="true" />
         <span className="flex-1">{tfl("location")}</span>
@@ -256,14 +247,15 @@ function GrnGroupLocations({
           <span className="text-destructive"> *</span>
         </span>
         <span className="w-44 shrink-0 text-right">{tfl("foc")}</span>
-        <span className="w-20 shrink-0 text-right">{tfl("netAmount")}</span>
+        <span className="w-28 shrink-0 text-right">{tfl("price")}</span>
+        <span className="w-20 shrink-0 text-right">{tfl("netAbbr")}</span>
         {!disabled && (
           <span className="ml-1 size-6 shrink-0" aria-hidden="true" />
         )}
       </div>
       <div className="divide-y">
         {group.indices.map((idx) => (
-          <GrnItemRow
+          <GrnLocationRow
             key={itemFields[idx]?.id ?? idx}
             index={idx}
             form={form}

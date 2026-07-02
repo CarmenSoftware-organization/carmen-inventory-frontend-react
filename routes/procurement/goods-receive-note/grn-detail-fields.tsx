@@ -4,7 +4,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import type { GrnFormValues } from "./grn-form-schema";
 
-interface GrnTabDetailsProps {
+interface GrnDetailFieldsProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly index: number;
   readonly disabled: boolean;
@@ -20,11 +20,11 @@ interface GrnTabDetailsProps {
  * @param props.disabled - ปิดการแก้ไข
  * @returns React element ของ section
  */
-export default function GrnTabDetails({
+export default function GrnDetailFields({
   form,
   index,
   disabled,
-}: GrnTabDetailsProps) {
+}: GrnDetailFieldsProps) {
   "use no memo";
   const tfl = useTranslations("field");
   const docType = useWatch({ control: form.control, name: "doc_type" }) ?? "";

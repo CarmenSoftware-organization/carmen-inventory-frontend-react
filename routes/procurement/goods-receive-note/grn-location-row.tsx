@@ -17,7 +17,7 @@ import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { useProductUnits } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
-import { GrnItemExpanded } from "./grn-item-expanded";
+import { GrnLocationExpanded } from "./grn-location-expanded";
 
 type GrnUnitField = "approved_unit_id" | "received_unit_id" | "foc_unit_id";
 
@@ -46,7 +46,7 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
           value={field.value ?? ""}
           onValueChange={field.onChange}
           disabled={disabled || !productId}
-          className="h-full w-[4.75rem] shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
+          className="h-full w-19 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
         />
       )}
     />
@@ -154,7 +154,52 @@ function QtyUnitCell({
   );
 }
 
-interface GrnItemRowProps {
+/** unit price เป็น plain text (view mode) */
+const PricePlain = memo(function PricePlain({
+  control,
+  index,
+}: {
+  control: Control<GrnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const v = useWatch({ control, name: `items.${index}.unit_price` });
+  return (
+    <span className="text-foreground w-28 shrink-0 text-right text-xs font-medium tabular-nums">
+      {formatCurrency(Number(v) || 0)}
+    </span>
+  );
+});
+
+/** ช่อง unit price บน location line — view → plain text */
+function PriceCell({
+  form,
+  index,
+  disabled,
+  plainText,
+}: {
+  form: UseFormReturn<GrnFormValues>;
+  index: number;
+  disabled: boolean;
+  plainText?: boolean;
+}) {
+  "use no memo";
+  if (plainText) return <PricePlain control={form.control} index={index} />;
+  return (
+    <Input
+      type="number"
+      inputMode="decimal"
+      min={0}
+      step="0.01"
+      placeholder="0.00"
+      className="h-8 w-28 shrink-0 text-right text-xs"
+      disabled={disabled}
+      {...form.register(`items.${index}.unit_price`, { valueAsNumber: true })}
+    />
+  );
+}
+
+interface GrnLocationRowProps {
   readonly index: number;
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
@@ -172,7 +217,7 @@ interface GrnItemRowProps {
  * แถว location ของ GRN item — location + Order/Received/FOC qty บน line เดียว,
  * คลิก chevron เพื่อ expand เผยฟอร์ม Pricing / Details (reuse GrnTab* เดิม)
  */
-export const GrnItemRow = memo(function GrnItemRow({
+export const GrnLocationRow = memo(function GrnLocationRow({
   index,
   form,
   disabled,
@@ -182,7 +227,7 @@ export const GrnItemRow = memo(function GrnItemRow({
   groupIndices,
   plainText,
   autoOpenLocation,
-}: GrnItemRowProps) {
+}: GrnLocationRowProps) {
   "use no memo";
   const tfl = useTranslations("field");
 
@@ -291,10 +336,6 @@ export const GrnItemRow = memo(function GrnItemRow({
               )}
             />
           ) : (
-            // <div className="flex h-8 items-center gap-1">
-            //   <MapPin className="text-muted-foreground size-3 shrink-0" />
-
-            //   </div>
             <span
               className={cn(
                 "truncate text-xs font-medium",
@@ -340,6 +381,14 @@ export const GrnItemRow = memo(function GrnItemRow({
           plainText={plainText}
         />
 
+        {/* Unit price */}
+        <PriceCell
+          form={form}
+          index={index}
+          disabled={disabled}
+          plainText={plainText}
+        />
+
         <span className="text-foreground w-20 shrink-0 text-right text-xs font-semibold tabular-nums">
           {formatCurrency(Number(netAmount) || 0)}
         </span>
@@ -359,7 +408,7 @@ export const GrnItemRow = memo(function GrnItemRow({
 
       {/* ── Expanded editor: Pricing / Details ── */}
       {showExpanded && (
-        <GrnItemExpanded form={form} index={index} disabled={disabled} />
+        <GrnLocationExpanded form={form} index={index} disabled={disabled} />
       )}
 
       <DeleteDialog

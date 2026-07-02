@@ -92,7 +92,7 @@ const PoAddButton = memo(function PoAddButton({
   );
 });
 
-interface GrnProductCardsProps {
+interface GrnItemTableProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
   /** view mode → qty ในแต่ละ location แสดงเป็น plain text */
@@ -103,11 +103,11 @@ interface GrnProductCardsProps {
  * รายการสินค้าของ GRN — DataGrid group-by-product (แบบ PO): 1 row = 1 product,
  * expand → location rows (แต่ละ location มี Quantity/Pricing/Details + Add Location)
  */
-export function GrnProductCards({
+export function GrnItemTable({
   form,
   disabled,
   plainText = false,
-}: GrnProductCardsProps) {
+}: GrnItemTableProps) {
   "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
   const tfl = useTranslations("field");

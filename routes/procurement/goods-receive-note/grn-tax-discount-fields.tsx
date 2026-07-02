@@ -8,7 +8,7 @@ import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
 
-interface GrnTabPricingProps {
+interface GrnTaxDiscountFieldsProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly index: number;
   readonly disabled: boolean;
@@ -25,13 +25,13 @@ interface GrnTabPricingProps {
  * @param props.disabled - ปิดการแก้ไข
  * @returns React element ของแท็บ pricing
  * @example
- * <GrnTabPricing form={form} index={itemIndex} disabled={isView} />
+ * <GrnTaxDiscountFields form={form} index={itemIndex} disabled={isView} />
  */
-export default function GrnTabPricing({
+export default function GrnTaxDiscountFields({
   form,
   index,
   disabled,
-}: GrnTabPricingProps) {
+}: GrnTaxDiscountFieldsProps) {
   "use no memo";
   const tfl = useTranslations("field");
 
@@ -127,26 +127,8 @@ export default function GrnTabPricing({
 
   return (
     <div className="space-y-4">
-      {/* Unit price + tax profile + rate */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor={`items-${index}-unit-price`} className="text-xs">
-            {tfl("unitPrice")}
-          </FieldLabel>
-          <Input
-            id={`items-${index}-unit-price`}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="0.01"
-            placeholder="0.00"
-            className="h-8 text-right text-xs"
-            disabled={disabled}
-            {...form.register(`items.${index}.unit_price`, {
-              valueAsNumber: true,
-            })}
-          />
-        </Field>
+      {/* Adjustment amounts — tax & discount on one line */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
         <Field>
           <FieldLabel className="text-xs">{tfl("taxProfile")}</FieldLabel>
           <Controller
@@ -165,10 +147,6 @@ export default function GrnTabPricing({
             )}
           />
         </Field>
-      </div>
-
-      {/* Adjustment amounts — tax & discount on one line */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
           <div className="flex items-center justify-between">
             <FieldLabel
@@ -210,74 +188,71 @@ export default function GrnTabPricing({
           />
         </Field>
 
-        {/* Discount row — % and amount equal width */}
-        <div className="grid grid-cols-2 gap-2">
-          <Field>
+        <Field>
+          <FieldLabel
+            htmlFor={`items-${index}-discount-rate`}
+            className="text-xs"
+          >
+            {tfl("discPercent")}
+          </FieldLabel>
+          <Input
+            id={`items-${index}-discount-rate`}
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step="0.01"
+            placeholder="0"
+            className="h-8 text-right text-xs"
+            disabled={disabled}
+            {...form.register(`items.${index}.discount_rate`, {
+              valueAsNumber: true,
+            })}
+          />
+        </Field>
+        <Field>
+          <div className="flex items-center justify-between">
             <FieldLabel
-              htmlFor={`items-${index}-discount-rate`}
+              htmlFor={`items-${index}-discount-amount`}
               className="text-xs"
             >
-              {tfl("discPercent")}
+              {tfl("discAmt")}
             </FieldLabel>
-            <Input
-              id={`items-${index}-discount-rate`}
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="0.01"
-              placeholder="0"
-              className="h-8 text-right text-xs"
-              disabled={disabled}
-              {...form.register(`items.${index}.discount_rate`, {
-                valueAsNumber: true,
-              })}
+            <Controller
+              control={form.control}
+              name={`items.${index}.is_discount_adjustment`}
+              render={({ field }) => (
+                <label className="flex cursor-pointer items-center gap-1">
+                  <Checkbox
+                    checked={field.value ?? false}
+                    onCheckedChange={field.onChange}
+                    disabled={disabled}
+                    className="size-3.5"
+                  />
+                  <span className="text-muted-foreground text-[0.6875rem] select-none">
+                    {tfl("override")}
+                  </span>
+                </label>
+              )}
             />
-          </Field>
-          <Field>
-            <div className="flex items-center justify-between">
-              <FieldLabel
-                htmlFor={`items-${index}-discount-amount`}
-                className="text-xs"
-              >
-                {tfl("discAmt")}
-              </FieldLabel>
-              <Controller
-                control={form.control}
-                name={`items.${index}.is_discount_adjustment`}
-                render={({ field }) => (
-                  <label className="flex cursor-pointer items-center gap-1">
-                    <Checkbox
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                      disabled={disabled}
-                      className="size-3.5"
-                    />
-                    <span className="text-muted-foreground text-[0.6875rem] select-none">
-                      {tfl("override")}
-                    </span>
-                  </label>
-                )}
-              />
-            </div>
-            <Input
-              id={`items-${index}-discount-amount`}
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="0.01"
-              placeholder="0.00"
-              className="h-8 text-right text-xs"
-              disabled={disabled || !isDiscAdj}
-              {...form.register(`items.${index}.discount_amount`, {
-                valueAsNumber: true,
-              })}
-            />
-          </Field>
-        </div>
+          </div>
+          <Input
+            id={`items-${index}-discount-amount`}
+            type="number"
+            inputMode="decimal"
+            min={0}
+            step="0.01"
+            placeholder="0.00"
+            className="h-8 text-right text-xs"
+            disabled={disabled || !isDiscAdj}
+            {...form.register(`items.${index}.discount_amount`, {
+              valueAsNumber: true,
+            })}
+          />
+        </Field>
       </div>
 
       {/* ── Summary (live) ── */}
-      <div className="space-y-2 border-t pt-3 text-sm tabular-nums">
+      <div className="space-y-2 border-t pt-3 text-xs tabular-nums">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">{tfl("subtotal")}</span>
           <span>{formatCurrency(subtotal)}</span>

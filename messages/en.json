@@ -508,6 +508,7 @@
     "general": "General",
     "pricingPeriod": "Pricing & Period",
     "pricing": "Pricing",
+    "taxDiscount": "Tax & Discount",
     "newLocation": "New Location",
     "deleteLocation": "Delete Location",
     "orderQty": "Order Qty",

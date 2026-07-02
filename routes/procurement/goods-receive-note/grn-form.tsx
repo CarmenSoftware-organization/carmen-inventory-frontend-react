@@ -16,7 +16,7 @@ import {
 } from "./grn-form-schema";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { getSessionItem, removeSessionItem } from "@/lib/safe-storage";
-import { GrnProductCards } from "./grn-product-cards";
+import { GrnItemTable } from "./grn-item-table";
 import { GrnFormDialogs } from "./grn-form-dialogs";
 import { useGrnFormActions } from "./use-grn-form-actions";
 import { useProfile } from "@/hooks/use-profile";
@@ -179,7 +179,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="general">
-            <GrnProductCards
+            <GrnItemTable
               form={form}
               disabled={isDisabled}
               plainText={isView}
