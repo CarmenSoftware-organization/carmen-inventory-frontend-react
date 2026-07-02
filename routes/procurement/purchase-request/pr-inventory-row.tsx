@@ -1,17 +1,12 @@
 import { useState } from "react";
 import { Control, useWatch } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { AlertTriangle, ChevronDown } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { PrFormValues } from "./pr-form-schema";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { PrOnHandDialog } from "./pr-on-hand-dialog";
 import { PrOnOrderDialog } from "./pr-on-order-dialog";
 
@@ -75,18 +70,14 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
   const statusTheme = STATUS_THEME[status];
 
   return (
-    <Collapsible defaultOpen>
-      <div className="bg-card rounded-lg border">
-        <CollapsibleTrigger className="hover:bg-muted/40 flex w-full items-center justify-between gap-2 px-3 py-2 text-xs font-semibold hover:cursor-pointer [&[data-state=open]>div:first-child>svg]:rotate-180">
-          <div className="flex items-center gap-1.5">
-            <ChevronDown className="size-3.5 shrink-0 transition-transform" />
-            <span>{t("inventoryInfo")}</span>
-          </div>
-        </CollapsibleTrigger>
-
-        <CollapsibleContent>
-          <div className="space-y-3 px-3 pb-3">
-            <div className="grid grid-cols-4 gap-3">
+    <>
+      <section className="space-y-3">
+        {/* Eyebrow แบบเดียวกับกลุ่มฝั่งซ้าย (PRICING/TAX) — ดู GroupEyebrow */}
+        <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
+          {t("inventoryInfo")}
+        </p>
+        <div className="space-y-3">
+          <div className="grid grid-cols-4 gap-3">
               <InventoryStat
                 label={t("onHand")}
                 value={on_hand_qty}
@@ -129,14 +120,10 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
                 ) : (
                   <span />
                 )}
-                <span className="text-muted-foreground tabular-nums">
-                  {t("stockLevel", { pct: pct.toFixed(1) })}
-                </span>
               </div>
             </div>
           </div>
-        </CollapsibleContent>
-      </div>
+      </section>
 
       <PrOnHandDialog
         open={onHandOpen}
@@ -148,7 +135,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
         onOpenChange={setOnOrderOpen}
         productId={productId}
       />
-    </Collapsible>
+    </>
   );
 }
 

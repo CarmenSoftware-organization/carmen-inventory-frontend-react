@@ -140,6 +140,9 @@ export function usePrItemTable({
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
+        // เริ่ม content ของ expand ที่คอลัมน์ Location — เว้นคอลัมน์ซ้าย
+        // (expand + #, และ select ในโหมด edit) ด้วย colSpan ว่าง
+        expandedColStart: isDisabled ? 2 : 3,
         expandedContent: (item: ItemField) => (
           <PrItemExpand
             item={item}

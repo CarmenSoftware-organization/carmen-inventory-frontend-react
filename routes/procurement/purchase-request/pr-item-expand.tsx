@@ -42,6 +42,23 @@ interface PrItemExpandProps {
   readonly role?: string;
 }
 
+/** Section eyebrow — iOS Settings grouped-list style: quiet, uppercase, muted */
+function GroupEyebrow({ children }: { readonly children: React.ReactNode }) {
+  return (
+    <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
+      {children}
+    </p>
+  );
+}
+
+/**
+ * เนื้อหาที่กางออก (expand) ของแต่ละรายการใบขอซื้อ — จัดกลุ่มแบบ iOS Settings
+ * (Pricing / Tax / Discount ทางซ้าย, Inventory + Summary เป็น sidebar ขวา)
+ * ด้วย eyebrow (GroupEyebrow) แทนกล่อง card, ตัวเลข/ค่าเป็น text-sm, layout
+ * 2 คอลัมน์ทำผ่าน float + flow-root เพราะ DataGrid กางลงใน table-fixed
+ * `<td colSpan>` ที่ flex/grid แบ่ง track ไม่ได้ เนื้อหาเริ่มตรงคอลัมน์ Location
+ * ผ่าน `expandedColStart` ของ column
+ */
 export function PrItemExpand({
   item,
   form,
@@ -57,8 +74,6 @@ export function PrItemExpand({
   const [showPricelist, setShowPricelist] = useState(false);
 
   const i = Math.max(index, 0);
-  // editable คุมด้วย isDisabled (view/pending) เท่านั้น — ไม่อิง
-  // current_stage_status ซึ่งเป็นค่า dynamic ของ workflow
   const isFieldDisabled = isDisabled;
 
   const [
@@ -196,317 +211,338 @@ export function PrItemExpand({
   const taxAmountError = itemErrors?.tax_amount?.message;
   const discountAmountError = itemErrors?.discount_amount?.message;
 
+  const overrideToggle = (
+    name:
+      | `items.${number}.is_tax_adjustment`
+      | `items.${number}.is_discount_adjustment`,
+  ) => (
+    <Controller
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <label className="flex cursor-pointer items-center gap-1.5">
+          <Checkbox
+            checked={field.value ?? false}
+            onCheckedChange={field.onChange}
+            className="size-3.5"
+          />
+          <span className="text-muted-foreground text-xs select-none">
+            {tfl("override")}
+          </span>
+        </label>
+      )}
+    />
+  );
+
   return (
-    <div className="w-full space-y-4 px-3 py-3">
-      {/* ── Sourcing: vendor · unit price · pricelist ── */}
-      <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-[1fr_9rem_1fr]">
-        <Field className="gap-1">
-          <FieldLabel
-            htmlFor={`items-${index}-vendor`}
-            className="text-muted-foreground text-xs"
-          >
-            {tfl("vendor")}
-          </FieldLabel>
-          {isFieldDisabled ? (
-            <p className="flex h-8 items-center truncate text-xs font-semibold">
-              {vendorName || "—"}
-            </p>
-          ) : (
-            <Controller
-              control={form.control}
-              name={`items.${index}.vendor_id`}
-              render={({ field }) => (
-                <LookupVendor
-                  value={field.value ?? ""}
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    if (value) {
-                      form.setValue(`items.${index}.stage_status`, "approve");
-                      form.setValue(
-                        `items.${index}.current_stage_status`,
-                        "approve",
-                      );
-                    }
-                  }}
-                  className="w-full text-xs"
-                  error={vendorError}
-                />
-              )}
-            />
-          )}
-        </Field>
-        <Field className="gap-3">
-          <FieldLabel
-            htmlFor={`items-${index}-pricelist-price`}
-            className="text-muted-foreground justify-end text-xs"
-          >
-            {tfl("unitPrice")}
-          </FieldLabel>
-          {isFieldDisabled ? (
-            <p className="text-right text-xs font-semibold tabular-nums">
-              {price ? formatCurrency(price) : "—"}
-            </p>
-          ) : (
-            <InputAmount
-              id={`items-${index}-pricelist-price`}
-              decimals={watchCurrencyDecimals}
-              min={0}
-              size="sm"
-              className={`text-right text-xs ${priceError ? "pl-7" : ""}`}
-              error={priceError}
-              errorIconAlign="left"
-              defaultValue={price}
-              {...form.register(`items.${index}.pricelist_price`)}
-              onChange={(e) => {
-                const n = e.target.valueAsNumber;
-                form.setValue(
-                  `items.${index}.pricelist_price`,
-                  Number.isNaN(n) ? 0 : n,
-                  { shouldDirty: true, shouldValidate: true },
-                );
-                form.setValue(
-                  `items.${index}.pricelist_type`,
-                  PR_ITEM_PRICELIST_COMPARE_TYPE.MANUAL_INPUT,
-                );
-              }}
-            />
-          )}
-        </Field>
-        <Field className="gap-1">
-          <div className="flex items-start justify-between">
-            <FieldLabel className="text-muted-foreground text-xs">
-              {tfl("pricelist")}
-            </FieldLabel>
-            {productId &&
-              unitId &&
-              currencyId &&
-              (role === STAGE_ROLE.PURCHASE || role === STAGE_ROLE.APPROVE) && (
-                <Button
-                  type="button"
-                  size="xs"
-                  className="shrink-0"
-                  aria-label={tfl("pricelist")}
-                  onClick={() => setShowPricelist(true)}
+    <div className="bg-muted/20 w-full py-5 pr-5 pl-3">
+      {/* 2-column via float + BFC (NOT flex/grid): the DataGrid expands into a
+          table-fixed <td colSpan>, which gives flex/grid no definite width to
+          split — but floats + flow-root lay out correctly inside a table-cell.
+          Right = Inventory + Summary; left = the editable detail groups. */}
+      {/* full width — left 80% details · right 20% Inventory + Summary */}
+      <div className="w-full">
+        <aside className="mb-6 space-y-6 sm:float-right sm:mb-0 sm:ml-6 sm:w-[30%]">
+          <PrInventoryRow
+            control={form.control}
+            index={index}
+            buCode={buCode ?? ""}
+          />
+          <PrItemSummary
+            subtotal={subtotal}
+            netAmount={netAmount}
+            totalPrice={totalPrice}
+            exchangeRate={exchangeRate}
+            isForeignCurrency={isForeignCurrency}
+            baseCurrencyCode={baseCurrencyCode}
+            currencyCode={watchCurrencyCode ?? ""}
+          />
+        </aside>
+
+        <div className="space-y-6 sm:flow-root">
+          {/* ── Pricing: vendor · unit price · pricelist ── */}
+          <section className="space-y-3">
+            <GroupEyebrow>{tfl("pricing")}</GroupEyebrow>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-[1.5fr_8rem_1.2fr]">
+              {/* Vendor */}
+              <Field className="gap-1.5">
+                <FieldLabel
+                  htmlFor={`items-${index}-vendor`}
+                  className="text-muted-foreground text-xs"
                 >
-                  <Scale className="size-3" />
-                  {tc("compare")}
-                </Button>
-              )}
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="flex-1 truncate text-xs font-semibold">
-              {pricelistNo || "—"}
-            </span>
-          </div>
-        </Field>
-      </div>
-
-      {/* ── Tax & Discount ── */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t pt-3 sm:grid-cols-[minmax(11rem,1.4fr)_4.5rem_8rem_4.5rem_8rem]">
-        <Field className="gap-1">
-          <FieldLabel
-            htmlFor={`items-${index}-tax-profile`}
-            className="text-muted-foreground text-xs"
-          >
-            {tfl("taxProfile")}
-          </FieldLabel>
-          {isFieldDisabled ? (
-            <p className="flex h-8 items-center truncate text-xs font-semibold">
-              {taxProfileName || "—"}
-            </p>
-          ) : (
-            <Controller
-              control={form.control}
-              name={`items.${index}.tax_profile_id`}
-              render={({ field }) => (
-                <LookupTaxProfile
-                  value={field.value ?? ""}
-                  onValueChange={(value, taxRate, taxProfileName) => {
-                    field.onChange(value || null);
-                    form.setValue(`items.${index}.tax_rate`, taxRate);
-                    form.setValue(
-                      `items.${index}.tax_profile_name`,
-                      taxProfileName,
-                    );
-                  }}
-                  className="w-full text-xs"
-                  size="sm"
-                  error={taxProfileError}
-                />
-              )}
-            />
-          )}
-        </Field>
-        <Field className="gap-1">
-          <FieldLabel
-            htmlFor={`items-${index}-tax-rate`}
-            className="text-muted-foreground justify-end text-xs"
-          >
-            {tfl("taxPercent")}
-          </FieldLabel>
-          <p className="flex h-8 items-center justify-end text-xs font-semibold tabular-nums">
-            {taxRate}
-          </p>
-        </Field>
-        <Field className="gap-1">
-          <div className="flex items-center justify-end gap-2">
-            <FieldLabel
-              htmlFor={`items-${index}-tax-amount`}
-              className="text-muted-foreground text-xs"
-            >
-              {tfl("taxAmt")}
-            </FieldLabel>
-            {!isFieldDisabled && (
-              <Controller
-                control={form.control}
-                name={`items.${index}.is_tax_adjustment`}
-                render={({ field }) => (
-                  <label className="flex cursor-pointer items-center gap-1">
-                    <Checkbox
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                      className="size-3.5"
-                    />
-                    <span className="text-muted-foreground text-xs select-none">
-                      {tfl("override")}
-                    </span>
-                  </label>
+                  {tfl("vendor")}
+                </FieldLabel>
+                {isFieldDisabled ? (
+                  <p className="flex min-h-9 items-center truncate text-sm font-medium">
+                    {vendorName || "—"}
+                  </p>
+                ) : (
+                  <Controller
+                    control={form.control}
+                    name={`items.${index}.vendor_id`}
+                    render={({ field }) => (
+                      <LookupVendor
+                        value={field.value ?? ""}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          if (value) {
+                            form.setValue(
+                              `items.${index}.stage_status`,
+                              "approve",
+                            );
+                            form.setValue(
+                              `items.${index}.current_stage_status`,
+                              "approve",
+                            );
+                          }
+                        }}
+                        className="w-full text-sm"
+                        error={vendorError}
+                      />
+                    )}
+                  />
                 )}
-              />
-            )}
-          </div>
-          {isFieldDisabled ? (
-            <p className="flex h-8 items-center justify-end text-xs font-semibold tabular-nums">
-              {formatCurrency(taxAmount)}
-            </p>
-          ) : (
-            <InputAmount
-              id={`items-${index}-tax-amount`}
-              decimals={watchCurrencyDecimals}
-              min={0}
-              size="sm"
-              className={`text-right text-xs ${taxAmountError ? "pl-7" : ""}`}
-              disabled={!isTaxAdj}
-              error={taxAmountError}
-              errorIconAlign="left"
-              defaultValue={taxAmt}
-              {...form.register(`items.${index}.tax_amount`)}
-              onChange={(e) => {
-                const n = e.target.valueAsNumber;
-                form.setValue(
-                  `items.${index}.tax_amount`,
-                  Number.isNaN(n) ? 0 : n,
-                  { shouldDirty: true, shouldValidate: true },
-                );
-              }}
-            />
-          )}
-        </Field>
-        <Field className="gap-1">
-          <FieldLabel
-            htmlFor={`items-${index}-discount-rate`}
-            className="text-muted-foreground justify-end text-xs"
-          >
-            {tfl("discPercent")}
-          </FieldLabel>
-          {isFieldDisabled ? (
-            <p className="flex h-8 items-center justify-end text-xs font-semibold tabular-nums">
-              {discRate}
-            </p>
-          ) : (
-            <FieldInput
-              id={`items-${index}-discount-rate`}
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="0.01"
-              placeholder="0"
-              size="sm"
-              className="text-right text-xs"
-              defaultValue={discRate}
-              {...form.register(`items.${index}.discount_rate`)}
-              onChange={(e) => {
-                const n = e.target.valueAsNumber;
-                form.setValue(
-                  `items.${index}.discount_rate`,
-                  Number.isNaN(n) ? 0 : n,
-                  { shouldDirty: true, shouldValidate: true },
-                );
-              }}
-            />
-          )}
-        </Field>
-        <Field className="gap-1">
-          <div className="flex items-center justify-end gap-2">
-            <FieldLabel
-              htmlFor={`items-${index}-discount-amount`}
-              className="text-muted-foreground text-xs"
-            >
-              {tfl("discAmt")}
-            </FieldLabel>
-            {!isFieldDisabled && (
-              <Controller
-                control={form.control}
-                name={`items.${index}.is_discount_adjustment`}
-                render={({ field }) => (
-                  <label className="flex cursor-pointer items-center gap-1">
-                    <Checkbox
-                      checked={field.value ?? false}
-                      onCheckedChange={field.onChange}
-                      className="size-3.5"
-                    />
-                    <span className="text-muted-foreground text-xs select-none">
-                      {tfl("override")}
-                    </span>
-                  </label>
-                )}
-              />
-            )}
-          </div>
-          {isFieldDisabled ? (
-            <p className="flex h-8 items-center justify-end text-xs font-semibold tabular-nums">
-              {formatCurrency(discountAmount)}
-            </p>
-          ) : (
-            <InputAmount
-              id={`items-${index}-discount-amount`}
-              decimals={watchCurrencyDecimals}
-              min={0}
-              size="sm"
-              className={`text-right text-xs ${discountAmountError ? "pl-7" : ""}`}
-              disabled={!isDiscAdj}
-              error={discountAmountError}
-              errorIconAlign="left"
-              defaultValue={discAmt}
-              {...form.register(`items.${index}.discount_amount`)}
-              onChange={(e) => {
-                const n = e.target.valueAsNumber;
-                form.setValue(
-                  `items.${index}.discount_amount`,
-                  Number.isNaN(n) ? 0 : n,
-                  { shouldDirty: true, shouldValidate: true },
-                );
-              }}
-            />
-          )}
-        </Field>
-      </div>
-      <PrInventoryRow
-        control={form.control}
-        index={index}
-        buCode={buCode ?? ""}
-      />
+              </Field>
 
-      <PrItemSummary
-        subtotal={subtotal}
-        netAmount={netAmount}
-        totalPrice={totalPrice}
-        exchangeRate={exchangeRate}
-        isForeignCurrency={isForeignCurrency}
-        baseCurrencyCode={baseCurrencyCode}
-        currencyCode={watchCurrencyCode ?? ""}
-      />
+              {/* Unit price */}
+              <Field className="gap-1.5">
+                <FieldLabel
+                  htmlFor={`items-${index}-pricelist-price`}
+                  className="text-muted-foreground text-xs"
+                >
+                  {tfl("unitPrice")}
+                </FieldLabel>
+                {isFieldDisabled ? (
+                  <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
+                    {price ? formatCurrency(price) : "—"}
+                  </p>
+                ) : (
+                  <InputAmount
+                    id={`items-${index}-pricelist-price`}
+                    decimals={watchCurrencyDecimals}
+                    min={0}
+                    className={`text-sm ${priceError ? "pl-7" : ""}`}
+                    error={priceError}
+                    errorIconAlign="left"
+                    defaultValue={price}
+                    {...form.register(`items.${index}.pricelist_price`)}
+                    onChange={(e) => {
+                      const n = e.target.valueAsNumber;
+                      form.setValue(
+                        `items.${index}.pricelist_price`,
+                        Number.isNaN(n) ? 0 : n,
+                        { shouldDirty: true, shouldValidate: true },
+                      );
+                      form.setValue(
+                        `items.${index}.pricelist_type`,
+                        PR_ITEM_PRICELIST_COMPARE_TYPE.MANUAL_INPUT,
+                      );
+                    }}
+                  />
+                )}
+              </Field>
+
+              {/* Pricelist */}
+              <Field className="gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel className="text-muted-foreground text-xs">
+                    {tfl("pricelist")}
+                  </FieldLabel>
+                  {productId &&
+                    unitId &&
+                    currencyId &&
+                    (role === STAGE_ROLE.PURCHASE ||
+                      role === STAGE_ROLE.APPROVE) && (
+                      <Button
+                        type="button"
+                        size="xs"
+                        variant="ghost"
+                        className="text-primary h-6 shrink-0 px-2"
+                        aria-label={tfl("pricelist")}
+                        onClick={() => setShowPricelist(true)}
+                      >
+                        <Scale className="size-3" />
+                        {tc("compare")}
+                      </Button>
+                    )}
+                </div>
+                <p className="flex min-h-9 items-center truncate text-sm font-medium">
+                  {pricelistNo || "—"}
+                </p>
+              </Field>
+            </div>
+          </section>
+
+          {/* ── Tax & Discount — two calm groups instead of a 5-col micro-grid ── */}
+          <div className="grid grid-cols-1 gap-x-8 gap-y-6 border-t pt-5 sm:grid-cols-2">
+            {/* Tax */}
+            <section className="space-y-3">
+              <GroupEyebrow>{tfl("tax")}</GroupEyebrow>
+              {/* Tax Profile · Tax % · Tax Amt ในแถวเดียวกัน */}
+              <div className="grid grid-cols-[minmax(0,1fr)_3.5rem_minmax(0,1fr)] gap-x-3">
+                <Field className="gap-1.5">
+                  <FieldLabel
+                    htmlFor={`items-${index}-tax-profile`}
+                    className="text-muted-foreground text-xs"
+                  >
+                    {tfl("taxProfile")}
+                  </FieldLabel>
+                  {isFieldDisabled ? (
+                    <p className="flex min-h-9 items-center truncate text-sm font-medium">
+                      {taxProfileName || "—"}
+                    </p>
+                  ) : (
+                    <Controller
+                      control={form.control}
+                      name={`items.${index}.tax_profile_id`}
+                      render={({ field }) => (
+                        <LookupTaxProfile
+                          value={field.value ?? ""}
+                          onValueChange={(value, taxRate, taxProfileName) => {
+                            field.onChange(value || null);
+                            form.setValue(`items.${index}.tax_rate`, taxRate);
+                            form.setValue(
+                              `items.${index}.tax_profile_name`,
+                              taxProfileName,
+                            );
+                          }}
+                          className="w-full text-sm"
+                          error={taxProfileError}
+                        />
+                      )}
+                    />
+                  )}
+                </Field>
+                <Field className="gap-1.5">
+                  <FieldLabel
+                    htmlFor={`items-${index}-tax-rate`}
+                      className="text-muted-foreground text-xs"
+                    >
+                      {tfl("taxPercent")}
+                    </FieldLabel>
+                    <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
+                      {taxRate}
+                    </p>
+                  </Field>
+                  <Field className="gap-1.5">
+                    <div className="flex min-h-[1.125rem] items-center justify-between gap-2">
+                      <FieldLabel
+                        htmlFor={`items-${index}-tax-amount`}
+                        className="text-muted-foreground text-xs"
+                      >
+                        {tfl("taxAmt")}
+                      </FieldLabel>
+                      {!isFieldDisabled &&
+                        overrideToggle(`items.${index}.is_tax_adjustment`)}
+                    </div>
+                    {isFieldDisabled ? (
+                      <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
+                        {formatCurrency(taxAmount)}
+                      </p>
+                    ) : (
+                      <InputAmount
+                        id={`items-${index}-tax-amount`}
+                        decimals={watchCurrencyDecimals}
+                        min={0}
+                        className={`text-sm ${taxAmountError ? "pl-7" : ""}`}
+                        disabled={!isTaxAdj}
+                        error={taxAmountError}
+                        errorIconAlign="left"
+                        defaultValue={taxAmt}
+                        {...form.register(`items.${index}.tax_amount`)}
+                        onChange={(e) => {
+                          const n = e.target.valueAsNumber;
+                          form.setValue(
+                            `items.${index}.tax_amount`,
+                            Number.isNaN(n) ? 0 : n,
+                            { shouldDirty: true, shouldValidate: true },
+                          );
+                        }}
+                      />
+                    )}
+                  </Field>
+              </div>
+            </section>
+
+            {/* Discount */}
+            <section className="space-y-3">
+              <GroupEyebrow>{tfl("discount")}</GroupEyebrow>
+              <div className="grid grid-cols-[5rem_1fr] gap-x-4">
+                <Field className="gap-1.5">
+                  <FieldLabel
+                    htmlFor={`items-${index}-discount-rate`}
+                    className="text-muted-foreground text-xs"
+                  >
+                    {tfl("discPercent")}
+                  </FieldLabel>
+                  {isFieldDisabled ? (
+                    <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
+                      {discRate}
+                    </p>
+                  ) : (
+                    <FieldInput
+                      id={`items-${index}-discount-rate`}
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.01"
+                      placeholder="0"
+                      className="text-sm"
+                      defaultValue={discRate}
+                      {...form.register(`items.${index}.discount_rate`)}
+                      onChange={(e) => {
+                        const n = e.target.valueAsNumber;
+                        form.setValue(
+                          `items.${index}.discount_rate`,
+                          Number.isNaN(n) ? 0 : n,
+                          { shouldDirty: true, shouldValidate: true },
+                        );
+                      }}
+                    />
+                  )}
+                </Field>
+                <Field className="gap-1.5">
+                  <div className="flex min-h-[1.125rem] items-center justify-between gap-2">
+                    <FieldLabel
+                      htmlFor={`items-${index}-discount-amount`}
+                      className="text-muted-foreground text-xs"
+                    >
+                      {tfl("discAmt")}
+                    </FieldLabel>
+                    {!isFieldDisabled &&
+                      overrideToggle(`items.${index}.is_discount_adjustment`)}
+                  </div>
+                  {isFieldDisabled ? (
+                    <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
+                      {formatCurrency(discountAmount)}
+                    </p>
+                  ) : (
+                    <InputAmount
+                      id={`items-${index}-discount-amount`}
+                      decimals={watchCurrencyDecimals}
+                      min={0}
+                      className={`text-sm ${discountAmountError ? "pl-7" : ""}`}
+                      disabled={!isDiscAdj}
+                      error={discountAmountError}
+                      errorIconAlign="left"
+                      defaultValue={discAmt}
+                      {...form.register(`items.${index}.discount_amount`)}
+                      onChange={(e) => {
+                        const n = e.target.valueAsNumber;
+                        form.setValue(
+                          `items.${index}.discount_amount`,
+                          Number.isNaN(n) ? 0 : n,
+                          { shouldDirty: true, shouldValidate: true },
+                        );
+                      }}
+                    />
+                  )}
+                </Field>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
 
       <Suspense fallback={null}>
         <PrPricelistDialog
