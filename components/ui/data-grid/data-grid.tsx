@@ -12,6 +12,9 @@ declare module "@tanstack/react-table" {
     cellClassName?: string;
     skeleton?: ReactNode;
     expandedContent?: (row: TData) => ReactNode;
+    /** column index ที่ให้ expanded content เริ่ม (วาง `<td colSpan>` เว้นซ้าย
+     *  ให้ตรงขอบ column นั้นโดยอาศัยความกว้าง column จริงของ table-fixed) */
+    expandedColStart?: number;
     footerContent?: (row: TData) => ReactNode;
     footerColSpan?: number;
   }

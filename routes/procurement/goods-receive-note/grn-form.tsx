@@ -179,7 +179,11 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="general">
-            <GrnProductCards form={form} disabled={isDisabled} />
+            <GrnProductCards
+              form={form}
+              disabled={isDisabled}
+              plainText={isView}
+            />
           </TabsContent>
           <TabsContent value="extra-cost">
             <GrnExtraCostFields form={form} disabled={isDisabled} />

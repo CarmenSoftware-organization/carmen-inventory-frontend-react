@@ -95,13 +95,19 @@ const PoAddButton = memo(function PoAddButton({
 interface GrnProductCardsProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
+  /** view mode → qty ในแต่ละ location แสดงเป็น plain text */
+  readonly plainText?: boolean;
 }
 
 /**
  * รายการสินค้าของ GRN — DataGrid group-by-product (แบบ PO): 1 row = 1 product,
  * expand → location rows (แต่ละ location มี Quantity/Pricing/Details + Add Location)
  */
-export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
+export function GrnProductCards({
+  form,
+  disabled,
+  plainText = false,
+}: GrnProductCardsProps) {
   "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
   const tfl = useTranslations("field");
@@ -183,6 +189,8 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
     groups,
     itemFields,
     disabled,
+    plainText,
+    isPo: !isManual,
     autoOpenProductKey,
     autoOpenLocationKey,
     onAddLocation: handleAddLocation,
