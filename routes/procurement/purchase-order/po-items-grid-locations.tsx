@@ -15,19 +15,14 @@ import { LookupProductLocation } from "@/components/lookup/lookup-product-locati
 import { cn } from "@/lib/utils";
 import type { PoFormValues } from "./po-form-schema";
 
-interface LocationsEditorProps {
+interface Props {
   readonly form: UseFormReturn<PoFormValues>;
   readonly index: number;
   readonly disabled: boolean;
   readonly readOnly: boolean;
 }
 
-export function LocationsEditor({
-  form,
-  index,
-  disabled,
-  readOnly,
-}: LocationsEditorProps) {
+export function LocationsEditor({ form, index, disabled, readOnly }: Props) {
   "use no memo";
   const tfl = useTranslations("field");
   const t = useTranslations("procurement.purchaseOrder");

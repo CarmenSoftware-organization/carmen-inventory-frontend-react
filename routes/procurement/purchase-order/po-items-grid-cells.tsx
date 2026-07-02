@@ -112,25 +112,6 @@ export function ProductHeaderCell({
   showStatusBadge,
 }: ProductHeaderCellProps) {
   "use no memo";
-  const productLocalName =
-    useWatch({
-      control: form.control,
-      name: `items.${index}.product_local_name`,
-    }) ?? "";
-  const productCode =
-    useWatch({
-      control: form.control,
-      name: `items.${index}.product_code`,
-    }) ?? "";
-  const productSku =
-    useWatch({
-      control: form.control,
-      name: `items.${index}.product_sku`,
-    }) ?? "";
-
-  // Edit mode (editable) → ซ่อน local name + code/SKU meta — เหลือเฉพาะ lookup
-  const isEditing = !disabled && !readOnly;
-
   return (
     <div className="min-w-0">
       <div className="flex items-center gap-1.5">
@@ -150,15 +131,6 @@ export function ProductHeaderCell({
         )}
         {showStatusBadge && <StatusCell control={form.control} index={index} />}
       </div>
-      {!isEditing && productLocalName && (
-        <p className="text-muted-foreground truncate">{productLocalName}</p>
-      )}
-      {!isEditing && (productCode || productSku) && (
-        <p className="text-muted-foreground/80 mt-0.5 truncate">
-          {productCode}
-          {productSku ? ` · SKU ${productSku}` : ""}
-        </p>
-      )}
     </div>
   );
 }

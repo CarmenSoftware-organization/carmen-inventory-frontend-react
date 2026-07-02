@@ -1,16 +1,23 @@
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { Check, Eye, Lock, Plus, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PO_STATUS } from "@/types/purchase-order";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { computePoAction } from "@/constant/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
 import { PO_ITEM } from "./po-form-schema";
 import { PoActionDialog } from "./po-action-dialog";
-import { PoItemsGrid } from "./po-items-grid";
+import { usePoItemTable } from "./use-po-item-table";
+import { PoItemComputedSync } from "./po-item-table";
 import { getDeleteDescription } from "@/lib/form-utils";
 
 interface PoItemFieldsProps {
@@ -46,9 +53,7 @@ export function PoItemFields({
   const tc = useTranslations("common");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [bulkAction, setBulkAction] = useState<"close" | "reject" | null>(null);
-  const [selected, setSelected] = useState<Set<number>>(new Set());
-  // signal นับครั้ง add — เพิ่มทีละ 1 ทุกครั้งที่ prepend item ใหม่
-  // ส่งให้ grid auto-expand row ที่ index 0 (item ใหม่อยู่บนสุดเพราะ prepend)
+  // signal นับครั้ง add — เพิ่มทีละ 1 ทุกครั้งที่ prepend item ใหม่ (auto-expand row บนสุด)
   const [addSignal, setAddSignal] = useState(0);
 
   const {
@@ -57,13 +62,56 @@ export function PoItemFields({
     remove: removeItem,
   } = useFieldArray({ control: form.control, name: "items" });
 
+  const readOnly = role === STAGE_ROLE.APPROVE;
+  const showApproveCheckbox = !!poStatus && poStatus !== "draft";
+
+  const table = usePoItemTable({
+    form,
+    itemFields,
+    disabled,
+    locationsDisabled,
+    readOnly,
+    showApproveCheckbox,
+    onDelete: setDeleteIndex,
+  });
+
   const handleAddItem = () => {
     prependItem({ ...PO_ITEM });
     setAddSignal((c) => c + 1);
   };
 
-  const readOnly = role === STAGE_ROLE.APPROVE;
-  const showApproveCheckbox = !!poStatus && poStatus !== "draft";
+  // add item ใหม่ → prepend อยู่ index 0 → auto-expand ให้กรอก location ได้เลย
+  useEffect(() => {
+    if (!addSignal) return;
+    const topId = itemFields[0]?.id;
+    if (topId) {
+      table.setExpanded((prev) => ({
+        ...(typeof prev === "object" ? prev : {}),
+        [topId]: true,
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addSignal]);
+
+  // validation ไม่ผ่าน: field location/order_qty อยู่ในส่วน expand → auto-expand
+  // แถวที่ติด error ให้ scrollToFirstInvalidField เจอ field
+  useEffect(() => {
+    if (!revealErrorSignal) return;
+    const itemErrors = form.formState.errors.items;
+    if (!itemErrors) return;
+    const next: Record<string, boolean> = {};
+    itemFields.forEach((f, i) => {
+      if (itemErrors[i]?.locations || itemErrors[i]?.order_qty) {
+        next[f.id] = true;
+      }
+    });
+    if (Object.keys(next).length === 0) return;
+    table.setExpanded((prev) => ({
+      ...(typeof prev === "object" ? prev : {}),
+      ...next,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealErrorSignal]);
 
   const items = useWatch({ control: form.control, name: "items" });
 
@@ -88,63 +136,39 @@ export function PoItemFields({
     !!poStatus &&
     (poStatus === PO_STATUS.SENT || poStatus === PO_STATUS.PARTIAL);
 
-  const canBulkAct = isApprover && selected.size > 0;
-  const showBulkActions = selected.size > 0 && (canBulkAct || canClose);
+  const selectedRows = table.getSelectedRowModel().rows;
+  const selectedIndices = selectedRows.map((r) => r.index);
 
-  // useCallback จำเป็นในไฟล์ "use no memo" (React Compiler ปิด) — เพื่อให้ ref
-  // คงที่ข้าม re-render ทำให้ memo ของ PoItemsGrid/ItemRow/ItemCard ทำงาน
-  const handleToggleSelected = useCallback(
-    (index: number, checked: boolean) => {
-      setSelected((prev) => {
-        const next = new Set(prev);
-        if (checked) next.add(index);
-        else next.delete(index);
-        return next;
-      });
-    },
-    [],
-  );
-
-  const handleToggleSelectAll = useCallback(
-    (checked: boolean) => {
-      if (checked) {
-        setSelected(new Set(itemFields.map((_, i) => i)));
-      } else {
-        setSelected(new Set());
-      }
-    },
-    [itemFields],
-  );
-
-  const resetSelection = () => setSelected(new Set());
+  const canBulkAct = isApprover && selectedRows.length > 0;
+  const showBulkActions = selectedRows.length > 0 && (canBulkAct || canClose);
 
   const handleBulkApprove = () => {
-    for (const index of selected) {
+    for (const index of selectedIndices) {
       form.setValue(`items.${index}.stage_status`, "approve");
       form.setValue(`items.${index}.current_stage_status`, "approved");
     }
-    resetSelection();
+    table.resetRowSelection();
   };
 
   const handleBulkReview = () => {
-    for (const index of selected) {
+    for (const index of selectedIndices) {
       form.setValue(`items.${index}.stage_status`, "review");
       form.setValue(`items.${index}.current_stage_status`, "review");
     }
-    resetSelection();
+    table.resetRowSelection();
   };
 
   const handleBulkActionConfirm = (messages: Record<number, string>) => {
     if (bulkAction === "close") {
       onClose?.(messages[0] ?? "");
     } else if (bulkAction === "reject") {
-      for (const index of selected) {
+      for (const index of selectedIndices) {
         form.setValue(`items.${index}.stage_status`, "reject");
         form.setValue(`items.${index}.stage_message`, messages[0] ?? "");
         form.setValue(`items.${index}.current_stage_status`, "rejected");
       }
     }
-    resetSelection();
+    table.resetRowSelection();
     setBulkAction(null);
   };
 
@@ -255,26 +279,35 @@ export function PoItemFields({
         </p>
       )}
 
-      {itemFields.length === 0 ? (
-        <div className="border-border/60 text-muted-foreground rounded-lg border border-dashed py-10 text-center text-sm">
-          {t("noItems")}
-        </div>
-      ) : (
-        <PoItemsGrid
+      {/* compute sync — 1 ต่อ item, เขียน derived order_qty/pricing/base_qty กลับ form */}
+      {itemFields.map((item, i) => (
+        <PoItemComputedSync
+          key={item.id}
+          control={form.control}
           form={form}
-          itemCount={itemFields.length}
-          addSignal={addSignal}
-          revealErrorSignal={revealErrorSignal}
-          disabled={disabled}
-          locationsDisabled={locationsDisabled}
-          readOnly={readOnly}
-          showApproveCheckbox={showApproveCheckbox}
-          selected={selected}
-          onToggleSelected={handleToggleSelected}
-          onToggleSelectAll={handleToggleSelectAll}
-          onDelete={setDeleteIndex}
+          index={i}
         />
-      )}
+      ))}
+
+      <DataGrid
+        table={table}
+        recordCount={itemFields.length}
+        tableLayout={{
+          checkbox: showApproveCheckbox,
+        }}
+        emptyMessage={
+          <div className="text-muted-foreground py-10 text-center text-sm">
+            {t("noItems")}
+          </div>
+        }
+      >
+        <ScrollArea className="w-full">
+          <DataGridContainer>
+            <DataGridTable />
+          </DataGridContainer>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </DataGrid>
 
       <DeleteDialog
         open={deleteIndex !== null}

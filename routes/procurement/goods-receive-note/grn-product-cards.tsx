@@ -308,8 +308,8 @@ export function GrnProductCards({ form, disabled }: GrnProductCardsProps) {
         <div className="space-y-3">
           {groupedItems.map((group, groupIdx) => (
             <div key={group.key} className="overflow-hidden rounded-xl border">
-              {/* Group header — flat, bare number + per-product subtotal */}
-              <div className="flex items-center gap-2.5 border-b px-4 py-3">
+              {/* Group header — grid head color (bg-muted/60) */}
+              <div className="bg-muted/60 flex items-center gap-2.5 border-b px-4 py-3">
                 <span className="text-muted-foreground w-4 shrink-0 text-xs tabular-nums">
                   {groupIdx + 1}
                 </span>

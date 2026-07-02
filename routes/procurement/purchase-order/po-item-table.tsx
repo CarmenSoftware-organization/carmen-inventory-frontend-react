@@ -30,14 +30,14 @@ const ProductCellDisplay = memo(function ProductCellDisplay({
   "use no memo";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
-  const description =
-    useWatch({ control, name: `items.${index}.description` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   return (
     <div className="group w-full text-left">
       <p className="truncate font-semibold">{productName || "—"}</p>
-      {description && (
+      {productLocalName && (
         <p className="text-muted-foreground truncate text-[0.625rem]">
-          {description}
+          {productLocalName}
         </p>
       )}
     </div>

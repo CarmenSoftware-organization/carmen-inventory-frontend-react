@@ -3,10 +3,18 @@ import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
+import { getDeleteDescription } from "@/lib/form-utils";
 import type { CnFormValues } from "./cn-form-schema";
 import { CN_ITEM } from "./cn-form-schema";
-import { CnItemRow } from "./cn-item-row";
+import { CnItemComputedSync, useCnItemTable } from "./use-cn-item-table";
 
 interface CnProductCardsProps {
   readonly form: UseFormReturn<CnFormValues>;
@@ -14,9 +22,8 @@ interface CnProductCardsProps {
 }
 
 /**
- * รายการสินค้าของ CN — flat: แต่ละ item = 1 card (product + location + expandable
- * quantity/pricing/details). ต่างจาก GRN ที่ group by product เพราะ CN model เป็น
- * flat (credit_note_detail แต่ละ detail = 1 product + 1 location)
+ * รายการสินค้าของ CN — flat data grid (1 row = 1 product + location + qty/unit),
+ * คลิก chevron เพื่อ expand เผยฟอร์ม Pricing / Details แบบ inline (colSpan row)
  */
 export function CnProductCards({ form, disabled }: CnProductCardsProps) {
   "use no memo";
@@ -24,10 +31,9 @@ export function CnProductCards({ form, disabled }: CnProductCardsProps) {
   const tfl = useTranslations("field");
   const grnId = useWatch({ control: form.control, name: "grn_id" }) || undefined;
   const canAddItem = !disabled && !!grnId;
-  // key ของ item ที่เพิ่งเพิ่ม → เปิด product lookup อัตโนมัติ (auto-focus)
-  const [autoOpenProductKey, setAutoOpenProductKey] = useState<string | null>(
-    null,
-  );
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  // index ของ row ที่เพิ่งเพิ่ม → auto-open product lookup (prepend อยู่ index 0)
+  const [autoOpenIndex, setAutoOpenIndex] = useState<number | null>(null);
 
   const {
     fields: itemFields,
@@ -36,15 +42,23 @@ export function CnProductCards({ form, disabled }: CnProductCardsProps) {
   } = useFieldArray({ control: form.control, name: "items" });
 
   const handleAddItem = () => {
-    const key = crypto.randomUUID();
     const currencyCode = form.getValues("currency_code") ?? "";
     prependItem({
       ...CN_ITEM,
-      _group_key: key,
+      _group_key: crypto.randomUUID(),
       currency_code: currencyCode,
     });
-    setAutoOpenProductKey(key); // auto-focus product lookup ของ item ใหม่
+    setAutoOpenIndex(0); // auto-focus product lookup ของ item ใหม่ (บนสุด)
   };
+
+  const table = useCnItemTable({
+    form,
+    itemFields,
+    disabled,
+    grnId,
+    autoOpenIndex,
+    onDelete: setDeleteIndex,
+  });
 
   const addAction = !disabled && (
     <Button
@@ -68,39 +82,55 @@ export function CnProductCards({ form, disabled }: CnProductCardsProps) {
         {addAction}
       </div>
 
-      {itemFields.length === 0 && (
-        <EmptyComponent
-          icon={BoxIcon}
-          title={t("noItems")}
-          description={t("noItemsDesc")}
-          content={addAction}
-        />
-      )}
-
       {itemsError && (
         <p className="text-destructive text-xs" role="alert">
           {itemsError}
         </p>
       )}
 
-      {itemFields.length > 0 && (
-        <div className="space-y-3">
-          {itemFields.map((item, idx) => (
-            <div key={item.id} className="overflow-hidden rounded-xl border">
-              <CnItemRow
-                index={idx}
-                itemNumber={idx + 1}
-                form={form}
-                disabled={disabled}
-                showDelete={!disabled}
-                onDelete={() => removeItem(idx)}
-                groupIndices={[idx]}
-                autoOpenProduct={item._group_key === autoOpenProductKey}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* compute sync — 1 ต่อ item, รัน setValue net/tax/total แม้ตอน collapsed */}
+      {itemFields.map((item, i) => (
+        <CnItemComputedSync
+          key={item.id}
+          control={form.control}
+          form={form}
+          index={i}
+        />
+      ))}
+
+      <DataGrid
+        table={table}
+        recordCount={itemFields.length}
+        emptyMessage={
+          <EmptyComponent
+            icon={BoxIcon}
+            title={t("noItems")}
+            description={t("noItemsDesc")}
+            content={addAction}
+          />
+        }
+      >
+        <ScrollArea className="w-full">
+          <DataGridContainer>
+            <DataGridTable />
+          </DataGridContainer>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </DataGrid>
+
+      <DeleteDialog
+        open={deleteIndex !== null}
+        onOpenChange={(o) => {
+          if (!o) setDeleteIndex(null);
+        }}
+        title={tfl("deleteLocation")}
+        description={getDeleteDescription(deleteIndex, form, "item_name")}
+        onConfirm={() => {
+          if (deleteIndex === null) return;
+          removeItem(deleteIndex);
+          setDeleteIndex(null);
+        }}
+      />
     </div>
   );
 }

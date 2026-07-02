@@ -14,9 +14,7 @@ import { LookupProductLocation } from "@/components/lookup/lookup-product-locati
 import { inventoryTypeLabelKey } from "@/constant/location";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
-import GrnTabQty from "./grn-tab-qty";
-import GrnTabPricing from "./grn-tab-pricing";
-import GrnTabDetails from "./grn-tab-details";
+import { GrnItemExpanded } from "./grn-item-expanded";
 import { FieldLabel } from "@/components/ui/field";
 import { Badge } from "@/components/ui/badge";
 
@@ -31,9 +29,6 @@ interface GrnItemRowProps {
   /** เปิด location lookup อัตโนมัติตอน mount (row ที่เพิ่งเพิ่ม) */
   readonly autoOpenLocation?: boolean;
 }
-
-const EYEBROW =
-  "text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase";
 
 /**
  * แถว location ของ GRN item — collapsed = summary อ่านอย่างเดียว,
@@ -114,7 +109,7 @@ export const GrnItemRow = memo(function GrnItemRow({
       <div
         className={cn(
           "flex items-center gap-2.5 py-3 pr-4 pl-8 transition-colors",
-          showExpanded ? "bg-muted/20" : "hover:bg-muted/20",
+          showExpanded ? "bg-muted/40" : "hover:bg-muted/40",
         )}
       >
         <button
@@ -184,7 +179,7 @@ export const GrnItemRow = memo(function GrnItemRow({
                 <MapPin className="text-muted-foreground size-3 shrink-0" />
                 <span
                   className={cn(
-                    "truncate text-[0.8125rem] font-medium",
+                    "truncate text-xs font-medium",
                     locationError ? "text-destructive" : "text-foreground",
                   )}
                 >
@@ -204,7 +199,7 @@ export const GrnItemRow = memo(function GrnItemRow({
             </>
           )}
         </span>
-        <span className="text-foreground w-20 text-right text-[0.8125rem] font-semibold tabular-nums">
+        <span className="text-foreground w-20 text-right text-xs font-semibold tabular-nums">
           {formatCurrency(Number(netAmount) || 0)}
         </span>
         {showDelete && (
@@ -223,27 +218,12 @@ export const GrnItemRow = memo(function GrnItemRow({
 
       {/* ── Expanded editor (inline, replaces the old sheet) ── */}
       {showExpanded && (
-        <div className="bg-muted/20 space-y-4 px-4 pt-2 pb-4 pl-8">
-          <section className="space-y-2">
-            <p className={EYEBROW}>{tfl("quantity")}</p>
-            <GrnTabQty
-              form={form}
-              index={index}
-              disabled={disabled}
-              docType={docType}
-            />
-          </section>
-
-          <section className="space-y-2 border-t pt-3">
-            <p className={EYEBROW}>{tfl("pricing")}</p>
-            <GrnTabPricing form={form} index={index} disabled={disabled} />
-          </section>
-
-          <section className="space-y-2 border-t pt-3">
-            <p className={EYEBROW}>{tfl("details")}</p>
-            <GrnTabDetails form={form} index={index} disabled={disabled} />
-          </section>
-        </div>
+        <GrnItemExpanded
+          form={form}
+          index={index}
+          disabled={disabled}
+          docType={docType}
+        />
       )}
 
       <DeleteDialog
