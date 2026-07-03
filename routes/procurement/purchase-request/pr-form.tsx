@@ -12,6 +12,7 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import { NotesSection } from "@/components/ui/notes-section";
 import { PrGeneralFields } from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
 import { PrFormActions } from "./pr-form-actions";
@@ -239,16 +240,10 @@ export function PurchaseRequestForm({
           onBulkReview={actions.handleBulkReview}
         />
 
-        <section className="space-y-3">
-          <div className="border-border/60 space-y-0.5 border-b pb-2">
-            <h2 className="text-foreground text-sm font-semibold tracking-tight">
-              {t("sectionNotes")}
-            </h2>
-            <p className="text-muted-foreground text-xs">
-              {t("sectionNotesSub")}
-            </p>
-          </div>
-
+        <NotesSection
+          title={t("sectionNotes")}
+          subtitle={t("sectionNotesSub")}
+        >
           <Field className={descriptionReadOnly ? "gap-1" : undefined}>
             <FieldLabel
               htmlFor="pr-description"
@@ -281,7 +276,7 @@ export function PurchaseRequestForm({
               />
             )}
           </Field>
-        </section>
+        </NotesSection>
       </form>
 
       <PrFormDialogs

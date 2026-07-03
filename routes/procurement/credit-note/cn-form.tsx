@@ -21,6 +21,9 @@ import {
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { NotesSection } from "@/components/ui/notes-section";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
@@ -211,7 +214,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex min-h-full flex-col space-y-4">
       <CnHeader
         creditNote={creditNote}
         mode={mode}
@@ -238,6 +241,35 @@ export function CnForm({ creditNote }: CnFormProps) {
       >
         <CnGeneralFields form={form} disabled={isDisabled} plainText={isView} />
         <CnProductCards form={form} disabled={isDisabled} />
+
+        <NotesSection
+          title={t("sectionNotes")}
+          subtitle={t("sectionNotesSub")}
+        >
+          <Field className={isView ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="cn-description"
+              className={isView ? "text-muted-foreground font-normal" : undefined}
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {isView ? (
+              <p className="min-h-8 text-xs whitespace-pre-wrap">
+                {form.getValues("description") || "—"}
+              </p>
+            ) : (
+              <Textarea
+                id="cn-description"
+                placeholder={tfl("optional")}
+                className="text-xs"
+                rows={2}
+                disabled={isDisabled}
+                maxLength={256}
+                {...form.register("description")}
+              />
+            )}
+          </Field>
+        </NotesSection>
       </form>
 
       <CnFooterAction control={form.control} />

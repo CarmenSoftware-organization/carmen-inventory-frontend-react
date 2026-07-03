@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import {
@@ -15,7 +15,6 @@ import {
   InputSuffixInput,
   InputSuffixPlain,
 } from "@/components/ui/input/input-suffix";
-import { Textarea } from "@/components/ui/textarea";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
@@ -333,51 +332,6 @@ export function CnGeneralFields({
           </Field>
         </div>
       </section>
-
-      {/* ── 4. Notes ── */}
-      <section className="space-y-2">
-        <GroupLabel>{t("groupNotes")}</GroupLabel>
-        <Field>
-          <FieldLabel htmlFor="cn-description" className="sr-only">
-            {tfl("description")}
-          </FieldLabel>
-          {plainText ? (
-            <p className="min-h-8 text-sm whitespace-pre-wrap">
-              {form.getValues("description") || "—"}
-            </p>
-          ) : (
-            <Textarea
-              id="cn-description"
-              placeholder={tfl("optional")}
-              className="text-xs"
-              rows={2}
-              disabled={disabled}
-              maxLength={256}
-              {...form.register("description")}
-            />
-          )}
-        </Field>
-      </section>
-    </div>
-  );
-}
-
-/** หัวข้อกรุ๊ปของ field — มี hint ขวา (optional) + เส้นคั่นล่าง */
-function GroupLabel({
-  children,
-  hint,
-}: {
-  readonly children: ReactNode;
-  readonly hint?: string;
-}) {
-  return (
-    <div className="flex items-baseline gap-2">
-      <h3 className="text-foreground text-sm font-semibold tracking-tight">
-        {children}
-      </h3>
-      {hint && (
-        <span className="text-muted-foreground text-[0.625rem]">{hint}</span>
-      )}
     </div>
   );
 }

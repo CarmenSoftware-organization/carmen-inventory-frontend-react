@@ -16,7 +16,6 @@ import {
   InputSuffixInput,
   InputSuffixPlain,
 } from "@/components/ui/input/input-suffix";
-import { Textarea } from "@/components/ui/textarea";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
@@ -313,24 +312,6 @@ export function GrnFormHeader({
           />
         </Field>
       </div>
-      <Field className={viewFieldGap}>
-        <FieldLabel className={viewLabelClass} htmlFor="grn-description">
-          {tfl("description")}
-        </FieldLabel>
-        {plainText ? (
-          <p className="min-h-8 text-sm whitespace-pre-wrap">
-            {form.getValues("description") || "—"}
-          </p>
-        ) : (
-          <Textarea
-            id="grn-description"
-            placeholder={t("descriptionPlaceholder")}
-            maxLength={256}
-            disabled={disabled}
-            {...form.register("description")}
-          />
-        )}
-      </Field>
     </div>
   );
 }

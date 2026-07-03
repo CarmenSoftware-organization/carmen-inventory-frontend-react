@@ -4,6 +4,7 @@ import { useWatch, type Control } from "react-hook-form";
 import { Check, Eye, SendHorizonal, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
+import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { PO_STATUS } from "@/types/purchase-order";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { computePoAction } from "@/constant/purchase-order";
@@ -122,61 +123,50 @@ export function PoFooterAction({
 
   return (
     <>
-      <div
-        className={`bg-background sticky bottom-0 z-20 mt-auto flex flex-wrap items-center gap-3 border-t p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:flex-nowrap sm:gap-4 ${hasItems ? "justify-between" : "justify-end"}`}
+      <SummaryFooterBar
+        hasRecord={hasItems}
+        items={[
+          {
+            key: "price",
+            label: tfl("price"),
+            value: formatCurrency(summary.subtotal),
+          },
+          {
+            key: "subtotal",
+            label: tfl("subtotal"),
+            value: formatCurrency(summary.subtotal),
+          },
+          {
+            key: "discount",
+            label: tfl("discount"),
+            value:
+              summary.totalDiscount > 0
+                ? `-${formatCurrency(summary.totalDiscount)}`
+                : formatCurrency(0),
+            valueClassName:
+              summary.totalDiscount > 0
+                ? "text-destructive font-semibold"
+                : "font-semibold",
+          },
+          {
+            key: "net",
+            label: tfl("net"),
+            value: formatCurrency(summary.totalNet),
+          },
+          {
+            key: "tax",
+            label: tfl("tax"),
+            value: formatCurrency(summary.totalTax),
+          },
+          {
+            key: "grandTotal",
+            label: tfl("grandTotal"),
+            value: formatCurrency(summary.grandTotal),
+            emphasis: true,
+            suffix: docCurrencyCode,
+          },
+        ]}
       >
-        {hasItems && (
-          <div className="flex items-center gap-4 text-xs tabular-nums">
-            <div className="flex items-center gap-1.5">
-              <span className="text-muted-foreground">{tfl("subtotal")}</span>
-              <span className="font-semibold">
-                {formatCurrency(summary.subtotal)}
-              </span>
-            </div>
-            <span className="text-border">|</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-muted-foreground">{tfl("discount")}</span>
-              <span
-                className={
-                  summary.totalDiscount > 0
-                    ? "text-destructive font-semibold"
-                    : "font-semibold"
-                }
-              >
-                {summary.totalDiscount > 0
-                  ? `-${formatCurrency(summary.totalDiscount)}`
-                  : formatCurrency(0)}
-              </span>
-            </div>
-            <span className="text-border">|</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-muted-foreground">{tfl("net")}</span>
-              <span className="font-semibold">
-                {formatCurrency(summary.totalNet)}
-              </span>
-            </div>
-            <span className="text-border">|</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-muted-foreground">{tfl("tax")}</span>
-              <span className="font-semibold">
-                {formatCurrency(summary.totalTax)}
-              </span>
-            </div>
-            <span className="text-border">|</span>
-            <div className="flex items-center gap-1.5 text-sm">
-              <span className="font-semibold">{tfl("total")}</span>
-              <span className="font-semibold">
-                {formatCurrency(summary.grandTotal)}
-              </span>
-              {docCurrencyCode && (
-                <span className="text-muted-foreground text-xs font-normal">
-                  {docCurrencyCode}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
         {showActions && (
           <div className="flex shrink-0 items-center gap-2">
             {canSubmit && (
@@ -252,7 +242,7 @@ export function PoFooterAction({
             )}
           </div>
         )}
-      </div>
+      </SummaryFooterBar>
 
       <PoActionDialog
         open={reviewOpen}

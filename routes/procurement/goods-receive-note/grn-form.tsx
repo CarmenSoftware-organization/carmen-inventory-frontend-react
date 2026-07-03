@@ -5,6 +5,10 @@ import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { formatCurrency, round2 } from "@/lib/currency-utils";
+import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import type { FormMode } from "@/types/form";
@@ -20,8 +24,10 @@ import { GrnItemTable } from "./grn-item-table";
 import { GrnFormDialogs } from "./grn-form-dialogs";
 import { useGrnFormActions } from "./use-grn-form-actions";
 import { useProfile } from "@/hooks/use-profile";
+import { useCurrency } from "@/hooks/use-currency";
 import { GrnHeader } from "./grn-header";
 import { GrnFormHeader } from "./grn-form-header";
+import { NotesSection } from "@/components/ui/notes-section";
 
 interface GrnFormProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
@@ -108,6 +114,37 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
       name: "extra_cost_details",
     })?.length ?? 0;
 
+  const { data: currencyData } = useCurrency({ perpage: -1 });
+  const currencies = currencyData?.data?.filter((c) => c.is_active) ?? [];
+
+  // grand summary — รวมยอดจากทุก item (net/discount/tax/total ที่คำนวณไว้แล้ว)
+  const items = useWatch({ control: form.control, name: "items" }) ?? [];
+  // currency code — derive จาก list ตาม currency_id (fallback currency_name)
+  // เหมือน grn-form-header เพราะบาง record ไม่เก็บ currency_name
+  const currencyId = useWatch({ control: form.control, name: "currency_id" });
+  const currencyName =
+    useWatch({ control: form.control, name: "currency_name" }) ?? "";
+  const currencyCode =
+    currencies.find((c) => c.id === currencyId)?.code || currencyName;
+  let totalDiscount = 0;
+  let totalNet = 0;
+  let totalTax = 0;
+  let grandTotal = 0;
+  for (const it of items) {
+    totalDiscount += Number(it?.discount_amount) || 0;
+    totalNet += Number(it?.net_amount) || 0;
+    totalTax += Number(it?.tax_amount) || 0;
+    grandTotal += Number(it?.total_price) || 0;
+  }
+  const summary = {
+    subtotal: round2(totalNet + totalDiscount),
+    totalDiscount: round2(totalDiscount),
+    totalNet: round2(totalNet),
+    totalTax: round2(totalTax),
+    grandTotal: round2(grandTotal),
+  };
+  const hasItems = items.length > 0;
+
   // Clear wizard data on SPA navigation (unmount) but keep on browser refresh
   useEffect(() => {
     let isRefresh = false;
@@ -122,7 +159,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="flex min-h-full flex-col space-y-4">
       <GrnHeader
         goodsReceiveNote={goodsReceiveNote}
         mode={mode}
@@ -160,7 +197,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           plainText={isView}
         />
 
-        <Tabs defaultValue="general" className="border-t pt-4">
+        <Tabs defaultValue="general">
           <TabsList variant="line">
             <TabsTrigger value="general" className="text-xs">
               {t("tabGeneral")}
@@ -189,7 +226,80 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
             <GrnExtraCostFields form={form} disabled={isDisabled} />
           </TabsContent>
         </Tabs>
+        <NotesSection title={t("sectionNotes")} subtitle={t("sectionNotesSub")}>
+          <Field className={isView ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="grn-description"
+              className={
+                isView ? "text-muted-foreground font-normal" : undefined
+              }
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {isView ? (
+              <p className="min-h-8 text-xs whitespace-pre-wrap">
+                {form.getValues("description") || "—"}
+              </p>
+            ) : (
+              <Textarea
+                id="grn-description"
+                placeholder={t("descriptionPlaceholder")}
+                maxLength={256}
+                rows={2}
+                disabled={isDisabled}
+                {...form.register("description")}
+              />
+            )}
+          </Field>
+        </NotesSection>
       </form>
+
+      {hasItems && (
+        <SummaryFooterBar
+          hasRecord
+          items={[
+            {
+              key: "price",
+              label: tfl("price"),
+              value: formatCurrency(summary.subtotal),
+            },
+            {
+              key: "subtotal",
+              label: tfl("subtotal"),
+              value: formatCurrency(summary.subtotal),
+            },
+            {
+              key: "discount",
+              label: tfl("discount"),
+              value:
+                summary.totalDiscount > 0
+                  ? `-${formatCurrency(summary.totalDiscount)}`
+                  : formatCurrency(0),
+              valueClassName:
+                summary.totalDiscount > 0
+                  ? "text-destructive font-semibold"
+                  : "font-semibold",
+            },
+            {
+              key: "net",
+              label: tfl("net"),
+              value: formatCurrency(summary.totalNet),
+            },
+            {
+              key: "tax",
+              label: tfl("tax"),
+              value: formatCurrency(summary.totalTax),
+            },
+            {
+              key: "grandTotal",
+              label: tfl("grandTotal"),
+              value: formatCurrency(summary.grandTotal),
+              emphasis: true,
+              suffix: currencyCode,
+            },
+          ]}
+        />
+      )}
 
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />
 

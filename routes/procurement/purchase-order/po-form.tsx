@@ -10,6 +10,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import { NotesSection } from "@/components/ui/notes-section";
 import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
 import { PoItemFields } from "./po-item-fields";
@@ -206,21 +207,16 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           />
         </section>
 
-        <section className="space-y-3">
-          <div className="border-border/60 space-y-0.5 border-b pb-2">
-            <h2 className="text-foreground text-sm font-semibold tracking-tight">
-              {t("sectionNotes")}
-            </h2>
-            <p className="text-muted-foreground text-xs">
-              {t("sectionNotesSub")}
-            </p>
-          </div>
+        <NotesSection
+          title={t("sectionNotes")}
+          subtitle={t("sectionNotesSub")}
+        >
           <PoNotesSummary
             form={form}
             disabled={fieldsDisabled}
             plainText={isView || isReadOnly}
           />
-        </section>
+        </NotesSection>
       </form>
 
       <PoFooterAction
