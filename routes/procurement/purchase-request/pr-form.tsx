@@ -10,6 +10,8 @@ import type {
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
+import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 import { PrGeneralFields } from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
 import { PrFormActions } from "./pr-form-actions";
@@ -107,6 +109,13 @@ export function PurchaseRequestForm({
   });
 
   const isDisabled = isView || actions.isPending;
+
+  // Notes (description) — view หรือหลัง submit (role != CREATE) แสดงเป็น plain text
+  const descriptionReadOnly = isView || role !== STAGE_ROLE.CREATE;
+  const watchedDescription = useWatch({
+    control: form.control,
+    name: "description",
+  });
 
   const workflowId = useWatch({ control: form.control, name: "workflow_id" });
   const watchedItems = useWatch({ control: form.control, name: "items" });
@@ -229,6 +238,50 @@ export function PurchaseRequestForm({
           stagesLoading={stagesLoading}
           onBulkReview={actions.handleBulkReview}
         />
+
+        <section className="space-y-3">
+          <div className="border-border/60 space-y-0.5 border-b pb-2">
+            <h2 className="text-foreground text-sm font-semibold tracking-tight">
+              {t("sectionNotes")}
+            </h2>
+            <p className="text-muted-foreground text-xs">
+              {t("sectionNotesSub")}
+            </p>
+          </div>
+
+          <Field className={descriptionReadOnly ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="pr-description"
+              className={
+                descriptionReadOnly
+                  ? "text-muted-foreground font-normal"
+                  : undefined
+              }
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {descriptionReadOnly ? (
+              <FieldPlainText className="text-sm">
+                {watchedDescription?.trim() ? (
+                  <span className="whitespace-pre-line">
+                    {watchedDescription}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground font-normal">—</span>
+                )}
+              </FieldPlainText>
+            ) : (
+              <Textarea
+                id="pr-description"
+                placeholder={t("descPlaceholder")}
+                rows={2}
+                maxLength={256}
+                disabled={actions.isPending}
+                {...form.register("description")}
+              />
+            )}
+          </Field>
+        </section>
       </form>
 
       <PrFormDialogs

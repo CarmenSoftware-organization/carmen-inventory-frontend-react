@@ -1,7 +1,6 @@
-import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { PrFormValues } from "./pr-form-schema";
@@ -24,12 +23,7 @@ export function PrGeneralFields({
   role,
   fromTemplate,
 }: PrGeneralFieldsProps) {
-  const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
-  const watchedDescription = useWatch({
-    control: form.control,
-    name: "description",
-  });
 
   // หลัง submit (role != CREATE) field ทั้งสองถูก lock ถาวร → render เป็น text
   const lockedAfterCreate = !!role && role !== STAGE_ROLE.CREATE;
@@ -62,37 +56,6 @@ export function PrGeneralFields({
             />
           )}
         />
-      </Field>
-
-      <Field className={descriptionReadOnly ? "gap-1" : undefined}>
-        <FieldLabel
-          htmlFor="pr-description"
-          className={
-            descriptionReadOnly
-              ? "text-muted-foreground font-normal"
-              : undefined
-          }
-        >
-          {tfl("description")}
-        </FieldLabel>
-        {descriptionReadOnly ? (
-          <FieldPlainText className="text-sm">
-            {watchedDescription?.trim() ? (
-              <span className="whitespace-pre-line">{watchedDescription}</span>
-            ) : (
-              <span className="text-muted-foreground font-normal">—</span>
-            )}
-          </FieldPlainText>
-        ) : (
-          <Textarea
-            id="pr-description"
-            placeholder={t("descPlaceholder")}
-            rows={2}
-            maxLength={256}
-            disabled={disabled}
-            {...form.register("description")}
-          />
-        )}
       </Field>
     </>
   );

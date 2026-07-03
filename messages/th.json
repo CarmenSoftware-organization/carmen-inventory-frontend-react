@@ -2544,6 +2544,8 @@
       "tabItems": "รายการ",
       "tabWorkflowHistory": "ประวัติเวิร์กโฟลว์",
       "descPlaceholder": "กรอกคำอธิบาย...",
+      "sectionNotes": "หมายเหตุ",
+      "sectionNotesSub": "รายละเอียดของใบขอซื้อ",
       "myPending": "รอดำเนินการของฉัน",
       "allDocuments": "เอกสารทั้งหมด",
       "allStage": "ทุกขั้นตอน",

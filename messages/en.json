@@ -2549,6 +2549,8 @@
       "tabItems": "Items",
       "tabWorkflowHistory": "Workflow History",
       "descPlaceholder": "Enter description...",
+      "sectionNotes": "Notes",
+      "sectionNotesSub": "Description for this request",
       "myPending": "My pending",
       "allDocuments": "All Documents",
       "allStage": "All Stage",
