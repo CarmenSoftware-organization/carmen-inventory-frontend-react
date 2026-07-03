@@ -532,6 +532,7 @@
     "override": "แก้ไขเอง",
     "pricelist": "รายการราคา",
     "requested": "ร้องขอ",
+    "requestedAbbr": "ขอ",
     "approved": "อนุมัติ",
     "requestedShort": "Req",
     "approvedShort": "Apv",
@@ -2658,7 +2659,9 @@
       "noItems": "ยังไม่มีรายการ",
       "noItemsDesc": "เพิ่มรายการในแม่แบบนี้",
       "removeItem": "ลบรายการ",
-      "namePlaceholder": "เช่น แม่แบบอาหาร"
+      "namePlaceholder": "เช่น แม่แบบอาหาร",
+      "sectionNotes": "รายละเอียด",
+      "sectionNotesSub": "คำอธิบายและสถานะของแม่แบบนี้"
     },
     "purchaseOrder": {
       "entity": "ใบสั่งซื้อ",

@@ -6,9 +6,8 @@ import {
   FieldGroup,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
 } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
-import { StatusSwitch } from "@/components/ui/status-switch";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { PrtFormValues } from "./prt-form-schema";
@@ -35,10 +34,6 @@ export function PrtGeneralFields({
   const tfl = useTranslations("field");
   const errors = form.formState.errors;
   const watchedName = useWatch({ control: form.control, name: "name" });
-  const watchedDescription = useWatch({
-    control: form.control,
-    name: "description",
-  });
 
   // view mode → คู่ label↔value ชิด (gap-1) + label เงียบ (เทา/ปกติ) ให้ value
   // เด่นกว่า สร้าง proximity grouping + lightness contrast แบบ Apple (เหมือน CN)
@@ -84,13 +79,13 @@ export function PrtGeneralFields({
               {tfl("name")}
             </FieldLabel>
             {readOnly ? (
-              <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
+              <FieldPlainText className="text-sm">
                 {watchedName?.trim() ? (
                   watchedName
                 ) : (
                   <span className="text-muted-foreground font-normal">—</span>
                 )}
-              </span>
+              </FieldPlainText>
             ) : (
               <FieldInput
                 id="prt-name"
@@ -104,49 +99,6 @@ export function PrtGeneralFields({
             )}
           </Field>
         </div>
-
-        <Field className={viewFieldGap}>
-          <FieldLabel
-            htmlFor="prt-description"
-            className={viewLabelClass}
-          >
-            {tfl("description")}
-          </FieldLabel>
-          {readOnly ? (
-            <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
-              {watchedDescription?.trim() ? (
-                <span className="whitespace-pre-line">
-                  {watchedDescription}
-                </span>
-              ) : (
-                <span className="text-muted-foreground font-normal">—</span>
-              )}
-            </span>
-          ) : (
-            <Textarea
-              id="prt-description"
-              placeholder={tfl("optional")}
-              rows={2}
-              disabled={disabled}
-              maxLength={256}
-              {...form.register("description")}
-            />
-          )}
-        </Field>
-
-        <Controller
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <StatusSwitch
-              id="prt-is-active"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-              description="Enable to make this template available for use"
-              disabled={readOnly || disabled}
-            />
-          )}
-        />
       </FieldGroup>
     </div>
   );

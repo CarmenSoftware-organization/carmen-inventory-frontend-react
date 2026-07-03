@@ -532,6 +532,7 @@
     "override": "Override",
     "pricelist": "Pricelist",
     "requested": "Requested",
+    "requestedAbbr": "Req",
     "approved": "Approved",
     "requestedShort": "Req",
     "approvedShort": "Apv",
@@ -2663,7 +2664,9 @@
       "noItems": "No Items Yet",
       "noItemsDesc": "Add items to this template.",
       "removeItem": "Remove Item",
-      "namePlaceholder": "e.g. Food Template"
+      "namePlaceholder": "e.g. Food Template",
+      "sectionNotes": "Details",
+      "sectionNotesSub": "Description and status of this template"
     },
     "purchaseOrder": {
       "entity": "Purchase Order",
