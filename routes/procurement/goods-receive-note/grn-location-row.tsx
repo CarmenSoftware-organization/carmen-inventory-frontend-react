@@ -12,6 +12,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { Input } from "@/components/ui/input";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { useProductUnits } from "@/hooks/use-product-units";
@@ -74,16 +80,11 @@ const QtyUnitPlain = memo(function QtyUnitPlain({
   const { data: units = [] } = useProductUnits(productId || undefined);
   const unitName = units.find((u) => u.id === unitId)?.name ?? "";
   return (
-    <span className="w-44 shrink-0 text-right text-xs">
-      <span className="text-foreground font-medium tabular-nums">
-        {Number(qty) || 0}
-      </span>
-      {unitName && (
-        <span className="text-muted-foreground ml-1 font-normal">
-          {unitName}
-        </span>
-      )}
-    </span>
+    <InputSuffixPlain
+      className="w-44"
+      value={Number(qty) || 0}
+      suffix={unitName}
+    />
   );
 });
 
@@ -123,34 +124,26 @@ function QtyUnitCell({
     );
   }
   return (
-    <div
-      className={cn(
-        "bg-background flex h-8 w-44 shrink-0 items-center overflow-hidden rounded-md border transition-[color,box-shadow]",
-        "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
-        error ? "border-destructive" : "border-input",
-        disabled && "bg-muted/60 opacity-70",
-      )}
-    >
-      <Input
+    <InputSuffixField className="w-44" disabled={disabled} error={!!error}>
+      <InputSuffixInput
         type="number"
         inputMode="decimal"
         min={min}
         placeholder="0"
-        aria-invalid={!!error}
-        className="h-full min-w-0 flex-1 rounded-none border-0 bg-transparent px-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-transparent disabled:opacity-100"
         disabled={disabled}
         {...form.register(`items.${index}.${qtyField}`, {
           valueAsNumber: true,
         })}
       />
-      <div className="bg-border h-4 w-px shrink-0" aria-hidden="true" />
-      <WatchedProductUnit
-        control={form.control}
-        index={index}
-        unitField={unitField}
-        disabled={disabled}
-      />
-    </div>
+      <InputSuffixAddon>
+        <WatchedProductUnit
+          control={form.control}
+          index={index}
+          unitField={unitField}
+          disabled={disabled}
+        />
+      </InputSuffixAddon>
+    </InputSuffixField>
   );
 }
 
@@ -165,9 +158,7 @@ const PricePlain = memo(function PricePlain({
   "use no memo";
   const v = useWatch({ control, name: `items.${index}.unit_price` });
   return (
-    <span className="text-foreground w-28 shrink-0 text-right text-xs font-medium tabular-nums">
-      {formatCurrency(Number(v) || 0)}
-    </span>
+    <InputSuffixPlain className="w-28" value={formatCurrency(Number(v) || 0)} />
   );
 });
 
@@ -408,7 +399,12 @@ export const GrnLocationRow = memo(function GrnLocationRow({
 
       {/* ── Expanded editor: Pricing / Details ── */}
       {showExpanded && (
-        <GrnLocationExpanded form={form} index={index} disabled={disabled} />
+        <GrnLocationExpanded
+          form={form}
+          index={index}
+          disabled={disabled}
+          plainText={plainText}
+        />
       )}
 
       <DeleteDialog

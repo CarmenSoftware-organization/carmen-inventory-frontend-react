@@ -99,7 +99,7 @@ export default function DashboardComponent() {
       <AnimationStyles />
       <div className="space-y-6 p-4">
         <Reveal>
-          <EyeBrow>
+          <EyeBrow className="mb-2">
             {t("brief")} · {dayLabel}
           </EyeBrow>
           <h1 className="text-foreground text-[1rem] leading-[1.1] font-bold tracking-[-0.05625rem] sm:text-[2rem]">

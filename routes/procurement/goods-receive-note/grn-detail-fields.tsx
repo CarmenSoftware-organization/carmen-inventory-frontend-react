@@ -2,12 +2,15 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import type { GrnFormValues } from "./grn-form-schema";
 
 interface GrnDetailFieldsProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly index: number;
   readonly disabled: boolean;
+  /** view mode → description/note แสดงเป็น plain text (เหมือน grn-form-header) */
+  readonly plainText?: boolean;
 }
 
 /**
@@ -24,9 +27,16 @@ export default function GrnDetailFields({
   form,
   index,
   disabled,
+  plainText = false,
 }: GrnDetailFieldsProps) {
   "use no memo";
   const tfl = useTranslations("field");
+
+  // view mode → คู่ label↔value ชิด + label เงียบ (เหมือน grn-form-header)
+  const viewFieldGap = plainText ? "gap-1" : undefined;
+  const viewLabelClass = plainText
+    ? "text-muted-foreground font-normal"
+    : undefined;
   const docType = useWatch({ control: form.control, name: "doc_type" }) ?? "";
   const poNumber =
     useWatch({
@@ -49,30 +59,48 @@ export default function GrnDetailFields({
 
       {/* Notes */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor={`items-${index}-description`} className="text-xs">
+        <Field className={viewFieldGap}>
+          <FieldLabel
+            htmlFor={`items-${index}-description`}
+            className={cn("text-xs", viewLabelClass)}
+          >
             {tfl("description")}
           </FieldLabel>
-          <Textarea
-            id={`items-${index}-description`}
-            maxLength={256}
-            disabled={disabled}
-            className="text-xs"
-            {...form.register(`items.${index}.description`)}
-          />
+          {plainText ? (
+            <p className="min-h-8 text-xs whitespace-pre-wrap">
+              {form.getValues(`items.${index}.description`) || "—"}
+            </p>
+          ) : (
+            <Textarea
+              id={`items-${index}-description`}
+              maxLength={256}
+              disabled={disabled}
+              className="text-xs"
+              {...form.register(`items.${index}.description`)}
+            />
+          )}
         </Field>
 
-        <Field>
-          <FieldLabel htmlFor={`items-${index}-note`} className="text-xs">
+        <Field className={viewFieldGap}>
+          <FieldLabel
+            htmlFor={`items-${index}-note`}
+            className={cn("text-xs", viewLabelClass)}
+          >
             {tfl("note")}
           </FieldLabel>
-          <Textarea
-            id={`items-${index}-note`}
-            maxLength={256}
-            disabled={disabled}
-            className="text-xs"
-            {...form.register(`items.${index}.note`)}
-          />
+          {plainText ? (
+            <p className="min-h-8 text-xs whitespace-pre-wrap">
+              {form.getValues(`items.${index}.note`) || "—"}
+            </p>
+          ) : (
+            <Textarea
+              id={`items-${index}-note`}
+              maxLength={256}
+              disabled={disabled}
+              className="text-xs"
+              {...form.register(`items.${index}.note`)}
+            />
+          )}
         </Field>
       </div>
     </div>

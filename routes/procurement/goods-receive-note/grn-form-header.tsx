@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactNode } from "react";
+import { useEffect, useMemo } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -6,9 +6,16 @@ import {
   FieldDatePicker,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
@@ -24,16 +31,6 @@ interface GrnFormHeaderProps {
   readonly fromWizard?: boolean;
   /** view mode → แสดงทุก field เป็น plain text แทน input (เหมือน CN) */
   readonly plainText?: boolean;
-}
-
-/** ค่าเป็น plain text (view mode) — value เด่น (เข้ม/medium/sm) ให้เกิด
- *  lightness+size contrast เหนือ label ที่เงียบ (เหมือน CN/PO) */
-function PlainText({ children }: { readonly children: ReactNode }) {
-  return (
-    <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
-      {children || "—"}
-    </span>
-  );
 }
 
 export function GrnFormHeader({
@@ -53,11 +50,19 @@ export function GrnFormHeader({
   const docType = useWatch({ control: form.control, name: "doc_type" });
   const isPo = docType === "purchase_order";
   const currencyId = useWatch({ control: form.control, name: "currency_id" });
+  const currencyName = useWatch({
+    control: form.control,
+    name: "currency_name",
+  });
   const { data: currencyData } = useCurrency({ perpage: -1 });
   const currencies = useMemo(
     () => currencyData?.data?.filter((c) => c.is_active) ?? [],
     [currencyData?.data],
   );
+  // currency code สำหรับต่อท้าย exchange rate — derive จาก list ตาม currencyId
+  // ให้ reactive ตอนเปลี่ยนสกุลเงิน, fallback เป็น currency_name ที่โหลดมา
+  const currencyCode =
+    currencies.find((c) => c.id === currencyId)?.code || currencyName;
 
   useEffect(() => {
     if (disabled) return;
@@ -86,8 +91,8 @@ export function GrnFormHeader({
     : undefined;
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-foreground text-sm font-semibold tracking-tight">
+    <div className="space-y-2">
+      <h2 className="text-muted-foreground text-sm font-semibold tracking-tight">
         {t("docInfo")}
       </h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -134,11 +139,17 @@ export function GrnFormHeader({
         </Field>
 
         <Field className={viewFieldGap}>
-          <FieldLabel className={viewLabelClass} htmlFor="grn-invoice-no" required>
+          <FieldLabel
+            className={viewLabelClass}
+            htmlFor="grn-invoice-no"
+            required
+          >
             {tfl("invoiceNo")}
           </FieldLabel>
           {plainText ? (
-            <PlainText>{form.getValues("invoice_no")}</PlainText>
+            <FieldPlainText className="text-xs">
+              {form.getValues("invoice_no")}
+            </FieldPlainText>
           ) : (
             <FieldInput
               id="grn-invoice-no"
@@ -172,53 +183,65 @@ export function GrnFormHeader({
           />
         </Field>
 
+        {/* Currency + Exchange rate รวมเป็น field เดียว: exchange rate (ค่า) +
+            currency selector (suffix) — เลือกสกุลเงินแล้วอัปเดต rate ให้เลย */}
         <Field className={viewFieldGap}>
-          <FieldLabel className={viewLabelClass} required>
+          <FieldLabel
+            className={viewLabelClass}
+            htmlFor="grn-exchange-rate"
+            required
+          >
             {tfl("currency")}
           </FieldLabel>
-          <Controller
-            control={form.control}
-            name="currency_id"
-            render={({ field }) => (
-              <LookupCurrency
-                value={field.value ?? ""}
-                onValueChange={field.onChange}
-                disabled={disabled || fromWizard}
-                readOnly={plainText}
-                error={errors.currency_id?.message}
-                className="h-9 w-full text-xs"
-              />
-            )}
-          />
-        </Field>
-
-        <Field className={viewFieldGap}>
-          <FieldLabel className={viewLabelClass} htmlFor="grn-exchange-rate">
-            {tfl("exchangeRate")}
-          </FieldLabel>
           {plainText ? (
-            <PlainText>
-              {formatExchangeRate(form.getValues("exchange_rate"))}
-            </PlainText>
-          ) : (
-            <FieldInput
-              id="grn-exchange-rate"
-              type="number"
-              inputMode="decimal"
-              step="0.0001"
-              className="h-9 text-right"
-              disabled
-              {...form.register("exchange_rate")}
+            <InputSuffixPlain
+              className="inline-flex min-h-8 items-center text-left text-xs"
+              value={formatExchangeRate(form.getValues("exchange_rate"))}
+              suffix={currencyCode}
             />
+          ) : (
+            <InputSuffixField
+              className="h-9"
+              disabled={disabled}
+              error={!!errors.currency_id?.message}
+            >
+              <InputSuffixInput
+                id="grn-exchange-rate"
+                type="number"
+                inputMode="decimal"
+                step="0.0001"
+                disabled
+                {...form.register("exchange_rate")}
+              />
+              <InputSuffixAddon>
+                <Controller
+                  control={form.control}
+                  name="currency_id"
+                  render={({ field }) => (
+                    <LookupCurrency
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                      onItemChange={(currency) => {
+                        form.setValue("currency_name", currency.code);
+                        form.setValue("exchange_rate", currency.exchange_rate);
+                      }}
+                      disabled={disabled || fromWizard}
+                      className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
+                    />
+                  )}
+                />
+              </InputSuffixAddon>
+            </InputSuffixField>
           )}
         </Field>
-      </div>
-
-      <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Field className={viewFieldGap}>
-          <FieldLabel className={viewLabelClass}>{tfl("creditTerm")}</FieldLabel>
+          <FieldLabel className={viewLabelClass}>
+            {tfl("creditTerm")}
+          </FieldLabel>
           {plainText ? (
-            <PlainText>{form.getValues("credit_term_name")}</PlainText>
+            <FieldPlainText className="text-xs">
+              {form.getValues("credit_term_name")}
+            </FieldPlainText>
           ) : (
             <Controller
               control={form.control}
@@ -266,7 +289,9 @@ export function GrnFormHeader({
             name="post_type"
             render={({ field }) =>
               plainText ? (
-                <PlainText>{postTypeLabels[field.value]}</PlainText>
+                <FieldPlainText className="text-xs">
+                  {postTypeLabels[field.value]}
+                </FieldPlainText>
               ) : (
                 <FieldSelect
                   value={field.value}
@@ -288,7 +313,6 @@ export function GrnFormHeader({
           />
         </Field>
       </div>
-
       <Field className={viewFieldGap}>
         <FieldLabel className={viewLabelClass} htmlFor="grn-description">
           {tfl("description")}

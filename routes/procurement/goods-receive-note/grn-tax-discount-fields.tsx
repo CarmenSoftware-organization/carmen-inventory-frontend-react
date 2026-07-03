@@ -2,16 +2,25 @@ import { useEffect, useMemo } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
+import { cn } from "@/lib/utils";
+import { useTaxProfile } from "@/hooks/use-tax-profile";
 import type { GrnFormValues } from "./grn-form-schema";
 
 interface GrnTaxDiscountFieldsProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly index: number;
   readonly disabled: boolean;
+  /** view mode → แสดงทุกช่องเป็น plain text แทน input (เหมือน grn-form-header) */
+  readonly plainText?: boolean;
 }
 
 /**
@@ -31,9 +40,16 @@ export default function GrnTaxDiscountFields({
   form,
   index,
   disabled,
+  plainText = false,
 }: GrnTaxDiscountFieldsProps) {
   "use no memo";
   const tfl = useTranslations("field");
+
+  // view mode → คู่ label↔value ชิด + label เงียบ (เหมือน grn-form-header)
+  const viewFieldGap = plainText ? "gap-1" : undefined;
+  const viewLabelClass = plainText
+    ? "text-muted-foreground font-normal"
+    : undefined;
 
   const [
     watchUnitPrice,
@@ -57,6 +73,18 @@ export default function GrnTaxDiscountFields({
       `items.${index}.discount_amount`,
     ] as const,
   });
+
+  // currency code (doc-level) สำหรับต่อท้ายช่องจำนวนเงิน tax/discount
+  const currencyCode =
+    useWatch({ control: form.control, name: "currency_name" }) ?? "";
+
+  // ชื่อ tax profile สำหรับ view mode (schema เก็บแค่ id → resolve จาก list)
+  const taxProfileId =
+    useWatch({ control: form.control, name: `items.${index}.tax_profile_id` }) ??
+    "";
+  const { data: taxProfileData } = useTaxProfile({ perpage: 30 });
+  const taxProfileName =
+    taxProfileData?.data?.find((t) => t.id === taxProfileId)?.name ?? "";
 
   // NaN guard: valueAsNumber produces NaN on empty inputs; NaN !== NaN breaks deps
   const unitPrice = Number(watchUnitPrice) || 0;
@@ -129,125 +157,179 @@ export default function GrnTaxDiscountFields({
     <div className="space-y-4">
       {/* Adjustment amounts — tax & discount on one line */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-        <Field>
-          <FieldLabel className="text-xs">{tfl("taxProfile")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name={`items.${index}.tax_profile_id`}
-            render={({ field }) => (
-              <LookupTaxProfile
-                value={field.value ?? ""}
-                onValueChange={(value, rate) => {
-                  field.onChange(value || null);
-                  form.setValue(`items.${index}.tax_rate`, rate);
-                }}
-                disabled={disabled}
-                className="h-8 w-full text-xs"
-              />
-            )}
-          />
+        <Field className={viewFieldGap}>
+          <FieldLabel className={cn("text-xs", viewLabelClass)}>
+            {tfl("taxProfile")}
+          </FieldLabel>
+          {plainText ? (
+            <FieldPlainText className="text-xs">{taxProfileName}</FieldPlainText>
+          ) : (
+            <Controller
+              control={form.control}
+              name={`items.${index}.tax_profile_id`}
+              render={({ field }) => (
+                <LookupTaxProfile
+                  value={field.value ?? ""}
+                  onValueChange={(value, rate) => {
+                    field.onChange(value || null);
+                    form.setValue(`items.${index}.tax_rate`, rate);
+                  }}
+                  disabled={disabled}
+                  className="h-8 w-full text-xs"
+                />
+              )}
+            />
+          )}
         </Field>
-        <Field>
+        <Field className={viewFieldGap}>
           <div className="flex items-center justify-between">
             <FieldLabel
               htmlFor={`items-${index}-tax-amount`}
-              className="text-xs"
+              className={cn("text-xs", viewLabelClass)}
             >
               {tfl("taxAmt")}
             </FieldLabel>
-            <Controller
-              control={form.control}
-              name={`items.${index}.is_tax_adjustment`}
-              render={({ field }) => (
-                <label className="flex cursor-pointer items-center gap-1">
-                  <Checkbox
-                    checked={field.value ?? false}
-                    onCheckedChange={field.onChange}
-                    disabled={disabled}
-                    className="size-3.5"
-                  />
-                  <span className="text-muted-foreground text-[0.6875rem] select-none">
-                    {tfl("override")}
-                  </span>
-                </label>
-              )}
-            />
+            {!plainText && (
+              <Controller
+                control={form.control}
+                name={`items.${index}.is_tax_adjustment`}
+                render={({ field }) => (
+                  <label className="flex cursor-pointer items-center gap-1">
+                    <Checkbox
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      disabled={disabled}
+                      className="size-3.5"
+                    />
+                    <span className="text-muted-foreground text-[0.6875rem] select-none">
+                      {tfl("override")}
+                    </span>
+                  </label>
+                )}
+              />
+            )}
           </div>
-          <Input
-            id={`items-${index}-tax-amount`}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="0.01"
-            placeholder="0.00"
-            className="h-8 text-right text-xs"
-            disabled={disabled || !isTaxAdj}
-            {...form.register(`items.${index}.tax_amount`, {
-              valueAsNumber: true,
-            })}
-          />
+          {plainText ? (
+            <InputSuffixPlain
+              className="inline-flex min-h-8 items-center text-left text-xs"
+              value={formatCurrency(taxAmt)}
+              suffix={currencyCode}
+            />
+          ) : (
+            <InputSuffixField className="w-full" disabled={disabled || !isTaxAdj}>
+              <InputSuffixInput
+                id={`items-${index}-tax-amount`}
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="0.01"
+                placeholder="0.00"
+                {...form.register(`items.${index}.tax_amount`, {
+                  valueAsNumber: true,
+                })}
+              />
+              {currencyCode && (
+                <InputSuffixAddon>
+                  <span className="text-muted-foreground px-2 text-xs">
+                    {currencyCode}
+                  </span>
+                </InputSuffixAddon>
+              )}
+            </InputSuffixField>
+          )}
         </Field>
 
-        <Field>
+        <Field className={viewFieldGap}>
           <FieldLabel
             htmlFor={`items-${index}-discount-rate`}
-            className="text-xs"
+            className={cn("text-xs", viewLabelClass)}
           >
             {tfl("discPercent")}
           </FieldLabel>
-          <Input
-            id={`items-${index}-discount-rate`}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="0.01"
-            placeholder="0"
-            className="h-8 text-right text-xs"
-            disabled={disabled}
-            {...form.register(`items.${index}.discount_rate`, {
-              valueAsNumber: true,
-            })}
-          />
+          {plainText ? (
+            <InputSuffixPlain
+              className="inline-flex min-h-8 items-center text-left text-xs"
+              value={discRate}
+              suffix="%"
+            />
+          ) : (
+            <InputSuffixField className="w-full" disabled={disabled}>
+              <InputSuffixInput
+                id={`items-${index}-discount-rate`}
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="0.01"
+                placeholder="0"
+                {...form.register(`items.${index}.discount_rate`, {
+                  valueAsNumber: true,
+                })}
+              />
+              <InputSuffixAddon>
+                <span className="text-muted-foreground px-2 text-xs">%</span>
+              </InputSuffixAddon>
+            </InputSuffixField>
+          )}
         </Field>
-        <Field>
+        <Field className={viewFieldGap}>
           <div className="flex items-center justify-between">
             <FieldLabel
               htmlFor={`items-${index}-discount-amount`}
-              className="text-xs"
+              className={cn("text-xs", viewLabelClass)}
             >
               {tfl("discAmt")}
             </FieldLabel>
-            <Controller
-              control={form.control}
-              name={`items.${index}.is_discount_adjustment`}
-              render={({ field }) => (
-                <label className="flex cursor-pointer items-center gap-1">
-                  <Checkbox
-                    checked={field.value ?? false}
-                    onCheckedChange={field.onChange}
-                    disabled={disabled}
-                    className="size-3.5"
-                  />
-                  <span className="text-muted-foreground text-[0.6875rem] select-none">
-                    {tfl("override")}
-                  </span>
-                </label>
-              )}
-            />
+            {!plainText && (
+              <Controller
+                control={form.control}
+                name={`items.${index}.is_discount_adjustment`}
+                render={({ field }) => (
+                  <label className="flex cursor-pointer items-center gap-1">
+                    <Checkbox
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      disabled={disabled}
+                      className="size-3.5"
+                    />
+                    <span className="text-muted-foreground text-[0.6875rem] select-none">
+                      {tfl("override")}
+                    </span>
+                  </label>
+                )}
+              />
+            )}
           </div>
-          <Input
-            id={`items-${index}-discount-amount`}
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="0.01"
-            placeholder="0.00"
-            className="h-8 text-right text-xs"
-            disabled={disabled || !isDiscAdj}
-            {...form.register(`items.${index}.discount_amount`, {
-              valueAsNumber: true,
-            })}
-          />
+          {plainText ? (
+            <InputSuffixPlain
+              className="inline-flex min-h-8 items-center text-left text-xs"
+              value={formatCurrency(discAmt)}
+              suffix={currencyCode}
+            />
+          ) : (
+            <InputSuffixField
+              className="w-full"
+              disabled={disabled || !isDiscAdj}
+            >
+              <InputSuffixInput
+                id={`items-${index}-discount-amount`}
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="0.01"
+                placeholder="0.00"
+                {...form.register(`items.${index}.discount_amount`, {
+                  valueAsNumber: true,
+                })}
+              />
+              {currencyCode && (
+                <InputSuffixAddon>
+                  <span className="text-muted-foreground px-2 text-xs">
+                    {currencyCode}
+                  </span>
+                </InputSuffixAddon>
+              )}
+            </InputSuffixField>
+          )}
         </Field>
       </div>
 

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import {
   useFieldArray,
+  useWatch,
   Controller,
   type UseFormReturn,
   type FieldArrayWithId,
@@ -9,6 +10,11 @@ import { useTranslations } from "use-intl";
 import { DollarSign, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+} from "@/components/ui/input/input-suffix";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
@@ -34,8 +40,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-const INPUT_CLS = "h-6 text-xs text-right";
-
 type ExtraCostField = FieldArrayWithId<
   GrnFormValues,
   "extra_cost_details",
@@ -56,6 +60,10 @@ export function GrnExtraCostFields({
   const tfl = useTranslations("field");
 
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+
+  // currency code (doc-level) สำหรับต่อท้ายช่องจำนวนเงิน
+  const currencyCode =
+    useWatch({ control: form.control, name: "currency_name" }) ?? "";
 
   const {
     fields: costFields,
@@ -101,17 +109,24 @@ export function GrnExtraCostFields({
         accessorKey: "amount",
         header: tfl("amount"),
         cell: ({ row }) => (
-          <Input
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="0.01"
-            className={INPUT_CLS}
-            disabled={disabled}
-            {...form.register(`extra_cost_details.${row.index}.amount`, {
-              valueAsNumber: true,
-            })}
-          />
+          <InputSuffixField className="h-6 w-full" disabled={disabled}>
+            <InputSuffixInput
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.01"
+              {...form.register(`extra_cost_details.${row.index}.amount`, {
+                valueAsNumber: true,
+              })}
+            />
+            {currencyCode && (
+              <InputSuffixAddon>
+                <span className="text-muted-foreground px-1.5 text-xs">
+                  {currencyCode}
+                </span>
+              </InputSuffixAddon>
+            )}
+          </InputSuffixField>
         ),
         size: 120,
         meta: { headerClassName: "text-right" },
@@ -154,7 +169,7 @@ export function GrnExtraCostFields({
     };
 
     return [indexCol, ...dataCols, ...(disabled ? [] : [actionCol])];
-  }, [form, disabled, tfl]);
+  }, [form, disabled, tfl, currencyCode]);
 
   const table = useReactTable({
     data: costFields,

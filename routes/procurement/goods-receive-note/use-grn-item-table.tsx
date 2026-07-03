@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { cn } from "@/lib/utils";
 import { LookupProduct } from "@/components/lookup/lookup-product";
 import { useProductUnits } from "@/hooks/use-product-units";
@@ -170,16 +171,7 @@ const GroupQtySum = memo(function GroupQtySum({
     useWatch({ control, name: `items.${primary}.${unitField}` }) ?? "";
   const { data: units = [] } = useProductUnits(productId || undefined);
   const unitName = units.find((u) => u.id === unitId)?.name ?? "";
-  return (
-    <span className="text-xs">
-      <span className="text-foreground font-medium tabular-nums">{total}</span>
-      {unitName && (
-        <span className="text-muted-foreground ml-1 font-normal">
-          {unitName}
-        </span>
-      )}
-    </span>
-  );
+  return <InputSuffixPlain value={total} suffix={unitName} />;
 });
 
 type GrnAmountField =
