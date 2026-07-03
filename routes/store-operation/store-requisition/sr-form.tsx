@@ -5,7 +5,9 @@ import { useTranslations } from "use-intl";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { NotesSection } from "@/components/ui/notes-section";
+import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useProfile } from "@/hooks/use-profile";
 import {
@@ -24,7 +26,6 @@ import {
 import { buildSrDefaultValues } from "./sr-form-helpers";
 import { useSrFormActions } from "./use-sr-form-actions";
 import { SrItemFields, type SrItemFieldsHandle } from "./sr-item-fields";
-import { SrWorkflowHistory } from "./sr-workflow-history";
 import { SrHeader } from "./sr-header";
 import { SrRequestDetails } from "./sr-request-details";
 import { SrFooter } from "./sr-footer";
@@ -100,6 +101,15 @@ export function StoreRequisitionForm({
     control: form.control,
     name: "department_id",
   });
+  const description = useWatch({ control: form.control, name: "description" });
+
+  // description แก้ได้เฉพาะผู้สร้าง (role CREATE) — ขั้น approve/issue/view lock
+  const srRole = storeRequisition?.role ?? STAGE_ROLE.CREATE;
+  const isDescReadOnly =
+    isView ||
+    srRole === STAGE_ROLE.APPROVE ||
+    srRole === STAGE_ROLE.ISSUE ||
+    srRole === STAGE_ROLE.VIEW_ONLY;
 
   const [fromLocInfo, setFromLocInfo] = useState<LocationInfo>({
     name: storeRequisition?.from_location_name ?? "",
@@ -146,9 +156,6 @@ export function StoreRequisitionForm({
     derivedSrType = storeRequisition?.sr_type;
   }
 
-  const hasWorkflowHistory =
-    (storeRequisition?.workflow_history?.length ?? 0) > 0;
-
   const itemFieldsProps = {
     ref: itemsRef,
     form,
@@ -186,7 +193,7 @@ export function StoreRequisitionForm({
         onSubmit={form.handleSubmit(actions.onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="flex-1 space-y-4 px-4 py-5"
+        className="flex-1 space-y-4 px-4"
       >
         <SrRequestDetails
           form={form}
@@ -219,29 +226,39 @@ export function StoreRequisitionForm({
               {form.formState.errors.items.message}
             </p>
           )}
-          {hasWorkflowHistory ? (
-            <Tabs defaultValue="items">
-              <TabsList variant="line">
-                <TabsTrigger value="items" className="text-xs">
-                  {t("tabItems")}
-                </TabsTrigger>
-                <TabsTrigger value="history" className="text-xs">
-                  {t("tabWorkflowHistory")}
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="items">
-                <SrItemFields {...itemFieldsProps} />
-              </TabsContent>
-              <TabsContent value="history">
-                <SrWorkflowHistory
-                  history={storeRequisition!.workflow_history}
-                />
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <SrItemFields {...itemFieldsProps} />
-          )}
+          <SrItemFields {...itemFieldsProps} />
         </section>
+
+        <NotesSection title={t("sectionNotes")} subtitle={t("sectionNotesSub")}>
+          <Field className={isDescReadOnly ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="sr-description"
+              className={
+                isDescReadOnly ? "text-muted-foreground font-normal" : undefined
+              }
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {isDescReadOnly ? (
+              <FieldPlainText className="text-sm">
+                {description?.trim() ? (
+                  <span className="whitespace-pre-line">{description}</span>
+                ) : (
+                  <span className="text-muted-foreground font-normal">—</span>
+                )}
+              </FieldPlainText>
+            ) : (
+              <Textarea
+                id="sr-description"
+                placeholder={t("optionalDescription")}
+                className="min-h-13 text-sm"
+                maxLength={256}
+                disabled={actions.isPending}
+                {...form.register("description")}
+              />
+            )}
+          </Field>
+        </NotesSection>
       </form>
 
       <SrFooter

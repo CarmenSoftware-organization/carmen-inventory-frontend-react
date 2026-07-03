@@ -16,13 +16,14 @@ import { useTranslations } from "use-intl";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { FieldInput, FieldPlainText } from "@/components/ui/field";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { StoreRequisitionStatus } from "@/types/store-requisition";
 import type { SrFormValues } from "./sr-form-schema";
 import { Badge } from "@/components/ui/badge";
-import { SR_STAGE_BADGE_VARIANT } from "@/constant/store-requisition";
+import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
+import { SrItemHistorySheet } from "./sr-item-history";
 
 const ProductCell = memo(function ProductCell({
   control,
@@ -144,9 +145,9 @@ const StatusCell = memo(function StatusCell({
   const currentStatus =
     useWatch({ control, name: `items.${index}.current_stage_status` }) ?? "";
   const effective = stageStatus || currentStatus;
-  const variant = SR_STAGE_BADGE_VARIANT[effective] ?? "secondary";
+  const config = SR_ITEM_STATUS_CONFIG[effective] ?? SR_ITEM_STATUS_CONFIG.pending;
   return (
-    <Badge variant={variant} className="text-xs uppercase">
+    <Badge className={`${config.className} inline-flex items-center gap-1`} size="xs">
       {translate(effective)}
     </Badge>
   );
@@ -269,21 +270,24 @@ export function useSrItemTable({
         cell: ({ row }) => {
           if (disabled || lockNonApproved) {
             return (
-              <span className="text-xs tabular-nums">
-                {row.original.requested_qty ?? "—"}
-              </span>
+              <FieldPlainText className="justify-end tabular-nums">
+                {row.original.requested_qty == null
+                  ? ""
+                  : row.original.requested_qty}
+              </FieldPlainText>
             );
           }
-          const hasError =
-            !!form.formState.errors.items?.[row.index]?.requested_qty;
+          const qtyError =
+            form.formState.errors.items?.[row.index]?.requested_qty?.message;
           return (
-            <Input
+            <FieldInput
               type="number"
               inputMode="decimal"
               min={1}
               placeholder={tfl("qty")}
-              className={`h-6 text-xs md:text-xs text-right${hasError ? "ring-destructive ring-1" : ""}`}
+              className="h-6 text-right text-xs md:text-xs"
               disabled={disabled}
+              error={qtyError}
               {...form.register(`items.${row.index}.requested_qty`, {
                 valueAsNumber: true,
               })}
@@ -302,19 +306,25 @@ export function useSrItemTable({
               cell: ({ row }) => {
                 if (disabled || lockApproved) {
                   return (
-                    <span className="text-xs tabular-nums">
-                      {row.original.approved_qty ?? "—"}
-                    </span>
+                    <FieldPlainText className="justify-end tabular-nums">
+                      {row.original.approved_qty == null
+                        ? ""
+                        : row.original.approved_qty}
+                    </FieldPlainText>
                   );
                 }
                 return (
-                  <Input
+                  <FieldInput
                     type="number"
                     inputMode="decimal"
                     min={0}
                     placeholder={tfl("qty")}
                     className="h-6 text-right text-xs md:text-xs"
                     disabled={disabled}
+                    error={
+                      form.formState.errors.items?.[row.index]?.approved_qty
+                        ?.message
+                    }
                     {...form.register(`items.${row.index}.approved_qty`, {
                       valueAsNumber: true,
                     })}
@@ -337,19 +347,25 @@ export function useSrItemTable({
               cell: ({ row }) => {
                 if (disabled || lockIssued) {
                   return (
-                    <span className="text-xs tabular-nums">
-                      {row.original.issued_qty ?? "—"}
-                    </span>
+                    <FieldPlainText className="justify-end tabular-nums">
+                      {row.original.issued_qty == null
+                        ? ""
+                        : row.original.issued_qty}
+                    </FieldPlainText>
                   );
                 }
                 return (
-                  <Input
+                  <FieldInput
                     type="number"
                     inputMode="decimal"
                     min={0}
                     placeholder={tfl("qty")}
                     className="h-6 text-right text-xs md:text-xs"
                     disabled={disabled}
+                    error={
+                      form.formState.errors.items?.[row.index]?.issued_qty
+                        ?.message
+                    }
                     {...form.register(`items.${row.index}.issued_qty`, {
                       valueAsNumber: true,
                     })}
@@ -378,22 +394,33 @@ export function useSrItemTable({
       },
     ];
 
+    const canDelete = !(disabled || lockNonApproved);
     const actionColumn: ColumnDef<SrItemField> = {
       id: "action",
       header: () => "",
-      cell: ({ row }: { row: { index: number } }) => (
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          aria-label={tc("delete")}
-          onClick={() => onDelete(row.index)}
-        >
-          <Trash2 />
-        </Button>
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end">
+          {(row.original.history?.length ?? 0) > 0 && (
+            <SrItemHistorySheet
+              history={row.original.history ?? []}
+              productName={row.original.product_name}
+            />
+          )}
+          {canDelete && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              aria-label={tc("delete")}
+              onClick={() => onDelete(row.index)}
+            >
+              <Trash2 />
+            </Button>
+          )}
+        </div>
       ),
       enableSorting: false,
-      size: 40,
+      size: 64,
       meta: {
         headerClassName: "text-right",
         cellClassName: "text-right",
@@ -441,11 +468,16 @@ export function useSrItemTable({
       },
     };
 
+    // แสดงคอลัมน์ action เมื่อแก้ไขได้ หรือมีรายการใดมีประวัติ workflow (ปุ่ม history)
+    const hasAnyHistory = itemFields.some(
+      (item) => (item.history?.length ?? 0) > 0,
+    );
+
     return [
       ...(showSelect ? [srSelectColumn] : []),
       indexColumn,
       ...dataColumns,
-      ...(disabled || lockNonApproved ? [] : [actionColumn]),
+      ...(canDelete || hasAnyHistory ? [actionColumn] : []),
     ];
   }, [
     form,
@@ -461,6 +493,7 @@ export function useSrItemTable({
     tfl,
     tc,
     translateStageStatus,
+    itemFields,
   ]);
 
   const table = useReactTable({

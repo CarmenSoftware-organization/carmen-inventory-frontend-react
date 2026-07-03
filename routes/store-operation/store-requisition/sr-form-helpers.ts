@@ -48,6 +48,7 @@ export function buildSrDefaultValues(
         current_stage_status: d.current_stage_status ?? "pending",
         stage_status: "",
         stage_message: "",
+        history: d.history ?? [],
       })) ?? [],
   };
 }

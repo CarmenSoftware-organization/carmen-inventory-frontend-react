@@ -2,18 +2,16 @@ import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
   Field,
-  FieldGroup,
   FieldLabel,
   FieldDatePicker,
+  FieldPlainText,
 } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { formatDate } from "@/lib/date-utils";
-import { PlainValue } from "./sr-form-shared";
 import type { SrFormValues } from "./sr-form-schema";
 
 interface LocationInfo {
@@ -57,7 +55,6 @@ export function SrRequestDetails({
   const srDate = form.watch("sr_date");
   const expectedDate = form.watch("expected_date");
   const fromLocationId = form.watch("from_location_id");
-  const description = form.watch("description");
 
   // role-based lock = ขั้น approve/issue/view ห้ามแก้ทั้ง section (ถาวร ไม่ใช่ pending)
   const isReadOnly =
@@ -73,162 +70,135 @@ export function SrRequestDetails({
 
   return (
     <section className="space-y-3">
-      <div className="border-border/60 border-b pb-2">
-        <h2 className="text-foreground text-sm font-semibold tracking-tight">
-          {t("requestDetails")}
-        </h2>
-      </div>
-      <div>
-        <FieldGroup className="gap-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field className={viewFieldGap}>
-              <FieldLabel required={!isReadOnly} className={labelMuted}>
-                {tfl("expectedDate")}
-              </FieldLabel>
-              {isReadOnly ? (
-                <PlainValue
-                  value={
-                    expectedDate ? formatDate(expectedDate, dateFormat) : ""
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
+        <Field className={viewFieldGap}>
+          <FieldLabel required={!isReadOnly} className={labelMuted}>
+            {tfl("workflow")}
+          </FieldLabel>
+          {isReadOnly ? (
+            <FieldPlainText className="text-xs">{workflowName}</FieldPlainText>
+          ) : (
+            <Controller
+              control={form.control}
+              name="workflow_id"
+              render={({ field }) => (
+                <LookupWorkflow
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  workflowType={WORKFLOW_TYPE.SR}
+                  disabled={disabled}
+                  error={errors.workflow_id?.message}
+                  className="text-xs"
+                />
+              )}
+            />
+          )}
+        </Field>
+        <Field className={viewFieldGap}>
+          <FieldLabel required={!isReadOnly} className={labelMuted}>
+            {tfl("expectedDate")}
+          </FieldLabel>
+          {isReadOnly ? (
+            <FieldPlainText className="text-xs">
+              {expectedDate ? formatDate(expectedDate, dateFormat) : ""}
+            </FieldPlainText>
+          ) : (
+            <Controller
+              control={form.control}
+              name="expected_date"
+              render={({ field }) => (
+                <FieldDatePicker
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={disabled || !srDate}
+                  fromDate={srDate ? new Date(srDate) : undefined}
+                  placeholder={t("pickExpectedDate")}
+                  className="w-full"
+                  error={errors.expected_date?.message}
+                />
+              )}
+            />
+          )}
+        </Field>
+
+        <Field className={viewFieldGap}>
+          <FieldLabel required={!isReadOnly} className={labelMuted}>
+            {tfl("fromLocation")}
+          </FieldLabel>
+          {isReadOnly ? (
+            <FieldPlainText className="text-xs">
+              {fromLocInfo.name}
+            </FieldPlainText>
+          ) : (
+            <Controller
+              control={form.control}
+              name="from_location_id"
+              render={({ field }) => (
+                <LookupUserLocation
+                  value={field.value}
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    if (val && val === form.getValues("to_location_id")) {
+                      form.setValue("to_location_id", "");
+                      onToLocInfoChange({ name: "", code: "" });
+                    }
+                  }}
+                  onItemChange={(item) =>
+                    onFromLocInfoChange({
+                      name: item?.name ?? "",
+                      code: item?.code ?? "",
+                      location_type: item?.location_type,
+                    })
                   }
-                />
-              ) : (
-                <Controller
-                  control={form.control}
-                  name="expected_date"
-                  render={({ field }) => (
-                    <FieldDatePicker
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={disabled || !srDate}
-                      fromDate={srDate ? new Date(srDate) : undefined}
-                      placeholder={t("pickExpectedDate")}
-                      className="w-full"
-                      error={errors.expected_date?.message}
-                    />
-                  )}
+                  disabled={disabled}
+                  locationTypes={[
+                    INVENTORY_TYPE.INVENTORY,
+                    INVENTORY_TYPE.CONSIGNMENT,
+                  ]}
+                  popoverWidth="31.25rem"
+                  className="text-xs"
+                  error={errors.from_location_id?.message}
                 />
               )}
-            </Field>
+            />
+          )}
+        </Field>
 
-            <Field className={viewFieldGap}>
-              <FieldLabel required={!isReadOnly} className={labelMuted}>
-                {tfl("workflow")}
-              </FieldLabel>
-              {isReadOnly ? (
-                <PlainValue value={workflowName} />
-              ) : (
-                <Controller
-                  control={form.control}
-                  name="workflow_id"
-                  render={({ field }) => (
-                    <LookupWorkflow
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      workflowType={WORKFLOW_TYPE.SR}
-                      disabled={disabled}
-                      error={errors.workflow_id?.message}
-                    />
-                  )}
+        <Field className={viewFieldGap}>
+          <FieldLabel required={!isReadOnly} className={labelMuted}>
+            {tfl("toLocation")}
+          </FieldLabel>
+          {isReadOnly ? (
+            <FieldPlainText className="text-xs">
+              {toLocInfo.name}
+            </FieldPlainText>
+          ) : (
+            <Controller
+              control={form.control}
+              name="to_location_id"
+              render={({ field }) => (
+                <LookupUserLocation
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onItemChange={(item) =>
+                    onToLocInfoChange({
+                      name: item?.name ?? "",
+                      code: item?.code ?? "",
+                      location_type: item?.location_type,
+                    })
+                  }
+                  disabled={disabled || !fromLocationId}
+                  excludeIds={
+                    fromLocationId ? new Set([fromLocationId]) : undefined
+                  }
+                  popoverWidth="31.25rem"
+                  className="text-xs"
+                  error={errors.to_location_id?.message}
                 />
               )}
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field className={viewFieldGap}>
-              <FieldLabel required={!isReadOnly} className={labelMuted}>
-                {tfl("fromLocation")}
-              </FieldLabel>
-              {isReadOnly ? (
-                <PlainValue value={fromLocInfo.name} />
-              ) : (
-                <Controller
-                  control={form.control}
-                  name="from_location_id"
-                  render={({ field }) => (
-                    <LookupUserLocation
-                      value={field.value}
-                      onValueChange={(val) => {
-                        field.onChange(val);
-                        if (val && val === form.getValues("to_location_id")) {
-                          form.setValue("to_location_id", "");
-                          onToLocInfoChange({ name: "", code: "" });
-                        }
-                      }}
-                      onItemChange={(item) =>
-                        onFromLocInfoChange({
-                          name: item?.name ?? "",
-                          code: item?.code ?? "",
-                          location_type: item?.location_type,
-                        })
-                      }
-                      disabled={disabled}
-                      locationTypes={[
-                        INVENTORY_TYPE.INVENTORY,
-                        INVENTORY_TYPE.CONSIGNMENT,
-                      ]}
-                      popoverWidth="31.25rem"
-                      className="text-xs"
-                      error={errors.from_location_id?.message}
-                    />
-                  )}
-                />
-              )}
-            </Field>
-
-            <Field className={viewFieldGap}>
-              <FieldLabel required={!isReadOnly} className={labelMuted}>
-                {tfl("toLocation")}
-              </FieldLabel>
-              {isReadOnly ? (
-                <PlainValue value={toLocInfo.name} />
-              ) : (
-                <Controller
-                  control={form.control}
-                  name="to_location_id"
-                  render={({ field }) => (
-                    <LookupUserLocation
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onItemChange={(item) =>
-                        onToLocInfoChange({
-                          name: item?.name ?? "",
-                          code: item?.code ?? "",
-                          location_type: item?.location_type,
-                        })
-                      }
-                      disabled={disabled || !fromLocationId}
-                      excludeIds={
-                        fromLocationId ? new Set([fromLocationId]) : undefined
-                      }
-                      popoverWidth="31.25rem"
-                      className="text-xs"
-                      error={errors.to_location_id?.message}
-                    />
-                  )}
-                />
-              )}
-            </Field>
-          </div>
-
-          <Field className={viewFieldGap}>
-            <FieldLabel htmlFor="sr-description" className={labelMuted}>
-              {tfl("description")}
-            </FieldLabel>
-            {isReadOnly ? (
-              <PlainValue value={description} multiline />
-            ) : (
-              <Textarea
-                id="sr-description"
-                placeholder={t("optionalDescription")}
-                className="min-h-13 text-sm"
-                maxLength={256}
-                disabled={disabled}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        </FieldGroup>
+            />
+          )}
+        </Field>
       </div>
     </section>
   );

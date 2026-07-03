@@ -7,6 +7,7 @@ import {
   FieldError,
   FieldDatePicker,
   FieldSelect,
+  FieldPlainText,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -135,9 +136,9 @@ export function DocumentInfo({
               {tfl("location")}
             </FieldLabel>
             {isView ? (
-              <PlainValue>
-                {inventoryAdjustment?.location_name ?? "—"}
-              </PlainValue>
+              <FieldPlainText className="min-h-9 text-sm">
+                {inventoryAdjustment?.location_name}
+              </FieldPlainText>
             ) : (
               <Controller
                 control={form.control}
@@ -195,26 +196,6 @@ export function DocumentInfo({
   );
 }
 
-function PlainValue({
-  children,
-  multiline,
-}: {
-  readonly children: React.ReactNode;
-  readonly multiline?: boolean;
-}) {
-  return (
-    <div
-      className={
-        multiline
-          ? "text-foreground min-h-9 text-sm font-medium whitespace-pre-wrap"
-          : "text-foreground flex h-9 items-center text-sm font-medium"
-      }
-    >
-      {children}
-    </div>
-  );
-}
-
 function PlainDateValue({
   control,
   dateFormat,
@@ -223,7 +204,11 @@ function PlainDateValue({
   readonly dateFormat: string;
 }) {
   const date = useWatch({ control, name: "date" });
-  return <PlainValue>{date ? formatDate(date, dateFormat) : "—"}</PlainValue>;
+  return (
+    <FieldPlainText className="min-h-9 text-sm">
+      {date ? formatDate(date, dateFormat) : ""}
+    </FieldPlainText>
+  );
 }
 
 function PlainReasonValue({
@@ -237,7 +222,11 @@ function PlainReasonValue({
 }) {
   const adjustmentTypeId = useWatch({ control, name: "adjustment_type_id" });
   const name = adjTypes.find((at) => at.id === adjustmentTypeId)?.name;
-  return <PlainValue>{name ?? fallback ?? "—"}</PlainValue>;
+  return (
+    <FieldPlainText className="min-h-9 text-sm">
+      {name ?? fallback}
+    </FieldPlainText>
+  );
 }
 
 function PlainDescriptionValue({
@@ -246,5 +235,13 @@ function PlainDescriptionValue({
   readonly control: Control<AdjFormValues>;
 }) {
   const description = useWatch({ control, name: "description" });
-  return <PlainValue multiline>{description || "—"}</PlainValue>;
+  return (
+    <FieldPlainText className="min-h-9 text-sm">
+      {description ? (
+        <span className="whitespace-pre-wrap">{description}</span>
+      ) : (
+        ""
+      )}
+    </FieldPlainText>
+  );
 }

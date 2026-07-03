@@ -2467,6 +2467,8 @@
       "subtitle": "Request stock transfer between locations",
       "documentInfo": "Document Info",
       "requestDetails": "Request details",
+      "sectionNotes": "Notes",
+      "sectionNotesSub": "Description for this requisition",
       "transferSummary": "Transfer summary",
       "summaryItems": "Items",
       "summaryTotalRequested": "Total requested",

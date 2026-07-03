@@ -25,6 +25,19 @@ function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     current_stage_status: z.string(),
     stage_status: z.string().optional(),
     stage_message: z.string().optional(),
+    // ประวัติ workflow ระดับรายการ (display-only passthrough, ไม่ส่งกลับ API)
+    history: z
+      .array(
+        z.object({
+          at: z.string(),
+          seq: z.coerce.number(),
+          name: z.string(),
+          user: z.object({ id: z.string(), name: z.string() }),
+          status: z.string(),
+          message: z.string().nullish(),
+        }),
+      )
+      .optional(),
   });
 }
 

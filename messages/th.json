@@ -2462,6 +2462,8 @@
       "subtitle": "ขอโอนสต็อกระหว่างคลัง",
       "documentInfo": "ข้อมูลเอกสาร",
       "requestDetails": "รายละเอียดการเบิก",
+      "sectionNotes": "หมายเหตุ",
+      "sectionNotesSub": "คำอธิบายของใบเบิก",
       "transferSummary": "สรุปการโอน",
       "summaryItems": "รายการ",
       "summaryTotalRequested": "รวมที่ขอเบิก",

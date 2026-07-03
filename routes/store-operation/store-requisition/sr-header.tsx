@@ -1,10 +1,19 @@
 
+import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { MessageCircle, Pencil, Save, Trash2, X } from "lucide-react";
+import { GitBranch, MessageCircle, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { WorkflowStep } from "@/components/share/workflow-step";
+import { SrWorkflowHistory } from "./sr-workflow-history";
 import {
   DocFormHeader,
   DocumentRibbon,
@@ -76,6 +85,10 @@ export function SrHeader({
   const isAdd = mode === "add";
   const isEdit = mode === "edit";
   const docStatus = storeRequisition?.doc_status;
+
+  const workflowHistory = storeRequisition?.workflow_history;
+  const hasHistory = !!workflowHistory && workflowHistory.length > 0;
+  const [showHistory, setShowHistory] = useState(false);
 
   const role = storeRequisition?.role ?? STAGE_ROLE.CREATE;
   const canEdit =
@@ -169,8 +182,42 @@ export function SrHeader({
           }
         />
       )}
+      {hasHistory && (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setShowHistory(true)}
+        >
+          <GitBranch aria-hidden="true" />
+          {t("tabWorkflowHistory")}
+        </Button>
+      )}
     </>
   );
+
+  const workflowHistorySheet = hasHistory ? (
+    <Sheet open={showHistory} onOpenChange={setShowHistory}>
+      <SheetContent
+        side="right"
+        className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
+      >
+        <SheetHeader>
+          <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {t("tabWorkflowHistory")}
+          </SheetDescription>
+        </SheetHeader>
+        <div className="px-4 pb-4">
+          <SrWorkflowHistory
+            history={workflowHistory}
+            requestorName={requesterName}
+            createdAt={storeRequisition?.created_at}
+          />
+        </div>
+      </SheetContent>
+    </Sheet>
+  ) : null;
 
   const departmentValue = (() => {
     if (isLoading) return "—";
@@ -227,15 +274,18 @@ export function SrHeader({
   ) : undefined;
 
   return (
-    <DocFormHeader
-      title={storeRequisition?.sr_no ?? t("title")}
-      subtitle={subtitle}
-      backLabel={tc("goBack")}
-      onBack={onBack}
-      badges={badges}
-      actions={actions}
-      ribbon={ribbon}
-      workflowStep={workflowStep}
-    />
+    <>
+      <DocFormHeader
+        title={storeRequisition?.sr_no ?? t("title")}
+        subtitle={subtitle}
+        backLabel={tc("goBack")}
+        onBack={onBack}
+        badges={badges}
+        actions={actions}
+        ribbon={ribbon}
+        workflowStep={workflowStep}
+      />
+      {workflowHistorySheet}
+    </>
   );
 }
