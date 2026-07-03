@@ -7,7 +7,7 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
@@ -23,6 +23,7 @@ import {
   ProductHeaderCell,
 } from "./po-items-grid-cells";
 import { PoItemExpanded, type PoItemField } from "./po-item-expanded";
+import { useAddLocationRegistry } from "./po-locations-add-context";
 import type { PoFormValues } from "./po-form-schema";
 
 export type { PoItemField };
@@ -57,6 +58,52 @@ const ProductCol = memo(function ProductCol({
       isFoc={!!isFoc}
       showStatusBadge={showStatusBadge}
     />
+  );
+});
+
+/**
+ * Action column ของ product row — ปุ่มลบ item + (เมื่อ expand) ปุ่ม "+" เพิ่ม
+ * location ที่ prepend เข้า items.N.locations (ใช้ field array ชื่อเดียวกับ
+ * LocationsEditor จึง sync กัน)
+ */
+const PoItemActionCell = memo(function PoItemActionCell({
+  index,
+  expanded,
+  canAddLocation,
+  onDelete,
+}: {
+  index: number;
+  expanded: boolean;
+  canAddLocation: boolean;
+  onDelete: (index: number) => void;
+}) {
+  "use no memo";
+  const t = useTranslations("procurement.purchaseOrder");
+  const registry = useAddLocationRegistry();
+  return (
+    <div className="flex items-center justify-center gap-1">
+      {expanded && canAddLocation && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          aria-label={t("addLocation")}
+          onClick={() => registry?.get(index)?.()}
+        >
+          <Plus className="size-3.5" aria-hidden="true" />
+        </Button>
+      )}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-xs"
+        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+        aria-label="Remove"
+        onClick={() => onDelete(index)}
+      >
+        <Trash2 className="size-3.5" aria-hidden="true" />
+      </Button>
+    </div>
   );
 });
 
@@ -253,20 +300,16 @@ export function usePoItemTable({
       id: "action",
       header: () => "",
       cell: ({ row }) => (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          aria-label="Remove"
-          onClick={() => onDelete(row.index)}
-        >
-          <Trash2 className="size-3.5" aria-hidden="true" />
-        </Button>
+        <PoItemActionCell
+          index={row.index}
+          expanded={row.getIsExpanded()}
+          canAddLocation={!locationsDisabled}
+          onDelete={onDelete}
+        />
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 40,
+      size: 56,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",

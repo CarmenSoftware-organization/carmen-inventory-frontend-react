@@ -1,4 +1,3 @@
-
 import { useEffect, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
@@ -7,6 +6,7 @@ import {
   FieldGroup,
   FieldLabel,
   FieldDatePicker,
+  FieldPlainText,
 } from "@/components/ui/field";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
@@ -18,7 +18,12 @@ import { formatDate } from "@/lib/date-utils";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { PoFormValues } from "./po-form-schema";
-import { Input } from "@/components/ui/input";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 
 interface PoGeneralFieldsProps {
   readonly form: UseFormReturn<PoFormValues>;
@@ -48,11 +53,7 @@ function PlainField({
       <FieldLabel className="text-muted-foreground font-normal">
         {label}
       </FieldLabel>
-      {children ?? (
-        <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
-          {value || "—"}
-        </span>
-      )}
+      {children ?? <FieldPlainText className="text-sm">{value}</FieldPlainText>}
     </Field>
   );
 }
@@ -66,7 +67,7 @@ export function PoGeneralFields({
 }: PoGeneralFieldsProps) {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const { defaultCurrencyId, defaultCurrencyCode, dateFormat } = useProfile();
+  const { defaultCurrencyId, dateFormat } = useProfile();
 
   const exchangeRate = useWatch({
     control: form.control,
@@ -121,11 +122,15 @@ export function PoGeneralFields({
               v.delivery_date ? formatDate(v.delivery_date, dateFormat) : ""
             }
           />
-          <PlainField label={tfl("currency")} value={v.currency_code} />
-          <PlainField
-            label={tfl("exchangeRate")}
-            value={formatExchangeRate(v.exchange_rate, defaultCurrencyCode)}
-          />
+          {/* Currency + Exchange rate รวมเป็น field เดียว (เหมือน GRN):
+              exchange rate (ค่า) + currency code (suffix) */}
+          <PlainField label={tfl("currency")}>
+            <InputSuffixPlain
+              className="inline-flex min-h-8 items-center text-left text-sm"
+              value={formatExchangeRate(v.exchange_rate)}
+              suffix={v.currency_code}
+            />
+          </PlainField>
         </div>
       </FieldGroup>
     );
@@ -202,35 +207,41 @@ export function PoGeneralFields({
             )}
           />
         </Field>
+        {/* Currency + Exchange rate รวมเป็น field เดียว (เหมือน GRN):
+            exchange rate (ค่า, auto) + currency selector (suffix) */}
         <Field>
-          <FieldLabel required>{tfl("currency")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="currency_id"
-            render={({ field, fieldState }) => (
-              <LookupCurrency
-                value={field.value}
-                onValueChange={field.onChange}
-                onItemChange={(currency) => {
-                  form.setValue("currency_code", currency.code);
-                  form.setValue("exchange_rate", currency.exchange_rate);
-                }}
-                disabled={manualFieldDisabled}
-                size="sm"
-                className="w-full text-xs"
-                error={fieldState.error?.message}
+          <FieldLabel required htmlFor="po-exchange-rate">
+            {tfl("currency")}
+          </FieldLabel>
+          <InputSuffixField
+            className="h-8"
+            error={!!form.formState.errors.currency_id?.message}
+          >
+            <InputSuffixInput
+              id="po-exchange-rate"
+              value={formatExchangeRate(exchangeRate)}
+              disabled
+              readOnly
+            />
+            <InputSuffixAddon>
+              <Controller
+                control={form.control}
+                name="currency_id"
+                render={({ field }) => (
+                  <LookupCurrency
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    onItemChange={(currency) => {
+                      form.setValue("currency_code", currency.code);
+                      form.setValue("exchange_rate", currency.exchange_rate);
+                    }}
+                    disabled={manualFieldDisabled}
+                    className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
+                  />
+                )}
               />
-            )}
-          />
-        </Field>
-        <Field>
-          <FieldLabel>{tfl("exchangeRate")}</FieldLabel>
-          <Input
-            value={formatExchangeRate(exchangeRate, defaultCurrencyCode)}
-            disabled
-            readOnly
-            className="h-8 text-right"
-          />
+            </InputSuffixAddon>
+          </InputSuffixField>
         </Field>
       </div>
     </FieldGroup>

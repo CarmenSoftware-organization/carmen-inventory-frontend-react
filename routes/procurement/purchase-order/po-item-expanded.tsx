@@ -35,7 +35,7 @@ export function PoItemExpanded({
     // ไม่ contribute กับ intrinsic width → ไม่ดัน column ให้ยืด (overflow scroll ในตัว)
     // paddingLeft = % ให้ตรงขอบ column Product + 0.75rem (px-3 ของ cell) ให้ตรงตัวอักษร
     <div
-      className="w-0 min-w-full overflow-x-auto py-4 pr-4"
+      className="w-0 min-w-full overflow-x-auto p-2"
       style={{ paddingLeft: `calc(${leftInsetPct}% + 0.75rem)` }}
     >
       <LocationsEditor

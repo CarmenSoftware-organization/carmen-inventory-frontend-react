@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { Check, Eye, Lock, Plus, ThumbsDown } from "lucide-react";
@@ -17,6 +17,10 @@ import type { PoFormValues } from "./po-form-schema";
 import { PO_ITEM } from "./po-form-schema";
 import { PoActionDialog } from "./po-action-dialog";
 import { usePoItemTable } from "./use-po-item-table";
+import {
+  AddLocationRegistryContext,
+  type AddLocationRegistry,
+} from "./po-locations-add-context";
 import { PoItemComputedSync } from "./po-item-table";
 import { getDeleteDescription } from "@/lib/form-utils";
 
@@ -74,6 +78,9 @@ export function PoItemFields({
     showApproveCheckbox,
     onDelete: setDeleteIndex,
   });
+
+  // registry ให้ปุ่ม "+" (action column) เรียก prepend location ของ LocationsEditor
+  const addLocationRegistry = useRef<AddLocationRegistry>(new Map()).current;
 
   const handleAddItem = () => {
     prependItem({ ...PO_ITEM });
@@ -289,25 +296,27 @@ export function PoItemFields({
         />
       ))}
 
-      <DataGrid
-        table={table}
-        recordCount={itemFields.length}
-        tableLayout={{
-          checkbox: showApproveCheckbox,
-        }}
-        emptyMessage={
-          <div className="text-muted-foreground py-10 text-center text-sm">
-            {t("noItems")}
-          </div>
-        }
-      >
-        <ScrollArea className="w-full">
-          <DataGridContainer>
-            <DataGridTable />
-          </DataGridContainer>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </DataGrid>
+      <AddLocationRegistryContext.Provider value={addLocationRegistry}>
+        <DataGrid
+          table={table}
+          recordCount={itemFields.length}
+          tableLayout={{
+            checkbox: showApproveCheckbox,
+          }}
+          emptyMessage={
+            <div className="text-muted-foreground py-10 text-center text-sm">
+              {t("noItems")}
+            </div>
+          }
+        >
+          <ScrollArea className="w-full">
+            <DataGridContainer>
+              <DataGridTable />
+            </DataGridContainer>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </DataGrid>
+      </AddLocationRegistryContext.Provider>
 
       <DeleteDialog
         open={deleteIndex !== null}

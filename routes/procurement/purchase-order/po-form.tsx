@@ -206,7 +206,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           />
         </section>
 
-        <section className="space-y-4">
+        <section className="space-y-3">
           <div className="border-border/60 space-y-0.5 border-b pb-2">
             <h2 className="text-foreground text-sm font-semibold tracking-tight">
               {t("sectionNotes")}

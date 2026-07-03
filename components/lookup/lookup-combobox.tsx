@@ -1,4 +1,3 @@
-
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Check,
@@ -175,7 +174,7 @@ export function LookupCombobox<T>({
     return (
       <span
         className={cn(
-          "inline-flex items-center text-sm",
+          "inline-flex items-center text-xs",
           size === "default" && "min-h-9",
           size === "sm" && "min-h-8",
           size === "xs" && "min-h-6 text-xs",
@@ -207,7 +206,7 @@ export function LookupCombobox<T>({
                 aria-expanded={open}
                 aria-invalid={!!error}
                 className={cn(
-                  "flex items-center justify-between pr-1 pl-3 text-sm",
+                  "flex items-center justify-between pr-1 pl-3 text-xs",
                   size === "default" && "h-9",
                   size === "sm" && "h-8",
                   size === "xs" && "h-6 gap-1 px-2 text-xs",
