@@ -620,7 +620,7 @@ function FieldPlainText({
     <span
       data-slot="field-plain-text"
       className={cn(
-        "text-foreground inline-flex min-h-8 items-center text-sm font-medium",
+        "text-foreground inline-flex min-h-8 items-center text-xs font-medium",
         className,
       )}
       {...props}

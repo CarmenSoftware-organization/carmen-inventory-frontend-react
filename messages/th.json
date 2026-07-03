@@ -518,6 +518,7 @@
     "discountAbbr": "ลด",
     "taxAbbr": "ภาษี",
     "netAbbr": "สุทธิ",
+    "amountAbbr": "รวม",
     "orderUnit": "หน่วยสั่งซื้อ",
     "baseQty": "จำนวนฐาน",
     "baseUnit": "หน่วยฐาน",

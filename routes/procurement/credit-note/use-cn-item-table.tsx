@@ -14,7 +14,12 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FieldInput } from "@/components/ui/field";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 import { cn } from "@/lib/utils";
 import { LookupGrnProduct } from "@/components/lookup/lookup-grn-product";
 import { LookupGrnProductLocation } from "@/components/lookup/lookup-grn-product-location";
@@ -28,7 +33,7 @@ export type { CnItemField };
 
 /**
  * คำนวณ + set net/tax/total ของ item — mount ตลอด (ทุก row) เพื่อให้ยอด
- * recompute แม้ตอน collapsed (CnTabPricing sync เฉพาะตอน expanded)
+ * recompute เสมอ (price/tax/subtotal/amt แสดงเป็นคอลัมน์ในแถว)
  */
 export const CnItemComputedSync = memo(function CnItemComputedSync({
   control,
@@ -96,8 +101,7 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
             form.setValue(`items.${index}.unit_name`, unit?.name ?? "");
           }}
           disabled={disabled || !productId}
-          readOnly={disabled}
-          className="h-8 w-full text-xs"
+          className="h-full w-20 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
           error={fieldState.error?.message}
         />
       )}
@@ -228,41 +232,132 @@ function QtyCell({
     control: form.control,
     name: `items.${index}.quantity`,
   });
+  const unitName =
+    useWatch({ control: form.control, name: `items.${index}.unit_name` }) ?? "";
   const error = form.formState.errors.items?.[index]?.quantity?.message;
   if (disabled) {
     return (
-      <span className="text-foreground block truncate text-xs font-medium">
-        {quantity != null ? String(quantity) : "—"}
-      </span>
+      <InputSuffixPlain
+        className="w-full"
+        value={quantity != null ? String(quantity) : "—"}
+        suffix={unitName}
+      />
     );
   }
   return (
-    <FieldInput
-      id={`items-${index}-quantity`}
-      type="number"
-      inputMode="decimal"
-      min={1}
-      placeholder="0"
-      className={cn("h-8 w-full text-right text-xs", error && "pl-7")}
-      error={error}
-      errorIconAlign="left"
-      {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
-    />
+    <InputSuffixField className="w-full" error={!!error}>
+      <InputSuffixInput
+        id={`items-${index}-quantity`}
+        type="number"
+        inputMode="decimal"
+        min={1}
+        placeholder="0"
+        {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
+      />
+      <InputSuffixAddon>
+        <WatchedProductUnit
+          control={form.control}
+          form={form}
+          index={index}
+          disabled={disabled}
+        />
+      </InputSuffixAddon>
+    </InputSuffixField>
   );
 }
 
-function NetCell({
+function PriceCell({
+  form,
+  index,
+  disabled,
+}: {
+  form: UseFormReturn<CnFormValues>;
+  index: number;
+  disabled: boolean;
+}) {
+  "use no memo";
+  const price = useWatch({
+    control: form.control,
+    name: `items.${index}.unit_price`,
+  });
+  if (disabled) {
+    return (
+      <InputSuffixPlain
+        className="w-full"
+        value={formatCurrency(Number(price) || 0)}
+      />
+    );
+  }
+  return (
+    <InputSuffixField className="w-full">
+      <InputSuffixInput
+        id={`items-${index}-unit-price`}
+        type="number"
+        inputMode="decimal"
+        min={0}
+        step="0.01"
+        placeholder="0.00"
+        {...form.register(`items.${index}.unit_price`, { valueAsNumber: true })}
+      />
+    </InputSuffixField>
+  );
+}
+
+function TaxRateCell({
+  form,
+  index,
+  disabled,
+}: {
+  form: UseFormReturn<CnFormValues>;
+  index: number;
+  disabled: boolean;
+}) {
+  "use no memo";
+  const taxRate = useWatch({
+    control: form.control,
+    name: `items.${index}.tax_rate`,
+  });
+  if (disabled) {
+    return (
+      <InputSuffixPlain
+        className="w-full"
+        value={Number(taxRate) || 0}
+        suffix="%"
+      />
+    );
+  }
+  return (
+    <InputSuffixField className="w-full">
+      <InputSuffixInput
+        id={`items-${index}-tax-rate`}
+        type="number"
+        inputMode="decimal"
+        min={0}
+        step="0.01"
+        placeholder="0"
+        {...form.register(`items.${index}.tax_rate`, { valueAsNumber: true })}
+      />
+      <InputSuffixAddon>
+        <span className="text-muted-foreground px-2 text-xs">%</span>
+      </InputSuffixAddon>
+    </InputSuffixField>
+  );
+}
+
+function AmountCell({
   control,
   index,
+  field,
 }: {
   control: Control<CnFormValues>;
   index: number;
+  field: "net_amount" | "tax_amount" | "total_amount";
 }) {
   "use no memo";
-  const net = useWatch({ control, name: `items.${index}.net_amount` });
+  const v = useWatch({ control, name: `items.${index}.${field}` });
   return (
     <span className="text-foreground text-xs font-semibold tabular-nums">
-      {formatCurrency(Number(net) || 0)}
+      {formatCurrency(Number(v) || 0)}
     </span>
   );
 }
@@ -291,9 +386,20 @@ export function useCnItemTable({
   // indent ของ expanded content ให้ตรงขอบซ้าย column Product — คิดเป็น % ของผลรวม
   // column size เพราะ table เป็น table-fixed w-full (column scale ตามสัดส่วน)
   const showAction = !disabled; // action column (ลบ item)
-  const preProductSize = 36 /* expand */ + 36 /* index */;
+  const preProductSize = 36 /* expand */ + 36; /* index */
+  // product 240 + location 200 + Rec 180 + price 120 + subtotal 110 + tax 100
+  // + taxAmt 110 + amt 120
   const totalSize =
-    preProductSize + 240 + 200 + 90 + 120 + 110 + (showAction ? 40 : 0);
+    preProductSize +
+    240 +
+    200 +
+    180 +
+    120 +
+    110 +
+    100 +
+    110 +
+    120 +
+    (showAction ? 40 : 0);
   const leftInsetPct = (preProductSize / totalSize) * 100;
 
   const columns = useMemo<ColumnDef<CnItemField>[]>(() => {
@@ -376,33 +482,60 @@ export function useCnItemTable({
       },
       {
         id: "quantity",
-        header: tfl("quantity"),
-        size: 90,
+        header: tfl("receivedAbbr"),
+        size: 180,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
         cell: ({ row }) => (
           <QtyCell form={form} index={row.index} disabled={disabled} />
         ),
       },
       {
-        accessorKey: "unit_id",
-        header: tfl("unit"),
+        id: "unit_price",
+        header: tfl("price"),
         size: 120,
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
         cell: ({ row }) => (
-          <WatchedProductUnit
-            control={form.control}
-            form={form}
-            index={row.index}
-            disabled={disabled}
-          />
+          <PriceCell form={form} index={row.index} disabled={disabled} />
         ),
       },
       {
-        id: "amount",
-        header: tfl("amount"),
+        id: "net_amount",
+        header: tfl("subtotalAbbr"),
         size: 110,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
         cell: ({ row }) => (
-          <NetCell control={form.control} index={row.index} />
+          <AmountCell control={form.control} index={row.index} field="net_amount" />
+        ),
+      },
+      {
+        id: "tax_rate",
+        header: tfl("taxAbbr"),
+        size: 100,
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        cell: ({ row }) => (
+          <TaxRateCell form={form} index={row.index} disabled={disabled} />
+        ),
+      },
+      {
+        id: "tax_amount",
+        header: tfl("taxAmt"),
+        size: 110,
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        cell: ({ row }) => (
+          <AmountCell control={form.control} index={row.index} field="tax_amount" />
+        ),
+      },
+      {
+        id: "total_amount",
+        header: tfl("amountAbbr"),
+        size: 120,
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        cell: ({ row }) => (
+          <AmountCell
+            control={form.control}
+            index={row.index}
+            field="total_amount"
+          />
         ),
       },
     ];

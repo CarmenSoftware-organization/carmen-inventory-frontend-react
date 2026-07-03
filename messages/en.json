@@ -518,6 +518,7 @@
     "discountAbbr": "Dis",
     "taxAbbr": "Tax",
     "netAbbr": "Net",
+    "amountAbbr": "Amt",
     "orderUnit": "Order Unit",
     "baseQty": "Base Qty",
     "baseUnit": "Base Unit",

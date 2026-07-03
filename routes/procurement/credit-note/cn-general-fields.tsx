@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import {
@@ -6,8 +6,15 @@ import {
   FieldDatePicker,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
   FieldSelect,
 } from "@/components/ui/field";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 import { Textarea } from "@/components/ui/textarea";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
@@ -24,16 +31,6 @@ interface CnGeneralFieldsProps {
   readonly disabled: boolean;
   /** view mode → แสดงทุก field เป็น plain text แทน input */
   readonly plainText?: boolean;
-}
-
-/** ค่าเป็น plain text (view mode) — value เด่น (เข้ม/medium/sm) ให้เกิด
- *  lightness+size contrast เหนือ label ที่เงียบ (เหมือน PO/GRN PlainField) */
-function PlainText({ children }: { readonly children: ReactNode }) {
-  return (
-    <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
-      {children || "—"}
-    </span>
-  );
 }
 
 export function CnGeneralFields({
@@ -58,6 +55,9 @@ export function CnGeneralFields({
     control: form.control,
     name: "currency_code",
   });
+  // currency_code เก็บ id → resolve เป็นตัวอักษรสกุลเงิน (THB) สำหรับต่อท้าย rate
+  const currencyLabel =
+    currencyData?.data?.find((c) => c.id === currencyCode)?.code ?? "";
   // GRN Reference เป็น plain text เสมอ → ต้อง watch ให้ reactive ตอนเลือก GRN
   const invoiceNo = useWatch({ control: form.control, name: "invoice_no" });
 
@@ -83,14 +83,13 @@ export function CnGeneralFields({
   // เด่นกว่า สร้าง proximity grouping + lightness contrast แบบ Apple (เหมือน PO)
   const viewFieldGap = plainText ? "gap-1" : undefined;
   const viewLabelClass = plainText
-    ? "text-muted-foreground font-normal"
+    ? "text-muted-foreground font-normal text-xs"
     : undefined;
 
   return (
     <div className="space-y-4">
       {/* ── 1. Credit Note (กรอกเอง) ── */}
       <section className="space-y-2">
-        <GroupLabel>{t("groupDetails")}</GroupLabel>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field className={viewFieldGap}>
             <FieldLabel className={viewLabelClass} required>
@@ -101,7 +100,7 @@ export function CnGeneralFields({
               name="credit_note_type"
               render={({ field }) =>
                 plainText ? (
-                  <PlainText>{cnTypeLabels[field.value]}</PlainText>
+                  <FieldPlainText>{cnTypeLabels[field.value]}</FieldPlainText>
                 ) : (
                   <FieldSelect
                     value={field.value}
@@ -113,10 +112,10 @@ export function CnGeneralFields({
                     size="sm"
                   >
                     <SelectContent>
-                      <SelectItem value="quantity_return">
+                      <SelectItem value="quantity_return" className="text-xs">
                         {t("quantityReturn")}
                       </SelectItem>
-                      <SelectItem value="amount_discount">
+                      <SelectItem value="amount_discount" className="text-xs">
                         {t("amountDiscount")}
                       </SelectItem>
                     </SelectContent>
@@ -193,13 +192,6 @@ export function CnGeneralFields({
               )}
             />
           </Field>
-        </div>
-      </section>
-
-      {/* ── 2. GRN Reference (auto-filled, read-only) ── */}
-      <section className="space-y-2">
-        <GroupLabel hint={t("grnRefHint")}>{t("groupGrnRef")}</GroupLabel>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field className={viewFieldGap}>
             <FieldLabel className={viewLabelClass}>{tfl("grnDate")}</FieldLabel>
             <Controller
@@ -219,8 +211,10 @@ export function CnGeneralFields({
           </Field>
 
           <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass}>{tfl("invoiceNo")}</FieldLabel>
-            <PlainText>{invoiceNo}</PlainText>
+            <FieldLabel className={viewLabelClass}>
+              {tfl("invoiceNo")}
+            </FieldLabel>
+            <FieldPlainText>{invoiceNo}</FieldPlainText>
           </Field>
 
           <Field className={viewFieldGap}>
@@ -243,36 +237,54 @@ export function CnGeneralFields({
             />
           </Field>
 
+          {/* Currency + Exchange rate รวมเป็น field เดียว (เหมือน GRN):
+              exchange rate (ค่า, auto) + currency selector (suffix) — เลือกสกุลเงิน
+              แล้วอัปเดต exchange_rate ให้ */}
           <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass}>{tfl("currency")}</FieldLabel>
-            <Controller
-              control={form.control}
-              name="currency_code"
-              render={({ field }) => (
-                <LookupCurrency
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  readOnly
-                  error={errors.currency_code?.message}
-                  size="sm"
-                  className="text-xs"
-                />
-              )}
-            />
-          </Field>
-
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass}>
-              {tfl("exchangeRate")}
+            <FieldLabel className={viewLabelClass} htmlFor="cn-exchange-rate">
+              {tfl("currency")}
             </FieldLabel>
-            <PlainText>{formatExchangeRate(exchangeRate)}</PlainText>
+            {plainText ? (
+              <InputSuffixPlain
+                className="inline-flex min-h-8 items-center text-left text-xs"
+                value={formatExchangeRate(exchangeRate)}
+                suffix={currencyLabel}
+              />
+            ) : (
+              <InputSuffixField error={!!errors.currency_code?.message}>
+                <InputSuffixInput
+                  id="cn-exchange-rate"
+                  type="number"
+                  inputMode="decimal"
+                  step="0.0001"
+                  disabled
+                  {...form.register("exchange_rate")}
+                />
+                <InputSuffixAddon>
+                  <Controller
+                    control={form.control}
+                    name="currency_code"
+                    render={({ field }) => (
+                      <LookupCurrency
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onItemChange={(currency) => {
+                          form.setValue("exchange_rate", currency.exchange_rate);
+                        }}
+                        disabled={disabled}
+                        className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
+                      />
+                    )}
+                  />
+                </InputSuffixAddon>
+              </InputSuffixField>
+            )}
           </Field>
         </div>
       </section>
 
       {/* ── 3. Tax Invoice (กรอกเอง) ── */}
       <section className="space-y-2">
-        <GroupLabel>{t("groupTaxInvoice")}</GroupLabel>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field className={viewFieldGap}>
             <FieldLabel
@@ -283,7 +295,9 @@ export function CnGeneralFields({
               {tfl("taxInvoiceNo")}
             </FieldLabel>
             {plainText ? (
-              <PlainText>{form.getValues("tax_invoice_no")}</PlainText>
+              <FieldPlainText>
+                {form.getValues("tax_invoice_no")}
+              </FieldPlainText>
             ) : (
               <FieldInput
                 id="cn-tax-invoice-no"

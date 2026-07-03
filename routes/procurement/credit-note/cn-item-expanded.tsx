@@ -1,13 +1,10 @@
-import { useTranslations } from "use-intl";
 import type { UseFormReturn, FieldArrayWithId } from "react-hook-form";
 import type { CnFormValues } from "./cn-form-schema";
-import CnTabPricing from "./cn-tab-pricing";
-import CnTabDetails from "./cn-tab-details";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { useTranslations } from "use-intl";
 
 export type CnItemField = FieldArrayWithId<CnFormValues, "items", "id">;
-
-const EYEBROW =
-  "text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase";
 
 interface CnItemExpandedProps {
   readonly item: CnItemField;
@@ -18,7 +15,7 @@ interface CnItemExpandedProps {
   readonly leftInsetPct: number;
 }
 
-/** เนื้อหาแถวที่ expand ของ CN item — Pricing + Details (reuse CnTab* เดิม) */
+/** เนื้อหาแถวที่ expand ของ CN item — Details (price/tax/subtotal ย้ายเป็นคอลัมน์แล้ว) */
 export function CnItemExpanded({
   item,
   form,
@@ -38,14 +35,24 @@ export function CnItemExpanded({
       className="w-0 min-w-full space-y-4 overflow-x-auto py-3 pr-4"
       style={{ paddingLeft: `calc(${leftInsetPct}% + 0.75rem)` }}
     >
-      <section className="space-y-2">
-        <p className={EYEBROW}>{tfl("pricing")}</p>
-        <CnTabPricing form={form} index={index} disabled={disabled} />
-      </section>
-      <section className="space-y-2 border-t pt-3">
-        <p className={EYEBROW}>{tfl("details")}</p>
-        <CnTabDetails form={form} index={index} disabled={disabled} />
-      </section>
+      <Field>
+        <FieldLabel htmlFor={`items-${index}-description`} className="text-xs">
+          {tfl("description")}
+        </FieldLabel>
+        {disabled ? (
+          <p className="min-h-8 text-xs whitespace-pre-wrap">
+            {form.getValues(`items.${index}.description`) || "—"}
+          </p>
+        ) : (
+          <Textarea
+            id={`items-${index}-description`}
+            maxLength={256}
+            disabled={disabled}
+            className="text-xs"
+            {...form.register(`items.${index}.description`)}
+          />
+        )}
+      </Field>
     </div>
   );
 }
