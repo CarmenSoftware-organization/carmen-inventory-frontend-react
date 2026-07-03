@@ -7,7 +7,7 @@ import {
   getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
@@ -81,16 +81,17 @@ const PoItemActionCell = memo(function PoItemActionCell({
   const t = useTranslations("procurement.purchaseOrder");
   const registry = useAddLocationRegistry();
   return (
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex items-center justify-center">
       {expanded && canAddLocation && (
         <Button
           type="button"
           variant="ghost"
           size="icon-xs"
           aria-label={t("addLocation")}
+          className="text-primary hover:bg-primary/10 hover:text-primary"
           onClick={() => registry?.get(index)?.()}
         >
-          <Plus className="size-3.5" aria-hidden="true" />
+          <MapPinPlus className="size-3.5" aria-hidden="true" />
         </Button>
       )}
       <Button

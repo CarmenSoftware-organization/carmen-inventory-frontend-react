@@ -1,4 +1,3 @@
-
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -118,7 +117,9 @@ export function CnForm({ creditNote }: CnFormProps) {
     );
 
     const payload: CreateCnDto = {
-      ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
+      ...(values.doc_version != null
+        ? { doc_version: values.doc_version }
+        : {}),
       credit_note_type: values.credit_note_type,
       grn_id: values.grn_id,
       grn_date: values.grn_date,
@@ -237,19 +238,18 @@ export function CnForm({ creditNote }: CnFormProps) {
         onSubmit={form.handleSubmit(onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4 px-4"
+        className="space-y-3 px-4"
       >
         <CnGeneralFields form={form} disabled={isDisabled} plainText={isView} />
         <CnProductCards form={form} disabled={isDisabled} />
 
-        <NotesSection
-          title={t("sectionNotes")}
-          subtitle={t("sectionNotesSub")}
-        >
+        <NotesSection title={t("sectionNotes")} subtitle={t("sectionNotesSub")}>
           <Field className={isView ? "gap-1" : undefined}>
             <FieldLabel
               htmlFor="cn-description"
-              className={isView ? "text-muted-foreground font-normal" : undefined}
+              className={
+                isView ? "text-muted-foreground font-normal" : undefined
+              }
             >
               {tfl("description")}
             </FieldLabel>

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { useForm, useWatch, type Resolver } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import type { PurchaseOrder } from "@/types/purchase-order";
@@ -129,20 +129,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   });
 
   const isDisabled = (isView && role !== STAGE_ROLE.APPROVE) || isPending;
-
-  // PO จาก price list — สินค้า/ราคา/เงื่อนไข มาจาก price list ทั้งหมด
-  // จึงล็อกทุก field ให้ผู้แก้ไขเปลี่ยนได้เฉพาะ location ของแต่ละ item เท่านั้น
-  // (ไม่ใช้กับ approver / view-only — field พวกนั้น read-only อยู่แล้ว)
   const isPriceListLocked =
     purchaseOrder?.po_type === PO_TYPE.PL && !isReadOnly && !isViewOnly;
   const fieldsDisabled = isDisabled || isPriceListLocked;
-
-  const items = useWatch({ control: form.control, name: "items" });
-  const itemQtyTotal = items.reduce(
-    (a, it) => a + (Number(it?.order_qty) || 0),
-    0,
-  );
-
   const departmentName = defaultBu?.department?.name ?? "";
 
   return (
@@ -178,39 +167,22 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           plainText={isView || isReadOnly}
         />
 
-        {/* Section 2 — flat (ไม่ห่อ card) ให้ตาราง line items เต็มความกว้าง */}
-        <section className="space-y-3">
-          <div className="border-border/60 flex items-baseline justify-between gap-2 border-b pb-2">
-            <h2 className="text-foreground text-sm font-semibold tracking-tight">
-              {t("sectionItems")}
-            </h2>
-            <p className="text-muted-foreground text-xs">
-              {t("sectionItemsSub", {
-                count: items.length,
-                qty: itemQtyTotal,
-              })}
-            </p>
-          </div>
-          <PoItemFields
-            form={form}
-            revealErrorSignal={revealErrorSignal}
-            disabled={fieldsDisabled}
-            locationsDisabled={isDisabled}
-            role={role}
-            poStatus={purchaseOrder?.po_status}
-            isPending={isPending}
-            onApprove={purchaseOrder ? handleApprovePo : undefined}
-            onReject={
-              purchaseOrder ? () => dialogs.setShowReject(true) : undefined
-            }
-            onClose={purchaseOrder ? handleClosePo : undefined}
-          />
-        </section>
+        <PoItemFields
+          form={form}
+          revealErrorSignal={revealErrorSignal}
+          disabled={fieldsDisabled}
+          locationsDisabled={isDisabled}
+          role={role}
+          poStatus={purchaseOrder?.po_status}
+          isPending={isPending}
+          onApprove={purchaseOrder ? handleApprovePo : undefined}
+          onReject={
+            purchaseOrder ? () => dialogs.setShowReject(true) : undefined
+          }
+          onClose={purchaseOrder ? handleClosePo : undefined}
+        />
 
-        <NotesSection
-          title={t("sectionNotes")}
-          subtitle={t("sectionNotesSub")}
-        >
+        <NotesSection title={t("sectionNotes")} subtitle={t("sectionNotesSub")}>
           <PoNotesSummary
             form={form}
             disabled={fieldsDisabled}

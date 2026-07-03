@@ -29,7 +29,8 @@ export function CnProductCards({ form, disabled }: CnProductCardsProps) {
   "use no memo";
   const t = useTranslations("procurement.creditNote");
   const tfl = useTranslations("field");
-  const grnId = useWatch({ control: form.control, name: "grn_id" }) || undefined;
+  const grnId =
+    useWatch({ control: form.control, name: "grn_id" }) || undefined;
   const canAddItem = !disabled && !!grnId;
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   // index ของ row ที่เพิ่งเพิ่ม → auto-open product lookup (prepend อยู่ index 0)
@@ -74,14 +75,8 @@ export function CnProductCards({ form, disabled }: CnProductCardsProps) {
   const itemsError = form.formState.errors.items?.message;
 
   return (
-    <div className="space-y-2 pt-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-foreground text-sm font-semibold tracking-tight">
-          {tfl("items")}
-        </h2>
-        {addAction}
-      </div>
-
+    <div className="space-y-2 pt-2">
+      <div className="flex items-center justify-end">{addAction}</div>
       {itemsError && (
         <p className="text-destructive text-xs" role="alert">
           {itemsError}

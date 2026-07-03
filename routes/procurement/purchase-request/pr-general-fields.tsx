@@ -52,7 +52,7 @@ export function PrGeneralFields({
               readOnly={workflowReadOnly}
               disabled={disabled}
               error={form.formState.errors.workflow_id?.message}
-              className={workflowReadOnly ? "font-medium" : undefined}
+              className="text-xs"
             />
           )}
         />

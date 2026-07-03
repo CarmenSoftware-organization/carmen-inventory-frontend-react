@@ -86,252 +86,232 @@ export function CnGeneralFields({
     : undefined;
 
   return (
-    <div className="space-y-4">
-      {/* ── 1. Credit Note (กรอกเอง) ── */}
-      <section className="space-y-2">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass} required>
-              {t("cnType")}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="credit_note_type"
-              render={({ field }) =>
-                plainText ? (
-                  <FieldPlainText>{cnTypeLabels[field.value]}</FieldPlainText>
-                ) : (
-                  <FieldSelect
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass} required>
+          {t("cnType")}
+        </FieldLabel>
+        <Controller
+          control={form.control}
+          name="credit_note_type"
+          render={({ field }) =>
+            plainText ? (
+              <FieldPlainText>{cnTypeLabels[field.value]}</FieldPlainText>
+            ) : (
+              <FieldSelect
+                value={field.value}
+                onValueChange={field.onChange}
+                placeholder={tfl("selectType")}
+                className="w-full text-xs"
+                disabled={disabled}
+                error={errors.credit_note_type?.message}
+                size="sm"
+              >
+                <SelectContent>
+                  <SelectItem value="quantity_return" className="text-xs">
+                    {t("quantityReturn")}
+                  </SelectItem>
+                  <SelectItem value="amount_discount" className="text-xs">
+                    {t("amountDiscount")}
+                  </SelectItem>
+                </SelectContent>
+              </FieldSelect>
+            )
+          }
+        />
+      </Field>
+
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass} required>
+          {tfl("vendor")}
+        </FieldLabel>
+        <Controller
+          control={form.control}
+          name="vendor_id"
+          render={({ field }) => (
+            <LookupVendor
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={disabled}
+              readOnly={plainText}
+              error={errors.vendor_id?.message}
+              className="text-xs"
+            />
+          )}
+        />
+      </Field>
+
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass} required>
+          {tfl("grnNo")}
+        </FieldLabel>
+        <Controller
+          control={form.control}
+          name="grn_id"
+          render={({ field }) => (
+            <LookupGrnByVendorForCn
+              value={field.value}
+              onValueChange={field.onChange}
+              onItemChange={(grn) => {
+                form.setValue("grn_date", grn.grn_date ?? "");
+                form.setValue("currency_code", grn.currency_id ?? "");
+                form.setValue("exchange_rate", grn.exchange_rate ?? 1);
+                form.setValue("invoice_no", grn.invoice_no ?? "");
+                form.setValue("invoice_date", grn.invoice_date ?? "");
+              }}
+              vendorId={vendorId}
+              disabled={disabled}
+              readOnly={plainText}
+              error={errors.grn_id?.message}
+              className="text-xs"
+            />
+          )}
+        />
+      </Field>
+
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass} required>
+          {tfl("reason")}
+        </FieldLabel>
+        <Controller
+          control={form.control}
+          name="reason"
+          render={({ field }) => (
+            <LookupCnReason
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={disabled}
+              readOnly={plainText}
+              error={errors.reason?.message}
+              className="w-full text-xs"
+            />
+          )}
+        />
+      </Field>
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass}>{tfl("grnDate")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="grn_date"
+          render={({ field }) => (
+            <FieldDatePicker
+              value={field.value}
+              onValueChange={field.onChange}
+              placeholder={tc("selectDate")}
+              className="text-xs"
+              readOnly
+              error={errors.grn_date?.message}
+            />
+          )}
+        />
+      </Field>
+
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass}>{tfl("invoiceNo")}</FieldLabel>
+        <FieldPlainText>{invoiceNo}</FieldPlainText>
+      </Field>
+
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass}>{tfl("invoiceDate")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="invoice_date"
+          render={({ field }) => (
+            <FieldDatePicker
+              value={field.value}
+              onValueChange={field.onChange}
+              placeholder={tc("selectDate")}
+              className="text-xs"
+              readOnly
+              error={errors.invoice_date?.message}
+            />
+          )}
+        />
+      </Field>
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass} htmlFor="cn-exchange-rate">
+          {tfl("currency")}
+        </FieldLabel>
+        {plainText ? (
+          <InputSuffixPlain
+            className="inline-flex min-h-8 items-center text-left text-xs"
+            value={formatExchangeRate(exchangeRate)}
+            suffix={currencyLabel}
+          />
+        ) : (
+          <InputSuffixField error={!!errors.currency_code?.message}>
+            <InputSuffixInput
+              id="cn-exchange-rate"
+              type="number"
+              inputMode="decimal"
+              step="0.0001"
+              disabled
+              {...form.register("exchange_rate")}
+            />
+            <InputSuffixAddon>
+              <Controller
+                control={form.control}
+                name="currency_code"
+                render={({ field }) => (
+                  <LookupCurrency
                     value={field.value}
                     onValueChange={field.onChange}
-                    placeholder={tfl("selectType")}
-                    className="w-full text-xs"
+                    onItemChange={(currency) => {
+                      form.setValue("exchange_rate", currency.exchange_rate);
+                    }}
                     disabled={disabled}
-                    error={errors.credit_note_type?.message}
-                    size="sm"
-                  >
-                    <SelectContent>
-                      <SelectItem value="quantity_return" className="text-xs">
-                        {t("quantityReturn")}
-                      </SelectItem>
-                      <SelectItem value="amount_discount" className="text-xs">
-                        {t("amountDiscount")}
-                      </SelectItem>
-                    </SelectContent>
-                  </FieldSelect>
-                )
-              }
-            />
-          </Field>
-
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass} required>
-              {tfl("vendor")}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="vendor_id"
-              render={({ field }) => (
-                <LookupVendor
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={disabled}
-                  readOnly={plainText}
-                  error={errors.vendor_id?.message}
-                  className="text-xs"
-                />
-              )}
-            />
-          </Field>
-
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass} required>
-              {tfl("grnNo")}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="grn_id"
-              render={({ field }) => (
-                <LookupGrnByVendorForCn
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  onItemChange={(grn) => {
-                    form.setValue("grn_date", grn.grn_date ?? "");
-                    form.setValue("currency_code", grn.currency_id ?? "");
-                    form.setValue("exchange_rate", grn.exchange_rate ?? 1);
-                    form.setValue("invoice_no", grn.invoice_no ?? "");
-                    form.setValue("invoice_date", grn.invoice_date ?? "");
-                  }}
-                  vendorId={vendorId}
-                  disabled={disabled}
-                  readOnly={plainText}
-                  error={errors.grn_id?.message}
-                  className="text-xs"
-                />
-              )}
-            />
-          </Field>
-
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass} required>
-              {tfl("reason")}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="reason"
-              render={({ field }) => (
-                <LookupCnReason
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={disabled}
-                  readOnly={plainText}
-                  error={errors.reason?.message}
-                  className="w-full text-xs"
-                />
-              )}
-            />
-          </Field>
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass}>{tfl("grnDate")}</FieldLabel>
-            <Controller
-              control={form.control}
-              name="grn_date"
-              render={({ field }) => (
-                <FieldDatePicker
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder={tc("selectDate")}
-                  className="text-xs"
-                  readOnly
-                  error={errors.grn_date?.message}
-                />
-              )}
-            />
-          </Field>
-
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass}>
-              {tfl("invoiceNo")}
-            </FieldLabel>
-            <FieldPlainText>{invoiceNo}</FieldPlainText>
-          </Field>
-
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass}>
-              {tfl("invoiceDate")}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="invoice_date"
-              render={({ field }) => (
-                <FieldDatePicker
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder={tc("selectDate")}
-                  className="text-xs"
-                  readOnly
-                  error={errors.invoice_date?.message}
-                />
-              )}
-            />
-          </Field>
-
-          {/* Currency + Exchange rate รวมเป็น field เดียว (เหมือน GRN):
-              exchange rate (ค่า, auto) + currency selector (suffix) — เลือกสกุลเงิน
-              แล้วอัปเดต exchange_rate ให้ */}
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass} htmlFor="cn-exchange-rate">
-              {tfl("currency")}
-            </FieldLabel>
-            {plainText ? (
-              <InputSuffixPlain
-                className="inline-flex min-h-8 items-center text-left text-xs"
-                value={formatExchangeRate(exchangeRate)}
-                suffix={currencyLabel}
-              />
-            ) : (
-              <InputSuffixField error={!!errors.currency_code?.message}>
-                <InputSuffixInput
-                  id="cn-exchange-rate"
-                  type="number"
-                  inputMode="decimal"
-                  step="0.0001"
-                  disabled
-                  {...form.register("exchange_rate")}
-                />
-                <InputSuffixAddon>
-                  <Controller
-                    control={form.control}
-                    name="currency_code"
-                    render={({ field }) => (
-                      <LookupCurrency
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        onItemChange={(currency) => {
-                          form.setValue("exchange_rate", currency.exchange_rate);
-                        }}
-                        disabled={disabled}
-                        className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
-                      />
-                    )}
+                    className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
                   />
-                </InputSuffixAddon>
-              </InputSuffixField>
-            )}
-          </Field>
-        </div>
-      </section>
-
-      {/* ── 3. Tax Invoice (กรอกเอง) ── */}
-      <section className="space-y-2">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field className={viewFieldGap}>
-            <FieldLabel
-              className={viewLabelClass}
-              htmlFor="cn-tax-invoice-no"
-              required
-            >
-              {tfl("taxInvoiceNo")}
-            </FieldLabel>
-            {plainText ? (
-              <FieldPlainText>
-                {form.getValues("tax_invoice_no")}
-              </FieldPlainText>
-            ) : (
-              <FieldInput
-                id="cn-tax-invoice-no"
-                placeholder="e.g. TAX-001"
-                className="h-8"
-                disabled={disabled}
-                maxLength={100}
-                error={errors.tax_invoice_no?.message}
-                {...form.register("tax_invoice_no")}
+                )}
               />
-            )}
-          </Field>
+            </InputSuffixAddon>
+          </InputSuffixField>
+        )}
+      </Field>
 
-          <Field className={viewFieldGap}>
-            <FieldLabel className={viewLabelClass} required>
-              {tfl("taxInvoiceDate")}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="tax_invoice_date"
-              render={({ field }) => (
-                <FieldDatePicker
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={disabled}
-                  placeholder={tc("selectDate")}
-                  className="w-full text-xs"
-                  readOnly={plainText}
-                  error={errors.tax_invoice_date?.message}
-                />
-              )}
+      <Field className={viewFieldGap}>
+        <FieldLabel
+          className={viewLabelClass}
+          htmlFor="cn-tax-invoice-no"
+          required
+        >
+          {tfl("taxInvoiceNo")}
+        </FieldLabel>
+        {plainText ? (
+          <FieldPlainText>{form.getValues("tax_invoice_no")}</FieldPlainText>
+        ) : (
+          <FieldInput
+            id="cn-tax-invoice-no"
+            placeholder="e.g. TAX-001"
+            className="h-8"
+            disabled={disabled}
+            maxLength={100}
+            error={errors.tax_invoice_no?.message}
+            {...form.register("tax_invoice_no")}
+          />
+        )}
+      </Field>
+
+      <Field className={viewFieldGap}>
+        <FieldLabel className={viewLabelClass} required>
+          {tfl("taxInvoiceDate")}
+        </FieldLabel>
+        <Controller
+          control={form.control}
+          name="tax_invoice_date"
+          render={({ field }) => (
+            <FieldDatePicker
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={disabled}
+              placeholder={tc("selectDate")}
+              className="w-full text-xs"
+              readOnly={plainText}
+              error={errors.tax_invoice_date?.message}
             />
-          </Field>
-        </div>
-      </section>
+          )}
+        />
+      </Field>
     </div>
   );
 }

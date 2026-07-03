@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import {
@@ -48,10 +47,7 @@ export function PrtGeneralFields({
         {/* Workflow + Name */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field className={viewFieldGap}>
-            <FieldLabel
-              required={!readOnly}
-              className={viewLabelClass}
-            >
+            <FieldLabel required={!readOnly} className={viewLabelClass}>
               {tfl("workflow")}
             </FieldLabel>
             <Controller
@@ -65,7 +61,7 @@ export function PrtGeneralFields({
                   readOnly={readOnly}
                   disabled={disabled}
                   error={errors.workflow_id?.message}
-                  className={readOnly ? "font-medium" : undefined}
+                  className="text-xs"
                 />
               )}
             />
@@ -79,7 +75,7 @@ export function PrtGeneralFields({
               {tfl("name")}
             </FieldLabel>
             {readOnly ? (
-              <FieldPlainText className="text-sm">
+              <FieldPlainText className="text-xs">
                 {watchedName?.trim() ? (
                   watchedName
                 ) : (

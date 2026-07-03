@@ -91,9 +91,6 @@ export function GrnFormHeader({
 
   return (
     <div className="space-y-2">
-      <h2 className="text-muted-foreground text-sm font-semibold tracking-tight">
-        {t("docInfo")}
-      </h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Field className={viewFieldGap}>
           <FieldLabel className={viewLabelClass} required>
@@ -181,9 +178,6 @@ export function GrnFormHeader({
             )}
           />
         </Field>
-
-        {/* Currency + Exchange rate รวมเป็น field เดียว: exchange rate (ค่า) +
-            currency selector (suffix) — เลือกสกุลเงินแล้วอัปเดต rate ให้เลย */}
         <Field className={viewFieldGap}>
           <FieldLabel
             className={viewLabelClass}

@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  useForm,
-  useWatch,
-  Controller,
-  type Resolver,
-} from "react-hook-form";
+import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -176,12 +171,14 @@ export function PrtForm({ template }: PrtFormProps) {
           <Field className={isView ? "gap-1" : undefined}>
             <FieldLabel
               htmlFor="prt-description"
-              className={isView ? "text-muted-foreground font-normal" : undefined}
+              className={
+                isView ? "text-muted-foreground font-normal" : undefined
+              }
             >
               {tfl("description")}
             </FieldLabel>
             {isView ? (
-              <FieldPlainText className="text-sm">
+              <FieldPlainText className="text-xs">
                 {watchedDescription?.trim() ? (
                   <span className="whitespace-pre-line">
                     {watchedDescription}

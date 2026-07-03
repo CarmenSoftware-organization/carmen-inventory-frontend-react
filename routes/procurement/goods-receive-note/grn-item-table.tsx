@@ -110,7 +110,6 @@ export function GrnItemTable({
 }: GrnItemTableProps) {
   "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
-  const tfl = useTranslations("field");
   const docType = useWatch({ control: form.control, name: "doc_type" });
   const isManual = docType === "manual";
   const [deleteGroup, setDeleteGroup] = useState<GrnGroup | null>(null);
@@ -210,7 +209,8 @@ export function GrnItemTable({
     }));
   };
 
-  const addAction = !disabled &&
+  const addAction =
+    !disabled &&
     (isManual ? (
       <Button type="button" size="xs" onClick={handleAddItem}>
         <Plus /> {t("addItem")}
@@ -226,13 +226,8 @@ export function GrnItemTable({
   const itemsError = form.formState.errors.items?.message;
 
   return (
-    <div className="space-y-2 pt-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-foreground text-sm font-semibold tracking-tight">
-          {tfl("items")}
-        </h2>
-        {addAction}
-      </div>
+    <div className="space-y-2 pt-2">
+      <div className="flex items-center justify-end">{addAction}</div>
 
       {itemsError && (
         <p className="text-destructive text-xs" role="alert">

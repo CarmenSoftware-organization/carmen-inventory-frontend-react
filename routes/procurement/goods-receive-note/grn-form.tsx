@@ -188,7 +188,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         onSubmit={form.handleSubmit(actions.onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4 px-4"
+        className="space-y-3 px-4"
       >
         <GrnFormHeader
           form={form}
