@@ -1,16 +1,12 @@
 import { useState } from "react";
 import { Control, useWatch } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { AlertTriangle } from "lucide-react";
 import { PrFormValues } from "./pr-form-schema";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { PrOnHandDialog } from "./pr-on-hand-dialog";
 import { PrOnOrderDialog } from "./pr-on-order-dialog";
-
-type StockStatus = "healthy" | "low" | "critical";
 
 interface Props {
   readonly control: Control<PrFormValues>;
@@ -39,7 +35,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
 
   if (!data && isLoading) {
     return (
-      <div className="space-y-2 rounded-lg border p-3">
+      <div className="space-y-2 p-3">
         <Skeleton className="h-4 w-40" />
         <div className="grid grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -57,72 +53,40 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
   if (!data) return null;
 
   const { on_hand_qty, on_order_qty, re_order_qty, re_stock_qty } = data;
-  const pct =
-    re_stock_qty > 0
-      ? Math.min(Math.round((on_hand_qty / re_stock_qty) * 1000) / 10, 100)
-      : 0;
-
-  const needsReorder = on_hand_qty < re_order_qty;
-  let status: StockStatus = "healthy";
-  if (needsReorder) status = "critical";
-  else if (on_hand_qty < re_stock_qty) status = "low";
-
-  const statusTheme = STATUS_THEME[status];
 
   return (
     <>
-      <section className="space-y-3">
+      <section className="space-y-2">
         {/* Eyebrow แบบเดียวกับกลุ่มฝั่งซ้าย (PRICING/TAX) — ดู GroupEyebrow */}
         <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
           {t("inventoryInfo")}
         </p>
         <div className="space-y-3">
-          <div className="grid grid-cols-4 gap-3">
-              <InventoryStat
-                label={t("onHand")}
-                value={on_hand_qty}
-                unit={unitName}
-                onLabelClick={() => setOnHandOpen(true)}
-              />
-              <InventoryStat
-                label={t("onOrder")}
-                value={on_order_qty}
-                unit={unitName}
-                onLabelClick={() => setOnOrderOpen(true)}
-              />
-              <InventoryStat
-                label={t("reorderPt")}
-                value={re_order_qty}
-                unit={unitName}
-              />
-              <InventoryStat
-                label={t("restock")}
-                value={re_stock_qty}
-                unit={unitName}
-              />
-            </div>
-
-            <div className="space-y-1">
-              <Progress
-                value={pct}
-                className="bg-muted/60 h-1.5"
-                indicatorClassName={cn(
-                  "transition-all duration-500",
-                  statusTheme.indicator,
-                )}
-              />
-              <div className="flex items-center justify-between text-[0.625rem]">
-                {needsReorder ? (
-                  <span className="text-destructive inline-flex items-center gap-1 font-semibold">
-                    <AlertTriangle className="size-3" aria-hidden="true" />
-                    {t("needsReorder")}
-                  </span>
-                ) : (
-                  <span />
-                )}
-              </div>
-            </div>
+          <div className="grid grid-cols-4 gap-4">
+            <InventoryStat
+              label={t("onHand")}
+              value={on_hand_qty}
+              unit={unitName}
+              onLabelClick={() => setOnHandOpen(true)}
+            />
+            <InventoryStat
+              label={t("onOrder")}
+              value={on_order_qty}
+              unit={unitName}
+              onLabelClick={() => setOnOrderOpen(true)}
+            />
+            <InventoryStat
+              label={t("reorderPt")}
+              value={re_order_qty}
+              unit={unitName}
+            />
+            <InventoryStat
+              label={t("restock")}
+              value={re_stock_qty}
+              unit={unitName}
+            />
           </div>
+        </div>
       </section>
 
       <PrOnHandDialog
@@ -139,23 +103,6 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
   );
 }
 
-// Status carries ONE signal each — the badge (trigger) and the progress bar
-// indicator — not stripes/borders/icon tiles (keeps the panel flat per DESIGN.md).
-const STATUS_THEME = {
-  healthy: {
-    indicator: "bg-success",
-    badge: "bg-success/10 text-success-foreground",
-  },
-  low: {
-    indicator: "bg-warning",
-    badge: "bg-warning/15 text-warning-foreground",
-  },
-  critical: {
-    indicator: "bg-destructive",
-    badge: "bg-destructive/10 text-destructive",
-  },
-} as const;
-
 interface InventoryStatProps {
   readonly label: string;
   readonly value: number;
@@ -170,7 +117,7 @@ function InventoryStat({
   onLabelClick,
 }: InventoryStatProps) {
   return (
-    <div className="space-y-0.5">
+    <div>
       {onLabelClick ? (
         <button
           type="button"
@@ -184,10 +131,13 @@ function InventoryStat({
           {label}
         </span>
       )}
-      <div className="text-foreground text-sm font-semibold tabular-nums">
-        {value.toLocaleString()}
-      </div>
-      <span className="text-muted-foreground text-[0.625rem]">{unit}</span>
+      <InputSuffixPlain
+        className="block text-left"
+        value={value.toLocaleString()}
+        suffix={unit}
+        valueClassName="text-sm font-semibold"
+        suffixClassName="text-[0.625rem]"
+      />
     </div>
   );
 }

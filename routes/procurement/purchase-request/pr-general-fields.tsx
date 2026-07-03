@@ -1,6 +1,6 @@
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
@@ -76,13 +76,13 @@ export function PrGeneralFields({
           {tfl("description")}
         </FieldLabel>
         {descriptionReadOnly ? (
-          <span className="text-foreground inline-flex min-h-8 items-center text-sm font-medium">
+          <FieldPlainText className="text-sm">
             {watchedDescription?.trim() ? (
               <span className="whitespace-pre-line">{watchedDescription}</span>
             ) : (
               <span className="text-muted-foreground font-normal">—</span>
             )}
-          </span>
+          </FieldPlainText>
         ) : (
           <Textarea
             id="pr-description"

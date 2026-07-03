@@ -1,5 +1,6 @@
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
+import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 
 interface Props {
@@ -31,12 +32,12 @@ export function PrItemSummary({
   const tfl = useTranslations("field");
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-2 pt-10">
       {/* Eyebrow แบบเดียวกับกลุ่มอื่น (PRICING/TAX/Inventory) */}
       <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
         {t("summary")}
       </p>
-      <dl className="space-y-1.5 text-xs">
+      <dl className="space-y-2 text-xs">
         <SummaryRow
           label={tfl("subtotal")}
           value={subtotal}
@@ -76,36 +77,26 @@ function SummaryRow({
   readonly muted?: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "flex items-baseline justify-between gap-3",
-        strong && "border-border/60 mt-2 border-t pt-2",
-      )}
-    >
-      <dt className={cn(strong ? "text-foreground text-sm font-medium" : "text-muted-foreground")}>
-        {label}
-      </dt>
-      <dd
+    <div className={cn("flex items-baseline justify-between gap-3")}>
+      <dt
         className={cn(
-          "tabular-nums",
           strong
-            ? "text-foreground text-base font-semibold"
-            : muted
-              ? "text-muted-foreground"
-              : "text-foreground",
+            ? "text-foreground text-sm font-medium"
+            : "text-muted-foreground",
         )}
       >
-        {formatCurrency(value)}
-        {unit && (
-          <span
-            className={cn(
-              "text-muted-foreground ml-1 font-normal",
-              strong ? "text-xs" : "text-[0.625rem]",
-            )}
-          >
-            {unit}
-          </span>
-        )}
+        {label}
+      </dt>
+      <dd>
+        <InputSuffixPlain
+          value={formatCurrency(value)}
+          suffix={unit}
+          valueClassName={cn(
+            strong ? "text-base font-semibold" : "font-normal",
+            muted && "text-muted-foreground",
+          )}
+          suffixClassName={strong ? "text-xs" : "text-[0.625rem]"}
+        />
       </dd>
     </div>
   );

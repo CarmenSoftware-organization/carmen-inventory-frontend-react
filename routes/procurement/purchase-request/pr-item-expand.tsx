@@ -10,8 +10,14 @@ import { useTranslations } from "use-intl";
 import { Scale } from "lucide-react";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_ITEM_PRICELIST_COMPARE_TYPE } from "@/types/purchase-request";
-import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { InputAmount } from "@/components/ui/input/input-amount";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+} from "@/components/ui/input/input-suffix";
+import { EyeBrow } from "@/components/ui/eye-brow";
 import { formatCurrency } from "@/lib/currency-utils";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,19 +48,10 @@ interface PrItemExpandProps {
   readonly role?: string;
 }
 
-/** Section eyebrow — iOS Settings grouped-list style: quiet, uppercase, muted */
-function GroupEyebrow({ children }: { readonly children: React.ReactNode }) {
-  return (
-    <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
-      {children}
-    </p>
-  );
-}
-
 /**
  * เนื้อหาที่กางออก (expand) ของแต่ละรายการใบขอซื้อ — จัดกลุ่มแบบ iOS Settings
  * (Pricing / Tax / Discount ทางซ้าย, Inventory + Summary เป็น sidebar ขวา)
- * ด้วย eyebrow (GroupEyebrow) แทนกล่อง card, ตัวเลข/ค่าเป็น text-sm, layout
+ * ด้วย eyebrow (EyeBrow) แทนกล่อง card, ตัวเลข/ค่าเป็น text-xs, layout
  * 2 คอลัมน์ทำผ่าน float + flow-root เพราะ DataGrid กางลงใน table-fixed
  * `<td colSpan>` ที่ flex/grid แบ่ง track ไม่ได้ เนื้อหาเริ่มตรงคอลัมน์ Location
  * ผ่าน `expandedColStart` ของ column
@@ -235,14 +232,14 @@ export function PrItemExpand({
   );
 
   return (
-    <div className="bg-muted/20 w-full py-5 pr-5 pl-3">
+    <div className="w-full p-3">
       {/* 2-column via float + BFC (NOT flex/grid): the DataGrid expands into a
           table-fixed <td colSpan>, which gives flex/grid no definite width to
           split — but floats + flow-root lay out correctly inside a table-cell.
           Right = Inventory + Summary; left = the editable detail groups. */}
       {/* full width — left 80% details · right 20% Inventory + Summary */}
       <div className="w-full">
-        <aside className="mb-6 space-y-6 sm:float-right sm:mb-0 sm:ml-6 sm:w-[30%]">
+        <aside className="sm:float-right sm:mb-0 sm:ml-6 sm:w-[30%]">
           <PrInventoryRow
             control={form.control}
             index={index}
@@ -259,21 +256,21 @@ export function PrItemExpand({
           />
         </aside>
 
-        <div className="space-y-6 sm:flow-root">
+        <div className="space-y-3 sm:flow-root">
           {/* ── Pricing: vendor · unit price · pricelist ── */}
-          <section className="space-y-3">
-            <GroupEyebrow>{tfl("pricing")}</GroupEyebrow>
-            <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-[1.5fr_8rem_1.2fr]">
+          <section className="space-y-2">
+            <EyeBrow>{tfl("pricing")}</EyeBrow>
+            <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_8rem_1.2fr]">
               {/* Vendor */}
-              <Field className="gap-1.5">
+              <Field>
                 <FieldLabel
                   htmlFor={`items-${index}-vendor`}
-                  className="text-muted-foreground text-xs"
+                  className="text-muted-foreground flex min-h-6 items-center text-xs"
                 >
                   {tfl("vendor")}
                 </FieldLabel>
                 {isFieldDisabled ? (
-                  <p className="flex min-h-9 items-center truncate text-sm font-medium">
+                  <p className="flex items-center truncate text-xs font-medium">
                     {vendorName || "—"}
                   </p>
                 ) : (
@@ -296,7 +293,7 @@ export function PrItemExpand({
                             );
                           }
                         }}
-                        className="w-full text-sm"
+                        className="w-full text-xs"
                         error={vendorError}
                       />
                     )}
@@ -305,15 +302,15 @@ export function PrItemExpand({
               </Field>
 
               {/* Unit price */}
-              <Field className="gap-1.5">
+              <Field>
                 <FieldLabel
                   htmlFor={`items-${index}-pricelist-price`}
-                  className="text-muted-foreground text-xs"
+                  className="text-muted-foreground flex min-h-6 items-center text-xs"
                 >
                   {tfl("unitPrice")}
                 </FieldLabel>
                 {isFieldDisabled ? (
-                  <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
+                  <p className="flex items-center text-xs font-semibold tabular-nums">
                     {price ? formatCurrency(price) : "—"}
                   </p>
                 ) : (
@@ -321,7 +318,7 @@ export function PrItemExpand({
                     id={`items-${index}-pricelist-price`}
                     decimals={watchCurrencyDecimals}
                     min={0}
-                    className={`text-sm ${priceError ? "pl-7" : ""}`}
+                    className={`text-xs ${priceError ? "pl-7" : ""}`}
                     error={priceError}
                     errorIconAlign="left"
                     defaultValue={price}
@@ -343,8 +340,8 @@ export function PrItemExpand({
               </Field>
 
               {/* Pricelist */}
-              <Field className="gap-1.5">
-                <div className="flex items-center justify-between gap-2">
+              <Field>
+                <div className="flex min-h-6 items-center justify-between">
                   <FieldLabel className="text-muted-foreground text-xs">
                     {tfl("pricelist")}
                   </FieldLabel>
@@ -357,7 +354,7 @@ export function PrItemExpand({
                         type="button"
                         size="xs"
                         variant="ghost"
-                        className="text-primary h-6 shrink-0 px-2"
+                        className="text-primary shrink-0 px-2"
                         aria-label={tfl("pricelist")}
                         onClick={() => setShowPricelist(true)}
                       >
@@ -366,9 +363,9 @@ export function PrItemExpand({
                       </Button>
                     )}
                 </div>
-                <p className="flex min-h-9 items-center truncate text-sm font-medium">
+                <span className="flex items-center truncate text-xs font-medium">
                   {pricelistNo || "—"}
-                </p>
+                </span>
               </Field>
             </div>
           </section>
@@ -377,10 +374,10 @@ export function PrItemExpand({
           <div className="grid grid-cols-1 gap-x-8 gap-y-6 border-t pt-5 sm:grid-cols-2">
             {/* Tax */}
             <section className="space-y-3">
-              <GroupEyebrow>{tfl("tax")}</GroupEyebrow>
+              <EyeBrow>{tfl("tax")}</EyeBrow>
               {/* Tax Profile · Tax % · Tax Amt ในแถวเดียวกัน */}
               <div className="grid grid-cols-[minmax(0,1fr)_3.5rem_minmax(0,1fr)] gap-x-3">
-                <Field className="gap-1.5">
+                <Field>
                   <FieldLabel
                     htmlFor={`items-${index}-tax-profile`}
                     className="text-muted-foreground text-xs"
@@ -388,7 +385,7 @@ export function PrItemExpand({
                     {tfl("taxProfile")}
                   </FieldLabel>
                   {isFieldDisabled ? (
-                    <p className="flex min-h-9 items-center truncate text-sm font-medium">
+                    <p className="flex min-h-9 items-center truncate text-xs font-medium">
                       {taxProfileName || "—"}
                     </p>
                   ) : (
@@ -406,94 +403,54 @@ export function PrItemExpand({
                               taxProfileName,
                             );
                           }}
-                          className="w-full text-sm"
+                          className="w-full text-xs"
                           error={taxProfileError}
                         />
                       )}
                     />
                   )}
                 </Field>
-                <Field className="gap-1.5">
+                <Field>
                   <FieldLabel
                     htmlFor={`items-${index}-tax-rate`}
-                      className="text-muted-foreground text-xs"
-                    >
-                      {tfl("taxPercent")}
-                    </FieldLabel>
-                    <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
-                      {taxRate}
-                    </p>
-                  </Field>
-                  <Field className="gap-1.5">
-                    <div className="flex min-h-[1.125rem] items-center justify-between gap-2">
-                      <FieldLabel
-                        htmlFor={`items-${index}-tax-amount`}
-                        className="text-muted-foreground text-xs"
-                      >
-                        {tfl("taxAmt")}
-                      </FieldLabel>
-                      {!isFieldDisabled &&
-                        overrideToggle(`items.${index}.is_tax_adjustment`)}
-                    </div>
-                    {isFieldDisabled ? (
-                      <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
-                        {formatCurrency(taxAmount)}
-                      </p>
-                    ) : (
-                      <InputAmount
-                        id={`items-${index}-tax-amount`}
-                        decimals={watchCurrencyDecimals}
-                        min={0}
-                        className={`text-sm ${taxAmountError ? "pl-7" : ""}`}
-                        disabled={!isTaxAdj}
-                        error={taxAmountError}
-                        errorIconAlign="left"
-                        defaultValue={taxAmt}
-                        {...form.register(`items.${index}.tax_amount`)}
-                        onChange={(e) => {
-                          const n = e.target.valueAsNumber;
-                          form.setValue(
-                            `items.${index}.tax_amount`,
-                            Number.isNaN(n) ? 0 : n,
-                            { shouldDirty: true, shouldValidate: true },
-                          );
-                        }}
-                      />
-                    )}
-                  </Field>
-              </div>
-            </section>
-
-            {/* Discount */}
-            <section className="space-y-3">
-              <GroupEyebrow>{tfl("discount")}</GroupEyebrow>
-              <div className="grid grid-cols-[5rem_1fr] gap-x-4">
-                <Field className="gap-1.5">
-                  <FieldLabel
-                    htmlFor={`items-${index}-discount-rate`}
                     className="text-muted-foreground text-xs"
                   >
-                    {tfl("discPercent")}
+                    {tfl("taxPercent")}
                   </FieldLabel>
+                  <p className="flex min-h-9 items-center text-xs font-semibold tabular-nums">
+                    {taxRate}
+                  </p>
+                </Field>
+                <Field>
+                  <div className="flex min-h-4.5 items-center justify-between gap-2">
+                    <FieldLabel
+                      htmlFor={`items-${index}-tax-amount`}
+                      className="text-muted-foreground text-xs"
+                    >
+                      {tfl("taxAmt")}
+                    </FieldLabel>
+                    {!isFieldDisabled &&
+                      overrideToggle(`items.${index}.is_tax_adjustment`)}
+                  </div>
                   {isFieldDisabled ? (
-                    <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
-                      {discRate}
+                    <p className="flex min-h-9 items-center text-xs font-semibold tabular-nums">
+                      {formatCurrency(taxAmount)}
                     </p>
                   ) : (
-                    <FieldInput
-                      id={`items-${index}-discount-rate`}
-                      type="number"
-                      inputMode="decimal"
+                    <InputAmount
+                      id={`items-${index}-tax-amount`}
+                      decimals={watchCurrencyDecimals}
                       min={0}
-                      step="0.01"
-                      placeholder="0"
-                      className="text-sm"
-                      defaultValue={discRate}
-                      {...form.register(`items.${index}.discount_rate`)}
+                      className={`text-xs ${taxAmountError ? "pl-7" : ""}`}
+                      disabled={!isTaxAdj}
+                      error={taxAmountError}
+                      errorIconAlign="left"
+                      defaultValue={taxAmt}
+                      {...form.register(`items.${index}.tax_amount`)}
                       onChange={(e) => {
                         const n = e.target.valueAsNumber;
                         form.setValue(
-                          `items.${index}.discount_rate`,
+                          `items.${index}.tax_amount`,
                           Number.isNaN(n) ? 0 : n,
                           { shouldDirty: true, shouldValidate: true },
                         );
@@ -501,8 +458,55 @@ export function PrItemExpand({
                     />
                   )}
                 </Field>
-                <Field className="gap-1.5">
-                  <div className="flex min-h-[1.125rem] items-center justify-between gap-2">
+              </div>
+            </section>
+
+            {/* Discount */}
+            <section className="space-y-3">
+              <EyeBrow>{tfl("discount")}</EyeBrow>
+              <div className="grid grid-cols-[5rem_1fr] gap-x-4">
+                <Field>
+                  <FieldLabel
+                    htmlFor={`items-${index}-discount-rate`}
+                    className="text-muted-foreground text-xs"
+                  >
+                    {tfl("discPercent")}
+                  </FieldLabel>
+                  {isFieldDisabled ? (
+                    <p className="flex min-h-9 items-center text-xs font-semibold tabular-nums">
+                      {discRate}
+                    </p>
+                  ) : (
+                    <InputSuffixField className="h-9">
+                      <InputSuffixInput
+                        id={`items-${index}-discount-rate`}
+                        type="number"
+                        inputMode="decimal"
+                        min={0}
+                        step="0.01"
+                        placeholder="0"
+                        className="text-xs"
+                        defaultValue={discRate}
+                        {...form.register(`items.${index}.discount_rate`)}
+                        onChange={(e) => {
+                          const n = e.target.valueAsNumber;
+                          form.setValue(
+                            `items.${index}.discount_rate`,
+                            Number.isNaN(n) ? 0 : n,
+                            { shouldDirty: true, shouldValidate: true },
+                          );
+                        }}
+                      />
+                      <InputSuffixAddon>
+                        <span className="text-muted-foreground px-2 text-xs">
+                          %
+                        </span>
+                      </InputSuffixAddon>
+                    </InputSuffixField>
+                  )}
+                </Field>
+                <Field>
+                  <div className="flex min-h-4.5 items-center justify-between gap-2">
                     <FieldLabel
                       htmlFor={`items-${index}-discount-amount`}
                       className="text-muted-foreground text-xs"
@@ -513,7 +517,7 @@ export function PrItemExpand({
                       overrideToggle(`items.${index}.is_discount_adjustment`)}
                   </div>
                   {isFieldDisabled ? (
-                    <p className="flex min-h-9 items-center text-sm font-semibold tabular-nums">
+                    <p className="flex min-h-9 items-center text-xs font-semibold tabular-nums">
                       {formatCurrency(discountAmount)}
                     </p>
                   ) : (
@@ -521,7 +525,7 @@ export function PrItemExpand({
                       id={`items-${index}-discount-amount`}
                       decimals={watchCurrencyDecimals}
                       min={0}
-                      className={`text-sm ${discountAmountError ? "pl-7" : ""}`}
+                      className={`text-xs ${discountAmountError ? "pl-7" : ""}`}
                       disabled={!isDiscAdj}
                       error={discountAmountError}
                       errorIconAlign="left"

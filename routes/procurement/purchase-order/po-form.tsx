@@ -169,23 +169,13 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         onSubmit={form.handleSubmit(onSubmit, revealErrors)}
         className="flex flex-1 flex-col gap-4 px-4"
       >
-        <section className="space-y-3">
-          <div className="border-border/60 space-y-0.5 border-b pb-2">
-            <h2 className="text-foreground text-sm font-semibold tracking-tight">
-              {t("sectionVendor")}
-            </h2>
-            <p className="text-muted-foreground text-xs">
-              {t("sectionVendorSub")}
-            </p>
-          </div>
-          <PoGeneralFields
-            form={form}
-            disabled={fieldsDisabled}
-            isManual={isManual}
-            readOnly={isReadOnly}
-            plainText={isView || isReadOnly}
-          />
-        </section>
+        <PoGeneralFields
+          form={form}
+          disabled={fieldsDisabled}
+          isManual={isManual}
+          readOnly={isReadOnly}
+          plainText={isView || isReadOnly}
+        />
 
         {/* Section 2 — flat (ไม่ห่อ card) ให้ตาราง line items เต็มความกว้าง */}
         <section className="space-y-3">

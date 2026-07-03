@@ -154,32 +154,51 @@ function InputSuffixAddon({
  *
  * @param value - ส่วนค่า (format มาแล้ว) แสดงตัวหนา tabular-nums
  * @param suffix - suffix ต่อท้าย (unit / currency) แสดง muted; เว้น/ว่าง → ไม่แสดง
- * @param className - class เสริม (เช่นความกว้างให้ตรงกับกล่อง input)
+ * @param className - class เสริมของ wrapper (เช่นความกว้างให้ตรงกับกล่อง input)
+ * @param valueClassName - override สไตล์ส่วนค่า (เช่น font/size/สี ของ total เด่น)
+ * @param suffixClassName - override สไตล์ส่วน suffix (เช่นขนาดตัวอักษร)
  * @returns JSX element ข้อความ
  * @example
  * ```tsx
  * <InputSuffixPlain className="w-44" value={Number(qty) || 0} suffix={unitName} />
- * <InputSuffixPlain className="w-28" value={formatCurrency(amount)} />
+ * <InputSuffixPlain value={formatCurrency(total)} suffix={code}
+ *   valueClassName="text-base font-semibold" />
  * ```
  */
 function InputSuffixPlain({
   value,
   suffix,
   className,
+  valueClassName,
+  suffixClassName,
   ...props
 }: Omit<React.ComponentProps<"span">, "children"> & {
   value: React.ReactNode;
   suffix?: React.ReactNode;
+  valueClassName?: string;
+  suffixClassName?: string;
 }) {
   return (
     <span
       data-slot="input-suffix-plain"
-      className={cn("shrink-0 text-right text-xs", className)}
+      className={cn(
+        "shrink-0 whitespace-nowrap text-right text-xs",
+        className,
+      )}
       {...props}
     >
-      <span className="text-foreground font-medium tabular-nums">{value}</span>
+      <span className={cn("text-foreground font-medium tabular-nums", valueClassName)}>
+        {value}
+      </span>
       {suffix ? (
-        <span className="text-muted-foreground ml-1 font-normal">{suffix}</span>
+        <span
+          className={cn(
+            "text-muted-foreground ml-1 font-normal",
+            suffixClassName,
+          )}
+        >
+          {suffix}
+        </span>
       ) : null}
     </span>
   );
