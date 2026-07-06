@@ -20,6 +20,8 @@ function createGrnDetailSchema(tv: TranslationFn, tf: TranslationFn) {
       .nullable()
       .refine((v) => !!v, tv("required", { field: tf("product") })),
     product_name: z.string(),
+    // display เท่านั้น — ไม่ส่งเข้า payload (เหมือน product_name)
+    product_local_name: z.string(),
     location_id: z
       .string()
       .nullable()
@@ -130,6 +132,7 @@ export const EMPTY_DETAIL: GrnFormValues["items"][number] = {
   purchase_order_detail_id: null,
   product_id: null,
   product_name: "",
+  product_local_name: "",
   location_id: null,
   location_name: "",
   location_code: "",
@@ -245,6 +248,7 @@ export function getDefaultValues(grn?: GoodsReceiveNote): GrnFormValues {
           purchase_order_detail_id: detail.purchase_order_detail_id,
           product_id: detail.product_id,
           product_name: detail.product_name ?? "",
+          product_local_name: detail.product_local_name ?? "",
           location_id: detail.location_id,
           location_name: detail.location_name ?? "",
           location_code: detail.location_code ?? "",

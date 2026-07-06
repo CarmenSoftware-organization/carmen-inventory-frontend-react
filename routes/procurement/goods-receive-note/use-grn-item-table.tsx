@@ -105,6 +105,12 @@ function ProductGroupCell({
       name: `items.${primaryIdx}.product_name`,
     }) ?? "";
 
+  const productLocalName =
+    useWatch({
+      control: form.control,
+      name: `items.${primaryIdx}.product_local_name`,
+    }) ?? "";
+
   if (group.isManual && !disabled) {
     return (
       <ManualProductCell
@@ -116,8 +122,17 @@ function ProductGroupCell({
     );
   }
   return (
+    // <div className="group w-full text-left">
+    //   <p className="truncate font-semibold">{productName || "—"}</p>
+    // </div>
+
     <div className="group w-full text-left">
       <p className="truncate font-semibold">{productName || "—"}</p>
+      {productLocalName && (
+        <p className="text-muted-foreground truncate text-[0.625rem]">
+          {productLocalName}
+        </p>
+      )}
     </div>
   );
 }
