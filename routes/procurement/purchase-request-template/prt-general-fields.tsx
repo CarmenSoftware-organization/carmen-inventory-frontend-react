@@ -42,7 +42,7 @@ export function PrtGeneralFields({
     : undefined;
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <FieldGroup className="gap-3">
         {/* Workflow + Name */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -61,7 +61,7 @@ export function PrtGeneralFields({
                   readOnly={readOnly}
                   disabled={disabled}
                   error={errors.workflow_id?.message}
-                  className="text-xs"
+                  className="w-full text-xs"
                 />
               )}
             />
