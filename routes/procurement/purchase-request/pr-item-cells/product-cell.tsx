@@ -42,14 +42,18 @@ export const ProductCell = memo(function ProductCell({
   const isRowLocked = useIsRowLocked(control, index);
   if (isDisabled || isRowLocked) {
     return (
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-0.5">
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center">
           <p className="min-w-0 flex-1 truncate text-left text-xs font-semibold">
             {productName || <span className="text-muted-foreground">—</span>}
           </p>
-          <InventoryTooltipCell control={control} index={index} buCode={buCode} />
+          <InventoryTooltipCell
+            control={control}
+            index={index}
+            buCode={buCode}
+          />
         </div>
-        <p className="text-muted-foreground min-w-0 flex-1 truncate text-xs">
+        <p className="text-muted-foreground truncate text-[0.625rem]">
           {productLocalName || <span className="text-muted-foreground">—</span>}
         </p>
       </div>

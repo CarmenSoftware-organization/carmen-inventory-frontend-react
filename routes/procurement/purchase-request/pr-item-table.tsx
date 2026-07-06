@@ -174,20 +174,20 @@ export function usePrItemTable({
         accessorKey: "location_id",
         header: tfl("location"),
         cell: ({ row }) => (
-          <div className="flex flex-col gap-1">
-            <LocationCell
-              control={form.control}
-              form={form}
-              index={row.index}
-              isDisabled={isLockedAfterCreate}
-            />
-            <StatusCell
-              control={form.control}
-              form={form}
-              index={row.index}
-              role={role}
-            />
-          </div>
+          <LocationCell
+            control={form.control}
+            form={form}
+            index={row.index}
+            isDisabled={isLockedAfterCreate}
+            statusSlot={
+              <StatusCell
+                control={form.control}
+                form={form}
+                index={row.index}
+                role={role}
+              />
+            }
+          />
         ),
         size: 200,
         meta: {
