@@ -9,7 +9,6 @@ import {
 } from "@/lib/form-helpers";
 import { FormToolbar } from "@/components/ui/form-toolbar";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { NotesSection } from "@/components/ui/notes-section";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusSwitch } from "@/components/ui/status-switch";
@@ -160,59 +159,58 @@ export function PrtForm({ template }: PrtFormProps) {
         className="space-y-4 px-4"
       >
         <PrtGeneralFields form={form} readOnly={isView} disabled={isPending} />
+
+        <div className="grid grid-cols-2 gap-4">
+          {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
+          {(!isView || watchedDescription?.trim()) && (
+            <Field className={isView ? "gap-1" : undefined}>
+              <FieldLabel
+                htmlFor="prt-description"
+                className={
+                  isView ? "text-muted-foreground font-normal" : undefined
+                }
+              >
+                {tfl("description")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText className="text-xs">
+                  <span className="whitespace-pre-line">
+                    {watchedDescription}
+                  </span>
+                </FieldPlainText>
+              ) : (
+                <Textarea
+                  id="prt-description"
+                  className="h-20"
+                  placeholder={tfl("optional")}
+                  disabled={isPending}
+                  maxLength={256}
+                  {...form.register("description")}
+                />
+              )}
+            </Field>
+          )}
+          <div className="mt-7">
+            <Controller
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <StatusSwitch
+                  id="prt-is-active"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isView || isPending}
+                />
+              )}
+            />
+          </div>
+        </div>
         <PrtItemFields
           form={form}
           readOnly={isView}
           disabled={isPending}
           defaultBu={defaultBu}
         />
-
-        <NotesSection title={t("sectionNotes")} subtitle={t("sectionNotesSub")}>
-          <Field className={isView ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor="prt-description"
-              className={
-                isView ? "text-muted-foreground font-normal" : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {isView ? (
-              <FieldPlainText className="text-xs">
-                {watchedDescription?.trim() ? (
-                  <span className="whitespace-pre-line">
-                    {watchedDescription}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground font-normal">—</span>
-                )}
-              </FieldPlainText>
-            ) : (
-              <Textarea
-                id="prt-description"
-                placeholder={tfl("optional")}
-                rows={2}
-                disabled={isPending}
-                maxLength={256}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-
-          <Controller
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <StatusSwitch
-                id="prt-is-active"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                description="Enable to make this template available for use"
-                disabled={isView || isPending}
-              />
-            )}
-          />
-        </NotesSection>
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
