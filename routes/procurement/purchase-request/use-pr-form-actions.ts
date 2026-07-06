@@ -176,26 +176,54 @@ export function usePrFormActions({
     ),
   });
 
+  // สร้าง save payload ตาม stage role (purchase/approve ส่งรายละเอียดเต็ม,
+  // role อื่นใช้ diff ของ buildCreateDetails) — ใช้ร่วมกันทั้งปุ่ม Save (onSubmit)
+  // และ save-before-action ก่อนยิง workflow event
+  const buildSaveDetails = (
+    values: PrFormValues,
+  ): CreatePurchaseRequestDto["details"] => {
+    if (purchaseRequest?.role === STAGE_ROLE.PURCHASE) {
+      return preparePurchaseDetails(
+        values.items,
+      ) as unknown as CreatePurchaseRequestDto["details"];
+    }
+    if (purchaseRequest?.role === STAGE_ROLE.APPROVE) {
+      return prepareApproveDetails(
+        values.items,
+        purchaseRequest.id,
+      ) as unknown as CreatePurchaseRequestDto["details"];
+    }
+    return buildCreateDetails(values);
+  };
+
+  // เรียก /save ก่อน workflow action ถ้าฟอร์มถูกแก้ (dirty) — กันค่าที่แก้ราย
+  // row หายตอน approve/reject/send back (reject/review payload ไม่ได้ส่งค่า
+  // field กลับ). คืน false ถ้า save ล้มเหลว เพื่อให้ caller หยุดไม่ยิง action ต่อ
+  const saveDirtyEdits = async (): Promise<boolean> => {
+    if (!purchaseRequest || !form.formState.isDirty) return true;
+    try {
+      const data = await updatePr.mutateAsync({
+        id: purchaseRequest.id,
+        stage_role: purchaseRequest.role,
+        details: buildSaveDetails(form.getValues()),
+      });
+      syncDocVersions(data);
+      return true;
+    } catch (err) {
+      handleMutationError(err as Error);
+      return false;
+    }
+  };
+
   const onSubmit = (values: PrFormValues) => {
     const details = buildCreateDetails(values);
 
     if (isEdit && purchaseRequest) {
-      const isPurchaseRole = purchaseRequest.role === STAGE_ROLE.PURCHASE;
-      const isApproveRole = purchaseRequest.role === STAGE_ROLE.APPROVE;
       updatePr.mutate(
         {
           id: purchaseRequest.id,
           stage_role: purchaseRequest.role,
-          details: isPurchaseRole
-            ? (preparePurchaseDetails(
-                values.items,
-              ) as unknown as CreatePurchaseRequestDto["details"])
-            : isApproveRole
-              ? (prepareApproveDetails(
-                  values.items,
-                  purchaseRequest.id,
-                ) as unknown as CreatePurchaseRequestDto["details"])
-              : details,
+          details: buildSaveDetails(values),
         },
         {
           onSuccess: (data) => {
@@ -319,6 +347,7 @@ export function usePrFormActions({
 
   const handleApprove = async () => {
     if (!purchaseRequest) return;
+    if (!(await saveDirtyEdits())) return;
     const fresh = await fetchFreshPr(purchaseRequest.id);
     approvePr.mutate(
       {
@@ -339,6 +368,7 @@ export function usePrFormActions({
 
   const handlePurchaseApprove = async () => {
     if (!purchaseRequest) return;
+    if (!(await saveDirtyEdits())) return;
     const fresh = await fetchFreshPr(purchaseRequest.id);
     purchaseApprovePr.mutate(
       {
@@ -359,6 +389,7 @@ export function usePrFormActions({
 
   const handleReject = async () => {
     if (!purchaseRequest) return;
+    if (!(await saveDirtyEdits())) return;
     const details = prepareStageDetails(form.getValues("items"));
     const fresh = await fetchFreshPr(purchaseRequest.id);
     rejectPr.mutate(
@@ -380,6 +411,7 @@ export function usePrFormActions({
     desStage: string,
   ) => {
     if (!purchaseRequest) return;
+    if (!(await saveDirtyEdits())) return;
     const items = form.getValues("items");
     const effectiveDesStage =
       desStage || items.find((item) => item.des_stage)?.des_stage;
