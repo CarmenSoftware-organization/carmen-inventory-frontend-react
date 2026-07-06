@@ -100,7 +100,7 @@ export function LookupProductLocation({
       }}
       items={locations}
       getId={(l) => l.id}
-      getLabel={(l) => `${l.code} — ${l.name}`}
+      getLabel={(l) => `${l.name} - ${l.code}`}
       serverSideSearch
       onSearchChange={setSearch}
       onLoadMore={loadMore}
