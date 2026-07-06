@@ -129,3 +129,88 @@ export interface CreditNote {
   audit?: AuditInfo;
   credit_note_detail: CreditNoteItem[];
 }
+
+export interface CreditNoteDetailItem {
+  id: string;
+  doc_version?: number;
+  sequence_no?: number;
+  product: {
+    id: string | null;
+    code: string | null;
+    name: string | null;
+    local_name: string | null;
+    sku: string | null;
+  } | null;
+  location: {
+    id: string | null;
+    code: string | null;
+    name: string | null;
+  } | null;
+  return_unit: {
+    id: string | null;
+    name: string | null;
+  } | null;
+  tax_profile: {
+    id: string | null;
+    name: string | null;
+  } | null;
+  return_qty: number;
+  price: number;
+  tax_rate: number;
+  tax_amount: number;
+  is_tax_adjustment: boolean;
+  discount_rate?: number;
+  discount_amount?: number;
+  is_discount_adjustment?: boolean;
+  net_amount: number;
+  total_price: number;
+  description: string | null;
+  note?: string | null;
+}
+
+/**
+ * Detail-view (findOne) shape of a credit note with relations collapsed into
+ * nested objects. Distinct from `CreditNote` (flat, list). `reference_number`/
+ * `tax_amount`/`discount_amount` are optional (not returned by findOne; form
+ * defaults them).
+ * รูปแบบ detail-view (findOne) ของใบลดหนี้ที่ยุบ relation เป็น object ซ้อน
+ */
+export interface CreditNoteDetail {
+  id: string;
+  doc_version?: number;
+  cn_no: string;
+  cn_date: string;
+  doc_status: CN_STATUS;
+  credit_note_type: CreditNoteType;
+  invoice_no: string | null;
+  invoice_date: string | null;
+  tax_invoice_no: string | null;
+  tax_invoice_date: string | null;
+  note: string | null;
+  description: string | null;
+  reference_number?: string | null;
+  tax_amount?: number;
+  discount_amount?: number;
+  vendor: {
+    id: string | null;
+    name: string | null;
+  } | null;
+  currency: {
+    id: string | null;
+    code: string | null;
+    exchange_rate: number | null;
+  } | null;
+  grn: {
+    id: string | null;
+    no: string | null;
+    date: string | null;
+  } | null;
+  cn_reason: {
+    id: string | null;
+    name: string | null;
+    description: string | null;
+  } | null;
+  /** audit จาก API — created.name ใช้แสดง "Created By" ใน header ribbon */
+  audit?: AuditInfo;
+  credit_note_detail: CreditNoteDetailItem[];
+}
