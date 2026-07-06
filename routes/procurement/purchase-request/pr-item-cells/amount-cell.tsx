@@ -26,12 +26,12 @@ export const AmountCell = memo(function AmountCell({
     !!currencyCode && !!baseCurrencyCode && currencyCode !== baseCurrencyCode;
   const baseAmount = round2(Number(totalPrice) * Number(exchangeRate));
   return (
-    <div className="flex flex-col items-end gap-0.5">
+    <div className="flex flex-col items-end gap-1">
       <div className="flex items-center justify-end gap-1.5">
         <span className="font-semibold tabular-nums">
           {formatCurrency(Number(totalPrice))}
         </span>
-        {currencySlot}
+        <span className="text-muted-foreground">{currencySlot}</span>
       </div>
       {isForeignCurrency && (
         <span className="text-muted-foreground text-[0.6875rem] tabular-nums">

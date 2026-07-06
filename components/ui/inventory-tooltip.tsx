@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 
 interface InventoryTooltipProps {
@@ -18,6 +19,7 @@ interface InventoryTooltipProps {
   readonly productId?: string;
   readonly unitName?: string;
   readonly icon?: "box" | "package";
+  readonly className?: string;
 }
 
 export const InventoryTooltip = memo(function InventoryTooltip({
@@ -26,6 +28,7 @@ export const InventoryTooltip = memo(function InventoryTooltip({
   productId,
   unitName,
   icon = "box",
+  className,
 }: InventoryTooltipProps) {
   const t = useTranslations("procurement.purchaseRequest");
 
@@ -65,9 +68,10 @@ export const InventoryTooltip = memo(function InventoryTooltip({
             variant="ghost"
             size="icon-xs"
             aria-label={t("inventoryInfo")}
-            className={
-              needsReorder ? "text-destructive" : "text-muted-foreground"
-            }
+            className={cn(
+              needsReorder ? "text-destructive" : "text-muted-foreground",
+              className,
+            )}
           >
             <Icon className="size-3.5" />
           </Button>
