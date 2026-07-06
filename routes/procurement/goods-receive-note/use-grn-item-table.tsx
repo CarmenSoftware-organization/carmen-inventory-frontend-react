@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { cn } from "@/lib/utils";
 import { LookupProduct } from "@/components/lookup/lookup-product";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProductUnits } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
@@ -121,20 +122,7 @@ function ProductGroupCell({
       />
     );
   }
-  return (
-    // <div className="group w-full text-left">
-    //   <p className="truncate font-semibold">{productName || "—"}</p>
-    // </div>
-
-    <div className="group w-full text-left">
-      <p className="truncate font-semibold">{productName || "—"}</p>
-      {productLocalName && (
-        <p className="text-muted-foreground truncate text-[0.625rem]">
-          {productLocalName}
-        </p>
-      )}
-    </div>
-  );
+  return <NameWithSubtext primary={productName} secondary={productLocalName} />;
 }
 
 /** Net รวมของกลุ่ม (sum ทุก location) */

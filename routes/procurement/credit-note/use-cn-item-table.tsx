@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { LookupGrnProduct } from "@/components/lookup/lookup-grn-product";
 import { LookupGrnProductLocation } from "@/components/lookup/lookup-grn-product-location";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import type { GrnProductItem } from "@/types/goods-receive-note";
 import type { CnFormValues } from "./cn-form-schema";
@@ -130,16 +131,7 @@ function ProductCell({
       name: `items.${index}.item_local_name`,
     }) ?? "";
   if (disabled) {
-    return (
-      <div className="group w-full text-left">
-        <p className="truncate font-semibold">{itemName || "—"}</p>
-        {productLocalName && (
-          <p className="text-muted-foreground truncate text-[0.625rem]">
-            {productLocalName}
-          </p>
-        )}
-      </div>
-    );
+    return <NameWithSubtext primary={itemName} secondary={productLocalName} />;
   }
   return (
     <Controller

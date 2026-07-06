@@ -9,6 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { LookupProduct } from "@/components/lookup/lookup-product";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
@@ -35,14 +36,7 @@ const ProductCellDisplay = memo(function ProductCellDisplay({
   const productLocalName =
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   return (
-    <div className="group w-full text-left">
-      <p className="truncate font-semibold">{productName || "—"}</p>
-      {productLocalName && (
-        <p className="text-muted-foreground truncate text-[0.625rem]">
-          {productLocalName}
-        </p>
-      )}
-    </div>
+    <NameWithSubtext primary={productName} secondary={productLocalName} />
   );
 });
 
