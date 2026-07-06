@@ -16,16 +16,15 @@ import type { CnFormValues } from "./cn-form-schema";
 import { CN_ITEM } from "./cn-form-schema";
 import { CnItemComputedSync, useCnItemTable } from "./use-cn-item-table";
 
-interface CnProductCardsProps {
+interface Props {
   readonly form: UseFormReturn<CnFormValues>;
   readonly disabled: boolean;
 }
 
 /**
- * รายการสินค้าของ CN — flat data grid (1 row = 1 product + location + qty/unit),
- * คลิก chevron เพื่อ expand เผยฟอร์ม Pricing / Details แบบ inline (colSpan row)
+ * รายการสินค้าของ CN — flat data grid (1 row = 1 product + location + qty/unit)
  */
-export function CnProductCards({ form, disabled }: CnProductCardsProps) {
+export function CnItem({ form, disabled }: Props) {
   "use no memo";
   const t = useTranslations("procurement.creditNote");
   const tfl = useTranslations("field");

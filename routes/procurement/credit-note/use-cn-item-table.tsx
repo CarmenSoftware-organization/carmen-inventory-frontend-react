@@ -3,16 +3,16 @@ import {
   Controller,
   useWatch,
   type Control,
+  type FieldArrayWithId,
   type UseFormReturn,
 } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
   getCoreRowModel,
-  getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   InputSuffixAddon,
@@ -27,9 +27,8 @@ import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import type { GrnProductItem } from "@/types/goods-receive-note";
 import type { CnFormValues } from "./cn-form-schema";
-import { CnItemExpanded, type CnItemField } from "./cn-item-expanded";
 
-export type { CnItemField };
+export type CnItemField = FieldArrayWithId<CnFormValues, "items", "id">;
 
 /**
  * คำนวณ + set net/tax/total ของ item — mount ตลอด (ทุก row) เพื่อให้ยอด
@@ -383,62 +382,7 @@ export function useCnItemTable({
   "use no memo";
   const tfl = useTranslations("field");
 
-  // indent ของ expanded content ให้ตรงขอบซ้าย column Product — คิดเป็น % ของผลรวม
-  // column size เพราะ table เป็น table-fixed w-full (column scale ตามสัดส่วน)
-  const showAction = !disabled; // action column (ลบ item)
-  const preProductSize = 36 /* expand */ + 36; /* index */
-  // product 240 + location 200 + Rec 180 + price 120 + subtotal 110 + tax 100
-  // + taxAmt 110 + amt 120
-  const totalSize =
-    preProductSize +
-    240 +
-    200 +
-    180 +
-    120 +
-    110 +
-    100 +
-    110 +
-    120 +
-    (showAction ? 40 : 0);
-  const leftInsetPct = (preProductSize / totalSize) * 100;
-
   const columns = useMemo<ColumnDef<CnItemField>[]>(() => {
-    const expandColumn: ColumnDef<CnItemField> = {
-      id: "expand",
-      header: "",
-      cell: ({ row }) => (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={row.getIsExpanded() ? "Collapse" : "Expand"}
-          onClick={() => row.toggleExpanded()}
-        >
-          {row.getIsExpanded() ? (
-            <ChevronDown className="size-3.5" />
-          ) : (
-            <ChevronRight className="size-3.5" />
-          )}
-        </Button>
-      ),
-      enableSorting: false,
-      enableResizing: false,
-      size: 36,
-      meta: {
-        headerClassName: "text-center",
-        cellClassName: "text-center",
-        expandedContent: (item: CnItemField) => (
-          <CnItemExpanded
-            item={item}
-            form={form}
-            itemFields={itemFields}
-            disabled={disabled}
-            leftInsetPct={leftInsetPct}
-          />
-        ),
-      },
-    };
-
     const indexColumn: ColumnDef<CnItemField> = {
       id: "index",
       header: "#",
@@ -565,7 +509,6 @@ export function useCnItemTable({
     };
 
     const baseCols = [
-      expandColumn,
       indexColumn,
       ...dataColumns,
       ...(disabled ? [] : [actionColumn]),
@@ -582,38 +525,17 @@ export function useCnItemTable({
     form,
     disabled,
     grnId,
-    itemFields,
     autoOpenIndex,
     onDelete,
     tfl,
-    leftInsetPct,
   ]);
 
   const table = useReactTable({
     data: itemFields,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
     getRowId: (row) => row.id,
   });
-
-  // auto-expand แถวที่ validation ไม่ผ่านหลัง submit (field pricing/details อยู่ใน expand)
-  const submitCount = form.formState.submitCount;
-  useEffect(() => {
-    if (!submitCount) return;
-    const itemErrors = form.formState.errors.items;
-    if (!itemErrors) return;
-    const next: Record<string, boolean> = {};
-    itemFields.forEach((f, i) => {
-      if (itemErrors[i]) next[f.id] = true;
-    });
-    if (Object.keys(next).length === 0) return;
-    table.setExpanded((prev) => ({
-      ...(typeof prev === "object" ? prev : {}),
-      ...next,
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submitCount]);
 
   return table;
 }
