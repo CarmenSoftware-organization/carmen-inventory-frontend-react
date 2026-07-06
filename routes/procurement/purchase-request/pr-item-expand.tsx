@@ -48,14 +48,6 @@ interface PrItemExpandProps {
   readonly role?: string;
 }
 
-/**
- * เนื้อหาที่กางออก (expand) ของแต่ละรายการใบขอซื้อ — จัดกลุ่มแบบ iOS Settings
- * (Pricing / Tax / Discount ทางซ้าย, Inventory + Summary เป็น sidebar ขวา)
- * ด้วย eyebrow (EyeBrow) แทนกล่อง card, ตัวเลข/ค่าเป็น text-xs, layout
- * 2 คอลัมน์ทำผ่าน float + flow-root เพราะ DataGrid กางลงใน table-fixed
- * `<td colSpan>` ที่ flex/grid แบ่ง track ไม่ได้ เนื้อหาเริ่มตรงคอลัมน์ Location
- * ผ่าน `expandedColStart` ของ column
- */
 export function PrItemExpand({
   item,
   form,

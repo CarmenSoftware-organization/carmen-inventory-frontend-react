@@ -50,11 +50,6 @@ export function PrHeader({
           {statusCfg.label ?? purchaseRequest?.pr_status}
         </Badge>
       )}
-      {purchaseRequest?.workflow_name && (
-        <Badge variant="info-light" size="sm">
-          {purchaseRequest.workflow_name}
-        </Badge>
-      )}
     </>
   );
 

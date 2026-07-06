@@ -2640,7 +2640,7 @@
       "onOrder": "On Order",
       "onHandDetailDesc": "On hand details for the selected location and product.",
       "onOrderDetailDesc": "On order details for the selected location and product.",
-      "reorderPt": "Re-order Pt.",
+      "reorderPt": "Re-order",
       "restock": "Re-stock",
       "stockLevel": "Stock Level: {pct}%",
       "inventoryInfo": "Inventory Information",

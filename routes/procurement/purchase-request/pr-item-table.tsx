@@ -346,10 +346,10 @@ export function usePrItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 40,
+      size: 80,
       meta: {
-        headerClassName: "text-center",
-        cellClassName: "text-center",
+        headerClassName: "text-right",
+        cellClassName: "text-right",
       },
     };
 
