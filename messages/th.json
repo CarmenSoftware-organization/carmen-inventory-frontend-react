@@ -2546,6 +2546,7 @@
       "removeItem": "ลบรายการ",
       "tabItems": "รายการ",
       "tabWorkflowHistory": "ประวัติเวิร์กโฟลว์",
+      "viewHistoryHint": "แตะเพื่อดูประวัติเวิร์กโฟลว์ทั้งหมด",
       "descPlaceholder": "กรอกคำอธิบาย...",
       "sectionNotes": "หมายเหตุ",
       "sectionNotesSub": "รายละเอียดของใบขอซื้อ",

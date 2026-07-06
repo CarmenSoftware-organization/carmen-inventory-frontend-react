@@ -2551,6 +2551,7 @@
       "removeItem": "Remove Item",
       "tabItems": "Items",
       "tabWorkflowHistory": "Workflow History",
+      "viewHistoryHint": "Tap to view full workflow history",
       "descPlaceholder": "Enter description...",
       "sectionNotes": "Notes",
       "sectionNotesSub": "Description for this request",

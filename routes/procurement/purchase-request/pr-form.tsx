@@ -4,15 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { useTranslations } from "use-intl";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import type {
-  PurchaseRequest,
-  PurchaseRequestTemplate,
+import {
+  PR_STATUS,
+  type PurchaseRequest,
+  type PurchaseRequestTemplate,
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { NotesSection } from "@/components/ui/notes-section";
 import { PrGeneralFields } from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
 import { PrFormActions } from "./pr-form-actions";
@@ -111,6 +111,13 @@ export function PurchaseRequestForm({
 
   const isDisabled = isView || actions.isPending;
 
+  // draft/add เท่านั้นที่แสดง general fields — ไม่ draft แล้วซ่อน
+  const isDraft =
+    !purchaseRequest?.pr_status ||
+    purchaseRequest.pr_status === PR_STATUS.DRAFT;
+
+  const hasHistory = !!purchaseRequest?.workflow_history?.length;
+
   // Notes (description) — view หรือหลัง submit (role != CREATE) แสดงเป็น plain text
   const descriptionReadOnly = isView || role !== STAGE_ROLE.CREATE;
   const watchedDescription = useWatch({
@@ -188,6 +195,8 @@ export function PurchaseRequestForm({
         reqName={reqName}
         departmentName={departmentName ?? ""}
         prDateDisplay={prDateDisplay}
+        hasHistory={hasHistory}
+        onShowHistory={() => actions.setShowHistory(true)}
         actions={
           <PrFormActions
             mode={mode}
@@ -200,9 +209,6 @@ export function PurchaseRequestForm({
             hasRecord={!!purchaseRequest}
             canSave={canSave}
             saveDisabledTitle={saveDisabledTitle}
-            workflowHistory={purchaseRequest?.workflow_history}
-            requestorName={purchaseRequest?.requestor_name}
-            createdAt={purchaseRequest?.created_at}
             onEdit={() => setMode("edit")}
             onCancel={actions.handleCancel}
             onDelete={() => actions.setShowDelete(true)}
@@ -217,13 +223,47 @@ export function PurchaseRequestForm({
         )}
         className="space-y-4 px-4"
       >
-        <PrGeneralFields
-          form={form}
-          readOnly={isView}
-          disabled={actions.isPending}
-          role={role}
-          fromTemplate={!!template}
-        />
+        {isDraft && (
+          <PrGeneralFields
+            form={form}
+            readOnly={isView}
+            disabled={actions.isPending}
+            role={role}
+            fromTemplate={!!template}
+          />
+        )}
+
+        {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
+        {(!descriptionReadOnly || watchedDescription?.trim()) && (
+          <Field className={descriptionReadOnly ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="pr-description"
+              className={
+                descriptionReadOnly
+                  ? "text-muted-foreground font-normal"
+                  : undefined
+              }
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {descriptionReadOnly ? (
+              <FieldPlainText className="text-xs">
+                <span className="whitespace-pre-line">
+                  {watchedDescription}
+                </span>
+              </FieldPlainText>
+            ) : (
+              <Textarea
+                id="pr-description"
+                placeholder={t("descPlaceholder")}
+                rows={2}
+                maxLength={256}
+                disabled={actions.isPending}
+                {...form.register("description")}
+              />
+            )}
+          </Field>
+        )}
 
         <PrItemFields
           form={form}
@@ -239,44 +279,6 @@ export function PurchaseRequestForm({
           stagesLoading={stagesLoading}
           onBulkReview={actions.handleBulkReview}
         />
-
-        <NotesSection
-          title={t("sectionNotes")}
-          subtitle={t("sectionNotesSub")}
-        >
-          <Field className={descriptionReadOnly ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor="pr-description"
-              className={
-                descriptionReadOnly
-                  ? "text-muted-foreground font-normal"
-                  : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {descriptionReadOnly ? (
-              <FieldPlainText className="text-sm">
-                {watchedDescription?.trim() ? (
-                  <span className="whitespace-pre-line">
-                    {watchedDescription}
-                  </span>
-                ) : (
-                  <span className="text-muted-foreground font-normal">—</span>
-                )}
-              </FieldPlainText>
-            ) : (
-              <Textarea
-                id="pr-description"
-                placeholder={t("descPlaceholder")}
-                rows={2}
-                maxLength={256}
-                disabled={actions.isPending}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        </NotesSection>
       </form>
 
       <PrFormDialogs
@@ -286,6 +288,11 @@ export function PurchaseRequestForm({
         deletePr={actions.deletePr}
         showComment={actions.showComment}
         setShowComment={actions.setShowComment}
+        showHistory={actions.showHistory}
+        setShowHistory={actions.setShowHistory}
+        workflowHistory={purchaseRequest?.workflow_history}
+        requestorName={purchaseRequest?.requestor_name}
+        createdAt={purchaseRequest?.created_at}
         showNoDepartment={showNoDepartment}
         discardDialogProps={actions.discardDialogProps}
         actionDialog={actions.actionDialog}
