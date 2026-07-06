@@ -24,6 +24,8 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
       .nullable()
       .refine((v) => !!v, tv("required", { field: tf("location") })),
     location_name: z.string(),
+    // display เท่านั้น — ไม่ส่งเข้า payload
+    location_code: z.string(),
     item_id: z
       .string()
       .nullable()
@@ -110,6 +112,7 @@ export const CN_ITEM = {
   _group_key: "",
   location_id: null,
   location_name: "",
+  location_code: "",
   item_id: null,
   item_name: "",
   item_local_name: "",
@@ -192,6 +195,7 @@ export function getDefaultValues(cn?: CreditNote): CnFormValues {
           _group_key: d.product_id ?? d.id,
           location_id: d.location_id ?? null,
           location_name: d.location_name ?? "",
+          location_code: d.location_code ?? "",
           item_id: d.product_id,
           item_name: d.product_name ?? "",
           item_local_name: d.product_local_name ?? "",

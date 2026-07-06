@@ -185,11 +185,14 @@ function LocationCell({
       control: form.control,
       name: `items.${index}.location_name`,
     }) ?? "";
+  const locationCode =
+    useWatch({
+      control: form.control,
+      name: `items.${index}.location_code`,
+    }) ?? "";
   if (disabled) {
     return (
-      <span className="text-foreground block truncate text-xs font-medium">
-        {locationName || "—"}
-      </span>
+      <NameWithSubtext primary={locationName} secondary={locationCode} />
     );
   }
   return (
