@@ -11,12 +11,10 @@ interface PoNotesSummaryProps {
   readonly plainText?: boolean;
 }
 
-/** Plain-text แสดงค่า notes ใน view/locked mode */
+/** Plain-text แสดงค่า notes ใน view/locked mode (render เฉพาะเมื่อมี value) */
 function PlainNote({ value }: { readonly value?: string }) {
   "use no memo";
-  return (
-    <p className="min-h-8 text-sm whitespace-pre-wrap">{value || "—"}</p>
-  );
+  return <p className="min-h-8 text-sm whitespace-pre-wrap">{value}</p>;
 }
 
 /**
@@ -37,18 +35,30 @@ export function PoNotesSummary({
   "use no memo";
   const tfl = useTranslations("field");
 
+  // view/locked แสดงเฉพาะ field ที่มี value; ตอนแก้ได้แสดง textarea เสมอ
+  const descriptionValue = form.getValues("description");
+  const remarksValue = form.getValues("remarks");
+  const showDescription = !plainText || !!descriptionValue?.trim();
+  const showRemarks = !plainText || !!remarksValue?.trim();
+
+  // view แล้วว่างทั้งคู่ → ไม่แสดง section เลย
+  if (!showDescription && !showRemarks) return null;
+
   // grand summary ย้ายไป footer (PoFooterAction) — ตำแหน่งเดียวกับ PR แล้ว
   return (
-    <div className="flex flex-col gap-4">
+    <div className="grid grid-cols-2 gap-4">
+      {showDescription && (
         <Field className={plainText ? "gap-1" : undefined}>
           <FieldLabel
             htmlFor="po-description"
-            className={plainText ? "text-muted-foreground font-normal" : undefined}
+            className={
+              plainText ? "text-muted-foreground font-normal" : undefined
+            }
           >
             {tfl("description")}
           </FieldLabel>
           {plainText ? (
-            <PlainNote value={form.getValues("description")} />
+            <PlainNote value={descriptionValue} />
           ) : (
             <Textarea
               id="po-description"
@@ -61,15 +71,19 @@ export function PoNotesSummary({
             />
           )}
         </Field>
+      )}
+      {showRemarks && (
         <Field className={plainText ? "gap-1" : undefined}>
           <FieldLabel
             htmlFor="po-remarks"
-            className={plainText ? "text-muted-foreground font-normal" : undefined}
+            className={
+              plainText ? "text-muted-foreground font-normal" : undefined
+            }
           >
             {tfl("remarks")}
           </FieldLabel>
           {plainText ? (
-            <PlainNote value={form.getValues("remarks")} />
+            <PlainNote value={remarksValue} />
           ) : (
             <Textarea
               id="po-remarks"
@@ -82,27 +96,7 @@ export function PoNotesSummary({
             />
           )}
         </Field>
-        <Field className={plainText ? "gap-1" : undefined}>
-          <FieldLabel
-            htmlFor="po-note"
-            className={plainText ? "text-muted-foreground font-normal" : undefined}
-          >
-            {tfl("note")}
-          </FieldLabel>
-          {plainText ? (
-            <PlainNote value={form.getValues("note")} />
-          ) : (
-            <Textarea
-              id="po-note"
-              placeholder={tfl("optional")}
-              className="min-h-13 text-sm"
-              rows={2}
-              disabled={disabled}
-              maxLength={256}
-              {...form.register("note")}
-            />
-          )}
-        </Field>
+      )}
     </div>
   );
 }
