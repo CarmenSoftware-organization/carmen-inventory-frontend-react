@@ -27,7 +27,6 @@ import { useProfile } from "@/hooks/use-profile";
 import { useCurrency } from "@/hooks/use-currency";
 import { GrnHeader } from "./grn-header";
 import { GrnFormHeader } from "./grn-form-header";
-import { NotesSection } from "@/components/ui/notes-section";
 
 interface GrnFormProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
@@ -101,6 +100,10 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   // grn_date เป็น field จริง
   const { dateFormat, defaultBu, data: profileData } = useProfile();
   const watchedGrnDate = useWatch({ control: form.control, name: "grn_date" });
+  const watchedDescription = useWatch({
+    control: form.control,
+    name: "description",
+  });
   const receivedByName =
     goodsReceiveNote?.received_by_name ||
     [profileData?.user_info?.firstname, profileData?.user_info?.lastname]
@@ -197,6 +200,34 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           plainText={isView}
         />
 
+        {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
+        {(!isView || watchedDescription?.trim()) && (
+          <Field className={isView ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="grn-description"
+              className={
+                isView ? "text-muted-foreground font-normal" : undefined
+              }
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {isView ? (
+              <p className="min-h-8 text-xs whitespace-pre-wrap">
+                {watchedDescription}
+              </p>
+            ) : (
+              <Textarea
+                id="grn-description"
+                placeholder={t("descriptionPlaceholder")}
+                maxLength={256}
+                rows={2}
+                disabled={isDisabled}
+                {...form.register("description")}
+              />
+            )}
+          </Field>
+        )}
+
         <Tabs defaultValue="general">
           <TabsList variant="line">
             <TabsTrigger value="general" className="text-xs">
@@ -226,32 +257,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
             <GrnExtraCostFields form={form} disabled={isDisabled} />
           </TabsContent>
         </Tabs>
-        <NotesSection title={t("sectionNotes")} subtitle={t("sectionNotesSub")}>
-          <Field className={isView ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor="grn-description"
-              className={
-                isView ? "text-muted-foreground font-normal" : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {isView ? (
-              <p className="min-h-8 text-xs whitespace-pre-wrap">
-                {form.getValues("description") || "—"}
-              </p>
-            ) : (
-              <Textarea
-                id="grn-description"
-                placeholder={t("descriptionPlaceholder")}
-                maxLength={256}
-                rows={2}
-                disabled={isDisabled}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        </NotesSection>
       </form>
 
       {hasItems && (
