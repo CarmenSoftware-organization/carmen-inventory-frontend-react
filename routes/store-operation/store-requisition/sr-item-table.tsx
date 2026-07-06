@@ -13,14 +13,14 @@ import {
 } from "@tanstack/react-table";
 import { memo, useCallback, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FieldInput, FieldPlainText } from "@/components/ui/field";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { StoreRequisitionStatus } from "@/types/store-requisition";
-import type { SrFormValues } from "./sr-form-schema";
+import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
 import { Badge } from "@/components/ui/badge";
 import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
 import { SrItemHistorySheet } from "./sr-item-history";
@@ -132,23 +132,62 @@ const isItemLocked = (stageStatus: string, currentStatus: string) => {
 
 const StatusCell = memo(function StatusCell({
   control,
+  form,
   index,
   translate,
+  role,
 }: {
   control: Control<SrFormValues>;
+  form?: UseFormReturn<SrFormValues>;
   index: number;
   translate: (value?: string) => string | undefined;
+  role?: string;
 }) {
   "use no memo";
   const stageStatus =
     useWatch({ control, name: `items.${index}.stage_status` }) ?? "";
   const currentStatus =
     useWatch({ control, name: `items.${index}.current_stage_status` }) ?? "";
+  const initialStatus =
+    useWatch({ control, name: `items.${index}._initial_stage_status` }) ?? "";
   const effective = stageStatus || currentStatus;
   const config = SR_ITEM_STATUS_CONFIG[effective] ?? SR_ITEM_STATUS_CONFIG.pending;
+
+  // approver/issuer แก้สถานะได้; แต่ล็อกถ้า server ส่งมาแล้วเป็น approve/reject
+  const canEdit =
+    !!form &&
+    (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
+  const isLockedFromServer =
+    initialStatus === SR_ITEM_STAGE.APPROVE ||
+    initialStatus === SR_ITEM_STAGE.REJECT;
+  const showReset =
+    canEdit &&
+    !isLockedFromServer &&
+    (effective === SR_ITEM_STAGE.APPROVE ||
+      effective === SR_ITEM_STAGE.REJECT ||
+      effective === SR_ITEM_STAGE.REVIEW);
+
+  const handleReset = () => {
+    form?.setValue(`items.${index}.stage_status`, SR_ITEM_STAGE.PENDING);
+    form?.setValue(
+      `items.${index}.current_stage_status`,
+      SR_ITEM_STAGE.PENDING,
+    );
+  };
+
   return (
     <Badge className={`${config.className} inline-flex items-center gap-1`} size="xs">
       {translate(effective)}
+      {showReset && (
+        <button
+          type="button"
+          aria-label="Reset status"
+          className="rounded-full opacity-60 hover:opacity-100 focus-visible:outline-none"
+          onClick={handleReset}
+        >
+          <X className="size-2.5" />
+        </button>
+      )}
     </Badge>
   );
 });
@@ -385,8 +424,10 @@ export function useSrItemTable({
         cell: ({ row }) => (
           <StatusCell
             control={form.control}
+            form={form}
             index={row.index}
             translate={translateStageStatus}
+            role={role}
           />
         ),
         size: 100,

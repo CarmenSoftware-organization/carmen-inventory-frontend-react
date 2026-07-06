@@ -17,6 +17,38 @@ import type {
 } from "@/components/ui/comment-sheet";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 
+export interface SrPreviousStage {
+  key: string;
+  name: string;
+}
+
+/**
+ * ดึงรายการ stage ก่อนหน้า (previous stages) ของ SR สำหรับ send-back picker
+ * API คืน object map แล้ว transform เป็น array ของ { key, name } (เหมือน PR)
+ * @param srId - รหัส SR
+ * @param enabled - เปิด/ปิดการ fetch (เช่นเปิดเฉพาะตอน dialog เปิด)
+ */
+export function useSrPreviousStages(srId: string | undefined, enabled = true) {
+  const buCode = useBuCode();
+
+  return useQuery<SrPreviousStage[]>({
+    queryKey: [QUERY_KEYS.STORE_REQUISITION_PREVIOUS_STAGES, buCode, srId],
+    queryFn: async () => {
+      const res = await httpClient.get(
+        API_ENDPOINTS.STORE_REQUISITION_PREVIOUS_STAGES(buCode!, srId!),
+      );
+      if (!res.ok) throw new Error("Failed to fetch previous stages");
+      const json = await res.json();
+      const data = json.data ?? {};
+      return Object.entries(data).map(([key, label]) => ({
+        key,
+        name: label as string,
+      }));
+    },
+    enabled: !!buCode && !!srId && enabled,
+  });
+}
+
 export function useStoreRequisition(
   params?: ParamsDto,
   options?: { enabled?: boolean },

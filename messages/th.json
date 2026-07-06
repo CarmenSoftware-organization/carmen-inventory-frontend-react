@@ -2458,6 +2458,7 @@
       "allDocuments": "เอกสารทั้งหมด",
       "tabItems": "รายการ",
       "tabWorkflowHistory": "ประวัติเวิร์กโฟลว์",
+      "viewHistoryHint": "แตะเพื่อดูประวัติเวิร์กโฟลว์ทั้งหมด",
       "noWorkflowHistory": "ไม่มีประวัติเวิร์กโฟลว์",
       "subtitle": "ขอโอนสต็อกระหว่างคลัง",
       "documentInfo": "ข้อมูลเอกสาร",

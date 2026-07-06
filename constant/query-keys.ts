@@ -109,6 +109,7 @@ export const QUERY_KEYS = {
   SPOT_CHECK_DETAIL_COMMENTS: "spot-check-detail-comments",
   STOCK_REPLENISHMENT: "stock-replenishment",
   STORE_REQUISITIONS: "store-requisitions",
+  STORE_REQUISITION_PREVIOUS_STAGES: "store-requisition-previous-stages",
   STORE_REQUISITION_COMMENTS: "store-requisition-comments",
   TAX_PROFILES: "tax-profiles",
   UNITS: "units",

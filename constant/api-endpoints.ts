@@ -367,6 +367,8 @@ export const API_ENDPOINTS = {
   STOCK_OUT: (buCode: string) => `/api/proxy/api/${buCode}/stock-outs`,
   STORE_REQUISITION: (buCode: string) =>
     `/api/proxy/api/${buCode}/store-requisitions`,
+  STORE_REQUISITION_PREVIOUS_STAGES: (buCode: string, srId: string) =>
+    `/api/proxy/api/${buCode}/store-requisitions/${srId}/previous-stages`,
   STORE_REQUISITIONS: "/api/proxy/api/store-requisitions",
   STORE_REQUISITION_COMMENT: (buCode: string, srId?: string) =>
     srId

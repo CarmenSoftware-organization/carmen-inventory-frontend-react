@@ -2463,6 +2463,7 @@
       "allDocuments": "All Documents",
       "tabItems": "Items",
       "tabWorkflowHistory": "Workflow History",
+      "viewHistoryHint": "Tap to view full workflow history",
       "noWorkflowHistory": "No workflow history",
       "subtitle": "Request stock transfer between locations",
       "documentInfo": "Document Info",

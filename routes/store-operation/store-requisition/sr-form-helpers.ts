@@ -47,6 +47,7 @@ export function buildSrDefaultValues(
         issued_qty: d.issued_qty ?? 0,
         current_stage_status: d.current_stage_status ?? "pending",
         stage_status: "",
+        _initial_stage_status: d.current_stage_status ?? "pending",
         stage_message: "",
         history: d.history ?? [],
       })) ?? [],

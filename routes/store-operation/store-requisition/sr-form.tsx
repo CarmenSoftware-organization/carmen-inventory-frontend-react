@@ -5,7 +5,6 @@ import { useTranslations } from "use-intl";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { NotesSection } from "@/components/ui/notes-section";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -193,7 +192,7 @@ export function StoreRequisitionForm({
         onSubmit={form.handleSubmit(actions.onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="flex-1 space-y-4 px-4"
+        className="space-y-4 px-4"
       >
         <SrRequestDetails
           form={form}
@@ -206,30 +205,14 @@ export function StoreRequisitionForm({
           onFromLocInfoChange={setFromLocInfo}
           onToLocInfoChange={setToLocInfo}
           role={storeRequisition?.role ?? STAGE_ROLE.CREATE}
+          isDraft={
+            !storeRequisition?.doc_status ||
+            storeRequisition.doc_status === "draft"
+          }
         />
 
-        <section className="space-y-3">
-          <div className="flex items-center justify-end">
-            {!isDisabled && (
-              <Button
-                type="button"
-                size="xs"
-                onClick={() => itemsRef.current?.addItem()}
-                disabled={!fromLocationId || !toLocationId}
-              >
-                <Plus /> {t("addItem")}
-              </Button>
-            )}
-          </div>
-          {form.formState.errors.items?.message && (
-            <p className="text-destructive text-xs" role="alert">
-              {form.formState.errors.items.message}
-            </p>
-          )}
-          <SrItemFields {...itemFieldsProps} />
-        </section>
-
-        <NotesSection title={t("sectionNotes")} subtitle={t("sectionNotesSub")}>
+        {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
+        {(!isDescReadOnly || description?.trim()) && (
           <Field className={isDescReadOnly ? "gap-1" : undefined}>
             <FieldLabel
               htmlFor="sr-description"
@@ -240,12 +223,8 @@ export function StoreRequisitionForm({
               {tfl("description")}
             </FieldLabel>
             {isDescReadOnly ? (
-              <FieldPlainText className="text-sm">
-                {description?.trim() ? (
-                  <span className="whitespace-pre-line">{description}</span>
-                ) : (
-                  <span className="text-muted-foreground font-normal">—</span>
-                )}
+              <FieldPlainText className="text-xs">
+                <span className="whitespace-pre-line">{description}</span>
               </FieldPlainText>
             ) : (
               <Textarea
@@ -258,7 +237,26 @@ export function StoreRequisitionForm({
               />
             )}
           </Field>
-        </NotesSection>
+        )}
+
+        <div className="flex items-center justify-end">
+          {!isDisabled && (
+            <Button
+              type="button"
+              size="xs"
+              onClick={() => itemsRef.current?.addItem()}
+              disabled={!fromLocationId || !toLocationId}
+            >
+              <Plus /> {t("addItem")}
+            </Button>
+          )}
+        </div>
+        {form.formState.errors.items?.message && (
+          <p className="text-destructive text-xs" role="alert">
+            {form.formState.errors.items.message}
+          </p>
+        )}
+        <SrItemFields {...itemFieldsProps} />
       </form>
 
       <SrFooter

@@ -33,6 +33,8 @@ interface SrRequestDetailsProps {
   readonly onFromLocInfoChange: (info: LocationInfo) => void;
   readonly onToLocInfoChange: (info: LocationInfo) => void;
   readonly role?: string;
+  /** draft/add เท่านั้นที่แสดง workflow picker — ไม่ draft ย้ายไป ribbon cell */
+  readonly isDraft?: boolean;
 }
 
 export function SrRequestDetails({
@@ -46,6 +48,7 @@ export function SrRequestDetails({
   onFromLocInfoChange,
   onToLocInfoChange,
   role,
+  isDraft = true,
 }: SrRequestDetailsProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
@@ -69,8 +72,8 @@ export function SrRequestDetails({
   const viewFieldGap = isReadOnly ? "gap-1" : undefined;
 
   return (
-    <section className="space-y-3">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
+    <div className="my-4 grid grid-cols-1 gap-4 sm:grid-cols-5">
+      {isDraft && (
         <Field className={viewFieldGap}>
           <FieldLabel required={!isReadOnly} className={labelMuted}>
             {tfl("workflow")}
@@ -94,112 +97,110 @@ export function SrRequestDetails({
             />
           )}
         </Field>
-        <Field className={viewFieldGap}>
-          <FieldLabel required={!isReadOnly} className={labelMuted}>
-            {tfl("expectedDate")}
-          </FieldLabel>
-          {isReadOnly ? (
-            <FieldPlainText className="text-xs">
-              {expectedDate ? formatDate(expectedDate, dateFormat) : ""}
-            </FieldPlainText>
-          ) : (
-            <Controller
-              control={form.control}
-              name="expected_date"
-              render={({ field }) => (
-                <FieldDatePicker
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  disabled={disabled || !srDate}
-                  fromDate={srDate ? new Date(srDate) : undefined}
-                  placeholder={t("pickExpectedDate")}
-                  className="w-full"
-                  error={errors.expected_date?.message}
-                />
-              )}
-            />
-          )}
-        </Field>
+      )}
+      <Field className={viewFieldGap}>
+        <FieldLabel required={!isReadOnly} className={labelMuted}>
+          {tfl("expectedDate")}
+        </FieldLabel>
+        {isReadOnly ? (
+          <FieldPlainText className="text-xs">
+            {expectedDate ? formatDate(expectedDate, dateFormat) : ""}
+          </FieldPlainText>
+        ) : (
+          <Controller
+            control={form.control}
+            name="expected_date"
+            render={({ field }) => (
+              <FieldDatePicker
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={disabled || !srDate}
+                fromDate={srDate ? new Date(srDate) : undefined}
+                placeholder={t("pickExpectedDate")}
+                className="w-full"
+                error={errors.expected_date?.message}
+              />
+            )}
+          />
+        )}
+      </Field>
 
-        <Field className={viewFieldGap}>
-          <FieldLabel required={!isReadOnly} className={labelMuted}>
-            {tfl("fromLocation")}
-          </FieldLabel>
-          {isReadOnly ? (
-            <FieldPlainText className="text-xs">
-              {fromLocInfo.name}
-            </FieldPlainText>
-          ) : (
-            <Controller
-              control={form.control}
-              name="from_location_id"
-              render={({ field }) => (
-                <LookupUserLocation
-                  value={field.value}
-                  onValueChange={(val) => {
-                    field.onChange(val);
-                    if (val && val === form.getValues("to_location_id")) {
-                      form.setValue("to_location_id", "");
-                      onToLocInfoChange({ name: "", code: "" });
-                    }
-                  }}
-                  onItemChange={(item) =>
-                    onFromLocInfoChange({
-                      name: item?.name ?? "",
-                      code: item?.code ?? "",
-                      location_type: item?.location_type,
-                    })
+      <Field className={viewFieldGap}>
+        <FieldLabel required={!isReadOnly} className={labelMuted}>
+          {tfl("fromLocation")}
+        </FieldLabel>
+        {isReadOnly ? (
+          <FieldPlainText className="text-xs">
+            {fromLocInfo.name}
+          </FieldPlainText>
+        ) : (
+          <Controller
+            control={form.control}
+            name="from_location_id"
+            render={({ field }) => (
+              <LookupUserLocation
+                value={field.value}
+                onValueChange={(val) => {
+                  field.onChange(val);
+                  if (val && val === form.getValues("to_location_id")) {
+                    form.setValue("to_location_id", "");
+                    onToLocInfoChange({ name: "", code: "" });
                   }
-                  disabled={disabled}
-                  locationTypes={[
-                    INVENTORY_TYPE.INVENTORY,
-                    INVENTORY_TYPE.CONSIGNMENT,
-                  ]}
-                  popoverWidth="31.25rem"
-                  className="text-xs"
-                  error={errors.from_location_id?.message}
-                />
-              )}
-            />
-          )}
-        </Field>
+                }}
+                onItemChange={(item) =>
+                  onFromLocInfoChange({
+                    name: item?.name ?? "",
+                    code: item?.code ?? "",
+                    location_type: item?.location_type,
+                  })
+                }
+                disabled={disabled}
+                locationTypes={[
+                  INVENTORY_TYPE.INVENTORY,
+                  INVENTORY_TYPE.CONSIGNMENT,
+                ]}
+                popoverWidth="31.25rem"
+                className="text-xs"
+                error={errors.from_location_id?.message}
+              />
+            )}
+          />
+        )}
+      </Field>
 
-        <Field className={viewFieldGap}>
-          <FieldLabel required={!isReadOnly} className={labelMuted}>
-            {tfl("toLocation")}
-          </FieldLabel>
-          {isReadOnly ? (
-            <FieldPlainText className="text-xs">
-              {toLocInfo.name}
-            </FieldPlainText>
-          ) : (
-            <Controller
-              control={form.control}
-              name="to_location_id"
-              render={({ field }) => (
-                <LookupUserLocation
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  onItemChange={(item) =>
-                    onToLocInfoChange({
-                      name: item?.name ?? "",
-                      code: item?.code ?? "",
-                      location_type: item?.location_type,
-                    })
-                  }
-                  disabled={disabled || !fromLocationId}
-                  excludeIds={
-                    fromLocationId ? new Set([fromLocationId]) : undefined
-                  }
-                  popoverWidth="31.25rem"
-                  className="text-xs"
-                  error={errors.to_location_id?.message}
-                />
-              )}
-            />
-          )}
-        </Field>
-      </div>
-    </section>
+      <Field className={viewFieldGap}>
+        <FieldLabel required={!isReadOnly} className={labelMuted}>
+          {tfl("toLocation")}
+        </FieldLabel>
+        {isReadOnly ? (
+          <FieldPlainText className="text-xs">{toLocInfo.name}</FieldPlainText>
+        ) : (
+          <Controller
+            control={form.control}
+            name="to_location_id"
+            render={({ field }) => (
+              <LookupUserLocation
+                value={field.value}
+                onValueChange={field.onChange}
+                onItemChange={(item) =>
+                  onToLocInfoChange({
+                    name: item?.name ?? "",
+                    code: item?.code ?? "",
+                    location_type: item?.location_type,
+                  })
+                }
+                disabled={disabled || !fromLocationId}
+                excludeIds={
+                  fromLocationId ? new Set([fromLocationId]) : undefined
+                }
+                popoverWidth="31.25rem"
+                className="text-xs"
+                error={errors.to_location_id?.message}
+              />
+            )}
+          />
+        )}
+      </Field>
+    </div>
   );
 }

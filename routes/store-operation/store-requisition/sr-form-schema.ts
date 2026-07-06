@@ -24,6 +24,8 @@ function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     issued_qty: z.coerce.number(),
     current_stage_status: z.string(),
     stage_status: z.string().optional(),
+    // snapshot สถานะจาก server ตอนโหลด — ใช้ lock ปุ่ม reset (ไม่ส่ง payload)
+    _initial_stage_status: z.string().optional(),
     stage_message: z.string().optional(),
     // ประวัติ workflow ระดับรายการ (display-only passthrough, ไม่ส่งกลับ API)
     history: z
@@ -97,6 +99,7 @@ export const SR_ITEM = {
   issued_qty: 0,
   current_stage_status: "pending",
   stage_status: "",
+  _initial_stage_status: "pending",
   stage_message: "",
 } as const;
 
