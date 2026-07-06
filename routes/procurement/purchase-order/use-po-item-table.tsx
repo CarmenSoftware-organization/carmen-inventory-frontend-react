@@ -12,9 +12,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
 import {
-  OrderQtyCell,
+  QtyUnitCell,
   TaxProfileCell,
-  WatchedProductUnit,
   ComputedPricingCell,
 } from "./po-item-table";
 import {
@@ -138,8 +137,7 @@ export function usePoItemTable({
   const totalSize =
     preProductSize +
     260 +
-    120 +
-    80 +
+    180 /* merged qty + unit */ +
     110 +
     90 +
     120 +
@@ -214,26 +212,18 @@ export function usePoItemTable({
         ),
       },
       {
-        accessorKey: "order_unit_id",
-        header: tfl("unit"),
-        size: 120,
+        id: "qty_unit",
+        header: tfl("receivedAbbr"),
+        size: 180,
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
         cell: ({ row }) => (
-          <WatchedProductUnit
+          <QtyUnitCell
             control={form.control}
             form={form}
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
           />
-        ),
-      },
-      {
-        id: "qty",
-        header: tfl("qty"),
-        size: 80,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
-        cell: ({ row }) => (
-          <OrderQtyCell control={form.control} index={row.index} />
         ),
       },
       {

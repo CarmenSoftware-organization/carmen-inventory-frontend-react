@@ -12,6 +12,11 @@ import { LookupProduct } from "@/components/lookup/lookup-product";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import {
   PO_ITEM_STATUS_CONFIG,
@@ -171,7 +176,7 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
             );
           }}
           disabled={disabled || !productId}
-          className="h-7 w-full text-xs"
+          className="h-full w-19 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
         />
       )}
     />
@@ -263,39 +268,64 @@ function computeItemPricing(item: PoFormValues["items"][number] | undefined) {
   };
 }
 
-/** Read-only display ของ order qty (= sum locations.order_qty) */
-export const OrderQtyCell = function OrderQtyCell({
+/**
+ * Merged qty + order unit (Receiving-style) — qty ระดับ item เป็น read-only
+ * sum ของ locations.order_qty; unit (order_unit_id) แก้ได้ใน addon
+ */
+export const QtyUnitCell = function QtyUnitCell({
   control,
+  form,
   index,
+  disabled,
+  readOnly = false,
 }: {
   control: Control<PoFormValues>;
+  form: UseFormReturn<PoFormValues>;
   index: number;
+  disabled: boolean;
+  readOnly?: boolean;
 }) {
   "use no memo";
   const locations =
     useWatch({ control, name: `items.${index}.locations` }) ?? [];
-  // order_qty ระดับ item = ยอดรวมจาก locations (read-only) — ถ้า zod validate
-  // แล้วยอดรวมไม่ผ่าน (min qty) จะไม่มี input ให้ scroll หา → mark data-invalid
-  // + สีแดงที่เซลล์นี้ ให้ scrollToFirstInvalidField เจอ + user เห็น field ที่ผิด
+  const sum = locations.reduce(
+    (acc, l) => acc + (Number(l?.order_qty) || 0),
+    0,
+  );
+  // order_qty ระดับ item = ยอดรวมจาก locations (read-only) — ถ้ายอดรวมไม่ผ่าน
+  // min qty จะไม่มี input ให้ scroll หา → mark data-invalid + สีแดงที่เซลล์นี้
+  // ให้ scrollToFirstInvalidField เจอ + user เห็น field ที่ผิด
   const { errors } = useFormState({
     control,
     name: `items.${index}.order_qty`,
   });
   const invalid = !!errors.items?.[index]?.order_qty;
-  const sum = locations.reduce(
-    (acc, l) => acc + (Number(l?.order_qty) || 0),
-    0,
-  );
+
+  if (disabled || readOnly) {
+    const unitName = form.getValues(`items.${index}.order_unit_name`) ?? "";
+    return <InputSuffixPlain className="w-full" value={sum} suffix={unitName} />;
+  }
+
   return (
-    <span
-      data-invalid={invalid ? "true" : undefined}
-      className={cn(
-        "tabular-nums",
-        invalid && "text-destructive font-semibold",
-      )}
-    >
-      {sum}
-    </span>
+    <InputSuffixField className="w-full" error={invalid}>
+      <span
+        data-invalid={invalid ? "true" : undefined}
+        className={cn(
+          "min-w-0 flex-1 px-2 text-right text-xs tabular-nums",
+          invalid && "text-destructive font-semibold",
+        )}
+      >
+        {sum}
+      </span>
+      <InputSuffixAddon>
+        <WatchedProductUnit
+          control={control}
+          form={form}
+          index={index}
+          disabled={disabled}
+        />
+      </InputSuffixAddon>
+    </InputSuffixField>
   );
 };
 

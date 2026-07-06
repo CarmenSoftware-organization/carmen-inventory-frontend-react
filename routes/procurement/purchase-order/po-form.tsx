@@ -112,7 +112,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const revealErrors = () => {
     setRevealErrorSignal((c) => c + 1);
     // scroll หา field แรกที่ผิด — retry ข้ามเฟรมจน row ที่ auto-expand mount field เสร็จ
-    // (order_qty rollup ระดับ item mark data-invalid ที่ OrderQtyCell ในแถวหลักแล้ว)
+    // (order_qty rollup ระดับ item mark data-invalid ที่ QtyUnitCell ในแถวหลักแล้ว)
     scrollToFirstInvalidField();
   };
 
