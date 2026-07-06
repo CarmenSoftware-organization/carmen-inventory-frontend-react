@@ -394,6 +394,30 @@ export function denormalizeStageStatus(status: string): string {
 }
 
 /**
+ * ตัดสิน stage_status ราย item สำหรับ payload ของ action approve/purchase-approve
+ * ใช้ค่าที่ผู้ใช้ตัดสินใจ (`stage_status` ของ session นี้) ก่อน แล้ว fallback ไป
+ * `current_stage_status` ที่โหลดจาก DB — คง reject/review ไว้เสมอ ไม่งั้น item ที่
+ * ถูก reject (แต่ stage_status ว่างเพราะโหลดมา) จะถูกส่งเป็น approve ผิดพลาด
+ * รายการอื่น ๆ (pending/submit/approve) ถือว่าอนุมัติเมื่อกดปุ่ม Approve
+ * @param item - item จากฟอร์ม PR
+ * @returns stage_status ที่ backend รับ: "reject" | "review" | "approve"
+ */
+function resolveApproveStageStatus(
+  item: PrFormValues["items"][number],
+): string {
+  const decided = denormalizeStageStatus(
+    item.stage_status || item.current_stage_status || "",
+  );
+  if (
+    decided === PR_ITEM_STAGE_STATUS.REJECT ||
+    decided === PR_ITEM_STAGE_STATUS.REVIEW
+  ) {
+    return decided;
+  }
+  return PR_ITEM_STAGE_STATUS.APPROVE;
+}
+
+/**
  * ตรวจสอบว่ารายการทั้งหมดของ PR กรอกข้อมูลครบถ้วนหรือยัง
  * ใช้ร่วมกันระหว่างปุ่ม Save และ Submit เพื่อให้เงื่อนไขตรงกันเสมอ
  * @param items - รายการ items ของ PR
@@ -496,20 +520,22 @@ export function prepareApproveDetails(
     .map((item) => ({
       id: item.id!,
       purchase_request_id: purchaseRequestId,
-      stage_status: denormalizeStageStatus(item.stage_status || "approve"),
+      stage_status: resolveApproveStageStatus(item),
       stage_message: item.stage_message || "",
       approved_qty: Number(item.approved_qty),
       approved_unit_id: item.approved_unit_id || item.requested_unit_id,
       vendor_id: item.vendor_id || undefined,
-      pricelist_detail_id: item.pricelist_detail_id,
+      // omit null string FK ทั้งหมด — backend zod รับเป็น string (ห้าม null);
+      // item ที่ถูก reject มักยังไม่มี tax/location/pricelist → ต้องไม่ส่ง null
+      pricelist_detail_id: item.pricelist_detail_id || undefined,
       pricelist_price: Number(item.pricelist_price),
       pricelist_no: item.pricelist_no,
       pricelist_type: item.pricelist_type || null,
       currency_id: item.currency_id || undefined,
-      delivery_point_id: item.delivery_point_id,
-      delivery_date: item.delivery_date,
-      location_id: item.location_id,
-      tax_profile_id: item.tax_profile_id,
+      delivery_point_id: item.delivery_point_id || undefined,
+      delivery_date: item.delivery_date || undefined,
+      location_id: item.location_id || undefined,
+      tax_profile_id: item.tax_profile_id || undefined,
       tax_rate: Number(item.tax_rate ?? 0),
       tax_amount: Number(item.tax_amount ?? 0),
       is_tax_adjustment: item.is_tax_adjustment ?? false,
@@ -556,7 +582,7 @@ export function preparePurchaseDetails(
 
       return {
         id: item.id!,
-        stage_status: denormalizeStageStatus(item.stage_status || "approve"),
+        stage_status: resolveApproveStageStatus(item),
         stage_message: item.stage_message || null,
         is_tax_adjustment: isTaxAdj,
         description: item.description || null,
