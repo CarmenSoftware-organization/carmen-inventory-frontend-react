@@ -16,7 +16,7 @@ import {
 } from "@/hooks/use-credit-note";
 import {
   CN_STATUS,
-  type CreditNote,
+  type CreditNoteDetail,
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
@@ -42,7 +42,7 @@ const CnCommentSheet = lazy(() =>
 );
 
 interface CnFormProps {
-  readonly creditNote?: CreditNote;
+  readonly creditNote?: CreditNoteDetail;
 }
 
 export function CnForm({ creditNote }: CnFormProps) {
