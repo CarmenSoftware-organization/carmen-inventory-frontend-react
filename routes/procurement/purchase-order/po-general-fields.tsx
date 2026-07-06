@@ -31,6 +31,8 @@ interface PoGeneralFieldsProps {
   readonly readOnly?: boolean;
   /** view/locked → แสดงค่าทุก field เป็น plain text แทน input */
   readonly plainText?: boolean;
+  /** draft/add เท่านั้นที่แสดง workflow picker — ไม่ draft ย้ายไป ribbon cell */
+  readonly isDraft?: boolean;
 }
 
 /** Field ที่แสดงค่าเป็น plain text (ใช้ใน view/locked mode) */
@@ -61,6 +63,7 @@ export function PoGeneralFields({
   isManual,
   readOnly = false,
   plainText = false,
+  isDraft = true,
 }: PoGeneralFieldsProps) {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
@@ -95,21 +98,28 @@ export function PoGeneralFields({
   const fieldDisabled = disabled || readOnly;
   const manualFieldDisabled = fieldDisabled || !isManual;
 
+  // draft โชว์ workflow (5 คอลัมน์); ไม่ draft ซ่อน workflow เหลือ 4 → เต็มแถว
+  const lgGridCols = isDraft ? "lg:grid-cols-5" : "lg:grid-cols-4";
+
   // View/locked/disabled → แสดงทุก field เป็น plain text (workflow ใช้ lookup
   // readOnly เพราะไม่ได้เก็บ workflow_name; ที่เหลืออ่านจาก *_name/_code ที่เก็บไว้)
   if (plainText || disabled) {
     const v = form.getValues();
     return (
-      <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
-        <PlainField label={tfl("workflow")}>
-          <LookupWorkflow
-            value={v.workflow_id}
-            onValueChange={() => {}}
-            workflowType={WORKFLOW_TYPE.PO}
-            readOnly
-            className="text-xs"
-          />
-        </PlainField>
+      <div
+        className={`grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${lgGridCols}`}
+      >
+        {isDraft && (
+          <PlainField label={tfl("workflow")}>
+            <LookupWorkflow
+              value={v.workflow_id}
+              onValueChange={() => {}}
+              workflowType={WORKFLOW_TYPE.PO}
+              readOnly
+              className="text-xs"
+            />
+          </PlainField>
+        )}
         <PlainField label={tfl("vendor")} value={v.vendor_name} />
         <PlainField label={tfl("creditTerm")} value={v.credit_term_name} />
         <PlainField
@@ -131,23 +141,25 @@ export function PoGeneralFields({
 
   return (
     <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
-      <Field>
-        <FieldLabel required>{tfl("workflow")}</FieldLabel>
-        <Controller
-          control={form.control}
-          name="workflow_id"
-          render={({ field, fieldState }) => (
-            <LookupWorkflow
-              value={field.value}
-              onValueChange={field.onChange}
-              workflowType={WORKFLOW_TYPE.PO}
-              disabled={manualFieldDisabled}
-              className="w-full text-xs"
-              error={fieldState.error?.message}
-            />
-          )}
-        />
-      </Field>
+      {isDraft && (
+        <Field>
+          <FieldLabel required>{tfl("workflow")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="workflow_id"
+            render={({ field, fieldState }) => (
+              <LookupWorkflow
+                value={field.value}
+                onValueChange={field.onChange}
+                workflowType={WORKFLOW_TYPE.PO}
+                disabled={manualFieldDisabled}
+                className="w-full text-xs"
+                error={fieldState.error?.message}
+              />
+            )}
+          />
+        </Field>
+      )}
       <Field>
         <FieldLabel required>{tfl("vendor")}</FieldLabel>
         <Controller

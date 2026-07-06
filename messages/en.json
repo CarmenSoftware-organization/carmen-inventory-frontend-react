@@ -2673,6 +2673,8 @@
     },
     "purchaseOrder": {
       "entity": "Purchase Order",
+      "tabWorkflowHistory": "Workflow History",
+      "viewHistoryHint": "Tap to view full workflow history",
       "title": "Purchase Order",
       "desc": "Manage purchase orders.",
       "add": "Add Purchase Order",

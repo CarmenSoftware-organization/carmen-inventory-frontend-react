@@ -1,6 +1,8 @@
 import type { ItemMoneyFields } from "./shared-item";
+import type { WorkflowHistoryEntry } from "./purchase-request";
 
 export enum PO_STATUS {
+  DRAFT = "draft",
   IN_PROGRESS = "in_progress",
   SENT = "sent",
   PARTIAL = "partial",
@@ -142,6 +144,7 @@ export interface PurchaseOrder {
   workflow_current_stage: string;
   workflow_previous_stage: string;
   workflow_next_stage: string;
+  workflow_history?: WorkflowHistoryEntry[];
   vendor_id: string;
   vendor_name: string;
   delivery_date: string;

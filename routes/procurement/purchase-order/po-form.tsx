@@ -9,8 +9,14 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { useProfile } from "@/hooks/use-profile";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { NotesSection } from "@/components/ui/notes-section";
 import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
 import { PoItemFields } from "./po-item-fields";
@@ -29,6 +35,13 @@ import { usePoFormHandlers } from "./use-po-form-handlers";
 
 const PoCommentSheet = lazy(() =>
   import("./po-comment-sheet").then((mod) => ({ default: mod.PoCommentSheet })),
+);
+
+// reuse PR's timeline — WorkflowHistoryEntry shape เหมือนกัน
+const PoWorkflowHistory = lazy(() =>
+  import("../purchase-request/workflow/pr-workflow-history").then((mod) => ({
+    default: mod.PrWorkflowHistory,
+  })),
 );
 
 interface PoFormProps {
@@ -55,7 +68,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const canEdit = !isViewOnly && !terminalStatus;
 
   const dialogs = usePoDialogState();
-  const { showDelete, showComment, showReject, showClose } = dialogs;
+  const { showDelete, showComment, showReject, showClose, showHistory } =
+    dialogs;
+  const hasHistory = !!purchaseOrder?.workflow_history?.length;
 
   const canClose =
     !!purchaseOrder &&
@@ -153,6 +168,8 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         onShowClose={() => dialogs.setShowClose(true)}
         onShowComment={() => dialogs.setShowComment(true)}
         onShowDelete={() => dialogs.setShowDelete(true)}
+        hasHistory={hasHistory}
+        onShowHistory={() => dialogs.setShowHistory(true)}
       />
       <form
         id="po-form"
@@ -164,6 +181,16 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           disabled={fieldsDisabled}
           isManual={isManual}
           readOnly={isReadOnly}
+          plainText={isView || isReadOnly}
+          isDraft={
+            !purchaseOrder?.po_status ||
+            purchaseOrder.po_status === PO_STATUS.DRAFT
+          }
+        />
+
+        <PoNotesSummary
+          form={form}
+          disabled={fieldsDisabled}
           plainText={isView || isReadOnly}
         />
 
@@ -181,14 +208,6 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           }
           onClose={purchaseOrder ? handleClosePo : undefined}
         />
-
-        <NotesSection title={t("sectionNotes")} subtitle={t("sectionNotesSub")}>
-          <PoNotesSummary
-            form={form}
-            disabled={fieldsDisabled}
-            plainText={isView || isReadOnly}
-          />
-        </NotesSection>
       </form>
 
       <PoFooterAction
@@ -227,6 +246,30 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
               onOpenChange={dialogs.setShowComment}
             />
           </Suspense>
+          {hasHistory && (
+            <Sheet open={showHistory} onOpenChange={dialogs.setShowHistory}>
+              <SheetContent
+                side="right"
+                className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
+              >
+                <SheetHeader>
+                  <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    {t("tabWorkflowHistory")}
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="px-4 pb-4">
+                  <Suspense fallback={null}>
+                    <PoWorkflowHistory
+                      history={purchaseOrder.workflow_history ?? []}
+                      requestorName={purchaseOrder.buyer_name}
+                      createdAt={purchaseOrder.created_at}
+                    />
+                  </Suspense>
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
           <PoActionDialog
             open={showReject}
             onOpenChange={(open) => {
