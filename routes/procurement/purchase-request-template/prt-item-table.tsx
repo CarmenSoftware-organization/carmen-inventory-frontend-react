@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/input/input-suffix";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupDeliveryPoint } from "@/components/lookup/lookup-delivery-point";
@@ -86,8 +87,17 @@ const ProductCell = ({
   "use no memo";
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
+  const productName =
+    useWatch({ control, name: `items.${index}.product_name` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   const productError =
     form.formState.errors.items?.[index]?.product_id?.message;
+  if (readOnly) {
+    return (
+      <NameWithSubtext primary={productName} secondary={productLocalName} />
+    );
+  }
   return (
     <Controller
       control={control}
@@ -248,6 +258,14 @@ export function usePrtItemTable({
         accessorKey: "location_id",
         header: tfl("location"),
         cell: ({ row }) => {
+          if (readOnly) {
+            return (
+              <NameWithSubtext
+                primary={form.getValues(`items.${row.index}.location_name`)}
+                secondary={form.getValues(`items.${row.index}.location_code`)}
+              />
+            );
+          }
           const locationError =
             form.formState.errors.items?.[row.index]?.location_id?.message;
           return (
