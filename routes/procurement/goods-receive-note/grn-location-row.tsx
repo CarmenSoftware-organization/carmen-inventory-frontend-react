@@ -227,6 +227,9 @@ export const GrnLocationRow = memo(function GrnLocationRow({
   const locationName =
     useWatch({ control: form.control, name: `items.${index}.location_name` }) ??
     "";
+  const locationCode =
+    useWatch({ control: form.control, name: `items.${index}.location_code` }) ??
+    "";
   const locationId =
     useWatch({ control: form.control, name: `items.${index}.location_id` }) ??
     "";
@@ -259,7 +262,6 @@ export const GrnLocationRow = memo(function GrnLocationRow({
     name: `items.${index}`,
   });
   const itemError = errors.items?.[index];
-  const locationError = itemError?.location_id?.message;
   const receivedQtyError = itemError?.received_qty?.message;
 
   // มี field error ใน pricing/details → บังคับ expand ให้ scroll หาเจอ
@@ -327,14 +329,12 @@ export const GrnLocationRow = memo(function GrnLocationRow({
               )}
             />
           ) : (
-            <span
-              className={cn(
-                "truncate text-xs font-medium",
-                locationError ? "text-destructive" : "text-foreground",
-              )}
-            >
-              {locationName || (locationError ? locationError : "—")}
-            </span>
+            <p className="text-xs font-medium">
+              {locationName} {"- "}
+              <span className="text-foreground text-xs font-medium">
+                {locationCode}
+              </span>
+            </p>
           )}
         </div>
 
