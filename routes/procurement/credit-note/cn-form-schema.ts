@@ -29,6 +29,8 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
       .nullable()
       .refine((v) => !!v, tv("required", { field: tf("product") })),
     item_name: z.string(),
+    // display เท่านั้น — ไม่ส่งเข้า payload (เหมือน item_name)
+    item_local_name: z.string(),
     quantity: z.coerce
       .number()
       .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
@@ -110,6 +112,7 @@ export const CN_ITEM = {
   location_name: "",
   item_id: null,
   item_name: "",
+  item_local_name: "",
   quantity: 1,
   requested_qty: 0,
   approved_qty: 0,
@@ -191,6 +194,7 @@ export function getDefaultValues(cn?: CreditNote): CnFormValues {
           location_name: d.location_name ?? "",
           item_id: d.product_id,
           item_name: d.product_name ?? "",
+          item_local_name: d.product_local_name ?? "",
           quantity: d.return_qty,
           requested_qty: 0,
           approved_qty: 0,

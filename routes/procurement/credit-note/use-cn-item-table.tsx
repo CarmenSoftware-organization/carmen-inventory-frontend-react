@@ -124,11 +124,21 @@ function ProductCell({
   "use no memo";
   const itemName =
     useWatch({ control: form.control, name: `items.${index}.item_name` }) ?? "";
+  const productLocalName =
+    useWatch({
+      control: form.control,
+      name: `items.${index}.item_local_name`,
+    }) ?? "";
   if (disabled) {
     return (
-      <span className="text-foreground block truncate text-xs font-medium">
-        {itemName || "—"}
-      </span>
+      <div className="group w-full text-left">
+        <p className="truncate font-semibold">{itemName || "—"}</p>
+        {productLocalName && (
+          <p className="text-muted-foreground truncate text-[0.625rem]">
+            {productLocalName}
+          </p>
+        )}
+      </div>
     );
   }
   return (
@@ -448,7 +458,11 @@ export function useCnItemTable({
         size: 110,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
         cell: ({ row }) => (
-          <AmountCell control={form.control} index={row.index} field="net_amount" />
+          <AmountCell
+            control={form.control}
+            index={row.index}
+            field="net_amount"
+          />
         ),
       },
       {
@@ -466,7 +480,11 @@ export function useCnItemTable({
         size: 110,
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
         cell: ({ row }) => (
-          <AmountCell control={form.control} index={row.index} field="tax_amount" />
+          <AmountCell
+            control={form.control}
+            index={row.index}
+            field="tax_amount"
+          />
         ),
       },
       {
@@ -521,14 +539,7 @@ export function useCnItemTable({
         cellClassName: cn("py-2 align-middle", col.meta?.cellClassName),
       },
     }));
-  }, [
-    form,
-    disabled,
-    grnId,
-    autoOpenIndex,
-    onDelete,
-    tfl,
-  ]);
+  }, [form, disabled, grnId, autoOpenIndex, onDelete, tfl]);
 
   const table = useReactTable({
     data: itemFields,
