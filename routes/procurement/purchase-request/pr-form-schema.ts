@@ -9,6 +9,7 @@ import type {
   PurchaseApproveDetail,
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
+import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { isoToDateInput } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
 
@@ -119,6 +120,16 @@ export function createPrSchema(
     items: z.array(createDetailSchema(tv, tf)).superRefine((items, ctx) => {
       if (!isPurchase) return;
       items.forEach((item, i) => {
+        // แถวที่ถูกทำเครื่องหมาย reject หรือ send back (review) ไม่ต้องกรอก
+        // vendor/price/currency/tax — validate เฉพาะแถวที่กำลังจะอนุมัติ
+        const status = item.current_stage_status ?? "";
+        if (
+          status === PR_ITEM_STAGE_STATUS.REJECT ||
+          status === PR_ITEM_STAGE_STATUS.REJECTED ||
+          status === PR_ITEM_STAGE_STATUS.REVIEW
+        ) {
+          return;
+        }
         if (!item.vendor_id) {
           ctx.addIssue({
             code: "custom",

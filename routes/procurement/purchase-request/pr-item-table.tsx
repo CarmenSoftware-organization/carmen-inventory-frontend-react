@@ -269,36 +269,27 @@ export function usePrItemTable({
       },
       {
         id: "amount",
-        header: tfl("amountShort"),
+        header: tfl("amountCurShort"),
         cell: ({ row }) => (
           <AmountCell
             control={form.control}
             index={row.index}
             baseCurrencyCode={baseCurrencyCode}
+            currencySlot={
+              <CurrencyCell
+                control={form.control}
+                form={form}
+                index={row.index}
+                isDisabled={isDisabled}
+                className="h-7 w-fit min-w-14 text-xs"
+              />
+            }
           />
         ),
-        size: 140,
+        size: 160,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
-        },
-      },
-
-      {
-        accessorKey: "currency_id",
-        header: tfl("currencyShort"),
-        cell: ({ row }) => (
-          <CurrencyCell
-            control={form.control}
-            form={form}
-            index={row.index}
-            isDisabled={isDisabled}
-          />
-        ),
-        size: 90,
-        meta: {
-          headerClassName: "text-center",
-          cellClassName: "text-center",
         },
       },
       {
@@ -312,7 +303,7 @@ export function usePrItemTable({
             isDisabled={isDisabled}
           />
         ),
-        size: 140,
+        size: 110,
       },
       {
         accessorKey: "delivery_date",
@@ -325,7 +316,7 @@ export function usePrItemTable({
             today={today}
           />
         ),
-        size: 140,
+        size: 110,
         meta: {
           headerClassName: "text-center",
           cellClassName: "text-center",

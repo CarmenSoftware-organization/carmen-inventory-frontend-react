@@ -319,7 +319,7 @@ export function PrItemFields({
   };
 
   const handleBulkReview = async () => {
-    if (await guardSelectedItemErrors()) return;
+    // send back ไม่ต้องกรอก vendor/price/tax ให้ครบ — ข้าม guard
     const indices = getSelectedIndices();
     for (const index of indices) {
       form.setValue(`items.${index}.stage_status`, PR_ITEM_STAGE_STATUS.REVIEW);
@@ -332,7 +332,7 @@ export function PrItemFields({
   };
 
   const handleBulkReject = async () => {
-    if (await guardSelectedItemErrors()) return;
+    // reject ไม่ต้องกรอก vendor/price/tax ให้ครบ — ข้าม guard
     setBulkAction(PR_ITEM_STAGE_STATUS.REJECTED);
   };
 

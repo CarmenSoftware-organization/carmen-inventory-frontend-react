@@ -15,11 +15,13 @@ export const CurrencyCell = memo(function CurrencyCell({
   form,
   index,
   isDisabled,
+  className,
 }: {
   control: Control<PrFormValues>;
   form: UseFormReturn<PrFormValues>;
   index: number;
   isDisabled: boolean;
+  className?: string;
 }) {
   "use no memo";
   const currencyId =
@@ -49,7 +51,13 @@ export const CurrencyCell = memo(function CurrencyCell({
       render={({ field }) => (
         <LookupCurrency
           value={field.value ?? ""}
-          onValueChange={field.onChange}
+          onValueChange={(value) =>
+            // shouldValidate: ล้างกรอบแดง currency ทันทีที่เลือก
+            form.setValue(`items.${index}.currency_id`, value, {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+          }
           onItemChange={(currency) => {
             form.setValue(`items.${index}.currency_code`, currency.code);
             form.setValue(
@@ -57,7 +65,7 @@ export const CurrencyCell = memo(function CurrencyCell({
               currency.decimal_places ?? 2,
             );
           }}
-          className="w-full text-xs"
+          className={className ?? "w-full text-xs"}
         />
       )}
     />

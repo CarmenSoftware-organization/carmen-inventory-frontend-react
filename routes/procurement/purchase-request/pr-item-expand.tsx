@@ -260,7 +260,7 @@ export function PrItemExpand({
           {/* ── Pricing: vendor · unit price · pricelist ── */}
           <section className="space-y-2">
             <EyeBrow>{tfl("pricing")}</EyeBrow>
-            <div className="grid grid-cols-1 sm:grid-cols-[1.5fr_8rem_1.2fr]">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1.5fr_8rem_1.2fr]">
               {/* Vendor */}
               <Field>
                 <FieldLabel
@@ -270,7 +270,7 @@ export function PrItemExpand({
                   {tfl("vendor")}
                 </FieldLabel>
                 {isFieldDisabled ? (
-                  <p className="flex items-center truncate text-xs font-medium">
+                  <p className="flex min-h-8 items-center truncate text-xs font-medium">
                     {vendorName || "—"}
                   </p>
                 ) : (
@@ -281,7 +281,12 @@ export function PrItemExpand({
                       <LookupVendor
                         value={field.value ?? ""}
                         onValueChange={(value) => {
-                          field.onChange(value);
+                          // shouldValidate: ล้างกรอบแดง vendor ทันทีที่เลือก
+                          // (mode=onSubmit จึงต้อง validate เองไม่งั้น error ค้าง)
+                          form.setValue(`items.${index}.vendor_id`, value, {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          });
                           if (value) {
                             form.setValue(
                               `items.${index}.stage_status`,
@@ -310,7 +315,7 @@ export function PrItemExpand({
                   {tfl("unitPrice")}
                 </FieldLabel>
                 {isFieldDisabled ? (
-                  <p className="flex items-center text-xs font-semibold tabular-nums">
+                  <p className="flex min-h-8 items-center text-xs font-semibold tabular-nums">
                     {price ? formatCurrency(price) : "—"}
                   </p>
                 ) : (
@@ -318,7 +323,7 @@ export function PrItemExpand({
                     id={`items-${index}-pricelist-price`}
                     decimals={watchCurrencyDecimals}
                     min={0}
-                    className={`text-xs ${priceError ? "pl-7" : ""}`}
+                    className={`h-8 text-right text-xs ${priceError ? "pl-7" : ""}`}
                     error={priceError}
                     errorIconAlign="left"
                     defaultValue={price}
@@ -363,7 +368,7 @@ export function PrItemExpand({
                       </Button>
                     )}
                 </div>
-                <span className="flex items-center truncate text-xs font-medium">
+                <span className="flex min-h-8 items-center truncate text-xs font-medium">
                   {pricelistNo || "—"}
                 </span>
               </Field>
@@ -371,58 +376,75 @@ export function PrItemExpand({
           </section>
 
           {/* ── Tax & Discount — two calm groups instead of a 5-col micro-grid ── */}
-          <div className="grid grid-cols-1 gap-x-8 gap-y-6 border-t pt-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 gap-x-8 border-t pt-5 sm:grid-cols-2">
             {/* Tax */}
-            <section className="space-y-3">
+            <section className="space-y-2">
               <EyeBrow>{tfl("tax")}</EyeBrow>
-              {/* Tax Profile · Tax % · Tax Amt ในแถวเดียวกัน */}
-              <div className="grid grid-cols-[minmax(0,1fr)_3.5rem_minmax(0,1fr)] gap-x-3">
+              {/* Tax Profile (+ rate prefix) · Tax Amt ในแถวเดียวกัน */}
+              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-x-2">
                 <Field>
                   <FieldLabel
                     htmlFor={`items-${index}-tax-profile`}
-                    className="text-muted-foreground text-xs"
+                    className="text-muted-foreground flex min-h-6 items-center text-xs"
                   >
                     {tfl("taxProfile")}
                   </FieldLabel>
                   {isFieldDisabled ? (
-                    <p className="flex min-h-9 items-center truncate text-xs font-medium">
-                      {taxProfileName || "—"}
+                    <p className="flex min-h-8 items-center gap-1.5 truncate text-xs font-medium">
+                      {taxProfileName ? (
+                        <>
+                          <span className="text-muted-foreground tabular-nums">
+                            {taxRate}%
+                          </span>
+                          <span className="truncate">{taxProfileName}</span>
+                        </>
+                      ) : (
+                        "—"
+                      )}
                     </p>
                   ) : (
                     <Controller
                       control={form.control}
                       name={`items.${index}.tax_profile_id`}
                       render={({ field }) => (
-                        <LookupTaxProfile
-                          value={field.value ?? ""}
-                          onValueChange={(value, taxRate, taxProfileName) => {
-                            field.onChange(value || null);
-                            form.setValue(`items.${index}.tax_rate`, taxRate);
-                            form.setValue(
-                              `items.${index}.tax_profile_name`,
-                              taxProfileName,
-                            );
-                          }}
-                          className="w-full text-xs"
-                          error={taxProfileError}
-                        />
+                        // % (rate) เป็น prefix ซ้าย + tax profile select ในกล่องเดียว
+                        <InputSuffixField
+                          className="w-full"
+                          error={!!taxProfileError}
+                        >
+                          <span className="text-muted-foreground shrink-0 px-2 text-xs whitespace-nowrap tabular-nums">
+                            {taxRate}%
+                          </span>
+                          <div
+                            className="bg-border h-4 w-px shrink-0"
+                            aria-hidden="true"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <LookupTaxProfile
+                              value={field.value ?? ""}
+                              onValueChange={(value, rate, name) => {
+                                // shouldValidate: ล้างกรอบแดง tax ทันทีที่เลือก
+                                form.setValue(
+                                  `items.${index}.tax_profile_id`,
+                                  value || null,
+                                  { shouldDirty: true, shouldValidate: true },
+                                );
+                                form.setValue(`items.${index}.tax_rate`, rate);
+                                form.setValue(
+                                  `items.${index}.tax_profile_name`,
+                                  name,
+                                );
+                              }}
+                              className="w-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
+                            />
+                          </div>
+                        </InputSuffixField>
                       )}
                     />
                   )}
                 </Field>
                 <Field>
-                  <FieldLabel
-                    htmlFor={`items-${index}-tax-rate`}
-                    className="text-muted-foreground text-xs"
-                  >
-                    {tfl("taxPercent")}
-                  </FieldLabel>
-                  <p className="flex min-h-9 items-center text-xs font-semibold tabular-nums">
-                    {taxRate}
-                  </p>
-                </Field>
-                <Field>
-                  <div className="flex min-h-4.5 items-center justify-between gap-2">
+                  <div className="flex min-h-6 items-center justify-between gap-2">
                     <FieldLabel
                       htmlFor={`items-${index}-tax-amount`}
                       className="text-muted-foreground text-xs"
@@ -433,7 +455,7 @@ export function PrItemExpand({
                       overrideToggle(`items.${index}.is_tax_adjustment`)}
                   </div>
                   {isFieldDisabled ? (
-                    <p className="flex min-h-9 items-center text-xs font-semibold tabular-nums">
+                    <p className="flex min-h-8 items-center text-xs font-semibold tabular-nums">
                       {formatCurrency(taxAmount)}
                     </p>
                   ) : (
@@ -441,7 +463,7 @@ export function PrItemExpand({
                       id={`items-${index}-tax-amount`}
                       decimals={watchCurrencyDecimals}
                       min={0}
-                      className={`text-xs ${taxAmountError ? "pl-7" : ""}`}
+                      className={`h-8 text-right text-xs ${taxAmountError ? "pl-7" : ""}`}
                       disabled={!isTaxAdj}
                       error={taxAmountError}
                       errorIconAlign="left"
@@ -462,22 +484,22 @@ export function PrItemExpand({
             </section>
 
             {/* Discount */}
-            <section className="space-y-3">
+            <section className="space-y-2">
               <EyeBrow>{tfl("discount")}</EyeBrow>
-              <div className="grid grid-cols-[5rem_1fr] gap-x-4">
+              <div className="grid grid-cols-[5rem_1fr] gap-x-2">
                 <Field>
                   <FieldLabel
                     htmlFor={`items-${index}-discount-rate`}
-                    className="text-muted-foreground text-xs"
+                    className="text-muted-foreground flex min-h-6 items-center text-xs"
                   >
                     {tfl("discPercent")}
                   </FieldLabel>
                   {isFieldDisabled ? (
-                    <p className="flex min-h-9 items-center text-xs font-semibold tabular-nums">
+                    <p className="flex min-h-8 items-center text-xs font-semibold tabular-nums">
                       {discRate}
                     </p>
                   ) : (
-                    <InputSuffixField className="h-9">
+                    <InputSuffixField className="h-8">
                       <InputSuffixInput
                         id={`items-${index}-discount-rate`}
                         type="number"
@@ -485,7 +507,7 @@ export function PrItemExpand({
                         min={0}
                         step="0.01"
                         placeholder="0"
-                        className="text-xs"
+                        className="h-8 text-right text-xs"
                         defaultValue={discRate}
                         {...form.register(`items.${index}.discount_rate`)}
                         onChange={(e) => {
@@ -506,7 +528,7 @@ export function PrItemExpand({
                   )}
                 </Field>
                 <Field>
-                  <div className="flex min-h-4.5 items-center justify-between gap-2">
+                  <div className="flex min-h-6 items-center justify-between gap-2">
                     <FieldLabel
                       htmlFor={`items-${index}-discount-amount`}
                       className="text-muted-foreground text-xs"
@@ -517,7 +539,7 @@ export function PrItemExpand({
                       overrideToggle(`items.${index}.is_discount_adjustment`)}
                   </div>
                   {isFieldDisabled ? (
-                    <p className="flex min-h-9 items-center text-xs font-semibold tabular-nums">
+                    <p className="flex min-h-8 items-center text-xs font-semibold tabular-nums">
                       {formatCurrency(discountAmount)}
                     </p>
                   ) : (
@@ -525,7 +547,7 @@ export function PrItemExpand({
                       id={`items-${index}-discount-amount`}
                       decimals={watchCurrencyDecimals}
                       min={0}
-                      className={`text-xs ${discountAmountError ? "pl-7" : ""}`}
+                      className={`h-8 text-right text-xs ${taxAmountError ? "pl-7" : ""}`}
                       disabled={!isDiscAdj}
                       error={discountAmountError}
                       errorIconAlign="left"

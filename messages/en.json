@@ -538,6 +538,7 @@
     "approvedShort": "Apv",
     "amountShort": "Amt",
     "currencyShort": "Cur",
+    "amountCurShort": "Amt/Cur",
     "issued": "Issued",
     "grnDate": "GRN Date",
     "invoiceDate": "Invoice Date",
