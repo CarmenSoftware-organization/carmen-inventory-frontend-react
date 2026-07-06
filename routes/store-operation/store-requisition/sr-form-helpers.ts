@@ -40,6 +40,7 @@ export function buildSrDefaultValues(
         doc_version: d.doc_version,
         product_id: d.product_id,
         product_name: d.product_name,
+        product_local_name: d.product_local_name ?? "",
         unit_name: d.inventory_unit_name ?? "",
         description: d.description ?? "",
         requested_qty: d.requested_qty,

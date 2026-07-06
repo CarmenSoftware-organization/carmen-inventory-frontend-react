@@ -17,6 +17,8 @@ function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     doc_version: z.coerce.number().optional(),
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     product_name: z.string(),
+    // display เท่านั้น — ไม่ส่ง payload
+    product_local_name: z.string(),
     unit_name: z.string(),
     description: z.string(),
     requested_qty: z.coerce.number().min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
@@ -92,6 +94,7 @@ export type SrFormValues = z.infer<ReturnType<typeof createSrSchema>>;
 export const SR_ITEM = {
   product_id: "",
   product_name: "",
+  product_local_name: "",
   unit_name: "",
   description: "",
   requested_qty: 1,

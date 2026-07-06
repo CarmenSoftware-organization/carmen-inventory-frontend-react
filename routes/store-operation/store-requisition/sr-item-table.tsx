@@ -24,6 +24,7 @@ import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
 import { Badge } from "@/components/ui/badge";
 import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
 import { SrItemHistorySheet } from "./sr-item-history";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
 const ProductCell = memo(function ProductCell({
   control,
@@ -45,11 +46,11 @@ const ProductCell = memo(function ProductCell({
   "use no memo";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   if (disabled) {
     return (
-      <span className="truncate text-xs font-semibold" title={productName}>
-        {productName || "—"}
-      </span>
+      <NameWithSubtext primary={productName} secondary={productLocalName} />
     );
   }
   return (
@@ -151,12 +152,12 @@ const StatusCell = memo(function StatusCell({
   const initialStatus =
     useWatch({ control, name: `items.${index}._initial_stage_status` }) ?? "";
   const effective = stageStatus || currentStatus;
-  const config = SR_ITEM_STATUS_CONFIG[effective] ?? SR_ITEM_STATUS_CONFIG.pending;
+  const config =
+    SR_ITEM_STATUS_CONFIG[effective] ?? SR_ITEM_STATUS_CONFIG.pending;
 
   // approver/issuer แก้สถานะได้; แต่ล็อกถ้า server ส่งมาแล้วเป็น approve/reject
   const canEdit =
-    !!form &&
-    (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
+    !!form && (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
   const isLockedFromServer =
     initialStatus === SR_ITEM_STAGE.APPROVE ||
     initialStatus === SR_ITEM_STAGE.REJECT;
@@ -176,7 +177,10 @@ const StatusCell = memo(function StatusCell({
   };
 
   return (
-    <Badge className={`${config.className} inline-flex items-center gap-1`} size="xs">
+    <Badge
+      className={`${config.className} inline-flex items-center gap-1`}
+      size="xs"
+    >
       {translate(effective)}
       {showReset && (
         <button
