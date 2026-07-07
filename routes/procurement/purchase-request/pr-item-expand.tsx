@@ -257,7 +257,7 @@ export function PrItemExpand({
               <Field>
                 <FieldLabel
                   htmlFor={`items-${index}-vendor`}
-                  className="text-muted-foreground flex min-h-6 items-center text-xs"
+                  className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
                 >
                   {tfl("vendor")}
                 </FieldLabel>
@@ -302,7 +302,7 @@ export function PrItemExpand({
               <Field>
                 <FieldLabel
                   htmlFor={`items-${index}-pricelist-price`}
-                  className="text-muted-foreground flex min-h-6 items-center text-xs"
+                  className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
                 >
                   {tfl("unitPrice")}
                 </FieldLabel>
@@ -339,7 +339,7 @@ export function PrItemExpand({
               {/* Pricelist */}
               <Field>
                 <div className="flex min-h-6 items-center justify-between">
-                  <FieldLabel className="text-muted-foreground text-xs">
+                  <FieldLabel className="text-muted-foreground text-xs tracking-wide">
                     {tfl("pricelist")}
                   </FieldLabel>
                   {productId &&
@@ -347,17 +347,14 @@ export function PrItemExpand({
                     currencyId &&
                     (role === STAGE_ROLE.PURCHASE ||
                       role === STAGE_ROLE.APPROVE) && (
-                      <Button
+                      <button
                         type="button"
-                        size="xs"
-                        variant="ghost"
-                        className="text-primary shrink-0 px-2"
-                        aria-label={tfl("pricelist")}
                         onClick={() => setShowPricelist(true)}
+                        className="text-primary flex items-center gap-1 text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
                       >
                         <Scale className="size-3" />
                         {tc("compare")}
-                      </Button>
+                      </button>
                     )}
                 </div>
                 <span className="flex min-h-8 items-center truncate text-xs font-medium">
@@ -377,7 +374,7 @@ export function PrItemExpand({
                 <Field>
                   <FieldLabel
                     htmlFor={`items-${index}-tax-profile`}
-                    className="text-muted-foreground flex min-h-6 items-center text-xs"
+                    className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
                   >
                     {tfl("taxProfile")}
                   </FieldLabel>
@@ -439,7 +436,7 @@ export function PrItemExpand({
                   <div className="flex min-h-6 items-center justify-between gap-2">
                     <FieldLabel
                       htmlFor={`items-${index}-tax-amount`}
-                      className="text-muted-foreground text-xs"
+                      className="text-muted-foreground text-xs tracking-wide"
                     >
                       {tfl("taxAmt")}
                     </FieldLabel>
@@ -482,7 +479,7 @@ export function PrItemExpand({
                 <Field>
                   <FieldLabel
                     htmlFor={`items-${index}-discount-rate`}
-                    className="text-muted-foreground flex min-h-6 items-center text-xs"
+                    className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
                   >
                     {tfl("discPercent")}
                   </FieldLabel>
@@ -523,7 +520,7 @@ export function PrItemExpand({
                   <div className="flex min-h-6 items-center justify-between gap-2">
                     <FieldLabel
                       htmlFor={`items-${index}-discount-amount`}
-                      className="text-muted-foreground text-xs"
+                      className="text-muted-foreground text-xs tracking-wide"
                     >
                       {tfl("discAmt")}
                     </FieldLabel>

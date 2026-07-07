@@ -34,6 +34,15 @@ import {
 
 export type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
 
+/**
+ * ความกว้างเท่ากันของคอลัมน์แคบ 3 ตัว (select / expand / index)
+ *
+ * ต้องใช้ค่าเดียวกันทั้งสาม + `enableResizing: false` เพราะ table นี้เปิด
+ * `columnsResizable` → th ได้ `width: getSize()` ตรงตาม `size` (px). ถ้าใส่ค่า
+ * ต่างกัน (เดิม 80/60/40) UI จึงกว้างไม่เท่ากัน
+ */
+const NARROW_COL_SIZE = 35;
+
 interface UsePrItemTableOptions {
   form: UseFormReturn<PrFormValues>;
   itemFields: ItemField[];
@@ -108,7 +117,7 @@ export function usePrItemTable({
       enableSorting: false,
       enableHiding: false,
       enableResizing: false,
-      size: 30,
+      size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -137,7 +146,7 @@ export function usePrItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 70,
+      size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -163,7 +172,8 @@ export function usePrItemTable({
       header: "#",
       cell: ({ row }) => row.index + 1,
       enableSorting: false,
-      size: role === STAGE_ROLE.PURCHASE ? 40 : 80,
+      enableResizing: false,
+      size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",

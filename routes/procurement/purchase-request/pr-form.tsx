@@ -114,8 +114,12 @@ export function PurchaseRequestForm({
     !purchaseRequest?.pr_status ||
     purchaseRequest.pr_status === PR_STATUS.DRAFT;
 
-  // แก้ไขได้เฉพาะตอน status = draft — สถานะอื่น (หลัง submit เข้า workflow) lock ฟอร์ม
-  const isDisabled = isView || actions.isPending || !isDraft;
+  // lock หลัง submit (status ≠ draft) เฉพาะ role ผู้สร้าง (CREATE) — role ใน
+  // workflow (purchase/approve) ยังต้องเลือก/แก้ item ได้ จึงไม่โดน lock ตรงนี้
+  const isDisabled =
+    isView ||
+    actions.isPending ||
+    (!isDraft && role === STAGE_ROLE.CREATE);
 
   const hasHistory = !!purchaseRequest?.workflow_history?.length;
 
