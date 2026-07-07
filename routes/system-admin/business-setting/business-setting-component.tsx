@@ -9,7 +9,10 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
+import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useProfile } from "@/hooks/use-profile";
+import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import {
   useBusinessUnit,
   useUpdateBusinessUnit,
@@ -78,15 +81,26 @@ export default function BusinessSettingComponent() {
   const configItems = data ? normalizeConfig(data.config) : [];
   const isBusy = !isProfileReady || isLoading;
 
+  // มีการแก้ค้าง (dirty) ระหว่างโหมด edit → กัน discard โดยไม่ได้ตั้งใจ
+  const hasUnsaved = editing && form.formState.isDirty;
+  const discard = useDiscardConfirm({
+    isDirty: hasUnsaved,
+    isPending: update.isPending,
+  });
+  const navGuard = useNavigationGuard(hasUnsaved);
+
+  const exitEdit = () => {
+    if (data) form.reset(toFormValues(data));
+    setEditing(false);
+  };
+
   const handleEdit = () => {
     if (data) form.reset(toFormValues(data));
     setEditing(true);
   };
 
-  const handleCancel = () => {
-    if (data) form.reset(toFormValues(data));
-    setEditing(false);
-  };
+  // กด Cancel ตอนมีการแก้ค้าง → confirm ก่อน (ผ่าน useDiscardConfirm)
+  const handleCancel = () => discard.confirm(exitEdit);
 
   const onSubmit = form.handleSubmit((values) => {
     if (!data) return;
@@ -554,6 +568,19 @@ export default function BusinessSettingComponent() {
           </SettingSection>
         </form>
       )}
+
+      {/* Cancel ตอนมีการแก้ค้าง */}
+      <DiscardDialog {...discard.dialogProps} variant="warning" />
+      {/* นำทางออก/กด back ระหว่างแก้ค้าง */}
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
     </div>
   );
 }
