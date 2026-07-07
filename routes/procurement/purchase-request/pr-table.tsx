@@ -191,7 +191,7 @@ export function usePurchaseRequestTable({
           <DropdownMenuContent align="end">
             {onApprove && isPendingApproval && (
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="cursor-pointer font-semibold tracking-wide"
                 onClick={() => onApprove(item)}
               >
                 <CheckCircle2
@@ -204,7 +204,7 @@ export function usePurchaseRequestTable({
 
             {onReject && isPendingApproval && (
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="cursor-pointer font-semibold tracking-wide"
                 onClick={() => onReject(item)}
               >
                 <XCircle

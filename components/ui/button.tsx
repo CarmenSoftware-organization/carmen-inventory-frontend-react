@@ -9,18 +9,19 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default:
+          "border border-black/10 bg-primary text-primary-foreground hover:bg-primary/90 dark:border-white/10",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "border border-black/10 bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 dark:border-white/10",
         outline:
           "border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border border-black/10 bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:border-white/10",
         success:
-          "bg-success text-white hover:bg-success/90 focus-visible:ring-success/20 dark:focus-visible:ring-success/40",
-        info: "bg-info text-white hover:bg-info/90 focus-visible:ring-info/20 dark:focus-visible:ring-info/40",
+          "border border-black/10 bg-success text-white hover:bg-success/90 focus-visible:ring-success/20 dark:focus-visible:ring-success/40 dark:border-white/10",
+        info: "border border-black/10 bg-info text-white hover:bg-info/90 focus-visible:ring-info/20 dark:focus-visible:ring-info/40 dark:border-white/10",
         warning:
-          "bg-warning text-black hover:bg-warning/90 focus-visible:ring-warning/20 dark:focus-visible:ring-warning/40",
+          "border border-black/10 bg-warning text-black hover:bg-warning/90 focus-visible:ring-warning/20 dark:focus-visible:ring-warning/40 dark:border-white/10",
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
