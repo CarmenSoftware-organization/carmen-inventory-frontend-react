@@ -75,7 +75,7 @@ export const InventoryTooltipCell = memo(function InventoryTooltipCell({
       productId={productId}
       unitName={unitName}
       icon="package"
-      className="text-primary"
+      className={productId ? "text-primary" : "text-muted-foreground"}
     />
   );
 });

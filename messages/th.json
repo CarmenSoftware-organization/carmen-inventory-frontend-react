@@ -2748,6 +2748,7 @@
       "restock": "เติมสต็อก",
       "stockLevel": "ระดับสต็อก: {pct}%",
       "inventoryInfo": "ข้อมูลสต็อก",
+      "selectProductForInventory": "เลือกสินค้าก่อนเพื่อดูข้อมูลสต็อก",
       "summary": "สรุปยอด",
       "needsReorder": "ต้องสั่งซื้อเพิ่ม",
       "nItems": "{count} รายการ",

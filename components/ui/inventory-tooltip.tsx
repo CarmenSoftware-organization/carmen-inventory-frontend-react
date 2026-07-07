@@ -54,6 +54,7 @@ export const InventoryTooltip = memo(function InventoryTooltip({
   else if (on_hand_qty < re_stock_qty) progressColor = "bg-warning";
 
   const Icon = icon === "package" ? Package : BoxIcon;
+  const hasProduct = !!productId;
 
   return (
     <TooltipProvider delayDuration={100}>
@@ -78,12 +79,22 @@ export const InventoryTooltip = memo(function InventoryTooltip({
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border w-56 rounded-lg border px-3 py-2 shadow-md"
+          className={cn(
+            "bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md",
+            hasProduct ? "w-56" : "max-w-[14rem]",
+          )}
         >
-          <p className="mb-2 text-[0.6875rem] font-semibold">
-            {t("inventoryInfo")}
-          </p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[0.6875rem]">
+          {!hasProduct && (
+            <p className="text-muted-foreground text-[0.6875rem]">
+              {t("selectProductForInventory")}
+            </p>
+          )}
+          {hasProduct && (
+            <>
+              <p className="mb-2 text-[0.6875rem] font-semibold">
+                {t("inventoryInfo")}
+              </p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[0.6875rem]">
             <div>
               <span
                 className={
@@ -157,6 +168,8 @@ export const InventoryTooltip = memo(function InventoryTooltip({
               {t("stockLevel", { pct: pct.toFixed(1) })}
             </span>
           </div>
+            </>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -2753,6 +2753,7 @@
       "restock": "Re-stock",
       "stockLevel": "Stock Level: {pct}%",
       "inventoryInfo": "Inventory Information",
+      "selectProductForInventory": "Select a product to view inventory",
       "summary": "Summary",
       "needsReorder": "Needs Reorder",
       "nItems": "{count} item(s)",

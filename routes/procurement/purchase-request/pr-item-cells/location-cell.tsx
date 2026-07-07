@@ -84,45 +84,43 @@ export const LocationCell = memo(function LocationCell({
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div>
-                  <LookupUserLocation
-                    value={field.value ?? ""}
-                    disableTooltip
-                    error={
-                      form.formState.errors.items?.[index]?.location_id?.message
+                <LookupUserLocation
+                  value={field.value ?? ""}
+                  disableTooltip
+                  error={
+                    form.formState.errors.items?.[index]?.location_id?.message
+                  }
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                  }}
+                  onItemChange={(location) => {
+                    form.setValue(
+                      `items.${index}.location_code`,
+                      location.code,
+                    );
+                    form.setValue(
+                      `items.${index}.location_name`,
+                      location.name,
+                    );
+                    form.setValue(
+                      `items.${index}.location_type`,
+                      location.location_type,
+                    );
+                    if (location.delivery_point) {
+                      form.setValue(
+                        `items.${index}.delivery_point_id`,
+                        location.delivery_point.id,
+                      );
+                      form.setValue(
+                        `items.${index}.delivery_point_name`,
+                        location.delivery_point.name,
+                      );
                     }
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                    }}
-                    onItemChange={(location) => {
-                      form.setValue(
-                        `items.${index}.location_code`,
-                        location.code,
-                      );
-                      form.setValue(
-                        `items.${index}.location_name`,
-                        location.name,
-                      );
-                      form.setValue(
-                        `items.${index}.location_type`,
-                        location.location_type,
-                      );
-                      if (location.delivery_point) {
-                        form.setValue(
-                          `items.${index}.delivery_point_id`,
-                          location.delivery_point.id,
-                        );
-                        form.setValue(
-                          `items.${index}.delivery_point_name`,
-                          location.delivery_point.name,
-                        );
-                      }
-                    }}
-                    className="h-7 w-full text-xs"
-                    popoverWidth="w-[26.25rem]"
-                    defaultLabel={locationName}
-                  />
-                </div>
+                  }}
+                  className="h-7 w-full text-xs"
+                  popoverWidth="w-[26.25rem]"
+                  defaultLabel={locationName}
+                />
               </TooltipTrigger>
               {hasLocation && (
                 <TooltipContent
