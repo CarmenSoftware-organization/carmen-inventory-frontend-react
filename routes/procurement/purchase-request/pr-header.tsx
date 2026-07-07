@@ -96,10 +96,10 @@ export function PrHeader({
         onClick={onShowHistory}
         title={t("tabWorkflowHistory")}
         aria-label={t("tabWorkflowHistory")}
-        className="group hover:bg-muted/60 focus-visible:ring-ring flex flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        className="group hover:bg-muted/60 focus-visible:ring-ring flex cursor-pointer flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {workflowStepEl}
-        <span className="text-muted-foreground/50 group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-[0.5625rem] tracking-wide transition-colors">
+        <span className="text-muted-foreground group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-[0.5625rem] tracking-wide transition-colors">
           <History className="size-2.5" />
           {t("viewHistoryHint")}
         </span>

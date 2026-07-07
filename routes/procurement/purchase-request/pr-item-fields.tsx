@@ -462,17 +462,18 @@ export function PrItemFields({
     <div className="space-y-4">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-end gap-1.5">
-          <PrAskAiMenu
-            items={selectedRows.map((row) => {
-              const item = form.getValues(`items.${row.index}`);
-              return {
-                productName: item.product_name,
-                productLocalName: item.product_local_name,
-                locationName: item.location_name,
-              };
-            })}
-            disabled={selectedRows.length === 0}
-          />
+          {selectedRows.length > 0 && (
+            <PrAskAiMenu
+              items={selectedRows.map((row) => {
+                const item = form.getValues(`items.${row.index}`);
+                return {
+                  productName: item.product_name,
+                  productLocalName: item.product_local_name,
+                  locationName: item.location_name,
+                };
+              })}
+            />
+          )}
           {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
             <Button
               type="button"

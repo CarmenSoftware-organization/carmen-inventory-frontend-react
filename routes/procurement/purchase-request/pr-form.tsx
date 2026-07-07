@@ -109,12 +109,13 @@ export function PurchaseRequestForm({
     role,
   });
 
-  const isDisabled = isView || actions.isPending;
-
   // draft/add เท่านั้นที่แสดง general fields — ไม่ draft แล้วซ่อน
   const isDraft =
     !purchaseRequest?.pr_status ||
     purchaseRequest.pr_status === PR_STATUS.DRAFT;
+
+  // แก้ไขได้เฉพาะตอน status = draft — สถานะอื่น (หลัง submit เข้า workflow) lock ฟอร์ม
+  const isDisabled = isView || actions.isPending || !isDraft;
 
   const hasHistory = !!purchaseRequest?.workflow_history?.length;
 

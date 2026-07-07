@@ -54,6 +54,7 @@ export function usePrItemTable({
   role,
   buCode,
   baseCurrencyCode,
+  dateFormat,
   onDelete,
 }: UsePrItemTableOptions) {
   "use no memo";
@@ -136,7 +137,7 @@ export function usePrItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 30,
+      size: 70,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -162,7 +163,7 @@ export function usePrItemTable({
       header: "#",
       cell: ({ row }) => row.index + 1,
       enableSorting: false,
-      size: 40,
+      size: role === STAGE_ROLE.PURCHASE ? 40 : 80,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",
@@ -314,9 +315,10 @@ export function usePrItemTable({
             index={row.index}
             isDisabled={isDisabled}
             today={today}
+            dateFormat={dateFormat}
           />
         ),
-        size: 110,
+        size: 150,
         meta: {
           headerClassName: "text-center",
           cellClassName: "text-center",
@@ -328,7 +330,7 @@ export function usePrItemTable({
       id: "action",
       header: () => "",
       cell: ({ row }) => (
-        <div className="flex items-center justify-center gap-0.5">
+        <div className="flex items-center justify-center gap-2">
           {(row.original.history?.length ?? 0) > 0 && (
             <PrItemHistorySheet
               history={row.original.history ?? []}
@@ -412,6 +414,7 @@ export function usePrItemTable({
     role,
     buCode,
     baseCurrencyCode,
+    dateFormat,
     itemFields,
     onDelete,
     setSelectDialogOpen,
