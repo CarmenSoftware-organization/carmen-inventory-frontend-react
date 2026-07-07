@@ -8,6 +8,7 @@ export const QUERY_KEYS = {
   APPROVAL_PENDING: "approval-pending",
   APPROVAL_PENDING_SUMMARY: "approval-pending-summary",
   APPLICATION_ROLES: "application-roles",
+  BUSINESS_UNIT_DETAIL: "business-unit-detail",
   BUSINESS_TYPES: "business-types",
   CERTIFICATIONS: "vendor-master-certificates",
   VENDOR_CERTIFICATES: "vendor-certificates",
