@@ -178,9 +178,7 @@ export function usePurchaseRequestTable({
   const prActionColumn = customActionColumn<PurchaseRequest>(({ row }) => {
     const item = row.original;
     const isDraft = item.pr_status === PR_STATUS.DRAFT;
-    const isPendingApproval =
-      item.pr_status === PR_STATUS.SUBMITTED ||
-      item.pr_status === PR_STATUS.IN_PROGRESS;
+    const isPendingApproval = item.pr_status === PR_STATUS.IN_PROGRESS;
 
     return (
       <div className="flex justify-end">

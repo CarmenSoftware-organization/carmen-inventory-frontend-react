@@ -14,8 +14,8 @@ export type PurchaseRequestStatus =
 
 export enum PR_STATUS {
   DRAFT = "draft",
-  SUBMITTED = "submitted",
   IN_PROGRESS = "in_progress",
+  APPROVED = "approved",
   COMPLETED = "completed",
   VOIDED = "voided",
 }

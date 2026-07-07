@@ -40,7 +40,7 @@ export function PrHeader({
   const tfl = useTranslations("field");
 
   const statusCfg = purchaseRequest
-    ? PR_STATUS_CONFIG[purchaseRequest.pr_status]
+    ? (PR_STATUS_CONFIG[purchaseRequest.pr_status] ?? PR_STATUS_CONFIG.draft)
     : null;
 
   const badges = (

@@ -59,7 +59,7 @@ export default function PrCard({
   const config = PR_STATUS_CONFIG[item.pr_status] ?? PR_STATUS_CONFIG.draft;
   const totalAmount = item.base_total_amount;
   const isDraft = item.pr_status === PR_STATUS.DRAFT;
-  const isPendingApproval = item.pr_status === PR_STATUS.SUBMITTED || item.pr_status === PR_STATUS.IN_PROGRESS;
+  const isPendingApproval = item.pr_status === PR_STATUS.IN_PROGRESS;
   const showApproveReject = isMyPending && isPendingApproval && (onApprove || onReject);
   const showDelete = isMyPending && isDraft && onDelete;
 
