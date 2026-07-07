@@ -1,12 +1,13 @@
-import { Controller, useWatch, type Control } from "react-hook-form";
-import { memo, useMemo } from "react";
+import { useController, useWatch, type Control } from "react-hook-form";
+import { memo, useEffect, useMemo, useRef } from "react";
+import { ChevronDownIcon } from "lucide-react";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { InputGroupButton } from "@/components/ui/input-group";
 import { useProductUnits } from "@/hooks/use-product-units";
 import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
@@ -96,59 +97,72 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
   "use no memo";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
-  const unitId =
-    useWatch({ control, name: `items.${index}.${unitField}` }) ?? "";
   const { data: units = [] } = useProductUnits(productId || undefined);
+  const { field } = useController({
+    control,
+    name: `items.${index}.${unitField}`,
+  });
+  const unitId = field.value ?? "";
   const selectedUnit = useMemo(
     () => units.find((u) => u.id === unitId),
     [units, unitId],
   );
 
+  // auto-init: เมื่อ units โหลดแล้วค่ายังว่าง/ไม่ match → เลือกหน่วยแรก และ
+  // propagate ผ่าน onExtraChange (foc/approved) ให้ครบเหมือนเดิม — เฉพาะตอนแก้ได้
+  const onExtraChangeRef = useRef(onExtraChange);
+  onExtraChangeRef.current = onExtraChange;
+  useEffect(() => {
+    if (isDisabled || units.length === 0) return;
+    if (unitId && units.some((u) => u.id === unitId)) return;
+    field.onChange(units[0].id);
+    onExtraChangeRef.current?.(units[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [units, unitId, isDisabled]);
+
   if (isDisabled) {
     return (
-      <p className="text-muted-foreground text-right text-xs">
+      <span className="text-muted-foreground text-xs font-medium">
         {selectedUnit?.name || "—"}
-      </p>
+      </span>
     );
   }
 
   return (
-    <Controller
-      control={control}
-      name={`items.${index}.${unitField}`}
-      render={({ field }) => (
-        <TooltipProvider delayDuration={100}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>
-                <LookupProductUnit
-                  productId={productId}
-                  value={field.value ?? ""}
-                  disableTooltip
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    onExtraChange?.(value);
-                  }}
-                  className="h-7 w-full text-xs"
-                />
-              </div>
-            </TooltipTrigger>
-            {selectedUnit && (
-              <TooltipContent
-                side="top"
-                className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
-              >
-                <p className="text-xs font-semibold">{selectedUnit.name}</p>
-                {selectedUnit.conversion !== 1 && (
-                  <p className="text-foreground/60 text-[0.6875rem]">
-                    1 = {selectedUnit.conversion} base
-                  </p>
-                )}
-              </TooltipContent>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <InputGroupButton
+          variant="ghost"
+          size="xs"
+          aria-label="Unit"
+          className="text-muted-foreground pr-1.5! font-semibold"
+        >
+          {selectedUnit?.name ?? "—"}
+          <ChevronDownIcon className="size-3 opacity-60" />
+        </InputGroupButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
+        {units.length === 0 && (
+          <DropdownMenuItem disabled>—</DropdownMenuItem>
+        )}
+        {units.map((u) => (
+          <DropdownMenuItem
+            key={u.id}
+            onSelect={() => {
+              field.onChange(u.id);
+              onExtraChange?.(u.id);
+            }}
+            className="gap-2"
+          >
+            <span className="font-semibold">{u.name}</span>
+            {u.conversion !== 1 && (
+              <span className="text-muted-foreground text-xs">
+                1 = {u.conversion}
+              </span>
             )}
-          </Tooltip>
-        </TooltipProvider>
-      )}
-    />
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 });

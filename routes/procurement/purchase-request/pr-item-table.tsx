@@ -42,6 +42,7 @@ export type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
  * ต่างกัน (เดิม 80/60/40) UI จึงกว้างไม่เท่ากัน
  */
 const NARROW_COL_SIZE = 35;
+const QTY_SIZE = 125;
 
 interface UsePrItemTableOptions {
   form: UseFormReturn<PrFormValues>;
@@ -239,7 +240,7 @@ export function usePrItemTable({
             isDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: QTY_SIZE,
         meta: {
           headerClassName: "text-right",
         },
@@ -256,7 +257,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: QTY_SIZE,
         meta: {
           headerClassName: "text-right",
         },
@@ -273,7 +274,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: QTY_SIZE,
         meta: {
           headerClassName: "text-right",
         },

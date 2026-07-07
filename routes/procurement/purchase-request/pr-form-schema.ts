@@ -186,7 +186,7 @@ export const PR_ITEM = {
   location_name: "",
   location_type: "",
   delivery_point_name: "",
-  requested_qty: 1,
+  requested_qty: 0,
   requested_unit_id: null,
   requested_unit_name: "",
   inventory_unit_id: null,
