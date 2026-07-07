@@ -2,7 +2,7 @@ import type React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
-import { MoreHorizontal, Check, X, Trash2 } from "lucide-react";
+import { MoreHorizontal, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import {
@@ -97,7 +97,7 @@ export function usePurchaseRequestTable({
         cellClassName: "text-center",
         headerClassName: "text-center",
       },
-      size: 100,
+      size: 120,
     },
     {
       accessorKey: "workflow_current_stage",
@@ -194,7 +194,10 @@ export function usePurchaseRequestTable({
                 className="cursor-pointer"
                 onClick={() => onApprove(item)}
               >
-                <Check className="text-positive size-3" aria-hidden="true" />
+                <CheckCircle2
+                  className="text-success size-3"
+                  aria-hidden="true"
+                />
                 {tc("approve")}
               </DropdownMenuItem>
             )}
@@ -204,7 +207,10 @@ export function usePurchaseRequestTable({
                 className="cursor-pointer"
                 onClick={() => onReject(item)}
               >
-                <X className="text-destructive size-3" aria-hidden="true" />
+                <XCircle
+                  className="text-destructive size-3"
+                  aria-hidden="true"
+                />
                 {tc("reject")}
               </DropdownMenuItem>
             )}

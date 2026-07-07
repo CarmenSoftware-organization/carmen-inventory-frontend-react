@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
-  Check,
+  CheckCircle2,
   Columns3,
   LayoutGrid,
   LayoutList,
-  X,
+  XCircle,
   Loader2,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -34,8 +34,7 @@ import { useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { VoidDialog } from "@/components/share/void-dialog";
+import { PrActionDialog } from "./workflow/pr-action-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { usePurchaseRequestTable } from "./pr-table";
 import PrCardList from "./pr-card-list";
@@ -356,11 +355,11 @@ export default function PurchaseRequestComponent() {
               {selectedRows.length} {t("selected")}
             </span>
             <Button size="sm" variant="success" onClick={handleBatchApprove}>
-              <Check aria-hidden="true" />
+              <CheckCircle2 aria-hidden="true" />
               {tc("approve")}
             </Button>
             <Button size="sm" variant="destructive" onClick={handleBatchReject}>
-              <X aria-hidden="true" />
+              <XCircle aria-hidden="true" />
               {tc("reject")}
             </Button>
           </div>
@@ -414,7 +413,7 @@ export default function PurchaseRequestComponent() {
         )}
       </div>
 
-      <ConfirmDialog
+      <PrActionDialog
         open={!!approveTarget}
         onOpenChange={(open) =>
           !open &&
@@ -423,7 +422,9 @@ export default function PurchaseRequestComponent() {
         }
         title={t("approveTitle")}
         description={t("approveConfirm", { prNo: approveTarget?.pr_no ?? "" })}
-        confirmText={tc("approve")}
+        confirmVariant="success"
+        confirmLabel={tc("approve")}
+        showMessage={false}
         isPending={batchApprovePurchaseRequest.isPending}
         onConfirm={() => {
           if (!approveTarget) return;
@@ -439,7 +440,7 @@ export default function PurchaseRequestComponent() {
           );
         }}
       />
-      <VoidDialog
+      <PrActionDialog
         open={!!rejectTarget}
         onOpenChange={(open) =>
           !open &&
@@ -448,11 +449,13 @@ export default function PurchaseRequestComponent() {
         }
         title={t("rejectTitle")}
         description={t("rejectConfirm", { prNo: rejectTarget?.pr_no ?? "" })}
+        confirmVariant="destructive"
+        confirmLabel={tc("reject")}
         isPending={batchRejectPurchaseRequest.isPending}
-        onConfirm={(reason) => {
+        onConfirm={(messages) => {
           if (!rejectTarget) return;
           batchRejectPurchaseRequest.mutate(
-            { pr_ids: [rejectTarget.id], reject_message: reason },
+            { pr_ids: [rejectTarget.id], reject_message: messages[0] ?? "" },
             {
               onSuccess: () => {
                 toast.success(tt("rejectSuccess", { entity: t("entity") }));
@@ -483,7 +486,7 @@ export default function PurchaseRequestComponent() {
         }}
       />
 
-      <ConfirmDialog
+      <PrActionDialog
         open={batchApproveOpen}
         onOpenChange={(open) =>
           !open &&
@@ -501,7 +504,9 @@ export default function PurchaseRequestComponent() {
             </ul>
           </div>
         }
-        confirmText={tc("approve")}
+        confirmVariant="success"
+        confirmLabel={tc("approve")}
+        showMessage={false}
         isPending={batchApprovePurchaseRequest.isPending}
         onConfirm={() => {
           const selectedIds = selectedRows.map((row) => row.original.id);
@@ -519,7 +524,7 @@ export default function PurchaseRequestComponent() {
         }}
       />
 
-      <VoidDialog
+      <PrActionDialog
         open={batchRejectOpen}
         onOpenChange={(open) =>
           !open &&
@@ -537,11 +542,13 @@ export default function PurchaseRequestComponent() {
             </ul>
           </div>
         }
+        confirmVariant="destructive"
+        confirmLabel={tc("reject")}
         isPending={batchRejectPurchaseRequest.isPending}
-        onConfirm={(reason) => {
+        onConfirm={(messages) => {
           const selectedIds = selectedRows.map((row) => row.original.id);
           batchRejectPurchaseRequest.mutate(
-            { pr_ids: selectedIds, reject_message: reason },
+            { pr_ids: selectedIds, reject_message: messages[0] ?? "" },
             {
               onSuccess: () => {
                 toast.success(tt("rejectSuccess", { entity: t("entity") }));

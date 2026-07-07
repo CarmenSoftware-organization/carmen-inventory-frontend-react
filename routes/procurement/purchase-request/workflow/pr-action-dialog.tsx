@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import {
   AlertTriangle,
@@ -41,7 +41,7 @@ interface PrActionDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly title: string;
-  readonly description?: string;
+  readonly description?: ReactNode;
   readonly confirmLabel?: string;
   readonly confirmVariant?: ActionVariant;
   readonly isPending?: boolean;
@@ -65,31 +65,31 @@ const TONE: Record<
   }
 > = {
   default: {
-    iconBg: "bg-primary/10",
+    iconBg: "bg-muted",
     iconColor: "text-primary",
     icon: Send,
     titleColor: "text-foreground",
   },
   success: {
-    iconBg: "bg-success/10",
+    iconBg: "bg-muted",
     iconColor: "text-success",
     icon: CheckCircle2,
     titleColor: "text-foreground",
   },
   destructive: {
-    iconBg: "bg-destructive/10",
+    iconBg: "bg-muted",
     iconColor: "text-destructive",
     icon: XCircle,
     titleColor: "text-destructive",
   },
   warning: {
-    iconBg: "bg-warning/10",
+    iconBg: "bg-muted",
     iconColor: "text-warning",
     icon: AlertTriangle,
     titleColor: "text-warning",
   },
   info: {
-    iconBg: "bg-info/10",
+    iconBg: "bg-muted",
     iconColor: "text-info",
     icon: Info,
     titleColor: "text-foreground",
