@@ -6,7 +6,7 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { BoxIcon, Plus } from "lucide-react";
+import { BoxIcon, ChevronsDownUp, ChevronsUpDown, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DataGrid,
@@ -110,6 +110,7 @@ export function GrnItemTable({
 }: GrnItemTableProps) {
   "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
+  const tc = useTranslations("common");
   const docType = useWatch({ control: form.control, name: "doc_type" });
   const isManual = docType === "manual";
   const [deleteGroup, setDeleteGroup] = useState<GrnGroup | null>(null);
@@ -227,7 +228,29 @@ export function GrnItemTable({
 
   return (
     <div className="space-y-2 pt-2">
-      <div className="flex items-center justify-end">{addAction}</div>
+      <div className="flex flex-wrap items-center justify-end gap-1.5">
+        {groups.length > 0 && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            onClick={() =>
+              table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+            }
+          >
+            {table.getIsAllRowsExpanded() ? (
+              <>
+                <ChevronsDownUp /> {tc("collapseAll")}
+              </>
+            ) : (
+              <>
+                <ChevronsUpDown /> {tc("expandAll")}
+              </>
+            )}
+          </Button>
+        )}
+        {addAction}
+      </div>
 
       {itemsError && (
         <p className="text-destructive text-xs" role="alert">

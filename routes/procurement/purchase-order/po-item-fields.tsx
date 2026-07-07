@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
-import { Check, Eye, Lock, Plus, ThumbsDown } from "lucide-react";
+import {
+  Check,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Eye,
+  Lock,
+  Plus,
+  ThumbsDown,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
@@ -271,6 +279,26 @@ export function PoItemFields({
           >
             <Lock />
             {tc("close")}
+          </Button>
+        )}
+        {itemFields.length > 0 && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            onClick={() =>
+              table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+            }
+          >
+            {table.getIsAllRowsExpanded() ? (
+              <>
+                <ChevronsDownUp /> {tc("collapseAll")}
+              </>
+            ) : (
+              <>
+                <ChevronsUpDown /> {tc("expandAll")}
+              </>
+            )}
           </Button>
         )}
         {(!role || role === STAGE_ROLE.CREATE) && !disabled && (
