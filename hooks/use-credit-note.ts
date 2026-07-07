@@ -8,7 +8,7 @@ import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { buildUrl } from "@/utils/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
-import type { CreditNote, CreateCnDto } from "@/types/credit-note";
+import type { CreditNote, CreditNoteDetail, CreateCnDto } from "@/types/credit-note";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import type { CommentItem } from "@/components/ui/comment-sheet";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
@@ -53,7 +53,7 @@ export function useCreditNote(
 export function useCreditNoteById(id: string | undefined) {
   const buCode = useBuCode();
 
-  return useQuery<CreditNote>({
+  return useQuery<CreditNoteDetail>({
     queryKey: [QUERY_KEYS.CREDIT_NOTES, buCode, id],
     queryFn: async () => {
       const res = await httpClient.get(

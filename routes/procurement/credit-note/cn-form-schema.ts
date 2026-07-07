@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
-import type { CreditNote, CnItemPayload } from "@/types/credit-note";
+import type { CreditNoteDetail, CnItemPayload } from "@/types/credit-note";
 
 /**
  * สร้าง Zod schema สำหรับรายการสินค้าในใบลดหนี้
@@ -160,27 +160,27 @@ export const EMPTY_FORM: CnFormValues = {
  * กรณีแก้ไข: แปลงจาก CreditNote เป็น CnFormValues (รวม items)
  * กรณีสร้างใหม่: ใช้ EMPTY_FORM + cn_date ปัจจุบัน — currency มาจากการเลือก GRN
  *
- * @param cn - CreditNote ที่จะแก้ไข (optional)
+ * @param cn - CreditNoteDetail ที่จะแก้ไข (optional)
  * @returns CnFormValues พร้อมใช้กับ useForm
  * @example
  * const defaultValues = getDefaultValues(cn);
  * const form = useForm<CnFormValues>({ defaultValues, resolver });
  */
-export function getDefaultValues(cn?: CreditNote): CnFormValues {
+export function getDefaultValues(cn?: CreditNoteDetail): CnFormValues {
   if (cn) {
     return {
       doc_version: cn.doc_version,
       credit_note_type: cn.credit_note_type ?? "quantity_return",
-      grn_id: cn.grn_id ?? "",
-      grn_date: cn.grn_date ?? "",
-      vendor_id: cn.vendor_id ?? "",
+      grn_id: cn.grn?.id ?? "",
+      grn_date: cn.grn?.date ?? "",
+      vendor_id: cn.vendor?.id ?? "",
       cn_no: cn.cn_no ?? "",
       cn_date: cn.cn_date ?? "",
-      reason: cn.cn_reason_id ?? "",
+      reason: cn.cn_reason?.id ?? "",
       reference_number: cn.reference_number ?? "",
       description: cn.description ?? "",
-      currency_code: cn.currency_id ?? "",
-      exchange_rate: cn.exchange_rate ?? 1,
+      currency_code: cn.currency?.id ?? "",
+      exchange_rate: cn.currency?.exchange_rate ?? 1,
       invoice_no: cn.invoice_no ?? "",
       invoice_date: cn.invoice_date ?? "",
       tax_invoice_no: cn.tax_invoice_no ?? "",
@@ -192,19 +192,19 @@ export function getDefaultValues(cn?: CreditNote): CnFormValues {
         cn.credit_note_detail?.map((d) => ({
           id: d.id,
           doc_version: d.doc_version,
-          _group_key: d.product_id ?? d.id,
-          location_id: d.location_id ?? null,
-          location_name: d.location_name ?? "",
-          location_code: d.location_code ?? "",
-          item_id: d.product_id,
-          item_name: d.product_name ?? "",
-          item_local_name: d.product_local_name ?? "",
+          _group_key: d.product?.id ?? d.id,
+          location_id: d.location?.id ?? null,
+          location_name: d.location?.name ?? "",
+          location_code: d.location?.code ?? "",
+          item_id: d.product?.id ?? "",
+          item_name: d.product?.name ?? "",
+          item_local_name: d.product?.local_name ?? "",
           quantity: d.return_qty,
           requested_qty: 0,
           approved_qty: 0,
-          unit_id: d.return_unit_id ?? "",
-          unit_name: d.return_unit_name ?? "",
-          currency_code: cn.currency_code ?? "",
+          unit_id: d.return_unit?.id ?? "",
+          unit_name: d.return_unit?.name ?? "",
+          currency_code: cn.currency?.code ?? "",
           unit_price: d.price ?? 0,
           net_amount: d.net_amount ?? 0,
           tax_rate: d.tax_rate ?? 0,
