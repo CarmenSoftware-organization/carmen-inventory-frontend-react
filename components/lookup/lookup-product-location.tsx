@@ -5,6 +5,7 @@ import { useLocationsByProduct } from "@/hooks/use-locations-by-product";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import type { Location } from "@/types/location";
 import { Badge } from "@/components/ui/badge";
+import { LocationTypeBadge } from "@/components/ui/location-type-badge";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductLocationProps {
@@ -23,12 +24,6 @@ interface LookupProductLocationProps {
   /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม location ใหม่) */
   readonly defaultOpen?: boolean;
 }
-
-const TYPE_VARIANT: Record<string, "info" | "warning" | "secondary"> = {
-  inventory: "info",
-  direct: "warning",
-  consignment: "secondary",
-};
 
 /**
  * Lookup Popover สำหรับเลือก location ที่มีสินค้าชิ้นนั้น ๆ อยู่ (cascading จาก productId)
@@ -112,9 +107,11 @@ export function LookupProductLocation({
             {l.code}
           </Badge>
           <span className="flex-1 truncate text-left">{l.name}</span>
-          <Badge size="xs" variant={TYPE_VARIANT[l.location_type]}>
-            {l.location_type.toUpperCase()}
-          </Badge>
+          <LocationTypeBadge
+            type={l.location_type}
+            size="xs"
+            className="shrink-0"
+          />
         </>
       )}
       placeholder={placeholder ?? tl("select", { entity: tfl("location") })}
