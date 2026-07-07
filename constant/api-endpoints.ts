@@ -39,8 +39,7 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/app-config/signature-candidates/${docType}`,
   APP_CONFIG_TEST_EMAIL: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/app-config/test-email`,
-  BUSINESS_UNIT_BY_ID: (id: string) =>
-    `/api/proxy/api-system/business-units/${id}`,
+  BUSINESS_UNIT: "/api/proxy/api/business-units",
   BUSINESS_UNIT_AVATAR: (id: string) =>
     `/api/proxy/api-system/business-units/${id}/avatar`,
   BUSINESS_UNIT_LOGO: (id: string) =>

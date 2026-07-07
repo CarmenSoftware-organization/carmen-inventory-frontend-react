@@ -9,10 +9,11 @@ import type {
 } from "@/types/business-unit";
 
 /**
- * Hook ดึงรายละเอียด Business Unit ตาม id จาก `GET api-system/business-units/:id`
+ * Hook ดึงรายละเอียด Business Unit ปัจจุบันจาก `GET api/business-units`
  *
- * ใช้ในหน้า Business Setting (system-admin) — query เปิดทำงานเมื่อมี `buId`
- * (ปกติมาจาก `useProfile().defaultBu.id`)
+ * backend หา BU จาก context (token/x-app-id) — ไม่มี id ใน URL. query เปิดทำงาน
+ * เมื่อมี `buId` (จาก `useProfile().defaultBu.id`) และใช้เป็น cache key เพื่อ
+ * refetch อัตโนมัติเมื่อสลับ BU
  *
  * @param buId - UUID ของ business unit (undefined = ยังไม่พร้อม, query ถูก disable)
  * @returns UseQueryResult ของ BusinessUnitDetail
@@ -26,7 +27,7 @@ export function useBusinessUnit(buId: string | undefined) {
   return useQuery<BusinessUnitDetail>({
     queryKey: [QUERY_KEYS.BUSINESS_UNIT_DETAIL, buId],
     queryFn: async () => {
-      const res = await httpClient.get(API_ENDPOINTS.BUSINESS_UNIT_BY_ID(buId!));
+      const res = await httpClient.get(API_ENDPOINTS.BUSINESS_UNIT);
       if (!res.ok) throw new Error("Failed to fetch business unit");
       const json = await res.json();
       return json.data;
@@ -37,7 +38,7 @@ export function useBusinessUnit(buId: string | undefined) {
 }
 
 /**
- * Hook แก้ไข Business Unit แบบ partial ผ่าน `PATCH api-system/business-units/:id`
+ * Hook แก้ไข Business Unit แบบ partial ผ่าน `PATCH api/business-units`
  *
  * ส่งเฉพาะ field ที่เปลี่ยน (payload ที่ caller สร้างจาก diff) — onSuccess
  * invalidate ทั้ง detail และ profile (เพราะ config บาง field เช่น date/currency
@@ -55,10 +56,7 @@ export function useUpdateBusinessUnit(buId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation<unknown, ApiError, BusinessUnitPatch>({
     mutationFn: async (payload) => {
-      const res = await httpClient.patch(
-        API_ENDPOINTS.BUSINESS_UNIT_BY_ID(buId!),
-        payload,
-      );
+      const res = await httpClient.patch(API_ENDPOINTS.BUSINESS_UNIT, payload);
       if (!res.ok) {
         let serverMessage: string | undefined;
         try {

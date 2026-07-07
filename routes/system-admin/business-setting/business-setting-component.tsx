@@ -47,7 +47,7 @@ import {
  *
  * โหมด view = read-only, กด Edit → field กลายเป็น input (toggle ในหน้าเดียว)
  * Save ส่งเฉพาะ field ที่เปลี่ยน (`PATCH` partial). ดึงข้อมูลจาก
- * `GET api-system/business-units/:id` — แสดงทุก field ยกเว้น `users[]`
+ * `GET api/business-units` — แสดงทุก field ยกเว้น `users[]`
  *
  * @returns React element ของหน้า business setting
  */

@@ -1,5 +1,5 @@
 /**
- * รายละเอียด Business Unit จาก `GET api-system/business-units/:bu_id`
+ * รายละเอียด Business Unit จาก `GET api/business-units`
  *
  * ใช้ในหน้า Business Setting (system-admin) — สะท้อน response ทั้งหมด
  * ยกเว้น `users[]` ที่หน้านี้ไม่ได้ใช้จึงไม่ระบุไว้
