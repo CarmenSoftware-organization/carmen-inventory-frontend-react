@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Pencil } from "lucide-react";
+import { Loader2, Pencil, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -126,6 +126,7 @@ export default function BusinessSettingComponent() {
                   onClick={handleCancel}
                   disabled={update.isPending}
                 >
+                  <X className="size-3.5" aria-hidden="true" />
                   {t("cancel")}
                 </Button>
                 <Button
@@ -134,11 +135,13 @@ export default function BusinessSettingComponent() {
                   onClick={onSubmit}
                   disabled={update.isPending}
                 >
-                  {update.isPending && (
+                  {update.isPending ? (
                     <Loader2
                       className="size-3.5 animate-spin"
                       aria-hidden="true"
                     />
+                  ) : (
+                    <Save className="size-3.5" aria-hidden="true" />
                   )}
                   {t("save")}
                 </Button>
