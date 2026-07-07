@@ -286,13 +286,13 @@ export function usePrItemTable({
             control={form.control}
             index={row.index}
             baseCurrencyCode={baseCurrencyCode}
+            isDisabled={isDisabled}
             currencySlot={
               <CurrencyCell
                 control={form.control}
                 form={form}
                 index={row.index}
                 isDisabled={isDisabled}
-                className="h-7 w-fit min-w-14 text-xs"
               />
             }
           />
