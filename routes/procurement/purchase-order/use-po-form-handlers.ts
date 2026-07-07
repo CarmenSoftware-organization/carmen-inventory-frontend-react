@@ -15,6 +15,7 @@ import {
   useClosePurchaseOrder,
 } from "@/hooks/use-purchase-order";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
@@ -96,6 +97,20 @@ export function usePoFormHandlers({
     isDirty: form.formState.isDirty,
     isPending,
   });
+
+  // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
+  // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
+  const navGuard = useNavigationGuard(
+    (mode === "add" || mode === "edit") && form.formState.isDirty,
+  );
+  const navDiscardDialogProps = {
+    open: navGuard.isOpen,
+    onOpenChange: (o: boolean) => {
+      if (!o) navGuard.cancel();
+    },
+    onConfirm: navGuard.confirm,
+    onCancel: navGuard.cancel,
+  };
 
   const buildDetailsFromForm = () =>
     form.getValues("items").map((item, i) => ({
@@ -406,5 +421,6 @@ export function usePoFormHandlers({
     handleClosePo,
     handleDeleteConfirm,
     discardDialogProps: discard.dialogProps,
+    navDiscardDialogProps,
   };
 }

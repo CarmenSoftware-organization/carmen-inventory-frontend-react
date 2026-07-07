@@ -296,6 +296,7 @@ export function PurchaseRequestForm({
         createdAt={purchaseRequest?.created_at}
         showNoDepartment={showNoDepartment}
         discardDialogProps={actions.discardDialogProps}
+        navDiscardDialogProps={actions.navDiscardDialogProps}
         actionDialog={actions.actionDialog}
         setActionDialog={actions.setActionDialog}
         isPending={actions.isPending}

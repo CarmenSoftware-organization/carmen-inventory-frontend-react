@@ -50,6 +50,7 @@ interface PrFormDialogsProps {
   createdAt?: string;
   showNoDepartment: boolean;
   discardDialogProps: DiscardConfirmDialogProps;
+  navDiscardDialogProps: DiscardConfirmDialogProps;
   actionDialog: ActionDialogState;
   setActionDialog: (state: ActionDialogState) => void;
   isPending: boolean;
@@ -73,6 +74,7 @@ export function PrFormDialogs({
   createdAt,
   showNoDepartment,
   discardDialogProps,
+  navDiscardDialogProps,
   actionDialog,
   setActionDialog,
   isPending,
@@ -167,6 +169,7 @@ export function PrFormDialogs({
       />
 
       <DiscardDialog {...discardDialogProps} variant="warning" />
+      <DiscardDialog {...navDiscardDialogProps} variant="warning" />
     </>
   );
 }

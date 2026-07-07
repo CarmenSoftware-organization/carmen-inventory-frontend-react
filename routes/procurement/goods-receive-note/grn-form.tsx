@@ -307,6 +307,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
       )}
 
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />
+      <DiscardDialog {...actions.navDiscardDialogProps} variant="warning" />
 
       {goodsReceiveNote && (
         <GrnFormDialogs

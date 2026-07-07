@@ -22,6 +22,7 @@ import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { PrtGeneralFields } from "./prt-general-fields";
 import { PrtItemFields } from "./prt-item-fields";
 import {
@@ -68,6 +69,9 @@ export function PrtForm({ template }: PrtFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+
+  // in-app navigation guard: เตือนก่อนออกเมื่อ add/edit และฟอร์มถูกแก้ไข
+  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
 
   const watchedDescription = useWatch({
     control: form.control,
@@ -214,6 +218,16 @@ export function PrtForm({ template }: PrtFormProps) {
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {template && (
         <DeleteDialog

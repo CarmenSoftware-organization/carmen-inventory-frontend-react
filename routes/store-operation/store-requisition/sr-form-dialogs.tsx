@@ -56,6 +56,7 @@ export function SrFormDialogs({
   return (
     <>
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />
+      <DiscardDialog {...actions.navDiscardDialogProps} variant="warning" />
 
       {storeRequisition && (
         <DeleteDialog

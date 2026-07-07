@@ -13,6 +13,7 @@ import {
   useVoidGoodsReceiveNote,
 } from "@/hooks/use-goods-receive-note";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import type {
   GoodsReceiveNote,
   CreateGrnDto,
@@ -68,6 +69,18 @@ export function useGrnFormActions({
     isDirty: form.formState.isDirty,
     isPending: isPending || isActionPending,
   });
+
+  // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
+  // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
+  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navDiscardDialogProps = {
+    open: navGuard.isOpen,
+    onOpenChange: (o: boolean) => {
+      if (!o) navGuard.cancel();
+    },
+    onConfirm: navGuard.confirm,
+    onCancel: navGuard.cancel,
+  };
 
   // re-sync doc_version จาก response /save กลับเข้า form (header + ราย item
   // ที่อยู่ใน good_received_note_detail[].items[] จับคู่ด้วย id) — กัน save ซ้ำ
@@ -353,5 +366,6 @@ export function useGrnFormActions({
     handleConfirmCommit,
     handleConfirmVoid,
     discardDialogProps: discard.dialogProps,
+    navDiscardDialogProps,
   };
 }

@@ -131,6 +131,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     handleClosePo,
     handleDeleteConfirm,
     discardDialogProps,
+    navDiscardDialogProps,
   } = usePoFormHandlers({
     purchaseOrder,
     form,
@@ -226,6 +227,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
       />
 
       <DiscardDialog {...discardDialogProps} variant="warning" />
+      <DiscardDialog {...navDiscardDialogProps} variant="warning" />
 
       {purchaseOrder && (
         <>

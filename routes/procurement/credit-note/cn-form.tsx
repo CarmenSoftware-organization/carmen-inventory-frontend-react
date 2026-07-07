@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { CnHeader } from "./cn-header";
 import { CnGeneralFields } from "./cn-general-fields";
@@ -85,6 +86,9 @@ export function CnForm({ creditNote }: CnFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+
+  // guard เฉพาะโหมด add/edit และฟอร์มมีการแก้ไข
+  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
 
   const cnSyncKey = [
     creditNote?.doc_version ?? "",
@@ -267,6 +271,16 @@ export function CnForm({ creditNote }: CnFormProps) {
       <CnFooterAction control={form.control} />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {creditNote && (
         <>
