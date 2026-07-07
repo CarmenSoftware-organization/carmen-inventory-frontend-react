@@ -5,10 +5,7 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { TransferItem } from "@/components/ui/transfer";
-import {
-  INVENTORY_TYPE,
-  LOCATION_TYPE_BADGE_VARIANT,
-} from "@/constant/location";
+import { INVENTORY_TYPE } from "@/constant/location";
 import { cn } from "@/lib/utils";
 import type { UserLocationItem } from "@/hooks/use-user";
 import { EmptyState, FilterChip, SectionCard } from "./user-assigned-ui";
@@ -246,7 +243,7 @@ function LocationsView({
                   {LOCATION_TYPE_LABEL[type]}
                 </h3>
               </div>
-              <Badge variant={LOCATION_TYPE_BADGE_VARIANT[type]} size="xs">
+              <Badge variant="secondary" size="xs">
                 {items.length}
               </Badge>
             </div>

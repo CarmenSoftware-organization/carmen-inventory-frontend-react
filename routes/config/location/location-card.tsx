@@ -3,10 +3,7 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  INVENTORY_TYPE_LABEL_KEY,
-  LOCATION_TYPE_BADGE_VARIANT,
-} from "@/constant/location";
+import { LocationTypeBadge } from "@/components/ui/location-type-badge";
 import type { Location } from "@/types/location";
 
 interface LocationCardProps {
@@ -29,7 +26,6 @@ interface LocationCardProps {
  * ```
  */
 export default function LocationCard({ item, index, onEdit }: LocationCardProps) {
-  const t = useTranslations("config.location");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
@@ -57,13 +53,7 @@ export default function LocationCard({ item, index, onEdit }: LocationCardProps)
         </div>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-xs">{item.code}</p>
-          <Badge
-            variant={LOCATION_TYPE_BADGE_VARIANT[item.location_type]}
-            className="text-xs"
-            size="xs"
-          >
-            {t(INVENTORY_TYPE_LABEL_KEY[item.location_type])}
-          </Badge>
+          <LocationTypeBadge type={item.location_type} size="xs" />
         </div>
       </CardHeader>
 
