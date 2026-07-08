@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,7 +44,7 @@ import {
   getDefaultValues,
   type RfpFormValues,
 } from "./rfp-form-schema";
-import RfpVendorSection from "./rfp-vendor-section";
+import RfpVendorTable from "./rfp-vendor-table";
 
 const FORM_ID = "rfp-form";
 
@@ -202,7 +201,11 @@ export function RequestPriceListForm({
 
     if (isEdit && requestPriceList) {
       updateRfp.mutate(
-        { id: requestPriceList.id, doc_version: requestPriceList.doc_version, ...payload },
+        {
+          id: requestPriceList.id,
+          doc_version: requestPriceList.doc_version,
+          ...payload,
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -220,7 +223,9 @@ export function RequestPriceListForm({
         onSuccess: (res) => {
           const id = (res as { data: { id: string } }).data.id;
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate(`/vendor-management/request-price-list/${id}`, { replace: true });
+          navigate(`/vendor-management/request-price-list/${id}`, {
+            replace: true,
+          });
         },
         onError: (err) => toast.error(err.message),
       });
@@ -261,85 +266,83 @@ export function RequestPriceListForm({
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="w-fit"
+            aria-label={tc("goBack")}
+            onClick={handleBack}
+          >
+            <ChevronLeft />
+          </Button>
+          <h1
+            className={cn(
+              "truncate text-lg font-semibold tracking-tight",
+              watchedName ? "text-foreground" : "text-muted-foreground italic",
+            )}
+          >
+            {watchedName || t("namePlaceholder")}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          {isView ? (
+            <>
+              <Button size="sm" onClick={() => setMode("edit")}>
+                <Pencil />
+                {tc("edit")}
+              </Button>
+              {requestPriceList?.id && (
+                <PrintDocumentButton
+                  documentType="RFQ"
+                  documentId={requestPriceList.id}
+                  filters={
+                    requestPriceList.name
+                      ? { DocumentNo: requestPriceList.name }
+                      : undefined
+                  }
+                />
+              )}
+            </>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCancel}
+                disabled={isPending}
+              >
+                <X />
+                {tc("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                form={FORM_ID}
+                disabled={isPending}
+              >
+                <Save />
+                {submitLabel}
+              </Button>
+              {isEdit && requestPriceList && (
                 <Button
                   type="button"
+                  variant="destructive"
                   size="sm"
-                  variant="ghost"
-                  className="w-fit"
-                  aria-label={tc("goBack")}
-                  onClick={handleBack}
+                  onClick={() => setShowDelete(true)}
+                  disabled={deleteRfp.isPending || isPending}
                 >
-                  <ChevronLeft />
+                  <Trash2 />
+                  {tc("delete")}
                 </Button>
-                <h1
-                  className={cn(
-                    "truncate text-lg font-semibold tracking-tight",
-                    watchedName
-                      ? "text-foreground"
-                      : "text-muted-foreground italic",
-                  )}
-                >
-                  {watchedName || t("namePlaceholder")}
-                </h1>
-              </div>
-              <div className="flex items-center gap-2">
-                {isView ? (
-                  <>
-                    <Button size="sm" onClick={() => setMode("edit")}>
-                      <Pencil />
-                      {tc("edit")}
-                    </Button>
-                    {requestPriceList?.id && (
-                      <PrintDocumentButton
-                        documentType="RFQ"
-                        documentId={requestPriceList.id}
-                        filters={
-                          requestPriceList.name
-                            ? { DocumentNo: requestPriceList.name }
-                            : undefined
-                        }
-                      />
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCancel}
-                      disabled={isPending}
-                    >
-                      <X />
-                      {tc("cancel")}
-                    </Button>
-                    <Button
-                      type="submit"
-                      size="sm"
-                      form={FORM_ID}
-                      disabled={isPending}
-                    >
-                      <Save />
-                      {submitLabel}
-                    </Button>
-                    {isEdit && requestPriceList && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setShowDelete(true)}
-                        disabled={deleteRfp.isPending || isPending}
-                      >
-                        <Trash2 />
-                        {tc("delete")}
-                      </Button>
-                    )}
-                  </>
-                )}
-              </div>
+              )}
+            </>
+          )}
+        </div>
       </header>
 
       <form
@@ -355,7 +358,7 @@ export function RequestPriceListForm({
           description={t("generalDesc")}
         >
           {/* Name */}
-          <Field className="sm:col-span-2">
+          <Field>
             <FieldLabel htmlFor="rfp-name">
               {tfl("name")}
               {!isView && <span className="text-destructive"> *</span>}
@@ -375,7 +378,7 @@ export function RequestPriceListForm({
           </Field>
 
           {/* Template */}
-          <Field className="sm:col-span-2">
+          <Field>
             <FieldLabel>
               {tfl("template")}
               {!isView && <span className="text-destructive"> *</span>}
@@ -394,9 +397,7 @@ export function RequestPriceListForm({
                     onValueChange={(value) => field.onChange(value)}
                     disabled={isDisabled}
                     className="w-full"
-                    error={
-                      form.formState.errors.pricelist_template_id?.message
-                    }
+                    error={form.formState.errors.pricelist_template_id?.message}
                   />
                 )}
               />
@@ -479,7 +480,7 @@ export function RequestPriceListForm({
           </Field>
         </SettingSection>
 
-        <RfpVendorSection
+        <RfpVendorTable
           isDisabled={isDisabled}
           isAdding={isAdding}
           setIsAdding={setIsAdding}
