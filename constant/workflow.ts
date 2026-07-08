@@ -32,6 +32,21 @@ export const WF_TYPE_VARIANT = createVariantMap({
   [WORKFLOW_TYPE.SR]: "success",
 });
 
+/**
+ * Dot color per workflow type — for the muted "dot badge" (neutral chip +
+ * colored dot, per DESIGN.md "avoid neon"), matching `LocationTypeBadge`.
+ * Same color semantics as `WF_TYPE_VARIANT`: PR=info, PO=warning, SR=success.
+ * Keyed on both short-form row values and long-form (enum) aliases.
+ */
+export const WF_TYPE_DOT_COLOR: Record<string, string> = {
+  [WF_ROW_TYPE.PR]: "bg-info",
+  [WF_ROW_TYPE.PO]: "bg-warning",
+  [WF_ROW_TYPE.SR]: "bg-success",
+  [WORKFLOW_TYPE.PR]: "bg-info",
+  [WORKFLOW_TYPE.PO]: "bg-warning",
+  [WORKFLOW_TYPE.SR]: "bg-success",
+};
+
 type WfI18nFn = (key: string) => string;
 
 export const WORKFLOW_TYPES = [

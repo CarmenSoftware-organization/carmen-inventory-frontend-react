@@ -1,4 +1,4 @@
-import { CheckCircle2, Crown, Play } from "lucide-react";
+import { CheckCircle2, Circle, Crown, Play } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { Role, Stage, WorkflowDto } from "@/types/workflows";
 import { cn } from "@/lib/utils";
-import { ROLE_SOLID } from "./wf-role-colors";
+import { ROLE_ICON, ROLE_TEXT } from "./wf-role-colors";
 
 interface WfFlowStripProps {
   readonly workflow: WorkflowDto;
@@ -87,40 +87,39 @@ interface FlowNodeProps {
 }
 
 function FlowNode({ label, ariaLabel, kind, role, isHod }: FlowNodeProps) {
-  const dotClass =
+  // Flat icon per node — vivid single-tone color, no bubble/ring/tint.
+  const Icon =
     kind === "start"
-      ? "bg-primary/15 text-primary ring-primary/30"
+      ? Play
       : kind === "end"
-        ? "bg-success/15 text-success-foreground ring-success/30"
-        : "bg-muted-foreground/10 ring-muted-foreground/20";
+        ? CheckCircle2
+        : role
+          ? ROLE_ICON[role]
+          : Circle;
 
-  const roleBg = kind === "middle" && role ? ROLE_SOLID[role] : undefined;
+  const colorClass =
+    kind === "start"
+      ? "text-primary"
+      : kind === "end"
+        ? "text-success"
+        : role
+          ? ROLE_TEXT[role]
+          : "text-muted-foreground";
 
   const node = (
     <span
-      className={cn(
-        "relative inline-flex shrink-0 items-center justify-center rounded-full ring-1",
-        kind === "middle" ? "size-2.5" : "size-4",
-        dotClass,
-      )}
+      className={cn("relative inline-flex shrink-0", colorClass)}
       aria-label={ariaLabel}
     >
-      {kind === "start" && (
-        <Play className="size-2 fill-current" aria-hidden="true" />
-      )}
-      {kind === "end" && (
-        <CheckCircle2 className="size-2.5" aria-hidden="true" />
-      )}
-      {kind === "middle" && roleBg && (
-        <span
-          className={cn("inline-block size-1.5 rounded-full", roleBg)}
+      <Icon
+        className={cn("size-4", kind === "start" && "fill-current")}
+        aria-hidden="true"
+      />
+      {isHod && kind === "middle" && (
+        <Crown
+          className="text-warning absolute -top-1.5 -right-1.5 size-2.5 fill-current"
           aria-hidden="true"
         />
-      )}
-      {isHod && kind === "middle" && (
-        <span className="bg-warning text-warning-foreground absolute -top-1 -right-1 inline-flex size-2.5 items-center justify-center rounded-full">
-          <Crown className="size-1.5" aria-hidden="true" />
-        </span>
       )}
     </span>
   );
@@ -130,6 +129,7 @@ function FlowNode({ label, ariaLabel, kind, role, isHod }: FlowNodeProps) {
       <TooltipTrigger asChild>{node}</TooltipTrigger>
       <TooltipContent side="top" className="text-xs">
         {label}
+        {isHod && kind === "middle" && " · HOD"}
       </TooltipContent>
     </Tooltip>
   );

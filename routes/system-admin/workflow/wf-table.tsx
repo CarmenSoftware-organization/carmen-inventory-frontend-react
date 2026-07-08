@@ -4,7 +4,10 @@ import { Lock } from "lucide-react";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { customActionColumn } from "@/components/ui/data-grid/columns";
+import {
+  customActionColumn,
+  statusColumn,
+} from "@/components/ui/data-grid/columns";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -12,7 +15,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { WorkflowDto } from "@/types/workflows";
-import { WF_TYPE_VARIANT, getWorkflowTypeLabels } from "@/constant/workflow";
+import { WF_TYPE_DOT_COLOR, getWorkflowTypeLabels } from "@/constant/workflow";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { formatRelativeTime } from "@/lib/relative-time";
@@ -105,9 +108,16 @@ export function useWfTable({
         return (
           <Badge
             size="sm"
-            variant={WF_TYPE_VARIANT[wfType]}
-            className={cn(inactive && "opacity-60")}
+            variant="secondary"
+            className={cn("font-normal", inactive && "opacity-60")}
           >
+            <span
+              className={cn(
+                "size-1.5 shrink-0 rounded-full",
+                WF_TYPE_DOT_COLOR[wfType] ?? "bg-muted-foreground/50",
+              )}
+              aria-hidden="true"
+            />
             {typeLabels[wfType] ?? wfType}
           </Badge>
         );
@@ -161,6 +171,8 @@ export function useWfTable({
       },
       size: 160,
     },
+
+    statusColumn<WorkflowDto>(),
     customActionColumn<WorkflowDto>(({ row }) => (
       <WfRowActions
         workflow={row.original}
@@ -178,5 +190,6 @@ export function useWfTable({
     totalRecords,
     params,
     tableConfig,
+    hideStatus: true,
   });
 }

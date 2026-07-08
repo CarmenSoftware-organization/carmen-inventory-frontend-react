@@ -1,5 +1,5 @@
 
-import { Copy, MoreVertical, Power, PowerOff, Trash2 } from "lucide-react";
+import { Copy, MoreHorizontal, Power, PowerOff, Trash2 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +40,7 @@ export default function WfRowActions({
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
-          <MoreVertical className="size-3.5" aria-hidden="true" />
+          <MoreHorizontal className="size-3.5" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
