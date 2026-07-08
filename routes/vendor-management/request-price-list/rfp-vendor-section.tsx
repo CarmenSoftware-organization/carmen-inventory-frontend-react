@@ -37,7 +37,7 @@ interface RfpVendorSectionProps {
   readonly onRemoveVendor: (vendorId: string) => void;
 }
 
-/** Vendor section — Soft Sheet card list (mirrors PltProductCard pattern) */
+/** Vendor section — Soft Sheet card list */
 export default function RfpVendorSection({
   isDisabled,
   isAdding,
