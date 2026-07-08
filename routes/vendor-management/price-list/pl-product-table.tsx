@@ -10,7 +10,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DataGrid,
@@ -64,7 +64,7 @@ export function PLProductTable({
     const cols: ColumnDef<DetailField>[] = [
       {
         id: "index",
-        size: 40,
+        size: 60,
         header: () => "#",
         cell: ({ row }) => (
           <span className="text-muted-foreground tabular-nums">
@@ -164,7 +164,7 @@ export function PLProductTable({
     if (!isView) {
       cols.push({
         id: "actions",
-        size: 40,
+        size: 60,
         header: () => null,
         cell: ({ row }) =>
           isDisabled ? null : (
@@ -176,7 +176,7 @@ export function PLProductTable({
               onClick={() => onRemove(row.index)}
               className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
             >
-              <X />
+              <Trash2 />
             </Button>
           ),
         meta: { headerClassName: "text-center", cellClassName: "text-center" },
