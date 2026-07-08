@@ -1463,6 +1463,11 @@
     "vendor": {
       "entity": "Vendor",
       "title": "Vendor",
+      "generalDesc": "Vendor code, name, business type and status.",
+      "infoDesc": "Custom key/value fields — Tax ID, registration no, contract reference.",
+      "addressesDesc": "Billing, shipping and registered addresses.",
+      "contactsDesc": "People to reach at this vendor; mark one as primary.",
+      "certificatesDesc": "Compliance documents and their validity dates.",
       "certificatesTitle": "Certificates",
       "addCertificate": "Add Certificate",
       "noCertificates": "No certificates yet",

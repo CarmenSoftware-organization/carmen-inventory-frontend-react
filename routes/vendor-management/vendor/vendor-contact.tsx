@@ -9,7 +9,7 @@ import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { getDeleteDescription } from "@/lib/form-utils";
-import { CardLabel, GlassCard } from "@/components/share/glass-card";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
 import {
   EMPTY_VENDOR_CONTACT,
   type VendorFormValues,
@@ -54,43 +54,45 @@ export function VendorContact({
   };
 
   return (
-    <GlassCard>
-      <div className="mb-3 flex items-center justify-between">
-        <CardLabel>
-          {t("contact.titleCount", { count: contactFields.length })}
-        </CardLabel>
-        {!isView && (
+    <SettingSection
+      title={t("contactsLabel")}
+      description={t("contactsDesc")}
+      count={contactFields.length}
+      action={
+        !isView ? (
           <Button type="button" size="xs" onClick={handleAdd}>
             <Plus />
             {t("contact.addContact")}
           </Button>
+        ) : undefined
+      }
+    >
+      <div className="sm:col-span-2">
+        {contactFields.length === 0 ? (
+          <EmptyContacts
+            isView={isView}
+            title={t("contact.noContacts")}
+            description={t("contact.noContactsDesc")}
+            addLabel={t("contact.addContact")}
+            onAdd={handleAdd}
+          />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {contactFields.map((field, index) => (
+              <ContactCard
+                key={field.id}
+                form={form}
+                index={index}
+                isView={isView}
+                isDisabled={isDisabled}
+                onSetPrimary={(c) => handleSetPrimary(index, c)}
+                onRemove={() => setDeleteIndex(index)}
+                t={t}
+              />
+            ))}
+          </div>
         )}
       </div>
-
-      {contactFields.length === 0 ? (
-        <EmptyContacts
-          isView={isView}
-          title={t("contact.noContacts")}
-          description={t("contact.noContactsDesc")}
-          addLabel={t("contact.addContact")}
-          onAdd={handleAdd}
-        />
-      ) : (
-        <div className="flex flex-col gap-2">
-          {contactFields.map((field, index) => (
-            <ContactCard
-              key={field.id}
-              form={form}
-              index={index}
-              isView={isView}
-              isDisabled={isDisabled}
-              onSetPrimary={(c) => handleSetPrimary(index, c)}
-              onRemove={() => setDeleteIndex(index)}
-              t={t}
-            />
-          ))}
-        </div>
-      )}
 
       <DeleteDialog
         open={deleteIndex !== null}
@@ -105,7 +107,7 @@ export function VendorContact({
           setDeleteIndex(null);
         }}
       />
-    </GlassCard>
+    </SettingSection>
   );
 }
 

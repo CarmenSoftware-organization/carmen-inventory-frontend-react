@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CardLabel, GlassCard, PlainText } from "@/components/share/glass-card";
+import { PlainText } from "@/components/share/glass-card";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
 import { EMPTY_VENDOR_INFO, type VendorFormValues } from "./vendor-form-schema";
 
 interface VendorInfoTabProps {
@@ -40,10 +41,12 @@ export function VendorInfo({
   const isView = isDisabled && !form.formState.isSubmitting;
 
   return (
-    <GlassCard>
-      <div className="mb-3 flex items-center justify-between">
-        <CardLabel>{t("info.title")}</CardLabel>
-        {!isView && (
+    <SettingSection
+      title={t("info.title")}
+      description={t("infoDesc")}
+      count={infoFields.length}
+      action={
+        !isView ? (
           <Button
             type="button"
             size="xs"
@@ -52,33 +55,35 @@ export function VendorInfo({
             <Plus />
             {t("info.addInfo")}
           </Button>
+        ) : undefined
+      }
+    >
+      <div className="sm:col-span-2">
+        {infoFields.length === 0 ? (
+          <EmptyInfo
+            isView={isView}
+            title={t("info.noInfo")}
+            description={t("info.noInfoDesc")}
+            addLabel={t("info.addInfo")}
+            onAdd={() => prependInfo(EMPTY_VENDOR_INFO)}
+          />
+        ) : (
+          <div className="flex flex-col gap-2">
+            {infoFields.map((field, index) => (
+              <InfoRow
+                key={field.id}
+                form={form}
+                index={index}
+                isView={isView}
+                isDisabled={isDisabled}
+                onRemove={() => removeInfo(index)}
+                t={t}
+              />
+            ))}
+          </div>
         )}
       </div>
-
-      {infoFields.length === 0 ? (
-        <EmptyInfo
-          isView={isView}
-          title={t("info.noInfo")}
-          description={t("info.noInfoDesc")}
-          addLabel={t("info.addInfo")}
-          onAdd={() => prependInfo(EMPTY_VENDOR_INFO)}
-        />
-      ) : (
-        <div className="flex flex-col gap-2">
-          {infoFields.map((field, index) => (
-            <InfoRow
-              key={field.id}
-              form={form}
-              index={index}
-              isView={isView}
-              isDisabled={isDisabled}
-              onRemove={() => removeInfo(index)}
-              t={t}
-            />
-          ))}
-        </div>
-      )}
-    </GlassCard>
+    </SettingSection>
   );
 }
 

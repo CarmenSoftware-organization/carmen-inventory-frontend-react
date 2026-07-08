@@ -27,7 +27,7 @@ import type {
 } from "@/hooks/use-thai-address";
 import { CACHE_STATIC } from "@/lib/cache-config";
 import { cn } from "@/lib/utils";
-import { CardLabel, GlassCard } from "@/components/share/glass-card";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
 
 interface VendorAddressTabProps {
   form: ReturnType<typeof useForm<VendorFormValues>>;
@@ -54,20 +54,21 @@ export function VendorAddress({
   const handleAdd = () => prependAddress(EMPTY_VENDOR_ADDRESS);
 
   return (
-    <GlassCard>
-      <div className="mb-3 flex items-center justify-between">
-        <CardLabel>
-          {t("address.titleCount", { count: addressFields.length })}
-        </CardLabel>
-        {!isView && (
+    <SettingSection
+      title={t("addressesLabel")}
+      description={t("addressesDesc")}
+      count={addressFields.length}
+      action={
+        !isView ? (
           <Button type="button" size="xs" onClick={handleAdd}>
             <Plus />
             {t("address.addAddress")}
           </Button>
-        )}
-      </div>
-
-      {addressFields.length === 0 ? (
+        ) : undefined
+      }
+    >
+      <div className="sm:col-span-2">
+        {addressFields.length === 0 ? (
         <div className="border-primary/35 bg-primary/5 rounded-xl border border-dashed p-6 text-center">
           <div className="text-primary-foreground mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-primary">
             <MapPin className="size-4" />
@@ -92,18 +93,19 @@ export function VendorAddress({
         </div>
       ) : (
         <div className="flex flex-col gap-2">
-          {addressFields.map((field, index) => (
-            <AddressRow
-              key={field.id}
-              form={form}
-              index={index}
-              isDisabled={isDisabled}
-              onRemove={() => removeAddress(index)}
-            />
-          ))}
-        </div>
-      )}
-    </GlassCard>
+            {addressFields.map((field, index) => (
+              <AddressRow
+                key={field.id}
+                form={form}
+                index={index}
+                isDisabled={isDisabled}
+                onRemove={() => removeAddress(index)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </SettingSection>
   );
 }
 

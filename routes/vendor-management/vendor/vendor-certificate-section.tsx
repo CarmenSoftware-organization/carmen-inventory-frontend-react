@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { CardLabel, GlassCard } from "@/components/share/glass-card";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
@@ -70,18 +70,21 @@ export function VendorCertificateSection({
   };
 
   return (
-    <GlassCard>
-      <div className="flex items-center justify-between gap-2">
-        <CardLabel>{t("certificatesTitle")}</CardLabel>
-        {!readOnly && (
+    <SettingSection
+      title={t("certificatesTitle")}
+      description={t("certificatesDesc")}
+      count={items.length}
+      action={
+        !readOnly ? (
           <Button type="button" size="xs" onClick={handleAdd}>
             <Plus />
             {t("addCertificate")}
           </Button>
-        )}
-      </div>
-
-      {isLoading && (
+        ) : undefined
+      }
+    >
+      <div className="sm:col-span-2">
+        {isLoading && (
         <div className="mt-2 space-y-2">
           <Skeleton className="h-9 w-full" />
           <Skeleton className="h-9 w-full" />
@@ -184,6 +187,7 @@ export function VendorCertificateSection({
           </table>
         </div>
       )}
+      </div>
 
       <VendorCertificateDialog
         open={dialogOpen}
@@ -204,6 +208,6 @@ export function VendorCertificateSection({
         isPending={deleteCert.isPending}
         onConfirm={handleConfirmDelete}
       />
-    </GlassCard>
+    </SettingSection>
   );
 }

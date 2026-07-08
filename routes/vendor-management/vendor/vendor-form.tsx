@@ -1,31 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  Controller,
-  useFieldArray,
-  useForm,
-  useWatch,
-  type Resolver,
-} from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useFieldArray, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import {
-  Building2,
-  ChevronLeft,
-  Pencil,
-  Save,
-  Trash2,
-  Users,
-  X,
-} from "lucide-react";
+import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { StatusSwitch } from "@/components/ui/status-switch";
+import { cn } from "@/lib/utils";
 import {
   useCreateVendor,
   useDeleteVendor,
@@ -33,13 +20,6 @@ import {
 } from "@/hooks/use-vendor";
 import type { CreateVendorDto, VendorDetail } from "@/types/vendor";
 import type { FormMode } from "@/types/form";
-import {
-  CardLabel,
-  GlassCard,
-  InfoRow,
-  StatusPill,
-} from "@/components/share/glass-card";
-import { NameField } from "../price-list/pl-name-field";
 import {
   buildNestedPayload,
   createVendorSchema,
@@ -69,7 +49,6 @@ export function VendorForm({ vendor }: VendorFormProps) {
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const tform = useTranslations("form");
-  const ts = useTranslations("status");
 
   const [mode, setMode] = useState<FormMode>(vendor ? "view" : "add");
   const isView = mode === "view";
@@ -157,39 +136,6 @@ export function VendorForm({ vendor }: VendorFormProps) {
   const watchedName = useWatch({ control: form.control, name: "name" });
   const watchedCode = useWatch({ control: form.control, name: "code" });
   const watchedActive = useWatch({ control: form.control, name: "is_active" });
-  const watchedBuTypes = useWatch({
-    control: form.control,
-    name: "business_types",
-  });
-  const watchedAddresses = useWatch({
-    control: form.control,
-    name: "vendor_address",
-  });
-  const watchedContacts = useWatch({
-    control: form.control,
-    name: "vendor_contact",
-  });
-  const watchedInfo = useWatch({ control: form.control, name: "info" });
-
-  const stats = useMemo(
-    () => ({
-      addresses: (watchedAddresses ?? []).length,
-      contacts: (watchedContacts ?? []).length,
-      businessTypes: (watchedBuTypes ?? []).length,
-      info: (watchedInfo ?? []).length,
-    }),
-    [watchedAddresses, watchedContacts, watchedBuTypes, watchedInfo],
-  );
-
-  const statusConfig = watchedActive
-    ? {
-        label: ts("active"),
-        className: "bg-success/15 text-success-foreground",
-      }
-    : {
-        label: ts("inactive"),
-        className: "bg-muted text-muted-foreground",
-      };
 
   const onSubmit = (values: VendorFormValues) => {
     const { dirtyFields } = form.formState;
@@ -288,26 +234,11 @@ export function VendorForm({ vendor }: VendorFormProps) {
   };
 
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
-  const primaryContact = (watchedContacts ?? []).find((c) => c.is_primary);
 
   return (
-    <div className="relative isolate -mx-3 -my-3">
-      <form
-        id={FORM_ID}
-        onSubmit={form.handleSubmit(onSubmit, (errors) => {
-          // 🐛 DEBUG: ดูว่า field ไหน validate ไม่ผ่าน (บล็อก save)
-          console.warn("[vendor-form] validation failed:", errors);
-          console.warn("[vendor-form] values:", form.getValues());
-          scrollToFirstInvalidField();
-        })}
-        className="relative px-4 pt-4 pb-8 lg:p-4"
-      >
-        {/* Hero section */}
-        <section className="mb-5">
-          <div>
-            {/* Toolbar */}
-            <div className="mb-3 flex flex-wrap items-center justify-between">
-              <div className="flex items-center gap-2">
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
                 <Button
                   type="button"
                   size="sm"
@@ -318,16 +249,22 @@ export function VendorForm({ vendor }: VendorFormProps) {
                 >
                   <ChevronLeft />
                 </Button>
-                <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-bold tracking-wider uppercase">
-                  <Building2 className="size-2.5" />
-                  {t("entity")}
-                </span>
+                <h1
+                  className={cn(
+                    "truncate text-lg font-semibold tracking-tight",
+                    watchedName
+                      ? "text-foreground"
+                      : "text-muted-foreground italic",
+                  )}
+                >
+                  {watchedName || t("namePlaceholder")}
+                </h1>
                 {watchedCode && (
-                  <span className="bg-foreground text-background inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold tracking-wider uppercase">
-                    {watchedCode}
+                  <span className="text-muted-foreground shrink-0 text-sm">
+                    · {watchedCode}
                   </span>
                 )}
-                <StatusPill statusConfig={statusConfig} large />
+                {!isAdd && <StatusBadge active={watchedActive} />}
               </div>
               <div className="flex items-center gap-2">
                 {isView ? (
@@ -371,51 +308,16 @@ export function VendorForm({ vendor }: VendorFormProps) {
                   </>
                 )}
               </div>
-            </div>
+      </header>
 
-            {/* Name input */}
-            <Controller
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <NameField
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder={t("namePlaceholder")}
-                  disabled={isDisabled}
-                  error={form.formState.errors.name?.message}
-                  labels={{
-                    nameLabel: tfl("name"),
-                    tapToEdit: t("vendorNameHint"),
-                    pressEnterToSave: t("pressEnterToSave"),
-                    clickToRename: t("clickToRename"),
-                    requiredField: t("requiredField"),
-                  }}
-                />
-              )}
-            />
-
-            {/* Descriptor */}
-            <p className="text-foreground/80 mt-2 max-w-xl text-xs leading-relaxed">
-              {watchedName && watchedCode ? (
-                <span className="text-foreground/80">
-                  {t("descriptorFilled", {
-                    contacts: stats.contacts,
-                    addresses: stats.addresses,
-                  })}
-                </span>
-              ) : (
-                <span className="text-muted-foreground italic">
-                  {t("descriptorEmpty")}
-                </span>
-              )}
-            </p>
-          </div>
-        </section>
-
-        {/* Body grid */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
-          <div className="flex flex-col gap-4">
+      <form
+        id={FORM_ID}
+        onSubmit={form.handleSubmit(onSubmit, (errors) => {
+          console.warn("[vendor-form] validation failed:", errors);
+          console.warn("[vendor-form] values:", form.getValues());
+          scrollToFirstInvalidField();
+        })}
+      >
             <VendorGeneral form={form} isDisabled={isDisabled} />
             <VendorInfo
               form={form}
@@ -438,108 +340,10 @@ export function VendorForm({ vendor }: VendorFormProps) {
               prependContact={prependContact}
               removeContact={handleRemoveContact}
             />
-          </div>
-
-          {/* Sidebar */}
-          <aside className="hidden flex-col gap-3 self-start lg:sticky lg:top-20 lg:flex">
-            <GlassCard>
-              <CardLabel>{t("primaryContactTitle")}</CardLabel>
-              {primaryContact && primaryContact.name ? (
-                <div className="flex items-start gap-3">
-                  <div className="text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary font-serif text-base font-semibold">
-                    {primaryContact.name[0]?.toUpperCase() ?? "?"}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-foreground truncate text-xs font-semibold">
-                      {primaryContact.name}
-                    </div>
-                    {primaryContact.email && (
-                      <div className="text-muted-foreground mt-0.5 truncate text-[0.6875rem]">
-                        {primaryContact.email}
-                      </div>
-                    )}
-                    {primaryContact.phone && (
-                      <div className="text-muted-foreground truncate text-[0.625rem]">
-                        {primaryContact.phone}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="border-primary/35 bg-primary/5 rounded-lg border border-dashed p-3 text-center">
-                  <div className="border-primary/30 bg-card/60 mx-auto mb-2 flex size-7 items-center justify-center rounded-lg border">
-                    <Users className="text-primary size-3" />
-                  </div>
-                  <div className="text-foreground text-[0.6875rem] font-semibold">
-                    {t("noPrimaryContact")}
-                  </div>
-                  <p className="text-muted-foreground mt-0.5 text-[0.625rem]">
-                    {t("noPrimaryContactDesc")}
-                  </p>
-                </div>
-              )}
-            </GlassCard>
-
-            <GlassCard>
-              <CardLabel>{t("vendorSummary")}</CardLabel>
-              <div className="grid gap-1.5">
-                <InfoRow
-                  k={t("businessTypesLabel")}
-                  v={stats.businessTypes || "—"}
-                  muted={!stats.businessTypes}
-                />
-                <InfoRow
-                  k={t("addressesLabel")}
-                  v={stats.addresses || "—"}
-                  muted={!stats.addresses}
-                />
-                <InfoRow
-                  k={t("contactsLabel")}
-                  v={stats.contacts || "—"}
-                  muted={!stats.contacts}
-                />
-                <InfoRow
-                  k={t("infoLabel")}
-                  v={stats.info || "—"}
-                  muted={!stats.info}
-                />
-              </div>
-
-              {/* Status switcher */}
-              {!isView && (
-                <div className="border-border/60 mt-3 border-t pt-3">
-                  <Controller
-                    control={form.control}
-                    name="is_active"
-                    render={({ field }) => (
-                      <StatusSwitch
-                        id="vendor-is-active"
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isDisabled}
-                      />
-                    )}
-                  />
-                </div>
-              )}
-            </GlassCard>
-
-            <GlassCard>
-              <CardLabel>{t("tipTitle")}</CardLabel>
-              <p className="text-foreground/80 text-[0.6875rem] leading-relaxed">
-                {t("tipBody")}
-              </p>
-            </GlassCard>
-          </aside>
-        </div>
       </form>
 
       {/* Certificates — CRUD อิสระ (นอก form, ยิง API เอง) แสดงเมื่อมี vendor */}
-      {vendor?.id && (
-        <div className="px-4 pb-8 lg:px-4">
-          <VendorCertificateSection vendorId={vendor.id} />
-        </div>
-      )}
+      {vendor?.id && <VendorCertificateSection vendorId={vendor.id} />}
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 

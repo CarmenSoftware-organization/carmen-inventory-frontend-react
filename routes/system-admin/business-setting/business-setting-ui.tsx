@@ -47,11 +47,17 @@ export function SettingSection({
   title,
   description,
   first,
+  count,
+  action,
   children,
 }: {
   readonly title: string;
   readonly description?: string;
   readonly first?: boolean;
+  /** optional count shown after the title (e.g. rows in a dynamic section) */
+  readonly count?: number;
+  /** optional control shown under the description (e.g. an Add button) */
+  readonly action?: React.ReactNode;
   readonly children: React.ReactNode;
 }) {
   return (
@@ -62,12 +68,20 @@ export function SettingSection({
       )}
     >
       <div className="md:col-span-1">
-        <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+        <div className="flex items-baseline gap-2">
+          <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+          {count !== undefined && (
+            <span className="text-muted-foreground text-xs font-semibold tabular-nums">
+              {count}
+            </span>
+          )}
+        </div>
         {description && (
           <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
             {description}
           </p>
         )}
+        {action && <div className="mt-3">{action}</div>}
       </div>
       <div className="grid gap-4 md:col-span-2 sm:grid-cols-2">{children}</div>
     </section>
