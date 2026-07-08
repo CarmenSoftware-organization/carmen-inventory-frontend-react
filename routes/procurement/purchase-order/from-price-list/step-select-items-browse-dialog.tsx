@@ -35,14 +35,14 @@ interface BrowseDialogProps {
    */
   readonly onAdd: (
     details: PriceListDetailItem[],
-    currency: { id: string; code: string; name: string } | null,
+    currency: { id: string; code: string; name?: string } | null,
   ) => void;
 }
 
 interface PlGroup {
   pricelist_id: string;
   pricelist_no: string;
-  currency: { id: string; code: string; name: string };
+  currency: { id: string; code: string; name?: string };
   details: PriceListDetailItem[];
 }
 
@@ -181,7 +181,7 @@ export function BrowseDialog({
   const handleAdd = () => {
     // dedup by product_id (same product จาก PL ต่างกัน → keep first picked)
     const byProduct = new Map<string, PriceListDetailItem>();
-    let currency: { id: string; code: string; name: string } | null = null;
+    let currency: { id: string; code: string; name?: string } | null = null;
     for (const g of allGroups) {
       for (const d of g.details) {
         if (picked.has(d.id) && !byProduct.has(d.product_id)) {

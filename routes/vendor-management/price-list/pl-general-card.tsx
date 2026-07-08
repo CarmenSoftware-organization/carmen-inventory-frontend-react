@@ -1,5 +1,4 @@
 import { Controller, type UseFormReturn } from "react-hook-form";
-import { useLocale } from "use-intl";
 import {
   Field,
   FieldDatePicker,
@@ -14,7 +13,8 @@ import { Badge } from "@/components/ui/badge";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { PRICE_LIST_STATUS_OPTIONS } from "@/constant/price-list";
-import { formatLocalizedDate } from "@/lib/date-utils";
+import { formatDate } from "@/lib/date-utils";
+import { useProfile } from "@/hooks/use-profile";
 import { SettingSection } from "@/components/ui/setting-section";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
@@ -45,7 +45,7 @@ export function PLGeneralCard({
   t,
   ts,
 }: PLGeneralCardProps) {
-  const locale = useLocale();
+  const { dateFormat } = useProfile();
 
   return (
     <SettingSection first title={tfl("general")} description={t("generalDesc")}>
@@ -102,7 +102,7 @@ export function PLGeneralCard({
           {!isView && <span className="text-destructive"> *</span>}
         </FieldLabel>
         {isView ? (
-          <FieldPlainText>{priceList?.currency?.name}</FieldPlainText>
+          <FieldPlainText>{priceList?.currency?.code}</FieldPlainText>
         ) : (
           <Controller
             control={form.control}
@@ -125,7 +125,7 @@ export function PLGeneralCard({
         <FieldLabel>{tfl("effectiveFrom")}</FieldLabel>
         {isView ? (
           <FieldPlainText>
-            {watchedFrom ? formatLocalizedDate(watchedFrom, locale) : ""}
+            {watchedFrom ? formatDate(watchedFrom, dateFormat) : ""}
           </FieldPlainText>
         ) : (
           <Controller
@@ -150,7 +150,7 @@ export function PLGeneralCard({
         <FieldLabel>{tfl("effectiveTo")}</FieldLabel>
         {isView ? (
           <FieldPlainText>
-            {watchedTo ? formatLocalizedDate(watchedTo, locale) : ""}
+            {watchedTo ? formatDate(watchedTo, dateFormat) : ""}
           </FieldPlainText>
         ) : (
           <Controller

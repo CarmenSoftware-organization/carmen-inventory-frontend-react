@@ -56,7 +56,8 @@ export interface PriceList {
   status: PriceListStatus;
   description: string;
   vendor: { id: string; name: string };
-  currency: { id: string; code: string; name: string };
+  // backend GET-by-id returns only { id, code } — name is not sent
+  currency: { id: string; code: string; name?: string };
   effectivePeriod: string;
   note: string;
   pricelist_detail: PriceListDetailItem[];

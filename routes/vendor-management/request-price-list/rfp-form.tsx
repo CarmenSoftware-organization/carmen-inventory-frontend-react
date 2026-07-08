@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
-import { useLocale, useTranslations } from "use-intl";
+import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
 
@@ -23,7 +23,8 @@ import {
 import { LookupPrt } from "@/components/lookup/lookup-prt";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { formatLocalizedDate } from "@/lib/date-utils";
+import { formatDate } from "@/lib/date-utils";
+import { useProfile } from "@/hooks/use-profile";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   useCreateRequestPriceList,
@@ -58,7 +59,7 @@ export function RequestPriceListForm({
   requestPriceList,
 }: RequestPriceListFormProps) {
   const navigate = useNavigate();
-  const locale = useLocale();
+  const { dateFormat } = useProfile();
   const t = useTranslations("vendorManagement.requestPriceList");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
@@ -407,7 +408,7 @@ export function RequestPriceListForm({
             <FieldLabel>{tfl("startDate")}</FieldLabel>
             {isView ? (
               <FieldPlainText>
-                {startDate ? formatLocalizedDate(startDate, locale) : ""}
+                {startDate ? formatDate(startDate, dateFormat) : ""}
               </FieldPlainText>
             ) : (
               <Controller
@@ -433,7 +434,7 @@ export function RequestPriceListForm({
             <FieldLabel>{tfl("endDate")}</FieldLabel>
             {isView ? (
               <FieldPlainText>
-                {endDate ? formatLocalizedDate(endDate, locale) : ""}
+                {endDate ? formatDate(endDate, dateFormat) : ""}
               </FieldPlainText>
             ) : (
               <Controller

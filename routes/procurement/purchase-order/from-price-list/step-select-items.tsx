@@ -86,7 +86,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
 
   // Resolve the picked price-list currency's exchange_rate the same way the
   // manual PO form does (LookupCurrency uses perpage: 30). The BrowseDialog
-  // currency object only carries {id, code, name}, so without this lookup a
+  // currency object only carries {id, code}, so without this lookup a
   // foreign-currency PO would submit with the EMPTY_FORM default exchange_rate 1.
   const { data: currencyData } = useCurrency({ perpage: 30 });
   const currencies = currencyData?.data ?? [];
@@ -113,7 +113,7 @@ export function StepSelectItems({ form }: StepSelectItemsProps) {
 
   const handleAddPicks = (
     details: PriceListDetailItem[],
-    currency: { id: string; code: string; name: string } | null,
+    currency: { id: string; code: string; name?: string } | null,
   ) => {
     const current = (form.getValues("items") ??
       []) as FromPriceListSelectedItem[];

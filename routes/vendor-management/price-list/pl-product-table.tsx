@@ -45,8 +45,9 @@ interface PLProductTableProps {
 }
 
 /**
- * Inline price-list table — TanStack DataGrid (project standard) สำหรับ edit/add
- * และ grouped rowspan view (merge tier ราคาของ product เดียวกัน) สำหรับ view mode
+ * Inline price-list table — TanStack DataGrid (project standard) ตัวเดียวกัน
+ * ทั้ง view และ edit/add: column ชุดเดียว, แต่ละ cell branch `isView`
+ * (plain text vs inputs/lookups) — actions column แสดงเฉพาะตอน edit
  */
 export function PLProductTable({
   form,
@@ -65,22 +66,38 @@ export function PLProductTable({
         id: "index",
         size: 40,
         header: () => "#",
-        cell: ({ row }) => <span>{row.index + 1}</span>,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground tabular-nums">
+            {row.index + 1}
+          </span>
+        ),
         meta: { headerClassName: "text-center", cellClassName: "text-center" },
       },
       {
         id: "product",
         header: () => tfl("product"),
-        cell: ({ row }) => (
-          <ProductCell form={form} index={row.index} isDisabled={isDisabled} />
-        ),
         size: 300,
+        cell: ({ row }) => (
+          <ProductCell
+            form={form}
+            index={row.index}
+            isView={isView}
+            isDisabled={isDisabled}
+            detailRef={detailRefs?.[row.index]}
+          />
+        ),
       },
       {
         id: "unit",
         header: () => tfl("unit"),
         cell: ({ row }) => (
-          <UnitCell form={form} index={row.index} isDisabled={isDisabled} />
+          <UnitCell
+            form={form}
+            index={row.index}
+            isView={isView}
+            isDisabled={isDisabled}
+            detailRef={detailRefs?.[row.index]}
+          />
         ),
         meta: { headerClassName: "text-center", cellClassName: "text-center" },
       },
@@ -89,7 +106,13 @@ export function PLProductTable({
         size: 96,
         header: () => tfl("moq"),
         cell: ({ row }) => (
-          <MoqCell form={form} index={row.index} isDisabled={isDisabled} />
+          <MoqCell
+            form={form}
+            index={row.index}
+            isView={isView}
+            isDisabled={isDisabled}
+            detailRef={detailRefs?.[row.index]}
+          />
         ),
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
       },
@@ -98,7 +121,13 @@ export function PLProductTable({
         size: 128,
         header: () => tfl("unitPrice"),
         cell: ({ row }) => (
-          <PriceCell form={form} index={row.index} isDisabled={isDisabled} />
+          <PriceCell
+            form={form}
+            index={row.index}
+            isView={isView}
+            isDisabled={isDisabled}
+            detailRef={detailRefs?.[row.index]}
+          />
         ),
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
       },
@@ -106,7 +135,13 @@ export function PLProductTable({
         id: "tax_profile",
         header: () => tfl("taxProfile"),
         cell: ({ row }) => (
-          <TaxCell form={form} index={row.index} isDisabled={isDisabled} />
+          <TaxCell
+            form={form}
+            index={row.index}
+            isView={isView}
+            isDisabled={isDisabled}
+            detailRef={detailRefs?.[row.index]}
+          />
         ),
       },
       {
@@ -114,34 +149,42 @@ export function PLProductTable({
         size: 96,
         header: () => tfl("leadTime"),
         cell: ({ row }) => (
-          <LeadCell form={form} index={row.index} isDisabled={isDisabled} />
+          <LeadCell
+            form={form}
+            index={row.index}
+            isView={isView}
+            isDisabled={isDisabled}
+            detailRef={detailRefs?.[row.index]}
+          />
         ),
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
       },
     ];
 
-    cols.push({
-      id: "actions",
-      size: 40,
-      header: () => null,
-      cell: ({ row }) =>
-        isDisabled ? null : (
-          <Button
-            type="button"
-            size="icon-xs"
-            variant="ghost"
-            aria-label={removeLabel}
-            onClick={() => onRemove(row.index)}
-            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
-          >
-            <X />
-          </Button>
-        ),
-      meta: { headerClassName: "text-center", cellClassName: "text-center" },
-    });
+    if (!isView) {
+      cols.push({
+        id: "actions",
+        size: 40,
+        header: () => null,
+        cell: ({ row }) =>
+          isDisabled ? null : (
+            <Button
+              type="button"
+              size="icon-xs"
+              variant="ghost"
+              aria-label={removeLabel}
+              onClick={() => onRemove(row.index)}
+              className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+            >
+              <X />
+            </Button>
+          ),
+        meta: { headerClassName: "text-center", cellClassName: "text-center" },
+      });
+    }
 
     return cols;
-  }, [form, isDisabled, tfl, onRemove, removeLabel]);
+  }, [form, isView, isDisabled, tfl, onRemove, removeLabel, detailRefs]);
 
   const table = useReactTable({
     data: detailFields,
@@ -149,181 +192,20 @@ export function PLProductTable({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // View mode — merge row ของ product เดียวกัน (rowspan) แสดง tier ราคาหลายระดับ
-  if (isView) {
-    return <PLProductViewTable detailRefs={detailRefs} tfl={tfl} />;
-  }
-
   return (
     <DataGrid
       table={table}
       recordCount={detailFields.length}
       tableLayout={{ headerSticky: true }}
     >
-      <DataGridContainer
-        className="border-border/60 bg-card"
-        border={false}
-      >
+      <DataGridContainer>
         <DataGridTable />
       </DataGridContainer>
     </DataGrid>
   );
 }
 
-/* ── View: grouped rowspan table ───────────────── */
-
-interface PriceTierGroup {
-  readonly productId: string;
-  readonly productName?: string | null;
-  readonly localName?: string | null;
-  readonly tiers: DetailRef[];
-}
-
-/** group ตาม product_id (เรียงตามลำดับที่เจอ) + เรียง tier ตาม moq น้อย→มาก */
-function groupDetailsByProduct(
-  details: readonly DetailRef[],
-): PriceTierGroup[] {
-  const map = new Map<string, PriceTierGroup>();
-  const order: string[] = [];
-  for (const d of details) {
-    let group = map.get(d.product_id);
-    if (!group) {
-      group = {
-        productId: d.product_id,
-        productName: d.product_name,
-        localName: d.product_local_name,
-        tiers: [],
-      };
-      map.set(d.product_id, group);
-      order.push(d.product_id);
-    }
-    group.tiers.push(d);
-  }
-  for (const group of map.values()) {
-    group.tiers.sort((a, b) => (Number(a.moq_qty) || 0) - (Number(b.moq_qty) || 0));
-  }
-  return order.map((id) => map.get(id)!);
-}
-
-/** count/min/max ของราคา (incl. tax) ทุก tier — ใช้ highlight สูง/ต่ำ */
-function computeRefMinMax(details: readonly DetailRef[]) {
-  const prices = details.map((d) => round2(Number(d.price) || 0));
-  const count = prices.length;
-  return {
-    count,
-    min: count > 0 ? Math.min(...prices) : 0,
-    max: count > 0 ? Math.max(...prices) : 0,
-  };
-}
-
-function PLProductViewTable({
-  detailRefs,
-  tfl,
-}: {
-  readonly detailRefs?: PriceList["pricelist_detail"];
-  readonly tfl: (key: string) => string;
-}) {
-  "use no memo";
-  const details = useMemo(() => detailRefs ?? [], [detailRefs]);
-  const groups = useMemo(() => groupDetailsByProduct(details), [details]);
-  const { count, min, max } = useMemo(
-    () => computeRefMinMax(details),
-    [details],
-  );
-
-  return (
-    <div className="border-border/60 bg-card overflow-hidden rounded-lg border">
-      <table className="w-full text-xs">
-        <thead className="bg-muted/60 text-foreground border-b">
-          <tr>
-            <th scope="col" className="w-10 px-2 py-2 text-center font-semibold">
-              #
-            </th>
-            <th scope="col" className="px-3 py-2 text-left font-semibold">
-              {tfl("product")}
-            </th>
-            <th scope="col" className="w-20 px-3 py-2 text-right font-semibold">
-              {tfl("moq")}
-            </th>
-            <th scope="col" className="px-3 py-2 text-center font-semibold">
-              {tfl("unit")}
-            </th>
-            <th scope="col" className="w-24 px-3 py-2 text-right font-semibold">
-              {tfl("unitPrice")}
-            </th>
-            <th scope="col" className="w-20 px-3 py-2 text-right font-semibold">
-              {tfl("tax")}
-            </th>
-            <th scope="col" className="w-24 px-3 py-2 text-right font-semibold">
-              {tfl("total")}
-            </th>
-            <th scope="col" className="w-20 px-3 py-2 text-right font-semibold">
-              {tfl("leadTime")}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {groups.map((group, groupIndex) =>
-            group.tiers.map((tier, tierIndex) => {
-              const inclPrice = round2(Number(tier.price) || 0);
-              const isHigh = count > 1 && inclPrice === max && min !== max;
-              const isLow = count > 1 && inclPrice === min && min !== max;
-              return (
-                <tr
-                  key={tier.id}
-                  className="border-border/40 border-t align-top"
-                >
-                  {tierIndex === 0 && (
-                    <td
-                      rowSpan={group.tiers.length}
-                      className="text-muted-foreground px-2 py-1.5 text-center font-semibold tabular-nums"
-                    >
-                      {groupIndex + 1}
-                    </td>
-                  )}
-                  {tierIndex === 0 && (
-                    <td rowSpan={group.tiers.length} className="px-3 py-1.5">
-                      <PlainProduct
-                        name={group.productName}
-                        localName={group.localName}
-                      />
-                    </td>
-                  )}
-                  <td className="px-3 py-1.5 text-right tabular-nums">
-                    {Number(tier.moq_qty) || 0}+
-                  </td>
-                  <td className="px-3 py-1.5 text-center">
-                    <PlainText value={tier.unit_name} />
-                  </td>
-                  <td className="px-3 py-1.5 text-right tabular-nums">
-                    {(Number(tier.price_without_tax) || 0).toFixed(2)}
-                  </td>
-                  <td className="text-muted-foreground px-3 py-1.5 text-right tabular-nums">
-                    {(Number(tier.tax_amt) || 0).toFixed(2)}
-                  </td>
-                  <td
-                    className={cn(
-                      "px-3 py-1.5 text-right font-semibold tabular-nums",
-                      isHigh && "text-warning-foreground",
-                      isLow && "text-success",
-                    )}
-                  >
-                    {inclPrice.toFixed(2)}
-                  </td>
-                  <td className="text-muted-foreground px-3 py-1.5 text-right tabular-nums">
-                    {Number(tier.lead_time_days) || 0}d
-                  </td>
-                </tr>
-              );
-            }),
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-/* ── Edit cells ────────────────────────────────── */
+/* ── Cells (view = plain text · edit = inputs/lookups) ─────────── */
 
 /** count/min/max ของราคา (incl. tax) ทุก row — ใช้ highlight border สูง/ต่ำ */
 function computePriceMinMax(
@@ -345,13 +227,24 @@ function computePriceMinMax(
 function ProductCell({
   form,
   index,
+  isView,
   isDisabled,
+  detailRef,
 }: {
   readonly form: UseFormReturn<PriceListFormValues>;
   readonly index: number;
+  readonly isView: boolean;
   readonly isDisabled: boolean;
+  readonly detailRef?: DetailRef;
 }) {
   "use no memo";
+  if (isView)
+    return (
+      <PlainProduct
+        name={detailRef?.product_name}
+        localName={detailRef?.product_local_name}
+      />
+    );
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
@@ -373,11 +266,15 @@ function ProductCell({
 function UnitCell({
   form,
   index,
+  isView,
   isDisabled,
+  detailRef,
 }: {
   readonly form: UseFormReturn<PriceListFormValues>;
   readonly index: number;
+  readonly isView: boolean;
   readonly isDisabled: boolean;
+  readonly detailRef?: DetailRef;
 }) {
   "use no memo";
   const productId =
@@ -385,6 +282,7 @@ function UnitCell({
       control: form.control,
       name: `pricelist_detail.${index}.product_id`,
     }) ?? "";
+  if (isView) return <PlainText value={detailRef?.unit_name} />;
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
@@ -407,13 +305,23 @@ function UnitCell({
 function MoqCell({
   form,
   index,
+  isView,
   isDisabled,
+  detailRef,
 }: {
   readonly form: UseFormReturn<PriceListFormValues>;
   readonly index: number;
+  readonly isView: boolean;
   readonly isDisabled: boolean;
+  readonly detailRef?: DetailRef;
 }) {
   "use no memo";
+  if (isView)
+    return (
+      <span className="text-foreground text-xs font-semibold tabular-nums">
+        {Number(detailRef?.moq_qty) || 0}+
+      </span>
+    );
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <FieldInput
@@ -434,13 +342,23 @@ function MoqCell({
 function LeadCell({
   form,
   index,
+  isView,
   isDisabled,
+  detailRef,
 }: {
   readonly form: UseFormReturn<PriceListFormValues>;
   readonly index: number;
+  readonly isView: boolean;
   readonly isDisabled: boolean;
+  readonly detailRef?: DetailRef;
 }) {
   "use no memo";
+  if (isView)
+    return (
+      <span className="text-muted-foreground text-xs tabular-nums">
+        {Number(detailRef?.lead_time_days) || 0}d
+      </span>
+    );
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <FieldInput
@@ -461,11 +379,15 @@ function LeadCell({
 function PriceCell({
   form,
   index,
+  isView,
   isDisabled,
+  detailRef,
 }: {
   readonly form: UseFormReturn<PriceListFormValues>;
   readonly index: number;
+  readonly isView: boolean;
   readonly isDisabled: boolean;
+  readonly detailRef?: DetailRef;
 }) {
   "use no memo";
   const priceWithoutTax = useWatch({
@@ -500,6 +422,13 @@ function PriceCell({
   const isHigh = count > 1 && numericPrice === max && min !== max;
   const isLow = count > 1 && numericPrice === min && min !== max;
 
+  if (isView)
+    return (
+      <span className="text-foreground text-xs font-semibold tabular-nums">
+        {(Number(detailRef?.price_without_tax) || 0).toFixed(2)}
+      </span>
+    );
+
   return (
     <div className="text-right">
       <FieldInput
@@ -529,13 +458,18 @@ function PriceCell({
 function TaxCell({
   form,
   index,
+  isView,
   isDisabled,
+  detailRef,
 }: {
   readonly form: UseFormReturn<PriceListFormValues>;
   readonly index: number;
+  readonly isView: boolean;
   readonly isDisabled: boolean;
+  readonly detailRef?: DetailRef;
 }) {
   "use no memo";
+  if (isView) return <PlainText value={detailRef?.tax_profile_name} />;
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
