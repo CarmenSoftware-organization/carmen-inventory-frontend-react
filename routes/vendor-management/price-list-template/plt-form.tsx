@@ -30,7 +30,7 @@ import type { PriceListTemplate } from "@/types/price-list-template";
 import type { FormMode } from "@/types/form";
 
 import { PlainText } from "@/components/share/glass-card";
-import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import { SettingSection } from "@/components/ui/setting-section";
 
 import {
   createPltSchema,

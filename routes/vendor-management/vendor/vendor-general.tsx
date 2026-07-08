@@ -6,7 +6,7 @@ import { LookupBuType } from "@/components/lookup/lookup-bu-type";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PlainText } from "@/components/share/glass-card";
-import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { VendorFormValues } from "./vendor-form-schema";
 
 interface VendorGeneralProps {

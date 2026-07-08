@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import type { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import { SettingSection } from "@/components/ui/setting-section";
 import { EmptyProducts } from "../price-list/pl-empty-states";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { PltFormValues } from "./plt-form-schema";

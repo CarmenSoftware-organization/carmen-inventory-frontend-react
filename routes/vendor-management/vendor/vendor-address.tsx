@@ -27,7 +27,7 @@ import type {
 } from "@/hooks/use-thai-address";
 import { CACHE_STATIC } from "@/lib/cache-config";
 import { cn } from "@/lib/utils";
-import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import { SettingSection } from "@/components/ui/setting-section";
 
 interface VendorAddressTabProps {
   form: ReturnType<typeof useForm<VendorFormValues>>;

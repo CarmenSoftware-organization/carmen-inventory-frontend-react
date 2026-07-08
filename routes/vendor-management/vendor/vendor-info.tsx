@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PlainText } from "@/components/share/glass-card";
-import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import { SettingSection } from "@/components/ui/setting-section";
 import { EMPTY_VENDOR_INFO, type VendorFormValues } from "./vendor-form-schema";
 
 interface VendorInfoTabProps {

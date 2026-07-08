@@ -14,7 +14,7 @@ import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import {
   SettingSection,
   SettingSectionSkeleton,
-} from "../business-setting/business-setting-ui";
+} from "@/components/ui/setting-section";
 import { useAppConfigByKey, useUpsertAppConfig, useTestEmail } from "@/hooks/use-app-config";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 

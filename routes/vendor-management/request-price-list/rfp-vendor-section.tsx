@@ -20,7 +20,7 @@ import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { cn } from "@/lib/utils";
 import type { Vendor } from "@/types/vendor";
 import type { RequestPriceListVendor } from "@/types/request-price-list";
-import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import { SettingSection } from "@/components/ui/setting-section";
 import { EmptyProducts } from "../price-list/pl-empty-states";
 import type { RfpFormValues } from "./rfp-form-schema";
 

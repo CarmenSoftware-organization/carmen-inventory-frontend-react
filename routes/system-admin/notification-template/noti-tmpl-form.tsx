@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   SettingSection,
   SettingSectionSkeleton,
-} from "../business-setting/business-setting-ui";
+} from "@/components/ui/setting-section";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";

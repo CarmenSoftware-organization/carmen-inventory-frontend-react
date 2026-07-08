@@ -9,7 +9,7 @@ import { Field, FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { getDeleteDescription } from "@/lib/form-utils";
-import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import { SettingSection } from "@/components/ui/setting-section";
 import {
   EMPTY_VENDOR_CONTACT,
   type VendorFormValues,

@@ -15,7 +15,7 @@ import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { PlainText } from "@/components/share/glass-card";
 import { PRICE_LIST_STATUS_OPTIONS } from "@/constant/price-list";
 import { formatLocalizedDate } from "@/lib/date-utils";
-import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
 
