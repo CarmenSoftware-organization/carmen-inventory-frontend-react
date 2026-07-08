@@ -11,6 +11,8 @@ export interface PriceListTemplateProduct {
   id: string;
   product_id: string;
   product_name: string;
+  product_local_name?: string;
+  product_code?: string;
   code: string;
   default_order: {
     unit_id: string;

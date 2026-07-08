@@ -10,7 +10,7 @@ import {
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DataGrid,
@@ -75,11 +75,11 @@ export function PltProductTable({
     const cols: ColumnDef<DetailField>[] = [
       {
         id: "index",
-        size: 40,
+        size: 60,
         header: () => "#",
         cell: ({ row }) => (
-          <span className="text-muted-foreground text-[0.625rem] tabular-nums">
-            {String(row.index + 1).padStart(2, "0")}
+          <span className="text-muted-foreground tabular-nums">
+            {row.index + 1}
           </span>
         ),
         meta: { headerClassName: "text-center", cellClassName: "text-center" },
@@ -145,7 +145,7 @@ export function PltProductTable({
     if (!isView) {
       cols.push({
         id: "actions",
-        size: 40,
+        size: 60,
         header: () => null,
         cell: ({ row }) =>
           isDisabled ? null : (
@@ -157,7 +157,7 @@ export function PltProductTable({
               onClick={() => onRemove(row.index)}
               className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
             >
-              <X />
+              <Trash2 />
             </Button>
           ),
         meta: { headerClassName: "text-center", cellClassName: "text-center" },
@@ -230,7 +230,14 @@ function ProductCell({
       ),
     [productIdsByIndex, index, ownId],
   );
-  if (isView) return <PlainProduct name={productRef?.product_name} />;
+
+  if (isView)
+    return (
+      <PlainProduct
+        name={productRef?.product_name}
+        localName={productRef?.product_code}
+      />
+    );
   return (
     <Controller
       control={form.control}
@@ -397,14 +404,12 @@ function PlainProduct({
       <span className="text-muted-foreground text-[0.6875rem] italic">—</span>
     );
   return (
-    <div className="flex flex-wrap items-baseline gap-1">
-      <span className="text-foreground text-xs leading-tight font-semibold">
+    <div className="flex flex-col items-baseline gap-1">
+      <p className="text-foreground text-xs leading-tight font-semibold">
         {name}
-      </span>
+      </p>
       {localName && (
-        <span className="text-muted-foreground text-[0.625rem]">
-          ({localName})
-        </span>
+        <p className="text-muted-foreground text-[0.625rem]">({localName})</p>
       )}
     </div>
   );

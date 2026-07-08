@@ -36,18 +36,9 @@ export function PltValidityStepper({
 
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
-        <label className="text-foreground/80 text-[0.625rem] font-semibold tracking-widest uppercase">
-          {labels.label}
-        </label>
-        <span className="text-muted-foreground text-[0.625rem]">
-          {labels.hint}
-        </span>
-      </div>
-
       <div
         className={cn(
-          "bg-background/60 flex items-center gap-3 rounded-xl border px-3 py-2 transition-colors",
+          "bg-background/60 flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors",
           focus ? "border-primary" : "border-border/60",
         )}
       >
@@ -76,7 +67,7 @@ export function PltValidityStepper({
             onBlur={() => setFocus(false)}
             placeholder="—"
             className={cn(
-              "w-20 border-0 bg-transparent p-0 text-center text-3xl font-semibold tracking-tight tabular-nums outline-none",
+              "w-16 border-0 bg-transparent p-0 text-center text-xl font-semibold tracking-tight tabular-nums outline-none",
               value ? "text-foreground" : "text-muted-foreground/60",
             )}
           />

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Controller,
@@ -15,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Field,
+  FieldDescription,
   FieldInput,
   FieldLabel,
   FieldPlainText,
@@ -148,9 +148,7 @@ export function PriceListTemplateForm({
           <h1
             className={cn(
               "truncate text-lg font-semibold tracking-tight",
-              watchedName
-                ? "text-foreground"
-                : "text-muted-foreground italic",
+              watchedName ? "text-foreground" : "text-muted-foreground italic",
             )}
           >
             {watchedName || t("namePlaceholder")}
@@ -215,52 +213,54 @@ export function PriceListTemplateForm({
           title={tfl("general")}
           description={t("generalDesc")}
         >
-          {/* Name */}
-          <Field className="sm:col-span-2">
-            <FieldLabel htmlFor="plt-name">
-              {tfl("name")}
-              {!isView && <span className="text-destructive"> *</span>}
-            </FieldLabel>
-            {isView ? (
-              <FieldPlainText>{form.getValues("name")}</FieldPlainText>
-            ) : (
-              <FieldInput
-                id="plt-name"
-                placeholder={t("namePlaceholder")}
-                disabled={isDisabled}
-                error={form.formState.errors.name?.message}
-                maxLength={100}
-                {...form.register("name")}
-              />
-            )}
-          </Field>
+          <div className="grid grid-cols-2 gap-4 sm:col-span-2">
+            {/* Name */}
+            <Field>
+              <FieldLabel htmlFor="plt-name">
+                {tfl("name")}
+                {!isView && <span className="text-destructive"> *</span>}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText>{form.getValues("name")}</FieldPlainText>
+              ) : (
+                <FieldInput
+                  id="plt-name"
+                  placeholder={t("namePlaceholder")}
+                  disabled={isDisabled}
+                  error={form.formState.errors.name?.message}
+                  maxLength={100}
+                  {...form.register("name")}
+                />
+              )}
+            </Field>
 
-          {/* Currency */}
-          <Field>
-            <FieldLabel>
-              {tfl("currency")}
-              {!isView && <span className="text-destructive"> *</span>}
-            </FieldLabel>
-            {isView ? (
-              <FieldPlainText>
-                {priceListTemplate?.currency?.code}
-              </FieldPlainText>
-            ) : (
-              <Controller
-                control={form.control}
-                name="currency_id"
-                render={({ field }) => (
-                  <LookupCurrency
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isDisabled}
-                    fullWidth
-                    error={form.formState.errors.currency_id?.message}
-                  />
-                )}
-              />
-            )}
-          </Field>
+            {/* Currency */}
+            <Field>
+              <FieldLabel>
+                {tfl("currency")}
+                {!isView && <span className="text-destructive"> *</span>}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText>
+                  {priceListTemplate?.currency?.code}
+                </FieldPlainText>
+              ) : (
+                <Controller
+                  control={form.control}
+                  name="currency_id"
+                  render={({ field }) => (
+                    <LookupCurrency
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isDisabled}
+                      fullWidth
+                      error={form.formState.errors.currency_id?.message}
+                    />
+                  )}
+                />
+              )}
+            </Field>
+          </div>
 
           {/* Validity period */}
           <Field className="sm:col-span-2">
@@ -272,18 +272,21 @@ export function PriceListTemplateForm({
                   : null}
               </FieldPlainText>
             ) : (
-              <Controller
-                control={form.control}
-                name="validity_period"
-                render={({ field }) => (
-                  <PltValidityStepper
-                    value={field.value}
-                    onChange={field.onChange}
-                    disabled={isDisabled}
-                    labels={stepperLabels}
-                  />
-                )}
-              />
+              <>
+                <FieldDescription>{stepperLabels.hint}</FieldDescription>
+                <Controller
+                  control={form.control}
+                  name="validity_period"
+                  render={({ field }) => (
+                    <PltValidityStepper
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={isDisabled}
+                      labels={stepperLabels}
+                    />
+                  )}
+                />
+              </>
             )}
           </Field>
 
