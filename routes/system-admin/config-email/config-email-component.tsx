@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -8,13 +8,8 @@ import { Save, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { SettingSection } from "../business-setting/business-setting-ui";
 import { useAppConfigByKey, useUpsertAppConfig, useTestEmail } from "@/hooks/use-app-config";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 
@@ -111,6 +106,9 @@ export default function ConfigEmailComponent() {
     });
   };
 
+  const smtpEnabled = useWatch({ control: form.control, name: "smtp_enabled" });
+  const submit = form.handleSubmit(onSubmit, () => scrollToFirstInvalidField());
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -120,93 +118,124 @@ export default function ConfigEmailComponent() {
   }
 
   return (
-    <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+      {/* ── Header: title + actions (business-setting layout) ── */}
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <ModuleTileIcon />
-            <h1 className="text-lg font-semibold">Email Configuration</h1>
-          </div>
-          <p className="text-muted-foreground text-sm">
+          <h1 className="text-lg font-semibold tracking-tight">
+            Email Configuration
+          </h1>
+          <p className="text-muted-foreground mt-0.5 text-sm">
             SMTP settings for sending notification and report emails
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={handleTestEmail} disabled={testEmail.isPending}>
-            <Send className="mr-1 size-4" />
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleTestEmail}
+            disabled={testEmail.isPending}
+          >
+            <Send className="size-3.5" aria-hidden="true" />
             Test Email
           </Button>
+          <Button size="sm" onClick={submit} disabled={upsert.isPending}>
+            {upsert.isPending ? (
+              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <Save className="size-3.5" aria-hidden="true" />
+            )}
+            {upsert.isPending ? "Saving..." : "Save"}
+          </Button>
         </div>
-      </div>
+      </header>
 
-      <form
-        onSubmit={form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())}
-        className="mt-6 max-w-2xl space-y-6"
-      >
-        <div className="rounded-lg border p-4">
-          <h2 className="mb-4 font-semibold">SMTP Server</h2>
-          <FieldGroup>
-            <div className="grid grid-cols-3 gap-4">
-              <Field className="col-span-2">
-                <FieldLabel>Host</FieldLabel>
-                <Input {...form.register("smtp_host")} placeholder="smtp.gmail.com" />
-                <FieldError>{form.formState.errors.smtp_host?.message}</FieldError>
-              </Field>
-              <Field>
-                <FieldLabel>Port</FieldLabel>
-                <Input {...form.register("smtp_port")} type="number" placeholder="587" />
-                <FieldError>{form.formState.errors.smtp_port?.message}</FieldError>
-              </Field>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Field>
-                <FieldLabel>Username</FieldLabel>
-                <Input {...form.register("smtp_username")} placeholder="noreply@example.com" />
-                <FieldError>{form.formState.errors.smtp_username?.message}</FieldError>
-              </Field>
-              <Field>
-                <FieldLabel>Password</FieldLabel>
-                <Input {...form.register("smtp_password")} type="password" placeholder="App password" />
-                <FieldError>{form.formState.errors.smtp_password?.message}</FieldError>
-              </Field>
-            </div>
-            <Field>
-              <FieldLabel>From Address</FieldLabel>
-              <Input {...form.register("smtp_from")} placeholder="noreply@example.com" />
-              <FieldError>{form.formState.errors.smtp_from?.message}</FieldError>
-            </Field>
-            <Field className="flex items-center gap-3 pt-2">
-              <Switch
-                checked={form.watch("smtp_enabled")}
-                onCheckedChange={(v) => form.setValue("smtp_enabled", v)}
-              />
-              <FieldLabel className="mb-0">Enabled</FieldLabel>
-            </Field>
-          </FieldGroup>
-        </div>
+      <form onSubmit={submit}>
+        <SettingSection
+          first
+          title="SMTP Server"
+          description="Connection details for the outgoing mail server."
+        >
+          <Field>
+            <FieldLabel>Host</FieldLabel>
+            <Input {...form.register("smtp_host")} placeholder="smtp.gmail.com" />
+            <FieldError>{form.formState.errors.smtp_host?.message}</FieldError>
+          </Field>
+          <Field>
+            <FieldLabel>Port</FieldLabel>
+            <Input
+              {...form.register("smtp_port")}
+              type="number"
+              placeholder="587"
+            />
+            <FieldError>{form.formState.errors.smtp_port?.message}</FieldError>
+          </Field>
+          <Field>
+            <FieldLabel>Username</FieldLabel>
+            <Input
+              {...form.register("smtp_username")}
+              placeholder="noreply@example.com"
+            />
+            <FieldError>
+              {form.formState.errors.smtp_username?.message}
+            </FieldError>
+          </Field>
+          <Field>
+            <FieldLabel>Password</FieldLabel>
+            <Input
+              {...form.register("smtp_password")}
+              type="password"
+              placeholder="App password"
+            />
+            <FieldError>
+              {form.formState.errors.smtp_password?.message}
+            </FieldError>
+          </Field>
+          <Field className="sm:col-span-2">
+            <FieldLabel>From Address</FieldLabel>
+            <Input
+              {...form.register("smtp_from")}
+              placeholder="noreply@example.com"
+            />
+            <FieldError>{form.formState.errors.smtp_from?.message}</FieldError>
+          </Field>
+          <div className="flex items-center gap-3 pt-1 sm:col-span-2">
+            <Switch
+              id="smtp_enabled"
+              checked={smtpEnabled}
+              onCheckedChange={(v) =>
+                form.setValue("smtp_enabled", v, { shouldDirty: true })
+              }
+            />
+            <label htmlFor="smtp_enabled" className="text-foreground text-sm">
+              Enabled
+            </label>
+          </div>
+        </SettingSection>
 
-        <div className="rounded-lg border p-4">
-          <h2 className="mb-4 font-semibold">Recipients</h2>
-          <FieldGroup>
-            <Field>
-              <FieldLabel>To (comma-separated)</FieldLabel>
-              <Input {...form.register("recipients")} placeholder="admin@example.com, manager@example.com" />
-            </Field>
-            <Field>
-              <FieldLabel>CC (comma-separated)</FieldLabel>
-              <Input {...form.register("cc")} placeholder="finance@example.com" />
-            </Field>
-            <Field>
-              <FieldLabel>Subject Prefix</FieldLabel>
-              <Input {...form.register("subject_prefix")} placeholder="[Carmen]" />
-            </Field>
-          </FieldGroup>
-        </div>
-
-        <Button type="submit" disabled={upsert.isPending}>
-          <Save className="mr-1 size-4" />
-          {upsert.isPending ? "Saving..." : "Save"}
-        </Button>
+        <SettingSection
+          title="Recipients"
+          description="Where report and notification emails are delivered."
+        >
+          <Field className="sm:col-span-2">
+            <FieldLabel>To (comma-separated)</FieldLabel>
+            <Input
+              {...form.register("recipients")}
+              placeholder="admin@example.com, manager@example.com"
+            />
+          </Field>
+          <Field className="sm:col-span-2">
+            <FieldLabel>CC (comma-separated)</FieldLabel>
+            <Input
+              {...form.register("cc")}
+              placeholder="finance@example.com"
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Subject Prefix</FieldLabel>
+            <Input {...form.register("subject_prefix")} placeholder="[Carmen]" />
+          </Field>
+        </SettingSection>
       </form>
     </div>
   );
