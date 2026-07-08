@@ -1616,6 +1616,7 @@
     "priceListTemplate": {
       "entity": "Price List Template",
       "title": "Price List Template",
+      "generalDesc": "Currency, validity period, description and status.",
       "desc": "Manage price list templates for your business.",
       "add": "Add Template",
       "edit": "Edit Price List Template",

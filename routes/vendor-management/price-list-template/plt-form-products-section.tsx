@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import type { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
 import { EmptyProducts } from "../price-list/pl-empty-states";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { PltFormValues } from "./plt-form-schema";
@@ -11,7 +12,6 @@ export function PltFormProductsSection({
   form,
   detailFields,
   priceListTemplate,
-  stats,
   isView,
   isDisabled,
   onAddProduct,
@@ -21,7 +21,6 @@ export function PltFormProductsSection({
   readonly form: UseFormReturn<PltFormValues>;
   readonly detailFields: FieldArrayWithId<PltFormValues, "details", "id">[];
   readonly priceListTemplate?: PriceListTemplate;
-  readonly stats: { productCount: number; tierCount: number };
   readonly isView: boolean;
   readonly isDisabled: boolean;
   readonly onAddProduct: () => void;
@@ -29,31 +28,20 @@ export function PltFormProductsSection({
   readonly labels: ProductLabels;
 }) {
   return (
-    <div>
-      <div className="mb-2 flex items-end justify-between gap-3 px-1">
-        <div>
-          <h3 className="text-foreground text-sm font-semibold tracking-tight">
-            {labels.sectionTitle}
-          </h3>
-          <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
-            {detailFields.length === 0
-              ? labels.noItems
-              : `${stats.productCount} ${labels.product} · ${stats.tierCount} ${stats.tierCount === 1 ? labels.tierSingular : labels.tierPlural}`}
-          </p>
-        </div>
-        {!isDisabled && (
-          <Button
-            type="button"
-            size="xs"
-            onClick={onAddProduct}
-            className="rounded-full"
-          >
+    <SettingSection
+      wide
+      title={labels.sectionTitle}
+      description={labels.noItemsDesc}
+      count={detailFields.length}
+      action={
+        !isDisabled ? (
+          <Button type="button" size="xs" onClick={onAddProduct}>
             <Plus />
             {labels.addLabel}
           </Button>
-        )}
-      </div>
-
+        ) : undefined
+      }
+    >
       {detailFields.length === 0 ? (
         <EmptyProducts
           onAdd={onAddProduct}
@@ -73,6 +61,6 @@ export function PltFormProductsSection({
           labels={labels}
         />
       )}
-    </div>
+    </SettingSection>
   );
 }
