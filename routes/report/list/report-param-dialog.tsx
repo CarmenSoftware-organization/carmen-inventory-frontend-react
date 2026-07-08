@@ -403,10 +403,13 @@ export function ReportParamDialog({
       if (!ds) return ctrl;
       const items = lookupData[ds];
       if (!items || items.length === 0) return ctrl;
+      // Period is a single-period selection (business rule): no "ALL" option, and the
+      // newest period — first in the DESC-ordered list — becomes the default (options[0]).
+      const includeAll = ds !== "period";
       return {
         ...ctrl,
-        items: ["ALL", ...items.map((i) => i.name)],
-        values: ["ALL", ...items.map((i) => i.code)],
+        items: includeAll ? ["ALL", ...items.map((i) => i.name)] : items.map((i) => i.name),
+        values: includeAll ? ["ALL", ...items.map((i) => i.code)] : items.map((i) => i.code),
       };
     };
     if (field.kind === "range") {
