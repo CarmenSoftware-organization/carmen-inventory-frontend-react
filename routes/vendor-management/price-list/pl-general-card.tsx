@@ -112,7 +112,7 @@ export function PLGeneralCard({
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={isDisabled}
-                className="w-full"
+                fullWidth
                 error={form.formState.errors.currency_id?.message}
               />
             )}
@@ -136,6 +136,7 @@ export function PLGeneralCard({
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={isDisabled}
+                className="w-full"
                 placeholder={tfl("pickDate")}
                 error={form.formState.errors.effective_from_date?.message}
               />
@@ -160,6 +161,7 @@ export function PLGeneralCard({
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={isDisabled}
+                className="w-full"
                 placeholder={tfl("pickDate")}
                 fromDate={watchedFrom ? new Date(watchedFrom) : undefined}
                 error={form.formState.errors.effective_to_date?.message}

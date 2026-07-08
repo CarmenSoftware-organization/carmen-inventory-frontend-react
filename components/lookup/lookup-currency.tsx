@@ -30,6 +30,8 @@ interface LookupCurrencyProps {
   readonly excludeIds?: Set<string>;
   readonly error?: string;
   readonly readOnly?: boolean;
+  /** fill the container width instead of the default content-width (w-fit) */
+  readonly fullWidth?: boolean;
 }
 
 export function LookupCurrency({
@@ -44,6 +46,7 @@ export function LookupCurrency({
   excludeIds,
   error,
   readOnly,
+  fullWidth,
 }: LookupCurrencyProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -90,7 +93,7 @@ export function LookupCurrency({
         onOpenChange={setTooltipOpen}
       >
         <TooltipTrigger asChild>
-          <div className="relative w-fit">
+          <div className={cn("relative", fullWidth ? "w-full" : "w-fit")}>
             <Select
               value={value}
               onValueChange={handleChange}
@@ -104,7 +107,7 @@ export function LookupCurrency({
                 className={cn(
                   className,
                   error && "border-destructive pr-7",
-                  "w-fit",
+                  fullWidth ? "w-full" : "w-fit",
                 )}
               >
                 <SelectValue placeholder={resolvedPlaceholder} />
