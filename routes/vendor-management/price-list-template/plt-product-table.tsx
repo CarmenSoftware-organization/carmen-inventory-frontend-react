@@ -129,6 +129,7 @@ export function PltProductTable({
       {
         id: "note",
         header: () => labels.notePlaceholder,
+        size: 260,
         cell: ({ row }) => (
           <NoteCell
             form={form}
@@ -187,10 +188,7 @@ export function PltProductTable({
       recordCount={detailFields.length}
       tableLayout={{ headerSticky: true }}
     >
-      <DataGridContainer
-        className="border-border/60 bg-card"
-        border={false}
-      >
+      <DataGridContainer>
         <DataGridTable />
       </DataGridContainer>
     </DataGrid>
