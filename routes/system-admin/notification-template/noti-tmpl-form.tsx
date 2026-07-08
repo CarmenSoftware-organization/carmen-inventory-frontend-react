@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,9 +15,13 @@ import {
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  SettingSection,
+  SettingSectionSkeleton,
+} from "../business-setting/business-setting-ui";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
@@ -146,7 +149,7 @@ export function NotificationTemplateForm({
   const submitLabel = isPending ? pendingLabel : actionLabel;
 
   return (
-    <div className="space-y-4 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button
@@ -223,130 +226,111 @@ export function NotificationTemplateForm({
         )}
       >
         {/* Section: General */}
-        <div className="grid grid-cols-1 gap-x-8 gap-y-3 md:grid-cols-3">
-          <div>
-            <h2 className="text-sm font-semibold">
-              {t("sectionGeneralTitle")}
-            </h2>
-            <p className="text-muted-foreground mt-1 text-xs leading-5">
-              {t("sectionGeneralDesc")}
-            </p>
-          </div>
-          <div className="sm:max-w-3xl md:col-span-2">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-6">
-              <Field className="sm:col-span-3">
-                <FieldLabel htmlFor="nt-name" required>
-                  {tfl("name")}
-                </FieldLabel>
-                <FieldInput
-                  id="nt-name"
-                  placeholder={t("namePlaceholder")}
+        <SettingSection
+          first
+          title={t("sectionGeneralTitle")}
+          description={t("sectionGeneralDesc")}
+        >
+          <Field>
+            <FieldLabel htmlFor="nt-name" required>
+              {tfl("name")}
+            </FieldLabel>
+            <FieldInput
+              id="nt-name"
+              placeholder={t("namePlaceholder")}
+              disabled={isDisabled}
+              maxLength={100}
+              error={errors.name?.message}
+              {...form.register("name")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel required>{t("colChannel")}</FieldLabel>
+            <Controller
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FieldSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  placeholder={t("selectChannel")}
                   disabled={isDisabled}
-                  maxLength={100}
-                  error={errors.name?.message}
-                  {...form.register("name")}
-                />
-              </Field>
+                  error={errors.type?.message}
+                >
+                  <SelectContent>
+                    {NOTIFICATION_CHANNEL_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </FieldSelect>
+              )}
+            />
+          </Field>
 
-              <Field className="sm:col-span-3">
-                <FieldLabel required>{t("colChannel")}</FieldLabel>
-                <Controller
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FieldSelect
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      placeholder={t("selectChannel")}
-                      disabled={isDisabled}
-                      error={errors.type?.message}
-                    >
-                      <SelectContent>
-                        {NOTIFICATION_CHANNEL_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </FieldSelect>
-                  )}
-                />
-              </Field>
+          <Field className="sm:col-span-2">
+            <FieldLabel htmlFor="nt-description">
+              {tfl("description")}
+            </FieldLabel>
+            <Textarea
+              id="nt-description"
+              placeholder={tfl("optional")}
+              rows={2}
+              disabled={isDisabled}
+              maxLength={256}
+              {...form.register("description")}
+            />
+          </Field>
 
-              <Field className="col-span-full">
-                <FieldLabel htmlFor="nt-description">
-                  {tfl("description")}
-                </FieldLabel>
-                <Textarea
-                  id="nt-description"
-                  placeholder={tfl("optional")}
-                  rows={2}
+          <div className="sm:col-span-2">
+            <Controller
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <StatusSwitch
+                  id="nt-is-active"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
                   disabled={isDisabled}
-                  maxLength={256}
-                  {...form.register("description")}
                 />
-              </Field>
-
-              <div className="col-span-full">
-                <Controller
-                  control={form.control}
-                  name="is_active"
-                  render={({ field }) => (
-                    <StatusSwitch
-                      id="nt-is-active"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={isDisabled}
-                    />
-                  )}
-                />
-              </div>
-            </div>
+              )}
+            />
           </div>
-        </div>
-
-        <Separator className="my-6" />
+        </SettingSection>
 
         {/* Section: Message content */}
-        <div className="grid grid-cols-1 gap-x-8 gap-y-3 md:grid-cols-3">
-          <div>
-            <h2 className="text-sm font-semibold">
-              {t("sectionMessageTitle")}
-            </h2>
-            <p className="text-muted-foreground mt-1 text-xs leading-5">
-              {t("sectionMessageDesc")}
-            </p>
-          </div>
-          <div className="sm:max-w-3xl md:col-span-2">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-6">
-              <Field className="col-span-full">
-                <FieldLabel htmlFor="nt-subject">{t("colSubject")}</FieldLabel>
-                <FieldInput
-                  id="nt-subject"
-                  placeholder={t("subjectPlaceholder")}
-                  disabled={isDisabled}
-                  maxLength={200}
-                  {...form.register("subject")}
-                />
-              </Field>
+        <SettingSection
+          title={t("sectionMessageTitle")}
+          description={t("sectionMessageDesc")}
+        >
+          <Field className="sm:col-span-2">
+            <FieldLabel htmlFor="nt-subject">{t("colSubject")}</FieldLabel>
+            <FieldInput
+              id="nt-subject"
+              placeholder={t("subjectPlaceholder")}
+              disabled={isDisabled}
+              maxLength={200}
+              {...form.register("subject")}
+            />
+          </Field>
 
-              <Field className="col-span-full">
-                <FieldLabel htmlFor="nt-body" required>
-                  {t("colBody")}
-                </FieldLabel>
-                <Textarea
-                  id="nt-body"
-                  placeholder={t("bodyPlaceholder")}
-                  disabled={isDisabled}
-                  maxLength={259}
-                  aria-invalid={!!errors.body}
-                  {...form.register("body")}
-                />
-                <FieldError>{errors.body?.message}</FieldError>
-              </Field>
-            </div>
-          </div>
-        </div>
+          <Field className="sm:col-span-2">
+            <FieldLabel htmlFor="nt-body" required>
+              {t("colBody")}
+            </FieldLabel>
+            <Textarea
+              id="nt-body"
+              placeholder={t("bodyPlaceholder")}
+              disabled={isDisabled}
+              maxLength={259}
+              aria-invalid={!!errors.body}
+              {...form.register("body")}
+            />
+            <FieldError>{errors.body?.message}</FieldError>
+          </Field>
+        </SettingSection>
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
@@ -363,6 +347,26 @@ export function NotificationTemplateForm({
           onConfirm={handleDelete}
         />
       )}
+    </div>
+  );
+}
+
+/** Loading skeleton that mirrors the form's real layout (header + 2 sections). */
+export function NotificationTemplateFormSkeleton() {
+  return (
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="mb-6 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="size-8 rounded-md" />
+          <Skeleton className="h-6 w-56" />
+          <Skeleton className="h-4 w-14 rounded-full" />
+        </div>
+        <Skeleton className="h-8 w-20" />
+      </div>
+      {/* General: name · channel · description(textarea) · status */}
+      <SettingSectionSkeleton first fields={["half", "half", "tall", "full"]} />
+      {/* Message content: subject · body(textarea) */}
+      <SettingSectionSkeleton fields={["full", "tall"]} />
     </div>
   );
 }

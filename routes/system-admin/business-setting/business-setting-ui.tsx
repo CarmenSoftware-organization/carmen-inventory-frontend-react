@@ -84,7 +84,8 @@ export function SettingSectionSkeleton({
   fields,
 }: {
   readonly first?: boolean;
-  readonly fields: ReadonlyArray<"full" | "half">;
+  /** "half" = one grid cell · "full" = whole row · "tall" = full-row textarea */
+  readonly fields: ReadonlyArray<"full" | "half" | "tall">;
 }) {
   return (
     <div
@@ -101,7 +102,11 @@ export function SettingSectionSkeleton({
         {fields.map((w, j) => (
           <Skeleton
             key={j}
-            className={cn("h-14 w-full", w === "full" && "sm:col-span-2")}
+            className={cn(
+              "w-full",
+              w === "tall" ? "h-24" : "h-14",
+              (w === "full" || w === "tall") && "sm:col-span-2",
+            )}
           />
         ))}
       </div>
