@@ -35,7 +35,7 @@ function RoleToggleCard({
       className={cn(
         "group flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all",
         checked
-          ? "border-primary/40 bg-primary/5 ring-primary/20 ring-1"
+          ? "border-primary/40 bg-primary/5"
           : "border-border/60 bg-card hover:border-foreground/20 hover:bg-muted/40",
         disabled &&
           "hover:border-border/60 hover:bg-card cursor-not-allowed opacity-60",

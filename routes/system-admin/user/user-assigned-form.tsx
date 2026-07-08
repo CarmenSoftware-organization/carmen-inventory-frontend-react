@@ -3,15 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
-import {
-  ArrowLeft,
-  Building2,
-  MapPin,
-  Pencil,
-  Save,
-  ShieldCheck,
-  X,
-} from "lucide-react";
+import { ArrowLeft, Pencil, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -34,7 +26,7 @@ import {
   getDefaultValues,
   type UserRolesFormValues,
 } from "./user-roles-form-schema";
-import { StatTile, UserAvatar } from "./user-assigned-ui";
+import { UserAvatar } from "./user-assigned-ui";
 import { RolesSection } from "./user-assigned-roles";
 import { DepartmentsSection } from "./user-assigned-departments";
 import { LocationsSection } from "./user-assigned-locations";
@@ -180,9 +172,6 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const roleCountForDisplay = isView
     ? initialRoleIds.length
     : selectedRoleCount;
-  const locationCountForDisplay = isView
-    ? initialLocationKeys.length
-    : locationTargetKeys.length;
 
   return (
     <div className="space-y-4">
@@ -210,11 +199,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
         </div>
         <div className="flex items-center gap-2">
           {isView ? (
-            <Button
-              size="sm"
-              onClick={() => setMode("edit")}
-              className="rounded-full"
-            >
+            <Button size="sm" onClick={() => setMode("edit")}>
               <Pencil />
               Edit
             </Button>
@@ -226,7 +211,6 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
                 size="sm"
                 onClick={handleCancel}
                 disabled={isPending}
-                className="rounded-full"
               >
                 <X className="size-3.5" aria-hidden="true" />
                 Cancel
@@ -236,7 +220,6 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
                 size="sm"
                 form="user-roles-form"
                 disabled={isPending}
-                className="rounded-full"
               >
                 <Save className="size-3.5" aria-hidden="true" />
                 {isPending ? "Saving..." : "Save"}
@@ -248,13 +231,9 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
 
       {/* ── Hero ──────────────────────────────────── */}
       <Reveal>
-        <section className="border-border/60 bg-card relative overflow-hidden rounded-2xl border p-5">
-          <div className="relative flex flex-wrap items-center gap-4">
-            <UserAvatar
-              first={user.firstname}
-              last={user.lastname}
-              seed={user.user_id}
-            />
+        <section className="border-border/60 bg-card rounded-2xl border p-5">
+          <div className="flex flex-wrap items-center gap-4">
+            <UserAvatar first={user.firstname} last={user.lastname} />
             <div className="min-w-0 flex-1">
               <h2 className="text-foreground text-lg font-semibold tracking-tight">
                 {user.firstname} {user.lastname}
@@ -270,30 +249,6 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
             </Badge>
           </div>
         </section>
-      </Reveal>
-
-      {/* ── Stat tiles ────────────────────────────── */}
-      <Reveal delay={80}>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <StatTile
-            icon={ShieldCheck}
-            label="Roles"
-            value={roleCountForDisplay}
-            tone="info"
-          />
-          <StatTile
-            icon={Building2}
-            label="Departments"
-            value={totalDeptCount}
-            tone="warning"
-          />
-          <StatTile
-            icon={MapPin}
-            label="Locations"
-            value={locationCountForDisplay}
-            tone="success"
-          />
-        </div>
       </Reveal>
 
       {/* ── 2-col grid ────────────────────────────── */}
