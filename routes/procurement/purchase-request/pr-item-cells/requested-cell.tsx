@@ -1,11 +1,14 @@
 import { useWatch, type UseFormReturn, type Control } from "react-hook-form";
 import { memo } from "react";
 import { useTranslations } from "use-intl";
-import { InputGroupQty } from "@/components/ui/input/input-group-qty";
-import { InputGroup, InputGroupAddon } from "@/components/ui/input-group";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+} from "@/components/ui/input/input-suffix";
 import { useQuantityFormatter } from "@/hooks/use-number-formatter";
 import type { PrFormValues } from "../pr-form-schema";
-import { useIsRowLocked, WatchedProductUnit } from "./helpers";
+import { useIsRowLocked, WatchedProductUnit, QtyUnitPlain } from "./helpers";
 
 export const RequestedCell = memo(function RequestedCell({
   control,
@@ -30,27 +33,25 @@ export const RequestedCell = memo(function RequestedCell({
 
   if (isFieldDisabled) {
     return (
-      <div className="flex h-7 items-center justify-end gap-1.5">
-        <span className="text-xs font-semibold tabular-nums">
-          {formatQty(productId ? (qty ?? 0) : 0)}
-        </span>
-        <WatchedProductUnit
-          control={control}
-          index={index}
-          unitField="requested_unit_id"
-          isDisabled
-        />
-      </div>
+      <QtyUnitPlain
+        control={control}
+        index={index}
+        unitField="requested_unit_id"
+        value={formatQty(productId ? (qty ?? 0) : 0)}
+      />
     );
   }
 
   return (
-    <InputGroup className="h-7 w-full">
-      <InputGroupQty
+    <InputSuffixField
+      className="w-full"
+      error={!!form.formState.errors.items?.[index]?.requested_qty}
+    >
+      <InputSuffixInput
+        type="number"
+        inputMode="decimal"
         min={1}
         placeholder={tfl("qty")}
-        className="h-7 text-right"
-        aria-invalid={!!form.formState.errors.items?.[index]?.requested_qty}
         defaultValue={qty ?? undefined}
         {...form.register(`items.${index}.requested_qty`)}
         onChange={(e) => {
@@ -62,7 +63,7 @@ export const RequestedCell = memo(function RequestedCell({
           );
         }}
       />
-      <InputGroupAddon align="inline-end">
+      <InputSuffixAddon>
         <WatchedProductUnit
           control={control}
           index={index}
@@ -73,7 +74,7 @@ export const RequestedCell = memo(function RequestedCell({
             form.setValue(`items.${index}.approved_unit_id`, value);
           }}
         />
-      </InputGroupAddon>
-    </InputGroup>
+      </InputSuffixAddon>
+    </InputSuffixField>
   );
 });

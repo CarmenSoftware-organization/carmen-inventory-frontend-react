@@ -1,17 +1,13 @@
 import { useController, useWatch, type Control } from "react-hook-form";
-import { memo, useEffect, useMemo, useRef } from "react";
-import { ChevronDownIcon } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { InputGroupButton } from "@/components/ui/input-group";
+import { memo, type ReactNode } from "react";
+import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
+import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { useProductUnits } from "@/hooks/use-product-units";
 import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import type { PrFormValues } from "../pr-form-schema";
+
+type PrUnitField = "requested_unit_id" | "approved_unit_id" | "foc_unit_id";
 
 export const STATUS_NORMALIZE: Record<string, string> = {
   approve: "approved",
@@ -81,6 +77,12 @@ export const InventoryTooltipCell = memo(function InventoryTooltipCell({
   );
 });
 
+/**
+ * unit lookup แบบไร้ border (Select) ฝังใน InputSuffixAddon ของกล่อง qty
+ * cascade ตาม product_id ของ row — auto-select หน่วยแรกทำโดย LookupProductUnit เอง
+ * `onExtraChange` ใช้ propagate หน่วยที่เลือก (requested → foc/approved) ทั้งตอน
+ * auto-select และตอนผู้ใช้เลือกเอง เพราะ onValueChange ยิงทั้งสองกรณี
+ */
 export const WatchedProductUnit = memo(function WatchedProductUnit({
   control,
   index,
@@ -90,79 +92,53 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
 }: {
   control: Control<PrFormValues>;
   index: number;
-  unitField: "requested_unit_id" | "approved_unit_id" | "foc_unit_id";
+  unitField: PrUnitField;
   isDisabled: boolean;
   onExtraChange?: (value: string) => void;
 }) {
   "use no memo";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
-  const { data: units = [] } = useProductUnits(productId || undefined);
   const { field } = useController({
     control,
     name: `items.${index}.${unitField}`,
   });
-  const unitId = field.value ?? "";
-  const selectedUnit = useMemo(
-    () => units.find((u) => u.id === unitId),
-    [units, unitId],
-  );
-
-  // auto-init: เมื่อ units โหลดแล้วค่ายังว่าง/ไม่ match → เลือกหน่วยแรก และ
-  // propagate ผ่าน onExtraChange (foc/approved) ให้ครบเหมือนเดิม — เฉพาะตอนแก้ได้
-  const onExtraChangeRef = useRef(onExtraChange);
-  onExtraChangeRef.current = onExtraChange;
-  useEffect(() => {
-    if (isDisabled || units.length === 0) return;
-    if (unitId && units.some((u) => u.id === unitId)) return;
-    field.onChange(units[0].id);
-    onExtraChangeRef.current?.(units[0].id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [units, unitId, isDisabled]);
-
-  if (isDisabled) {
-    return (
-      <span className="text-muted-foreground text-xs font-medium">
-        {selectedUnit?.name || "—"}
-      </span>
-    );
-  }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <InputGroupButton
-          variant="ghost"
-          size="xs"
-          aria-label="Unit"
-          className="text-muted-foreground pr-1.5! font-semibold"
-        >
-          {selectedUnit?.name ?? "—"}
-          <ChevronDownIcon className="size-3 opacity-60" />
-        </InputGroupButton>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="max-h-64 overflow-y-auto">
-        {units.length === 0 && (
-          <DropdownMenuItem disabled>—</DropdownMenuItem>
-        )}
-        {units.map((u) => (
-          <DropdownMenuItem
-            key={u.id}
-            onSelect={() => {
-              field.onChange(u.id);
-              onExtraChange?.(u.id);
-            }}
-            className="gap-2"
-          >
-            <span className="font-semibold">{u.name}</span>
-            {u.conversion !== 1 && (
-              <span className="text-muted-foreground text-xs">
-                1 = {u.conversion}
-              </span>
-            )}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <LookupProductUnit
+      productId={productId}
+      value={field.value ?? ""}
+      onValueChange={(id) => {
+        field.onChange(id);
+        onExtraChange?.(id);
+      }}
+      disabled={isDisabled || !productId}
+      className="h-full w-19 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
+    />
   );
+});
+
+/**
+ * qty + unit เป็น plain text (view/locked mode) — resolve ชื่อหน่วยจาก product
+ * units ให้ล้อ layout ของกล่อง InputSuffix (ค่า ซ้าย + หน่วย ขวา, ชิดขวา)
+ */
+export const QtyUnitPlain = memo(function QtyUnitPlain({
+  control,
+  index,
+  unitField,
+  value,
+}: {
+  control: Control<PrFormValues>;
+  index: number;
+  unitField: PrUnitField;
+  value: ReactNode;
+}) {
+  "use no memo";
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const unitId =
+    useWatch({ control, name: `items.${index}.${unitField}` }) ?? "";
+  const { data: units = [] } = useProductUnits(productId || undefined);
+  const unitName = units.find((u) => u.id === unitId)?.name ?? "";
+  return <InputSuffixPlain className="w-full" value={value} suffix={unitName} />;
 });

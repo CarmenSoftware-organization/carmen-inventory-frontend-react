@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
-import { BoxIcon, Plus } from "lucide-react";
+import { BoxIcon, PackagePlus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DataGrid,
@@ -78,7 +78,7 @@ export function PrtItemFields({
             disabled={disabled}
             onClick={handleAddItem}
           >
-            <Plus /> {t("addItem")}
+            <PackagePlus /> {t("addItem")}
           </Button>
         )}
       </div>

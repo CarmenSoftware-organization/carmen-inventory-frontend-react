@@ -148,7 +148,7 @@ const WatchedProductUnit = ({
           onValueChange={field.onChange}
           disabled={disabled}
           readOnly={readOnly}
-          className="h-full w-20 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
+          className="w-20 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
           error={unitError}
         />
       )}
@@ -347,12 +347,13 @@ export function usePrtItemTable({
                   readOnly={readOnly}
                   className="flex w-full justify-center text-xs"
                   error={currencyError}
+                  size="sm"
                 />
               )}
             />
           );
         },
-        size: 60,
+        size: 80,
         meta: {
           headerClassName: "text-center",
         },

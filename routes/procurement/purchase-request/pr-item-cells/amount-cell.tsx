@@ -2,10 +2,10 @@ import { useWatch, type Control } from "react-hook-form";
 import { memo, type ReactNode } from "react";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+} from "@/components/ui/input/input-suffix";
 import type { PrFormValues } from "../pr-form-schema";
 
 export const AmountCell = memo(function AmountCell({
@@ -55,15 +55,15 @@ export const AmountCell = memo(function AmountCell({
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <InputGroup className="h-7 w-full">
-        <InputGroupInput
+      <InputSuffixField className="w-full">
+        <InputSuffixInput
           readOnly
           tabIndex={-1}
           value={amountText}
-          className="h-7 cursor-default text-right font-semibold tabular-nums"
+          className="cursor-default font-semibold tabular-nums"
         />
-        <InputGroupAddon align="inline-end">{currencySlot}</InputGroupAddon>
-      </InputGroup>
+        <InputSuffixAddon>{currencySlot}</InputSuffixAddon>
+      </InputSuffixField>
       {baseLine}
     </div>
   );

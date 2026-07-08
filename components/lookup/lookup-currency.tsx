@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -91,7 +90,7 @@ export function LookupCurrency({
         onOpenChange={setTooltipOpen}
       >
         <TooltipTrigger asChild>
-          <div className="relative w-full">
+          <div className="relative w-fit">
             <Select
               value={value}
               onValueChange={handleChange}
@@ -101,9 +100,11 @@ export function LookupCurrency({
               <SelectTrigger
                 aria-invalid={!!error}
                 size={size}
+                align="end"
                 className={cn(
-                  className ?? "w-full",
+                  className,
                   error && "border-destructive pr-7",
+                  "w-fit",
                 )}
               >
                 <SelectValue placeholder={resolvedPlaceholder} />
@@ -113,7 +114,7 @@ export function LookupCurrency({
                   <SelectItem
                     key={currency.id}
                     value={currency.id}
-                    className="text-xs"
+                    className="text-right text-xs"
                   >
                     {currency.code}
                   </SelectItem>

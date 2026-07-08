@@ -13,6 +13,7 @@ import {
   ChevronsUpDown,
   Eye,
   Loader2,
+  PackagePlus,
   Plus,
   RefreshCcw,
   Scissors,
@@ -502,7 +503,7 @@ export function PrItemFields({
               title={!canAddItem ? t("selectWorkflowFirst") : undefined}
               onClick={() => handleAddItem()}
             >
-              <Plus /> {t("addItem")}
+              <PackagePlus /> {t("addItem")}
             </Button>
           )}
 

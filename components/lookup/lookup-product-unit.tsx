@@ -1,9 +1,15 @@
-
 import { useEffect, useRef } from "react";
 import { useTranslations } from "use-intl";
-import { Ruler } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useProductUnits, type ProductUnit } from "@/hooks/use-product-units";
-import { LookupCombobox } from "./lookup-combobox";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface LookupProductUnitProps {
   readonly productId: string;
@@ -13,13 +19,12 @@ interface LookupProductUnitProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
-  readonly disableTooltip?: boolean;
   readonly error?: string;
   readonly readOnly?: boolean;
 }
 
 /**
- * Lookup Popover สำหรับเลือกหน่วยนับของสินค้ารายการใดรายการหนึ่ง (cascading จาก productId)
+ * Select สำหรับเลือกหน่วยนับของสินค้ารายการใดรายการหนึ่ง (cascading จาก productId)
  *
  * ดึงข้อมูลผ่าน `useProductUnits(productId)` ซึ่งคืนเฉพาะหน่วยที่สินค้าชิ้นนั้นรองรับ
  * (inventory/order/ingredient units) auto-select หน่วยแรกเมื่อ value ไม่ match หรือยังว่าง
@@ -27,7 +32,7 @@ interface LookupProductUnitProps {
  *
  * @param value - product unit id ที่เลือกอยู่
  * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
- * @returns JSX popover element ของ product unit lookup
+ * @returns JSX select element ของ product unit lookup
  * @example
  * ```tsx
  * const productId = useWatch({ control, name: "product_id" });
@@ -44,7 +49,6 @@ export function LookupProductUnit({
   disabled,
   placeholder,
   className,
-  disableTooltip,
   error,
   readOnly,
 }: LookupProductUnitProps) {
@@ -65,27 +69,56 @@ export function LookupProductUnit({
     onValueChangeRef.current(units[0].id);
   }, [units, value]);
 
+  if (readOnly) {
+    const selected = units.find((u) => u.id === value);
+    return (
+      <span
+        className={cn(
+          "inline-flex min-h-8 items-center text-xs",
+          !selected && "text-muted-foreground",
+          className,
+        )}
+      >
+        {selected?.name ?? "—"}
+      </span>
+    );
+  }
+
   return (
-    <LookupCombobox
-      value={value}
-      onValueChange={(id, item) => {
+    <Select
+      value={value || undefined}
+      onValueChange={(id) => {
         onValueChange(id);
-        if (item) onItemChange?.(item);
+        const unit = units.find((u) => u.id === id);
+        if (unit) onItemChange?.(unit);
       }}
-      items={units}
-      getId={(u) => u.id}
-      getLabel={(u) => u.name}
-      placeholder={placeholder ?? tl("select", { entity: tfl("unit") })}
-      searchPlaceholder={tl("search", { entity: tfl("unit") })}
-      disabled={disabled || !productId}
-      isLoading={isLoading}
-      className={className}
-      emptyIcon={Ruler}
-      emptyTitle={tl("noFound", { entity: tfl("unit") })}
-      emptyDescription={tl("noFoundDesc")}
-      disableTooltip={disableTooltip}
-      error={error}
-      readOnly={readOnly}
-    />
+      disabled={disabled || !productId || isLoading}
+    >
+      <SelectTrigger
+        size="sm"
+        align="end"
+        aria-invalid={!!error}
+        className={cn("text-xs", className, "w-fit")}
+      >
+        {isLoading ? (
+          <Loader2 className="text-muted-foreground size-3.5 animate-spin" />
+        ) : (
+          <SelectValue
+            placeholder={placeholder ?? tl("select", { entity: tfl("unit") })}
+          />
+        )}
+      </SelectTrigger>
+      <SelectContent>
+        {units.map((unit) => (
+          <SelectItem
+            key={unit.id}
+            value={unit.id}
+            className="text-right text-xs"
+          >
+            {unit.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
