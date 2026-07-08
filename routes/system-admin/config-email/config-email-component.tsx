@@ -4,12 +4,17 @@ import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { useTranslations } from "use-intl";
 import { Save, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
-import { SettingSection } from "../business-setting/business-setting-ui";
+import {
+  SettingSection,
+  SettingSectionSkeleton,
+} from "../business-setting/business-setting-ui";
 import { useAppConfigByKey, useUpsertAppConfig, useTestEmail } from "@/hooks/use-app-config";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 
@@ -74,6 +79,9 @@ function toApiValue(values: FormValues): Record<string, unknown> {
 }
 
 export default function ConfigEmailComponent() {
+  const t = useTranslations("systemAdmin.configEmail");
+  const tc = useTranslations("common");
+  const tf = useTranslations("form");
   const { data, isLoading } = useAppConfigByKey("report_email");
   const upsert = useUpsertAppConfig();
   const testEmail = useTestEmail();
@@ -93,7 +101,7 @@ export default function ConfigEmailComponent() {
     upsert.mutate(
       { key: "report_email", value: toApiValue(values) },
       {
-        onSuccess: () => toast.success("Email config saved"),
+        onSuccess: () => toast.success(t("saved")),
         onError: (err) => toast.error(err.message),
       },
     );
@@ -101,7 +109,7 @@ export default function ConfigEmailComponent() {
 
   const handleTestEmail = () => {
     testEmail.mutate(undefined as never, {
-      onSuccess: () => toast.success("Test email sent successfully"),
+      onSuccess: () => toast.success(t("testSent")),
       onError: (err) => toast.error(err.message),
     });
   };
@@ -111,8 +119,23 @@ export default function ConfigEmailComponent() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="text-muted-foreground size-6 animate-spin" />
+      <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-16" />
+          </div>
+        </div>
+        {/* mirror the real field layout so the skeleton is exactly as tall */}
+        <SettingSectionSkeleton
+          first
+          fields={["half", "half", "half", "half", "full", "full"]}
+        />
+        <SettingSectionSkeleton fields={["full", "full", "half"]} />
       </div>
     );
   }
@@ -122,12 +145,8 @@ export default function ConfigEmailComponent() {
       {/* ── Header: title + actions (business-setting layout) ── */}
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight">
-            Email Configuration
-          </h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">
-            SMTP settings for sending notification and report emails
-          </p>
+          <h1 className="text-lg font-semibold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground mt-0.5 text-sm">{t("desc")}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <Button
@@ -137,7 +156,7 @@ export default function ConfigEmailComponent() {
             disabled={testEmail.isPending}
           >
             <Send className="size-3.5" aria-hidden="true" />
-            Test Email
+            {t("testEmail")}
           </Button>
           <Button size="sm" onClick={submit} disabled={upsert.isPending}>
             {upsert.isPending ? (
@@ -145,7 +164,7 @@ export default function ConfigEmailComponent() {
             ) : (
               <Save className="size-3.5" aria-hidden="true" />
             )}
-            {upsert.isPending ? "Saving..." : "Save"}
+            {upsert.isPending ? tf("saving") : tc("save")}
           </Button>
         </div>
       </header>
@@ -153,16 +172,16 @@ export default function ConfigEmailComponent() {
       <form onSubmit={submit}>
         <SettingSection
           first
-          title="SMTP Server"
-          description="Connection details for the outgoing mail server."
+          title={t("smtpServer")}
+          description={t("smtpServerDesc")}
         >
           <Field>
-            <FieldLabel>Host</FieldLabel>
+            <FieldLabel>{t("host")}</FieldLabel>
             <Input {...form.register("smtp_host")} placeholder="smtp.gmail.com" />
             <FieldError>{form.formState.errors.smtp_host?.message}</FieldError>
           </Field>
           <Field>
-            <FieldLabel>Port</FieldLabel>
+            <FieldLabel>{t("port")}</FieldLabel>
             <Input
               {...form.register("smtp_port")}
               type="number"
@@ -171,7 +190,7 @@ export default function ConfigEmailComponent() {
             <FieldError>{form.formState.errors.smtp_port?.message}</FieldError>
           </Field>
           <Field>
-            <FieldLabel>Username</FieldLabel>
+            <FieldLabel>{t("username")}</FieldLabel>
             <Input
               {...form.register("smtp_username")}
               placeholder="noreply@example.com"
@@ -181,7 +200,7 @@ export default function ConfigEmailComponent() {
             </FieldError>
           </Field>
           <Field>
-            <FieldLabel>Password</FieldLabel>
+            <FieldLabel>{t("password")}</FieldLabel>
             <Input
               {...form.register("smtp_password")}
               type="password"
@@ -192,47 +211,41 @@ export default function ConfigEmailComponent() {
             </FieldError>
           </Field>
           <Field className="sm:col-span-2">
-            <FieldLabel>From Address</FieldLabel>
+            <FieldLabel>{t("fromAddress")}</FieldLabel>
             <Input
               {...form.register("smtp_from")}
               placeholder="noreply@example.com"
             />
             <FieldError>{form.formState.errors.smtp_from?.message}</FieldError>
           </Field>
-          <div className="flex items-center gap-3 pt-1 sm:col-span-2">
+          <label className="flex items-center gap-2 pt-1 sm:col-span-2">
             <Switch
-              id="smtp_enabled"
               checked={smtpEnabled}
               onCheckedChange={(v) =>
                 form.setValue("smtp_enabled", v, { shouldDirty: true })
               }
             />
-            <label htmlFor="smtp_enabled" className="text-foreground text-sm">
-              Enabled
-            </label>
-          </div>
+            <span className="text-sm">{t("enabled")}</span>
+          </label>
         </SettingSection>
 
         <SettingSection
-          title="Recipients"
-          description="Where report and notification emails are delivered."
+          title={t("recipients")}
+          description={t("recipientsDesc")}
         >
           <Field className="sm:col-span-2">
-            <FieldLabel>To (comma-separated)</FieldLabel>
+            <FieldLabel>{t("to")}</FieldLabel>
             <Input
               {...form.register("recipients")}
               placeholder="admin@example.com, manager@example.com"
             />
           </Field>
           <Field className="sm:col-span-2">
-            <FieldLabel>CC (comma-separated)</FieldLabel>
-            <Input
-              {...form.register("cc")}
-              placeholder="finance@example.com"
-            />
+            <FieldLabel>{t("cc")}</FieldLabel>
+            <Input {...form.register("cc")} placeholder="finance@example.com" />
           </Field>
           <Field>
-            <FieldLabel>Subject Prefix</FieldLabel>
+            <FieldLabel>{t("subjectPrefix")}</FieldLabel>
             <Input {...form.register("subject_prefix")} placeholder="[Carmen]" />
           </Field>
         </SettingSection>

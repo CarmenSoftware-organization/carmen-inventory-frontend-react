@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -70,6 +71,41 @@ export function SettingSection({
       </div>
       <div className="grid gap-4 md:col-span-2 sm:grid-cols-2">{children}</div>
     </section>
+  );
+}
+
+/**
+ * Skeleton ที่ mirror โครง `SettingSection` เป๊ะ — ใช้ตอน loading ให้ความสูง
+ * เท่ากับเนื้อหาจริง โดยรับ `fields` เป็น layout ของแต่ละช่อง ("full" กินเต็มแถว
+ * เหมือน field ที่ `sm:col-span-2`, "half" = ครึ่งแถว) reuse ได้ทุกหน้า settings
+ */
+export function SettingSectionSkeleton({
+  first,
+  fields,
+}: {
+  readonly first?: boolean;
+  readonly fields: ReadonlyArray<"full" | "half">;
+}) {
+  return (
+    <div
+      className={cn(
+        "grid gap-x-10 gap-y-4 md:grid-cols-3",
+        !first && "border-border/70 mt-8 border-t pt-8",
+      )}
+    >
+      <div className="space-y-2 md:col-span-1">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-3 w-44" />
+      </div>
+      <div className="grid gap-4 md:col-span-2 sm:grid-cols-2">
+        {fields.map((w, j) => (
+          <Skeleton
+            key={j}
+            className={cn("h-14 w-full", w === "full" && "sm:col-span-2")}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 

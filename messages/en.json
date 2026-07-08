@@ -1398,7 +1398,24 @@
       "generateNext": "Generate next 12 periods"
     },
     "configEmail": {
-      "title": "Email Configuration"
+      "title": "Email Configuration",
+      "desc": "SMTP settings for sending notification and report emails",
+      "testEmail": "Test Email",
+      "smtpServer": "SMTP Server",
+      "smtpServerDesc": "Connection details for the outgoing mail server.",
+      "host": "Host",
+      "port": "Port",
+      "username": "Username",
+      "password": "Password",
+      "fromAddress": "From Address",
+      "enabled": "Enabled",
+      "recipients": "Recipients",
+      "recipientsDesc": "Where report and notification emails are delivered.",
+      "to": "To (comma-separated)",
+      "cc": "CC (comma-separated)",
+      "subjectPrefix": "Subject Prefix",
+      "saved": "Email config saved",
+      "testSent": "Test email sent successfully"
     },
     "notificationTemplate": {
       "entity": "Notification Template",

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -20,6 +19,7 @@ import {
 import type { BusinessUnitNumberFormat } from "@/types/business-unit";
 import {
   SettingSection,
+  SettingSectionSkeleton,
   SettingField,
   EditableField,
   SelectField,
@@ -120,7 +120,7 @@ export default function BusinessSettingComponent() {
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex items-start justify-between gap-3">
+      <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">
             {tm("businessSetting")}
@@ -175,17 +175,33 @@ export default function BusinessSettingComponent() {
       )}
 
       {!isError && isBusy && (
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="grid gap-x-10 gap-y-4 md:grid-cols-3">
-              <Skeleton className="h-16 w-full md:col-span-1" />
-              <div className="grid gap-4 sm:grid-cols-2 md:col-span-2">
-                {Array.from({ length: 4 }).map((_, j) => (
-                  <Skeleton key={j} className="h-14 w-full" />
-                ))}
-              </div>
-            </div>
-          ))}
+        <div>
+          {/* mirror each real section's field layout so the skeleton is as tall */}
+          <SettingSectionSkeleton
+            first
+            fields={[
+              "half",
+              "half",
+              "half",
+              "full",
+              "full",
+              "half",
+              "half",
+              "half",
+              "half",
+            ]}
+          />
+          <SettingSectionSkeleton
+            fields={["full", "half", "half", "full", "half"]}
+          />
+          <SettingSectionSkeleton
+            fields={["full", "half", "half", "half", "half", "full", "half"]}
+          />
+          <SettingSectionSkeleton fields={["half", "half"]} />
+          <SettingSectionSkeleton
+            fields={["half", "half", "half", "half", "half", "half"]}
+          />
+          <SettingSectionSkeleton fields={["half", "half", "half", "half"]} />
         </div>
       )}
 
