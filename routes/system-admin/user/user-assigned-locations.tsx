@@ -150,6 +150,7 @@ export function LocationsSection({
 
   return (
     <AssignSection
+      wide
       title={tu("locationsTitle")}
       description={tu("locationsDesc")}
       count={isView ? initialLocationCount : locationTargetKeys.length}

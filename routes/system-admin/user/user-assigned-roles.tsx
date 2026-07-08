@@ -1,7 +1,7 @@
 
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Check, Shield, ShieldCheck } from "lucide-react";
+import { Check, Shield } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { cn } from "@/lib/utils";
@@ -33,34 +33,16 @@ function RoleToggleCard({
       disabled={disabled}
       aria-pressed={checked}
       className={cn(
-        "group flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-all",
-        checked
-          ? "border-primary/40 bg-primary/5"
-          : "border-border/60 bg-card hover:border-foreground/20 hover:bg-muted/40",
-        disabled &&
-          "hover:border-border/60 hover:bg-card cursor-not-allowed opacity-60",
+        "group flex w-full items-center gap-3 px-3 py-2 text-left transition-colors",
+        checked ? "bg-primary/5" : "hover:bg-muted/40",
+        disabled && "cursor-not-allowed opacity-60 hover:bg-transparent",
       )}
     >
-      <div
-        className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-md transition-colors",
-          checked
-            ? "bg-primary text-primary-foreground"
-            : "bg-muted text-muted-foreground group-hover:bg-muted-foreground/10",
-        )}
-        aria-hidden="true"
-      >
-        {checked ? (
-          <ShieldCheck className="size-4" />
-        ) : (
-          <Shield className="size-4" />
-        )}
-      </div>
       <div className="min-w-0 flex-1">
         <p
           className={cn(
-            "truncate text-sm font-semibold",
-            checked ? "text-foreground" : "text-foreground/90",
+            "truncate text-sm",
+            checked ? "text-foreground font-medium" : "text-foreground/90",
           )}
         >
           {role.name}
@@ -73,7 +55,7 @@ function RoleToggleCard({
       </div>
       <div
         className={cn(
-          "flex size-5 shrink-0 items-center justify-center rounded-full border transition-all",
+          "flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
           checked
             ? "border-primary bg-primary text-primary-foreground"
             : "border-border group-hover:border-foreground/30 bg-transparent",
@@ -136,7 +118,7 @@ export function RolesSection({
             scrollToFirstInvalidField(),
           )}
         >
-          <div className="space-y-2">
+          <div className="divide-border/60 overflow-hidden rounded-lg border divide-y">
             {roles.map((role: Role) => (
               <Controller
                 key={role.id}
