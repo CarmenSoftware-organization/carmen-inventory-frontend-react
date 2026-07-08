@@ -105,7 +105,9 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const fieldVariants = cva(
-  "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
+  // In plain-text view mode (a FieldPlainText value is present), mute the label so the
+  // foreground value reads as the emphasis — no per-field className needed.
+  "group/field flex w-full gap-3 data-[invalid=true]:text-destructive has-[>[data-slot=field-plain-text]]:gap-1 has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:text-muted-foreground has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:font-normal",
   {
     variants: {
       orientation: {

@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlainText } from "@/components/share/glass-card";
+import { FieldPlainText } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
 import { EMPTY_VENDOR_INFO, type VendorFormValues } from "./vendor-form-schema";
 
@@ -106,8 +106,8 @@ function InfoRow({
     const item = form.getValues(`info.${index}`);
     return (
       <div className="border-border/40 bg-background/40 grid grid-cols-[1fr_2fr_auto] items-center gap-3 rounded-lg border px-3 py-2">
-        <PlainText value={item.label} />
-        <PlainText value={item.value} />
+        <FieldPlainText>{item.label}</FieldPlainText>
+        <FieldPlainText>{item.value}</FieldPlainText>
         <span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-[0.625rem] font-semibold tracking-widest uppercase">
           {item.data_type}
         </span>

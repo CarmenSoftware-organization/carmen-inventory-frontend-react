@@ -5,6 +5,7 @@ import {
   FieldDatePicker,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
@@ -12,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
-import { PlainText } from "@/components/share/glass-card";
 import { PRICE_LIST_STATUS_OPTIONS } from "@/constant/price-list";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import { SettingSection } from "@/components/ui/setting-section";
@@ -56,7 +56,7 @@ export function PLGeneralCard({
           {!isView && <span className="text-destructive"> *</span>}
         </FieldLabel>
         {isView ? (
-          <PlainText value={form.getValues("name")} />
+          <FieldPlainText>{form.getValues("name")}</FieldPlainText>
         ) : (
           <FieldInput
             id="pl-name"
@@ -76,7 +76,7 @@ export function PLGeneralCard({
           {!isView && <span className="text-destructive"> *</span>}
         </FieldLabel>
         {isView ? (
-          <PlainText value={priceList?.vendor?.name} />
+          <FieldPlainText>{priceList?.vendor?.name}</FieldPlainText>
         ) : (
           <Controller
             control={form.control}
@@ -102,7 +102,7 @@ export function PLGeneralCard({
           {!isView && <span className="text-destructive"> *</span>}
         </FieldLabel>
         {isView ? (
-          <PlainText value={priceList?.currency?.name} />
+          <FieldPlainText>{priceList?.currency?.name}</FieldPlainText>
         ) : (
           <Controller
             control={form.control}
@@ -124,9 +124,9 @@ export function PLGeneralCard({
       <Field>
         <FieldLabel>{tfl("effectiveFrom")}</FieldLabel>
         {isView ? (
-          <PlainText
-            value={watchedFrom ? formatLocalizedDate(watchedFrom, locale) : ""}
-          />
+          <FieldPlainText>
+            {watchedFrom ? formatLocalizedDate(watchedFrom, locale) : ""}
+          </FieldPlainText>
         ) : (
           <Controller
             control={form.control}
@@ -149,9 +149,9 @@ export function PLGeneralCard({
       <Field>
         <FieldLabel>{tfl("effectiveTo")}</FieldLabel>
         {isView ? (
-          <PlainText
-            value={watchedTo ? formatLocalizedDate(watchedTo, locale) : ""}
-          />
+          <FieldPlainText>
+            {watchedTo ? formatLocalizedDate(watchedTo, locale) : ""}
+          </FieldPlainText>
         ) : (
           <Controller
             control={form.control}
@@ -175,7 +175,9 @@ export function PLGeneralCard({
       <Field className="sm:col-span-2">
         <FieldLabel>{tfl("description")}</FieldLabel>
         {isView ? (
-          <PlainText value={priceList?.description} multiline />
+          <FieldPlainText className="items-start whitespace-pre-wrap">
+            {priceList?.description}
+          </FieldPlainText>
         ) : (
           <Textarea
             placeholder={tfl("optional")}

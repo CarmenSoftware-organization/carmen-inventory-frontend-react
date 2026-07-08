@@ -1,11 +1,15 @@
 import { Controller, useForm } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldInput,
+  FieldLabel,
+  FieldPlainText,
+} from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupBuType } from "@/components/lookup/lookup-bu-type";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { PlainText } from "@/components/share/glass-card";
 import { SettingSection } from "@/components/ui/setting-section";
 import type { VendorFormValues } from "./vendor-form-schema";
 
@@ -31,7 +35,7 @@ export function VendorGeneral({ form, isDisabled }: VendorGeneralProps) {
           {!isView && <span className="text-destructive"> *</span>}
         </FieldLabel>
         {isView ? (
-          <PlainText value={form.getValues("name")} />
+          <FieldPlainText>{form.getValues("name")}</FieldPlainText>
         ) : (
           <FieldInput
             id="vendor-name"
@@ -51,7 +55,7 @@ export function VendorGeneral({ form, isDisabled }: VendorGeneralProps) {
           {!isView && <span className="text-destructive"> *</span>}
         </FieldLabel>
         {isView ? (
-          <PlainText value={form.getValues("code")} />
+          <FieldPlainText>{form.getValues("code")}</FieldPlainText>
         ) : (
           <FieldInput
             id="vendor-code"
@@ -68,13 +72,11 @@ export function VendorGeneral({ form, isDisabled }: VendorGeneralProps) {
       <Field>
         <FieldLabel>{tfl("businessType")}</FieldLabel>
         {isView ? (
-          <PlainText
-            value={
-              businessTypes && businessTypes.length > 0
-                ? businessTypes.map((b) => b.name).join(", ")
-                : null
-            }
-          />
+          <FieldPlainText>
+            {businessTypes && businessTypes.length > 0
+              ? businessTypes.map((b) => b.name).join(", ")
+              : null}
+          </FieldPlainText>
         ) : (
           <Controller
             control={form.control}
@@ -96,7 +98,9 @@ export function VendorGeneral({ form, isDisabled }: VendorGeneralProps) {
           {tfl("description")}
         </FieldLabel>
         {isView ? (
-          <PlainText value={form.getValues("description")} multiline />
+          <FieldPlainText className="items-start whitespace-pre-wrap">
+            {form.getValues("description")}
+          </FieldPlainText>
         ) : (
           <Textarea
             id="vendor-description"

@@ -18,6 +18,7 @@ import {
   FieldDatePicker,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
 } from "@/components/ui/field";
 import { LookupPrt } from "@/components/lookup/lookup-prt";
 import { Input } from "@/components/ui/input";
@@ -37,7 +38,6 @@ import type {
 } from "@/types/request-price-list";
 import type { FormMode } from "@/types/form";
 
-import { PlainText } from "@/components/share/glass-card";
 import { SettingSection } from "@/components/ui/setting-section";
 import {
   createRfpSchema,
@@ -360,7 +360,7 @@ export function RequestPriceListForm({
               {!isView && <span className="text-destructive"> *</span>}
             </FieldLabel>
             {isView ? (
-              <PlainText value={form.getValues("name")} />
+              <FieldPlainText>{form.getValues("name")}</FieldPlainText>
             ) : (
               <FieldInput
                 id="rfp-name"
@@ -380,7 +380,9 @@ export function RequestPriceListForm({
               {!isView && <span className="text-destructive"> *</span>}
             </FieldLabel>
             {isView ? (
-              <PlainText value={requestPriceList?.pricelist_template?.name} />
+              <FieldPlainText>
+                {requestPriceList?.pricelist_template?.name}
+              </FieldPlainText>
             ) : (
               <Controller
                 control={form.control}
@@ -404,9 +406,9 @@ export function RequestPriceListForm({
           <Field>
             <FieldLabel>{tfl("startDate")}</FieldLabel>
             {isView ? (
-              <PlainText
-                value={startDate ? formatLocalizedDate(startDate, locale) : ""}
-              />
+              <FieldPlainText>
+                {startDate ? formatLocalizedDate(startDate, locale) : ""}
+              </FieldPlainText>
             ) : (
               <Controller
                 control={form.control}
@@ -430,9 +432,9 @@ export function RequestPriceListForm({
           <Field>
             <FieldLabel>{tfl("endDate")}</FieldLabel>
             {isView ? (
-              <PlainText
-                value={endDate ? formatLocalizedDate(endDate, locale) : ""}
-              />
+              <FieldPlainText>
+                {endDate ? formatLocalizedDate(endDate, locale) : ""}
+              </FieldPlainText>
             ) : (
               <Controller
                 control={form.control}
@@ -461,7 +463,9 @@ export function RequestPriceListForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{t("customMessageTitle")}</FieldLabel>
             {isView ? (
-              <PlainText value={requestPriceList?.custom_message} multiline />
+              <FieldPlainText className="items-start whitespace-pre-wrap">
+                {requestPriceList?.custom_message}
+              </FieldPlainText>
             ) : (
               <Input
                 type="text"

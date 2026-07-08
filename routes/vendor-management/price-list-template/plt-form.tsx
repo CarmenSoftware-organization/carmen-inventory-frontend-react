@@ -17,6 +17,7 @@ import {
   Field,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
@@ -29,7 +30,6 @@ import { useProfile } from "@/hooks/use-profile";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { FormMode } from "@/types/form";
 
-import { PlainText } from "@/components/share/glass-card";
 import { SettingSection } from "@/components/ui/setting-section";
 
 import {
@@ -222,7 +222,7 @@ export function PriceListTemplateForm({
               {!isView && <span className="text-destructive"> *</span>}
             </FieldLabel>
             {isView ? (
-              <PlainText value={form.getValues("name")} />
+              <FieldPlainText>{form.getValues("name")}</FieldPlainText>
             ) : (
               <FieldInput
                 id="plt-name"
@@ -242,7 +242,9 @@ export function PriceListTemplateForm({
               {!isView && <span className="text-destructive"> *</span>}
             </FieldLabel>
             {isView ? (
-              <PlainText value={priceListTemplate?.currency?.code} />
+              <FieldPlainText>
+                {priceListTemplate?.currency?.code}
+              </FieldPlainText>
             ) : (
               <Controller
                 control={form.control}
@@ -264,13 +266,11 @@ export function PriceListTemplateForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{tfl("validityPeriod")}</FieldLabel>
             {isView ? (
-              <PlainText
-                value={
-                  watchedValidity
-                    ? t("daysSuffix", { count: watchedValidity })
-                    : null
-                }
-              />
+              <FieldPlainText>
+                {watchedValidity
+                  ? t("daysSuffix", { count: watchedValidity })
+                  : null}
+              </FieldPlainText>
             ) : (
               <Controller
                 control={form.control}
@@ -291,7 +291,9 @@ export function PriceListTemplateForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{tfl("description")}</FieldLabel>
             {isView ? (
-              <PlainText value={priceListTemplate?.description} multiline />
+              <FieldPlainText className="items-start whitespace-pre-wrap">
+                {priceListTemplate?.description}
+              </FieldPlainText>
             ) : (
               <Textarea
                 placeholder={tfl("optional")}
@@ -349,10 +351,9 @@ export function PriceListTemplateForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{t("vendorInstructionTitle")}</FieldLabel>
             {isView ? (
-              <PlainText
-                value={priceListTemplate?.vendor_instructions}
-                multiline
-              />
+              <FieldPlainText className="items-start whitespace-pre-wrap">
+                {priceListTemplate?.vendor_instructions}
+              </FieldPlainText>
             ) : (
               <Textarea
                 placeholder={t("vendorInstructionPlaceholder")}
