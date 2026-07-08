@@ -57,7 +57,7 @@ export function createConfigCrud<T, TCreate>({
   ) => UseQueryResult<PaginatedResponse<T>>;
   useById: (id: string | undefined) => UseQueryResult<T>;
   useCreate: () => UseMutationResult<unknown, Error, TCreate>;
-  useUpdate: () => UseMutationResult<unknown, Error, TCreate & { id: string }>;
+  useUpdate: () => UseMutationResult<unknown, Error, TCreate & { id: string; doc_version?: number }>;
   useDelete: () => UseMutationResult<unknown, Error, string>;
 } {
   const api = createConfigApi<T, TCreate>({ endpoint, label, updateMethod });
@@ -151,7 +151,7 @@ export function createConfigCrud<T, TCreate>({
    * ```
    */
   function useUpdate() {
-    return useApiMutation<TCreate & { id: string }>({
+    return useApiMutation<TCreate & { id: string; doc_version?: number }>({
       mutationFn: ({ id, ...data }, buCode) =>
         api.update(buCode, id, data as TCreate),
       invalidateKeys: [queryKey],

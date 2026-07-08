@@ -1,6 +1,13 @@
-
 import { useTranslations } from "use-intl";
-import { Lock, MessageSquare, Pencil, Save, Trash2, X } from "lucide-react";
+import {
+  History,
+  Lock,
+  MessageSquare,
+  Pencil,
+  Save,
+  Trash2,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PrintDocumentButton } from "@/components/print-document-button";
@@ -33,6 +40,10 @@ interface PoHeaderProps {
   readonly onShowClose: () => void;
   readonly onShowComment: () => void;
   readonly onShowDelete: () => void;
+  /** มี workflow history ให้ดูไหม — คุมว่า WorkflowStep กดได้หรือไม่ */
+  readonly hasHistory?: boolean;
+  /** เปิด workflow history sheet (แตะที่ WorkflowStep) */
+  readonly onShowHistory?: () => void;
 }
 
 export function PoHeader({
@@ -52,6 +63,8 @@ export function PoHeader({
   onShowClose,
   onShowComment,
   onShowDelete,
+  hasHistory,
+  onShowHistory,
 }: PoHeaderProps) {
   const t = useTranslations("procurement.purchaseOrder");
   const tc = useTranslations("common");
@@ -61,6 +74,9 @@ export function PoHeader({
   const isView = mode === "view";
   const isEditMode = mode === "edit";
   const isAdd = !purchaseOrder;
+  const isDraft =
+    !purchaseOrder?.po_status ||
+    purchaseOrder.po_status === PO_STATUS.DRAFT;
 
   const headerTitle = purchaseOrder?.po_no ?? t("entity");
   const poStatusConfig = purchaseOrder
@@ -82,11 +98,6 @@ export function PoHeader({
           {poTypeConfig.label}
         </Badge>
       )}
-      {purchaseOrder?.workflow_name && (
-        <Badge variant="info-light" size="sm">
-          {purchaseOrder.workflow_name}
-        </Badge>
-      )}
     </>
   );
 
@@ -105,10 +116,6 @@ export function PoHeader({
               {tc("close")}
             </Button>
           )}
-          <Button size="sm" variant="info" onClick={onShowComment}>
-            <MessageSquare aria-hidden="true" />
-            {tc("comment")}
-          </Button>
           {isView && (
             <PrintDocumentButton
               documentType="PO"
@@ -121,12 +128,7 @@ export function PoHeader({
             />
           )}
           {isView && canEdit && (
-            <Button
-              size="sm"
-              variant="info"
-              onClick={onEnterEdit}
-              disabled={isPending}
-            >
+            <Button size="sm" onClick={onEnterEdit} disabled={isPending}>
               <Pencil aria-hidden="true" />
               {tc("edit")}
             </Button>
@@ -164,6 +166,10 @@ export function PoHeader({
               )}
             </>
           )}
+          <Button size="sm" variant="info" onClick={onShowComment}>
+            <MessageSquare aria-hidden="true" />
+            {tc("comment")}
+          </Button>
         </>
       )}
       {isAdd && (
@@ -179,7 +185,7 @@ export function PoHeader({
           </Button>
           <Button size="sm" type="submit" form="po-form" disabled={isPending}>
             <Save aria-hidden="true" />
-            {t("add")}
+            {tc("save")}
           </Button>
         </>
       )}
@@ -189,6 +195,11 @@ export function PoHeader({
   // แสดง ribbon ทุกโหมด รวม add (buyer = current user, orderDate = วันนี้)
   const ribbon = (
     <DocumentRibbon>
+      {!isDraft && purchaseOrder?.workflow_name && (
+        <RibbonCell label={tfl("workflow")}>
+          {purchaseOrder.workflow_name}
+        </RibbonCell>
+      )}
       <RibbonCell label={tfl("buyer")}>{buyerName || "—"}</RibbonCell>
       <RibbonCell label={tfl("department")}>{departmentName || "—"}</RibbonCell>
       <RibbonCell label={tfl("orderDate")}>
@@ -197,7 +208,7 @@ export function PoHeader({
     </DocumentRibbon>
   );
 
-  const workflowStep = purchaseOrder?.workflow_current_stage ? (
+  const workflowStepEl = purchaseOrder?.workflow_current_stage ? (
     <WorkflowStep
       previousStage={purchaseOrder.workflow_previous_stage}
       currentStage={purchaseOrder.workflow_current_stage}
@@ -208,6 +219,26 @@ export function PoHeader({
       }
     />
   ) : undefined;
+
+  // แตะที่ workflow step → เปิด history sheet (progressive disclosure)
+  const workflowStep =
+    workflowStepEl && hasHistory && onShowHistory ? (
+      <button
+        type="button"
+        onClick={onShowHistory}
+        title={t("tabWorkflowHistory")}
+        aria-label={t("tabWorkflowHistory")}
+        className="group hover:bg-muted/60 focus-visible:ring-ring flex flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      >
+        {workflowStepEl}
+        <span className="text-muted-foreground/50 group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-[0.5625rem] tracking-wide transition-colors">
+          <History className="size-2.5" />
+          {t("viewHistoryHint")}
+        </span>
+      </button>
+    ) : (
+      workflowStepEl
+    );
 
   const subtitle =
     purchaseOrder?.doc_version != null
@@ -222,7 +253,6 @@ export function PoHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      infoLabel={t("documentInfo")}
       ribbon={ribbon}
       workflowStep={workflowStep}
     />

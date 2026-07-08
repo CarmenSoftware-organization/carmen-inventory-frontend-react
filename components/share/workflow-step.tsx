@@ -1,4 +1,3 @@
-
 import { Ban, Check, ChevronRight } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
@@ -7,38 +6,9 @@ interface WorkflowStepProps {
   readonly previousStage?: string;
   readonly currentStage: string;
   readonly nextStage?: string;
-  /**
-   * Marks the workflow as terminated — no forward motion is possible.
-   * - `"voided"`: current stage rendered as red Ban (no animation), next hidden.
-   *   Previous stages still show as success-green to preserve the journey.
-   * Extend with `"completed"` etc. when those flows need bespoke visuals.
-   */
   readonly terminalState?: "voided";
 }
 
-/**
- * Stepper แสดงขั้นตอน workflow
- *
- * Render stepper แนวนอน 3 ขั้น previous → current → next โดยขั้น previous
- * มีเครื่องหมาย check สีเขียว, current ไฮไลต์ด้วย ring สี info, next เป็น
- * วงกลม dashed กรอง stage ที่เป็น undefined หรือ "-" ออกและคืน null ถ้า
- * ไม่มี stage เลย รองรับการเลื่อนแนวนอนเมื่อเกินจอ
- *
- * ถ้า `terminalState === "voided"` จะซ่อน nextStage และเปลี่ยน current เป็น
- * วงกลมแดงไอคอน Ban (ไม่มี ping animation) เพื่อสื่อว่าเอกสารถูกยกเลิกแล้ว
- *
- * @param props - props ของ component
- * @param props.previousStage - ชื่อ stage ก่อนหน้า (optional)
- * @param props.currentStage - ชื่อ stage ปัจจุบัน (required)
- * @param props.nextStage - ชื่อ stage ถัดไป (optional, "-" = ไม่มี)
- * @param props.terminalState - state ที่ปิดเส้นทาง forward เช่น "voided"
- * @returns JSX element ของ stepper หรือ null
- * @example
- * ```tsx
- * <WorkflowStep previousStage="Draft" currentStage="Review" nextStage="Approved" />
- * <WorkflowStep currentStage="Review" terminalState="voided" />
- * ```
- */
 export function WorkflowStep({
   previousStage,
   currentStage,
@@ -47,8 +17,7 @@ export function WorkflowStep({
 }: WorkflowStepProps) {
   const t = useTranslations("common");
   const isVoided = terminalState === "voided";
-  const resolvedNext =
-    isVoided || nextStage === "-" ? undefined : nextStage;
+  const resolvedNext = isVoided || nextStage === "-" ? undefined : nextStage;
   const stages = [previousStage, currentStage, resolvedNext].filter(
     (s): s is string => !!s,
   );
@@ -81,7 +50,7 @@ export function WorkflowStep({
             <div className="flex w-20 flex-col items-center gap-1">
               <span
                 className={cn(
-                  "max-w-full truncate text-[0.5625rem] leading-none uppercase tracking-wider",
+                  "max-w-full truncate text-[0.5625rem] leading-none tracking-wider uppercase",
                   isPrevious && "text-success-foreground/70",
                   currentIsVoided && "text-destructive font-bold",
                   isCurrent && !currentIsVoided && "text-info font-bold",

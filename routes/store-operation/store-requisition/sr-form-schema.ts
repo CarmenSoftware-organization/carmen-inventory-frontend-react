@@ -17,6 +17,8 @@ function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     doc_version: z.coerce.number().optional(),
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     product_name: z.string(),
+    // display เท่านั้น — ไม่ส่ง payload
+    product_local_name: z.string(),
     unit_name: z.string(),
     description: z.string(),
     requested_qty: z.coerce.number().min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
@@ -24,7 +26,22 @@ function createSrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     issued_qty: z.coerce.number(),
     current_stage_status: z.string(),
     stage_status: z.string().optional(),
+    // snapshot สถานะจาก server ตอนโหลด — ใช้ lock ปุ่ม reset (ไม่ส่ง payload)
+    _initial_stage_status: z.string().optional(),
     stage_message: z.string().optional(),
+    // ประวัติ workflow ระดับรายการ (display-only passthrough, ไม่ส่งกลับ API)
+    history: z
+      .array(
+        z.object({
+          at: z.string(),
+          seq: z.coerce.number(),
+          name: z.string(),
+          user: z.object({ id: z.string(), name: z.string() }),
+          status: z.string(),
+          message: z.string().nullish(),
+        }),
+      )
+      .optional(),
   });
 }
 
@@ -77,6 +94,7 @@ export type SrFormValues = z.infer<ReturnType<typeof createSrSchema>>;
 export const SR_ITEM = {
   product_id: "",
   product_name: "",
+  product_local_name: "",
   unit_name: "",
   description: "",
   requested_qty: 1,
@@ -84,6 +102,7 @@ export const SR_ITEM = {
   issued_qty: 0,
   current_stage_status: "pending",
   stage_status: "",
+  _initial_stage_status: "pending",
   stage_message: "",
 } as const;
 

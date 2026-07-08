@@ -1,14 +1,22 @@
 import { memo, useEffect, useMemo } from "react";
 import {
   Controller,
+  useFormState,
   useWatch,
   type UseFormReturn,
   type Control,
 } from "react-hook-form";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { LookupProduct } from "@/components/lookup/lookup-product";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import {
   PO_ITEM_STATUS_CONFIG,
@@ -30,17 +38,10 @@ const ProductCellDisplay = memo(function ProductCellDisplay({
   "use no memo";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
-  const description =
-    useWatch({ control, name: `items.${index}.description` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   return (
-    <div className="group w-full text-left">
-      <p className="truncate font-semibold">{productName || "—"}</p>
-      {description && (
-        <p className="text-muted-foreground truncate text-[0.625rem]">
-          {description}
-        </p>
-      )}
-    </div>
+    <NameWithSubtext primary={productName} secondary={productLocalName} />
   );
 });
 
@@ -175,7 +176,7 @@ export const WatchedProductUnit = memo(function WatchedProductUnit({
             );
           }}
           disabled={disabled || !productId}
-          className="h-7 w-full text-xs"
+          className="h-full w-19 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
         />
       )}
     />
@@ -213,7 +214,7 @@ export const TaxProfileCell = memo(function TaxProfileCell({
             form.setValue(`items.${index}.tax_rate`, rate);
           }}
           disabled={disabled}
-          className="w-full text-xs"
+          className="h-7 w-full text-xs"
           error={fieldState.error?.message}
         />
       )}
@@ -239,20 +240,6 @@ export const StatusCell = memo(function StatusCell({
   );
 });
 
-/**
- * Read-only display ของ order qty
- *
- * Value มาจาก sum ของ `items[index].locations[*].order_qty` (ไม่ใช่
- * editable input). User แก้ qty ที่ locations sub-table ใน expanded row;
- * cell นี้ sync ค่ารวมกลับเข้า `order_qty` field ของ form เพื่อให้
- * `ComputedPricingCell` คำนวณ subtotal/total ได้ถูก
- */
-/**
- * คำนวณ derived values ของ 1 item — pure function ใช้ร่วมกันระหว่าง
- * display cell และ side-effect sync เพื่อกันสูตร drift กัน
- *
- * qty derive จาก sum ของ locations.order_qty (source of truth)
- */
 function computeItemPricing(item: PoFormValues["items"][number] | undefined) {
   const price = Number(item?.price ?? 0);
   const orderQty = (item?.locations ?? []).reduce(
@@ -281,13 +268,22 @@ function computeItemPricing(item: PoFormValues["items"][number] | undefined) {
   };
 }
 
-/** Read-only display ของ order qty (= sum locations.order_qty) */
-export const OrderQtyCell = function OrderQtyCell({
+/**
+ * Merged qty + order unit (Receiving-style) — qty ระดับ item เป็น read-only
+ * sum ของ locations.order_qty; unit (order_unit_id) แก้ได้ใน addon
+ */
+export const QtyUnitCell = function QtyUnitCell({
   control,
+  form,
   index,
+  disabled,
+  readOnly = false,
 }: {
   control: Control<PoFormValues>;
+  form: UseFormReturn<PoFormValues>;
   index: number;
+  disabled: boolean;
+  readOnly?: boolean;
 }) {
   "use no memo";
   const locations =
@@ -296,7 +292,41 @@ export const OrderQtyCell = function OrderQtyCell({
     (acc, l) => acc + (Number(l?.order_qty) || 0),
     0,
   );
-  return <span className="tabular-nums">{sum}</span>;
+  // order_qty ระดับ item = ยอดรวมจาก locations (read-only) — ถ้ายอดรวมไม่ผ่าน
+  // min qty จะไม่มี input ให้ scroll หา → mark data-invalid + สีแดงที่เซลล์นี้
+  // ให้ scrollToFirstInvalidField เจอ + user เห็น field ที่ผิด
+  const { errors } = useFormState({
+    control,
+    name: `items.${index}.order_qty`,
+  });
+  const invalid = !!errors.items?.[index]?.order_qty;
+
+  if (disabled || readOnly) {
+    const unitName = form.getValues(`items.${index}.order_unit_name`) ?? "";
+    return <InputSuffixPlain className="w-full" value={sum} suffix={unitName} />;
+  }
+
+  return (
+    <InputSuffixField className="w-full" error={invalid}>
+      <span
+        data-invalid={invalid ? "true" : undefined}
+        className={cn(
+          "min-w-0 flex-1 px-2 text-right text-xs tabular-nums",
+          invalid && "text-destructive font-semibold",
+        )}
+      >
+        {sum}
+      </span>
+      <InputSuffixAddon>
+        <WatchedProductUnit
+          control={control}
+          form={form}
+          index={index}
+          disabled={disabled}
+        />
+      </InputSuffixAddon>
+    </InputSuffixField>
+  );
 };
 
 /** Read-only display ของ net/tax/total — คำนวณ local เพื่อแสดงผล (ไม่เขียน form) */

@@ -433,6 +433,7 @@ function submitUpdate({
   mutate(
     {
       id: priceList.id,
+      doc_version: priceList.doc_version,
       ...buildBasePayload(values),
       pricelist_detail,
     },

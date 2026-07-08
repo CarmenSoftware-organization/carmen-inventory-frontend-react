@@ -183,7 +183,6 @@ export default function CnComponent() {
           <DocumentListHeader
             title={t("title")}
             description={t("desc")}
-            count={totalRecords}
           />
           <DocumentListActions
             onExport={handleExport}

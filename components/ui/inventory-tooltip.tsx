@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 
 interface InventoryTooltipProps {
@@ -18,6 +19,7 @@ interface InventoryTooltipProps {
   readonly productId?: string;
   readonly unitName?: string;
   readonly icon?: "box" | "package";
+  readonly className?: string;
 }
 
 export const InventoryTooltip = memo(function InventoryTooltip({
@@ -26,6 +28,7 @@ export const InventoryTooltip = memo(function InventoryTooltip({
   productId,
   unitName,
   icon = "box",
+  className,
 }: InventoryTooltipProps) {
   const t = useTranslations("procurement.purchaseRequest");
 
@@ -51,6 +54,7 @@ export const InventoryTooltip = memo(function InventoryTooltip({
   else if (on_hand_qty < re_stock_qty) progressColor = "bg-warning";
 
   const Icon = icon === "package" ? Package : BoxIcon;
+  const hasProduct = !!productId;
 
   return (
     <TooltipProvider delayDuration={100}>
@@ -65,21 +69,32 @@ export const InventoryTooltip = memo(function InventoryTooltip({
             variant="ghost"
             size="icon-xs"
             aria-label={t("inventoryInfo")}
-            className={
-              needsReorder ? "text-destructive" : "text-muted-foreground"
-            }
+            className={cn(
+              needsReorder ? "text-destructive" : "text-muted-foreground",
+              className,
+            )}
           >
             <Icon className="size-3.5" />
           </Button>
         </TooltipTrigger>
         <TooltipContent
           side="top"
-          className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border w-56 rounded-lg border px-3 py-2 shadow-md"
+          className={cn(
+            "bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md",
+            hasProduct ? "w-56" : "max-w-[14rem]",
+          )}
         >
-          <p className="mb-2 text-[0.6875rem] font-semibold">
-            {t("inventoryInfo")}
-          </p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[0.6875rem]">
+          {!hasProduct && (
+            <p className="text-muted-foreground text-[0.6875rem]">
+              {t("selectProductForInventory")}
+            </p>
+          )}
+          {hasProduct && (
+            <>
+              <p className="mb-2 text-[0.6875rem] font-semibold">
+                {t("inventoryInfo")}
+              </p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[0.6875rem]">
             <div>
               <span
                 className={
@@ -153,6 +168,8 @@ export const InventoryTooltip = memo(function InventoryTooltip({
               {t("stockLevel", { pct: pct.toFixed(1) })}
             </span>
           </div>
+            </>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

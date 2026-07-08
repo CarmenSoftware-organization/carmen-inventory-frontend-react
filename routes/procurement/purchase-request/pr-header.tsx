@@ -1,5 +1,5 @@
-
 import { type ReactNode } from "react";
+import { History } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { WorkflowStep } from "@/components/share/workflow-step";
@@ -19,13 +19,12 @@ interface PrHeaderProps {
   readonly prDateDisplay: string;
   /** ปุ่ม action (PrFormActions) — caller ประกอบเอง */
   readonly actions: ReactNode;
+  /** มี workflow history ให้ดูไหม — คุมว่า WorkflowStep กดได้หรือไม่ */
+  readonly hasHistory?: boolean;
+  /** เปิด workflow history sheet (แตะที่ WorkflowStep) */
+  readonly onShowHistory?: () => void;
 }
 
-/**
- * Header ของฟอร์ม Purchase Request — ใช้ `DocFormHeader` กลางร่วมกับ PO
- * แสดง title + status/workflow badges + document info ribbon (requester/
- * department/date) + workflow step
- */
 export function PrHeader({
   purchaseRequest,
   onBack,
@@ -33,13 +32,15 @@ export function PrHeader({
   departmentName,
   prDateDisplay,
   actions,
+  hasHistory,
+  onShowHistory,
 }: PrHeaderProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
 
   const statusCfg = purchaseRequest
-    ? PR_STATUS_CONFIG[purchaseRequest.pr_status]
+    ? (PR_STATUS_CONFIG[purchaseRequest.pr_status] ?? PR_STATUS_CONFIG.draft)
     : null;
 
   const badges = (
@@ -49,37 +50,63 @@ export function PrHeader({
           {statusCfg.label ?? purchaseRequest?.pr_status}
         </Badge>
       )}
-      {purchaseRequest?.workflow_name && (
-        <Badge variant="info-light" size="sm">
-          {purchaseRequest.workflow_name}
-        </Badge>
-      )}
     </>
   );
+
+  // draft/add ยังไม่เข้า workflow — ซ่อน workflow cell/step
+  const isDraft =
+    !purchaseRequest?.pr_status ||
+    purchaseRequest.pr_status === PR_STATUS.DRAFT;
 
   // แสดง ribbon ทุกโหมด รวม add (requester/department/date seed จาก profile/วันนี้)
   const ribbon = (
     <DocumentRibbon>
+      {!isDraft && purchaseRequest?.workflow_name && (
+        <RibbonCell label={tfl("workflow")}>
+          {purchaseRequest.workflow_name}
+        </RibbonCell>
+      )}
       <RibbonCell label={tfl("requester")}>{reqName || "—"}</RibbonCell>
       <RibbonCell label={tfl("department")}>{departmentName || "—"}</RibbonCell>
       <RibbonCell label={tfl("date")}>{prDateDisplay || "—"}</RibbonCell>
     </DocumentRibbon>
   );
 
-  const workflowStep = purchaseRequest?.workflow_current_stage ? (
-    <WorkflowStep
-      previousStage={purchaseRequest.workflow_previous_stage}
-      currentStage={purchaseRequest.workflow_current_stage}
-      nextStage={
-        purchaseRequest.pr_status === PR_STATUS.COMPLETED
-          ? undefined
-          : purchaseRequest.workflow_next_stage
-      }
-      terminalState={
-        purchaseRequest.pr_status === PR_STATUS.VOIDED ? "voided" : undefined
-      }
-    />
-  ) : undefined;
+  const workflowStepEl =
+    !isDraft && purchaseRequest?.workflow_current_stage ? (
+      <WorkflowStep
+        previousStage={purchaseRequest.workflow_previous_stage}
+        currentStage={purchaseRequest.workflow_current_stage}
+        nextStage={
+          purchaseRequest.pr_status === PR_STATUS.COMPLETED
+            ? undefined
+            : purchaseRequest.workflow_next_stage
+        }
+        terminalState={
+          purchaseRequest.pr_status === PR_STATUS.VOIDED ? "voided" : undefined
+        }
+      />
+    ) : undefined;
+
+  // แตะที่ workflow step → เปิด history sheet (progressive disclosure)
+  const workflowStep =
+    workflowStepEl && hasHistory && onShowHistory ? (
+      <button
+        type="button"
+        onClick={onShowHistory}
+        title={t("tabWorkflowHistory")}
+        aria-label={t("tabWorkflowHistory")}
+        className="group hover:bg-muted/60 focus-visible:ring-ring flex cursor-pointer flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      >
+        {workflowStepEl}
+        <span className="text-muted-foreground group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-[0.5625rem] tracking-wide transition-colors">
+          <History className="size-2.5" />
+          {t("viewHistoryHint")}
+        </span>
+      </button>
+    ) : (
+      workflowStepEl
+    );
 
   const subtitle =
     purchaseRequest?.doc_version != null
@@ -94,7 +121,6 @@ export function PrHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      infoLabel={t("documentInfo")}
       ribbon={ribbon}
       workflowStep={workflowStep}
     />

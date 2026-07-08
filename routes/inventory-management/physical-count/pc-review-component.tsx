@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -43,7 +42,7 @@ export function PcReviewComponent({
 
   const handleSubmit = () => {
     submitPhysicalCount.mutate(
-      {},
+      { doc_version: physicalCountReview.doc_version },
       {
         onSuccess: () => {
           toast.success(t("reviewSubmitSuccess"));

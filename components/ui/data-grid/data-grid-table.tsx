@@ -546,17 +546,26 @@ function DataGridTableBodyRowExpandded<TData>({ row }: { row: Row<TData> }) {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   const { props, table } = useDataGrid();
 
+  const expandedCol = table
+    .getAllColumns()
+    .find((column) => column.columnDef.meta?.expandedContent);
+  const total = row.getVisibleCells().length;
+  // เว้น column ซ้าย (colSpan) ให้ content เริ่มตรงขอบ column ที่ระบุ —
+  // table-fixed จัดความกว้างตาม size ของ column จริง ไม่ต้องคำนวณ % เอง
+  const start = Math.min(
+    expandedCol?.columnDef.meta?.expandedColStart ?? 0,
+    Math.max(0, total - 1),
+  );
+
   return (
     <tr
       className={cn(
         props.tableLayout?.rowBorder && "[&:not(:last-child)>td]:border-b",
       )}
     >
-      <td colSpan={row.getVisibleCells().length}>
-        {table
-          .getAllColumns()
-          .find((column) => column.columnDef.meta?.expandedContent)
-          ?.columnDef.meta?.expandedContent?.(row.original)}
+      {start > 0 && <td colSpan={start} aria-hidden="true" />}
+      <td colSpan={total - start}>
+        {expandedCol?.columnDef.meta?.expandedContent?.(row.original)}
       </td>
     </tr>
   );

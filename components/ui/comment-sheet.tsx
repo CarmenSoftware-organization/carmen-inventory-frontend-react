@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
@@ -41,15 +40,23 @@ export interface CommentAttachment {
   contentType: string;
 }
 
+export interface CommentAudit {
+  /** ISO timestamp ของ action */
+  at: string;
+  /** user id ของผู้กระทำ (มีเฉพาะ created) */
+  id?: string;
+  /** ชื่อเต็มที่ backend format มาแล้ว เช่น "สมชาย ใจดี" (มีเฉพาะ created) */
+  name?: string;
+}
+
 export interface CommentItem {
   id: string;
   message: string;
-  created_at: string;
-  created_by_id: string;
-  firstname: string;
-  middlename: string | null;
-  lastname: string;
   attachments: CommentAttachment[];
+  audit: {
+    created: CommentAudit;
+    updated?: CommentAudit;
+  };
 }
 
 interface CommentSheetProps {
@@ -93,9 +100,7 @@ const ALLOWED_TYPES = new Set([
   "text/csv",
 ]);
 
-const getFullName = (c: CommentItem) => {
-  return [c.firstname, c.middlename, c.lastname].filter(Boolean).join(" ");
-};
+const getFullName = (c: CommentItem) => c.audit?.created?.name ?? "";
 
 const isImageType = (contentType: string) => contentType.startsWith("image/");
 
@@ -391,7 +396,8 @@ export function CommentSheet({
     }
   };
 
-  const isOwner = (c: CommentItem) => currentUserId === c.created_by_id;
+  const isOwner = (c: CommentItem) =>
+    !!currentUserId && currentUserId === c.audit?.created?.id;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -400,10 +406,8 @@ export function CommentSheet({
         className="flex h-full flex-col gap-0 overflow-hidden p-0"
       >
         <SheetHeader className="animate-fade-in-left shrink-0 gap-0 border-b px-5 py-4">
-          <div className="flex items-start gap-3">
-            <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-              <MessageCircle className="size-4.5" />
-            </div>
+          <div className="flex items-center gap-2">
+            <MessageCircle className="text-primary size-4.5" />
             <div className="min-w-0 flex-1">
               <SheetTitle className="text-base">
                 {t("title", { count: comments.length })}
@@ -435,7 +439,7 @@ export function CommentSheet({
           {!isLoading && comments.length > 0 && (
             <div className="divide-y">
               {comments.map((c) => (
-                <div key={c.id} className="space-y-0.5 px-3 py-2">
+                <div key={c.id} className="space-y-0.5 px-5 py-4">
                   <div className="flex items-center gap-1.5">
                     <div className="bg-muted flex size-5 shrink-0 items-center justify-center rounded-full">
                       <User className="text-muted-foreground size-3" />
@@ -444,10 +448,17 @@ export function CommentSheet({
                       {getFullName(c)}
                     </span>
                     <span
-                      className="text-muted-foreground ml-auto shrink-0 text-[10px]"
-                      title={formatDate(c.created_at, `${dateFormat} HH:mm`)}
+                      className="text-muted-foreground shrink-0 text-[10px]"
+                      title={formatDate(
+                        c.audit?.created?.at ?? "",
+                        `${dateFormat} HH:mm`,
+                      )}
                     >
-                      {formatCommentTime(c.created_at, dateFormat, t)}
+                      {formatCommentTime(
+                        c.audit?.created?.at ?? "",
+                        dateFormat,
+                        t,
+                      )}
                     </span>
                   </div>
 
@@ -567,7 +578,7 @@ export function CommentSheet({
                         </div>
                       )}
                       {isOwner(c) && (
-                        <div className="flex justify-end pt-0.5 pl-6.5">
+                        <div className="flex justify-end">
                           <Button
                             size="icon-xs"
                             variant="ghost"

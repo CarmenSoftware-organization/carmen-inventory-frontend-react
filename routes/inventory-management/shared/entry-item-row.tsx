@@ -1,10 +1,10 @@
-
 import { memo, useState, type ComponentType } from "react";
 import { Calculator, ImageIcon, MessageSquarePlus, Pencil } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { STATUS_DOT_CHIP } from "@/constant/status-config";
 import { ProductAvatar } from "./inv-shared";
 import type { SavedNotePayload } from "./entry-notes-dialog";
 interface NotesDialogComponentProps {
@@ -101,7 +101,7 @@ export const EntryItemRow = memo(function EntryItemRow({
           {detailedHeader ? (
             <>
               <div className="flex flex-wrap items-baseline gap-1.5">
-                <span className="text-muted-foreground/80 text-[0.625rem] font-bold tabular-nums">
+                <span className="text-muted-foreground/80 text-[0.625rem] font-semibold tabular-nums">
                   #{String(sequenceNo).padStart(2, "0")}
                 </span>
                 <h3 className="text-foreground text-sm leading-tight font-semibold tracking-tight">
@@ -137,11 +137,7 @@ export const EntryItemRow = memo(function EntryItemRow({
         </div>
 
         {isCounted && (
-          <Badge
-            variant="success"
-            size="xs"
-            className="text-[0.5625rem] tracking-widest uppercase"
-          >
+          <Badge size="xs" className={`${STATUS_DOT_CHIP} before:bg-success`}>
             {t("counted")}
           </Badge>
         )}
@@ -233,7 +229,7 @@ export const EntryItemRow = memo(function EntryItemRow({
                   </div>
                 ))}
                 {savedNote.images.length > 4 && (
-                  <div className="border-border/60 bg-muted/60 text-muted-foreground flex size-10 items-center justify-center rounded-md border text-[0.625rem] font-bold tabular-nums">
+                  <div className="border-border/60 bg-muted/60 text-muted-foreground flex size-10 items-center justify-center rounded-md border text-[0.625rem] font-semibold tabular-nums">
                     +{savedNote.images.length - 4}
                   </div>
                 )}

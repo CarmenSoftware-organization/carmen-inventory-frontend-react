@@ -9,6 +9,7 @@ import type {
   PurchaseApproveDetail,
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
+import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { isoToDateInput } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
 
@@ -78,6 +79,19 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     net_amount: z.coerce.number().optional(),
     total_price: z.coerce.number().optional(),
     comment: z.string(),
+    // ประวัติ workflow ระดับรายการ (display-only passthrough, ไม่ส่งกลับ API)
+    history: z
+      .array(
+        z.object({
+          at: z.string(),
+          seq: z.coerce.number(),
+          name: z.string(),
+          user: z.object({ id: z.string(), name: z.string() }),
+          status: z.string(),
+          message: z.string().nullish(),
+        }),
+      )
+      .optional(),
   });
 }
 
@@ -106,6 +120,16 @@ export function createPrSchema(
     items: z.array(createDetailSchema(tv, tf)).superRefine((items, ctx) => {
       if (!isPurchase) return;
       items.forEach((item, i) => {
+        // แถวที่ถูกทำเครื่องหมาย reject หรือ send back (review) ไม่ต้องกรอก
+        // vendor/price/currency/tax — validate เฉพาะแถวที่กำลังจะอนุมัติ
+        const status = item.current_stage_status ?? "";
+        if (
+          status === PR_ITEM_STAGE_STATUS.REJECT ||
+          status === PR_ITEM_STAGE_STATUS.REJECTED ||
+          status === PR_ITEM_STAGE_STATUS.REVIEW
+        ) {
+          return;
+        }
         if (!item.vendor_id) {
           ctx.addIssue({
             code: "custom",
@@ -162,7 +186,7 @@ export const PR_ITEM = {
   location_name: "",
   location_type: "",
   delivery_point_name: "",
-  requested_qty: 1,
+  requested_qty: 0,
   requested_unit_id: null,
   requested_unit_name: "",
   inventory_unit_id: null,
@@ -283,6 +307,7 @@ export function getDefaultValues(
           net_amount: d.net_amount ?? 0,
           total_price: d.total_price ?? 0,
           comment: d.comment ?? "",
+          history: d.history,
         })) ?? [],
     };
   }
@@ -366,6 +391,30 @@ const STATUS_DENORMALIZE: Record<string, string> = {
  */
 export function denormalizeStageStatus(status: string): string {
   return STATUS_DENORMALIZE[status] ?? status;
+}
+
+/**
+ * ตัดสิน stage_status ราย item สำหรับ payload ของ action approve/purchase-approve
+ * ใช้ค่าที่ผู้ใช้ตัดสินใจ (`stage_status` ของ session นี้) ก่อน แล้ว fallback ไป
+ * `current_stage_status` ที่โหลดจาก DB — คง reject/review ไว้เสมอ ไม่งั้น item ที่
+ * ถูก reject (แต่ stage_status ว่างเพราะโหลดมา) จะถูกส่งเป็น approve ผิดพลาด
+ * รายการอื่น ๆ (pending/submit/approve) ถือว่าอนุมัติเมื่อกดปุ่ม Approve
+ * @param item - item จากฟอร์ม PR
+ * @returns stage_status ที่ backend รับ: "reject" | "review" | "approve"
+ */
+function resolveApproveStageStatus(
+  item: PrFormValues["items"][number],
+): string {
+  const decided = denormalizeStageStatus(
+    item.stage_status || item.current_stage_status || "",
+  );
+  if (
+    decided === PR_ITEM_STAGE_STATUS.REJECT ||
+    decided === PR_ITEM_STAGE_STATUS.REVIEW
+  ) {
+    return decided;
+  }
+  return PR_ITEM_STAGE_STATUS.APPROVE;
 }
 
 /**
@@ -471,20 +520,22 @@ export function prepareApproveDetails(
     .map((item) => ({
       id: item.id!,
       purchase_request_id: purchaseRequestId,
-      stage_status: denormalizeStageStatus(item.stage_status || "approve"),
+      stage_status: resolveApproveStageStatus(item),
       stage_message: item.stage_message || "",
       approved_qty: Number(item.approved_qty),
       approved_unit_id: item.approved_unit_id || item.requested_unit_id,
       vendor_id: item.vendor_id || undefined,
-      pricelist_detail_id: item.pricelist_detail_id,
+      // omit null string FK ทั้งหมด — backend zod รับเป็น string (ห้าม null);
+      // item ที่ถูก reject มักยังไม่มี tax/location/pricelist → ต้องไม่ส่ง null
+      pricelist_detail_id: item.pricelist_detail_id || undefined,
       pricelist_price: Number(item.pricelist_price),
       pricelist_no: item.pricelist_no,
       pricelist_type: item.pricelist_type || null,
       currency_id: item.currency_id || undefined,
-      delivery_point_id: item.delivery_point_id,
-      delivery_date: item.delivery_date,
-      location_id: item.location_id,
-      tax_profile_id: item.tax_profile_id,
+      delivery_point_id: item.delivery_point_id || undefined,
+      delivery_date: item.delivery_date || undefined,
+      location_id: item.location_id || undefined,
+      tax_profile_id: item.tax_profile_id || undefined,
       tax_rate: Number(item.tax_rate ?? 0),
       tax_amount: Number(item.tax_amount ?? 0),
       is_tax_adjustment: item.is_tax_adjustment ?? false,
@@ -531,7 +582,7 @@ export function preparePurchaseDetails(
 
       return {
         id: item.id!,
-        stage_status: denormalizeStageStatus(item.stage_status || "approve"),
+        stage_status: resolveApproveStageStatus(item),
         stage_message: item.stage_message || null,
         is_tax_adjustment: isTaxAdj,
         description: item.description || null,

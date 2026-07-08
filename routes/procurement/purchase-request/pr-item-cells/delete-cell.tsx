@@ -20,7 +20,7 @@ export const DeleteCell = memo(function DeleteCell({
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant="destructive"
       size="xs"
       aria-label="Remove"
       disabled={isRowLocked}

@@ -192,7 +192,7 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
         <div className="relative space-y-4 px-6 pt-10 pb-6">
           <DialogHeader>
             <div className="flex items-start gap-3">
-              <div className="bg-warning/10 text-warning flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-warning flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Truck className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
@@ -228,7 +228,7 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
                   <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
                     {tfl("total")}
                   </p>
-                  <p className="text-warning text-lg leading-tight font-bold tabular-nums">
+                  <p className="text-warning text-lg leading-tight font-semibold tabular-nums">
                     {totalQty.toLocaleString()}
                   </p>
                   <p className="text-muted-foreground text-[0.625rem]">

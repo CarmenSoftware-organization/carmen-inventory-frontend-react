@@ -14,7 +14,7 @@ export const getPcActionLabel = createLabelGetter(
 );
 
 export const PC_ACTION_BUTTON_VARIANTS = {
-  start: "outline",
-  resume: "default",
-  done: "ghost",
-} as const satisfies Record<PcActionType, "default" | "outline" | "ghost">;
+  start: "info",
+  resume: "outline",
+  done: "success",
+} as const satisfies Record<PcActionType, "outline" | "info" | "success">;

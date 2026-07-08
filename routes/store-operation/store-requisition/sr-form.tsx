@@ -5,8 +5,8 @@ import { useTranslations } from "use-intl";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { WorkflowStep } from "@/components/share/workflow-step";
+import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useProfile } from "@/hooks/use-profile";
 import {
@@ -25,10 +25,8 @@ import {
 import { buildSrDefaultValues } from "./sr-form-helpers";
 import { useSrFormActions } from "./use-sr-form-actions";
 import { SrItemFields, type SrItemFieldsHandle } from "./sr-item-fields";
-import { SrWorkflowHistory } from "./sr-workflow-history";
 import { SrHeader } from "./sr-header";
 import { SrRequestDetails } from "./sr-request-details";
-import { SrTransferSummary } from "./sr-transfer-summary";
 import { SrFooter } from "./sr-footer";
 import { SrFormDialogs } from "./sr-form-dialogs";
 
@@ -102,6 +100,15 @@ export function StoreRequisitionForm({
     control: form.control,
     name: "department_id",
   });
+  const description = useWatch({ control: form.control, name: "description" });
+
+  // description แก้ได้เฉพาะผู้สร้าง (role CREATE) — ขั้น approve/issue/view lock
+  const srRole = storeRequisition?.role ?? STAGE_ROLE.CREATE;
+  const isDescReadOnly =
+    isView ||
+    srRole === STAGE_ROLE.APPROVE ||
+    srRole === STAGE_ROLE.ISSUE ||
+    srRole === STAGE_ROLE.VIEW_ONLY;
 
   const [fromLocInfo, setFromLocInfo] = useState<LocationInfo>({
     name: storeRequisition?.from_location_name ?? "",
@@ -139,31 +146,6 @@ export function StoreRequisitionForm({
     (storeRequisition?.doc_status === "draft" ||
       storeRequisition?.doc_status === "in_progress");
 
-  const itemCount = items.length;
-  const totalRequested = items.reduce(
-    (s, i) => s + (Number(i.requested_qty) || 0),
-    0,
-  );
-  const totalApproved = items.reduce(
-    (s, i) => s + (Number(i.approved_qty) || 0),
-    0,
-  );
-  const totalIssued = items.reduce(
-    (s, i) => s + (Number(i.issued_qty) || 0),
-    0,
-  );
-
-  const overIssuedLines = items.reduce<
-    { line: number; issued: number; approved: number }[]
-  >((acc, item, idx) => {
-    const issued = Number(item.issued_qty) || 0;
-    const approved = Number(item.approved_qty) || 0;
-    if (issued > approved) {
-      acc.push({ line: idx + 1, issued, approved });
-    }
-    return acc;
-  }, []);
-
   let derivedSrType: StoreRequisitionType | undefined;
   if (toLocInfo.location_type === INVENTORY_TYPE.DIRECT) {
     derivedSrType = SR_TYPE.ISSUE;
@@ -172,9 +154,6 @@ export function StoreRequisitionForm({
   } else {
     derivedSrType = storeRequisition?.sr_type;
   }
-
-  const hasWorkflowHistory =
-    (storeRequisition?.workflow_history?.length ?? 0) > 0;
 
   const itemFieldsProps = {
     ref: itemsRef,
@@ -213,90 +192,71 @@ export function StoreRequisitionForm({
         onSubmit={form.handleSubmit(actions.onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="flex-1 py-5"
+        className="space-y-4 px-4"
       >
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
-          <div className="flex flex-col gap-5">
-            <SrRequestDetails
-              form={form}
-              readOnly={isView}
-              disabled={actions.isPending}
-              dateFormat={dateFormat}
-              workflowName={storeRequisition?.workflow_name}
-              fromLocInfo={fromLocInfo}
-              toLocInfo={toLocInfo}
-              onFromLocInfoChange={setFromLocInfo}
-              onToLocInfoChange={setToLocInfo}
-              role={storeRequisition?.role ?? STAGE_ROLE.CREATE}
-            />
+        <SrRequestDetails
+          form={form}
+          readOnly={isView}
+          disabled={actions.isPending}
+          dateFormat={dateFormat}
+          workflowName={storeRequisition?.workflow_name}
+          fromLocInfo={fromLocInfo}
+          toLocInfo={toLocInfo}
+          onFromLocInfoChange={setFromLocInfo}
+          onToLocInfoChange={setToLocInfo}
+          role={storeRequisition?.role ?? STAGE_ROLE.CREATE}
+          isDraft={
+            !storeRequisition?.doc_status ||
+            storeRequisition.doc_status === "draft"
+          }
+        />
 
-            {storeRequisition?.workflow_current_stage && (
-              <WorkflowStep
-                previousStage={storeRequisition.workflow_previous_stage}
-                currentStage={storeRequisition.workflow_current_stage}
-                nextStage={
-                  storeRequisition.doc_status === "completed" ||
-                  storeRequisition.doc_status === "cancelled" ||
-                  storeRequisition.doc_status === "voided"
-                    ? undefined
-                    : storeRequisition.workflow_next_stage
-                }
+        {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
+        {(!isDescReadOnly || description?.trim()) && (
+          <Field className={isDescReadOnly ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="sr-description"
+              className={
+                isDescReadOnly ? "text-muted-foreground font-normal" : undefined
+              }
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {isDescReadOnly ? (
+              <FieldPlainText className="text-xs">
+                <span className="whitespace-pre-line">{description}</span>
+              </FieldPlainText>
+            ) : (
+              <Textarea
+                id="sr-description"
+                placeholder={t("optionalDescription")}
+                className="min-h-13 text-sm"
+                maxLength={256}
+                disabled={actions.isPending}
+                {...form.register("description")}
               />
             )}
-          </div>
+          </Field>
+        )}
 
-          <SrTransferSummary
-            fromLocInfo={fromLocInfo}
-            toLocInfo={toLocInfo}
-            itemCount={itemCount}
-            totalRequested={totalRequested}
-            totalApproved={totalApproved}
-            totalIssued={totalIssued}
-            firstOverIssued={overIssuedLines[0]}
-          />
+        <div className="flex items-center justify-end">
+          {!isDisabled && (
+            <Button
+              type="button"
+              size="xs"
+              onClick={() => itemsRef.current?.addItem()}
+              disabled={!fromLocationId || !toLocationId}
+            >
+              <Plus /> {t("addItem")}
+            </Button>
+          )}
         </div>
-
-        <section className="space-y-3 pt-2">
-          <div className="flex items-center justify-end">
-            {!isDisabled && (
-              <Button
-                type="button"
-                size="xs"
-                onClick={() => itemsRef.current?.addItem()}
-                disabled={!fromLocationId || !toLocationId}
-              >
-                <Plus /> {t("addItem")}
-              </Button>
-            )}
-          </div>
-          {form.formState.errors.items?.message && (
-            <p className="text-destructive text-xs" role="alert">
-              {form.formState.errors.items.message}
-            </p>
-          )}
-          {hasWorkflowHistory ? (
-            <Tabs defaultValue="items">
-              <TabsList variant="line">
-                <TabsTrigger value="items" className="text-xs">
-                  {t("tabItems")}
-                </TabsTrigger>
-                <TabsTrigger value="history" className="text-xs">
-                  {t("tabWorkflowHistory")}
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="items">
-                <SrItemFields {...itemFieldsProps} />
-              </TabsContent>
-              <TabsContent value="history">
-                <SrWorkflowHistory
-                  history={storeRequisition!.workflow_history}
-                />
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <SrItemFields {...itemFieldsProps} />
-          )}
-        </section>
+        {form.formState.errors.items?.message && (
+          <p className="text-destructive text-xs" role="alert">
+            {form.formState.errors.items.message}
+          </p>
+        )}
+        <SrItemFields {...itemFieldsProps} />
       </form>
 
       <SrFooter

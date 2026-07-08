@@ -1,4 +1,3 @@
-
 import { useFormatter, useTranslations } from "use-intl";
 import { useWatch, type useForm } from "react-hook-form";
 import { Info } from "lucide-react";
@@ -55,13 +54,11 @@ export function AdjSummarySidebar({
 
   return (
     <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
-      <Card className="gap-0 py-0">
-        <CardHeader className="border-b px-5 py-3">
-          <CardTitle className="text-sm font-semibold">
-            {t("summary")}
-          </CardTitle>
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle className="text-sm">{t("summary")}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 px-5 py-4 text-xs">
+        <CardContent className="space-y-3 text-xs">
           <SummaryRow label={tfl("status")}>
             <Badge className={statusConfig?.className} size="sm">
               {statusConfig?.label ?? statusKey}
@@ -90,7 +87,7 @@ export function AdjSummarySidebar({
             <span className="text-muted-foreground text-sm">
               {t("grandTotal")}
             </span>
-            <span className="text-primary text-xl font-bold tabular-nums">
+            <span className="text-primary text-xl font-semibold tabular-nums">
               {formatter.number(grandTotal, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,

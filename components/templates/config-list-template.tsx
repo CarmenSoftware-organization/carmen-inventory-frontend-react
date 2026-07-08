@@ -1,16 +1,11 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Columns3,
-  Download,
   Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
-  MoreHorizontal,
-  Plus,
-  Printer,
   RefreshCw,
 } from "lucide-react";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
@@ -31,18 +26,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
-import { ModuleTileIcon } from "@/components/ui/module-tile";
 import SearchInput from "@/components/search-input";
+import { DocumentListHeader } from "@/components/share/document-list-header";
+import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
@@ -320,98 +310,21 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <ModuleTileIcon />
-              <h1 className="text-lg font-semibold">{t("title")}</h1>
-              {totalRecords > 0 && (
-                <Badge variant="secondary" size="sm" className="tabular-nums">
-                  {totalRecords.toLocaleString()}
-                </Badge>
-              )}
-            </div>
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              {t("desc")}
-            </p>
-          </div>
-          <div className="flex w-full items-center gap-2 sm:w-auto">
-            {/* Desktop: inline export/print */}
-            {!hideExportPrint && (
-              <div className="hidden items-center gap-2 sm:flex">
-                {exportColumns && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleExport}
-                    disabled={isExporting}
-                  >
-                    {isExporting ? (
-                      <Loader2 className="animate-spin" aria-hidden="true" />
-                    ) : (
-                      <Download aria-hidden="true" />
-                    )}
-                    {isExporting ? tc("exporting") : tc("export")}
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => globalThis.print()}
-                >
-                  <Printer aria-hidden="true" />
-                  {tc("print")}
-                </Button>
-              </div>
-            )}
-            {extraActions}
-            <Button
-              size="sm"
-              onClick={
-                createDenied
-                  ? () => dispatchPermissionDenied(createPermission)
-                  : handleAdd
-              }
-              aria-disabled={createDenied || undefined}
-              className={cn(createDenied && "opacity-50")}
-            >
-              <Plus aria-hidden="true" />
-              {t("add")}
-            </Button>
-            {/* Mobile: overflow menu for export/print */}
-            {!hideExportPrint && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="h-11 w-11 shrink-0 sm:hidden"
-                    aria-label={tc("aria.moreActions")}
-                  >
-                    <MoreHorizontal aria-hidden="true" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {exportColumns && (
-                    <DropdownMenuItem
-                      onClick={handleExport}
-                      disabled={isExporting}
-                    >
-                      {isExporting ? (
-                        <Loader2 className="animate-spin" aria-hidden="true" />
-                      ) : (
-                        <Download aria-hidden="true" />
-                      )}
-                      {isExporting ? tc("exporting") : tc("export")}
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={() => globalThis.print()}>
-                    <Printer aria-hidden="true" />
-                    {tc("print")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
+          <DocumentListHeader title={t("title")} description={t("desc")} />
+          <DocumentListActions
+            onAdd={
+              createDenied
+                ? () => dispatchPermissionDenied(createPermission)
+                : handleAdd
+            }
+            addDisabled={createDenied}
+            addLabel={t("add")}
+            onExport={handleExport}
+            isExporting={isExporting}
+            showExport={!!exportColumns}
+            hideExportPrint={hideExportPrint}
+            extraActions={extraActions}
+          />
         </div>
 
         {/* Toolbar */}

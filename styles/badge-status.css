@@ -39,7 +39,7 @@
 
 :root {
   /* ── Gray: ยังไม่เริ่ม ── */
-  --status-draft: oklch(0.92 0.01 258.7);            /* Light gray (brand neutral) */
+  --status-draft: oklch(0.68 0.02 258.7);            /* Mid gray — dot ต้องเห็นชัดบน bg-muted (0.95) */
   --status-draft-fg: oklch(0.40 0 0);
 
   /* ── Blue tones: รอดำเนินการ / ส่งแล้ว ── */

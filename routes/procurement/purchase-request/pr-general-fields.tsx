@@ -1,7 +1,6 @@
-import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { PrFormValues } from "./pr-form-schema";
@@ -24,12 +23,7 @@ export function PrGeneralFields({
   role,
   fromTemplate,
 }: PrGeneralFieldsProps) {
-  const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
-  const watchedDescription = useWatch({
-    control: form.control,
-    name: "description",
-  });
 
   // หลัง submit (role != CREATE) field ทั้งสองถูก lock ถาวร → render เป็น text
   const lockedAfterCreate = !!role && role !== STAGE_ROLE.CREATE;
@@ -37,67 +31,32 @@ export function PrGeneralFields({
   const workflowReadOnly = descriptionReadOnly || !!fromTemplate;
 
   return (
-    <div className="max-w-2xl space-y-4">
-      <FieldGroup className="gap-3">
-        <div className="grid grid-cols-2 gap-3">
-          <Field>
-            <FieldLabel
-              required={!workflowReadOnly}
-              className={
-                workflowReadOnly ? "text-muted-foreground" : undefined
-              }
-            >
-              {tfl("workflow")}
-            </FieldLabel>
-            <Controller
-              control={form.control}
-              name="workflow_id"
-              render={({ field }) => (
-                <LookupWorkflow
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  workflowType={WORKFLOW_TYPE.PR}
-                  readOnly={workflowReadOnly}
-                  disabled={disabled}
-                  error={form.formState.errors.workflow_id?.message}
-                  className={workflowReadOnly ? "font-semibold" : undefined}
-                />
-              )}
-            />
-          </Field>
-        </div>
-
-        <Field>
-          <FieldLabel
-            htmlFor="pr-description"
-            className={
-              descriptionReadOnly ? "text-muted-foreground" : undefined
-            }
-          >
-            {tfl("description")}
-          </FieldLabel>
-          {descriptionReadOnly ? (
-            <span className="inline-flex min-h-8 items-center text-sm font-semibold">
-              {watchedDescription?.trim() ? (
-                <span className="whitespace-pre-line">
-                  {watchedDescription}
-                </span>
-              ) : (
-                <span className="text-muted-foreground font-normal">—</span>
-              )}
-            </span>
-          ) : (
-            <Textarea
-              id="pr-description"
-              placeholder={t("descPlaceholder")}
-              rows={2}
-              maxLength={256}
+    <>
+      <Field className={workflowReadOnly ? "gap-1" : undefined}>
+        <FieldLabel
+          required={!workflowReadOnly}
+          className={
+            workflowReadOnly ? "text-muted-foreground font-normal" : undefined
+          }
+        >
+          {tfl("workflow")}
+        </FieldLabel>
+        <Controller
+          control={form.control}
+          name="workflow_id"
+          render={({ field }) => (
+            <LookupWorkflow
+              value={field.value}
+              onValueChange={field.onChange}
+              workflowType={WORKFLOW_TYPE.PR}
+              readOnly={workflowReadOnly}
               disabled={disabled}
-              {...form.register("description")}
+              error={form.formState.errors.workflow_id?.message}
+              className="text-xs"
             />
           )}
-        </Field>
-      </FieldGroup>
-    </div>
+        />
+      </Field>
+    </>
   );
 }

@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import {
   ChevronRight,
@@ -14,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { getLocationTypeLabel } from "@/constant/location-type";
+import { STATUS_DOT_CHIP } from "@/constant/status-config";
 import {
   getPcActionLabel,
   PC_ACTION_BUTTON_VARIANTS,
@@ -78,8 +78,11 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
               name={item.name}
               code={item.code}
               countBadge={{
-                variant:
-                  item.physical_count_type === "yes" ? "outline" : "secondary",
+                className: `${STATUS_DOT_CHIP} ${
+                  item.physical_count_type === "yes"
+                    ? "before:bg-success"
+                    : "before:bg-muted-foreground/40"
+                }`,
                 label:
                   item.physical_count_type === "yes"
                     ? t("count")
@@ -107,7 +110,6 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
               size="sm"
               variant={actionVariant}
               onClick={() => onAction(item)}
-              className="rounded-full"
             >
               <ActionIcon className="size-3.5" aria-hidden="true" />
               {actionLabel}

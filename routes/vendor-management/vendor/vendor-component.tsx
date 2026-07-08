@@ -190,7 +190,6 @@ export default function VendorComponent() {
           <DocumentListHeader
             title={t("title")}
             description={t("desc")}
-            count={totalRecords}
           />
           <DocumentListActions
             onExport={handleExport}

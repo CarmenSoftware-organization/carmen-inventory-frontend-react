@@ -38,7 +38,6 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { BusinessUnit } from "@/types/profile";
 import type { PrFormValues } from "./pr-form-schema";
@@ -136,7 +135,6 @@ export function PrItemFields({
 }: PrItemFieldsProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
-  const tfl = useTranslations("field");
   const [isAllocating, setIsAllocating] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [bulkAction, setBulkAction] = useState<
@@ -321,7 +319,7 @@ export function PrItemFields({
   };
 
   const handleBulkReview = async () => {
-    if (await guardSelectedItemErrors()) return;
+    // send back ไม่ต้องกรอก vendor/price/tax ให้ครบ — ข้าม guard
     const indices = getSelectedIndices();
     for (const index of indices) {
       form.setValue(`items.${index}.stage_status`, PR_ITEM_STAGE_STATUS.REVIEW);
@@ -334,7 +332,7 @@ export function PrItemFields({
   };
 
   const handleBulkReject = async () => {
-    if (await guardSelectedItemErrors()) return;
+    // reject ไม่ต้องกรอก vendor/price/tax ให้ครบ — ข้าม guard
     setBulkAction(PR_ITEM_STAGE_STATUS.REJECTED);
   };
 
@@ -461,12 +459,10 @@ export function PrItemFields({
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h2 className="border-b pb-2 text-sm font-semibold">{tfl("items")}</h2>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-end gap-1.5">
+    <div className="space-y-4">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-end gap-1.5">
+          {selectedRows.length > 0 && (
             <PrAskAiMenu
               items={selectedRows.map((row) => {
                 const item = form.getValues(`items.${row.index}`);
@@ -476,99 +472,98 @@ export function PrItemFields({
                   locationName: item.location_name,
                 };
               })}
-              disabled={selectedRows.length === 0}
             />
-            {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="xs"
-                onClick={() =>
-                  table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
-                }
-              >
-                {table.getIsAllRowsExpanded() ? (
-                  <>
-                    <ChevronsDownUp /> {tc("collapseAll")}
-                  </>
-                ) : (
-                  <>
-                    <ChevronsUpDown /> {tc("expandAll")}
-                  </>
-                )}
-              </Button>
-            )}
-            {!isDisabled && role === STAGE_ROLE.CREATE && (
-              <Button
-                type="button"
-                size="xs"
-                disabled={!canAddItem}
-                title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-                onClick={() => handleAddItem()}
-              >
-                <Plus /> {t("addItem")}
-              </Button>
-            )}
+          )}
+          {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              onClick={() =>
+                table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+              }
+            >
+              {table.getIsAllRowsExpanded() ? (
+                <>
+                  <ChevronsDownUp /> {tc("collapseAll")}
+                </>
+              ) : (
+                <>
+                  <ChevronsUpDown /> {tc("expandAll")}
+                </>
+              )}
+            </Button>
+          )}
+          {!isDisabled && role === STAGE_ROLE.CREATE && (
+            <Button
+              type="button"
+              size="xs"
+              disabled={!canAddItem}
+              title={!canAddItem ? t("selectWorkflowFirst") : undefined}
+              onClick={() => handleAddItem()}
+            >
+              <Plus /> {t("addItem")}
+            </Button>
+          )}
 
-            {!isDisabled && role === STAGE_ROLE.PURCHASE && (
+          {!isDisabled && role === STAGE_ROLE.PURCHASE && (
+            <Button
+              type="button"
+              size="xs"
+              disabled={isAllocating || itemFields.length === 0}
+              onClick={handleAutoAllocate}
+            >
+              {isAllocating ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <RefreshCcw />
+              )}
+              {t("autoAllocate")}
+            </Button>
+          )}
+        </div>
+        {selectedRows.length > 0 && canBulkAction && (
+          <div className="flex items-center gap-1.5">
+            <Button
+              type="button"
+              variant="success"
+              size="xs"
+              onClick={handleBulkApprove}
+            >
+              <Check />
+              {tc("approve")}
+            </Button>
+            <Button
+              type="button"
+              variant="warning"
+              size="xs"
+              onClick={handleBulkReview}
+            >
+              <Eye />
+              {t("reviewTitle")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="xs"
+              onClick={handleBulkReject}
+            >
+              <X />
+              {tc("reject")}
+            </Button>
+            {prId && (
               <Button
                 type="button"
+                variant="outline"
                 size="xs"
-                disabled={isAllocating || itemFields.length === 0}
-                onClick={handleAutoAllocate}
+                onClick={handleBulkSplit}
               >
-                {isAllocating ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  <RefreshCcw />
-                )}
-                {t("autoAllocate")}
+                <Scissors />
+                {t("split")}
               </Button>
             )}
           </div>
-          {selectedRows.length > 0 && canBulkAction && (
-            <div className="flex items-center gap-1.5">
-              <Button
-                type="button"
-                variant="success"
-                size="xs"
-                onClick={handleBulkApprove}
-              >
-                <Check />
-                {tc("approve")}
-              </Button>
-              <Button
-                type="button"
-                variant="warning"
-                size="xs"
-                onClick={handleBulkReview}
-              >
-                <Eye />
-                {t("reviewTitle")}
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="xs"
-                onClick={handleBulkReject}
-              >
-                <X />
-                {tc("reject")}
-              </Button>
-              {prId && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="xs"
-                  onClick={handleBulkSplit}
-                >
-                  <Scissors />
-                  {t("split")}
-                </Button>
-              )}
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       <DataGrid
@@ -600,21 +595,13 @@ export function PrItemFields({
           />
         }
       >
-        <ScrollArea className="w-full pb-2">
-          <DataGridContainer>
-            <DataGridTable />
-          </DataGridContainer>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
+            — ไม่ห่อด้วย Radix ScrollArea เพื่อเลี่ยง nested scroll ที่ทำให้ scroll
+            แนวนอนสะดุด (เห็นชัดในโหมด edit ที่ตารางกว้าง/หนักกว่า) */}
+        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+          <DataGridTable />
+        </DataGridContainer>
       </DataGrid>
-
-      {/* {!isAdd && itemFields.length > 0 && prStatus && prStatus !== "draft" && (
-        <GrandTotal
-          control={form.control}
-          itemCount={itemFields.length}
-          currencyCode={defaultBu?.config?.default_currency?.code ?? ""}
-        />
-      )} */}
 
       <DeleteDialog
         open={deleteIndex !== null}
@@ -659,7 +646,7 @@ export function PrItemFields({
           {" "}
           <div className="p-5">
             <div className="flex items-start gap-3">
-              <div className="bg-warning/10 text-warning flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-warning flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <AlertTriangle className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">

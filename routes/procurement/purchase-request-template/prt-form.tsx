@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -9,7 +8,10 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { FormToolbar } from "@/components/ui/form-toolbar";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
+import { StatusSwitch } from "@/components/ui/status-switch";
 import { toast } from "sonner";
 import { useCreatePrt, useUpdatePrt, useDeletePrt } from "@/hooks/use-prt";
 import type {
@@ -20,6 +22,7 @@ import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { PrtGeneralFields } from "./prt-general-fields";
 import { PrtItemFields } from "./prt-item-fields";
 import {
@@ -67,6 +70,14 @@ export function PrtForm({ template }: PrtFormProps) {
     isPending,
   });
 
+  // in-app navigation guard: เตือนก่อนออกเมื่อ add/edit และฟอร์มถูกแก้ไข
+  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+
+  const watchedDescription = useWatch({
+    control: form.control,
+    name: "description",
+  });
+
   const onSubmit = (values: PrtFormValues) => {
     const purchase_request_template_detail = buildItemChanges(
       values.items,
@@ -85,7 +96,7 @@ export function PrtForm({ template }: PrtFormProps) {
 
     if (isEdit && template) {
       updatePrt.mutate(
-        { id: template.id, ...payload },
+        { id: template.id, doc_version: template.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -98,10 +109,9 @@ export function PrtForm({ template }: PrtFormProps) {
       createPrt.mutate(payload, {
         onSuccess: (data) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
-          navigate(
-            `/procurement/purchase-request-template/${data.data.id}`,
-            { replace: true },
-          );
+          navigate(`/procurement/purchase-request-template/${data.data.id}`, {
+            replace: true,
+          });
           setMode("view");
         },
         onError: (err) => toast.error(err.message),
@@ -122,9 +132,7 @@ export function PrtForm({ template }: PrtFormProps) {
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() =>
-        navigate("/procurement/purchase-request-template"),
-      );
+      discard.confirm(() => navigate("/procurement/purchase-request-template"));
     } else {
       navigate("/procurement/purchase-request-template");
     }
@@ -135,14 +143,7 @@ export function PrtForm({ template }: PrtFormProps) {
       <FormToolbar
         entity={template?.name || t("entity")}
         statusBadge={
-          template && (
-            <Badge
-              variant={template.is_active ? "default" : "secondary"}
-              size="sm"
-            >
-              {template.is_active ? "ACTIVE" : "INACTIVE"}
-            </Badge>
-          )
+          template && <StatusBadge active={template.is_active} size="xs" />
         }
         mode={mode}
         formId="prt-form"
@@ -159,9 +160,55 @@ export function PrtForm({ template }: PrtFormProps) {
         onSubmit={form.handleSubmit(onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4"
+        className="space-y-4 px-4"
       >
         <PrtGeneralFields form={form} readOnly={isView} disabled={isPending} />
+
+        <div className="grid grid-cols-2 gap-4">
+          {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
+          {(!isView || watchedDescription?.trim()) && (
+            <Field className={isView ? "gap-1" : undefined}>
+              <FieldLabel
+                htmlFor="prt-description"
+                className={
+                  isView ? "text-muted-foreground font-normal" : undefined
+                }
+              >
+                {tfl("description")}
+              </FieldLabel>
+              {isView ? (
+                <FieldPlainText className="text-xs">
+                  <span className="whitespace-pre-line">
+                    {watchedDescription}
+                  </span>
+                </FieldPlainText>
+              ) : (
+                <Textarea
+                  id="prt-description"
+                  className="h-20"
+                  placeholder={tfl("optional")}
+                  disabled={isPending}
+                  maxLength={256}
+                  {...form.register("description")}
+                />
+              )}
+            </Field>
+          )}
+          <div className="mt-7">
+            <Controller
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <StatusSwitch
+                  id="prt-is-active"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isView || isPending}
+                />
+              )}
+            />
+          </div>
+        </div>
         <PrtItemFields
           form={form}
           readOnly={isView}
@@ -171,6 +218,16 @@ export function PrtForm({ template }: PrtFormProps) {
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {template && (
         <DeleteDialog

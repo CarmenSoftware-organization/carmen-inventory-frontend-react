@@ -32,15 +32,18 @@ export const CommentFooterRow = memo(function CommentFooterRow({
   if (index === -1) return null;
   const isReadOnly = isDisabled || isRowLocked;
   if (isReadOnly) {
+    // ไม่ใช่ edit → ไม่มี comment ไม่ต้องแสดง; มีก็โชว์ในเครื่องหมายคำพูด ตัวเอียง muted
     if (!comment) return null;
     return (
-      <div className="px-2 py-1.5">
-        <p className="text-xs wrap-break-word whitespace-pre-wrap">{comment}</p>
+      <div className="px-2 pb-4">
+        <p className="text-muted-foreground text-xs italic wrap-break-word whitespace-pre-wrap">
+          {`"${comment}"`}
+        </p>
       </div>
     );
   }
   return (
-    <div className="px-2 py-1.5">
+    <div className="px-2 pb-4">
       <Input
         id={`items-${index}-comment`}
         placeholder={placeholder}

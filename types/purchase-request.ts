@@ -14,8 +14,8 @@ export type PurchaseRequestStatus =
 
 export enum PR_STATUS {
   DRAFT = "draft",
-  SUBMITTED = "submitted",
   IN_PROGRESS = "in_progress",
+  APPROVED = "approved",
   COMPLETED = "completed",
   VOIDED = "voided",
 }
@@ -79,9 +79,20 @@ export interface PurchaseRequestDetail
   state_message: string | null;
   info: Record<string, unknown>;
   dimension: unknown[];
+  history?: PrItemHistoryEntry[];
   doc_version: number;
   created_at: string;
   updated_at: string;
+}
+
+/** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบขอซื้อ */
+export interface PrItemHistoryEntry {
+  at: string;
+  seq: number;
+  name: string;
+  user: { id: string; name: string };
+  status: string;
+  message?: string | null;
 }
 
 export interface PurchaseRequestTemplateDetail
@@ -137,6 +148,7 @@ export interface PurchaseRequestTemplate {
   workflow_name: string;
   info: Record<string, unknown>;
   is_active: boolean;
+  doc_version?: number;
   created_at: string;
   purchase_request_template_detail: PurchaseRequestTemplateDetail[];
 }
@@ -364,6 +376,7 @@ export interface PurchaseApproveDetail {
 export interface PrActionPayload {
   id: string;
   stage_role: string;
+  doc_version?: number;
   details: (WorkflowStageDetail | ApproveDetail | PurchaseApproveDetail)[];
   des_stage?: string;
 }

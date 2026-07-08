@@ -362,7 +362,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                 </div>
                 <div className="border-border/40 flex justify-between border-t pt-1.5 text-base">
                   <dt className="font-semibold">{t("summaryGrandTotal")}</dt>
-                  <dd className="flex items-baseline gap-1.5 font-bold tabular-nums">
+                  <dd className="flex items-baseline gap-1.5 font-semibold tabular-nums">
                     {values.currency_code && (
                       <span className="text-muted-foreground text-xs">
                         {values.currency_code}

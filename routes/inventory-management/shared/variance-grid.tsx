@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -104,7 +103,7 @@ export function VarianceGrid<T extends VarianceGridItem>({
                   <td className="px-3 py-2 text-right align-middle">
                     <span
                       className={cn(
-                        "text-sm font-bold tabular-nums",
+                        "text-sm font-semibold tabular-nums",
                         variance > 0 && "text-success",
                         variance < 0 && "text-destructive",
                       )}

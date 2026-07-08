@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { CircleAlert } from "lucide-react";
@@ -449,39 +448,6 @@ function FieldInput({
   );
 }
 
-/**
- * Select ที่ฝัง error tooltip
- *
- * Render `Select` + `SelectTrigger` ที่แสดงไอคอน CircleAlert สีแดงเมื่อมี
- * error และเปิด tooltip บอก error message เมื่อ hover/focus เหมาะสำหรับ
- * compact layout เช่นเดียวกับ FieldInput
- *
- * @param props - props ของ component
- * @param props.error - ข้อความ error (ถ้ามี)
- * @param props.placeholder - placeholder ของ SelectValue
- * @param props.size - ขนาดของ SelectTrigger
- * @param props.children - SelectContent ที่มี SelectItem
- * @returns JSX element ของ select wrapper
- * @example
- * ```tsx
- * <Controller
- *   control={form.control}
- *   name="type"
- *   render={({ field }) => (
- *     <FieldSelect
- *       value={field.value}
- *       onValueChange={field.onChange}
- *       error={errors.type?.message}
- *       placeholder="Select type"
- *     >
- *       <SelectContent>
- *         <SelectItem value="a">A</SelectItem>
- *       </SelectContent>
- *     </FieldSelect>
- *   )}
- * />
- * ```
- */
 function FieldSelect({
   error,
   className,
@@ -629,10 +595,46 @@ function FieldInputGroup({
   );
 }
 
+/**
+ * ค่าของ field แบบ plain text สำหรับ view mode — แทน input ด้วยข้อความอ่านอย่างเดียว
+ *
+ * value เด่น (text-foreground / medium) ให้เกิด lightness+size contrast เหนือ
+ * label ที่เงียบ (แบบ CN/PO/GRN) จัดแนวตั้งด้วย min-h-8 ให้สูงเท่าแถว input
+ * ค่าว่าง/undefined จะแสดง em dash "—" อัตโนมัติ ขนาด default text-sm ปรับผ่าน
+ * className ได้ (เช่น "text-xs" ให้ตรงกับ field ที่ใช้ text-xs)
+ *
+ * @param children - ค่าที่จะแสดง (ว่าง → "—")
+ * @param className - class เสริม (override ขนาด/สี/แนว)
+ * @returns JSX element ของข้อความ
+ * @example
+ * ```tsx
+ * <FieldPlainText>{form.getValues("invoice_no")}</FieldPlainText>
+ * ```
+ */
+function FieldPlainText({
+  children,
+  className,
+  ...props
+}: React.ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="field-plain-text"
+      className={cn(
+        "text-foreground inline-flex min-h-8 items-center text-xs font-medium",
+        className,
+      )}
+      {...props}
+    >
+      {children || "—"}
+    </span>
+  );
+}
+
 export {
   Field,
   FieldDatePicker,
   FieldInputGroup,
+  FieldPlainText,
   FieldLabel,
   FieldDescription,
   FieldError,

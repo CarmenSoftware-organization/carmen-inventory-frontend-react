@@ -57,7 +57,8 @@ export function cleanServerMessage(
   message: string | undefined,
   fallback: string,
 ): string {
-  if (!message) return fallback;
+  // guard: server อาจส่ง message เป็น non-string (object/array) → .replace crash
+  if (!message || typeof message !== "string") return fallback;
   // ตัด placeholder `{...}` ที่ค้าง พร้อม separator นำหน้า (": ", " - ", " ")
   const cleaned = message.replace(/\s*[:-]?\s*\{[^}]*\}/g, "").trim();
   return cleaned || fallback;

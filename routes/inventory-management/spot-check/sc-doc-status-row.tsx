@@ -1,4 +1,3 @@
-
 import { Receipt } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +42,7 @@ export function ScDocStatusRow({
         />
         <span
           className={cn(
-            "text-foreground truncate font-bold tracking-wider",
+            "text-foreground truncate font-semibold tracking-wider",
             isSm ? "text-[0.75rem]" : "text-sm",
           )}
         >

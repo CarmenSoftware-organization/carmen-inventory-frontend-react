@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/app-config/signature-candidates/${docType}`,
   APP_CONFIG_TEST_EMAIL: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/app-config/test-email`,
+  BUSINESS_UNIT: "/api/proxy/api/business-units",
   BUSINESS_UNIT_AVATAR: (id: string) =>
     `/api/proxy/api-system/business-units/${id}/avatar`,
   BUSINESS_UNIT_LOGO: (id: string) =>
@@ -367,6 +368,8 @@ export const API_ENDPOINTS = {
   STOCK_OUT: (buCode: string) => `/api/proxy/api/${buCode}/stock-outs`,
   STORE_REQUISITION: (buCode: string) =>
     `/api/proxy/api/${buCode}/store-requisitions`,
+  STORE_REQUISITION_PREVIOUS_STAGES: (buCode: string, srId: string) =>
+    `/api/proxy/api/${buCode}/store-requisitions/${srId}/previous-stages`,
   STORE_REQUISITIONS: "/api/proxy/api/store-requisitions",
   STORE_REQUISITION_COMMENT: (buCode: string, srId?: string) =>
     srId

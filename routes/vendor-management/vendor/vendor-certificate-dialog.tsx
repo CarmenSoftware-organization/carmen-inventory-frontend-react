@@ -144,7 +144,7 @@ export function VendorCertificateDialog({
     };
 
     if (isEdit) {
-      updateCert.mutate({ id: certificate.id, ...payload }, handlers);
+      updateCert.mutate({ id: certificate.id, doc_version: certificate.doc_version, ...payload }, handlers);
     } else {
       createCert.mutate({ vendor_id: vendorId, ...payload }, handlers);
     }
@@ -164,7 +164,7 @@ export function VendorCertificateDialog({
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <DialogHeader className="gap-0 px-5 py-4">
             <div className="flex items-center gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Award className="size-4.5" />
               </div>
               <DialogTitle className="text-base">

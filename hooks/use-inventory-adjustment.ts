@@ -120,6 +120,7 @@ export function useUpdateInventoryAdjustment() {
     CreateInventoryAdjustmentDto & {
       id: string;
       type: InventoryAdjustmentType;
+      doc_version?: number;
     }
   >({
     mutationFn: ({ id, type, ...data }, buCode) => {
@@ -144,12 +145,14 @@ export function useVoidInventoryAdjustment() {
     id: string;
     type: InventoryAdjustmentType;
     void_reason: string;
+    doc_version?: number;
   }>({
-    mutationFn: ({ id, type, void_reason }, buCode) => {
+    mutationFn: ({ id, type, void_reason, doc_version }, buCode) => {
       const endpoint = getEndpoint(type);
       return httpClient.patch(`${endpoint(buCode)}/${id}`, {
         doc_status: "voided",
         void_reason,
+        doc_version,
       });
     },
     invalidateKeys: [QUERY_KEYS.INVENTORY_ADJUSTMENTS],

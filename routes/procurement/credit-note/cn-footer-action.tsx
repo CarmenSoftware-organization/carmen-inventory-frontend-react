@@ -1,7 +1,8 @@
-
 import { useTranslations } from "use-intl";
 import { useWatch, type Control } from "react-hook-form";
 import { formatCurrency } from "@/lib/currency-utils";
+import { useCurrency } from "@/hooks/use-currency";
+import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import type { CnFormValues } from "./cn-form-schema";
 
 interface CnFooterActionProps {
@@ -11,7 +12,13 @@ interface CnFooterActionProps {
 export function CnFooterAction({ control }: CnFooterActionProps) {
   const tfl = useTranslations("field");
   const items = useWatch({ control, name: "items" });
+  // currency_code เก็บ id → resolve เป็นตัวอักษรสกุลเงินสำหรับต่อท้าย total
+  const currencyId = useWatch({ control, name: "currency_code" }) ?? "";
+  const { data: currencyData } = useCurrency({ perpage: -1 });
+  const currencyCode =
+    currencyData?.data?.find((c) => c.id === currencyId)?.code ?? "";
 
+  // CN ไม่มีส่วนลดต่อบรรทัด → net_amount = ยอดก่อนภาษี (subtotal)
   let totalNet = 0;
   let totalTax = 0;
   let grandTotal = 0;
@@ -23,29 +30,32 @@ export function CnFooterAction({ control }: CnFooterActionProps) {
   const summary = { totalNet, totalTax, grandTotal };
 
   return (
-    <div className="bg-background sticky bottom-0 z-20 mt-auto flex flex-wrap items-center justify-between gap-3 border-t p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] sm:flex-nowrap sm:gap-4">
-      <div className="flex items-center gap-4 text-xs tabular-nums">
-        <div className="flex items-center gap-1.5">
-          <span className="text-muted-foreground">{tfl("netAmount")}</span>
-          <span className="font-semibold">
-            {formatCurrency(summary.totalNet)}
-          </span>
-        </div>
-        <span className="text-border">|</span>
-        <div className="flex items-center gap-1.5">
-          <span className="text-muted-foreground">{tfl("tax")}</span>
-          <span className="font-semibold">
-            {formatCurrency(summary.totalTax)}
-          </span>
-        </div>
-        <span className="text-border">|</span>
-        <div className="flex items-center gap-1.5 text-sm">
-          <span className="font-semibold">{tfl("total")}</span>
-          <span className="font-semibold">
-            {formatCurrency(summary.grandTotal)}
-          </span>
-        </div>
-      </div>
-    </div>
+    <SummaryFooterBar
+      hasRecord={items.length > 0}
+      items={[
+        {
+          key: "price",
+          label: tfl("price"),
+          value: formatCurrency(summary.totalNet),
+        },
+        {
+          key: "subtotal",
+          label: tfl("subtotal"),
+          value: formatCurrency(summary.totalNet),
+        },
+        {
+          key: "tax",
+          label: tfl("tax"),
+          value: formatCurrency(summary.totalTax),
+        },
+        {
+          key: "grandTotal",
+          label: tfl("grandTotal"),
+          value: formatCurrency(summary.grandTotal),
+          emphasis: true,
+          suffix: currencyCode,
+        },
+      ]}
+    />
   );
 }

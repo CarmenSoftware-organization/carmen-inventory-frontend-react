@@ -8,9 +8,19 @@ export type StoreRequisitionStatus =
 export interface WorkflowHistoryEntry {
   user: { id: string; name: string };
   action: string;
-  datetime: Record<string, unknown>;
+  at: string;
   next_stage: string;
   current_stage?: string;
+}
+
+/** ประวัติ workflow ระดับรายการ (per-item) — backend ส่งมากับแต่ละ detail */
+export interface SrItemHistoryEntry {
+  seq: number;
+  name: string;
+  user: { id: string; name: string };
+  status: string;
+  message?: string | null;
+  at: string;
 }
 
 export interface StoreRequisitionDetail {
@@ -25,6 +35,7 @@ export interface StoreRequisitionDetail {
   approved_qty: number;
   issued_qty: number;
   current_stage_status: string;
+  history?: SrItemHistoryEntry[];
   info: Record<string, unknown>;
   dimension: string;
   doc_version: number;

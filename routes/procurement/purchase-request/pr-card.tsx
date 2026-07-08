@@ -1,4 +1,4 @@
-import { CalendarDays, Building2, User, Workflow, Check, X, Trash2 } from "lucide-react";
+import { CalendarDays, Building2, User, Workflow, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ export default function PrCard({
   const config = PR_STATUS_CONFIG[item.pr_status] ?? PR_STATUS_CONFIG.draft;
   const totalAmount = item.base_total_amount;
   const isDraft = item.pr_status === PR_STATUS.DRAFT;
-  const isPendingApproval = item.pr_status === PR_STATUS.SUBMITTED || item.pr_status === PR_STATUS.IN_PROGRESS;
+  const isPendingApproval = item.pr_status === PR_STATUS.IN_PROGRESS;
   const showApproveReject = isMyPending && isPendingApproval && (onApprove || onReject);
   const showDelete = isMyPending && isDraft && onDelete;
 
@@ -191,7 +191,7 @@ export default function PrCard({
                       onApprove(item);
                     }}
                   >
-                    <Check className="size-3" aria-hidden="true" />
+                    <CheckCircle2 className="size-3" aria-hidden="true" />
                     {tc("approve")}
                   </Button>
                 )}
@@ -205,7 +205,7 @@ export default function PrCard({
                       onReject(item);
                     }}
                   >
-                    <X className="size-3" aria-hidden="true" />
+                    <XCircle className="size-3" aria-hidden="true" />
                     {tc("reject")}
                   </Button>
                 )}

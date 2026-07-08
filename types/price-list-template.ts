@@ -29,6 +29,7 @@ export interface PriceListTemplate {
   vendor_instructions: string | null;
   currency: { id: string; code: string };
   products: PriceListTemplateProduct[];
+  doc_version?: number;
   created_at: string;
   updated_at: string;
 }

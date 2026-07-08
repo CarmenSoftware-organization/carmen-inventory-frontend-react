@@ -1,9 +1,18 @@
-
+import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { MessageCircle, Pencil, Save, Trash2, X } from "lucide-react";
+import { History, MessageCircle, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { PrintDocumentButton } from "@/components/print-document-button";
+import { WorkflowStep } from "@/components/share/workflow-step";
+import { SrWorkflowHistory } from "./sr-workflow-history";
 import {
   DocFormHeader,
   DocumentRibbon,
@@ -75,6 +84,12 @@ export function SrHeader({
   const isAdd = mode === "add";
   const isEdit = mode === "edit";
   const docStatus = storeRequisition?.doc_status;
+  // draft/add ยังไม่เข้า workflow — ซ่อน workflow step (เหมือน PR)
+  const isDraft = !docStatus || docStatus === "draft";
+
+  const workflowHistory = storeRequisition?.workflow_history;
+  const hasHistory = !!workflowHistory && workflowHistory.length > 0;
+  const [showHistory, setShowHistory] = useState(false);
 
   const role = storeRequisition?.role ?? STAGE_ROLE.CREATE;
   const canEdit =
@@ -171,6 +186,29 @@ export function SrHeader({
     </>
   );
 
+  const workflowHistorySheet = hasHistory ? (
+    <Sheet open={showHistory} onOpenChange={setShowHistory}>
+      <SheetContent
+        side="right"
+        className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
+      >
+        <SheetHeader>
+          <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
+          <SheetDescription className="sr-only">
+            {t("tabWorkflowHistory")}
+          </SheetDescription>
+        </SheetHeader>
+        <div className="px-4 pb-4">
+          <SrWorkflowHistory
+            history={workflowHistory}
+            requestorName={requesterName}
+            createdAt={storeRequisition?.created_at}
+          />
+        </div>
+      </SheetContent>
+    </Sheet>
+  ) : null;
+
   const departmentValue = (() => {
     if (isLoading) return "—";
     if (!departmentName) {
@@ -194,6 +232,11 @@ export function SrHeader({
 
   const ribbon = (
     <DocumentRibbon>
+      {!isDraft && storeRequisition?.workflow_name && (
+        <RibbonCell label={tfl("workflow")}>
+          {storeRequisition.workflow_name}
+        </RibbonCell>
+      )}
       <RibbonCell label={tfl("srDate")}>
         {srDate ? formatDate(srDate, dateFormat) : "—"}
       </RibbonCell>
@@ -209,16 +252,56 @@ export function SrHeader({
       ? `${tfl("version")} ${storeRequisition.doc_version}`
       : undefined;
 
+  // workflow stepper ใน header (เหมือน PR) — แสดงเส้นทาง prev → current → next
+  const workflowStepEl =
+    !isDraft && storeRequisition?.workflow_current_stage ? (
+      <WorkflowStep
+        previousStage={storeRequisition.workflow_previous_stage}
+        currentStage={storeRequisition.workflow_current_stage}
+        nextStage={
+          docStatus === "completed" ||
+          docStatus === "cancelled" ||
+          docStatus === "voided"
+            ? undefined
+            : storeRequisition.workflow_next_stage
+        }
+        terminalState={docStatus === "voided" ? "voided" : undefined}
+      />
+    ) : undefined;
+
+  // แตะที่ workflow step → เปิด history sheet (progressive disclosure, เหมือน PR)
+  const workflowStep =
+    workflowStepEl && hasHistory ? (
+      <button
+        type="button"
+        onClick={() => setShowHistory(true)}
+        title={t("tabWorkflowHistory")}
+        aria-label={t("tabWorkflowHistory")}
+        className="group hover:bg-muted/60 focus-visible:ring-ring flex flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+      >
+        {workflowStepEl}
+        <span className="text-muted-foreground/50 group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-[0.5625rem] tracking-wide transition-colors">
+          <History className="size-2.5" />
+          {t("viewHistoryHint")}
+        </span>
+      </button>
+    ) : (
+      workflowStepEl
+    );
+
   return (
-    <DocFormHeader
-      title={storeRequisition?.sr_no ?? t("title")}
-      subtitle={subtitle}
-      backLabel={tc("goBack")}
-      onBack={onBack}
-      badges={badges}
-      actions={actions}
-      infoLabel={t("documentInfo")}
-      ribbon={ribbon}
-    />
+    <>
+      <DocFormHeader
+        title={storeRequisition?.sr_no ?? t("title")}
+        subtitle={subtitle}
+        backLabel={tc("goBack")}
+        onBack={onBack}
+        badges={badges}
+        actions={actions}
+        ribbon={ribbon}
+        workflowStep={workflowStep}
+      />
+      {workflowHistorySheet}
+    </>
   );
 }

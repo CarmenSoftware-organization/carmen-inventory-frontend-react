@@ -1,4 +1,3 @@
-
 import { Download, Upload } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -71,7 +70,6 @@ export function EntryToolbar({
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full"
                 onClick={onImportClick}
                 disabled={importDisabled}
               >
@@ -86,7 +84,6 @@ export function EntryToolbar({
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full"
                 onClick={onExportClick}
                 disabled={exportDisabled}
               >

@@ -1,7 +1,5 @@
-import { useTranslations } from "use-intl";
-
-import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { DeliveryPoint } from "@/types/delivery-point";
 
 interface DeliveryPointCardProps {
@@ -23,8 +21,6 @@ export default function DeliveryPointCard({
   index,
   onEdit,
 }: DeliveryPointCardProps) {
-  const ts = useTranslations("status");
-
   return (
     <Card
       role="button"
@@ -50,13 +46,7 @@ export default function DeliveryPointCard({
           </CardTitle>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
     </Card>

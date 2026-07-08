@@ -1,4 +1,3 @@
-
 import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,14 +10,16 @@ const SKELETON_KEYS = Array.from({ length: 30 }, (_, i) => `skl-${i}`);
 
 type KpiTone = "primary" | "info" | "warning" | "success";
 
+// FLAT (DESIGN.md "avoid neon"): neutral icon box (bg-muted), the tone color
+// appears once — as the icon glyph (single signal), never as a tinted box.
 const KPI_TONE_MAP: Record<KpiTone, { iconBg: string; text: string }> = {
-  primary: { iconBg: "bg-primary/15 text-primary", text: "text-primary" },
-  info: { iconBg: "bg-info/15 text-info", text: "text-info" },
+  primary: { iconBg: "bg-muted text-primary", text: "text-primary" },
+  info: { iconBg: "bg-muted text-info", text: "text-info" },
   warning: {
-    iconBg: "bg-warning/15 text-warning-foreground",
+    iconBg: "bg-muted text-warning",
     text: "text-warning-foreground",
   },
-  success: { iconBg: "bg-success/15 text-success", text: "text-success" },
+  success: { iconBg: "bg-muted text-success", text: "text-success" },
 };
 
 export function KpiTile({
@@ -44,8 +45,7 @@ export function KpiTile({
       onClick={onClick}
       className={cn(
         "border-border/40 bg-card hover:bg-card group relative flex items-center gap-3 rounded-xl border p-2 transition-all",
-        active &&
-          "border-primary shadow-[0_0_0_3px_color-mix(in_oklch,var(--primary),transparent_88%)]",
+        active && "border-primary",
       )}
     >
       <div
@@ -62,7 +62,7 @@ export function KpiTile({
         </div>
         <div
           className={cn(
-            "text-lg font-bold tracking-tight tabular-nums",
+            "text-lg font-semibold tracking-tight tabular-nums",
             tones.text,
           )}
         >
@@ -107,7 +107,7 @@ export function StatusHero({
           {doneDisplay}
         </span>
         <span className="text-muted-foreground text-sm">/ {totalDisplay}</span>
-        <span className="bg-primary/10 text-primary ml-auto rounded-full px-1.5 py-0.5 text-[0.625rem] font-bold tabular-nums">
+        <span className="bg-primary/10 text-primary ml-auto rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums">
           {pct}%
         </span>
       </div>
@@ -322,9 +322,10 @@ export function LocationAvatar({
   return (
     <div className="relative shrink-0">
       <div
-        className="relative size-9 overflow-hidden rounded-lg shadow-[inset_0_0_0_0.0625rem_rgba(0,0,0,0.06)]"
+        className="relative size-9 overflow-hidden rounded-lg shadow-[inset_0_0_0_0.0625rem_color-mix(in_oklch,var(--warning),black_25%)]"
         style={{
-          background: "linear-gradient(135deg, #e8d9a0 0%, #c8b97f 100%)",
+          background:
+            "linear-gradient(135deg, color-mix(in oklch, var(--warning), white 52%) 0%, color-mix(in oklch, var(--warning), white 28%) 100%)",
         }}
       >
         <svg
@@ -337,7 +338,10 @@ export function LocationAvatar({
         </svg>
         <div
           className="absolute inset-0 flex items-center justify-center font-serif text-base font-semibold"
-          style={{ color: "#1a1814", letterSpacing: "-0.02em" }}
+          style={{
+            color: "color-mix(in oklch, var(--warning), black 72%)",
+            letterSpacing: "-0.02em",
+          }}
         >
           {letter}
         </div>
@@ -361,7 +365,7 @@ export function LocationHeading({
   readonly name: string;
   readonly code: string;
   readonly countBadge: {
-    readonly variant: "outline" | "secondary";
+    readonly className: string;
     readonly label: string;
   };
 }) {
@@ -379,11 +383,7 @@ export function LocationHeading({
       >
         {code}
       </Link>
-      <Badge
-        variant={countBadge.variant}
-        size="xs"
-        className="text-[0.5625rem] tracking-widest uppercase"
-      >
+      <Badge size="xs" className={countBadge.className}>
         {countBadge.label}
       </Badge>
     </div>
@@ -442,33 +442,6 @@ export function LocationCardShell({
     <div className="border-border/60 bg-card hover:border-primary/40 relative space-y-3 rounded-xl border p-3 transition-colors">
       {children}
     </div>
-  );
-}
-
-export function InvPageHeader({
-  icon: Icon,
-  eyebrow,
-  title,
-  desc,
-}: {
-  readonly icon: React.ComponentType<{ className?: string }>;
-  readonly eyebrow: string;
-  readonly title: string;
-  readonly desc: string;
-}) {
-  return (
-    <>
-      <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-bold tracking-wider uppercase">
-        <Icon className="size-2.5" />
-        {eyebrow}
-      </span>
-      <h1 className="mt-2 text-2xl leading-tight font-semibold tracking-tight md:text-[1.75rem]">
-        {title}
-      </h1>
-      <p className="text-foreground/80 mt-1 max-w-xl text-xs leading-relaxed">
-        {desc}
-      </p>
-    </>
   );
 }
 

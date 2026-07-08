@@ -1,10 +1,11 @@
-import type { ColumnDef } from "@tanstack/react-table";
+import type { Column, ColumnDef } from "@tanstack/react-table";
+import { useTranslations } from "use-intl";
 import {
   DataGridTableRowSelect,
   DataGridTableRowSelectAll,
 } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Permission } from "@/constant/permissions";
@@ -82,11 +83,23 @@ export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
   };
 }
 
+/** Status column header — แปลหัวคอลัมน์ผ่าน i18n เหมือน column อื่นในตาราง */
+function StatusColumnHeader<T>({ column }: { column: Column<T, unknown> }) {
+  const tfl = useTranslations("field");
+  return (
+    <DataGridColumnHeader
+      column={column}
+      title={tfl("status")}
+      className="justify-center"
+    />
+  );
+}
+
 /**
  * สร้าง ColumnDef ของ status badge
  *
- * อ่านค่า `is_active` แล้ว render `Badge` สี success/destructive พร้อม
- * label "Active" / "Inactive" header รองรับ sort (ใช้ `DataGridColumnHeader`)
+ * อ่านค่า `is_active` แล้ว render `Badge` สี success/secondary (ตรงกับ card)
+ * พร้อม label "ใช้งาน"/"ไม่ใช้งาน" จาก i18n header รองรับ sort + แปล
  * จัดความกว้าง 100px align center
  *
  * @typeParam T - ประเภทข้อมูลแถว
@@ -99,20 +112,9 @@ export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
 export function statusColumn<T>(): ColumnDef<T> {
   return {
     accessorKey: "is_active",
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        column={column}
-        title="Status"
-        className="justify-center"
-      />
-    ),
+    header: ({ column }) => <StatusColumnHeader<T> column={column} />,
     cell: ({ row }) => (
-      <Badge
-        size="lg"
-        variant={row.getValue("is_active") ? "success" : "destructive"}
-      >
-        {row.getValue("is_active") ? "Active" : "Inactive"}
-      </Badge>
+      <StatusBadge active={Boolean(row.getValue("is_active"))} />
     ),
     size: 100,
     meta: {

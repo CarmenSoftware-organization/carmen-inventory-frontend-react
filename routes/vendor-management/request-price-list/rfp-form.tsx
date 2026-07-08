@@ -216,7 +216,7 @@ export function RequestPriceListForm({
 
     if (isEdit && requestPriceList) {
       updateRfp.mutate(
-        { id: requestPriceList.id, ...payload },
+        { id: requestPriceList.id, doc_version: requestPriceList.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

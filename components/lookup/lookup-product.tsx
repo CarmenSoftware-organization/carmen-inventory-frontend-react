@@ -16,6 +16,8 @@ interface LookupProductProps {
   readonly className?: string;
   readonly excludeIds?: string[];
   readonly error?: string;
+  /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม item ใหม่) */
+  readonly defaultOpen?: boolean;
 }
 
 /**
@@ -46,6 +48,7 @@ export function LookupProduct({
   className,
   excludeIds,
   error,
+  defaultOpen,
 }: LookupProductProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -59,7 +62,7 @@ export function LookupProduct({
       useListHook: useProduct,
       search,
       perpage: 30,
-      enabled: hasOpened || !!value,
+      enabled: hasOpened || !!value || !!defaultOpen,
       filter: (p: Product) => {
         if (p.product_status_type !== "active") return false;
         if (excludedSet && excludedSet.has(p.id)) return false;
@@ -71,6 +74,7 @@ export function LookupProduct({
     <LookupCombobox
       value={value}
       onValueChange={onValueChange}
+      defaultOpen={defaultOpen}
       onOpenChange={(open) => {
         if (open) setHasOpened(true);
       }}

@@ -1,5 +1,6 @@
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Card,
   CardHeader,
@@ -22,7 +23,6 @@ export default function AdjustmentTypeCard({
   onEdit,
 }: AdjustmentTypeCardProps) {
   const tfl = useTranslations("field");
-  const ts = useTranslations("status");
 
   return (
     <Card
@@ -61,13 +61,7 @@ export default function AdjustmentTypeCard({
               ? tfl("stockIn")
               : tfl("stockOut")}
           </Badge>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
 

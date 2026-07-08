@@ -250,7 +250,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
     }
 
     saveSc.mutate(
-      { items: saveItems },
+      { doc_version: spotCheck?.doc_version, items: saveItems },
       {
         onSuccess: () => {
           toast.success(t("saveSuccess"));
@@ -269,7 +269,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
     }
 
     reviewSc.mutate(
-      { items: submitItems },
+      { doc_version: spotCheck?.doc_version, items: submitItems },
       {
         onSuccess: (res) => {
           toast.success(t("submitReviewSuccess"));

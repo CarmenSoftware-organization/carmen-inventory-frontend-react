@@ -61,8 +61,8 @@ export const SubTiles: Record<string, TileRenderer> = {
     <>
       <TileBase palette={palette} />
       <rect x="14" y="9" width="12" height="9" rx="1.4" style={{ fill: palette.accent }} />
-      <rect x="8" y="20" width="11" height="11" rx="1.4" fill="#fff" />
-      <rect x="21" y="20" width="11" height="11" rx="1.4" fill="#fff" />
+      <rect x="8" y="20" width="11" height="11" rx="1.4" fill="currentColor" />
+      <rect x="21" y="20" width="11" height="11" rx="1.4" fill="currentColor" />
       <rect x="14" y="12.5" width="12" height="0.9" style={{ fill: palette.shadow }} opacity="0.3" />
     </>
   ),
@@ -81,9 +81,9 @@ export const SubTiles: Record<string, TileRenderer> = {
   myApproval: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="8" y="21" width="24" height="10" rx="1.6" fill="#fff" />
+      <rect x="8" y="21" width="24" height="10" rx="1.6" fill="currentColor" />
       <path d="M 8 21 L 12 16 H 28 L 32 21" style={{ fill: palette.accent }} />
-      <rect x="14" y="9" width="12" height="13" rx="1.2" fill="#fff" />
+      <rect x="14" y="9" width="12" height="13" rx="1.2" fill="currentColor" />
       <path d="M 16 13 L 18 15 L 23 11" style={{ stroke: palette.shadow }} strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
@@ -114,7 +114,7 @@ export const SubTiles: Record<string, TileRenderer> = {
     <>
       <TileBase palette={palette} />
       <path d="M 8 11 H 16 L 18 13 H 30 V 27 H 8 Z" style={{ fill: palette.accent }} />
-      <path d="M 8 16 H 18 L 20 18 H 32 V 31 H 8 Z" fill="#fff" />
+      <path d="M 8 16 H 18 L 20 18 H 32 V 31 H 8 Z" fill="currentColor" />
       <rect x="11" y="22" width="14" height="1.4" rx="0.7" style={{ fill: palette.base }} opacity="0.35" />
       <rect x="11" y="25" width="10" height="1.4" rx="0.7" style={{ fill: palette.base }} opacity="0.35" />
     </>
@@ -130,7 +130,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   vendor: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="12" y="11" width="16" height="22" rx="1.5" fill="#fff" />
+      <rect x="12" y="11" width="16" height="22" rx="1.5" fill="currentColor" />
       <WindowGrid fill={palette.base} x={14.5} y={14.5} cols={3} rows={2} />
       <rect x="18" y="25" width="4" height="8" style={{ fill: palette.accent }} />
     </>
@@ -176,7 +176,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   wastageReporting: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <path d="M 20 9 L 32 30 H 8 Z" fill="#fff" />
+      <path d="M 20 9 L 32 30 H 8 Z" fill="currentColor" />
       <rect x="19" y="16" width="2" height="7" rx="1" style={{ fill: palette.base }} />
       <circle cx="20" cy="26" r="1.3" style={{ fill: palette.base }} />
     </>
@@ -237,7 +237,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   operationRecipe: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <path d="M 10 9 H 20 V 32 H 11 Q 10 32 10 31 Z" fill="#fff" />
+      <path d="M 10 9 H 20 V 32 H 11 Q 10 32 10 31 Z" fill="currentColor" />
       <path d="M 20 9 H 30 Q 30 9 30 10 V 31 Q 30 32 29 32 H 20 Z" style={{ fill: palette.accent }} />
       <rect x="13" y="14" width="5" height="1.2" rx="0.6" style={{ fill: palette.base }} opacity="0.35" />
       <rect x="13" y="17" width="5" height="1.2" rx="0.6" style={{ fill: palette.base }} opacity="0.35" />
@@ -250,7 +250,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   operationCategory: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <path d="M 8 16 H 18 L 20 18 H 32 V 31 H 8 Z" fill="#fff" />
+      <path d="M 8 16 H 18 L 20 18 H 32 V 31 H 8 Z" fill="currentColor" />
       <rect x="14" y="20" width="1.5" height="8" rx="0.6" style={{ fill: palette.base }} opacity="0.7" />
       <rect x="22" y="20" width="1.6" height="8" rx="0.6" style={{ fill: palette.base }} opacity="0.7" />
       <path d="M 21 20 Q 24 20 24 23 H 22 Z" style={{ fill: palette.base }} opacity="0.7" />
@@ -259,7 +259,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   operationCuisine: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <circle cx="20" cy="22" r="11" fill="#fff" />
+      <circle cx="20" cy="22" r="11" fill="currentColor" />
       <circle cx="20" cy="22" r="7" fill="none" style={{ stroke: palette.base }} strokeWidth="0.8" opacity="0.3" />
       <rect x="12" y="11" width="1.6" height="9" rx="0.6" style={{ fill: palette.shadow }} transform="rotate(-25 12.8 15.5)" />
       <rect x="26" y="11" width="1.6" height="9" rx="0.6" style={{ fill: palette.shadow }} transform="rotate(25 26.8 15.5)" />
@@ -268,14 +268,14 @@ export const SubTiles: Record<string, TileRenderer> = {
   operationEquipment: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <path d="M 25 8 A 6 6 0 1 0 30 16 L 32 18 L 30 20 L 28 18 L 26 20 L 24 18 L 26 16 A 6 6 0 0 0 25 8 Z" fill="#fff" />
+      <path d="M 25 8 A 6 6 0 1 0 30 16 L 32 18 L 30 20 L 28 18 L 26 20 L 24 18 L 26 16 A 6 6 0 0 0 25 8 Z" fill="currentColor" />
       <path d="M 11 24 L 23 12 L 27 16 L 15 28 Q 13 30 11 28 Z" style={{ fill: palette.accent }} />
     </>
   ),
   operationEquipmentCategory: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <path d="M 8 16 H 18 L 20 18 H 32 V 31 H 8 Z" fill="#fff" />
+      <path d="M 8 16 H 18 L 20 18 H 32 V 31 H 8 Z" fill="currentColor" />
       <path d="M 23 21 A 3 3 0 1 0 25 25 L 27 27 L 25 29 L 23 27 L 21 29 L 19 27 L 21 25 A 3 3 0 0 0 23 21 Z" style={{ fill: palette.base }} opacity="0.7" />
       <rect x="11" y="22" width="6" height="1.4" rx="0.7" style={{ fill: palette.base }} opacity="0.35" />
       <rect x="11" y="25" width="5" height="1.4" rx="0.7" style={{ fill: palette.base }} opacity="0.35" />
@@ -305,7 +305,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   reportHistory: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <circle cx="20" cy="22" r="11" fill="#fff" />
+      <circle cx="20" cy="22" r="11" fill="currentColor" />
       <circle cx="20" cy="22" r="11" fill="none" style={{ stroke: palette.accent }} strokeWidth="1" opacity="0.5" />
       <path d="M 20 14 V 22 L 25.5 25" style={{ stroke: palette.base }} strokeWidth="2" strokeLinecap="round" fill="none" />
     </>
@@ -323,7 +323,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   department: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="9" y="14" width="10" height="17" rx="1.4" fill="#fff" />
+      <rect x="9" y="14" width="10" height="17" rx="1.4" fill="currentColor" />
       <rect x="21" y="10" width="11" height="21" rx="1.4" style={{ fill: palette.accent }} />
       <WindowGrid fill={palette.base} x={11.5} y={17} cols={2} rows={2} colGap={3.5} rowGap={4} size={2} opacity={0.5} />
       <WindowGrid fill={palette.shadow} x={23.5} y={14} cols={2} rows={2} colGap={3.5} rowGap={4} size={2} opacity={0.5} />
@@ -343,7 +343,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   unit: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="8" y="17" width="24" height="9" rx="1.6" fill="#fff" />
+      <rect x="8" y="17" width="24" height="9" rx="1.6" fill="currentColor" />
       <path d="M 12 17 V 21 M 16 17 V 23 M 20 17 V 21 M 24 17 V 23 M 28 17 V 21" style={{ stroke: palette.base }} strokeWidth="1" opacity="0.55" />
       <rect x="8" y="17" width="24" height="2" style={{ fill: palette.accent }} />
     </>
@@ -351,22 +351,22 @@ export const SubTiles: Record<string, TileRenderer> = {
   adjustmentType: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="9" y="13" width="22" height="2" rx="1" fill="#fff" opacity="0.7" />
-      <circle cx="16" cy="14" r="2.5" fill="#fff" />
+      <rect x="9" y="13" width="22" height="2" rx="1" fill="currentColor" opacity="0.7" />
+      <circle cx="16" cy="14" r="2.5" fill="currentColor" />
       <circle cx="16" cy="14" r="1.2" style={{ fill: palette.accent }} />
-      <rect x="9" y="19" width="22" height="2" rx="1" fill="#fff" opacity="0.7" />
-      <circle cx="24" cy="20" r="2.5" fill="#fff" />
+      <rect x="9" y="19" width="22" height="2" rx="1" fill="currentColor" opacity="0.7" />
+      <circle cx="24" cy="20" r="2.5" fill="currentColor" />
       <circle cx="24" cy="20" r="1.2" style={{ fill: palette.accent }} />
-      <rect x="9" y="25" width="22" height="2" rx="1" fill="#fff" opacity="0.7" />
-      <circle cx="19" cy="26" r="2.5" fill="#fff" />
+      <rect x="9" y="25" width="22" height="2" rx="1" fill="currentColor" opacity="0.7" />
+      <circle cx="19" cy="26" r="2.5" fill="currentColor" />
       <circle cx="19" cy="26" r="1.2" style={{ fill: palette.accent }} />
     </>
   ),
   businessType: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="8" y="15" width="24" height="17" rx="1.6" fill="#fff" />
-      <path d="M 15 15 V 12 Q 15 11 16 11 H 24 Q 25 11 25 12 V 15" fill="none" stroke="#fff" strokeWidth="2.2" />
+      <rect x="8" y="15" width="24" height="17" rx="1.6" fill="currentColor" />
+      <path d="M 15 15 V 12 Q 15 11 16 11 H 24 Q 25 11 25 12 V 15" fill="none" stroke="currentColor" strokeWidth="2.2" />
       <rect x="8" y="20" width="24" height="2" style={{ fill: palette.accent }} />
       <rect x="18" y="19" width="4" height="4" rx="0.5" style={{ fill: palette.shadow }} />
     </>
@@ -374,7 +374,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   creditNoteReason: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <path d="M 9 12 H 31 Q 32 12 32 13 V 25 Q 32 26 31 26 H 22 L 17 31 V 26 H 9 Q 8 26 8 25 V 13 Q 8 12 9 12 Z" fill="#fff" />
+      <path d="M 9 12 H 31 Q 32 12 32 13 V 25 Q 32 26 31 26 H 22 L 17 31 V 26 H 9 Q 8 26 8 25 V 13 Q 8 12 9 12 Z" fill="currentColor" />
       <rect x="13" y="17" width="14" height="1.4" rx="0.7" style={{ fill: palette.base }} opacity="0.35" />
       <rect x="13" y="20.4" width="10" height="1.4" rx="0.7" style={{ fill: palette.base }} opacity="0.35" />
     </>
@@ -382,7 +382,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   currency: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <circle cx="20" cy="20" r="11" fill="#fff" />
+      <circle cx="20" cy="20" r="11" fill="currentColor" />
       <circle cx="20" cy="20" r="8.5" fill="none" style={{ stroke: palette.accent }} strokeWidth="1" opacity="0.6" />
       <Glyph x={20} y={25} size={13} fill={palette.base} anchor="middle">$</Glyph>
     </>
@@ -390,7 +390,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   exchangeRate: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <circle cx="14" cy="16" r="6" fill="#fff" />
+      <circle cx="14" cy="16" r="6" fill="currentColor" />
       <Glyph x={14} y={19} size={8} fill={palette.base} anchor="middle">$</Glyph>
       <circle cx="26" cy="26" r="6" style={{ fill: palette.accent }} />
       <Glyph x={26} y={29} size={8} fill={palette.shadow} anchor="middle">€</Glyph>
@@ -406,7 +406,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   creditTerm: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <circle cx="20" cy="20" r="11" fill="#fff" />
+      <circle cx="20" cy="20" r="11" fill="currentColor" />
       <Glyph x={20} y={24} size={11} fill={palette.base} anchor="middle" opacity={0.85}>$</Glyph>
       <path d="M 20 12 V 20 L 26 23" style={{ stroke: palette.accent }} strokeWidth="2" strokeLinecap="round" fill="none" />
     </>
@@ -416,9 +416,9 @@ export const SubTiles: Record<string, TileRenderer> = {
       <TileBase palette={palette} />
       <circle cx="15" cy="18" r="5" style={{ fill: palette.accent }} />
       <Glyph x={15} y={21} size={6.5} fill={palette.shadow} anchor="middle">$</Glyph>
-      <circle cx="25" cy="24" r="5" fill="#fff" />
+      <circle cx="25" cy="24" r="5" fill="currentColor" />
       <Glyph x={25} y={27} size={6.5} fill={palette.base} anchor="middle">$</Glyph>
-      <path d="M 30 14 V 18 M 28 16 H 32" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M 30 14 V 18 M 28 16 H 32" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </>
   ),
   certification: ({ palette }) => (
@@ -443,7 +443,7 @@ export const SubTiles: Record<string, TileRenderer> = {
         opacity="0.55"
       />
       {/* Medal body (white) */}
-      <circle cx="20" cy="17" r="9" fill="#fff" />
+      <circle cx="20" cy="17" r="9" fill="currentColor" />
       {/* Scalloped ring */}
       <circle
         cx="20"
@@ -460,7 +460,7 @@ export const SubTiles: Record<string, TileRenderer> = {
       {/* 5-point star */}
       <path
         d="M 20 13.5 L 21 16 L 23.7 16.2 L 21.6 17.9 L 22.3 20.5 L 20 19 L 17.7 20.5 L 18.4 17.9 L 16.3 16.2 L 19 16 Z"
-        fill="#fff"
+        fill="currentColor"
       />
     </>
   ),
@@ -475,7 +475,7 @@ export const SubTiles: Record<string, TileRenderer> = {
       {/* Main vein */}
       <path
         d="M 12 30 Q 18 22 28 13"
-        stroke="#fff"
+        stroke="currentColor"
         strokeWidth="1.5"
         fill="none"
         strokeLinecap="round"
@@ -484,7 +484,7 @@ export const SubTiles: Record<string, TileRenderer> = {
       {/* Side veins */}
       <path
         d="M 17 24 L 20 21 M 20 27 L 23 24"
-        stroke="#fff"
+        stroke="currentColor"
         strokeWidth="0.9"
         fill="none"
         strokeLinecap="round"
@@ -509,10 +509,10 @@ export const SubTiles: Record<string, TileRenderer> = {
     <>
       <TileBase palette={palette} />
       <circle cx="11" cy="13" r="3.6" style={{ fill: palette.accent }} />
-      <circle cx="29" cy="13" r="3.6" fill="#fff" />
-      <circle cx="20" cy="28" r="3.6" fill="#fff" />
-      <path d="M 14 14 Q 18 20 17.5 25" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      <path d="M 26 14 Q 22 20 22.5 25" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <circle cx="29" cy="13" r="3.6" fill="currentColor" />
+      <circle cx="20" cy="28" r="3.6" fill="currentColor" />
+      <path d="M 14 14 Q 18 20 17.5 25" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <path d="M 26 14 Q 22 20 22.5 25" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
     </>
   ),
   role: ({ palette }) => (
@@ -524,8 +524,8 @@ export const SubTiles: Record<string, TileRenderer> = {
   user: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <circle cx="20" cy="16" r="5.5" fill="#fff" />
-      <path d="M 9 33 Q 9 23 20 23 Q 31 23 31 33 Z" fill="#fff" />
+      <circle cx="20" cy="16" r="5.5" fill="currentColor" />
+      <path d="M 9 33 Q 9 23 20 23 Q 31 23 31 33 Z" fill="currentColor" />
       <circle cx="27" cy="27" r="4" style={{ fill: palette.accent }} />
       <path d="M 25.2 27 L 26.5 28.3 L 28.8 25.8" style={{ stroke: palette.shadow }} strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </>
@@ -551,8 +551,8 @@ export const SubTiles: Record<string, TileRenderer> = {
   userActivity: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <circle cx="14" cy="14" r="4.5" fill="#fff" />
-      <path d="M 7 26 Q 7 19 14 19 Q 18 19 20 22" fill="#fff" />
+      <circle cx="14" cy="14" r="4.5" fill="currentColor" />
+      <path d="M 7 26 Q 7 19 14 19 Q 18 19 20 22" fill="currentColor" />
       <rect x="20" y="20" width="13" height="11" rx="1.4" style={{ fill: palette.accent }} />
       <path d="M 22 25 L 25 22 L 28 27 L 31 23" style={{ stroke: palette.shadow }} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </>
@@ -560,14 +560,14 @@ export const SubTiles: Record<string, TileRenderer> = {
   activityLog: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="8" y="14" width="24" height="14" rx="1.6" fill="#fff" />
+      <rect x="8" y="14" width="24" height="14" rx="1.6" fill="currentColor" />
       <path d="M 9 22 L 13 22 L 15 17 L 18 26 L 21 19 L 23 22 L 31 22" style={{ stroke: palette.accent }} strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
   configEmail: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="8" y="13" width="24" height="16" rx="1.6" fill="#fff" />
+      <rect x="8" y="13" width="24" height="16" rx="1.6" fill="currentColor" />
       <path d="M 8 14 L 20 23 L 32 14" fill="none" style={{ stroke: palette.accent }} strokeWidth="1.8" strokeLinejoin="round" />
     </>
   ),
@@ -577,7 +577,7 @@ export const SubTiles: Record<string, TileRenderer> = {
       {/* Handle knob */}
       <circle cx="20" cy="8" r="1.8" style={{ fill: palette.accent }} />
       {/* Bell body */}
-      <path d="M 20 9.5 C 14.5 9.5 13 12.8 13 17.2 C 13 21.8 10.5 25.5 10.5 25.5 H 29.5 C 29.5 25.5 27 21.8 27 17.2 C 27 12.8 25.5 9.5 20 9.5 Z" fill="#fff" />
+      <path d="M 20 9.5 C 14.5 9.5 13 12.8 13 17.2 C 13 21.8 10.5 25.5 10.5 25.5 H 29.5 C 29.5 25.5 27 21.8 27 17.2 C 27 12.8 25.5 9.5 20 9.5 Z" fill="currentColor" />
       {/* Rim shadow */}
       <rect x="10.5" y="23.8" width="19" height="1.7" rx="0.85" style={{ fill: palette.shadow }} opacity="0.18" />
       {/* Clapper */}
@@ -587,7 +587,7 @@ export const SubTiles: Record<string, TileRenderer> = {
   queryDataset: ({ palette }) => (
     <>
       <TileBase palette={palette} />
-      <rect x="8" y="11" width="24" height="20" rx="1.6" fill="#fff" />
+      <rect x="8" y="11" width="24" height="20" rx="1.6" fill="currentColor" />
       <rect x="8" y="11" width="24" height="4" style={{ fill: palette.accent }} />
       <path d="M 16 15 V 31 M 24 15 V 31" style={{ stroke: palette.base }} strokeWidth="0.8" opacity="0.35" />
       <path d="M 8 21 H 32 M 8 27 H 32" style={{ stroke: palette.base }} strokeWidth="0.8" opacity="0.35" />
@@ -597,14 +597,14 @@ export const SubTiles: Record<string, TileRenderer> = {
     <>
       <TileBase palette={palette} />
       {/* Mini dashboard grid — top half */}
-      <rect x="9" y="9" width="9" height="5" rx="1.2" fill="#fff" />
+      <rect x="9" y="9" width="9" height="5" rx="1.2" fill="currentColor" />
       <rect x="20" y="9" width="11" height="5" rx="1.2" style={{ fill: palette.accent }} />
       <rect x="9" y="15" width="9" height="5" rx="1.2" style={{ fill: palette.accent }} />
-      <rect x="20" y="15" width="11" height="5" rx="1.2" fill="#fff" />
+      <rect x="20" y="15" width="11" height="5" rx="1.2" fill="currentColor" />
       {/* Database cylinder — bottom half */}
       <ellipse cx="20" cy="23" rx="10" ry="2.2" style={{ fill: palette.accent }} />
-      <rect x="10" y="23" width="20" height="7" fill="#fff" />
-      <ellipse cx="20" cy="30" rx="10" ry="2.2" fill="#fff" />
+      <rect x="10" y="23" width="20" height="7" fill="currentColor" />
+      <ellipse cx="20" cy="30" rx="10" ry="2.2" fill="currentColor" />
       <ellipse cx="20" cy="26.5" rx="10" ry="2.2" fill="none" style={{ stroke: palette.base }} strokeWidth="0.7" opacity="0.4" />
       <path d="M 10 23 V 30 M 30 23 V 30" style={{ stroke: palette.base }} strokeWidth="0.6" opacity="0.3" fill="none" />
     </>

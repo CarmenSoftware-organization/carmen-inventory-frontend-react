@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Calculator, Plus, Minus, Trash2 } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -79,7 +78,8 @@ export function CalculatorDialog({
   }, [units, rows, baseUnitName]);
 
   const unitMap = new Map<string, { name: string; conversion: number }>();
-  for (const u of units) unitMap.set(u.id, { name: u.name, conversion: u.conversion });
+  for (const u of units)
+    unitMap.set(u.id, { name: u.name, conversion: u.conversion });
 
   const addRow = () => {
     const baseUnit = units.find(
@@ -137,7 +137,7 @@ export function CalculatorDialog({
         <div className="p-5">
           <DialogHeader className="space-y-2">
             <div className="flex items-start gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Calculator className="size-4.5" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">
@@ -215,7 +215,7 @@ export function CalculatorDialog({
                   >
                     <SelectTrigger
                       className={cn(
-                        "border-border/40 bg-card h-8 w-20 shrink-0 rounded-full text-[0.6875rem] font-semibold tracking-wide shadow-none",
+                        "border-border/40 bg-card h-8 w-20 shrink-0 rounded-md text-[0.6875rem] font-semibold tracking-wide shadow-none",
                         isBaseUnit &&
                           "border-primary/50 bg-primary/10 text-primary",
                       )}
@@ -291,17 +291,11 @@ export function CalculatorDialog({
           <Button
             variant="outline"
             size="sm"
-            className="rounded-full"
             onClick={() => onOpenChange(false)}
           >
             {tc("cancel")}
           </Button>
-          <Button
-            size="sm"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
-            onClick={handleConfirm}
-            disabled={total <= 0}
-          >
+          <Button size="sm" onClick={handleConfirm} disabled={total <= 0}>
             {t("useThisTotal")}
           </Button>
         </DialogFooter>

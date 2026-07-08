@@ -30,10 +30,7 @@ export const round2 = (n: number): number =>
  * formatCurrency(1234.5678, 4); // "1,234.5678"
  * ```
  */
-export function formatCurrency(
-  value: number,
-  decimals: number = 2,
-): string {
+export function formatCurrency(value: number, decimals: number = 2): string {
   return value.toLocaleString(undefined, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
@@ -60,7 +57,8 @@ export function formatAmount(
 ): string {
   if (amountFormat) {
     // Use minimumIntegerDigits: 1 when value < 10 to avoid "00.00" for zero
-    const minIntDigits = Math.abs(value) < 10 ? 1 : amountFormat.minimumIntegerDigits;
+    const minIntDigits =
+      Math.abs(value) < 10 ? 1 : amountFormat.minimumIntegerDigits;
     return value.toLocaleString(amountFormat.locales, {
       minimumIntegerDigits: minIntDigits,
       minimumFractionDigits: 2,
@@ -73,21 +71,6 @@ export function formatAmount(
 /** จำนวนทศนิยมมาตรฐานสำหรับ exchange rate ทั้งระบบ */
 export const EXCHANGE_RATE_DECIMALS = 5;
 
-/**
- * จัดรูปแบบอัตราแลกเปลี่ยนเป็นจำนวนทศนิยม 5 ตำแหน่งพร้อม currency code ต่อท้าย
- *
- * ค่า rate ที่ส่งเข้ามาต้องเป็น "X default per 1 currency" ที่เก็บใน DB อยู่แล้ว
- * ไม่ต้อง invert ใดๆ ภายในฟังก์ชัน
- *
- * @param rate - อัตราแลกเปลี่ยน (default per 1 currency)
- * @param currencyCode - รหัสสกุลเงิน default ที่จะต่อท้าย
- * @returns string ที่จัดรูปแบบแล้ว หรือ "-" หากไม่มี rate
- * @example
- * ```ts
- * formatExchangeRate(35.71428, "THB"); // "35.71428 THB"
- * formatExchangeRate(null); // "-"
- * ```
- */
 export function formatExchangeRate(
   rate: number | null | undefined,
   currencyCode?: string | null,

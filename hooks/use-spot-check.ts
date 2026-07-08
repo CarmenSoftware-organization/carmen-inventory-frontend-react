@@ -29,7 +29,10 @@ const crud = createConfigCrud<SpotCheck, CreateSpotCheckDto>({
  */
 export function useSpotCheck(
   params?: ParamsDto,
-  options?: Omit<UseQueryOptions<PaginatedResponse<SpotCheck>>, "queryKey" | "queryFn">,
+  options?: Omit<
+    UseQueryOptions<PaginatedResponse<SpotCheck>>,
+    "queryKey" | "queryFn"
+  >,
 ) {
   return crud.useList(params, options);
 }
@@ -132,16 +135,17 @@ export function useSpotCheckReview(id: string | undefined) {
 
 /**
  * Hook submit final ของ Spot Check (workflow approval)
- * PATCH /api/{buCode}/spot-check/{id}/submit (ไม่มี body)
+ * PATCH /api/{buCode}/spot-check/{id}/submit พร้อม doc_version
+ * (optimistic concurrency)
  *
  * @param spotCheckId - รหัส spot check
  */
 export function useSubmitSpotCheck(spotCheckId: string) {
-  return useApiMutation<Record<string, never>>({
-    mutationFn: (_data, buCode) =>
+  return useApiMutation<{ doc_version?: number }>({
+    mutationFn: (data, buCode) =>
       httpClient.patch(
         API_ENDPOINTS.SPOT_CHECK_SUBMIT(buCode, spotCheckId),
-        {},
+        data,
       ),
     invalidateKeys: [QUERY_KEYS.SPOT_CHECKS, QUERY_KEYS.SPOT_CHECK_CURRENT],
     errorMessage: "Failed to submit spot check",

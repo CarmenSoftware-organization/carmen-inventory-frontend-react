@@ -1,18 +1,18 @@
-
 import { useState, useEffect } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { useTranslations } from "use-intl";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { lazy, Suspense } from "react";
-import type {
-  PurchaseRequest,
-  PurchaseRequestTemplate,
+import {
+  PR_STATUS,
+  type PurchaseRequest,
+  type PurchaseRequestTemplate,
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 import { PrGeneralFields } from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
 import { PrFormActions } from "./pr-form-actions";
@@ -29,11 +29,6 @@ import { useProfile } from "@/hooks/use-profile";
 import { usePrPreviousStages } from "@/hooks/use-purchase-request";
 import { formatDate } from "@/lib/date-utils";
 import { PrHeader } from "./pr-header";
-
-// แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
-const PrWorkflowHistory = lazy(() =>
-  import("./workflow/pr-workflow-history").then((mod) => ({ default: mod.PrWorkflowHistory })),
-);
 
 interface PurchaseRequestFormProps {
   readonly purchaseRequest?: PurchaseRequest;
@@ -114,7 +109,26 @@ export function PurchaseRequestForm({
     role,
   });
 
-  const isDisabled = isView || actions.isPending;
+  // draft/add เท่านั้นที่แสดง general fields — ไม่ draft แล้วซ่อน
+  const isDraft =
+    !purchaseRequest?.pr_status ||
+    purchaseRequest.pr_status === PR_STATUS.DRAFT;
+
+  // lock หลัง submit (status ≠ draft) เฉพาะ role ผู้สร้าง (CREATE) — role ใน
+  // workflow (purchase/approve) ยังต้องเลือก/แก้ item ได้ จึงไม่โดน lock ตรงนี้
+  const isDisabled =
+    isView ||
+    actions.isPending ||
+    (!isDraft && role === STAGE_ROLE.CREATE);
+
+  const hasHistory = !!purchaseRequest?.workflow_history?.length;
+
+  // Notes (description) — view หรือหลัง submit (role != CREATE) แสดงเป็น plain text
+  const descriptionReadOnly = isView || role !== STAGE_ROLE.CREATE;
+  const watchedDescription = useWatch({
+    control: form.control,
+    name: "description",
+  });
 
   const workflowId = useWatch({ control: form.control, name: "workflow_id" });
   const watchedItems = useWatch({ control: form.control, name: "items" });
@@ -179,90 +193,97 @@ export function PurchaseRequestForm({
   }, []);
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="my-2">
-        <PrHeader
-          purchaseRequest={purchaseRequest}
-          onBack={actions.handleBack}
-          reqName={reqName}
-          departmentName={departmentName ?? ""}
-          prDateDisplay={prDateDisplay}
-          actions={
-            <PrFormActions
-              mode={mode}
-              role={role}
-              prStatus={purchaseRequest?.pr_status}
-              prId={purchaseRequest?.id}
-              prNo={purchaseRequest?.pr_no}
-              isPending={actions.isPending}
-              isDeletePending={actions.deletePr.isPending}
-              hasRecord={!!purchaseRequest}
-              canSave={canSave}
-              saveDisabledTitle={saveDisabledTitle}
-              onEdit={() => setMode("edit")}
-              onCancel={actions.handleCancel}
-              onDelete={() => actions.setShowDelete(true)}
-              onComment={() => actions.setShowComment(true)}
-            />
-          }
-        />
-      </div>
-
+    <div className="flex flex-1 flex-col space-y-4">
+      <PrHeader
+        purchaseRequest={purchaseRequest}
+        onBack={actions.handleBack}
+        reqName={reqName}
+        departmentName={departmentName ?? ""}
+        prDateDisplay={prDateDisplay}
+        hasHistory={hasHistory}
+        onShowHistory={() => actions.setShowHistory(true)}
+        actions={
+          <PrFormActions
+            mode={mode}
+            role={role}
+            prStatus={purchaseRequest?.pr_status}
+            prId={purchaseRequest?.id}
+            prNo={purchaseRequest?.pr_no}
+            isPending={actions.isPending}
+            isDeletePending={actions.deletePr.isPending}
+            hasRecord={!!purchaseRequest}
+            canSave={canSave}
+            saveDisabledTitle={saveDisabledTitle}
+            onEdit={() => setMode("edit")}
+            onCancel={actions.handleCancel}
+            onDelete={() => actions.setShowDelete(true)}
+            onComment={() => actions.setShowComment(true)}
+          />
+        }
+      />
       <form
         id="purchase-request-form"
         onSubmit={form.handleSubmit(actions.onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4"
+        className="space-y-4 px-4"
       >
-        <PrGeneralFields
-          form={form}
-          readOnly={isView}
-          disabled={actions.isPending}
-          role={role}
-          fromTemplate={!!template}
-        />
+        {isDraft && (
+          <PrGeneralFields
+            form={form}
+            readOnly={isView}
+            disabled={actions.isPending}
+            role={role}
+            fromTemplate={!!template}
+          />
+        )}
 
-        <Tabs defaultValue="items">
-          <TabsList variant="line">
-            <TabsTrigger value="items" className="text-xs">
-              {t("tabItems")}
-            </TabsTrigger>
-            {(purchaseRequest?.workflow_history?.length ?? 0) > 0 && (
-              <TabsTrigger value="history" className="text-xs">
-                {t("tabWorkflowHistory")}
-              </TabsTrigger>
+        {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
+        {(!descriptionReadOnly || watchedDescription?.trim()) && (
+          <Field className={descriptionReadOnly ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="pr-description"
+              className={
+                descriptionReadOnly
+                  ? "text-muted-foreground font-normal"
+                  : undefined
+              }
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {descriptionReadOnly ? (
+              <FieldPlainText className="text-xs">
+                <span className="whitespace-pre-line">
+                  {watchedDescription}
+                </span>
+              </FieldPlainText>
+            ) : (
+              <Textarea
+                id="pr-description"
+                placeholder={t("descPlaceholder")}
+                rows={2}
+                maxLength={256}
+                disabled={actions.isPending}
+                {...form.register("description")}
+              />
             )}
-          </TabsList>
-          <TabsContent value="items">
-            <PrItemFields
-              form={form}
-              isDisabled={isDisabled}
-              role={role}
-              prId={purchaseRequest?.id}
-              prStatus={purchaseRequest?.pr_status}
-              buCode={buCode}
-              defaultBu={defaultBu}
-              dateFormat={dateFormat}
-              onSplit={actions.handleSplit}
-              previousStages={previousStages}
-              stagesLoading={stagesLoading}
-              onBulkReview={actions.handleBulkReview}
-            />
-          </TabsContent>
-          {purchaseRequest?.workflow_history &&
-            purchaseRequest.workflow_history.length > 0 && (
-              <TabsContent value="history">
-                <Suspense fallback={null}>
-                  <PrWorkflowHistory
-                    history={purchaseRequest.workflow_history}
-                    requestorName={purchaseRequest.requestor_name}
-                    createdAt={purchaseRequest.created_at}
-                  />
-                </Suspense>
-              </TabsContent>
-            )}
-        </Tabs>
+          </Field>
+        )}
+
+        <PrItemFields
+          form={form}
+          isDisabled={isDisabled}
+          role={role}
+          prId={purchaseRequest?.id}
+          prStatus={purchaseRequest?.pr_status}
+          buCode={buCode}
+          defaultBu={defaultBu}
+          dateFormat={dateFormat}
+          onSplit={actions.handleSplit}
+          previousStages={previousStages}
+          stagesLoading={stagesLoading}
+          onBulkReview={actions.handleBulkReview}
+        />
       </form>
 
       <PrFormDialogs
@@ -272,8 +293,14 @@ export function PurchaseRequestForm({
         deletePr={actions.deletePr}
         showComment={actions.showComment}
         setShowComment={actions.setShowComment}
+        showHistory={actions.showHistory}
+        setShowHistory={actions.setShowHistory}
+        workflowHistory={purchaseRequest?.workflow_history}
+        requestorName={purchaseRequest?.requestor_name}
+        createdAt={purchaseRequest?.created_at}
         showNoDepartment={showNoDepartment}
         discardDialogProps={actions.discardDialogProps}
+        navDiscardDialogProps={actions.navDiscardDialogProps}
         actionDialog={actions.actionDialog}
         setActionDialog={actions.setActionDialog}
         isPending={actions.isPending}

@@ -1,6 +1,5 @@
 import { Layers, Tag, MapPin } from "lucide-react";
-import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Card,
   CardAction,
@@ -31,7 +30,6 @@ export default function EqCard({
   categoryName,
   onEdit,
 }: EqCardProps) {
-  const ts = useTranslations("status");
   const brandModel = [item.brand, item.model].filter(Boolean).join(" / ");
 
   return (
@@ -62,13 +60,7 @@ export default function EqCard({
           </div>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="xs"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
 

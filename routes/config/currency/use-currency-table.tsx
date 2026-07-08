@@ -79,14 +79,20 @@ export function useCurrencyTable({
           className="justify-end"
         />
       ),
-      cell: ({ row }) => (
-        <span>
-          {formatExchangeRate(
-            row.getValue<number>("exchange_rate"),
-            defaultCurrencyCode,
-          )}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const rate = row.getValue<number>("exchange_rate");
+        if (!rate) return <div className="text-right">-</div>;
+        return (
+          <div className="text-right">
+            <span className="font-medium">{formatExchangeRate(rate)}</span>
+            {defaultCurrencyCode && (
+              <span className="text-muted-foreground ms-1 text-xs font-normal">
+                {defaultCurrencyCode}
+              </span>
+            )}
+          </div>
+        );
+      },
       size: 120,
       meta: {
         headerTitle: tfl("exchangeRate"),

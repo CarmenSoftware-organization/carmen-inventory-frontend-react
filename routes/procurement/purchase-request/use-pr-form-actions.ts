@@ -6,6 +6,10 @@ import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
 import { buildItemChanges } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { httpClient } from "@/lib/http-client";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import {
   useCreatePurchaseRequest,
   useDeletePurchaseRequest,
@@ -52,6 +56,55 @@ export function usePrFormActions({
   const t = useTranslations("procurement.purchaseRequest");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const buCode = useBuCode();
+
+  // GET PR สดจาก DB ก่อนยิง workflow event — กัน 409 optimistic lock จาก
+  // doc_version ที่ค้างเก่าใน form/prop หลัง /save bump (แบบเดียวกับ PO)
+  const fetchFreshPr = async (
+    id: string,
+  ): Promise<{
+    doc_version?: number;
+    purchase_request_detail?: { id: string; doc_version?: number }[];
+  } | null> => {
+    if (!buCode) return null;
+    try {
+      const res = await httpClient.get(
+        `${API_ENDPOINTS.PURCHASE_REQUEST(buCode)}/${id}`,
+      );
+      if (res.ok) return (await res.json())?.data ?? null;
+    } catch {
+      // network/parse fail — fallback ค่าจาก form/prop
+    }
+    return null;
+  };
+
+  const resolveDocVersion = (fresh: { doc_version?: number } | null): number =>
+    fresh?.doc_version ??
+    form.getValues("doc_version") ??
+    purchaseRequest?.doc_version ??
+    0;
+
+  // re-sync doc_version จาก response /save กลับเข้า form (header + ราย detail
+  // ตาม id) — กัน save ซ้ำส่ง version เก่า
+  const syncDocVersions = (saved: unknown) => {
+    const data = (
+      saved as {
+        data?: {
+          doc_version?: number;
+          purchase_request_detail?: { id: string; doc_version?: number }[];
+        };
+      }
+    )?.data;
+    if (!data) return;
+    if (data.doc_version != null) form.setValue("doc_version", data.doc_version);
+    const items = form.getValues("items");
+    for (const d of data.purchase_request_detail ?? []) {
+      const idx = items.findIndex((it) => it.id === d.id);
+      if (idx >= 0 && d.doc_version != null) {
+        form.setValue(`items.${idx}.doc_version`, d.doc_version);
+      }
+    }
+  };
 
   const isEdit = mode === "edit";
   const isAdd = mode === "add";
@@ -71,6 +124,7 @@ export function usePrFormActions({
 
   const [showDelete, setShowDelete] = useState(false);
   const [showComment, setShowComment] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [actionDialog, setActionDialog] = useState<ActionDialogState>({
     type: null,
   });
@@ -90,12 +144,19 @@ export function usePrFormActions({
     isPending,
   });
 
-  const handleMutationError = (err: Error) => toast.error(err.message);
-
-  const onSuccessView = (msg: string) => () => {
-    toast.success(msg);
-    setMode("view");
+  // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
+  // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
+  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navDiscardDialogProps = {
+    open: navGuard.isOpen,
+    onOpenChange: (o: boolean) => {
+      if (!o) navGuard.cancel();
+    },
+    onConfirm: navGuard.confirm,
+    onCancel: navGuard.cancel,
   };
+
+  const handleMutationError = (err: Error) => toast.error(err.message);
 
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
@@ -128,29 +189,61 @@ export function usePrFormActions({
     ),
   });
 
+  // สร้าง save payload ตาม stage role (purchase/approve ส่งรายละเอียดเต็ม,
+  // role อื่นใช้ diff ของ buildCreateDetails) — ใช้ร่วมกันทั้งปุ่ม Save (onSubmit)
+  // และ save-before-action ก่อนยิง workflow event
+  const buildSaveDetails = (
+    values: PrFormValues,
+  ): CreatePurchaseRequestDto["details"] => {
+    if (purchaseRequest?.role === STAGE_ROLE.PURCHASE) {
+      return preparePurchaseDetails(
+        values.items,
+      ) as unknown as CreatePurchaseRequestDto["details"];
+    }
+    if (purchaseRequest?.role === STAGE_ROLE.APPROVE) {
+      return prepareApproveDetails(
+        values.items,
+        purchaseRequest.id,
+      ) as unknown as CreatePurchaseRequestDto["details"];
+    }
+    return buildCreateDetails(values);
+  };
+
+  // เรียก /save ก่อน workflow action ถ้าฟอร์มถูกแก้ (dirty) — กันค่าที่แก้ราย
+  // row หายตอน approve/reject/send back (reject/review payload ไม่ได้ส่งค่า
+  // field กลับ). คืน false ถ้า save ล้มเหลว เพื่อให้ caller หยุดไม่ยิง action ต่อ
+  const saveDirtyEdits = async (): Promise<boolean> => {
+    if (!purchaseRequest || !form.formState.isDirty) return true;
+    try {
+      const data = await updatePr.mutateAsync({
+        id: purchaseRequest.id,
+        stage_role: purchaseRequest.role,
+        details: buildSaveDetails(form.getValues()),
+      });
+      syncDocVersions(data);
+      return true;
+    } catch (err) {
+      handleMutationError(err as Error);
+      return false;
+    }
+  };
+
   const onSubmit = (values: PrFormValues) => {
     const details = buildCreateDetails(values);
 
     if (isEdit && purchaseRequest) {
-      const isPurchaseRole = purchaseRequest.role === STAGE_ROLE.PURCHASE;
-      const isApproveRole = purchaseRequest.role === STAGE_ROLE.APPROVE;
       updatePr.mutate(
         {
           id: purchaseRequest.id,
           stage_role: purchaseRequest.role,
-          details: isPurchaseRole
-            ? (preparePurchaseDetails(
-                values.items,
-              ) as unknown as CreatePurchaseRequestDto["details"])
-            : isApproveRole
-              ? (prepareApproveDetails(
-                  values.items,
-                  purchaseRequest.id,
-                ) as unknown as CreatePurchaseRequestDto["details"])
-              : details,
+          details: buildSaveDetails(values),
         },
         {
-          onSuccess: onSuccessView(tt("updateSuccess", { entity: t("entity") })),
+          onSuccess: (data) => {
+            syncDocVersions(data);
+            toast.success(tt("updateSuccess", { entity: t("entity") }));
+            setMode("view");
+          },
           onError: handleMutationError,
         },
       );
@@ -190,9 +283,18 @@ export function usePrFormActions({
     }
   };
 
-  const doSubmitPr = (prId: string, stageDetails: WorkflowStageDetail[]) => {
+  const doSubmitPr = async (
+    prId: string,
+    stageDetails: WorkflowStageDetail[],
+  ) => {
+    const fresh = await fetchFreshPr(prId);
     submitPr.mutate(
-      { id: prId, stage_role: STAGE_ROLE.CREATE, details: stageDetails },
+      {
+        id: prId,
+        stage_role: STAGE_ROLE.CREATE,
+        doc_version: resolveDocVersion(fresh),
+        details: stageDetails,
+      },
       {
         onSuccess: onSuccessList(t("submitted")),
         onError: handleMutationError,
@@ -207,11 +309,12 @@ export function usePrFormActions({
       { id: purchaseRequest.id, stage_role: purchaseRequest.role, details },
       {
         onSuccess: (data) => {
+          syncDocVersions(data);
           const savedItems = toSubmitStageDetails(
             (data as { data?: { purchase_request_detail?: { id: string }[] } })
               ?.data?.purchase_request_detail,
           );
-          doSubmitPr(purchaseRequest.id, savedItems);
+          void doSubmitPr(purchaseRequest.id, savedItems);
         },
         onError: handleMutationError,
       },
@@ -230,7 +333,12 @@ export function usePrFormActions({
             data.data.purchase_request_detail,
           );
           submitPr.mutate(
-            { id: newId, stage_role: STAGE_ROLE.CREATE, details: stageDetails },
+            {
+              id: newId,
+              stage_role: STAGE_ROLE.CREATE,
+              doc_version: data.data.doc_version,
+              details: stageDetails,
+            },
             {
               onSuccess: onSuccessList(t("submitted")),
               onError: handleMutationError,
@@ -250,12 +358,15 @@ export function usePrFormActions({
     form.handleSubmit(doCreateAndSubmitPr)();
   };
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!purchaseRequest) return;
+    if (!(await saveDirtyEdits())) return;
+    const fresh = await fetchFreshPr(purchaseRequest.id);
     approvePr.mutate(
       {
         id: purchaseRequest.id,
         stage_role: role || STAGE_ROLE.APPROVE,
+        doc_version: resolveDocVersion(fresh),
         details: prepareApproveDetails(
           form.getValues("items"),
           purchaseRequest.id,
@@ -268,12 +379,15 @@ export function usePrFormActions({
     );
   };
 
-  const handlePurchaseApprove = () => {
+  const handlePurchaseApprove = async () => {
     if (!purchaseRequest) return;
+    if (!(await saveDirtyEdits())) return;
+    const fresh = await fetchFreshPr(purchaseRequest.id);
     purchaseApprovePr.mutate(
       {
         id: purchaseRequest.id,
         stage_role: STAGE_ROLE.PURCHASE,
+        doc_version: resolveDocVersion(fresh),
         details: prepareApproveDetails(
           form.getValues("items"),
           purchaseRequest.id,
@@ -286,13 +400,16 @@ export function usePrFormActions({
     );
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (!purchaseRequest) return;
+    if (!(await saveDirtyEdits())) return;
     const details = prepareStageDetails(form.getValues("items"));
+    const fresh = await fetchFreshPr(purchaseRequest.id);
     rejectPr.mutate(
       {
         id: purchaseRequest.id,
         stage_role: role || STAGE_ROLE.CREATE,
+        doc_version: resolveDocVersion(fresh),
         details,
       },
       {
@@ -302,8 +419,12 @@ export function usePrFormActions({
     );
   };
 
-  const handleReview = (messages: Record<number, string>, desStage: string) => {
+  const handleReview = async (
+    messages: Record<number, string>,
+    desStage: string,
+  ) => {
     if (!purchaseRequest) return;
+    if (!(await saveDirtyEdits())) return;
     const items = form.getValues("items");
     const effectiveDesStage =
       desStage || items.find((item) => item.des_stage)?.des_stage;
@@ -317,10 +438,12 @@ export function usePrFormActions({
             : item.stage_status || PR_ITEM_STAGE_STATUS.SUBMIT,
         stage_message: messages[index] ?? item.stage_message ?? "",
       }));
+    const fresh = await fetchFreshPr(purchaseRequest.id);
     reviewPr.mutate(
       {
         id: purchaseRequest.id,
         stage_role: role || STAGE_ROLE.CREATE,
+        doc_version: resolveDocVersion(fresh),
         details,
         ...(effectiveDesStage ? { des_stage: effectiveDesStage } : {}),
       },
@@ -347,7 +470,7 @@ export function usePrFormActions({
     }
   };
 
-  const handleActionConfirm = (
+  const handleActionConfirm = async (
     messages: Record<number, string>,
     desStage?: string,
   ) => {
@@ -355,9 +478,11 @@ export function usePrFormActions({
 
     const message = Object.values(messages)[0] ?? "";
     const details = prepareStageDetails(form.getValues("items"), message);
+    const fresh = await fetchFreshPr(purchaseRequest.id);
     const payload = {
       id: purchaseRequest.id,
       stage_role: role || STAGE_ROLE.CREATE,
+      doc_version: resolveDocVersion(fresh),
       details,
       ...(desStage ? { des_stage: desStage } : {}),
     };
@@ -416,7 +541,10 @@ export function usePrFormActions({
     setShowDelete,
     showComment,
     setShowComment,
+    showHistory,
+    setShowHistory,
     discardDialogProps: discard.dialogProps,
+    navDiscardDialogProps,
     actionDialog,
     setActionDialog,
     onSubmit,

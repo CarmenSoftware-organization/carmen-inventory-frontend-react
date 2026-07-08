@@ -1,6 +1,6 @@
 import { FileText, GitBranch } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
@@ -17,7 +17,6 @@ interface PrtCardProps {
  * @returns React element ของการ์ด PRT
  */
 export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
-  const ts = useTranslations("status");
   const tfl = useTranslations("field");
   return (
     <Card
@@ -45,13 +44,7 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
           <p className="text-muted-foreground truncate text-xs">
             {item.description || "-"}
           </p>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="xs"
-            className="shrink-0 text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} className="shrink-0" />
         </div>
       </CardHeader>
 

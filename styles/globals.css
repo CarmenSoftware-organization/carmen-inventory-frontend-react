@@ -42,8 +42,8 @@
   /* semantic */
   --success: oklch(0.7515 0.1117 188.43);
   --success-foreground: oklch(0.30 0.08 188.43);
-  --info: oklch(0.5852 0.1706 253.27);
-  --info-foreground: oklch(0.30 0.10 253.27);
+  --info: oklch(0.55 0.135 230);
+  --info-foreground: oklch(0.32 0.09 230);
   --warning: oklch(0.78 0.15 75);
   --warning-foreground: oklch(0.30 0.06 75);
   --invert: oklch(0.20 0 0);
@@ -127,8 +127,8 @@
   /* semantic */
   --success: oklch(0.7515 0.1117 188.43);
   --success-foreground: oklch(0.82 0.08 188.43);
-  --info: oklch(0.5852 0.1706 253.27);
-  --info-foreground: oklch(0.75 0.12 253.27);
+  --info: oklch(0.66 0.13 230);
+  --info-foreground: oklch(0.80 0.11 230);
   --warning: oklch(0.82 0.13 75);
   --warning-foreground: oklch(0.80 0.14 75);
   --invert: oklch(0.40 0 0);

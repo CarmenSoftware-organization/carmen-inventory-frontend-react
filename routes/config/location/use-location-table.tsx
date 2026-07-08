@@ -8,11 +8,7 @@ import { CircleCheck, CircleX } from "lucide-react";
 import type { Location } from "@/types/location";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import { Badge } from "@/components/ui/badge";
-import {
-  INVENTORY_TYPE_LABEL_KEY,
-  LOCATION_TYPE_BADGE_VARIANT,
-} from "@/constant/location";
+import { LocationTypeBadge } from "@/components/ui/location-type-badge";
 
 interface UseLocationTableOptions {
   data: Location[];
@@ -44,7 +40,6 @@ export function useLocationTable({
   onEdit,
   onDelete,
 }: UseLocationTableOptions) {
-  const t = useTranslations("config.location");
   const tfl = useTranslations("field");
   const columns: ColumnDef<Location>[] = [
     {
@@ -83,12 +78,7 @@ export function useLocationTable({
         />
       ),
       cell: ({ row }) => (
-        <Badge
-          variant={LOCATION_TYPE_BADGE_VARIANT[row.original.location_type]}
-          size="lg"
-        >
-          {t(INVENTORY_TYPE_LABEL_KEY[row.original.location_type])}
-        </Badge>
+        <LocationTypeBadge type={row.original.location_type} />
       ),
       size: 120,
       meta: {

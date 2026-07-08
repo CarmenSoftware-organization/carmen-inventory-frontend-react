@@ -1,12 +1,10 @@
-import { useTranslations } from "use-intl";
-
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardAction,
 } from "@/components/ui/card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import type { Unit } from "@/types/unit";
 
 interface UnitCardProps {
@@ -29,8 +27,6 @@ interface UnitCardProps {
  * ```
  */
 export default function UnitCard({ item, index, onEdit }: UnitCardProps) {
-  const ts = useTranslations("status");
-
   return (
     <Card
       role="button"
@@ -54,13 +50,7 @@ export default function UnitCard({ item, index, onEdit }: UnitCardProps) {
           <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name || "..."}</CardTitle>
         </div>
         <CardAction>
-          <Badge
-            variant={item.is_active ? "success" : "secondary"}
-            size="sm"
-            className="text-xs"
-          >
-            {item.is_active ? ts("active") : ts("inactive")}
-          </Badge>
+          <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
     </Card>

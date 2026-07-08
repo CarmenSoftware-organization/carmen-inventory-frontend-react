@@ -186,7 +186,6 @@ export default function PoComponent() {
           <DocumentListHeader
             title={t("title")}
             description={t("desc")}
-            count={totalRecords}
           />
           <DocumentListActions
             onExport={handleExport}

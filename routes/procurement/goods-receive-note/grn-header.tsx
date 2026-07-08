@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import {
   Check,
@@ -250,7 +249,6 @@ export function GrnHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      infoLabel={t("documentInfo")}
       ribbon={ribbon}
     />
   );

@@ -11,7 +11,7 @@ import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import type { FormMode } from "@/types/form";
-import { CN_STATUS, type CreditNote } from "@/types/credit-note";
+import { CN_STATUS, type CreditNoteDetail } from "@/types/credit-note";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
 import {
   DocFormHeader,
@@ -20,7 +20,7 @@ import {
 } from "@/components/share/doc-form-header";
 
 interface CnHeaderProps {
-  readonly creditNote?: CreditNote;
+  readonly creditNote?: CreditNoteDetail;
   readonly mode: FormMode;
   readonly isPending: boolean;
   readonly deleteIsPending: boolean;
@@ -229,7 +229,6 @@ export function CnHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      infoLabel={t("documentInfo")}
       ribbon={ribbon}
     />
   );

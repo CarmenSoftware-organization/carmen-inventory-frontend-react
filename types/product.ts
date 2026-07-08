@@ -67,6 +67,7 @@ export interface ProductDetail extends Product {
   locations: ProductLocationItem[];
   order_units: ProductUnitConversion[];
   ingredient_units: ProductUnitConversion[];
+  doc_version?: number;
 }
 
 export interface LocationPairProduct {

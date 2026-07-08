@@ -178,7 +178,6 @@ export default function RecipeCategoryComponent() {
           <DocumentListHeader
             title={t("title")}
             description={t("desc")}
-            count={totalRecords}
           />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button

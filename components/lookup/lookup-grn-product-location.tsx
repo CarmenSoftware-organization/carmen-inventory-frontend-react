@@ -20,6 +20,7 @@ interface LookupGrnProductLocationProps {
   readonly modal?: boolean;
   readonly defaultLabel?: string;
   readonly disableTooltip?: boolean;
+  readonly defaultOpen?: boolean;
   readonly error?: string;
 }
 
@@ -48,6 +49,7 @@ export function LookupGrnProductLocation({
   modal,
   defaultLabel,
   disableTooltip,
+  defaultOpen,
   error,
 }: LookupGrnProductLocationProps) {
   const tl = useTranslations("lookup");
@@ -104,6 +106,7 @@ export function LookupGrnProductLocation({
       modal={modal}
       defaultLabel={defaultLabel}
       disableTooltip={disableTooltip}
+      defaultOpen={defaultOpen}
       error={error}
     />
   );

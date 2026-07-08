@@ -13,6 +13,7 @@ import {
   useVoidGoodsReceiveNote,
 } from "@/hooks/use-goods-receive-note";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import type {
   GoodsReceiveNote,
   CreateGrnDto,
@@ -69,6 +70,46 @@ export function useGrnFormActions({
     isPending: isPending || isActionPending,
   });
 
+  // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
+  // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
+  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navDiscardDialogProps = {
+    open: navGuard.isOpen,
+    onOpenChange: (o: boolean) => {
+      if (!o) navGuard.cancel();
+    },
+    onConfirm: navGuard.confirm,
+    onCancel: navGuard.cancel,
+  };
+
+  // re-sync doc_version จาก response /save กลับเข้า form (header + ราย item
+  // ที่อยู่ใน good_received_note_detail[].items[] จับคู่ด้วย id) — กัน save ซ้ำ
+  // ส่ง doc_version เก่า → 409 optimistic lock (แบบเดียวกับ PO)
+  const syncDocVersions = (saved: unknown) => {
+    const data = (
+      saved as {
+        data?: {
+          doc_version?: number;
+          good_received_note_detail?: {
+            items?: { id: string; doc_version?: number }[];
+          }[];
+        };
+      }
+    )?.data;
+    if (!data) return;
+    if (data.doc_version != null) form.setValue("doc_version", data.doc_version);
+    const versionById = new Map<string, number>();
+    for (const grp of data.good_received_note_detail ?? []) {
+      for (const it of grp.items ?? []) {
+        if (it.doc_version != null) versionById.set(it.id, it.doc_version);
+      }
+    }
+    form.getValues("items").forEach((it, idx) => {
+      const v = it.id ? versionById.get(it.id) : undefined;
+      if (v != null) form.setValue(`items.${idx}.doc_version`, v);
+    });
+  };
+
   const onSubmit = (values: GrnFormValues) => {
     const isManual = values.doc_type === "manual";
 
@@ -86,6 +127,14 @@ export function useGrnFormActions({
         return payload;
       },
     );
+
+    // PATCH: backend ต้องการ good_received_note_id (parent ref) ต่อ item ใน update
+    if (isEdit && goodsReceiveNote && detail.update) {
+      detail.update = detail.update.map((u) => ({
+        ...u,
+        good_received_note_id: goodsReceiveNote.id,
+      }));
+    }
 
     const extraCostDetail = buildItemChanges(
       values.extra_cost_details,
@@ -178,13 +227,17 @@ export function useGrnFormActions({
         return;
       }
 
+      // backend ต้องการ doc_version ทุกครั้งตอน PATCH (optimistic lock)
+      patchPayload.doc_version = values.doc_version;
+
       updateGrn.mutate(
         {
           id: goodsReceiveNote.id,
           ...(patchPayload as unknown as CreateGrnDto),
         },
         {
-          onSuccess: () => {
+          onSuccess: (res) => {
+            syncDocVersions(res);
             const finalize = () => {
               toast.success(tt("updateSuccess", { entity: t("entity") }));
               setMode("view");
@@ -313,5 +366,6 @@ export function useGrnFormActions({
     handleConfirmCommit,
     handleConfirmVoid,
     discardDialogProps: discard.dialogProps,
+    navDiscardDialogProps,
   };
 }

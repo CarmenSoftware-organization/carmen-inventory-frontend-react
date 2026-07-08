@@ -290,7 +290,6 @@ export default function ProductComponent() {
           <DocumentListHeader
             title={t("title")}
             description={t("desc")}
-            count={totalRecords}
           />
           <DocumentListActions
             onExport={handleExport}

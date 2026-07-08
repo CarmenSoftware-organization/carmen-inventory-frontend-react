@@ -604,7 +604,7 @@ function FooterBand() {
     <section className="bg-foreground text-background px-6 py-10 sm:px-12">
       <div className="relative grid items-center gap-6 lg:grid-cols-[1fr_auto]">
         <div>
-          <EyeBrow>{t("footerKicker")}</EyeBrow>
+          <EyeBrow className="mb-2">{t("footerKicker")}</EyeBrow>
           <h3 className="text-background text-lg leading-snug font-bold sm:text-xl">
             {t("footerTitle")}
           </h3>

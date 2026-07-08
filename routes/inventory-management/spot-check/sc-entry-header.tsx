@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router";
 import { ArrowLeft, Calendar, ClipboardCheck, MapPin } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -58,7 +57,7 @@ export function ScEntryHeader({
             <ArrowLeft />
           </Button>
           <div className="min-w-0">
-            <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-bold tracking-widest uppercase">
+            <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold tracking-widest uppercase">
               <ClipboardCheck className="size-2.5" />
               {t("entryTitle")}
             </span>

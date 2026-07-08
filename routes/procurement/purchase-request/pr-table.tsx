@@ -2,7 +2,7 @@ import type React from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
-import { MoreHorizontal, Check, X, Trash2 } from "lucide-react";
+import { MoreHorizontal, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import {
@@ -68,7 +68,7 @@ export function usePurchaseRequestTable({
           {row.original.pr_no}
         </CellAction>
       ),
-      size: 120,
+      size: 140,
       meta: { headerTitle: tfl("prNo"), skeleton: columnSkeletons.text },
     },
     {
@@ -97,7 +97,7 @@ export function usePurchaseRequestTable({
         cellClassName: "text-center",
         headerClassName: "text-center",
       },
-      size: 100,
+      size: 120,
     },
     {
       accessorKey: "workflow_current_stage",
@@ -128,13 +128,13 @@ export function usePurchaseRequestTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
-      size: 100,
+      size: 140,
     },
     {
       accessorKey: "requestor_name",
       header: tfl("requester"),
       meta: { headerTitle: tfl("requester"), skeleton: columnSkeletons.text },
-      size: 160,
+      size: 180,
     },
     {
       accessorKey: "department_name",
@@ -144,37 +144,41 @@ export function usePurchaseRequestTable({
     },
     {
       accessorKey: "base_total_amount",
-      header: tfl("totalAmount"),
-      cell: ({ row }) =>
-        formatAmount(row.original.base_total_amount, amountFormat),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("totalAmount")}
+          className="justify-end"
+        />
+      ),
+      cell: ({ row }) => {
+        const amount = row.original.base_total_amount;
+        if (amount == null) return <span></span>;
+        return (
+          <div className="text-right">
+            <span className="font-medium">
+              {formatAmount(amount, amountFormat)}
+            </span>
+            <span className="text-muted-foreground ms-1 text-xs font-normal">
+              {defaultCurrencyCode}
+            </span>
+          </div>
+        );
+      },
       meta: {
         headerTitle: tfl("totalAmount"),
         skeleton: columnSkeletons.text,
         cellClassName: "text-right",
         headerClassName: "text-right",
       },
-      size: 120,
-    },
-    {
-      id: "currency",
-      header: tfl("currency"),
-      meta: {
-        headerTitle: tfl("currency"),
-        cellClassName: "text-center",
-        headerClassName: "text-center",
-        skeleton: columnSkeletons.text,
-      },
-      cell: () => defaultCurrencyCode,
-      size: 80,
+      size: 150,
     },
   ];
 
   const prActionColumn = customActionColumn<PurchaseRequest>(({ row }) => {
     const item = row.original;
     const isDraft = item.pr_status === PR_STATUS.DRAFT;
-    const isPendingApproval =
-      item.pr_status === PR_STATUS.SUBMITTED ||
-      item.pr_status === PR_STATUS.IN_PROGRESS;
+    const isPendingApproval = item.pr_status === PR_STATUS.IN_PROGRESS;
 
     return (
       <div className="flex justify-end">
@@ -187,20 +191,26 @@ export function usePurchaseRequestTable({
           <DropdownMenuContent align="end">
             {onApprove && isPendingApproval && (
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="cursor-pointer font-semibold tracking-wide"
                 onClick={() => onApprove(item)}
               >
-                <Check className="text-positive size-3" aria-hidden="true" />
+                <CheckCircle2
+                  className="text-success size-3"
+                  aria-hidden="true"
+                />
                 {tc("approve")}
               </DropdownMenuItem>
             )}
 
             {onReject && isPendingApproval && (
               <DropdownMenuItem
-                className="cursor-pointer"
+                className="cursor-pointer font-semibold tracking-wide"
                 onClick={() => onReject(item)}
               >
-                <X className="text-destructive size-3" aria-hidden="true" />
+                <XCircle
+                  className="text-destructive size-3"
+                  aria-hidden="true"
+                />
                 {tc("reject")}
               </DropdownMenuItem>
             )}

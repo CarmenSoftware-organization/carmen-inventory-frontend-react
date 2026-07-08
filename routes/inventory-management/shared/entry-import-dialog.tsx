@@ -1,10 +1,4 @@
-
-import {
-  useRef,
-  useState,
-  type ChangeEvent,
-  type DragEvent,
-} from "react";
+import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -227,7 +221,7 @@ export function EntryImportDialog({
         <div className="p-5">
           <DialogHeader className="space-y-2">
             <div className="flex items-start gap-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Upload className="size-4.5" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">
@@ -254,7 +248,7 @@ export function EntryImportDialog({
 
           {file ? (
             <div className="border-border/60 bg-card relative flex items-start gap-3 rounded-xl border p-3">
-              <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <FileSpreadsheet className="size-5" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1 space-y-0.5">
@@ -360,7 +354,6 @@ export function EntryImportDialog({
           <Button
             variant="outline"
             size="sm"
-            className="rounded-full"
             onClick={() => closeDialog(false)}
           >
             {tc("cancel")}
@@ -369,7 +362,6 @@ export function EntryImportDialog({
             size="sm"
             disabled={!canApply || isParsing}
             onClick={handleApply}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
           >
             <CheckCircle2 className="size-3.5" aria-hidden="true" />
             {t("importApply")}
@@ -389,23 +381,27 @@ function PreviewStat({
   readonly value: number;
   readonly tone: "primary" | "success" | "warning" | "muted";
 }) {
-  const toneMap: Record<string, string> = {
-    primary: "bg-primary/5 border-primary/30 text-primary",
-    success: "bg-success/5 border-success/30 text-success",
-    warning: "bg-warning/5 border-warning/30 text-warning-foreground",
-    muted: "bg-muted/40 border-border/40 text-muted-foreground",
+  // Single signal (DESIGN.md "avoid neon"): neutral box + muted label; the tone
+  // color appears ONCE — on the number — never clustered across box/border/text.
+  const toneText: Record<string, string> = {
+    primary: "text-primary",
+    success: "text-success",
+    warning: "text-warning-foreground",
+    muted: "text-foreground",
   };
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center rounded-xl border px-2 py-2",
-        toneMap[tone],
-      )}
-    >
-      <div className="text-[0.5rem] font-semibold tracking-widest uppercase opacity-70">
+    <div className="bg-muted/40 border-border/40 flex flex-col items-center justify-center rounded-xl border px-2 py-2">
+      <div className="text-muted-foreground text-[0.5rem] font-semibold tracking-widest uppercase">
         {label}
       </div>
-      <div className="mt-0.5 text-base font-bold tabular-nums">{value}</div>
+      <div
+        className={cn(
+          "mt-0.5 text-base font-semibold tabular-nums",
+          toneText[tone],
+        )}
+      >
+        {value}
+      </div>
     </div>
   );
 }

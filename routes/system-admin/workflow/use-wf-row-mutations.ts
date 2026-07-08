@@ -73,10 +73,12 @@ export function useWfRowMutations() {
     handle(workflow, async (detail) => {
       const next = !workflow.is_active;
       const defaults = getWorkflowFormDefaults(detail);
-      const payload: WorkflowCreateModel & { id: string } = {
+      const payload: WorkflowCreateModel & { id: string; doc_version?: number } = {
         ...defaults,
         id: workflow.id,
         is_active: next,
+        // detail is freshly GET-fetched above — its doc_version is current
+        doc_version: detail.doc_version,
       };
       await runMutation(
         updateWorkflow,

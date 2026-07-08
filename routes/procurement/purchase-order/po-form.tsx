@@ -1,6 +1,5 @@
-
 import { lazy, Suspense, useState } from "react";
-import { useForm, useWatch, type Resolver } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import type { PurchaseOrder } from "@/types/purchase-order";
@@ -10,6 +9,13 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { useProfile } from "@/hooks/use-profile";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
@@ -29,6 +35,13 @@ import { usePoFormHandlers } from "./use-po-form-handlers";
 
 const PoCommentSheet = lazy(() =>
   import("./po-comment-sheet").then((mod) => ({ default: mod.PoCommentSheet })),
+);
+
+// reuse PR's timeline — WorkflowHistoryEntry shape เหมือนกัน
+const PoWorkflowHistory = lazy(() =>
+  import("../purchase-request/workflow/pr-workflow-history").then((mod) => ({
+    default: mod.PrWorkflowHistory,
+  })),
 );
 
 interface PoFormProps {
@@ -55,7 +68,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const canEdit = !isViewOnly && !terminalStatus;
 
   const dialogs = usePoDialogState();
-  const { showDelete, showComment, showReject, showClose } = dialogs;
+  const { showDelete, showComment, showReject, showClose, showHistory } =
+    dialogs;
+  const hasHistory = !!purchaseOrder?.workflow_history?.length;
 
   const canClose =
     !!purchaseOrder &&
@@ -96,21 +111,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const [revealErrorSignal, setRevealErrorSignal] = useState(0);
   const revealErrors = () => {
     setRevealErrorSignal((c) => c + 1);
+    // scroll หา field แรกที่ผิด — retry ข้ามเฟรมจน row ที่ auto-expand mount field เสร็จ
+    // (order_qty rollup ระดับ item mark data-invalid ที่ QtyUnitCell ในแถวหลักแล้ว)
     scrollToFirstInvalidField();
-    // order_qty ของ item = ยอดรวมจาก locations แสดงแบบ read-only (ไม่มี aria-invalid
-    // ให้ scroll หา) — ถ้า item ติด error เฉพาะ order_qty ให้ scroll ไปที่แถวนั้นแทน
-    // เพื่อให้ user เห็น row ที่ถูก auto-expand (กรอก qty ของ location ได้)
-    const itemErrors = form.formState.errors.items;
-    const rollupIdx = itemErrors
-      ? Object.keys(itemErrors)
-          .map(Number)
-          .filter((n) => !Number.isNaN(n))
-          .sort((a, b) => a - b)
-          .find((i) => !!itemErrors[i]?.order_qty && !itemErrors[i]?.locations)
-      : undefined;
-    if (rollupIdx != null) {
-      scrollToFirstInvalidField({ selector: `#po-item-row-${rollupIdx}` });
-    }
   };
 
   const {
@@ -128,6 +131,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     handleClosePo,
     handleDeleteConfirm,
     discardDialogProps,
+    navDiscardDialogProps,
   } = usePoFormHandlers({
     purchaseOrder,
     form,
@@ -141,24 +145,13 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   });
 
   const isDisabled = (isView && role !== STAGE_ROLE.APPROVE) || isPending;
-
-  // PO จาก price list — สินค้า/ราคา/เงื่อนไข มาจาก price list ทั้งหมด
-  // จึงล็อกทุก field ให้ผู้แก้ไขเปลี่ยนได้เฉพาะ location ของแต่ละ item เท่านั้น
-  // (ไม่ใช้กับ approver / view-only — field พวกนั้น read-only อยู่แล้ว)
   const isPriceListLocked =
     purchaseOrder?.po_type === PO_TYPE.PL && !isReadOnly && !isViewOnly;
   const fieldsDisabled = isDisabled || isPriceListLocked;
-
-  const items = useWatch({ control: form.control, name: "items" });
-  const itemQtyTotal = items.reduce(
-    (a, it) => a + (Number(it?.order_qty) || 0),
-    0,
-  );
-
   const departmentName = defaultBu?.department?.name ?? "";
 
   return (
-    <div className="flex min-h-full flex-col space-y-4 p-4">
+    <div className="flex min-h-full flex-col space-y-4">
       <PoHeader
         purchaseOrder={purchaseOrder}
         mode={mode}
@@ -176,74 +169,46 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         onShowClose={() => dialogs.setShowClose(true)}
         onShowComment={() => dialogs.setShowComment(true)}
         onShowDelete={() => dialogs.setShowDelete(true)}
+        hasHistory={hasHistory}
+        onShowHistory={() => dialogs.setShowHistory(true)}
       />
       <form
         id="po-form"
         onSubmit={form.handleSubmit(onSubmit, revealErrors)}
-        className="flex flex-1 flex-col gap-4"
+        className="flex flex-1 flex-col gap-4 px-4"
       >
-        <section className="space-y-3">
-          <div className="border-border/60 border-b pb-2">
-            <h2 className="text-sm font-bold tracking-tight">
-              {t("sectionVendor")}
-            </h2>
-            <p className="text-muted-foreground text-xs">
-              {t("sectionVendorSub")}
-            </p>
-          </div>
-          <PoGeneralFields
-            form={form}
-            disabled={fieldsDisabled}
-            isManual={isManual}
-            readOnly={isReadOnly}
-            plainText={isView || isReadOnly}
-          />
-        </section>
+        <PoGeneralFields
+          form={form}
+          disabled={fieldsDisabled}
+          isManual={isManual}
+          readOnly={isReadOnly}
+          plainText={isView || isReadOnly}
+          isDraft={
+            !purchaseOrder?.po_status ||
+            purchaseOrder.po_status === PO_STATUS.DRAFT
+          }
+        />
 
-        {/* Section 2 — flat (ไม่ห่อ card) ให้ตาราง line items เต็มความกว้าง */}
-        <section className="space-y-3">
-          <div className="border-border/60 flex items-baseline justify-between gap-2 border-b pb-2">
-            <h2 className="text-sm font-bold tracking-tight">
-              {t("sectionItems")}
-            </h2>
-            <p className="text-muted-foreground text-xs">
-              {t("sectionItemsSub", {
-                count: items.length,
-                qty: itemQtyTotal,
-              })}
-            </p>
-          </div>
-          <PoItemFields
-            form={form}
-            revealErrorSignal={revealErrorSignal}
-            disabled={fieldsDisabled}
-            locationsDisabled={isDisabled}
-            role={role}
-            poStatus={purchaseOrder?.po_status}
-            isPending={isPending}
-            onApprove={purchaseOrder ? handleApprovePo : undefined}
-            onReject={
-              purchaseOrder ? () => dialogs.setShowReject(true) : undefined
-            }
-            onClose={purchaseOrder ? handleClosePo : undefined}
-          />
-        </section>
+        <PoNotesSummary
+          form={form}
+          disabled={fieldsDisabled}
+          plainText={isView || isReadOnly}
+        />
 
-        <section className="space-y-3">
-          <div className="border-border/60 border-b pb-2">
-            <h2 className="text-sm font-bold tracking-tight">
-              {t("sectionNotes")}
-            </h2>
-            <p className="text-muted-foreground text-xs">
-              {t("sectionNotesSub")}
-            </p>
-          </div>
-          <PoNotesSummary
-            form={form}
-            disabled={fieldsDisabled}
-            plainText={isView || isReadOnly}
-          />
-        </section>
+        <PoItemFields
+          form={form}
+          revealErrorSignal={revealErrorSignal}
+          disabled={fieldsDisabled}
+          locationsDisabled={isDisabled}
+          role={role}
+          poStatus={purchaseOrder?.po_status}
+          isPending={isPending}
+          onApprove={purchaseOrder ? handleApprovePo : undefined}
+          onReject={
+            purchaseOrder ? () => dialogs.setShowReject(true) : undefined
+          }
+          onClose={purchaseOrder ? handleClosePo : undefined}
+        />
       </form>
 
       <PoFooterAction
@@ -262,6 +227,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
       />
 
       <DiscardDialog {...discardDialogProps} variant="warning" />
+      <DiscardDialog {...navDiscardDialogProps} variant="warning" />
 
       {purchaseOrder && (
         <>
@@ -282,6 +248,30 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
               onOpenChange={dialogs.setShowComment}
             />
           </Suspense>
+          {hasHistory && (
+            <Sheet open={showHistory} onOpenChange={dialogs.setShowHistory}>
+              <SheetContent
+                side="right"
+                className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
+              >
+                <SheetHeader>
+                  <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    {t("tabWorkflowHistory")}
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="px-4 pb-4">
+                  <Suspense fallback={null}>
+                    <PoWorkflowHistory
+                      history={purchaseOrder.workflow_history ?? []}
+                      requestorName={purchaseOrder.buyer_name}
+                      createdAt={purchaseOrder.created_at}
+                    />
+                  </Suspense>
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
           <PoActionDialog
             open={showReject}
             onOpenChange={(open) => {

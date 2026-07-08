@@ -14,9 +14,15 @@ import {
 import { useMemo } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FieldInput } from "@/components/ui/field";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupDeliveryPoint } from "@/components/lookup/lookup-delivery-point";
@@ -81,8 +87,17 @@ const ProductCell = ({
   "use no memo";
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
+  const productName =
+    useWatch({ control, name: `items.${index}.product_name` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   const productError =
     form.formState.errors.items?.[index]?.product_id?.message;
+  if (readOnly) {
+    return (
+      <NameWithSubtext primary={productName} secondary={productLocalName} />
+    );
+  }
   return (
     <Controller
       control={control}
@@ -133,7 +148,7 @@ const WatchedProductUnit = ({
           onValueChange={field.onChange}
           disabled={disabled}
           readOnly={readOnly}
-          className="w-full text-xs"
+          className="h-full w-20 shrink-0 rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
           error={unitError}
         />
       )}
@@ -141,7 +156,8 @@ const WatchedProductUnit = ({
   );
 };
 
-const QtyCell = ({
+// รวม qty + unit เป็น InputSuffix เดียว (เหมือน GRN): input จำนวน + addon เลือกหน่วย
+const QtyUnitCell = ({
   control,
   form,
   index,
@@ -157,34 +173,46 @@ const QtyCell = ({
   "use no memo";
   const tfl = useTranslations("field");
   const qty = useWatch({ control, name: `items.${index}.requested_qty` });
+  const unitName =
+    useWatch({ control, name: `items.${index}.requested_unit_name` }) ?? "";
   const qtyError = form.formState.errors.items?.[index]?.requested_qty?.message;
 
   if (readOnly) {
     return (
-      <span className="text-xs">
-        {qty == null || qty === 0 ? (
-          <span className="text-muted-foreground">—</span>
-        ) : (
-          qty
-        )}
-      </span>
+      <InputSuffixPlain
+        value={
+          qty == null || qty === 0 ? (
+            <span className="text-muted-foreground">—</span>
+          ) : (
+            qty
+          )
+        }
+        suffix={unitName}
+      />
     );
   }
 
   return (
-    <FieldInput
-      type="number"
-      inputMode="decimal"
-      min={1}
-      placeholder={tfl("qty")}
-      className={`h-6 text-right text-xs md:text-xs ${qtyError ? "pl-7" : ""}`}
-      disabled={disabled}
-      error={qtyError}
-      errorIconAlign="left"
-      {...form.register(`items.${index}.requested_qty`, {
-        valueAsNumber: true,
-      })}
-    />
+    <InputSuffixField error={!!qtyError} disabled={disabled}>
+      <InputSuffixInput
+        type="number"
+        inputMode="decimal"
+        min={1}
+        placeholder={tfl("qty")}
+        {...form.register(`items.${index}.requested_qty`, {
+          valueAsNumber: true,
+        })}
+      />
+      <InputSuffixAddon>
+        <WatchedProductUnit
+          control={control}
+          form={form}
+          index={index}
+          disabled={disabled}
+          readOnly={readOnly}
+        />
+      </InputSuffixAddon>
+    </InputSuffixField>
   );
 };
 
@@ -230,6 +258,14 @@ export function usePrtItemTable({
         accessorKey: "location_id",
         header: tfl("location"),
         cell: ({ row }) => {
+          if (readOnly) {
+            return (
+              <NameWithSubtext
+                primary={form.getValues(`items.${row.index}.location_name`)}
+                secondary={form.getValues(`items.${row.index}.location_code`)}
+              />
+            );
+          }
           const locationError =
             form.formState.errors.items?.[row.index]?.location_id?.message;
           return (
@@ -277,9 +313,9 @@ export function usePrtItemTable({
       },
       {
         id: "requested_qty",
-        header: tfl("qty"),
+        header: tfl("requestedAbbr"),
         cell: ({ row }) => (
-          <QtyCell
+          <QtyUnitCell
             control={form.control}
             form={form}
             index={row.index}
@@ -287,25 +323,11 @@ export function usePrtItemTable({
             readOnly={readOnly}
           />
         ),
-        size: 60,
+        size: 150,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
         },
-      },
-      {
-        id: "requested_unit",
-        header: tfl("unit"),
-        cell: ({ row }) => (
-          <WatchedProductUnit
-            control={form.control}
-            form={form}
-            index={row.index}
-            disabled={disabled}
-            readOnly={readOnly}
-          />
-        ),
-        size: 60,
       },
       {
         accessorKey: "currency_id",

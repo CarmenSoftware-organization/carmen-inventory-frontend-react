@@ -18,6 +18,9 @@ function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
       .string()
       .nullable()
       .refine((v) => !!v, tv("required", { field: tf("location") })),
+    // display เท่านั้น — ไม่ส่งเข้า payload
+    location_name: z.string(),
+    location_code: z.string(),
     delivery_point_id: z
       .string()
       .nullable()
@@ -27,6 +30,8 @@ function createPrtDetailSchema(tv: TranslationFn, tf: TranslationFn) {
       .nullable()
       .refine((v) => !!v, tv("required", { field: tf("product") })),
     product_name: z.string(),
+    // display เท่านั้น — ไม่ส่งเข้า payload (เหมือน product_name)
+    product_local_name: z.string(),
     inventory_unit_id: z.string().nullable(),
     inventory_unit_name: z.string(),
     requested_qty: z.coerce
@@ -68,9 +73,12 @@ export type PrtFormValues = z.infer<ReturnType<typeof createPrtSchema>>;
 
 export const PRT_ITEM = {
   location_id: null,
+  location_name: "",
+  location_code: "",
   delivery_point_id: null,
   product_id: null,
   product_name: "",
+  product_local_name: "",
   inventory_unit_id: null,
   inventory_unit_name: "",
   requested_qty: 1,
@@ -107,9 +115,12 @@ export function getDefaultValues(
         template.purchase_request_template_detail?.map((d) => ({
           id: d.id,
           location_id: d.location_id ?? null,
+          location_name: d.location_name ?? "",
+          location_code: d.location_code ?? "",
           delivery_point_id: d.delivery_point_id ?? null,
           product_id: d.product_id,
           product_name: d.product_name,
+          product_local_name: d.product_local_name ?? "",
           inventory_unit_id: d.inventory_unit_id ?? null,
           inventory_unit_name: d.inventory_unit_name ?? "",
           requested_qty: d.requested_qty,

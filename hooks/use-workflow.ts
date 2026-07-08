@@ -124,7 +124,7 @@ export function useCreateWorkflow() {
  * update.mutate({ id, ...values });
  */
 export function useUpdateWorkflow() {
-  return useApiMutation<WorkflowCreateModel & { id: string }>({
+  return useApiMutation<WorkflowCreateModel & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.put(`${API_ENDPOINTS.WORKFLOWS(buCode)}/${id}`, data),
     invalidateKeys: [QUERY_KEYS.WORKFLOWS],

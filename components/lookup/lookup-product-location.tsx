@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
@@ -6,6 +5,7 @@ import { useLocationsByProduct } from "@/hooks/use-locations-by-product";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import type { Location } from "@/types/location";
 import { Badge } from "@/components/ui/badge";
+import { LocationTypeBadge } from "@/components/ui/location-type-badge";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductLocationProps {
@@ -21,13 +21,9 @@ interface LookupProductLocationProps {
   readonly defaultLabel?: string;
   readonly error?: string;
   readonly readOnly?: boolean;
+  /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม location ใหม่) */
+  readonly defaultOpen?: boolean;
 }
-
-const TYPE_VARIANT: Record<string, "info" | "warning" | "secondary"> = {
-  inventory: "info",
-  direct: "warning",
-  consignment: "secondary",
-};
 
 /**
  * Lookup Popover สำหรับเลือก location ที่มีสินค้าชิ้นนั้น ๆ อยู่ (cascading จาก productId)
@@ -60,6 +56,7 @@ export function LookupProductLocation({
   defaultLabel,
   error,
   readOnly,
+  defaultOpen,
 }: LookupProductLocationProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -67,19 +64,27 @@ export function LookupProductLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: { search?: string; perpage: number; page?: number }) =>
-    useLocationsByProduct(productId || undefined, params);
+  const useListHook = (params: {
+    search?: string;
+    perpage: number;
+    page?: number;
+  }) => useLocationsByProduct(productId || undefined, params);
 
-  const { items: locations, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Location>({
-      useListHook,
-      search,
-      perpage: 30,
-      filter: (l: Location) => {
-        if (excludedSet && excludedSet.has(l.id)) return false;
-        return true;
-      },
-    });
+  const {
+    items: locations,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<Location>({
+    useListHook,
+    search,
+    perpage: 30,
+    filter: (l: Location) => {
+      if (excludedSet && excludedSet.has(l.id)) return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox
@@ -90,7 +95,7 @@ export function LookupProductLocation({
       }}
       items={locations}
       getId={(l) => l.id}
-      getLabel={(l) => `${l.code} — ${l.name}`}
+      getLabel={(l) => `${l.name} - ${l.code}`}
       serverSideSearch
       onSearchChange={setSearch}
       onLoadMore={loadMore}
@@ -102,9 +107,11 @@ export function LookupProductLocation({
             {l.code}
           </Badge>
           <span className="flex-1 truncate text-left">{l.name}</span>
-          <Badge size="xs" variant={TYPE_VARIANT[l.location_type]}>
-            {l.location_type.toUpperCase()}
-          </Badge>
+          <LocationTypeBadge
+            type={l.location_type}
+            size="xs"
+            className="shrink-0"
+          />
         </>
       )}
       placeholder={placeholder ?? tl("select", { entity: tfl("location") })}
@@ -121,6 +128,7 @@ export function LookupProductLocation({
       defaultLabel={defaultLabel}
       error={error}
       readOnly={readOnly}
+      defaultOpen={defaultOpen}
     />
   );
 }

@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { PrFormValues } from "./pr-form-schema";
 import { PrItemExpand } from "./pr-item-expand";
+import { PrItemHistorySheet } from "./workflow/pr-item-history";
 import {
   SelectCell,
   StatusCell,
@@ -32,6 +33,16 @@ import {
 } from "./pr-item-cells";
 
 export type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
+
+/**
+ * ความกว้างเท่ากันของคอลัมน์แคบ 3 ตัว (select / expand / index)
+ *
+ * ต้องใช้ค่าเดียวกันทั้งสาม + `enableResizing: false` เพราะ table นี้เปิด
+ * `columnsResizable` → th ได้ `width: getSize()` ตรงตาม `size` (px). ถ้าใส่ค่า
+ * ต่างกัน (เดิม 80/60/40) UI จึงกว้างไม่เท่ากัน
+ */
+const NARROW_COL_SIZE = 35;
+const QTY_SIZE = 125;
 
 interface UsePrItemTableOptions {
   form: UseFormReturn<PrFormValues>;
@@ -53,10 +64,12 @@ export function usePrItemTable({
   role,
   buCode,
   baseCurrencyCode,
+  dateFormat,
   onDelete,
 }: UsePrItemTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 
   const allCount = itemFields.length;
@@ -89,7 +102,7 @@ export function usePrItemTable({
                 t.toggleAllPageRowsSelected(false);
               }
             }}
-            aria-label="Select all"
+            aria-label={tc("aria.selectAll")}
             className="align-[inherit]"
           />
         );
@@ -105,7 +118,7 @@ export function usePrItemTable({
       enableSorting: false,
       enableHiding: false,
       enableResizing: false,
-      size: 30,
+      size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -120,7 +133,9 @@ export function usePrItemTable({
           type="button"
           variant="ghost"
           size="icon-xs"
-          aria-label={row.getIsExpanded() ? "Collapse row" : "Expand row"}
+          aria-label={
+            row.getIsExpanded() ? tc("aria.collapseRow") : tc("aria.expandRow")
+          }
           onClick={() => row.toggleExpanded()}
         >
           {row.getIsExpanded() ? (
@@ -132,10 +147,13 @@ export function usePrItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 30,
+      size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
+        // เริ่ม content ของ expand ที่คอลัมน์ Location — เว้นคอลัมน์ซ้าย
+        // (expand + #, และ select ในโหมด edit) ด้วย colSpan ว่าง
+        expandedColStart: isDisabled ? 2 : 3,
         expandedContent: (item: ItemField) => (
           <PrItemExpand
             item={item}
@@ -155,7 +173,8 @@ export function usePrItemTable({
       header: "#",
       cell: ({ row }) => row.index + 1,
       enableSorting: false,
-      size: 40,
+      enableResizing: false,
+      size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",
@@ -167,20 +186,20 @@ export function usePrItemTable({
         accessorKey: "location_id",
         header: tfl("location"),
         cell: ({ row }) => (
-          <div className="flex flex-col gap-1">
-            <LocationCell
-              control={form.control}
-              form={form}
-              index={row.index}
-              isDisabled={isLockedAfterCreate}
-            />
-            <StatusCell
-              control={form.control}
-              form={form}
-              index={row.index}
-              role={role}
-            />
-          </div>
+          <LocationCell
+            control={form.control}
+            form={form}
+            index={row.index}
+            isDisabled={isLockedAfterCreate}
+            statusSlot={
+              <StatusCell
+                control={form.control}
+                form={form}
+                index={row.index}
+                role={role}
+              />
+            }
+          />
         ),
         size: 200,
         meta: {
@@ -212,7 +231,7 @@ export function usePrItemTable({
       },
       {
         id: "requested",
-        header: tfl("requested"),
+        header: tfl("requestedShort"),
         cell: ({ row }) => (
           <RequestedCell
             control={form.control}
@@ -221,14 +240,14 @@ export function usePrItemTable({
             isDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: QTY_SIZE,
         meta: {
           headerClassName: "text-right",
         },
       },
       {
         id: "approved",
-        header: tfl("approved"),
+        header: tfl("approvedShort"),
         cell: ({ row }) => (
           <ApprovedCell
             control={form.control}
@@ -238,7 +257,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: QTY_SIZE,
         meta: {
           headerClassName: "text-right",
         },
@@ -255,43 +274,34 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: 100,
+        size: QTY_SIZE,
         meta: {
           headerClassName: "text-right",
         },
       },
       {
         id: "amount",
-        header: tfl("amount"),
+        header: tfl("amountCurShort"),
         cell: ({ row }) => (
           <AmountCell
             control={form.control}
             index={row.index}
             baseCurrencyCode={baseCurrencyCode}
+            isDisabled={isDisabled}
+            currencySlot={
+              <CurrencyCell
+                control={form.control}
+                form={form}
+                index={row.index}
+                isDisabled={isDisabled}
+              />
+            }
           />
         ),
-        size: 80,
+        size: 160,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
-        },
-      },
-
-      {
-        accessorKey: "currency_id",
-        header: tfl("currency"),
-        cell: ({ row }) => (
-          <CurrencyCell
-            control={form.control}
-            form={form}
-            index={row.index}
-            isDisabled={isDisabled}
-          />
-        ),
-        size: 100,
-        meta: {
-          headerClassName: "text-center",
-          cellClassName: "text-center",
         },
       },
       {
@@ -305,7 +315,7 @@ export function usePrItemTable({
             isDisabled={isDisabled}
           />
         ),
-        size: 100,
+        size: 110,
       },
       {
         accessorKey: "delivery_date",
@@ -316,9 +326,10 @@ export function usePrItemTable({
             index={row.index}
             isDisabled={isDisabled}
             today={today}
+            dateFormat={dateFormat}
           />
         ),
-        size: 140,
+        size: 150,
         meta: {
           headerClassName: "text-center",
           cellClassName: "text-center",
@@ -329,25 +340,40 @@ export function usePrItemTable({
     const actionColumn: ColumnDef<ItemField> = {
       id: "action",
       header: () => "",
-      cell: ({ row }: { row: { index: number } }) => (
-        <DeleteCell
-          control={form.control}
-          index={row.index}
-          onDelete={onDelete}
-        />
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center gap-2">
+          {(row.original.history?.length ?? 0) > 0 && (
+            <PrItemHistorySheet
+              history={row.original.history ?? []}
+              productName={row.original.product_name}
+            />
+          )}
+          {!isDisabled && (
+            <DeleteCell
+              control={form.control}
+              index={row.index}
+              onDelete={onDelete}
+            />
+          )}
+        </div>
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 40,
+      size: 80,
       meta: {
-        headerClassName: "text-center",
-        cellClassName: "text-center",
+        headerClassName: "text-right",
+        cellClassName: "text-right",
       },
     };
 
     const isDraft = !prStatus || prStatus === PR_STATUS.DRAFT;
     const isCreateRole = role === STAGE_ROLE.CREATE;
     const hiddenInDraft = new Set(["foc", "approved"]);
+    // ในโหมด view (isDisabled) ยังต้องโชว์คอลัมน์ action ถ้ามีรายการที่มีประวัติ
+    // เพื่อให้ปุ่ม history แสดงได้ (ปุ่ม delete จะถูกซ่อนเองภายใน cell)
+    const hasAnyHistory = itemFields.some(
+      (item) => (item.history?.length ?? 0) > 0,
+    );
 
     const visibleDataColumns =
       isDraft || isCreateRole
@@ -359,15 +385,22 @@ export function usePrItemTable({
       ...(isDraft || isCreateRole ? [] : [expandColumn]),
       indexColumn,
       ...visibleDataColumns,
-      ...(isDisabled ? [] : [actionColumn]),
+      ...(isDisabled && !hasAnyHistory ? [] : [actionColumn]),
     ];
 
-    // location_id column: footer spans from there to end so comment input fills row
+    // Comment footer starts at location_id and spans through the delivery_point
+    // column so the comment input matches the Delivery Point column's right edge
+    // (delivery_date + action keep their own footer cells).
     const locationColIdx = baseCols.findIndex(
       (c) => "accessorKey" in c && c.accessorKey === "location_id",
     );
+    const deliveryPointColIdx = baseCols.findIndex(
+      (c) => "accessorKey" in c && c.accessorKey === "delivery_point_id",
+    );
     const footerSpan =
-      locationColIdx >= 0 ? baseCols.length - locationColIdx : 1;
+      locationColIdx >= 0 && deliveryPointColIdx >= locationColIdx
+        ? deliveryPointColIdx - locationColIdx + 1
+        : 1;
 
     const locationCol = visibleDataColumns.find(
       (c) => "accessorKey" in c && c.accessorKey === "location_id",
@@ -380,7 +413,7 @@ export function usePrItemTable({
       ...col,
       meta: {
         ...col.meta,
-        cellClassName: cn("py-2 align-center", col.meta?.cellClassName),
+        cellClassName: cn("py-2 align-middle", col.meta?.cellClassName),
       },
     }));
 
@@ -392,12 +425,14 @@ export function usePrItemTable({
     role,
     buCode,
     baseCurrencyCode,
+    dateFormat,
     itemFields,
     onDelete,
     setSelectDialogOpen,
     today,
     isLockedAfterCreate,
     tfl,
+    tc,
   ]);
 
   const table = useReactTable({

@@ -6,10 +6,12 @@ export interface PoDialogState {
   showComment: boolean;
   showReject: boolean;
   showClose: boolean;
+  showHistory: boolean;
   setShowDelete: Dispatch<SetStateAction<boolean>>;
   setShowComment: Dispatch<SetStateAction<boolean>>;
   setShowReject: Dispatch<SetStateAction<boolean>>;
   setShowClose: Dispatch<SetStateAction<boolean>>;
+  setShowHistory: Dispatch<SetStateAction<boolean>>;
 }
 
 /**
@@ -27,6 +29,7 @@ export function usePoDialogState(): PoDialogState {
   const [showComment, setShowComment] = useState(false);
   const [showReject, setShowReject] = useState(false);
   const [showClose, setShowClose] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   return {
     showDelete,
@@ -37,5 +40,7 @@ export function usePoDialogState(): PoDialogState {
     setShowReject,
     showClose,
     setShowClose,
+    showHistory,
+    setShowHistory,
   };
 }

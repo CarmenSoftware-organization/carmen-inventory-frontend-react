@@ -1,14 +1,8 @@
-
 import { useNavigate } from "react-router";
-import {
-  ArrowLeft,
-  Calendar,
-  ClipboardCheck,
-  Clock,
-  MapPin,
-} from "lucide-react";
+import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
+import { STATUS_DOT_CHIP } from "@/constant/status-config";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
@@ -51,26 +45,31 @@ export function PcEntryHeader({
             <ArrowLeft />
           </Button>
           <div className="min-w-0">
-            <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-bold tracking-widest uppercase">
-              <ClipboardCheck className="size-2.5" />
-              {t("entryTitle")}
-            </span>
-            <h1 className="text-foreground mt-1 text-base leading-tight font-semibold tracking-tight">
-              {locationName || "—"}
-            </h1>
-            <p className="text-muted-foreground mt-0.5 text-[0.625rem] tracking-wide uppercase">
-              {locationCode}
-            </p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-foreground mt-1 text-base leading-tight font-semibold tracking-tight">
+                {locationName || "—"}
+              </h1>
+              <Badge size="xs" className={`${STATUS_DOT_CHIP} before:bg-info`}>
+                {status ?? t("tabInProgress")}
+              </Badge>
+            </div>
+
+            <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-[0.625rem] tracking-wide uppercase">
+              <p>{locationCode}</p>
+              {startCountingAt && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="size-2.5" aria-hidden="true" />
+                  {new Date(startCountingAt).toLocaleDateString()}
+                </span>
+              )}
+              <span className="flex items-center gap-1">
+                <Clock className="size-2.5" aria-hidden="true" />
+                {t("lastSaved", { time: lastSaved ?? "--:--" })}
+              </span>
+            </div>
           </div>
         </div>
         <div className="shrink-0 text-right">
-          <Badge
-            variant="info"
-            size="xs"
-            className="text-[0.5625rem] tracking-widest uppercase"
-          >
-            {status ?? t("tabInProgress")}
-          </Badge>
           <p className="text-foreground mt-1 text-sm font-semibold tabular-nums">
             {countedCount}{" "}
             <span className="text-muted-foreground text-xs">
@@ -84,23 +83,6 @@ export function PcEntryHeader({
       </div>
 
       <Progress value={percent} variant="auto" className="mt-3 h-1" />
-
-      <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-3 text-[0.6875rem]">
-        <span className="flex items-center gap-1">
-          <MapPin className="size-2.5" aria-hidden="true" />
-          {locationName}
-        </span>
-        {startCountingAt && (
-          <span className="flex items-center gap-1">
-            <Calendar className="size-2.5" aria-hidden="true" />
-            {new Date(startCountingAt).toLocaleDateString()}
-          </span>
-        )}
-        <span className="flex items-center gap-1">
-          <Clock className="size-2.5" aria-hidden="true" />
-          {t("lastSaved", { time: lastSaved ?? "--:--" })}
-        </span>
-      </div>
     </div>
   );
 }

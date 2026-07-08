@@ -14,7 +14,6 @@ import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
 import {
   IA_STATUS_CONFIG,
-  IA_STATUS_VARIANT,
   IA_TYPE_CONFIG,
   IA_TYPE_ICON,
 } from "@/constant/inventory-adjustment";
@@ -125,11 +124,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             </div>
           </div>
 
-          <Badge
-            variant={IA_STATUS_VARIANT[item.doc_status]}
-            size="xs"
-            className="shrink-0"
-          >
+          <Badge size="xs" className={cn(statusConfig.className, "shrink-0")}>
             {statusConfig.label}
           </Badge>
         </div>

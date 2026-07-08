@@ -2,13 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  ArrowLeft,
-  FileText,
-  LayoutTemplate,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
+import { ArrowLeft, FileText, LayoutTemplate, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -79,111 +73,82 @@ export function CreatePRDialog({ open, onOpenChange }: CreatePRDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="overflow-hidden p-0 sm:max-w-2xl">
         {view === "choice" ? (
-          <>            <div className="relative space-y-5 p-6">
-              <DialogHeader>
-                <div className="flex items-start gap-3">
-                  <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-                    <LayoutTemplate className="size-4.5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                      {t("getStarted")}
-                    </div>
-                    <DialogTitle className="text-base">
-                      {t("createTitle")}
-                    </DialogTitle>
-                    <DialogDescription className="mt-1">
-                      {t("createDesc")}
-                    </DialogDescription>
-                  </div>
+          <div className="space-y-5 p-6">
+            <DialogHeader>
+              <DialogTitle className="text-base">
+                {t("createTitle")}
+              </DialogTitle>
+              <DialogDescription className="mt-1">
+                {t("createDesc")}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={handleBlankPR}
+                className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 flex cursor-pointer flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2"
+              >
+                <FileText className="text-foreground size-5" />
+                <div className="space-y-0.5">
+                  <h3 className="text-foreground text-sm font-semibold">
+                    {t("blankPr")}
+                  </h3>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    {t("blankPrDesc")}
+                  </p>
                 </div>
-              </DialogHeader>
+              </button>
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={handleBlankPR}
-                  className="group hover:border-warning/40 bg-card focus-visible:ring-warning/40 relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
-                >
-                  <div className="bg-warning/10 text-warning flex size-10 items-center justify-center rounded-lg">
-                    <FileText className="size-5" />
-                  </div>
-                  <div className="relative space-y-0.5">
-                    <h3 className="text-sm font-semibold">{t("blankPr")}</h3>
-                    <p className="text-muted-foreground text-[0.6875rem] font-semibold">
-                      {t("blankPrSubtitle")}
-                    </p>
-                    <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
-                      {t("blankPrDesc")}
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setView("template")}
-                  className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 relative flex cursor-pointer flex-col items-start gap-3 overflow-hidden rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
-                >
-                  <span className="bg-primary/10 text-primary absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                    <Sparkles className="size-2.5" />
-                    {t("recommended")}
-                  </span>
-                  <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg">
-                    <LayoutTemplate className="size-5" />
-                  </div>
-                  <div className="relative space-y-0.5">
-                    <h3 className="text-sm font-semibold">
-                      {t("fromTemplate")}
-                    </h3>
-                    <p className="text-muted-foreground text-[0.6875rem] font-semibold">
-                      {t("fromTemplateSubtitle")}
-                    </p>
-                    <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
-                      {t("fromTemplateDesc")}
-                    </p>
-                  </div>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setView("template")}
+                className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 flex cursor-pointer flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2"
+              >
+                <LayoutTemplate className="text-primary size-5" />
+                <div className="space-y-0.5">
+                  <h3 className="text-foreground text-sm font-semibold">
+                    {t("fromTemplate")}
+                  </h3>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    {t("fromTemplateDesc")}
+                  </p>
+                </div>
+              </button>
             </div>
-          </>
+          </div>
         ) : (
-          <>            <div className="relative flex max-h-[85vh] flex-col gap-4 p-6">
-              <DialogHeader>
-                <div className="flex items-start gap-3 pt-2">
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={handleBackToChoice}
-                    aria-label={tc("goBack")}
-                    className="shrink-0 cursor-pointer"
-                  >
-                    <ArrowLeft className="size-4" />
-                  </Button>
-                  <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-                    <LayoutTemplate className="size-4.5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                      {t("fromTemplate")}
-                    </div>
-                    <DialogTitle className="text-base">
-                      {t("selectTemplate")}
-                    </DialogTitle>
-                    <DialogDescription className="mt-1">
-                      {t("selectTemplateDesc")}
-                    </DialogDescription>
-                  </div>
-                  {!isLoading && templates && templates.length > 0 && (
-                    <Badge
-                      variant="outline"
-                      size="xs"
-                      className="mt-1 shrink-0 tabular-nums"
-                    >
-                      {filteredTemplates.length}/{templates.length}
-                    </Badge>
-                  )}
+          <div className="flex max-h-[85vh] flex-col gap-4 p-6">
+            <DialogHeader>
+              <div className="flex items-start gap-3">
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={handleBackToChoice}
+                  aria-label={tc("goBack")}
+                  className="shrink-0 cursor-pointer"
+                >
+                  <ArrowLeft className="size-4" />
+                </Button>
+                <div className="min-w-0 flex-1">
+                  <DialogTitle className="text-base">
+                    {t("selectTemplate")}
+                  </DialogTitle>
+                  <DialogDescription className="mt-1">
+                    {t("selectTemplateDesc")}
+                  </DialogDescription>
                 </div>
-              </DialogHeader>
+                {!isLoading && templates && templates.length > 0 && (
+                  <Badge
+                    variant="outline"
+                    size="xs"
+                    className="mt-1 shrink-0 tabular-nums"
+                  >
+                    {filteredTemplates.length}/{templates.length}
+                  </Badge>
+                )}
+              </div>
+            </DialogHeader>
 
               {!isLoading && templates && templates.length > 0 && (
                 <SearchInput
@@ -233,7 +198,6 @@ export function CreatePRDialog({ open, onOpenChange }: CreatePRDialogProps) {
                 </div>
               </ScrollArea>
             </div>
-          </>
         )}
       </DialogContent>
     </Dialog>

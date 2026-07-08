@@ -1,7 +1,7 @@
 import { Clock, GitBranch, ListChecks, Lock } from "lucide-react";
-import { useLocale, useTranslations } from "use-intl";
+import { useLocale } from "use-intl";
 
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Card,
   CardHeader,
@@ -36,7 +36,6 @@ export default function WfCard({
   isPending,
 }: WfCardProps) {
   const locale = useLocale();
-  const ts = useTranslations("status");
   const updated = item.audit?.updated;
   const updatedRelative = updated?.at
     ? formatRelativeTime(updated.at, locale)
@@ -96,13 +95,7 @@ export default function WfCard({
         </div>
         <CardAction>
           <div className="flex items-center gap-1">
-            <Badge
-              variant={item.is_active ? "success" : "secondary"}
-              size="sm"
-              className="text-xs"
-            >
-              {item.is_active ? ts("active") : ts("inactive")}
-            </Badge>
+            <StatusBadge active={item.is_active} />
             {onToggleActive && onDuplicate && onDelete && (
               <WfRowActions
                 workflow={item}

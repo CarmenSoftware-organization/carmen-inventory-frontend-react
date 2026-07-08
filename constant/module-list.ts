@@ -424,6 +424,12 @@ export const moduleList: ModuleDto[] = [
     icon: Shield,
     subModules: [
       {
+        name: "businessSetting",
+        path: "/system-admin/business-setting",
+        icon: Briefcase,
+        permission: PERMISSIONS.system_configuration.view,
+      },
+      {
         name: "period",
         path: "/system-admin/period",
         icon: Calendar,

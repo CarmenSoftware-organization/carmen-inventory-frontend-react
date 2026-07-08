@@ -1,12 +1,11 @@
-
 import { useEffect, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import {
   Field,
-  FieldGroup,
   FieldLabel,
   FieldDatePicker,
+  FieldPlainText,
 } from "@/components/ui/field";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
@@ -18,7 +17,12 @@ import { formatDate } from "@/lib/date-utils";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { PoFormValues } from "./po-form-schema";
-import { Input } from "@/components/ui/input";
+import {
+  InputSuffixAddon,
+  InputSuffixField,
+  InputSuffixInput,
+  InputSuffixPlain,
+} from "@/components/ui/input/input-suffix";
 
 interface PoGeneralFieldsProps {
   readonly form: UseFormReturn<PoFormValues>;
@@ -27,6 +31,8 @@ interface PoGeneralFieldsProps {
   readonly readOnly?: boolean;
   /** view/locked → แสดงค่าทุก field เป็น plain text แทน input */
   readonly plainText?: boolean;
+  /** draft/add เท่านั้นที่แสดง workflow picker — ไม่ draft ย้ายไป ribbon cell */
+  readonly isDraft?: boolean;
 }
 
 /** Field ที่แสดงค่าเป็น plain text (ใช้ใน view/locked mode) */
@@ -39,14 +45,14 @@ function PlainField({
   readonly value?: string;
   readonly children?: ReactNode;
 }) {
+  // gap-1 (4px) ภายในคู่ label↔value ให้ชิดกันเป็นชุดเดียว — แถวต่อแถวเว้น 16px
+  // (gap-y-4) สร้าง proximity grouping แบบ Apple (intra ชิดกว่า inter มากๆ)
   return (
-    <Field>
-      <FieldLabel>{label}</FieldLabel>
-      {children ?? (
-        <span className="inline-flex min-h-8 items-center text-sm">
-          {value || "—"}
-        </span>
-      )}
+    <Field className="gap-1">
+      <FieldLabel className="text-muted-foreground font-normal">
+        {label}
+      </FieldLabel>
+      {children ?? <FieldPlainText className="text-xs">{value}</FieldPlainText>}
     </Field>
   );
 }
@@ -57,10 +63,11 @@ export function PoGeneralFields({
   isManual,
   readOnly = false,
   plainText = false,
+  isDraft = true,
 }: PoGeneralFieldsProps) {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const { defaultCurrencyId, defaultCurrencyCode, dateFormat } = useProfile();
+  const { defaultCurrencyId, dateFormat } = useProfile();
 
   const exchangeRate = useWatch({
     control: form.control,
@@ -91,13 +98,18 @@ export function PoGeneralFields({
   const fieldDisabled = disabled || readOnly;
   const manualFieldDisabled = fieldDisabled || !isManual;
 
+  // draft โชว์ workflow (5 คอลัมน์); ไม่ draft ซ่อน workflow เหลือ 4 → เต็มแถว
+  const lgGridCols = isDraft ? "lg:grid-cols-5" : "lg:grid-cols-4";
+
   // View/locked/disabled → แสดงทุก field เป็น plain text (workflow ใช้ lookup
   // readOnly เพราะไม่ได้เก็บ workflow_name; ที่เหลืออ่านจาก *_name/_code ที่เก็บไว้)
   if (plainText || disabled) {
     const v = form.getValues();
     return (
-      <FieldGroup className="gap-4">
-        <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={`grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${lgGridCols}`}
+      >
+        {isDraft && (
           <PlainField label={tfl("workflow")}>
             <LookupWorkflow
               value={v.workflow_id}
@@ -107,27 +119,29 @@ export function PoGeneralFields({
               className="text-xs"
             />
           </PlainField>
-          <PlainField label={tfl("vendor")} value={v.vendor_name} />
-          <PlainField label={tfl("creditTerm")} value={v.credit_term_name} />
-          <PlainField
-            label={tfl("deliveryDate")}
-            value={
-              v.delivery_date ? formatDate(v.delivery_date, dateFormat) : ""
-            }
+        )}
+        <PlainField label={tfl("vendor")} value={v.vendor_name} />
+        <PlainField label={tfl("creditTerm")} value={v.credit_term_name} />
+        <PlainField
+          label={tfl("deliveryDate")}
+          value={v.delivery_date ? formatDate(v.delivery_date, dateFormat) : ""}
+        />
+        {/* Currency + Exchange rate รวมเป็น field เดียว (เหมือน GRN):
+            exchange rate (ค่า) + currency code (suffix) */}
+        <PlainField label={tfl("currency")}>
+          <InputSuffixPlain
+            className="inline-flex min-h-8 items-center text-left text-xs"
+            value={formatExchangeRate(v.exchange_rate)}
+            suffix={v.currency_code}
           />
-          <PlainField label={tfl("currency")} value={v.currency_code} />
-          <PlainField
-            label={tfl("exchangeRate")}
-            value={formatExchangeRate(v.exchange_rate, defaultCurrencyCode)}
-          />
-        </div>
-      </FieldGroup>
+        </PlainField>
+      </div>
     );
   }
 
   return (
-    <FieldGroup className="gap-4">
-      <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
+      {isDraft && (
         <Field>
           <FieldLabel required>{tfl("workflow")}</FieldLabel>
           <Controller
@@ -145,88 +159,92 @@ export function PoGeneralFields({
             )}
           />
         </Field>
-        <Field>
-          <FieldLabel required>{tfl("vendor")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="vendor_id"
-            render={({ field, fieldState }) => (
-              <LookupVendor
-                value={field.value}
-                onValueChange={field.onChange}
-                onItemChange={(vendor) => {
-                  form.setValue("vendor_name", vendor.name);
-                }}
-                disabled={manualFieldDisabled}
-                error={fieldState.error?.message}
-                className="text-xs"
-              />
-            )}
-          />
-        </Field>
+      )}
+      <Field>
+        <FieldLabel required>{tfl("vendor")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="vendor_id"
+          render={({ field, fieldState }) => (
+            <LookupVendor
+              value={field.value}
+              onValueChange={field.onChange}
+              onItemChange={(vendor) => {
+                form.setValue("vendor_name", vendor.name);
+              }}
+              disabled={manualFieldDisabled}
+              error={fieldState.error?.message}
+              className="text-xs"
+            />
+          )}
+        />
+      </Field>
 
-        <Field>
-          <FieldLabel>{tfl("creditTerm")}</FieldLabel>
-          <LookupCreditTerm
-            value={creditTermId}
-            onValueChange={(val, creditTerm) => {
-              form.setValue("credit_term_id", val);
-              if (creditTerm) {
-                form.setValue("credit_term_name", creditTerm.name);
-                form.setValue("credit_term_value", creditTerm.value);
-              }
-            }}
-            disabled={fieldDisabled}
-          />
-        </Field>
-        <Field>
-          <FieldLabel required>{tfl("deliveryDate")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="delivery_date"
-            render={({ field, fieldState }) => (
-              <FieldDatePicker
-                value={field.value}
-                onValueChange={field.onChange}
-                disabled={manualFieldDisabled}
-                placeholder={tc("selectDate")}
-                className="w-full text-xs"
-                error={fieldState.error?.message}
-              />
-            )}
-          />
-        </Field>
-        <Field>
-          <FieldLabel required>{tfl("currency")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="currency_id"
-            render={({ field, fieldState }) => (
-              <LookupCurrency
-                value={field.value}
-                onValueChange={field.onChange}
-                onItemChange={(currency) => {
-                  form.setValue("currency_code", currency.code);
-                  form.setValue("exchange_rate", currency.exchange_rate);
-                }}
-                disabled={manualFieldDisabled}
-                size="sm"
-                className="w-full text-xs"
-                error={fieldState.error?.message}
-              />
-            )}
-          />
-        </Field>
-        <Field>
-          <FieldLabel>{tfl("exchangeRate")}</FieldLabel>
-          <Input
-            value={formatExchangeRate(exchangeRate, defaultCurrencyCode)}
+      <Field>
+        <FieldLabel>{tfl("creditTerm")}</FieldLabel>
+        <LookupCreditTerm
+          value={creditTermId}
+          onValueChange={(val, creditTerm) => {
+            form.setValue("credit_term_id", val);
+            if (creditTerm) {
+              form.setValue("credit_term_name", creditTerm.name);
+              form.setValue("credit_term_value", creditTerm.value);
+            }
+          }}
+          disabled={fieldDisabled}
+        />
+      </Field>
+      <Field>
+        <FieldLabel required>{tfl("deliveryDate")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="delivery_date"
+          render={({ field, fieldState }) => (
+            <FieldDatePicker
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={manualFieldDisabled}
+              placeholder={tc("selectDate")}
+              className="w-full text-xs"
+              error={fieldState.error?.message}
+            />
+          )}
+        />
+      </Field>
+      <Field>
+        <FieldLabel required htmlFor="po-exchange-rate">
+          {tfl("currency")}
+        </FieldLabel>
+        <InputSuffixField
+          className="h-8"
+          error={!!form.formState.errors.currency_id?.message}
+        >
+          <InputSuffixInput
+            id="po-exchange-rate"
+            value={formatExchangeRate(exchangeRate)}
             disabled
             readOnly
-            className="h-8 text-right"
           />
-        </Field>
-      </div>
-    </FieldGroup>
+          <InputSuffixAddon>
+            <Controller
+              control={form.control}
+              name="currency_id"
+              render={({ field }) => (
+                <LookupCurrency
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onItemChange={(currency) => {
+                    form.setValue("currency_code", currency.code);
+                    form.setValue("exchange_rate", currency.exchange_rate);
+                  }}
+                  disabled={manualFieldDisabled}
+                  className="h-full w-24 rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
+                />
+              )}
+            />
+          </InputSuffixAddon>
+        </InputSuffixField>
+      </Field>
+    </div>
   );
 }

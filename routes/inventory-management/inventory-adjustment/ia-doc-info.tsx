@@ -1,11 +1,5 @@
-
 import { useTranslations } from "use-intl";
-import {
-  Controller,
-  useForm,
-  useWatch,
-  type Control,
-} from "react-hook-form";
+import { Controller, useForm, useWatch, type Control } from "react-hook-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Field,
@@ -13,11 +7,13 @@ import {
   FieldError,
   FieldDatePicker,
   FieldSelect,
+  FieldPlainText,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
 import { INVENTORY_TYPE } from "@/constant/location";
+import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import type { InventoryAdjustment } from "@/types/inventory-adjustment";
 import type { AdjFormValues } from "./ia-form-schema";
@@ -50,14 +46,19 @@ export function DocumentInfo({
   tfl,
 }: DocumentInfoProps) {
   return (
-    <Card className="gap-0 py-0">
-      <CardHeader className="border-b px-5 py-3">
-        <CardTitle className="text-sm font-semibold">{t("docInfo")}</CardTitle>
+    <Card>
+      <CardHeader className="border-b">
+        <CardTitle className="text-sm">{t("docInfo")}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 px-5 py-4">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Field>
-            <FieldLabel required={!isView}>{tfl("date")}</FieldLabel>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Field className={cn(isView && "gap-1")}>
+            <FieldLabel
+              required={!isView}
+              className={cn(isView && "text-muted-foreground font-normal")}
+            >
+              {tfl("date")}
+            </FieldLabel>
             {isView ? (
               <PlainDateValue control={form.control} dateFormat={dateFormat} />
             ) : (
@@ -86,8 +87,13 @@ export function DocumentInfo({
             )}
           </Field>
 
-          <Field>
-            <FieldLabel required={!isView}>{tfl("reason")}</FieldLabel>
+          <Field className={cn(isView && "gap-1")}>
+            <FieldLabel
+              required={!isView}
+              className={cn(isView && "text-muted-foreground font-normal")}
+            >
+              {tfl("reason")}
+            </FieldLabel>
             {isView ? (
               <PlainReasonValue
                 control={form.control}
@@ -120,12 +126,19 @@ export function DocumentInfo({
             )}
           </Field>
 
-          <Field className="sm:col-span-2 lg:col-span-1">
-            <FieldLabel required={!isView}>{tfl("location")}</FieldLabel>
+          <Field
+            className={cn("sm:col-span-2 lg:col-span-1", isView && "gap-1")}
+          >
+            <FieldLabel
+              required={!isView}
+              className={cn(isView && "text-muted-foreground font-normal")}
+            >
+              {tfl("location")}
+            </FieldLabel>
             {isView ? (
-              <PlainValue>
-                {inventoryAdjustment?.location_name ?? "—"}
-              </PlainValue>
+              <FieldPlainText className="min-h-9 text-sm">
+                {inventoryAdjustment?.location_name}
+              </FieldPlainText>
             ) : (
               <Controller
                 control={form.control}
@@ -150,8 +163,11 @@ export function DocumentInfo({
           </Field>
         </div>
 
-        <Field>
-          <FieldLabel htmlFor="inv-adj-description">
+        <Field className={cn(isView && "gap-1")}>
+          <FieldLabel
+            htmlFor="inv-adj-description"
+            className={cn(isView && "text-muted-foreground font-normal")}
+          >
             {tfl("description")}
           </FieldLabel>
           {isView ? (
@@ -161,8 +177,7 @@ export function DocumentInfo({
               <Textarea
                 id="inv-adj-description"
                 placeholder={tfl("optional")}
-                className="min-h-13 text-xs"
-                rows={2}
+                className="text-xs"
                 disabled={isDisabled}
                 maxLength={256}
                 aria-invalid={!!form.formState.errors.description}
@@ -181,26 +196,6 @@ export function DocumentInfo({
   );
 }
 
-function PlainValue({
-  children,
-  multiline,
-}: {
-  readonly children: React.ReactNode;
-  readonly multiline?: boolean;
-}) {
-  return (
-    <div
-      className={
-        multiline
-          ? "text-foreground min-h-9 text-sm whitespace-pre-wrap"
-          : "text-foreground flex h-9 items-center text-sm"
-      }
-    >
-      {children}
-    </div>
-  );
-}
-
 function PlainDateValue({
   control,
   dateFormat,
@@ -209,7 +204,11 @@ function PlainDateValue({
   readonly dateFormat: string;
 }) {
   const date = useWatch({ control, name: "date" });
-  return <PlainValue>{date ? formatDate(date, dateFormat) : "—"}</PlainValue>;
+  return (
+    <FieldPlainText className="min-h-9 text-sm">
+      {date ? formatDate(date, dateFormat) : ""}
+    </FieldPlainText>
+  );
 }
 
 function PlainReasonValue({
@@ -223,7 +222,11 @@ function PlainReasonValue({
 }) {
   const adjustmentTypeId = useWatch({ control, name: "adjustment_type_id" });
   const name = adjTypes.find((at) => at.id === adjustmentTypeId)?.name;
-  return <PlainValue>{name ?? fallback ?? "—"}</PlainValue>;
+  return (
+    <FieldPlainText className="min-h-9 text-sm">
+      {name ?? fallback}
+    </FieldPlainText>
+  );
 }
 
 function PlainDescriptionValue({
@@ -232,5 +235,13 @@ function PlainDescriptionValue({
   readonly control: Control<AdjFormValues>;
 }) {
   const description = useWatch({ control, name: "description" });
-  return <PlainValue multiline>{description || "—"}</PlainValue>;
+  return (
+    <FieldPlainText className="min-h-9 text-sm">
+      {description ? (
+        <span className="whitespace-pre-wrap">{description}</span>
+      ) : (
+        ""
+      )}
+    </FieldPlainText>
+  );
 }

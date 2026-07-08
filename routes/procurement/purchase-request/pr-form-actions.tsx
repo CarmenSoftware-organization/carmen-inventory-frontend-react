@@ -1,11 +1,5 @@
 import { useTranslations } from "use-intl";
-import {
-  MessageSquare,
-  Pencil,
-  Save,
-  Trash2,
-  X,
-} from "lucide-react";
+import { MessageSquare, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { STAGE_ROLE } from "@/types/stage-role";

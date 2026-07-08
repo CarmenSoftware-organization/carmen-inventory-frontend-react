@@ -1,9 +1,7 @@
-
 import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
-  ClipboardCheck,
   Send,
   TrendingDown,
   TrendingUp,
@@ -74,11 +72,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
             <ArrowLeft />
           </Button>
           <div className="min-w-0">
-            <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-bold tracking-widest uppercase">
-              <ClipboardCheck className="size-2.5" />
-              {t("entity")}
-            </span>
-            <h1 className="text-foreground mt-1 text-lg leading-tight font-semibold tracking-tight md:text-xl">
+            <h1 className="text-foreground text-lg leading-tight font-semibold tracking-tight md:text-xl">
               {t("reviewTitle")}
             </h1>
             {(locationCode ?? locationName) && (
@@ -159,12 +153,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
 
         <div className="border-border/60 bg-card/80 fixed inset-x-0 bottom-0 z-30 border-t px-4 py-3 backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button
-              size="sm"
-              onClick={onSubmit}
-              disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
-            >
+            <Button size="sm" onClick={onSubmit} disabled={isSubmitting}>
               <Send className="size-3.5" aria-hidden="true" />
               {isSubmitting ? submittingLabel : submitLabel}
             </Button>

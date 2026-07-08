@@ -1,6 +1,5 @@
-
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -17,17 +16,20 @@ import {
 } from "@/hooks/use-credit-note";
 import {
   CN_STATUS,
-  type CreditNote,
+  type CreditNoteDetail,
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useProfile } from "@/hooks/use-profile";
 import { CnHeader } from "./cn-header";
 import { CnGeneralFields } from "./cn-general-fields";
-import { CnItemFields } from "./cn-item-fields";
+import { CnItem } from "./cn-item";
 import { CnFooterAction } from "./cn-footer-action";
 import {
   createCnSchema,
@@ -41,7 +43,7 @@ const CnCommentSheet = lazy(() =>
 );
 
 interface CnFormProps {
-  readonly creditNote?: CreditNote;
+  readonly creditNote?: CreditNoteDetail;
 }
 
 export function CnForm({ creditNote }: CnFormProps) {
@@ -75,24 +77,19 @@ export function CnForm({ creditNote }: CnFormProps) {
     reValidateMode: "onChange",
   });
 
+  const watchedDescription = useWatch({
+    control: form.control,
+    name: "description",
+  });
+
   const discard = useDiscardConfirm({
     isDirty: form.formState.isDirty,
     isPending,
   });
 
-  // After a successful edit-save the update mutation invalidates the
-  // CREDIT_NOTES query prefix, so useCreditNoteById refetches and the
-  // `creditNote` prop comes back with the server's new doc_version + per-item
-  // ids/doc_versions. Re-sync the form to it while in view mode so a second
-  // consecutive edit carries the current doc_version instead of the stale
-  // pre-save one (which optimistic locking would reject / mis-merge).
-  //
-  // Keyed on a signature of header doc_version + each item (id:doc_version),
-  // NOT on `mode`. Two reasons: (1) keying on mode would fire on the edit→view
-  // transition before the refetch lands — resetting to the still-stale prop and
-  // dropping any just-added item from view; (2) the item signature also catches
-  // a newly-added item getting its server id even if the header doc_version
-  // stayed put (observed as 0 on the dev backend, so not relied on alone).
+  // guard เฉพาะโหมด add/edit และฟอร์มมีการแก้ไข
+  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+
   const cnSyncKey = [
     creditNote?.doc_version ?? "",
     ...(creditNote?.credit_note_detail ?? []).map(
@@ -115,7 +112,9 @@ export function CnForm({ creditNote }: CnFormProps) {
     );
 
     const payload: CreateCnDto = {
-      ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
+      ...(values.doc_version != null
+        ? { doc_version: values.doc_version }
+        : {}),
       credit_note_type: values.credit_note_type,
       grn_id: values.grn_id,
       grn_date: values.grn_date,
@@ -211,7 +210,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex min-h-full flex-col space-y-4">
       <CnHeader
         creditNote={creditNote}
         mode={mode}
@@ -234,15 +233,54 @@ export function CnForm({ creditNote }: CnFormProps) {
         onSubmit={form.handleSubmit(onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4"
+        className="space-y-3 px-4"
       >
         <CnGeneralFields form={form} disabled={isDisabled} plainText={isView} />
-        <CnItemFields form={form} disabled={isDisabled} />
+
+        {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
+        {(!isView || watchedDescription?.trim()) && (
+          <Field className={isView ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor="cn-description"
+              className={
+                isView ? "text-muted-foreground font-normal" : undefined
+              }
+            >
+              {tfl("description")}
+            </FieldLabel>
+            {isView ? (
+              <p className="min-h-8 text-xs whitespace-pre-wrap">
+                {watchedDescription}
+              </p>
+            ) : (
+              <Textarea
+                id="cn-description"
+                placeholder={tfl("optional")}
+                className="text-xs"
+                rows={2}
+                disabled={isDisabled}
+                maxLength={256}
+                {...form.register("description")}
+              />
+            )}
+          </Field>
+        )}
+        <CnItem form={form} disabled={isDisabled} />
       </form>
 
       <CnFooterAction control={form.control} />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {creditNote && (
         <>

@@ -1,17 +1,12 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
-  ClipboardList,
   Columns3,
-  FileText,
   Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
-  PackageCheck,
-  Sparkles,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
@@ -31,13 +26,6 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   useGoodsReceiveNote,
   useDeleteGoodsReceiveNote,
@@ -63,7 +51,8 @@ import EmptyComponent from "@/components/empty-component";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { useGrnActiveFilters } from "./grn-active-filters";
 import { GrnPoWizardDialog } from "./grn-po-wizard-dialog";
-import { mapPoDetailToItems } from "./grn-product-cards";
+import { GrnCreateDialog } from "./grn-create-dialog";
+import { mapPoDetailToItems } from "./grn-item-table";
 import type { PoForGrn } from "@/types/purchase-order";
 
 export default function GrnComponent() {
@@ -72,7 +61,7 @@ export default function GrnComponent() {
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
-  const [showDocTypeDialog, setShowDocTypeDialog] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<GoodsReceiveNote | null>(
     null,
@@ -176,7 +165,7 @@ export default function GrnComponent() {
   };
 
   const handleSelectDocType = (docType: string) => {
-    setShowDocTypeDialog(false);
+    setShowCreateDialog(false);
     if (docType === "purchase_order") {
       setShowWizard(true);
     } else {
@@ -225,15 +214,11 @@ export default function GrnComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-            count={totalRecords}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => setShowDocTypeDialog(true)}
+            onAdd={() => setShowCreateDialog(true)}
             addLabel={t("add")}
           />
         </div>
@@ -407,75 +392,11 @@ export default function GrnComponent() {
         )}
       </div>
 
-      <Dialog open={showDocTypeDialog} onOpenChange={setShowDocTypeDialog}>
-        <DialogContent className="overflow-hidden p-0 sm:max-w-2xl">          <div className="relative space-y-5 p-6">
-            <DialogHeader>
-              <div className="flex items-start gap-3">
-                <div className="bg-invert/10 text-invert flex size-9 shrink-0 items-center justify-center rounded-lg">
-                  <PackageCheck className="size-4.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                    {t("getStarted")}
-                  </div>
-                  <DialogTitle className="text-base">
-                    {t("selectDocType")}
-                  </DialogTitle>
-                  <DialogDescription className="mt-1">
-                    {t("selectDocTypeDesc")}
-                  </DialogDescription>
-                </div>
-              </div>
-            </DialogHeader>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => handleSelectDocType("manual")}
-                className="group hover:border-warning/40 bg-card focus-visible:ring-warning/40 flex cursor-pointer flex-col items-start gap-3 rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
-              >
-                <div className="bg-warning/10 text-warning flex size-10 items-center justify-center rounded-lg">
-                  <FileText className="size-5" />
-                </div>
-                <div className="relative space-y-0.5">
-                  <h3 className="text-sm font-semibold">{t("manual")}</h3>
-                  <p className="text-muted-foreground text-[0.6875rem] font-semibold">
-                    {t("manualSubtitle")}
-                  </p>
-                  <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
-                    {t("manualDesc")}
-                  </p>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSelectDocType("purchase_order")}
-                className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 relative flex cursor-pointer flex-col items-start gap-3 rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
-              >
-                <span className="bg-primary/10 text-primary absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                  <Sparkles className="size-2.5" />
-                  {t("recommended")}
-                </span>
-                <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg">
-                  <ClipboardList className="size-5" />
-                </div>
-                <div className="relative space-y-0.5">
-                  <h3 className="text-sm font-semibold">
-                    {t("purchaseOrder")}
-                  </h3>
-                  <p className="text-muted-foreground text-[0.6875rem] font-semibold">
-                    {t("poSubtitle")}
-                  </p>
-                  <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
-                    {t("poDesc")}
-                  </p>
-                </div>
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <GrnCreateDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSelect={handleSelectDocType}
+      />
 
       {showWizard && (
         <GrnPoWizardDialog

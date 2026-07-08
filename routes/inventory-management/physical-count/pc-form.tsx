@@ -74,7 +74,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
 
     if (isEdit && physicalCount) {
       updatePc.mutate(
-        { id: physicalCount.id, ...payload },
+        { id: physicalCount.id, doc_version: physicalCount.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

@@ -8,6 +8,7 @@ import type { SrFormValues } from "./sr-form-schema";
 import { SrSubmitDialog } from "./sr-submit-dialog";
 import { SrActionDialog } from "./sr-action-dialog";
 import type { UseSrFormActionsReturn } from "./use-sr-form-actions";
+import { useSrPreviousStages } from "@/hooks/use-store-requisition";
 
 // แทน next/dynamic ด้วย React.lazy (code-split comment-sheet chunk เหมือนเดิม)
 // lazy ต้องการ default export — wrap named export ด้วย { default: ... }
@@ -31,11 +32,31 @@ export function SrFormDialogs({
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
 
+  // previous-stages list สำหรับ send-back — fetch เฉพาะตอน review dialog เปิด
+  const { data: previousStages } = useSrPreviousStages(
+    storeRequisition?.id,
+    actions.actionDialog === "review",
+  );
+
+  // ใช้ list จริงจาก API; ถ้ายังไม่มี (loading/ไม่รองรับ) fallback stage เดียว
+  const sendBackStages =
+    previousStages && previousStages.length > 0
+      ? previousStages
+      : storeRequisition?.workflow_previous_stage
+        ? [
+            {
+              key: storeRequisition.workflow_previous_stage,
+              name: storeRequisition.workflow_previous_stage,
+            },
+          ]
+        : undefined;
+
   const closeActionDialog = () => actions.setActionDialog(null);
 
   return (
     <>
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />
+      <DiscardDialog {...actions.navDiscardDialogProps} variant="warning" />
 
       {storeRequisition && (
         <DeleteDialog
@@ -123,16 +144,7 @@ export function SrFormDialogs({
             productName: item.product_name ?? "",
             locationName: item.unit_name ?? "",
           }))}
-        stages={
-          storeRequisition?.workflow_previous_stage
-            ? [
-                {
-                  key: storeRequisition.workflow_previous_stage,
-                  name: storeRequisition.workflow_previous_stage,
-                },
-              ]
-            : undefined
-        }
+        stages={sendBackStages}
         onConfirm={(messages, desStage) => {
           for (const [idxStr, msg] of Object.entries(messages)) {
             const idx = Number(idxStr);

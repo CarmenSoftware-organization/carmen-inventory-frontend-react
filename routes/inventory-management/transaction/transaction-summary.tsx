@@ -80,7 +80,7 @@ function SummaryCard({
       </div>
       <div
         className={cn(
-          "text-xl leading-none font-bold tracking-tight tabular-nums",
+          "text-xl leading-none font-semibold tracking-tight tabular-nums",
           tones.valueText,
         )}
       >

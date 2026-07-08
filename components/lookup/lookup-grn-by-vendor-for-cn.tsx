@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { ClipboardList } from "lucide-react";
@@ -58,16 +57,24 @@ export function LookupGrnByVendorForCn({
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
 
-  const useListByVendor = (params: { search?: string; perpage: number; page?: number }) =>
-    useGoodsReceiveNoteByVendorForCn(vendorId, params);
+  const useListByVendor = (params: {
+    search?: string;
+    perpage: number;
+    page?: number;
+  }) => useGoodsReceiveNoteByVendorForCn(vendorId, params);
 
-  const { items: grns, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<GoodsReceiveNote>({
-      useListHook: useListByVendor,
-      search,
-      perpage: 30,
-      resetDeps: [vendorId],
-    });
+  const {
+    items: grns,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<GoodsReceiveNote>({
+    useListHook: useListByVendor,
+    search,
+    perpage: 30,
+    resetDeps: [vendorId],
+  });
 
   return (
     <LookupCombobox
@@ -88,7 +95,7 @@ export function LookupGrnByVendorForCn({
           <span className="flex-1 truncate text-left">{g.invoice_no}</span>
         </>
       )}
-      renderSelected={(g) => `${g.grn_no} - ${g.invoice_no ?? ""}`}
+      renderSelected={(g) => g.grn_no}
       serverSideSearch
       onSearchChange={setSearch}
       onLoadMore={loadMore}

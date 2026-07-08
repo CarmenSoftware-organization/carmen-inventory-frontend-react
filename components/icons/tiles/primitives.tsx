@@ -14,18 +14,9 @@ export type TileRenderer = (props: {
 const SQ = (size = 40, r = 11) =>
   `M ${r} 0 H ${size - r} Q ${size} 0 ${size} ${r} V ${size - r} Q ${size} ${size} ${size - r} ${size} H ${r} Q 0 ${size} 0 ${size - r} V ${r} Q 0 0 ${r} 0 Z`;
 
-/** Filled base squircle + subtle top-edge highlight (ใช้ทั้ง AppTile + SubTile) */
+/** Filled base squircle — พื้นไทล์โทน primary-tint (flat, ไม่มี sheen/gradient) */
 export function TileBase({ palette }: { readonly palette: Palette }) {
-  return (
-    <>
-      <path d={SQ()} style={{ fill: palette.base }} />
-      <path
-        d="M 0 0 H 40 V 22 Q 30 16 20 16 T 0 22 Z"
-        fill="#fff"
-        opacity="0.08"
-      />
-    </>
-  );
+  return <path d={SQ()} style={{ fill: palette.base }} />;
 }
 
 /* ───────── Paper / Box / surfaces ───────── */
@@ -56,7 +47,7 @@ export function Paper({
     <>
       <path
         d={`M ${x} ${y} H ${foldX} L ${right} ${foldY} V ${bottom} H ${x} Z`}
-        fill="#fff"
+        fill="currentColor"
       />
       {accent && (
         <path
@@ -87,7 +78,7 @@ export function Box({
 }: BoxProps) {
   return (
     <>
-      <rect x={x} y={y} width={w} height={h} rx="1.6" fill="#fff" />
+      <rect x={x} y={y} width={w} height={h} rx="1.6" fill="currentColor" />
       {accentTop && (
         <rect
           x={x}
@@ -105,7 +96,7 @@ export function Box({
 export function Clipboard({ palette }: { readonly palette: Palette }) {
   return (
     <>
-      <rect x="10" y="11" width="20" height="22" rx="2" fill="#fff" />
+      <rect x="10" y="11" width="20" height="22" rx="2" fill="currentColor" />
       <rect
         x="15"
         y="8"
@@ -130,7 +121,7 @@ export function Clipboard({ palette }: { readonly palette: Palette }) {
 export function Calendar({ palette }: { readonly palette: Palette }) {
   return (
     <>
-      <rect x="9" y="10" width="22" height="22" rx="2" fill="#fff" />
+      <rect x="9" y="10" width="22" height="22" rx="2" fill="currentColor" />
       <rect
         x="9"
         y="10"
@@ -221,7 +212,7 @@ export function Shield({ palette }: { readonly palette: Palette }) {
     <>
       <path
         d="M 20 7 L 31 11 V 19 C 31 25.5 26.5 30 20 33 C 13.5 30 9 25.5 9 19 V 11 Z"
-        fill="#fff"
+        fill="currentColor"
       />
       <path
         d="M 14.5 19.5 L 18.5 23.5 L 25.5 16"
@@ -241,7 +232,7 @@ export function Pin({ children }: { readonly children?: React.ReactNode }) {
     <>
       <path
         d="M 20 8 C 14 8 11 13 11 17 C 11 23 20 32 20 32 C 20 32 29 23 29 17 C 29 13 26 8 20 8 Z"
-        fill="#fff"
+        fill="currentColor"
       />
       {children}
     </>
@@ -252,7 +243,7 @@ export function Pin({ children }: { readonly children?: React.ReactNode }) {
 export function ProductCube({ palette }: { readonly palette: Palette }) {
   return (
     <>
-      <path d="M 20 9 L 31 13.5 V 26 L 20 30.5 L 9 26 V 13.5 Z" fill="#fff" />
+      <path d="M 20 9 L 31 13.5 V 26 L 20 30.5 L 9 26 V 13.5 Z" fill="currentColor" />
       <path
         d="M 20 9 L 31 13.5 L 20 18 L 9 13.5 Z"
         style={{ fill: palette.accent }}
@@ -298,10 +289,10 @@ export function DashboardGrid({
 }) {
   return (
     <>
-      <rect x="9" y="9" width="9" height="14" rx={rx} fill="#fff" />
+      <rect x="9" y="9" width="9" height="14" rx={rx} fill="currentColor" />
       <rect x="9" y="25" width="9" height="6" rx={rx} style={{ fill: palette.accent }} />
       <rect x="20" y="9" width="11" height="7" rx={rx} style={{ fill: palette.accent }} />
-      <rect x="20" y="18" width="11" height="13" rx={rx} fill="#fff" />
+      <rect x="20" y="18" width="11" height="13" rx={rx} fill="currentColor" />
     </>
   );
 }

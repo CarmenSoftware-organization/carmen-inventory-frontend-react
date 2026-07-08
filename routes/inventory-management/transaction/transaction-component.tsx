@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useURL } from "@/hooks/use-url";
-import { ArrowRightLeft, Filter as FilterIcon } from "lucide-react";
+import { Filter as FilterIcon } from "lucide-react";
 import {
   DataGrid,
   DataGridContainer,
@@ -31,7 +30,7 @@ import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupCategory } from "@/components/lookup/lookup-category";
 import { cn } from "@/lib/utils";
 import EmptyComponent from "@/components/empty-component";
-import { InvPageHeader } from "../shared/inv-shared";
+import { DocumentListHeader } from "@/components/share/document-list-header";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { useTransactionTable } from "./use-transaction-table";
 import { TransactionSummary } from "./transaction-summary";
@@ -71,16 +70,6 @@ interface BuildFilterArgs {
   refTypes: Set<string>;
 }
 
-/**
- * Build filter query string ตาม API convention:
- * `field:value;field|op:val1,val2`
- *
- * ตัวอย่าง:
- *   `inventory_doc_type|in:grn,sr;created_at|daterange:2026-05-01,2026-05-31;location_id:loc1`
- *
- * - Custom date picker (`pickerDateRange`) มี priority เหนือ preset (`dateRange`)
- * - Preset แปลงเป็น from/to relative กับวันปัจจุบัน
- */
 function buildTransactionFilter({
   pickerDateRange,
   dateRange,
@@ -339,12 +328,7 @@ export default function TransactionComponent() {
       <div className="relative px-4 pt-4 pb-[max(2rem,env(safe-area-inset-bottom))] lg:p-4">
         {/* ── Page header ─────────── */}
         <Reveal>
-          <InvPageHeader
-            icon={ArrowRightLeft}
-            eyebrow={t("title")}
-            title={t("title")}
-            desc={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
         </Reveal>
 
         {/* ── Search + DateRange + Mobile Filter ─────────── */}
@@ -403,7 +387,7 @@ export default function TransactionComponent() {
                     className="h-11 w-full rounded-full"
                     onClick={() => setFilterSheetOpen(false)}
                   >
-                    Done
+                    {tc("done")}
                   </Button>
                 </div>
               </SheetContent>

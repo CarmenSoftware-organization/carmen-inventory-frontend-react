@@ -7,6 +7,10 @@ import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
 import { buildItemChanges } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { httpClient } from "@/lib/http-client";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { SR_LIST_PATH } from "@/constant/store-requisition";
 import {
@@ -97,9 +101,40 @@ export function useSrFormActions({
     isPending,
   });
 
-  const currentRole = storeRequisition?.role ?? STAGE_ROLE.CREATE;
+  // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
+  // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
+  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navDiscardDialogProps = {
+    open: navGuard.isOpen,
+    onOpenChange: (o: boolean) => {
+      if (!o) navGuard.cancel();
+    },
+    onConfirm: navGuard.confirm,
+    onCancel: navGuard.cancel,
+  };
 
-  const onSubmit = (values: SrFormValues) => {
+  const currentRole = storeRequisition?.role ?? STAGE_ROLE.CREATE;
+  const buCode = useBuCode();
+
+  // GET SR สดจาก DB ก่อนยิง save/workflow event — กัน 409 optimistic lock จาก
+  // doc_version ที่ค้างเก่าใน prop หลัง bump (แบบเดียวกับ PO)
+  const fetchFreshSr = async (): Promise<{ doc_version?: number } | null> => {
+    if (!storeRequisition || !buCode) return null;
+    try {
+      const res = await httpClient.get(
+        `${API_ENDPOINTS.STORE_REQUISITION(buCode)}/${storeRequisition.id}`,
+      );
+      if (res.ok) return (await res.json())?.data ?? null;
+    } catch {
+      // network/parse fail — fallback prop
+    }
+    return null;
+  };
+
+  const resolveDocVersion = (fresh: { doc_version?: number } | null): number =>
+    fresh?.doc_version ?? storeRequisition?.doc_version ?? 0;
+
+  const onSubmit = async (values: SrFormValues) => {
     const store_requisition_detail = buildItemChanges(
       values.items,
       defaultValues.items,
@@ -108,6 +143,7 @@ export function useSrFormActions({
       mapSrItemToPayload,
     );
 
+    const fresh = isEdit && storeRequisition ? await fetchFreshSr() : null;
     const details: CreateStoreRequisitionDto["details"] = {
       sr_date: values.sr_date,
       expected_date: values.expected_date,
@@ -117,7 +153,7 @@ export function useSrFormActions({
       department_id: values.department_id,
       from_location_id: values.from_location_id,
       to_location_id: values.to_location_id,
-      doc_version: storeRequisition?.doc_version ?? 0,
+      doc_version: resolveDocVersion(fresh),
       store_requisition_detail,
     };
 
@@ -152,13 +188,16 @@ export function useSrFormActions({
     }
   };
 
-  const runWorkflow = (
+  const runWorkflow = async (
     mutation: typeof submitSr,
     payload: SrActionPayload,
     options?: { keepOnPage?: boolean; onDone?: () => void },
   ) => {
     if (!storeRequisition) return;
-    mutation.mutate(payload, {
+    const fresh = await fetchFreshSr();
+    mutation.mutate(
+      { ...payload, doc_version: resolveDocVersion(fresh) },
+      {
       onSuccess: () => {
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         options?.onDone?.();
@@ -307,6 +346,7 @@ export function useSrFormActions({
     setActionDialog,
     // discard
     discardDialogProps: discard.dialogProps,
+    navDiscardDialogProps,
     // handlers
     onSubmit,
     handleSubmitSr,

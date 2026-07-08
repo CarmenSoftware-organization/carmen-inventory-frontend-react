@@ -4,6 +4,12 @@ import { useTranslations } from "use-intl";
 import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   DataGrid,
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
@@ -57,59 +63,63 @@ export function AdjItemFields({
     typeof itemsError?.message === "string" ? itemsError.message : undefined;
 
   return (
-    <div className="space-y-2 pt-4">
-      <div className="flex items-center justify-between">
-        <h2 className="border-b pb-2 text-sm font-semibold">
+    <>
+      <CardHeader className="border-b">
+        <CardTitle className="text-sm">
           {tfl("items")}{" "}
           <span className="text-muted-foreground font-normal">
             ({itemFields.length})
           </span>
-        </h2>
+        </CardTitle>
         {!disabled && (
-          <Button
-            type="button"
-            size="xs"
-            onClick={handleAddItem}
-            disabled={!hasLocation}
-          >
-            <Plus /> {t("addItem")}
-          </Button>
+          <CardAction>
+            <Button
+              type="button"
+              size="xs"
+              onClick={handleAddItem}
+              disabled={!hasLocation}
+            >
+              <Plus /> {t("addItem")}
+            </Button>
+          </CardAction>
         )}
-      </div>
-      {itemsRootMessage && (
-        <p className="text-destructive text-xs" role="alert">
-          {itemsRootMessage}
-        </p>
-      )}
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {itemsRootMessage && (
+          <p className="text-destructive text-xs" role="alert">
+            {itemsRootMessage}
+          </p>
+        )}
 
-      <DataGrid
-        table={table}
-        recordCount={itemFields.length}
-        tableClassNames={{ headerRow: "h-10", bodyRow: "h-10" }}
-        emptyMessage={
-          <EmptyComponent
-            icon={BoxIcon}
-            title={t("noItems")}
-            description={t("noItemsDesc")}
-            content={
-              !disabled && (
-                <Button
-                  type="button"
-                  size="xs"
-                  onClick={handleAddItem}
-                  disabled={!hasLocation}
-                >
-                  <Plus /> {t("addItem")}
-                </Button>
-              )
-            }
-          />
-        }
-      >
-        <DataGridContainer>
-          <DataGridTable />
-        </DataGridContainer>
-      </DataGrid>
+        <DataGrid
+          table={table}
+          recordCount={itemFields.length}
+          tableClassNames={{ headerRow: "h-10", bodyRow: "h-10" }}
+          emptyMessage={
+            <EmptyComponent
+              icon={BoxIcon}
+              title={t("noItems")}
+              description={t("noItemsDesc")}
+              content={
+                !disabled && (
+                  <Button
+                    type="button"
+                    size="xs"
+                    onClick={handleAddItem}
+                    disabled={!hasLocation}
+                  >
+                    <Plus /> {t("addItem")}
+                  </Button>
+                )
+              }
+            />
+          }
+        >
+          <DataGridContainer>
+            <DataGridTable />
+          </DataGridContainer>
+        </DataGrid>
+      </CardContent>
 
       <DeleteDialog
         open={deleteIndex !== null}
@@ -124,6 +134,6 @@ export function AdjItemFields({
           setDeleteIndex(null);
         }}
       />
-    </div>
+    </>
   );
 }

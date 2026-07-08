@@ -1,10 +1,10 @@
-
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
   ArrowLeft,
   Ban,
   CalendarDays,
+  Check,
   MapPin,
   Pencil,
   Save,
@@ -65,18 +65,18 @@ export function IaFormHero({
   onVoid,
 }: IaFormHeroProps) {
   const tc = useTranslations("common");
-  const tf = useTranslations("form");
   const isStockIn = adjustmentType === "stock-in";
   const isView = mode === "view";
   const isEdit = mode === "edit";
-  const isAdd = mode === "add";
   const TypeIcon = IA_TYPE_ICON[adjustmentType];
   const docNo = inventoryAdjustment?.si_no ?? inventoryAdjustment?.so_no ?? "";
   const canDelete = !!inventoryAdjustment && !isReadOnly;
   const canVoid = isEdit && !!inventoryAdjustment && !isReadOnly;
   const canPrint = isView && !!inventoryAdjustment?.id;
-  const submitLabel = isAdd ? tc("create") : tc("save");
-  const submitPendingLabel = isAdd ? tf("creating") : tf("saving");
+
+  /** Save = ฉบับร่าง (draft) / Submit = ปิดเอกสาร (completed) — ตั้ง doc_status ก่อน submit */
+  const submitWith = (docStatus: "draft" | "completed") => () =>
+    form.setValue("doc_status", docStatus);
 
   /* useWatch subscribes only to `date` so re-render is scoped */
   const watchedDate = useWatch({ control: form.control, name: "date" });
@@ -92,7 +92,7 @@ export function IaFormHero({
         isStockIn ? "border-l-success" : "border-l-destructive",
       )}
     >
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3">
         {/* Back button */}
         <Button
           variant="ghost"
@@ -217,12 +217,24 @@ export function IaFormHero({
               </Button>
               <Button
                 type="submit"
+                variant="outline"
                 size="sm"
                 form={formId}
                 disabled={isPending}
+                onClick={submitWith("draft")}
               >
                 <Save />
-                {isPending ? submitPendingLabel : submitLabel}
+                {tc("save")}
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                form={formId}
+                disabled={isPending}
+                onClick={submitWith("completed")}
+              >
+                <Check />
+                {tc("submit")}
               </Button>
             </>
           ) : null}
