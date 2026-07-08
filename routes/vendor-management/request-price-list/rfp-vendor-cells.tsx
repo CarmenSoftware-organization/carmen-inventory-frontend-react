@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Check,
-  CheckCircle2,
-  Copy,
-  ExternalLink,
-  FileText,
-  Trash2,
-} from "lucide-react";
+import { Check, CheckCircle2, Copy, ExternalLink, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
