@@ -174,12 +174,12 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     : selectedRoleCount;
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <AnimationStyles />
 
-      {/* ── Sticky toolbar ─────────────────────────── */}
-      <div className="bg-background/80 sticky top-0 z-20 -mx-3 flex items-center justify-between gap-3 border-b px-3 py-2 backdrop-blur-md">
-        <div className="flex min-w-0 items-center gap-2">
+      {/* ── Header: identity + actions (business-setting layout) ── */}
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -188,16 +188,24 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
           >
             <ArrowLeft />
           </Button>
+          <UserAvatar first={user.firstname} last={user.lastname} />
           <div className="min-w-0">
-            <h1 className="text-sm leading-tight font-semibold">
-              {isView ? "User Assign" : "Edit Assignment"}
-            </h1>
-            <p className="text-muted-foreground truncate text-[0.6875rem]">
-              {user.firstname} {user.lastname}
-            </p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-foreground truncate text-lg font-semibold tracking-tight">
+                {user.firstname} {user.lastname}
+              </h1>
+              <Badge variant="success-light" size="xs" className="shrink-0">
+                ● Active
+              </Badge>
+            </div>
+            <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
+              <span className="break-all">{user.email}</span>
+              <span aria-hidden="true">·</span>
+              <span>@{user.username}</span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {isView ? (
             <Button size="sm" onClick={() => setMode("edit")}>
               <Pencil />
@@ -227,68 +235,43 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
             </>
           )}
         </div>
-      </div>
+      </header>
 
-      {/* ── Hero ──────────────────────────────────── */}
-      <Reveal>
-        <section className="border-border/60 bg-card rounded-2xl border p-5">
-          <div className="flex flex-wrap items-center gap-4">
-            <UserAvatar first={user.firstname} last={user.lastname} />
-            <div className="min-w-0 flex-1">
-              <h2 className="text-foreground text-lg font-semibold tracking-tight">
-                {user.firstname} {user.lastname}
-              </h2>
-              <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-                <span className="break-all">{user.email}</span>
-                <span aria-hidden="true">·</span>
-                <span>@{user.username}</span>
-              </div>
-            </div>
-            <Badge variant="success-light" size="xs" className="shrink-0">
-              ● Active
-            </Badge>
-          </div>
-        </section>
+      {/* ── Settings-style sections (title+desc left · body right) ── */}
+      <Reveal delay={80}>
+        <RolesSection
+          first
+          form={form}
+          roles={roles}
+          isLoading={rolesLoading}
+          isDisabled={isDisabled}
+          count={roleCountForDisplay}
+          onSubmit={onSubmit}
+        />
       </Reveal>
 
-      {/* ── 2-col grid ────────────────────────────── */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="space-y-4">
-          <Reveal delay={140}>
-            <RolesSection
-              form={form}
-              roles={roles}
-              isLoading={rolesLoading}
-              isDisabled={isDisabled}
-              count={roleCountForDisplay}
-              onSubmit={onSubmit}
-            />
-          </Reveal>
+      <Reveal delay={140}>
+        <DepartmentsSection
+          memberDepartment={memberDepartment}
+          hodDepartments={hodDepartments}
+          isLoading={departmentsLoading}
+          totalCount={totalDeptCount}
+        />
+      </Reveal>
 
-          <Reveal delay={200}>
-            <DepartmentsSection
-              memberDepartment={memberDepartment}
-              hodDepartments={hodDepartments}
-              isLoading={departmentsLoading}
-              totalCount={totalDeptCount}
-            />
-          </Reveal>
-        </div>
-
-        <Reveal delay={260}>
-          <LocationsSection
-            isView={isView}
-            isLoading={locationsLoading}
-            isDisabled={isDisabled}
-            userLocations={userLocations}
-            locationSource={locationSource}
-            locationTargetKeys={locationTargetKeys}
-            onTargetKeysChange={setLocationTargetKeys}
-            transferLoading={allLocationsLoading || locationsLoading}
-            initialLocationCount={initialLocationKeys.length}
-          />
-        </Reveal>
-      </div>
+      <Reveal delay={200}>
+        <LocationsSection
+          isView={isView}
+          isLoading={locationsLoading}
+          isDisabled={isDisabled}
+          userLocations={userLocations}
+          locationSource={locationSource}
+          locationTargetKeys={locationTargetKeys}
+          onTargetKeysChange={setLocationTargetKeys}
+          transferLoading={allLocationsLoading || locationsLoading}
+          initialLocationCount={initialLocationKeys.length}
+        />
+      </Reveal>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
     </div>

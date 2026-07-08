@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types/role";
-import { EmptyState, SectionCard } from "./user-assigned-ui";
+import { AssignSection, EmptyState } from "./user-assigned-ui";
 import type { UserRolesFormValues } from "./user-roles-form-schema";
 
 /* ------------------------------------------------------------------ */
@@ -96,6 +96,7 @@ interface RolesSectionProps {
   readonly isLoading: boolean;
   readonly isDisabled: boolean;
   readonly count: number;
+  readonly first?: boolean;
   readonly onSubmit: (values: UserRolesFormValues) => void;
 }
 
@@ -105,11 +106,17 @@ export function RolesSection({
   isLoading,
   isDisabled,
   count,
+  first,
   onSubmit,
 }: RolesSectionProps) {
   const t = useTranslations("systemAdmin.user");
   return (
-    <SectionCard icon={Shield} title={t("assignRoles")} count={count}>
+    <AssignSection
+      title={t("assignRoles")}
+      description={t("assignRolesDesc")}
+      count={count}
+      first={first}
+    >
       {isLoading ? (
         <div className="space-y-2">
           {[0, 1, 2].map((i) => (
@@ -159,6 +166,6 @@ export function RolesSection({
           </div>
         </form>
       )}
-    </SectionCard>
+    </AssignSection>
   );
 }

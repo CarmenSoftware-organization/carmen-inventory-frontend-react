@@ -4,7 +4,7 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DepartmentRef } from "@/types/user";
-import { EmptyState, SectionCard } from "./user-assigned-ui";
+import { AssignSection, EmptyState } from "./user-assigned-ui";
 
 interface DepartmentsSectionProps {
   readonly memberDepartment: DepartmentRef | null;
@@ -21,9 +21,9 @@ export function DepartmentsSection({
 }: DepartmentsSectionProps) {
   const t = useTranslations("systemAdmin.user");
   return (
-    <SectionCard
-      icon={Building2}
+    <AssignSection
       title={t("departmentsTitle")}
+      description={t("departmentsDesc")}
       count={totalCount || undefined}
     >
       {isLoading ? (
@@ -102,6 +102,6 @@ export function DepartmentsSection({
           </div>
         </div>
       )}
-    </SectionCard>
+    </AssignSection>
   );
 }

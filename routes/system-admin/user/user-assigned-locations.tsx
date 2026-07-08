@@ -8,7 +8,7 @@ import type { TransferItem } from "@/components/ui/transfer";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { cn } from "@/lib/utils";
 import type { UserLocationItem } from "@/hooks/use-user";
-import { EmptyState, FilterChip, SectionCard } from "./user-assigned-ui";
+import { AssignSection, EmptyState, FilterChip } from "./user-assigned-ui";
 
 // แทน next/dynamic ด้วย React.lazy (code-split transfer chunk เหมือนเดิม)
 const Transfer = lazy(() =>
@@ -149,9 +149,9 @@ export function LocationsSection({
     ) : undefined;
 
   return (
-    <SectionCard
-      icon={MapPin}
+    <AssignSection
       title={tu("locationsTitle")}
+      description={tu("locationsDesc")}
       count={isView ? initialLocationCount : locationTargetKeys.length}
       action={action}
     >
@@ -174,7 +174,7 @@ export function LocationsSection({
           />
         </Suspense>
       )}
-    </SectionCard>
+    </AssignSection>
   );
 }
 

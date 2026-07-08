@@ -1138,6 +1138,9 @@
     },
     "user": {
       "assignRoles": "Assign Roles",
+      "assignRolesDesc": "Application roles granted to this user.",
+      "departmentsDesc": "Departments this user belongs to or heads.",
+      "locationsDesc": "Inventory locations this user can access.",
       "noRolesAvailable": "No roles available",
       "noRolesAvailableDesc": "Create roles in System Admin first",
       "departmentsTitle": "Departments",
