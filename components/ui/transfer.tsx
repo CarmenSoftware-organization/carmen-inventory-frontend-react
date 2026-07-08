@@ -254,10 +254,12 @@ const TransferPanel = ({
         </div>
       </div>
 
-      {/* Virtualized list */}
+      {/* Virtualized list — fixed-height scroll viewport (was flex-1, which let
+          basis:0% override h-60 so the list grew to fit all rows in an
+          unbounded parent, pushing the move arrows off-screen). */}
       <div
         ref={scrollRef}
-        className="contain:strict relative h-60 flex-1 overflow-y-auto"
+        className="relative h-60 overflow-y-auto [contain:strict]"
       >
         {loading && <PanelLoading />}
         {!loading && items.length === 0 && <PanelEmpty hasSearch={!!search} />}

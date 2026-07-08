@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
@@ -60,25 +60,20 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     .map((l) => ({ key: l.id, title: `${l.code} — ${l.name}` }));
 
   const initialLocationKeys = userLocations.map((l) => l.location_id);
+  const serverLocationKey = initialLocationKeys.join("|");
 
   const [locationTargetKeys, setLocationTargetKeys] =
     useState<string[]>(initialLocationKeys);
 
-  useEffect(() => {
-    queueMicrotask(() => {
-      setLocationTargetKeys((prev) => {
-        const sorted = [...initialLocationKeys].sort();
-        const prevSorted = [...prev].sort();
-        if (
-          sorted.length === prevSorted.length &&
-          sorted.every((k, i) => k === prevSorted[i])
-        ) {
-          return prev;
-        }
-        return initialLocationKeys;
-      });
-    });
-  }, [initialLocationKeys]);
+  // Re-seed the transfer target only when the SERVER data actually changes,
+  // via React's "adjust state during render" pattern. Depending on
+  // `initialLocationKeys` in an effect re-ran every render (fresh array each
+  // time) and reverted the user's picks the moment they moved one across.
+  const [seededLocationKey, setSeededLocationKey] = useState(serverLocationKey);
+  if (seededLocationKey !== serverLocationKey) {
+    setSeededLocationKey(serverLocationKey);
+    setLocationTargetKeys(initialLocationKeys);
+  }
 
   const memberDepartment = userDepartments?.department ?? null;
   const hodDepartments = userDepartments?.hod_departments ?? [];
