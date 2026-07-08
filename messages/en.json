@@ -1683,6 +1683,7 @@
     "requestPriceList": {
       "entity": "Request for Pricing",
       "title": "Request for Pricing",
+      "generalDesc": "Template and the effective request period.",
       "desc": "Manage request price lists for your business.",
       "add": "Add Request",
       "edit": "Edit Request for Price List",

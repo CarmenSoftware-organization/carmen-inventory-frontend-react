@@ -20,6 +20,7 @@ import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { cn } from "@/lib/utils";
 import type { Vendor } from "@/types/vendor";
 import type { RequestPriceListVendor } from "@/types/request-price-list";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
 import { EmptyProducts } from "../price-list/pl-empty-states";
 import type { RfpFormValues } from "./rfp-form-schema";
 
@@ -53,37 +54,26 @@ export default function RfpVendorSection({
     setIsAdding(true);
   };
 
-  const submittedCount = displayVendors.filter(
-    (v) => "has_submitted" in v && v.has_submitted,
-  ).length;
-
   return (
-    <div>
-      <div className="mb-2 flex items-end justify-between gap-3 px-1">
-        <div>
-          <h3 className="text-foreground text-sm font-semibold tracking-tight">
-            {t("vendors.title")}
-          </h3>
-          <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
-            {displayVendors.length === 0
-              ? t("vendors.noVendors")
-              : `${displayVendors.length} ${t("vendorsLabel")} · ${submittedCount} ${t("submittedLabel")}`}
-          </p>
-        </div>
-        {!isDisabled && (
+    <SettingSection
+      wide
+      title={t("vendors.title")}
+      description={t("vendors.noVendorsDesc")}
+      count={displayVendors.length}
+      action={
+        !isDisabled ? (
           <Button
             type="button"
             size="xs"
             onClick={handleAddClick}
             disabled={isAdding}
-            className="rounded-full"
           >
             <Plus />
             {t("vendors.addVendor")}
           </Button>
-        )}
-      </div>
-
+        ) : undefined
+      }
+    >
       {displayVendors.length === 0 && !isAdding ? (
         <EmptyProducts
           onAdd={handleAddClick}
@@ -113,7 +103,7 @@ export default function RfpVendorSection({
           )}
         </div>
       )}
-    </div>
+    </SettingSection>
   );
 }
 

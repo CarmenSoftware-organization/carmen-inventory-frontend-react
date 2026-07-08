@@ -5,29 +5,23 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { toast } from "sonner";
-import {
-  Building2,
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ClipboardList,
-  Mail,
-  Pencil,
-  Save,
-  Trash2,
-  Users,
-  X,
-} from "lucide-react";
+import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { Field, FieldDatePicker, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDatePicker,
+  FieldInput,
+  FieldLabel,
+} from "@/components/ui/field";
 import { LookupPrt } from "@/components/lookup/lookup-prt";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { daysBetween, formatLocalizedDate } from "@/lib/date-utils";
+import { formatLocalizedDate } from "@/lib/date-utils";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import {
   useCreateRequestPriceList,
@@ -42,15 +36,8 @@ import type {
 } from "@/types/request-price-list";
 import type { FormMode } from "@/types/form";
 
-import {
-  CardLabel,
-  DateCard,
-  GlassCard,
-  InfoRow,
-  MetaChip,
-  PlainText,
-} from "@/components/share/glass-card";
-import { NameField } from "../price-list/pl-name-field";
+import { PlainText } from "@/components/share/glass-card";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
 import {
   createRfpSchema,
   getDefaultValues,
@@ -59,9 +46,6 @@ import {
 import RfpVendorSection from "./rfp-vendor-section";
 
 const FORM_ID = "rfp-form";
-const LABEL_CLASS = cn(
-  "text-muted-foreground text-[0.625rem] font-semibold tracking-[0.1em] uppercase",
-);
 
 type VendorAddItem = RfpFormValues["vendors"]["add"][number];
 
@@ -114,6 +98,7 @@ export function RequestPriceListForm({
 
   const startDate = useWatch({ control: form.control, name: "start_date" });
   const endDate = useWatch({ control: form.control, name: "end_date" });
+  const watchedName = useWatch({ control: form.control, name: "name" });
 
   const watchedAdd = useWatch({ control: form.control, name: "vendors.add" });
   const addedVendors: VendorAddItem[] = watchedAdd ?? [];
@@ -137,10 +122,6 @@ export function RequestPriceListForm({
     ...existingVendors.map((v) => v.vendor_id),
     ...addedVendors.map((v) => v.vendor_id),
   ]);
-
-  const submittedCount = existingVendors.filter(
-    (v) => "has_submitted" in v && v.has_submitted,
-  ).length;
 
   const handleAddVendor = (vendor: Vendor) => {
     if (selectedVendorIds.has(vendor.id)) {
@@ -272,26 +253,12 @@ export function RequestPriceListForm({
     });
   };
 
-  const totalVendors = displayVendors.length;
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
-  const durationDays =
-    startDate && endDate ? daysBetween(startDate, endDate) : 0;
 
   return (
-    <div className="relative isolate -mx-3 -my-3">
-      <form
-        id={FORM_ID}
-        onSubmit={form.handleSubmit(onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
-        className="relative px-4 pt-4 pb-8 lg:p-4"
-      >
-        {/* Hero */}
-        <section className="mb-5 grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
-          <div>
-            {/* Toolbar */}
-            <div className="mb-3 flex flex-wrap items-center justify-between">
-              <div className="flex items-center gap-2">
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
                 <Button
                   type="button"
                   size="sm"
@@ -302,10 +269,16 @@ export function RequestPriceListForm({
                 >
                   <ChevronLeft />
                 </Button>
-                <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-bold tracking-wider uppercase">
-                  <Mail className="size-2.5" />
-                  {t("entity")}
-                </span>
+                <h1
+                  className={cn(
+                    "truncate text-lg font-semibold tracking-tight",
+                    watchedName
+                      ? "text-foreground"
+                      : "text-muted-foreground italic",
+                  )}
+                >
+                  {watchedName || t("namePlaceholder")}
+                </h1>
               </div>
               <div className="flex items-center gap-2">
                 {isView ? (
@@ -362,289 +335,150 @@ export function RequestPriceListForm({
                   </>
                 )}
               </div>
-            </div>
+      </header>
 
-            {/* Name input */}
-            <Controller
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <NameField
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder={t("namePlaceholder")}
-                  disabled={isDisabled}
-                  error={form.formState.errors.name?.message}
-                  labels={{
-                    nameLabel: tfl("name"),
-                    tapToEdit: t("internalNote"),
-                    pressEnterToSave: t("pressEnterToSave"),
-                    clickToRename: t("clickToRename"),
-                    requiredField: t("requiredField"),
-                  }}
-                />
-              )}
-            />
-
-            {/* Descriptor */}
-            <p className="text-foreground/80 mt-2 max-w-xl text-xs leading-relaxed">
-              {totalVendors > 0 && durationDays > 0 ? (
-                <span className="text-foreground/80">
-                  {t("descriptorFilled", {
-                    count: totalVendors,
-                    days: durationDays,
-                  })}
-                </span>
-              ) : (
-                <span className="text-muted-foreground italic">
-                  {t("descriptorEmpty")}
-                </span>
-              )}
-            </p>
-
-            {/* Meta chips */}
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              <MetaChip
-                icon={Users}
-                label={
-                  totalVendors > 0
-                    ? t("vendorsCount", { count: totalVendors })
-                    : t("noVendors")
-                }
-                empty={!totalVendors}
+      <form
+        id={FORM_ID}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
+      >
+        {/* General */}
+        <SettingSection
+          first
+          title={tfl("general")}
+          description={t("generalDesc")}
+        >
+          {/* Name */}
+          <Field className="sm:col-span-2">
+            <FieldLabel htmlFor="rfp-name">
+              {tfl("name")}
+              {!isView && <span className="text-destructive"> *</span>}
+            </FieldLabel>
+            {isView ? (
+              <PlainText value={form.getValues("name")} />
+            ) : (
+              <FieldInput
+                id="rfp-name"
+                placeholder={t("namePlaceholder")}
+                disabled={isDisabled}
+                error={form.formState.errors.name?.message}
+                maxLength={100}
+                {...form.register("name")}
               />
-              <MetaChip
-                icon={CalendarIcon}
-                label={
-                  startDate && endDate
-                    ? `${formatLocalizedDate(startDate, locale)} → ${formatLocalizedDate(endDate, locale)}`
-                    : tfl("startDate")
-                }
-                empty={!startDate || !endDate}
-              />
-              <MetaChip
-                icon={ClipboardList}
-                label={
-                  requestPriceList?.pricelist_template?.name || tfl("template")
-                }
-                empty={!requestPriceList?.pricelist_template}
-              />
-            </div>
-          </div>
+            )}
+          </Field>
 
-          {/* Hero stat card */}
-          <RfpHeroStatCard
-            totalVendors={totalVendors}
-            submittedCount={submittedCount}
-            durationDays={durationDays}
-            labels={{
-              vendors: t("vendorsLabel"),
-              submitted: t("submittedLabel"),
-              days: t("daysLabel"),
-              footer: t("heroFooter"),
-              vendorsInvited: t("vendorsInvited"),
-            }}
-          />
-        </section>
-
-        {/* Body grid */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
-          <div className="flex flex-col gap-4">
-            {/* General settings card */}
-            <GlassCard>
-              <CardLabel>{tfl("general")}</CardLabel>
-
-              <Field>
-                <FieldLabel className={LABEL_CLASS}>
-                  {tfl("template")}
-                  {!isView && <span className="text-destructive">*</span>}
-                </FieldLabel>
-                {isView ? (
-                  <PlainText
-                    value={requestPriceList?.pricelist_template?.name}
-                  />
-                ) : (
-                  <Controller
-                    control={form.control}
-                    name="pricelist_template_id"
-                    render={({ field }) => (
-                      <LookupPrt
-                        value={field.value ?? ""}
-                        onValueChange={(value) => field.onChange(value)}
-                        disabled={isDisabled}
-                        className="h-8 w-full text-xs"
-                        error={
-                          form.formState.errors.pricelist_template_id?.message
-                        }
-                      />
-                    )}
+          {/* Template */}
+          <Field className="sm:col-span-2">
+            <FieldLabel>
+              {tfl("template")}
+              {!isView && <span className="text-destructive"> *</span>}
+            </FieldLabel>
+            {isView ? (
+              <PlainText value={requestPriceList?.pricelist_template?.name} />
+            ) : (
+              <Controller
+                control={form.control}
+                name="pricelist_template_id"
+                render={({ field }) => (
+                  <LookupPrt
+                    value={field.value ?? ""}
+                    onValueChange={(value) => field.onChange(value)}
+                    disabled={isDisabled}
+                    className="w-full"
+                    error={
+                      form.formState.errors.pricelist_template_id?.message
+                    }
                   />
                 )}
-              </Field>
+              />
+            )}
+          </Field>
 
-              <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                <DateCard label={tfl("startDate")} value={startDate}>
-                  {isView ? (
-                    <PlainText
-                      value={
-                        startDate ? formatLocalizedDate(startDate, locale) : ""
-                      }
-                    />
-                  ) : (
-                    <Controller
-                      control={form.control}
-                      name="start_date"
-                      render={({ field }) => (
-                        <FieldDatePicker
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          disabled={isDisabled}
-                          placeholder={tfl("pickDate")}
-                          className="h-8 w-full border-0 bg-transparent text-xs shadow-none focus-visible:ring-0"
-                          fromDate={today}
-                          error={form.formState.errors.start_date?.message}
-                        />
-                      )}
-                    />
-                  )}
-                </DateCard>
-                <DateCard label={tfl("endDate")} value={endDate} highlight>
-                  {isView ? (
-                    <PlainText
-                      value={endDate ? formatLocalizedDate(endDate, locale) : ""}
-                    />
-                  ) : (
-                    <Controller
-                      control={form.control}
-                      name="end_date"
-                      render={({ field }) => (
-                        <FieldDatePicker
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          disabled={isDisabled}
-                          placeholder={tfl("pickDate")}
-                          className="h-8 w-full border-0 bg-transparent text-xs shadow-none focus-visible:ring-0"
-                          fromDate={startDate ? new Date(startDate) : today}
-                          error={form.formState.errors.end_date?.message}
-                        />
-                      )}
-                    />
-                  )}
-                </DateCard>
-              </div>
-            </GlassCard>
+          {/* Start date */}
+          <Field>
+            <FieldLabel>{tfl("startDate")}</FieldLabel>
+            {isView ? (
+              <PlainText
+                value={startDate ? formatLocalizedDate(startDate, locale) : ""}
+              />
+            ) : (
+              <Controller
+                control={form.control}
+                name="start_date"
+                render={({ field }) => (
+                  <FieldDatePicker
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={isDisabled}
+                    className="w-full"
+                    placeholder={tfl("pickDate")}
+                    fromDate={today}
+                    error={form.formState.errors.start_date?.message}
+                  />
+                )}
+              />
+            )}
+          </Field>
 
-            {/* Custom message card */}
-            <GlassCard>
-              <CardLabel>{t("customMessageTitle")}</CardLabel>
-              <p className="text-muted-foreground mb-3 max-w-xl text-[0.6875rem] leading-relaxed">
-                {t("customMessageHelp")}
-              </p>
-              {isView ? (
-                <PlainText value={requestPriceList?.custom_message} multiline />
-              ) : (
-                <Input
-                  type="text"
-                  disabled={isDisabled}
-                  placeholder={t("customMessagePlaceholder")}
-                  maxLength={500}
-                  className="border-border/40 bg-background/60 hover:border-foreground/50 focus-visible:border-primary h-9 rounded-lg border text-xs shadow-none transition-colors focus-visible:ring-0"
-                  {...form.register("custom_message")}
-                />
-              )}
-            </GlassCard>
+          {/* End date */}
+          <Field>
+            <FieldLabel>{tfl("endDate")}</FieldLabel>
+            {isView ? (
+              <PlainText
+                value={endDate ? formatLocalizedDate(endDate, locale) : ""}
+              />
+            ) : (
+              <Controller
+                control={form.control}
+                name="end_date"
+                render={({ field }) => (
+                  <FieldDatePicker
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    disabled={isDisabled}
+                    className="w-full"
+                    placeholder={tfl("pickDate")}
+                    fromDate={startDate ? new Date(startDate) : today}
+                    error={form.formState.errors.end_date?.message}
+                  />
+                )}
+              />
+            )}
+          </Field>
+        </SettingSection>
 
-            {/* Vendors section */}
-            <RfpVendorSection
-              isDisabled={isDisabled}
-              isAdding={isAdding}
-              setIsAdding={setIsAdding}
-              displayVendors={displayVendors}
-              selectedVendorIds={selectedVendorIds}
-              onAddVendor={handleAddVendor}
-              onRemoveVendor={handleRemoveVendor}
-            />
-          </div>
+        {/* Custom message */}
+        <SettingSection
+          title={t("customMessageTitle")}
+          description={t("customMessageHelp")}
+        >
+          <Field className="sm:col-span-2">
+            <FieldLabel>{t("customMessageTitle")}</FieldLabel>
+            {isView ? (
+              <PlainText value={requestPriceList?.custom_message} multiline />
+            ) : (
+              <Input
+                type="text"
+                disabled={isDisabled}
+                placeholder={t("customMessagePlaceholder")}
+                maxLength={500}
+                {...form.register("custom_message")}
+              />
+            )}
+          </Field>
+        </SettingSection>
 
-          {/* Sidebar */}
-          <aside className="hidden flex-col gap-3 self-start lg:sticky lg:top-20 lg:flex">
-            <GlassCard>
-              <CardLabel>{t("templateSummary")}</CardLabel>
-              {requestPriceList?.pricelist_template ? (
-                <div className="flex items-start gap-3">
-                  <div className="text-primary-foreground flex size-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-semibold">
-                    <ClipboardList className="size-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-foreground truncate text-xs font-semibold">
-                      {requestPriceList.pricelist_template.name}
-                    </div>
-                    <div className="text-muted-foreground mt-0.5 text-[0.625rem] tracking-wide uppercase">
-                      {requestPriceList.pricelist_template.currency?.code}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="border-primary/35 bg-primary/5 rounded-lg border border-dashed p-3 text-center">
-                  <div className="border-primary/30 bg-card/60 mx-auto mb-2 flex size-7 items-center justify-center rounded-lg border">
-                    <Building2 className="text-primary size-3" />
-                  </div>
-                  <div className="text-foreground text-[0.6875rem] font-semibold">
-                    {t("noTemplate")}
-                  </div>
-                  <p className="text-muted-foreground mt-0.5 text-[0.625rem]">
-                    {t("templateEmptyDesc")}
-                  </p>
-                </div>
-              )}
-            </GlassCard>
-
-            <GlassCard>
-              <CardLabel>{t("rfpSummary")}</CardLabel>
-              <div className="grid gap-1.5">
-                <InfoRow
-                  k={t("vendorsLabel")}
-                  v={totalVendors || "—"}
-                  muted={!totalVendors}
-                />
-                <InfoRow
-                  k={t("submittedLabel")}
-                  v={`${submittedCount} / ${totalVendors || 0}`}
-                  muted={!totalVendors}
-                />
-                <InfoRow
-                  k={tfl("startDate")}
-                  v={startDate ? formatLocalizedDate(startDate, locale) : "—"}
-                  muted={!startDate}
-                />
-                <InfoRow
-                  k={tfl("endDate")}
-                  v={endDate ? formatLocalizedDate(endDate, locale) : "—"}
-                  muted={!endDate}
-                />
-                <InfoRow
-                  k={t("durationLabel")}
-                  v={
-                    durationDays > 0
-                      ? t("daysSuffix", { count: durationDays })
-                      : "—"
-                  }
-                  muted={!durationDays}
-                />
-              </div>
-
-              <div className="border-primary/30 bg-primary/5 mt-4 rounded-lg border p-3">
-                <div className="text-primary flex items-center gap-1 text-[0.5625rem] font-bold tracking-widest uppercase">
-                  <Mail className="size-2.5" />
-                  {t("tipTitle")}
-                </div>
-                <p className="text-foreground/80 mt-1 text-[0.6875rem] leading-relaxed">
-                  {t("tipBody")}
-                </p>
-              </div>
-            </GlassCard>
-          </aside>
-        </div>
+        <RfpVendorSection
+          isDisabled={isDisabled}
+          isAdding={isAdding}
+          setIsAdding={setIsAdding}
+          displayVendors={displayVendors}
+          selectedVendorIds={selectedVendorIds}
+          onAddVendor={handleAddVendor}
+          onRemoveVendor={handleRemoveVendor}
+        />
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
@@ -661,89 +495,6 @@ export function RequestPriceListForm({
           onConfirm={handleConfirmDelete}
         />
       )}
-    </div>
-  );
-}
-
-/* ── Hero stat card ─────────────────────────────────────────── */
-
-function RfpHeroStatCard({
-  totalVendors,
-  submittedCount,
-  durationDays,
-  labels,
-}: {
-  readonly totalVendors: number;
-  readonly submittedCount: number;
-  readonly durationDays: number;
-  readonly labels: {
-    readonly vendors: string;
-    readonly submitted: string;
-    readonly days: string;
-    readonly footer: string;
-    readonly vendorsInvited: string;
-  };
-}) {
-  const isEmpty = !totalVendors;
-  return (
-    <div className="text-primary-foreground hidden rounded-2xl bg-primary p-4 lg:block">
-      <div className="text-primary-foreground/70 text-[0.5625rem] font-semibold tracking-widest uppercase">
-        {labels.vendorsInvited}
-      </div>
-      <div className="mt-1 flex items-baseline gap-1.5">
-        <span
-          className={cn(
-            "text-3xl leading-none font-semibold tracking-tight tabular-nums",
-            isEmpty && "text-primary-foreground/45",
-          )}
-        >
-          {totalVendors}
-        </span>
-        <span className="text-primary-foreground/70 text-xs">
-          {labels.vendors}
-        </span>
-      </div>
-
-      <div className="bg-primary-foreground/15 mt-3 grid grid-cols-3 gap-px overflow-hidden rounded-lg">
-        <Cell k={labels.vendors} v={totalVendors || "—"} empty={isEmpty} />
-        <Cell
-          k={labels.submitted}
-          v={totalVendors ? `${submittedCount}/${totalVendors}` : "—"}
-          empty={isEmpty}
-        />
-        <Cell k={labels.days} v={durationDays || "—"} empty={!durationDays} />
-      </div>
-
-      <div className="text-primary-foreground/80 mt-2 flex items-center gap-1 text-[0.6875rem]">
-        <Mail className="size-2.5" />
-        {labels.footer}
-      </div>
-    </div>
-  );
-}
-
-function Cell({
-  k,
-  v,
-  empty,
-}: {
-  readonly k: string;
-  readonly v: string | number;
-  readonly empty?: boolean;
-}) {
-  return (
-    <div className="bg-primary/40 px-2 py-1.5">
-      <div className="text-primary-foreground/65 text-[0.5rem] font-semibold tracking-widest uppercase">
-        {k}
-      </div>
-      <div
-        className={cn(
-          "mt-0.5 text-[0.6875rem] font-semibold",
-          empty ? "text-primary-foreground/45" : "text-primary-foreground",
-        )}
-      >
-        {v}
-      </div>
     </div>
   );
 }
