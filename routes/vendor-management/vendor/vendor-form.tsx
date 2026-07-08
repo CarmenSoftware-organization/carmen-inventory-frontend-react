@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { cn } from "@/lib/utils";
 import {
@@ -74,6 +75,9 @@ export function VendorForm({ vendor }: VendorFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty,
+  );
 
   const {
     fields: infoFields,
@@ -346,6 +350,16 @@ export function VendorForm({ vendor }: VendorFormProps) {
       {vendor?.id && <VendorCertificateSection vendorId={vendor.id} />}
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {vendor && (
         <DeleteDialog

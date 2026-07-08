@@ -42,6 +42,7 @@ import { PltValidityStepper } from "./plt-validity-stepper";
 import { PltFormProductsSection } from "./plt-form-products-section";
 import { PltFormDialogs } from "./plt-form-dialogs";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { usePltFormActions } from "./use-plt-form-actions";
 import { FORM_ID } from "./plt-form-helpers";
 import { useProductLabels, useStepperLabels } from "./plt-form-labels";
@@ -99,6 +100,9 @@ export function PriceListTemplateForm({
   });
 
   const isDisabled = isView || actions.isPending;
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty,
+  );
 
   const watchedValidity = useWatch({
     control: form.control,
@@ -375,6 +379,16 @@ export function PriceListTemplateForm({
       </form>
 
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       <PltFormDialogs
         priceListTemplate={priceListTemplate}

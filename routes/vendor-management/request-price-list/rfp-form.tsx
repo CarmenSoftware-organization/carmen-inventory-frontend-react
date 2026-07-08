@@ -12,6 +12,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import {
   Field,
   FieldDatePicker,
@@ -89,6 +90,9 @@ export function RequestPriceListForm({
     isDirty: form.formState.isDirty,
     isPending,
   });
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty,
+  );
 
   const today = (() => {
     const d = new Date();
@@ -482,6 +486,16 @@ export function RequestPriceListForm({
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {requestPriceList && (
         <DeleteDialog

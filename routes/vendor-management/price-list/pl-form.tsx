@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { cn } from "@/lib/utils";
 import {
   buildItemChanges,
@@ -83,6 +84,9 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty,
+  );
 
   useEffect(() => {
     if (isAdd && defaultCurrencyId && !form.getValues("currency_id")) {
@@ -300,6 +304,16 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
+
+      <DiscardDialog
+        open={navGuard.isOpen}
+        onOpenChange={(o) => {
+          if (!o) navGuard.cancel();
+        }}
+        onConfirm={navGuard.confirm}
+        onCancel={navGuard.cancel}
+        variant="warning"
+      />
 
       {priceList && (
         <DeleteDialog
