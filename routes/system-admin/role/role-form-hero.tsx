@@ -1,20 +1,9 @@
 
-import { ArrowLeft, Pencil, Save, Shield, Trash2, X } from "lucide-react";
+import { ArrowLeft, Pencil, Save, Trash2, X } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-
-function RoleAvatar() {
-  return (
-    <div
-      className="ring-background bg-primary text-primary-foreground flex size-16 shrink-0 items-center justify-center rounded-2xl ring-4"
-      aria-hidden="true"
-    >
-      <Shield className="size-7" strokeWidth={2.25} />
-    </div>
-  );
-}
 
 interface RoleHeroProps {
   readonly name: string;
@@ -23,8 +12,6 @@ interface RoleHeroProps {
   readonly canDelete: boolean;
   readonly isDeleting: boolean;
   readonly isSaving: boolean;
-  readonly selectedPermissions: number;
-  readonly totalPermissions: number;
   readonly onBack: () => void;
   readonly onDelete: () => void;
   readonly onEdit: () => void;
@@ -38,8 +25,6 @@ export function RoleHero({
   canDelete,
   isDeleting,
   isSaving,
-  selectedPermissions,
-  totalPermissions,
   onBack,
   onDelete,
   onEdit,
@@ -49,27 +34,10 @@ export function RoleHero({
   const tc = useTranslations("common");
   const tf = useTranslations("form");
   const displayName = name?.trim() || t("untitled");
-  const ratio =
-    totalPermissions > 0 ? selectedPermissions / totalPermissions : 0;
-  const ratioPct = Math.round(ratio * 100);
-  const ratioBucket = (() => {
-    if (ratio === 0) return "none";
-    if (ratio === 1) return "full";
-    if (ratio >= 0.66) return "high";
-    if (ratio >= 0.33) return "mid";
-    return "low";
-  })();
-  const ratioColor: Record<typeof ratioBucket, string> = {
-    none: "bg-muted-foreground/40",
-    low: "bg-info",
-    mid: "bg-warning",
-    high: "bg-success",
-    full: "bg-success",
-  };
 
   return (
-    <section className="border-border/60 bg-card relative overflow-hidden rounded-2xl border p-5">
-      <div className="relative flex flex-wrap items-center gap-4">
+    <section className="border-border/60 bg-card rounded-2xl border p-4">
+      <div className="flex flex-wrap items-center gap-3">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -78,8 +46,7 @@ export function RoleHero({
         >
           <ArrowLeft />
         </Button>
-        <RoleAvatar />
-        <div className="min-w-0 flex-1 space-y-2">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2
               className={cn(
@@ -137,28 +104,6 @@ export function RoleHero({
                   </Button>
                 </>
               )}
-            </div>
-          </div>
-
-          {/* Progress */}
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[0.6875rem]">
-              <span className="text-muted-foreground">{t("coverage")}</span>
-              <span className="text-foreground font-semibold tabular-nums">
-                {selectedPermissions} / {totalPermissions}
-                <span className="text-muted-foreground ml-1.5">
-                  ({ratioPct}%)
-                </span>
-              </span>
-            </div>
-            <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all duration-500 ease-out",
-                  ratioColor[ratioBucket],
-                )}
-                style={{ width: `${ratioPct}%` }}
-              />
             </div>
           </div>
         </div>

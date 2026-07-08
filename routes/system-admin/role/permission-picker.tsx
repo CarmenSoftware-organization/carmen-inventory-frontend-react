@@ -57,14 +57,6 @@ interface CategoryMeta {
   readonly labelEn: string;
   readonly labelTh: string;
   readonly icon: LucideIcon;
-  readonly tile: string;
-  readonly tileText: string;
-  readonly headerBg: string;
-  readonly headerText: string;
-  readonly headerSubText: string;
-  readonly rowTint: string;
-  readonly borderTint: string;
-  readonly dot: string;
 }
 
 const CATEGORY_META: Record<string, CategoryMeta> = {
@@ -73,84 +65,36 @@ const CATEGORY_META: Record<string, CategoryMeta> = {
     labelEn: "Configuration",
     labelTh: "การตั้งค่า",
     icon: Settings2,
-    tile: "bg-module-config/15 border-module-config/30",
-    tileText: "text-module-config",
-    headerBg: "bg-module-config/5",
-    headerText: "text-module-config",
-    headerSubText: "text-module-config/70",
-    rowTint: "bg-module-config/5",
-    borderTint: "border-module-config/20",
-    dot: "bg-module-config",
   },
   product_management: {
     tkey: "catProduct",
     labelEn: "Product Management",
     labelTh: "การจัดการสินค้า",
     icon: Package,
-    tile: "bg-module-product/15 border-module-product/30",
-    tileText: "text-module-product",
-    headerBg: "bg-module-product/5",
-    headerText: "text-module-product",
-    headerSubText: "text-module-product/70",
-    rowTint: "bg-module-product/5",
-    borderTint: "border-module-product/20",
-    dot: "bg-module-product",
   },
   vendor_management: {
     tkey: "catVendor",
     labelEn: "Vendor Management",
     labelTh: "การจัดการผู้ขาย",
     icon: Users,
-    tile: "bg-module-vendor/15 border-module-vendor/30",
-    tileText: "text-module-vendor",
-    headerBg: "bg-module-vendor/5",
-    headerText: "text-module-vendor",
-    headerSubText: "text-module-vendor/70",
-    rowTint: "bg-module-vendor/5",
-    borderTint: "border-module-vendor/20",
-    dot: "bg-module-vendor",
   },
   procurement: {
     tkey: "catProcurement",
     labelEn: "Procurement",
     labelTh: "จัดซื้อ",
     icon: ShoppingCart,
-    tile: "bg-module-procurement/15 border-module-procurement/30",
-    tileText: "text-module-procurement",
-    headerBg: "bg-module-procurement/5",
-    headerText: "text-module-procurement",
-    headerSubText: "text-module-procurement/70",
-    rowTint: "bg-module-procurement/5",
-    borderTint: "border-module-procurement/20",
-    dot: "bg-module-procurement",
   },
   inventory_management: {
     tkey: "catInventory",
     labelEn: "Inventory Management",
     labelTh: "การจัดการคลัง",
     icon: Warehouse,
-    tile: "bg-module-inventory/15 border-module-inventory/30",
-    tileText: "text-module-inventory",
-    headerBg: "bg-module-inventory/5",
-    headerText: "text-module-inventory",
-    headerSubText: "text-module-inventory/70",
-    rowTint: "bg-module-inventory/5",
-    borderTint: "border-module-inventory/20",
-    dot: "bg-module-inventory",
   },
   widget: {
     tkey: "catWidget",
     labelEn: "Widgets",
     labelTh: "วิดเจ็ต",
     icon: LayoutDashboard,
-    tile: "bg-module-dashboard/15 border-module-dashboard/30",
-    tileText: "text-module-dashboard",
-    headerBg: "bg-module-dashboard/5",
-    headerText: "text-module-dashboard",
-    headerSubText: "text-module-dashboard/70",
-    rowTint: "bg-module-dashboard/5",
-    borderTint: "border-module-dashboard/20",
-    dot: "bg-module-dashboard",
   },
 };
 
@@ -429,7 +373,7 @@ export function PermissionPicker({
         ))}
         <span className="bg-border h-3 w-px" aria-hidden="true" />
         <span className="text-foreground/70 inline-flex items-center gap-1.5">
-          <span className="border-info/30 bg-info/10 text-info inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
+          <span className="border-border/60 bg-card text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
             <span className="bg-info size-1 rounded-full" aria-hidden="true" />
             {t("actionViewAll")}
           </span>
@@ -546,44 +490,21 @@ function ModuleMatrix({
   });
 
   return (
-    <section
-      className={cn(
-        "bg-card overflow-hidden rounded-xl border",
-        categoryMeta.borderTint,
-      )}
-    >
-      {/* Module header */}
-      <header
-        className={cn(
-          "flex items-center gap-3 border-b px-4 py-3",
-          categoryMeta.headerBg,
-          categoryMeta.borderTint,
-        )}
-      >
-        <div
-          className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-lg border",
-            categoryMeta.tile,
-            categoryMeta.tileText,
-          )}
-        >
-          <Icon className="size-4" aria-hidden="true" />
-        </div>
+    <section className="bg-card overflow-hidden rounded-xl border">
+      {/* Module header — neutral chrome; wayfinding by icon shape + name (single
+          accent reserved for interactive/selected state, per DESIGN.md) */}
+      <header className="bg-muted/30 flex items-center gap-3 border-b px-4 py-3">
+        <Icon
+          className="text-muted-foreground size-5 shrink-0"
+          aria-hidden="true"
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
-            <h3
-              className={cn(
-                "truncate text-sm font-semibold tracking-tight",
-                categoryMeta.headerText,
-              )}
-            >
+            <h3 className="text-foreground truncate text-sm font-semibold tracking-tight">
               {categoryLabel}
             </h3>
             <span
-              className={cn(
-                "truncate text-xs font-semibold",
-                categoryMeta.headerSubText,
-              )}
+              className="text-muted-foreground truncate text-xs"
               aria-hidden="true"
             >
               {secondaryLabel}
@@ -599,9 +520,7 @@ function ModuleMatrix({
         </div>
         <label
           className={cn(
-            "bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
-            categoryMeta.borderTint,
-            categoryMeta.headerText,
+            "bg-card text-foreground border-border/60 inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
             disabled
               ? "cursor-not-allowed opacity-60"
               : "cursor-pointer hover:border-primary/40",
@@ -624,7 +543,7 @@ function ModuleMatrix({
       {/* Desktop matrix table */}
       <div className="hidden md:block">
         {/* Column header row */}
-        <div className="bg-muted/30 text-muted-foreground border-border/60 grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center border-b px-4 py-2 text-[0.625rem] font-bold tracking-widest uppercase">
+        <div className="bg-muted/30 text-muted-foreground border-border/60 grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center border-b px-4 py-2 text-[0.625rem] font-semibold tracking-widest uppercase">
           <span>{t("matrixHeaderResource")}</span>
           {MAIN_ACTIONS.map((a, i) => {
             const cc = colCounts[i];
@@ -647,7 +566,7 @@ function ModuleMatrix({
               >
                 <span
                   className={cn(
-                    "font-bold",
+                    "font-semibold",
                     allCol && "text-foreground",
                     someCol && "text-foreground/80",
                   )}
@@ -670,7 +589,6 @@ function ModuleMatrix({
             label={getResourceLabel(r)}
             selectedSet={selectedSet}
             disabled={disabled}
-            categoryMeta={categoryMeta}
             isLast={idx === group.resources.length - 1}
             onToggleResource={(c) => onToggleResource(r, c)}
             onTogglePermission={onTogglePermission}
@@ -687,7 +605,6 @@ function ModuleMatrix({
             label={getResourceLabel(r)}
             selectedSet={selectedSet}
             disabled={disabled}
-            categoryMeta={categoryMeta}
             onToggleResource={(c) => onToggleResource(r, c)}
             onTogglePermission={onTogglePermission}
           />
@@ -706,7 +623,6 @@ interface MatrixRowProps {
   readonly label: string;
   readonly selectedSet: Set<string>;
   readonly disabled?: boolean;
-  readonly categoryMeta: CategoryMeta;
   readonly isLast: boolean;
   readonly onToggleResource: (checked: boolean) => void;
   readonly onTogglePermission: (id: string, checked: boolean) => void;
@@ -717,7 +633,6 @@ function MatrixRow({
   label,
   selectedSet,
   disabled,
-  categoryMeta,
   isLast,
   onToggleResource,
   onTogglePermission,
@@ -733,8 +648,7 @@ function MatrixRow({
       className={cn(
         "grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center px-4 py-2",
         !isLast && "border-b",
-        allOn ? categoryMeta.rowTint : "bg-card",
-        categoryMeta.borderTint,
+        allOn ? "bg-muted/40" : "bg-card",
       )}
     >
       {/* Resource label cell */}
@@ -746,17 +660,10 @@ function MatrixRow({
           className="size-3.5"
           aria-label={t("selectAllResource", { resource: label })}
         />
-        <span
-          className={cn(
-            "flex size-5 shrink-0 items-center justify-center rounded border",
-            categoryMeta.tile,
-          )}
-        >
-          <CircleDot
-            className={cn("size-2.5", categoryMeta.tileText)}
-            aria-hidden="true"
-          />
-        </span>
+        <CircleDot
+          className="text-muted-foreground/40 size-3 shrink-0"
+          aria-hidden="true"
+        />
         <div className="min-w-0">
           <p className="text-foreground truncate text-xs font-semibold">
             {label}
@@ -809,7 +716,6 @@ interface MobileResourceRowProps {
   readonly label: string;
   readonly selectedSet: Set<string>;
   readonly disabled?: boolean;
-  readonly categoryMeta: CategoryMeta;
   readonly onToggleResource: (checked: boolean) => void;
   readonly onTogglePermission: (id: string, checked: boolean) => void;
 }
@@ -819,7 +725,6 @@ function MobileResourceRow({
   label,
   selectedSet,
   disabled,
-  categoryMeta,
   onToggleResource,
   onTogglePermission,
 }: MobileResourceRowProps) {
@@ -830,7 +735,7 @@ function MobileResourceRow({
   const someOn = rowSelected > 0 && !allOn;
 
   return (
-    <div className={cn("p-3", allOn && categoryMeta.rowTint)}>
+    <div className={cn("p-3", allOn && "bg-muted/40")}>
       <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <Checkbox

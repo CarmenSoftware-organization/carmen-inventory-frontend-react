@@ -4,7 +4,7 @@ import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { KeySquare, Layers, UserCog, Warehouse } from "lucide-react";
+import { KeySquare, UserCog } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Field, FieldError } from "@/components/ui/field";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -13,11 +13,10 @@ import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
 import { useCreateRole, useUpdateRole, useDeleteRole } from "@/hooks/use-role";
-import { usePermission } from "@/hooks/use-permission";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RoleDetail } from "@/types/role";
 import type { FormMode } from "@/types/form";
-import { SectionCard, StatTile } from "../shared/admin-ui";
+import { SectionCard } from "../shared/admin-ui";
 import { RoleHero } from "./role-form-hero";
 import { PermissionPicker } from "./permission-picker";
 import {
@@ -71,24 +70,6 @@ export function RoleForm({ role }: RoleFormProps) {
     name: "permissions",
   });
   const selectedPermissionCount = watchedPermissions?.length ?? 0;
-
-  /* Permission catalog stats (cached — picker uses same query) */
-  const { data: permData } = usePermission({ perpage: -1 });
-  const permAll = permData?.data ?? [];
-  const permCategories = new Set<string>();
-  const permResources = new Set<string>();
-  for (const p of permAll) {
-    const dot = p.resource.indexOf(".");
-    if (dot !== -1) {
-      permCategories.add(p.resource.substring(0, dot));
-      permResources.add(p.resource);
-    }
-  }
-  const permStats = {
-    total: permAll.length,
-    categories: permCategories.size,
-    resources: permResources.size,
-  };
 
   const onSubmit = (values: RoleFormValues) => {
     if (isAdd) {
@@ -167,37 +148,11 @@ export function RoleForm({ role }: RoleFormProps) {
           canDelete={isView && !!role}
           isDeleting={deleteRole.isPending}
           isSaving={isPending}
-          selectedPermissions={selectedPermissionCount}
-          totalPermissions={permStats.total}
           onBack={handleBack}
           onDelete={() => setShowDelete(true)}
           onEdit={() => setMode("edit")}
           onCancel={handleCancel}
         />
-      </Reveal>
-
-      {/* ── Stat tiles ────────────────────────────── */}
-      <Reveal delay={80}>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <StatTile
-            icon={KeySquare}
-            label={t("statPermissions")}
-            value={selectedPermissionCount}
-            tone="info"
-          />
-          <StatTile
-            icon={Layers}
-            label={t("statCategories")}
-            value={permStats.categories}
-            tone="warning"
-          />
-          <StatTile
-            icon={Warehouse}
-            label={t("statResources")}
-            value={permStats.resources}
-            tone="success"
-          />
-        </div>
       </Reveal>
 
       {/* ── Form ──────────────────────────────────── */}
