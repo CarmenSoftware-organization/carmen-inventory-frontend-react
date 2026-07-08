@@ -49,6 +49,7 @@ export function SettingSection({
   first,
   count,
   action,
+  wide,
   children,
 }: {
   readonly title: string;
@@ -58,8 +59,45 @@ export function SettingSection({
   readonly count?: number;
   /** optional control shown under the description (e.g. an Add button) */
   readonly action?: React.ReactNode;
+  /** body needs full width (e.g. a wide table) — title/desc stack on top */
+  readonly wide?: boolean;
   readonly children: React.ReactNode;
 }) {
+  const heading = (
+    <>
+      <div className="flex items-baseline gap-2">
+        <h2 className="text-base font-semibold tracking-tight">{title}</h2>
+        {count !== undefined && (
+          <span className="text-muted-foreground text-xs font-semibold tabular-nums">
+            {count}
+          </span>
+        )}
+      </div>
+      {description && (
+        <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+          {description}
+        </p>
+      )}
+    </>
+  );
+
+  if (wide) {
+    return (
+      <section
+        className={cn(
+          "space-y-4",
+          !first && "border-border/70 mt-8 border-t pt-8",
+        )}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div className="min-w-0">{heading}</div>
+          {action}
+        </div>
+        <div className="min-w-0">{children}</div>
+      </section>
+    );
+  }
+
   return (
     <section
       className={cn(
@@ -68,19 +106,7 @@ export function SettingSection({
       )}
     >
       <div className="md:col-span-1">
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-base font-semibold tracking-tight">{title}</h2>
-          {count !== undefined && (
-            <span className="text-muted-foreground text-xs font-semibold tabular-nums">
-              {count}
-            </span>
-          )}
-        </div>
-        {description && (
-          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-            {description}
-          </p>
-        )}
+        {heading}
         {action && <div className="mt-3">{action}</div>}
       </div>
       <div className="grid gap-4 md:col-span-2 sm:grid-cols-2">{children}</div>

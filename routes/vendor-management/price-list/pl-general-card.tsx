@@ -1,19 +1,25 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useLocale } from "use-intl";
-import { Field, FieldDatePicker, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDatePicker,
+  FieldInput,
+  FieldLabel,
+  FieldSelect,
+} from "@/components/ui/field";
+import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
-import { cn } from "@/lib/utils";
-import type { PriceList } from "@/types/price-list";
-import { CardLabel, DateCard, GlassCard, PlainText } from "@/components/share/glass-card";
+import { PlainText } from "@/components/share/glass-card";
+import { PRICE_LIST_STATUS_OPTIONS } from "@/constant/price-list";
 import { formatLocalizedDate } from "@/lib/date-utils";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
+import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
 
-const LABEL_CLASS = cn(
-  "text-muted-foreground text-[0.625rem] font-semibold tracking-[0.1em] uppercase",
-);
+type PlStatus = "draft" | "active" | "inactive";
 
 interface PLGeneralCardProps {
   readonly form: UseFormReturn<PriceListFormValues>;
@@ -23,9 +29,11 @@ interface PLGeneralCardProps {
   readonly watchedFrom: string;
   readonly watchedTo: string;
   readonly tfl: (key: string) => string;
+  readonly t: (key: string) => string;
+  readonly ts: (key: PlStatus) => string;
 }
 
-/** General info card — vendor, currency, description, note, effective dates */
+/** General section — name, vendor, currency, effective dates, description, status */
 export function PLGeneralCard({
   form,
   priceList,
@@ -34,223 +42,183 @@ export function PLGeneralCard({
   watchedFrom,
   watchedTo,
   tfl,
+  t,
+  ts,
 }: PLGeneralCardProps) {
-  return (
-    <GlassCard>
-      <CardLabel>{tfl("general")}</CardLabel>
-
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <VendorField
-          form={form}
-          priceList={priceList}
-          isView={isView}
-          isDisabled={isDisabled}
-          tfl={tfl}
-        />
-        <CurrencyField
-          form={form}
-          priceList={priceList}
-          isView={isView}
-          isDisabled={isDisabled}
-          tfl={tfl}
-        />
-      </div>
-
-      <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-        <DateField
-          form={form}
-          isView={isView}
-          isDisabled={isDisabled}
-          name="effective_from_date"
-          label={tfl("effectiveFrom")}
-          placeholder={tfl("pickDate")}
-          value={watchedFrom}
-        />
-        <DateField
-          form={form}
-          isView={isView}
-          isDisabled={isDisabled}
-          name="effective_to_date"
-          label={tfl("effectiveTo")}
-          placeholder={tfl("pickDate")}
-          value={watchedTo}
-          fromDateValue={watchedFrom}
-          highlight
-        />
-      </div>
-
-      <div className="mt-3">
-        <TextField
-          form={form}
-          priceList={priceList}
-          isView={isView}
-          isDisabled={isDisabled}
-          name="description"
-          label={tfl("description")}
-        />
-      </div>
-    </GlassCard>
-  );
-}
-
-function VendorField({
-  form,
-  priceList,
-  isView,
-  isDisabled,
-  tfl,
-}: {
-  readonly form: UseFormReturn<PriceListFormValues>;
-  readonly priceList?: PriceList;
-  readonly isView: boolean;
-  readonly isDisabled: boolean;
-  readonly tfl: (key: string) => string;
-}) {
-  return (
-    <Field>
-      <FieldLabel className={LABEL_CLASS}>
-        {tfl("vendor")}
-        {!isView && <span className="text-destructive">*</span>}
-      </FieldLabel>
-      {isView ? (
-        <PlainText value={priceList?.vendor?.name} />
-      ) : (
-        <Controller
-          control={form.control}
-          name="vendor_id"
-          render={({ field }) => (
-            <LookupVendor
-              value={field.value}
-              onValueChange={field.onChange}
-              disabled={isDisabled}
-              className="h-8 w-full text-xs"
-              defaultLabel={priceList?.vendor?.name}
-              error={form.formState.errors.vendor_id?.message}
-            />
-          )}
-        />
-      )}
-    </Field>
-  );
-}
-
-function CurrencyField({
-  form,
-  priceList,
-  isView,
-  isDisabled,
-  tfl,
-}: {
-  readonly form: UseFormReturn<PriceListFormValues>;
-  readonly priceList?: PriceList;
-  readonly isView: boolean;
-  readonly isDisabled: boolean;
-  readonly tfl: (key: string) => string;
-}) {
-  return (
-    <Field>
-      <FieldLabel className={LABEL_CLASS}>
-        {tfl("currency")}
-        {!isView && <span className="text-destructive">*</span>}
-      </FieldLabel>
-      {isView ? (
-        <PlainText value={priceList?.currency?.name} />
-      ) : (
-        <Controller
-          control={form.control}
-          name="currency_id"
-          render={({ field }) => (
-            <LookupCurrency
-              value={field.value}
-              onValueChange={field.onChange}
-              disabled={isDisabled}
-              className="w-full text-xs"
-              error={form.formState.errors.currency_id?.message}
-            />
-          )}
-        />
-      )}
-    </Field>
-  );
-}
-
-function TextField({
-  form,
-  priceList,
-  isView,
-  isDisabled,
-  name,
-  label,
-}: {
-  readonly form: UseFormReturn<PriceListFormValues>;
-  readonly priceList?: PriceList;
-  readonly isView: boolean;
-  readonly isDisabled: boolean;
-  readonly name: "description" | "note";
-  readonly label: string;
-}) {
-  return (
-    <Field>
-      <FieldLabel className={LABEL_CLASS}>{label}</FieldLabel>
-      {isView ? (
-        <PlainText value={priceList?.[name]} multiline />
-      ) : (
-        <Textarea
-          placeholder={label}
-          rows={2}
-          maxLength={256}
-          disabled={isDisabled}
-          className="bg-background/60 resize-none rounded-lg text-xs"
-          {...form.register(name)}
-        />
-      )}
-    </Field>
-  );
-}
-
-function DateField({
-  form,
-  isView,
-  isDisabled,
-  name,
-  label,
-  placeholder,
-  value,
-  fromDateValue,
-  highlight,
-}: {
-  readonly form: UseFormReturn<PriceListFormValues>;
-  readonly isView: boolean;
-  readonly isDisabled: boolean;
-  readonly name: "effective_from_date" | "effective_to_date";
-  readonly label: string;
-  readonly placeholder: string;
-  readonly value: string;
-  readonly fromDateValue?: string;
-  readonly highlight?: boolean;
-}) {
   const locale = useLocale();
+
   return (
-    <DateCard label={label} value={value} highlight={highlight}>
-      {isView ? (
-        <PlainText value={value ? formatLocalizedDate(value, locale) : ""} />
-      ) : (
-        <Controller
-          control={form.control}
-          name={name}
-          render={({ field }) => (
-            <FieldDatePicker
-              value={field.value}
-              onValueChange={field.onChange}
-              disabled={isDisabled}
-              placeholder={placeholder}
-              className="h-8 w-full border-0 bg-transparent text-xs shadow-none focus-visible:ring-0"
-              fromDate={fromDateValue ? new Date(fromDateValue) : undefined}
-              error={form.formState.errors[name]?.message}
-            />
-          )}
-        />
-      )}
-    </DateCard>
+    <SettingSection first title={tfl("general")} description={t("generalDesc")}>
+      {/* Name */}
+      <Field className="sm:col-span-2">
+        <FieldLabel htmlFor="pl-name">
+          {tfl("name")}
+          {!isView && <span className="text-destructive"> *</span>}
+        </FieldLabel>
+        {isView ? (
+          <PlainText value={form.getValues("name")} />
+        ) : (
+          <FieldInput
+            id="pl-name"
+            placeholder={t("namePlaceholder")}
+            disabled={isDisabled}
+            error={form.formState.errors.name?.message}
+            maxLength={100}
+            {...form.register("name")}
+          />
+        )}
+      </Field>
+
+      {/* Vendor */}
+      <Field>
+        <FieldLabel>
+          {tfl("vendor")}
+          {!isView && <span className="text-destructive"> *</span>}
+        </FieldLabel>
+        {isView ? (
+          <PlainText value={priceList?.vendor?.name} />
+        ) : (
+          <Controller
+            control={form.control}
+            name="vendor_id"
+            render={({ field }) => (
+              <LookupVendor
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isDisabled}
+                className="w-full"
+                defaultLabel={priceList?.vendor?.name}
+                error={form.formState.errors.vendor_id?.message}
+              />
+            )}
+          />
+        )}
+      </Field>
+
+      {/* Currency */}
+      <Field>
+        <FieldLabel>
+          {tfl("currency")}
+          {!isView && <span className="text-destructive"> *</span>}
+        </FieldLabel>
+        {isView ? (
+          <PlainText value={priceList?.currency?.name} />
+        ) : (
+          <Controller
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <LookupCurrency
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isDisabled}
+                className="w-full"
+                error={form.formState.errors.currency_id?.message}
+              />
+            )}
+          />
+        )}
+      </Field>
+
+      {/* Effective from */}
+      <Field>
+        <FieldLabel>{tfl("effectiveFrom")}</FieldLabel>
+        {isView ? (
+          <PlainText
+            value={watchedFrom ? formatLocalizedDate(watchedFrom, locale) : ""}
+          />
+        ) : (
+          <Controller
+            control={form.control}
+            name="effective_from_date"
+            render={({ field }) => (
+              <FieldDatePicker
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isDisabled}
+                placeholder={tfl("pickDate")}
+                error={form.formState.errors.effective_from_date?.message}
+              />
+            )}
+          />
+        )}
+      </Field>
+
+      {/* Effective to */}
+      <Field>
+        <FieldLabel>{tfl("effectiveTo")}</FieldLabel>
+        {isView ? (
+          <PlainText
+            value={watchedTo ? formatLocalizedDate(watchedTo, locale) : ""}
+          />
+        ) : (
+          <Controller
+            control={form.control}
+            name="effective_to_date"
+            render={({ field }) => (
+              <FieldDatePicker
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isDisabled}
+                placeholder={tfl("pickDate")}
+                fromDate={watchedFrom ? new Date(watchedFrom) : undefined}
+                error={form.formState.errors.effective_to_date?.message}
+              />
+            )}
+          />
+        )}
+      </Field>
+
+      {/* Description */}
+      <Field className="sm:col-span-2">
+        <FieldLabel>{tfl("description")}</FieldLabel>
+        {isView ? (
+          <PlainText value={priceList?.description} multiline />
+        ) : (
+          <Textarea
+            placeholder={tfl("optional")}
+            rows={2}
+            maxLength={256}
+            disabled={isDisabled}
+            className="resize-none"
+            {...form.register("description")}
+          />
+        )}
+      </Field>
+
+      {/* Status */}
+      <Field className="sm:col-span-2">
+        <FieldLabel>{tfl("status")}</FieldLabel>
+        {isView ? (
+          <div>
+            <Badge variant="secondary" size="sm">
+              {ts(form.getValues("status") as PlStatus)}
+            </Badge>
+          </div>
+        ) : (
+          <Controller
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FieldSelect
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isDisabled}
+                placeholder={tfl("selectStatus")}
+                error={form.formState.errors.status?.message}
+              >
+                <SelectContent>
+                  {PRICE_LIST_STATUS_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {ts(opt.value as PlStatus)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </FieldSelect>
+            )}
+          />
+        )}
+      </Field>
+    </SettingSection>
   );
 }

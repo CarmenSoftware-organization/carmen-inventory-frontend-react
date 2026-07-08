@@ -2,6 +2,7 @@
 import { Plus } from "lucide-react";
 import type { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { SettingSection } from "../../system-admin/business-setting/business-setting-ui";
 import type { PriceList } from "@/types/price-list";
 import { EmptyProducts } from "./pl-empty-states";
 import { PLProductTable } from "./pl-product-table";
@@ -45,29 +46,20 @@ export function PLProductsSection({
   headerLabels,
 }: PLProductsSectionProps) {
   return (
-    <div>
-      <div className="mb-2 flex items-end justify-between gap-3 px-1">
-        <div>
-          <h3 className="text-foreground text-sm font-semibold tracking-tight">
-            {headerLabels.title}
-          </h3>
-          <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
-            {getCountLabel(detailFields.length, headerLabels)}
-          </p>
-        </div>
-        {!isDisabled && (
-          <Button
-            type="button"
-            size="xs"
-            onClick={onAdd}
-            className="rounded-full"
-          >
+    <SettingSection
+      wide
+      title={headerLabels.title}
+      description={headerLabels.noItemsDesc}
+      count={detailFields.length}
+      action={
+        !isDisabled ? (
+          <Button type="button" size="xs" onClick={onAdd}>
             <Plus />
             {headerLabels.addLabel}
           </Button>
-        )}
-      </div>
-
+        ) : undefined
+      }
+    >
       {detailFields.length === 0 ? (
         <EmptyProducts
           onAdd={onAdd}
@@ -88,14 +80,6 @@ export function PLProductsSection({
           removeLabel={removeLabel}
         />
       )}
-    </div>
+    </SettingSection>
   );
-}
-
-function getCountLabel(
-  count: number,
-  labels: PLProductsSectionProps["headerLabels"],
-): string {
-  if (count === 0) return labels.noItems;
-  return `${count} ${count === 1 ? labels.itemSingular : labels.itemPlural}`;
 }

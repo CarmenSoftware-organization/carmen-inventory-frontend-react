@@ -11,10 +11,13 @@ import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 
+import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { AnimationStyles, Reveal } from "@/components/share/reveal";
+import { cn } from "@/lib/utils";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -25,7 +28,6 @@ import {
   useUpdatePriceList,
 } from "@/hooks/use-price-list";
 import { useProfile } from "@/hooks/use-profile";
-import { PL_STATUS_CONFIG } from "@/constant/price-list";
 import type { CreatePriceListDto, PriceList } from "@/types/price-list";
 import type { FormMode } from "@/types/form";
 import {
@@ -35,11 +37,8 @@ import {
   PRICE_LIST_DETAIL_EMPTY,
   type PriceListFormValues,
 } from "./pl-form-schema";
-import { PLToolbar } from "./pl-toolbar";
-import { PLHero } from "./pl-hero";
 import { PLGeneralCard } from "./pl-general-card";
 import { PLProductsSection } from "./pl-products-section";
-import { PLSidebar } from "./pl-sidebar";
 
 const FORM_ID = "pl-form";
 
@@ -115,10 +114,7 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     remove: removeDetail,
   } = useFieldArray({ control: form.control, name: "pricelist_detail" });
 
-  const watchedDetails = useWatch({
-    control: form.control,
-    name: "pricelist_detail",
-  });
+  const watchedName = useWatch({ control: form.control, name: "name" });
   const watchedFrom = useWatch({
     control: form.control,
     name: "effective_from_date",
@@ -128,31 +124,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     name: "effective_to_date",
   });
   const watchedStatus = useWatch({ control: form.control, name: "status" });
-
-  const stats = (() => {
-    // Derive price (incl. tax) จาก price_without_tax + tax_rate
-    // หลีกเลี่ยงการพึ่ง d.price ที่ไม่ sync จาก cell แล้ว (กัน infinite loop)
-    const prices = (watchedDetails ?? []).map((d) => {
-      const noTax = Number(d.price_without_tax) || 0;
-      const rate = Number(d.tax_rate) || 0;
-      return noTax + (noTax * rate) / 100;
-    });
-    const n = prices.length;
-    const leadAvg =
-      n > 0
-        ? (watchedDetails ?? []).reduce(
-            (a, d) => a + (Number(d.lead_time_days) || 0),
-            0,
-          ) / n
-        : 0;
-    return {
-      count: n,
-      avg: n > 0 ? prices.reduce((a, b) => a + b, 0) / n : 0,
-      min: n > 0 ? Math.min(...prices) : 0,
-      max: n > 0 ? Math.max(...prices) : 0,
-      avgLead: leadAvg,
-    };
-  })();
 
   const handleAddDetail = () => prependDetail({ ...PRICE_LIST_DETAIL_EMPTY });
 
@@ -216,95 +187,116 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   };
 
   const plNo = priceList?.no ?? null;
-  const statusConfig =
-    PL_STATUS_CONFIG[watchedStatus] ?? PL_STATUS_CONFIG.draft;
-
-  const heroLabels = useHeroLabels(t);
   const productsHeaderLabels = useProductsHeaderLabels(t);
-  const sidebarLabels = useSidebarLabels(t, tfl);
-  const toolbarLabels = useToolbarLabels(tc, tform);
   const removeItemLabel = t("detail.removeItem");
+  const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
+  const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
-    <div className="relative isolate -mx-3 -my-3">
-      <AnimationStyles />
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <Button
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            aria-label={tc("goBack")}
+            onClick={handleBack}
+          >
+            <ChevronLeft />
+          </Button>
+          <h1
+            className={cn(
+              "truncate text-lg font-semibold tracking-tight",
+              watchedName
+                ? "text-foreground"
+                : "text-muted-foreground italic",
+            )}
+          >
+            {watchedName || t("namePlaceholder")}
+          </h1>
+          {plNo && (
+            <span className="text-muted-foreground shrink-0 text-sm">
+              · {plNo}
+            </span>
+          )}
+          <Badge variant="secondary" size="sm">
+            {tsStatus(watchedStatus)}
+          </Badge>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {isView ? (
+            <Button size="sm" onClick={() => setMode("edit")}>
+              <Pencil />
+              {tc("edit")}
+            </Button>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCancel}
+                disabled={isPending}
+              >
+                <X />
+                {tc("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                form={FORM_ID}
+                disabled={isPending}
+              >
+                <Save />
+                {submitLabel}
+              </Button>
+              {isEdit && priceList && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDelete(true)}
+                  disabled={deletePriceList.isPending || isPending}
+                >
+                  <Trash2 />
+                  {tc("delete")}
+                </Button>
+              )}
+            </>
+          )}
+        </div>
+      </header>
+
       <form
         id={FORM_ID}
         onSubmit={form.handleSubmit(handleSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="relative px-4 pt-4 pb-8 lg:p-4"
       >
-        <section className="mb-5">
-          <Reveal>
-            <PLToolbar
-              mode={mode}
-              plNo={plNo}
-              statusConfig={statusConfig}
-              isPending={isPending}
-              isDeleting={deletePriceList.isPending}
-              onBack={handleBack}
-              onEdit={() => setMode("edit")}
-              onCancel={handleCancel}
-              onDelete={() => setShowDelete(true)}
-              formId={FORM_ID}
-              labels={toolbarLabels}
-            />
-          </Reveal>
-
-          <Reveal delay={80}>
-            <PLHero
-              form={form}
-              priceList={priceList}
-              isDisabled={isDisabled}
-              watchedFrom={watchedFrom}
-              watchedTo={watchedTo}
-              labels={heroLabels}
-            />
-          </Reveal>
-        </section>
-
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_22rem]">
-          <Reveal delay={160}>
-            <PLGeneralCard
-              form={form}
-              priceList={priceList}
-              isView={isView}
-              isDisabled={isDisabled}
-              watchedFrom={watchedFrom}
-              watchedTo={watchedTo}
-              tfl={tfl}
-            />
-          </Reveal>
-
-          <Reveal delay={200}>
-            <PLSidebar
-              form={form}
-              stats={stats}
-              watchedFrom={watchedFrom}
-              watchedTo={watchedTo}
-              isView={isView}
-              isDisabled={isDisabled}
-              tfl={tfl}
-              ts={ts as (key: "draft" | "active" | "inactive") => string}
-              labels={sidebarLabels}
-            />
-          </Reveal>
-        </div>
-        <Reveal delay={220}>
-          <PLProductsSection
-            form={form}
-            detailFields={detailFields}
-            priceList={priceList}
-            isView={isView}
-            isDisabled={isDisabled}
-            onAdd={handleAddDetail}
-            onRemove={setDeleteIndex}
-            tfl={tfl}
-            removeLabel={removeItemLabel}
-            headerLabels={productsHeaderLabels}
-          />
-        </Reveal>
+        <PLGeneralCard
+          form={form}
+          priceList={priceList}
+          isView={isView}
+          isDisabled={isDisabled}
+          watchedFrom={watchedFrom}
+          watchedTo={watchedTo}
+          tfl={tfl}
+          t={t}
+          ts={tsStatus}
+        />
+        <PLProductsSection
+          form={form}
+          detailFields={detailFields}
+          priceList={priceList}
+          isView={isView}
+          isDisabled={isDisabled}
+          onAdd={handleAddDetail}
+          onRemove={setDeleteIndex}
+          tfl={tfl}
+          removeLabel={removeItemLabel}
+          headerLabels={productsHeaderLabels}
+        />
       </form>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
@@ -341,21 +333,14 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
 
 /* ── label hooks ─────────────────────────────────────────────── */
 
-function useHeroLabels(t: ReturnType<typeof useTranslations>) {
-  return {
-    namePlaceholder: t("namePlaceholder"),
-    nameLabel: t("nameLabel"),
-    tapToEdit: t("tapToEdit"),
-    pressEnterToSave: t("pressEnterToSave"),
-    clickToRename: t("clickToRename"),
-    requiredField: t("requiredField"),
-    descriptorEmpty: t("descriptorEmpty"),
-    descriptorFilled: (vars: {
-      vendor: string;
-      days: number;
-      date: string;
-    }) => t("descriptorFilled", vars),
-  };
+function getSubmitLabel(
+  isPending: boolean,
+  isAdd: boolean,
+  tc: (key: string) => string,
+  tform: (key: string) => string,
+): string {
+  if (isPending) return isAdd ? tform("creating") : tform("saving");
+  return isAdd ? tc("create") : tc("save");
 }
 
 function useProductsHeaderLabels(t: ReturnType<typeof useTranslations>) {
@@ -366,37 +351,6 @@ function useProductsHeaderLabels(t: ReturnType<typeof useTranslations>) {
     addLabel: t("detail.addDetail"),
     itemSingular: t("itemSingular"),
     itemPlural: t("itemPlural"),
-  };
-}
-
-function useSidebarLabels(
-  t: ReturnType<typeof useTranslations>,
-  tfl: ReturnType<typeof useTranslations>,
-) {
-  return {
-    summary: t("summary"),
-    duration: t("duration"),
-    priceRange: t("priceRange"),
-    daysSuffix: (count: number) => t("daysSuffix", { count }),
-    detailTitle: t("detail.title"),
-    avgUnitPrice: t("avgUnitPrice"),
-    selectStatus: tfl("selectStatus"),
-  };
-}
-
-function useToolbarLabels(
-  tc: ReturnType<typeof useTranslations>,
-  tform: ReturnType<typeof useTranslations>,
-) {
-  return {
-    goBack: tc("goBack"),
-    edit: tc("edit"),
-    cancel: tc("cancel"),
-    save: tc("save"),
-    create: tc("create"),
-    saving: tform("saving"),
-    creating: tform("creating"),
-    delete: tc("delete"),
   };
 }
 
