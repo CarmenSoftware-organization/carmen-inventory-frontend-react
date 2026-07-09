@@ -1,14 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Clock, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useTranslations, useLocale } from "use-intl";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -16,7 +11,6 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { useDeleteWorkflow } from "@/hooks/use-workflow";
 import type { Workflow } from "@/types/workflows";
 import { getWorkflowTypeLabels } from "@/constant/workflow";
-import { formatRelativeTime } from "@/lib/relative-time";
 
 interface WfHeaderProps {
   readonly workflow: Workflow;
@@ -43,16 +37,6 @@ export function WfHeader({
   const tf = useTranslations("form");
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
-  const locale = useLocale();
-
-  const updated = workflow.audit?.updated;
-  const updatedAt = updated?.at ?? workflow.updated_at;
-  const updatedRelative = updatedAt
-    ? formatRelativeTime(updatedAt, locale)
-    : null;
-  const updatedAbsolute = updatedAt
-    ? new Date(updatedAt).toLocaleString(locale)
-    : null;
 
   const typeLabels = getWorkflowTypeLabels(t);
 
