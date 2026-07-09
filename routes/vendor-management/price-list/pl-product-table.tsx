@@ -16,6 +16,7 @@ import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
 import { buildPlProductColumns } from "./pl-product-columns";
 import type { DetailField } from "./pl-product-cells";
+import { PLProductGroupedView } from "./pl-product-grouped-view";
 
 interface PLProductTableProps {
   readonly form: UseFormReturn<PriceListFormValues>;
@@ -28,7 +29,23 @@ interface PLProductTableProps {
   readonly removeLabel: string;
 }
 
-export function PLProductTable({
+/**
+ * Dispatcher: view mode → grouped read-only table (product ซ้ำ group เป็นกลุ่ม);
+ * edit/add → editable DataGrid เดิม แยกเป็นคนละ component เพื่อให้ hooks ของแต่ละ
+ * ฝั่งเรียกแบบ unconditional (ไม่ชน rules-of-hooks) และ edit path ไม่เปลี่ยน
+ */
+export function PLProductTable(props: PLProductTableProps) {
+  if (props.isView)
+    return (
+      <PLProductGroupedView
+        detailRefs={props.detailRefs ?? []}
+        tfl={props.tfl}
+      />
+    );
+  return <PLProductEditTable {...props} />;
+}
+
+function PLProductEditTable({
   form,
   detailFields,
   detailRefs,
