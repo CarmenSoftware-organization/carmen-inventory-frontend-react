@@ -43,10 +43,11 @@ export function PLProductGroupedView({
                 "py-1",
                 isLast && "border-border/50 border-b",
               );
-              // Amount = ราคา (ก่อนภาษี) + ภาษีจาก tax_rate → รวมภาษีแล้ว
+              // Rate = ยอดภาษี (คำนวณจาก tax_rate), Amount = ราคา + Rate (รวมภาษี)
               const priceNoTax = Number(tier.price_without_tax) || 0;
               const rate = Number(tier.tax_rate) || 0;
-              const amount = round2(priceNoTax + (priceNoTax * rate) / 100);
+              const taxAmt = round2((priceNoTax * rate) / 100);
+              const amount = round2(priceNoTax + taxAmt);
               return (
                 <tr key={tier.id ?? `${group.productId}-${ti}`}>
                   {isFirst && (
@@ -83,14 +84,14 @@ export function PLProductGroupedView({
                       </span>
                     </span>
                   </Td>
-                  {/* Rate = อัตราภาษีที่ใช้คำนวณ Amount */}
+                  {/* Rate = ยอดภาษีที่คำนวณจาก tax_rate (ค่าเงิน ไม่ใช่ %) */}
                   <Td
                     className={cn(
                       "text-muted-foreground text-right align-middle tabular-nums",
                       tierClass,
                     )}
                   >
-                    {rate}%
+                    {taxAmt.toFixed(2)}
                   </Td>
                   {/* Amount = ราคารวมภาษีแล้ว */}
                   <Td
