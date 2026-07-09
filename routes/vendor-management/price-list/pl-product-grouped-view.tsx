@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
+import { round2 } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
 import type { PriceList } from "@/types/price-list";
 import { buildProductGroups } from "./pl-product-grouping";
@@ -29,7 +30,7 @@ export function PLProductGroupedView({
             <Th className="w-14 text-center">#</Th>
             <Th className="text-left">{tfl("product")}</Th>
             <Th className="text-left">{tfl("moqPricing")}</Th>
-            <Th className="text-left">{tfl("taxProfile")}</Th>
+            <Th className="text-right">{tfl("amount")}</Th>
           </tr>
         </thead>
         <tbody>
@@ -41,6 +42,10 @@ export function PLProductGroupedView({
                 "py-1",
                 isLast && "border-border/50 border-b",
               );
+              // Amount = ราคา (ก่อนภาษี) + ภาษีจาก tax_rate → รวมภาษีแล้ว
+              const priceNoTax = Number(tier.price_without_tax) || 0;
+              const rate = Number(tier.tax_rate) || 0;
+              const amount = round2(priceNoTax + (priceNoTax * rate) / 100);
               return (
                 <tr key={tier.id ?? `${group.productId}-${ti}`}>
                   {isFirst && (
@@ -70,15 +75,28 @@ export function PLProductGroupedView({
                       </span>
                       <span className="text-muted-foreground">→</span>
                       <span className="text-foreground font-semibold">
-                        {(Number(tier.price_without_tax) || 0).toFixed(2)}
+                        {priceNoTax.toFixed(2)}
                       </span>
                       <span className="text-muted-foreground text-[0.6875rem]">
                         ({Number(tier.lead_time_days) || 0}d)
                       </span>
                     </span>
                   </Td>
-                  <Td className={cn("align-middle", tierClass)}>
-                    <PlainCell value={tier.tax_profile_name} />
+                  {/* Amount = ราคารวมภาษี + อัตราภาษีที่ใช้คำนวณ */}
+                  <Td
+                    className={cn(
+                      "text-right align-middle tabular-nums",
+                      tierClass,
+                    )}
+                  >
+                    <span className="text-foreground font-semibold">
+                      {amount.toFixed(2)}
+                    </span>
+                    {rate > 0 && (
+                      <span className="text-muted-foreground ml-1 text-[0.6875rem]">
+                        +{rate}%
+                      </span>
+                    )}
                   </Td>
                 </tr>
               );
@@ -118,11 +136,4 @@ function Td({
       {children}
     </td>
   );
-}
-
-/** plain text ของ tier cell — เหมือน FieldPlainText แต่ไม่มี min-h-8 (กัน gap สูง) */
-function PlainCell({ value }: { readonly value?: string | null }) {
-  if (!value)
-    return <span className="text-muted-foreground text-xs">—</span>;
-  return <span className="text-foreground text-xs font-medium">{value}</span>;
 }
