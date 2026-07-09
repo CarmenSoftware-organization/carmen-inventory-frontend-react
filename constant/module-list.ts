@@ -52,7 +52,6 @@ import {
   UserRoundSearch,
   Mail,
   BellRing,
-  LayoutTemplate,
   Database,
   Award,
   Leaf,
@@ -487,12 +486,6 @@ export const moduleList: ModuleDto[] = [
         name: "notificationTemplate",
         path: "/system-admin/notification-template",
         icon: BellRing,
-        permission: PERMISSIONS.system_configuration.view,
-      },
-      {
-        name: "queryDataset",
-        path: "/system-admin/query-dataset",
-        icon: LayoutTemplate,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
