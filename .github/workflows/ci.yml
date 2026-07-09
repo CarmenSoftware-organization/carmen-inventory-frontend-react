@@ -32,5 +32,9 @@ jobs:
         run: bun run test:run
 
       # build รวม `tsc --noEmit` อยู่แล้ว — ครอบ typecheck + vite build ในขั้นเดียว
+      # config.prod.json ถูก gitignore (env-specific) — build-verification ใช้
+      # committed config.sample.json ผ่าน BUILD_CONFIG_FILE (ไม่ใช่ค่า deploy จริง)
       - name: Build
         run: bun run build
+        env:
+          BUILD_CONFIG_FILE: config.sample.json
