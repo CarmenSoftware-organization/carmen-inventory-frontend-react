@@ -19,15 +19,28 @@ const textItem: BusinessUnitConfigItem = {
   value: "hello",
 };
 
+const enumItem: BusinessUnitConfigItem = {
+  key: "si.cost-from",
+  label: "Default price for added items",
+  datatype: "enum",
+  value: "last_cost",
+};
+const enumOptions = [
+  { value: "last_receiving", label: "Last receiving" },
+  { value: "last_cost", label: "Last cost" },
+];
+
 /** harness: RHF form ที่มี config[0] = item ที่ส่งเข้ามา */
 function Harness({
   editing,
   item,
   label,
+  options,
 }: {
   readonly editing: boolean;
   readonly item: BusinessUnitConfigItem;
   readonly label?: string;
+  readonly options?: readonly { value: string; label: string }[];
 }) {
   const form = useForm<BusinessSettingFormValues>({
     defaultValues: { config: [item] },
@@ -41,6 +54,7 @@ function Harness({
       yesLabel="Yes"
       noLabel="No"
       label={label}
+      options={options}
     />
   );
 }
@@ -86,5 +100,25 @@ describe("ConfigField", () => {
     expect(input).toBeInTheDocument();
     expect(input.value).toBe("hello");
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+  });
+});
+
+describe("ConfigField — enum", () => {
+  it("view: shows the label of the current value (not the raw value)", () => {
+    render(<Harness editing={false} item={enumItem} options={enumOptions} />);
+    expect(screen.getByText("Last cost")).toBeInTheDocument();
+    expect(screen.queryByText("last_cost")).not.toBeInTheDocument();
+  });
+
+  it("edit: renders a Select (combobox), not a text input", () => {
+    render(<Harness editing item={enumItem} options={enumOptions} />);
+    expect(screen.getByRole("combobox")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("enum without options falls back to a text input", () => {
+    render(<Harness editing item={enumItem} />);
+    expect(screen.getByRole("textbox")).toBeInTheDocument();
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });
 });

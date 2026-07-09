@@ -20,7 +20,9 @@
       "config": "Configuration",
       "configDesc": "Feature switches and settings for this business unit.",
       "pr": "PR",
-      "prDesc": "Purchase Request settings for this business unit."
+      "prDesc": "Purchase Request settings for this business unit.",
+      "si": "SI",
+      "siDesc": "Stock In settings for this business unit."
     },
     "fields": {
       "code": "Code",
@@ -110,7 +112,13 @@
     "yes": "Yes",
     "no": "No",
     "config": {
-      "prAllowDuplicateProduct": "Allow selecting duplicate products"
+      "prAllowDuplicateProduct": "Allow selecting duplicate products",
+      "siCostFrom": "Default price for added items",
+      "siCostFromOptions": {
+        "average": "Average",
+        "lastReceiving": "Last receiving",
+        "lastCost": "Last cost"
+      }
     }
   },
   "dashboardWidget": {

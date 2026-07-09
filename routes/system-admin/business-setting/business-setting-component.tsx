@@ -44,7 +44,10 @@ import {
   mergeSeededConfig,
   type BusinessSettingFormValues,
 } from "./business-setting-form-schema";
-import { groupConfigForRender } from "./business-setting-config-registry";
+import {
+  groupConfigForRender,
+  resolveConfigOptions,
+} from "./business-setting-config-registry";
 
 /**
  * หน้า Business Setting (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
@@ -553,18 +556,28 @@ export default function BusinessSettingComponent() {
               title={t(section.titleKey)}
               description={t(section.descKey)}
             >
-              {section.entries.map((entry) => (
-                <ConfigField
-                  key={entry.item.key}
-                  editing={editing}
-                  form={form}
-                  index={entry.index}
-                  item={entry.item}
-                  label={t(entry.labelKey)}
-                  yesLabel={t("yes")}
-                  noLabel={t("no")}
-                />
-              ))}
+              {section.entries.map((entry) => {
+                const options = entry.options
+                  ? resolveConfigOptions(
+                      entry.options,
+                      data.calculation_method,
+                      entry.item.value,
+                    ).map((o) => ({ value: o.value, label: t(o.labelKey) }))
+                  : undefined;
+                return (
+                  <ConfigField
+                    key={entry.item.key}
+                    editing={editing}
+                    form={form}
+                    index={entry.index}
+                    item={entry.item}
+                    label={t(entry.labelKey)}
+                    yesLabel={t("yes")}
+                    noLabel={t("no")}
+                    options={options}
+                  />
+                );
+              })}
             </SettingSection>
           ))}
 

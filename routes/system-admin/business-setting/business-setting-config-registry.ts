@@ -1,5 +1,15 @@
 import type { BusinessUnitConfigItem } from "@/types/business-unit";
 
+/** option ของ enum config (datatype "enum") */
+export interface ConfigOption {
+  /** ค่าที่เก็บ (canonical snake_case, locale-independent) */
+  value: string;
+  /** i18n key ของ label option (relative ต่อ businessSetting) */
+  labelKey: string;
+  /** แสดง option นี้เฉพาะเมื่อ BU.calculation_method === ค่านี้ (undefined = แสดงเสมอ) */
+  visibleWhenCalcMethod?: string;
+}
+
 /**
  * รายการ config ที่ frontend "seed" — แสดงเสมอแม้ backend ยังไม่มีค่า
  * (default = defaultValue) พอ user เปิดแล้ว save ค่าจะถูกเขียนลง backend
@@ -15,6 +25,8 @@ export interface SeededConfigItem {
   label: string;
   /** i18n key สำหรับ "แสดงผล" (relative ต่อ namespace businessSetting) */
   labelKey: string;
+  /** สำหรับ datatype "enum" — รายการ option ตามลำดับที่แสดง */
+  options?: ConfigOption[];
 }
 
 /** section ที่จัดกลุ่ม seeded config items */
@@ -44,6 +56,35 @@ export const CONFIG_SECTIONS: readonly ConfigSection[] = [
       },
     ],
   },
+  {
+    id: "si",
+    titleKey: "sections.si",
+    descKey: "sections.siDesc",
+    items: [
+      {
+        key: "si.cost-from",
+        datatype: "enum",
+        defaultValue: "last_cost",
+        label: "Default price for added items",
+        labelKey: "config.siCostFrom",
+        options: [
+          {
+            value: "average",
+            labelKey: "config.siCostFromOptions.average",
+            visibleWhenCalcMethod: "average",
+          },
+          {
+            value: "last_receiving",
+            labelKey: "config.siCostFromOptions.lastReceiving",
+          },
+          {
+            value: "last_cost",
+            labelKey: "config.siCostFromOptions.lastCost",
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 /** seeded items ทั้งหมด flatten จากทุก section */
@@ -62,6 +103,8 @@ export interface ConfigSectionEntry {
   index: number;
   /** i18n key สำหรับ display label (จาก registry) */
   labelKey: string;
+  /** สำหรับ enum — options จาก registry (undefined = ไม่ใช่ enum) */
+  options?: ConfigOption[];
 }
 
 /** entry ของ config ที่ไม่อยู่ใน registry section (backend-only) */
@@ -105,7 +148,7 @@ export function groupConfigForRender(
     for (const seeded of section.items) {
       const found = indexed.find((e) => e.item.key === seeded.key);
       if (found) {
-        entries.push({ ...found, labelKey: seeded.labelKey });
+        entries.push({ ...found, labelKey: seeded.labelKey, options: seeded.options });
       }
     }
     return {
@@ -121,4 +164,26 @@ export function groupConfigForRender(
   );
 
   return { sections, other };
+}
+
+/**
+ * คืน options ที่ควรแสดงใน dropdown — ตัด option ที่มี visibleWhenCalcMethod
+ * ไม่ตรงกับ calculationMethod ยกเว้น option ที่ value === currentValue
+ * (คงค่าที่ backend เก็บไว้ ไม่ทำข้อมูลหาย)
+ *
+ * @param options - จาก registry (ConfigOption[])
+ * @param calculationMethod - BU.calculation_method (อาจเป็น null)
+ * @param currentValue - ค่าปัจจุบันของ config item
+ */
+export function resolveConfigOptions(
+  options: readonly ConfigOption[],
+  calculationMethod: string | null | undefined,
+  currentValue: string,
+): ConfigOption[] {
+  return options.filter(
+    (o) =>
+      !o.visibleWhenCalcMethod ||
+      o.visibleWhenCalcMethod === calculationMethod ||
+      o.value === currentValue,
+  );
 }
