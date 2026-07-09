@@ -93,12 +93,6 @@ describe("buildPatch", () => {
       amount_format: { locales: "en-US", minimumIntegerDigits: 2 },
     });
   });
-
-  it("ส่งค่า boolean (is_active) เมื่อเปลี่ยน", () => {
-    const original = toFormValues(baseData);
-    const values = { ...original, is_active: false };
-    expect(buildPatch(values, original)).toEqual({ is_active: false });
-  });
 });
 
 describe("mergeSeededConfig", () => {

@@ -338,30 +338,6 @@ export function NumberFormatField({
   );
 }
 
-/** Switch ผูก RHF สำหรับ boolean field (is_active / is_hq) */
-export function SwitchField({
-  form,
-  name,
-  label,
-}: {
-  readonly form: Form;
-  readonly name: "is_active";
-  readonly label: string;
-}) {
-  return (
-    <Controller
-      control={form.control}
-      name={name}
-      render={({ field }) => (
-        <label className="flex items-center gap-2">
-          <Switch checked={field.value} onCheckedChange={field.onChange} />
-          <span className="text-sm">{label}</span>
-        </label>
-      )}
-    />
-  );
-}
-
 /**
  * Field ของ config หนึ่งรายการ — label มาจาก backend, value เก็บเป็น string เสมอ
  *
