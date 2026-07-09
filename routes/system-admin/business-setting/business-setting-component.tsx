@@ -111,7 +111,8 @@ export default function BusinessSettingComponent() {
       setEditing(false);
       return;
     }
-    update.mutate(patch, {
+    // แนบ doc_version (optimistic lock) ไปกับ payload เพื่อกัน 409 version ค้าง
+    update.mutate({ ...patch, doc_version: data.doc_version }, {
       onSuccess: () => {
         toast.success(t("saved"));
         setEditing(false);

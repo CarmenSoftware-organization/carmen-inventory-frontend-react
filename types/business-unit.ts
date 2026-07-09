@@ -139,5 +139,8 @@ export interface BusinessUnitEditable {
   config: BusinessUnitConfigItem[];
 }
 
-/** payload PATCH — ส่งเฉพาะ field ที่แก้จริง (partial) */
-export type BusinessUnitPatch = Partial<BusinessUnitEditable>;
+/** payload PATCH — ส่งเฉพาะ field ที่แก้จริง (partial) + doc_version สำหรับ
+ * optimistic lock (กัน 409 ตอน backend เทียบ version) */
+export type BusinessUnitPatch = Partial<BusinessUnitEditable> & {
+  doc_version?: number;
+};
