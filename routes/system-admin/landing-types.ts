@@ -7,7 +7,6 @@ import {
   Folder,
   Gauge,
   Mail,
-  Search,
   Shield,
   Terminal,
   Users,
@@ -100,7 +99,6 @@ export const CHAPTERS: readonly ChapterDef[] = [
     key: "data",
     tone: "orange",
     modules: [
-      { key: "query", visualKey: "query", href: "/system-admin/query-dataset", icon: Search },
       { key: "dataset", visualKey: "dataset", href: "/system-admin/dashboard-dataset", icon: Database },
     ],
   },

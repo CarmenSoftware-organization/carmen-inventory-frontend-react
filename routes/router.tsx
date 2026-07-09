@@ -195,7 +195,6 @@ export const router = createBrowserRouter([
               { path: "user", lazy: () => import("./system-admin/user/user.route") },
               { path: "user/:id", lazy: () => import("./system-admin/user/user-edit.route") },
               { path: "document", lazy: () => import("./system-admin/document/document.route") },
-              { path: "query-dataset", lazy: () => import("./system-admin/query-dataset/query-dataset.route") },
               { path: "activity-log", lazy: () => import("./system-admin/activity-log/activity-log.route") },
               { path: "workflow", lazy: () => import("./system-admin/workflow/workflow.route") },
               { path: "workflow/new", lazy: () => import("./system-admin/workflow/workflow-new.route") },
