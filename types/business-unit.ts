@@ -68,17 +68,33 @@ export interface BusinessUnitDetail {
   branch_no: string | null;
 
   company_name: string | null;
-  company_address: string | null;
+  company_address_line1: string | null;
+  company_address_line2: string | null;
+  company_sub_district: string | null;
+  company_district: string | null;
+  company_city: string | null;
+  company_province: string | null;
+  company_postal_code: string | null;
+  company_country: string | null;
+  company_latitude: string | null;
+  company_longitude: string | null;
   company_email: string | null;
   company_tel: string | null;
-  company_zip_code: string | null;
   tax_no: string | null;
 
   hotel_name: string | null;
-  hotel_address: string | null;
+  hotel_address_line1: string | null;
+  hotel_address_line2: string | null;
+  hotel_sub_district: string | null;
+  hotel_district: string | null;
+  hotel_city: string | null;
+  hotel_province: string | null;
+  hotel_postal_code: string | null;
+  hotel_country: string | null;
+  hotel_latitude: string | null;
+  hotel_longitude: string | null;
   hotel_email: string | null;
   hotel_tel: string | null;
-  hotel_zip_code: string | null;
 
   date_format: string | null;
   date_time_format: string | null;
@@ -111,18 +127,34 @@ export interface BusinessUnitEditable {
   default_currency_id: string | null;
 
   company_name: string | null;
-  company_address: string | null;
+  company_address_line1: string | null;
+  company_address_line2: string | null;
+  company_sub_district: string | null;
+  company_district: string | null;
+  company_city: string | null;
+  company_province: string | null;
+  company_postal_code: string | null;
+  company_country: string | null;
+  company_latitude: string | null;
+  company_longitude: string | null;
   company_email: string | null;
   company_tel: string | null;
-  company_zip_code: string | null;
   tax_no: string | null;
   branch_no: string | null;
 
   hotel_name: string | null;
-  hotel_address: string | null;
+  hotel_address_line1: string | null;
+  hotel_address_line2: string | null;
+  hotel_sub_district: string | null;
+  hotel_district: string | null;
+  hotel_city: string | null;
+  hotel_province: string | null;
+  hotel_postal_code: string | null;
+  hotel_country: string | null;
+  hotel_latitude: string | null;
+  hotel_longitude: string | null;
   hotel_email: string | null;
   hotel_tel: string | null;
-  hotel_zip_code: string | null;
 
   timezone: string | null;
   date_format: string | null;
