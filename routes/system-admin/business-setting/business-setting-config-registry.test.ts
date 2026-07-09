@@ -3,7 +3,10 @@ import {
   CONFIG_SECTIONS,
   SEEDED_ITEMS,
   SEEDED_KEYS,
+  groupConfigForRender,
 } from "./business-setting-config-registry";
+import { mergeSeededConfig } from "./business-setting-form-schema";
+import type { BusinessUnitConfigItem } from "@/types/business-unit";
 
 describe("config registry", () => {
   it("SEEDED_ITEMS flattens every section's items", () => {
@@ -29,5 +32,41 @@ describe("config registry", () => {
     expect(pr?.items.some((i) => i.key === "pr.allow-duplicate.product")).toBe(
       true,
     );
+  });
+});
+
+describe("groupConfigForRender", () => {
+  it("puts the seeded PR item in the pr section with absolute index and labelKey", () => {
+    const merged = mergeSeededConfig([]); // → [pr] at index 0
+    const groups = groupConfigForRender(merged);
+    expect(groups.sections).toHaveLength(1);
+    expect(groups.sections[0].id).toBe("pr");
+    expect(groups.sections[0].entries).toHaveLength(1);
+    expect(groups.sections[0].entries[0].index).toBe(0);
+    expect(groups.sections[0].entries[0].item.key).toBe(
+      "pr.allow-duplicate.product",
+    );
+    expect(groups.sections[0].entries[0].labelKey).toBe(
+      "config.prAllowDuplicateProduct",
+    );
+    expect(groups.other).toHaveLength(0);
+  });
+
+  it("keeps unknown backend items in 'other' and preserves absolute indices", () => {
+    const backend: BusinessUnitConfigItem[] = [
+      { key: "x.unknown", label: "X", datatype: "string", value: "1" },
+    ];
+    const merged = mergeSeededConfig(backend); // [x.unknown(0), pr(1)]
+    const groups = groupConfigForRender(merged);
+    expect(groups.other).toHaveLength(1);
+    expect(groups.other[0].index).toBe(0);
+    expect(groups.other[0].item.key).toBe("x.unknown");
+    expect(groups.sections[0].entries[0].index).toBe(1);
+  });
+
+  it("omits a section when none of its items are present", () => {
+    const groups = groupConfigForRender([]); // no items at all
+    expect(groups.sections).toHaveLength(0);
+    expect(groups.other).toHaveLength(0);
   });
 });
