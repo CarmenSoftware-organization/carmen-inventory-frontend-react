@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { FieldPlainText } from "@/components/ui/field";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { cn } from "@/lib/utils";
 import type { PriceList } from "@/types/price-list";
@@ -41,8 +40,12 @@ export function PLProductGroupedView({
             group.tiers.map((tier, ti) => {
               const isFirst = ti === 0;
               const isLast = ti === group.tiers.length - 1;
+              // tier cell padding 2px แต่ละด้าน → tier ในกลุ่มห่างกัน ~4px
               // เส้นคั่นเฉพาะแถวสุดท้ายของกลุ่ม → ภายในกลุ่มไม่มีเส้น (ดูเป็นแถวเดียว)
-              const tierBorder = isLast ? "border-border border-b" : "";
+              const tierClass = cn(
+                "py-0.5",
+                isLast && "border-border border-b",
+              );
               return (
                 <tr key={tier.id ?? `${group.productId}-${ti}`}>
                   {isFirst && (
@@ -64,13 +67,13 @@ export function PLProductGroupedView({
                       </Td>
                     </>
                   )}
-                  <Td className={cn("text-center align-middle", tierBorder)}>
-                    <FieldPlainText>{tier.unit_name}</FieldPlainText>
+                  <Td className={cn("text-center align-middle", tierClass)}>
+                    <PlainCell value={tier.unit_name} />
                   </Td>
                   <Td
                     className={cn(
                       "text-foreground text-right align-middle font-semibold tabular-nums",
-                      tierBorder,
+                      tierClass,
                     )}
                   >
                     {Number(tier.moq_qty) || 0}+
@@ -78,18 +81,18 @@ export function PLProductGroupedView({
                   <Td
                     className={cn(
                       "text-foreground text-right align-middle font-semibold tabular-nums",
-                      tierBorder,
+                      tierClass,
                     )}
                   >
                     {(Number(tier.price_without_tax) || 0).toFixed(2)}
                   </Td>
-                  <Td className={cn("align-middle", tierBorder)}>
-                    <FieldPlainText>{tier.tax_profile_name}</FieldPlainText>
+                  <Td className={cn("align-middle", tierClass)}>
+                    <PlainCell value={tier.tax_profile_name} />
                   </Td>
                   <Td
                     className={cn(
                       "text-muted-foreground text-right align-middle tabular-nums",
-                      tierBorder,
+                      tierClass,
                     )}
                   >
                     {Number(tier.lead_time_days) || 0}d
@@ -132,4 +135,11 @@ function Td({
       {children}
     </td>
   );
+}
+
+/** plain text ของ tier cell — เหมือน FieldPlainText แต่ไม่มี min-h-8 (กัน gap สูง) */
+function PlainCell({ value }: { readonly value?: string | null }) {
+  if (!value)
+    return <span className="text-muted-foreground text-xs">—</span>;
+  return <span className="text-foreground text-xs font-medium">{value}</span>;
 }
