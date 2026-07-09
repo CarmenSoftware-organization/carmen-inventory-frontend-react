@@ -30,6 +30,7 @@ export function PLProductGroupedView({
             <Th className="w-14 text-center">#</Th>
             <Th className="text-left">{tfl("product")}</Th>
             <Th className="text-left">{tfl("moqPricing")}</Th>
+            <Th className="w-20 text-right">{tfl("rate")}</Th>
             <Th className="text-right">{tfl("amount")}</Th>
           </tr>
         </thead>
@@ -82,21 +83,23 @@ export function PLProductGroupedView({
                       </span>
                     </span>
                   </Td>
-                  {/* Amount = ราคารวมภาษี + อัตราภาษีที่ใช้คำนวณ */}
+                  {/* Rate = อัตราภาษีที่ใช้คำนวณ Amount */}
                   <Td
                     className={cn(
-                      "text-right align-middle tabular-nums",
+                      "text-muted-foreground text-right align-middle tabular-nums",
                       tierClass,
                     )}
                   >
-                    <span className="text-foreground font-semibold">
-                      {amount.toFixed(2)}
-                    </span>
-                    {rate > 0 && (
-                      <span className="text-muted-foreground ml-1 text-[0.6875rem]">
-                        +{rate}%
-                      </span>
+                    {rate}%
+                  </Td>
+                  {/* Amount = ราคารวมภาษีแล้ว */}
+                  <Td
+                    className={cn(
+                      "text-foreground text-right align-middle font-semibold tabular-nums",
+                      tierClass,
                     )}
+                  >
+                    {amount.toFixed(2)}
                   </Td>
                 </tr>
               );
