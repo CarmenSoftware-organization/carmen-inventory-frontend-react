@@ -584,15 +584,6 @@ export const SubTiles: Record<string, TileRenderer> = {
       <circle cx="20" cy="28.6" r="2.1" style={{ fill: palette.accent }} />
     </>
   ),
-  queryDataset: ({ palette }) => (
-    <>
-      <TileBase palette={palette} />
-      <rect x="8" y="11" width="24" height="20" rx="1.6" fill="currentColor" />
-      <rect x="8" y="11" width="24" height="4" style={{ fill: palette.accent }} />
-      <path d="M 16 15 V 31 M 24 15 V 31" style={{ stroke: palette.base }} strokeWidth="0.8" opacity="0.35" />
-      <path d="M 8 21 H 32 M 8 27 H 32" style={{ stroke: palette.base }} strokeWidth="0.8" opacity="0.35" />
-    </>
-  ),
   dashboardDataset: ({ palette }) => (
     <>
       <TileBase palette={palette} />

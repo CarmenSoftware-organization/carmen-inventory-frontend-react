@@ -18,7 +18,9 @@
       "numberFormats": "Number Formats",
       "numberFormatsDesc": "Locale and precision for amounts, quantities and lists.",
       "config": "Configuration",
-      "configDesc": "Feature switches and settings for this business unit."
+      "configDesc": "Feature switches and settings for this business unit.",
+      "pr": "PR",
+      "prDesc": "Purchase Request settings for this business unit."
     },
     "fields": {
       "code": "Code",
@@ -106,7 +108,10 @@
     "saveError": "Failed to save changes",
     "configEmpty": "No configuration settings.",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "config": {
+      "prAllowDuplicateProduct": "Allow selecting duplicate products"
+    }
   },
   "dashboardWidget": {
     "loadError": "Failed to load widgets: {message}",

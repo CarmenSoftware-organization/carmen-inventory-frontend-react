@@ -340,30 +340,6 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/spot-checks/${id}/save`,
   SPOT_CHECK_SUBMIT: (buCode: string, id: string) =>
     `/api/proxy/api/${buCode}/spot-checks/${id}/submit`,
-  SQL_QUERY_DB_OBJECTS: (buCode: string) =>
-    `/api/proxy/api/config/${buCode}/sql-query/db-objects`,
-  SQL_QUERY_DB_OBJECT_DEFINITION: (
-    buCode: string,
-    type: string,
-    schema: string,
-    name: string,
-  ) =>
-    `/api/proxy/api/config/${buCode}/sql-query/db-objects/definition?type=${encodeURIComponent(
-      type,
-    )}&schema=${encodeURIComponent(schema)}&name=${encodeURIComponent(name)}`,
-  SQL_QUERY_DROP: (
-    buCode: string,
-    type: string,
-    schema: string,
-    name: string,
-  ) =>
-    `/api/proxy/api/config/${buCode}/sql-query/db-objects?type=${encodeURIComponent(
-      type,
-    )}&schema=${encodeURIComponent(schema)}&name=${encodeURIComponent(name)}`,
-  SQL_QUERY_EXECUTE: (buCode: string) =>
-    `/api/proxy/api/config/${buCode}/sql-query/execute`,
-  SQL_QUERY_SAVE: (buCode: string) =>
-    `/api/proxy/api/config/${buCode}/sql-query/save`,
   STOCK_IN: (buCode: string) => `/api/proxy/api/${buCode}/stock-ins`,
   STOCK_OUT: (buCode: string) => `/api/proxy/api/${buCode}/stock-outs`,
   STORE_REQUISITION: (buCode: string) =>

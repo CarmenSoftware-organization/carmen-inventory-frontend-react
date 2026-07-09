@@ -6,6 +6,7 @@ import type {
   BusinessUnitNumberFormat,
   BusinessUnitPatch,
 } from "@/types/business-unit";
+import { SEEDED_ITEMS } from "./business-setting-config-registry";
 
 const numberFormatSchema = z.object({
   locales: z.string(),
@@ -87,6 +88,28 @@ export function normalizeConfig(
   return Array.isArray(config) ? config : [];
 }
 
+/**
+ * merge seeded config (จาก registry) เข้ากับ config จาก backend
+ *
+ * seed เฉพาะ key ที่ backend ยังไม่มี — ต่อท้าย ใช้ defaultValue + canonical label
+ * pure/locale-independent → diff เสถียร (ไม่ false-dirty ตอนสลับ locale)
+ *
+ * @param items - config items จาก backend (ผ่าน normalizeConfig แล้ว)
+ * @returns config items ที่รวม seeded items ที่ยังขาด
+ */
+export function mergeSeededConfig(
+  items: BusinessUnitConfigItem[],
+): BusinessUnitConfigItem[] {
+  const existing = new Set(items.map((i) => i.key));
+  const seeded = SEEDED_ITEMS.filter((s) => !existing.has(s.key)).map((s) => ({
+    key: s.key,
+    label: s.label,
+    datatype: s.datatype,
+    value: s.defaultValue,
+  }));
+  return [...items, ...seeded];
+}
+
 const emptyFormat: BusinessUnitNumberFormat = {
   locales: "",
   minimumIntegerDigits: 0,
@@ -131,7 +154,7 @@ export function toFormValues(
     perpage_format: data.perpage_format ?? { ...emptyFormat },
     recipe_format: data.recipe_format ?? { ...emptyFormat },
 
-    config: normalizeConfig(data.config),
+    config: mergeSeededConfig(normalizeConfig(data.config)),
   };
 }
 

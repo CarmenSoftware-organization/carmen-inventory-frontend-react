@@ -41,8 +41,10 @@ import {
   toFormValues,
   buildPatch,
   normalizeConfig,
+  mergeSeededConfig,
   type BusinessSettingFormValues,
 } from "./business-setting-form-schema";
+import { groupConfigForRender } from "./business-setting-config-registry";
 
 /**
  * หน้า Business Setting (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
@@ -78,7 +80,9 @@ export default function BusinessSettingComponent() {
       ? `${f.locales} · ${t("minDigits", { n: f.minimumIntegerDigits })}`
       : null;
 
-  const configItems = data ? normalizeConfig(data.config) : [];
+  const configGroups = data
+    ? groupConfigForRender(mergeSeededConfig(normalizeConfig(data.config)))
+    : { sections: [], other: [] };
   const isBusy = !isProfileReady || isLoading;
 
   // มีการแก้ค้าง (dirty) ระหว่างโหมด edit → กัน discard โดยไม่ได้ตั้งใจ
@@ -542,23 +546,45 @@ export default function BusinessSettingComponent() {
             />
           </SettingSection>
 
-          {/* Config */}
+          {/* Registry sections (เช่น PR) — seeded config จัดกลุ่มตาม section */}
+          {configGroups.sections.map((section) => (
+            <SettingSection
+              key={section.id}
+              title={t(section.titleKey)}
+              description={t(section.descKey)}
+            >
+              {section.entries.map((entry) => (
+                <ConfigField
+                  key={entry.item.key}
+                  editing={editing}
+                  form={form}
+                  index={entry.index}
+                  item={entry.item}
+                  label={t(entry.labelKey)}
+                  yesLabel={t("yes")}
+                  noLabel={t("no")}
+                />
+              ))}
+            </SettingSection>
+          ))}
+
+          {/* Configuration — config จาก backend ที่ไม่อยู่ใน registry section */}
           <SettingSection
             title={t("sections.config")}
             description={t("sections.configDesc")}
           >
-            {configItems.length === 0 ? (
+            {configGroups.other.length === 0 ? (
               <p className="text-muted-foreground/70 text-sm sm:col-span-2">
                 {t("configEmpty")}
               </p>
             ) : (
-              configItems.map((item, i) => (
+              configGroups.other.map((entry) => (
                 <ConfigField
-                  key={item.key}
+                  key={entry.item.key}
                   editing={editing}
                   form={form}
-                  index={i}
-                  item={item}
+                  index={entry.index}
+                  item={entry.item}
                   yesLabel={t("yes")}
                   noLabel={t("no")}
                 />

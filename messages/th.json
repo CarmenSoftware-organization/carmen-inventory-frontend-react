@@ -18,7 +18,9 @@
       "numberFormats": "รูปแบบตัวเลข",
       "numberFormatsDesc": "locale และความละเอียดของจำนวนเงิน จำนวน และรายการ",
       "config": "การตั้งค่า",
-      "configDesc": "สวิตช์ฟีเจอร์และการตั้งค่าของหน่วยธุรกิจนี้"
+      "configDesc": "สวิตช์ฟีเจอร์และการตั้งค่าของหน่วยธุรกิจนี้",
+      "pr": "PR",
+      "prDesc": "การตั้งค่า Purchase Request ของหน่วยธุรกิจนี้"
     },
     "fields": {
       "code": "รหัส",
@@ -106,7 +108,10 @@
     "saveError": "บันทึกการเปลี่ยนแปลงไม่สำเร็จ",
     "configEmpty": "ไม่มีการตั้งค่า",
     "yes": "ใช่",
-    "no": "ไม่"
+    "no": "ไม่",
+    "config": {
+      "prAllowDuplicateProduct": "อนุญาตให้เลือก product ซ้ำกันได้"
+    }
   },
   "dashboardWidget": {
     "loadError": "โหลดข้อมูล widget ไม่สำเร็จ: {message}",

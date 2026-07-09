@@ -52,7 +52,6 @@ import {
   UserRoundSearch,
   Mail,
   BellRing,
-  LayoutTemplate,
   Database,
   Award,
   Leaf,
@@ -433,6 +432,7 @@ export const moduleList: ModuleDto[] = [
         name: "period",
         path: "/system-admin/period",
         icon: Calendar,
+        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
@@ -445,6 +445,7 @@ export const moduleList: ModuleDto[] = [
         name: "role",
         path: "/system-admin/role",
         icon: ShieldCheck,
+        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
@@ -457,6 +458,7 @@ export const moduleList: ModuleDto[] = [
         name: "runningCode",
         path: "/system-admin/running-code",
         icon: Hash,
+        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
@@ -469,6 +471,7 @@ export const moduleList: ModuleDto[] = [
         name: "userActivity",
         path: "/system-admin/user-activity",
         icon: UserRoundSearch,
+        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
@@ -481,18 +484,13 @@ export const moduleList: ModuleDto[] = [
         name: "configEmail",
         path: "/system-admin/config-email",
         icon: Mail,
+        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
         name: "notificationTemplate",
         path: "/system-admin/notification-template",
         icon: BellRing,
-        permission: PERMISSIONS.system_configuration.view,
-      },
-      {
-        name: "queryDataset",
-        path: "/system-admin/query-dataset",
-        icon: LayoutTemplate,
         permission: PERMISSIONS.system_configuration.view,
       },
       {
