@@ -22,7 +22,9 @@
       "pr": "PR",
       "prDesc": "การตั้งค่า Purchase Request ของหน่วยธุรกิจนี้",
       "si": "SI",
-      "siDesc": "การตั้งค่า Stock In ของหน่วยธุรกิจนี้"
+      "siDesc": "การตั้งค่า Stock In ของหน่วยธุรกิจนี้",
+      "po": "PO",
+      "poDesc": "การตั้งค่า Purchase Order ของหน่วยธุรกิจนี้"
     },
     "fields": {
       "code": "รหัส",
@@ -118,7 +120,8 @@
         "average": "เฉลี่ย",
         "lastReceiving": "รับล่าสุด",
         "lastCost": "ต้นทุนล่าสุด"
-      }
+      },
+      "poGroupByPrComment": "เพิ่มการจัดกลุ่มตาม pr comment"
     }
   },
   "dashboardWidget": {
