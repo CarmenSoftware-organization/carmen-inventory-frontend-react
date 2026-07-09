@@ -121,15 +121,28 @@ export function StoreRequisitionForm({
 
   useEffect(() => {
     if (!profile || !defaultBu) return;
-    if (!form.getValues("requestor_id")) {
-      form.setValue("requestor_id", defaultRequestorId);
-    }
-    if (!form.getValues("department_id")) {
-      form.setValue("department_id", defaultDepartmentId);
+    // reset baseline (ไม่ใช่ setValue) ให้ค่า auto เป็น default — RHF คิด isDirty
+    // จาก deepEqual(getValues, defaultValues) ทั้งฟอร์ม; setValue ค่าที่ต่างจาก
+    // default จะทำให้ค้าง dirty ทั้งที่ยังไม่ได้กรอก → back/navigate ติด discard
+    // (ดู pr-form.tsx). keepDirtyValues คงค่าที่ผู้ใช้แก้ไว้
+    const values = form.getValues();
+    const patch: Partial<SrFormValues> = {};
+    if (!values.requestor_id) patch.requestor_id = defaultRequestorId;
+    if (!values.department_id) patch.department_id = defaultDepartmentId;
+    if (Object.keys(patch).length > 0) {
+      form.reset(
+        {
+          ...defaultValues,
+          requestor_id: patch.requestor_id ?? values.requestor_id,
+          department_id: patch.department_id ?? values.department_id,
+        },
+        { keepDirtyValues: true },
+      );
     }
     if (isAdd && !hasDepartment) {
       toast.warning(t("noDepartment"));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- defaultValues โครงสร้างคงที่ในโหมด add; เว้นจาก deps กัน toast ยิงซ้ำทุก render
   }, [
     profile,
     defaultBu,

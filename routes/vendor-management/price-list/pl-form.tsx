@@ -90,8 +90,14 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
 
   useEffect(() => {
     if (isAdd && defaultCurrencyId && !form.getValues("currency_id")) {
-      form.setValue("currency_id", defaultCurrencyId);
+      // reset baseline (ไม่ใช่ setValue) ให้ currency_id เป็น default — กัน isDirty
+      // ค้างทำให้ back/navigate ติด discard ทั้งที่ยังไม่ได้กรอก (ดู pr-form.tsx)
+      form.reset(
+        { ...defaultValues, currency_id: defaultCurrencyId },
+        { keepDirtyValues: true },
+      );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- defaultValues stable; run on isAdd/defaultCurrencyId
   }, [isAdd, defaultCurrencyId, form]);
 
   // After a successful edit-save the byId query is invalidated and refetches,

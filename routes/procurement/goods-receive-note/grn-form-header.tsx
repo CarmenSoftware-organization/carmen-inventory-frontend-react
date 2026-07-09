@@ -70,9 +70,20 @@ export function GrnFormHeader({
     const currency = currencies.find((c) => c.id === defaultCurrencyId);
     if (!currency) return;
     if (form.getValues("currency_id") === defaultCurrencyId) return;
-    form.setValue("currency_id", defaultCurrencyId);
-    form.setValue("currency_name", currency.code);
-    form.setValue("exchange_rate", currency.exchange_rate);
+    // reset baseline (ไม่ใช่ setValue) ให้ค่า currency default เป็น default ของฟอร์ม
+    // — RHF คิด isDirty จาก deepEqual(getValues, defaultValues) ทั้งฟอร์ม; setValue
+    // ค่าที่ต่างจาก default จะค้าง dirty ทั้งที่ยังไม่ได้กรอก → back ติด discard
+    // (ดู pr-form.tsx). ใช้ formState.defaultValues เป็น baseline (component นี้เป็น
+    // ลูก ไม่มี defaultValues ตรง ๆ); keepDirtyValues คงค่าที่ผู้ใช้แก้ไว้
+    form.reset(
+      {
+        ...form.formState.defaultValues,
+        currency_id: defaultCurrencyId,
+        currency_name: currency.code,
+        exchange_rate: currency.exchange_rate,
+      },
+      { keepDirtyValues: true },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
   }, [currencyId, defaultCurrencyId, currencies, disabled]);
 

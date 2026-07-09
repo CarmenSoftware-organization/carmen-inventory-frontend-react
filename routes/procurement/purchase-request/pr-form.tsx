@@ -159,26 +159,37 @@ export function PurchaseRequestForm({
   const [todayIso] = useState(() => new Date().toISOString());
   const prDateDisplay = formatDate(defaultPrDate || todayIso, dateFormat);
 
+  // Auto-populate ค่า default ที่ซ่อนไว้ (pr_date/requestor/department) — ต้อง
+  // reset baseline ไม่ใช่ setValue. RHF คิด isDirty = !deepEqual(getValues(),
+  // defaultValues) ทั้งฟอร์ม; setValue ค่าที่ต่างจาก default จะ "ค้าง" อยู่ใน
+  // formValues แล้วพอมี action ใดไป trigger การ recompute (เช่นเพิ่ม/ลบ item,
+  // profile โหลด, useWatch) ฟอร์มจะกลายเป็น dirty ทั้งที่ยังไม่ได้กรอกจริง →
+  // back/navigate ติด discard. reset + keepDirtyValues ทำให้ค่า auto เป็น
+  // baseline (ไม่นับ dirty) แต่ยังคงค่าที่ผู้ใช้แก้ไว้เป็น dirty ตามเดิม
   useEffect(() => {
-    if (!form.getValues("pr_date")) {
-      form.setValue("pr_date", new Date().toISOString().split("T")[0]);
+    const values = form.getValues();
+    const patch: Partial<PrFormValues> = {};
+    if (!values.pr_date) {
+      patch.pr_date = new Date().toISOString().split("T")[0];
     }
-    if (!profile || !defaultBu) return;
-    if (!form.getValues("requestor_id")) {
-      form.setValue("requestor_id", defaultRequestorId);
+    if (profile && defaultBu) {
+      if (!values.requestor_id) patch.requestor_id = defaultRequestorId;
+      if (!values.department_id) patch.department_id = defaultDefaultId;
     }
-    if (!form.getValues("department_id")) {
-      form.setValue("department_id", defaultDefaultId);
-    }
-  }, [
-    profile,
-    defaultBu,
-    form,
-    defaultRequestorId,
-    defaultDefaultId,
-    isAdd,
-    hasDepartment,
-  ]);
+    if (Object.keys(patch).length === 0) return;
+    // ใช้ค่า auto ที่ตั้งไว้แล้วเป็น baseline ต่อ (patch.X ?? values.X) — กันเคส
+    // profile โหลดทีหลัง (2 เฟส) แล้ว reset รอบสองไป wipe pr_date ที่ตั้งไว้รอบแรก
+    form.reset(
+      {
+        ...defaultValues,
+        pr_date: patch.pr_date ?? values.pr_date,
+        requestor_id: patch.requestor_id ?? values.requestor_id,
+        department_id: patch.department_id ?? values.department_id,
+      },
+      { keepDirtyValues: true },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form stable; defaultValues โครงสร้างคงที่ในโหมด add
+  }, [profile, defaultBu, form, defaultRequestorId, defaultDefaultId]);
 
   useEffect(() => {
     const formEl = document.getElementById("purchase-request-form");

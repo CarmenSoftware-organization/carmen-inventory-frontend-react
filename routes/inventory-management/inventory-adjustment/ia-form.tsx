@@ -109,10 +109,15 @@ export function InventoryAdjustmentForm({
   });
 
   // currentPeriod loads async after mount — sync the default date once it arrives.
+  // reset baseline (ไม่ใช่ setValue) ให้ date เป็น default — กัน isDirty ค้างทำให้
+  // back ติด discard ทั้งที่ยังไม่ได้แก้ (ดู pr-form.tsx). keepDirtyValues คงค่าที่แก้
   useEffect(() => {
     if (inventoryAdjustment || !currentPeriod?.end_at) return;
     if (form.formState.dirtyFields.date) return;
-    form.setValue("date", resolveDefaultDate(currentPeriod.end_at));
+    form.reset(
+      { ...defaultValues, date: resolveDefaultDate(currentPeriod.end_at) },
+      { keepDirtyValues: true },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPeriod?.end_at, inventoryAdjustment]);
 
