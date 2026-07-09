@@ -31,7 +31,11 @@ export function ProductCell({
   isView,
   isDisabled,
   productRef,
-}: CellProps & { readonly productRef?: ProductRef }) {
+  confirmDuplicate,
+}: CellProps & {
+  readonly productRef?: ProductRef;
+  readonly confirmDuplicate: (action: () => void, productName?: string) => void;
+}) {
   "use no memo";
   const errors = form.formState.errors.details?.[index];
   if (isView)
@@ -48,7 +52,14 @@ export function ProductCell({
       render={({ field }) => (
         <LookupProduct
           value={field.value}
-          onValueChange={field.onChange}
+          onValueChange={(id, product) => {
+            const rows = form.getValues("details");
+            const isDup =
+              !!id && rows.some((r, i) => i !== index && r.product_id === id);
+            if (isDup)
+              confirmDuplicate(() => field.onChange(id), product?.name);
+            else field.onChange(id);
+          }}
           disabled={isDisabled}
           className="h-8 w-full text-xs"
           error={errors?.product_id?.message}

@@ -276,6 +276,12 @@
     "confirmNamed": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
     "deleting": "Deleting..."
   },
+  "duplicateProduct": {
+    "title": "Duplicate product",
+    "description": "This product is already in the list. Add it again?",
+    "descriptionNamed": "\"{name}\" is already in this list. Add it again?",
+    "confirm": "Add anyway"
+  },
   "status": {
     "active": "Active",
     "inactive": "Inactive",

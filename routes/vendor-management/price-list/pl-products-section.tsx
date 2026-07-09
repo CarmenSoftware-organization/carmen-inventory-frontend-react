@@ -1,5 +1,5 @@
 
-import { Plus } from "lucide-react";
+import { PackagePlus } from "lucide-react";
 import type { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { SettingSection } from "@/components/ui/setting-section";
@@ -54,7 +54,7 @@ export function PLProductsSection({
       action={
         !isDisabled ? (
           <Button type="button" size="xs" onClick={onAdd}>
-            <Plus />
+            <PackagePlus />
             {headerLabels.addLabel}
           </Button>
         ) : undefined

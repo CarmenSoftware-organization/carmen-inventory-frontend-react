@@ -21,6 +21,7 @@ interface BuildColumnsOptions {
   readonly isDisabled: boolean;
   readonly onRemove: (idx: number) => void;
   readonly labels: ProductLabels;
+  readonly confirmDuplicate: (action: () => void, productName?: string) => void;
 }
 
 /**
@@ -35,6 +36,7 @@ export function buildPltProductColumns({
   isDisabled,
   onRemove,
   labels,
+  confirmDuplicate,
 }: BuildColumnsOptions): ColumnDef<DetailField>[] {
   const findProductRef = (rowIndex: number): ProductRef | undefined => {
     const productId = form.getValues(`details.${rowIndex}.product_id`);
@@ -65,6 +67,7 @@ export function buildPltProductColumns({
           isView={isView}
           isDisabled={isDisabled}
           productRef={findProductRef(row.index)}
+          confirmDuplicate={confirmDuplicate}
         />
       ),
     },

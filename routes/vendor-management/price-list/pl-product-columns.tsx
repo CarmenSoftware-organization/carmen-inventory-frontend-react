@@ -22,6 +22,7 @@ interface BuildColumnsOptions {
   readonly onRemove: (idx: number) => void;
   readonly tfl: (key: string) => string;
   readonly removeLabel: string;
+  readonly confirmDuplicate: (action: () => void, productName?: string) => void;
 }
 
 /**
@@ -37,6 +38,7 @@ export function buildPlProductColumns({
   onRemove,
   tfl,
   removeLabel,
+  confirmDuplicate,
 }: BuildColumnsOptions): ColumnDef<DetailField>[] {
   const cols: ColumnDef<DetailField>[] = [
     {
@@ -61,6 +63,7 @@ export function buildPlProductColumns({
           isView={isView}
           isDisabled={isDisabled}
           detailRef={detailRefs?.[row.index]}
+          confirmDuplicate={confirmDuplicate}
         />
       ),
     },

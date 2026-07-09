@@ -10,6 +10,8 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { DuplicateProductDialog } from "@/components/ui/duplicate-product-dialog";
+import { useDuplicateProductConfirm } from "@/hooks/use-duplicate-product-confirm";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
 import { buildPlProductColumns } from "./pl-product-columns";
@@ -37,6 +39,7 @@ export function PLProductTable({
   removeLabel,
 }: PLProductTableProps) {
   "use no memo";
+  const dupConfirm = useDuplicateProductConfirm();
   const columns = useMemo<ColumnDef<DetailField>[]>(
     () =>
       buildPlProductColumns({
@@ -47,7 +50,9 @@ export function PLProductTable({
         onRemove,
         tfl,
         removeLabel,
+        confirmDuplicate: dupConfirm.confirm,
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dupConfirm.confirm is stable
     [form, isView, isDisabled, tfl, onRemove, removeLabel, detailRefs],
   );
 
@@ -61,14 +66,17 @@ export function PLProductTable({
   });
 
   return (
-    <DataGrid
-      table={table}
-      recordCount={detailFields.length}
-      tableLayout={{ headerSticky: true }}
-    >
-      <DataGridContainer>
-        <DataGridTable />
-      </DataGridContainer>
-    </DataGrid>
+    <>
+      <DataGrid
+        table={table}
+        recordCount={detailFields.length}
+        tableLayout={{ headerSticky: true }}
+      >
+        <DataGridContainer>
+          <DataGridTable />
+        </DataGridContainer>
+      </DataGrid>
+      <DuplicateProductDialog {...dupConfirm.dialogProps} />
+    </>
   );
 }
