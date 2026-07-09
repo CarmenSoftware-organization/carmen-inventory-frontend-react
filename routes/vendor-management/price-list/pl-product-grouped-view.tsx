@@ -22,10 +22,10 @@ export function PLProductGroupedView({
   const groups = useMemo(() => buildProductGroups(detailRefs), [detailRefs]);
 
   return (
-    <div className="border-border overflow-x-auto rounded-lg border">
-      <table className="w-full border-collapse text-xs">
+    <div className="border-border/60 bg-card w-full overflow-x-auto rounded-lg border">
+      <table className="text-foreground w-full border-collapse text-xs">
         <thead>
-          <tr className="border-border text-muted-foreground border-b">
+          <tr className="bg-muted/60 text-muted-foreground border-border/60 border-b">
             <Th className="w-14 text-center">#</Th>
             <Th className="text-left">{tfl("product")}</Th>
             <Th className="text-center">{tfl("unit")}</Th>
@@ -44,7 +44,7 @@ export function PLProductGroupedView({
               // เส้นคั่นเฉพาะแถวสุดท้ายของกลุ่ม → ภายในกลุ่มไม่มีเส้น (ดูเป็นแถวเดียว)
               const tierClass = cn(
                 "py-0.5",
-                isLast && "border-border border-b",
+                isLast && "border-border/50 border-b",
               );
               return (
                 <tr key={tier.id ?? `${group.productId}-${ti}`}>
@@ -52,13 +52,13 @@ export function PLProductGroupedView({
                     <>
                       <Td
                         rowSpan={group.tiers.length}
-                        className="border-border text-muted-foreground border-b text-center align-middle tabular-nums"
+                        className="border-border/50 text-muted-foreground border-b text-center align-middle tabular-nums"
                       >
                         {group.groupNumber}
                       </Td>
                       <Td
                         rowSpan={group.tiers.length}
-                        className="border-border border-b align-middle"
+                        className="border-border/50 border-b align-middle"
                       >
                         <NameWithSubtext
                           primary={tier.product_name ?? ""}
