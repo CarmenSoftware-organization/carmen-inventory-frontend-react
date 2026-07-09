@@ -40,10 +40,8 @@ export function PLProductGroupedView({
             group.tiers.map((tier, ti) => {
               const isFirst = ti === 0;
               const isLast = ti === group.tiers.length - 1;
-              // tier cell padding 2px แต่ละด้าน → tier ในกลุ่มห่างกัน ~4px
-              // เส้นคั่นเฉพาะแถวสุดท้ายของกลุ่ม → ภายในกลุ่มไม่มีเส้น (ดูเป็นแถวเดียว)
               const tierClass = cn(
-                "py-0.5",
+                "py-1",
                 isLast && "border-border/50 border-b",
               );
               return (
