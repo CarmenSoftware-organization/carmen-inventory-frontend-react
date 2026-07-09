@@ -12,6 +12,13 @@ const boolItem: BusinessUnitConfigItem = {
   value: "true",
 };
 
+const textItem: BusinessUnitConfigItem = {
+  key: "pr.some.text",
+  label: "Some text setting",
+  datatype: "string",
+  value: "hello",
+};
+
 /** harness: RHF form ที่มี config[0] = item ที่ส่งเข้ามา */
 function Harness({
   editing,
@@ -67,5 +74,17 @@ describe("ConfigField", () => {
     expect(
       screen.getByText("Allow selecting duplicate products"),
     ).toBeInTheDocument();
+  });
+
+  it("edit: non-boolean item renders a text input under the label override", () => {
+    render(<Harness editing item={textItem} label="ข้อความ" />);
+    // label override shows on the text branch too
+    expect(screen.getByText("ข้อความ")).toBeInTheDocument();
+    expect(screen.queryByText("Some text setting")).not.toBeInTheDocument();
+    // text branch renders an <input> bound to the config value (not a switch)
+    const input = screen.getByRole("textbox") as HTMLInputElement;
+    expect(input).toBeInTheDocument();
+    expect(input.value).toBe("hello");
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
   });
 });
