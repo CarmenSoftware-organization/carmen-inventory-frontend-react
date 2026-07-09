@@ -5,7 +5,6 @@ import { Loader2, Pencil, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/ui/status-badge";
 import { ErrorState } from "@/components/ui/error-state";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -26,7 +25,6 @@ import {
   EditableField,
   SelectField,
   NumberFormatField,
-  SwitchField,
   ConfigField,
 } from "./business-setting-ui";
 import {
@@ -112,13 +110,16 @@ export default function BusinessSettingComponent() {
       return;
     }
     // แนบ doc_version (optimistic lock) ไปกับ payload เพื่อกัน 409 version ค้าง
-    update.mutate({ ...patch, doc_version: data.doc_version }, {
-      onSuccess: () => {
-        toast.success(t("saved"));
-        setEditing(false);
+    update.mutate(
+      { ...patch, doc_version: data.doc_version },
+      {
+        onSuccess: () => {
+          toast.success(t("saved"));
+          setEditing(false);
+        },
+        onError: (e) => toast.error(e.message || t("saveError")),
       },
-      onError: (e) => toast.error(e.message || t("saveError")),
-    });
+    );
   });
 
   return (
@@ -285,27 +286,6 @@ export default function BusinessSettingComponent() {
                   />
                 )}
               />
-            </div>
-            <div className="min-w-0 space-y-1">
-              <div className="text-foreground text-xs font-semibold">
-                {t("fields.status")}
-              </div>
-              <p className="text-muted-foreground/80 text-[0.6875rem] leading-snug">
-                {t("fields.statusDesc")}
-              </p>
-              {editing ? (
-                <div className="flex flex-wrap items-center gap-4 pt-1">
-                  <SwitchField
-                    form={form}
-                    name="is_active"
-                    label={t("fields.isActive")}
-                  />
-                </div>
-              ) : (
-                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  <StatusBadge active={data.is_active} />
-                </div>
-              )}
             </div>
           </SettingSection>
 

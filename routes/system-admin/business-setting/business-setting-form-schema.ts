@@ -27,7 +27,10 @@ const configItemSchema = z.object({
  * @param tv - ฟังก์ชันแปลข้อความ validation (namespace `validation`)
  * @param tf - ฟังก์ชันแปลชื่อ field (namespace `businessSetting.fields`)
  */
-export function createBusinessSettingSchema(tv: TranslationFn, tf: TranslationFn) {
+export function createBusinessSettingSchema(
+  tv: TranslationFn,
+  tf: TranslationFn,
+) {
   const optionalEmail = z
     .string()
     .refine(
@@ -41,7 +44,6 @@ export function createBusinessSettingSchema(tv: TranslationFn, tf: TranslationFn
     alias_name: z.string(),
     description: z.string(),
     info: z.string(),
-    is_active: z.boolean(),
     default_currency_id: z.string(),
 
     company_name: z.string(),
@@ -101,7 +103,6 @@ export function toFormValues(
     alias_name: s(data.alias_name),
     description: s(data.description),
     info: s(data.info),
-    is_active: data.is_active,
     default_currency_id: s(data.default_currency_id),
 
     company_name: s(data.company_name),
@@ -185,10 +186,10 @@ export function buildPatch(
 
   if (values.code !== original.code) patch.code = values.code;
   if (values.name !== original.name) patch.name = values.name;
-  if (values.is_active !== original.is_active) patch.is_active = values.is_active;
 
   for (const k of NULLABLE_STR_FIELDS) {
-    if (values[k] !== original[k]) patch[k] = values[k] === "" ? null : values[k];
+    if (values[k] !== original[k])
+      patch[k] = values[k] === "" ? null : values[k];
   }
 
   for (const k of NUMBER_FORMAT_FIELDS) {
