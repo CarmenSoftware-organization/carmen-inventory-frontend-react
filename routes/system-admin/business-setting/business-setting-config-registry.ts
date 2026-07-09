@@ -103,6 +103,8 @@ export interface ConfigSectionEntry {
   index: number;
   /** i18n key สำหรับ display label (จาก registry) */
   labelKey: string;
+  /** สำหรับ enum — options จาก registry (undefined = ไม่ใช่ enum) */
+  options?: ConfigOption[];
 }
 
 /** entry ของ config ที่ไม่อยู่ใน registry section (backend-only) */
@@ -146,7 +148,7 @@ export function groupConfigForRender(
     for (const seeded of section.items) {
       const found = indexed.find((e) => e.item.key === seeded.key);
       if (found) {
-        entries.push({ ...found, labelKey: seeded.labelKey });
+        entries.push({ ...found, labelKey: seeded.labelKey, options: seeded.options });
       }
     }
     return {

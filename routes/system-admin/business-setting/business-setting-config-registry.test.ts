@@ -100,6 +100,31 @@ describe("SI config registry", () => {
   });
 });
 
+describe("groupConfigForRender — enum options", () => {
+  it("attaches registry options to the SI enum entry", () => {
+    const merged = mergeSeededConfig([]); // seeds ทั้ง PR + SI
+    const groups = groupConfigForRender(merged);
+    const si = groups.sections.find((s) => s.id === "si");
+    expect(si).toBeDefined();
+    const entry = si?.entries.find((e) => e.item.key === "si.cost-from");
+    expect(entry?.options?.map((o) => o.value)).toEqual([
+      "average",
+      "last_receiving",
+      "last_cost",
+    ]);
+  });
+
+  it("leaves options undefined for non-enum (boolean PR) entries", () => {
+    const merged = mergeSeededConfig([]);
+    const groups = groupConfigForRender(merged);
+    const pr = groups.sections.find((s) => s.id === "pr");
+    const entry = pr?.entries.find(
+      (e) => e.item.key === "pr.allow-duplicate.product",
+    );
+    expect(entry?.options).toBeUndefined();
+  });
+});
+
 describe("resolveConfigOptions", () => {
   const opts = [
     { value: "average", labelKey: "a", visibleWhenCalcMethod: "average" },
