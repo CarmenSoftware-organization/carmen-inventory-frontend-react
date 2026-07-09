@@ -38,9 +38,9 @@ describe("config registry", () => {
 
 describe("groupConfigForRender", () => {
   it("puts the seeded PR item in the pr section with absolute index and labelKey", () => {
-    const merged = mergeSeededConfig([]); // → [pr, si]
+    const merged = mergeSeededConfig([]); // → one entry per seeded section
     const groups = groupConfigForRender(merged);
-    expect(groups.sections).toHaveLength(2);
+    expect(groups.sections).toHaveLength(CONFIG_SECTIONS.length);
     expect(groups.sections[0].id).toBe("pr");
     expect(groups.sections[0].entries).toHaveLength(1);
     expect(groups.sections[0].entries[0].index).toBe(0);
@@ -154,5 +154,18 @@ describe("resolveConfigOptions", () => {
     expect(
       resolveConfigOptions(opts, "fifo", "average").map((o) => o.value),
     ).toEqual(["average", "last_receiving", "last_cost"]);
+  });
+});
+
+describe("PO config registry", () => {
+  it("registers po.group-by-pr-comment as a boolean defaulting to false under section 'po'", () => {
+    const po = CONFIG_SECTIONS.find((s) => s.id === "po");
+    expect(po).toBeDefined();
+    const item = po?.items.find((i) => i.key === "po.group-by-pr-comment");
+    expect(item).toBeDefined();
+    expect(item?.datatype).toBe("boolean");
+    expect(item?.defaultValue).toBe("false");
+    expect(item?.labelKey).toBe("config.poGroupByPrComment");
+    expect(item?.options).toBeUndefined();
   });
 });

@@ -85,6 +85,20 @@ export const CONFIG_SECTIONS: readonly ConfigSection[] = [
       },
     ],
   },
+  {
+    id: "po",
+    titleKey: "sections.po",
+    descKey: "sections.poDesc",
+    items: [
+      {
+        key: "po.group-by-pr-comment",
+        datatype: "boolean",
+        defaultValue: "false",
+        label: "Group by PR comment",
+        labelKey: "config.poGroupByPrComment",
+      },
+    ],
+  },
 ];
 
 /** seeded items ทั้งหมด flatten จากทุก section */

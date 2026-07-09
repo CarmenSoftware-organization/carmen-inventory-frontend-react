@@ -22,7 +22,9 @@
       "pr": "PR",
       "prDesc": "Purchase Request settings for this business unit.",
       "si": "SI",
-      "siDesc": "Stock In settings for this business unit."
+      "siDesc": "Stock In settings for this business unit.",
+      "po": "PO",
+      "poDesc": "Purchase Order settings for this business unit."
     },
     "fields": {
       "code": "Code",
@@ -118,7 +120,8 @@
         "average": "Average",
         "lastReceiving": "Last receiving",
         "lastCost": "Last cost"
-      }
+      },
+      "poGroupByPrComment": "Group by PR comment"
     }
   },
   "dashboardWidget": {
