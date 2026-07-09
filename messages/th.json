@@ -504,6 +504,7 @@
     "taxAmt": "ภาษี",
     "leadTime": "ระยะเวลาจัดส่ง",
     "moq": "MOQ",
+    "moqPricing": "MOQ Pricing",
     "moqQty": "จำนวน MOQ",
     "productName": "ชื่อสินค้า",
     "contactPerson": "ผู้ติดต่อ",

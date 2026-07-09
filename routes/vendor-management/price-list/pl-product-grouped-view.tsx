@@ -28,11 +28,8 @@ export function PLProductGroupedView({
           <tr className="bg-muted/60 text-muted-foreground border-border/60 border-b">
             <Th className="w-14 text-center">#</Th>
             <Th className="text-left">{tfl("product")}</Th>
-            <Th className="text-center">{tfl("unit")}</Th>
-            <Th className="w-24 text-right">{tfl("moq")}</Th>
-            <Th className="w-32 text-right">{tfl("unitPrice")}</Th>
+            <Th className="text-left">{tfl("moqPricing")}</Th>
             <Th className="text-left">{tfl("taxProfile")}</Th>
-            <Th className="w-24 text-right">{tfl("leadTime")}</Th>
           </tr>
         </thead>
         <tbody>
@@ -65,35 +62,23 @@ export function PLProductGroupedView({
                       </Td>
                     </>
                   )}
-                  <Td className={cn("text-center align-middle", tierClass)}>
-                    <PlainCell value={tier.unit_name} />
-                  </Td>
-                  <Td
-                    className={cn(
-                      "text-foreground text-right align-middle font-semibold tabular-nums",
-                      tierClass,
-                    )}
-                  >
-                    {Number(tier.moq_qty) || 0}+
-                  </Td>
-                  <Td
-                    className={cn(
-                      "text-foreground text-right align-middle font-semibold tabular-nums",
-                      tierClass,
-                    )}
-                  >
-                    {(Number(tier.price_without_tax) || 0).toFixed(2)}
+                  {/* moq + unit → price (lead time) */}
+                  <Td className={cn("align-middle", tierClass)}>
+                    <span className="flex items-center gap-1.5 text-xs tabular-nums">
+                      <span className="text-foreground font-medium">
+                        {Number(tier.moq_qty) || 0}+ {tier.unit_name ?? "—"}
+                      </span>
+                      <span className="text-muted-foreground">→</span>
+                      <span className="text-foreground font-semibold">
+                        {(Number(tier.price_without_tax) || 0).toFixed(2)}
+                      </span>
+                      <span className="text-muted-foreground text-[0.6875rem]">
+                        ({Number(tier.lead_time_days) || 0}d)
+                      </span>
+                    </span>
                   </Td>
                   <Td className={cn("align-middle", tierClass)}>
                     <PlainCell value={tier.tax_profile_name} />
-                  </Td>
-                  <Td
-                    className={cn(
-                      "text-muted-foreground text-right align-middle tabular-nums",
-                      tierClass,
-                    )}
-                  >
-                    {Number(tier.lead_time_days) || 0}d
                   </Td>
                 </tr>
               );

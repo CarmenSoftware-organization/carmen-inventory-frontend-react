@@ -504,6 +504,7 @@
     "taxAmt": "Tax Amt",
     "leadTime": "Lead Time",
     "moq": "MOQ",
+    "moqPricing": "MOQ Pricing",
     "moqQty": "MOQ Qty",
     "productName": "Product Name",
     "contactPerson": "Contact Person",
