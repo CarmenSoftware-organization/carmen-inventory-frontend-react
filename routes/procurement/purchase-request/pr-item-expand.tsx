@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/input/input-suffix";
 import { EyeBrow } from "@/components/ui/eye-brow";
 import { formatCurrency } from "@/lib/currency-utils";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
@@ -237,6 +236,49 @@ export function PrItemExpand({
             index={index}
             buCode={buCode ?? ""}
           />
+          {isForeignCurrency && (
+            <section className="space-y-2 pt-6">
+              <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
+                {tfl("exchangeRate")}
+              </p>
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-muted-foreground">
+                  1 {watchCurrencyCode} = {baseCurrencyCode}
+                </span>
+                {isFieldDisabled ? (
+                  <span className="font-semibold tabular-nums">
+                    {exchangeRate}
+                  </span>
+                ) : (
+                  <InputSuffixField className="h-8 w-28">
+                    <InputSuffixInput
+                      id={`items-${index}-exchange-rate`}
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.0001"
+                      className="h-8 text-right text-xs"
+                      defaultValue={exchangeRate}
+                      {...form.register(`items.${index}.exchange_rate`)}
+                      onChange={(e) => {
+                        const n = e.target.valueAsNumber;
+                        form.setValue(
+                          `items.${index}.exchange_rate`,
+                          Number.isNaN(n) ? 1 : n,
+                          { shouldDirty: true },
+                        );
+                      }}
+                    />
+                    <InputSuffixAddon>
+                      <span className="text-muted-foreground px-2 text-xs">
+                        {baseCurrencyCode}
+                      </span>
+                    </InputSuffixAddon>
+                  </InputSuffixField>
+                )}
+              </div>
+            </section>
+          )}
           <PrItemSummary
             subtotal={subtotal}
             netAmount={netAmount}

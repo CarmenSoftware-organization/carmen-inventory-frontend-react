@@ -69,10 +69,6 @@ export function PoGeneralFields({
   const tfl = useTranslations("field");
   const { defaultCurrencyId, dateFormat } = useProfile();
 
-  const exchangeRate = useWatch({
-    control: form.control,
-    name: "exchange_rate",
-  });
   const currencyId = useWatch({ control: form.control, name: "currency_id" });
 
   const { data: currencyData } = useCurrency({ perpage: -1 });
@@ -221,9 +217,11 @@ export function PoGeneralFields({
         >
           <InputSuffixInput
             id="po-exchange-rate"
-            value={formatExchangeRate(exchangeRate)}
-            disabled
-            readOnly
+            type="number"
+            inputMode="decimal"
+            step="0.0001"
+            disabled={fieldDisabled}
+            {...form.register("exchange_rate")}
           />
           <InputSuffixAddon>
             <Controller

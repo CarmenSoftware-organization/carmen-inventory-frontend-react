@@ -245,7 +245,7 @@ export function CnGeneralFields({
               type="number"
               inputMode="decimal"
               step="0.0001"
-              disabled
+              disabled={disabled}
               {...form.register("exchange_rate")}
             />
             <InputSuffixAddon>

@@ -214,7 +214,7 @@ export function GrnFormHeader({
                 type="number"
                 inputMode="decimal"
                 step="0.0001"
-                disabled
+                disabled={disabled}
                 {...form.register("exchange_rate")}
               />
               <InputSuffixAddon>
