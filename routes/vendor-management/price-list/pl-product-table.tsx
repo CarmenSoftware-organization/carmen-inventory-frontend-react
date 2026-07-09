@@ -26,11 +26,6 @@ interface PLProductTableProps {
   readonly removeLabel: string;
 }
 
-/**
- * Inline price-list table — TanStack DataGrid (project standard) ตัวเดียวกัน
- * ทั้ง view และ edit/add: column ชุดเดียว (ดู `pl-product-columns`), แต่ละ cell
- * (ดู `pl-product-cells`) branch `isView` เอง — actions column แสดงเฉพาะตอน edit
- */
 export function PLProductTable({
   form,
   detailFields,
@@ -59,6 +54,9 @@ export function PLProductTable({
   const table = useReactTable({
     data: detailFields,
     columns,
+    // key rows by the stable useFieldArray id (ไม่ใช่ index) — ไม่งั้น prepend
+    // ทำให้ cell ที่ index เดิมไม่ remount แล้ว lookup โชว์ค่าเดิมค้าง (stale)
+    getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
   });
 

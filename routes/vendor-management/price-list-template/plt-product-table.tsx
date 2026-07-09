@@ -58,6 +58,9 @@ export function PltProductTable({
   const table = useReactTable({
     data: detailFields,
     columns,
+    // key rows by the stable useFieldArray id (ไม่ใช่ index) — ไม่งั้น prepend
+    // ทำให้ cell ที่ index เดิมไม่ remount แล้ว lookup โชว์ค่าเดิมค้าง (stale)
+    getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
   });
 

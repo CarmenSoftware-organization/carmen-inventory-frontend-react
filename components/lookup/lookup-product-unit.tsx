@@ -28,7 +28,8 @@ interface LookupProductUnitProps {
  *
  * ดึงข้อมูลผ่าน `useProductUnits(productId)` ซึ่งคืนเฉพาะหน่วยที่สินค้าชิ้นนั้นรองรับ
  * (inventory/order/ingredient units) auto-select หน่วยแรกเมื่อ value ไม่ match หรือยังว่าง
- * disabled เมื่อไม่มี `productId` มี `onItemChange` ส่ง object `ProductUnit` เต็มสำหรับ side effects
+ * เปิดใช้ได้แม้ยังไม่เลือก `productId` (dropdown จะว่างจนกว่าจะมี product) มี
+ * `onItemChange` ส่ง object `ProductUnit` เต็มสำหรับ side effects
  *
  * @param value - product unit id ที่เลือกอยู่
  * @param onValueChange - callback เมื่อเปลี่ยนค่า ส่งเฉพาะ id
@@ -92,7 +93,7 @@ export function LookupProductUnit({
         const unit = units.find((u) => u.id === id);
         if (unit) onItemChange?.(unit);
       }}
-      disabled={disabled || !productId || isLoading}
+      disabled={disabled || isLoading}
     >
       <SelectTrigger
         size="sm"
