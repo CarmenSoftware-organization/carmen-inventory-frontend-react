@@ -376,6 +376,7 @@ export function ConfigField({
   item,
   yesLabel,
   noLabel,
+  label,
 }: {
   readonly editing: boolean;
   readonly form: Form;
@@ -383,14 +384,17 @@ export function ConfigField({
   readonly item: BusinessUnitConfigItem;
   readonly yesLabel: string;
   readonly noLabel: string;
+  /** override display label (เช่น i18n ของ seeded item); ไม่มี → ใช้ item.label */
+  readonly label?: string;
 }) {
   const isBool = item.datatype === "boolean";
   const name = `config.${index}.value` as FormName;
+  const displayLabel = label ?? item.label;
 
   if (!editing) {
     return (
       <SettingField
-        label={item.label}
+        label={displayLabel}
         description={item.key}
         value={isBool ? (item.value === "true" ? yesLabel : noLabel) : item.value}
       />
@@ -399,7 +403,7 @@ export function ConfigField({
 
   if (isBool) {
     return (
-      <EditShell label={item.label} description={item.key}>
+      <EditShell label={displayLabel} description={item.key}>
         <Controller
           control={form.control}
           name={name}
@@ -415,7 +419,7 @@ export function ConfigField({
   }
 
   return (
-    <EditShell label={item.label} description={item.key} htmlFor={name}>
+    <EditShell label={displayLabel} description={item.key} htmlFor={name}>
       <Input {...form.register(name)} className="h-8 text-sm" />
     </EditShell>
   );
