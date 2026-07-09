@@ -182,10 +182,13 @@ export function usePoFormHandlers({
           const body = res as { data?: { id?: string } } | undefined;
           const newId = body?.data?.id;
           if (newId) {
+            // NOTE: อย่าเรียก setMode("view") ตรงนี้ — มันจะ re-render แล้วทำให้
+            // useNavigationGuard teardown เรียก history.back() (ลบ sentinel) ก่อน
+            // ที่ navigate ไป /:id (lazy route, async) จะ commit → เด้งกลับ /new
+            // ปล่อยให้ route /:id mount PoForm ใหม่เป็น view mode เองพอ
             navigate(`/procurement/purchase-order/${newId}`, {
               replace: true,
             });
-            setMode("view");
           } else {
             navigate("/procurement/purchase-order");
           }
