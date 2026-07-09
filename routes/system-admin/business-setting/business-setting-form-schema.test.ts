@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
-import type { BusinessUnitDetail } from "@/types/business-unit";
-import { toFormValues, buildPatch } from "./business-setting-form-schema";
+import type { BusinessUnitDetail, BusinessUnitConfigItem } from "@/types/business-unit";
+import {
+  toFormValues,
+  buildPatch,
+  mergeSeededConfig,
+  normalizeConfig,
+} from "./business-setting-form-schema";
 
 /** minimal detail สำหรับ test — ค่าที่ไม่เกี่ยวใส่ null/ค่าว่างพอผ่าน type */
 const baseData: BusinessUnitDetail = {
@@ -93,5 +98,66 @@ describe("buildPatch", () => {
     const original = toFormValues(baseData);
     const values = { ...original, is_active: false };
     expect(buildPatch(values, original)).toEqual({ is_active: false });
+  });
+});
+
+describe("mergeSeededConfig", () => {
+  it("seeds the PR item when backend config is empty ({})", () => {
+    const merged = mergeSeededConfig(normalizeConfig({}));
+    expect(merged).toEqual([
+      {
+        key: "pr.allow-duplicate.product",
+        label: "Allow selecting duplicate products",
+        datatype: "boolean",
+        value: "false",
+      },
+    ]);
+  });
+
+  it("does not duplicate when backend already has the key", () => {
+    const backend: BusinessUnitConfigItem[] = [
+      {
+        key: "pr.allow-duplicate.product",
+        label: "L",
+        datatype: "boolean",
+        value: "true",
+      },
+    ];
+    expect(mergeSeededConfig(backend)).toEqual(backend);
+  });
+
+  it("keeps unknown backend items and appends seeded items after them", () => {
+    const backend: BusinessUnitConfigItem[] = [
+      { key: "x.unknown", label: "X", datatype: "string", value: "1" },
+    ];
+    const merged = mergeSeededConfig(backend);
+    expect(merged).toHaveLength(2);
+    expect(merged[0]).toEqual(backend[0]);
+    expect(merged[1].key).toBe("pr.allow-duplicate.product");
+  });
+});
+
+describe("buildPatch — seeded config", () => {
+  it("does not send config when the seeded item is untouched", () => {
+    const original = toFormValues(baseData); // baseData.config = {} → seeded to [pr false]
+    expect(buildPatch({ ...original }, original).config).toBeUndefined();
+  });
+
+  it("sends the whole config array when the PR switch is toggled on", () => {
+    const original = toFormValues(baseData);
+    const values = {
+      ...original,
+      config: [{ ...original.config[0], value: "true" }],
+    };
+    expect(buildPatch(values, original)).toEqual({
+      config: [
+        {
+          key: "pr.allow-duplicate.product",
+          label: "Allow selecting duplicate products",
+          datatype: "boolean",
+          value: "true",
+        },
+      ],
+    });
   });
 });
