@@ -341,10 +341,11 @@ export function NumberFormatField({
 /**
  * Field ของ config หนึ่งรายการ — label มาจาก backend, value เก็บเป็น string เสมอ
  *
- * boolean → Switch (checked = "true"), อื่นๆ → text input. view แสดงค่าปัจจุบัน
+ * boolean → Switch, enum (มี options) → Select, อื่นๆ → text input. view แสดงค่าปัจจุบัน
  *
  * @param yesLabel/noLabel - ป้าย boolean ในโหมด view
  * @param label - override label ที่แสดง (เช่น i18n ของ seeded item); ไม่มี → ใช้ item.label
+ * @param options - สำหรับ enum: รายการ {value,label} ที่ resolve แล้ว; ไม่มี → fallback text input
  */
 export function ConfigField({
   editing,
