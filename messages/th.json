@@ -20,7 +20,9 @@
       "config": "การตั้งค่า",
       "configDesc": "สวิตช์ฟีเจอร์และการตั้งค่าของหน่วยธุรกิจนี้",
       "pr": "PR",
-      "prDesc": "การตั้งค่า Purchase Request ของหน่วยธุรกิจนี้"
+      "prDesc": "การตั้งค่า Purchase Request ของหน่วยธุรกิจนี้",
+      "si": "SI",
+      "siDesc": "การตั้งค่า Stock In ของหน่วยธุรกิจนี้"
     },
     "fields": {
       "code": "รหัส",
@@ -110,7 +112,13 @@
     "yes": "ใช่",
     "no": "ไม่",
     "config": {
-      "prAllowDuplicateProduct": "อนุญาตให้เลือก product ซ้ำกันได้"
+      "prAllowDuplicateProduct": "อนุญาตให้เลือก product ซ้ำกันได้",
+      "siCostFrom": "ราคาเริ่มต้นสำหรับสินค้าที่เพิ่มเข้าไป",
+      "siCostFromOptions": {
+        "average": "เฉลี่ย",
+        "lastReceiving": "รับล่าสุด",
+        "lastCost": "ต้นทุนล่าสุด"
+      }
     }
   },
   "dashboardWidget": {
