@@ -264,11 +264,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
           hasRecord
           items={[
             {
-              key: "price",
-              label: tfl("price"),
-              value: formatCurrency(summary.subtotal),
-            },
-            {
               key: "subtotal",
               label: tfl("subtotal"),
               value: formatCurrency(summary.subtotal),

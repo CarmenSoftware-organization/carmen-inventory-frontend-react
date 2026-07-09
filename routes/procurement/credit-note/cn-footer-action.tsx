@@ -34,11 +34,6 @@ export function CnFooterAction({ control }: CnFooterActionProps) {
       hasRecord={items.length > 0}
       items={[
         {
-          key: "price",
-          label: tfl("price"),
-          value: formatCurrency(summary.totalNet),
-        },
-        {
           key: "subtotal",
           label: tfl("subtotal"),
           value: formatCurrency(summary.totalNet),
