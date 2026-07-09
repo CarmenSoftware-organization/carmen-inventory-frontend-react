@@ -1,18 +1,9 @@
 import { useMemo } from "react";
-import {
-  getCoreRowModel,
-  useReactTable,
-  type ColumnDef,
-} from "@tanstack/react-table";
-import {
-  DataGrid,
-  DataGridContainer,
-} from "@/components/ui/data-grid/data-grid";
-import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { FieldPlainText } from "@/components/ui/field";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
+import { cn } from "@/lib/utils";
 import type { PriceList } from "@/types/price-list";
-import { buildGroupedRows, type GroupedRow } from "./pl-product-grouping";
+import { buildProductGroups } from "./pl-product-grouping";
 
 interface PLProductGroupedViewProps {
   readonly detailRefs: PriceList["pricelist_detail"];
@@ -21,114 +12,124 @@ interface PLProductGroupedViewProps {
 
 /**
  * View-mode grouped table ของ price-list products — product ที่ซ้ำกัน (หลาย MOQ
- * tier) จะถูก group: ชื่อ product โชว์ครั้งเดียว แล้ว tier เรียงตาม MOQ น้อย→มาก
- * เป็น sub-row ใต้กัน (read-only, ขับด้วย detailRefs ล้วน) ใช้เฉพาะตอน view
+ * tier) ถูก group เป็น "แถวเดียว": ชื่อ product + ลำดับ span ทั้งกลุ่มด้วย rowspan
+ * จัดกึ่งกลางแนวตั้ง, ไม่มีเส้นคั่นระหว่าง tier ในกลุ่ม (เส้นคั่นเฉพาะระหว่างกลุ่ม)
+ * tier เรียงตาม MOQ น้อย→มาก (read-only, ขับด้วย detailRefs ล้วน)
  */
 export function PLProductGroupedView({
   detailRefs,
   tfl,
 }: PLProductGroupedViewProps) {
-  "use no memo";
-  const rows = useMemo(() => buildGroupedRows(detailRefs), [detailRefs]);
-
-  const columns = useMemo<ColumnDef<GroupedRow>[]>(
-    () => [
-      {
-        id: "index",
-        size: 60,
-        header: () => "#",
-        cell: ({ row }) =>
-          row.original.isFirstInGroup ? (
-            <span className="text-muted-foreground tabular-nums">
-              {row.original.groupNumber}
-            </span>
-          ) : null,
-        meta: { headerClassName: "text-center", cellClassName: "text-center" },
-      },
-      {
-        id: "product",
-        header: () => tfl("product"),
-        size: 300,
-        cell: ({ row }) =>
-          row.original.isFirstInGroup ? (
-            <NameWithSubtext
-              primary={row.original.ref.product_name ?? ""}
-              secondary={row.original.ref.product_local_name}
-            />
-          ) : (
-            <span className="text-muted-foreground pl-2 text-xs tabular-nums">
-              {row.original.isLastInGroup ? "└" : "├"}
-            </span>
-          ),
-      },
-      {
-        id: "unit",
-        header: () => tfl("unit"),
-        cell: ({ row }) => (
-          <FieldPlainText>{row.original.ref.unit_name}</FieldPlainText>
-        ),
-        meta: { headerClassName: "text-center", cellClassName: "text-center" },
-      },
-      {
-        id: "moq",
-        size: 96,
-        header: () => tfl("moq"),
-        cell: ({ row }) => (
-          <span className="text-foreground text-xs font-semibold tabular-nums">
-            {Number(row.original.ref.moq_qty) || 0}+
-          </span>
-        ),
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
-      },
-      {
-        id: "price",
-        size: 128,
-        header: () => tfl("unitPrice"),
-        cell: ({ row }) => (
-          <span className="text-foreground text-xs font-semibold tabular-nums">
-            {(Number(row.original.ref.price_without_tax) || 0).toFixed(2)}
-          </span>
-        ),
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
-      },
-      {
-        id: "tax_profile",
-        header: () => tfl("taxProfile"),
-        cell: ({ row }) => (
-          <FieldPlainText>{row.original.ref.tax_profile_name}</FieldPlainText>
-        ),
-      },
-      {
-        id: "lead",
-        size: 96,
-        header: () => tfl("leadTime"),
-        cell: ({ row }) => (
-          <span className="text-muted-foreground text-xs tabular-nums">
-            {Number(row.original.ref.lead_time_days) || 0}d
-          </span>
-        ),
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
-      },
-    ],
-    [tfl],
-  );
-
-  const table = useReactTable({
-    data: rows,
-    columns,
-    getRowId: (row) => row.key,
-    getCoreRowModel: getCoreRowModel(),
-  });
+  const groups = useMemo(() => buildProductGroups(detailRefs), [detailRefs]);
 
   return (
-    <DataGrid
-      table={table}
-      recordCount={rows.length}
-      tableLayout={{ headerSticky: true }}
-    >
-      <DataGridContainer>
-        <DataGridTable />
-      </DataGridContainer>
-    </DataGrid>
+    <div className="border-border overflow-x-auto rounded-lg border">
+      <table className="w-full border-collapse text-xs">
+        <thead>
+          <tr className="border-border text-muted-foreground border-b">
+            <Th className="w-14 text-center">#</Th>
+            <Th className="text-left">{tfl("product")}</Th>
+            <Th className="text-center">{tfl("unit")}</Th>
+            <Th className="w-24 text-right">{tfl("moq")}</Th>
+            <Th className="w-32 text-right">{tfl("unitPrice")}</Th>
+            <Th className="text-left">{tfl("taxProfile")}</Th>
+            <Th className="w-24 text-right">{tfl("leadTime")}</Th>
+          </tr>
+        </thead>
+        <tbody>
+          {groups.map((group) =>
+            group.tiers.map((tier, ti) => {
+              const isFirst = ti === 0;
+              const isLast = ti === group.tiers.length - 1;
+              // เส้นคั่นเฉพาะแถวสุดท้ายของกลุ่ม → ภายในกลุ่มไม่มีเส้น (ดูเป็นแถวเดียว)
+              const tierBorder = isLast ? "border-border border-b" : "";
+              return (
+                <tr key={tier.id ?? `${group.productId}-${ti}`}>
+                  {isFirst && (
+                    <>
+                      <Td
+                        rowSpan={group.tiers.length}
+                        className="border-border text-muted-foreground border-b text-center align-middle tabular-nums"
+                      >
+                        {group.groupNumber}
+                      </Td>
+                      <Td
+                        rowSpan={group.tiers.length}
+                        className="border-border border-b align-middle"
+                      >
+                        <NameWithSubtext
+                          primary={tier.product_name ?? ""}
+                          secondary={tier.product_local_name}
+                        />
+                      </Td>
+                    </>
+                  )}
+                  <Td className={cn("text-center align-middle", tierBorder)}>
+                    <FieldPlainText>{tier.unit_name}</FieldPlainText>
+                  </Td>
+                  <Td
+                    className={cn(
+                      "text-foreground text-right align-middle font-semibold tabular-nums",
+                      tierBorder,
+                    )}
+                  >
+                    {Number(tier.moq_qty) || 0}+
+                  </Td>
+                  <Td
+                    className={cn(
+                      "text-foreground text-right align-middle font-semibold tabular-nums",
+                      tierBorder,
+                    )}
+                  >
+                    {(Number(tier.price_without_tax) || 0).toFixed(2)}
+                  </Td>
+                  <Td className={cn("align-middle", tierBorder)}>
+                    <FieldPlainText>{tier.tax_profile_name}</FieldPlainText>
+                  </Td>
+                  <Td
+                    className={cn(
+                      "text-muted-foreground text-right align-middle tabular-nums",
+                      tierBorder,
+                    )}
+                  >
+                    {Number(tier.lead_time_days) || 0}d
+                  </Td>
+                </tr>
+              );
+            }),
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function Th({
+  className,
+  children,
+}: {
+  readonly className?: string;
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <th className={cn("px-3 py-2 font-medium whitespace-nowrap", className)}>
+      {children}
+    </th>
+  );
+}
+
+function Td({
+  className,
+  rowSpan,
+  children,
+}: {
+  readonly className?: string;
+  readonly rowSpan?: number;
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <td rowSpan={rowSpan} className={cn("px-3 py-2", className)}>
+      {children}
+    </td>
   );
 }

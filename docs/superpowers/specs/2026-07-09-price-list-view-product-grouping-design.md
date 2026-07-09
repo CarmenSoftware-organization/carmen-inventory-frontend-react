@@ -13,7 +13,9 @@ product rows grouped: the product name shows once, its tiers listed beneath it.
 ## Decisions (from brainstorming)
 
 - **View mode only.** Edit/add stay flat, one row per detail — untouched.
-- **rowspan-style grouping:** product name once per group; tiers as sub-rows.
+- **True rowspan grouping:** the product name + group number span the whole
+  group (`rowSpan`), vertically centered; no divider between tiers within a
+  group (borders only between groups); no tree-connector glyph.
 - Tiers sorted **by MOQ ascending** within a group; groups in first-appearance
   order.
 - Group key = `product_id`.
@@ -62,20 +64,21 @@ rules-of-hooks issue) and leaves the editable path byte-for-byte the same.
 
 ### Columns (read-only)
 
-| Column | first tier | later tiers |
-| --- | --- | --- |
-| `#` | `groupNumber` | empty |
-| Product | `NameWithSubtext` (name + local name) | muted tree connector (`└` last / `│` otherwise) |
-| Unit | `unit_name` (plain) | same, per tier |
-| MOQ | `{moq_qty}+` | per tier |
-| Unit Price | `price_without_tax.toFixed(2)` | per tier |
-| Tax Profile | `tax_profile_name` (plain) | per tier |
-| Lead Time | `{lead_time_days}d` | per tier |
+Rendered as a bespoke `<table>` (the generic DataGrid cannot emit `rowSpan`):
+
+| Column | rendering |
+| --- | --- |
+| `#` | `groupNumber`, `rowSpan={tiers}`, centered |
+| Product | `NameWithSubtext` (name + local name), `rowSpan={tiers}`, centered |
+| Unit | `unit_name` (plain), per tier |
+| MOQ | `{moq_qty}+`, per tier |
+| Unit Price | `price_without_tax.toFixed(2)`, per tier |
+| Tax Profile | `tax_profile_name` (plain), per tier |
+| Lead Time | `{lead_time_days}d`, per tier |
 
 No actions column. Header labels via the existing `tfl` keys
-(`product`/`unit`/`moq`/`unitPrice`/`taxProfile`/`leadTime`). Plain-text
-renderers match the existing view-mode cell styles (reuse `NameWithSubtext` /
-`FieldPlainText`; small inline spans for the number formats).
+(`product`/`unit`/`moq`/`unitPrice`/`taxProfile`/`leadTime`). Bottom borders
+only on the last tier of each group, so a multi-tier product reads as one row.
 
 ## Testing
 
