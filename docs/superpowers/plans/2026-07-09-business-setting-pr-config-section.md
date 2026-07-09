@@ -88,11 +88,9 @@ Expected: FAIL — `Failed to resolve import "./business-setting-config-registry
 
 - [ ] **Step 3: สร้าง registry**
 
-สร้าง `routes/system-admin/business-setting/business-setting-config-registry.ts`:
+สร้าง `routes/system-admin/business-setting/business-setting-config-registry.ts` (ยังไม่ต้อง import `BusinessUnitConfigItem` — Task 3 จะเพิ่มตอนที่ `groupConfigForRender` ใช้จริง):
 
 ```ts
-import type { BusinessUnitConfigItem } from "@/types/business-unit";
-
 /**
  * รายการ config ที่ frontend "seed" — แสดงเสมอแม้ backend ยังไม่มีค่า
  * (default = defaultValue) พอ user เปิดแล้ว save ค่าจะถูกเขียนลง backend
@@ -147,14 +145,7 @@ export const SEEDED_ITEMS: readonly SeededConfigItem[] =
 export const SEEDED_KEYS: ReadonlySet<string> = new Set(
   SEEDED_ITEMS.map((i) => i.key),
 );
-
-// หมายเหตุ: import type BusinessUnitConfigItem ไว้สำหรับ groupConfigForRender ที่ Task 3
-// จะเพิ่มในไฟล์นี้ (ป้องกัน lint no-unused ให้เพิ่มฟังก์ชันใน Task 3 ทันที)
-export type { BusinessUnitConfigItem };
 ```
-
-> หมายเหตุ: บรรทัด `export type { BusinessUnitConfigItem }` เป็น placeholder กัน ESLint no-unused-vars
-> ในช่วง Task 1 เท่านั้น — Task 3 จะใช้ type นี้จริงและลบ re-export บรรทัดนี้ทิ้ง
 
 - [ ] **Step 4: รัน test ให้ผ่าน**
 
@@ -411,14 +402,13 @@ Expected: FAIL — `groupConfigForRender is not exported` / undefined
 
 - [ ] **Step 3: เพิ่ม `groupConfigForRender` ใน registry**
 
-ใน `business-setting-config-registry.ts` **ลบ** บรรทัด placeholder ท้ายไฟล์:
+ใน `business-setting-config-registry.ts` เพิ่ม import บนสุดของไฟล์ (บรรทัดแรก):
 
 ```ts
-// หมายเหตุ: import type ...
-export type { BusinessUnitConfigItem };
+import type { BusinessUnitConfigItem } from "@/types/business-unit";
 ```
 
-แล้วเพิ่มโค้ดนี้แทนท้ายไฟล์:
+แล้วเพิ่มโค้ดนี้ท้ายไฟล์:
 
 ```ts
 /** entry ของ config ใน section — เก็บ absolute index (สำหรับ RHF path) + labelKey */
