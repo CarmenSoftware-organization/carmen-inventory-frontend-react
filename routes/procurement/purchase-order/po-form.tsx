@@ -148,6 +148,12 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const isPriceListLocked =
     purchaseOrder?.po_type === PO_TYPE.PL && !isReadOnly && !isViewOnly;
   const fieldsDisabled = isDisabled || isPriceListLocked;
+  // PO ที่มาจาก PR (!isManual): เนื้อหามาจาก PR หมดแล้ว ล็อกทุกอย่าง (items,
+  // locations, notes) — ยกเว้น currency rate ที่ปลดไว้ใน PoGeneralFields
+  // (gate ที่ fieldsDisabled ไม่ใช่ contentLocked) ให้ override เรตได้
+  const isFromPr = !isManual;
+  const contentLocked = fieldsDisabled || isFromPr;
+  const locationsDisabled = isDisabled || isFromPr;
   const departmentName = defaultBu?.department?.name ?? "";
 
   return (
@@ -191,15 +197,15 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
 
         <PoNotesSummary
           form={form}
-          disabled={fieldsDisabled}
+          disabled={contentLocked}
           plainText={isView || isReadOnly}
         />
 
         <PoItemFields
           form={form}
           revealErrorSignal={revealErrorSignal}
-          disabled={fieldsDisabled}
-          locationsDisabled={isDisabled}
+          disabled={contentLocked}
+          locationsDisabled={locationsDisabled}
           role={role}
           poStatus={purchaseOrder?.po_status}
           isPending={isPending}
