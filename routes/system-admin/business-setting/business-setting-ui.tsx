@@ -354,6 +354,7 @@ export function ConfigField({
   yesLabel,
   noLabel,
   label,
+  options,
 }: {
   readonly editing: boolean;
   readonly form: Form;
@@ -363,17 +364,30 @@ export function ConfigField({
   readonly noLabel: string;
   /** override display label (เช่น i18n ของ seeded item); ไม่มี → ใช้ item.label */
   readonly label?: string;
+  /** สำหรับ enum — options ที่ resolve แล้ว (value + label i18n) */
+  readonly options?: readonly { value: string; label: string }[];
 }) {
   const isBool = item.datatype === "boolean";
+  const isEnum =
+    item.datatype === "enum" && options != null && options.length > 0;
   const name = `config.${index}.value` as FormName;
   const displayLabel = label ?? item.label;
 
   if (!editing) {
+    let displayValue: string;
+    if (isBool) {
+      displayValue = item.value === "true" ? yesLabel : noLabel;
+    } else if (isEnum) {
+      displayValue =
+        options.find((o) => o.value === item.value)?.label ?? item.value;
+    } else {
+      displayValue = item.value;
+    }
     return (
       <SettingField
         label={displayLabel}
         description={item.key}
-        value={isBool ? (item.value === "true" ? yesLabel : noLabel) : item.value}
+        value={displayValue}
       />
     );
   }
@@ -389,6 +403,34 @@ export function ConfigField({
               checked={field.value === "true"}
               onCheckedChange={(v) => field.onChange(v ? "true" : "false")}
             />
+          )}
+        />
+      </EditShell>
+    );
+  }
+
+  if (isEnum) {
+    return (
+      <EditShell label={displayLabel} description={item.key} htmlFor={name}>
+        <Controller
+          control={form.control}
+          name={name}
+          render={({ field }) => (
+            <Select
+              value={typeof field.value === "string" ? field.value : ""}
+              onValueChange={field.onChange}
+            >
+              <SelectTrigger id={name} size="sm" className="w-full text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((o) => (
+                  <SelectItem key={o.value} value={o.value} className="text-sm">
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         />
       </EditShell>
