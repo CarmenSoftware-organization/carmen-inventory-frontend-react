@@ -15,7 +15,7 @@ interface SummaryBarProps {
   className?: string;
 }
 
-function SummaryBar({ items, className }: SummaryBarProps) {
+export function SummaryBar({ items, className }: SummaryBarProps) {
   return (
     <div
       className={["flex items-center gap-4 text-xs tabular-nums", className]

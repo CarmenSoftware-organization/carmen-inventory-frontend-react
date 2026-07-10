@@ -4,7 +4,7 @@ import { useTranslations } from "use-intl";
 import { PrFormValues } from "./pr-form-schema";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 import { Skeleton } from "@/components/ui/skeleton";
-import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
+import { SummaryBar } from "@/components/ui/summary-bar";
 import { PrOnHandDialog } from "./pr-on-hand-dialog";
 import { PrOnOrderDialog } from "./pr-on-order-dialog";
 
@@ -22,8 +22,6 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
   const productId =
     useWatch({ control, name: `items.${index}.product_id` }) ?? "";
-  const unitName =
-    useWatch({ control, name: `items.${index}.inventory_unit_name` }) ?? "";
 
   const { data, isLoading } = useProductInventory(
     buCode,
@@ -35,17 +33,10 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
 
   if (!data && isLoading) {
     return (
-      <div className="space-y-2 p-3">
-        <Skeleton className="h-4 w-40" />
-        <div className="grid grid-cols-4 gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="space-y-1.5">
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-5 w-full" />
-              <Skeleton className="h-3 w-10" />
-            </div>
-          ))}
-        </div>
+      <div className="flex items-center gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-4 w-24" />
+        ))}
       </div>
     );
   }
@@ -54,40 +45,43 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
 
   const { on_hand_qty, on_order_qty, re_order_qty, re_stock_qty } = data;
 
+  // label · value อยู่ line เดียวกัน + มี | คั่น เหมือน grand total (SummaryBar)
+  const clickableLabel = (label: string, onClick: () => void) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className="text-primary underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
+    >
+      {label}
+    </button>
+  );
+
   return (
     <>
-      <section className="space-y-2">
-        {/* Eyebrow แบบเดียวกับกลุ่มฝั่งซ้าย (PRICING/TAX) — ดู GroupEyebrow */}
-        <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
-          {t("inventoryInfo")}
-        </p>
-        <div className="space-y-3">
-          <div className="grid grid-cols-4 gap-4">
-            <InventoryStat
-              label={t("onHand")}
-              value={on_hand_qty}
-              unit={unitName}
-              onLabelClick={() => setOnHandOpen(true)}
-            />
-            <InventoryStat
-              label={t("onOrder")}
-              value={on_order_qty}
-              unit={unitName}
-              onLabelClick={() => setOnOrderOpen(true)}
-            />
-            <InventoryStat
-              label={t("reorderPt")}
-              value={re_order_qty}
-              unit={unitName}
-            />
-            <InventoryStat
-              label={t("restock")}
-              value={re_stock_qty}
-              unit={unitName}
-            />
-          </div>
-        </div>
-      </section>
+      <SummaryBar
+        items={[
+          {
+            key: "onHand",
+            label: clickableLabel(t("onHand"), () => setOnHandOpen(true)),
+            value: on_hand_qty.toLocaleString(),
+          },
+          {
+            key: "onOrder",
+            label: clickableLabel(t("onOrder"), () => setOnOrderOpen(true)),
+            value: on_order_qty.toLocaleString(),
+          },
+          {
+            key: "reorderPt",
+            label: t("reorderPt"),
+            value: re_order_qty.toLocaleString(),
+          },
+          {
+            key: "restock",
+            label: t("restock"),
+            value: re_stock_qty.toLocaleString(),
+          },
+        ]}
+      />
 
       <PrOnHandDialog
         open={onHandOpen}
@@ -100,44 +94,5 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
         productId={productId}
       />
     </>
-  );
-}
-
-interface InventoryStatProps {
-  readonly label: string;
-  readonly value: number;
-  readonly unit: string;
-  readonly onLabelClick?: () => void;
-}
-
-function InventoryStat({
-  label,
-  value,
-  unit,
-  onLabelClick,
-}: InventoryStatProps) {
-  return (
-    <div>
-      {onLabelClick ? (
-        <button
-          type="button"
-          onClick={onLabelClick}
-          className="text-primary text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
-        >
-          {label}
-        </button>
-      ) : (
-        <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
-          {label}
-        </span>
-      )}
-      <InputSuffixPlain
-        className="block text-left"
-        value={value.toLocaleString()}
-        suffix={unit}
-        valueClassName="text-sm font-semibold"
-        suffixClassName="text-[0.625rem]"
-      />
-    </div>
   );
 }

@@ -17,7 +17,6 @@ import {
   InputSuffixField,
   InputSuffixInput,
 } from "@/components/ui/input/input-suffix";
-import { EyeBrow } from "@/components/ui/eye-brow";
 import { formatCurrency } from "@/lib/currency-utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
@@ -226,26 +225,337 @@ export function PrItemExpand({
 
   return (
     <div className="w-full p-3">
-      {/* 2-column via float + BFC (NOT flex/grid): the DataGrid expands into a
-          table-fixed <td colSpan>, which gives flex/grid no definite width to
-          split — but floats + flow-root lay out correctly inside a table-cell.
-          Right = Inventory + Summary; left = the editable detail groups. */}
-      {/* full width — left 80% details · right 20% Inventory + Summary */}
-      <div className="w-full">
-        <aside className="sm:float-right sm:mb-0 sm:ml-6 sm:w-[30%]">
+      {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
+          Inventory · Summary อยู่แถบล่าง */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[1.5fr_7rem_1fr_1fr_2fr]">
+          {/* Vendor */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor={`items-${index}-vendor`}
+              className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
+            >
+              {tfl("vendor")}
+            </FieldLabel>
+            {isFieldDisabled ? (
+              <p className="flex min-h-6 items-center truncate text-xs font-medium">
+                {vendorName || "—"}
+              </p>
+            ) : (
+              <Controller
+                control={form.control}
+                name={`items.${index}.vendor_id`}
+                render={({ field }) => (
+                  <LookupVendor
+                    value={field.value ?? ""}
+                    onValueChange={(value) => {
+                      // shouldValidate: ล้างกรอบแดง vendor ทันทีที่เลือก
+                      // (mode=onSubmit จึงต้อง validate เองไม่งั้น error ค้าง)
+                      form.setValue(`items.${index}.vendor_id`, value, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                      if (value) {
+                        form.setValue(`items.${index}.stage_status`, "approve");
+                        form.setValue(
+                          `items.${index}.current_stage_status`,
+                          "approve",
+                        );
+                      }
+                    }}
+                    className="w-full text-xs"
+                    error={vendorError}
+                  />
+                )}
+              />
+            )}
+          </Field>
+
+          {/* Unit price */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor={`items-${index}-pricelist-price`}
+              className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
+            >
+              {tfl("unitPrice")}
+            </FieldLabel>
+            {isFieldDisabled ? (
+              <p className="flex min-h-6 items-center text-xs font-semibold tabular-nums">
+                {price ? formatCurrency(price) : "—"}
+              </p>
+            ) : (
+              <InputAmount
+                id={`items-${index}-pricelist-price`}
+                decimals={watchCurrencyDecimals}
+                min={0}
+                className={`h-8 text-right text-xs ${priceError ? "pl-7" : ""}`}
+                error={priceError}
+                errorIconAlign="left"
+                defaultValue={price}
+                {...form.register(`items.${index}.pricelist_price`)}
+                onChange={(e) => {
+                  const n = e.target.valueAsNumber;
+                  form.setValue(
+                    `items.${index}.pricelist_price`,
+                    Number.isNaN(n) ? 0 : n,
+                    { shouldDirty: true, shouldValidate: true },
+                  );
+                  form.setValue(
+                    `items.${index}.pricelist_type`,
+                    PR_ITEM_PRICELIST_COMPARE_TYPE.MANUAL_INPUT,
+                  );
+                }}
+              />
+            )}
+          </Field>
+
+          {/* Pricelist */}
+          <Field className="gap-1">
+            <div className="flex min-h-6 items-center justify-between gap-2">
+              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
+                {tfl("pricelist")}
+              </FieldLabel>
+              {productId &&
+                unitId &&
+                currencyId &&
+                (role === STAGE_ROLE.PURCHASE ||
+                  role === STAGE_ROLE.APPROVE) && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPricelist(true)}
+                    className="text-primary flex items-center gap-1 text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
+                  >
+                    <Scale className="size-3" />
+                    {tc("compare")}
+                  </button>
+                )}
+            </div>
+            <p className="flex min-h-6 items-center truncate text-xs font-medium">
+              {pricelistNo || "—"}
+            </p>
+          </Field>
+
+          {/* Discount */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <div className="flex min-h-6 items-center justify-between gap-2">
+              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
+                {tfl("discount")}
+              </FieldLabel>
+              {!isFieldDisabled &&
+                overrideToggle(`items.${index}.is_discount_adjustment`)}
+            </div>
+            {isFieldDisabled ? (
+              <p className="flex min-h-6 items-center gap-1.5 truncate text-xs font-medium">
+                <span className="text-muted-foreground tabular-nums">
+                  {discRate}%
+                </span>
+                <span className="text-muted-foreground">·</span>
+                <span className="tabular-nums">
+                  {formatCurrency(discountAmount)}
+                </span>
+                <span className="text-muted-foreground">{currencyCode}</span>
+              </p>
+            ) : (
+              <InputSuffixField
+                className="w-full"
+                error={!!discountAmountError}
+              >
+                <InputSuffixInput
+                  id={`items-${index}-discount-rate`}
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="0.01"
+                  placeholder="0"
+                  aria-label={tfl("discPercent")}
+                  max={100}
+                  disabled={isDiscAdj}
+                  className="disabled:bg-muted disabled:text-muted-foreground h-8 w-12 flex-none rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
+                  defaultValue={discRate}
+                  {...form.register(`items.${index}.discount_rate`)}
+                  onChange={(e) => {
+                    const n = e.target.valueAsNumber;
+                    // clamp 0–100 (disc% สูงสุด 100)
+                    const rate = Number.isNaN(n)
+                      ? 0
+                      : Math.min(100, Math.max(0, n));
+                    form.setValue(`items.${index}.discount_rate`, rate, {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    });
+                  }}
+                />
+                <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
+                  %
+                </span>
+                <div
+                  className="bg-border h-4 w-px shrink-0"
+                  aria-hidden="true"
+                />
+                <div className="min-w-0 flex-1">
+                  <InputAmount
+                    id={`items-${index}-discount-amount`}
+                    decimals={watchCurrencyDecimals}
+                    min={0}
+                    disabled={!isDiscAdj}
+                    aria-label={tfl("discAmt")}
+                    className="disabled:bg-muted disabled:text-muted-foreground h-8 w-full rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
+                    defaultValue={discAmt}
+                    {...form.register(`items.${index}.discount_amount`)}
+                    onChange={(e) => {
+                      const n = e.target.valueAsNumber;
+                      form.setValue(
+                        `items.${index}.discount_amount`,
+                        Number.isNaN(n) ? 0 : n,
+                        { shouldDirty: true, shouldValidate: true },
+                      );
+                    }}
+                  />
+                </div>
+                <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
+                  {currencyCode}
+                </span>
+              </InputSuffixField>
+            )}
+          </Field>
+
+          {/* Tax */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <div className="flex min-h-6 items-center justify-between gap-2">
+              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
+                {tfl("tax")}
+              </FieldLabel>
+              {!isFieldDisabled &&
+                overrideToggle(`items.${index}.is_tax_adjustment`)}
+            </div>
+            {isFieldDisabled ? (
+              <p className="flex min-h-6 items-center gap-1.5 truncate text-xs font-medium">
+                {taxProfileName ? (
+                  <>
+                    <span className="truncate">{taxProfileName}</span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="text-muted-foreground tabular-nums">
+                      {taxRate}%
+                    </span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="tabular-nums">
+                      {formatCurrency(taxAmount)}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {currencyCode}
+                    </span>
+                  </>
+                ) : (
+                  "—"
+                )}
+              </p>
+            ) : (
+              <Controller
+                control={form.control}
+                name={`items.${index}.tax_profile_id`}
+                render={({ field }) => (
+                  // tax profile · tax amount (+ rate% เป็น suffix) ในกล่องเดียว
+                  <InputSuffixField
+                    className="w-full"
+                    error={!!taxProfileError || !!taxAmountError}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <LookupTaxProfile
+                        value={field.value ?? ""}
+                        onValueChange={(value, rate, name) => {
+                          // shouldValidate: ล้างกรอบแดง tax ทันทีที่เลือก
+                          form.setValue(
+                            `items.${index}.tax_profile_id`,
+                            value || null,
+                            { shouldDirty: true, shouldValidate: true },
+                          );
+                          form.setValue(`items.${index}.tax_rate`, rate);
+                          form.setValue(
+                            `items.${index}.tax_profile_name`,
+                            name,
+                          );
+                        }}
+                        className="w-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
+                      />
+                    </div>
+                    <div
+                      className="bg-border h-4 w-px shrink-0"
+                      aria-hidden="true"
+                    />
+                    {/* tax rate — กรอกได้เมื่อ override ปิด (amount auto จาก rate),
+                          override เปิด = disabled (amount กรอกเอง) */}
+                    <InputSuffixInput
+                      id={`items-${index}-tax-rate`}
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step="0.01"
+                      placeholder="0"
+                      aria-label={tfl("taxRate")}
+                      max={100}
+                      disabled={isTaxAdj}
+                      className="disabled:bg-muted disabled:text-muted-foreground h-8 w-12 flex-none rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
+                      defaultValue={taxRate}
+                      {...form.register(`items.${index}.tax_rate`)}
+                      onChange={(e) => {
+                        const r = e.target.valueAsNumber;
+                        // clamp 0–100 (tax rate เป็น % สูงสุด 100)
+                        const rate = Number.isNaN(r)
+                          ? 0
+                          : Math.min(100, Math.max(0, r));
+                        form.setValue(`items.${index}.tax_rate`, rate, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        });
+                      }}
+                    />
+                    <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
+                      %
+                    </span>
+                    <div
+                      className="bg-border h-4 w-px shrink-0"
+                      aria-hidden="true"
+                    />
+                    <InputAmount
+                      id={`items-${index}-tax-amount`}
+                      decimals={watchCurrencyDecimals}
+                      min={0}
+                      disabled={!isTaxAdj}
+                      aria-label={tfl("taxAmt")}
+                      className="disabled:bg-muted disabled:text-muted-foreground h-8 w-28 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
+                      defaultValue={taxAmt}
+                      {...form.register(`items.${index}.tax_amount`)}
+                      onChange={(e) => {
+                        const n = e.target.valueAsNumber;
+                        form.setValue(
+                          `items.${index}.tax_amount`,
+                          Number.isNaN(n) ? 0 : n,
+                          { shouldDirty: true, shouldValidate: true },
+                        );
+                      }}
+                    />
+                    <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
+                      {currencyCode}
+                    </span>
+                  </InputSuffixField>
+                )}
+              />
+            )}
+          </Field>
+        </div>
+
+        {/* Inventory · Summary — แถบล่าง */}
+        <div className="flex flex-col gap-4 border-t pt-4 lg:flex-row lg:items-start lg:justify-between">
           <PrInventoryRow
             control={form.control}
             index={index}
             buCode={buCode ?? ""}
           />
-          {isForeignCurrency && (
-            <section className="space-y-2 pt-6">
-              <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wider uppercase">
-                {tfl("exchangeRate")}
-              </p>
-              <div className="flex items-center justify-between gap-2 text-xs">
-                <span className="text-muted-foreground">
-                  1 {watchCurrencyCode} = {baseCurrencyCode}
+          <div className="flex shrink-0 flex-col items-end gap-3">
+            {isForeignCurrency && (
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
+                  {tfl("exchangeRate")}
                 </span>
                 {isFieldDisabled ? (
                   <span className="font-semibold tabular-nums">
@@ -279,340 +589,18 @@ export function PrItemExpand({
                   </InputSuffixField>
                 )}
               </div>
-            </section>
-          )}
-          <PrItemSummary
-            subtotal={subtotal}
-            netAmount={netAmount}
-            totalPrice={totalPrice}
-            exchangeRate={exchangeRate}
-            isForeignCurrency={isForeignCurrency}
-            baseCurrencyCode={baseCurrencyCode}
-            currencyCode={watchCurrencyCode ?? ""}
-          />
-        </aside>
-
-        <div className="space-y-3 sm:flow-root">
-          {/* ── Pricing: vendor · unit price · pricelist ── */}
-          <section className="space-y-2">
-            <EyeBrow>{tfl("pricing")}</EyeBrow>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1.5fr_8rem_1.2fr]">
-              {/* Vendor */}
-              <Field>
-                <FieldLabel
-                  htmlFor={`items-${index}-vendor`}
-                  className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
-                >
-                  {tfl("vendor")}
-                </FieldLabel>
-                {isFieldDisabled ? (
-                  <p className="flex min-h-8 items-center truncate text-xs font-medium">
-                    {vendorName || "—"}
-                  </p>
-                ) : (
-                  <Controller
-                    control={form.control}
-                    name={`items.${index}.vendor_id`}
-                    render={({ field }) => (
-                      <LookupVendor
-                        value={field.value ?? ""}
-                        onValueChange={(value) => {
-                          // shouldValidate: ล้างกรอบแดง vendor ทันทีที่เลือก
-                          // (mode=onSubmit จึงต้อง validate เองไม่งั้น error ค้าง)
-                          form.setValue(`items.${index}.vendor_id`, value, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-                          if (value) {
-                            form.setValue(
-                              `items.${index}.stage_status`,
-                              "approve",
-                            );
-                            form.setValue(
-                              `items.${index}.current_stage_status`,
-                              "approve",
-                            );
-                          }
-                        }}
-                        className="w-full text-xs"
-                        error={vendorError}
-                      />
-                    )}
-                  />
-                )}
-              </Field>
-
-              {/* Unit price */}
-              <Field>
-                <FieldLabel
-                  htmlFor={`items-${index}-pricelist-price`}
-                  className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
-                >
-                  {tfl("unitPrice")}
-                </FieldLabel>
-                {isFieldDisabled ? (
-                  <p className="flex min-h-8 items-center text-xs font-semibold tabular-nums">
-                    {price ? formatCurrency(price) : "—"}
-                  </p>
-                ) : (
-                  <InputAmount
-                    id={`items-${index}-pricelist-price`}
-                    decimals={watchCurrencyDecimals}
-                    min={0}
-                    className={`h-8 text-right text-xs ${priceError ? "pl-7" : ""}`}
-                    error={priceError}
-                    errorIconAlign="left"
-                    defaultValue={price}
-                    {...form.register(`items.${index}.pricelist_price`)}
-                    onChange={(e) => {
-                      const n = e.target.valueAsNumber;
-                      form.setValue(
-                        `items.${index}.pricelist_price`,
-                        Number.isNaN(n) ? 0 : n,
-                        { shouldDirty: true, shouldValidate: true },
-                      );
-                      form.setValue(
-                        `items.${index}.pricelist_type`,
-                        PR_ITEM_PRICELIST_COMPARE_TYPE.MANUAL_INPUT,
-                      );
-                    }}
-                  />
-                )}
-              </Field>
-
-              {/* Pricelist */}
-              <Field>
-                <div className="flex min-h-6 items-center justify-between">
-                  <FieldLabel className="text-muted-foreground text-xs tracking-wide">
-                    {tfl("pricelist")}
-                  </FieldLabel>
-                  {productId &&
-                    unitId &&
-                    currencyId &&
-                    (role === STAGE_ROLE.PURCHASE ||
-                      role === STAGE_ROLE.APPROVE) && (
-                      <button
-                        type="button"
-                        onClick={() => setShowPricelist(true)}
-                        className="text-primary flex items-center gap-1 text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
-                      >
-                        <Scale className="size-3" />
-                        {tc("compare")}
-                      </button>
-                    )}
-                </div>
-                <span className="flex min-h-8 items-center truncate text-xs font-medium">
-                  {pricelistNo || "—"}
-                </span>
-              </Field>
-            </div>
-          </section>
-
-          {/* ── Tax & Discount — two calm groups instead of a 5-col micro-grid ── */}
-          <div className="grid grid-cols-1 gap-2 gap-x-8 border-t pt-5 sm:grid-cols-2">
-            {/* Tax — rate% · profile · amount รวมเป็นกล่องเดียว */}
-            <section className="space-y-2">
-              <div className="flex min-h-6 items-center justify-between gap-2">
-                <EyeBrow>{tfl("tax")}</EyeBrow>
-                {!isFieldDisabled &&
-                  overrideToggle(`items.${index}.is_tax_adjustment`)}
-              </div>
-              {isFieldDisabled ? (
-                <p className="flex min-h-8 items-center gap-1.5 truncate text-xs font-medium">
-                  {taxProfileName ? (
-                    <>
-                      <span className="truncate">{taxProfileName}</span>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="text-muted-foreground tabular-nums">
-                        {taxRate}%
-                      </span>
-                      <span className="text-muted-foreground">·</span>
-                      <span className="tabular-nums">
-                        {formatCurrency(taxAmount)}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {currencyCode}
-                      </span>
-                    </>
-                  ) : (
-                    "—"
-                  )}
-                </p>
-              ) : (
-                <Controller
-                  control={form.control}
-                  name={`items.${index}.tax_profile_id`}
-                  render={({ field }) => (
-                    // tax profile · tax amount (+ rate% เป็น suffix) ในกล่องเดียว
-                    <InputSuffixField
-                      className="w-full"
-                      error={!!taxProfileError || !!taxAmountError}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <LookupTaxProfile
-                          value={field.value ?? ""}
-                          onValueChange={(value, rate, name) => {
-                            // shouldValidate: ล้างกรอบแดง tax ทันทีที่เลือก
-                            form.setValue(
-                              `items.${index}.tax_profile_id`,
-                              value || null,
-                              { shouldDirty: true, shouldValidate: true },
-                            );
-                            form.setValue(`items.${index}.tax_rate`, rate);
-                            form.setValue(
-                              `items.${index}.tax_profile_name`,
-                              name,
-                            );
-                          }}
-                          className="w-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
-                        />
-                      </div>
-                      <div
-                        className="bg-border h-4 w-px shrink-0"
-                        aria-hidden="true"
-                      />
-                      {/* tax rate — กรอกได้เมื่อ override ปิด (amount auto จาก rate),
-                          override เปิด = disabled (amount กรอกเอง) */}
-                      <InputSuffixInput
-                        id={`items-${index}-tax-rate`}
-                        type="number"
-                        inputMode="decimal"
-                        min={0}
-                        step="0.01"
-                        placeholder="0"
-                        aria-label={tfl("taxRate")}
-                        max={100}
-                        disabled={isTaxAdj}
-                        className="h-8 w-14 shrink-0 rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-default disabled:opacity-100"
-                        defaultValue={taxRate}
-                        {...form.register(`items.${index}.tax_rate`)}
-                        onChange={(e) => {
-                          const r = e.target.valueAsNumber;
-                          // clamp 0–100 (tax rate เป็น % สูงสุด 100)
-                          const rate = Number.isNaN(r)
-                            ? 0
-                            : Math.min(100, Math.max(0, r));
-                          form.setValue(`items.${index}.tax_rate`, rate, {
-                            shouldDirty: true,
-                            shouldValidate: true,
-                          });
-                        }}
-                      />
-                      <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
-                        %
-                      </span>
-                      <div
-                        className="bg-border h-4 w-px shrink-0"
-                        aria-hidden="true"
-                      />
-                      <InputAmount
-                        id={`items-${index}-tax-amount`}
-                        decimals={watchCurrencyDecimals}
-                        min={0}
-                        disabled={!isTaxAdj}
-                        aria-label={tfl("taxAmt")}
-                        className="h-8 w-16 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-default disabled:opacity-100"
-                        defaultValue={taxAmt}
-                        {...form.register(`items.${index}.tax_amount`)}
-                        onChange={(e) => {
-                          const n = e.target.valueAsNumber;
-                          form.setValue(
-                            `items.${index}.tax_amount`,
-                            Number.isNaN(n) ? 0 : n,
-                            { shouldDirty: true, shouldValidate: true },
-                          );
-                        }}
-                      />
-                      <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
-                        {currencyCode}
-                      </span>
-                    </InputSuffixField>
-                  )}
-                />
-              )}
-            </section>
-
-            {/* Discount — disc% · amount (+ currency suffix) รวมเป็นกล่องเดียว */}
-            <section className="space-y-2">
-              <div className="flex min-h-6 items-center justify-between gap-2">
-                <EyeBrow>{tfl("discount")}</EyeBrow>
-                {!isFieldDisabled &&
-                  overrideToggle(`items.${index}.is_discount_adjustment`)}
-              </div>
-              {isFieldDisabled ? (
-                <p className="flex min-h-8 items-center gap-1.5 truncate text-xs font-medium">
-                  <span className="text-muted-foreground tabular-nums">
-                    {discRate}%
-                  </span>
-                  <span className="text-muted-foreground">·</span>
-                  <span className="tabular-nums">
-                    {formatCurrency(discountAmount)}
-                  </span>
-                  <span className="text-muted-foreground">{currencyCode}</span>
-                </p>
-              ) : (
-                <InputSuffixField
-                  className="w-full"
-                  error={!!discountAmountError}
-                >
-                  <InputSuffixInput
-                    id={`items-${index}-discount-rate`}
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="0.01"
-                    placeholder="0"
-                    aria-label={tfl("discPercent")}
-                    max={100}
-                    disabled={isDiscAdj}
-                    className="h-8 w-14 shrink-0 rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-default disabled:opacity-100"
-                    defaultValue={discRate}
-                    {...form.register(`items.${index}.discount_rate`)}
-                    onChange={(e) => {
-                      const n = e.target.valueAsNumber;
-                      // clamp 0–100 (disc% สูงสุด 100)
-                      const rate = Number.isNaN(n)
-                        ? 0
-                        : Math.min(100, Math.max(0, n));
-                      form.setValue(`items.${index}.discount_rate`, rate, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      });
-                    }}
-                  />
-                  <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
-                    %
-                  </span>
-                  <div
-                    className="bg-border h-4 w-px shrink-0"
-                    aria-hidden="true"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <InputAmount
-                      id={`items-${index}-discount-amount`}
-                      decimals={watchCurrencyDecimals}
-                      min={0}
-                      disabled={!isDiscAdj}
-                      aria-label={tfl("discAmt")}
-                      className="h-8 w-full rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-default disabled:opacity-100"
-                      defaultValue={discAmt}
-                      {...form.register(`items.${index}.discount_amount`)}
-                      onChange={(e) => {
-                        const n = e.target.valueAsNumber;
-                        form.setValue(
-                          `items.${index}.discount_amount`,
-                          Number.isNaN(n) ? 0 : n,
-                          { shouldDirty: true, shouldValidate: true },
-                        );
-                      }}
-                    />
-                  </div>
-                  <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
-                    {currencyCode}
-                  </span>
-                </InputSuffixField>
-              )}
-            </section>
+            )}
+            <PrItemSummary
+              subtotal={subtotal}
+              discountAmount={discountAmount}
+              netAmount={netAmount}
+              taxAmount={taxAmount}
+              totalPrice={totalPrice}
+              exchangeRate={exchangeRate}
+              isForeignCurrency={isForeignCurrency}
+              baseCurrencyCode={baseCurrencyCode}
+              currencyCode={watchCurrencyCode ?? ""}
+            />
           </div>
         </div>
       </div>
