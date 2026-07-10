@@ -25,16 +25,32 @@ const baseData: BusinessUnitDetail = {
   max_license_users: 3,
   branch_no: null,
   company_name: null,
-  company_address: null,
+  company_address_line1: null,
+  company_address_line2: null,
+  company_sub_district: null,
+  company_district: null,
+  company_city: null,
+  company_province: null,
+  company_postal_code: null,
+  company_country: null,
+  company_latitude: null,
+  company_longitude: null,
   company_email: null,
   company_tel: null,
-  company_zip_code: null,
   tax_no: null,
   hotel_name: null,
-  hotel_address: null,
+  hotel_address_line1: null,
+  hotel_address_line2: null,
+  hotel_sub_district: null,
+  hotel_district: null,
+  hotel_city: null,
+  hotel_province: null,
+  hotel_postal_code: null,
+  hotel_country: null,
+  hotel_latitude: null,
+  hotel_longitude: null,
   hotel_email: null,
   hotel_tel: null,
-  hotel_zip_code: null,
   date_format: "yyyy-MM-dd",
   date_time_format: "yyyy-MM-dd HH:mm:ss",
   time_format: "HH:mm:ss",
@@ -98,14 +114,13 @@ describe("buildPatch", () => {
 describe("mergeSeededConfig", () => {
   it("seeds the PR item when backend config is empty ({})", () => {
     const merged = mergeSeededConfig(normalizeConfig({}));
-    expect(merged).toEqual([
-      {
-        key: "pr.allow-duplicate.product",
-        label: "Allow selecting duplicate products",
-        datatype: "boolean",
-        value: "false",
-      },
-    ]);
+    // assert per-key (registry may seed other items too, e.g. SI)
+    expect(merged.find((i) => i.key === "pr.allow-duplicate.product")).toEqual({
+      key: "pr.allow-duplicate.product",
+      label: "Allow selecting duplicate products",
+      datatype: "boolean",
+      value: "false",
+    });
   });
 
   it("does not duplicate when backend already has the key", () => {
@@ -117,17 +132,24 @@ describe("mergeSeededConfig", () => {
         value: "true",
       },
     ];
-    expect(mergeSeededConfig(backend)).toEqual(backend);
+    const merged = mergeSeededConfig(backend);
+    // the backend key is kept as-is (not re-seeded), exactly once
+    expect(
+      merged.filter((i) => i.key === "pr.allow-duplicate.product"),
+    ).toEqual(backend);
   });
 
-  it("keeps unknown backend items and appends seeded items after them", () => {
+  it("keeps unknown backend items first, then appends seeded items", () => {
     const backend: BusinessUnitConfigItem[] = [
       { key: "x.unknown", label: "X", datatype: "string", value: "1" },
     ];
     const merged = mergeSeededConfig(backend);
-    expect(merged).toHaveLength(2);
+    // backend item stays first; seeded items (e.g. PR) appended after
     expect(merged[0]).toEqual(backend[0]);
-    expect(merged[1].key).toBe("pr.allow-duplicate.product");
+    expect(merged.some((i) => i.key === "pr.allow-duplicate.product")).toBe(
+      true,
+    );
+    expect(merged.length).toBeGreaterThan(1);
   });
 });
 

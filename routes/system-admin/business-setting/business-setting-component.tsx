@@ -44,7 +44,10 @@ import {
   mergeSeededConfig,
   type BusinessSettingFormValues,
 } from "./business-setting-form-schema";
-import { groupConfigForRender } from "./business-setting-config-registry";
+import {
+  groupConfigForRender,
+  resolveConfigOptions,
+} from "./business-setting-config-registry";
 
 /**
  * หน้า Business Setting (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
@@ -326,20 +329,84 @@ export default function BusinessSettingComponent() {
             <EditableField
               editing={editing}
               form={form}
-              name="hotel_address"
-              type="textarea"
-              label={t("fields.hotelAddress")}
-              description={t("fields.hotelAddressDesc")}
-              displayValue={data.hotel_address}
+              name="hotel_address_line1"
+              label={t("fields.hotelAddressLine1")}
+              description={t("fields.hotelAddressLine1Desc")}
+              displayValue={data.hotel_address_line1}
               fullWidth
             />
             <EditableField
               editing={editing}
               form={form}
-              name="hotel_zip_code"
-              label={t("fields.hotelZipCode")}
-              description={t("fields.hotelZipCodeDesc")}
-              displayValue={data.hotel_zip_code}
+              name="hotel_address_line2"
+              label={t("fields.hotelAddressLine2")}
+              description={t("fields.hotelAddressLine2Desc")}
+              displayValue={data.hotel_address_line2}
+              fullWidth
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="hotel_sub_district"
+              label={t("fields.hotelSubDistrict")}
+              description={t("fields.hotelSubDistrictDesc")}
+              displayValue={data.hotel_sub_district}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="hotel_district"
+              label={t("fields.hotelDistrict")}
+              description={t("fields.hotelDistrictDesc")}
+              displayValue={data.hotel_district}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="hotel_city"
+              label={t("fields.hotelCity")}
+              description={t("fields.hotelCityDesc")}
+              displayValue={data.hotel_city}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="hotel_province"
+              label={t("fields.hotelProvince")}
+              description={t("fields.hotelProvinceDesc")}
+              displayValue={data.hotel_province}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="hotel_postal_code"
+              label={t("fields.hotelPostalCode")}
+              description={t("fields.hotelPostalCodeDesc")}
+              displayValue={data.hotel_postal_code}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="hotel_country"
+              label={t("fields.hotelCountry")}
+              description={t("fields.hotelCountryDesc")}
+              displayValue={data.hotel_country}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="hotel_latitude"
+              label={t("fields.hotelLatitude")}
+              description={t("fields.hotelLatitudeDesc")}
+              displayValue={data.hotel_latitude}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="hotel_longitude"
+              label={t("fields.hotelLongitude")}
+              description={t("fields.hotelLongitudeDesc")}
+              displayValue={data.hotel_longitude}
             />
           </SettingSection>
 
@@ -392,20 +459,84 @@ export default function BusinessSettingComponent() {
             <EditableField
               editing={editing}
               form={form}
-              name="company_address"
-              type="textarea"
-              label={t("fields.companyAddress")}
-              description={t("fields.companyAddressDesc")}
-              displayValue={data.company_address}
+              name="company_address_line1"
+              label={t("fields.companyAddressLine1")}
+              description={t("fields.companyAddressLine1Desc")}
+              displayValue={data.company_address_line1}
               fullWidth
             />
             <EditableField
               editing={editing}
               form={form}
-              name="company_zip_code"
-              label={t("fields.companyZipCode")}
-              description={t("fields.companyZipCodeDesc")}
-              displayValue={data.company_zip_code}
+              name="company_address_line2"
+              label={t("fields.companyAddressLine2")}
+              description={t("fields.companyAddressLine2Desc")}
+              displayValue={data.company_address_line2}
+              fullWidth
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="company_sub_district"
+              label={t("fields.companySubDistrict")}
+              description={t("fields.companySubDistrictDesc")}
+              displayValue={data.company_sub_district}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="company_district"
+              label={t("fields.companyDistrict")}
+              description={t("fields.companyDistrictDesc")}
+              displayValue={data.company_district}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="company_city"
+              label={t("fields.companyCity")}
+              description={t("fields.companyCityDesc")}
+              displayValue={data.company_city}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="company_province"
+              label={t("fields.companyProvince")}
+              description={t("fields.companyProvinceDesc")}
+              displayValue={data.company_province}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="company_postal_code"
+              label={t("fields.companyPostalCode")}
+              description={t("fields.companyPostalCodeDesc")}
+              displayValue={data.company_postal_code}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="company_country"
+              label={t("fields.companyCountry")}
+              description={t("fields.companyCountryDesc")}
+              displayValue={data.company_country}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="company_latitude"
+              label={t("fields.companyLatitude")}
+              description={t("fields.companyLatitudeDesc")}
+              displayValue={data.company_latitude}
+            />
+            <EditableField
+              editing={editing}
+              form={form}
+              name="company_longitude"
+              label={t("fields.companyLongitude")}
+              description={t("fields.companyLongitudeDesc")}
+              displayValue={data.company_longitude}
             />
           </SettingSection>
 
@@ -553,18 +684,28 @@ export default function BusinessSettingComponent() {
               title={t(section.titleKey)}
               description={t(section.descKey)}
             >
-              {section.entries.map((entry) => (
-                <ConfigField
-                  key={entry.item.key}
-                  editing={editing}
-                  form={form}
-                  index={entry.index}
-                  item={entry.item}
-                  label={t(entry.labelKey)}
-                  yesLabel={t("yes")}
-                  noLabel={t("no")}
-                />
-              ))}
+              {section.entries.map((entry) => {
+                const options = entry.options
+                  ? resolveConfigOptions(
+                      entry.options,
+                      data.calculation_method,
+                      entry.item.value,
+                    ).map((o) => ({ value: o.value, label: t(o.labelKey) }))
+                  : undefined;
+                return (
+                  <ConfigField
+                    key={entry.item.key}
+                    editing={editing}
+                    form={form}
+                    index={entry.index}
+                    item={entry.item}
+                    label={t(entry.labelKey)}
+                    yesLabel={t("yes")}
+                    noLabel={t("no")}
+                    options={options}
+                  />
+                );
+              })}
             </SettingSection>
           ))}
 
