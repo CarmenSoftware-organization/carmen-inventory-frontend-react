@@ -1,6 +1,4 @@
-import { useTranslations } from "use-intl";
-import { formatCurrency, round2 } from "@/lib/currency-utils";
-import { SummaryBar } from "@/components/ui/summary-bar";
+import { formatCurrency } from "@/lib/currency-utils";
 
 interface Props {
   readonly subtotal: number;
@@ -11,13 +9,12 @@ interface Props {
   readonly exchangeRate: number;
   readonly isForeignCurrency: boolean;
   readonly baseCurrencyCode?: string;
-  readonly currencyCode?: string;
 }
 
 /**
- * Summary ของ PR item แบบ inline (label · value อยู่ line เดียวกัน มี | คั่น)
- * ใช้ SummaryBar ตัวเดียวกับ grand total — เรียง subtotal · discount · net · tax ·
- * total (total เป็นพระเอกด้วย SIZE) เพิ่ม base-currency conversion เมื่อเป็นสกุลต่างประเทศ
+ * แถว base-currency ของ PR item summary — render เป็น grid cells (fragment) วาง
+ * เรียงใต้คอลัมน์ Subtotal · Discount · Net · Tax · Total ของ grid แถว Vendor
+ * (ค่า × exchange rate) ไม่มี label · โชว์เฉพาะสกุลต่างประเทศ
  */
 export function PrItemSummary({
   subtotal,
@@ -28,51 +25,36 @@ export function PrItemSummary({
   exchangeRate,
   isForeignCurrency,
   baseCurrencyCode,
-  currencyCode,
 }: Props) {
-  const tfl = useTranslations("field");
+  if (!isForeignCurrency) return null;
+
+  const metrics = [
+    { k: "subtotal", v: subtotal },
+    { k: "discount", v: discountAmount },
+    { k: "net", v: netAmount },
+    { k: "tax", v: taxAmount },
+    { k: "total", v: totalPrice },
+  ];
 
   return (
-    <SummaryBar
-      className="justify-end"
-      items={[
-        {
-          key: "subtotal",
-          label: tfl("subtotal"),
-          value: formatCurrency(subtotal),
-        },
-        {
-          key: "discount",
-          label: tfl("discount"),
-          value:
-            discountAmount > 0
-              ? `-${formatCurrency(discountAmount)}`
-              : formatCurrency(0),
-          valueClassName:
-            discountAmount > 0
-              ? "text-destructive font-semibold"
-              : "font-semibold",
-        },
-        { key: "net", label: tfl("net"), value: formatCurrency(netAmount) },
-        { key: "tax", label: tfl("tax"), value: formatCurrency(taxAmount) },
-        ...(isForeignCurrency
-          ? [
-              {
-                key: "base",
-                label: baseCurrencyCode ?? "",
-                value: formatCurrency(round2(totalPrice * exchangeRate)),
-                valueClassName: "text-muted-foreground",
-              },
-            ]
-          : []),
-        {
-          key: "total",
-          label: tfl("total"),
-          value: formatCurrency(totalPrice),
-          emphasis: true,
-          suffix: currencyCode,
-        },
-      ]}
-    />
+    <>
+      {metrics.map((m, i) => {
+        const isTotal = i === metrics.length - 1;
+        return (
+          <div
+            key={m.k}
+            className={`text-muted-foreground flex items-center justify-end text-[0.6875rem] tabular-nums ${
+              i === 0 ? "lg:col-start-5" : ""
+            }`}
+          >
+            {formatCurrency(m.v * exchangeRate)}
+            {/* currency code โชว์ที่ Total ที่เดียว */}
+            {isTotal && baseCurrencyCode && (
+              <span className="ml-1 text-[0.625rem]">{baseCurrencyCode}</span>
+            )}
+          </div>
+        );
+      })}
+    </>
   );
 }

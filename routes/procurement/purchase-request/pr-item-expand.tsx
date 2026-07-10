@@ -227,7 +227,35 @@ export function PrItemExpand({
       {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
           Inventory · Summary อยู่แถบล่าง */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[15rem_6rem_8rem_11rem_0.9fr_12rem_0.9fr_15rem]">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[10rem_15rem_8rem_11rem_0.9fr_12rem_0.9fr_15rem_0.9fr]">
+          {/* Pricelist */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <div className="flex min-h-6 items-center justify-between gap-2">
+              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
+                {tfl("pricelist")}
+              </FieldLabel>
+              {productId &&
+                unitId &&
+                currencyId &&
+                (role === STAGE_ROLE.PURCHASE ||
+                  role === STAGE_ROLE.APPROVE) && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPricelist(true)}
+                    className="text-primary flex items-center gap-1 text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
+                  >
+                    <Scale className="size-3" />
+                    {tc("compare")}
+                  </button>
+                )}
+            </div>
+            <p
+              className={`flex items-center truncate text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+            >
+              {pricelistNo || "—"}
+            </p>
+          </Field>
+
           {/* Vendor */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel
@@ -354,41 +382,13 @@ export function PrItemExpand({
             )}
           </Field>
 
-          {/* Pricelist */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <div className="flex min-h-6 items-center justify-between gap-2">
-              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
-                {tfl("pricelist")}
-              </FieldLabel>
-              {productId &&
-                unitId &&
-                currencyId &&
-                (role === STAGE_ROLE.PURCHASE ||
-                  role === STAGE_ROLE.APPROVE) && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPricelist(true)}
-                    className="text-primary flex items-center gap-1 text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
-                  >
-                    <Scale className="size-3" />
-                    {tc("compare")}
-                  </button>
-                )}
-            </div>
-            <p
-              className={`flex items-center truncate text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
-            >
-              {pricelistNo || "—"}
-            </p>
-          </Field>
-
           {/* Subtotal — plaintext (คำนวณ ไม่แก้ไข) */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
               {tfl("subtotal")}
             </FieldLabel>
             <p
-              className={`flex items-center text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+              className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
             >
               {formatCurrency(subtotal)}
             </p>
@@ -412,7 +412,6 @@ export function PrItemExpand({
                 <span className="tabular-nums">
                   {formatCurrency(discountAmount)}
                 </span>
-                <span className="text-muted-foreground">{currencyCode}</span>
               </p>
             ) : (
               <InputSuffixField
@@ -471,9 +470,6 @@ export function PrItemExpand({
                     }}
                   />
                 </div>
-                <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
-                  {currencyCode}
-                </span>
               </InputSuffixField>
             )}
           </Field>
@@ -484,7 +480,7 @@ export function PrItemExpand({
               {tfl("net")}
             </FieldLabel>
             <p
-              className={`flex items-center text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+              className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
             >
               {formatCurrency(netAmount)}
             </p>
@@ -515,9 +511,6 @@ export function PrItemExpand({
                     <span className="text-muted-foreground">·</span>
                     <span className="tabular-nums">
                       {formatCurrency(taxAmount)}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {currencyCode}
                     </span>
                   </>
                 ) : (
@@ -575,37 +568,48 @@ export function PrItemExpand({
                         );
                       }}
                     />
-                    <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
-                      {currencyCode}
-                    </span>
                   </InputSuffixField>
                 )}
               />
             )}
           </Field>
+
+          {/* Total — plaintext (สกุลที่เลือก) */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
+              {tfl("total")}
+            </FieldLabel>
+            <p
+              className={`flex items-center justify-end text-xs font-semibold tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+            >
+              {formatCurrency(totalPrice)}
+              {currencyCode && (
+                <span className="text-muted-foreground ml-1 text-[0.625rem] font-normal">
+                  {currencyCode}
+                </span>
+              )}
+            </p>
+          </Field>
+
+          {/* แถว base currency (summary) — เรียงใต้ Subtotal·Discount·Net·Tax·
+              Total ของ grid นี้ (เฉพาะสกุลต่างประเทศ) */}
+          <PrItemSummary
+            subtotal={subtotal}
+            discountAmount={discountAmount}
+            netAmount={netAmount}
+            taxAmount={taxAmount}
+            totalPrice={totalPrice}
+            exchangeRate={exchangeRate}
+            isForeignCurrency={isForeignCurrency}
+            baseCurrencyCode={baseCurrencyCode}
+          />
         </div>
 
-        {/* Inventory · Summary — แถบล่าง */}
-        <div className="flex flex-col gap-4 border-t pt-4 lg:flex-row lg:items-start lg:justify-between">
-          <PrInventoryRow
-            control={form.control}
-            index={index}
-            buCode={buCode ?? ""}
-          />
-          <div className="flex shrink-0 flex-col items-end gap-3">
-            <PrItemSummary
-              subtotal={subtotal}
-              discountAmount={discountAmount}
-              netAmount={netAmount}
-              taxAmount={taxAmount}
-              totalPrice={totalPrice}
-              exchangeRate={exchangeRate}
-              isForeignCurrency={isForeignCurrency}
-              baseCurrencyCode={baseCurrencyCode}
-              currencyCode={watchCurrencyCode ?? ""}
-            />
-          </div>
-        </div>
+        <PrInventoryRow
+          control={form.control}
+          index={index}
+          buCode={buCode ?? ""}
+        />
       </div>
 
       <Suspense fallback={null}>
