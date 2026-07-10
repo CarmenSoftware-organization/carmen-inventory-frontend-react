@@ -619,7 +619,8 @@ export function PrItemExpand({
           approvedQty={approvedQty}
           approvedUnitName={approvedUnitName}
           onSelect={handlePricelistSelect}
-          readOnly={role !== STAGE_ROLE.PURCHASE}
+          // เลือกราคาได้เฉพาะ edit mode + role purchase — view/role อื่นดูได้อย่างเดียว
+          readOnly={isFieldDisabled || role !== STAGE_ROLE.PURCHASE}
         />
       </Suspense>
     </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useTranslations } from "use-intl";
 import { FileText, Package, Receipt } from "lucide-react";
@@ -55,6 +54,7 @@ const buildColumns = (
   dateFormat: string,
   tfl: ReturnType<typeof useTranslations>,
   t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>,
   readOnly: boolean,
   minPrice: number,
 ): ColumnDef<PricelistEntry>[] => {
@@ -83,12 +83,8 @@ const buildColumns = (
     {
       accessorKey: "pricelist_no",
       header: t("pricelistNo"),
+      meta: { cellClassName: "text-muted-foreground" },
       size: 140,
-      cell: ({ getValue }) => (
-        <Badge variant="outline" size="xs" className="text-[0.625rem]">
-          {getValue<string>()}
-        </Badge>
-      ),
     },
     {
       accessorKey: "unit_name",
@@ -106,7 +102,7 @@ const buildColumns = (
         headerClassName: "text-right",
         cellClassName: "text-right",
       },
-      size: 120,
+      size: 160,
       cell: ({ row }) => {
         const price = row.original.price;
         const isBest = price === minPrice && minPrice > 0;
@@ -121,28 +117,15 @@ const buildColumns = (
                 {t("best")}
               </Badge>
             )}
-            <span
-              className={`tabular-nums ${isBest ? "text-success font-semibold" : "font-semibold"}`}
-            >
+            <span className="font-semibold tabular-nums">
               {formatCurrency(price)}
+            </span>
+            <span className="text-muted-foreground">
+              {row.original.currency}
             </span>
           </div>
         );
       },
-    },
-    {
-      accessorKey: "currency",
-      header: tfl("currency"),
-      meta: {
-        headerClassName: "text-center",
-        cellClassName: "text-center",
-      },
-      size: 80,
-      cell: ({ getValue }) => (
-        <Badge variant="outline" size="xs" className="text-[0.625rem]">
-          {getValue<string>()}
-        </Badge>
-      ),
     },
     {
       id: "effective",
@@ -172,7 +155,7 @@ const buildColumns = (
       meta: { cellClassName: "text-right" },
       cell: () => (
         <Button type="button" size="xs" variant="success">
-          Select
+          {tc("select")}
         </Button>
       ),
     },
@@ -218,6 +201,7 @@ export function PrPricelistDialog({
 }: PrPricelistDialogProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const { buCode, dateFormat } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
   const [lists, setLists] = useState<PricelistEntry[]>([]);
@@ -260,14 +244,14 @@ export function PrPricelistDialog({
       ? Math.min(...lists.map((l) => l.price).filter((p) => p > 0))
       : 0;
 
-  const maxPrice = lists.length > 0 ? Math.max(...lists.map((l) => l.price)) : 0;
-
-  const savingPct =
-    minPrice === 0 || maxPrice === 0 || minPrice === maxPrice
-      ? 0
-      : Math.round(((maxPrice - minPrice) / maxPrice) * 100);
-
-  const pricelistColumns = buildColumns(dateFormat, tfl, t, readOnly, minPrice);
+  const pricelistColumns = buildColumns(
+    dateFormat,
+    tfl,
+    t,
+    tc,
+    readOnly,
+    minPrice,
+  );
 
   const table = useReactTable({
     data: lists,
@@ -317,30 +301,6 @@ export function PrPricelistDialog({
               )}
             </div>
           </DialogHeader>
-
-          {!isLoading && lists.length > 0 && (
-            <div className="grid grid-cols-3 gap-3">
-              <SummaryTile
-                label={tfl("vendor")}
-                value={lists.length.toString()}
-                unit={lists.length === 1 ? t("vendorSingular") : t("vendorPlural")}
-              />
-              <SummaryTile
-                label={t("bestPrice")}
-                value={formatCurrency(minPrice)}
-                unit={lists[0]?.currency}
-                accent="success"
-              />
-              {savingPct > 0 && (
-                <SummaryTile
-                  label={t("maxSavings")}
-                  value={`${savingPct}%`}
-                  unit={t("vsHighest")}
-                  accent="primary"
-                />
-              )}
-            </div>
-          )}
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col px-6 pb-6">
@@ -357,7 +317,7 @@ export function PrPricelistDialog({
               rowBorder: true,
             }}
             tableClassNames={{
-              base: "text-sm",
+              base: "text-xs",
               headerRow: "h-10",
               bodyRow: "h-11 hover:bg-primary/5 cursor-pointer",
             }}
@@ -369,41 +329,5 @@ export function PrPricelistDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function SummaryTile({
-  label,
-  value,
-  unit,
-  accent,
-}: {
-  readonly label: string;
-  readonly value: string;
-  readonly unit?: string;
-  readonly accent?: "success" | "primary";
-}) {
-  const bg =
-    accent === "success"
-      ? "bg-success/5 border-success/30"
-      : accent === "primary"
-        ? "bg-primary/5 border-primary/30"
-        : "bg-muted/40";
-  const textColor =
-    accent === "success"
-      ? "text-success"
-      : accent === "primary"
-        ? "text-primary"
-        : "";
-  return (
-    <div className={`rounded-lg border p-3 ${bg}`}>
-      <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
-        {label}
-      </p>
-      <p className={`mt-1 text-sm font-semibold tabular-nums ${textColor}`}>
-        {value}
-      </p>
-      {unit && <p className="text-muted-foreground text-[0.625rem]">{unit}</p>}
-    </div>
   );
 }
