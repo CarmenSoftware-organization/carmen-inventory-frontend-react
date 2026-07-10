@@ -13,7 +13,6 @@ import { PR_ITEM_PRICELIST_COMPARE_TYPE } from "@/types/purchase-request";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputAmount } from "@/components/ui/input/input-amount";
 import {
-  InputSuffixAddon,
   InputSuffixField,
   InputSuffixInput,
 } from "@/components/ui/input/input-suffix";
@@ -228,7 +227,7 @@ export function PrItemExpand({
       {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
           Inventory · Summary อยู่แถบล่าง */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[1.5fr_7rem_1fr_1fr_2fr]">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[12.5rem_6rem_8rem_1fr_0.9fr_12rem_0.9fr_19rem]">
           {/* Vendor */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel
@@ -238,7 +237,9 @@ export function PrItemExpand({
               {tfl("vendor")}
             </FieldLabel>
             {isFieldDisabled ? (
-              <p className="flex min-h-6 items-center truncate text-xs font-medium">
+              <p
+                className={`flex items-center truncate text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+              >
                 {vendorName || "—"}
               </p>
             ) : (
@@ -309,8 +310,49 @@ export function PrItemExpand({
             )}
           </Field>
 
+          {/* Exchange rate — แก้ไขได้ (มีผลจริงเมื่อเป็นสกุลต่างประเทศ) */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <FieldLabel
+              htmlFor={`items-${index}-exchange-rate`}
+              className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
+            >
+              {tfl("exchangeRate")}
+            </FieldLabel>
+            {isFieldDisabled ? (
+              <p
+                className={`flex items-center text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+              >
+                {exchangeRate}
+              </p>
+            ) : (
+              <InputSuffixField className="h-8 w-full">
+                <InputSuffixInput
+                  id={`items-${index}-exchange-rate`}
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="0.0001"
+                  className="h-8 text-right text-xs"
+                  defaultValue={exchangeRate}
+                  {...form.register(`items.${index}.exchange_rate`)}
+                  onChange={(e) => {
+                    const n = e.target.valueAsNumber;
+                    form.setValue(
+                      `items.${index}.exchange_rate`,
+                      Number.isNaN(n) ? 1 : n,
+                      { shouldDirty: true },
+                    );
+                  }}
+                />
+                <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
+                  {baseCurrencyCode}
+                </span>
+              </InputSuffixField>
+            )}
+          </Field>
+
           {/* Pricelist */}
-          <Field className="gap-1">
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <div className="flex min-h-6 items-center justify-between gap-2">
               <FieldLabel className="text-muted-foreground text-xs tracking-wide">
                 {tfl("pricelist")}
@@ -330,8 +372,22 @@ export function PrItemExpand({
                   </button>
                 )}
             </div>
-            <p className="flex min-h-6 items-center truncate text-xs font-medium">
+            <p
+              className={`flex items-center truncate text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+            >
               {pricelistNo || "—"}
+            </p>
+          </Field>
+
+          {/* Subtotal — plaintext (คำนวณ ไม่แก้ไข) */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
+              {tfl("subtotal")}
+            </FieldLabel>
+            <p
+              className={`flex items-center text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+            >
+              {formatCurrency(subtotal)}
             </p>
           </Field>
 
@@ -419,12 +475,32 @@ export function PrItemExpand({
             )}
           </Field>
 
+          {/* Net — plaintext */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
+              {tfl("net")}
+            </FieldLabel>
+            <p
+              className={`flex items-center text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+            >
+              {formatCurrency(netAmount)}
+            </p>
+          </Field>
+
           {/* Tax */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <div className="flex min-h-6 items-center justify-between gap-2">
-              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
-                {tfl("tax")}
-              </FieldLabel>
+              <div className="flex items-center gap-1.5">
+                <FieldLabel className="text-muted-foreground text-xs tracking-wide">
+                  {tfl("tax")}
+                </FieldLabel>
+                {/* tax rate เป็น plain text (มาจาก profile — override ไม่ได้) */}
+                {taxRate > 0 && (
+                  <span className="text-muted-foreground text-[0.625rem] font-semibold tabular-nums">
+                    {taxRate}%
+                  </span>
+                )}
+              </div>
               {!isFieldDisabled &&
                 overrideToggle(`items.${index}.is_tax_adjustment`)}
             </div>
@@ -433,10 +509,6 @@ export function PrItemExpand({
                 {taxProfileName ? (
                   <>
                     <span className="truncate">{taxProfileName}</span>
-                    <span className="text-muted-foreground">·</span>
-                    <span className="text-muted-foreground tabular-nums">
-                      {taxRate}%
-                    </span>
                     <span className="text-muted-foreground">·</span>
                     <span className="tabular-nums">
                       {formatCurrency(taxAmount)}
@@ -482,40 +554,6 @@ export function PrItemExpand({
                       className="bg-border h-4 w-px shrink-0"
                       aria-hidden="true"
                     />
-                    {/* tax rate — กรอกได้เมื่อ override ปิด (amount auto จาก rate),
-                          override เปิด = disabled (amount กรอกเอง) */}
-                    <InputSuffixInput
-                      id={`items-${index}-tax-rate`}
-                      type="number"
-                      inputMode="decimal"
-                      min={0}
-                      step="0.01"
-                      placeholder="0"
-                      aria-label={tfl("taxRate")}
-                      max={100}
-                      disabled={isTaxAdj}
-                      className="disabled:bg-muted disabled:text-muted-foreground h-8 w-12 flex-none rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
-                      defaultValue={taxRate}
-                      {...form.register(`items.${index}.tax_rate`)}
-                      onChange={(e) => {
-                        const r = e.target.valueAsNumber;
-                        // clamp 0–100 (tax rate เป็น % สูงสุด 100)
-                        const rate = Number.isNaN(r)
-                          ? 0
-                          : Math.min(100, Math.max(0, r));
-                        form.setValue(`items.${index}.tax_rate`, rate, {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        });
-                      }}
-                    />
-                    <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
-                      %
-                    </span>
-                    <div
-                      className="bg-border h-4 w-px shrink-0"
-                      aria-hidden="true"
-                    />
                     <InputAmount
                       id={`items-${index}-tax-amount`}
                       decimals={watchCurrencyDecimals}
@@ -552,44 +590,6 @@ export function PrItemExpand({
             buCode={buCode ?? ""}
           />
           <div className="flex shrink-0 flex-col items-end gap-3">
-            {isForeignCurrency && (
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
-                  {tfl("exchangeRate")}
-                </span>
-                {isFieldDisabled ? (
-                  <span className="font-semibold tabular-nums">
-                    {exchangeRate}
-                  </span>
-                ) : (
-                  <InputSuffixField className="h-8 w-28">
-                    <InputSuffixInput
-                      id={`items-${index}-exchange-rate`}
-                      type="number"
-                      inputMode="decimal"
-                      min={0}
-                      step="0.0001"
-                      className="h-8 text-right text-xs"
-                      defaultValue={exchangeRate}
-                      {...form.register(`items.${index}.exchange_rate`)}
-                      onChange={(e) => {
-                        const n = e.target.valueAsNumber;
-                        form.setValue(
-                          `items.${index}.exchange_rate`,
-                          Number.isNaN(n) ? 1 : n,
-                          { shouldDirty: true },
-                        );
-                      }}
-                    />
-                    <InputSuffixAddon>
-                      <span className="text-muted-foreground px-2 text-xs">
-                        {baseCurrencyCode}
-                      </span>
-                    </InputSuffixAddon>
-                  </InputSuffixField>
-                )}
-              </div>
-            )}
             <PrItemSummary
               subtotal={subtotal}
               discountAmount={discountAmount}
