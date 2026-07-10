@@ -145,6 +145,8 @@ export function PrItemExpand({
   // Sync computed values back to form
   useEffect(() => {
     if (index === -1) return;
+    // override ปิด: amount auto จาก rate · override เปิด: amount กรอกเอง,
+    // rate ค้างค่าเดิม (disabled, ไม่ back-compute) — ทั้ง discount และ tax
     if (!isDiscAdj) {
       form.setValue(`items.${index}.discount_amount`, discountAmount);
     }
@@ -408,180 +410,191 @@ export function PrItemExpand({
 
           {/* ── Tax & Discount — two calm groups instead of a 5-col micro-grid ── */}
           <div className="grid grid-cols-1 gap-2 gap-x-8 border-t pt-5 sm:grid-cols-2">
-            {/* Tax */}
+            {/* Tax — rate% · profile · amount รวมเป็นกล่องเดียว */}
             <section className="space-y-2">
-              <EyeBrow>{tfl("tax")}</EyeBrow>
-              {/* Tax Profile (+ rate prefix) · Tax Amt ในแถวเดียวกัน */}
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-x-2">
-                <Field>
-                  <FieldLabel
-                    htmlFor={`items-${index}-tax-profile`}
-                    className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
-                  >
-                    {tfl("taxProfile")}
-                  </FieldLabel>
-                  {isFieldDisabled ? (
-                    <p className="flex min-h-8 items-center gap-1.5 truncate text-xs font-medium">
-                      {taxProfileName ? (
-                        <>
-                          <span className="text-muted-foreground tabular-nums">
-                            {taxRate}%
-                          </span>
-                          <span className="truncate">{taxProfileName}</span>
-                        </>
-                      ) : (
-                        "—"
-                      )}
-                    </p>
-                  ) : (
-                    <Controller
-                      control={form.control}
-                      name={`items.${index}.tax_profile_id`}
-                      render={({ field }) => (
-                        // % (rate) เป็น prefix ซ้าย + tax profile select ในกล่องเดียว
-                        <InputSuffixField
-                          className="w-full"
-                          error={!!taxProfileError}
-                        >
-                          <span className="text-muted-foreground shrink-0 px-2 text-xs whitespace-nowrap tabular-nums">
-                            {taxRate}%
-                          </span>
-                          <div
-                            className="bg-border h-4 w-px shrink-0"
-                            aria-hidden="true"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <LookupTaxProfile
-                              value={field.value ?? ""}
-                              onValueChange={(value, rate, name) => {
-                                // shouldValidate: ล้างกรอบแดง tax ทันทีที่เลือก
-                                form.setValue(
-                                  `items.${index}.tax_profile_id`,
-                                  value || null,
-                                  { shouldDirty: true, shouldValidate: true },
-                                );
-                                form.setValue(`items.${index}.tax_rate`, rate);
-                                form.setValue(
-                                  `items.${index}.tax_profile_name`,
-                                  name,
-                                );
-                              }}
-                              className="w-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
-                            />
-                          </div>
-                        </InputSuffixField>
-                      )}
-                    />
-                  )}
-                </Field>
-                <Field>
-                  <div className="flex min-h-6 items-center justify-between gap-2">
-                    <FieldLabel
-                      htmlFor={`items-${index}-tax-amount`}
-                      className="text-muted-foreground text-xs tracking-wide"
-                    >
-                      {tfl("taxAmt")}
-                    </FieldLabel>
-                    {!isFieldDisabled &&
-                      overrideToggle(`items.${index}.is_tax_adjustment`)}
-                  </div>
-                  {isFieldDisabled ? (
-                    <p className="flex min-h-8 items-center text-xs font-semibold tabular-nums">
-                      {formatCurrency(taxAmount)}
-                    </p>
-                  ) : (
-                    <InputAmount
-                      id={`items-${index}-tax-amount`}
-                      decimals={watchCurrencyDecimals}
-                      min={0}
-                      className={`h-8 text-right text-xs ${taxAmountError ? "pl-7" : ""}`}
-                      disabled={!isTaxAdj}
-                      error={taxAmountError}
-                      errorIconAlign="left"
-                      defaultValue={taxAmt}
-                      {...form.register(`items.${index}.tax_amount`)}
-                      onChange={(e) => {
-                        const n = e.target.valueAsNumber;
-                        form.setValue(
-                          `items.${index}.tax_amount`,
-                          Number.isNaN(n) ? 0 : n,
-                          { shouldDirty: true, shouldValidate: true },
-                        );
-                      }}
-                    />
-                  )}
-                </Field>
+              <div className="flex min-h-6 items-center justify-between gap-2">
+                <EyeBrow>{tfl("tax")}</EyeBrow>
+                {!isFieldDisabled &&
+                  overrideToggle(`items.${index}.is_tax_adjustment`)}
               </div>
-            </section>
-
-            {/* Discount */}
-            <section className="space-y-2">
-              <EyeBrow>{tfl("discount")}</EyeBrow>
-              <div className="grid grid-cols-[5rem_1fr] gap-x-2">
-                <Field>
-                  <FieldLabel
-                    htmlFor={`items-${index}-discount-rate`}
-                    className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
-                  >
-                    {tfl("discPercent")}
-                  </FieldLabel>
-                  {isFieldDisabled ? (
-                    <p className="flex min-h-8 items-center text-xs font-semibold tabular-nums">
-                      {discRate}
-                    </p>
+              {isFieldDisabled ? (
+                <p className="flex min-h-8 items-center gap-1.5 truncate text-xs font-medium">
+                  {taxProfileName ? (
+                    <>
+                      <span className="truncate">{taxProfileName}</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-muted-foreground tabular-nums">
+                        {taxRate}%
+                      </span>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="tabular-nums">
+                        {formatCurrency(taxAmount)}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {currencyCode}
+                      </span>
+                    </>
                   ) : (
-                    <InputSuffixField className="h-8">
+                    "—"
+                  )}
+                </p>
+              ) : (
+                <Controller
+                  control={form.control}
+                  name={`items.${index}.tax_profile_id`}
+                  render={({ field }) => (
+                    // tax profile · tax amount (+ rate% เป็น suffix) ในกล่องเดียว
+                    <InputSuffixField
+                      className="w-full"
+                      error={!!taxProfileError || !!taxAmountError}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <LookupTaxProfile
+                          value={field.value ?? ""}
+                          onValueChange={(value, rate, name) => {
+                            // shouldValidate: ล้างกรอบแดง tax ทันทีที่เลือก
+                            form.setValue(
+                              `items.${index}.tax_profile_id`,
+                              value || null,
+                              { shouldDirty: true, shouldValidate: true },
+                            );
+                            form.setValue(`items.${index}.tax_rate`, rate);
+                            form.setValue(
+                              `items.${index}.tax_profile_name`,
+                              name,
+                            );
+                          }}
+                          className="w-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
+                        />
+                      </div>
+                      <div
+                        className="bg-border h-4 w-px shrink-0"
+                        aria-hidden="true"
+                      />
+                      {/* tax rate — กรอกได้เมื่อ override ปิด (amount auto จาก rate),
+                          override เปิด = disabled (amount กรอกเอง) */}
                       <InputSuffixInput
-                        id={`items-${index}-discount-rate`}
+                        id={`items-${index}-tax-rate`}
                         type="number"
                         inputMode="decimal"
                         min={0}
                         step="0.01"
                         placeholder="0"
-                        className="h-8 text-right text-xs"
-                        defaultValue={discRate}
-                        {...form.register(`items.${index}.discount_rate`)}
+                        aria-label={tfl("taxRate")}
+                        max={100}
+                        disabled={isTaxAdj}
+                        className="h-8 w-14 shrink-0 rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-default disabled:opacity-100"
+                        defaultValue={taxRate}
+                        {...form.register(`items.${index}.tax_rate`)}
+                        onChange={(e) => {
+                          const r = e.target.valueAsNumber;
+                          // clamp 0–100 (tax rate เป็น % สูงสุด 100)
+                          const rate = Number.isNaN(r)
+                            ? 0
+                            : Math.min(100, Math.max(0, r));
+                          form.setValue(`items.${index}.tax_rate`, rate, {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          });
+                        }}
+                      />
+                      <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
+                        %
+                      </span>
+                      <div
+                        className="bg-border h-4 w-px shrink-0"
+                        aria-hidden="true"
+                      />
+                      <InputAmount
+                        id={`items-${index}-tax-amount`}
+                        decimals={watchCurrencyDecimals}
+                        min={0}
+                        disabled={!isTaxAdj}
+                        aria-label={tfl("taxAmt")}
+                        className="h-8 w-16 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-default disabled:opacity-100"
+                        defaultValue={taxAmt}
+                        {...form.register(`items.${index}.tax_amount`)}
                         onChange={(e) => {
                           const n = e.target.valueAsNumber;
                           form.setValue(
-                            `items.${index}.discount_rate`,
+                            `items.${index}.tax_amount`,
                             Number.isNaN(n) ? 0 : n,
                             { shouldDirty: true, shouldValidate: true },
                           );
                         }}
                       />
-                      <InputSuffixAddon>
-                        <span className="text-muted-foreground px-2 text-xs">
-                          %
-                        </span>
-                      </InputSuffixAddon>
+                      <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
+                        {currencyCode}
+                      </span>
                     </InputSuffixField>
                   )}
-                </Field>
-                <Field>
-                  <div className="flex min-h-6 items-center justify-between gap-2">
-                    <FieldLabel
-                      htmlFor={`items-${index}-discount-amount`}
-                      className="text-muted-foreground text-xs tracking-wide"
-                    >
-                      {tfl("discAmt")}
-                    </FieldLabel>
-                    {!isFieldDisabled &&
-                      overrideToggle(`items.${index}.is_discount_adjustment`)}
-                  </div>
-                  {isFieldDisabled ? (
-                    <p className="flex min-h-8 items-center text-xs font-semibold tabular-nums">
-                      {formatCurrency(discountAmount)}
-                    </p>
-                  ) : (
+                />
+              )}
+            </section>
+
+            {/* Discount — disc% · amount (+ currency suffix) รวมเป็นกล่องเดียว */}
+            <section className="space-y-2">
+              <div className="flex min-h-6 items-center justify-between gap-2">
+                <EyeBrow>{tfl("discount")}</EyeBrow>
+                {!isFieldDisabled &&
+                  overrideToggle(`items.${index}.is_discount_adjustment`)}
+              </div>
+              {isFieldDisabled ? (
+                <p className="flex min-h-8 items-center gap-1.5 truncate text-xs font-medium">
+                  <span className="text-muted-foreground tabular-nums">
+                    {discRate}%
+                  </span>
+                  <span className="text-muted-foreground">·</span>
+                  <span className="tabular-nums">
+                    {formatCurrency(discountAmount)}
+                  </span>
+                  <span className="text-muted-foreground">{currencyCode}</span>
+                </p>
+              ) : (
+                <InputSuffixField
+                  className="w-full"
+                  error={!!discountAmountError}
+                >
+                  <InputSuffixInput
+                    id={`items-${index}-discount-rate`}
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="0.01"
+                    placeholder="0"
+                    aria-label={tfl("discPercent")}
+                    max={100}
+                    disabled={isDiscAdj}
+                    className="h-8 w-14 shrink-0 rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-default disabled:opacity-100"
+                    defaultValue={discRate}
+                    {...form.register(`items.${index}.discount_rate`)}
+                    onChange={(e) => {
+                      const n = e.target.valueAsNumber;
+                      // clamp 0–100 (disc% สูงสุด 100)
+                      const rate = Number.isNaN(n)
+                        ? 0
+                        : Math.min(100, Math.max(0, n));
+                      form.setValue(`items.${index}.discount_rate`, rate, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }}
+                  />
+                  <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
+                    %
+                  </span>
+                  <div
+                    className="bg-border h-4 w-px shrink-0"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 flex-1">
                     <InputAmount
                       id={`items-${index}-discount-amount`}
                       decimals={watchCurrencyDecimals}
                       min={0}
-                      className={`h-8 text-right text-xs ${taxAmountError ? "pl-7" : ""}`}
                       disabled={!isDiscAdj}
-                      error={discountAmountError}
-                      errorIconAlign="left"
+                      aria-label={tfl("discAmt")}
+                      className="h-8 w-full rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-default disabled:opacity-100"
                       defaultValue={discAmt}
                       {...form.register(`items.${index}.discount_amount`)}
                       onChange={(e) => {
@@ -593,9 +606,12 @@ export function PrItemExpand({
                         );
                       }}
                     />
-                  )}
-                </Field>
-              </div>
+                  </div>
+                  <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
+                    {currencyCode}
+                  </span>
+                </InputSuffixField>
+              )}
             </section>
           </div>
         </div>
