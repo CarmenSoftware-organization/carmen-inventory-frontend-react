@@ -4,7 +4,7 @@ import type { BusinessUnitConfigItem } from "@/types/business-unit";
 export interface ConfigOption {
   /** ค่าที่เก็บ (canonical snake_case, locale-independent) */
   value: string;
-  /** i18n key ของ label option (relative ต่อ companyProfile) */
+  /** i18n key ของ label option (relative ต่อ defaultSetting) */
   labelKey: string;
   /** แสดง option นี้เฉพาะเมื่อ BU.calculation_method === ค่านี้ (undefined = แสดงเสมอ) */
   visibleWhenCalcMethod?: string;
@@ -23,7 +23,7 @@ export interface SeededConfigItem {
   defaultValue: string;
   /** label canonical (EN) ที่ persist ลง backend — locale-independent กัน false-dirty */
   label: string;
-  /** i18n key สำหรับ "แสดงผล" (relative ต่อ namespace companyProfile) */
+  /** i18n key สำหรับ "แสดงผล" (relative ต่อ namespace defaultSetting) */
   labelKey: string;
   /** สำหรับ datatype "enum" — รายการ option ตามลำดับที่แสดง */
   options?: ConfigOption[];
@@ -33,7 +33,7 @@ export interface SeededConfigItem {
 export interface ConfigSection {
   /** id ภายใน (ไม่แสดงผล) */
   id: string;
-  /** i18n key ของหัวข้อ (relative ต่อ companyProfile) */
+  /** i18n key ของหัวข้อ (relative ต่อ defaultSetting) */
   titleKey: string;
   /** i18n key ของคำอธิบาย */
   descKey: string;

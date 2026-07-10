@@ -1,6 +1,6 @@
 {
   "companyProfile": {
-    "pageDescription": "General information and configuration for the current business unit.",
+    "pageDescription": "General information for the current business unit.",
     "loadError": "Failed to load business unit settings.",
     "minDigits": "min {n} digits",
     "noImage": "No image",
