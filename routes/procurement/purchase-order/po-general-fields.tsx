@@ -199,7 +199,7 @@ export function PoGeneralFields({
             <FieldDatePicker
               value={field.value}
               onValueChange={field.onChange}
-              disabled={manualFieldDisabled}
+              disabled={fieldDisabled}
               placeholder={tc("selectDate")}
               className="w-full text-xs"
               error={fieldState.error?.message}
