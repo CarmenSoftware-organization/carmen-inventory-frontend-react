@@ -1,14 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import {
   Controller,
   useWatch,
   type UseFormReturn,
   type FieldArrayWithId,
 } from "react-hook-form";
-import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
-import { Scale } from "lucide-react";
-import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_ITEM_PRICELIST_COMPARE_TYPE } from "@/types/purchase-request";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputAmount } from "@/components/ui/input/input-amount";
@@ -21,17 +18,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { computePrItemAmounts, type PrFormValues } from "./pr-form-schema";
-import type { PricelistEntry } from "./pr-pricelist-dialog";
 import PrInventoryRow from "./pr-inventory-row";
 import { PrItemSummary } from "./pr-item-summary";
-import { formatDate } from "@/lib/date-utils";
-
-// แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
-const PrPricelistDialog = lazy(() =>
-  import("./pr-pricelist-dialog").then((mod) => ({
-    default: mod.PrPricelistDialog,
-  })),
-);
 
 type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
 
@@ -42,7 +30,6 @@ interface PrItemExpandProps {
   readonly itemFields: ItemField[];
   readonly buCode?: string;
   readonly baseCurrencyCode?: string;
-  readonly role?: string;
 }
 
 export function PrItemExpand({
@@ -52,12 +39,9 @@ export function PrItemExpand({
   itemFields,
   buCode,
   baseCurrencyCode,
-  role,
 }: PrItemExpandProps) {
   const tfl = useTranslations("field");
-  const tc = useTranslations("common");
   const index = itemFields.findIndex((f) => f.id === item.id);
-  const [showPricelist, setShowPricelist] = useState(false);
 
   const i = Math.max(index, 0);
   const isFieldDisabled = isDisabled;
@@ -72,14 +56,7 @@ export function PrItemExpand({
     watchIsDiscAdj,
     watchDiscAmt,
     watchPricelistNo,
-    watchProductId,
-    watchProductName,
-    watchUnitId,
-    watchCurrencyId,
-    watchDeliveryDate,
-    watchRequestedUnitName,
     watchApprovedQty,
-    watchApprovedUnitName,
     watchCurrencyCode,
     watchCurrencyDecimals,
     watchExchangeRate,
@@ -97,14 +74,7 @@ export function PrItemExpand({
       `items.${i}.is_discount_adjustment`,
       `items.${i}.discount_amount`,
       `items.${i}.pricelist_no`,
-      `items.${i}.product_id`,
-      `items.${i}.product_name`,
-      `items.${i}.requested_unit_id`,
-      `items.${i}.currency_id`,
-      `items.${i}.delivery_date`,
-      `items.${i}.requested_unit_name`,
       `items.${i}.approved_qty`,
-      `items.${i}.approved_unit_name`,
       `items.${i}.currency_code`,
       `items.${i}.currency_decimal_places`,
       `items.${i}.exchange_rate`,
@@ -167,30 +137,8 @@ export function PrItemExpand({
   if (index === -1) return null;
 
   const pricelistNo = watchPricelistNo ?? null;
-  const productId = watchProductId ?? "";
-  const productName = watchProductName ?? "";
-  const unitId = watchUnitId ?? "";
-  const currencyId = watchCurrencyId ?? "";
-  const deliveryDate = watchDeliveryDate ?? "";
-  const requestedUnitName = watchRequestedUnitName ?? "";
-  const approvedUnitName = watchApprovedUnitName ?? "";
   const vendorName = watchVendorName ?? "";
   const taxProfileName = watchTaxProfileName ?? "";
-
-  const handlePricelistSelect = (entry: PricelistEntry) => {
-    form.setValue(`items.${index}.vendor_id`, entry.vendor_id);
-    form.setValue(`items.${index}.vendor_name`, entry.vendor_name);
-    form.setValue(`items.${index}.pricelist_price`, entry.price);
-    form.setValue(
-      `items.${index}.pricelist_detail_id`,
-      entry.pricelist_detail_id,
-    );
-    form.setValue(`items.${index}.pricelist_no`, entry.pricelist_no);
-    form.setValue(
-      `items.${index}.pricelist_type`,
-      PR_ITEM_PRICELIST_COMPARE_TYPE.MANUAL_SELECT,
-    );
-  };
 
   const itemErrors = form.formState.errors.items?.[index];
   const vendorError = itemErrors?.vendor_id?.message;
@@ -227,28 +175,12 @@ export function PrItemExpand({
       {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
           Inventory · Summary อยู่แถบล่าง */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[10rem_15rem_8rem_11rem_0.9fr_12rem_0.9fr_15rem_0.9fr]">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[10rem_15rem_4rem_8rem_11rem_0.9fr_12rem_0.9fr_15rem_0.9fr]">
           {/* Pricelist */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <div className="flex min-h-6 items-center justify-between gap-2">
-              <FieldLabel className="text-muted-foreground text-xs tracking-wide">
-                {tfl("pricelist")}
-              </FieldLabel>
-              {productId &&
-                unitId &&
-                currencyId &&
-                (role === STAGE_ROLE.PURCHASE ||
-                  role === STAGE_ROLE.APPROVE) && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPricelist(true)}
-                    className="text-primary flex items-center gap-1 text-[0.625rem] font-semibold tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
-                  >
-                    <Scale className="size-3" />
-                    {tc("compare")}
-                  </button>
-                )}
-            </div>
+            <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
+              {tfl("pricelist")}
+            </FieldLabel>
             <p
               className={`flex items-center truncate text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
             >
@@ -300,17 +232,29 @@ export function PrItemExpand({
             )}
           </Field>
 
+          {/* Currency — สกุลเงินของรายการ */}
+          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+            <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
+              {tfl("currency")}
+            </FieldLabel>
+            <p
+              className={`flex items-center justify-end text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+            >
+              {currencyCode || "—"}
+            </p>
+          </Field>
+
           {/* Unit price */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel
               htmlFor={`items-${index}-pricelist-price`}
-              className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
+              className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide"
             >
               {tfl("unitPrice")}
             </FieldLabel>
             {isFieldDisabled ? (
-              <p className="flex min-h-6 items-center text-xs font-semibold tabular-nums">
-                {price ? formatCurrency(price) : "—"}
+              <p className="flex min-h-6 items-center justify-end text-xs font-semibold tabular-nums">
+                {formatCurrency(price)}
               </p>
             ) : (
               <InputAmount
@@ -342,13 +286,13 @@ export function PrItemExpand({
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel
               htmlFor={`items-${index}-exchange-rate`}
-              className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide"
+              className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide"
             >
               {tfl("exchangeRate")}
             </FieldLabel>
             {isFieldDisabled ? (
               <p
-                className={`flex items-center text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
+                className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
               >
                 {exchangeRate}
               </p>
@@ -384,8 +328,8 @@ export function PrItemExpand({
 
           {/* Subtotal — plaintext (คำนวณ ไม่แก้ไข) */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
-              {tfl("subtotal")}
+            <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
+              Sub.
             </FieldLabel>
             <p
               className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
@@ -396,7 +340,9 @@ export function PrItemExpand({
 
           {/* Discount */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <div className="flex min-h-6 items-center justify-between gap-2">
+            <div
+              className={`flex min-h-6 items-center gap-2 ${isFieldDisabled ? "justify-end" : "justify-between"}`}
+            >
               <FieldLabel className="text-muted-foreground text-xs tracking-wide">
                 {tfl("discount")}
               </FieldLabel>
@@ -404,7 +350,7 @@ export function PrItemExpand({
                 overrideToggle(`items.${index}.is_discount_adjustment`)}
             </div>
             {isFieldDisabled ? (
-              <p className="flex min-h-6 items-center gap-1.5 truncate text-xs font-medium">
+              <p className="flex min-h-6 items-center justify-end gap-1.5 truncate text-xs font-medium">
                 <span className="text-muted-foreground tabular-nums">
                   {discRate}%
                 </span>
@@ -476,7 +422,7 @@ export function PrItemExpand({
 
           {/* Net — plaintext */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
+            <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
               {tfl("net")}
             </FieldLabel>
             <p
@@ -488,7 +434,9 @@ export function PrItemExpand({
 
           {/* Tax */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <div className="flex min-h-6 items-center justify-between gap-2">
+            <div
+              className={`flex min-h-6 items-center gap-2 ${isFieldDisabled ? "justify-end" : "justify-between"}`}
+            >
               <div className="flex items-center gap-1.5">
                 <FieldLabel className="text-muted-foreground text-xs tracking-wide">
                   {tfl("tax")}
@@ -504,7 +452,7 @@ export function PrItemExpand({
                 overrideToggle(`items.${index}.is_tax_adjustment`)}
             </div>
             {isFieldDisabled ? (
-              <p className="flex min-h-6 items-center gap-1.5 truncate text-xs font-medium">
+              <p className="flex min-h-6 items-center justify-end gap-1.5 truncate text-xs font-medium">
                 {taxProfileName ? (
                   <>
                     <span className="truncate">{taxProfileName}</span>
@@ -576,23 +524,18 @@ export function PrItemExpand({
 
           {/* Total — plaintext (สกุลที่เลือก) */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
-            <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
+            <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
               {tfl("total")}
             </FieldLabel>
             <p
               className={`flex items-center justify-end text-xs font-semibold tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
             >
               {formatCurrency(totalPrice)}
-              {currencyCode && (
-                <span className="text-muted-foreground ml-1 text-[0.625rem] font-normal">
-                  {currencyCode}
-                </span>
-              )}
             </p>
           </Field>
 
           {/* Inventory — อยู่แถวเดียวกับ base summary (col 1-4 ของ grid) */}
-          <div className="lg:col-span-4 lg:col-start-1">
+          <div className="lg:col-span-2 lg:col-start-1">
             <PrInventoryRow
               control={form.control}
               index={index}
@@ -614,25 +557,6 @@ export function PrItemExpand({
           />
         </div>
       </div>
-
-      <Suspense fallback={null}>
-        <PrPricelistDialog
-          open={showPricelist}
-          onOpenChange={setShowPricelist}
-          productId={productId}
-          productName={productName}
-          unitId={unitId}
-          currencyId={currencyId}
-          atDate={formatDate(deliveryDate, "yyyy-MM-dd")}
-          requestedQty={qty}
-          requestedUnitName={requestedUnitName}
-          approvedQty={approvedQty}
-          approvedUnitName={approvedUnitName}
-          onSelect={handlePricelistSelect}
-          // เลือกราคาได้เฉพาะ edit mode + role purchase — view/role อื่นดูได้อย่างเดียว
-          readOnly={isFieldDisabled || role !== STAGE_ROLE.PURCHASE}
-        />
-      </Suspense>
     </div>
   );
 }

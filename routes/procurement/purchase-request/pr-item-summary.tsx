@@ -38,23 +38,20 @@ export function PrItemSummary({
 
   return (
     <>
-      {metrics.map((m, i) => {
-        const isTotal = i === metrics.length - 1;
-        return (
-          <div
-            key={m.k}
-            className={`text-muted-foreground flex items-center justify-end text-[0.6875rem] tabular-nums ${
-              i === 0 ? "lg:col-start-5" : ""
-            }`}
-          >
-            {formatCurrency(m.v * exchangeRate)}
-            {/* currency code โชว์ที่ Total ที่เดียว */}
-            {isTotal && baseCurrencyCode && (
-              <span className="ml-1 text-[0.625rem]">{baseCurrencyCode}</span>
-            )}
-          </div>
-        );
-      })}
+      {/* base currency code — คอลัมน์ Currency (col 3) แถวเดียวกับค่า base */}
+      <div className="text-muted-foreground flex items-center justify-end text-[0.6875rem] lg:col-start-3">
+        {baseCurrencyCode}
+      </div>
+      {metrics.map((m, i) => (
+        <div
+          key={m.k}
+          className={`text-muted-foreground flex items-center justify-end text-[0.6875rem] tabular-nums ${
+            i === 0 ? "lg:col-start-6" : ""
+          }`}
+        >
+          {formatCurrency(m.v * exchangeRate)}
+        </div>
+      ))}
     </>
   );
 }

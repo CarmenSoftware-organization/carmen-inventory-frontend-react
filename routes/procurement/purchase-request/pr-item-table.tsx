@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import type { PrFormValues } from "./pr-form-schema";
 import { PrItemExpand } from "./pr-item-expand";
+import { PrPricelistCompare } from "./pr-pricelist-compare";
 import { PrItemHistorySheet } from "./workflow/pr-item-history";
 import {
   SelectCell,
@@ -149,6 +150,16 @@ export function usePrItemTable({
         // คอลัมน์ select ถือ chevron ด้วย — expand content เริ่มที่ Location
         // (เว้น select + index) ไม่มีคอลัมน์ expand แยกแล้ว
         expandedColStart: 2,
+        // ปุ่ม compare pricelist วางใน gutter ซ้าย ตรงแถว Pricelist (แถวแรก)
+        expandedLeading: (row) => (
+          <PrPricelistCompare
+            control={form.control}
+            form={form}
+            index={row.index}
+            role={role}
+            isDisabled={isDisabled}
+          />
+        ),
         expandedContent: (item: ItemField) => (
           <PrItemExpand
             item={item}
@@ -157,7 +168,6 @@ export function usePrItemTable({
             itemFields={itemFields}
             buCode={buCode}
             baseCurrencyCode={baseCurrencyCode}
-            role={role}
           />
         ),
       },

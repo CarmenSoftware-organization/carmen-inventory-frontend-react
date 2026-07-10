@@ -1,6 +1,5 @@
-
 import { createContext, ReactNode, useContext, useMemo } from "react";
-import { RowData, Table } from "@tanstack/react-table";
+import { Row, RowData, Table } from "@tanstack/react-table";
 
 import { cn } from "@/lib/utils";
 
@@ -15,6 +14,9 @@ declare module "@tanstack/react-table" {
     /** column index ที่ให้ expanded content เริ่ม (วาง `<td colSpan>` เว้นซ้าย
      *  ให้ตรงขอบ column นั้นโดยอาศัยความกว้าง column จริงของ table-fixed) */
     expandedColStart?: number;
+    /** เนื้อหาใน gutter ซ้าย (colSpan ที่เว้นไว้) ของแถว expanded — top-aligned
+     *  ให้ตรงแถวแรกของ content เช่นปุ่ม compare pricelist */
+    expandedLeading?: (row: Row<TData>) => ReactNode;
     footerContent?: (row: TData) => ReactNode;
     footerColSpan?: number;
   }
@@ -252,7 +254,7 @@ function DataGridContainer({
       data-slot="data-grid"
       className={cn(
         "w-full overflow-auto",
-        border && "rounded-lg border border-border/60 bg-card",
+        border && "border-border/60 bg-card rounded-lg border",
         className,
       )}
     >

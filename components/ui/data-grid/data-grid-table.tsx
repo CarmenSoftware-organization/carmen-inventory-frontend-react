@@ -1,4 +1,3 @@
-
 import { CSSProperties, Fragment, ReactNode } from "react";
 import { useDataGrid } from "@/components/ui/data-grid/data-grid";
 import {
@@ -557,13 +556,23 @@ function DataGridTableBodyRowExpandded<TData>({ row }: { row: Row<TData> }) {
     Math.max(0, total - 1),
   );
 
+  const leading = expandedCol?.columnDef.meta?.expandedLeading?.(row);
+
   return (
     <tr
       className={cn(
         props.tableLayout?.rowBorder && "[&:not(:last-child)>td]:border-b",
       )}
     >
-      {start > 0 && <td colSpan={start} aria-hidden="true" />}
+      {start > 0 && (
+        <td
+          colSpan={start}
+          className="px-2 align-top"
+          aria-hidden={leading ? undefined : true}
+        >
+          {leading}
+        </td>
+      )}
       <td colSpan={total - start}>
         {expandedCol?.columnDef.meta?.expandedContent?.(row.original)}
       </td>
