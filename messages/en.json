@@ -133,9 +133,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "saved": "Business unit updated",
-    "saveError": "Failed to save changes",
-    "yes": "Yes",
-    "no": "No"
+    "saveError": "Failed to save changes"
   },
   "defaultSetting": {
     "pageDescription": "Operational default settings for the current business unit.",

@@ -142,7 +142,7 @@ export default function ConfigEmailComponent() {
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      {/* ── Header: title + actions (business-setting layout) ── */}
+      {/* ── Header: title + actions (company-profile layout) ── */}
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">{t("title")}</h1>

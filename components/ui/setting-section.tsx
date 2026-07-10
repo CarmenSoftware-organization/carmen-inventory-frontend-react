@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  * ซ้าย = ชื่อ section + คำอธิบายสั้น (+ count / action), ขวา = grid ของ field
  * มีเส้นคั่นด้านบนทุก section ยกเว้นอันแรก (คุมด้วย prop `first`)
  *
- * Shared primitive — ใช้ทั้ง business-setting, config-email, notification-template
+ * Shared primitive — ใช้ทั้ง company-profile, config-email, notification-template
  * และทุกฟอร์มใน vendor-management
  *
  * @param title - ชื่อ section

@@ -14,7 +14,7 @@ export {
 } from "../shared/admin-ui";
 
 /* ------------------------------------------------------------------ */
-/* AssignSection — 2-column "settings" row (mirrors business-setting)  */
+/* AssignSection — 2-column "settings" row (mirrors company-profile)  */
 /* left = title + description (+ count / filter action); right = body   */
 /* ------------------------------------------------------------------ */
 

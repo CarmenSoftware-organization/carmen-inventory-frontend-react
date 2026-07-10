@@ -53,7 +53,7 @@ import {
  * @returns React element ของหน้า company profile
  */
 
-export default function BusinessSettingComponent() {
+export default function CompanyProfileComponent() {
   const tm = useTranslations("modules");
   const t = useTranslations("companyProfile");
   const tv = useTranslations("validation");
