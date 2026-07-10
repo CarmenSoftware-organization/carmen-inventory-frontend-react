@@ -175,7 +175,7 @@ export function PrItemExpand({
       {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
           Inventory · Summary อยู่แถบล่าง */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[10rem_15rem_4rem_8rem_11rem_0.9fr_12rem_0.9fr_15rem_0.9fr]">
+        <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[5rem_19.5rem_3rem_minmax(4.5rem,1fr)_minmax(4rem,1fr)_minmax(5rem,1fr)_minmax(9rem,1.4fr)_minmax(5rem,1fr)_minmax(9rem,1.4fr)_minmax(5rem,1fr)]">
           {/* Pricelist */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
@@ -232,10 +232,10 @@ export function PrItemExpand({
             )}
           </Field>
 
-          {/* Currency — สกุลเงินของรายการ */}
-          <Field className={isFieldDisabled ? "gap-1" : undefined}>
+          {/* Currency — สกุลเงินของรายการ (เริ่ม col 3 = ตรง Req column) */}
+          <Field className={`lg:col-start-3 ${isFieldDisabled ? "gap-1" : ""}`}>
             <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
-              {tfl("currency")}
+              Cur.
             </FieldLabel>
             <p
               className={`flex items-center justify-end text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
@@ -250,7 +250,7 @@ export function PrItemExpand({
               htmlFor={`items-${index}-pricelist-price`}
               className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide"
             >
-              {tfl("unitPrice")}
+              U.Price
             </FieldLabel>
             {isFieldDisabled ? (
               <p className="flex min-h-6 items-center justify-end text-xs font-semibold tabular-nums">
@@ -288,7 +288,7 @@ export function PrItemExpand({
               htmlFor={`items-${index}-exchange-rate`}
               className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide"
             >
-              {tfl("exchangeRate")}
+              Ex. Rate
             </FieldLabel>
             {isFieldDisabled ? (
               <p
@@ -319,9 +319,6 @@ export function PrItemExpand({
                     );
                   }}
                 />
-                <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem] whitespace-nowrap">
-                  {baseCurrencyCode}
-                </span>
               </InputSuffixField>
             )}
           </Field>
@@ -504,7 +501,7 @@ export function PrItemExpand({
                       min={0}
                       disabled={!isTaxAdj}
                       aria-label={tfl("taxAmt")}
-                      className="disabled:bg-muted disabled:text-muted-foreground h-8 w-24 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
+                      className="disabled:bg-muted disabled:text-muted-foreground h-8 w-20 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
                       defaultValue={taxAmt}
                       {...form.register(`items.${index}.tax_amount`)}
                       onChange={(e) => {
@@ -534,7 +531,7 @@ export function PrItemExpand({
             </p>
           </Field>
 
-          {/* Inventory — อยู่แถวเดียวกับ base summary (col 1-4 ของ grid) */}
+          {/* Inventory — อยู่แถวเดียวกับ base summary (col 1-2 = Pricelist + Vendor(fr)) */}
           <div className="lg:col-span-2 lg:col-start-1">
             <PrInventoryRow
               control={form.control}
