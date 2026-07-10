@@ -710,7 +710,7 @@ export default function BusinessSettingComponent() {
           ))}
 
           {/* Configuration — config จาก backend ที่ไม่อยู่ใน registry section */}
-          <SettingSection
+          {/* <SettingSection
             title={t("sections.config")}
             description={t("sections.configDesc")}
           >
@@ -731,7 +731,7 @@ export default function BusinessSettingComponent() {
                 />
               ))
             )}
-          </SettingSection>
+          </SettingSection> */}
         </form>
       )}
 
