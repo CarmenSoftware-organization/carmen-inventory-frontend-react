@@ -44,19 +44,19 @@ Rename the existing folder and split out the config registry:
 
 ```
 routes/system-admin/
-  company-profile/                       ← renamed from business-setting/
-    company-profile.route.tsx            ← renamed
-    company-profile-component.tsx        ← renamed; remove the config-sections block
-    company-profile-ui.tsx               ← renamed; keep ALL field components incl. ConfigField
-    company-profile-options.ts           ← renamed
-    company-profile-form-schema.ts       ← renamed; helpers unchanged
-    company-profile-ui.test.tsx          ← renamed; drop config-section assertions
-    company-profile-form-schema.test.ts  ← renamed
-  default-setting/                        ← new
+  company-profile/                        ← renamed from business-setting/
+    company-profile.route.tsx             ← renamed
+    company-profile-component.tsx         ← renamed; remove the config-sections block
+    company-profile-ui.tsx                ← renamed; keep ALL field components incl. ConfigField
+    company-profile-options.ts            ← renamed
+    company-profile-form-schema.ts        ← renamed; helpers unchanged
+    company-profile-config-registry.ts    ← renamed; STAYS here (see below)
+    company-profile-ui.test.tsx           ← renamed
+    company-profile-form-schema.test.ts   ← renamed
+    company-profile-config-registry.test.ts ← renamed
+  default-setting/                         ← new
     default-setting.route.tsx
     default-setting-component.tsx
-    default-setting-config-registry.ts       ← moved from business-setting-config-registry.ts
-    default-setting-config-registry.test.ts  ← moved & renamed
 ```
 
 **Dependency direction:** `default-setting-component.tsx` imports:
@@ -64,12 +64,19 @@ routes/system-admin/
 - `createBusinessSettingSchema`, `toFormValues`, `buildPatch`, `mergeSeededConfig`,
   `normalizeConfig`, `BusinessSettingFormValues` from
   `../company-profile/company-profile-form-schema`
+- `groupConfigForRender`, `resolveConfigOptions` from
+  `../company-profile/company-profile-config-registry`
 - `useBusinessUnit`, `useUpdateBusinessUnit` from `@/hooks/use-business-unit` (global)
-- `groupConfigForRender`, `resolveConfigOptions`, registry types from its own
-  `./default-setting-config-registry`
 
-The config registry moves into `default-setting/` because, after the split,
-`company-profile` no longer renders config (so it no longer needs the registry).
+**Why the registry stays in `company-profile/`:** `company-profile-form-schema.ts`
+imports `SEEDED_ITEMS` from the registry (to seed config defaults in `toFormValues`
+/`mergeSeededConfig`). If the registry moved to `default-setting/`, then
+`company-profile` would import from `default-setting` **and** vice-versa — a
+bidirectional cross-folder coupling. Keeping the registry in `company-profile`
+makes `company-profile` the self-contained "BU-settings domain" and
+`default-setting` a thin consumer with a strictly one-directional dependency
+(`default-setting → company-profile`).
+
 `company-profile-form-schema.ts`'s `mergeSeededConfig`/`normalizeConfig` continue
 to round-trip the `config` array in the shared form values harmlessly (the
 company-profile page keeps `config` in its form state but never renders or dirties
@@ -147,22 +154,28 @@ Under the `system-admin` section children:
 
 - `.claude/skills/add-business-setting-config/SKILL.md`: update the file table and
   page references to point at
-  `routes/system-admin/default-setting/default-setting-config-registry.ts`, the
+  `routes/system-admin/company-profile/company-profile-config-registry.ts`, the
   `defaultSetting.sections.*` / `defaultSetting.config.*` i18n keys, and the page
-  `/system-admin/default-setting`. (Skill folder name kept as-is.)
-- Memory `business-setting-config-registry.md`: update the registry location and
+  where config now renders (`/system-admin/default-setting`). (Skill folder name
+  kept as-is.)
+- Memory `business-setting-config-registry.md`: update the registry file path and
   the page it renders on.
 
 ### Tests
 
-- Move `business-setting-config-registry.test.ts` →
-  `default-setting-config-registry.test.ts`, update the import path.
-- `company-profile-ui.test.tsx`: drop any assertions about PR/SI/PO config
-  sections (they no longer render on that page).
-- Add a smoke test for `default-setting-component`: renders the PR/SI/PO config
-  fields and, on save, patches **only** the `config` field (assert the mutation
-  payload has no identity/format keys).
-- `bunx tsc --noEmit && bun run lint && bun test:run` must be clean.
+- Rename the three existing test files with their subjects
+  (`company-profile-config-registry.test.ts`, `company-profile-form-schema.test.ts`,
+  `company-profile-ui.test.tsx`) and update their relative import paths. Their
+  assertions are unchanged — `ConfigField` and the registry/schema helpers keep
+  their behavior; only their file locations change.
+- No new page-render test for `default-setting-component`: it is a verbatim copy
+  of already-tested rendering (`ConfigField`) over already-tested pure helpers
+  (`groupConfigForRender`, `mergeSeededConfig`, `buildPatch`). The
+  "only `config` is patched" guarantee is already covered by
+  `buildPatch — seeded config` in the form-schema test. This matches the existing
+  convention (the current business-setting page has no component render test).
+- `bunx tsc --noEmit && bun run lint && bun test:run` must stay clean
+  (baseline: 403 tests passing).
 
 ## Alternatives considered
 
