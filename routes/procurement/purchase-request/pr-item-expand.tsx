@@ -227,7 +227,7 @@ export function PrItemExpand({
       {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
           Inventory · Summary อยู่แถบล่าง */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[12.5rem_6rem_8rem_1fr_0.9fr_12rem_0.9fr_19rem]">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 lg:grid-cols-[15rem_6rem_8rem_11rem_0.9fr_12rem_0.9fr_15rem]">
           {/* Vendor */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel
@@ -560,7 +560,7 @@ export function PrItemExpand({
                       min={0}
                       disabled={!isTaxAdj}
                       aria-label={tfl("taxAmt")}
-                      className="disabled:bg-muted disabled:text-muted-foreground h-8 w-28 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
+                      className="disabled:bg-muted disabled:text-muted-foreground h-8 w-24 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
                       defaultValue={taxAmt}
                       {...form.register(`items.${index}.tax_amount`)}
                       onChange={(e) => {

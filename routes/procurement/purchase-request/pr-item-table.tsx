@@ -107,13 +107,37 @@ export function usePrItemTable({
           />
         );
       },
+      // checkbox ด้านบน + expand chevron ด้านล่าง ในคอลัมน์เดียว
+      // (view mode: SelectCell ซ่อนตัวเอง เหลือแค่ chevron)
       cell: ({ row }) => (
-        <SelectCell
-          control={form.control}
-          index={row.index}
-          row={row}
-          isHidden={isDisabled}
-        />
+        // 1 element (view: chevron เดียว) → center · 2 elements (edit:
+        // checkbox+chevron) → ดันลงล่าง (justify-end + chevron only:my-auto)
+        <div className="absolute inset-0 flex flex-col items-center justify-end gap-0.5 py-1">
+          <SelectCell
+            control={form.control}
+            index={row.index}
+            row={row}
+            isHidden={isDisabled}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="only:my-auto"
+            aria-label={
+              row.getIsExpanded()
+                ? tc("aria.collapseRow")
+                : tc("aria.expandRow")
+            }
+            onClick={() => row.toggleExpanded()}
+          >
+            {row.getIsExpanded() ? (
+              <ChevronDown className="size-3.5" />
+            ) : (
+              <ChevronRight className="size-3.5" />
+            )}
+          </Button>
+        </div>
       ),
       enableSorting: false,
       enableHiding: false,
@@ -121,39 +145,10 @@ export function usePrItemTable({
       size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
-        cellClassName: "text-center",
-      },
-    };
-
-    const expandColumn: ColumnDef<ItemField> = {
-      id: "expand",
-      header: "",
-      cell: ({ row }) => (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={
-            row.getIsExpanded() ? tc("aria.collapseRow") : tc("aria.expandRow")
-          }
-          onClick={() => row.toggleExpanded()}
-        >
-          {row.getIsExpanded() ? (
-            <ChevronDown className="size-3.5" />
-          ) : (
-            <ChevronRight className="size-3.5" />
-          )}
-        </Button>
-      ),
-      enableSorting: false,
-      enableResizing: false,
-      size: NARROW_COL_SIZE,
-      meta: {
-        headerClassName: "text-center",
-        cellClassName: "text-center",
-        // เริ่ม content ของ expand ที่คอลัมน์ Location — เว้นคอลัมน์ซ้าย
-        // (expand + #, และ select ในโหมด edit) ด้วย colSpan ว่าง
-        expandedColStart: isDisabled ? 2 : 3,
+        cellClassName: "relative text-center",
+        // คอลัมน์ select ถือ chevron ด้วย — expand content เริ่มที่ Location
+        // (เว้น select + index) ไม่มีคอลัมน์ expand แยกแล้ว
+        expandedColStart: 2,
         expandedContent: (item: ItemField) => (
           <PrItemExpand
             item={item}
@@ -384,8 +379,9 @@ export function usePrItemTable({
         : dataColumns;
 
     const baseCols = [
-      ...(isDraft || isCreateRole || isDisabled ? [] : [prSelectColumn]),
-      ...(isDraft || isCreateRole ? [] : [expandColumn]),
+      // select column ถือทั้ง checkbox + expand chevron — แสดงเมื่อไม่ใช่
+      // draft/create (view mode ก็แสดง แต่ SelectCell ซ่อน checkbox เหลือ chevron)
+      ...(isDraft || isCreateRole ? [] : [prSelectColumn]),
       indexColumn,
       ...visibleDataColumns,
       ...(isDisabled && !hasAnyHistory ? [] : [actionColumn]),
