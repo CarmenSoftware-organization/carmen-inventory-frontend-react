@@ -382,22 +382,6 @@ export default function CompanyProfileComponent() {
               description={t("fields.hotelCountryDesc")}
               displayValue={data.hotel_country}
             />
-            <EditableField
-              editing={editing}
-              form={form}
-              name="hotel_latitude"
-              label={t("fields.hotelLatitude")}
-              description={t("fields.hotelLatitudeDesc")}
-              displayValue={data.hotel_latitude}
-            />
-            <EditableField
-              editing={editing}
-              form={form}
-              name="hotel_longitude"
-              label={t("fields.hotelLongitude")}
-              description={t("fields.hotelLongitudeDesc")}
-              displayValue={data.hotel_longitude}
-            />
           </SettingSection>
 
           {/* Company */}
@@ -511,22 +495,6 @@ export default function CompanyProfileComponent() {
               label={t("fields.companyCountry")}
               description={t("fields.companyCountryDesc")}
               displayValue={data.company_country}
-            />
-            <EditableField
-              editing={editing}
-              form={form}
-              name="company_latitude"
-              label={t("fields.companyLatitude")}
-              description={t("fields.companyLatitudeDesc")}
-              displayValue={data.company_latitude}
-            />
-            <EditableField
-              editing={editing}
-              form={form}
-              name="company_longitude"
-              label={t("fields.companyLongitude")}
-              description={t("fields.companyLongitudeDesc")}
-              displayValue={data.company_longitude}
             />
           </SettingSection>
 
