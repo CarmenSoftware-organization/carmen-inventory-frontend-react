@@ -62,103 +62,105 @@ export const LocationCell = memo(function LocationCell({
   if (isDisabled || isRowLocked) {
     return (
       <div className="flex flex-col gap-1">
-        <p className="truncate text-xs font-semibold">
-          {locationName || <span className="text-muted-foreground">—</span>}
-        </p>
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground truncate text-[0.625rem]">
-            {locationCode}
-          </span>
+        <div className="flex min-w-0 items-center justify-between gap-1.5">
+          <p className="min-w-0 truncate text-xs font-semibold">
+            {locationName || <span className="text-muted-foreground">—</span>}
+          </p>
           {statusSlot}
         </div>
+        <span className="text-muted-foreground truncate text-[0.625rem]">
+          {locationCode}
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <Controller
-        control={control}
-        name={`items.${index}.location_id`}
-        render={({ field }) => (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <LookupUserLocation
-                  value={field.value ?? ""}
-                  disableTooltip
-                  error={
-                    form.formState.errors.items?.[index]?.location_id?.message
-                  }
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                  }}
-                  onItemChange={(location) => {
-                    form.setValue(
-                      `items.${index}.location_code`,
-                      location.code,
-                    );
-                    form.setValue(
-                      `items.${index}.location_name`,
-                      location.name,
-                    );
-                    form.setValue(
-                      `items.${index}.location_type`,
-                      location.location_type,
-                    );
-                    if (location.delivery_point) {
-                      form.setValue(
-                        `items.${index}.delivery_point_id`,
-                        location.delivery_point.id,
-                      );
-                      form.setValue(
-                        `items.${index}.delivery_point_name`,
-                        location.delivery_point.name,
-                      );
+    <div className="flex items-center justify-between gap-1.5">
+      <div className="min-w-0 flex-1">
+        <Controller
+          control={control}
+          name={`items.${index}.location_id`}
+          render={({ field }) => (
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <LookupUserLocation
+                    value={field.value ?? ""}
+                    disableTooltip
+                    error={
+                      form.formState.errors.items?.[index]?.location_id?.message
                     }
-                  }}
-                  className="h-7 w-full text-xs"
-                  popoverWidth="w-[26.25rem]"
-                  defaultLabel={locationName}
-                />
-              </TooltipTrigger>
-              {hasLocation && (
-                <TooltipContent
-                  side="top"
-                  className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
-                >
-                  <div className="space-y-1">
-                    <p className="text-foreground/60 text-[0.6875rem] font-semibold">
-                      {locationCode}
-                    </p>
-                    <p className="text-xs leading-snug font-semibold">
-                      {locationName}
-                    </p>
-                  </div>
-                  {(locationType || deliveryPointName) && (
-                    <div className="mt-2 flex items-center gap-2 border-t pt-2 text-[0.6875rem]">
-                      {locationType && (
-                        <Badge
-                          size="xs"
-                          variant={
-                            LOCATION_TYPE_VARIANT[locationType] ?? "secondary"
-                          }
-                          className="h-4 px-1.5 text-[0.625rem]"
-                        >
-                          {(() => {
-                            const k = inventoryTypeLabelKey(locationType);
-                            return k ? tl(k) : locationType.toUpperCase();
-                          })()}
-                        </Badge>
-                      )}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                    }}
+                    onItemChange={(location) => {
+                      form.setValue(
+                        `items.${index}.location_code`,
+                        location.code,
+                      );
+                      form.setValue(
+                        `items.${index}.location_name`,
+                        location.name,
+                      );
+                      form.setValue(
+                        `items.${index}.location_type`,
+                        location.location_type,
+                      );
+                      if (location.delivery_point) {
+                        form.setValue(
+                          `items.${index}.delivery_point_id`,
+                          location.delivery_point.id,
+                        );
+                        form.setValue(
+                          `items.${index}.delivery_point_name`,
+                          location.delivery_point.name,
+                        );
+                      }
+                    }}
+                    className="h-7 w-full text-xs"
+                    popoverWidth="w-[26.25rem]"
+                    defaultLabel={locationName}
+                  />
+                </TooltipTrigger>
+                {hasLocation && (
+                  <TooltipContent
+                    side="top"
+                    className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-foreground/60 text-[0.6875rem] font-semibold">
+                        {locationCode}
+                      </p>
+                      <p className="text-xs leading-snug font-semibold">
+                        {locationName}
+                      </p>
                     </div>
-                  )}
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
-        )}
-      />
+                    {(locationType || deliveryPointName) && (
+                      <div className="mt-2 flex items-center gap-2 border-t pt-2 text-[0.6875rem]">
+                        {locationType && (
+                          <Badge
+                            size="xs"
+                            variant={
+                              LOCATION_TYPE_VARIANT[locationType] ?? "secondary"
+                            }
+                            className="h-4 px-1.5 text-[0.625rem]"
+                          >
+                            {(() => {
+                              const k = inventoryTypeLabelKey(locationType);
+                              return k ? tl(k) : locationType.toUpperCase();
+                            })()}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        />
+      </div>
       {statusSlot}
     </div>
   );

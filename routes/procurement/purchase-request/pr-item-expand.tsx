@@ -332,7 +332,10 @@ export function PrItemExpand({
                   inputMode="decimal"
                   min={0}
                   step="0.0001"
-                  className="h-8 text-right text-xs"
+                  // base/default currency → disabled (rate = 1 อยู่แล้ว, ไม่มีผล);
+                  // แก้ได้เฉพาะสกุลต่างประเทศ
+                  disabled={!isForeignCurrency}
+                  className="disabled:bg-muted disabled:text-muted-foreground h-8 text-right text-xs disabled:cursor-default disabled:opacity-100"
                   defaultValue={exchangeRate}
                   {...form.register(`items.${index}.exchange_rate`)}
                   onChange={(e) => {
