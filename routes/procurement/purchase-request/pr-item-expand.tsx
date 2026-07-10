@@ -591,6 +591,15 @@ export function PrItemExpand({
             </p>
           </Field>
 
+          {/* Inventory — อยู่แถวเดียวกับ base summary (col 1-4 ของ grid) */}
+          <div className="lg:col-span-4 lg:col-start-1">
+            <PrInventoryRow
+              control={form.control}
+              index={index}
+              buCode={buCode ?? ""}
+            />
+          </div>
+
           {/* แถว base currency (summary) — เรียงใต้ Subtotal·Discount·Net·Tax·
               Total ของ grid นี้ (เฉพาะสกุลต่างประเทศ) */}
           <PrItemSummary
@@ -604,12 +613,6 @@ export function PrItemExpand({
             baseCurrencyCode={baseCurrencyCode}
           />
         </div>
-
-        <PrInventoryRow
-          control={form.control}
-          index={index}
-          buCode={buCode ?? ""}
-        />
       </div>
 
       <Suspense fallback={null}>
