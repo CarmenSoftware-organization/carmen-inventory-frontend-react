@@ -25,7 +25,6 @@ import {
   EditableField,
   SelectField,
   NumberFormatField,
-  ConfigField,
 } from "./company-profile-ui";
 import {
   TIMEZONES,
@@ -40,24 +39,18 @@ import {
   createBusinessSettingSchema,
   toFormValues,
   buildPatch,
-  normalizeConfig,
-  mergeSeededConfig,
   type BusinessSettingFormValues,
 } from "./company-profile-form-schema";
-import {
-  groupConfigForRender,
-  resolveConfigOptions,
-} from "./company-profile-config-registry";
 
 /**
- * หน้า Business Setting (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
+ * หน้า Company Profile (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
  * (จาก `useProfile().defaultBu`) จัดเป็น section ตาม layout settings
  *
  * โหมด view = read-only, กด Edit → field กลายเป็น input (toggle ในหน้าเดียว)
  * Save ส่งเฉพาะ field ที่เปลี่ยน (`PATCH` partial). ดึงข้อมูลจาก
  * `GET api/business-units` — แสดงทุก field ยกเว้น `users[]`
  *
- * @returns React element ของหน้า business setting
+ * @returns React element ของหน้า company profile
  */
 
 export default function BusinessSettingComponent() {
@@ -83,9 +76,6 @@ export default function BusinessSettingComponent() {
       ? `${f.locales} · ${t("minDigits", { n: f.minimumIntegerDigits })}`
       : null;
 
-  const configGroups = data
-    ? groupConfigForRender(mergeSeededConfig(normalizeConfig(data.config)))
-    : { sections: [], other: [] };
   const isBusy = !isProfileReady || isLoading;
 
   // มีการแก้ค้าง (dirty) ระหว่างโหมด edit → กัน discard โดยไม่ได้ตั้งใจ
@@ -676,62 +666,6 @@ export default function BusinessSettingComponent() {
               digitsPlaceholder={t("fields.minimumIntegerDigits")}
             />
           </SettingSection>
-
-          {/* Registry sections (เช่น PR) — seeded config จัดกลุ่มตาม section */}
-          {configGroups.sections.map((section) => (
-            <SettingSection
-              key={section.id}
-              title={t(section.titleKey)}
-              description={t(section.descKey)}
-            >
-              {section.entries.map((entry) => {
-                const options = entry.options
-                  ? resolveConfigOptions(
-                      entry.options,
-                      data.calculation_method,
-                      entry.item.value,
-                    ).map((o) => ({ value: o.value, label: t(o.labelKey) }))
-                  : undefined;
-                return (
-                  <ConfigField
-                    key={entry.item.key}
-                    editing={editing}
-                    form={form}
-                    index={entry.index}
-                    item={entry.item}
-                    label={t(entry.labelKey)}
-                    yesLabel={t("yes")}
-                    noLabel={t("no")}
-                    options={options}
-                  />
-                );
-              })}
-            </SettingSection>
-          ))}
-
-          {/* Configuration — config จาก backend ที่ไม่อยู่ใน registry section */}
-          {/* <SettingSection
-            title={t("sections.config")}
-            description={t("sections.configDesc")}
-          >
-            {configGroups.other.length === 0 ? (
-              <p className="text-muted-foreground/70 text-sm sm:col-span-2">
-                {t("configEmpty")}
-              </p>
-            ) : (
-              configGroups.other.map((entry) => (
-                <ConfigField
-                  key={entry.item.key}
-                  editing={editing}
-                  form={form}
-                  index={entry.index}
-                  item={entry.item}
-                  yesLabel={t("yes")}
-                  noLabel={t("no")}
-                />
-              ))
-            )}
-          </SettingSection> */}
         </form>
       )}
 

@@ -429,6 +429,12 @@ export const moduleList: ModuleDto[] = [
         permission: PERMISSIONS.system_configuration.view,
       },
       {
+        name: "defaultSetting",
+        path: "/system-admin/default-setting",
+        icon: SlidersHorizontal,
+        permission: PERMISSIONS.system_configuration.view,
+      },
+      {
         name: "period",
         path: "/system-admin/period",
         icon: Calendar,

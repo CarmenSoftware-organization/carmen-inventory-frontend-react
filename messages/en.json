@@ -16,15 +16,7 @@
       "dateTime": "Date & Time",
       "dateTimeDesc": "Timezone and the date/time formats used throughout the app.",
       "numberFormats": "Number Formats",
-      "numberFormatsDesc": "Locale and precision for amounts, quantities and lists.",
-      "config": "Configuration",
-      "configDesc": "Feature switches and settings for this business unit.",
-      "pr": "PR",
-      "prDesc": "Purchase Request settings for this business unit.",
-      "si": "SI",
-      "siDesc": "Stock In settings for this business unit.",
-      "po": "PO",
-      "poDesc": "Purchase Order settings for this business unit."
+      "numberFormatsDesc": "Locale and precision for amounts, quantities and lists."
     },
     "fields": {
       "code": "Code",
@@ -142,9 +134,27 @@
     "cancel": "Cancel",
     "saved": "Business unit updated",
     "saveError": "Failed to save changes",
-    "configEmpty": "No configuration settings.",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "defaultSetting": {
+    "pageDescription": "Operational default settings for the current business unit.",
+    "loadError": "Failed to load business unit settings.",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "Business unit updated",
+    "saveError": "Failed to save changes",
     "yes": "Yes",
     "no": "No",
+    "sections": {
+      "pr": "PR",
+      "prDesc": "Purchase Request settings for this business unit.",
+      "si": "SI",
+      "siDesc": "Stock In settings for this business unit.",
+      "po": "PO",
+      "poDesc": "Purchase Order settings for this business unit."
+    },
     "config": {
       "prAllowDuplicateProduct": "Allow selecting duplicate products",
       "siCostFrom": "Default price for added items",
@@ -3644,6 +3654,7 @@
     "queryDataset": "Query Dataset",
     "dashboardDataset": "Dashboard Dataset",
     "companyProfile": "Company Profile",
+    "defaultSetting": "Default Setting",
     "vendorManagement": "Vendor Management",
     "priceList": "Price List",
     "priceListTemplate": "Price List Template",
