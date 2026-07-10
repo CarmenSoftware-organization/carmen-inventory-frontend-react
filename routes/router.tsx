@@ -202,7 +202,8 @@ export const router = createBrowserRouter([
               { path: "running-code", lazy: () => import("./system-admin/running-code/running-code.route") },
               { path: "config-email", lazy: () => import("./system-admin/config-email/config-email.route") },
               { path: "dashboard-dataset", lazy: () => import("./system-admin/dashboard-dataset/dashboard-dataset.route") },
-              { path: "business-setting", lazy: () => import("./system-admin/business-setting/business-setting.route") },
+              { path: "company-profile", lazy: () => import("./system-admin/company-profile/company-profile.route") },
+              { path: "business-setting", element: <Navigate to="/system-admin/company-profile" replace /> },
             ],
           },
           {

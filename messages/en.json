@@ -1,5 +1,5 @@
 {
-  "businessSetting": {
+  "companyProfile": {
     "pageDescription": "General information and configuration for the current business unit.",
     "loadError": "Failed to load business unit settings.",
     "minDigits": "min {n} digits",
@@ -3643,7 +3643,7 @@
     "notificationTemplate": "Notification Template",
     "queryDataset": "Query Dataset",
     "dashboardDataset": "Dashboard Dataset",
-    "businessSetting": "Business Setting",
+    "companyProfile": "Company Profile",
     "vendorManagement": "Vendor Management",
     "priceList": "Price List",
     "priceListTemplate": "Price List Template",

@@ -5,7 +5,7 @@ import {
   buildPatch,
   mergeSeededConfig,
   normalizeConfig,
-} from "./business-setting-form-schema";
+} from "./company-profile-form-schema";
 
 /** minimal detail สำหรับ test — ค่าที่ไม่เกี่ยวใส่ null/ค่าว่างพอผ่าน type */
 const baseData: BusinessUnitDetail = {

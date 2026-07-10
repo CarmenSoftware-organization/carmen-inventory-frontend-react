@@ -26,7 +26,7 @@ import {
   SelectField,
   NumberFormatField,
   ConfigField,
-} from "./business-setting-ui";
+} from "./company-profile-ui";
 import {
   TIMEZONES,
   DATE_FORMATS,
@@ -35,7 +35,7 @@ import {
   SHORT_TIME_FORMATS,
   LONG_TIME_FORMATS,
   LOCALES,
-} from "./business-setting-options";
+} from "./company-profile-options";
 import {
   createBusinessSettingSchema,
   toFormValues,
@@ -43,11 +43,11 @@ import {
   normalizeConfig,
   mergeSeededConfig,
   type BusinessSettingFormValues,
-} from "./business-setting-form-schema";
+} from "./company-profile-form-schema";
 import {
   groupConfigForRender,
   resolveConfigOptions,
-} from "./business-setting-config-registry";
+} from "./company-profile-config-registry";
 
 /**
  * หน้า Business Setting (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
@@ -62,9 +62,9 @@ import {
 
 export default function BusinessSettingComponent() {
   const tm = useTranslations("modules");
-  const t = useTranslations("businessSetting");
+  const t = useTranslations("companyProfile");
   const tv = useTranslations("validation");
-  const tf = useTranslations("businessSetting.fields");
+  const tf = useTranslations("companyProfile.fields");
   const { defaultBu, isProfileReady } = useProfile();
   const buId = defaultBu?.id;
   const { data, isLoading, isError, refetch } = useBusinessUnit(buId);
@@ -134,7 +134,7 @@ export default function BusinessSettingComponent() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">
-            {tm("businessSetting")}
+            {tm("companyProfile")}
           </h1>
           <p className="text-muted-foreground mt-0.5 text-sm">
             {t("pageDescription")}
@@ -759,7 +759,7 @@ function BrandImage({
   readonly url: string | undefined;
   readonly shape: "landscape" | "round";
 }) {
-  const t = useTranslations("businessSetting");
+  const t = useTranslations("companyProfile");
   const box =
     shape === "landscape" ? "h-16 w-32 rounded-md" : "size-16 rounded-full";
   const fit = shape === "landscape" ? "object-contain" : "object-cover";

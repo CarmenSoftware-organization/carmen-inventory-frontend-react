@@ -1,5 +1,5 @@
 {
-  "businessSetting": {
+  "companyProfile": {
     "pageDescription": "ข้อมูลทั่วไปและการตั้งค่าของหน่วยธุรกิจปัจจุบัน",
     "loadError": "โหลดการตั้งค่าหน่วยธุรกิจไม่สำเร็จ",
     "minDigits": "อย่างน้อย {n} หลัก",
@@ -3632,7 +3632,7 @@
     "notificationTemplate": "เทมเพลตการแจ้งเตือน",
     "queryDataset": "ชุดข้อมูล SQL",
     "dashboardDataset": "ชุดข้อมูลแดชบอร์ด",
-    "businessSetting": "ตั้งค่าธุรกิจ",
+    "companyProfile": "ข้อมูลบริษัท",
     "vendorManagement": "จัดการผู้ขาย",
     "priceList": "รายการราคา",
     "priceListTemplate": "แม่แบบรายการราคา",
