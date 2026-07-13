@@ -12,6 +12,7 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { isoToDateInput } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
+import { computeLineAmounts } from "@/lib/line-pricing";
 
 /**
  * สร้าง zod schema สำหรับ detail แต่ละรายการของใบขอซื้อ
@@ -458,16 +459,8 @@ export interface PrItemAmountInput {
  * เพื่อให้สูตรเดียวกัน ไม่ drift
  */
 export function computePrItemAmounts(input: PrItemAmountInput) {
-  const subtotal = round2(input.price * input.qty);
-  const discountAmount = input.isDiscAdj
-    ? input.discAmt
-    : round2((subtotal * input.discRate) / 100);
-  const netAmount = round2(subtotal - discountAmount);
-  const taxAmount = input.isTaxAdj
-    ? input.taxAmt
-    : round2((netAmount * input.taxRate) / 100);
-  const totalPrice = round2(netAmount + taxAmount);
-  return { subtotal, discountAmount, netAmount, taxAmount, totalPrice };
+  // สูตรกลาง (shared กับ PO) — ดู lib/line-pricing.ts
+  return computeLineAmounts(input);
 }
 
 /**

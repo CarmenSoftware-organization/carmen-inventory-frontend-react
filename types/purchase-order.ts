@@ -26,6 +26,18 @@ export interface PoDetailLocation {
   order_base_qty: number;
   received_qty: number;
   foc_qty: number;
+  // per-location pricing (optional — POs เก่าอาจไม่มี, load แล้ว fallback ค่า item)
+  discount_rate?: number;
+  discount_amount?: number;
+  is_discount_adjustment?: boolean;
+  tax_profile_id?: string | null;
+  tax_profile_name?: string;
+  tax_rate?: number;
+  tax_amount?: number;
+  is_tax_adjustment?: boolean;
+  sub_total_price?: number;
+  net_amount?: number;
+  total_price?: number;
 }
 
 export interface PurchaseOrderDetail extends ItemMoneyFields {
@@ -101,6 +113,17 @@ export interface PoDetailPayloadLocation {
   location_id: string;
   order_qty: number;
   order_base_qty: number;
+  discount_rate: number;
+  discount_amount: number;
+  is_discount_adjustment: boolean;
+  tax_profile_id: string | null;
+  tax_profile_name: string;
+  tax_rate: number;
+  tax_amount: number;
+  is_tax_adjustment: boolean;
+  sub_total_price: number;
+  net_amount: number;
+  total_price: number;
 }
 
 export interface CreatePoDto {

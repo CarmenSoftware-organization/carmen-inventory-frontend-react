@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { round2 } from "@/lib/currency-utils";
+import { computeLineAmounts } from "@/lib/line-pricing";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type {
   PurchaseOrder,
@@ -13,6 +15,15 @@ const createLocationSchema = (tv: TranslationFn, tf: TranslationFn) =>
       .number()
       .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
     received_qty: z.coerce.number().min(0),
+    // per-location Disc%/Tax (input) — pricing คำนวณต่อ location + override
+    discount_rate: z.coerce.number().optional(),
+    discount_amount: z.coerce.number().optional(),
+    is_discount_adjustment: z.boolean().optional(),
+    tax_profile_id: z.string().nullable().optional(),
+    tax_profile_name: z.string().optional(),
+    tax_rate: z.coerce.number().optional(),
+    tax_amount: z.coerce.number().optional(),
+    is_tax_adjustment: z.boolean().optional(),
   });
 
 const prDetailSchema = z.object({
@@ -49,10 +60,8 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     sub_total_price: z.coerce.number(),
     net_amount: z.coerce.number(),
     total_price: z.coerce.number(),
-    tax_profile_id: z
-      .string()
-      .nullable()
-      .refine((v) => !!v, tv("required", { field: tf("tax") })),
+    // item-level tax เป็น derived จาก location (mirror location แรก) — ไม่ required แล้ว
+    tax_profile_id: z.string().nullable().optional(),
     tax_profile_name: z.string().optional(),
     tax_rate: z.coerce.number().optional(),
     tax_amount: z.coerce.number().optional(),
@@ -135,10 +144,32 @@ export const PO_ITEM: PoFormValues["items"][number] = {
   // item ใหม่เริ่มด้วย location ว่าง 1 แถวเสมอ — qty ของ item มาจาก locations
   // ทุก item จึงต้องมีอย่างน้อย 1 location; ทำให้ user เห็นแถวให้กรอกทันที และ
   // ตอน save แถวนี้ validate แดงเอง (order_qty 0 < min 1) ไม่ใช่แค่ border แดงลอย ๆ
-  locations: [{ id: "", order_qty: 0, received_qty: 0 }] as {
+  locations: [
+    {
+      id: "",
+      order_qty: 0,
+      received_qty: 0,
+      discount_rate: 0,
+      discount_amount: 0,
+      is_discount_adjustment: false,
+      tax_profile_id: null,
+      tax_profile_name: "",
+      tax_rate: 0,
+      tax_amount: 0,
+      is_tax_adjustment: false,
+    },
+  ] as {
     id: string;
     order_qty: number;
     received_qty: number;
+    discount_rate: number;
+    discount_amount: number;
+    is_discount_adjustment: boolean;
+    tax_profile_id: string | null;
+    tax_profile_name: string;
+    tax_rate: number;
+    tax_amount: number;
+    is_tax_adjustment: boolean;
   }[],
 };
 
@@ -235,6 +266,17 @@ export function getDefaultValues(
                 id: loc.location_id ?? "",
                 order_qty: loc.order_qty ?? 0,
                 received_qty: loc.received_qty ?? 0,
+                // PO เก่าไม่มี Disc%/Tax ต่อ location → fallback ค่า item-level
+                discount_rate: loc.discount_rate ?? d.discount_rate ?? 0,
+                discount_amount:
+                  loc.discount_amount ?? d.discount_amount ?? 0,
+                is_discount_adjustment: loc.is_discount_adjustment ?? false,
+                tax_profile_id: loc.tax_profile_id ?? d.tax_profile_id ?? null,
+                tax_profile_name:
+                  loc.tax_profile_name ?? d.tax_profile_name ?? "",
+                tax_rate: loc.tax_rate ?? d.tax_rate ?? 0,
+                tax_amount: loc.tax_amount ?? d.tax_amount ?? 0,
+                is_tax_adjustment: loc.is_tax_adjustment ?? false,
               })) ?? [],
         })) ?? [],
     };
@@ -253,6 +295,52 @@ export function mapItemToPayload(
   item: PoFormValues["items"][number],
   index: number,
 ): PoDetailPayload {
+  const price = item.price ?? 0;
+  const conversion = item.order_unit_conversion_factor ?? 1;
+
+  // pricing ต่อ location — honor override (isAdj → ใช้ amount ที่กรอกเอง)
+  const locations = (item.locations ?? []).map((loc) => {
+    const qty = loc.order_qty ?? 0;
+    const discRate = loc.discount_rate ?? 0;
+    const taxRate = loc.tax_rate ?? 0;
+    const isDiscAdj = loc.is_discount_adjustment ?? false;
+    const isTaxAdj = loc.is_tax_adjustment ?? false;
+    const { subtotal, discountAmount, netAmount, taxAmount, totalPrice } =
+      computeLineAmounts({
+        price,
+        qty,
+        discRate,
+        isDiscAdj,
+        discAmt: loc.discount_amount ?? 0,
+        taxRate,
+        isTaxAdj,
+        taxAmt: loc.tax_amount ?? 0,
+      });
+    return {
+      location_id: loc.id,
+      // backend contract: order_qty (order unit) + order_base_qty (base unit)
+      order_qty: qty,
+      order_base_qty: qty * conversion,
+      discount_rate: discRate,
+      discount_amount: discountAmount,
+      is_discount_adjustment: isDiscAdj,
+      tax_profile_id: loc.tax_profile_id ?? null,
+      tax_profile_name: loc.tax_profile_name ?? "",
+      tax_rate: taxRate,
+      tax_amount: taxAmount,
+      is_tax_adjustment: isTaxAdj,
+      sub_total_price: subtotal,
+      net_amount: netAmount,
+      total_price: totalPrice,
+    };
+  });
+
+  // item-level = ผลรวมทุก location; tax/discount rate mirror จาก location แรกที่มีค่า
+  const sum = (pick: (l: (typeof locations)[number]) => number) =>
+    round2(locations.reduce((acc, l) => acc + pick(l), 0));
+  const firstTax = locations.find((l) => l.tax_profile_id);
+  const firstLoc = locations[0];
+
   return {
     ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     sequence: index + 1,
@@ -263,30 +351,24 @@ export function mapItemToPayload(
     product_sku: item.product_sku ?? "",
     order_unit_id: item.order_unit_id || "",
     order_unit_name: item.order_unit_name ?? "",
-    order_unit_conversion_factor: item.order_unit_conversion_factor ?? 1,
+    order_unit_conversion_factor: conversion,
     order_qty: item.order_qty,
     base_unit_id: item.base_unit_id || item.order_unit_id || "",
     base_unit_name: item.base_unit_name ?? "",
     base_qty: item.base_qty ?? item.order_qty,
-    price: item.price ?? 0,
-    sub_total_price: item.sub_total_price ?? 0,
-    net_amount: item.net_amount ?? 0,
-    total_price: item.total_price ?? 0,
-    tax_profile_id: item.tax_profile_id || null,
-    tax_profile_name: item.tax_profile_name ?? "",
-    tax_rate: item.tax_rate ?? 0,
-    tax_amount: item.tax_amount ?? 0,
+    price,
+    sub_total_price: sum((l) => l.sub_total_price),
+    net_amount: sum((l) => l.net_amount),
+    total_price: sum((l) => l.total_price),
+    tax_profile_id: firstTax?.tax_profile_id ?? null,
+    tax_profile_name: firstTax?.tax_profile_name ?? "",
+    tax_rate: firstTax?.tax_rate ?? 0,
+    tax_amount: sum((l) => l.tax_amount),
     is_foc: item.is_foc ?? false,
-    discount_rate: item.discount_rate ?? 0,
-    discount_amount: item.discount_amount ?? 0,
+    discount_rate: firstLoc?.discount_rate ?? 0,
+    discount_amount: sum((l) => l.discount_amount),
     pr_detail: item.pr_detail ?? [],
     description: item.description ?? "",
-    locations:
-      item.locations?.map((loc) => ({
-        location_id: loc.id,
-        // backend contract: order_qty (order unit) + order_base_qty (base unit)
-        order_qty: loc.order_qty,
-        order_base_qty: loc.order_qty * (item.order_unit_conversion_factor ?? 1),
-      })) ?? [],
+    locations,
   };
 }

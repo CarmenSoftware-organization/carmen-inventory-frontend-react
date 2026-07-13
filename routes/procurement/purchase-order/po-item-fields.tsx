@@ -17,7 +17,6 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { PO_STATUS } from "@/types/purchase-order";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { computePoAction } from "@/constant/purchase-order";
@@ -330,6 +329,9 @@ export function PoItemFields({
           recordCount={itemFields.length}
           tableLayout={{
             checkbox: showApproveCheckbox,
+            // table กว้างเกิน container → scroll แนวนอน (เหมือน PR): width =
+            // getTotalSize(), column กว้างตาม size px ที่กำหนด
+            columnsResizable: true,
           }}
           emptyMessage={
             <div className="text-muted-foreground py-10 text-center text-sm">
@@ -337,12 +339,11 @@ export function PoItemFields({
             </div>
           }
         >
-          <ScrollArea className="w-full">
-            <DataGridContainer>
-              <DataGridTable />
-            </DataGridContainer>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ
+              Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด) */}
+          <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+            <DataGridTable />
+          </DataGridContainer>
         </DataGrid>
       </AddLocationRegistryContext.Provider>
 

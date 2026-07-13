@@ -12,17 +12,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
 import {
-  QtyUnitCell,
-  TaxProfileCell,
+  OrderSummaryCell,
+  RecSummaryCell,
   ComputedPricingCell,
 } from "./po-item-table";
-import {
-  DiscountRateCell,
-  PriceCell,
-  ProductHeaderCell,
-} from "./po-items-grid-cells";
+import { PriceCell, ProductHeaderCell } from "./po-items-grid-cells";
 import { PoItemExpanded, type PoItemField } from "./po-item-expanded";
 import { useAddLocationRegistry } from "./po-locations-add-context";
+import { PO_COL, PO_COL_DATA_TOTAL } from "./po-item-columns";
 import type { PoFormValues } from "./po-form-schema";
 
 export type { PoItemField };
@@ -135,14 +132,7 @@ export function usePoItemTable({
     36 /* expand */ + 36 /* index */ + (showApproveCheckbox ? 50 : 0);
   const showAction = !disabled && !readOnly; // action column (ลบ item)
   const totalSize =
-    preProductSize +
-    260 +
-    180 /* merged qty + unit */ +
-    110 +
-    90 +
-    120 +
-    110 +
-    (showAction ? 40 : 0);
+    preProductSize + PO_COL_DATA_TOTAL + (showAction ? PO_COL.action : 0);
   const leftInsetPct = (preProductSize / totalSize) * 100;
 
   const columns = useMemo<ColumnDef<PoItemField>[]>(() => {
@@ -175,6 +165,7 @@ export function usePoItemTable({
             item={item}
             form={form}
             itemFields={itemFields}
+            disabled={disabled}
             locationsDisabled={locationsDisabled}
             readOnly={readOnly}
             leftInsetPct={leftInsetPct}
@@ -196,11 +187,18 @@ export function usePoItemTable({
       },
     };
 
+    // product row = summary รวมทุก location (read-only) ยกเว้น price (input)
+    // Discount/Tax = คอลัมน์ combo เดียว (product row โชว์ยอดรวม, location โชว์
+    // rate/amount override) — ไม่มี rate/amount แยกซ้ำ
+    const rightMeta = {
+      headerClassName: "text-right",
+      cellClassName: "text-right",
+    };
     const dataColumns: ColumnDef<PoItemField>[] = [
       {
         accessorKey: "product_id",
         header: tfl("product"),
-        size: 260,
+        size: PO_COL.product,
         cell: ({ row }) => (
           <ProductCol
             form={form}
@@ -212,25 +210,28 @@ export function usePoItemTable({
         ),
       },
       {
-        id: "qty_unit",
-        header: tfl("receivedAbbr"),
-        size: 180,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        id: "order",
+        header: tfl("orderAbbr"),
+        size: PO_COL.order,
+        meta: rightMeta,
         cell: ({ row }) => (
-          <QtyUnitCell
-            control={form.control}
-            form={form}
-            index={row.index}
-            disabled={disabled}
-            readOnly={readOnly}
-          />
+          <OrderSummaryCell control={form.control} index={row.index} />
+        ),
+      },
+      {
+        id: "received",
+        header: tfl("receivedAbbr"),
+        size: PO_COL.rec,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <RecSummaryCell control={form.control} index={row.index} />
         ),
       },
       {
         accessorKey: "price",
-        header: tfl("unitPrice"),
-        size: 110,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        header: tfl("unitPriceAbbr"),
+        size: PO_COL.price,
+        meta: rightMeta,
         cell: ({ row }) => (
           <PriceCell
             form={form}
@@ -241,38 +242,61 @@ export function usePoItemTable({
         ),
       },
       {
-        accessorKey: "discount_rate",
-        header: tfl("discPercent"),
-        size: 90,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        id: "subtotal",
+        header: tfl("subtotalAbbr"),
+        size: PO_COL.sub,
+        meta: rightMeta,
         cell: ({ row }) => (
-          <DiscountRateCell
-            form={form}
-            index={row.index}
-            disabled={disabled}
-            readOnly={readOnly}
-          />
-        ),
-      },
-      {
-        accessorKey: "tax_profile_id",
-        header: tfl("tax"),
-        size: 120,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
-        cell: ({ row }) => (
-          <TaxProfileCell
+          <ComputedPricingCell
             control={form.control}
-            form={form}
             index={row.index}
-            disabled={disabled}
-            readOnly={readOnly}
+            field="sub_total_price"
           />
         ),
       },
       {
-        id: "total",
-        header: tfl("total"),
-        size: 110,
+        id: "discount",
+        header: tfl("discount"),
+        size: PO_COL.discount,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <ComputedPricingCell
+            control={form.control}
+            index={row.index}
+            field="discount_amount"
+          />
+        ),
+      },
+      {
+        id: "net",
+        header: tfl("netAbbr"),
+        size: PO_COL.net,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <ComputedPricingCell
+            control={form.control}
+            index={row.index}
+            field="net_amount"
+          />
+        ),
+      },
+      {
+        id: "tax",
+        header: tfl("tax"),
+        size: PO_COL.tax,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <ComputedPricingCell
+            control={form.control}
+            index={row.index}
+            field="tax_amount"
+          />
+        ),
+      },
+      {
+        id: "amount",
+        header: tfl("amountAbbr"),
+        size: PO_COL.amt,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right font-semibold tabular-nums",
@@ -300,7 +324,7 @@ export function usePoItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 56,
+      size: PO_COL.action,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -308,7 +332,9 @@ export function usePoItemTable({
     };
 
     const baseCols = [
-      selectColumn<PoItemField>(),
+      // ใส่ select เฉพาะตอนมี checkbox — ไม่งั้น getTotalSize() นับ 50px ผี
+      // ทำให้ product row กว้างไม่ตรงกับ location table (expand)
+      ...(showApproveCheckbox ? [selectColumn<PoItemField>()] : []),
       expandColumn,
       indexColumn,
       ...dataColumns,
