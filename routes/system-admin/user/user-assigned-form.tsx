@@ -172,7 +172,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <AnimationStyles />
 
-      {/* ── Header: identity + actions (business-setting layout) ── */}
+      {/* ── Header: identity + actions (company-profile layout) ── */}
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <Button

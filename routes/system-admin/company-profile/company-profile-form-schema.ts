@@ -6,7 +6,7 @@ import type {
   BusinessUnitNumberFormat,
   BusinessUnitPatch,
 } from "@/types/business-unit";
-import { SEEDED_ITEMS } from "./business-setting-config-registry";
+import { SEEDED_ITEMS } from "./company-profile-config-registry";
 
 const numberFormatSchema = z.object({
   locales: z.string(),
@@ -26,7 +26,7 @@ const configItemSchema = z.object({
  * text field ที่ nullable เก็บเป็น "" ในฟอร์ม (แปลงกลับเป็น null ตอน build patch)
  *
  * @param tv - ฟังก์ชันแปลข้อความ validation (namespace `validation`)
- * @param tf - ฟังก์ชันแปลชื่อ field (namespace `businessSetting.fields`)
+ * @param tf - ฟังก์ชันแปลชื่อ field (namespace `companyProfile.fields`)
  */
 export function createBusinessSettingSchema(
   tv: TranslationFn,

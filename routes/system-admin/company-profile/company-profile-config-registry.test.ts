@@ -5,8 +5,8 @@ import {
   SEEDED_KEYS,
   groupConfigForRender,
   resolveConfigOptions,
-} from "./business-setting-config-registry";
-import { mergeSeededConfig } from "./business-setting-form-schema";
+} from "./company-profile-config-registry";
+import { mergeSeededConfig } from "./company-profile-form-schema";
 import type { BusinessUnitConfigItem } from "@/types/business-unit";
 
 describe("config registry", () => {

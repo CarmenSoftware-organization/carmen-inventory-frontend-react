@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { BusinessUnitConfigItem } from "@/types/business-unit";
-import type { BusinessSettingFormValues } from "./business-setting-form-schema";
+import type { BusinessSettingFormValues } from "./company-profile-form-schema";
 
 type Form = UseFormReturn<BusinessSettingFormValues>;
 type FormName = FieldPath<BusinessSettingFormValues>;

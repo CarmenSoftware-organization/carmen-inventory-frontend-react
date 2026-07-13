@@ -1,13 +1,13 @@
 ---
 name: add-business-setting-config
-description: Use when adding a new configuration option or section to the /system-admin/business-setting page in carmen-inventory-frontend-react — a new config key (boolean toggle or enum dropdown) and/or a new named section (like PR / SI / PO) that persists per business unit.
+description: Use when adding a new configuration option or section to the /system-admin/default-setting page in carmen-inventory-frontend-react — a new config key (boolean toggle or enum dropdown) and/or a new named section (like PR / SI / PO) that persists per business unit.
 ---
 
 # Add a Business Setting config module
 
 ## Overview
 
-Config options on `/system-admin/business-setting` are **frontend-seeded**: they live in a
+Config options on `/system-admin/default-setting` are **frontend-seeded**: they live in a
 registry, not the backend schema. Adding one is (almost always) **registry data + i18n only** —
 no component, hook, endpoint, or form-schema changes. The value persists in the business unit's
 `config` array via the existing `PATCH /api/business-units`.
@@ -28,13 +28,18 @@ Reuse path per datatype:
 
 | File | Change |
 |---|---|
-| `routes/system-admin/business-setting/business-setting-config-registry.ts` | add/extend a `CONFIG_SECTIONS` entry |
-| `messages/en.json` + `messages/th.json` | add i18n under `businessSetting.sections.*` and `businessSetting.config.*` |
-| `routes/system-admin/business-setting/business-setting-config-registry.test.ts` | add a registry test |
+| `routes/system-admin/company-profile/company-profile-config-registry.ts` | add/extend a `CONFIG_SECTIONS` entry |
+| `messages/en.json` + `messages/th.json` | add i18n under `defaultSetting.sections.*` and `defaultSetting.config.*` |
+| `routes/system-admin/company-profile/company-profile-config-registry.test.ts` | add a registry test |
 
-**Do not touch** `business-setting-ui.tsx` (ConfigField), `business-setting-component.tsx`,
-`business-setting-form-schema.ts` (`mergeSeededConfig`/`buildPatch`), hooks, or the endpoint —
-they already handle every datatype.
+**Do not touch** `company-profile-ui.tsx` (ConfigField), `default-setting/default-setting-component.tsx`
+(where the registry is rendered), `company-profile-form-schema.ts` (`mergeSeededConfig`/
+`buildPatch`), hooks, or the endpoint — they already handle every datatype.
+
+Note: the registry file lives in `company-profile/` (not `default-setting/`) because
+`company-profile-form-schema.ts` consumes its `SEEDED_ITEMS`, but the config it defines
+renders on the `/system-admin/default-setting` page, under the `defaultSetting` i18n
+namespace.
 
 ## Recipe
 
@@ -53,7 +58,7 @@ Add a new section object, or append an item to an existing section's `items`. Bo
       datatype: "boolean",
       defaultValue: "false",         // string always; boolean default = "false"
       label: "Group by PR comment",  // canonical EN — PERSISTED to backend, locale-independent
-      labelKey: "config.poGroupByPrComment", // i18n key for DISPLAY (relative to businessSetting)
+      labelKey: "config.poGroupByPrComment", // i18n key for DISPLAY (relative to defaultSetting)
     },
   ],
 }
@@ -81,7 +86,9 @@ Types are `ConfigSection` / `SeededConfigItem` / `ConfigOption` (exported from t
 
 Naming & conventions:
 - `id` = lowercase section id; append the section object to the end of `CONFIG_SECTIONS`
-  (array order = on-screen render order, after the built-in General/Company/… sections).
+  (array order = on-screen render order on the Default Setting page — this page renders
+  only registry sections, no built-in General/Company sections; those live on the separate
+  Company Profile page).
 - `key` / option `value` = canonical `snake_case` (locale-independent, stored in the backend
   verbatim). Note real keys may keep dots/hyphens (`pr.allow-duplicate.product`).
 - `labelKey` = `config.` + **camelCase of the key** (drop the `<namespace>.` prefix):
@@ -92,7 +99,7 @@ Naming & conventions:
 
 ### 2. i18n — BOTH `messages/en.json` and `messages/th.json`
 
-Under `businessSetting`:
+Under `defaultSetting`:
 - `sections.<id>` = short header (usually the acronym itself); `sections.<id>Desc` = a full
   sentence. You must supply BOTH locales — translate the section name/description yourself if the
   request only gave you a Thai label for the config value. Real example (`po`):
@@ -103,7 +110,7 @@ Under `businessSetting`:
 
 Keep Thai diacritics exact; keep JSON valid (watch trailing commas when appending).
 
-### 3. Registry test (`business-setting-config-registry.test.ts`)
+### 3. Registry test (`company-profile-config-registry.test.ts`)
 
 Add a `describe` asserting the item's shape (datatype, defaultValue, labelKey; `options`
 undefined for boolean, or the option values/order + gate for enum). Follow the existing
@@ -112,9 +119,9 @@ undefined for boolean, or the option values/order + gate for enum). Follow the e
 ## Verify (all must pass)
 
 ```bash
-bunx tsc --noEmit                                  # 0 errors
-bun test:run routes/system-admin/business-setting/ # all pass
-bun run build                                      # ✓ built
+bunx tsc --noEmit                                    # 0 errors
+bun test:run routes/system-admin/company-profile/    # all pass (registry test lives here)
+bun run build                                        # ✓ built
 ```
 
 ## Gotchas

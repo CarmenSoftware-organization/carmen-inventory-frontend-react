@@ -25,8 +25,7 @@ import {
   EditableField,
   SelectField,
   NumberFormatField,
-  ConfigField,
-} from "./business-setting-ui";
+} from "./company-profile-ui";
 import {
   TIMEZONES,
   DATE_FORMATS,
@@ -35,36 +34,30 @@ import {
   SHORT_TIME_FORMATS,
   LONG_TIME_FORMATS,
   LOCALES,
-} from "./business-setting-options";
+} from "./company-profile-options";
 import {
   createBusinessSettingSchema,
   toFormValues,
   buildPatch,
-  normalizeConfig,
-  mergeSeededConfig,
   type BusinessSettingFormValues,
-} from "./business-setting-form-schema";
-import {
-  groupConfigForRender,
-  resolveConfigOptions,
-} from "./business-setting-config-registry";
+} from "./company-profile-form-schema";
 
 /**
- * หน้า Business Setting (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
+ * หน้า Company Profile (system-admin) — แสดง/แก้ไขรายละเอียด business unit ปัจจุบัน
  * (จาก `useProfile().defaultBu`) จัดเป็น section ตาม layout settings
  *
  * โหมด view = read-only, กด Edit → field กลายเป็น input (toggle ในหน้าเดียว)
  * Save ส่งเฉพาะ field ที่เปลี่ยน (`PATCH` partial). ดึงข้อมูลจาก
  * `GET api/business-units` — แสดงทุก field ยกเว้น `users[]`
  *
- * @returns React element ของหน้า business setting
+ * @returns React element ของหน้า company profile
  */
 
-export default function BusinessSettingComponent() {
+export default function CompanyProfileComponent() {
   const tm = useTranslations("modules");
-  const t = useTranslations("businessSetting");
+  const t = useTranslations("companyProfile");
   const tv = useTranslations("validation");
-  const tf = useTranslations("businessSetting.fields");
+  const tf = useTranslations("companyProfile.fields");
   const { defaultBu, isProfileReady } = useProfile();
   const buId = defaultBu?.id;
   const { data, isLoading, isError, refetch } = useBusinessUnit(buId);
@@ -83,9 +76,6 @@ export default function BusinessSettingComponent() {
       ? `${f.locales} · ${t("minDigits", { n: f.minimumIntegerDigits })}`
       : null;
 
-  const configGroups = data
-    ? groupConfigForRender(mergeSeededConfig(normalizeConfig(data.config)))
-    : { sections: [], other: [] };
   const isBusy = !isProfileReady || isLoading;
 
   // มีการแก้ค้าง (dirty) ระหว่างโหมด edit → กัน discard โดยไม่ได้ตั้งใจ
@@ -134,7 +124,7 @@ export default function BusinessSettingComponent() {
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">
-            {tm("businessSetting")}
+            {tm("companyProfile")}
           </h1>
           <p className="text-muted-foreground mt-0.5 text-sm">
             {t("pageDescription")}
@@ -392,22 +382,6 @@ export default function BusinessSettingComponent() {
               description={t("fields.hotelCountryDesc")}
               displayValue={data.hotel_country}
             />
-            <EditableField
-              editing={editing}
-              form={form}
-              name="hotel_latitude"
-              label={t("fields.hotelLatitude")}
-              description={t("fields.hotelLatitudeDesc")}
-              displayValue={data.hotel_latitude}
-            />
-            <EditableField
-              editing={editing}
-              form={form}
-              name="hotel_longitude"
-              label={t("fields.hotelLongitude")}
-              description={t("fields.hotelLongitudeDesc")}
-              displayValue={data.hotel_longitude}
-            />
           </SettingSection>
 
           {/* Company */}
@@ -521,22 +495,6 @@ export default function BusinessSettingComponent() {
               label={t("fields.companyCountry")}
               description={t("fields.companyCountryDesc")}
               displayValue={data.company_country}
-            />
-            <EditableField
-              editing={editing}
-              form={form}
-              name="company_latitude"
-              label={t("fields.companyLatitude")}
-              description={t("fields.companyLatitudeDesc")}
-              displayValue={data.company_latitude}
-            />
-            <EditableField
-              editing={editing}
-              form={form}
-              name="company_longitude"
-              label={t("fields.companyLongitude")}
-              description={t("fields.companyLongitudeDesc")}
-              displayValue={data.company_longitude}
             />
           </SettingSection>
 
@@ -676,62 +634,6 @@ export default function BusinessSettingComponent() {
               digitsPlaceholder={t("fields.minimumIntegerDigits")}
             />
           </SettingSection>
-
-          {/* Registry sections (เช่น PR) — seeded config จัดกลุ่มตาม section */}
-          {configGroups.sections.map((section) => (
-            <SettingSection
-              key={section.id}
-              title={t(section.titleKey)}
-              description={t(section.descKey)}
-            >
-              {section.entries.map((entry) => {
-                const options = entry.options
-                  ? resolveConfigOptions(
-                      entry.options,
-                      data.calculation_method,
-                      entry.item.value,
-                    ).map((o) => ({ value: o.value, label: t(o.labelKey) }))
-                  : undefined;
-                return (
-                  <ConfigField
-                    key={entry.item.key}
-                    editing={editing}
-                    form={form}
-                    index={entry.index}
-                    item={entry.item}
-                    label={t(entry.labelKey)}
-                    yesLabel={t("yes")}
-                    noLabel={t("no")}
-                    options={options}
-                  />
-                );
-              })}
-            </SettingSection>
-          ))}
-
-          {/* Configuration — config จาก backend ที่ไม่อยู่ใน registry section */}
-          <SettingSection
-            title={t("sections.config")}
-            description={t("sections.configDesc")}
-          >
-            {configGroups.other.length === 0 ? (
-              <p className="text-muted-foreground/70 text-sm sm:col-span-2">
-                {t("configEmpty")}
-              </p>
-            ) : (
-              configGroups.other.map((entry) => (
-                <ConfigField
-                  key={entry.item.key}
-                  editing={editing}
-                  form={form}
-                  index={entry.index}
-                  item={entry.item}
-                  yesLabel={t("yes")}
-                  noLabel={t("no")}
-                />
-              ))
-            )}
-          </SettingSection>
         </form>
       )}
 
@@ -759,7 +661,7 @@ function BrandImage({
   readonly url: string | undefined;
   readonly shape: "landscape" | "round";
 }) {
-  const t = useTranslations("businessSetting");
+  const t = useTranslations("companyProfile");
   const box =
     shape === "landscape" ? "h-16 w-32 rounded-md" : "size-16 rounded-full";
   const fit = shape === "landscape" ? "object-contain" : "object-cover";

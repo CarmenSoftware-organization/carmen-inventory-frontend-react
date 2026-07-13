@@ -423,9 +423,15 @@ export const moduleList: ModuleDto[] = [
     icon: Shield,
     subModules: [
       {
-        name: "businessSetting",
-        path: "/system-admin/business-setting",
+        name: "companyProfile",
+        path: "/system-admin/company-profile",
         icon: Briefcase,
+        permission: PERMISSIONS.system_configuration.view,
+      },
+      {
+        name: "defaultSetting",
+        path: "/system-admin/default-setting",
+        icon: SlidersHorizontal,
         permission: PERMISSIONS.system_configuration.view,
       },
       {

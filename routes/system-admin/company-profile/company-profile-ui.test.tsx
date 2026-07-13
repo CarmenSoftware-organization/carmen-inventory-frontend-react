@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { useForm } from "react-hook-form";
-import { ConfigField } from "./business-setting-ui";
-import type { BusinessSettingFormValues } from "./business-setting-form-schema";
+import { ConfigField } from "./company-profile-ui";
+import type { BusinessSettingFormValues } from "./company-profile-form-schema";
 import type { BusinessUnitConfigItem } from "@/types/business-unit";
 
 const boolItem: BusinessUnitConfigItem = {
