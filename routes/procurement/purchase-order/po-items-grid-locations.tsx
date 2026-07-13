@@ -308,6 +308,8 @@ export function LocationsEditor({
     addRegistry.set(index, () =>
       prepend({
         id: "",
+        location_code: "",
+        location_name: "",
         order_qty: 0,
         received_qty: 0,
         discount_rate: 0,
@@ -390,6 +392,13 @@ export function LocationsEditor({
                         productId={productId}
                         value={field.value}
                         onValueChange={field.onChange}
+                        onItemChange={(loc) => {
+                          // capture meta ของ location → ส่งใน payload (backend)
+                          const b =
+                            `items.${index}.locations.${locIndex}` as const;
+                          form.setValue(`${b}.location_code`, loc.code ?? "");
+                          form.setValue(`${b}.location_name`, loc.name ?? "");
+                        }}
                         disabled={!locEditable}
                         readOnly={!locEditable}
                         excludeIds={(watchedLocations ?? [])

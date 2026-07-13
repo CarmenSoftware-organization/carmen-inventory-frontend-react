@@ -101,8 +101,10 @@ export interface PoDetailPayload {
   tax_profile_name: string;
   tax_rate: number;
   tax_amount: number;
+  is_tax_adjustment: boolean;
   discount_rate: number;
   discount_amount: number;
+  is_discount_adjustment: boolean;
   is_foc: boolean;
   pr_detail: PrDetailRef[];
   description: string;
@@ -111,8 +113,11 @@ export interface PoDetailPayload {
 
 export interface PoDetailPayloadLocation {
   location_id: string;
+  location_code: string;
+  location_name: string;
   order_qty: number;
   order_base_qty: number;
+  price: number;
   discount_rate: number;
   discount_amount: number;
   is_discount_adjustment: boolean;

@@ -11,6 +11,9 @@ import type {
 const createLocationSchema = (tv: TranslationFn, tf: TranslationFn) =>
   z.object({
     id: z.string().min(1),
+    // meta ของ location (capture ตอนเลือก) — ส่งใน payload ให้ backend
+    location_code: z.string().optional(),
+    location_name: z.string().optional(),
     order_qty: z.coerce
       .number()
       .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
@@ -147,6 +150,8 @@ export const PO_ITEM: PoFormValues["items"][number] = {
   locations: [
     {
       id: "",
+      location_code: "",
+      location_name: "",
       order_qty: 0,
       received_qty: 0,
       discount_rate: 0,
@@ -160,6 +165,8 @@ export const PO_ITEM: PoFormValues["items"][number] = {
     },
   ] as {
     id: string;
+    location_code: string;
+    location_name: string;
     order_qty: number;
     received_qty: number;
     discount_rate: number;
@@ -264,6 +271,8 @@ export function getDefaultValues(
               ?.filter((loc) => loc.location_id)
               ?.map((loc) => ({
                 id: loc.location_id ?? "",
+                location_code: loc.location_code ?? "",
+                location_name: loc.location_name ?? "",
                 order_qty: loc.order_qty ?? 0,
                 received_qty: loc.received_qty ?? 0,
                 // PO เก่าไม่มี Disc%/Tax ต่อ location → fallback ค่า item-level
@@ -318,9 +327,12 @@ export function mapItemToPayload(
       });
     return {
       location_id: loc.id,
+      location_code: loc.location_code ?? "",
+      location_name: loc.location_name ?? "",
       // backend contract: order_qty (order unit) + order_base_qty (base unit)
       order_qty: qty,
       order_base_qty: qty * conversion,
+      price,
       discount_rate: discRate,
       discount_amount: discountAmount,
       is_discount_adjustment: isDiscAdj,
@@ -364,9 +376,11 @@ export function mapItemToPayload(
     tax_profile_name: firstTax?.tax_profile_name ?? "",
     tax_rate: firstTax?.tax_rate ?? 0,
     tax_amount: sum((l) => l.tax_amount),
+    is_tax_adjustment: firstLoc?.is_tax_adjustment ?? false,
     is_foc: item.is_foc ?? false,
     discount_rate: firstLoc?.discount_rate ?? 0,
     discount_amount: sum((l) => l.discount_amount),
+    is_discount_adjustment: firstLoc?.is_discount_adjustment ?? false,
     pr_detail: item.pr_detail ?? [],
     description: item.description ?? "",
     locations,
