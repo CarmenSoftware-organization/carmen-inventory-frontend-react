@@ -7,6 +7,7 @@ import {
   InputSuffixInput,
 } from "@/components/ui/input/input-suffix";
 import type { PrFormValues } from "../pr-form-schema";
+import { useIsRowLocked } from "./helpers";
 
 export const AmountCell = memo(function AmountCell({
   control,
@@ -29,10 +30,14 @@ export const AmountCell = memo(function AmountCell({
     useWatch({ control, name: `items.${index}.exchange_rate` }) ?? 1;
   const currencyCode =
     useWatch({ control, name: `items.${index}.currency_code` }) ?? "";
+  const isRowLocked = useIsRowLocked(control, index);
   const isForeignCurrency =
     !!currencyCode && !!baseCurrencyCode && currencyCode !== baseCurrencyCode;
   const baseAmount = round2(Number(totalPrice) * Number(exchangeRate));
   const amountText = formatCurrency(Number(totalPrice));
+
+  // currency เลือกได้เมื่อฟอร์มยังแก้ได้และ row ไม่ถูก lock (ตรงกับ CurrencyCell)
+  const currencySelectable = !isDisabled && !isRowLocked;
 
   const baseLine = isForeignCurrency && (
     <span className="text-muted-foreground text-[0.6875rem] tabular-nums">
@@ -40,8 +45,10 @@ export const AmountCell = memo(function AmountCell({
     </span>
   );
 
-  // View/locked: ยอดคำนวณ read-only ไม่ควรดูเหมือนช่องกรอกได้ → แสดงเป็น text เดิม
-  if (isDisabled) {
+  // ยอดคำนวณ read-only เสมอ (กรอกไม่ได้). currency เลือกได้ → ใช้กล่อง InputSuffix
+  // โดยยอดเป็น bg-muted (สื่อว่ากรอกไม่ได้) แต่ currencySlot ยังเลือกได้;
+  // เลือกไม่ได้ → plain text ทั้งแถว
+  if (!currencySelectable) {
     return (
       <div className="flex flex-col items-end gap-1">
         <div className="flex items-center justify-end gap-1.5">
@@ -60,7 +67,7 @@ export const AmountCell = memo(function AmountCell({
           readOnly
           tabIndex={-1}
           value={amountText}
-          className="cursor-default font-semibold tabular-nums"
+          className="bg-muted cursor-default font-semibold tabular-nums"
         />
         <InputSuffixAddon>{currencySlot}</InputSuffixAddon>
       </InputSuffixField>

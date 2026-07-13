@@ -175,7 +175,7 @@ export function PrItemExpand({
       {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
           Inventory · Summary อยู่แถบล่าง */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[5rem_19.5rem_3rem_minmax(4.5rem,1fr)_minmax(4rem,1fr)_minmax(5rem,1fr)_minmax(9rem,1.4fr)_minmax(5rem,1fr)_minmax(9rem,1.4fr)_minmax(5rem,1fr)]">
+        <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[5rem_19.5rem_3rem_minmax(4.5rem,1fr)_minmax(4rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
           {/* Pricelist */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
