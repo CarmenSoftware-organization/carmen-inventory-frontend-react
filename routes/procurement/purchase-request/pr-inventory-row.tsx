@@ -50,7 +50,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
     <button
       type="button"
       onClick={onClick}
-      className="text-primary underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
+      className="tracking-wide text-primary uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
     >
       {label}
     </button>
@@ -59,6 +59,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
   return (
     <>
       <SummaryBar
+        className="text-[0.6875rem]"
         items={[
           {
             key: "onHand",
@@ -72,12 +73,12 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
           },
           {
             key: "reorderPt",
-            label: t("reorderPt"),
+            label: <span className="uppercase">{t("reorderPt")}</span>,
             value: re_order_qty.toLocaleString(),
           },
           {
             key: "restock",
-            label: t("restock"),
+            label: <span className="uppercase">{t("restock")}</span>,
             value: re_stock_qty.toLocaleString(),
           },
         ]}

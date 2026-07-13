@@ -510,7 +510,8 @@ export function PrItemExpand({
             </p>
           </Field>
 
-          {/* Inventory — อยู่แถวเดียวกับ base summary (col 1-2 = Pricelist + Vendor(fr)) */}
+          {/* Inventory — อยู่แถวเดียวกับ base summary (currency diff): inventory
+              ซ้าย (col 1-2), base amounts ขวา (col 6-10) */}
           <div className="lg:col-span-2 lg:col-start-1">
             <PrInventoryRow
               control={form.control}

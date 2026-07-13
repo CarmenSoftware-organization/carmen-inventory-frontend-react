@@ -1,5 +1,6 @@
 // components/form/summary-footer-bar.tsx
 import { Fragment, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface SummaryItemConfig {
   key: string;
@@ -18,9 +19,7 @@ interface SummaryBarProps {
 export function SummaryBar({ items, className }: SummaryBarProps) {
   return (
     <div
-      className={["flex items-center gap-4 text-xs tabular-nums", className]
-        .filter(Boolean)
-        .join(" ")}
+      className={cn("flex items-center gap-4 tabular-nums", className)}
     >
       {items.map((item, i) => (
         <Fragment key={item.key}>
@@ -34,9 +33,7 @@ export function SummaryBar({ items, className }: SummaryBarProps) {
               .join(" ")}
           >
             <span
-              className={
-                item.emphasis ? "font-semibold" : "text-muted-foreground"
-              }
+              className="font-semibold"
             >
               {item.label}
             </span>
