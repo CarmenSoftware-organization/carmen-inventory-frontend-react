@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   useFieldArray,
   useWatch,
@@ -13,7 +13,6 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { GrnPoSelectDialog } from "./grn-po-select-dialog";
 import type { GrnFormValues } from "./grn-form-schema";
@@ -21,6 +20,7 @@ import { EMPTY_DETAIL } from "./grn-form-schema";
 import EmptyComponent from "@/components/empty-component";
 import type { PoForGrn, PoGrnDetail } from "@/types/purchase-order";
 import { useGrnItemTable, type GrnGroup } from "./use-grn-item-table";
+import { GrnItemComputedSync } from "./grn-location-row";
 
 export const mapPoDetailToItems = (
   d: PoGrnDetail,
@@ -97,6 +97,8 @@ interface GrnItemTableProps {
   readonly disabled: boolean;
   /** view mode → qty ในแต่ละ location แสดงเป็น plain text */
   readonly plainText?: boolean;
+  /** counter จากฟอร์ม — เพิ่มทุกครั้งที่ validation ไม่ผ่าน เพื่อ auto-expand group ที่ error */
+  readonly revealErrorSignal?: number;
 }
 
 /**
@@ -107,6 +109,7 @@ export function GrnItemTable({
   form,
   disabled,
   plainText = false,
+  revealErrorSignal = 0,
 }: GrnItemTableProps) {
   "use no memo";
   const t = useTranslations("procurement.goodsReceiveNote");
@@ -198,6 +201,24 @@ export function GrnItemTable({
     onDeleteItem: removeItem,
   });
 
+  // validation ไม่ผ่าน: field location/received_qty/discount/tax อยู่ใน group expand
+  // → auto-expand group ที่ติด error ให้ scrollToFirstInvalidField เจอ field (mirror PO)
+  useEffect(() => {
+    if (!revealErrorSignal) return;
+    const itemErrors = form.formState.errors.items;
+    if (!itemErrors) return;
+    const next: Record<string, boolean> = {};
+    for (const group of groups) {
+      if (group.indices.some((i) => itemErrors[i])) next[group.key] = true;
+    }
+    if (Object.keys(next).length === 0) return;
+    table.setExpanded((prev) => ({
+      ...(typeof prev === "object" ? prev : {}),
+      ...next,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revealErrorSignal]);
+
   const handleAddItem = () => {
     const key = crypto.randomUUID();
     prependItem({ ...EMPTY_DETAIL, _group_key: key });
@@ -258,9 +279,19 @@ export function GrnItemTable({
         </p>
       )}
 
+      {/* compute sync — 1 ต่อ location index, เขียน derived discount/tax/net/total กลับ form */}
+      {itemFields.map((item, i) => (
+        <GrnItemComputedSync key={item.id} form={form} index={i} />
+      ))}
+
       <DataGrid
         table={table}
         recordCount={groups.length}
+        tableLayout={{
+          // table กว้างเกิน container → scroll แนวนอน (เหมือน PO): width =
+          // getTotalSize(), column กว้างตาม size px ที่กำหนด
+          columnsResizable: true,
+        }}
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}
@@ -270,12 +301,11 @@ export function GrnItemTable({
           />
         }
       >
-        <ScrollArea className="w-full">
-          <DataGridContainer>
-            <DataGridTable />
-          </DataGridContainer>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+        {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ
+            Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด) */}
+        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+          <DataGridTable />
+        </DataGridContainer>
       </DataGrid>
 
       <DeleteDialog

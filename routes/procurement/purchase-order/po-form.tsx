@@ -118,6 +118,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
     if (!purchaseOrder && !profileData) return;
     didRebaseline.current = true;
     form.reset(form.getValues(), { keepDirtyValues: true });
+    // reset() re-validate ทั้งฟอร์ม → required field ที่ยังว่างโชว์ error แดงทั้งที่
+    // user ยังไม่แตะ → clear (mode onChange จะ validate ใหม่เมื่อ user แก้จริง)
+    form.clearErrors();
   }, [form, purchaseOrder, profileData]);
 
   // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand row ที่

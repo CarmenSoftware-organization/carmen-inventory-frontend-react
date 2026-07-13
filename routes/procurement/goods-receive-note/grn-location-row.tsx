@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import {
   Controller,
   useFormState,
@@ -7,9 +7,8 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { ChevronRight, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,12 +19,103 @@ import {
 } from "@/components/ui/input/input-suffix";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
+import {
+  DiscountOverrideInput,
+  OverrideToggle,
+  TaxOverrideInput,
+} from "@/components/procurement/discount-tax-override";
 import { useProductUnits } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
+import { computeLineAmounts } from "@/lib/line-pricing";
 import type { GrnFormValues } from "./grn-form-schema";
-import { GrnLocationExpanded } from "./grn-location-expanded";
 
 type GrnUnitField = "approved_unit_id" | "received_unit_id" | "foc_unit_id";
+
+/**
+ * อ่านค่าที่ต้องใช้คำนวณของ location เดียว → computeLineAmounts (honor override)
+ * ฐานคิดของ GRN = unit_price × received_qty
+ */
+function useGrnLocationLine(form: UseFormReturn<GrnFormValues>, index: number) {
+  "use no memo";
+  const [price, qty, discRate, discAmt, isDiscAdj, taxRate, taxAmt, isTaxAdj] =
+    useWatch({
+      control: form.control,
+      name: [
+        `items.${index}.unit_price`,
+        `items.${index}.received_qty`,
+        `items.${index}.discount_rate`,
+        `items.${index}.discount_amount`,
+        `items.${index}.is_discount_adjustment`,
+        `items.${index}.tax_rate`,
+        `items.${index}.tax_amount`,
+        `items.${index}.is_tax_adjustment`,
+      ] as const,
+    });
+  return computeLineAmounts({
+    price: Number(price) || 0,
+    qty: Number(qty) || 0,
+    discRate: Number(discRate) || 0,
+    isDiscAdj: !!isDiscAdj,
+    discAmt: Number(discAmt) || 0,
+    taxRate: Number(taxRate) || 0,
+    isTaxAdj: !!isTaxAdj,
+    taxAmt: Number(taxAmt) || 0,
+  });
+}
+
+/**
+ * เขียน derived amounts (discount/tax auto + net + total) กลับเข้า form เพื่อให้
+ * group summary + payload อ่านได้ — render-null, ติดตั้ง 1 ตัวต่อ location index ที่
+ * ระดับ grid (mirror PoItemComputedSync) จึงคำนวณแม้ group ถูก collapse
+ * discount_amount/tax_amount เขียนเฉพาะตอนไม่ override (auto); override → คงค่า user
+ */
+export const GrnItemComputedSync = memo(function GrnItemComputedSync({
+  form,
+  index,
+}: {
+  form: UseFormReturn<GrnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const isDiscAdj =
+    useWatch({
+      control: form.control,
+      name: `items.${index}.is_discount_adjustment`,
+    }) ?? false;
+  const isTaxAdj =
+    useWatch({
+      control: form.control,
+      name: `items.${index}.is_tax_adjustment`,
+    }) ?? false;
+  const { discountAmount, netAmount, taxAmount, totalPrice } =
+    useGrnLocationLine(form, index);
+
+  useEffect(() => {
+    if (!isDiscAdj) {
+      const cur = form.getValues(`items.${index}.discount_amount`);
+      if (cur !== discountAmount) {
+        form.setValue(`items.${index}.discount_amount`, discountAmount);
+      }
+    }
+    if (!isTaxAdj) {
+      const cur = form.getValues(`items.${index}.tax_amount`);
+      if (cur !== taxAmount) {
+        form.setValue(`items.${index}.tax_amount`, taxAmount);
+      }
+    }
+    const curNet = form.getValues(`items.${index}.net_amount`);
+    if (curNet !== netAmount) {
+      form.setValue(`items.${index}.net_amount`, netAmount);
+    }
+    const curTotal = form.getValues(`items.${index}.total_price`);
+    if (curTotal !== totalPrice) {
+      form.setValue(`items.${index}.total_price`, totalPrice);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
+  }, [index, discountAmount, taxAmount, netAmount, totalPrice, isDiscAdj, isTaxAdj]);
+
+  return null;
+});
 
 /** unit lookup (borderless) — ฝังในกล่อง qty เดียวกัน, sync ตาม product_id ของ row */
 const WatchedProductUnit = memo(function WatchedProductUnit({
@@ -81,7 +171,7 @@ const QtyUnitPlain = memo(function QtyUnitPlain({
   const unitName = units.find((u) => u.id === unitId)?.name ?? "";
   return (
     <InputSuffixPlain
-      className="w-44"
+      className="block w-full text-right"
       value={Number(qty) || 0}
       suffix={unitName}
     />
@@ -89,8 +179,7 @@ const QtyUnitPlain = memo(function QtyUnitPlain({
 });
 
 /**
- * เซลล์ qty + unit บน line ของ location — input (ซ้าย) + unit lookup (ขวา)
- * ห่อในกล่อง border เดียว (input-group) ให้ดูเป็น field เดียว
+ * เซลล์ qty + unit บน location row — input (ซ้าย) + unit lookup (ขวา) ในกล่องเดียว
  * view mode → plain text
  */
 function QtyUnitCell({
@@ -124,7 +213,7 @@ function QtyUnitCell({
     );
   }
   return (
-    <InputSuffixField className="w-44" disabled={disabled} error={!!error}>
+    <InputSuffixField className="w-full" disabled={disabled} error={!!error}>
       <InputSuffixInput
         type="number"
         inputMode="decimal"
@@ -158,11 +247,14 @@ const PricePlain = memo(function PricePlain({
   "use no memo";
   const v = useWatch({ control, name: `items.${index}.unit_price` });
   return (
-    <InputSuffixPlain className="w-28" value={formatCurrency(Number(v) || 0)} />
+    <InputSuffixPlain
+      className="block w-full text-right"
+      value={formatCurrency(Number(v) || 0)}
+    />
   );
 });
 
-/** ช่อง unit price บน location line — view → plain text */
+/** ช่อง unit price บน location row — view → plain text */
 function PriceCell({
   form,
   index,
@@ -183,10 +275,164 @@ function PriceCell({
       min={0}
       step="0.01"
       placeholder="0.00"
-      className="h-8 w-28 shrink-0 text-right text-xs"
+      className="h-8 w-full text-right text-xs"
       disabled={disabled}
       {...form.register(`items.${index}.unit_price`, { valueAsNumber: true })}
     />
+  );
+}
+
+/** ยอดเงินของ location เดียว (plain text) — honor override */
+function GrnAmountCell({
+  form,
+  index,
+  field,
+}: {
+  form: UseFormReturn<GrnFormValues>;
+  index: number;
+  field: "subtotal" | "netAmount" | "totalPrice";
+}) {
+  "use no memo";
+  const line = useGrnLocationLine(form, index);
+  return (
+    <span className="block text-right tabular-nums">
+      {formatCurrency(line[field])}
+    </span>
+  );
+}
+
+/** Discount cell ต่อ location — override toggle + rate/amount combo (shared) */
+function GrnLocationDiscountCell({
+  form,
+  index,
+  editable,
+}: {
+  form: UseFormReturn<GrnFormValues>;
+  index: number;
+  editable: boolean;
+}) {
+  "use no memo";
+  const base = `items.${index}` as const;
+  const rate =
+    useWatch({ control: form.control, name: `${base}.discount_rate` }) ?? 0;
+  const isAdj =
+    useWatch({
+      control: form.control,
+      name: `${base}.is_discount_adjustment`,
+    }) ?? false;
+  const line = useGrnLocationLine(form, index);
+  const amount = line.discountAmount;
+
+  if (!editable) {
+    return (
+      <span className="block text-right text-xs tabular-nums">
+        {rate}% · {formatCurrency(amount)}
+      </span>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-0.5">
+      {/* override toggle (label คอลัมน์อยู่ที่ header row) */}
+      <div className="flex justify-end">
+        <OverrideToggle
+          checked={isAdj}
+          onCheckedChange={(on) => {
+            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+            if (on) {
+              form.setValue(`${base}.discount_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_discount_adjustment`, on, {
+              shouldDirty: true,
+            });
+          }}
+        />
+      </div>
+      <DiscountOverrideInput
+        rate={rate}
+        amount={amount}
+        isAdjustment={isAdj}
+        onRateChange={(r) =>
+          form.setValue(`${base}.discount_rate`, r, {
+            shouldDirty: true,
+            shouldValidate: true,
+          })
+        }
+        onAmountChange={(a) =>
+          form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
+        }
+      />
+    </div>
+  );
+}
+
+/** Tax cell ต่อ location — override toggle + tax-profile/amount combo (shared) */
+function GrnLocationTaxCell({
+  form,
+  index,
+  editable,
+}: {
+  form: UseFormReturn<GrnFormValues>;
+  index: number;
+  editable: boolean;
+}) {
+  "use no memo";
+  const base = `items.${index}` as const;
+  const taxProfileId =
+    useWatch({ control: form.control, name: `${base}.tax_profile_id` }) ?? null;
+  const rate =
+    useWatch({ control: form.control, name: `${base}.tax_rate` }) ?? 0;
+  const isAdj =
+    useWatch({ control: form.control, name: `${base}.is_tax_adjustment` }) ??
+    false;
+  const line = useGrnLocationLine(form, index);
+  const amount = line.taxAmount;
+
+  if (!editable) {
+    return (
+      <span className="block text-right text-xs tabular-nums">
+        {rate}% · {formatCurrency(amount)}
+      </span>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-0.5">
+      {/* rate% + override toggle (label คอลัมน์อยู่ที่ header row) */}
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-muted-foreground text-[0.7rem] font-semibold tabular-nums">
+          {rate > 0 ? `${rate}%` : ""}
+        </span>
+        <OverrideToggle
+          checked={isAdj}
+          onCheckedChange={(on) => {
+            if (on) {
+              form.setValue(`${base}.tax_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_tax_adjustment`, on, {
+              shouldDirty: true,
+            });
+          }}
+        />
+      </div>
+      <TaxOverrideInput
+        taxProfileId={taxProfileId}
+        amount={amount}
+        isAdjustment={isAdj}
+        onTaxChange={(value, r) => {
+          form.setValue(`${base}.tax_profile_id`, value || null, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          form.setValue(`${base}.tax_rate`, r);
+        }}
+        onAmountChange={(a) =>
+          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+        }
+      />
+    </div>
   );
 }
 
@@ -195,24 +441,27 @@ interface GrnLocationRowProps {
   readonly form: UseFormReturn<GrnFormValues>;
   readonly disabled: boolean;
   readonly isManual: boolean;
+  readonly isPo: boolean;
   readonly showDelete: boolean;
   readonly onDelete: () => void;
   readonly groupIndices: number[];
-  /** view mode → qty แสดงเป็น plain text */
+  /** view mode → qty/pricing แสดงเป็น plain text */
   readonly plainText?: boolean;
   /** เปิด location lookup อัตโนมัติตอน mount (row ที่เพิ่งเพิ่ม) */
   readonly autoOpenLocation?: boolean;
 }
 
 /**
- * แถว location ของ GRN item — location + Order/Received/FOC qty บน line เดียว,
- * คลิก chevron เพื่อ expand เผยฟอร์ม Pricing / Details (reuse GrnTab* เดิม)
+ * แถว location ของ GRN item = `<tr>` ใน location table (aligned กับ group row ผ่าน
+ * GRN_COL) — location + Order/Received/FOC/Price/Sub/Discount/Net/Tax/Amount inline
+ * (pricing/override อยู่ในแถวเลย ไม่มี 2nd-level expand แล้ว)
  */
 export const GrnLocationRow = memo(function GrnLocationRow({
   index,
   form,
   disabled,
   isManual,
+  isPo,
   showDelete,
   onDelete,
   groupIndices,
@@ -222,16 +471,11 @@ export const GrnLocationRow = memo(function GrnLocationRow({
   "use no memo";
   const tfl = useTranslations("field");
 
-  const docType = useWatch({ control: form.control, name: "doc_type" }) ?? "";
-  const isPo = docType !== "manual";
   const locationName =
     useWatch({ control: form.control, name: `items.${index}.location_name` }) ??
     "";
   const locationCode =
     useWatch({ control: form.control, name: `items.${index}.location_code` }) ??
-    "";
-  const locationId =
-    useWatch({ control: form.control, name: `items.${index}.location_id` }) ??
     "";
   const productId =
     useWatch({ control: form.control, name: `items.${index}.product_id` }) ??
@@ -247,13 +491,6 @@ export const GrnLocationRow = memo(function GrnLocationRow({
     (v): v is string => !!v,
   );
 
-  const netAmount = useWatch({
-    control: form.control,
-    name: `items.${index}.net_amount`,
-  });
-
-  // เริ่ม expand เองถ้าเป็น manual ที่ยังไม่ได้เลือก location (ต้องกรอกก่อน)
-  const [expanded, setExpanded] = useState(isManual && !locationId);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // subscribe เฉพาะ error ของ item นี้ — รับประกัน re-render เมื่อ validation ของแถวเปลี่ยน
@@ -264,82 +501,57 @@ export const GrnLocationRow = memo(function GrnLocationRow({
   const itemError = errors.items?.[index];
   const receivedQtyError = itemError?.received_qty?.message;
 
-  // มี field error ใน pricing/details → บังคับ expand ให้ scroll หาเจอ
-  // (location/qty อยู่ line หลักแล้ว จึงเห็น error ได้โดยไม่ต้อง expand)
-  const showExpanded = expanded || !!itemError;
+  const editable = !disabled && !plainText; // discount/tax combo แก้ได้
 
   return (
-    <div>
-      {/* ── location + Order/Received/FOC บน line เดียว ── */}
-      <div className="hover:bg-muted/40 flex items-center gap-2.5 py-2 pr-4 pl-3 transition-colors">
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          aria-expanded={showExpanded}
-          aria-label={showExpanded ? tfl("collapse") : tfl("expand")}
-          className={cn(
-            "flex size-4 shrink-0 cursor-pointer items-center justify-center transition-colors",
-            showExpanded
-              ? "text-primary"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
-          <ChevronRight
-            className={cn(
-              "size-4 transition-transform",
-              showExpanded && "rotate-90",
+    <tr className="hover:bg-muted/40 align-middle transition-colors">
+      {/* Location (align ใต้ product) */}
+      <td className="py-1 pr-2 pl-2">
+        {isManual && !disabled ? (
+          <Controller
+            control={form.control}
+            name={`items.${index}.location_id`}
+            render={({ field, fieldState }) => (
+              <LookupProductLocation
+                productId={productId}
+                value={field.value ?? ""}
+                onValueChange={field.onChange}
+                onItemChange={(location) => {
+                  form.setValue(`items.${index}.location_name`, location.name);
+                  form.setValue(`items.${index}.location_code`, location.code);
+                  form.setValue(
+                    `items.${index}.location_type`,
+                    location.location_type,
+                  );
+                }}
+                defaultLabel={locationName || undefined}
+                excludeIds={excludeLocationIds}
+                disabled={!productId}
+                defaultOpen={autoOpenLocation}
+                className="h-8 w-full text-xs"
+                modal
+                error={fieldState.error?.message}
+              />
             )}
-            aria-hidden="true"
           />
-        </button>
+        ) : (
+          <p className="text-xs font-medium">
+            {locationName}
+            {locationCode ? (
+              <>
+                {" - "}
+                <span className="text-foreground text-xs font-medium">
+                  {locationCode}
+                </span>
+              </>
+            ) : null}
+          </p>
+        )}
+      </td>
 
-        {/* Location */}
-        <div className="min-w-0 flex-1">
-          {isManual && !disabled ? (
-            <Controller
-              control={form.control}
-              name={`items.${index}.location_id`}
-              render={({ field, fieldState }) => (
-                <LookupProductLocation
-                  productId={productId}
-                  value={field.value ?? ""}
-                  onValueChange={field.onChange}
-                  onItemChange={(location) => {
-                    form.setValue(
-                      `items.${index}.location_name`,
-                      location.name,
-                    );
-                    form.setValue(
-                      `items.${index}.location_code`,
-                      location.code,
-                    );
-                    form.setValue(
-                      `items.${index}.location_type`,
-                      location.location_type,
-                    );
-                  }}
-                  defaultLabel={locationName || undefined}
-                  excludeIds={excludeLocationIds}
-                  disabled={!productId}
-                  defaultOpen={autoOpenLocation}
-                  className="h-8 w-full text-xs"
-                  modal
-                  error={fieldState.error?.message}
-                />
-              )}
-            />
-          ) : (
-            <p className="text-xs font-medium">
-              {locationName} {"- "}
-              <span className="text-foreground text-xs font-medium">
-                {locationCode}
-              </span>
-            </p>
-          )}
-        </div>
-
-        {/* Order (PO เท่านั้น — disabled) */}
-        {isPo && (
+      {/* Order (PO เท่านั้น — disabled) */}
+      {isPo && (
+        <td className="px-1 py-1 text-right">
           <QtyUnitCell
             form={form}
             index={index}
@@ -348,9 +560,11 @@ export const GrnLocationRow = memo(function GrnLocationRow({
             disabled
             plainText={plainText}
           />
-        )}
+        </td>
+      )}
 
-        {/* Received (required) */}
+      {/* Received (required, min 1) */}
+      <td className="px-1 py-1 text-right">
         <QtyUnitCell
           form={form}
           index={index}
@@ -361,8 +575,10 @@ export const GrnLocationRow = memo(function GrnLocationRow({
           error={receivedQtyError}
           min={1}
         />
+      </td>
 
-        {/* FOC */}
+      {/* FOC */}
+      <td className="px-1 py-1 text-right">
         <QtyUnitCell
           form={form}
           index={index}
@@ -371,52 +587,68 @@ export const GrnLocationRow = memo(function GrnLocationRow({
           disabled={disabled}
           plainText={plainText}
         />
+      </td>
 
-        {/* Unit price */}
+      {/* Unit price */}
+      <td className="px-2 py-1 text-right">
         <PriceCell
           form={form}
           index={index}
           disabled={disabled}
           plainText={plainText}
         />
+      </td>
 
-        <span className="text-foreground w-20 shrink-0 text-right text-xs font-semibold tabular-nums">
-          {formatCurrency(Number(netAmount) || 0)}
-        </span>
-        {showDelete && (
+      {/* Sub */}
+      <td className="px-2 py-1 text-right">
+        <GrnAmountCell form={form} index={index} field="subtotal" />
+      </td>
+
+      {/* Discount combo (rate/amount + override) */}
+      <td className="px-1 py-1">
+        <GrnLocationDiscountCell form={form} index={index} editable={editable} />
+      </td>
+
+      {/* Net */}
+      <td className="px-2 py-1 text-right">
+        <GrnAmountCell form={form} index={index} field="netAmount" />
+      </td>
+
+      {/* Tax combo (profile/amount + override) */}
+      <td className="px-1 py-1">
+        <GrnLocationTaxCell form={form} index={index} editable={editable} />
+      </td>
+
+      {/* Amount (total) */}
+      <td className="px-2 py-1 text-right font-semibold">
+        <GrnAmountCell form={form} index={index} field="totalPrice" />
+      </td>
+
+      {showDelete && (
+        <td className="px-1 py-1 text-center">
           <Button
             type="button"
             variant="ghost"
             size="icon-xs"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive ml-1 shrink-0"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
             aria-label={tfl("deleteLocation")}
             onClick={() => setShowDeleteConfirm(true)}
           >
             <Trash2 className="size-3.5" />
           </Button>
-        )}
-      </div>
 
-      {/* ── Expanded editor: Pricing / Details ── */}
-      {showExpanded && (
-        <GrnLocationExpanded
-          form={form}
-          index={index}
-          disabled={disabled}
-          plainText={plainText}
-        />
+          <DeleteDialog
+            open={showDeleteConfirm}
+            onOpenChange={setShowDeleteConfirm}
+            title={tfl("deleteLocation")}
+            description={locationName || undefined}
+            onConfirm={() => {
+              onDelete();
+              setShowDeleteConfirm(false);
+            }}
+          />
+        </td>
       )}
-
-      <DeleteDialog
-        open={showDeleteConfirm}
-        onOpenChange={setShowDeleteConfirm}
-        title={tfl("deleteLocation")}
-        description={locationName || undefined}
-        onConfirm={() => {
-          onDelete();
-          setShowDeleteConfirm(false);
-        }}
-      />
-    </div>
+    </tr>
   );
 });

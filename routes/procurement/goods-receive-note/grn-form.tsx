@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "react-router";
@@ -86,12 +86,22 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
     reValidateMode: "onChange",
   });
 
+  // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand group ที่
+  // location/qty/discount/tax ติด error (field อยู่ใน group expand เท่านั้น) + scroll
+  const [revealErrorSignal, setRevealErrorSignal] = useState(0);
+  const revealErrors = () => {
+    setRevealErrorSignal((c) => c + 1);
+    // scroll หา field แรกที่ผิด — retry ข้ามเฟรมจน group ที่ auto-expand mount field เสร็จ
+    scrollToFirstInvalidField();
+  };
+
   const actions = useGrnFormActions({
     form,
     goodsReceiveNote,
     defaultValues,
     mode,
     setMode,
+    revealErrors,
   });
 
   const isDisabled = isView || actions.isPending;
@@ -99,6 +109,24 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   // Document info ribbon — buyer/requestor + department แสดงอย่างเดียว (ไม่เข้า payload),
   // grn_date เป็น field จริง
   const { dateFormat, defaultBu, data: profileData } = useProfile();
+
+  // Rebaseline dirty state หลัง compute-sync ของ location (discount/tax/net/total)
+  // settle. RHF คิด isDirty จาก !deepEqual(getValues(), defaultValues) → setValue
+  // ค่า derived ที่ต่างจาก default ทำให้ dirty ค้าง → back/cancel ติด discard dialog
+  // เกินจริง. reset(getValues, keepDirtyValues) ทำให้ค่า derived เป็น baseline
+  // (ไม่นับ dirty) แต่คงค่าที่ผู้ใช้แก้ไว้ — ทำครั้งเดียวหลัง data พร้อม (mirror PO)
+  const didRebaseline = useRef(false);
+  useEffect(() => {
+    if (didRebaseline.current) return;
+    if (!goodsReceiveNote && !profileData) return;
+    didRebaseline.current = true;
+    form.reset(form.getValues(), { keepDirtyValues: true });
+    // reset() re-validate ทั้งฟอร์ม → required field ที่ยังว่าง (เช่น currency
+    // default ที่ header เพิ่งจะตั้งทีหลัง) โชว์ error แดงทั้งที่ user ยังไม่แตะ →
+    // clear ทิ้ง (mode onChange จะ validate ใหม่เองเมื่อ user แก้จริง)
+    form.clearErrors();
+  }, [form, goodsReceiveNote, profileData]);
+
   const watchedGrnDate = useWatch({ control: form.control, name: "grn_date" });
   const watchedDescription = useWatch({
     control: form.control,
@@ -188,9 +216,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
 
       <form
         id="grn-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
+        onSubmit={form.handleSubmit(actions.onSubmit, revealErrors)}
         className="space-y-3 px-4"
       >
         <GrnFormHeader
@@ -251,6 +277,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
               form={form}
               disabled={isDisabled}
               plainText={isView}
+              revealErrorSignal={revealErrorSignal}
             />
           </TabsContent>
           <TabsContent value="extra-cost">

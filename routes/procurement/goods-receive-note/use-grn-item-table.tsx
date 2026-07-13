@@ -22,6 +22,7 @@ import { useProductUnits } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
 import { GrnLocationRow } from "./grn-location-row";
+import { GRN_COL, grnColDataTotal } from "./grn-item-columns";
 
 /** 1 product group = 1 แถวใน DataGrid (product + N location indices) */
 export interface GrnGroup {
@@ -125,8 +126,8 @@ function ProductGroupCell({
   return <NameWithSubtext primary={productName} secondary={productLocalName} />;
 }
 
-/** Net รวมของกลุ่ม (sum ทุก location) */
-const NetTotalCell = memo(function NetTotalCell({
+/** Total (net + tax) รวมของกลุ่ม (sum total_price ทุก location) — คอลัมน์ Amount */
+const GroupTotalCell = memo(function GroupTotalCell({
   control,
   indices,
 }: {
@@ -134,11 +135,11 @@ const NetTotalCell = memo(function NetTotalCell({
   indices: number[];
 }) {
   "use no memo";
-  const nets = useWatch({
+  const totals = useWatch({
     control,
-    name: indices.map((i) => `items.${i}.net_amount` as const),
+    name: indices.map((i) => `items.${i}.total_price` as const),
   });
-  const total = (nets ?? []).reduce((a, n) => a + (Number(n) || 0), 0);
+  const total = (totals ?? []).reduce((a, n) => a + (Number(n) || 0), 0);
   return (
     <span className="text-foreground text-xs font-semibold tabular-nums">
       {formatCurrency(total)}
@@ -206,13 +207,17 @@ const GroupAmountSum = memo(function GroupAmountSum({
   );
 });
 
-/** เนื้อหา expand ของแถว product — location rows เดิม (GrnLocationRow) + Add Location */
+/**
+ * เนื้อหา expand ของแถว product — location rows เป็น `<table table-fixed>` ที่ align
+ * คอลัมน์กับ group row ผ่าน GRN_COL (mirror po-items-grid-locations) พร้อม thead labels
+ */
 function GrnGroupLocations({
   group,
   form,
   itemFields,
   disabled,
   plainText,
+  isPo,
   autoOpenLocationKey,
   onDeleteItem,
 }: {
@@ -221,34 +226,66 @@ function GrnGroupLocations({
   itemFields: { id: string }[];
   disabled: boolean;
   plainText: boolean;
+  isPo: boolean;
   autoOpenLocationKey: string | null;
   onDeleteItem: (index: number) => void;
 }) {
   "use no memo";
   const tfl = useTranslations("field");
-  const docType = useWatch({ control: form.control, name: "doc_type" }) ?? "";
-  const isPo = docType !== "manual";
+  const showActionCol = !disabled;
+
+  // คอลัมน์ align กับ group row — % ของ (data + action ถ้ามี); order นับเฉพาะ isPo
+  const denom = grnColDataTotal(isPo) + (showActionCol ? GRN_COL.action : 0);
+  const pct = (px: number) => `${(px / denom) * 100}%`;
+  const colCount =
+    9 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
+
   return (
-    <div className="w-0 min-w-full overflow-x-auto">
-      {/* section header ของ location (เหมือน PO) — จัดคอลัมน์ตรงกับ GrnLocationRow */}
-      <div className="text-muted-foreground flex items-center gap-2.5 py-1.5 pr-4 pl-3 text-xs font-semibold">
-        <span className="size-4 shrink-0" aria-hidden="true" />
-        <span className="flex-1">{tfl("location")}</span>
-        {isPo && (
-          <span className="w-44 shrink-0 text-right">{tfl("orderAbbr")}</span>
+    <table className="w-full table-fixed text-xs">
+      <colgroup>
+        <col style={{ width: pct(GRN_COL.product) }} />
+        {isPo && <col style={{ width: pct(GRN_COL.order) }} />}
+        <col style={{ width: pct(GRN_COL.received) }} />
+        <col style={{ width: pct(GRN_COL.foc) }} />
+        <col style={{ width: pct(GRN_COL.price) }} />
+        <col style={{ width: pct(GRN_COL.sub) }} />
+        <col style={{ width: pct(GRN_COL.discount) }} />
+        <col style={{ width: pct(GRN_COL.net) }} />
+        <col style={{ width: pct(GRN_COL.tax) }} />
+        <col style={{ width: pct(GRN_COL.amt) }} />
+        {showActionCol && <col style={{ width: pct(GRN_COL.action) }} />}
+      </colgroup>
+      <thead className="text-muted-foreground text-[0.7rem] font-semibold">
+        <tr className="border-border/60 border-b">
+          <th className="px-2 py-1 text-left">{tfl("location")}</th>
+          {isPo && (
+            <th className="px-1 py-1 text-right">{tfl("orderAbbr")}</th>
+          )}
+          <th className="px-1 py-1 text-right">
+            {tfl("receivedAbbr")}
+            <span className="text-destructive"> *</span>
+          </th>
+          <th className="px-1 py-1 text-right">{tfl("foc")}</th>
+          <th className="px-2 py-1 text-right">{tfl("unitPriceAbbr")}</th>
+          <th className="px-2 py-1 text-right">{tfl("subtotalAbbr")}</th>
+          <th className="px-2 py-1 text-right">{tfl("discount")}</th>
+          <th className="px-2 py-1 text-right">{tfl("netAbbr")}</th>
+          <th className="px-2 py-1 text-right">{tfl("tax")}</th>
+          <th className="px-2 py-1 text-right">{tfl("amountAbbr")}</th>
+          {showActionCol && <th className="px-1 py-1" />}
+        </tr>
+      </thead>
+      <tbody className="divide-border/60 divide-y">
+        {group.indices.length === 0 && (
+          <tr>
+            <td
+              colSpan={colCount}
+              className="text-muted-foreground py-3 text-center"
+            >
+              —
+            </td>
+          </tr>
         )}
-        <span className="w-44 shrink-0 text-right">
-          {tfl("receivedAbbr")}
-          <span className="text-destructive"> *</span>
-        </span>
-        <span className="w-44 shrink-0 text-right">{tfl("foc")}</span>
-        <span className="w-28 shrink-0 text-right">{tfl("price")}</span>
-        <span className="w-20 shrink-0 text-right">{tfl("netAbbr")}</span>
-        {!disabled && (
-          <span className="ml-1 size-6 shrink-0" aria-hidden="true" />
-        )}
-      </div>
-      <div className="divide-y">
         {group.indices.map((idx) => (
           <GrnLocationRow
             key={itemFields[idx]?.id ?? idx}
@@ -256,15 +293,16 @@ function GrnGroupLocations({
             form={form}
             disabled={disabled}
             isManual={group.isManual}
-            showDelete={!disabled}
+            isPo={isPo}
+            showDelete={showActionCol}
             onDelete={() => onDeleteItem(idx)}
             groupIndices={group.indices}
             plainText={plainText}
             autoOpenLocation={group.key === autoOpenLocationKey}
           />
         ))}
-      </div>
-    </div>
+      </tbody>
+    </table>
   );
 }
 
@@ -333,6 +371,7 @@ export function useGrnItemTable({
             itemFields={itemFields}
             disabled={disabled}
             plainText={plainText}
+            isPo={isPo}
             autoOpenLocationKey={autoOpenLocationKey}
             onDeleteItem={onDeleteItem}
           />
@@ -353,11 +392,15 @@ export function useGrnItemTable({
       },
     };
 
+    const rightMeta = {
+      headerClassName: "text-right",
+      cellClassName: "text-right",
+    };
     const dataColumns: ColumnDef<GrnGroup>[] = [
       {
         id: "product",
         header: tfl("product"),
-        size: 320,
+        size: GRN_COL.product,
         cell: ({ row }) => (
           <ProductGroupCell
             form={form}
@@ -372,11 +415,8 @@ export function useGrnItemTable({
             {
               id: "order",
               header: tfl("orderAbbr"),
-              size: 140,
-              meta: {
-                headerClassName: "text-right",
-                cellClassName: "text-right",
-              },
+              size: GRN_COL.order,
+              meta: rightMeta,
               cell: ({ row }) => (
                 <GroupQtySum
                   control={form.control}
@@ -391,8 +431,8 @@ export function useGrnItemTable({
       {
         id: "received",
         header: tfl("receivedAbbr"),
-        size: 140,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        size: GRN_COL.received,
+        meta: rightMeta,
         cell: ({ row }) => (
           <GroupQtySum
             control={form.control}
@@ -405,8 +445,8 @@ export function useGrnItemTable({
       {
         id: "foc",
         header: tfl("foc"),
-        size: 140,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        size: GRN_COL.foc,
+        meta: rightMeta,
         cell: ({ row }) => (
           <GroupQtySum
             control={form.control}
@@ -417,10 +457,18 @@ export function useGrnItemTable({
         ),
       },
       {
+        // price เป็น per-location (product row โชว์ dash เหมือน PO)
+        id: "price",
+        header: tfl("unitPriceAbbr"),
+        size: GRN_COL.price,
+        meta: rightMeta,
+        cell: () => <span className="text-muted-foreground">—</span>,
+      },
+      {
         id: "subtotal",
         header: tfl("subtotalAbbr"),
-        size: 120,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        size: GRN_COL.sub,
+        meta: rightMeta,
         cell: ({ row }) => (
           <GroupAmountSum
             control={form.control}
@@ -431,9 +479,9 @@ export function useGrnItemTable({
       },
       {
         id: "discount",
-        header: tfl("discountAbbr"),
-        size: 120,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        header: tfl("discount"),
+        size: GRN_COL.discount,
+        meta: rightMeta,
         cell: ({ row }) => (
           <GroupAmountSum
             control={form.control}
@@ -443,10 +491,23 @@ export function useGrnItemTable({
         ),
       },
       {
+        id: "net",
+        header: tfl("netAbbr"),
+        size: GRN_COL.net,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <GroupAmountSum
+            control={form.control}
+            indices={row.original.indices}
+            fields={["net_amount"]}
+          />
+        ),
+      },
+      {
         id: "tax",
-        header: tfl("taxAbbr"),
-        size: 120,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        header: tfl("tax"),
+        size: GRN_COL.tax,
+        meta: rightMeta,
         cell: ({ row }) => (
           <GroupAmountSum
             control={form.control}
@@ -457,11 +518,14 @@ export function useGrnItemTable({
       },
       {
         id: "amount",
-        header: tfl("netAbbr"),
-        size: 140,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+        header: tfl("amountAbbr"),
+        size: GRN_COL.amt,
+        meta: rightMeta,
         cell: ({ row }) => (
-          <NetTotalCell control={form.control} indices={row.original.indices} />
+          <GroupTotalCell
+            control={form.control}
+            indices={row.original.indices}
+          />
         ),
       },
     ];
@@ -501,7 +565,7 @@ export function useGrnItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 72,
+      size: GRN_COL.action,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",

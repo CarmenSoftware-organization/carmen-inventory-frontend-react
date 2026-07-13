@@ -33,6 +33,8 @@ interface UseGrnFormActionsParams {
   defaultValues: GrnFormValues;
   mode: FormMode;
   setMode: (mode: FormMode) => void;
+  /** validation ไม่ผ่าน → auto-expand group ที่ error + scroll หา field แรก */
+  revealErrors?: () => void;
 }
 
 export function useGrnFormActions({
@@ -41,6 +43,7 @@ export function useGrnFormActions({
   defaultValues,
   mode,
   setMode,
+  revealErrors,
 }: UseGrnFormActionsParams) {
   const navigate = useNavigate();
   const t = useTranslations("procurement.goodsReceiveNote");
@@ -289,6 +292,8 @@ export function useGrnFormActions({
       if (errs.items?.message) {
         toast.error(errs.items.message);
       }
+      // location/received_qty/discount/tax อยู่ใน group expand → เผย + scroll หา field
+      revealErrors?.();
     })();
   };
 
