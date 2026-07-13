@@ -13,7 +13,7 @@ import {
   InputSuffixField,
   InputSuffixInput,
 } from "@/components/ui/input/input-suffix";
-import { formatCurrency } from "@/lib/currency-utils";
+import { formatCurrency, EXCHANGE_RATE_DECIMALS } from "@/lib/currency-utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
@@ -260,19 +260,15 @@ export function PrItemExpand({
               <InputAmount
                 id={`items-${index}-pricelist-price`}
                 decimals={watchCurrencyDecimals}
-                min={0}
                 className={`h-8 text-right text-xs ${priceError ? "pl-7" : ""}`}
                 error={priceError}
                 errorIconAlign="left"
-                defaultValue={price}
-                {...form.register(`items.${index}.pricelist_price`)}
-                onChange={(e) => {
-                  const n = e.target.valueAsNumber;
-                  form.setValue(
-                    `items.${index}.pricelist_price`,
-                    Number.isNaN(n) ? 0 : n,
-                    { shouldDirty: true, shouldValidate: true },
-                  );
+                value={price}
+                onValueChange={(n) => {
+                  form.setValue(`items.${index}.pricelist_price`, n, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
                   form.setValue(
                     `items.${index}.pricelist_type`,
                     PR_ITEM_PRICELIST_COMPARE_TYPE.MANUAL_INPUT,
@@ -294,32 +290,23 @@ export function PrItemExpand({
               <p
                 className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
               >
-                {exchangeRate}
+                {exchangeRate.toFixed(EXCHANGE_RATE_DECIMALS)}
               </p>
             ) : (
-              <InputSuffixField className="h-8 w-full">
-                <InputSuffixInput
-                  id={`items-${index}-exchange-rate`}
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="0.0001"
-                  // base/default currency → disabled (rate = 1 อยู่แล้ว, ไม่มีผล);
-                  // แก้ได้เฉพาะสกุลต่างประเทศ
-                  disabled={!isForeignCurrency}
-                  className="disabled:bg-muted disabled:text-muted-foreground h-8 text-right text-xs disabled:cursor-default disabled:opacity-100"
-                  defaultValue={exchangeRate}
-                  {...form.register(`items.${index}.exchange_rate`)}
-                  onChange={(e) => {
-                    const n = e.target.valueAsNumber;
-                    form.setValue(
-                      `items.${index}.exchange_rate`,
-                      Number.isNaN(n) ? 1 : n,
-                      { shouldDirty: true },
-                    );
-                  }}
-                />
-              </InputSuffixField>
+              // exchange rate: fix 5 ทศนิยมตายตัว (เช่น 32.09500) ต่างจาก amount ที่
+              // อิงทศนิยมของสกุลเงิน — base/default currency → disabled (rate = 1)
+              <InputAmount
+                id={`items-${index}-exchange-rate`}
+                decimals={EXCHANGE_RATE_DECIMALS}
+                disabled={!isForeignCurrency}
+                className="disabled:bg-muted disabled:text-muted-foreground h-8 text-right text-xs disabled:cursor-default disabled:opacity-100"
+                value={exchangeRate}
+                onValueChange={(n) =>
+                  form.setValue(`items.${index}.exchange_rate`, n || 1, {
+                    shouldDirty: true,
+                  })
+                }
+              />
             )}
           </Field>
 
@@ -397,20 +384,16 @@ export function PrItemExpand({
                   <InputAmount
                     id={`items-${index}-discount-amount`}
                     decimals={watchCurrencyDecimals}
-                    min={0}
                     disabled={!isDiscAdj}
                     aria-label={tfl("discAmt")}
                     className="disabled:bg-muted disabled:text-muted-foreground h-8 w-full rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
-                    defaultValue={discAmt}
-                    {...form.register(`items.${index}.discount_amount`)}
-                    onChange={(e) => {
-                      const n = e.target.valueAsNumber;
-                      form.setValue(
-                        `items.${index}.discount_amount`,
-                        Number.isNaN(n) ? 0 : n,
-                        { shouldDirty: true, shouldValidate: true },
-                      );
-                    }}
+                    value={discAmt}
+                    onValueChange={(n) =>
+                      form.setValue(`items.${index}.discount_amount`, n, {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
                   />
                 </div>
               </InputSuffixField>
@@ -498,20 +481,16 @@ export function PrItemExpand({
                     <InputAmount
                       id={`items-${index}-tax-amount`}
                       decimals={watchCurrencyDecimals}
-                      min={0}
                       disabled={!isTaxAdj}
                       aria-label={tfl("taxAmt")}
                       className="disabled:bg-muted disabled:text-muted-foreground h-8 w-20 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
-                      defaultValue={taxAmt}
-                      {...form.register(`items.${index}.tax_amount`)}
-                      onChange={(e) => {
-                        const n = e.target.valueAsNumber;
-                        form.setValue(
-                          `items.${index}.tax_amount`,
-                          Number.isNaN(n) ? 0 : n,
-                          { shouldDirty: true, shouldValidate: true },
-                        );
-                      }}
+                      value={taxAmt}
+                      onValueChange={(n) =>
+                        form.setValue(`items.${index}.tax_amount`, n, {
+                          shouldDirty: true,
+                          shouldValidate: true,
+                        })
+                      }
                     />
                   </InputSuffixField>
                 )}
