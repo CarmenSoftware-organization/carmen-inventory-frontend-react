@@ -1,14 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  Building2,
-  Calendar,
-  ClipboardList,
-  FileText,
-  Package,
-  Truck,
-} from "lucide-react";
+import { Building2, FileText, Truck } from "lucide-react";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -53,7 +46,6 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
 
   const rows: OnOrderRow[] = data?.orders ?? [];
   const totalQty = Number(data?.total_on_order ?? 0);
-  const totalAmount = Number(data?.total_order_amount ?? 0);
   const summaryUnit = data?.inventory_unit_name ?? "";
 
   const columns = useMemo<ColumnDef<OnOrderRow>[]>(
@@ -239,28 +231,6 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
             </div>
           </DialogHeader>
 
-          {!isLoading && rows.length > 0 && (
-            <div className="grid grid-cols-3 gap-3">
-              <SummaryCard
-                icon={ClipboardList}
-                label={tfl("poNo")}
-                value={rows.length.toString()}
-              />
-              <SummaryCard
-                icon={Package}
-                label={tfl("quantity")}
-                value={totalQty.toLocaleString()}
-                unit={summaryUnit}
-              />
-              <SummaryCard
-                icon={Calendar}
-                label={tfl("total")}
-                value={formatCurrency(totalAmount)}
-                accent
-              />
-            </div>
-          )}
-
           <DataGrid
             table={table}
             recordCount={rows.length}
@@ -279,38 +249,5 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function SummaryCard({
-  icon: Icon,
-  label,
-  value,
-  unit,
-  accent,
-}: {
-  readonly icon: React.ComponentType<{ className?: string }>;
-  readonly label: string;
-  readonly value: string;
-  readonly unit?: string;
-  readonly accent?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-lg border p-3 ${
-        accent ? "bg-warning/5 border-warning/30" : "bg-muted/40"
-      }`}
-    >
-      <div className="text-muted-foreground flex items-center gap-1 text-[0.625rem] font-semibold tracking-wider uppercase">
-        <Icon className="size-3" />
-        {label}
-      </div>
-      <p
-        className={`mt-1 text-sm font-semibold tabular-nums ${accent ? "text-warning" : ""}`}
-      >
-        {value}
-      </p>
-      {unit && <p className="text-muted-foreground text-[0.625rem]">{unit}</p>}
-    </div>
   );
 }
