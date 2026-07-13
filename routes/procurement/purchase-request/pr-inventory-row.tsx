@@ -73,12 +73,20 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
           },
           {
             key: "reorderPt",
-            label: <span className="uppercase">{t("reorderPt")}</span>,
+            label: (
+              <span className="text-muted-foreground uppercase">
+                {t("reorderPt")}
+              </span>
+            ),
             value: re_order_qty.toLocaleString(),
           },
           {
             key: "restock",
-            label: <span className="uppercase">{t("restock")}</span>,
+            label: (
+              <span className="text-muted-foreground uppercase">
+                {t("restock")}
+              </span>
+            ),
             value: re_stock_qty.toLocaleString(),
           },
         ]}
