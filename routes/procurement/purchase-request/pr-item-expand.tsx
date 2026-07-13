@@ -20,6 +20,7 @@ import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { computePrItemAmounts, type PrFormValues } from "./pr-form-schema";
 import PrInventoryRow from "./pr-inventory-row";
 import { PrItemSummary } from "./pr-item-summary";
+import { PrLastReceivingInfo } from "./pr-last-receiving-info";
 
 type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
 
@@ -248,9 +249,14 @@ export function PrItemExpand({
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel
               htmlFor={`items-${index}-pricelist-price`}
-              className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide"
+              className="text-muted-foreground flex min-h-6 items-center justify-end gap-1 text-xs tracking-wide"
             >
               U.Price
+              <PrLastReceivingInfo
+                control={form.control}
+                index={index}
+                buCode={buCode}
+              />
             </FieldLabel>
             {isFieldDisabled ? (
               <p className="flex min-h-6 items-center justify-end text-xs font-semibold tabular-nums">

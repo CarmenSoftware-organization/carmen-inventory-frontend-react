@@ -228,6 +228,12 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/product-item-groups`,
   PRODUCT_LAST_RECEIVING: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/cost/product/${productId}/last-receiving`,
+  PRODUCT_LAST_RECEIVING_BY_UNIT: (
+    buCode: string,
+    productId: string,
+    unitId: string,
+  ) =>
+    `/api/proxy/api/${buCode}/cost/products/${productId}/last-receiving/unit/${unitId}`,
   PRODUCT_ON_HAND: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/products/${productId}/on-hand`,
   PRODUCT_ON_ORDER: (buCode: string, productId: string) =>
