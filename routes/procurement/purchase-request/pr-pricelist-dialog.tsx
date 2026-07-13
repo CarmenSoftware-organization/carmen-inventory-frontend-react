@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "use-intl";
-import { FileText, Package, Receipt } from "lucide-react";
+import { Crown, FileText, Package, Receipt } from "lucide-react";
 import { toast } from "sonner";
 import {
   type ColumnDef,
@@ -60,6 +60,16 @@ const buildColumns = (
 ): ColumnDef<PricelistEntry>[] => {
   const base: ColumnDef<PricelistEntry>[] = [
     {
+      id: "index",
+      header: "#",
+      size: 44,
+      meta: {
+        headerClassName: "text-center",
+        cellClassName: "text-center text-muted-foreground tabular-nums",
+      },
+      cell: ({ row }) => row.index + 1,
+    },
+    {
       accessorKey: "vendor_name",
       header: tfl("vendor"),
       size: 200,
@@ -70,11 +80,12 @@ const buildColumns = (
           </span>
           {row.original.is_preferred && (
             <Badge
-              variant="success-light"
               size="xs"
-              className="text-[0.625rem]"
+              variant={'ghost'}
+              className="gap-1 text-[0.625rem]"
             >
-              ★ {t("preferred")}
+              <Crown className="size-3 text-warning" />
+              {/*{t("preferred")}*/}
             </Badge>
           )}
         </div>
@@ -205,6 +216,8 @@ export function PrPricelistDialog({
   const { buCode, dateFormat } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
   const [lists, setLists] = useState<PricelistEntry[]>([]);
+  // pricelist ที่ถูกเลือกอยู่ (data.selected) — แยกจาก lists จึงต้องรวมมาแสดงเอง
+  const [selected, setSelected] = useState<PricelistEntry | null>(null);
 
   useEffect(() => {
     if (!open || !productId || !unitId || !currencyId || !buCode) return;
@@ -212,6 +225,7 @@ export function PrPricelistDialog({
     const fetchPriceLists = async () => {
       setIsLoading(true);
       setLists([]);
+      setSelected(null);
       try {
         const url = buildUrl(API_ENDPOINTS.PRICE_LIST_COMPARE(buCode), {
           product_id: productId,
@@ -223,6 +237,7 @@ export function PrPricelistDialog({
         if (!res.ok) return;
         const json = await res.json();
         setLists(json.data?.lists ?? []);
+        setSelected(json.data?.selected ?? null);
       } catch {
         toast.error(t("priceListLoadFailed"));
       } finally {
@@ -231,7 +246,7 @@ export function PrPricelistDialog({
     };
 
     fetchPriceLists();
-  }, [open, productId, unitId, currencyId, atDate, buCode]);
+  }, [open, productId, unitId, currencyId, atDate, buCode, t]);
 
   const handleSelect = (entry: PricelistEntry) => {
     if (readOnly) return;
@@ -239,9 +254,19 @@ export function PrPricelistDialog({
     onOpenChange(false);
   };
 
+  // selected ไม่อยู่ใน lists → prepend (กัน duplicate ด้วย pricelist_detail_id)
+  const rows = useMemo(() => {
+    if (!selected) return lists;
+    return lists.some(
+      (l) => l.pricelist_detail_id === selected.pricelist_detail_id,
+    )
+      ? lists
+      : [selected, ...lists];
+  }, [lists, selected]);
+
   const minPrice =
-    lists.length > 0
-      ? Math.min(...lists.map((l) => l.price).filter((p) => p > 0))
+    rows.length > 0
+      ? Math.min(...rows.map((l) => l.price).filter((p) => p > 0))
       : 0;
 
   const pricelistColumns = buildColumns(
@@ -254,7 +279,7 @@ export function PrPricelistDialog({
   );
 
   const table = useReactTable({
-    data: lists,
+    data: rows,
     columns: pricelistColumns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.pricelist_detail_id,
@@ -306,7 +331,7 @@ export function PrPricelistDialog({
         <div className="flex min-h-0 flex-1 flex-col px-6 pb-6">
           <DataGrid
             table={table}
-            recordCount={lists.length}
+            recordCount={rows.length}
             isLoading={isLoading}
             loadingMode="spinner"
             emptyMessage={emptyMessage}
@@ -319,7 +344,10 @@ export function PrPricelistDialog({
             tableClassNames={{
               base: "text-xs",
               headerRow: "h-10",
-              bodyRow: "h-11 hover:bg-primary/5 cursor-pointer",
+              // readOnly = เลือกไม่ได้ → ไม่ต้องขึ้น pointer/hover ให้เข้าใจผิดว่าคลิกได้
+              bodyRow: readOnly
+                ? "h-11"
+                : "h-11 hover:bg-primary/5 cursor-pointer",
             }}
           >
             <DataGridContainer className="rounded-lg border">
