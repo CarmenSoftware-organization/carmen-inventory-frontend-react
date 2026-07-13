@@ -93,7 +93,9 @@ export function PrPricelistCompare({
           <TooltipTrigger asChild>
             <Button
               type="button"
+              variant="ghost"
               size="icon-xs"
+              className="text-primary"
               aria-label={tc("comparePrice")}
               onClick={() => setShowPricelist(true)}
             >
