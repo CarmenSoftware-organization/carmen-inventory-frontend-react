@@ -26,7 +26,7 @@ describe("categorySchema — code is optional (server-assigned)", () => {
   });
 
   it("parses successfully with no code key at all", () => {
-    const { code, ...withoutCode } = baseValues;
+    const { code: _code, ...withoutCode } = baseValues;
     const result = categorySchema.safeParse(withoutCode);
     expect(result.success).toBe(true);
   });
