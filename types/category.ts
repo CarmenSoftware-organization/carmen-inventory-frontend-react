@@ -89,7 +89,7 @@ export interface ItemGroupDto {
 }
 
 export interface CreateCategoryDto {
-  code: string;
+  code?: string;
   name: string;
   description?: string;
   is_active: boolean;
@@ -105,7 +105,7 @@ export interface CreateCategoryDto {
 }
 
 export interface CreateSubCategoryDto {
-  code: string;
+  code?: string;
   name: string;
   description?: string;
   is_active: boolean;
@@ -122,7 +122,7 @@ export interface CreateSubCategoryDto {
 }
 
 export interface CreateItemGroupDto {
-  code: string;
+  code?: string;
   name: string;
   description?: string;
   is_active: boolean;

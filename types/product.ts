@@ -145,10 +145,7 @@ function createLocationSchema(tv: TranslationFn, tf: TranslationFn) {
 export function createProductSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     name: z.string().min(1, tv("required", { field: tf("name") })),
-    code: z
-      .string()
-      .min(1, tv("required", { field: tf("code") }))
-      .max(10, tv("maxLength", { field: tf("code"), max: 10 })),
+    code: z.string().optional(),
     local_name: z
       .string()
       .min(1, tv("required", { field: tf("localName") }))
@@ -210,7 +207,7 @@ export interface LocationPayload {
 
 export interface CreateProductDto {
   name: string;
-  code: string;
+  code?: string;
   local_name: string;
   description: string;
   inventory_unit_id: string;

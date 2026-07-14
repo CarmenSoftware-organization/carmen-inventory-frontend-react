@@ -37,6 +37,13 @@ export function useCategoryTree({
   const [userToggles, setUserToggles] = useState<Record<string, boolean>>({});
   const [overrideAll, setOverrideAll] = useState<boolean | null>(null);
 
+  // เรียงทุกระดับตาม code น้อย→มาก แบบ numeric-aware (C2 มาก่อน C10 ไม่ใช่ lexical)
+  const byCode = (a: CategoryNode, b: CategoryNode) =>
+    a.code.localeCompare(b.code, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+
   const categoryData: CategoryNode[] = (() => {
     if (isLoading || !categories || !subCategories || !itemGroups) return [];
 
@@ -64,7 +71,8 @@ export function useCategoryTree({
           tax_rate: Number(ig.tax_rate ?? 0),
           cascade_deviation: ig.cascade_deviation,
           doc_version: ig.doc_version,
-        }));
+        }))
+        .sort(byCode);
     };
 
     const mapSubCategories = (categoryId: string): CategoryNode[] => {
@@ -91,27 +99,30 @@ export function useCategoryTree({
           tax_rate: Number(sub.tax_rate ?? 0),
           cascade_deviation: sub.cascade_deviation,
           doc_version: sub.doc_version,
-        }));
+        }))
+        .sort(byCode);
     };
 
-    return categories.map((cat) => ({
-      id: cat.id,
-      code: cat.code,
-      name: cat.name,
-      description: cat.description,
-      type: NODE_TYPE.CATEGORY,
-      children: mapSubCategories(cat.id),
-      is_active: cat.is_active,
-      price_deviation_limit: cat.price_deviation_limit,
-      qty_deviation_limit: cat.qty_deviation_limit,
-      is_used_in_recipe: cat.is_used_in_recipe,
-      is_sold_directly: cat.is_sold_directly,
-      tax_profile_id: cat.tax_profile_id,
-      tax_profile_name: cat.tax_profile_name,
-      tax_rate: Number(cat.tax_rate ?? 0),
-      cascade_deviation: false,
-      doc_version: cat.doc_version,
-    }));
+    return categories
+      .map((cat) => ({
+        id: cat.id,
+        code: cat.code,
+        name: cat.name,
+        description: cat.description,
+        type: NODE_TYPE.CATEGORY,
+        children: mapSubCategories(cat.id),
+        is_active: cat.is_active,
+        price_deviation_limit: cat.price_deviation_limit,
+        qty_deviation_limit: cat.qty_deviation_limit,
+        is_used_in_recipe: cat.is_used_in_recipe,
+        is_sold_directly: cat.is_sold_directly,
+        tax_profile_id: cat.tax_profile_id,
+        tax_profile_name: cat.tax_profile_name,
+        tax_rate: Number(cat.tax_rate ?? 0),
+        cascade_deviation: false,
+        doc_version: cat.doc_version,
+      }))
+      .sort(byCode);
   })();
 
   const expandedResult: Record<string, boolean> = {};

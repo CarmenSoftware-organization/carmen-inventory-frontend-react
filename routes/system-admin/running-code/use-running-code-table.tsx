@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
+import { columnSkeletons } from "@/components/ui/data-grid/columns";
 import type { RunningCode } from "@/types/running-code";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -44,6 +45,23 @@ export function useRunningCodeTable({
           {row.getValue("type")}
         </CellAction>
       ),
+    },
+    {
+      accessorKey: "note",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("note")} />
+      ),
+      cell: ({ row }) => {
+        const note = row.getValue<string>("note");
+        return note ? (
+          <span className="block max-w-[24rem] truncate" title={note}>
+            {note}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        );
+      },
+      meta: { headerTitle: tfl("note"), skeleton: columnSkeletons.text },
     },
   ];
 
