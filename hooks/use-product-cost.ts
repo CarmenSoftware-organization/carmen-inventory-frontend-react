@@ -42,6 +42,8 @@ export interface ProductLastReceivingByUnit {
   currency_id?: string;
   currency_code?: string;
   exchange_rate?: number;
+  vendor_id?: string;
+  vendor_name?: string;
 }
 
 export function useProductCostByLocationQty(

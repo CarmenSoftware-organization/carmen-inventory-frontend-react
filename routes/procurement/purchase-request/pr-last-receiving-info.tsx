@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useWatch, type Control } from "react-hook-form";
+import { Link } from "react-router";
 import { Info } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
@@ -45,6 +46,11 @@ export function PrLastReceivingInfo({ control, index, buCode }: Props) {
   // data อาจกลับมาเป็น object แต่ไม่มี cost_per_unit → กัน formatCurrency(undefined) crash
   const cost = data?.cost_per_unit;
   const hasCost = typeof cost === "number" && Number.isFinite(cost);
+  // ลิงก์ไปเอกสารต้นทางได้เฉพาะ GRN (type อื่น/ไม่มี id → แสดงเป็น text)
+  const grnLink =
+    data?.type === "good_received_note" && data.id
+      ? `/procurement/goods-receive-note/${data.id}`
+      : null;
 
   return (
     <TooltipProvider delayDuration={100}>
@@ -69,9 +75,20 @@ export function PrLastReceivingInfo({ control, index, buCode }: Props) {
                   {formatCurrency(cost)}
                   {data?.currency_code ? ` ${data.currency_code}` : ""}
                 </div>
-                {data?.no && (
-                  <div className="text-muted-foreground">{data.no}</div>
+                {data?.vendor_name && (
+                  <div className="text-muted-foreground">{data.vendor_name}</div>
                 )}
+                {data?.no &&
+                  (grnLink ? (
+                    <Link
+                      to={grnLink}
+                      className="text-primary hover:underline"
+                    >
+                      {data.no}
+                    </Link>
+                  ) : (
+                    <div className="text-muted-foreground">{data.no}</div>
+                  ))}
               </>
             ) : (
               <div className="text-muted-foreground">
