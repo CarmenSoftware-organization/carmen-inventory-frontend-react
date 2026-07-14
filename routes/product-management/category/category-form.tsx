@@ -7,7 +7,7 @@ import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusSwitch } from "@/components/ui/status-switch";
-import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldInput, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -186,6 +186,11 @@ export function CategoryForm({
               />
             )}
           />
+          {form.formState.errors.tax_profile_id?.message && (
+            <FieldError>
+              {form.formState.errors.tax_profile_id.message}
+            </FieldError>
+          )}
         </Field>
 
         {/* Deviation limits */}
