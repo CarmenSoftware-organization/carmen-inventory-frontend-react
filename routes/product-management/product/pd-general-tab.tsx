@@ -4,7 +4,11 @@ import { Percent, Plus } from "lucide-react";
 import { Controller, useFieldArray } from "react-hook-form";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
-import type { ItemGroupDto } from "@/types/category";
+import type {
+  ItemGroupDto,
+  CategoryDto,
+  SubCategoryDto,
+} from "@/types/category";
 import {
   Field,
   FieldError,
@@ -23,6 +27,8 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { LookupUnit } from "@/components/lookup/lookup-unit";
+import { LookupCategory } from "@/components/lookup/lookup-category";
+import { LookupSubCategory } from "@/components/lookup/lookup-sub-category";
 import { LookupItemGroup } from "@/components/lookup/lookup-item-group";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import EmptyComponent from "@/components/empty-component";
@@ -57,6 +63,33 @@ function GeneralTab({
   );
 
   const isAdd = !product;
+
+  const [categoryId, setCategoryId] = useState(
+    product?.product_category?.id ?? "",
+  );
+  const [subCategoryId, setSubCategoryId] = useState(
+    product?.product_sub_category?.id ?? "",
+  );
+
+  const handleCategoryChange = (id: string, item?: CategoryDto) => {
+    setCategoryId(id);
+    setCategoryName(item?.name ?? "");
+    setSubCategoryId("");
+    setSubCategoryName("");
+    form.setValue("product_item_group_id", "", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  const handleSubCategoryChange = (id: string, item?: SubCategoryDto) => {
+    setSubCategoryId(id);
+    setSubCategoryName(item?.name ?? "");
+    form.setValue("product_item_group_id", "", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
   const handleItemGroupChange = (id: string, item?: ItemGroupDto) => {
     form.setValue("product_item_group_id", id, {
@@ -215,6 +248,8 @@ function GeneralTab({
                       <LookupItemGroup
                         value={field.value}
                         onValueChange={handleItemGroupChange}
+                        filterSubCategoryId={subCategoryId}
+                        disabled={!subCategoryId}
                         defaultLabel={product?.product_item_group?.name}
                         placeholder={t("itemGroupPlaceholder")}
                         error={
@@ -228,12 +263,32 @@ function GeneralTab({
 
               <Field>
                 <FieldLabel>{tfl("category")}</FieldLabel>
-                <ReadOnlyValue value={categoryName} />
+                {isDisabled ? (
+                  <ReadOnlyValue value={categoryName} />
+                ) : (
+                  <LookupCategory
+                    value={categoryId}
+                    onValueChange={handleCategoryChange}
+                    defaultLabel={product?.product_category?.name}
+                    className="w-full"
+                  />
+                )}
               </Field>
 
               <Field>
                 <FieldLabel>{tfl("subCategory")}</FieldLabel>
-                <ReadOnlyValue value={subCategoryName} />
+                {isDisabled ? (
+                  <ReadOnlyValue value={subCategoryName} />
+                ) : (
+                  <LookupSubCategory
+                    value={subCategoryId}
+                    onValueChange={handleSubCategoryChange}
+                    filterCategoryId={categoryId}
+                    disabled={!categoryId}
+                    defaultLabel={product?.product_sub_category?.name}
+                    className="w-full"
+                  />
+                )}
               </Field>
 
               <Field>
