@@ -236,31 +236,6 @@ function GeneralTab({
                 )}
               </Field>
 
-              <Field className="sm:col-span-2">
-                <FieldLabel required>{tfl("itemGroup")}</FieldLabel>
-                {isDisabled ? (
-                  <ReadOnlyValue value={product?.product_item_group?.name} />
-                ) : (
-                  <Controller
-                    control={form.control}
-                    name="product_item_group_id"
-                    render={({ field }) => (
-                      <LookupItemGroup
-                        value={field.value}
-                        onValueChange={handleItemGroupChange}
-                        filterSubCategoryId={subCategoryId}
-                        disabled={!subCategoryId && !field.value}
-                        defaultLabel={product?.product_item_group?.name}
-                        placeholder={t("itemGroupPlaceholder")}
-                        error={
-                          form.formState.errors.product_item_group_id?.message
-                        }
-                      />
-                    )}
-                  />
-                )}
-              </Field>
-
               <Field>
                 <FieldLabel>{tfl("category")}</FieldLabel>
                 {isDisabled ? (
@@ -287,6 +262,31 @@ function GeneralTab({
                     disabled={!categoryId}
                     defaultLabel={product?.product_sub_category?.name}
                     className="w-full"
+                  />
+                )}
+              </Field>
+
+              <Field className="sm:col-span-2">
+                <FieldLabel required>{tfl("itemGroup")}</FieldLabel>
+                {isDisabled ? (
+                  <ReadOnlyValue value={product?.product_item_group?.name} />
+                ) : (
+                  <Controller
+                    control={form.control}
+                    name="product_item_group_id"
+                    render={({ field }) => (
+                      <LookupItemGroup
+                        value={field.value}
+                        onValueChange={handleItemGroupChange}
+                        filterSubCategoryId={subCategoryId}
+                        disabled={!subCategoryId && !field.value}
+                        defaultLabel={product?.product_item_group?.name}
+                        placeholder={t("itemGroupPlaceholder")}
+                        error={
+                          form.formState.errors.product_item_group_id?.message
+                        }
+                      />
+                    )}
                   />
                 )}
               </Field>
