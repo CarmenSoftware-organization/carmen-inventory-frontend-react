@@ -122,6 +122,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           code: department.code,
           name: department.name,
           description: department.description,
+          account_code: department.account_code ?? "",
           is_active: department.is_active,
           department_users: { ...emptyTransfer },
           hod_users: { ...emptyTransfer },
@@ -130,6 +131,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           code: "",
           name: "",
           description: "",
+          account_code: "",
           is_active: true,
           department_users: { ...emptyTransfer },
           hod_users: { ...emptyTransfer },
@@ -165,6 +167,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
       code: values.code,
       name: values.name,
       description: values.description ?? "",
+      account_code: values.account_code,
       is_active: values.is_active,
       department_users: values.department_users,
       hod_users: values.hod_users,
@@ -203,6 +206,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           code: department.code,
           name: department.name,
           description: department.description,
+          account_code: department.account_code ?? "",
           is_active: department.is_active,
           department_users: { ...emptyTransfer },
           hod_users: { ...emptyTransfer },
@@ -299,6 +303,22 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                       error={form.formState.errors.name?.message}
                       maxLength={100}
                       {...form.register("name")}
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Field>
+                    <FieldLabel htmlFor="department-account-code">
+                      {tfl("accountCode")}
+                    </FieldLabel>
+                    <FieldInput
+                      id="department-account-code"
+                      placeholder={tfl("optional")}
+                      className="h-8"
+                      disabled={isDisabled}
+                      maxLength={30}
+                      {...form.register("account_code")}
                     />
                   </Field>
                 </div>
