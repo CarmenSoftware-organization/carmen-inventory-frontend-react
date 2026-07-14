@@ -5,6 +5,8 @@ import {
   type FieldArrayWithId,
   type UseFormReturn,
 } from "react-hook-form";
+import { Crown } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { FieldInput, FieldPlainText } from "@/components/ui/field";
 import { LookupProduct } from "@/components/lookup/lookup-product";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
@@ -256,6 +258,39 @@ export function PriceCell({
         {...form.register(`pricelist_detail.${index}.price_without_tax`, {
           valueAsNumber: true,
         })}
+      />
+    </div>
+  );
+}
+
+/** Preferred — view: Crown เมื่อ preferred · edit: checkbox toggle ต่อ item */
+export function PreferredCell({
+  form,
+  index,
+  isView,
+  isDisabled,
+  detailRef,
+}: CellProps) {
+  "use no memo";
+  if (isView)
+    return detailRef?.is_preferred ? (
+      <Crown className="text-warning mx-auto size-3.5" aria-label="preferred" />
+    ) : (
+      <span className="text-muted-foreground/50">—</span>
+    );
+  return (
+    <div className="flex justify-center">
+      <Controller
+        control={form.control}
+        name={`pricelist_detail.${index}.is_preferred`}
+        render={({ field }) => (
+          <Checkbox
+            checked={!!field.value}
+            onCheckedChange={(v) => field.onChange(v === true)}
+            disabled={isDisabled}
+            aria-label="preferred"
+          />
+        )}
       />
     </div>
   );

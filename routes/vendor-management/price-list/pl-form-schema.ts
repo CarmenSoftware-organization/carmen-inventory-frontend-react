@@ -21,6 +21,7 @@ function createPriceListDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     tax_rate: z.coerce.number().min(0),
     tax_amt: z.coerce.number().min(0),
     lead_time_days: z.coerce.number().min(0),
+    is_preferred: z.boolean(),
   });
 }
 
@@ -115,6 +116,7 @@ export function getDefaultValues(
           tax_rate: d.tax_rate ?? 0,
           tax_amt: d.tax_amt,
           lead_time_days: d.lead_time_days,
+          is_preferred: d.is_preferred ?? false,
         })) ?? [],
     };
   }
@@ -135,6 +137,7 @@ export const PRICE_LIST_DETAIL_EMPTY = {
   tax_rate: 0,
   tax_amt: 0,
   lead_time_days: 0,
+  is_preferred: false,
 } satisfies PriceListFormValues["pricelist_detail"][number];
 
 /**
@@ -164,5 +167,6 @@ export function mapDetailToPayload(
     tax_amt: taxAmt,
     lead_time_days: d.lead_time_days,
     moq_qty: d.moq_qty,
+    is_preferred: d.is_preferred,
   };
 }

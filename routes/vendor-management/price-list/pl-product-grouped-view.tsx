@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Crown } from "lucide-react";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { round2 } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
@@ -72,6 +73,12 @@ export function PLProductGroupedView({
                   {/* moq + unit → price (lead time) */}
                   <Td className={cn("align-middle", tierClass)}>
                     <span className="flex items-center gap-1.5 text-xs tabular-nums">
+                      {tier.is_preferred && (
+                        <Crown
+                          className="text-warning size-3 shrink-0"
+                          aria-label="preferred"
+                        />
+                      )}
                       <span className="text-foreground font-medium">
                         {Number(tier.moq_qty) || 0}+ {tier.unit_name ?? "—"}
                       </span>

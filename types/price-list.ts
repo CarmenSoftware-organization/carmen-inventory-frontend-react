@@ -31,6 +31,7 @@ export interface PriceListDetailItem {
   tax_rate: number;
   tax_amt: number;
   lead_time_days: number;
+  is_preferred: boolean;
   is_active: boolean;
   description: string | null;
   note: string | null;
@@ -86,6 +87,7 @@ export interface CreatePriceListDto {
       tax_amt: number;
       lead_time_days: number;
       moq_qty: number;
+      is_preferred: boolean;
     }[];
     update?: {
       id: string;
@@ -99,6 +101,7 @@ export interface CreatePriceListDto {
       tax_amt: number;
       lead_time_days: number;
       moq_qty: number;
+      is_preferred: boolean;
     }[];
     remove?: { id: string }[];
   };

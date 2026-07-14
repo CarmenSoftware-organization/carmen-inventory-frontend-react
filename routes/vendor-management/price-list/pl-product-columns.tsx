@@ -7,6 +7,7 @@ import type { PriceListFormValues } from "./pl-form-schema";
 import {
   LeadCell,
   MoqCell,
+  PreferredCell,
   PriceCell,
   ProductCell,
   TaxCell,
@@ -138,6 +139,21 @@ export function buildPlProductColumns({
         />
       ),
       meta: { headerClassName: "text-right", cellClassName: "text-right" },
+    },
+    {
+      id: "preferred",
+      size: 96,
+      header: () => tfl("preferred"),
+      cell: ({ row }) => (
+        <PreferredCell
+          form={form}
+          index={row.index}
+          isView={isView}
+          isDisabled={isDisabled}
+          detailRef={detailRefs?.[row.index]}
+        />
+      ),
+      meta: { headerClassName: "text-center", cellClassName: "text-center" },
     },
   ];
 
