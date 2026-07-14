@@ -3054,7 +3054,16 @@
       "discountAmountLabel": "Discount Amount",
       "taxAdjustment": "Tax Adjustment",
       "addLocation": "Add Location",
-      "deleteProduct": "Delete Product"
+      "deleteProduct": "Delete Product",
+      "selectFromGrn": "Select from GRN",
+      "selectFromGrnDesc": "Pick received lines from the referenced GRN to credit.",
+      "searchProduct": "Search product by code or name…",
+      "alreadyAdded": "Added",
+      "noGrnItems": "No lines in this GRN",
+      "noGrnItemsDesc": "The referenced GRN has no received lines to credit.",
+      "nItemsSelected": "{count} selected",
+      "addNItems": "{count, plural, =0 {Add} =1 {Add 1 item} other {Add # items}}",
+      "cnAmount": "CN Amount"
     },
     "goodsReceiveNote": {
       "entity": "Goods Receive Note",

@@ -126,8 +126,9 @@ export function CnForm({ creditNote }: CnFormProps) {
       description: values.description,
       currency_id: values.currency_code,
       exchange_rate: values.exchange_rate,
-      invoice_no: values.invoice_no,
-      invoice_date: values.invoice_date,
+      // omit ตอนว่าง — backend ไม่รับ "" (invoice_date เป็น ISO-8601 datetime)
+      ...(values.invoice_no ? { invoice_no: values.invoice_no } : {}),
+      ...(values.invoice_date ? { invoice_date: values.invoice_date } : {}),
       tax_invoice_no: values.tax_invoice_no,
       tax_invoice_date: values.tax_invoice_date,
       tax_amount: values.tax_amount,

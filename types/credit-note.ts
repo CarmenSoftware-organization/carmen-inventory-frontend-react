@@ -51,6 +51,10 @@ export interface CnItemPayload {
   currency_code: string;
   price: number;
   net_amount: number;
+  discount_rate: number;
+  discount_amount: number;
+  is_discount_adjustment: boolean;
+  tax_profile_id?: string | null;
   tax_rate: number;
   tax_amount: number;
   total_price: number;
@@ -71,8 +75,10 @@ export interface CreateCnDto {
   description?: string;
   currency_id: string;
   exchange_rate: number;
-  invoice_no: string;
-  invoice_date: string;
+  // อ้างอิงจาก GRN — GRN บางใบไม่มี จึง optional และ omit ตอนว่าง
+  // (backend ไม่รับ "" สำหรับ invoice_date ที่เป็น ISO-8601 datetime)
+  invoice_no?: string;
+  invoice_date?: string;
   tax_invoice_no: string;
   tax_invoice_date: string;
   tax_amount: number;

@@ -158,6 +158,10 @@ export function CnGeneralFields({
                 form.setValue("exchange_rate", grn.exchange_rate ?? 1);
                 form.setValue("invoice_no", grn.invoice_no ?? "");
                 form.setValue("invoice_date", grn.invoice_date ?? "");
+                // เปลี่ยน GRN → ล้าง items เดิม (เป็นของ GRN ก่อนหน้า, product/location
+                // คนละชุด) · onItemChange ยิงเฉพาะตอน user เลือกเอง ไม่ยิงตอน mount
+                // จึงไม่ล้าง items ที่โหลดมาในโหมด edit
+                form.setValue("items", [], { shouldDirty: true });
               }}
               vendorId={vendorId}
               disabled={disabled}

@@ -3049,7 +3049,16 @@
       "discountAmountLabel": "จำนวนส่วนลด",
       "taxAdjustment": "ปรับปรุงภาษี",
       "addLocation": "เพิ่มสถานที่",
-      "deleteProduct": "ลบสินค้า"
+      "deleteProduct": "ลบสินค้า",
+      "selectFromGrn": "เลือกจาก GRN",
+      "selectFromGrnDesc": "เลือกรายการที่รับเข้าจาก GRN อ้างอิงเพื่อทำใบลดหนี้",
+      "searchProduct": "ค้นหาสินค้าด้วยรหัสหรือชื่อ…",
+      "alreadyAdded": "เพิ่มแล้ว",
+      "noGrnItems": "ไม่มีรายการใน GRN นี้",
+      "noGrnItemsDesc": "GRN อ้างอิงไม่มีรายการที่รับเข้าให้ทำใบลดหนี้",
+      "nItemsSelected": "เลือก {count} รายการ",
+      "addNItems": "{count, plural, =0 {เพิ่ม} other {เพิ่ม # รายการ}}",
+      "cnAmount": "จำนวนลดหนี้"
     },
     "goodsReceiveNote": {
       "entity": "ใบรับสินค้า",

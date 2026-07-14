@@ -43,6 +43,11 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
     currency_code: z.string(),
     unit_price: z.coerce.number().min(0),
     net_amount: z.coerce.number().min(0),
+    discount_rate: z.coerce.number().min(0),
+    discount_amount: z.coerce.number().min(0),
+    is_discount_adjustment: z.boolean(),
+    tax_profile_id: z.string().nullable(),
+    tax_profile_name: z.string(),
     tax_rate: z.coerce.number().min(0),
     tax_amount: z.coerce.number().min(0),
     total_amount: z.coerce.number().min(0),
@@ -83,12 +88,10 @@ export function createCnSchema(tv: TranslationFn, tf: TranslationFn) {
     exchange_rate: z.coerce
       .number()
       .gt(0, tv("minNumber", { field: tf("exchangeRate"), min: 0 })),
-    invoice_no: z
-      .string()
-      .min(1, tv("required", { field: tf("invoiceNo") })),
-    invoice_date: z
-      .string()
-      .min(1, tv("required", { field: tf("invoiceDate") })),
+    // invoice_no / invoice_date เป็นข้อมูลอ้างอิงจาก GRN (readOnly แก้เองไม่ได้) —
+    // GRN บางใบไม่มีค่า จึงไม่บังคับ กัน submit โดนบล็อกเงียบ ๆ โดยไม่มี error โชว์
+    invoice_no: z.string(),
+    invoice_date: z.string(),
     tax_invoice_no: z
       .string()
       .min(1, tv("required", { field: tf("taxInvoiceNo") })),
@@ -124,6 +127,11 @@ export const CN_ITEM = {
   currency_code: "",
   unit_price: 0,
   net_amount: 0,
+  discount_rate: 0,
+  discount_amount: 0,
+  is_discount_adjustment: false,
+  tax_profile_id: null,
+  tax_profile_name: "",
   tax_rate: 0,
   tax_amount: 0,
   total_amount: 0,
@@ -207,6 +215,11 @@ export function getDefaultValues(cn?: CreditNoteDetail): CnFormValues {
           currency_code: cn.currency?.code ?? "",
           unit_price: d.price ?? 0,
           net_amount: d.net_amount ?? 0,
+          discount_rate: d.discount_rate ?? 0,
+          discount_amount: d.discount_amount ?? 0,
+          is_discount_adjustment: d.is_discount_adjustment ?? false,
+          tax_profile_id: d.tax_profile?.id ?? null,
+          tax_profile_name: d.tax_profile?.name ?? "",
           tax_rate: d.tax_rate ?? 0,
           tax_amount: d.tax_amount ?? 0,
           total_amount: d.total_price ?? 0,
@@ -249,6 +262,10 @@ export function mapItemToPayload(
     currency_code: item.currency_code,
     price: item.unit_price ?? 0,
     net_amount: item.net_amount ?? 0,
+    discount_rate: item.discount_rate ?? 0,
+    discount_amount: item.discount_amount ?? 0,
+    is_discount_adjustment: item.is_discount_adjustment ?? false,
+    ...(item.tax_profile_id ? { tax_profile_id: item.tax_profile_id } : {}),
     tax_rate: item.tax_rate ?? 0,
     tax_amount: item.tax_amount ?? 0,
     total_price: item.total_amount ?? 0,
