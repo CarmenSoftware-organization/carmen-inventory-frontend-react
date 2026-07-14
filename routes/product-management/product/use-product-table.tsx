@@ -62,7 +62,6 @@ export function useProductTable({
           {row.original.code}
         </CellAction>
       ),
-      enableSorting: false,
       meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.text },
     },
     {
@@ -84,7 +83,6 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("localName")} />
       ),
-      enableSorting: false,
       size: 300,
       meta: { headerTitle: tfl("localName"), skeleton: columnSkeletons.text },
     },
@@ -93,7 +91,6 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("unit")} />
       ),
-      enableSorting: false,
       meta: { headerTitle: tfl("unit"), skeleton: columnSkeletons.text },
     },
     {
@@ -145,7 +142,6 @@ export function useProductTable({
         );
       },
       size: 100,
-      enableSorting: false,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
