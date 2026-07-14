@@ -63,9 +63,15 @@ describe("useProductTable — sortable columns", () => {
     const { result } = renderProductTable();
     const table = result.current;
     for (const id of SORTABLE) {
-      expect(table.getColumn(id)?.getCanSort(), `${id} should be sortable`).toBe(
-        true,
+      const column = table.getColumn(id);
+      // The sort field sent to the backend is the column id verbatim
+      // (useDataGridState.onSortingChange emits `${id}:${dir}`). Pin id === the
+      // backend-accepted field name so a future accessorKey/id rename can't
+      // silently emit an unrecognized field and surface a 400 to users.
+      expect(column?.id, `${id} column id must equal the backend field`).toBe(
+        id,
       );
+      expect(column?.getCanSort(), `${id} should be sortable`).toBe(true);
     }
   });
 
