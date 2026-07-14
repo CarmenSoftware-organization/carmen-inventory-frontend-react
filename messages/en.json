@@ -2733,6 +2733,8 @@
       "entity": "Purchase Request",
       "title": "Purchase Request",
       "desc": "Manage purchase requests for your business.",
+      "lastReceiving": "Last received",
+      "lastReceivingNone": "No receiving history",
       "documentInfo": "Document Info",
       "add": "Add Request",
       "edit": "Edit Purchase Request",

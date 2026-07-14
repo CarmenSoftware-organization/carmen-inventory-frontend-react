@@ -26,6 +26,24 @@ export interface ProductLastReceiving {
   currency?: string;
 }
 
+/**
+ * Last receiving cost ต่อ inventory unit — shape ตรงกับ response ของ endpoint
+ * PRODUCT_LAST_RECEIVING_BY_UNIT (source doc + ต้นทุนต่อหน่วยครั้งล่าสุดที่รับเข้า)
+ */
+export interface ProductLastReceivingByUnit {
+  /** ชนิดเอกสารต้นทาง เช่น "good_received_note" */
+  type?: string;
+  /** เลขที่เอกสารต้นทาง (เช่น GRN no) */
+  no?: string;
+  /** id เอกสารต้นทาง */
+  id?: string;
+  /** ต้นทุนต่อหน่วย (ตาม inventory unit ที่ query) ครั้งล่าสุดที่รับเข้า */
+  cost_per_unit: number;
+  currency_id?: string;
+  currency_code?: string;
+  exchange_rate?: number;
+}
+
 export function useProductCostByLocationQty(
   buCode: string | undefined,
   productId: string | undefined,
@@ -64,7 +82,8 @@ export function useProductCostByLocationQty(
 
 /**
  * Last receiving cost ต่อ inventory unit — ยิงตอน `enabled` เป็น true เท่านั้น
- * (ใช้ hover-to-fetch ข้าง U.Price). response shape ค่อยเติมภายหลัง
+ * (ใช้ hover-to-fetch ข้าง U.Price) → คืน `ProductLastReceivingByUnit` (หรือ null
+ * ถ้ายังไม่เคยรับเข้า)
  */
 export function useProductLastReceivingByUnit(
   buCode: string | undefined,
@@ -72,7 +91,7 @@ export function useProductLastReceivingByUnit(
   unitId: string | undefined,
   enabled = true,
 ) {
-  return useQuery<ProductLastReceiving | null>({
+  return useQuery<ProductLastReceivingByUnit | null>({
     queryKey: [
       QUERY_KEYS.PRODUCT_LAST_RECEIVING_BY_UNIT,
       buCode,
