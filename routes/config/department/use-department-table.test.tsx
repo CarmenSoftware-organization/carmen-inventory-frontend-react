@@ -52,10 +52,23 @@ function renderDepartmentTable() {
 }
 
 describe("useDepartmentTable — account_code column", () => {
-  it("exposes a non-sortable account_code column", () => {
+  it("exposes a sortable account_code column whose id matches the backend field", () => {
     const { result } = renderDepartmentTable();
     const column = result.current.getColumn("account_code");
     expect(column, "account_code column must exist").not.toBeUndefined();
-    expect(column?.getCanSort(), "account_code should not be sortable").toBe(false);
+    // The sort field sent to the backend is the column id verbatim
+    // (useDataGridState.onSortingChange emits `${id}:${dir}`). Pin id === the
+    // backend column name so a future accessorKey/id rename can't emit an
+    // unrecognized field. The backend orders by any real tb_department column.
+    expect(column?.id, "account_code column id must equal the backend field").toBe(
+      "account_code",
+    );
+    expect(column?.getCanSort(), "account_code should be sortable").toBe(true);
+  });
+
+  it("orders the account_code column after name", () => {
+    const { result } = renderDepartmentTable();
+    const ids = result.current.getAllColumns().map((c) => c.id);
+    expect(ids.indexOf("account_code")).toBeGreaterThan(ids.indexOf("name"));
   });
 });

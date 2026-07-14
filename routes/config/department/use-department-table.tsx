@@ -18,7 +18,8 @@ interface UseDepartmentTableOptions {
 }
 
 /**
- * Hook สำหรับสร้าง TanStack Table สำหรับ Department พร้อมคอลัมน์ code, name
+ * Hook สำหรับสร้าง TanStack Table สำหรับ Department พร้อมคอลัมน์ code, name,
+ * account_code (sortable ทุกคอลัมน์ — backend เรียงตาม column จริงของ tb_department)
  *
  * ใช้ภายใน `DepartmentComponent` โดยส่งผ่าน prop `useTable` ของ
  * `ConfigListTemplate`
@@ -54,19 +55,6 @@ export function useDepartmentTable({
       meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.textShort },
     },
     {
-      accessorKey: "account_code",
-      enableSorting: false,
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("accountCode")} />
-      ),
-      cell: ({ row }) => row.original.account_code || "-",
-      size: 40,
-      meta: {
-        headerTitle: tfl("accountCode"),
-        skeleton: columnSkeletons.textShort,
-      },
-    },
-    {
       accessorKey: "name",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("name")} />
@@ -77,6 +65,18 @@ export function useDepartmentTable({
         </CellAction>
       ),
       meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },
+    },
+    {
+      accessorKey: "account_code",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("accountCode")} />
+      ),
+      cell: ({ row }) => row.original.account_code || "-",
+      size: 40,
+      meta: {
+        headerTitle: tfl("accountCode"),
+        skeleton: columnSkeletons.textShort,
+      },
     },
   ];
 
