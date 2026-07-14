@@ -1,0 +1,82 @@
+import { describe, it, expect } from "vitest";
+import { renderHook } from "@testing-library/react";
+import { IntlProvider } from "use-intl";
+import en from "@/messages/en.json";
+import type { ParamsDto } from "@/types/params";
+import { useProductTable } from "./use-product-table";
+
+const params: ParamsDto = { page: 1, perpage: 10 };
+
+// Minimal tableConfig matching the shape useDataGridState().tableConfig produces,
+// so the test does not need a Router context.
+const tableConfig = {
+  manualPagination: true as const,
+  manualSorting: true as const,
+  pageCount: 0,
+  state: {
+    pagination: { pageIndex: 0, pageSize: 10 },
+    sorting: [],
+  },
+  onPaginationChange: () => {},
+  onSortingChange: () => {},
+};
+
+function wrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <IntlProvider locale="en" messages={en}>
+      {children}
+    </IntlProvider>
+  );
+}
+
+function renderProductTable() {
+  return renderHook(
+    () =>
+      useProductTable({
+        products: [],
+        totalRecords: 0,
+        params,
+        tableConfig,
+        onEdit: () => {},
+        onDelete: () => {},
+      }),
+    { wrapper },
+  );
+}
+
+const SORTABLE = [
+  "code",
+  "name",
+  "local_name",
+  "inventory_unit_name",
+  "product_status_type",
+];
+
+const NOT_SORTABLE = [
+  "product_category_name",
+  "product_sub_category_name",
+  "product_item_group_name",
+];
+
+describe("useProductTable — sortable columns", () => {
+  it("enables sort only on backend-supported columns", () => {
+    const { result } = renderProductTable();
+    const table = result.current;
+    for (const id of SORTABLE) {
+      expect(table.getColumn(id)?.getCanSort(), `${id} should be sortable`).toBe(
+        true,
+      );
+    }
+  });
+
+  it("keeps relation columns non-sortable (backend rejects those sort fields)", () => {
+    const { result } = renderProductTable();
+    const table = result.current;
+    for (const id of NOT_SORTABLE) {
+      expect(
+        table.getColumn(id)?.getCanSort(),
+        `${id} should NOT be sortable`,
+      ).toBe(false);
+    }
+  });
+});
