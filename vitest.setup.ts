@@ -55,3 +55,7 @@ globalThis.ResizeObserver = class ResizeObserver {
   unobserve() {}
   disconnect() {}
 };
+
+// jsdom does not implement scrollIntoView; form-helpers' scrollToFirstInvalidField
+// calls it on validation failure. Stub it so submit-with-errors tests don't throw.
+Element.prototype.scrollIntoView = () => {};

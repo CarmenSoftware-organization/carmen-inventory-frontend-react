@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { IntlProvider } from "use-intl";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import en from "@/messages/en.json";
@@ -40,6 +41,17 @@ describe("CategoryForm — auto-generated code field", () => {
     renderForm({ mode: "add" });
     const codeLabel = screen.getByText(en.field.code);
     expect(codeLabel.textContent).not.toContain("*");
+  });
+
+  it("add mode: submitting without a tax profile shows a visible required error", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    renderForm({ mode: "add", onSubmit });
+    await user.click(screen.getByRole("button", { name: en.common.create }));
+    expect(
+      await screen.findByText("Tax profile is required"),
+    ).toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it("edit mode: code input is disabled and shows the existing code", () => {
