@@ -106,10 +106,11 @@ type ProductDirtyFields = {
   ingredient_units?: Record<string, unknown>[];
 };
 
-const buildPayload = (
+export const buildPayload = (
   values: ProductFormValues,
   product?: ProductDetail,
   dirtyFields?: ProductDirtyFields,
+  isAdd?: boolean,
 ): CreateProductDto => {
   const locationDiff = buildItemChanges(
     values.locations,
@@ -133,7 +134,7 @@ const buildPayload = (
 
   return {
     name: values.name,
-    code: values.code,
+    code: isAdd ? undefined : values.code,
     local_name: values.local_name,
     description: values.description ?? "",
     inventory_unit_id: values.inventory_unit_id,
@@ -278,11 +279,16 @@ export function ProductForm({ product }: ProductFormProps) {
         : values;
 
     const dirty = form.formState.dirtyFields as unknown as ProductDirtyFields;
-    const payload = buildPayload(normalizedValues, product, {
-      locations: dirty.locations ?? [],
-      order_units: dirty.order_units ?? [],
-      ingredient_units: dirty.ingredient_units ?? [],
-    });
+    const payload = buildPayload(
+      normalizedValues,
+      product,
+      {
+        locations: dirty.locations ?? [],
+        order_units: dirty.order_units ?? [],
+        ingredient_units: dirty.ingredient_units ?? [],
+      },
+      isAdd,
+    );
 
     if (isEdit && product) {
       updateProduct.mutate(
