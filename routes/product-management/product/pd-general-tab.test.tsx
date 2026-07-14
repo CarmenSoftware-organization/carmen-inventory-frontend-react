@@ -104,4 +104,23 @@ describe("GeneralTab — category cascade", () => {
     });
     expect(itemGroupTrigger).toBeDisabled();
   });
+
+  it("edit mode: Item Group stays editable when the product has an item group but no sub-category", () => {
+    const product = {
+      id: "p1",
+      code: "P001",
+      name: "Espresso",
+      product_category: null,
+      product_sub_category: null,
+      product_item_group: { id: "ig1", name: "Beans" },
+      inventory_unit: { id: "u1", name: "KG" },
+    } as unknown as ProductDetail;
+    renderTab({
+      product,
+      isDisabled: false,
+      defaults: { ...BASE_DEFAULTS, product_item_group_id: "ig1" },
+    });
+    // With value set + defaultLabel "Beans", the trigger's accessible name is "Beans"
+    expect(screen.getByRole("button", { name: "Beans" })).not.toBeDisabled();
+  });
 });

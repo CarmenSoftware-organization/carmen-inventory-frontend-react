@@ -249,7 +249,7 @@ function GeneralTab({
                         value={field.value}
                         onValueChange={handleItemGroupChange}
                         filterSubCategoryId={subCategoryId}
-                        disabled={!subCategoryId}
+                        disabled={!subCategoryId && !field.value}
                         defaultLabel={product?.product_item_group?.name}
                         placeholder={t("itemGroupPlaceholder")}
                         error={
