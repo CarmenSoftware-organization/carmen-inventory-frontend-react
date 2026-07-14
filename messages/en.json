@@ -2542,7 +2542,6 @@
       "imgViewerName": "Image: {label}",
       "imgViewerAria": "Image viewer (drop images to upload)",
       "imgFallbackLabel": "Image {n}",
-      "codePlaceholder": "e.g. ESP-250G",
       "namePlaceholder": "e.g. Coffee Beans",
       "localNamePlaceholder": "e.g. เมล็ดกาแฟ",
       "barcodePlaceholder": "e.g. 8851234567890",
