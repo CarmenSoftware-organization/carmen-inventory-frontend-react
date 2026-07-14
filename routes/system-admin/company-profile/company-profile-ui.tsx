@@ -131,6 +131,7 @@ export function EditableField({
   displayValue,
   fullWidth,
   mono,
+  maxLength,
 }: {
   readonly editing: boolean;
   readonly form: Form;
@@ -141,6 +142,8 @@ export function EditableField({
   readonly displayValue?: string | number | null;
   readonly fullWidth?: boolean;
   readonly mono?: boolean;
+  /** character-count cap (โชว์ counter). default: textarea 256 · text 100 */
+  readonly maxLength?: number;
 }) {
   if (!editing) {
     return (
@@ -154,6 +157,9 @@ export function EditableField({
     );
   }
   const error = fieldError(form, name);
+  // default cap ต่อชนิด — number ไม่ cap (counter ไม่ applicable)
+  const resolvedMaxLength =
+    maxLength ?? (type === "textarea" ? 256 : type === "text" ? 100 : undefined);
   return (
     <EditShell
       label={label}
@@ -164,6 +170,7 @@ export function EditableField({
       {type === "textarea" ? (
         <Textarea
           id={name}
+          maxLength={resolvedMaxLength}
           {...form.register(name)}
           aria-invalid={!!error}
           className="min-h-16 text-sm"
@@ -172,6 +179,7 @@ export function EditableField({
         <Input
           id={name}
           type={type === "number" ? "number" : "text"}
+          maxLength={resolvedMaxLength}
           {...form.register(name, { valueAsNumber: type === "number" })}
           aria-invalid={!!error}
           className={cn("h-8 text-sm", mono && "font-mono text-xs")}

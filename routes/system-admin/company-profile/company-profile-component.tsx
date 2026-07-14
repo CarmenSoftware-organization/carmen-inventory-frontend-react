@@ -252,6 +252,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.info")}
               description={t("fields.infoDesc")}
               displayValue={data.info}
+              maxLength={256}
               fullWidth
             />
             {/* costing method + max license users: read-only เสมอ (แก้ผ่านหน้านี้ไม่ได้) */}
@@ -323,6 +324,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.hotelAddressLine1")}
               description={t("fields.hotelAddressLine1Desc")}
               displayValue={data.hotel_address_line1}
+              maxLength={256}
               fullWidth
             />
             <EditableField
@@ -332,6 +334,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.hotelAddressLine2")}
               description={t("fields.hotelAddressLine2Desc")}
               displayValue={data.hotel_address_line2}
+              maxLength={256}
               fullWidth
             />
             <EditableField
@@ -437,6 +440,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.companyAddressLine1")}
               description={t("fields.companyAddressLine1Desc")}
               displayValue={data.company_address_line1}
+              maxLength={256}
               fullWidth
             />
             <EditableField
@@ -446,6 +450,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.companyAddressLine2")}
               description={t("fields.companyAddressLine2Desc")}
               displayValue={data.company_address_line2}
+              maxLength={256}
               fullWidth
             />
             <EditableField
