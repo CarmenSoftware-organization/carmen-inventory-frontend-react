@@ -54,6 +54,19 @@ export function useDepartmentTable({
       meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.textShort },
     },
     {
+      accessorKey: "account_code",
+      enableSorting: false,
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("accountCode")} />
+      ),
+      cell: ({ row }) => row.original.account_code || "-",
+      size: 40,
+      meta: {
+        headerTitle: tfl("accountCode"),
+        skeleton: columnSkeletons.textShort,
+      },
+    },
+    {
       accessorKey: "name",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("name")} />
