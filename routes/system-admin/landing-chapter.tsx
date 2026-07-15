@@ -23,7 +23,7 @@ export function LandingChapter({
           <div className="text-primary text-3xl leading-[0.85] font-extrabold tracking-tight md:text-4xl lg:text-5xl">
             {chapter.num}
           </div>
-          <div className="border-primary text-primary mt-2 inline-block border-t-[1.5px] pt-1.5 text-[0.5625rem] font-bold tracking-[0.14em] uppercase">
+          <div className="border-primary text-primary mt-2 inline-block border-t-[1.5px] pt-1.5 text-[0.5625rem] font-semibold tracking-[0.14em] uppercase">
             {t(`chapters.${chapter.key}.kicker`)}
           </div>
         </div>

@@ -164,7 +164,7 @@ function ContactCard({
                 {contact.name || "—"}
               </div>
               {isPrimary && (
-                <span className="bg-primary/10 text-primary mt-0.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-bold tracking-widest uppercase">
+                <span className="bg-primary/10 text-primary mt-0.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold tracking-widest uppercase">
                   <CheckCircle2 className="size-2.5" />
                   {t("contact.primary")}
                 </span>

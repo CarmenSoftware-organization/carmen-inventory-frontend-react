@@ -33,7 +33,7 @@ export function LandingModuleCard({
 
       <div className="flex flex-1 flex-col gap-1 p-3">
         <div
-          className="text-[0.5625rem] font-bold tracking-[0.14em] uppercase"
+          className="text-[0.5625rem] font-semibold tracking-[0.14em] uppercase"
           style={{ color: tint }}
         >
           {mod.key.replace(/([A-Z])/g, "-$1").toLowerCase()}

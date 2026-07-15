@@ -391,7 +391,7 @@ function ScheduleVisual() {
       <div className="grid grid-cols-7 gap-1">
         {days.map((d, di) => (
           <div key={d}>
-            <div className="text-muted-foreground border-border/40 border-b py-1 text-center text-[0.5625rem] font-bold tracking-wider uppercase">
+            <div className="text-muted-foreground border-border/40 border-b py-1 text-center text-[0.5625rem] font-semibold tracking-wider uppercase">
               {d}
             </div>
             <div className="flex min-h-34 flex-col gap-1 py-1.5">

@@ -169,7 +169,7 @@ function PeriodViz({ tint }: { readonly tint: string }) {
   return (
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
-        <div className="text-muted-foreground mb-1.5 text-[0.5625rem] font-bold tracking-wider uppercase">
+        <div className="text-muted-foreground mb-1.5 text-[0.5625rem] font-semibold tracking-wider uppercase">
           FY 2026 · Months
         </div>
         <div className="grid grid-cols-12 gap-0.5">
@@ -397,7 +397,7 @@ function MonitorViz({ tint }: { readonly tint: string }) {
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-muted-foreground text-[0.5625rem] font-bold tracking-wider uppercase">
+          <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-wider uppercase">
             CPU · last 30m
           </span>
           <span className="text-[0.6875rem] font-bold" style={{ color: tint }}>
@@ -434,7 +434,7 @@ function EmailViz({ tint }: { readonly tint: string }) {
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-foreground text-[0.5625rem] font-bold">
+          <span className="text-foreground text-[0.5625rem] font-semibold">
             mail.aureliabay.com
           </span>
           <span className="text-positive inline-flex items-center gap-1 text-[0.5rem] font-bold">
@@ -633,7 +633,7 @@ function DatasetViz({ tint }: { readonly tint: string }) {
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border px-2 py-1.5">
         <div className="border-border-subtle flex items-center justify-between border-b pb-1">
-          <span className="text-foreground text-[0.5625rem] font-bold">
+          <span className="text-foreground text-[0.5625rem] font-semibold">
             vendor_spend_monthly
           </span>
           <span
