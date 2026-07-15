@@ -37,6 +37,26 @@ scripts/deploy-s3.sh <bucket> <distribution-id>
 
 ### One-time infrastructure setup
 
+One command provisions everything (bucket → Cloud CDN → HTTPS LB → managed cert)
+and runs the first deploy:
+
+```bash
+scripts/setup-gcs-cdn.sh <bucket> config.<env>.json            # no domain? auto <LB-IP>.sslip.io
+scripts/setup-gcs-cdn.sh <bucket> config.<env>.json app.example.com
+scripts/setup-gcs-cdn.sh <bucket> --teardown                   # delete LB/CDN (bucket kept)
+```
+
+- Idempotent — safe to re-run; every resource is create-if-missing.
+- `config.json` is uploaded only if absent on the bucket (never overwritten).
+- With a custom domain, point an A record to the printed LB IP; the managed
+  cert activates once DNS resolves. Without one, sslip.io resolves immediately
+  (first cert takes ~15–40 min).
+- Cache mode is `USE_ORIGIN_HEADERS`, so the per-object headers set by
+  `deploy-gcs.sh` (immutable assets, no-cache `index.html`) drive the CDN.
+- Remember the backend CORS prerequisite (Shared notes below).
+
+<details><summary>What the script creates (manual reference)</summary>
+
 1. **GCS bucket**:
    ```bash
    gcloud storage buckets create gs://<bucket> --location=<region> --uniform-bucket-level-access
@@ -60,6 +80,8 @@ scripts/deploy-s3.sh <bucket> <distribution-id>
    ```bash
    gcloud storage cp config.uat.json gs://<bucket>/config.json --cache-control="no-cache"
    ```
+
+</details>
 
 ### Each release
 
