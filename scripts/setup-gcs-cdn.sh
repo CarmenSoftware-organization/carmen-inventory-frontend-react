@@ -57,6 +57,36 @@ if [ "${MODE}" = "setup" ]; then
   [ -n "${BACKEND_URL_VAL}" ] || { log "BACKEND_URL missing/empty in ${CONFIG_FILE}"; exit 1; }
 fi
 
+# ---- teardown: ลบย้อนลำดับ ไม่แตะ GCS bucket ----
+if [ "${MODE}" = "teardown" ]; then
+  echo "Will delete (project ${PROJECT}):"
+  echo "  ${HTTP_RULE} ${HTTPS_RULE} ${HTTP_PROXY} ${HTTPS_PROXY}"
+  echo "  ${REDIRECT_MAP} ${URL_MAP} ${CERT_NAME} ${BACKEND_NAME} ${IP_NAME}"
+  echo "GCS bucket gs://${BUCKET} will be KEPT."
+  read -r -p "Proceed? [y/N] " ANSWER
+  [ "${ANSWER}" = "y" ] || { log "aborted"; exit 0; }
+  del() { # del <kind> <name> [flags...]
+    local kind="$1" name="$2"; shift 2
+    if gcloud compute "${kind}" describe "${name}" "$@" >/dev/null 2>&1; then
+      gcloud compute "${kind}" delete "${name}" "$@" --quiet
+      log "deleted ${kind} ${name}"
+    else
+      log "${kind} ${name} absent, skip"
+    fi
+  }
+  del forwarding-rules "${HTTP_RULE}" --global
+  del forwarding-rules "${HTTPS_RULE}" --global
+  del target-http-proxies "${HTTP_PROXY}"
+  del target-https-proxies "${HTTPS_PROXY}"
+  del url-maps "${REDIRECT_MAP}"
+  del url-maps "${URL_MAP}"
+  del ssl-certificates "${CERT_NAME}"
+  del backend-buckets "${BACKEND_NAME}"
+  del addresses "${IP_NAME}" --global
+  log "done. bucket kept — delete manually: gcloud storage rm -r gs://${BUCKET}"
+  exit 0
+fi
+
 # ---- 1. GCS bucket ----
 if gcloud storage buckets describe "gs://${BUCKET}" >/dev/null 2>&1; then
   log "bucket gs://${BUCKET} exists, skip create"
