@@ -176,7 +176,7 @@ log "waiting for managed cert to go ACTIVE..."
 DEADLINE=$((SECONDS + 2400))
 CERT_STATUS=""
 while :; do
-  CERT_STATUS="$(gcloud compute ssl-certificates describe "${CERT_NAME}" --format='value(managed.status)')"
+  CERT_STATUS="$(gcloud compute ssl-certificates describe "${CERT_NAME}" --format='value(managed.status)' 2>/dev/null || true)"
   [ "${CERT_STATUS}" = "ACTIVE" ] && break
   if [ "${SECONDS}" -ge "${DEADLINE}" ]; then
     log "cert still ${CERT_STATUS:-unknown} after 40 min — not fatal; site serves once ACTIVE."
