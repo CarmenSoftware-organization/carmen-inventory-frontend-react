@@ -1,7 +1,9 @@
 import { useTranslations } from "use-intl";
-import { MessageSquare, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
+import { usePurchaseRequestComments } from "@/hooks/use-purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_STATUS } from "@/types/purchase-request";
 import type { FormMode } from "@/types/form";
@@ -72,6 +74,9 @@ export function PrFormActions({
   onComment,
 }: PrFormActionsProps) {
   const tc = useTranslations("common");
+  const { data: comments } = usePurchaseRequestComments(
+    hasRecord ? prId : undefined,
+  );
   const isView = mode === "view";
   const isVoided = prStatus === PR_STATUS.VOIDED;
   const isViewOnly = role === STAGE_ROLE.VIEW_ONLY;
@@ -126,10 +131,7 @@ export function PrFormActions({
       )}
 
       {hasRecord && (
-        <Button type="button" size="sm" variant="info" onClick={onComment}>
-          <MessageSquare />
-          {tc("comment")}
-        </Button>
+        <CommentButton count={comments?.length} onClick={onComment} />
       )}
 
       {hasRecord && isView && prId && (

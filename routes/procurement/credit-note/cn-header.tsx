@@ -1,9 +1,11 @@
 
 import { useTranslations } from "use-intl";
-import { MessageSquare, Pencil, Save, SendHorizonal, Trash2, X } from "lucide-react";
+import { Pencil, Save, SendHorizonal, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
+import { useCreditNoteComments } from "@/hooks/use-credit-note";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
@@ -60,6 +62,7 @@ export function CnHeader({
   const t = useTranslations("procurement.creditNote");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const { data: comments } = useCreditNoteComments(creditNote?.id);
 
   const { can, isAdmin } = useCan();
   const prefix = usePermissionPrefix();
@@ -190,10 +193,7 @@ export function CnHeader({
 
       {/* Always (มี record) — comment + print */}
       {creditNote && (
-        <Button size="sm" variant="info" onClick={onShowComment}>
-          <MessageSquare aria-hidden="true" />
-          {tc("comment")}
-        </Button>
+        <CommentButton count={comments?.length} onClick={onShowComment} />
       )}
       {isView && creditNote?.id && (
         <PrintDocumentButton

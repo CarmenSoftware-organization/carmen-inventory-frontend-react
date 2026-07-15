@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { History, MessageCircle, Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CommentButton } from "@/components/comment-button";
+import { useStoreRequisitionComments } from "@/hooks/use-store-requisition";
 import {
   Sheet,
   SheetContent,
@@ -79,6 +81,7 @@ export function SrHeader({
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
+  const { data: comments } = useStoreRequisitionComments(storeRequisition?.id);
 
   const isView = mode === "view";
   const isAdd = mode === "add";
@@ -167,10 +170,7 @@ export function SrHeader({
         </>
       )}
       {storeRequisition && onComment && (
-        <Button type="button" size="sm" variant="info" onClick={onComment}>
-          <MessageCircle aria-hidden="true" />
-          {tc("comment")}
-        </Button>
+        <CommentButton count={comments?.length} onClick={onComment} />
       )}
       {isView && storeRequisition?.id && (
         <PrintDocumentButton
