@@ -139,7 +139,6 @@ export function WfHeader({
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               navigate("/system-admin/workflow");
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

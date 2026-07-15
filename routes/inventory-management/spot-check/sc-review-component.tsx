@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { useSubmitSpotCheck } from "@/hooks/use-spot-check";
 import { useUnit } from "@/hooks/use-unit";
 import type {
@@ -32,7 +31,6 @@ export function ScReviewComponent({
 }: ScReviewComponentProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
   const navigate = useNavigate();
-  const errorToast = useErrorToast();
   const submitSc = useSubmitSpotCheck(review.id);
 
   const { data: unitsData } = useUnit({ perpage: -1 });
@@ -62,7 +60,6 @@ export function ScReviewComponent({
           toast.success(t("submitSuccess"));
           navigate("/inventory-management/spot-check");
         },
-        onError: errorToast,
       },
     );
   };

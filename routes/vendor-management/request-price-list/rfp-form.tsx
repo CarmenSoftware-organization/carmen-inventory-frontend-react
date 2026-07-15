@@ -215,7 +215,6 @@ export function RequestPriceListForm({
             form.reset({ ...values, vendors: { add: [], remove: [] } });
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -227,7 +226,6 @@ export function RequestPriceListForm({
             replace: true,
           });
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -259,7 +257,6 @@ export function RequestPriceListForm({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/vendor-management/request-price-list");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

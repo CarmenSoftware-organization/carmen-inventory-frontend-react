@@ -134,7 +134,7 @@ export function useUpdateProfile() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to update profile",
         );
@@ -164,7 +164,7 @@ export function useUploadUserAvatar() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to upload avatar",
         );
@@ -190,7 +190,7 @@ export function useDeleteUserAvatar() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to remove avatar",
         );
@@ -223,7 +223,7 @@ export function useUploadBuLogo() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to upload BU logo",
         );
@@ -251,7 +251,7 @@ export function useDeleteBuLogo() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to remove BU logo",
         );
@@ -283,7 +283,7 @@ export function useUploadBuAvatar() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to upload BU avatar",
         );
@@ -311,7 +311,7 @@ export function useDeleteBuAvatar() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to remove BU avatar",
         );
@@ -342,7 +342,7 @@ export function useUploadUserSignature() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to upload signature",
         );
@@ -368,7 +368,7 @@ export function useDeleteUserSignature() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to remove signature",
         );
@@ -396,7 +396,7 @@ export function useChangePassword() {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to change password",
         );

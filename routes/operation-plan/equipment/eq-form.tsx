@@ -118,7 +118,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
             form.reset(values);
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -133,7 +132,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
             // prop ยัง undefined)
             navigate("/operation-plan/equipment");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     }
@@ -168,7 +166,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/operation-plan/equipment");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

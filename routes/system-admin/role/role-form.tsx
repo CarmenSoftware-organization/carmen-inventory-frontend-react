@@ -83,7 +83,6 @@ export function RoleForm({ role }: RoleFormProps) {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             navigate("/system-admin/role");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isEdit && role) {
@@ -108,7 +107,6 @@ export function RoleForm({ role }: RoleFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/system-admin/role");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     }
@@ -225,7 +223,6 @@ export function RoleForm({ role }: RoleFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/system-admin/role");
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

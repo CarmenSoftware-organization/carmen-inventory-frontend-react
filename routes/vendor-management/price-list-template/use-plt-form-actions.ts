@@ -80,7 +80,6 @@ export function usePltFormActions({
             form.reset(values);
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -89,7 +88,6 @@ export function usePltFormActions({
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/vendor-management/price-list-template");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -120,7 +118,6 @@ export function usePltFormActions({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/vendor-management/price-list-template");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

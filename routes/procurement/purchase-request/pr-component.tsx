@@ -435,7 +435,6 @@ export default function PurchaseRequestComponent() {
                 toast.success(tt("approveSuccess", { entity: t("entity") }));
                 setApproveTarget(null);
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}
@@ -461,7 +460,6 @@ export default function PurchaseRequestComponent() {
                 toast.success(tt("rejectSuccess", { entity: t("entity") }));
                 setRejectTarget(null);
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}
@@ -481,7 +479,6 @@ export default function PurchaseRequestComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />
@@ -518,7 +515,6 @@ export default function PurchaseRequestComponent() {
                 setBatchApproveOpen(false);
                 table.resetRowSelection();
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}
@@ -555,7 +551,6 @@ export default function PurchaseRequestComponent() {
                 setBatchRejectOpen(false);
                 table.resetRowSelection();
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}

@@ -248,13 +248,11 @@ export function useGrnFormActions({
             if (values.doc_status === "saved") {
               saveGrn.mutate(goodsReceiveNote.id, {
                 onSuccess: finalize,
-                onError: (err) => toast.error(err.message),
               });
             } else {
               finalize();
             }
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -275,13 +273,11 @@ export function useGrnFormActions({
           if (values.doc_status === "saved" && newId) {
             saveGrn.mutate(newId, {
               onSuccess: finalize,
-              onError: (err) => toast.error(err.message),
             });
           } else {
             finalize();
           }
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -323,7 +319,6 @@ export function useGrnFormActions({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/procurement/goods-receive-note");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -334,7 +329,6 @@ export function useGrnFormActions({
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowCommit(false);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -345,7 +339,6 @@ export function useGrnFormActions({
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowVoid(false);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

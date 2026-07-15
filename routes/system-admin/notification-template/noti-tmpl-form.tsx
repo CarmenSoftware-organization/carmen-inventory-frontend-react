@@ -100,7 +100,6 @@ export function NotificationTemplateForm({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate(LIST_PATH);
           },
-          onError: (err) => toast.error(err.message),
         },
       );
       return;
@@ -110,7 +109,6 @@ export function NotificationTemplateForm({
         toast.success(tt("createSuccess", { entity: t("entity") }));
         navigate(LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -140,7 +138,6 @@ export function NotificationTemplateForm({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate(LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

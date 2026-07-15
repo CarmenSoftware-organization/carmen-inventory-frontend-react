@@ -340,7 +340,6 @@ export default function PriceListTemplateComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

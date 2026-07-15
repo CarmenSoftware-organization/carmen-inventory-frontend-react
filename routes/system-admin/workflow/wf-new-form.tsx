@@ -59,7 +59,6 @@ export default function WorkflowNewForm() {
         const id = data?.data?.id ?? payload.id;
         navigate(`/system-admin/workflow/${id}`, { replace: true });
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

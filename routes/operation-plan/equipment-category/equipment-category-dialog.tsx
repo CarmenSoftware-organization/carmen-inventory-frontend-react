@@ -91,7 +91,6 @@ export function EquipmentCategoryDialog({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             onOpenChange(false);
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -100,7 +99,6 @@ export function EquipmentCategoryDialog({
           toast.success(tt("createSuccess", { entity: t("entity") }));
           onOpenChange(false);
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };

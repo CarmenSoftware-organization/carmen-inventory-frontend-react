@@ -72,7 +72,6 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/operation-plan/cuisine");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -81,7 +80,6 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/operation-plan/cuisine");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -114,7 +112,6 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/operation-plan/cuisine");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

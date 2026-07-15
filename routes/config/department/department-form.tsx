@@ -177,7 +177,6 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -188,7 +187,6 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           navigate(`/config/department/${id}`, { replace: true });
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -439,7 +437,6 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/config/department");
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

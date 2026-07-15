@@ -373,7 +373,6 @@ export default function VendorComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

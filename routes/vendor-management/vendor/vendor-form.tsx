@@ -185,7 +185,6 @@ export function VendorForm({ vendor }: VendorFormProps) {
             setRemovedContactIds([]);
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -200,7 +199,6 @@ export function VendorForm({ vendor }: VendorFormProps) {
             navigate("/vendor-management/vendor");
           }
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -233,7 +231,6 @@ export function VendorForm({ vendor }: VendorFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/vendor-management/vendor");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

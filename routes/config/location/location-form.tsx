@@ -214,7 +214,6 @@ export function LocationForm({ location }: LocationFormProps) {
               containerRef.current?.focus();
             });
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -225,7 +224,6 @@ export function LocationForm({ location }: LocationFormProps) {
           navigate(`/config/location/${id}`, { replace: true });
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -542,7 +540,6 @@ export function LocationForm({ location }: LocationFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/config/location");
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

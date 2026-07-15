@@ -29,7 +29,6 @@ interface MutationLike<TVars> {
     vars: TVars,
     options: {
       onSuccess: (data: unknown) => void;
-      onError: (err: Error) => void;
     },
   ) => void;
   isPending: boolean;
@@ -168,7 +167,6 @@ export function ConfigEntityDialog<
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             onOpenChange(false);
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -178,7 +176,6 @@ export function ConfigEntityDialog<
           onOpenChange(false);
           onCreated?.(data);
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };

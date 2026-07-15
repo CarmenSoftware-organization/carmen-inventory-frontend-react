@@ -87,7 +87,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/operation-plan/category");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -96,7 +95,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/operation-plan/category");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -129,7 +127,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/operation-plan/category");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

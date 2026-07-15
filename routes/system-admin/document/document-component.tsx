@@ -164,7 +164,6 @@ export default function DocumentComponent() {
     }
     uploadDocument.mutate(file, {
       onSuccess: () => toast.success(t("uploadSuccess")),
-      onError: (err) => toast.error(err.message),
     });
     e.target.value = "";
   };
@@ -347,7 +346,6 @@ export default function DocumentComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

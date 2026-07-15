@@ -193,7 +193,6 @@ export default function PeriodComponent() {
                       toast.success(
                         tt("createSuccess", { entity: t("entity") }),
                       ),
-                    onError: (err) => toast.error(err.message),
                   },
                 );
               }}
@@ -257,7 +256,6 @@ export default function PeriodComponent() {
                           toast.success(
                             tt("createSuccess", { entity: t("entity") }),
                           ),
-                        onError: (err) => toast.error(err.message),
                       },
                     )
                   }
