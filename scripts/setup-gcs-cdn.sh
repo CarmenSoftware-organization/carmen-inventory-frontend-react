@@ -158,3 +158,45 @@ else
   gcloud compute forwarding-rules create "${HTTP_RULE}" --global \
     --address="${IP_NAME}" --target-http-proxy="${HTTP_PROXY}" --ports=80
 fi
+
+# ---- config.json — อัปโหลดครั้งแรกเท่านั้น ห้ามทับของ environment (ดู docs/deploy.md) ----
+if gcloud storage objects describe "gs://${BUCKET}/config.json" >/dev/null 2>&1; then
+  log "config.json already on bucket — kept as-is"
+else
+  gcloud storage cp "${CONFIG_FILE}" "gs://${BUCKET}/config.json" --cache-control="no-cache"
+  log "uploaded ${CONFIG_FILE} as gs://${BUCKET}/config.json"
+fi
+
+# ---- first deploy (build + rsync + cache headers + CDN invalidation) ----
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"${SCRIPT_DIR}/deploy-gcs.sh" "${BUCKET}" "${URL_MAP}"
+
+# ---- รอ cert ACTIVE (sslip.io resolve ทันที — รอบแรก ~15-40 นาที) ----
+log "waiting for managed cert to go ACTIVE..."
+DEADLINE=$((SECONDS + 2400))
+CERT_STATUS=""
+while :; do
+  CERT_STATUS="$(gcloud compute ssl-certificates describe "${CERT_NAME}" --format='value(managed.status)')"
+  [ "${CERT_STATUS}" = "ACTIVE" ] && break
+  if [ "${SECONDS}" -ge "${DEADLINE}" ]; then
+    log "cert still ${CERT_STATUS:-unknown} after 40 min — not fatal; site serves once ACTIVE."
+    log "check: gcloud compute ssl-certificates describe ${CERT_NAME} --format='value(managed.status)'"
+    break
+  fi
+  log "cert status: ${CERT_STATUS:-PROVISIONING} — recheck in 30s"
+  sleep 30
+done
+
+# ---- summary ----
+echo
+log "=================================================="
+log "site:         https://${DOMAIN}"
+log "LB IP:        ${LB_IP}"
+log "cert status:  ${CERT_STATUS:-unknown}"
+log "next deploys: scripts/deploy-gcs.sh ${BUCKET} ${URL_MAP}"
+if [ "${CUSTOM_DOMAIN}" = true ]; then
+  log "DNS: point an A record for ${DOMAIN} to ${LB_IP} — cert activates after DNS resolves"
+fi
+log "REQUIRED (backend team): enable CORS for origin https://${DOMAIN}"
+log "  methods GET/POST/PUT/PATCH/DELETE; headers Authorization, Content-Type, x-app-id"
+log "=================================================="
