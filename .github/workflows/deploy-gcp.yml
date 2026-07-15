@@ -1,0 +1,62 @@
+name: Deploy to GCP (Cloud Storage + CDN)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  GCS_BUCKET: carmen-web-static
+  CDN_URL_MAP: carmen-lb
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Authenticate to Google Cloud (Workload Identity Federation)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/54906806682/locations/global/workloadIdentityPools/github-provider/providers/github-provider
+          service_account: carmen-frontend-deployer@carmen-software-poc.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to GCS + invalidate CDN
+        env:
+          # vite.config.ts's emit-build-config plugin reads this file at build time and
+          # requires it to exist — public/config.prod.json is gitignored (dev-local only),
+          # so point it at public/config.sample.json (committed, placeholder values) instead.
+          # Its content never reaches the bucket: deploy-gcs.sh deletes dist/config.json
+          # before syncing; the real config.json is written by the next step below.
+          BUILD_CONFIG_FILE: config.sample.json
+        run: |
+          chmod +x scripts/deploy-gcs.sh
+          scripts/deploy-gcs.sh "${GCS_BUCKET}" "${CDN_URL_MAP}"
+
+      # deploy-gcs.sh deliberately excludes config.json from its sync (per-environment,
+      # never overwritten by a build sync) — upload it as its own step instead, sourced from
+      # repo variables. Set these under Settings > Secrets and variables > Actions > Variables.
+      - name: Write and upload config.json
+        run: |
+          cat > /tmp/config.json <<EOF
+          {
+            "BACKEND_URL": "${{ vars.BACKEND_URL }}",
+            "X_APP_ID": "${{ vars.X_APP_ID }}"
+          }
+          EOF
+          gcloud storage cp /tmp/config.json "gs://${GCS_BUCKET}/config.json" --cache-control="no-cache"
