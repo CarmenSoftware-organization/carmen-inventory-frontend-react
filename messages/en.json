@@ -820,7 +820,10 @@
       "members": "Department Members",
       "availableUsers": "Available Users",
       "hod": "Head of Department",
-      "notFound": "Department not found"
+      "notFound": "Department not found",
+      "generalDesc": "Code, name, account code and status.",
+      "membersDesc": "Users who belong to this department.",
+      "hodDesc": "Users who approve on behalf of this department."
     },
     "location": {
       "entity": "Store Location",
@@ -842,7 +845,10 @@
       "typeConsignment": "Consignment",
       "pcYes": "Physical Count: Yes",
       "pcNo": "Physical Count: No",
-      "activeDescription": "Activate or deactivate this location for inventory operations"
+      "activeDescription": "Activate or deactivate this location for inventory operations",
+      "generalDesc": "Code, name, type, delivery point and status.",
+      "usersDesc": "Users who can access this location.",
+      "productsDesc": "Products stocked at this location."
     },
     "taxProfile": {
       "entity": "Tax Profile",
@@ -2879,8 +2885,8 @@
       "noItemsDesc": "Add items to this template.",
       "removeItem": "Remove Item",
       "namePlaceholder": "e.g. Food Template",
-      "sectionNotes": "Details",
-      "sectionNotesSub": "Description and status of this template"
+      "generalDesc": "Workflow, name, description and status of this template.",
+      "itemsDesc": "Products included in this template."
     },
     "purchaseOrder": {
       "entity": "Purchase Order",

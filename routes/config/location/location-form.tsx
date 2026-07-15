@@ -2,7 +2,6 @@ import { lazy, Suspense, useRef, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
-import { Boxes, MapPin, Users } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
@@ -12,16 +11,16 @@ import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import {
   Field,
-  FieldGroup,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
   FieldSelect,
 } from "@/components/ui/field";
 import { FormToolbar } from "@/components/ui/form-toolbar";
 import { ProductTable } from "@/components/ui/product-table";
 import { SelectContent, SelectItem } from "@/components/ui/select";
+import { SettingSection } from "@/components/ui/setting-section";
 import { StatusSwitch } from "@/components/ui/status-switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import type { TransferItem } from "@/components/ui/transfer";
 import { TreeProductLookup } from "@/components/ui/tree-product-lookup";
@@ -35,7 +34,6 @@ import {
 import { useAllUsers } from "@/hooks/use-all-users";
 import { useAllProducts } from "@/hooks/use-all-products";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { cn } from "@/lib/utils";
 import {
   INVENTORY_TYPE_LABEL_KEY,
   INVENTORY_TYPE_OPTIONS,
@@ -269,213 +267,198 @@ export function LocationForm({ location }: LocationFormProps) {
     <div
       ref={containerRef}
       tabIndex={-1}
-      className="relative isolate -mx-3 -my-3 outline-none"
+      className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))] outline-none"
     >
       <AnimationStyles />
-      <div className="relative px-4 pt-4 pb-8 lg:p-4">
-        {/* ── Toolbar ─────────── */}
-        <Reveal>
-          <div className="max-w-5xl">
-            <FormToolbar
-              entity={location && mode !== "add" ? location.name : t("entity")}
-              mode={mode}
-              formId={FORM_ID}
-              isPending={isPending}
-              onBack={handleBack}
-              onEdit={() => setMode("edit")}
-              onCancel={handleCancel}
-              onDelete={location ? () => setShowDelete(true) : undefined}
-              deleteIsPending={deleteLocation.isPending}
-              statusBadge={codeBadge}
-              permissionPrefix="configuration.location"
-            />
-          </div>
-        </Reveal>
+      {/* ── Toolbar ─────────── */}
+      <Reveal>
+        <FormToolbar
+          entity={location && mode !== "add" ? location.name : t("entity")}
+          mode={mode}
+          formId={FORM_ID}
+          isPending={isPending}
+          onBack={handleBack}
+          onEdit={() => setMode("edit")}
+          onCancel={handleCancel}
+          onDelete={location ? () => setShowDelete(true) : undefined}
+          deleteIsPending={deleteLocation.isPending}
+          statusBadge={codeBadge}
+          permissionPrefix="configuration.location"
+        />
+      </Reveal>
 
+      <div className="mt-6">
         {/* ── General Info ─────────── */}
         <Reveal delay={80}>
-          <Panel>
-            <SectionLabel icon={MapPin}>{t("entity")}</SectionLabel>
-
-            <form
-              id={FORM_ID}
-              onSubmit={(e) =>
-                form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())(
-                  e,
-                )
-              }
-              className="space-y-4"
+          <form
+            id={FORM_ID}
+            onSubmit={(e) =>
+              form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())(e)
+            }
+          >
+            <SettingSection
+              first
+              title={tfl("general")}
+              description={t("generalDesc")}
             >
-              <FieldGroup className="gap-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <Field>
-                    <FieldLabel htmlFor="location-code" required>
-                      {tfl("code")}
-                    </FieldLabel>
-                    {isView ? (
-                      <PlainText value={location?.code} />
-                    ) : (
-                      <FieldInput
-                        id="location-code"
-                        placeholder={t("codePlaceholder")}
-                        className="h-8"
+              <Field>
+                <FieldLabel htmlFor="location-code" required>
+                  {tfl("code")}
+                </FieldLabel>
+                {isView ? (
+                  <FieldPlainText>{location?.code}</FieldPlainText>
+                ) : (
+                  <FieldInput
+                    id="location-code"
+                    placeholder={t("codePlaceholder")}
+                    disabled={isDisabled}
+                    error={form.formState.errors.code?.message}
+                    maxLength={10}
+                    {...form.register("code")}
+                  />
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="location-name" required>
+                  {tfl("name")}
+                </FieldLabel>
+                {isView ? (
+                  <FieldPlainText>{location?.name}</FieldPlainText>
+                ) : (
+                  <FieldInput
+                    id="location-name"
+                    placeholder={t("namePlaceholder")}
+                    disabled={isDisabled}
+                    error={form.formState.errors.name?.message}
+                    maxLength={100}
+                    {...form.register("name")}
+                  />
+                )}
+              </Field>
+
+              <Field>
+                <FieldLabel required>{tfl("locationType")}</FieldLabel>
+                {isView ? (
+                  <FieldPlainText>
+                    {location?.location_type
+                      ? t(INVENTORY_TYPE_LABEL_KEY[location.location_type])
+                      : ""}
+                  </FieldPlainText>
+                ) : (
+                  <Controller
+                    control={form.control}
+                    name="location_type"
+                    render={({ field }) => (
+                      <FieldSelect
+                        value={field.value}
+                        onValueChange={field.onChange}
                         disabled={isDisabled}
-                        error={form.formState.errors.code?.message}
-                        maxLength={10}
-                        {...form.register("code")}
-                      />
+                        error={form.formState.errors.location_type?.message}
+                        placeholder={tfl("selectLocationType")}
+                      >
+                        <SelectContent>
+                          {INVENTORY_TYPE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {t(INVENTORY_TYPE_LABEL_KEY[opt.value])}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </FieldSelect>
                     )}
-                  </Field>
+                  />
+                )}
+              </Field>
 
-                  <Field>
-                    <FieldLabel htmlFor="location-name" required>
-                      {tfl("name")}
-                    </FieldLabel>
-                    {isView ? (
-                      <PlainText value={location?.name} />
-                    ) : (
-                      <FieldInput
-                        id="location-name"
-                        placeholder={t("namePlaceholder")}
-                        className="h-8"
+              <Field>
+                <FieldLabel required>{tfl("physicalCount")}</FieldLabel>
+                {isView ? (
+                  <FieldPlainText>
+                    {location?.physical_count_type
+                      ? t(
+                          PHYSICAL_COUNT_LABEL_KEY[
+                            location.physical_count_type
+                          ],
+                        )
+                      : ""}
+                  </FieldPlainText>
+                ) : (
+                  <Controller
+                    control={form.control}
+                    name="physical_count_type"
+                    render={({ field }) => (
+                      <FieldSelect
+                        value={field.value}
+                        onValueChange={field.onChange}
                         disabled={isDisabled}
-                        error={form.formState.errors.name?.message}
-                        maxLength={100}
-                        {...form.register("name")}
-                      />
-                    )}
-                  </Field>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <Field>
-                    <FieldLabel required>{tfl("locationType")}</FieldLabel>
-                    {isView ? (
-                      <PlainText
-                        value={
-                          location?.location_type
-                            ? t(
-                                INVENTORY_TYPE_LABEL_KEY[
-                                  location.location_type
-                                ],
-                              )
-                            : undefined
+                        error={
+                          form.formState.errors.physical_count_type?.message
                         }
-                      />
-                    ) : (
-                      <Controller
-                        control={form.control}
-                        name="location_type"
-                        render={({ field }) => (
-                          <FieldSelect
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={isDisabled}
-                            error={form.formState.errors.location_type?.message}
-                            placeholder={tfl("selectLocationType")}
-                            className="h-8 text-sm"
-                          >
-                            <SelectContent>
-                              {INVENTORY_TYPE_OPTIONS.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                  {t(INVENTORY_TYPE_LABEL_KEY[opt.value])}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </FieldSelect>
-                        )}
-                      />
+                        placeholder={tfl("selectPhysicalCountType")}
+                      >
+                        <SelectContent>
+                          {PHYSICAL_COUNT_TYPE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {t(PHYSICAL_COUNT_LABEL_KEY[opt.value])}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </FieldSelect>
                     )}
-                  </Field>
+                  />
+                )}
+              </Field>
 
-                  <Field>
-                    <FieldLabel required>{tfl("physicalCount")}</FieldLabel>
-                    {isView ? (
-                      <PlainText
-                        value={
-                          location?.physical_count_type
-                            ? t(
-                                PHYSICAL_COUNT_LABEL_KEY[
-                                  location.physical_count_type
-                                ],
-                              )
-                            : undefined
+              <Field className="sm:col-span-2">
+                <FieldLabel required>{tfl("deliveryPoint")}</FieldLabel>
+                {isView ? (
+                  <FieldPlainText>
+                    {location?.delivery_point?.name}
+                  </FieldPlainText>
+                ) : (
+                  <Controller
+                    control={form.control}
+                    name="delivery_point_id"
+                    render={({ field }) => (
+                      <LookupDeliveryPoint
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onItemChange={(item) =>
+                          form.setValue("delivery_point_name", item.name)
                         }
-                      />
-                    ) : (
-                      <Controller
-                        control={form.control}
-                        name="physical_count_type"
-                        render={({ field }) => (
-                          <FieldSelect
-                            value={field.value}
-                            onValueChange={field.onChange}
-                            disabled={isDisabled}
-                            error={
-                              form.formState.errors.physical_count_type?.message
-                            }
-                            placeholder={tfl("selectPhysicalCountType")}
-                            className="h-8 text-sm"
-                          >
-                            <SelectContent>
-                              {PHYSICAL_COUNT_TYPE_OPTIONS.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                  {t(PHYSICAL_COUNT_LABEL_KEY[opt.value])}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </FieldSelect>
-                        )}
+                        // โชว์ชื่อ delivery point เดิมได้แม้ inactive (ไม่อยู่ใน
+                        // lookup list ที่กรองเฉพาะ active) แทนการตก placeholder
+                        defaultLabel={location?.delivery_point?.name}
+                        disabled={isDisabled}
+                        error={form.formState.errors.delivery_point_id?.message}
                       />
                     )}
-                  </Field>
-                </div>
+                  />
+                )}
+              </Field>
 
-                <Field>
-                  <FieldLabel required>{tfl("deliveryPoint")}</FieldLabel>
-                  {isView ? (
-                    <PlainText value={location?.delivery_point?.name} />
-                  ) : (
-                    <Controller
-                      control={form.control}
-                      name="delivery_point_id"
-                      render={({ field }) => (
-                        <LookupDeliveryPoint
-                          value={field.value}
-                          onValueChange={field.onChange}
-                          onItemChange={(item) =>
-                            form.setValue("delivery_point_name", item.name)
-                          }
-                          // โชว์ชื่อ delivery point เดิมได้แม้ inactive (ไม่อยู่ใน
-                          // lookup list ที่กรองเฉพาะ active) แทนการตก placeholder
-                          defaultLabel={location?.delivery_point?.name}
-                          disabled={isDisabled}
-                          error={
-                            form.formState.errors.delivery_point_id?.message
-                          }
-                        />
-                      )}
-                    />
-                  )}
-                </Field>
+              <Field className="sm:col-span-2">
+                <FieldLabel htmlFor="location-description">
+                  {tfl("description")}
+                </FieldLabel>
+                {isView ? (
+                  <FieldPlainText className="items-start whitespace-pre-wrap">
+                    {location?.description}
+                  </FieldPlainText>
+                ) : (
+                  <Textarea
+                    id="location-description"
+                    placeholder={tfl("optional")}
+                    rows={2}
+                    disabled={isDisabled}
+                    maxLength={256}
+                    className="resize-none"
+                    {...form.register("description")}
+                  />
+                )}
+              </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="location-description">
-                    {tfl("description")}
-                  </FieldLabel>
-                  {isView ? (
-                    <PlainText value={location?.description} multiline />
-                  ) : (
-                    <Textarea
-                      id="location-description"
-                      placeholder={tfl("optional")}
-                      disabled={isDisabled}
-                      maxLength={256}
-                      {...form.register("description")}
-                    />
-                  )}
-                </Field>
-
+              <div className="sm:col-span-2">
                 <Controller
                   control={form.control}
                   name="is_active"
@@ -489,175 +472,80 @@ export function LocationForm({ location }: LocationFormProps) {
                     />
                   )}
                 />
-              </FieldGroup>
-            </form>
-          </Panel>
+              </div>
+            </SettingSection>
+          </form>
         </Reveal>
 
-        {/* ── Users + Products ─────────── */}
-        {isView ? (
-          location && (
-            <Reveal delay={160}>
-              <Panel>
-                <Tabs defaultValue="users">
-                  <TabsList variant="line">
-                    <TabsTrigger value="users" className="text-xs">
-                      <Users className="size-3" aria-hidden="true" />
-                      {t("locationUsers")} ({location.user_location.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="products" className="text-xs">
-                      <Boxes className="size-3" aria-hidden="true" />
-                      {t("products")} ({enrichedProducts.length})
-                    </TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="users" className="mt-3">
-                    <UserTable users={enrichedUsers} />
-                  </TabsContent>
-                  <TabsContent value="products" className="mt-3">
-                    <ProductTable products={enrichedProducts} />
-                  </TabsContent>
-                </Tabs>
-              </Panel>
-            </Reveal>
-          )
-        ) : (
-          <>
-            <Reveal delay={160}>
-              <Panel>
-                <SectionLabel icon={Users} count={userTargetKeys.length}>
-                  {t("locationUsers")}
-                </SectionLabel>
-                <Suspense fallback={null}>
-                  <Transfer
-                    dataSource={userSource}
-                    targetKeys={userTargetKeys}
-                    onChange={handleUsersChange}
-                    disabled={isDisabled}
-                    loading={isLoadingUsers}
-                    titles={[t("availableUsers"), t("locationUsers")]}
-                  />
-                </Suspense>
-              </Panel>
-            </Reveal>
-
-            <Reveal delay={220}>
-              <Panel>
-                <SectionLabel icon={Boxes} count={selectedProductIds.size}>
-                  {t("products")}
-                </SectionLabel>
-                <TreeProductLookup
-                  products={allProducts}
-                  selectedProductIds={selectedProductIds}
-                  onSelectionChange={handleProductSelectionChange}
+        {/* ── Users ─────────── */}
+        <Reveal delay={160}>
+          <SettingSection
+            wide
+            title={t("locationUsers")}
+            description={t("usersDesc")}
+            count={isView ? enrichedUsers.length : userTargetKeys.length}
+          >
+            {isView ? (
+              <UserTable users={enrichedUsers} />
+            ) : (
+              <Suspense fallback={null}>
+                <Transfer
+                  dataSource={userSource}
+                  targetKeys={userTargetKeys}
+                  onChange={handleUsersChange}
                   disabled={isDisabled}
-                  loading={isLoadingProducts}
+                  loading={isLoadingUsers}
+                  titles={[t("availableUsers"), t("locationUsers")]}
                 />
-              </Panel>
-            </Reveal>
-          </>
-        )}
+              </Suspense>
+            )}
+          </SettingSection>
+        </Reveal>
 
-        <DiscardDialog {...discard.dialogProps} variant="warning" />
-
-        {location && (
-          <DeleteDialog
-            open={showDelete}
-            onOpenChange={(open) =>
-              !open && !deleteLocation.isPending && setShowDelete(false)
-            }
-            title={t("deleteTitle")}
-            description={t("deleteConfirm", { name: location?.name ?? "" })}
-            isPending={deleteLocation.isPending}
-            onConfirm={() => {
-              deleteLocation.mutate(location.id, {
-                onSuccess: () => {
-                  toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                  navigate("/config/location");
-                },
-                onError: (err) => toast.error(err.message),
-              });
-            }}
-          />
-        )}
+        {/* ── Products ─────────── */}
+        <Reveal delay={220}>
+          <SettingSection
+            wide
+            title={t("products")}
+            description={t("productsDesc")}
+            count={isView ? enrichedProducts.length : selectedProductIds.size}
+          >
+            {isView ? (
+              <ProductTable products={enrichedProducts} />
+            ) : (
+              <TreeProductLookup
+                products={allProducts}
+                selectedProductIds={selectedProductIds}
+                onSelectionChange={handleProductSelectionChange}
+                disabled={isDisabled}
+                loading={isLoadingProducts}
+              />
+            )}
+          </SettingSection>
+        </Reveal>
       </div>
-    </div>
-  );
-}
 
-/* ── Panel surface (shared card chrome) ─────────── */
+      <DiscardDialog {...discard.dialogProps} variant="warning" />
 
-function Panel({
-  children,
-  className,
-}: {
-  readonly children: React.ReactNode;
-  readonly className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4",
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ── Plain text display (view mode) ─────────── */
-
-function PlainText({
-  value,
-  multiline,
-}: {
-  readonly value?: string | null;
-  readonly multiline?: boolean;
-}) {
-  const empty = !value;
-  return (
-    <div className="min-h-8 py-1.5">
-      <div
-        className={cn(
-          "text-foreground",
-          multiline
-            ? "text-xs leading-relaxed whitespace-pre-wrap"
-            : "text-sm font-semibold tracking-tight",
-          empty && "text-muted-foreground text-xs font-normal italic",
-        )}
-      >
-        {empty ? "—" : value}
-      </div>
-    </div>
-  );
-}
-
-/* ── Section label atom ─────────── */
-
-function SectionLabel({
-  icon: Icon,
-  children,
-  count,
-}: {
-  readonly icon: React.ComponentType<{ className?: string }>;
-  readonly children: React.ReactNode;
-  readonly count?: number;
-}) {
-  return (
-    <div className="text-muted-foreground mb-3 flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-widest uppercase">
-      <Icon className="size-2.5" aria-hidden="true" />
-      <span>{children}</span>
-      {typeof count === "number" && (
-        <span
-          className={cn(
-            "inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tracking-wider tabular-nums",
-            count > 0
-              ? "bg-primary/15 text-primary"
-              : "bg-muted text-muted-foreground",
-          )}
-        >
-          {count}
-        </span>
+      {location && (
+        <DeleteDialog
+          open={showDelete}
+          onOpenChange={(open) =>
+            !open && !deleteLocation.isPending && setShowDelete(false)
+          }
+          title={t("deleteTitle")}
+          description={t("deleteConfirm", { name: location?.name ?? "" })}
+          isPending={deleteLocation.isPending}
+          onConfirm={() => {
+            deleteLocation.mutate(location.id, {
+              onSuccess: () => {
+                toast.success(tt("deleteSuccess", { entity: t("entity") }));
+                navigate("/config/location");
+              },
+              onError: (err) => toast.error(err.message),
+            });
+          }}
+        />
       )}
     </div>
   );
