@@ -409,7 +409,7 @@ function ScheduleVisual() {
                       borderLeft: `2px solid ${c.tone}`,
                     }}
                   >
-                    <div className="text-foreground/70 text-[0.5rem] font-bold">
+                    <div className="text-foreground/70 text-[0.5rem] font-semibold">
                       {c.t}
                     </div>
                     <div className="text-foreground text-[0.5625rem] leading-tight font-semibold">

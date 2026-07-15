@@ -3,44 +3,48 @@ import type { VisualKey } from "./landing-types";
 const VIZ_WRAP =
   "absolute inset-0 flex flex-col justify-end px-2 pt-2 pb-2 pl-11";
 
-export function ModuleVisual({
-  visualKey,
-  tint,
-}: {
-  readonly visualKey: VisualKey;
-  readonly tint: string;
-}) {
+/**
+ * สีเดียวที่ภาพจำลองใช้ได้
+ *
+ * เดิมแต่ละโมดูลรับ `tint` จาก `TONE_COLOR` ซึ่งเป็น map 5 สี (indigo/blue/
+ * green/rose/orange) ใช้เข้ารหัสว่าโมดูลไหนเป็นหมวดไหน — docs/DESIGN.md บอกว่า
+ * "no second brand color exists" การ์ดแยกกันด้วยไอคอน ชื่อ และตัวภาพอยู่แล้ว
+ * ไม่ต้องใช้สีมาบอกหมวด
+ */
+const ACCENT = "var(--primary)";
+
+export function ModuleVisual({ visualKey }: { readonly visualKey: VisualKey }) {
   switch (visualKey) {
     case "roles":
-      return <RolesViz tint={tint} />;
+      return <RolesViz />;
     case "assign":
-      return <AssignViz tint={tint} />;
+      return <AssignViz />;
     case "period":
-      return <PeriodViz tint={tint} />;
+      return <PeriodViz />;
     case "workflows":
-      return <WorkflowsViz tint={tint} />;
+      return <WorkflowsViz />;
     case "docs":
-      return <DocsViz tint={tint} />;
+      return <DocsViz />;
     case "userActivity":
-      return <UserActivityViz tint={tint} />;
+      return <UserActivityViz />;
     case "monitor":
-      return <MonitorViz tint={tint} />;
+      return <MonitorViz />;
     case "email":
-      return <EmailViz tint={tint} />;
+      return <EmailViz />;
     case "notify":
-      return <NotifyViz tint={tint} />;
+      return <NotifyViz />;
     case "code":
-      return <CodeViz tint={tint} />;
+      return <CodeViz />;
     case "query":
-      return <QueryViz tint={tint} />;
+      return <QueryViz />;
     case "dataset":
-      return <DatasetViz tint={tint} />;
+      return <DatasetViz />;
     default:
       return null;
   }
 }
 
-function RolesViz({ tint }: { readonly tint: string }) {
+function RolesViz() {
   const roles = ["Buyer", "Storekeeper", "Finance"];
   const perms = ["View", "Create", "Approve", "Export"];
   const matrix = [
@@ -56,7 +60,7 @@ function RolesViz({ tint }: { readonly tint: string }) {
           {perms.map((p) => (
             <span
               key={p}
-              className="text-muted-foreground text-center text-[0.5rem] font-bold tracking-wider uppercase"
+              className="text-muted-foreground text-center text-[0.5rem] font-semibold tracking-wider uppercase"
             >
               {p}
             </span>
@@ -78,7 +82,7 @@ function RolesViz({ tint }: { readonly tint: string }) {
                 className="h-2 w-full rounded-[1px]"
                 style={
                   v
-                    ? { background: tint }
+                    ? { background: ACCENT }
                     : {
                         background: "transparent",
                         border: "1px solid var(--border)",
@@ -93,7 +97,7 @@ function RolesViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function AssignViz({ tint }: { readonly tint: string }) {
+function AssignViz() {
   const users = [
     { i: "AC", n: "A. Chen", r: "Buyer" },
     { i: "MR", n: "M. Rodriguez", r: "Storekeeper" },
@@ -110,10 +114,11 @@ function AssignViz({ tint }: { readonly tint: string }) {
             }`}
           >
             <span
-              className="inline-flex size-4 items-center justify-center rounded-full text-[0.5rem] font-bold"
+              className="inline-flex size-4 items-center justify-center rounded-full text-[0.5rem] font-semibold"
               style={{
-                background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
-                color: tint,
+                background:
+                  "color-mix(in oklch, var(--primary), var(--card) 80%)",
+                color: ACCENT,
               }}
             >
               {u.i}
@@ -122,10 +127,11 @@ function AssignViz({ tint }: { readonly tint: string }) {
               {u.n}
             </span>
             <span
-              className="rounded-sm px-1.5 py-0.5 text-[0.5rem] font-bold tracking-wider uppercase"
+              className="rounded-sm px-1.5 py-0.5 text-[0.5rem] font-semibold tracking-wider uppercase"
               style={{
-                background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
-                color: tint,
+                background:
+                  "color-mix(in oklch, var(--primary), var(--card) 80%)",
+                color: ACCENT,
               }}
             >
               {u.r}
@@ -137,7 +143,7 @@ function AssignViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function PeriodViz({ tint }: { readonly tint: string }) {
+function PeriodViz() {
   const months = [
     "Jan",
     "Feb",
@@ -182,7 +188,7 @@ function PeriodViz({ tint }: { readonly tint: string }) {
                     color: "var(--muted-foreground)",
                   }
                 : s === "o"
-                  ? { background: tint, color: "var(--primary-foreground)" }
+                  ? { background: ACCENT, color: "var(--primary-foreground)" }
                   : {
                       background: "transparent",
                       color: "var(--muted-foreground)",
@@ -191,7 +197,7 @@ function PeriodViz({ tint }: { readonly tint: string }) {
             return (
               <div
                 key={m}
-                className="rounded-[1px] py-1 text-center text-[0.5rem] font-bold"
+                className="rounded-[1px] py-1 text-center text-[0.5rem] font-semibold"
                 style={style}
               >
                 {m}
@@ -203,7 +209,7 @@ function PeriodViz({ tint }: { readonly tint: string }) {
           <span className="inline-flex items-center gap-1">
             <span
               className="inline-block size-2 rounded-[1px]"
-              style={{ background: tint }}
+              style={{ background: ACCENT }}
             />
             Open
           </span>
@@ -217,7 +223,7 @@ function PeriodViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function WorkflowsViz({ tint }: { readonly tint: string }) {
+function WorkflowsViz() {
   const nodes = [
     { x: 20, y: 50, l: "Draft", filled: false, accent: false },
     { x: 95, y: 30, l: "Dept.", filled: false, accent: false },
@@ -249,14 +255,16 @@ function WorkflowsViz({ tint }: { readonly tint: string }) {
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M0,0 L10,5 L0,10 z" fill={tint} />
+            <path d="M0,0 L10,5 L0,10 z" fill={ACCENT} />
           </marker>
         </defs>
         {nodes.map((n, i) => {
+          // "เสร็จแล้ว" ไม่ใช้เขียว — นั่นคือ accent ตัวที่สอง สเต็ปที่ผ่านแล้ว
+          // กับสเต็ปปัจจุบันแยกกันด้วย accent เต็ม vs เทาทึบ ไม่ใช่คนละสี
           const fill = n.accent
-            ? tint
+            ? ACCENT
             : n.filled
-              ? "var(--positive)"
+              ? "var(--muted-foreground)"
               : "var(--card)";
           const text = n.filled
             ? "var(--primary-foreground)"
@@ -270,7 +278,7 @@ function WorkflowsViz({ tint }: { readonly tint: string }) {
                 height="22"
                 rx="3"
                 fill={fill}
-                stroke={tint}
+                stroke={ACCENT}
                 strokeWidth="1"
               />
               <text
@@ -290,7 +298,7 @@ function WorkflowsViz({ tint }: { readonly tint: string }) {
           <path
             key={i}
             d={`M${x1} ${y1} L${x2} ${y2}`}
-            stroke={tint}
+            stroke={ACCENT}
             strokeWidth="1.3"
             fill="none"
             markerEnd="url(#wf-arrow)"
@@ -301,7 +309,7 @@ function WorkflowsViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function DocsViz({ tint }: { readonly tint: string }) {
+function DocsViz() {
   const tree = [
     { d: 0, label: "Procurement", kind: "folder" as const },
     { d: 1, label: "POs · 2026", kind: "folder" as const },
@@ -323,7 +331,7 @@ function DocsViz({ tint }: { readonly tint: string }) {
               {row.kind === "folder" ? (
                 <span
                   className="block h-[7px] w-[9px] rounded-[1px]"
-                  style={{ background: tint }}
+                  style={{ background: ACCENT }}
                 />
               ) : (
                 <span className="bg-card border-muted-foreground block h-[9px] w-[7px] rounded-[1px] border" />
@@ -343,7 +351,7 @@ function DocsViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function UserActivityViz({ tint }: { readonly tint: string }) {
+function UserActivityViz() {
   const events = [
     { i: "AC", t: "approved PO-12480", m: "2m ago" },
     { i: "JM", t: "edited Role · Buyer", m: "14m ago" },
@@ -360,10 +368,11 @@ function UserActivityViz({ tint }: { readonly tint: string }) {
             }`}
           >
             <span
-              className="inline-flex size-4 items-center justify-center rounded-full text-[0.5rem] font-bold"
+              className="inline-flex size-4 items-center justify-center rounded-full text-[0.5rem] font-semibold"
               style={{
-                background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
-                color: tint,
+                background:
+                  "color-mix(in oklch, var(--primary), var(--card) 80%)",
+                color: ACCENT,
               }}
             >
               {e.i}
@@ -379,7 +388,7 @@ function UserActivityViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function MonitorViz({ tint }: { readonly tint: string }) {
+function MonitorViz() {
   const points = [
     12, 18, 22, 16, 28, 24, 32, 28, 36, 30, 28, 22, 26, 34, 30, 38, 42, 36,
   ];
@@ -400,7 +409,10 @@ function MonitorViz({ tint }: { readonly tint: string }) {
           <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-wider uppercase">
             CPU · last 30m
           </span>
-          <span className="text-[0.6875rem] font-bold" style={{ color: tint }}>
+          <span
+            className="text-[0.6875rem] font-bold"
+            style={{ color: ACCENT }}
+          >
             34%
           </span>
         </div>
@@ -412,24 +424,24 @@ function MonitorViz({ tint }: { readonly tint: string }) {
         >
           <path
             d={area}
-            fill={`color-mix(in oklch, ${tint}, var(--card) 78%)`}
+            fill={"color-mix(in oklch, var(--primary), var(--card) 78%)"}
           />
           <path
             d={path}
-            stroke={tint}
+            stroke={ACCENT}
             strokeWidth="1.5"
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <circle cx={lastX} cy={lastY} r="2.5" fill={tint} />
+          <circle cx={lastX} cy={lastY} r="2.5" fill={ACCENT} />
         </svg>
       </div>
     </div>
   );
 }
 
-function EmailViz({ tint }: { readonly tint: string }) {
+function EmailViz() {
   return (
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
@@ -437,7 +449,7 @@ function EmailViz({ tint }: { readonly tint: string }) {
           <span className="text-foreground text-[0.5625rem] font-semibold">
             mail.aureliabay.com
           </span>
-          <span className="text-positive inline-flex items-center gap-1 text-[0.5rem] font-bold">
+          <span className="text-positive inline-flex items-center gap-1 text-[0.5rem] font-semibold">
             <span className="bg-positive inline-block size-1.5 rounded-full" />{" "}
             Connected
           </span>
@@ -451,8 +463,9 @@ function EmailViz({ tint }: { readonly tint: string }) {
           <div
             className="rounded-[1px] px-1.5 py-1 font-bold"
             style={{
-              background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
-              color: tint,
+              background:
+                "color-mix(in oklch, var(--primary), var(--card) 80%)",
+              color: ACCENT,
             }}
           >
             4 templates
@@ -463,7 +476,7 @@ function EmailViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function NotifyViz({ tint }: { readonly tint: string }) {
+function NotifyViz() {
   const templates = [
     { n: "Approval Required", e: "onApprove", c: "Email" },
     { n: "Request Submitted", e: "onSubmit", c: "System" },
@@ -482,26 +495,28 @@ function NotifyViz({ tint }: { readonly tint: string }) {
             <span
               className="inline-flex size-4 shrink-0 items-center justify-center rounded-full"
               style={{
-                background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
+                background:
+                  "color-mix(in oklch, var(--primary), var(--card) 80%)",
               }}
               aria-hidden
             >
               <svg viewBox="0 0 16 16" className="size-2.5" fill="none">
                 <path
                   d="M8 3 C 5.8 3 5 4.4 5 6.3 C 5 8.5 4 9.6 4 9.6 H 12 C 12 9.6 11 8.5 11 6.3 C 11 4.4 10.2 3 8 3 Z"
-                  fill={tint}
+                  fill={ACCENT}
                 />
-                <circle cx="8" cy="11.4" r="1" fill={tint} />
+                <circle cx="8" cy="11.4" r="1" fill={ACCENT} />
               </svg>
             </span>
             <span className="text-foreground flex-1 truncate text-[0.625rem] font-semibold">
               {tpl.n}
             </span>
             <span
-              className="rounded-sm px-1 py-0.5 text-[0.5rem] font-bold"
+              className="rounded-sm px-1 py-0.5 text-[0.5rem] font-semibold"
               style={{
-                background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
-                color: tint,
+                background:
+                  "color-mix(in oklch, var(--primary), var(--card) 80%)",
+                color: ACCENT,
               }}
             >
               {tpl.e}
@@ -516,7 +531,7 @@ function NotifyViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function CodeViz({ tint }: { readonly tint: string }) {
+function CodeViz() {
   const lines = [
     {
       p: "cron · 0 2 * * *",
@@ -530,8 +545,13 @@ function CodeViz({ tint }: { readonly tint: string }) {
       bold: true,
       prefix: "$ ",
     },
-    { p: "→ 1,284 rows updated", color: tint, bold: false, prefix: "  " },
-    { p: "→ done · 4.2s", color: "var(--positive)", bold: false, prefix: "  " },
+    { p: "→ 1,284 rows updated", color: ACCENT, bold: false, prefix: "  " },
+    {
+      p: "→ done · 4.2s",
+      color: "var(--muted-foreground)",
+      bold: false,
+      prefix: "  ",
+    },
   ];
   return (
     <div className={VIZ_WRAP}>
@@ -565,39 +585,39 @@ function CodeViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function QueryViz({ tint }: { readonly tint: string }) {
+function QueryViz() {
   return (
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
         <div className="text-foreground text-[0.5625rem] leading-relaxed">
           <div>
-            <span className="font-bold" style={{ color: tint }}>
+            <span className="font-bold" style={{ color: ACCENT }}>
               SELECT
             </span>{" "}
             vendor,{" "}
-            <span className="font-bold" style={{ color: tint }}>
+            <span className="font-bold" style={{ color: ACCENT }}>
               SUM
             </span>
             (total)
           </div>
           <div>
-            <span className="font-bold" style={{ color: tint }}>
+            <span className="font-bold" style={{ color: ACCENT }}>
               FROM
             </span>{" "}
             purchase_orders
           </div>
           <div>
-            <span className="font-bold" style={{ color: tint }}>
+            <span className="font-bold" style={{ color: ACCENT }}>
               WHERE
             </span>{" "}
             period{" "}
-            <span className="font-bold" style={{ color: tint }}>
+            <span className="font-bold" style={{ color: ACCENT }}>
               =
             </span>{" "}
             <span className="text-positive">{`'2026-05'`}</span>
           </div>
           <div>
-            <span className="font-bold" style={{ color: tint }}>
+            <span className="font-bold" style={{ color: ACCENT }}>
               GROUP BY
             </span>{" "}
             vendor;
@@ -608,10 +628,11 @@ function QueryViz({ tint }: { readonly tint: string }) {
             184 rows · 1.2s
           </span>
           <span
-            className="rounded-[1px] px-1.5 py-0.5 text-[0.5rem] font-bold"
+            className="rounded-[1px] px-1.5 py-0.5 text-[0.5rem] font-semibold"
             style={{
-              background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
-              color: tint,
+              background:
+                "color-mix(in oklch, var(--primary), var(--card) 80%)",
+              color: ACCENT,
             }}
           >
             Save
@@ -622,7 +643,7 @@ function QueryViz({ tint }: { readonly tint: string }) {
   );
 }
 
-function DatasetViz({ tint }: { readonly tint: string }) {
+function DatasetViz() {
   const cols = [
     { n: "vendor_id", t: "string", pk: true },
     { n: "period", t: "date", pk: false },
@@ -637,10 +658,11 @@ function DatasetViz({ tint }: { readonly tint: string }) {
             vendor_spend_monthly
           </span>
           <span
-            className="rounded-[1px] px-1.5 py-0.5 text-[0.5rem] font-bold"
+            className="rounded-[1px] px-1.5 py-0.5 text-[0.5rem] font-semibold"
             style={{
-              background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
-              color: tint,
+              background:
+                "color-mix(in oklch, var(--primary), var(--card) 80%)",
+              color: ACCENT,
             }}
           >
             fresh
@@ -658,8 +680,9 @@ function DatasetViz({ tint }: { readonly tint: string }) {
               style={
                 c.pk
                   ? {
-                      background: `color-mix(in oklch, ${tint}, var(--card) 80%)`,
-                      color: tint,
+                      background:
+                        "color-mix(in oklch, var(--primary), var(--card) 80%)",
+                      color: ACCENT,
                     }
                   : {
                       background: "transparent",

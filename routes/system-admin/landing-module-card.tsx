@@ -1,44 +1,32 @@
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
-import {
-  TONE_COLOR,
-  type ModuleDef,
-  type TFn,
-  type Tone,
-} from "./landing-types";
+import { type ModuleDef, type TFn } from "./landing-types";
 import { ModuleVisual } from "./landing-visuals";
 
 export function LandingModuleCard({
   mod,
-  tone,
   t,
 }: {
   readonly mod: ModuleDef;
-  readonly tone: Tone;
   readonly t: TFn;
 }) {
-  const tint = TONE_COLOR[tone];
   const Icon = mod.icon;
   return (
     <article className="bg-card border-border flex flex-col overflow-hidden rounded-md border">
-      <div
-        className="border-border-subtle relative h-28 overflow-hidden border-b"
-        style={{ background: `color-mix(in oklch, ${tint}, var(--card) 88%)` }}
-      >
-        <ModuleVisual visualKey={mod.visualKey} tint={tint} />
+      {/* chrome ของการ์ดเป็นกลาง — การ์ดแยกกันด้วยไอคอน ชื่อ และตัวภาพ ไม่ใช่สี
+          (accent เหลือแค่ในภาพจำลอง ดู ACCENT ใน landing-visuals) */}
+      <div className="bg-muted/40 border-border-subtle relative h-28 overflow-hidden border-b">
+        <ModuleVisual visualKey={mod.visualKey} />
         <div className="bg-card border-border absolute top-2 left-2 flex size-7 items-center justify-center rounded-md border">
-          <Icon aria-hidden style={{ color: tint }} className="size-3.5" />
+          <Icon aria-hidden className="text-muted-foreground size-3.5" />
         </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <div
-          className="text-[0.5625rem] font-semibold tracking-[0.14em] uppercase"
-          style={{ color: tint }}
-        >
+        <div className="text-muted-foreground text-[0.5625rem] font-semibold tracking-[0.14em] uppercase">
           {mod.key.replace(/([A-Z])/g, "-$1").toLowerCase()}
         </div>
-        <h3 className="text-foreground text-sm leading-tight font-bold tracking-tight">
+        <h3 className="text-foreground text-sm leading-tight font-semibold tracking-tight">
           {t(`modules.${mod.key}.name`)}
         </h3>
         <div className="text-foreground/75 text-xs leading-snug font-semibold">

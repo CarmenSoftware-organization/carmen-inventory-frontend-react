@@ -13,8 +13,12 @@ import { describe, it, expect } from "vitest";
  */
 const ROOT = join(import.meta.dirname, "../..");
 
-/** 9px — `{typography.micro-eyebrow}`. The one sanctioned sub-10px tier. */
-const MICRO_EYEBROW = String.raw`text-\[0\.5625rem\]`;
+/**
+ * The one sanctioned sub-10px tier: `{typography.micro-eyebrow}` is 9px and
+ * "compresses to 8px in the tightest micro-grid cells" — same ladder, so both
+ * sizes want weight 600.
+ */
+const MICRO_EYEBROW = String.raw`text-\[0\.5(?:625)?rem\]`;
 
 function tsxFiles(dir: string): string[] {
   return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => {

@@ -42,7 +42,7 @@ export function LandingChapter({
 
       <div className={`mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 ${cols}`}>
         {chapter.modules.map((m) => (
-          <LandingModuleCard key={m.key} mod={m} tone={chapter.tone} t={t} />
+          <LandingModuleCard key={m.key} mod={m} t={t} />
         ))}
       </div>
     </section>
