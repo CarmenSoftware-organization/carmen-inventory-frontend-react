@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { type useFieldArray, type useForm } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { CheckCircle2, Mail, Phone, Plus, Star, User, X } from "lucide-react";
+import { Mail, Phone, Plus, Star, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -146,12 +146,12 @@ function ContactCard({
       <div className="flex items-start gap-3">
         {/* Avatar */}
         <div className="relative shrink-0">
-          <div className="text-primary-foreground flex size-9 items-center justify-center rounded-lg bg-primary font-serif text-base font-semibold">
+          <div className="text-primary-foreground bg-primary flex size-9 items-center justify-center rounded-lg font-serif text-base font-semibold">
             {initial}
           </div>
           {isPrimary && (
             <div className="bg-primary text-primary-foreground absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full">
-              <Star className="size-2.5 fill-current" />
+              <Star className="size-2.5 fill-current" aria-hidden />
             </div>
           )}
         </div>
@@ -163,9 +163,11 @@ function ContactCard({
               <div className="text-foreground truncate text-sm font-semibold tracking-tight">
                 {contact.name || "—"}
               </div>
+              {/* ป้ายเทาเปล่า ไม่ใช่ชิปสีน้ำเงิน — สัญญาณ "primary" มีที่ดาวบน
+                  avatar อยู่แล้ว (ดู docs/DESIGN.md: หนึ่งสัญญาณต่อ element)
+                  ป้ายนี้มีไว้ให้ screen reader และคนที่ไม่รู้ว่าดาวแปลว่าอะไร */}
               {isPrimary && (
-                <span className="bg-primary/10 text-primary mt-0.5 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.5625rem] font-semibold tracking-widest uppercase">
-                  <CheckCircle2 className="size-2.5" />
+                <span className="text-muted-foreground mt-0.5 inline-flex text-[0.5625rem] font-semibold tracking-widest uppercase">
                   {t("contact.primary")}
                 </span>
               )}
@@ -204,7 +206,8 @@ function ContactCard({
               size="icon-xs"
               aria-label={t("contact.removeContact")}
               onClick={onRemove}
-              className="bg-primary/10 text-muted-foreground hover:text-destructive hover:bg-primary/20 rounded-md"
+              variant="ghost"
+              className="text-muted-foreground hover:text-destructive"
             >
               <X />
             </Button>
@@ -327,8 +330,8 @@ function EmptyContacts({
 }) {
   "use no memo";
   return (
-    <div className="border-primary/35 bg-primary/5 rounded-xl border border-dashed p-6 text-center">
-      <div className="text-primary-foreground mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-primary">
+    <div className="border-border/60 bg-muted/20 rounded-xl border border-dashed p-6 text-center">
+      <div className="bg-muted text-muted-foreground/70 mx-auto mb-2 flex size-9 items-center justify-center rounded-xl">
         <User className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
@@ -336,12 +339,7 @@ function EmptyContacts({
         {description}
       </p>
       {!isView && (
-        <Button
-          type="button"
-          size="xs"
-          onClick={onAdd}
-          className="mt-2 rounded-full"
-        >
+        <Button type="button" size="xs" onClick={onAdd} className="mt-2">
           <Plus />
           {addLabel}
         </Button>

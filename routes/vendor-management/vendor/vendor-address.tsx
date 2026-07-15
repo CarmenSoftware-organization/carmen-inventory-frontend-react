@@ -69,30 +69,30 @@ export function VendorAddress({
     >
       <div className="sm:col-span-2">
         {addressFields.length === 0 ? (
-        <div className="border-primary/35 bg-primary/5 rounded-xl border border-dashed p-6 text-center">
-          <div className="text-primary-foreground mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-primary">
-            <MapPin className="size-4" />
+          <div className="border-border/60 bg-muted/20 rounded-xl border border-dashed p-6 text-center">
+            <div className="bg-muted text-muted-foreground/70 mx-auto mb-2 flex size-9 items-center justify-center rounded-xl">
+              <MapPin className="size-4" />
+            </div>
+            <div className="text-foreground text-xs font-semibold">
+              {t("address.noAddresses")}
+            </div>
+            <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
+              {t("address.noAddressesDesc")}
+            </p>
+            {!isView && (
+              <Button
+                type="button"
+                size="xs"
+                onClick={handleAdd}
+                className="mt-2"
+              >
+                <Plus />
+                {t("address.addAddress")}
+              </Button>
+            )}
           </div>
-          <div className="text-foreground text-xs font-semibold">
-            {t("address.noAddresses")}
-          </div>
-          <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
-            {t("address.noAddressesDesc")}
-          </p>
-          {!isView && (
-            <Button
-              type="button"
-              size="xs"
-              onClick={handleAdd}
-              className="mt-2 rounded-full"
-            >
-              <Plus />
-              {t("address.addAddress")}
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2">
+        ) : (
+          <div className="flex flex-col gap-2">
             {addressFields.map((field, index) => (
               <AddressRow
                 key={field.id}
@@ -310,7 +310,8 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
             size="icon-xs"
             aria-label={t("address.removeAddress")}
             onClick={onRemove}
-            className="bg-primary/10 text-muted-foreground hover:text-destructive hover:bg-primary/20 rounded-md"
+            variant="ghost"
+            className="text-muted-foreground hover:text-destructive"
           >
             <X />
           </Button>
