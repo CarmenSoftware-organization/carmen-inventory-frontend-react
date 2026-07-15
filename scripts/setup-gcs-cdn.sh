@@ -89,7 +89,12 @@ log "domain: ${DOMAIN}"
 # ---- 4. managed SSL cert ----
 if gcloud compute ssl-certificates describe "${CERT_NAME}" >/dev/null 2>&1; then
   CERT_DOMAINS="$(gcloud compute ssl-certificates describe "${CERT_NAME}" --format='value(managed.domains)')"
-  if [[ "${CERT_DOMAINS}" == *"${DOMAIN}"* ]]; then
+  CERT_COVERS=false
+  IFS=';,' read -ra CERT_DOMAIN_LIST <<<"${CERT_DOMAINS}"
+  for d in "${CERT_DOMAIN_LIST[@]}"; do
+    [[ "${d}" == "${DOMAIN}" ]] && CERT_COVERS=true
+  done
+  if [ "${CERT_COVERS}" = true ]; then
     log "cert ${CERT_NAME} exists for ${DOMAIN}, skip"
   else
     log "WARNING: cert ${CERT_NAME} covers '${CERT_DOMAINS}', not '${DOMAIN}'"
