@@ -4,20 +4,33 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { type Plugin, defineConfig } from "vite";
 
-// Dev-only: เสิร์ฟ config ตามโหมดที่ /config.json (runtime fetch /config.json เสมอ)
-//   `bun run dev`  (USE_LOCAL_CONFIG=1) → public/config.local.json (local backend)
-//   `bun run prod`                      → public/config.prod.json  (remote backend)
-// ไม่มีผลตอน `vite build` (deploy แยกจัดการ config.json เอง)
-function serveLocalConfig(): Plugin {
-  const file =
-    process.env.USE_LOCAL_CONFIG === "1" ? "config.local.json" : "config.prod.json";
+// Dev-only: เสิร์ฟ config ตาม CONFIG_ENV ที่ /config.json (runtime fetch /config.json เสมอ)
+//   CONFIG_ENV=local|dev|uat|prod (default: local) → public/config.<env>.json
+//   ใช้ผ่าน `bun run dev:local` / `dev:dev` / `dev:uat` / `dev:prod`
+// ไม่มีผลตอน `vite build` (deploy แยกจัดการ config.json เอง — ดู emitBuildConfig)
+const CONFIG_ENVS = ["local", "dev", "uat", "prod"];
+
+function serveEnvConfig(): Plugin {
+  const env = process.env.CONFIG_ENV ?? "local";
+  if (!CONFIG_ENVS.includes(env)) {
+    throw new Error(
+      `CONFIG_ENV="${env}" is not a known environment — use one of: ${CONFIG_ENVS.join(", ")}`,
+    );
+  }
+  const file = `config.${env}.json`;
   return {
-    name: "serve-local-config",
+    name: "serve-env-config",
     apply: "serve", // dev server เท่านั้น — ไม่มีผลตอน `vite build`
     configureServer(server) {
-      server.middlewares.use("/config.json", (_req, res, next) => {
-        const target = path.resolve(import.meta.dirname, "public", file);
-        if (!fs.existsSync(target)) return next();
+      const target = path.resolve(import.meta.dirname, "public", file);
+      // fail fast ตอน start — ไม่งั้นจบเป็น 404 เงียบ + SPA โชว์
+      // "Failed to load application configuration"
+      if (!fs.existsSync(target)) {
+        throw new Error(
+          `${target} not found — copy public/config.sample.json to public/${file} and fill in the values`,
+        );
+      }
+      server.middlewares.use("/config.json", (_req, res) => {
         res.setHeader("Content-Type", "application/json");
         res.end(fs.readFileSync(target));
       });
@@ -48,7 +61,7 @@ function emitBuildConfig(): Plugin {
 // ใน public/config.json — request จะวิ่งผ่าน Vite proxy (เลี่ยงปัญหา CORS ระหว่างรอ backend เปิด CORS)
 export default defineConfig(() => ({
   plugins: [
-    serveLocalConfig(),
+    serveEnvConfig(),
     emitBuildConfig(),
     react({ babel: { plugins: ["babel-plugin-react-compiler"] } }),
     tailwindcss(),
