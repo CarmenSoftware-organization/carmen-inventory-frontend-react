@@ -37,8 +37,12 @@ export function useInterfaceConfig(configKey: string): UseInterfaceConfigResult 
 
   return {
     value: query.data?.value,
-    isLoading: query.isLoading,
-    isNew: isNotFound,
+    // isPending, not isLoading: useAppConfigByKey is gated `enabled: !!buCode`, and a
+    // disabled query has fetchStatus "idle", so isLoading is false while the profile is
+    // still resolving — the form would render its defaults, then flicker to a skeleton,
+    // and form.reset would wipe anything typed in that window.
+    isLoading: query.isPending,
+    isNew: isNotFound && !query.data,
     isError: query.isError && !isNotFound,
     refetch: () => void query.refetch(),
     save: (value, opts) =>
