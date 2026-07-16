@@ -3,6 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement, type ReactNode } from "react";
 import { useAppConfigs } from "../use-app-config";
+import { ApiError } from "@/lib/api-error";
 import type { AppConfig } from "@/types/app-config";
 
 vi.mock("@/hooks/use-profile", () => ({
@@ -77,5 +78,7 @@ describe("useAppConfigs", () => {
     const { result } = renderHook(() => useAppConfigs(), { wrapper });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.error).toBeInstanceOf(ApiError);
+    expect((result.current.error as ApiError).statusCode).toBe(500);
   });
 });

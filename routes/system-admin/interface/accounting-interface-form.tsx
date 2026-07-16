@@ -51,9 +51,10 @@ export function toApiValue(
   return { ...values };
 }
 
-const SYSTEMS = ["carmen_gl", "blueledgers", "external"] as const;
-const FORMATS = ["csv", "xml", "json"] as const;
-const FREQUENCIES = ["manual", "daily", "monthly"] as const;
+// derive dropdown options from the schema so the two never drift
+const SYSTEMS = accountingSchema.shape.system.options;
+const FORMATS = accountingSchema.shape.export_format.options;
+const FREQUENCIES = accountingSchema.shape.posting_frequency.options;
 
 /**
  * หน้า config ของ Accounting Interface — ตั้งค่าการส่งข้อมูลไป GL/AP

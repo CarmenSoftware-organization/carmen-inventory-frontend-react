@@ -46,7 +46,8 @@ export function toApiValue(values: PmsFormValues): Record<string, unknown> {
   return { ...values };
 }
 
-const VENDORS = ["opera", "protel", "other"] as const;
+// derive dropdown options from the schema so the two never drift
+const VENDORS = pmsSchema.shape.vendor.options;
 
 /**
  * หน้า config ของ PMS Interface — ตั้งค่าการ post City Ledger / Credit Card จากระบบ PMS

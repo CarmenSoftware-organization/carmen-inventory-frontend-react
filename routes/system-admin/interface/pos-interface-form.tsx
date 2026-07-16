@@ -51,9 +51,10 @@ export function toApiValue(values: PosFormValues): Record<string, unknown> {
   return { ...values };
 }
 
-const VENDORS = ["micros", "infrasys", "square", "other"] as const;
-const FREQUENCIES = ["manual", "hourly", "daily"] as const;
-const POSTINGS = ["recipe", "direct"] as const;
+// derive dropdown options from the schema so the two never drift
+const VENDORS = posSchema.shape.vendor.options;
+const FREQUENCIES = posSchema.shape.sync_frequency.options;
+const POSTINGS = posSchema.shape.consumption_posting.options;
 
 /**
  * หน้า config ของ POS Interface — ตั้งค่าการดึงยอดขาย/การใช้วัตถุดิบจากระบบขายหน้าร้าน
