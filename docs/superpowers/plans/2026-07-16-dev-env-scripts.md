@@ -59,12 +59,12 @@ Do NOT modify `public/config.prod.json` — it keeps the dev-backend values as a
 
 - [ ] **Step 3: Consolidate .gitignore config entries**
 
-Replace the entire `.gitignore` content. Current content has three per-file config lines plus a duplicated pair at the bottom (`public/config.json`, `public/config.local.json` ×2, `public/config.prod.json` ×2); replace all of them with one glob + one negation:
+Replace the entire `.gitignore` content. Current content has three per-file config lines plus a duplicated pair at the bottom (`public/config.json`, `public/config.local.json` ×2, `public/config.prod.json` ×2); replace all of them with one glob + one negation. Note `public/config*.json` has no dot after `config` — `config.*.json` would not match the bare `config.json` and would silently un-ignore it:
 
 ```
 node_modules
 dist
-public/config.*.json
+public/config*.json
 !public/config.sample.json
 *.tsbuildinfo
 .remember/
