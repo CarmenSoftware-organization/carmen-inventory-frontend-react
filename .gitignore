@@ -1,8 +1,7 @@
 node_modules
 dist
-public/config.json
-public/config.local.json
-public/config.prod.json
+public/config.*.json
+!public/config.sample.json
 *.tsbuildinfo
 .remember/
 test-results/
