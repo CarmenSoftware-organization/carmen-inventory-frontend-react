@@ -4,13 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "USE_LOCAL_CONFIG=1 vite",
-    "prod": "vite",
+    "dev": "bun run dev:local",
+    "dev:local": "CONFIG_ENV=local vite",
+    "dev:dev": "CONFIG_ENV=dev vite",
+    "dev:uat": "CONFIG_ENV=uat vite",
+    "dev:prod": "CONFIG_ENV=prod vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint .",
     "test": "vitest",
     "test:run": "vitest run",
+    "lint": "eslint .",
     "clear": "rm -rf dist node_modules"
   },
   "dependencies": {
