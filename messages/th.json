@@ -1568,6 +1568,28 @@
         "exportFormat": "รูปแบบไฟล์",
         "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
         "postingFrequency": "ความถี่ในการส่ง"
+      },
+      "pos": {
+        "title": "การเชื่อมต่อระบบขายหน้าร้าน",
+        "desc": "การนำยอดขายและการใช้วัตถุดิบจากระบบขายหน้าร้านเข้าสู่สินค้าคงคลัง",
+        "connection": "การเชื่อมต่อ",
+        "connectionDesc": "ระบบขายหน้าร้านที่ Carmen จะดึงข้อมูลมา",
+        "vendor": "ผู้ให้บริการระบบขายหน้าร้าน",
+        "vendorOption": {
+          "micros": "Oracle Micros",
+          "infrasys": "Infrasys",
+          "square": "Square",
+          "other": "อื่นๆ"
+        },
+        "sync": "การดึงข้อมูล",
+        "syncDesc": "ความถี่ในการดึงยอดขาย และวิธีตัดสต๊อก",
+        "syncFrequency": "ความถี่ในการดึงข้อมูล",
+        "defaultLocationCode": "รหัสสถานที่เริ่มต้น",
+        "consumptionPosting": "วิธีตัดวัตถุดิบ",
+        "postingOption": {
+          "recipe": "ตามสูตรอาหาร",
+          "direct": "ตัดจากสินค้าโดยตรง"
+        }
       }
     }
   },

@@ -1568,6 +1568,28 @@
         "exportFormat": "Export format",
         "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
         "postingFrequency": "Posting frequency"
+      },
+      "pos": {
+        "title": "POS Interface",
+        "desc": "How sales and consumption from your point-of-sale system reach inventory.",
+        "connection": "Connection",
+        "connectionDesc": "Which POS system Carmen reads from.",
+        "vendor": "POS vendor",
+        "vendorOption": {
+          "micros": "Oracle Micros",
+          "infrasys": "Infrasys",
+          "square": "Square",
+          "other": "Other"
+        },
+        "sync": "Sync",
+        "syncDesc": "How often sales are pulled and how they reduce stock.",
+        "syncFrequency": "Sync frequency",
+        "defaultLocationCode": "Default location code",
+        "consumptionPosting": "Consumption posting",
+        "postingOption": {
+          "recipe": "By recipe",
+          "direct": "Direct to item"
+        }
       }
     }
   },
