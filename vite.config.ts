@@ -46,7 +46,7 @@ function emitBuildConfig(): Plugin {
   const file = process.env.BUILD_CONFIG_FILE ?? "config.prod.json";
   return {
     name: "emit-build-config",
-    apply: "build", // build เท่านั้น — dev ใช้ serveLocalConfig
+    apply: "build", // build เท่านั้น — dev ใช้ serveEnvConfig
     generateBundle() {
       const source = fs.readFileSync(
         path.resolve(import.meta.dirname, "public", file),
