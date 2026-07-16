@@ -43,6 +43,7 @@
 | `use-interface-config.ts` | Wraps `useAppConfigByKey` + `useUpsertAppConfig`; maps 404 → `isNew`. |
 | `use-interface-config.test.ts` | 404 → `isNew`, 500 → `isError`. |
 | `interface-page-layout.tsx` | Header, Save button, skeleton, `ErrorState`, unsaved-edits navigation guard. Holds no form state — takes an `isDirty` flag. |
+| `interface-fields.tsx` | `TextField` / `EnumField` / `ToggleField` — the field shapes all three forms repeat. Presentational, no form state. |
 | `accounting-interface-form.tsx` | Accounting form + zod schema + `toFormValues`/`toApiValue`. |
 | `accounting-interface-form.test.ts` | Schema + mapper round-trip. |
 | `pos-interface-form.tsx` | POS form + schema + mappers. |
@@ -771,10 +772,11 @@ renders its defaults instead of an error page."
 
 ---
 
-### Task 5: Frontend — `InterfacePageLayout`
+### Task 5: Frontend — shared layout + field helpers
 
 **Files:**
 - Create: `routes/system-admin/interface/interface-page-layout.tsx`
+- Create: `routes/system-admin/interface/interface-fields.tsx`
 
 **Interfaces:**
 - Consumes: `Button` (`@/components/ui/button`), `ErrorState` (`@/components/ui/error-state`), `SettingSectionSkeleton` (`@/components/ui/setting-section`), `DiscardDialog` (`@/components/ui/discard-dialog`), `useNavigationGuard` (`@/hooks/use-navigation-guard`)
@@ -795,6 +797,36 @@ renders its defaults instead of an error page."
   }): React.ReactElement;
   ```
   Tasks 6–8 render their fields as `children`, pass their own `form.handleSubmit(...)` as `onSave`, and pass `form.formState.isDirty` as `isDirty`.
+
+  From `interface-fields.tsx`:
+  ```tsx
+  export function TextField(props: {
+    readonly label: string;
+    readonly field: UseFormRegisterReturn;
+    readonly error?: string;
+    readonly placeholder?: string;
+    readonly type?: "text" | "password";
+    readonly hint?: string;
+    readonly className?: string;
+  }): React.ReactElement;
+
+  export function EnumField<T extends string>(props: {
+    readonly label: string;
+    readonly value: T;
+    readonly options: readonly T[];
+    readonly optionLabel: (option: T) => string;
+    readonly onChange: (next: T) => void;
+  }): React.ReactElement;
+
+  export function ToggleField(props: {
+    readonly label: string;
+    readonly checked: boolean;
+    readonly onChange: (next: boolean) => void;
+  }): React.ReactElement;
+  ```
+  Tasks 6–8 build every field through these three. The three forms otherwise repeat the same `Field` + `Select` + `SelectTrigger` + `SelectContent` + `SelectItem.map` block roughly eight times; these helpers carry that shape once.
+
+  This is a **presentational** helper, not the generic field renderer the spec rejected: it takes a label and a value, not a schema. Each form still declares its own fields, types, and order — a future interface can ignore these helpers entirely and render a mapping table.
 
 The layout **holds no form state** — it receives a dirty flag, not a form. The Save button lives here while submit logic lives in the form; that is the only coupling between them, and it is intentional (a shell owning form state would force a generic schema, which the spec rejects).
 
@@ -906,20 +938,139 @@ export function InterfacePageLayout({
 }
 ```
 
-- [ ] **Step 2: Verify it compiles**
+- [ ] **Step 2: Write the field helpers**
+
+Create `routes/system-admin/interface/interface-fields.tsx`:
+
+```tsx
+import type { UseFormRegisterReturn } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+/**
+ * ช่องกรอกข้อความของ interface form
+ *
+ * @param props.field - ผลของ `form.register("...")`
+ * @param props.hint - ข้อความช่วยใต้ช่อง (เช่นบอกว่า api_key ที่เป็น mask ไม่ต้องพิมพ์ใหม่)
+ * @returns React element ของ text field
+ */
+export function TextField({
+  label,
+  field,
+  error,
+  placeholder,
+  type,
+  hint,
+  className,
+}: {
+  readonly label: string;
+  readonly field: UseFormRegisterReturn;
+  readonly error?: string;
+  readonly placeholder?: string;
+  readonly type?: "text" | "password";
+  readonly hint?: string;
+  readonly className?: string;
+}) {
+  return (
+    <Field className={className}>
+      <FieldLabel>{label}</FieldLabel>
+      <Input {...field} type={type} placeholder={placeholder} />
+      {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
+      <FieldError>{error}</FieldError>
+    </Field>
+  );
+}
+
+/**
+ * ช่องเลือกค่าจากชุดที่กำหนดไว้ (enum ของ zod schema)
+ *
+ * รับ label กับ value ไม่ได้รับ schema — แต่ละ form ยังประกาศ field ของตัวเองอยู่
+ * ตัวนี้แค่ห่อรูปแบบ Select ที่ทั้งสาม form เขียนเหมือนกัน
+ *
+ * @param props.optionLabel - แปลง option เป็นข้อความที่แสดง (ปกติเป็น `t()`)
+ * @returns React element ของ enum field
+ */
+export function EnumField<T extends string>({
+  label,
+  value,
+  options,
+  optionLabel,
+  onChange,
+}: {
+  readonly label: string;
+  readonly value: T;
+  readonly options: readonly T[];
+  readonly optionLabel: (option: T) => string;
+  readonly onChange: (next: T) => void;
+}) {
+  return (
+    <Field>
+      <FieldLabel>{label}</FieldLabel>
+      <Select value={value} onValueChange={(v) => onChange(v as T)}>
+        <SelectTrigger size="sm" className="w-full text-sm">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((o) => (
+            <SelectItem key={o} value={o} className="text-sm">
+              {optionLabel(o)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </Field>
+  );
+}
+
+/**
+ * สวิตช์เปิด/ปิดของ interface form — กินความกว้างเต็มแถว
+ *
+ * @returns React element ของ toggle field
+ */
+export function ToggleField({
+  label,
+  checked,
+  onChange,
+}: {
+  readonly label: string;
+  readonly checked: boolean;
+  readonly onChange: (next: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center gap-2 pt-1 sm:col-span-2">
+      <Switch checked={checked} onCheckedChange={onChange} />
+      <span className="text-sm">{label}</span>
+    </label>
+  );
+}
+```
+
+- [ ] **Step 3: Verify both compile**
 
 Run: `bunx tsc --noEmit && bun run lint`
 Expected: both exit 0.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add routes/system-admin/interface/interface-page-layout.tsx
-git commit -m "feat(interface): add shared InterfacePageLayout
+git add routes/system-admin/interface/interface-page-layout.tsx routes/system-admin/interface/interface-fields.tsx
+git commit -m "feat(interface): add shared layout and field helpers
 
-Header, Save, skeleton, ErrorState and the unsaved-edits navigation guard.
-Takes an isDirty flag rather than owning form state, so each interface keeps
-its own form and schema."
+InterfacePageLayout carries the header, Save, skeleton, ErrorState and the
+unsaved-edits navigation guard, taking an isDirty flag rather than owning form
+state. TextField/EnumField/ToggleField carry the field shapes the three forms
+would otherwise repeat.
+
+Both are presentational — they take labels and values, not schemas — so each
+interface keeps its own form, schema and field list."
 ```
 
 ---
@@ -932,7 +1083,7 @@ its own form and schema."
 - Modify: `messages/en.json`, `messages/th.json`
 
 **Interfaces:**
-- Consumes: `useInterfaceConfig` (Task 4), `InterfacePageLayout` (Task 5)
+- Consumes: `useInterfaceConfig` (Task 4); `InterfacePageLayout` and `TextField` / `EnumField` / `ToggleField` (Task 5)
 - Produces: default export `AccountingInterfaceForm` (Task 9's registry lazy-imports it); named exports `accountingSchema`, `toFormValues`, `toApiValue`, `EMPTY_ACCOUNTING`, `type AccountingFormValues`
 
 Field types come straight from the spec. Note `default_invoice_value` is a **free-text string** — the spec flags this as an open question (the KB never says what the value is). If the AP receiving flow turns out to treat it as a number or an enum, only this field's type and zod rule change.
@@ -1018,20 +1169,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useInterfaceConfig } from "./use-interface-config";
 import { InterfacePageLayout } from "./interface-page-layout";
+import { TextField, EnumField, ToggleField } from "./interface-fields";
 
 export const accountingSchema = z.object({
   enabled: z.boolean(),
@@ -1121,117 +1263,64 @@ export default function AccountingInterfaceForm() {
       saveLabel={t("save")}
     >
       <SettingSection first title={ta("connection")} description={ta("connectionDesc")}>
-        <label className="flex items-center gap-2 pt-1 sm:col-span-2">
-          <Switch
-            checked={form.watch("enabled")}
-            onCheckedChange={(v) =>
-              form.setValue("enabled", v, { shouldDirty: true })
-            }
-          />
-          <span className="text-sm">{t("enabled")}</span>
-        </label>
-        <Field>
-          <FieldLabel>{ta("system")}</FieldLabel>
-          <Select
-            value={form.watch("system")}
-            onValueChange={(v) =>
-              form.setValue("system", v as AccountingFormValues["system"], {
-                shouldDirty: true,
-              })
-            }
-          >
-            <SelectTrigger size="sm" className="w-full text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SYSTEMS.map((s) => (
-                <SelectItem key={s} value={s} className="text-sm">
-                  {ta(`systemOption.${s}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field>
-          <FieldLabel>{t("endpoint")}</FieldLabel>
-          <Input {...form.register("endpoint")} placeholder="https://gl.example.com" />
-          <FieldError>{form.formState.errors.endpoint?.message}</FieldError>
-        </Field>
+        <ToggleField
+          label={t("enabled")}
+          checked={form.watch("enabled")}
+          onChange={(v) => form.setValue("enabled", v, { shouldDirty: true })}
+        />
+        <EnumField
+          label={ta("system")}
+          value={form.watch("system")}
+          options={SYSTEMS}
+          optionLabel={(s) => ta(`systemOption.${s}`)}
+          onChange={(v) => form.setValue("system", v, { shouldDirty: true })}
+        />
+        <TextField
+          label={t("endpoint")}
+          field={form.register("endpoint")}
+          error={form.formState.errors.endpoint?.message}
+          placeholder="https://gl.example.com"
+        />
       </SettingSection>
 
       <SettingSection title={ta("defaults")} description={ta("defaultsDesc")}>
-        <Field>
-          <FieldLabel>{ta("defaultAccountCode")}</FieldLabel>
-          <Input {...form.register("default_account_code")} placeholder="1000" />
-          <FieldError>
-            {form.formState.errors.default_account_code?.message}
-          </FieldError>
-        </Field>
-        <Field>
-          <FieldLabel>{ta("defaultDepartmentCode")}</FieldLabel>
-          <Input {...form.register("default_department_code")} placeholder="D1" />
-          <FieldError>
-            {form.formState.errors.default_department_code?.message}
-          </FieldError>
-        </Field>
-        <Field>
-          <FieldLabel>{ta("defaultInvoiceValue")}</FieldLabel>
-          <Input {...form.register("default_invoice_value")} placeholder="0" />
-          <FieldError>
-            {form.formState.errors.default_invoice_value?.message}
-          </FieldError>
-        </Field>
+        <TextField
+          label={ta("defaultAccountCode")}
+          field={form.register("default_account_code")}
+          error={form.formState.errors.default_account_code?.message}
+          placeholder="1000"
+        />
+        <TextField
+          label={ta("defaultDepartmentCode")}
+          field={form.register("default_department_code")}
+          error={form.formState.errors.default_department_code?.message}
+          placeholder="D1"
+        />
+        <TextField
+          label={ta("defaultInvoiceValue")}
+          field={form.register("default_invoice_value")}
+          error={form.formState.errors.default_invoice_value?.message}
+          placeholder="0"
+        />
       </SettingSection>
 
       <SettingSection title={ta("posting")} description={ta("postingDesc")}>
-        <Field>
-          <FieldLabel>{ta("exportFormat")}</FieldLabel>
-          <Select
-            value={form.watch("export_format")}
-            onValueChange={(v) =>
-              form.setValue(
-                "export_format",
-                v as AccountingFormValues["export_format"],
-                { shouldDirty: true },
-              )
-            }
-          >
-            <SelectTrigger size="sm" className="w-full text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FORMATS.map((f) => (
-                <SelectItem key={f} value={f} className="text-sm">
-                  {ta(`formatOption.${f}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field>
-          <FieldLabel>{ta("postingFrequency")}</FieldLabel>
-          <Select
-            value={form.watch("posting_frequency")}
-            onValueChange={(v) =>
-              form.setValue(
-                "posting_frequency",
-                v as AccountingFormValues["posting_frequency"],
-                { shouldDirty: true },
-              )
-            }
-          >
-            <SelectTrigger size="sm" className="w-full text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FREQUENCIES.map((f) => (
-                <SelectItem key={f} value={f} className="text-sm">
-                  {t(`frequencyOption.${f}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+        <EnumField
+          label={ta("exportFormat")}
+          value={form.watch("export_format")}
+          options={FORMATS}
+          optionLabel={(f) => ta(`formatOption.${f}`)}
+          onChange={(v) => form.setValue("export_format", v, { shouldDirty: true })}
+        />
+        <EnumField
+          label={ta("postingFrequency")}
+          value={form.watch("posting_frequency")}
+          options={FREQUENCIES}
+          optionLabel={(f) => t(`frequencyOption.${f}`)}
+          onChange={(v) =>
+            form.setValue("posting_frequency", v, { shouldDirty: true })
+          }
+        />
       </SettingSection>
     </InterfacePageLayout>
   );
@@ -1357,7 +1446,7 @@ Vendor fallback codes come from the documented AP receiving behaviour
 - Modify: `messages/en.json`, `messages/th.json`
 
 **Interfaces:**
-- Consumes: `useInterfaceConfig` (Task 4), `InterfacePageLayout` (Task 5)
+- Consumes: `useInterfaceConfig` (Task 4); `InterfacePageLayout` and `TextField` / `EnumField` / `ToggleField` (Task 5)
 - Produces: default export `PosInterfaceForm`; named exports `posSchema`, `toFormValues`, `toApiValue`, `EMPTY_POS`, `type PosFormValues`
 
 `api_key` is a secret. The backend returns it masked as `***ENCRYPTED***` and Task 1 makes `upsert` restore the stored value when that mask is posted back — so the form may submit the mask unchanged and nothing is lost. Render it as `type="password"` and show `apiKeyHint`.
@@ -1452,20 +1541,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useInterfaceConfig } from "./use-interface-config";
 import { InterfacePageLayout } from "./interface-page-layout";
+import { TextField, EnumField, ToggleField } from "./interface-fields";
 
 export const posSchema = z.object({
   enabled: z.boolean(),
@@ -1552,104 +1632,57 @@ export default function PosInterfaceForm() {
       saveLabel={t("save")}
     >
       <SettingSection first title={tp("connection")} description={tp("connectionDesc")}>
-        <label className="flex items-center gap-2 pt-1 sm:col-span-2">
-          <Switch
-            checked={form.watch("enabled")}
-            onCheckedChange={(v) =>
-              form.setValue("enabled", v, { shouldDirty: true })
-            }
-          />
-          <span className="text-sm">{t("enabled")}</span>
-        </label>
-        <Field>
-          <FieldLabel>{tp("vendor")}</FieldLabel>
-          <Select
-            value={form.watch("vendor")}
-            onValueChange={(v) =>
-              form.setValue("vendor", v as PosFormValues["vendor"], {
-                shouldDirty: true,
-              })
-            }
-          >
-            <SelectTrigger size="sm" className="w-full text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {VENDORS.map((v) => (
-                <SelectItem key={v} value={v} className="text-sm">
-                  {tp(`vendorOption.${v}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field>
-          <FieldLabel>{t("endpoint")}</FieldLabel>
-          <Input {...form.register("endpoint")} placeholder="https://pos.example.com" />
-          <FieldError>{form.formState.errors.endpoint?.message}</FieldError>
-        </Field>
-        <Field className="sm:col-span-2">
-          <FieldLabel>{t("apiKey")}</FieldLabel>
-          <Input {...form.register("api_key")} type="password" />
-          <p className="text-muted-foreground text-xs">{t("apiKeyHint")}</p>
-          <FieldError>{form.formState.errors.api_key?.message}</FieldError>
-        </Field>
+        <ToggleField
+          label={t("enabled")}
+          checked={form.watch("enabled")}
+          onChange={(v) => form.setValue("enabled", v, { shouldDirty: true })}
+        />
+        <EnumField
+          label={tp("vendor")}
+          value={form.watch("vendor")}
+          options={VENDORS}
+          optionLabel={(v) => tp(`vendorOption.${v}`)}
+          onChange={(v) => form.setValue("vendor", v, { shouldDirty: true })}
+        />
+        <TextField
+          label={t("endpoint")}
+          field={form.register("endpoint")}
+          error={form.formState.errors.endpoint?.message}
+          placeholder="https://pos.example.com"
+        />
+        <TextField
+          label={t("apiKey")}
+          field={form.register("api_key")}
+          error={form.formState.errors.api_key?.message}
+          type="password"
+          hint={t("apiKeyHint")}
+          className="sm:col-span-2"
+        />
       </SettingSection>
 
       <SettingSection title={tp("sync")} description={tp("syncDesc")}>
-        <Field>
-          <FieldLabel>{tp("syncFrequency")}</FieldLabel>
-          <Select
-            value={form.watch("sync_frequency")}
-            onValueChange={(v) =>
-              form.setValue("sync_frequency", v as PosFormValues["sync_frequency"], {
-                shouldDirty: true,
-              })
-            }
-          >
-            <SelectTrigger size="sm" className="w-full text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FREQUENCIES.map((f) => (
-                <SelectItem key={f} value={f} className="text-sm">
-                  {t(`frequencyOption.${f}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field>
-          <FieldLabel>{tp("defaultLocationCode")}</FieldLabel>
-          <Input {...form.register("default_location_code")} placeholder="L1" />
-          <FieldError>
-            {form.formState.errors.default_location_code?.message}
-          </FieldError>
-        </Field>
-        <Field>
-          <FieldLabel>{tp("consumptionPosting")}</FieldLabel>
-          <Select
-            value={form.watch("consumption_posting")}
-            onValueChange={(v) =>
-              form.setValue(
-                "consumption_posting",
-                v as PosFormValues["consumption_posting"],
-                { shouldDirty: true },
-              )
-            }
-          >
-            <SelectTrigger size="sm" className="w-full text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {POSTINGS.map((p) => (
-                <SelectItem key={p} value={p} className="text-sm">
-                  {tp(`postingOption.${p}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+        <EnumField
+          label={tp("syncFrequency")}
+          value={form.watch("sync_frequency")}
+          options={FREQUENCIES}
+          optionLabel={(f) => t(`frequencyOption.${f}`)}
+          onChange={(v) => form.setValue("sync_frequency", v, { shouldDirty: true })}
+        />
+        <TextField
+          label={tp("defaultLocationCode")}
+          field={form.register("default_location_code")}
+          error={form.formState.errors.default_location_code?.message}
+          placeholder="L1"
+        />
+        <EnumField
+          label={tp("consumptionPosting")}
+          value={form.watch("consumption_posting")}
+          options={POSTINGS}
+          optionLabel={(p) => tp(`postingOption.${p}`)}
+          onChange={(v) =>
+            form.setValue("consumption_posting", v, { shouldDirty: true })
+          }
+        />
       </SettingSection>
     </InterfacePageLayout>
   );
@@ -1737,7 +1770,7 @@ backend restores the stored secret."
 - Modify: `messages/en.json`, `messages/th.json`
 
 **Interfaces:**
-- Consumes: `useInterfaceConfig` (Task 4), `InterfacePageLayout` (Task 5)
+- Consumes: `useInterfaceConfig` (Task 4); `InterfacePageLayout` and `TextField` / `EnumField` / `ToggleField` (Task 5)
 - Produces: default export `PmsInterfaceForm`; named exports `pmsSchema`, `toFormValues`, `toApiValue`, `EMPTY_PMS`, `type PmsFormValues`
 
 `post_city_ledger` and `post_credit_card` come from the documented PMS posting behaviour (`kb-carmen/contents/carmen/ar/AR-posting_pms.md`: "post ข้อมูล City Ledger และ Credit Card จากระบบ PMS แบบ API"). This is the interface the user called "HMS".
@@ -1817,20 +1850,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useInterfaceConfig } from "./use-interface-config";
 import { InterfacePageLayout } from "./interface-page-layout";
+import { TextField, EnumField, ToggleField } from "./interface-fields";
 
 export const pmsSchema = z.object({
   enabled: z.boolean(),
@@ -1913,74 +1937,54 @@ export default function PmsInterfaceForm() {
       saveLabel={t("save")}
     >
       <SettingSection first title={tp("connection")} description={tp("connectionDesc")}>
-        <label className="flex items-center gap-2 pt-1 sm:col-span-2">
-          <Switch
-            checked={form.watch("enabled")}
-            onCheckedChange={(v) =>
-              form.setValue("enabled", v, { shouldDirty: true })
-            }
-          />
-          <span className="text-sm">{t("enabled")}</span>
-        </label>
-        <Field>
-          <FieldLabel>{tp("vendor")}</FieldLabel>
-          <Select
-            value={form.watch("vendor")}
-            onValueChange={(v) =>
-              form.setValue("vendor", v as PmsFormValues["vendor"], {
-                shouldDirty: true,
-              })
-            }
-          >
-            <SelectTrigger size="sm" className="w-full text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {VENDORS.map((v) => (
-                <SelectItem key={v} value={v} className="text-sm">
-                  {tp(`vendorOption.${v}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field>
-          <FieldLabel>{tp("propertyCode")}</FieldLabel>
-          <Input {...form.register("property_code")} placeholder="P1" />
-          <FieldError>{form.formState.errors.property_code?.message}</FieldError>
-        </Field>
-        <Field>
-          <FieldLabel>{t("endpoint")}</FieldLabel>
-          <Input {...form.register("endpoint")} placeholder="https://pms.example.com" />
-          <FieldError>{form.formState.errors.endpoint?.message}</FieldError>
-        </Field>
-        <Field>
-          <FieldLabel>{t("apiKey")}</FieldLabel>
-          <Input {...form.register("api_key")} type="password" />
-          <p className="text-muted-foreground text-xs">{t("apiKeyHint")}</p>
-          <FieldError>{form.formState.errors.api_key?.message}</FieldError>
-        </Field>
+        <ToggleField
+          label={t("enabled")}
+          checked={form.watch("enabled")}
+          onChange={(v) => form.setValue("enabled", v, { shouldDirty: true })}
+        />
+        <EnumField
+          label={tp("vendor")}
+          value={form.watch("vendor")}
+          options={VENDORS}
+          optionLabel={(v) => tp(`vendorOption.${v}`)}
+          onChange={(v) => form.setValue("vendor", v, { shouldDirty: true })}
+        />
+        <TextField
+          label={tp("propertyCode")}
+          field={form.register("property_code")}
+          error={form.formState.errors.property_code?.message}
+          placeholder="P1"
+        />
+        <TextField
+          label={t("endpoint")}
+          field={form.register("endpoint")}
+          error={form.formState.errors.endpoint?.message}
+          placeholder="https://pms.example.com"
+        />
+        <TextField
+          label={t("apiKey")}
+          field={form.register("api_key")}
+          error={form.formState.errors.api_key?.message}
+          type="password"
+          hint={t("apiKeyHint")}
+        />
       </SettingSection>
 
       <SettingSection title={tp("posting")} description={tp("postingDesc")}>
-        <label className="flex items-center gap-2 pt-1 sm:col-span-2">
-          <Switch
-            checked={form.watch("post_city_ledger")}
-            onCheckedChange={(v) =>
-              form.setValue("post_city_ledger", v, { shouldDirty: true })
-            }
-          />
-          <span className="text-sm">{tp("postCityLedger")}</span>
-        </label>
-        <label className="flex items-center gap-2 pt-1 sm:col-span-2">
-          <Switch
-            checked={form.watch("post_credit_card")}
-            onCheckedChange={(v) =>
-              form.setValue("post_credit_card", v, { shouldDirty: true })
-            }
-          />
-          <span className="text-sm">{tp("postCreditCard")}</span>
-        </label>
+        <ToggleField
+          label={tp("postCityLedger")}
+          checked={form.watch("post_city_ledger")}
+          onChange={(v) =>
+            form.setValue("post_city_ledger", v, { shouldDirty: true })
+          }
+        />
+        <ToggleField
+          label={tp("postCreditCard")}
+          checked={form.watch("post_credit_card")}
+          onChange={(v) =>
+            form.setValue("post_credit_card", v, { shouldDirty: true })
+          }
+        />
       </SettingSection>
     </InterfacePageLayout>
   );
