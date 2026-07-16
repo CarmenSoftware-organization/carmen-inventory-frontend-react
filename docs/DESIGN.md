@@ -28,14 +28,19 @@ colors:
   border: "#e1e1e1"
   ring: "#0154bd"
   sidebar: "#f5f5f5"
-  destructive: "#f75253"
+  destructive: "#cd2531"        # dark enough for a white label — WCAG AA 5.38:1
   success: "#44c5bc"
   info: "#007eb0"            # Azure — semantic info/comment, distinct from primary blue
   warning: "#efa831"
   positive: "#23a136"
   # ── Dark mode (Supabase-style neutral) ──
-  dark-primary: "#197cdd"       # Aquatic — brand accent on dark surfaces
-  dark-primary-foreground: "#fcfcfc"
+  dark-primary: "#3894f7"       # Aquatic — brighter on dark so `text-primary` reads
+                                # on the canvas (5.79:1). One token serves both the
+                                # fill and links, and no lightness satisfies both with
+                                # a white label, so the fill takes a dark one. This is
+                                # Apple's Action-Blue/Sky-Link-Blue split collapsed
+                                # into a single token.
+  dark-primary-foreground: "#08121f"
   dark-background: "#161616"
   dark-foreground: "#e8e8e8"
   dark-card: "#1f1f1f"
@@ -45,9 +50,11 @@ colors:
   dark-muted-foreground: "#8c8c8c"
   dark-accent: "#2b2b2b"
   dark-border: "#2e2e2e"
-  dark-ring: "#197cdd"
+  dark-ring: "#3894f7"
   dark-sidebar: "#0f0f0f"
-  dark-destructive: "#f75253"
+  dark-destructive: "#f75253"   # stays light so `text-destructive` reads on dark;
+                                # the fill takes a dark label (see dark-destructive-foreground)
+  dark-destructive-foreground: "#1d0c0b"
   dark-success: "#44c5bc"
   dark-info: "#0aa0d2"          # Azure (brighter on dark) — distinct from dark-primary
   dark-warning: "#f5b75b"

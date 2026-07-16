@@ -106,15 +106,62 @@ describe("button variants meet WCAG AA against their own background", () => {
     expect(ratio).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
   });
 
-  it("primary uses primary-foreground and passes in light mode", () => {
-    expect(
-      contrast(token("light", "primary"), token("light", "primary-foreground")),
-    ).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
-  });
-
   it("destructive passes in dark mode, where it is composited at 60%", () => {
     const effective = over(token("dark", "destructive"), token("dark", "card"), 0.6);
     expect(contrast(effective, WHITE)).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
+  });
+
+  /**
+   * Every `bg-x text-x-foreground` pairing, not just the button's — the same
+   * two tokens dress badges, sidebar items and anything else that needs a
+   * filled surface, so a token nudge has to clear the bar for all of them.
+   *
+   * `primary`/`sidebar-primary` on dark were 4.11:1 and `destructive` 3.34:1
+   * (light) / 3.25:1 (dark) until the tokens moved.
+   */
+  it.each([
+    ["primary", "primary-foreground"],
+    ["sidebar-primary", "sidebar-primary-foreground"],
+    ["destructive", "destructive-foreground"],
+    ["secondary", "secondary-foreground"],
+    ["accent", "accent-foreground"],
+    ["muted", "muted-foreground"],
+    ["card", "card-foreground"],
+    ["background", "foreground"],
+  ])("%s / %s in both themes", (bg, fg) => {
+    for (const theme of ["light", "dark"] as const) {
+      expect(
+        contrast(token(theme, bg), token(theme, fg)),
+        `${bg}/${fg} in ${theme}`,
+      ).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
+    }
+  });
+
+  /**
+   * `--primary` on dark has to serve two jobs that pull apart: a fill behind
+   * `--primary-foreground`, and `text-primary` for links on the page itself.
+   * No lightness satisfies both with a white label — which is why the label
+   * went dark and the token went brighter. Guard the second job too.
+   */
+  it.each(["background", "card"])(
+    "text-primary stays readable on dark %s",
+    (surface) => {
+      expect(
+        contrast(token("dark", "primary"), token("dark", surface)),
+      ).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
+    },
+  );
+
+  it.each([
+    ["light", "background"],
+    ["dark", "background"],
+  ])("text-destructive stays readable on %s %s", (theme, surface) => {
+    expect(
+      contrast(
+        token(theme as "light" | "dark", "destructive"),
+        token(theme as "light" | "dark", surface),
+      ),
+    ).toBeGreaterThanOrEqual(AA_NORMAL_TEXT);
   });
 
   it("reads the label colour from button.tsx rather than assuming it", () => {
