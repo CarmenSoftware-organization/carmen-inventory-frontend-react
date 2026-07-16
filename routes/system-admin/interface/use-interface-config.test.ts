@@ -103,13 +103,18 @@ describe("useInterfaceConfig", () => {
       json: async () => ({ data: {} }),
     } as Response);
 
-    const { result } = renderHook(() => useInterfaceConfig("interface_pos"), {
+    const { result, rerender } = renderHook(() => useInterfaceConfig("interface_pos"), {
       wrapper,
     });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     const onSuccess = vi.fn();
-    act(() => result.current.save({ enabled: true }, { onSuccess }));
+    act(() => {
+      result.current.save({ enabled: true }, { onSuccess });
+      rerender();
+    });
+
+    expect(result.current.isSaving).toBe(true);
 
     await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
     expect(httpClient.put).toHaveBeenCalledWith(
@@ -117,6 +122,45 @@ describe("useInterfaceConfig", () => {
       { value: { enabled: true } },
     );
     expect(result.current.isSaving).toBe(false);
+  });
+
+  it("refetches, and a 404 after a prior success does not report the interface as new", async () => {
+    vi.mocked(httpClient.get)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          data: { id: "1", key: "interface_pos", value: { enabled: true } },
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ message: "Config key not found" }),
+      } as Response);
+
+    const { result } = renderHook(() => useInterfaceConfig("interface_pos"), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.value).toEqual({ enabled: true }));
+    expect(httpClient.get).toHaveBeenCalledTimes(1);
+
+    act(() => result.current.refetch());
+
+    // refetch must actually re-fire the request
+    await waitFor(() => expect(httpClient.get).toHaveBeenCalledTimes(2));
+
+    // Let the rejected refetch fully propagate through react-query's internal
+    // dispatch/notify chain (which schedules its observer notification on a real
+    // macrotask) before reading settled state — otherwise the assertion below can
+    // observe the pre-refetch snapshot and pass for the wrong reason.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    // v5 keeps the cached data on a failed refetch. "Never configured" must stay false
+    // while that data is still being handed to the form.
+    expect(result.current.isNew).toBe(false);
+    expect(result.current.value).toEqual({ enabled: true });
   });
 
   it("fetches the config key it was given", async () => {
