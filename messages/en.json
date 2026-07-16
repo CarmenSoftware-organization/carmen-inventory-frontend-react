@@ -1545,6 +1545,7 @@
       "saved": "Interface settings saved",
       "loadError": "Could not load interface settings",
       "notFound": "Interface not found",
+      "empty": "No interfaces are available for this business unit.",
       "enabled": "Enabled",
       "endpoint": "Endpoint",
       "apiKey": "API key",
@@ -1562,8 +1563,7 @@
         "desc": "How inventory activity reaches your general ledger and payables.",
         "connection": "Connection",
         "connectionDesc": "Which accounting system receives the postings.",
-        "system": "Accounting system",
-        "systemOption": {
+        "brand": {
           "carmen_gl": "Carmen GL",
           "blueledgers": "BlueLedgers",
           "external": "External system"
@@ -1584,12 +1584,10 @@
         "desc": "How sales and consumption from your point-of-sale system reach inventory.",
         "connection": "Connection",
         "connectionDesc": "Which POS system Carmen reads from.",
-        "vendor": "POS vendor",
-        "vendorOption": {
+        "brand": {
           "micros": "Oracle Micros",
           "infrasys": "Infrasys",
-          "square": "Square",
-          "other": "Other"
+          "square": "Square"
         },
         "sync": "Sync",
         "syncDesc": "How often sales are pulled and how they reduce stock.",
@@ -1606,11 +1604,9 @@
         "desc": "How city ledger and credit card postings reach receivables from your property system.",
         "connection": "Connection",
         "connectionDesc": "Which property management system Carmen reads from.",
-        "vendor": "PMS vendor",
-        "vendorOption": {
+        "brand": {
           "opera": "Oracle Opera",
-          "protel": "Protel",
-          "other": "Other"
+          "protel": "Protel"
         },
         "propertyCode": "Property code",
         "posting": "Posting",

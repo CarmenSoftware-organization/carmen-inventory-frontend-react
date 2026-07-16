@@ -2,52 +2,93 @@ import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 import { BookOpen, Hotel, ShoppingCart } from "lucide-react";
 import type { LucideIcon } from "../landing-types";
 
-export type InterfaceDef = {
-  /** route param — `/system-admin/interface/:key` */
+/**
+ * brand หนึ่งตัวใต้ category — เช่น Micros ใต้ POS
+ *
+ * แต่ละ brand ตั้งค่าแยกกัน มี row ของตัวเองใน app_config
+ */
+export type BrandDef = {
+  /** route param — `/system-admin/interface/:category/:brand` */
   readonly key: string;
-  /** key ของ row ใน app_config */
+  /** key ของ row ใน app_config — `interface_<category>_<brand>` */
   readonly configKey: string;
-  readonly icon: LucideIcon;
-  readonly form: LazyExoticComponent<ComponentType>;
 };
 
 /**
- * รายการ interface ทั้งหมด — เก็บแค่ metadata ของ list ไม่เก็บ field/schema
- *
- * แต่ละ interface ถือ form + schema ของตัวเอง เพราะหน้าตาต่างกันจริง และตัวที่จะเพิ่ม
- * ทีหลังอาจต้องการ UI ที่ต่างออกไปมาก (เช่น mapping table) — ดู
- * docs/superpowers/specs/2026-07-16-interfaces-config-design.md
- *
- * เพิ่ม interface ใหม่ = เพิ่ม entry ที่นี่ + สร้างไฟล์ form หนึ่งไฟล์
- * ถ้า interface นั้นมีค่าลับ ต้องเพิ่ม path ใน `secretPathsByKey` ฝั่ง backend ด้วย
+ * category ที่รวม brand หลายตัวที่ใช้ form เดียวกัน — เช่น POS ที่มี Micros / Infrasys / Square
  */
-export const INTERFACES: readonly InterfaceDef[] = [
+export type InterfaceCategoryDef = {
+  /** route param — `/system-admin/interface/:category` */
+  readonly key: string;
+  readonly icon: LucideIcon;
+  readonly brands: readonly BrandDef[];
+  /** form เดียวต่อ category — brand มาจาก route param ไม่ใช่ dropdown */
+  readonly form: LazyExoticComponent<ComponentType>;
+};
+
+function brands(
+  category: string,
+  keys: readonly string[],
+): readonly BrandDef[] {
+  return keys.map((key) => ({
+    key,
+    configKey: `interface_${category}_${key}`,
+  }));
+}
+
+/**
+ * รายการ interface ทั้งหมด สองชั้น — category ถือ brand, brand ถือ config
+ *
+ * registry เก็บแค่ metadata (route key, config key, icon, form) ไม่เก็บ field/schema —
+ * แต่ละ category ถือ form + schema ของตัวเอง เพราะหน้าตาต่างกันจริง ดู
+ * docs/superpowers/specs/2026-07-16-interface-brands-visibility-design.md
+ *
+ * เพิ่ม brand = เพิ่ม key ใน brands() ของ category นั้น + i18n label + secret path ฝั่ง backend
+ * เพิ่ม category = เพิ่ม entry ที่นี่ + สร้างไฟล์ form หนึ่งไฟล์
+ */
+export const INTERFACE_CATEGORIES: readonly InterfaceCategoryDef[] = [
   {
     key: "accounting",
-    configKey: "interface_accounting",
     icon: BookOpen,
+    brands: brands("accounting", ["carmen_gl", "blueledgers", "external"]),
     form: lazy(() => import("./accounting-interface-form")),
   },
   {
     key: "pos",
-    configKey: "interface_pos",
     icon: ShoppingCart,
+    brands: brands("pos", ["micros", "infrasys", "square"]),
     form: lazy(() => import("./pos-interface-form")),
   },
   {
     key: "pms",
-    configKey: "interface_pms",
     icon: Hotel,
+    brands: brands("pms", ["opera", "protel"]),
     form: lazy(() => import("./pms-interface-form")),
   },
 ];
 
 /**
- * หา interface จาก route param
+ * หา category จาก route param
  *
- * @param key - ค่าจาก `useParams().key`
- * @returns InterfaceDef หรือ undefined ถ้าไม่รู้จัก (caller ควรโชว์ NotFound)
+ * @param key - ค่าจาก `useParams().category`
+ * @returns InterfaceCategoryDef หรือ undefined ถ้าไม่รู้จัก (caller ควรโชว์ NotFound)
  */
-export function findInterface(key: string | undefined): InterfaceDef | undefined {
-  return INTERFACES.find((def) => def.key === key);
+export function findCategory(
+  key: string | undefined,
+): InterfaceCategoryDef | undefined {
+  return INTERFACE_CATEGORIES.find((def) => def.key === key);
+}
+
+/**
+ * หา brand จาก route param ทั้งคู่
+ *
+ * @param categoryKey - ค่าจาก `useParams().category`
+ * @param brandKey - ค่าจาก `useParams().brand`
+ * @returns BrandDef หรือ undefined ถ้า category/brand ไม่รู้จัก
+ */
+export function findBrand(
+  categoryKey: string | undefined,
+  brandKey: string | undefined,
+): BrandDef | undefined {
+  return findCategory(categoryKey)?.brands.find((b) => b.key === brandKey);
 }

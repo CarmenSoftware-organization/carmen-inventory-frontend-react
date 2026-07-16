@@ -1545,6 +1545,7 @@
       "saved": "บันทึกการตั้งค่าการเชื่อมต่อแล้ว",
       "loadError": "โหลดการตั้งค่าการเชื่อมต่อไม่สำเร็จ",
       "notFound": "ไม่พบการเชื่อมต่อที่ต้องการ",
+      "empty": "ไม่มีการเชื่อมต่อที่เปิดให้ business unit นี้ใช้งาน",
       "enabled": "เปิดใช้งาน",
       "endpoint": "ปลายทาง",
       "apiKey": "API key",
@@ -1562,8 +1563,7 @@
         "desc": "การส่งข้อมูลความเคลื่อนไหวของสินค้าคงคลังไปยังบัญชีแยกประเภทและเจ้าหนี้",
         "connection": "การเชื่อมต่อ",
         "connectionDesc": "ระบบบัญชีที่จะรับข้อมูล",
-        "system": "ระบบบัญชี",
-        "systemOption": {
+        "brand": {
           "carmen_gl": "Carmen GL",
           "blueledgers": "BlueLedgers",
           "external": "ระบบภายนอก"
@@ -1584,12 +1584,10 @@
         "desc": "การนำยอดขายและการใช้วัตถุดิบจากระบบขายหน้าร้านเข้าสู่สินค้าคงคลัง",
         "connection": "การเชื่อมต่อ",
         "connectionDesc": "ระบบขายหน้าร้านที่ Carmen จะดึงข้อมูลมา",
-        "vendor": "ผู้ให้บริการระบบขายหน้าร้าน",
-        "vendorOption": {
+        "brand": {
           "micros": "Oracle Micros",
           "infrasys": "Infrasys",
-          "square": "Square",
-          "other": "อื่นๆ"
+          "square": "Square"
         },
         "sync": "การดึงข้อมูล",
         "syncDesc": "ความถี่ในการดึงยอดขาย และวิธีตัดสต๊อก",
@@ -1606,11 +1604,9 @@
         "desc": "การนำรายการ City Ledger และบัตรเครดิตจากระบบบริหารโรงแรมเข้าสู่ลูกหนี้",
         "connection": "การเชื่อมต่อ",
         "connectionDesc": "ระบบบริหารโรงแรมที่ Carmen จะดึงข้อมูลมา",
-        "vendor": "ผู้ให้บริการระบบบริหารโรงแรม",
-        "vendorOption": {
+        "brand": {
           "opera": "Oracle Opera",
-          "protel": "Protel",
-          "other": "อื่นๆ"
+          "protel": "Protel"
         },
         "propertyCode": "รหัสโรงแรม",
         "posting": "การดึงรายการ",

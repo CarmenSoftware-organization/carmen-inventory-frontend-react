@@ -10,7 +10,6 @@ describe("posSchema", () => {
   it("accepts a fully populated value", () => {
     const parsed = posSchema.safeParse({
       enabled: true,
-      vendor: "micros",
       endpoint: "https://pos.example.com",
       api_key: "k",
       sync_frequency: "daily",
@@ -20,15 +19,18 @@ describe("posSchema", () => {
     expect(parsed.success).toBe(true);
   });
 
-  it("rejects an unknown vendor", () => {
-    const parsed = posSchema.safeParse({ ...EMPTY_POS, vendor: "aloha" });
-    expect(parsed.success).toBe(false);
-  });
-
   it("rejects an unknown sync frequency", () => {
     const parsed = posSchema.safeParse({
       ...EMPTY_POS,
       sync_frequency: "monthly",
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects an unknown consumption posting", () => {
+    const parsed = posSchema.safeParse({
+      ...EMPTY_POS,
+      consumption_posting: "average",
     });
     expect(parsed.success).toBe(false);
   });
@@ -42,7 +44,6 @@ describe("toFormValues / toApiValue", () => {
   it("keeps the masked api_key so an untouched form posts it back unchanged", () => {
     const values = toFormValues({
       enabled: true,
-      vendor: "micros",
       endpoint: "e",
       api_key: "***ENCRYPTED***",
       sync_frequency: "daily",
@@ -55,7 +56,6 @@ describe("toFormValues / toApiValue", () => {
   it("round-trips a full value unchanged", () => {
     const values = {
       enabled: true,
-      vendor: "infrasys" as const,
       endpoint: "https://x.example.com",
       api_key: "k",
       sync_frequency: "hourly" as const,

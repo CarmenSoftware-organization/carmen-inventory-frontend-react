@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
+import { useParams } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -12,7 +13,6 @@ import { TextField, EnumField, ToggleField } from "./interface-fields";
 
 export const posSchema = z.object({
   enabled: z.boolean(),
-  vendor: z.enum(["micros", "infrasys", "square", "other"]),
   endpoint: z.string(),
   api_key: z.string(),
   sync_frequency: z.enum(["manual", "hourly", "daily"]),
@@ -24,7 +24,6 @@ export type PosFormValues = z.infer<typeof posSchema>;
 
 export const EMPTY_POS: PosFormValues = {
   enabled: false,
-  vendor: "micros",
   endpoint: "",
   api_key: "",
   sync_frequency: "manual",
@@ -52,20 +51,23 @@ export function toApiValue(values: PosFormValues): Record<string, unknown> {
 }
 
 // derive dropdown options from the schema so the two never drift
-const VENDORS = posSchema.shape.vendor.options;
 const FREQUENCIES = posSchema.shape.sync_frequency.options;
 const POSTINGS = posSchema.shape.consumption_posting.options;
 
 /**
- * หน้า config ของ POS Interface — ตั้งค่าการดึงยอดขาย/การใช้วัตถุดิบจากระบบขายหน้าร้าน
+ * หน้า config ของ POS brand เดียว — ตั้งค่าการดึงยอดขาย/การใช้วัตถุดิบจากระบบขายหน้าร้าน
+ *
+ * brand (Micros / Infrasys / Square) มาจาก route param — เก็บใน key `interface_pos_<brand>`
+ * ไม่ใช่ field ในฟอร์ม
  *
  * @returns React element ของหน้า POS interface
  */
 export default function PosInterfaceForm() {
   const t = useTranslations("systemAdmin.interface");
   const tp = useTranslations("systemAdmin.interface.pos");
+  const { brand } = useParams<{ brand: string }>();
   const { value, isLoading, isError, refetch, save, isSaving } =
-    useInterfaceConfig("interface_pos");
+    useInterfaceConfig(`interface_pos_${brand}`);
 
   const form = useForm<PosFormValues>({
     resolver: zodResolver(posSchema) as Resolver<PosFormValues>,
@@ -84,7 +86,7 @@ export default function PosInterfaceForm() {
 
   return (
     <InterfacePageLayout
-      title={tp("title")}
+      title={tp(`brand.${brand}`)}
       description={tp("desc")}
       onSave={submit}
       isSaving={isSaving}
@@ -100,13 +102,6 @@ export default function PosInterfaceForm() {
           label={t("enabled")}
           checked={form.watch("enabled")}
           onChange={(v) => form.setValue("enabled", v, { shouldDirty: true })}
-        />
-        <EnumField
-          label={tp("vendor")}
-          value={form.watch("vendor")}
-          options={VENDORS}
-          optionLabel={(v) => tp(`vendorOption.${v}`)}
-          onChange={(v) => form.setValue("vendor", v, { shouldDirty: true })}
         />
         <TextField
           label={t("endpoint")}
