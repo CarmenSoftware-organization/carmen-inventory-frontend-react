@@ -67,7 +67,8 @@ export function useProfile() {
     : "";
   const avatarUrl = query.data?.avatar_url ?? null;
   const signatureUrl = query.data?.signature_url ?? null;
-  const enabledInterfaces = query.data?.enabled_interfaces;
+  // Interface entitlement is per-BU — read the current (default) BU's list.
+  const enabledInterfaces = defaultBu?.enabled_interfaces;
   const buCode = defaultBu?.code;
   const buLogoUrl = defaultBu?.logo_url ?? null;
 
