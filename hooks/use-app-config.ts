@@ -25,6 +25,29 @@ export function useAppConfigByKey(key: string | undefined) {
   });
 }
 
+/**
+ * Hook ดึง app config ทั้งหมดของ business unit ปัจจุบัน
+ *
+ * ใช้ในหน้า list ที่ต้องรู้สถานะของหลาย key พร้อมกัน (เช่น interface list ที่โชว์
+ * badge enabled/disabled ต่อ interface) แทนการยิง `useAppConfigByKey` ทีละ key
+ *
+ * @returns query ที่คืน `AppConfig[]`
+ */
+export function useAppConfigs() {
+  const buCode = useBuCode();
+  return useQuery<AppConfig[]>({
+    queryKey: [QUERY_KEYS.APP_CONFIGS, buCode],
+    queryFn: async () => {
+      const res = await httpClient.get(API_ENDPOINTS.APP_CONFIGS(buCode!));
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch app configs");
+      const json = await res.json();
+      return json.data;
+    },
+    ...CACHE_STATIC,
+    enabled: !!buCode,
+  });
+}
+
 export function useUpsertAppConfig() {
   return useApiMutation<{ key: string; value: Record<string, unknown> }>({
     mutationFn: ({ key, value }, buCode) =>
