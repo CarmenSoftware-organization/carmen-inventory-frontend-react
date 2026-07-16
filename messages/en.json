@@ -1535,6 +1535,7 @@
       "save": "Save",
       "saved": "Interface settings saved",
       "loadError": "Could not load interface settings",
+      "notFound": "Interface not found",
       "enabled": "Enabled",
       "endpoint": "Endpoint",
       "apiKey": "API key",
