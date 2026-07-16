@@ -29,6 +29,12 @@ export interface UserProfile {
   avatar_url: string | null;
   /** Pre-signed signature URL (transparent PNG). Expires — re-fetch profile to refresh. Null when unset. */
   signature_url: string | null;
+  /**
+   * Per-BU interface entitlement — `<category>_<brand>` keys the platform licensed for the
+   * current business unit (e.g. `"pos_micros"`). Absent on older gateways → the UI shows
+   * every shipped brand (backward compat); an empty array hides all.
+   */
+  enabled_interfaces?: string[];
 }
 
 export interface CurrentPeriod {

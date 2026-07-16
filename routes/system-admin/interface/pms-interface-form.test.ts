@@ -10,7 +10,6 @@ describe("pmsSchema", () => {
   it("accepts a fully populated value", () => {
     const parsed = pmsSchema.safeParse({
       enabled: true,
-      vendor: "opera",
       endpoint: "https://pms.example.com",
       api_key: "k",
       property_code: "P1",
@@ -20,8 +19,11 @@ describe("pmsSchema", () => {
     expect(parsed.success).toBe(true);
   });
 
-  it("rejects an unknown vendor", () => {
-    const parsed = pmsSchema.safeParse({ ...EMPTY_PMS, vendor: "fidelio" });
+  it("rejects a non-boolean posting toggle", () => {
+    const parsed = pmsSchema.safeParse({
+      ...EMPTY_PMS,
+      post_city_ledger: "yes",
+    });
     expect(parsed.success).toBe(false);
   });
 });
@@ -40,7 +42,6 @@ describe("toFormValues / toApiValue", () => {
   it("round-trips a full value unchanged", () => {
     const values = {
       enabled: true,
-      vendor: "protel" as const,
       endpoint: "https://x.example.com",
       api_key: "k",
       property_code: "P9",

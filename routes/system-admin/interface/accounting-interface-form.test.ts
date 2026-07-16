@@ -10,7 +10,6 @@ describe("accountingSchema", () => {
   it("accepts a fully populated value", () => {
     const parsed = accountingSchema.safeParse({
       enabled: true,
-      system: "carmen_gl",
       default_account_code: "1000",
       default_department_code: "D1",
       default_invoice_value: "0",
@@ -21,10 +20,10 @@ describe("accountingSchema", () => {
     expect(parsed.success).toBe(true);
   });
 
-  it("rejects an unknown accounting system", () => {
+  it("rejects an unknown export format", () => {
     const parsed = accountingSchema.safeParse({
       ...EMPTY_ACCOUNTING,
-      system: "sap",
+      export_format: "pdf",
     });
     expect(parsed.success).toBe(false);
   });
@@ -45,7 +44,6 @@ describe("toFormValues / toApiValue", () => {
   it("round-trips a full value unchanged", () => {
     const values = {
       enabled: true,
-      system: "blueledgers" as const,
       default_account_code: "2000",
       default_department_code: "D2",
       default_invoice_value: "100",

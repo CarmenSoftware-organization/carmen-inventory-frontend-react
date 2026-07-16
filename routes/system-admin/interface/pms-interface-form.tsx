@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
+import { useParams } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -8,11 +9,10 @@ import { SettingSection } from "@/components/ui/setting-section";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useInterfaceConfig } from "./use-interface-config";
 import { InterfacePageLayout } from "./interface-page-layout";
-import { TextField, EnumField, ToggleField } from "./interface-fields";
+import { TextField, ToggleField } from "./interface-fields";
 
 export const pmsSchema = z.object({
   enabled: z.boolean(),
-  vendor: z.enum(["opera", "protel", "other"]),
   endpoint: z.string(),
   api_key: z.string(),
   property_code: z.string(),
@@ -24,7 +24,6 @@ export type PmsFormValues = z.infer<typeof pmsSchema>;
 
 export const EMPTY_PMS: PmsFormValues = {
   enabled: false,
-  vendor: "opera",
   endpoint: "",
   api_key: "",
   property_code: "",
@@ -46,11 +45,11 @@ export function toApiValue(values: PmsFormValues): Record<string, unknown> {
   return { ...values };
 }
 
-// derive dropdown options from the schema so the two never drift
-const VENDORS = pmsSchema.shape.vendor.options;
-
 /**
- * หน้า config ของ PMS Interface — ตั้งค่าการ post City Ledger / Credit Card จากระบบ PMS
+ * หน้า config ของ PMS brand เดียว — ตั้งค่าการ post City Ledger / Credit Card จากระบบ PMS
+ *
+ * brand (Opera / Protel) มาจาก route param — เก็บใน key `interface_pms_<brand>`
+ * ไม่ใช่ field ในฟอร์ม
  *
  * City Ledger และ Credit Card เป็นสองอย่างที่ Carmen ดึงจาก PMS ผ่าน API
  * (ดู kb-carmen AR-posting_pms.md)
@@ -60,8 +59,9 @@ const VENDORS = pmsSchema.shape.vendor.options;
 export default function PmsInterfaceForm() {
   const t = useTranslations("systemAdmin.interface");
   const tp = useTranslations("systemAdmin.interface.pms");
+  const { brand } = useParams<{ brand: string }>();
   const { value, isLoading, isError, refetch, save, isSaving } =
-    useInterfaceConfig("interface_pms");
+    useInterfaceConfig(`interface_pms_${brand}`);
 
   const form = useForm<PmsFormValues>({
     resolver: zodResolver(pmsSchema) as Resolver<PmsFormValues>,
@@ -80,7 +80,7 @@ export default function PmsInterfaceForm() {
 
   return (
     <InterfacePageLayout
-      title={tp("title")}
+      title={tp(`brand.${brand}`)}
       description={tp("desc")}
       onSave={submit}
       isSaving={isSaving}
@@ -96,13 +96,6 @@ export default function PmsInterfaceForm() {
           label={t("enabled")}
           checked={form.watch("enabled")}
           onChange={(v) => form.setValue("enabled", v, { shouldDirty: true })}
-        />
-        <EnumField
-          label={tp("vendor")}
-          value={form.watch("vendor")}
-          options={VENDORS}
-          optionLabel={(v) => tp(`vendorOption.${v}`)}
-          onChange={(v) => form.setValue("vendor", v, { shouldDirty: true })}
         />
         <TextField
           label={tp("propertyCode")}

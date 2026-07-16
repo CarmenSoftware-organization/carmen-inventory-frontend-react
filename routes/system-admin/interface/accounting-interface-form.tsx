@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
+import { useParams } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -12,7 +13,6 @@ import { TextField, EnumField, ToggleField } from "./interface-fields";
 
 export const accountingSchema = z.object({
   enabled: z.boolean(),
-  system: z.enum(["carmen_gl", "blueledgers", "external"]),
   default_account_code: z.string(),
   default_department_code: z.string(),
   /** free text — ดู "Open question" ใน spec: KB ไม่ได้ระบุว่า value นี้คืออะไร */
@@ -26,7 +26,6 @@ export type AccountingFormValues = z.infer<typeof accountingSchema>;
 
 export const EMPTY_ACCOUNTING: AccountingFormValues = {
   enabled: false,
-  system: "carmen_gl",
   default_account_code: "",
   default_department_code: "",
   default_invoice_value: "",
@@ -52,12 +51,14 @@ export function toApiValue(
 }
 
 // derive dropdown options from the schema so the two never drift
-const SYSTEMS = accountingSchema.shape.system.options;
 const FORMATS = accountingSchema.shape.export_format.options;
 const FREQUENCIES = accountingSchema.shape.posting_frequency.options;
 
 /**
- * หน้า config ของ Accounting Interface — ตั้งค่าการส่งข้อมูลไป GL/AP
+ * หน้า config ของ Accounting brand เดียว — ตั้งค่าการส่งข้อมูลไป GL/AP
+ *
+ * brand (Carmen GL / BlueLedgers / External) มาจาก route param — เก็บใน key
+ * `interface_accounting_<brand>` ไม่ใช่ field ในฟอร์ม
  *
  * `default_account_code` / `default_department_code` / `default_invoice_value` เป็นค่า
  * fallback ที่ระบบใช้เมื่อ vendor ไม่ได้ตั้งค่าไว้ (ดู kb-carmen changelog sep2024)
@@ -67,8 +68,9 @@ const FREQUENCIES = accountingSchema.shape.posting_frequency.options;
 export default function AccountingInterfaceForm() {
   const t = useTranslations("systemAdmin.interface");
   const ta = useTranslations("systemAdmin.interface.accounting");
+  const { brand } = useParams<{ brand: string }>();
   const { value, isLoading, isError, refetch, save, isSaving } =
-    useInterfaceConfig("interface_accounting");
+    useInterfaceConfig(`interface_accounting_${brand}`);
 
   const form = useForm<AccountingFormValues>({
     resolver: zodResolver(accountingSchema) as Resolver<AccountingFormValues>,
@@ -87,7 +89,7 @@ export default function AccountingInterfaceForm() {
 
   return (
     <InterfacePageLayout
-      title={ta("title")}
+      title={ta(`brand.${brand}`)}
       description={ta("desc")}
       onSave={submit}
       isSaving={isSaving}
@@ -104,18 +106,12 @@ export default function AccountingInterfaceForm() {
           checked={form.watch("enabled")}
           onChange={(v) => form.setValue("enabled", v, { shouldDirty: true })}
         />
-        <EnumField
-          label={ta("system")}
-          value={form.watch("system")}
-          options={SYSTEMS}
-          optionLabel={(s) => ta(`systemOption.${s}`)}
-          onChange={(v) => form.setValue("system", v, { shouldDirty: true })}
-        />
         <TextField
           label={t("endpoint")}
           field={form.register("endpoint")}
           error={form.formState.errors.endpoint?.message}
           placeholder="https://gl.example.com"
+          className="sm:col-span-2"
         />
       </SettingSection>
 
