@@ -49,7 +49,9 @@ export function InterfacePageLayout({
   readonly children: React.ReactNode;
 }) {
   // แก้ค้างแล้วกดลิงก์/กด back → ถามก่อนทิ้ง
-  const navGuard = useNavigationGuard(isDirty && !isSaving);
+  // ไม่ต้องกัน `!isSaving`: ช่วงที่ save กำลังวิ่งคือช่วงที่เสี่ยงเสียงานที่สุด ต้องกันด้วย
+  // และพอ save สำเร็จ form.reset ทำให้ isDirty เป็น false เองอยู่แล้ว (ตาม default-setting)
+  const navGuard = useNavigationGuard(isDirty);
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
@@ -60,7 +62,7 @@ export function InterfacePageLayout({
         </div>
         {!isError && !isLoading && (
           <div className="flex shrink-0 items-center gap-2">
-            <Button size="sm" onClick={onSave} disabled={isSaving}>
+            <Button type="button" size="sm" onClick={onSave} disabled={isSaving}>
               {isSaving ? (
                 <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
               ) : (

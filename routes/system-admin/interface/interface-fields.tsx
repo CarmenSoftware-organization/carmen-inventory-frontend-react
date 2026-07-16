@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -34,10 +35,11 @@ export function TextField({
   readonly hint?: string;
   readonly className?: string;
 }) {
+  const id = useId();
   return (
     <Field className={className}>
-      <FieldLabel>{label}</FieldLabel>
-      <Input {...field} type={type} placeholder={placeholder} />
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <Input {...field} id={id} type={type} placeholder={placeholder} />
       {hint && <p className="text-muted-foreground text-xs">{hint}</p>}
       <FieldError>{error}</FieldError>
     </Field>
@@ -66,11 +68,12 @@ export function EnumField<T extends string>({
   readonly optionLabel: (option: T) => string;
   readonly onChange: (next: T) => void;
 }) {
+  const id = useId();
   return (
     <Field>
-      <FieldLabel>{label}</FieldLabel>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <Select value={value} onValueChange={(v) => onChange(v as T)}>
-        <SelectTrigger size="sm" className="w-full text-sm">
+        <SelectTrigger id={id} size="sm" className="w-full text-sm">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
