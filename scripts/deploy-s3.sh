@@ -11,21 +11,21 @@ bun run build
 
 # Guard: remove dev config files from dist so they can never be uploaded,
 # even if someone edits the --exclude flags below.
-# (vite copies public/ into dist/, which includes config.json and config.sample.json)
-rm -f dist/config.json dist/config.sample.json
+# (vite copies public/ into dist/, which includes config.json + every
+# config.<env>.json / config.sample.json)
+rm -f dist/config*.json
 
 # Hashed assets — cache ยาว (immutable)
 # --delete: removes files from the bucket that are no longer in dist/.
-# --exclude config.json / config.sample.json: these patterns are excluded from
-#   the sync entirely — aws s3 sync treats excluded files as invisible, so
-#   --delete will NOT remove them from the destination bucket. The env's
-#   config.json that lives on the bucket is therefore safe.
+# --exclude config*.json: this pattern is excluded from the sync entirely —
+#   aws s3 sync treats excluded files as invisible, so --delete will NOT
+#   remove them from the destination bucket. The env's config.json that
+#   lives on the bucket is therefore safe.
 aws s3 sync dist/ "s3://${BUCKET}/" \
   --delete \
   --cache-control "public,max-age=31536000,immutable" \
   --exclude "index.html" \
-  --exclude "config.json" \
-  --exclude "config.sample.json"
+  --exclude "config*.json"
 
 # index.html — no-cache เพื่อให้ deploy ใหม่มีผลทันที
 aws s3 cp dist/index.html "s3://${BUCKET}/index.html" \

@@ -73,12 +73,14 @@ Replace the two per-file config entries (and the duplicated pair at the bottom)
 with:
 
 ```
-public/config.*.json
+public/config*.json
 !public/config.sample.json
 ```
 
 Covers `config.json`, `config.local.json`, `config.prod.json`, and the new
-`config.dev.json` / `config.uat.json`; only the sample stays committed.
+`config.dev.json` / `config.uat.json`; only the sample stays committed. Note the
+glob has no dot after `config` — `config.*.json` would not match the bare
+`config.json`.
 
 ### 5. Docs
 

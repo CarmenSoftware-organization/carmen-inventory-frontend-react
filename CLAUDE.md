@@ -13,7 +13,8 @@ backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migr
 ## Commands
 
 ```bash
-bun dev              # Dev server (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
+bun dev              # Dev server = dev:local (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
+bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/config.<env>.json (prod = dev backend until real prod exists)
 bun run build        # tsc + vite build → dist/
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
