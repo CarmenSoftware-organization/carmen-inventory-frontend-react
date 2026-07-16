@@ -246,7 +246,7 @@ cover business units and deploys where the default is not yet present.
 | Case | Behavior |
 |---|---|
 | general route error | `/system-admin` parent already carries `RouteErrorBoundaryAdapter` — nothing new |
-| `:key` not in registry | render `routes/not-found` Component |
+| `:key` not in registry | inline `ErrorState` ("Interface not found") — the detail route is nested inside `RootLayout`, so it must NOT use the full-page `NotFoundComponent` (which brings its own `min-h-screen` header/logo/footer and would double the shell chrome). Matches the department/role edit convention of an inline `ErrorState` when a record is missing inside the shell. |
 | config 404 (never configured) | `isNew: true` → form shows defaults, no error UI |
 | 500 / 401 | `ErrorState` + retry (per default-setting) |
 | save error | `toast.error` from the ApiError message (per config-email) |

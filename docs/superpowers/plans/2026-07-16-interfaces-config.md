@@ -50,7 +50,7 @@
 | `pos-interface-form.test.ts` | Schema + mapper round-trip. |
 | `pms-interface-form.tsx` | PMS form + schema + mappers. |
 | `pms-interface-form.test.ts` | Schema + mapper round-trip. |
-| `interface-detail.route.tsx` | Resolve `:key` via registry → lazy form, else NotFound. |
+| `interface-detail.route.tsx` | Resolve `:key` via registry → lazy form, else inline ErrorState (nested in the shell — not the full-page NotFound). |
 | `interface-list.tsx` | Card grid + enabled badge. |
 | `interface-list.test.tsx` | Badge derivation. |
 | `interface.route.tsx` | List route entry. |
@@ -2205,7 +2205,7 @@ export const INTERFACES: readonly InterfaceDef[] = [
  * หา interface จาก route param
  *
  * @param key - ค่าจาก `useParams().key`
- * @returns InterfaceDef หรือ undefined ถ้าไม่รู้จัก (caller ควรโชว์ NotFound)
+ * @returns InterfaceDef หรือ undefined ถ้าไม่รู้จัก (caller ควรโชว์ ErrorState แบบ inline)
  */
 export function findInterface(key: string | undefined): InterfaceDef | undefined {
   return INTERFACES.find((def) => def.key === key);
@@ -2236,7 +2236,7 @@ interface with a different shape needs no rewrite here."
 - Modify: `routes/router.tsx:206` (add both routes after the `default-setting` entry)
 
 **Interfaces:**
-- Consumes: `findInterface` (Task 9); `NotFoundComponent` (`@/components/not-found-component`)
+- Consumes: `findInterface` (Task 9); `ErrorState` (`@/components/ui/error-state`)
 - Produces: the route `/system-admin/interface/:key`. The list route registered here points at `./system-admin/interface/interface.route`, created in Task 11 — so register both now and finish the list next.
 
 - [ ] **Step 1: Write the detail route**
@@ -2246,22 +2246,28 @@ Create `routes/system-admin/interface/interface-detail.route.tsx`:
 ```tsx
 import { Suspense } from "react";
 import { useParams } from "react-router";
-import { NotFoundComponent } from "@/components/not-found-component";
+import { useTranslations } from "use-intl";
+import { ErrorState } from "@/components/ui/error-state";
 import { SettingSectionSkeleton } from "@/components/ui/setting-section";
 import { findInterface } from "./interface-registry";
 
 /**
  * หน้า config ของ interface ตัวเดียว — resolve `:key` จาก registry แล้ว render form
  *
- * key ที่ไม่รู้จักถือเป็น 404 (ไม่ใช่ error) เพราะเป็น URL ที่พิมพ์มั่วหรือ bookmark เก่า
+ * key ที่ไม่รู้จักถือเป็น "ไม่พบ" (URL พิมพ์มั่ว/bookmark เก่า) — ใช้ ErrorState แบบ inline
+ * ไม่ใช่ NotFoundComponent เพราะหน้านี้ mount อยู่ใน RootLayout (มี sidebar+navbar อยู่แล้ว)
+ * ส่วน NotFoundComponent เป็น full-page (min-h-screen + header/logo/footer ของตัวเอง) ไว้ใช้กับ
+ * top-level catch-all เท่านั้น — เอามาซ้อนในนี้จะได้ chrome ซ้อน chrome (ตาม department/role
+ * edit ที่ใช้ ErrorState inline เมื่อของหายระหว่างอยู่ใน shell)
  *
  * @returns React element ของหน้า interface detail
  */
 export function Component() {
+  const t = useTranslations("systemAdmin.interface");
   const { key } = useParams<{ key: string }>();
   const def = findInterface(key);
 
-  if (!def) return <NotFoundComponent />;
+  if (!def) return <ErrorState message={t("notFound")} />;
 
   const Form = def.form;
   return (
@@ -2276,6 +2282,19 @@ export function Component() {
     </Suspense>
   );
 }
+```
+
+The `notFound` i18n key is shared, so it belongs with the other shared `systemAdmin.interface`
+keys rather than in a per-interface sub-block. Add it to BOTH locales in this step:
+
+`messages/en.json`, inside `systemAdmin.interface` (beside `loadError`):
+```json
+      "notFound": "Interface not found",
+```
+
+`messages/th.json`, inside `systemAdmin.interface` (beside `loadError`):
+```json
+      "notFound": "ไม่พบการเชื่อมต่อที่ต้องการ",
 ```
 
 - [ ] **Step 2: Register both routes**
@@ -2300,7 +2319,8 @@ Expected: **one** error — `Cannot find module './system-admin/interface/interf
 git add routes/system-admin/interface/interface-detail.route.tsx routes/router.tsx
 git commit -m "feat(interface): add interface detail route
 
-Unknown :key renders NotFound rather than throwing to the error boundary."
+Unknown :key renders an inline ErrorState (nested in the shell) rather than the full-page
+NotFound or throwing to the error boundary."
 ```
 
 Note: this commit does not typecheck on its own — Task 11 adds the missing list route. Run the two tasks back to back.
@@ -2656,7 +2676,8 @@ Log in (`admin@zebra.com` / `12345678` against the local gateway), then check:
 - reopening POS shows the API key field filled with the mask, not the raw key
 - saving again **without** retyping the key keeps it working (this is the sentinel from Task 1)
 - editing a field and then clicking back to the list prompts before discarding
-- `/system-admin/interface/hms` renders the not-found page
+- `/system-admin/interface/hms` shows the inline "Interface not found" message WITH the
+  sidebar and navbar still around it (not a full-page 404, not a doubled header)
 - the browser console is free of errors
 
 - [ ] **Step 6: Commit**
