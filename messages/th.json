@@ -1590,6 +1590,23 @@
           "recipe": "ตามสูตรอาหาร",
           "direct": "ตัดจากสินค้าโดยตรง"
         }
+      },
+      "pms": {
+        "title": "การเชื่อมต่อระบบบริหารโรงแรม",
+        "desc": "การนำรายการ City Ledger และบัตรเครดิตจากระบบบริหารโรงแรมเข้าสู่ลูกหนี้",
+        "connection": "การเชื่อมต่อ",
+        "connectionDesc": "ระบบบริหารโรงแรมที่ Carmen จะดึงข้อมูลมา",
+        "vendor": "ผู้ให้บริการระบบบริหารโรงแรม",
+        "vendorOption": {
+          "opera": "Oracle Opera",
+          "protel": "Protel",
+          "other": "อื่นๆ"
+        },
+        "propertyCode": "รหัสโรงแรม",
+        "posting": "การดึงรายการ",
+        "postingDesc": "รายการที่ Carmen จะดึงจากระบบบริหารโรงแรม",
+        "postCityLedger": "ดึงรายการ City Ledger",
+        "postCreditCard": "ดึงรายการบัตรเครดิต"
       }
     }
   },
