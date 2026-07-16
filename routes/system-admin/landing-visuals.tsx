@@ -31,6 +31,8 @@ export function ModuleVisual({ visualKey }: { readonly visualKey: VisualKey }) {
       return <MonitorViz />;
     case "email":
       return <EmailViz />;
+    case "interface":
+      return <InterfaceViz />;
     case "notify":
       return <NotifyViz />;
     case "code":
@@ -472,6 +474,27 @@ function EmailViz() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** ภาพจำลอง: สามระบบภายนอกต่อเข้าหากล่องกลาง */
+function InterfaceViz() {
+  return (
+    <div className={VIZ_WRAP}>
+      <div className="flex items-center gap-1.5">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="h-1.5 flex-1 rounded-full"
+            style={{ background: ACCENT, opacity: 0.3 + i * 0.25 }}
+          />
+        ))}
+      </div>
+      <div
+        className="mt-1.5 h-5 w-10 rounded"
+        style={{ background: ACCENT, opacity: 0.75 }}
+      />
     </div>
   );
 }

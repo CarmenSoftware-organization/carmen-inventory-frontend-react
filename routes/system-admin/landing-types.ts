@@ -2,6 +2,7 @@ import type { ComponentType, SVGProps } from "react";
 import {
   Activity,
   BellRing,
+  Cable,
   Calendar,
   Database,
   Folder,
@@ -26,6 +27,7 @@ export type VisualKey =
   | "userActivity"
   | "monitor"
   | "email"
+  | "interface"
   | "notify"
   | "code"
   | "query"
@@ -114,6 +116,12 @@ export const CHAPTERS: readonly ChapterDef[] = [
         visualKey: "email",
         href: "/system-admin/config-email",
         icon: Mail,
+      },
+      {
+        key: "interface",
+        visualKey: "interface",
+        href: "/system-admin/interface",
+        icon: Cable,
       },
       {
         key: "notifyTemplate",

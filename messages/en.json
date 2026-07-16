@@ -1072,6 +1072,13 @@
           "stat": "mail.aureliabay.com · OK",
           "meta": "4 templates · EN + TH"
         },
+        "interface": {
+          "name": "Interfaces",
+          "one": "Accounting, POS and PMS connections.",
+          "long": "Point Carmen at the systems around it — the ledger that receives your postings, the tills that report what was sold, the property system that owns the folios. Set the codes each one expects and the cadence they run at.",
+          "stat": "3 interfaces",
+          "meta": "Accounting · POS · PMS"
+        },
         "notifyTemplate": {
           "name": "Notification Templates",
           "one": "Reusable messages for workflow events.",
