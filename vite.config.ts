@@ -7,7 +7,9 @@ import { type Plugin, defineConfig } from "vite";
 // Dev-only: เสิร์ฟ config ตาม CONFIG_ENV ที่ /config.json (runtime fetch /config.json เสมอ)
 //   CONFIG_ENV=local|dev|uat|prod (default: local) → public/config.<env>.json
 //   ใช้ผ่าน `bun run dev:local` / `dev:dev` / `dev:uat` / `dev:prod`
-// ไม่มีผลตอน `vite build` (deploy แยกจัดการ config.json เอง — ดู emitBuildConfig)
+// hooks (configureServer) มีผลเฉพาะ dev server (apply: "serve") — ไม่รันตอน `vite build`
+// (deploy แยกจัดการ config.json เอง — ดู emitBuildConfig) แต่ CONFIG_ENV validation ด้านล่าง
+// อยู่ใน factory body เอง จึงรันทุกครั้งที่ config โหลด รวมถึงตอน `vite build` ด้วย
 const CONFIG_ENVS = ["local", "dev", "uat", "prod"];
 
 function serveEnvConfig(): Plugin {
@@ -20,7 +22,7 @@ function serveEnvConfig(): Plugin {
   const file = `config.${env}.json`;
   return {
     name: "serve-env-config",
-    apply: "serve", // dev server เท่านั้น — ไม่มีผลตอน `vite build`
+    apply: "serve", // hooks (configureServer) เท่านั้น — ไม่รันตอน `vite build`
     configureServer(server) {
       const target = path.resolve(import.meta.dirname, "public", file);
       // fail fast ตอน start — ไม่งั้นจบเป็น 404 เงียบ + SPA โชว์
@@ -58,7 +60,7 @@ function emitBuildConfig(): Plugin {
 }
 
 // Dev mode: เซ็ต VITE_DEV_PROXY_TARGET=https://<uat-backend> แล้วใช้ BACKEND_URL=""
-// ใน public/config.json — request จะวิ่งผ่าน Vite proxy (เลี่ยงปัญหา CORS ระหว่างรอ backend เปิด CORS)
+// ใน public/config.<env>.json — request จะวิ่งผ่าน Vite proxy (เลี่ยงปัญหา CORS ระหว่างรอ backend เปิด CORS)
 export default defineConfig(() => ({
   plugins: [
     serveEnvConfig(),

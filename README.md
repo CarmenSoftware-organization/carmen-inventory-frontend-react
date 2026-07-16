@@ -33,9 +33,13 @@ zod 4 · use-intl (en/th) · Vitest + Testing Library · **Bun** runtime
 
 ```bash
 bun install
-cp public/config.sample.json public/config.json   # set X_APP_ID; keep BACKEND_URL="" for proxy mode
+cp public/config.sample.json public/config.local.json   # set X_APP_ID; keep BACKEND_URL="" for proxy mode
 VITE_DEV_PROXY_TARGET=http://localhost:4000 bun dev   # proxy /api/* to your backend (avoids CORS in dev)
 ```
+
+`bun dev` (alias for `bun run dev:local`) serves `public/config.local.json` as `/config.json` —
+there is no literal `public/config.json` in dev. Use `bun run dev:dev` / `dev:uat` / `dev:prod`
+to point at `public/config.dev.json` / `config.uat.json` / `config.prod.json` instead.
 
 Open http://localhost:3000 (Vite picks the next port if busy) and log in with a backend
 account.
@@ -44,6 +48,7 @@ account.
 
 ```bash
 bun dev              # Dev server (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
+bun run dev:{local,dev,uat,prod}   # Dev server serving public/config.<env>.json (dev aliases dev:local)
 bun run build        # tsc + vite build → dist/
 bun run preview      # Serve the production build locally
 bun run lint         # ESLint          bun test            # Vitest watch
