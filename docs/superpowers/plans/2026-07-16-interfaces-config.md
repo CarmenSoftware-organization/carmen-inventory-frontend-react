@@ -20,7 +20,7 @@
 - **Never hardcode backend URLs.** Runtime config comes from `public/config.json`.
 - **Do not add `onError` toasts to mutations.** `components/providers.tsx:21-26` installs a `MutationCache.onError` that calls `reportApiError` globally. A local `onError` toast double-fires. Only add `onSuccess`.
 - **Frontend gate:** `bunx tsc --noEmit && bun test:run` must be clean before any commit.
-- **Backend gate:** `bun run check-types && bun test` (run from `apps/micro-business`) must be clean before any commit.
+- **Backend gate:** `bun run check-types && bun run test` (run from `apps/micro-business`) must be clean before any commit. Use `bun run test` (→ jest, `rootDir: src`), **not** bare `bun test` — that invokes bun's own runner, which globs `.js` from the cwd and trips over the gitignored `dist/` build output. Only jest is the project's real gate.
 - Exact secret constants, verbatim: `PREFIX = 'enc:v1:'` (`apps/micro-business/src/common/crypto.util.ts:18`), `MASK = '***ENCRYPTED***'` (`apps/micro-business/src/app-config/app-config.service.ts:9`).
 
 ---
@@ -176,7 +176,7 @@ Append a new `describe` block after `describe('get', ...)`:
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd ../carmen-turborepo-backend-v2/apps/micro-business && bun test app-config.service.spec -t "mask"`
+Run: `cd ../carmen-turborepo-backend-v2/apps/micro-business && bun run test -- app-config.service.spec -t "mask"`
 Expected: FAIL — the regression test shows `stored.smtp.password` is `'ENC:***ENCRYPTED***'` (the bug), and interface tests show `api_key` unencrypted/unmasked.
 
 - [ ] **Step 3: Replace mask/encrypt with the path registry**
@@ -256,8 +256,17 @@ In `app-config.service.ts`, replace `maskSensitiveFields` and `encryptSensitiveF
     let out: unknown = incoming;
     for (const path of paths) {
       if (this.readSecret(out, path) !== MASK) continue;
-      // No stored secret to restore → store empty rather than the literal mask.
-      out = this.writeSecret(out, path, this.readSecret(stored, path) ?? '');
+      const kept = this.readSecret(stored, path);
+      // The caller echoed the mask but there is nothing to restore (row deleted while
+      // their form was open). Storing the literal mask would destroy the secret; storing
+      // '' would persist a row that fails its own schema and break the integration
+      // silently. Refuse instead.
+      if (kept === undefined) {
+        throw new Error(
+          `Cannot save ${key}: no stored secret to restore for ${path.join('.')}`,
+        );
+      }
+      out = this.writeSecret(out, path, kept);
     }
     return out;
   }
@@ -289,7 +298,7 @@ Leave the rest of `upsert` (the `nowIso` comment and the create/update branches)
 
 - [ ] **Step 5: Run tests to verify they pass**
 
-Run: `cd ../carmen-turborepo-backend-v2/apps/micro-business && bun test app-config.service.spec`
+Run: `cd ../carmen-turborepo-backend-v2/apps/micro-business && bun run test -- app-config.service.spec`
 Expected: PASS — all existing cases plus the five new ones.
 
 - [ ] **Step 6: Typecheck**
@@ -370,7 +379,7 @@ Append a new `describe` block to `app-config.service.spec.ts`:
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd ../carmen-turborepo-backend-v2/apps/micro-business && bun test app-config.service.spec -t "interface config keys"`
+Run: `cd ../carmen-turborepo-backend-v2/apps/micro-business && bun run test -- app-config.service.spec -t "interface config keys"`
 Expected: FAIL — default test gets `null`/undefined value; the vendor test resolves instead of throwing (unknown keys pass through today).
 
 - [ ] **Step 3: Add the schemas**
@@ -430,7 +439,7 @@ In `defaultByKey`, add:
 
 - [ ] **Step 5: Run tests to verify they pass**
 
-Run: `cd ../carmen-turborepo-backend-v2/apps/micro-business && bun test app-config.service.spec && bun run check-types`
+Run: `cd ../carmen-turborepo-backend-v2/apps/micro-business && bun run test -- app-config.service.spec && bun run check-types`
 Expected: PASS, typecheck exit 0.
 
 - [ ] **Step 6: Commit**
@@ -2657,7 +2666,7 @@ Sits in the config chapter beside Email Config and links to the list page."
 From the spec, all must hold:
 
 - `bunx tsc --noEmit && bun test:run` clean in this repo
-- `bun test && bun run check-types` clean in `carmen-turborepo-backend-v2/apps/micro-business`
+- `bun run test && bun run check-types` clean in `carmen-turborepo-backend-v2/apps/micro-business`
 - all three interfaces reachable from the system-admin landing `config` chapter
 - saving an interface updates the list badge without a manual refresh
 - `api_key` never leaves the backend unmasked, and is never stored in plaintext

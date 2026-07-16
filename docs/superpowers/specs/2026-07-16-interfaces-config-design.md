@@ -225,6 +225,12 @@ Fix: in `upsert`, when an incoming secret equals `MASK`, retain the stored value
 of overwriting it. After change 1 both keys share this path, so `report_email` is fixed
 alongside the new interface keys.
 
+If the caller posts MASK and there is **no** stored secret to restore — the row was
+deleted while their form was open — `upsert` throws rather than persisting anything.
+Storing the literal mask would destroy the secret; storing `''` would persist a row that
+fails its own schema, breaking report email with a confusing error and letting a POS
+interface authenticate with an empty key. Neither is acceptable, so refuse the write.
+
 ### 3. `schemaByKey` — add zod schemas for the three interface keys
 
 Not strictly required (unknown keys pass through) but without it validation is
