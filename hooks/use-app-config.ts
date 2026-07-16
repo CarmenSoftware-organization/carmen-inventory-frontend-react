@@ -41,7 +41,9 @@ export function useAppConfigs() {
       const res = await httpClient.get(API_ENDPOINTS.APP_CONFIGS(buCode!));
       if (!res.ok) throw await ApiError.from(res, "Failed to fetch app configs");
       const json = await res.json();
-      return json.data;
+      // list endpoint wraps rows as `data: { items, count }` (unlike the single-key
+      // GET, whose `data` IS the row) — the array lives at `data.items`
+      return json.data?.items ?? [];
     },
     ...CACHE_STATIC,
     enabled: !!buCode,

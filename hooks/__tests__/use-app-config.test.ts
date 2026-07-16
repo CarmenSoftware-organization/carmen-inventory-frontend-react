@@ -37,10 +37,13 @@ function wrapper({ children }: { children: ReactNode }) {
 describe("useAppConfigs", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("returns every app config row for the current business unit", async () => {
+  it("unwraps the list rows from the data.items envelope", async () => {
+    // The list endpoint wraps rows as `data: { items, count }` — NOT a bare array
+    // at `data`, and NOT the flat single-key shape. Verified against the live
+    // gateway during Task 12 browser verification.
     vi.mocked(httpClient.get).mockResolvedValue({
       ok: true,
-      json: async () => ({ data: rows }),
+      json: async () => ({ data: { items: rows, count: rows.length } }),
     } as Response);
 
     const { result } = renderHook(() => useAppConfigs(), { wrapper });
@@ -50,6 +53,18 @@ describe("useAppConfigs", () => {
     expect(httpClient.get).toHaveBeenCalledWith(
       "/api/proxy/api/config/BU001/app-config",
     );
+  });
+
+  it("returns an empty array when the envelope has no items", async () => {
+    vi.mocked(httpClient.get).mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { items: [], count: 0 } }),
+    } as Response);
+
+    const { result } = renderHook(() => useAppConfigs(), { wrapper });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual([]);
   });
 
   it("surfaces a failed request as an error", async () => {
