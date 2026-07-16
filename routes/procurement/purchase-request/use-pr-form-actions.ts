@@ -244,7 +244,6 @@ export function usePrFormActions({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: handleMutationError,
         },
       );
     } else if (isAdd) {
@@ -258,7 +257,6 @@ export function usePrFormActions({
             }
             setMode("view");
           },
-          onError: handleMutationError,
         },
       );
     }
@@ -297,7 +295,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("submitted")),
-        onError: handleMutationError,
       },
     );
   };
@@ -316,7 +313,6 @@ export function usePrFormActions({
           );
           void doSubmitPr(purchaseRequest.id, savedItems);
         },
-        onError: handleMutationError,
       },
     );
   };
@@ -341,11 +337,9 @@ export function usePrFormActions({
             },
             {
               onSuccess: onSuccessList(t("submitted")),
-              onError: handleMutationError,
             },
           );
         },
-        onError: handleMutationError,
       },
     );
   };
@@ -374,7 +368,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("prApproved")),
-        onError: handleMutationError,
       },
     );
   };
@@ -395,7 +388,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("purchaseApproved")),
-        onError: handleMutationError,
       },
     );
   };
@@ -414,7 +406,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("prRejected")),
-        onError: handleMutationError,
       },
     );
   };
@@ -449,7 +440,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("sentBack")),
-        onError: handleMutationError,
       },
     );
   };
@@ -503,7 +493,6 @@ export function usePrFormActions({
         setActionDialog({ type: null });
         setMode("view");
       },
-      onError: handleMutationError,
     });
   };
 
@@ -529,7 +518,6 @@ export function usePrFormActions({
 
           toast.success(t("splitSuccess"));
         },
-        onError: handleMutationError,
       },
     );
   };

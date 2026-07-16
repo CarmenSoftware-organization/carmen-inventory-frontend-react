@@ -172,7 +172,6 @@ export function usePoFormHandlers({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (mode === "add") {
@@ -193,7 +192,6 @@ export function usePoFormHandlers({
             navigate("/procurement/purchase-order");
           }
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -265,7 +263,6 @@ export function usePoFormHandlers({
         onSuccess: () => {
           toast.success(t("submitted"));
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -322,7 +319,6 @@ export function usePoFormHandlers({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -348,7 +344,6 @@ export function usePoFormHandlers({
           setShowReject(false);
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -377,7 +372,6 @@ export function usePoFormHandlers({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -389,7 +383,6 @@ export function usePoFormHandlers({
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowClose(false);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -400,7 +393,6 @@ export function usePoFormHandlers({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/procurement/purchase-order");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

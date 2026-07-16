@@ -35,7 +35,7 @@ export function useReportHistory(
         : API_ENDPOINTS.REPORT_HISTORY(buCode!);
       const res = await httpClient.get(url);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to fetch report history");
+        throw await ApiError.from(res, "Failed to fetch report history");
       }
       return res.json();
     },

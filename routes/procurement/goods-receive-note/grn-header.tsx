@@ -1,14 +1,8 @@
 import { useTranslations } from "use-intl";
-import {
-  Check,
-  FileText,
-  MessageSquare,
-  Pencil,
-  Save,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Check, FileText, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CommentButton } from "@/components/comment-button";
+import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
 import { Badge } from "@/components/ui/badge";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { useCan } from "@/hooks/use-can";
@@ -81,6 +75,7 @@ export function GrnHeader({
   const t = useTranslations("procurement.goodsReceiveNote");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const { data: comments } = useGoodsReceiveNoteComments(goodsReceiveNote?.id);
 
   const { can, isAdmin } = useCan();
   const prefix = usePermissionPrefix();
@@ -207,10 +202,7 @@ export function GrnHeader({
 
       {/* Always (มี record) — comment + print */}
       {goodsReceiveNote && (
-        <Button size="sm" variant="info" onClick={onShowComment}>
-          <MessageSquare aria-hidden="true" />
-          {tc("comment")}
-        </Button>
+        <CommentButton count={comments?.length} onClick={onShowComment} />
       )}
       {isView && goodsReceiveNote?.id && (
         <PrintDocumentButton

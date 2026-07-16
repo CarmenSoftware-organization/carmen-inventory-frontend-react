@@ -44,7 +44,7 @@ export function useReportTemplates(params?: ParamsDto) {
       const url = qs ? `${base}?${qs}` : base;
       const res = await httpClient.get(url);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to fetch report templates");
+        throw await ApiError.from(res, "Failed to fetch report templates");
       }
       return res.json();
     },
@@ -99,7 +99,7 @@ export function useReportListLookups({
       });
       const res = await httpClient.get(url);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to fetch report lookups");
+        throw await ApiError.from(res, "Failed to fetch report lookups");
       }
       const json = await res.json();
       const raw = (json.data ?? json) as Record<string, unknown>;
@@ -158,7 +158,7 @@ export function useRunReportMutation() {
       const url = `${API_ENDPOINTS.REPORTS(buCode!)}/viewer`;
       const res = await httpClient.post(url, payload);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to generate report viewer");
+        throw await ApiError.from(res, "Failed to generate report viewer");
       }
       const json = await res.json();
       const viewerUrl: string | undefined = json.data?.url ?? json.url;

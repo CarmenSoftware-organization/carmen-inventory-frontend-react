@@ -161,7 +161,6 @@ export default function ExchangeRateComponent() {
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setBulkConfirmOpen(false);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -377,7 +376,6 @@ export default function ExchangeRateComponent() {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 setDeleteItem(null);
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}

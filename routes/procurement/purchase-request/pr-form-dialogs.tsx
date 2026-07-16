@@ -111,7 +111,6 @@ export function PrFormDialogs({
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/procurement/purchase-request");
               },
-              onError: (err: Error) => toast.error(err.message),
             });
           }}
         />

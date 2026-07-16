@@ -88,7 +88,7 @@ export default function SortableStageItem({
         onClick={onClick}
       >
         {isLast ? (
-          <CheckCircle2 className="text-success-foreground size-3 shrink-0" />
+          <CheckCircle2 className="text-muted-foreground size-3 shrink-0" />
         ) : (
           <span className="text-muted-foreground shrink-0 text-[0.625rem]">
             {index + 1}.

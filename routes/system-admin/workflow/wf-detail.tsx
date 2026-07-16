@@ -96,7 +96,6 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
           form.reset(values);
           setIsEditing(false);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };

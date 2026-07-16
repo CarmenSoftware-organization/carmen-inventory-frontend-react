@@ -40,7 +40,7 @@ export function usePurchaseOrder(
       const url = buildUrl(API_ENDPOINTS.PURCHASE_ORDER(buCode!), params);
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch purchase orders");
+        throw await ApiError.from(res, "Failed to fetch purchase orders");
       return res.json();
     },
     ...CACHE_DYNAMIC,
@@ -74,7 +74,7 @@ export function useMyPendingPurchaseOrder(
       });
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch my pending purchase orders",
         );
@@ -113,7 +113,7 @@ export function usePurchaseOrderGrnVendors() {
         API_ENDPOINTS.PURCHASE_ORDER_GRN_VENDORS(buCode!),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch vendors for GRN");
+        throw await ApiError.from(res, "Failed to fetch vendors for GRN");
       const json = await res.json();
       return json.data ?? json;
     },
@@ -143,7 +143,7 @@ export function usePurchaseOrderForGrn(
       const url = buildUrl(API_ENDPOINTS.PURCHASE_ORDER_GRN(buCode!), params);
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch purchase orders for GRN",
         );
@@ -172,7 +172,7 @@ export function usePurchaseOrderForGrnByVendor(vendorId: string | undefined) {
         API_ENDPOINTS.PURCHASE_ORDER_GRN_VENDOR(buCode!, vendorId!),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch purchase orders for GRN",
         );
@@ -201,7 +201,7 @@ export function usePurchaseOrderById(id: string | undefined) {
         `${API_ENDPOINTS.PURCHASE_ORDER(buCode!)}/${id}`,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch purchase order");
+        throw await ApiError.from(res, "Failed to fetch purchase order");
       const json = await res.json();
       return json.data;
     },
@@ -371,7 +371,7 @@ export function usePoPreviousStages(poId: string | undefined) {
         `${API_ENDPOINTS.PURCHASE_ORDER(buCode!)}/${poId}/previous-stages`,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch previous stages");
+        throw await ApiError.from(res, "Failed to fetch previous stages");
       const json = await res.json();
       const data = json.data ?? {};
       // API returns { "1": "Create Request", "2": "..." } → transform to array
@@ -475,7 +475,7 @@ export function usePurchaseOrderComments(poId: string | undefined) {
         API_ENDPOINTS.PURCHASE_ORDER_COMMENT(buCode, poId),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch comments");
+        throw await ApiError.from(res, "Failed to fetch comments");
       const json = await res.json();
       return json.data ?? [];
     },
@@ -550,14 +550,14 @@ export function useExportPurchaseOrder() {
           });
           const res = await httpClient.get(url);
           if (!res.ok)
-            throw ApiError.fromResponse(res, "Failed to fetch purchase orders");
+            throw await ApiError.from(res, "Failed to fetch purchase orders");
           const json = await res.json();
           return json.data?.[0]?.data ?? [];
         }
         const url = buildUrl(API_ENDPOINTS.PURCHASE_ORDER(buCode), params);
         const res = await httpClient.get(url);
         if (!res.ok)
-          throw ApiError.fromResponse(res, "Failed to fetch purchase orders");
+          throw await ApiError.from(res, "Failed to fetch purchase orders");
         const json = await res.json();
         return json.data ?? [];
       },

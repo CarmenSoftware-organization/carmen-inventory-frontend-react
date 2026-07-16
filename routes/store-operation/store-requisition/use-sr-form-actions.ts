@@ -169,7 +169,6 @@ export function useSrFormActions({
             });
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -182,7 +181,6 @@ export function useSrFormActions({
             navigate(`${SR_LIST_PATH}/${id}`, { replace: true });
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     }
@@ -203,7 +201,6 @@ export function useSrFormActions({
         options?.onDone?.();
         if (!options?.keepOnPage) navigate(SR_LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -321,7 +318,6 @@ export function useSrFormActions({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate(SR_LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

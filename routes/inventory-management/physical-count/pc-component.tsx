@@ -28,7 +28,6 @@ import {
   usePhysicalCountPeriodDetail,
 } from "@/hooks/use-physical-count-period";
 import { useCreatePhysicalCount } from "@/hooks/use-physical-count";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { useLocale } from "@/hooks/use-locale";
 import { formatDate as formatDateUtil } from "@/lib/date-utils";
 import { ErrorState } from "@/components/ui/error-state";
@@ -137,7 +136,6 @@ export default function PcComponent() {
   const [activeFilter, setActiveFilter] = useState<"all" | StatusKey>("all");
   const [showNotImplemented, setShowNotImplemented] = useState(false);
   const [previousPeriodId, setPreviousPeriodId] = useState("");
-  const errorToast = useErrorToast();
 
   const {
     data: currentPeriod,
@@ -236,7 +234,6 @@ export default function PcComponent() {
           const { id } = (res as { data: { id: string } }).data;
           navigate(`/inventory-management/physical-count/${id}/entry`);
         },
-        onError: errorToast,
       },
     );
   };

@@ -101,7 +101,6 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/operation-plan/recipe");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -112,7 +111,6 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             navigate("/operation-plan/recipe");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     }
@@ -147,7 +145,6 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/operation-plan/recipe");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

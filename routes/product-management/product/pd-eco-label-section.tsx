@@ -64,7 +64,6 @@ export function ProductEcoLabelSection({
         toast.success(tt("deleteSuccess", { entity: tfl("ecoLabel") }));
         setDeleteItem(null);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

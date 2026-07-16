@@ -58,7 +58,6 @@ export default function ChangePasswordSection() {
           toast.success(t("passwordChanged"));
           logout.mutate();
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };

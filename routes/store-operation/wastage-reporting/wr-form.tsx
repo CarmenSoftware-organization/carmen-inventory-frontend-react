@@ -138,7 +138,6 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/store-operation/wastage-reporting");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -147,7 +146,6 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/store-operation/wastage-reporting");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -320,7 +318,6 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/store-operation/wastage-reporting");
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

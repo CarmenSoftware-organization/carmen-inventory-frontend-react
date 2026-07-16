@@ -299,7 +299,6 @@ export function ProductForm({ product }: ProductFormProps) {
             form.reset(normalizedValues);
             setMode("view");
           },
-          onError: (err: Error) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -313,7 +312,6 @@ export function ProductForm({ product }: ProductFormProps) {
             navigate(returnUrl);
           }
         },
-        onError: (err: Error) => toast.error(err.message),
       });
     }
   };
@@ -458,7 +456,6 @@ export function ProductForm({ product }: ProductFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate(returnUrl);
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

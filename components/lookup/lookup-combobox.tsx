@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Button } from "@/components/ui/button";
 import { Command, CommandInput } from "@/components/ui/command";
+import { FieldPlainText } from "@/components/ui/field";
 import {
   Popover,
   PopoverContent,
@@ -171,19 +172,18 @@ export function LookupCombobox<T>({
   const showErrorTooltip = !!error && !open;
 
   if (readOnly) {
+    // FieldPlainText (ไม่ใช่ <span> เปล่า) เพราะ `Field` จะมุด label ให้ก็ต่อเมื่อ
+    // เจอ data-slot="field-plain-text" เป็น direct child — และมันแสดง "—" เองอยู่แล้ว
     return (
-      <span
+      <FieldPlainText
         className={cn(
-          "inline-flex items-center text-xs",
           size === "default" && "min-h-9",
-          size === "sm" && "min-h-8",
-          size === "xs" && "min-h-6 text-xs",
-          !selectedLabel && "text-muted-foreground",
+          size === "xs" && "min-h-6",
           className,
         )}
       >
-        {selectedLabel ?? "—"}
-      </span>
+        {selectedLabel}
+      </FieldPlainText>
     );
   }
 

@@ -118,7 +118,6 @@ function EditForm({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           onOpenChange(false);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -301,7 +300,6 @@ function CreateForm({
           });
           onOpenChange(false);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };

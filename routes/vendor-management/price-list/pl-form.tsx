@@ -150,7 +150,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           form.reset(values);
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       });
     } else if (isAdd) {
       submitCreate({
@@ -161,7 +160,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           navigate(`/vendor-management/price-list/${id}`, { replace: true });
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -192,7 +190,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/vendor-management/price-list");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -383,7 +380,6 @@ function submitUpdate({
   form,
   mutate,
   onSuccess,
-  onError,
 }: {
   values: PriceListFormValues;
   priceList: PriceList;
@@ -391,7 +387,6 @@ function submitUpdate({
   form: ReturnType<typeof useForm<PriceListFormValues>>;
   mutate: ReturnType<typeof useUpdatePriceList>["mutate"];
   onSuccess: () => void;
-  onError: (err: Error) => void;
 }) {
   const pricelist_detail = buildItemChanges(
     values.pricelist_detail,
@@ -411,7 +406,7 @@ function submitUpdate({
       ...buildBasePayload(values),
       pricelist_detail,
     },
-    { onSuccess, onError },
+    { onSuccess },
   );
 }
 
@@ -419,12 +414,10 @@ function submitCreate({
   values,
   mutate,
   onSuccess,
-  onError,
 }: {
   values: PriceListFormValues;
   mutate: ReturnType<typeof useCreatePriceList>["mutate"];
   onSuccess: (id: string) => void;
-  onError: (err: Error) => void;
 }) {
   const pricelist_detail: CreatePriceListDto["pricelist_detail"] = {};
   if (values.pricelist_detail.length > 0) {
@@ -440,7 +433,6 @@ function submitCreate({
         const created = data as { data: { id: string } };
         onSuccess(created.data.id);
       },
-      onError,
     },
   );
 }

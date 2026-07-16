@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { Role, Stage, WorkflowDto } from "@/types/workflows";
 import { cn } from "@/lib/utils";
-import { ROLE_ICON, ROLE_TEXT } from "./wf-role-colors";
+import { ROLE_ICON } from "./wf-role-colors";
 
 interface WfFlowStripProps {
   readonly workflow: WorkflowDto;
@@ -87,7 +87,8 @@ interface FlowNodeProps {
 }
 
 function FlowNode({ label, ariaLabel, kind, role, isHod }: FlowNodeProps) {
-  // Flat icon per node — vivid single-tone color, no bubble/ring/tint.
+  // แต่ละโหนดแยกกันด้วย "รูปร่าง" ของไอคอน ไม่ใช่สี — strip นี้เป็นแผนผังของ
+  // นิยาม workflow ไม่มีโหนดไหน "กำลังทำงาน" อยู่ จึงไม่มีอะไรควรได้ accent
   const Icon =
     kind === "start"
       ? Play
@@ -97,18 +98,9 @@ function FlowNode({ label, ariaLabel, kind, role, isHod }: FlowNodeProps) {
           ? ROLE_ICON[role]
           : Circle;
 
-  const colorClass =
-    kind === "start"
-      ? "text-primary"
-      : kind === "end"
-        ? "text-success"
-        : role
-          ? ROLE_TEXT[role]
-          : "text-muted-foreground";
-
   const node = (
     <span
-      className={cn("relative inline-flex shrink-0", colorClass)}
+      className="text-muted-foreground relative inline-flex shrink-0"
       aria-label={ariaLabel}
     >
       <Icon
@@ -117,7 +109,7 @@ function FlowNode({ label, ariaLabel, kind, role, isHod }: FlowNodeProps) {
       />
       {isHod && kind === "middle" && (
         <Crown
-          className="text-warning absolute -top-1.5 -right-1.5 size-2.5 fill-current"
+          className="absolute -top-1.5 -right-1.5 size-2.5 fill-current"
           aria-hidden="true"
         />
       )}

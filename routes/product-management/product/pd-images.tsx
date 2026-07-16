@@ -74,7 +74,6 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
       {
         onSuccess: () =>
           toast.success(t("imgUploaded", { count: valid.length })),
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -88,7 +87,6 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
           toast.success(t("imgDeleted"));
           setDeleteTarget(null);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };

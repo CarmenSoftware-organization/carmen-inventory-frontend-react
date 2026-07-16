@@ -145,7 +145,6 @@ export function CnForm({ creditNote }: CnFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -160,7 +159,6 @@ export function CnForm({ creditNote }: CnFormProps) {
             navigate("/procurement/credit-note");
           }
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -206,7 +204,6 @@ export function CnForm({ creditNote }: CnFormProps) {
       onSuccess: () => {
         toast.success(tt("submitSuccess", { entity: t("entity") }));
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -299,7 +296,6 @@ export function CnForm({ creditNote }: CnFormProps) {
                   toast.success(tt("deleteSuccess", { entity: t("entity") }));
                   navigate("/procurement/credit-note");
                 },
-                onError: (err) => toast.error(err.message),
               });
             }}
           />

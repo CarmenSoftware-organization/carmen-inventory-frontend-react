@@ -16,7 +16,7 @@ export function useAppConfigByKey(key: string | undefined) {
       const res = await httpClient.get(
         API_ENDPOINTS.APP_CONFIG_BY_KEY(buCode!, key!),
       );
-      if (!res.ok) throw ApiError.fromResponse(res, "Failed to fetch app config");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch app config");
       const json = await res.json();
       return json.data;
     },
@@ -61,7 +61,7 @@ export function useSignatureCandidates(docType: string | undefined) {
         API_ENDPOINTS.APP_CONFIG_SIGNATURE_CANDIDATES(buCode!, docType!),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch signature candidates");
+        throw await ApiError.from(res, "Failed to fetch signature candidates");
       const json = await res.json();
       return (json.data?.candidates ?? []) as SignatureCandidate[];
     },

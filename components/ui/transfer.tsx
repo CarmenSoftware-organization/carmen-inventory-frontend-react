@@ -225,7 +225,7 @@ const TransferPanel = ({
         </span>
         <span
           className={cn(
-            "ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-bold tracking-wider tabular-nums",
+            "ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-semibold tracking-wider tabular-nums",
             checkedKeys.size > 0
               ? "bg-primary/15 text-primary"
               : "bg-muted text-muted-foreground",

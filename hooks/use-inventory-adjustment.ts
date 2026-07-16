@@ -104,6 +104,10 @@ export function useCreateInventoryAdjustment() {
     },
     invalidateKeys: [QUERY_KEYS.INVENTORY_ADJUSTMENTS],
     errorMessage: "Failed to create inventory adjustment",
+    // backend คืน business error (เช่น "Insufficient stock") เป็น HTTP 500 ซึ่ง
+    // toast กลางจะกลบเป็นข้อความ generic — ia-form จัดการ error เองใน
+    // handleMutationError เอง — ดู skipsGlobalErrorToast ใน lib/api-error-handler.ts
+    meta: { skipGlobalErrorToast: true },
   });
 }
 
@@ -129,6 +133,10 @@ export function useUpdateInventoryAdjustment() {
     },
     invalidateKeys: [QUERY_KEYS.INVENTORY_ADJUSTMENTS],
     errorMessage: "Failed to update inventory adjustment",
+    // backend คืน business error (เช่น "Insufficient stock") เป็น HTTP 500 ซึ่ง
+    // toast กลางจะกลบเป็นข้อความ generic — ia-form จัดการ error เองใน
+    // handleMutationError เอง — ดู skipsGlobalErrorToast ใน lib/api-error-handler.ts
+    meta: { skipGlobalErrorToast: true },
   });
 }
 

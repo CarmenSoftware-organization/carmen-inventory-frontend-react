@@ -17,7 +17,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { useResetSpotCheck } from "@/hooks/use-spot-check";
 import { getLocationTypeLabel } from "@/constant/location-type";
@@ -54,7 +53,6 @@ export function ScLocationCard({
 }: ScLocationCardProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
   const { dateFormat } = useProfile();
-  const errorToast = useErrorToast();
 
   const latest = item.latest_spot_check;
   const isResume = latest !== null;
@@ -69,7 +67,6 @@ export function ScLocationCard({
         toast.success(t("resetSuccess"));
         setShowResetConfirm(false);
       },
-      onError: errorToast,
     });
   };
 

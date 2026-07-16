@@ -1,18 +1,12 @@
 import { useTranslations } from "use-intl";
-import {
-  History,
-  Lock,
-  MessageSquare,
-  Pencil,
-  Save,
-  Trash2,
-  X,
-} from "lucide-react";
+import { History, Lock, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { WorkflowStep } from "@/components/share/workflow-step";
 import { useProfile } from "@/hooks/use-profile";
+import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
 import { formatDate } from "@/lib/date-utils";
 import { PO_STATUS, type PurchaseOrder } from "@/types/purchase-order";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
@@ -70,6 +64,7 @@ export function PoHeader({
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();
+  const { data: comments } = usePurchaseOrderComments(purchaseOrder?.id);
 
   const isView = mode === "view";
   const isEditMode = mode === "edit";
@@ -166,10 +161,7 @@ export function PoHeader({
               )}
             </>
           )}
-          <Button size="sm" variant="info" onClick={onShowComment}>
-            <MessageSquare aria-hidden="true" />
-            {tc("comment")}
-          </Button>
+          <CommentButton count={comments?.length} onClick={onShowComment} />
         </>
       )}
       {isAdd && (

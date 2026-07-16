@@ -133,7 +133,6 @@ export function ScForm({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/inventory-management/spot-check");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -148,7 +147,6 @@ export function ScForm({
               : "/inventory-management/spot-check",
           );
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -179,7 +177,6 @@ export function ScForm({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/inventory-management/spot-check");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

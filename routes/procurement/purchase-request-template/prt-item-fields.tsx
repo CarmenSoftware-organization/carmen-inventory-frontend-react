@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { BusinessUnit } from "@/types/profile";
 import type { PrtFormValues } from "./prt-form-schema";
 import { usePrtItemTable } from "./prt-item-table";
@@ -61,17 +62,13 @@ export function PrtItemFields({
   });
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h2 className="border-b pb-2 text-sm font-semibold">
-          {tfl("items")}
-          {itemFields.length > 0 && (
-            <span className="text-muted-foreground ml-1.5 text-xs font-normal">
-              ({itemFields.length})
-            </span>
-          )}
-        </h2>
-        {!readOnly && (
+    <SettingSection
+      wide
+      title={tfl("items")}
+      description={t("itemsDesc")}
+      count={itemFields.length}
+      action={
+        !readOnly ? (
           <Button
             type="button"
             size="xs"
@@ -80,9 +77,9 @@ export function PrtItemFields({
           >
             <PackagePlus /> {t("addItem")}
           </Button>
-        )}
-      </div>
-
+        ) : undefined
+      }
+    >
       <DataGrid
         table={table}
         recordCount={itemFields.length}
@@ -124,6 +121,6 @@ export function PrtItemFields({
           setDeleteIndex(null);
         }}
       />
-    </div>
+    </SettingSection>
   );
 }

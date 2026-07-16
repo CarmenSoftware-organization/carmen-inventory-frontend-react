@@ -154,7 +154,6 @@ export default function CategoryComponent() {
         );
         ok();
       },
-      onError: (e: Error) => toast.error(e.message),
     });
 
     if (isEdit && selectedNode) {
@@ -220,7 +219,6 @@ export default function CategoryComponent() {
         );
         setDeleteTarget(null);
       },
-      onError: (e: Error) => toast.error(e.message),
     };
     const actions = {
       [NODE_TYPE.CATEGORY]: () => deleteCategory.mutate(deleteTarget.id, opts),

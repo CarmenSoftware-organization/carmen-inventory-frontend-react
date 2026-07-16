@@ -488,7 +488,6 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         };
 

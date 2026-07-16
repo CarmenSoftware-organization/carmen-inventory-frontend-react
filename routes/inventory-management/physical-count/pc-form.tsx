@@ -20,7 +20,6 @@ import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { PcGeneralFields } from "./pc-general-fields";
 import {
@@ -65,7 +64,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
-  const errorToast = useErrorToast();
 
   const onSubmit = (values: PhysicalCountFormValues) => {
     const payload = {
@@ -80,7 +78,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: errorToast,
         },
       );
     } else if (isAdd) {
@@ -89,7 +86,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/inventory-management/physical-count");
         },
-        onError: errorToast,
       });
     }
   };
@@ -163,7 +159,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/inventory-management/physical-count");
               },
-              onError: errorToast,
             });
           }}
         />

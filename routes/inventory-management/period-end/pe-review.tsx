@@ -93,7 +93,6 @@ export default function PeReview() {
         setConfirmOpen(false);
         navigate("/inventory-management/period-end");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

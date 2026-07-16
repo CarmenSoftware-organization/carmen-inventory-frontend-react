@@ -34,7 +34,7 @@ export function useCreditNote(
       const url = buildUrl(API_ENDPOINTS.CREDIT_NOTE(buCode!), params);
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch credit notes");
+        throw await ApiError.from(res, "Failed to fetch credit notes");
       return res.json();
     },
     ...CACHE_DYNAMIC,
@@ -60,7 +60,7 @@ export function useCreditNoteById(id: string | undefined) {
         `${API_ENDPOINTS.CREDIT_NOTE(buCode!)}/${id}`,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch credit note");
+        throw await ApiError.from(res, "Failed to fetch credit note");
       const json = await res.json();
       return json.data;
     },
@@ -173,7 +173,7 @@ export function useCreditNoteComments(cnId: string | undefined) {
         API_ENDPOINTS.CREDIT_NOTE_COMMENT(buCode, cnId),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch comments");
+        throw await ApiError.from(res, "Failed to fetch comments");
       const json = await res.json();
       return json.data ?? [];
     },
@@ -243,7 +243,7 @@ export function useExportCreditNote() {
         const url = buildUrl(API_ENDPOINTS.CREDIT_NOTE(buCode), params);
         const res = await httpClient.get(url);
         if (!res.ok)
-          throw ApiError.fromResponse(res, "Failed to fetch credit notes");
+          throw await ApiError.from(res, "Failed to fetch credit notes");
         const json = await res.json();
         return json.data ?? [];
       },
