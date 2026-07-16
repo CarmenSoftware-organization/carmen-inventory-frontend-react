@@ -113,7 +113,7 @@ export function usePrItemTable({
       cell: ({ row }) => (
         // 1 element (view: chevron เดียว) → center · 2 elements (edit:
         // checkbox+chevron) → ดันลงล่าง (justify-end + chevron only:my-auto)
-        <div className="absolute inset-0 flex flex-col items-center justify-end gap-0.5 py-1">
+        <div className="inset-0 flex flex-col items-center justify-end gap-0.5 px-2 py-1">
           <SelectCell
             control={form.control}
             index={row.index}
@@ -146,7 +146,7 @@ export function usePrItemTable({
       size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
-        cellClassName: "relative text-center",
+        cellClassName: "text-center",
         // คอลัมน์ select ถือ chevron ด้วย — expand content เริ่มที่ Location
         // (เว้น select + index) ไม่มีคอลัมน์ expand แยกแล้ว
         expandedColStart: 2,
