@@ -61,6 +61,7 @@ export function CnItem({ form, disabled }: Props) {
       lines.map((line) => ({
         ...CN_ITEM,
         _group_key: crypto.randomUUID(),
+        _grn_received_qty: line.quantity,
         currency_code: currencyCode,
         item_id: line.product_id,
         item_name: line.product_name,

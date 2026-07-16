@@ -53,7 +53,40 @@ export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
         message: tv("endDateAfterStart"),
         path: ["effective_to_date"],
       },
-    );
+    )
+    .superRefine((data, ctx) => {
+      // MOQ tier ต่อ product+unit เดียวกัน: ชั้นที่ MOQ สูงกว่าต้องราคาไม่แพงกว่า
+      const groups = new Map<string, number[]>();
+      data.pricelist_detail.forEach((d, i) => {
+        const key = `${d.product_id}::${d.unit_id}`;
+        const bucket = groups.get(key);
+        if (bucket) bucket.push(i);
+        else groups.set(key, [i]);
+      });
+      for (const indices of groups.values()) {
+        const sorted = [...indices].sort(
+          (a, b) =>
+            data.pricelist_detail[a].moq_qty - data.pricelist_detail[b].moq_qty,
+        );
+        for (let k = 1; k < sorted.length; k++) {
+          const prev = data.pricelist_detail[sorted[k - 1]];
+          const cur = data.pricelist_detail[sorted[k]];
+          if (cur.moq_qty === prev.moq_qty) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: tv("moqDuplicate"),
+              path: ["pricelist_detail", sorted[k], "moq_qty"],
+            });
+          } else if (cur.price > prev.price) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: tv("moqTierPrice"),
+              path: ["pricelist_detail", sorted[k], "price"],
+            });
+          }
+        }
+      }
+    });
 }
 
 export type PriceListFormValues = z.infer<ReturnType<typeof createPriceListSchema>>;

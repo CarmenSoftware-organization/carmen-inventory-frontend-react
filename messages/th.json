@@ -452,6 +452,8 @@
     "maxLength": "{field}ต้องมีไม่เกิน {max} ตัวอักษร",
     "invalidEmail": "รูปแบบอีเมลไม่ถูกต้อง",
     "endDateAfterStart": "วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มต้น",
+    "moqTierPrice": "MOQ ชั้นที่สูงกว่าต้องไม่แพงกว่าชั้นที่ต่ำกว่า",
+    "moqDuplicate": "MOQ ซ้ำกันใน product + หน่วยเดียวกัน",
     "expectedDateAfterSr": "วันที่คาดว่าจะได้รับต้องไม่ก่อนวันที่ SR",
     "atLeastOneItem": "ต้องมี{item}อย่างน้อย 1 รายการ",
     "cityOrDistrictRequired": "กรุณากรอกเมืองหรือเขต",
@@ -3068,13 +3070,15 @@
       "noGrnItemsDesc": "GRN อ้างอิงไม่มีรายการที่รับเข้าให้ทำใบลดหนี้",
       "nItemsSelected": "เลือก {count} รายการ",
       "addNItems": "{count, plural, =0 {เพิ่ม} other {เพิ่ม # รายการ}}",
-      "cnAmount": "จำนวนลดหนี้"
+      "cnAmount": "จำนวนลดหนี้",
+      "overReturnWarning": "คืนเกินจำนวนรับ (รับ {received})"
     },
     "goodsReceiveNote": {
       "entity": "ใบรับสินค้า",
       "title": "ใบรับสินค้า",
       "desc": "จัดการใบรับสินค้าสำหรับจัดซื้อ",
       "mixedCurrencyError": "PO ที่เลือกใช้สกุลเงินต่างกัน กรุณาเลือก PO ที่ใช้สกุลเงินเดียวกัน",
+      "overReceiptWarning": "รับเกินจำนวนสั่ง (สั่ง {ordered})",
       "documentInfo": "ข้อมูลเอกสาร",
       "add": "เพิ่ม GRN",
       "create": "สร้าง GRN",

@@ -236,6 +236,44 @@ function QtyUnitCell({
   );
 }
 
+/**
+ * เตือน (ไม่ block) เมื่อรับเกินจำนวนสั่งของ PO — เทียบได้เฉพาะตอนหน่วยรับ
+ * ตรงกับหน่วยสั่ง (คนละหน่วยเทียบตรง ๆ ไม่ได้ ปล่อยให้ backend ตัดสินตอน commit)
+ */
+const OverReceiptWarning = memo(function OverReceiptWarning({
+  control,
+  index,
+}: {
+  control: Control<GrnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const t = useTranslations("procurement.goodsReceiveNote");
+  const [poDetailId, approvedQty, approvedUnitId, receivedQty, receivedUnitId] =
+    useWatch({
+      control,
+      name: [
+        `items.${index}.purchase_order_detail_id`,
+        `items.${index}.approved_qty`,
+        `items.${index}.approved_unit_id`,
+        `items.${index}.received_qty`,
+        `items.${index}.received_unit_id`,
+      ] as const,
+    });
+
+  const ordered = Number(approvedQty) || 0;
+  const received = Number(receivedQty) || 0;
+  const comparable =
+    !!poDetailId && !!approvedUnitId && approvedUnitId === receivedUnitId;
+  if (!comparable || ordered <= 0 || received <= ordered) return null;
+
+  return (
+    <p className="mt-0.5 text-right text-[0.7rem] text-amber-600 dark:text-amber-500">
+      {t("overReceiptWarning", { ordered })}
+    </p>
+  );
+});
+
 /** unit price เป็น plain text (view mode) */
 const PricePlain = memo(function PricePlain({
   control,
@@ -575,6 +613,9 @@ export const GrnLocationRow = memo(function GrnLocationRow({
           error={receivedQtyError}
           min={1}
         />
+        {!disabled && !plainText && (
+          <OverReceiptWarning control={form.control} index={index} />
+        )}
       </td>
 
       {/* FOC */}

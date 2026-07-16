@@ -19,6 +19,9 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
     id: z.string().optional(),
     doc_version: z.coerce.number().optional(),
     _group_key: z.string(),
+    // จำนวนที่รับเข้าตาม GRN บรรทัดอ้างอิง — ใช้เตือนคืนเกินตอนกรอกเท่านั้น
+    // (0 = ไม่มีข้อมูลอ้างอิง เช่น ใบเก่าที่โหลดกลับมา) ไม่ส่งเข้า payload
+    _grn_received_qty: z.coerce.number(),
     location_id: z
       .string()
       .nullable()
@@ -113,6 +116,7 @@ export type CnFormValues = z.infer<ReturnType<typeof createCnSchema>>;
 
 export const CN_ITEM = {
   _group_key: "",
+  _grn_received_qty: 0,
   location_id: null,
   location_name: "",
   location_code: "",
@@ -201,6 +205,7 @@ export function getDefaultValues(cn?: CreditNoteDetail): CnFormValues {
           id: d.id,
           doc_version: d.doc_version,
           _group_key: d.product?.id ?? d.id,
+          _grn_received_qty: 0,
           location_id: d.location?.id ?? null,
           location_name: d.location?.name ?? "",
           location_code: d.location?.code ?? "",
