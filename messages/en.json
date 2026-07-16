@@ -1528,6 +1528,47 @@
       "emptyDesc": "There are no dashboard datasets registered for this business unit.",
       "emptyFilteredTitle": "No matching datasets",
       "emptyFilteredDesc": "Try a different search term."
+    },
+    "interface": {
+      "title": "Interfaces",
+      "desc": "Connections between Carmen and your accounting, POS and property systems.",
+      "save": "Save",
+      "saved": "Interface settings saved",
+      "loadError": "Could not load interface settings",
+      "enabled": "Enabled",
+      "endpoint": "Endpoint",
+      "apiKey": "API key",
+      "apiKeyHint": "Leave untouched to keep the stored key.",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "frequencyOption": {
+        "manual": "Manual",
+        "hourly": "Hourly",
+        "daily": "Daily",
+        "monthly": "Monthly"
+      },
+      "accounting": {
+        "title": "Accounting Interface",
+        "desc": "How inventory activity reaches your general ledger and payables.",
+        "connection": "Connection",
+        "connectionDesc": "Which accounting system receives the postings.",
+        "system": "Accounting system",
+        "systemOption": {
+          "carmen_gl": "Carmen GL",
+          "blueledgers": "BlueLedgers",
+          "external": "External system"
+        },
+        "defaults": "Vendor fallbacks",
+        "defaultsDesc": "Used when a vendor has no account code, department code or invoice value of its own.",
+        "defaultAccountCode": "Default account code",
+        "defaultDepartmentCode": "Default department code",
+        "defaultInvoiceValue": "Default invoice value",
+        "posting": "Posting",
+        "postingDesc": "Export format and how often postings are sent.",
+        "exportFormat": "Export format",
+        "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
+        "postingFrequency": "Posting frequency"
+      }
     }
   },
   "vendorManagement": {
