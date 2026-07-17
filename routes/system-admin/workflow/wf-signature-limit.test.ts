@@ -27,6 +27,11 @@ describe("isSignatureCheckboxDisabled", () => {
     expect(isSignatureCheckboxDisabled(stages(true, false), 1)).toBe(false);
   });
 
+  it("ครบ 4 แล้ว — stage ที่ยังไม่ติ๊กยังเปิดอยู่", () => {
+    const s = stages(true, true, true, true, false);
+    expect(isSignatureCheckboxDisabled(s, 4)).toBe(false);
+  });
+
   it("ครบ 5 แล้ว — stage ที่ยังไม่ติ๊กถูก disable", () => {
     const s = stages(true, true, true, true, true, false);
     expect(isSignatureCheckboxDisabled(s, 5)).toBe(true);
