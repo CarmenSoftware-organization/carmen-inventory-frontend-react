@@ -195,7 +195,11 @@ export function GrnHeader({
   const ribbon = (
     <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
       <RibbonField label={tfl("receivedBy")} value={receivedByName || "—"} />
-      <RibbonField label={tfl("department")} value={departmentName || "—"} />
+      <RibbonField
+        label={tfl("department")}
+        value={departmentName || "—"}
+        className="lg:col-span-2"
+      />
       <RibbonField
         label={tfl("grnDate")}
         value={grnDate ? formatDate(grnDate, dateFormat) : "—"}

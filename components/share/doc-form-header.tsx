@@ -123,12 +123,15 @@ export function DocFormHeader({
 export function RibbonField({
   label,
   value,
+  className,
 }: {
   readonly label: string;
   readonly value: ReactNode;
+  /** เช่น "lg:col-span-2" สำหรับ cell ที่ค่ายาว (department/vendor) */
+  readonly className?: string;
 }) {
   return (
-    <div className="min-w-0">
+    <div className={cn("min-w-0", className)}>
       <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
         {label}
       </p>

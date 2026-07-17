@@ -62,7 +62,7 @@ export function PrHeader({
   // general (pr-general-fields) ที่ใช้ track เดียวกัน. ml-4 หักล้าง -ml-4 ของ
   // DocFormHeader. draft = 3 cells (workflow ไป general); ไม่ draft = 4 (workflow มา ribbon)
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
       {!isDraft && purchaseRequest?.workflow_name && (
         <RibbonField
           label={tfl("workflow")}
@@ -70,7 +70,11 @@ export function PrHeader({
         />
       )}
       <RibbonField label={tfl("requester")} value={reqName || "—"} />
-      <RibbonField label={tfl("department")} value={departmentName || "—"} />
+      <RibbonField
+        label={tfl("department")}
+        value={departmentName || "—"}
+        className="lg:col-span-2"
+      />
       <RibbonField label={tfl("date")} value={prDateDisplay || "—"} />
     </div>
   );

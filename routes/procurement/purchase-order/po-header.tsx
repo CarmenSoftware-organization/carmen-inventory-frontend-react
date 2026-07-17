@@ -188,9 +188,9 @@ export function PoHeader({
   // ไม่ draft = 4 (workflow มาอยู่ ribbon) — sync กับ lgGridCols ของ general.
   // ml-4 หักล้าง -ml-4 ของ DocFormHeader (ที่ไว้ชดเชย px-4 ของ RibbonCell flex
   // เดิม ซึ่ง grid cell ไม่มี)
-  const ribbonCols = isDraft
-    ? "lg:grid-cols-[repeat(5,minmax(0,10rem))]"
-    : "lg:grid-cols-[repeat(4,minmax(0,10rem))]";
+  // department span-2 → draft(buyer/dept2/date)=4, non-draft(workflow/buyer/dept2/date)=5
+  // units; cols-6 ทั้งคู่ให้ ribbon↔general (po-general) align track เดียวกัน
+  const ribbonCols = "lg:grid-cols-[repeat(6,minmax(0,10rem))]";
   const ribbon = (
     <div
       className={`ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 ${ribbonCols}`}
@@ -202,7 +202,11 @@ export function PoHeader({
         />
       )}
       <RibbonField label={tfl("buyer")} value={buyerName || "—"} />
-      <RibbonField label={tfl("department")} value={departmentName || "—"} />
+      <RibbonField
+        label={tfl("department")}
+        value={departmentName || "—"}
+        className="lg:col-span-2"
+      />
       <RibbonField
         label={tfl("orderDate")}
         value={orderDate ? formatDate(orderDate, dateFormat) : "—"}

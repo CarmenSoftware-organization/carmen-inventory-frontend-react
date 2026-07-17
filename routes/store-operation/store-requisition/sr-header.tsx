@@ -247,7 +247,11 @@ export function SrHeader({
         label={tfl("requester")}
         value={isLoading ? "—" : requesterName || "—"}
       />
-      <RibbonField label={tfl("department")} value={departmentValue} />
+      <RibbonField
+        label={tfl("department")}
+        value={departmentValue}
+        className="lg:col-span-2"
+      />
     </div>
   );
 

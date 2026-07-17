@@ -121,7 +121,7 @@ export function CnGeneralFields({
         />
       </Field>
 
-      <Field className={viewFieldGap}>
+      <Field className={`${viewFieldGap ?? ""} lg:col-span-2`}>
         <FieldLabel className={viewLabelClass} required>
           {tfl("vendor")}
         </FieldLabel>

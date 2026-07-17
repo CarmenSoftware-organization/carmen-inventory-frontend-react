@@ -40,15 +40,17 @@ function PlainField({
   label,
   value,
   children,
+  className,
 }: {
   readonly label: string;
   readonly value?: string;
   readonly children?: ReactNode;
+  readonly className?: string;
 }) {
   // gap-1 (4px) ภายในคู่ label↔value ให้ชิดกันเป็นชุดเดียว — แถวต่อแถวเว้น 16px
   // (gap-y-4) สร้าง proximity grouping แบบ Apple (intra ชิดกว่า inter มากๆ)
   return (
-    <Field className="gap-1">
+    <Field className={`gap-1${className ? ` ${className}` : ""}`}>
       <FieldLabel className="text-muted-foreground font-normal">
         {label}
       </FieldLabel>
@@ -97,9 +99,10 @@ export function PoGeneralFields({
   // คอลัมน์กว้างคงที่ 12rem (ไม่ยืดเต็มแถว) → fields ชิดซ้าย compact และ align
   // ตรงกับ ribbon (po-header ใช้ track เดียวกัน). draft = 5 คอลัมน์ (มี workflow);
   // ไม่ draft = 4 (workflow ย้ายไป ribbon)
-  const lgGridCols = isDraft
-    ? "lg:grid-cols-[repeat(5,minmax(0,10rem))]"
-    : "lg:grid-cols-[repeat(4,minmax(0,10rem))]";
+  // vendor span-2 → draft(workflow/vendor2/creditTerm/delivery/currency)=6,
+  // non-draft(vendor2/creditTerm/delivery/currency)=5 units; cols-6 ทั้งคู่ให้ align
+  // กับ ribbon (po-header)
+  const lgGridCols = "lg:grid-cols-[repeat(6,minmax(0,10rem))]";
 
   // View/locked/disabled → แสดงทุก field เป็น plain text (workflow ใช้ lookup
   // readOnly เพราะไม่ได้เก็บ workflow_name; ที่เหลืออ่านจาก *_name/_code ที่เก็บไว้)
@@ -120,7 +123,11 @@ export function PoGeneralFields({
             />
           </PlainField>
         )}
-        <PlainField label={tfl("vendor")} value={v.vendor_name} />
+        <PlainField
+          label={tfl("vendor")}
+          value={v.vendor_name}
+          className="lg:col-span-2"
+        />
         <PlainField label={tfl("creditTerm")} value={v.credit_term_name} />
         <PlainField
           label={tfl("deliveryDate")}
@@ -162,7 +169,7 @@ export function PoGeneralFields({
           />
         </Field>
       )}
-      <Field>
+      <Field className="lg:col-span-2">
         <FieldLabel required>{tfl("vendor")}</FieldLabel>
         <Controller
           control={form.control}
