@@ -403,10 +403,13 @@ export function useSaveGoodsReceiveNote() {
  * confirm.mutate(grnId);
  */
 export function useCommitGoodsReceiveNote() {
-  return useApiMutation<string>({
-    mutationFn: (id, buCode) =>
+  return useApiMutation<{ id: string; doc_version: number }>({
+    // ส่ง body { doc_version } — backend commit ต้องการ object (ไม่งั้น 400
+    // "(root): Required (expected object, received undefined)") เหมือน CN submit
+    mutationFn: ({ id, doc_version }, buCode) =>
       httpClient.patch(
         `${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode)}/${id}/commit`,
+        { doc_version },
       ),
     invalidateKeys: [QUERY_KEYS.GOODS_RECEIVE_NOTES],
     errorMessage: "Failed to confirm goods receive note",

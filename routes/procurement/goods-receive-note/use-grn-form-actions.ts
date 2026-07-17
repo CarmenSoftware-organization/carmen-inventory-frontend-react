@@ -333,12 +333,18 @@ export function useGrnFormActions({
 
   const handleConfirmCommit = () => {
     if (!goodsReceiveNote) return;
-    commitGrn.mutate(goodsReceiveNote.id, {
-      onSuccess: () => {
-        toast.success(tt("updateSuccess", { entity: t("entity") }));
-        setShowCommit(false);
+    commitGrn.mutate(
+      {
+        id: goodsReceiveNote.id,
+        doc_version: goodsReceiveNote.doc_version ?? 0,
       },
-    });
+      {
+        onSuccess: () => {
+          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          setShowCommit(false);
+        },
+      },
+    );
   };
 
   const handleConfirmVoid = () => {
