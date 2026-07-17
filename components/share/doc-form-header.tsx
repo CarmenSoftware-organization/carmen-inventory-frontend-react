@@ -84,13 +84,22 @@ export function DocFormHeader({
             workflowStepBelow → workflowStep แยกแถวล่างเพื่อไม่หักความกว้าง ribbon */}
         {ribbon &&
           (workflowStepBelow ? (
-            // workflowStep แถวแยกใต้ ribbon → ribbon เต็มความกว้าง align คอลัมน์ได้
-            <div className="pt-4">
+            // ribbon เต็มความกว้าง (columns align กับ form body) + workflowStep
+            // absolute มุมขวาบน อยู่ line เดียวกับ ribbon โดยไม่หักความกว้าง ribbon
+            // (ribbon ชิดซ้าย cols fixed → มีที่ว่างขวาให้ step ไม่ทับ cells).
+            // min-h เผื่อความสูง workflowStep (absolute ไม่กินที่) กัน content ถัดไป
+            // (เช่น item table ตอนไม่มี general fields คั่น) ถูก step ทับ
+            <div
+              className={cn(
+                "relative pt-4",
+                workflowStep && "min-h-[6.5rem]",
+              )}
+            >
               <div className="-ml-4 flex w-full min-w-0 items-center">
                 {ribbon}
               </div>
               {workflowStep && (
-                <div className="mt-2 flex justify-end">{workflowStep}</div>
+                <div className="absolute top-4 right-0">{workflowStep}</div>
               )}
             </div>
           ) : (
