@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { FormToolbar } from "@/components/ui/form-toolbar";
@@ -38,6 +38,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(physicalCount ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -101,13 +102,19 @@ export function PcForm({ physicalCount }: PcFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() =>
-        navigate("/inventory-management/physical-count"),
-      );
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/inventory-management/physical-count");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 

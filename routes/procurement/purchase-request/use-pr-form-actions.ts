@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -56,6 +56,7 @@ export function usePrFormActions({
   const t = useTranslations("procurement.purchaseRequest");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const location = useLocation();
   const buCode = useBuCode();
 
   // GET PR สดจาก DB ก่อนยิง workflow event — กัน 409 optimistic lock จาก
@@ -273,11 +274,23 @@ export function usePrFormActions({
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/procurement/purchase-request"));
+  // กลับ list พร้อม tab/filter/sort ที่ค้างใน URL — navigate(-1) คือ browser back
+  // ไปยัง history entry ของ list (params ถูกเก็บใน URL อยู่แล้ว). ถ้าเข้า detail
+  // ตรง ๆ (deep-link, location.key === "default" คือ entry แรก ไม่มี history ในแอป)
+  // fallback ไป list path เปล่า
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/procurement/purchase-request");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 

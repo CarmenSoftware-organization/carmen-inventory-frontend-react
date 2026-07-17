@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
@@ -41,6 +41,7 @@ export function PrtForm({ template }: PrtFormProps) {
   const tfl = useTranslations("field");
   const { defaultBu } = useProfile();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(template ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -122,11 +123,19 @@ export function PrtForm({ template }: PrtFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/procurement/purchase-request-template"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/procurement/purchase-request-template");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(() => goBack());
+    } else {
+      goBack();
     }
   };
 

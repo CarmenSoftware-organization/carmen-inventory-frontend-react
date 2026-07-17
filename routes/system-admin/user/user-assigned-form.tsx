@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation as useRouterLocation, useNavigate } from "react-router";
 import { ArrowLeft, Pencil, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,7 @@ interface UserAssignedFormProps {
 
 export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const navigate = useNavigate();
+  const location = useRouterLocation();
   const [mode, setMode] = useState<FormMode>("view");
   const isView = mode === "view";
 
@@ -149,11 +150,19 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (mode === "edit") {
-      discard.confirm(() => navigate("/system-admin/user"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/system-admin/user");
+    }
+  };
+
+  const handleBack = () => {
+    if (mode === "edit") {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 

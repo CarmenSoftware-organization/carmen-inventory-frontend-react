@@ -81,9 +81,11 @@ export default function PurchaseRequestComponent() {
   );
   const [batchApproveOpen, setBatchApproveOpen] = useState(false);
   const [batchRejectOpen, setBatchRejectOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"my-pending" | "all-document">(
-    "my-pending",
-  );
+  // viewMode อยู่ใน URL (?view=) เพื่อให้ปุ่ม back จาก detail กลับมาเจอ tab เดิม
+  const [viewModeParam, setViewMode] = useURL("view", {
+    defaultValue: "my-pending",
+  });
+  const viewMode = viewModeParam as "my-pending" | "all-document";
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const isMobile = useIsMobile();

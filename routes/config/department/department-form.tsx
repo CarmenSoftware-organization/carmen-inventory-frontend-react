@@ -1,7 +1,7 @@
 import { lazy, Suspense, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
@@ -50,6 +50,7 @@ interface DepartmentFormProps {
 
 export function DepartmentForm({ department }: DepartmentFormProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(department ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -214,11 +215,19 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/config/department"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/config/department");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 

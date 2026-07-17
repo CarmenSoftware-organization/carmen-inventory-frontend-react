@@ -1,7 +1,7 @@
 import { lazy, Suspense, useRef, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
@@ -63,6 +63,7 @@ interface LocationFormProps {
 export function LocationForm({ location }: LocationFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const routerLocation = useLocation();
   const [mode, setMode] = useState<FormMode>(location ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -241,11 +242,19 @@ export function LocationForm({ location }: LocationFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/config/location"));
+  const goBack = () => {
+    if (routerLocation.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/config/location");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 

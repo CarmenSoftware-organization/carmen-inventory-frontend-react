@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -46,6 +46,7 @@ export function useGrnFormActions({
   revealErrors,
 }: UseGrnFormActionsParams) {
   const navigate = useNavigate();
+  const location = useLocation();
   const t = useTranslations("procurement.goodsReceiveNote");
   const tt = useTranslations("toast");
 
@@ -304,11 +305,19 @@ export function useGrnFormActions({
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/procurement/goods-receive-note"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/procurement/goods-receive-note");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
