@@ -31,7 +31,8 @@ export function PrGeneralFields({
   const workflowReadOnly = descriptionReadOnly || !!fromTemplate;
 
   return (
-    <>
+    // grid col fixed 10rem → workflow ชิดซ้าย align กับ ribbon (pr-header) คอลัมน์แรก
+    <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
       <Field className={workflowReadOnly ? "gap-1" : undefined}>
         <FieldLabel
           required={!workflowReadOnly}
@@ -57,6 +58,6 @@ export function PrGeneralFields({
           )}
         />
       </Field>
-    </>
+    </div>
   );
 }

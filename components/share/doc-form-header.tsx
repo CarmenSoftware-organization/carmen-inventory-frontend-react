@@ -13,6 +13,12 @@ interface DocFormHeaderProps {
   readonly actions?: ReactNode;
   readonly ribbon?: ReactNode;
   readonly workflowStep?: ReactNode;
+  /**
+   * วาง workflowStep เป็นแถวแยกใต้ ribbon แทนคอลัมน์ขวาข้าง ribbon — ใช้เมื่อ
+   * ribbon เป็น grid ที่ต้อง align คอลัมน์กับ form body (เช่น PO): workflowStep
+   * ข้างขวาจะหักความกว้าง ribbon ทำให้คอลัมน์ drift
+   */
+  readonly workflowStepBelow?: boolean;
   /** icon/visual block ก่อน title — สำหรับ icon-hero (เช่น IA, period-end) */
   readonly leading?: ReactNode;
   /**
@@ -33,6 +39,7 @@ export function DocFormHeader({
   actions,
   ribbon,
   workflowStep,
+  workflowStepBelow = false,
   leading,
   flush = false,
 }: DocFormHeaderProps) {
@@ -72,37 +79,51 @@ export function DocFormHeader({
         )}
 
         {/* ── Document info ribbon ── */}
-        {ribbon && (
-          <div className="flex items-center justify-between pt-4">
-            {/* -ml-4 หัก px-4 ของ RibbonCell ตัวแรก → content ตัวแรกเสมอกับ title */}
-            <div className="-ml-4 flex items-center gap-2">{ribbon}</div>
-            {workflowStep}
-          </div>
-        )}
+        {/* ribbon เป็น grid ที่ align คอลัมน์กับ form body (PO/PR/GRN/CN/SR); ml-4
+            ของตัว ribbon เอง cancel -ml-4 นี้ ให้ content ตัวแรกเสมอกับ title.
+            workflowStepBelow → workflowStep แยกแถวล่างเพื่อไม่หักความกว้าง ribbon */}
+        {ribbon &&
+          (workflowStepBelow ? (
+            // workflowStep แถวแยกใต้ ribbon → ribbon เต็มความกว้าง align คอลัมน์ได้
+            <div className="pt-4">
+              <div className="-ml-4 flex w-full min-w-0 items-center">
+                {ribbon}
+              </div>
+              {workflowStep && (
+                <div className="mt-2 flex justify-end">{workflowStep}</div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-2 pt-4">
+              <div className="-ml-4 flex min-w-0 flex-1 items-center gap-2">
+                {ribbon}
+              </div>
+              {workflowStep}
+            </div>
+          ))}
       </div>
     </div>
   );
 }
 
-export function DocumentRibbon({ children }: { readonly children: ReactNode }) {
-  return <div className="flex flex-wrap items-stretch">{children}</div>;
-}
-
-export function RibbonCell({
+/**
+ * ribbon cell แบบ grid — label เล็ก uppercase + value; ไม่มี px (spacing มาจาก
+ * grid gap ของ container) → align คอลัมน์กับ form body ที่ใช้ grid track เดียวกัน
+ * (PO/PR/GRN/CN/SR)
+ */
+export function RibbonField({
   label,
-  children,
-  className,
+  value,
 }: {
   readonly label: string;
-  readonly children: ReactNode;
-  readonly className?: string;
+  readonly value: ReactNode;
 }) {
   return (
-    <div className={cn("min-w-0 px-4", className)}>
+    <div className="min-w-0">
       <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
         {label}
       </p>
-      <div className="mt-0.5 truncate text-sm font-semibold">{children}</div>
+      <div className="mt-0.5 truncate text-sm font-semibold">{value}</div>
     </div>
   );
 }

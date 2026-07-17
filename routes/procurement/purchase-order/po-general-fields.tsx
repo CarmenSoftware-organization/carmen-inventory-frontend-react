@@ -94,8 +94,12 @@ export function PoGeneralFields({
   const fieldDisabled = disabled || readOnly;
   const manualFieldDisabled = fieldDisabled || !isManual;
 
-  // draft โชว์ workflow (5 คอลัมน์); ไม่ draft ซ่อน workflow เหลือ 4 → เต็มแถว
-  const lgGridCols = isDraft ? "lg:grid-cols-5" : "lg:grid-cols-4";
+  // คอลัมน์กว้างคงที่ 12rem (ไม่ยืดเต็มแถว) → fields ชิดซ้าย compact และ align
+  // ตรงกับ ribbon (po-header ใช้ track เดียวกัน). draft = 5 คอลัมน์ (มี workflow);
+  // ไม่ draft = 4 (workflow ย้ายไป ribbon)
+  const lgGridCols = isDraft
+    ? "lg:grid-cols-[repeat(5,minmax(0,10rem))]"
+    : "lg:grid-cols-[repeat(4,minmax(0,10rem))]";
 
   // View/locked/disabled → แสดงทุก field เป็น plain text (workflow ใช้ lookup
   // readOnly เพราะไม่ได้เก็บ workflow_name; ที่เหลืออ่านจาก *_name/_code ที่เก็บไว้)
@@ -136,7 +140,9 @@ export function PoGeneralFields({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div
+      className={`grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${lgGridCols}`}
+    >
       {isDraft && (
         <Field>
           <FieldLabel required>{tfl("workflow")}</FieldLabel>

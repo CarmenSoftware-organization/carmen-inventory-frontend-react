@@ -17,8 +17,7 @@ import { GRN_FORM_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 import {
   DocFormHeader,
-  DocumentRibbon,
-  RibbonCell,
+  RibbonField,
 } from "@/components/share/doc-form-header";
 
 interface GrnHeaderProps {
@@ -218,14 +217,18 @@ export function GrnHeader({
     </>
   );
 
+  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (grn-form-header, grid-cols-4)
+  // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
+  // gap-x-3 ให้ตรง gap-3 ของ general grid
   const ribbon = (
-    <DocumentRibbon>
-      <RibbonCell label={tfl("receivedBy")}>{receivedByName || "—"}</RibbonCell>
-      <RibbonCell label={tfl("department")}>{departmentName || "—"}</RibbonCell>
-      <RibbonCell label={tfl("grnDate")}>
-        {grnDate ? formatDate(grnDate, dateFormat) : "—"}
-      </RibbonCell>
-    </DocumentRibbon>
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
+      <RibbonField label={tfl("receivedBy")} value={receivedByName || "—"} />
+      <RibbonField label={tfl("department")} value={departmentName || "—"} />
+      <RibbonField
+        label={tfl("grnDate")}
+        value={grnDate ? formatDate(grnDate, dateFormat) : "—"}
+      />
+    </div>
   );
 
   const subtitle =
