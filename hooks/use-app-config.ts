@@ -67,30 +67,3 @@ export function useTestEmail() {
     errorMessage: "Test email failed",
   });
 }
-
-export interface SignatureCandidate {
-  user_id: string;
-  firstname: string;
-  middlename: string;
-  lastname: string;
-  email: string;
-  department: { id?: string; name?: string } | null;
-}
-
-export function useSignatureCandidates(docType: string | undefined) {
-  const buCode = useBuCode();
-  return useQuery<SignatureCandidate[]>({
-    queryKey: [QUERY_KEYS.APP_CONFIGS, buCode, "signature-candidates", docType],
-    queryFn: async () => {
-      const res = await httpClient.get(
-        API_ENDPOINTS.APP_CONFIG_SIGNATURE_CANDIDATES(buCode!, docType!),
-      );
-      if (!res.ok)
-        throw await ApiError.from(res, "Failed to fetch signature candidates");
-      const json = await res.json();
-      return (json.data?.candidates ?? []) as SignatureCandidate[];
-    },
-    ...CACHE_STATIC,
-    enabled: !!buCode && !!docType,
-  });
-}
