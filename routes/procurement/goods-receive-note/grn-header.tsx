@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Check, FileText, Pencil, Save, Trash2, X } from "lucide-react";
+import { FileText, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentButton } from "@/components/comment-button";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
@@ -24,7 +24,6 @@ interface GrnHeaderProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
   readonly mode: FormMode;
   readonly isPending: boolean;
-  readonly isActionPending: boolean;
   readonly isCommitted: boolean;
   readonly isVoid: boolean;
   readonly deleteIsPending: boolean;
@@ -37,8 +36,6 @@ interface GrnHeaderProps {
   readonly onBack: () => void;
   readonly onEnterEdit: () => void;
   readonly onCancel: () => void;
-  readonly onShowCommit: () => void;
-  readonly onShowVoid: () => void;
   readonly onShowComment: () => void;
   readonly onShowDelete: () => void;
   readonly onSaveDraft: () => void;
@@ -53,7 +50,6 @@ export function GrnHeader({
   goodsReceiveNote,
   mode,
   isPending,
-  isActionPending,
   isCommitted,
   isVoid,
   deleteIsPending,
@@ -64,8 +60,6 @@ export function GrnHeader({
   onBack,
   onEnterEdit,
   onCancel,
-  onShowCommit,
-  onShowVoid,
   onShowComment,
   onShowDelete,
   onSaveDraft,
@@ -112,43 +106,21 @@ export function GrnHeader({
 
   const actions = (
     <>
-      {/* View mode — commit / void / edit */}
+      {/* View mode — edit (commit/void ย้ายไป footer ขวาล่าง = GrnFooterAction) */}
       {isView && goodsReceiveNote && canEdit && (
-        <>
-          <Button
-            type="button"
-            variant="success"
-            size="sm"
-            disabled={isActionPending}
-            onClick={onShowCommit}
-          >
-            <Check aria-hidden="true" />
-            {tc("commit")}
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            disabled={isActionPending}
-            onClick={onShowVoid}
-          >
-            <X aria-hidden="true" />
-            {tc("void")}
-          </Button>
-          <Button
-            size="sm"
-            onClick={
-              editDenied
-                ? () => dispatchPermissionDenied(updatePermission)
-                : onEnterEdit
-            }
-            aria-disabled={editDenied || undefined}
-            className={cn(editDenied && "opacity-50")}
-          >
-            <Pencil aria-hidden="true" />
-            {tc("edit")}
-          </Button>
-        </>
+        <Button
+          size="sm"
+          onClick={
+            editDenied
+              ? () => dispatchPermissionDenied(updatePermission)
+              : onEnterEdit
+          }
+          aria-disabled={editDenied || undefined}
+          className={cn(editDenied && "opacity-50")}
+        >
+          <Pencil aria-hidden="true" />
+          {tc("edit")}
+        </Button>
       )}
 
       {/* Edit / add mode — cancel / save draft / save / delete */}
