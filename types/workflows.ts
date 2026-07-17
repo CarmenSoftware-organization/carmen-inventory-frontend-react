@@ -117,6 +117,7 @@ export interface Stage {
   creator_access?: CreatorAccess;
   available_actions: AvailableActions;
   hide_fields: HideFields;
+  is_show_signature?: boolean;
   assigned_users?: User[];
   is_hod?: boolean;
   sla_warning_notification?: SLAWarningNotification;

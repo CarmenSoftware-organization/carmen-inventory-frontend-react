@@ -1331,6 +1331,8 @@
       "slaUnit": "หน่วย",
       "availableActions": "การดำเนินการที่พร้อมใช้",
       "hideFields": "ซ่อนฟิลด์",
+      "showSignatureInReport": "แสดงช่องเซ็นในรายงาน",
+      "signatureLimitReached": "ช่องเซ็นในรายงานได้สูงสุด 5 ช่อง",
       "roleCreate": "สร้าง",
       "roleApprove": "อนุมัติ",
       "rolePurchase": "จัดซื้อ",

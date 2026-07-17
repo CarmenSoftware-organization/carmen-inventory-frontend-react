@@ -116,6 +116,7 @@ export const wfFormSchema = z.object({
           price_per_unit: z.boolean(),
           total_price: z.boolean(),
         }),
+        is_show_signature: z.boolean().optional(),
         assigned_users: z
           .array(
             z.object({
@@ -241,6 +242,7 @@ export function buildDefaultStages(): Stage[] {
         sendback: { is_active: false, recipients: makeRecipients(false, false, false) },
       },
       hide_fields: { price_per_unit: false, total_price: false },
+      is_show_signature: false,
       assigned_users: [],
     },
     {
@@ -256,6 +258,7 @@ export function buildDefaultStages(): Stage[] {
         sendback: { is_active: false, recipients: makeRecipients(false, false, false) },
       },
       hide_fields: { price_per_unit: false, total_price: false },
+      is_show_signature: false,
       assigned_users: [],
     },
   ];

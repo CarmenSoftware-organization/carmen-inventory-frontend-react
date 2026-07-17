@@ -1331,6 +1331,8 @@
       "slaUnit": "Unit",
       "availableActions": "Available Actions",
       "hideFields": "Hide Fields",
+      "showSignatureInReport": "Show signature in report",
+      "signatureLimitReached": "Maximum 5 signatures per report",
       "roleCreate": "Create",
       "roleApprove": "Approve",
       "rolePurchase": "Purchase",
