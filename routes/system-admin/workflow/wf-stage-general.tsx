@@ -15,6 +15,10 @@ import { Badge } from "@/components/ui/badge";
 import { useTranslations } from "use-intl";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import type { WorkflowCreateModel } from "./wf-form-schema";
+import {
+  isSignatureCheckboxDisabled,
+  type SignatureStageLike,
+} from "./wf-signature-limit";
 
 const roleValues = ["create", "approve", "purchase", "issue"] as const;
 const slaUnitValues = ["minutes", "hours", "days"] as const;
@@ -35,6 +39,14 @@ export function WfStageGeneral({
   const t = useTranslations("systemAdmin.workflow");
   const tfl = useTranslations("field");
   const prefix = `data.stages.${index}` as const;
+
+  const watchedStages = form.watch("data.stages") as
+    | SignatureStageLike[]
+    | undefined;
+  const signatureDisabled = isSignatureCheckboxDisabled(
+    watchedStages ?? [],
+    index,
+  );
 
   const roleLabelKeys = {
     create: "roleCreate",
@@ -173,7 +185,7 @@ export function WfStageGeneral({
         </Field>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[2fr_1fr] sm:gap-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[2fr_1fr_1fr] sm:gap-4">
         <div>
           <FieldLabel className="mb-1.5">{t("availableActions")}</FieldLabel>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -294,6 +306,31 @@ export function WfStageGeneral({
               <FieldLabel>{t("totalPrice")}</FieldLabel>
             </Field>
           </div>
+        </div>
+
+        <div>
+          <FieldLabel className="mb-1.5">
+            {t("showSignatureInReport")}
+          </FieldLabel>
+          <Field orientation="horizontal">
+            <Controller
+              control={form.control}
+              name={`data.stages.${index}.is_show_signature`}
+              render={({ field }) => (
+                <Checkbox
+                  aria-label={t("showSignatureInReport")}
+                  checked={field.value ?? false}
+                  onCheckedChange={field.onChange}
+                  disabled={isDisabled || signatureDisabled}
+                />
+              )}
+            />
+          </Field>
+          {signatureDisabled && (
+            <p className="text-muted-foreground mt-1 text-[0.625rem]">
+              {t("signatureLimitReached")}
+            </p>
+          )}
         </div>
       </div>
     </FieldGroup>
