@@ -107,16 +107,20 @@ export function useUpdateCreditNote() {
 
 /**
  * Hook สำหรับ submit credit note (ส่งเข้า workflow) ที่ `/{id}/submit`
- * ไม่ต้องส่ง body — backend ใช้ข้อมูลของเอกสารที่บันทึกไว้แล้ว
- * @returns UseMutationResult รับ id ของ credit note
+ * ส่ง body `{ doc_version }` — backend ต้องการ doc_version (optimistic lock)
+ * ไม่งั้น 400 "doc_version: Required (expected number, received undefined)"
+ * @returns UseMutationResult รับ `{ id, doc_version }` ของ credit note
  * @example
  * const submit = useSubmitCreditNote();
- * submit.mutate(cn.id);
+ * submit.mutate({ id: cn.id, doc_version: cn.doc_version });
  */
 export function useSubmitCreditNote() {
-  return useApiMutation<string>({
-    mutationFn: (id, buCode) =>
-      httpClient.patch(`${API_ENDPOINTS.CREDIT_NOTE(buCode)}/${id}/submit`),
+  return useApiMutation<{ id: string; doc_version: number }>({
+    mutationFn: ({ id, doc_version }, buCode) =>
+      httpClient.patch(
+        `${API_ENDPOINTS.CREDIT_NOTE(buCode)}/${id}/submit`,
+        { doc_version },
+      ),
     invalidateKeys: [QUERY_KEYS.CREDIT_NOTES],
     errorMessage: "Failed to submit credit note",
   });

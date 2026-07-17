@@ -200,11 +200,14 @@ export function CnForm({ creditNote }: CnFormProps) {
 
   const handleSubmitCn = () => {
     if (!creditNote) return;
-    submitCn.mutate(creditNote.id, {
-      onSuccess: () => {
-        toast.success(tt("submitSuccess", { entity: t("entity") }));
+    submitCn.mutate(
+      { id: creditNote.id, doc_version: creditNote.doc_version ?? 0 },
+      {
+        onSuccess: () => {
+          toast.success(tt("submitSuccess", { entity: t("entity") }));
+        },
       },
-    });
+    );
   };
 
   return (
