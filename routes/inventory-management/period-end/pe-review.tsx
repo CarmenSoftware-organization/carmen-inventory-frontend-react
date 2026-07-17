@@ -1,6 +1,5 @@
 
 import {
-  ArrowLeft,
   CalendarRange,
   CheckCircle2,
   ClipboardList,
@@ -21,6 +20,7 @@ import { toast } from "sonner";
 import EmptyComponent from "@/components/empty-component";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   Card,
   CardAction,
@@ -109,16 +109,8 @@ export default function PeReview() {
 
   return (
     <div className="animate-fade-in-up space-y-5 p-3 md:p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => navigate("/inventory-management/period-end")}
-            aria-label={tc("goBack")}
-          >
-            <ArrowLeft />
-          </Button>
+      <DocFormHeader
+        leading={
           <span
             aria-hidden="true"
             className="inline-flex size-9 items-center justify-center rounded-xl"
@@ -130,41 +122,40 @@ export default function PeReview() {
           >
             <CalendarRange className="size-5" />
           </span>
-          <div className="min-w-0">
-            <h1 className="text-foreground truncate text-xl font-semibold tracking-tight">
-              {t("review")}
-            </h1>
-            <p className="text-muted-foreground truncate text-sm">
-              {t("reviewDesc")}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 self-end sm:self-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isFetching}
-            aria-label={tc("refresh")}
-          >
-            <RefreshCw
-              className={isFetching ? "animate-spin" : undefined}
-              aria-hidden="true"
-            />
-            <span className="hidden sm:inline">{tc("refresh")}</span>
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setConfirmOpen(true)}
-            disabled={!canClose || closeMutation.isPending}
-            title={!canClose ? t("notReadyToClose") : undefined}
-          >
-            <Lock aria-hidden="true" />
-            {t("closePeriod")}
-          </Button>
-        </div>
-      </div>
+        }
+        title={t("review")}
+        subtitle={t("reviewDesc")}
+        backLabel={tc("goBack")}
+        onBack={() => navigate("/inventory-management/period-end")}
+        actions={
+          <>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              aria-label={tc("refresh")}
+            >
+              <RefreshCw
+                className={isFetching ? "animate-spin" : undefined}
+                aria-hidden="true"
+              />
+              <span className="hidden sm:inline">{tc("refresh")}</span>
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setConfirmOpen(true)}
+              disabled={!canClose || closeMutation.isPending}
+              title={!canClose ? t("notReadyToClose") : undefined}
+            >
+              <Lock aria-hidden="true" />
+              {t("closePeriod")}
+            </Button>
+          </>
+        }
+        flush
+      />
 
       {isLoading && (
         <div className="space-y-3">

@@ -112,7 +112,10 @@ export function PcForm({ physicalCount }: PcFormProps) {
   };
 
   return (
-    <div className="space-y-4">
+    // px-4 ให้ทั้ง header+form มี gutter ซ้าย — FormToolbar flush (title ตรง form
+    // body) และปุ่ม back hang ออกซ้ายพอดีในกรอบ ไม่โดน main-content ตัด (pc เป็น
+    // full-width ต่างจาก config forms ที่อยู่ใน centered card ปุ่มลอยนอกได้)
+    <div className="space-y-4 px-4">
       <FormToolbar
         entity={t("entity")}
         mode={mode}

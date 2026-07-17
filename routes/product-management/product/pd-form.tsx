@@ -365,7 +365,9 @@ export function ProductForm({ product }: ProductFormProps) {
   };
 
   return (
-    <div className="space-y-4">
+    // px-4 ให้ header+form มี gutter ซ้าย — ปุ่ม back hang พอดี ไม่โดน main-content
+    // ตัด (product เป็น full-width flush เหมือน pc)
+    <div className="space-y-4 px-4">
       <FormToolbar
         product={product}
         form={form}

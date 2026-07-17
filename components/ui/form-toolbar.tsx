@@ -1,7 +1,7 @@
-
 import { useTranslations } from "use-intl";
-import { ArrowLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
@@ -30,6 +30,12 @@ interface FormToolbarProps {
    * จะคำนวณ `{prefix}.create` (Save ใน add mode), `.update` (Edit + Save ใน edit mode), `.delete`
    */
   readonly permissionPrefix?: string;
+  /**
+   * ส่งต่อ `DocFormHeader.flush` — default true เพราะ consumer ของ FormToolbar
+   * ทั้งหมด form body flush กับ container ของตัวเอง (centered card `p-4` /
+   * full-width) ไม่มี px-4 เหมือน PR/PO จึงต้องให้ header flush ด้วยเพื่อ align
+   */
+  readonly flush?: boolean;
 }
 
 export function FormToolbar({
@@ -49,6 +55,7 @@ export function FormToolbar({
   children,
   editTitle,
   permissionPrefix,
+  flush = true,
 }: FormToolbarProps) {
   const tc = useTranslations("common");
   const tf = useTranslations("form");
@@ -82,100 +89,93 @@ export function FormToolbar({
   const deleteDenied =
     !!deletePermission && !isAdmin && !can(deletePermission);
 
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
+  // ประกอบปุ่ม action ตาม mode แล้วส่งเข้า DocFormHeader.actions — layout (back
+  // button, title align, gutter) อยู่ที่ DocFormHeader ที่เดียวทั้งแอป
+  const actions = (
+    <>
+      {isView && viewActions}
+      {isView && onEdit ? (
         <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={onBack}
-          aria-label={tc("goBack")}
+          size="sm"
+          onClick={
+            editDenied
+              ? () => dispatchPermissionDenied(updatePermission)
+              : onEdit
+          }
+          aria-disabled={editDenied || undefined}
+          className={cn(editDenied && "opacity-50")}
         >
-          <ArrowLeft />
+          <Pencil />
+          {tc("edit")}
         </Button>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold">{title}</h1>
-            {statusBadge}
-          </div>
-          {subtitle && (
-            <p className="text-muted-foreground text-xs">{subtitle}</p>
-          )}
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        {isView && viewActions}
-        {isView && onEdit ? (
-          <Button
-            size="sm"
-            onClick={
-              editDenied
-                ? () => dispatchPermissionDenied(updatePermission)
-                : onEdit
-            }
-            aria-disabled={editDenied || undefined}
-            className={cn(editDenied && "opacity-50")}
-          >
-            <Pencil />
-            {tc("edit")}
-          </Button>
-        ) : !isView ? (
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onCancel}
-              disabled={isPending}
-            >
-              <X />
-              {tc("cancel")}
-            </Button>
-            {submitSlot ??
-              (saveDenied ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => dispatchPermissionDenied(savePermission)}
-                  aria-disabled
-                  className="opacity-50"
-                >
-                  <Save />
-                  {submit}
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  size="sm"
-                  form={formId}
-                  disabled={isPending}
-                >
-                  <Save />
-                  {isPending ? pending : submit}
-                </Button>
-              ))}
-          </>
-        ) : null}
-        {isEdit && onDelete && (
+      ) : !isView ? (
+        <>
           <Button
             type="button"
-            variant="destructive"
+            variant="outline"
             size="sm"
-            onClick={
-              deleteDenied
-                ? () => dispatchPermissionDenied(deletePermission)
-                : onDelete
-            }
-            disabled={!deleteDenied && (isPending || deleteIsPending)}
-            aria-disabled={deleteDenied || undefined}
-            className={cn(deleteDenied && "opacity-50")}
+            onClick={onCancel}
+            disabled={isPending}
           >
-            <Trash2 />
-            {tc("delete")}
+            <X />
+            {tc("cancel")}
           </Button>
-        )}
-        {children}
-      </div>
-    </div>
+          {submitSlot ??
+            (saveDenied ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => dispatchPermissionDenied(savePermission)}
+                aria-disabled
+                className="opacity-50"
+              >
+                <Save />
+                {submit}
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                size="sm"
+                form={formId}
+                disabled={isPending}
+              >
+                <Save />
+                {isPending ? pending : submit}
+              </Button>
+            ))}
+        </>
+      ) : null}
+      {isEdit && onDelete && (
+        <Button
+          type="button"
+          variant="destructive"
+          size="sm"
+          onClick={
+            deleteDenied
+              ? () => dispatchPermissionDenied(deletePermission)
+              : onDelete
+          }
+          disabled={!deleteDenied && (isPending || deleteIsPending)}
+          aria-disabled={deleteDenied || undefined}
+          className={cn(deleteDenied && "opacity-50")}
+        >
+          <Trash2 />
+          {tc("delete")}
+        </Button>
+      )}
+      {children}
+    </>
+  );
+
+  return (
+    <DocFormHeader
+      title={title}
+      subtitle={subtitle}
+      backLabel={tc("goBack")}
+      onBack={onBack}
+      badges={statusBadge}
+      actions={actions}
+      flush={flush}
+    />
   );
 }

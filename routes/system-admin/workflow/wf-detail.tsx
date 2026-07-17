@@ -106,7 +106,8 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
   };
 
   return (
-    <div className="space-y-3">
+    // px-4 ให้ header+content มี gutter (full-width flush) ปุ่ม back hang พอดี
+    <div className="space-y-3 px-4">
       <WfHeader
         workflow={workflow}
         isEditing={isEditing}
