@@ -77,11 +77,14 @@ export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
               message: tv("moqDuplicate"),
               path: ["pricelist_detail", sorted[k], "moq_qty"],
             });
-          } else if (cur.price > prev.price) {
+          } else if (cur.price_without_tax > prev.price_without_tax) {
+            // เทียบราคา net (price_without_tax) ที่ vendor กรอกจริง ไม่ใช่ price (gross)
+            // เพราะ price เป็น derived คำนวณตอน render — ในฟอร์ม create มันไม่ถูก commit
+            // เข้า form state (คง 0) ทำให้ guard นี้ไม่เคยจับได้ถ้าเทียบ price
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: tv("moqTierPrice"),
-              path: ["pricelist_detail", sorted[k], "price"],
+              path: ["pricelist_detail", sorted[k], "price_without_tax"],
             });
           }
         }
@@ -121,9 +124,12 @@ export function getDefaultValues(
 ): PriceListFormValues {
   if (priceList) {
     const parts = priceList.effectivePeriod.split(" - ");
+    // เก็บ ISO string ดิบไว้ (แค่ validate ว่า parse ได้) — อย่า round-trip ผ่าน
+    // toISOString().split() เพราะมันบีบเป็น UTC date ทำให้ effective date หล่นไป 1 วัน
+    // บน timezone บวก (UTC+7) เทียบกับ list ที่ formatDate() อ่าน local ตรง ๆ
     const fmt = (s: string) => {
-      const d = new Date(s.trim());
-      return Number.isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+      const trimmed = s.trim();
+      return Number.isNaN(new Date(trimmed).getTime()) ? "" : trimmed;
     };
     const from = parts.length === 2 ? fmt(parts[0]) : "";
     const to = parts.length === 2 ? fmt(parts[1]) : "";
