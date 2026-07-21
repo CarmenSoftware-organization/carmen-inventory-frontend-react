@@ -255,88 +255,10 @@ export default function PriceListExternalProductTable({
         enableResizing: true,
       },
       {
-        accessorKey: "lead_time_days",
-        id: "lead_time_days",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Lead Time"
-            visibility={true}
-            column={column}
-          />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return (
-            <Input
-              type="number"
-              {...form.register(
-                `tb_pricelist_detail.${fieldIndex}.lead_time_days`,
-                { valueAsNumber: true },
-              )}
-              className="h-7 text-xs"
-              min={0}
-              placeholder="Days"
-            />
-          );
-        },
-        size: 100,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "price_without_tax",
-        id: "price_without_tax",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="PWT" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return (
-            <Input
-              type="text"
-              {...form.register(
-                `tb_pricelist_detail.${fieldIndex}.price_without_tax`,
-              )}
-              className="h-7 text-xs text-right"
-            />
-          );
-        },
-        size: 100,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "tax_amt",
-        id: "tax_amt",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Tax" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return (
-            <Input
-              type="text"
-              {...form.register(`tb_pricelist_detail.${fieldIndex}.tax_amt`)}
-              className="h-7 text-xs text-right"
-            />
-          );
-        },
-        size: 80,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
-      },
-      {
         accessorKey: "tax_profile_name",
         id: "tax_profile_name",
         header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Tax Profile"
-            visibility={true}
-            column={column}
-          />
+          <DataGridColumnHeader title="Tax" visibility={true} column={column} />
         ),
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
@@ -377,6 +299,59 @@ export default function PriceListExternalProductTable({
           );
         },
         size: 140,
+        enableSorting: true,
+        enableHiding: true,
+        enableResizing: true,
+      },
+      {
+        accessorKey: "price_without_tax",
+        id: "price_without_tax",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="PWT" visibility={true} column={column} />
+        ),
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return (
+            <Input
+              type="text"
+              {...form.register(
+                `tb_pricelist_detail.${fieldIndex}.price_without_tax`,
+              )}
+              className="h-7 text-xs text-right"
+            />
+          );
+        },
+        size: 100,
+        enableSorting: true,
+        enableHiding: true,
+        enableResizing: true,
+      },
+      {
+        accessorKey: "lead_time_days",
+        id: "lead_time_days",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            title="Lead Time"
+            visibility={true}
+            column={column}
+          />
+        ),
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return (
+            <Input
+              type="number"
+              {...form.register(
+                `tb_pricelist_detail.${fieldIndex}.lead_time_days`,
+                { valueAsNumber: true },
+              )}
+              className="h-7 text-xs"
+              min={0}
+              placeholder="Days"
+            />
+          );
+        },
+        size: 100,
         enableSorting: true,
         enableHiding: true,
         enableResizing: true,

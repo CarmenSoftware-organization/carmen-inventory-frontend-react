@@ -62,10 +62,16 @@ export default function PriceListExternalComponent({
     },
   });
 
-  // Reset form when data is loaded
+  // Reset form when data is loaded — MOQ ขั้นต่ำ default เป็น 1 (0 ไม่สมเหตุผล)
   useEffect(() => {
     if (data) {
-      form.reset(data);
+      form.reset({
+        ...data,
+        tb_pricelist_detail: data.tb_pricelist_detail.map((d) => ({
+          ...d,
+          moq_qty: d.moq_qty || 1,
+        })),
+      });
     }
   }, [data, form]);
 
