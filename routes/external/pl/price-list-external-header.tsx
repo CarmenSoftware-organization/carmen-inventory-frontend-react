@@ -61,6 +61,7 @@ export default function PriceListExternalHeader({
       </div>
 
       <dl className="flex flex-wrap gap-x-10 gap-y-4">
+        <Meta label="Vendor" value={data.vendor?.name || "—"} />
         <Meta label="Currency" value={data.currency_code} />
         <Meta
           label="Respond by"
