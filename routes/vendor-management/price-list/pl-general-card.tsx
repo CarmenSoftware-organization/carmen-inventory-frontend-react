@@ -19,7 +19,7 @@ import { SettingSection } from "@/components/ui/setting-section";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
 
-type PlStatus = "draft" | "active" | "inactive";
+type PlStatus = "draft" | "submitted" | "active" | "inactive";
 
 interface PLGeneralCardProps {
   readonly form: UseFormReturn<PriceListFormValues>;

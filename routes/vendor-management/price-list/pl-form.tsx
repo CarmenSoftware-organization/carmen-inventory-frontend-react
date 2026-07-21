@@ -199,7 +199,7 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   const plNo = priceList?.no ?? null;
   const productsHeaderLabels = useProductsHeaderLabels(t);
   const removeItemLabel = t("detail.removeItem");
-  const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
+  const tsStatus = ts as (key: "draft" | "submitted" | "active" | "inactive") => string;
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (

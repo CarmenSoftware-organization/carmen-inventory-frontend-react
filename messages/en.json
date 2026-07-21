@@ -344,6 +344,7 @@
     "active": "Active",
     "inactive": "Inactive",
     "draft": "Draft",
+    "submitted": "Submitted",
     "approved": "Approved",
     "rejected": "Rejected",
     "inProgress": "In Progress",
