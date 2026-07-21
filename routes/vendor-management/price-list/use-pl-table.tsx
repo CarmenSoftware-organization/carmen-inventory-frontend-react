@@ -113,7 +113,7 @@ export function usePriceListTable({
             size="lg"
             tone={PL_STATUS_TONE[status] ?? "neutral"}
           >
-            {ts(status as "draft" | "active" | "inactive")}
+            {ts(status as "draft" | "submitted" | "active" | "inactive")}
           </StatusDotBadge>
         );
       },

@@ -1,4 +1,4 @@
-export type PriceListStatus = "draft" | "active" | "inactive";
+export type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
 
 /**
  * Vendor record จาก `/{buCode}/pricelists/active-vendors/{date}` —
@@ -37,6 +37,7 @@ export interface PriceListDetailItem {
   note: string | null;
   info: Record<string, unknown>;
   dimension: unknown[];
+  doc_version?: number;
 }
 
 export interface PriceListAuditEntry {

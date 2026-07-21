@@ -63,7 +63,7 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
             tone={PL_STATUS_TONE[item.status] ?? "neutral"}
             size="xs"
           >
-            {ts(item.status as "draft" | "active" | "inactive")}
+            {ts(item.status as "draft" | "submitted" | "active" | "inactive")}
           </StatusDotBadge>
         </div>
       </CardHeader>
