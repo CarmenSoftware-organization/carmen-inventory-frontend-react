@@ -27,30 +27,24 @@ import { DataGridPagination } from "@/components/ui/data-grid/data-grid-paginati
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { FieldSelect } from "@/components/ui/field";
+import { FieldInput, FieldSelect } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import MoqTiersSubTable from "./moq-tiers-sub-table";
+import { PLProductGroupedView } from "@/routes/vendor-management/price-list/pl-product-grouped-view";
 import type {
   PricelistExternalDto,
   PricelistExternalDetailDto,
   PricelistExternalTaxProfileOption,
 } from "@/types/price-list-external";
 
-// Type for grouped rows in view mode
-interface GroupedProductRow {
-  product_id: string;
-  product_name: string;
-  itemCount: number;
-  prices: number[];
-  prices_without_tax: number[];
-  tax_amts: number[];
-  moq_qtys: number[];
-  unit_names: string[];
-  tax_profile_names: string[];
-  lead_time_days_list: number[];
-  sequence_nos: number[];
-}
+// label ของ grouped view (mirror price list ภายใน) — portal เป็น public ใช้
+// อังกฤษล้วนเหมือน header ส่วนอื่นของหน้านี้
+const VIEW_LABELS: Record<string, string> = {
+  product: "Product",
+  moqPricing: "MOQ Pricing",
+  rate: "Rate",
+  amount: "Amount",
+};
 
 interface PriceListExternalProductTableProps {
   form: UseFormReturn<PricelistExternalDto>;
@@ -104,46 +98,6 @@ export default function PriceListExternalProductTable({
 
   const hasPendingChanges = form.formState.isDirty;
 
-  // Grouped table data for view mode only
-  const groupedTableData = useMemo(() => {
-    if (!isViewMode) return [];
-
-    const groupMap = new Map<string, GroupedProductRow>();
-
-    for (const item of fields || []) {
-      const key = item.product_id || `ungrouped-${item.id}`;
-
-      if (groupMap.has(key)) {
-        const group = groupMap.get(key)!;
-        group.itemCount++;
-        group.prices.push(item.price);
-        group.prices_without_tax.push(item.price_without_tax ?? 0);
-        group.tax_amts.push(item.tax_amt ?? 0);
-        group.moq_qtys.push(item.moq_qty ?? 0);
-        group.unit_names.push(item.unit_name || "-");
-        group.tax_profile_names.push(item.tax_profile_name || "-");
-        group.lead_time_days_list.push(item.lead_time_days ?? 0);
-        group.sequence_nos.push(item.sequence_no ?? 0);
-      } else {
-        groupMap.set(key, {
-          product_id: item.product_id || "",
-          product_name: item.product_name || "",
-          itemCount: 1,
-          prices: [item.price],
-          prices_without_tax: [item.price_without_tax ?? 0],
-          tax_amts: [item.tax_amt ?? 0],
-          moq_qtys: [item.moq_qty ?? 0],
-          unit_names: [item.unit_name || "-"],
-          tax_profile_names: [item.tax_profile_name || "-"],
-          lead_time_days_list: [item.lead_time_days ?? 0],
-          sequence_nos: [item.sequence_no ?? 0],
-        });
-      }
-    }
-
-    return Array.from(groupMap.values());
-  }, [fields, isViewMode]);
-
   // Handler for updating MOQ tiers — ใช้ setValue ไม่ใช่ useFieldArray.update()
   // เพราะ update() จะ regenerate field id ของแถวนั้น ทำให้ columns (memo บน fields)
   // recreate แล้ว MoqTiersSubTable remount → input ใน tier เสีย focus แบบเดียวกับ
@@ -179,8 +133,15 @@ export default function PriceListExternalProductTable({
           />
         ),
         cell: ({ row }) => (
-          <div className="font-semibold text-primary text-xs">
-            {row.original.product_name}
+          <div className="flex flex-col">
+            <span className="text-foreground text-xs font-medium">
+              {row.original.product_name}
+            </span>
+            {row.original.product_code && (
+              <span className="text-muted-foreground text-[0.6875rem]">
+                {row.original.product_code}
+              </span>
+            )}
           </div>
         ),
         size: 300,
@@ -199,9 +160,9 @@ export default function PriceListExternalProductTable({
           />
         ),
         cell: ({ row }) => (
-          <Badge variant="secondary" className="text-xs">
-            {row.original.unit_name || "-"}
-          </Badge>
+          <span className="text-muted-foreground text-xs">
+            {row.original.unit_name || "—"}
+          </span>
         ),
         size: 80,
         enableSorting: true,
@@ -217,10 +178,15 @@ export default function PriceListExternalProductTable({
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return (
-            <Input
-              type="text"
-              {...form.register(`tb_pricelist_detail.${fieldIndex}.moq_qty`)}
-              className="h-7 text-xs text-right"
+            <FieldInput
+              type="number"
+              inputMode="decimal"
+              min={0}
+              placeholder="0"
+              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
+              {...form.register(`tb_pricelist_detail.${fieldIndex}.moq_qty`, {
+                valueAsNumber: true,
+              })}
             />
           );
         },
@@ -230,11 +196,11 @@ export default function PriceListExternalProductTable({
         enableResizing: true,
       },
       {
-        accessorKey: "price",
-        id: "price",
+        accessorKey: "price_without_tax",
+        id: "price_without_tax",
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="Price"
+            title="Unit Price"
             visibility={true}
             column={column}
           />
@@ -242,14 +208,20 @@ export default function PriceListExternalProductTable({
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return (
-            <Input
-              type="text"
-              {...form.register(`tb_pricelist_detail.${fieldIndex}.price`)}
-              className="h-7 text-xs text-right font-semibold"
+            <FieldInput
+              type="number"
+              inputMode="decimal"
+              min={0}
+              placeholder="0.00"
+              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
+              {...form.register(
+                `tb_pricelist_detail.${fieldIndex}.price_without_tax`,
+                { valueAsNumber: true },
+              )}
             />
           );
         },
-        size: 100,
+        size: 110,
         enableSorting: true,
         enableHiding: true,
         enableResizing: true,
@@ -258,7 +230,11 @@ export default function PriceListExternalProductTable({
         accessorKey: "tax_profile_name",
         id: "tax_profile_name",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Tax" visibility={true} column={column} />
+          <DataGridColumnHeader
+            title="Tax Profile"
+            visibility={true}
+            column={column}
+          />
         ),
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
@@ -284,7 +260,7 @@ export default function PriceListExternalProductTable({
                     );
                   }}
                   placeholder="—"
-                  className="h-7 text-xs"
+                  className="h-8 text-xs"
                 >
                   <SelectContent>
                     {taxProfiles.map((tp) => (
@@ -304,29 +280,6 @@ export default function PriceListExternalProductTable({
         enableResizing: true,
       },
       {
-        accessorKey: "price_without_tax",
-        id: "price_without_tax",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="PWT" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return (
-            <Input
-              type="text"
-              {...form.register(
-                `tb_pricelist_detail.${fieldIndex}.price_without_tax`,
-              )}
-              className="h-7 text-xs text-right"
-            />
-          );
-        },
-        size: 100,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
-      },
-      {
         accessorKey: "lead_time_days",
         id: "lead_time_days",
         header: ({ column }) => (
@@ -339,15 +292,16 @@ export default function PriceListExternalProductTable({
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return (
-            <Input
+            <FieldInput
               type="number"
+              inputMode="numeric"
+              min={0}
+              placeholder="0"
+              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
               {...form.register(
                 `tb_pricelist_detail.${fieldIndex}.lead_time_days`,
                 { valueAsNumber: true },
               )}
-              className="h-7 text-xs"
-              min={0}
-              placeholder="Days"
             />
           );
         },
@@ -421,37 +375,13 @@ export default function PriceListExternalProductTable({
   });
 
   if (isViewMode) {
-    // clean read layout — product แต่ละตัวโชว์ชั้น MOQ → ราคา แบบเรียบ (label
-    // recede, ราคา dominant tabular) ไม่ต้องมี grid chrome/pagination/sort ใน
-    // portal ที่มีสินค้าไม่กี่ตัว
+    // view mode mirror หน้า price list ภายใน 100% — grouped table เดียวกัน
+    // (# · Product · MOQ Pricing · Rate · Amount, group product ด้วย rowspan)
     return (
-      <div className="divide-border overflow-hidden rounded-lg border border-border divide-y">
-        {groupedTableData.map((product) => (
-          <div key={product.product_id} className="px-4 py-3.5">
-            <p className="text-sm font-medium text-foreground">
-              {product.product_name}
-            </p>
-            <div className="mt-2 space-y-1">
-              {product.moq_qtys.map((moq, i) => (
-                <div
-                  key={product.sequence_nos[i]}
-                  className="flex items-baseline justify-between gap-4 text-sm"
-                >
-                  <span className="text-muted-foreground">
-                    MOQ {moq}+ · {product.unit_names[i]}
-                    {product.lead_time_days_list[i]
-                      ? ` · ${product.lead_time_days_list[i]}d`
-                      : ""}
-                  </span>
-                  <span className="font-medium tabular-nums text-foreground">
-                    {product.prices[i]}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      <PLProductGroupedView
+        detailRefs={fields}
+        tfl={(key) => VIEW_LABELS[key] ?? key}
+      />
     );
   }
 
