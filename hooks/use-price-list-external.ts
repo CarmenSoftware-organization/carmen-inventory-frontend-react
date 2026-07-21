@@ -7,22 +7,47 @@ import type {
   PricelistExternalTaxProfileOption,
 } from "../types/price-list-external";
 
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
 /**
- * แปลงข้อมูลฟอร์ม price list ภายนอกเป็น payload สำหรับส่ง API
+ * แปลงฟอร์มเป็น payload update — โครงเดียวกับ price list ปกติ (เรื่องเดียวกัน
+ * ต่างแค่ vendor เป็นคนกรอก): base fields + pricelist_detail.update[] โดย derive
+ * price/tax_amt จาก price_without_tax + tax_rate ตอนส่ง (cell ไม่ sync ระหว่างพิมพ์)
  * @param formData - ข้อมูลฟอร์มจาก vendor
- * @returns payload ที่จัด structure แบบ products + moqs แล้ว
+ * @returns payload สำหรับ PATCH/submit
  */
 const buildPayload = (formData: PricelistExternalDto) => {
   return {
-    products: formData.tb_pricelist_detail.map((item) => ({
-      id: item.product_id,
-      moqs: (item.moq_tiers || []).map((tier) => ({
-        minQuantity: tier.minimum_quantity,
-        unit: item.unit_name || "",
-        price: tier.price,
-        leadTimeDays: tier.lead_time_days ?? 0,
-      })),
-    })),
+    vendor_id: formData.vendor?.id ?? "",
+    name: formData.name,
+    description: formData.description,
+    status: formData.status,
+    currency_id: formData.currency_id,
+    effective_from_date: formData.effective_from_date,
+    effective_to_date: formData.effective_to_date,
+    note: formData.note,
+    pricelist_detail: {
+      update: formData.tb_pricelist_detail.map((d, i) => {
+        const priceNoTax = Number(d.price_without_tax) || 0;
+        const rate = Number(d.tax_rate) || 0;
+        const taxAmt = round2((priceNoTax * rate) / 100);
+        const price = round2(priceNoTax + taxAmt);
+        return {
+          id: d.id,
+          sequence_no: i + 1,
+          product_id: d.product_id,
+          price,
+          price_without_tax: d.price_without_tax,
+          unit_id: d.unit_id,
+          tax_profile_id: d.tax_profile_id || "",
+          tax_rate: d.tax_rate,
+          tax_amt: taxAmt,
+          lead_time_days: d.lead_time_days,
+          moq_qty: d.moq_qty,
+          is_preferred: d.is_preferred,
+        };
+      }),
+    },
   };
 };
 
@@ -133,7 +158,7 @@ export function useUpdatePriceListExternal(urlToken: string) {
   return useMutation({
     mutationFn: async (formData: PricelistExternalDto) => {
       const res = await httpClient.patch(
-        API_ENDPOINTS.PRICE_LIST_EXTERNAL(urlToken),
+        API_ENDPOINTS.PRICE_LIST_EXTERNAL_CHECK(urlToken),
         buildPayload(formData),
       );
       return handleResponse(res, "Failed to save changes");
@@ -161,7 +186,7 @@ export function useSubmitPriceListExternal(urlToken: string) {
   return useMutation({
     mutationFn: async (formData: PricelistExternalDto) => {
       const res = await httpClient.post(
-        `${API_ENDPOINTS.PRICE_LIST_EXTERNAL(urlToken)}/submit`,
+        `${API_ENDPOINTS.PRICE_LIST_EXTERNAL_CHECK(urlToken)}/submit`,
         buildPayload(formData),
       );
       return handleResponse(res, "Failed to submit price list");
