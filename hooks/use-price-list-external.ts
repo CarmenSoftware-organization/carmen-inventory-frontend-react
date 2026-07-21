@@ -158,7 +158,7 @@ export function useUpdatePriceListExternal(urlToken: string) {
   return useMutation({
     mutationFn: async (formData: PricelistExternalDto) => {
       const res = await httpClient.patch(
-        API_ENDPOINTS.PRICE_LIST_EXTERNAL_CHECK(urlToken),
+        API_ENDPOINTS.PRICE_LIST_EXTERNAL(urlToken),
         buildPayload(formData),
       );
       return handleResponse(res, "Failed to save changes");
@@ -186,7 +186,7 @@ export function useSubmitPriceListExternal(urlToken: string) {
   return useMutation({
     mutationFn: async (formData: PricelistExternalDto) => {
       const res = await httpClient.post(
-        `${API_ENDPOINTS.PRICE_LIST_EXTERNAL_CHECK(urlToken)}/submit`,
+        `${API_ENDPOINTS.PRICE_LIST_EXTERNAL(urlToken)}/submit`,
         buildPayload(formData),
       );
       return handleResponse(res, "Failed to submit price list");
