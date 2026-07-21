@@ -378,117 +378,6 @@ export default function PriceListExternalProductTable({
     [fields, form],
   );
 
-  // Columns for view mode (grouped data - displays combined pricing info)
-  const viewModeColumns = useMemo<ColumnDef<GroupedProductRow>[]>(
-    () => [
-      {
-        id: "no",
-        header: "#",
-        cell: ({ row }) => <span className="text-xs">{row.index + 1}</span>,
-        size: 50,
-        enableSorting: false,
-      },
-      {
-        accessorKey: "product_name",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Product"
-            visibility={true}
-            column={column}
-          />
-        ),
-        cell: ({ row }) => (
-          <div className="font-semibold text-primary text-xs">
-            {row.original.product_name}
-          </div>
-        ),
-        size: 300,
-        enableSorting: true,
-      },
-      {
-        id: "pricing",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="MOQ" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col gap-0.5">
-            {row.original.moq_qtys.map((moq, i) => (
-              <span
-                key={`${row.original.product_id}-moq-${row.original.sequence_nos[i]}`}
-                className="text-xs"
-              >
-                {moq}+ {row.original.unit_names[i]}→{row.original.prices[i]}(
-                {row.original.lead_time_days_list[i]}d)
-              </span>
-            ))}
-          </div>
-        ),
-        size: 200,
-      },
-      {
-        accessorKey: "prices_without_tax",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="PWT" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col gap-0.5">
-            {row.original.prices_without_tax.map((p, i) => (
-              <span
-                key={`${row.original.product_id}-pwt-${row.original.sequence_nos[i]}`}
-                className="text-xs"
-              >
-                {p}
-              </span>
-            ))}
-          </div>
-        ),
-        size: 100,
-      },
-      {
-        accessorKey: "tax_amts",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Tax" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col gap-0.5">
-            {row.original.tax_amts.map((t, i) => (
-              <span
-                key={`${row.original.product_id}-tax-${row.original.sequence_nos[i]}`}
-                className="text-xs"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-        ),
-        size: 80,
-      },
-      {
-        accessorKey: "tax_profile_names",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Tax Profile"
-            visibility={true}
-            column={column}
-          />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col gap-0.5">
-            {row.original.tax_profile_names.map((t, i) => (
-              <span
-                key={`${row.original.product_id}-taxprofile-${row.original.sequence_nos[i]}`}
-                className="text-xs"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-        ),
-        size: 120,
-      },
-    ],
-    [],
-  );
 
   // Table for edit mode
   const editTable = useReactTable({
@@ -512,47 +401,38 @@ export default function PriceListExternalProductTable({
     getSortedRowModel: getSortedRowModel(),
   });
 
-  // Table for view mode (grouped rows)
-  const viewTable = useReactTable({
-    data: groupedTableData,
-    columns: viewModeColumns,
-    pageCount: Math.ceil((groupedTableData?.length || 0) / pagination.pageSize),
-    getRowId: (row) => row.product_id || `ungrouped-${row.product_name}`,
-    state: {
-      pagination,
-      sorting,
-    },
-    columnResizeMode: "onChange",
-    onPaginationChange: setPagination,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
-
   if (isViewMode) {
+    // clean read layout — product แต่ละตัวโชว์ชั้น MOQ → ราคา แบบเรียบ (label
+    // recede, ราคา dominant tabular) ไม่ต้องมี grid chrome/pagination/sort ใน
+    // portal ที่มีสินค้าไม่กี่ตัว
     return (
-      <DataGrid
-        table={viewTable}
-        recordCount={groupedTableData.length}
-        tableLayout={{
-          columnsPinnable: true,
-          columnsResizable: true,
-          columnsMovable: true,
-          columnsVisibility: true,
-        }}
-      >
-        <div className="w-full space-y-2">
-          <DataGridContainer>
-            <ScrollArea>
-              <DataGridTable />
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          <DataGridPagination />
-          </DataGridContainer>
-        </div>
-      </DataGrid>
+      <div className="divide-border overflow-hidden rounded-lg border border-border divide-y">
+        {groupedTableData.map((product) => (
+          <div key={product.product_id} className="px-4 py-3.5">
+            <p className="text-sm font-medium text-foreground">
+              {product.product_name}
+            </p>
+            <div className="mt-2 space-y-1">
+              {product.moq_qtys.map((moq, i) => (
+                <div
+                  key={product.sequence_nos[i]}
+                  className="flex items-baseline justify-between gap-4 text-sm"
+                >
+                  <span className="text-muted-foreground">
+                    MOQ {moq}+ · {product.unit_names[i]}
+                    {product.lead_time_days_list[i]
+                      ? ` · ${product.lead_time_days_list[i]}d`
+                      : ""}
+                  </span>
+                  <span className="font-medium tabular-nums text-foreground">
+                    {product.prices[i]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     );
   }
 
