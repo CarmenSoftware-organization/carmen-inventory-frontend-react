@@ -11,8 +11,9 @@ export type PricelistExternalDto = {
   pricelist_no: string;
   name: string;
   status: "draft" | "active" | "inactive" | "expired";
-  vendor_id: string;
-  vendor_name: string | null;
+  vendor: { id: string | null; name: string | null };
+  // โรงแรมผู้ขอเสนอราคา (ผู้ยื่นเอกสารให้ vendor กรอก)
+  hotel: { name: string; address: string } | null;
   currency_id: string;
   currency_code: string;
   effective_from_date: string;
@@ -33,18 +34,20 @@ export type PricelistExternalDetailDto = {
   id: string;
   sequence_no: number;
   product_id: string;
+  product_code: string;
   product_name: string;
   unit_id: string | null;
   unit_name: string | null;
-  moq_qty: string;
-  price_without_tax: string;
-  tax_amt: string;
-  price: string;
+  moq_qty: number;
+  price_without_tax: number;
+  tax_amt: number;
+  price: number;
   tax_profile_id: string;
   tax_profile_name: string | null;
-  tax_rate: string;
+  tax_rate: number;
   lead_time_days: number;
   is_active: boolean;
+  is_preferred: boolean;
   note: string | null;
   moq_tiers?: MoqTierDto[];
 };

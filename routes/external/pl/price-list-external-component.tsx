@@ -50,8 +50,8 @@ export default function PriceListExternalComponent({
       pricelist_no: "",
       name: "",
       status: "draft",
-      vendor_id: "",
-      vendor_name: null,
+      vendor: { id: null, name: null },
+      hotel: null,
       currency_id: "",
       currency_code: "",
       effective_from_date: "",
@@ -131,12 +131,17 @@ export default function PriceListExternalComponent({
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <PriceListExternalHeader data={data} />
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-muted-foreground">
+          {isViewMode
+            ? "Items requested for pricing."
+            : "Enter your price and tax for each item, then submit."}
+        </p>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setIsViewMode(!isViewMode)}
-          className="gap-1.5"
+          className="gap-1.5 shrink-0"
         >
           {isViewMode ? (
             <>

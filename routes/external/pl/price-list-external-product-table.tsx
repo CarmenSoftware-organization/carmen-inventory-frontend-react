@@ -42,10 +42,10 @@ interface GroupedProductRow {
   product_id: string;
   product_name: string;
   itemCount: number;
-  prices: string[];
-  prices_without_tax: string[];
-  tax_amts: string[];
-  moq_qtys: string[];
+  prices: number[];
+  prices_without_tax: number[];
+  tax_amts: number[];
+  moq_qtys: number[];
   unit_names: string[];
   tax_profile_names: string[];
   lead_time_days_list: number[];
@@ -117,9 +117,9 @@ export default function PriceListExternalProductTable({
         const group = groupMap.get(key)!;
         group.itemCount++;
         group.prices.push(item.price);
-        group.prices_without_tax.push(item.price_without_tax || "0");
-        group.tax_amts.push(item.tax_amt || "0");
-        group.moq_qtys.push(item.moq_qty || "0");
+        group.prices_without_tax.push(item.price_without_tax ?? 0);
+        group.tax_amts.push(item.tax_amt ?? 0);
+        group.moq_qtys.push(item.moq_qty ?? 0);
         group.unit_names.push(item.unit_name || "-");
         group.tax_profile_names.push(item.tax_profile_name || "-");
         group.lead_time_days_list.push(item.lead_time_days ?? 0);
@@ -130,9 +130,9 @@ export default function PriceListExternalProductTable({
           product_name: item.product_name || "",
           itemCount: 1,
           prices: [item.price],
-          prices_without_tax: [item.price_without_tax || "0"],
-          tax_amts: [item.tax_amt || "0"],
-          moq_qtys: [item.moq_qty || "0"],
+          prices_without_tax: [item.price_without_tax ?? 0],
+          tax_amts: [item.tax_amt ?? 0],
+          moq_qtys: [item.moq_qty ?? 0],
           unit_names: [item.unit_name || "-"],
           tax_profile_names: [item.tax_profile_name || "-"],
           lead_time_days_list: [item.lead_time_days ?? 0],
@@ -358,7 +358,7 @@ export default function PriceListExternalProductTable({
                     );
                     form.setValue(
                       `tb_pricelist_detail.${fieldIndex}.tax_rate`,
-                      String(tp?.tax_rate ?? 0),
+                      tp?.tax_rate ?? 0,
                     );
                   }}
                   placeholder="—"
