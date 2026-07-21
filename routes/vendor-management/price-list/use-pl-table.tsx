@@ -112,12 +112,13 @@ export function usePriceListTable({
           "outline" | "success" | "secondary"
         > = {
           draft: "outline",
+          submitted: "secondary",
           active: "success",
           inactive: "secondary",
         };
         return (
           <Badge size="lg" variant={variantMap[status] ?? "outline"}>
-            {ts(status as "draft" | "active" | "inactive")}
+            {ts(status as "draft" | "submitted" | "active" | "inactive")}
           </Badge>
         );
       },

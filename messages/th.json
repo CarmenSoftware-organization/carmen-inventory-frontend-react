@@ -344,6 +344,7 @@
     "active": "ใช้งาน",
     "inactive": "ไม่ใช้งาน",
     "draft": "ฉบับร่าง",
+    "submitted": "ส่งแล้ว",
     "approved": "อนุมัติ",
     "rejected": "ไม่อนุมัติ",
     "inProgress": "กำลังดำเนินการ",

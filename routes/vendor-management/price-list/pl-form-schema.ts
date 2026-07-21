@@ -37,7 +37,7 @@ export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
     .object({
       name: z.string().min(1, tv("required", { field: tf("name") })),
       description: z.string(),
-      status: z.enum(["draft", "active", "inactive"]),
+      status: z.enum(["draft", "submitted", "active", "inactive"]),
       vendor_id: z.string().min(1, tv("required", { field: tf("vendor") })),
       currency_id: z.string().min(1, tv("required", { field: tf("currency") })),
       effective_from_date: z.string().min(1, tv("required", { field: tf("startDate") })),

@@ -1,4 +1,4 @@
-export type PriceListStatus = "draft" | "active" | "inactive";
+export type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
 
 /**
  * Vendor record จาก `/{buCode}/pricelists/active-vendors/{date}` —

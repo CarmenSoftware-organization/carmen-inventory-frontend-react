@@ -69,7 +69,7 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
             size="xs"
             className="text-xs"
           >
-            {ts(item.status as "draft" | "active" | "inactive")}
+            {ts(item.status as "draft" | "submitted" | "active" | "inactive")}
           </Badge>
         </div>
       </CardHeader>
