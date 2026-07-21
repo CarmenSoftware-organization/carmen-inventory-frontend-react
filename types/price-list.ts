@@ -37,6 +37,7 @@ export interface PriceListDetailItem {
   note: string | null;
   info: Record<string, unknown>;
   dimension: unknown[];
+  doc_version?: number;
 }
 
 export interface PriceListAuditEntry {

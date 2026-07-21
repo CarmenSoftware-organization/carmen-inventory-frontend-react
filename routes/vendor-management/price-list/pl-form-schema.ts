@@ -12,6 +12,7 @@ import type { PriceList } from "@/types/price-list";
 function createPriceListDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    doc_version: z.coerce.number().optional(),
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     unit_id: z.string().min(1, tv("required", { field: tf("unit") })),
     moq_qty: z.coerce.number().min(0),
@@ -146,6 +147,7 @@ export function getDefaultValues(
       pricelist_detail:
         priceList.pricelist_detail?.map((d) => ({
           id: d.id,
+          doc_version: d.doc_version,
           product_id: d.product_id,
           unit_id: d.unit_id,
           moq_qty: d.moq_qty,
@@ -196,6 +198,7 @@ export function mapDetailToPayload(
   const taxAmt = Math.round(((priceNoTax * rate) / 100) * 100) / 100;
   const price = Math.round((priceNoTax + taxAmt) * 100) / 100;
   return {
+    ...(d.doc_version != null ? { doc_version: d.doc_version } : {}),
     sequence_no: index + 1,
     product_id: d.product_id,
     price,
