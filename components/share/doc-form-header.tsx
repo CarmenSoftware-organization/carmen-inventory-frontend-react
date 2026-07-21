@@ -5,6 +5,11 @@ import { cn } from "@/lib/utils";
 
 interface DocFormHeaderProps {
   readonly title: string;
+  /**
+   * title เป็น placeholder (ยังไม่กรอกชื่อ) → render เป็น muted italic เป็น cue
+   * ว่าเป็นค่าตัวอย่าง — ใช้ในฟอร์ม create/edit ที่ชื่อว่างได้ (vendor-management)
+   */
+  readonly titleMuted?: boolean;
   /** บรรทัดย่อยใต้ title (เช่น document version) */
   readonly subtitle?: ReactNode;
   readonly backLabel: string;
@@ -32,6 +37,7 @@ interface DocFormHeaderProps {
 
 export function DocFormHeader({
   title,
+  titleMuted = false,
   subtitle,
   backLabel,
   onBack,
@@ -63,7 +69,10 @@ export function DocFormHeader({
           {leading}
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <h1
-              className="truncate text-xl font-semibold tracking-tight sm:text-2xl"
+              className={cn(
+                "truncate text-xl font-semibold tracking-tight sm:text-2xl",
+                titleMuted && "text-muted-foreground italic",
+              )}
               title={title}
             >
               {title}

@@ -11,14 +11,15 @@ import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
-import { cn } from "@/lib/utils";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -204,38 +205,27 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label={tc("goBack")}
-            onClick={handleBack}
-          >
-            <ChevronLeft />
-          </Button>
-          <h1
-            className={cn(
-              "truncate text-lg font-semibold tracking-tight",
-              watchedName
-                ? "text-foreground"
-                : "text-muted-foreground italic",
+      <div className="mb-6">
+        <DocFormHeader
+          flush
+          title={watchedName || t("namePlaceholder")}
+          titleMuted={!watchedName}
+        backLabel={tc("goBack")}
+        onBack={handleBack}
+        badges={
+          <>
+            {plNo && (
+              <span className="text-muted-foreground shrink-0 text-sm">
+                · {plNo}
+              </span>
             )}
-          >
-            {watchedName || t("namePlaceholder")}
-          </h1>
-          {plNo && (
-            <span className="text-muted-foreground shrink-0 text-sm">
-              · {plNo}
-            </span>
-          )}
-          <Badge variant="secondary" size="sm">
-            {tsStatus(watchedStatus)}
-          </Badge>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {isView ? (
+            <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
+              {tsStatus(watchedStatus)}
+            </StatusDotBadge>
+          </>
+        }
+        actions={
+          isView ? (
             <Button size="sm" onClick={() => setMode("edit")}>
               <Pencil />
               {tc("edit")}
@@ -274,9 +264,10 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
                 </Button>
               )}
             </>
-          )}
-        </div>
-      </header>
+          )
+        }
+        />
+      </div>
 
       <form
         id={FORM_ID}

@@ -9,10 +9,13 @@ import {
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
-import { PRICE_LIST_STATUS_OPTIONS } from "@/constant/price-list";
+import {
+  PRICE_LIST_STATUS_OPTIONS,
+  PL_STATUS_TONE,
+} from "@/constant/price-list";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { SettingSection } from "@/components/ui/setting-section";
@@ -86,7 +89,9 @@ export function PLGeneralCard({
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={isDisabled}
-                className="w-full"
+                // h-9 ให้เท่า currency/name/status (field มาตรฐานของฟอร์ม) —
+                // combobox default เป็น h-8 (สำหรับ table) จึง override ที่ call site
+                className="h-9 w-full"
                 defaultLabel={priceList?.vendor?.name}
                 error={form.formState.errors.vendor_id?.message}
               />
@@ -136,7 +141,7 @@ export function PLGeneralCard({
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={isDisabled}
-                className="w-full"
+                className="h-9 w-full"
                 placeholder={tfl("pickDate")}
                 error={form.formState.errors.effective_from_date?.message}
               />
@@ -161,7 +166,7 @@ export function PLGeneralCard({
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={isDisabled}
-                className="w-full"
+                className="h-9 w-full"
                 placeholder={tfl("pickDate")}
                 fromDate={watchedFrom ? new Date(watchedFrom) : undefined}
                 error={form.formState.errors.effective_to_date?.message}
@@ -195,9 +200,11 @@ export function PLGeneralCard({
         <FieldLabel>{tfl("status")}</FieldLabel>
         {isView ? (
           <div>
-            <Badge variant="secondary" size="sm">
+            <StatusDotBadge
+              tone={PL_STATUS_TONE[form.getValues("status")] ?? "neutral"}
+            >
               {ts(form.getValues("status") as PlStatus)}
-            </Badge>
+            </StatusDotBadge>
           </div>
         ) : (
           <Controller

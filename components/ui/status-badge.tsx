@@ -1,6 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 
 interface StatusBadgeProps {
   /** สถานะ active/inactive ของ entity (อ่านจาก `is_active`) */
@@ -34,19 +33,12 @@ export function StatusBadge({
 }: Readonly<StatusBadgeProps>) {
   const ts = useTranslations("status");
   return (
-    <Badge
-      variant="secondary"
+    <StatusDotBadge
+      tone={active ? "success" : "neutral"}
       size={size}
-      className={cn("font-normal", className)}
+      className={className}
     >
-      <span
-        className={cn(
-          "size-1.5 shrink-0 rounded-full",
-          active ? "bg-success" : "bg-muted-foreground/50",
-        )}
-        aria-hidden="true"
-      />
       {active ? ts("active") : ts("inactive")}
-    </Badge>
+    </StatusDotBadge>
   );
 }

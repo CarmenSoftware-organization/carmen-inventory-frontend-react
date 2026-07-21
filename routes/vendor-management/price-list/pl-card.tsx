@@ -1,6 +1,7 @@
 import { CalendarDays, Store } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useProfile } from "@/hooks/use-profile";
@@ -34,12 +35,6 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
     return `${from} - ${to}`;
   };
 
-  const variantMap: Record<string, "outline" | "success" | "secondary"> = {
-    draft: "outline",
-    active: "success",
-    inactive: "secondary",
-  };
-
   return (
     <Card
       role="button"
@@ -64,13 +59,12 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
         </div>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-xs">{item.no}</p>
-          <Badge
-            variant={variantMap[item.status] ?? "outline"}
+          <StatusDotBadge
+            tone={PL_STATUS_TONE[item.status] ?? "neutral"}
             size="xs"
-            className="text-xs"
           >
             {ts(item.status as "draft" | "active" | "inactive")}
-          </Badge>
+          </StatusDotBadge>
         </div>
       </CardHeader>
 

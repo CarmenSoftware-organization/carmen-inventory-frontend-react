@@ -3,7 +3,8 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import {
   selectColumn,
   indexColumn,
@@ -107,18 +108,13 @@ export function usePriceListTable({
       ),
       cell: ({ row }) => {
         const status = row.getValue<string>("status");
-        const variantMap: Record<
-          string,
-          "outline" | "success" | "secondary"
-        > = {
-          draft: "outline",
-          active: "success",
-          inactive: "secondary",
-        };
         return (
-          <Badge size="lg" variant={variantMap[status] ?? "outline"}>
+          <StatusDotBadge
+            size="lg"
+            tone={PL_STATUS_TONE[status] ?? "neutral"}
+          >
             {ts(status as "draft" | "active" | "inactive")}
-          </Badge>
+          </StatusDotBadge>
         );
       },
       size: 100,

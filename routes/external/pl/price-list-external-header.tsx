@@ -1,16 +1,9 @@
 import { formatDate } from "@/lib/date-utils";
 import type { PricelistExternalDto } from "@/types/price-list-external";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 
 const DATE_FORMAT = "yyyy-MM-dd";
-
-// align กับ pl-card convention (draft→outline, active→success, inactive→secondary)
-// — สถานะไม่ใช่ action ดังนั้นไม่ใช้ default primary
-const STATUS_VARIANT: Record<string, "outline" | "success" | "secondary"> = {
-  draft: "outline",
-  active: "success",
-  inactive: "secondary",
-};
 
 interface PriceListHeaderProps {
   data: PricelistExternalDto;
@@ -55,9 +48,9 @@ export default function PriceListExternalHeader({
             </p>
           )}
         </div>
-        <Badge variant={STATUS_VARIANT[data.status] ?? "outline"}>
+        <StatusDotBadge tone={PL_STATUS_TONE[data.status] ?? "neutral"}>
           {data.status.toLocaleUpperCase()}
-        </Badge>
+        </StatusDotBadge>
       </div>
 
       <dl className="flex flex-wrap gap-x-10 gap-y-4">
