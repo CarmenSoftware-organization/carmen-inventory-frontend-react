@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   usePriceListExternal,
+  useExternalTaxProfiles,
   useUpdatePriceListExternal,
   useSubmitPriceListExternal,
   HttpError,
@@ -35,6 +36,7 @@ export default function PriceListExternalComponent({
 }: PriceListExternalComponentProps) {
   const { data, isLoading, isError, error, refetch } =
     usePriceListExternal(urlToken);
+  const { data: taxProfiles } = useExternalTaxProfiles(urlToken);
 
   const updateMutation = useUpdatePriceListExternal(urlToken);
   const submitMutation = useSubmitPriceListExternal(urlToken);
@@ -156,6 +158,7 @@ export default function PriceListExternalComponent({
         onSubmit={handleSubmit}
         isSaving={updateMutation.isPending}
         isSubmitting={submitMutation.isPending}
+        taxProfiles={taxProfiles ?? []}
       />
     </div>
   );

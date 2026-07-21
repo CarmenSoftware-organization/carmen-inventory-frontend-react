@@ -123,6 +123,7 @@ export const QUERY_KEYS = {
   WORKFLOWS: "workflows",
   // External
   PRICE_LIST_EXTERNAL: "price-list-external",
+  PRICE_LIST_EXTERNAL_TAX_PROFILES: "price-list-external-tax-profiles",
 } as const;
 
 export const BU_SWITCH_CHANNEL = "bu-switch";

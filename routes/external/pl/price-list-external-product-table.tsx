@@ -1,6 +1,10 @@
 
 import { useMemo, useState } from "react";
-import { type UseFormReturn, useFieldArray } from "react-hook-form";
+import {
+  Controller,
+  type UseFormReturn,
+  useFieldArray,
+} from "react-hook-form";
 import {
   ColumnDef,
   ExpandedState,
@@ -24,10 +28,13 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { FieldSelect } from "@/components/ui/field";
+import { SelectContent, SelectItem } from "@/components/ui/select";
 import MoqTiersSubTable from "./moq-tiers-sub-table";
 import type {
   PricelistExternalDto,
   PricelistExternalDetailDto,
+  PricelistExternalTaxProfileOption,
 } from "@/types/price-list-external";
 
 // Type for grouped rows in view mode
@@ -52,6 +59,8 @@ interface PriceListExternalProductTableProps {
   onSubmit?: () => void;
   isSaving?: boolean;
   isSubmitting?: boolean;
+  // tax profile options จาก endpoint แยก (check-pricelist/{token}/tax-profiles)
+  taxProfiles?: PricelistExternalTaxProfileOption[];
 }
 
 /**
@@ -79,6 +88,7 @@ export default function PriceListExternalProductTable({
   onSubmit,
   isSaving = false,
   isSubmitting = false,
+  taxProfiles = [],
 }: PriceListExternalProductTableProps) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -328,12 +338,45 @@ export default function PriceListExternalProductTable({
             column={column}
           />
         ),
-        cell: ({ row }) => (
-          <span className="text-xs">
-            {row.original.tax_profile_name || "-"}
-          </span>
-        ),
-        size: 120,
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          // taxProfiles (prop) มาจาก endpoint แยก — portal public เรียก auth lookup
+          // ไม่ได้ · เลือกแล้ว sync name + rate ของแถว
+          return (
+            <Controller
+              control={form.control}
+              name={`tb_pricelist_detail.${fieldIndex}.tax_profile_id`}
+              render={({ field }) => (
+                <FieldSelect
+                  value={field.value}
+                  onValueChange={(id) => {
+                    field.onChange(id);
+                    const tp = taxProfiles.find((t) => t.id === id);
+                    form.setValue(
+                      `tb_pricelist_detail.${fieldIndex}.tax_profile_name`,
+                      tp?.name ?? null,
+                    );
+                    form.setValue(
+                      `tb_pricelist_detail.${fieldIndex}.tax_rate`,
+                      String(tp?.tax_rate ?? 0),
+                    );
+                  }}
+                  placeholder="—"
+                  className="h-7 text-xs"
+                >
+                  <SelectContent>
+                    {taxProfiles.map((tp) => (
+                      <SelectItem key={tp.id} value={tp.id}>
+                        {tp.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </FieldSelect>
+              )}
+            />
+          );
+        },
+        size: 140,
         enableSorting: true,
         enableHiding: true,
         enableResizing: true,
@@ -371,11 +414,12 @@ export default function PriceListExternalProductTable({
         },
       },
     ],
-    // form เป็น stable ref จาก useForm — เพิ่มได้โดยไม่ทำให้ columns recreate ต่อ render
+    // form เป็น stable ref จาก useForm · taxProfiles จาก query cache (ref นิ่งจน
+    // โหลดเสร็จ) — เพิ่มได้โดยไม่ทำให้ columns recreate ต่อ render
     // (อย่าใส่ handleTiersUpdate ที่ recreate ทุก render ไม่งั้น columns จะ recreate →
     // row remount → focus หายกลับมา ซึ่งเป็นบั๊กที่เพิ่งแก้)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [fields, form],
+    [fields, form, taxProfiles],
   );
 
 
