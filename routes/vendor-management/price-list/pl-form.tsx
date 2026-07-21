@@ -157,8 +157,11 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         mutate: createPriceList.mutate,
         onSuccess: (id) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
+          // navigate ไป detail ของ record ที่เพิ่งสร้าง (edit route จะ mount ใหม่
+          // แล้วตั้ง mode=view จาก priceList เอง) — อย่า setMode/reset ที่นี่ เพราะ
+          // มันทำให้ navGuard enabled true→false ระหว่าง navigate ยังไม่ commit แล้ว
+          // teardown ของมันยิง history.back() เด้งกลับ /new (ดู use-navigation-guard)
           navigate(`/vendor-management/price-list/${id}`, { replace: true });
-          setMode("view");
         },
       });
     }
