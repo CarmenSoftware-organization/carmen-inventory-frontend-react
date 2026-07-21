@@ -248,7 +248,7 @@ export default function MoqTiersSubTable({
                 className="h-7 px-2"
               >
                 {isEditing ? (
-                  <Check className="h-3 w-3 text-green-500" />
+                  <Check className="h-3 w-3 text-positive" />
                 ) : (
                   <Pencil className="h-3 w-3" />
                 )}
@@ -259,7 +259,7 @@ export default function MoqTiersSubTable({
                 variant="ghost"
                 className="h-7 px-2"
               >
-                <Trash2 className="h-3 w-3 text-red-600" />
+                <Trash2 className="h-3 w-3 text-destructive" />
               </Button>
             </div>
           );

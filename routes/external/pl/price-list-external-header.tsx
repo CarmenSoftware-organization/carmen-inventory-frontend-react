@@ -4,6 +4,14 @@ import { Badge } from "@/components/ui/badge";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
+// align กับ pl-card convention (draft→outline, active→success, inactive→secondary)
+// — สถานะไม่ใช่ action ดังนั้นไม่ใช้ default primary
+const STATUS_VARIANT: Record<string, "outline" | "success" | "secondary"> = {
+  draft: "outline",
+  active: "success",
+  inactive: "secondary",
+};
+
 interface PriceListHeaderProps {
   data: PricelistExternalDto;
 }
@@ -28,20 +36,22 @@ export default function PriceListExternalHeader({
           <h1 className="text-lg font-semibold">{data.pricelist_no}</h1>
           <p className="text-muted-foreground">{data.name}</p>
         </div>
-        <Badge className="font-bold">{data.status.toLocaleUpperCase()}</Badge>
+        <Badge variant={STATUS_VARIANT[data.status] ?? "outline"}>
+          {data.status.toLocaleUpperCase()}
+        </Badge>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm pt-2">
         <div>
           <span className="text-muted-foreground">Vendor Name:</span>{" "}
-          <span className="font-semibold">{data.vendor_name || "-"}</span>
+          <span className="font-medium">{data.vendor_name || "-"}</span>
         </div>
         <div>
           <span className="text-muted-foreground">Currency:</span>{" "}
-          <span className="font-semibold">{data.currency_code}</span>
+          <span className="font-medium">{data.currency_code}</span>
         </div>
         <div>
           <span className="text-muted-foreground">Date:</span>{" "}
-          <span className="font-semibold">
+          <span className="font-medium">
             {formatDate(data.effective_from_date, DATE_FORMAT)} -{" "}
             {formatDate(data.effective_to_date, DATE_FORMAT)}
           </span>
@@ -49,13 +59,13 @@ export default function PriceListExternalHeader({
         {data.description && (
           <div className="col-span-2 md:col-span-4">
             <span className="text-muted-foreground">Description:</span>{" "}
-            <span className="font-semibold">{data.description}</span>
+            <span className="font-medium">{data.description}</span>
           </div>
         )}
         {data.note && (
           <div className="col-span-2 md:col-span-4">
             <span className="text-muted-foreground">Note:</span>{" "}
-            <span className="font-semibold">{data.note}</span>
+            <span className="font-medium">{data.note}</span>
           </div>
         )}
       </div>
