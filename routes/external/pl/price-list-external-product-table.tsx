@@ -87,7 +87,7 @@ export default function PriceListExternalProductTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [expandedRows, setExpandedRows] = useState<ExpandedState>({});
 
-  const { fields, update } = useFieldArray({
+  const { fields } = useFieldArray({
     control: form.control,
     name: "tb_pricelist_detail",
   });
@@ -134,23 +134,17 @@ export default function PriceListExternalProductTable({
     return Array.from(groupMap.values());
   }, [fields, isViewMode]);
 
-  // Handler for updating item fields
-  const handleItemFieldChange = (
-    index: number,
-    field: keyof PricelistExternalDetailDto,
-    value: string | number,
-  ) => {
-    const currentItem = fields[index];
-    update(index, { ...currentItem, [field]: value });
-  };
-
-  // Handler for updating MOQ tiers
+  // Handler for updating MOQ tiers — ใช้ setValue ไม่ใช่ useFieldArray.update()
+  // เพราะ update() จะ regenerate field id ของแถวนั้น ทำให้ columns (memo บน fields)
+  // recreate แล้ว MoqTiersSubTable remount → input ใน tier เสีย focus แบบเดียวกับ
+  // cells หลัก setValue เปลี่ยนเฉพาะค่า moq_tiers ไม่แตะ field id
   const handleTiersUpdate = (
     itemIndex: number,
     tiers: PricelistExternalDetailDto["moq_tiers"],
   ) => {
-    const currentItem = fields[itemIndex];
-    update(itemIndex, { ...currentItem, moq_tiers: tiers });
+    form.setValue(`tb_pricelist_detail.${itemIndex}.moq_tiers`, tiers, {
+      shouldDirty: true,
+    });
   };
 
   const columns = useMemo<ColumnDef<PricelistExternalDetailDto>[]>(
@@ -215,10 +209,7 @@ export default function PriceListExternalProductTable({
           return (
             <Input
               type="text"
-              value={row.original.moq_qty}
-              onChange={(e) =>
-                handleItemFieldChange(fieldIndex, "moq_qty", e.target.value)
-              }
+              {...form.register(`tb_pricelist_detail.${fieldIndex}.moq_qty`)}
               className="h-7 text-xs text-right"
             />
           );
@@ -243,10 +234,7 @@ export default function PriceListExternalProductTable({
           return (
             <Input
               type="text"
-              value={row.original.price}
-              onChange={(e) =>
-                handleItemFieldChange(fieldIndex, "price", e.target.value)
-              }
+              {...form.register(`tb_pricelist_detail.${fieldIndex}.price`)}
               className="h-7 text-xs text-right font-semibold"
             />
           );
@@ -271,14 +259,10 @@ export default function PriceListExternalProductTable({
           return (
             <Input
               type="number"
-              value={row.original.lead_time_days}
-              onChange={(e) =>
-                handleItemFieldChange(
-                  fieldIndex,
-                  "lead_time_days",
-                  Number(e.target.value),
-                )
-              }
+              {...form.register(
+                `tb_pricelist_detail.${fieldIndex}.lead_time_days`,
+                { valueAsNumber: true },
+              )}
               className="h-7 text-xs"
               min={0}
               placeholder="Days"
@@ -301,14 +285,9 @@ export default function PriceListExternalProductTable({
           return (
             <Input
               type="text"
-              value={row.original.price_without_tax || ""}
-              onChange={(e) =>
-                handleItemFieldChange(
-                  fieldIndex,
-                  "price_without_tax",
-                  e.target.value,
-                )
-              }
+              {...form.register(
+                `tb_pricelist_detail.${fieldIndex}.price_without_tax`,
+              )}
               className="h-7 text-xs text-right"
             />
           );
@@ -329,10 +308,7 @@ export default function PriceListExternalProductTable({
           return (
             <Input
               type="text"
-              value={row.original.tax_amt || ""}
-              onChange={(e) =>
-                handleItemFieldChange(fieldIndex, "tax_amt", e.target.value)
-              }
+              {...form.register(`tb_pricelist_detail.${fieldIndex}.tax_amt`)}
               className="h-7 text-xs text-right"
             />
           );
@@ -395,7 +371,11 @@ export default function PriceListExternalProductTable({
         },
       },
     ],
-    [fields],
+    // form เป็น stable ref จาก useForm — เพิ่มได้โดยไม่ทำให้ columns recreate ต่อ render
+    // (อย่าใส่ handleTiersUpdate ที่ recreate ทุก render ไม่งั้น columns จะ recreate →
+    // row remount → focus หายกลับมา ซึ่งเป็นบั๊กที่เพิ่งแก้)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fields, form],
   );
 
   // Columns for view mode (grouped data - displays combined pricing info)
