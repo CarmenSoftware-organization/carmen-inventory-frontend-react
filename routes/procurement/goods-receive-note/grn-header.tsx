@@ -1,14 +1,8 @@
 import { useTranslations } from "use-intl";
-import {
-  Check,
-  FileText,
-  MessageSquare,
-  Pencil,
-  Save,
-  Trash2,
-  X,
-} from "lucide-react";
+import { FileText, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CommentButton } from "@/components/comment-button";
+import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
 import { Badge } from "@/components/ui/badge";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { useCan } from "@/hooks/use-can";
@@ -23,15 +17,13 @@ import { GRN_FORM_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 import {
   DocFormHeader,
-  DocumentRibbon,
-  RibbonCell,
+  RibbonField,
 } from "@/components/share/doc-form-header";
 
 interface GrnHeaderProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
   readonly mode: FormMode;
   readonly isPending: boolean;
-  readonly isActionPending: boolean;
   readonly isCommitted: boolean;
   readonly isVoid: boolean;
   readonly deleteIsPending: boolean;
@@ -44,8 +36,6 @@ interface GrnHeaderProps {
   readonly onBack: () => void;
   readonly onEnterEdit: () => void;
   readonly onCancel: () => void;
-  readonly onShowCommit: () => void;
-  readonly onShowVoid: () => void;
   readonly onShowComment: () => void;
   readonly onShowDelete: () => void;
   readonly onSaveDraft: () => void;
@@ -60,7 +50,6 @@ export function GrnHeader({
   goodsReceiveNote,
   mode,
   isPending,
-  isActionPending,
   isCommitted,
   isVoid,
   deleteIsPending,
@@ -71,8 +60,6 @@ export function GrnHeader({
   onBack,
   onEnterEdit,
   onCancel,
-  onShowCommit,
-  onShowVoid,
   onShowComment,
   onShowDelete,
   onSaveDraft,
@@ -81,6 +68,7 @@ export function GrnHeader({
   const t = useTranslations("procurement.goodsReceiveNote");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const { data: comments } = useGoodsReceiveNoteComments(goodsReceiveNote?.id);
 
   const { can, isAdmin } = useCan();
   const prefix = usePermissionPrefix();
@@ -118,43 +106,21 @@ export function GrnHeader({
 
   const actions = (
     <>
-      {/* View mode — commit / void / edit */}
+      {/* View mode — edit (commit/void ย้ายไป footer ขวาล่าง = GrnFooterAction) */}
       {isView && goodsReceiveNote && canEdit && (
-        <>
-          <Button
-            type="button"
-            variant="success"
-            size="sm"
-            disabled={isActionPending}
-            onClick={onShowCommit}
-          >
-            <Check aria-hidden="true" />
-            {tc("commit")}
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            disabled={isActionPending}
-            onClick={onShowVoid}
-          >
-            <X aria-hidden="true" />
-            {tc("void")}
-          </Button>
-          <Button
-            size="sm"
-            onClick={
-              editDenied
-                ? () => dispatchPermissionDenied(updatePermission)
-                : onEnterEdit
-            }
-            aria-disabled={editDenied || undefined}
-            className={cn(editDenied && "opacity-50")}
-          >
-            <Pencil aria-hidden="true" />
-            {tc("edit")}
-          </Button>
-        </>
+        <Button
+          size="sm"
+          onClick={
+            editDenied
+              ? () => dispatchPermissionDenied(updatePermission)
+              : onEnterEdit
+          }
+          aria-disabled={editDenied || undefined}
+          className={cn(editDenied && "opacity-50")}
+        >
+          <Pencil aria-hidden="true" />
+          {tc("edit")}
+        </Button>
       )}
 
       {/* Edit / add mode — cancel / save draft / save / delete */}
@@ -207,10 +173,7 @@ export function GrnHeader({
 
       {/* Always (มี record) — comment + print */}
       {goodsReceiveNote && (
-        <Button size="sm" variant="info" onClick={onShowComment}>
-          <MessageSquare aria-hidden="true" />
-          {tc("comment")}
-        </Button>
+        <CommentButton count={comments?.length} onClick={onShowComment} />
       )}
       {isView && goodsReceiveNote?.id && (
         <PrintDocumentButton
@@ -226,14 +189,22 @@ export function GrnHeader({
     </>
   );
 
+  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (grn-form-header, grid-cols-4)
+  // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
+  // gap-x-3 ให้ตรง gap-3 ของ general grid
   const ribbon = (
-    <DocumentRibbon>
-      <RibbonCell label={tfl("receivedBy")}>{receivedByName || "—"}</RibbonCell>
-      <RibbonCell label={tfl("department")}>{departmentName || "—"}</RibbonCell>
-      <RibbonCell label={tfl("grnDate")}>
-        {grnDate ? formatDate(grnDate, dateFormat) : "—"}
-      </RibbonCell>
-    </DocumentRibbon>
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
+      <RibbonField label={tfl("receivedBy")} value={receivedByName || "—"} />
+      <RibbonField
+        label={tfl("department")}
+        value={departmentName || "—"}
+        className="lg:col-span-2"
+      />
+      <RibbonField
+        label={tfl("grnDate")}
+        value={grnDate ? formatDate(grnDate, dateFormat) : "—"}
+      />
+    </div>
   );
 
   const subtitle =

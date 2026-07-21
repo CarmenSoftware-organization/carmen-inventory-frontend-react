@@ -150,7 +150,6 @@ const SavedWidgetsSection = () => {
       {
         onSuccess: () =>
           toast.success(tt("createSuccess", { entity: t("entity") })),
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -163,7 +162,6 @@ const SavedWidgetsSection = () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         setPendingDelete(null);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -192,7 +190,6 @@ const SavedWidgetsSection = () => {
         updateWidget.mutate(
           { id: w.id, order_index: w.order_index },
           {
-            onError: (err) => toast.error(err.message),
           },
         );
       }

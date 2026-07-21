@@ -16,7 +16,7 @@ RUN bun install --frozen-lockfile
 
 COPY . .
 # config ของ dev ห้ามติดไป image (สร้างใหม่ตอน start จาก env)
-RUN rm -f public/config.json && bun run build && rm -f dist/config.json dist/config.sample.json
+RUN rm -f public/config.json && bun run build && rm -f dist/config*.json
 
 # ─── Runner ──────────────────────────────────────────────────────────────────
 FROM nginx:1.27-alpine AS runner

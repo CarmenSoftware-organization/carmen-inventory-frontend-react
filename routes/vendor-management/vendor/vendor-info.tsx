@@ -1,4 +1,3 @@
-
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Info, Plus, X } from "lucide-react";
@@ -155,7 +154,8 @@ function InfoRow({
         size="icon-xs"
         aria-label={t("info.removeInfo")}
         onClick={onRemove}
-        className="bg-primary/10 text-muted-foreground hover:text-destructive hover:bg-primary/20 mt-0.5 rounded-md"
+        variant="ghost"
+        className="text-muted-foreground hover:text-destructive mt-0.5"
       >
         <X />
       </Button>
@@ -177,8 +177,8 @@ function EmptyInfo({
   readonly onAdd: () => void;
 }) {
   return (
-    <div className="border-primary/35 bg-primary/5 rounded-xl border border-dashed p-6 text-center">
-      <div className="text-primary-foreground mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-primary">
+    <div className="border-border/60 bg-muted/20 rounded-xl border border-dashed p-6 text-center">
+      <div className="bg-muted text-muted-foreground/70 mx-auto mb-2 flex size-9 items-center justify-center rounded-xl">
         <Info className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
@@ -186,12 +186,7 @@ function EmptyInfo({
         {description}
       </p>
       {!isView && (
-        <Button
-          type="button"
-          size="xs"
-          onClick={onAdd}
-          className="mt-2 rounded-full"
-        >
+        <Button type="button" size="xs" onClick={onAdd} className="mt-2">
           <Plus />
           {addLabel}
         </Button>

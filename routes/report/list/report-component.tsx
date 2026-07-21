@@ -50,6 +50,7 @@ const templateToReport = (t: ReportTemplate): Report => {
     _templateId: t.id,
     _content: t.content,
     _columns: t.columns ?? [],
+    _templateType: t.template_type ?? "list",
   };
 };
 

@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { useSubmitPhysicalCount } from "@/hooks/use-physical-count";
 import type {
   PhysicalCountData,
@@ -18,7 +17,6 @@ export function PcReviewComponent({
 }: PcReviewComponentProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const navigate = useNavigate();
-  const errorToast = useErrorToast();
   const submitPhysicalCount = useSubmitPhysicalCount(physicalCountReview.id);
 
   let m = 0;
@@ -48,7 +46,6 @@ export function PcReviewComponent({
           toast.success(t("reviewSubmitSuccess"));
           navigate("/inventory-management/physical-count");
         },
-        onError: errorToast,
       },
     );
   };

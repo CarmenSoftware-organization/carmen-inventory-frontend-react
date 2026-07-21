@@ -452,6 +452,8 @@
     "maxLength": "{field} must be at most {max} characters",
     "invalidEmail": "Invalid email format",
     "endDateAfterStart": "End date must not be before start date",
+    "moqTierPrice": "A higher MOQ tier must not have a higher unit price",
+    "moqDuplicate": "Duplicate MOQ tier for the same product and unit",
     "expectedDateAfterSr": "Expected date must not be before SR date",
     "atLeastOneItem": "At least one {item} is required",
     "cityOrDistrictRequired": "City or District is required",
@@ -820,7 +822,10 @@
       "members": "Department Members",
       "availableUsers": "Available Users",
       "hod": "Head of Department",
-      "notFound": "Department not found"
+      "notFound": "Department not found",
+      "generalDesc": "Code, name, account code and status.",
+      "membersDesc": "Users who belong to this department.",
+      "hodDesc": "Users who approve on behalf of this department."
     },
     "location": {
       "entity": "Store Location",
@@ -842,7 +847,10 @@
       "typeConsignment": "Consignment",
       "pcYes": "Physical Count: Yes",
       "pcNo": "Physical Count: No",
-      "activeDescription": "Activate or deactivate this location for inventory operations"
+      "activeDescription": "Activate or deactivate this location for inventory operations",
+      "generalDesc": "Code, name, type, delivery point and status.",
+      "usersDesc": "Users who can access this location.",
+      "productsDesc": "Products stocked at this location."
     },
     "taxProfile": {
       "entity": "Tax Profile",
@@ -1065,6 +1073,13 @@
           "long": "Hook up your outbound mailserver, manage signing domains, configure DKIM/SPF, edit notification templates per locale. Test-send to any address before going live.",
           "stat": "mail.aureliabay.com · OK",
           "meta": "4 templates · EN + TH"
+        },
+        "interface": {
+          "name": "Interfaces",
+          "one": "Accounting, POS and PMS connections.",
+          "long": "Point Carmen at the systems around it — the ledger that receives your postings, the tills that report what was sold, the property system that owns the folios. Set the codes each one expects and the cadence they run at.",
+          "stat": "3 interfaces",
+          "meta": "Accounting · POS · PMS"
         },
         "notifyTemplate": {
           "name": "Notification Templates",
@@ -1316,6 +1331,8 @@
       "slaUnit": "Unit",
       "availableActions": "Available Actions",
       "hideFields": "Hide Fields",
+      "showSignatureInReport": "Show signature in report",
+      "signatureLimitReached": "Maximum 5 signatures per report",
       "roleCreate": "Create",
       "roleApprove": "Approve",
       "rolePurchase": "Purchase",
@@ -1522,6 +1539,83 @@
       "emptyDesc": "There are no dashboard datasets registered for this business unit.",
       "emptyFilteredTitle": "No matching datasets",
       "emptyFilteredDesc": "Try a different search term."
+    },
+    "interface": {
+      "title": "Interfaces",
+      "desc": "Connections between Carmen and your accounting, POS and property systems.",
+      "save": "Save",
+      "saved": "Interface settings saved",
+      "loadError": "Could not load interface settings",
+      "notFound": "Interface not found",
+      "empty": "No interfaces are available for this business unit.",
+      "enabled": "Enabled",
+      "endpoint": "Endpoint",
+      "apiKey": "API key",
+      "apiKeyHint": "Leave untouched to keep the stored key.",
+      "statusEnabled": "Enabled",
+      "statusDisabled": "Disabled",
+      "frequencyOption": {
+        "manual": "Manual",
+        "hourly": "Hourly",
+        "daily": "Daily",
+        "monthly": "Monthly"
+      },
+      "accounting": {
+        "title": "Accounting Interface",
+        "desc": "How inventory activity reaches your general ledger and payables.",
+        "connection": "Connection",
+        "connectionDesc": "Which accounting system receives the postings.",
+        "brand": {
+          "carmen_gl": "Carmen GL",
+          "blueledgers": "BlueLedgers",
+          "external": "External system"
+        },
+        "defaults": "Vendor fallbacks",
+        "defaultsDesc": "Used when a vendor has no account code, department code or invoice value of its own.",
+        "defaultAccountCode": "Default account code",
+        "defaultDepartmentCode": "Default department code",
+        "defaultInvoiceValue": "Default invoice value",
+        "posting": "Posting",
+        "postingDesc": "Export format and how often postings are sent.",
+        "exportFormat": "Export format",
+        "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
+        "postingFrequency": "Posting frequency"
+      },
+      "pos": {
+        "title": "POS Interface",
+        "desc": "How sales and consumption from your point-of-sale system reach inventory.",
+        "connection": "Connection",
+        "connectionDesc": "Which POS system Carmen reads from.",
+        "brand": {
+          "micros": "Oracle Micros",
+          "infrasys": "Infrasys",
+          "square": "Square"
+        },
+        "sync": "Sync",
+        "syncDesc": "How often sales are pulled and how they reduce stock.",
+        "syncFrequency": "Sync frequency",
+        "defaultLocationCode": "Default location code",
+        "consumptionPosting": "Consumption posting",
+        "postingOption": {
+          "recipe": "By recipe",
+          "direct": "Direct to item"
+        }
+      },
+      "pms": {
+        "title": "PMS Interface",
+        "desc": "How city ledger and credit card postings reach receivables from your property system.",
+        "connection": "Connection",
+        "connectionDesc": "Which property management system Carmen reads from.",
+        "brand": {
+          "opera": "Oracle Opera",
+          "protel": "Protel"
+        },
+        "propertyCode": "Property code",
+        "posting": "Posting",
+        "postingDesc": "Which postings Carmen pulls from the PMS.",
+        "postCityLedger": "Post city ledger",
+        "postCreditCard": "Post credit card"
+      }
     }
   },
   "vendorManagement": {
@@ -2879,8 +2973,8 @@
       "noItemsDesc": "Add items to this template.",
       "removeItem": "Remove Item",
       "namePlaceholder": "e.g. Food Template",
-      "sectionNotes": "Details",
-      "sectionNotesSub": "Description and status of this template"
+      "generalDesc": "Workflow, name, description and status of this template.",
+      "itemsDesc": "Products included in this template."
     },
     "purchaseOrder": {
       "entity": "Purchase Order",
@@ -3067,13 +3161,15 @@
       "noGrnItemsDesc": "The referenced GRN has no received lines to credit.",
       "nItemsSelected": "{count} selected",
       "addNItems": "{count, plural, =0 {Add} =1 {Add 1 item} other {Add # items}}",
-      "cnAmount": "CN Amount"
+      "cnAmount": "CN Amount",
+      "overReturnWarning": "Return exceeds received ({received})"
     },
     "goodsReceiveNote": {
       "entity": "Goods Receive Note",
       "title": "Goods Receive Note",
       "desc": "Manage goods receive notes for procurement.",
       "mixedCurrencyError": "Selected POs use different currencies. Please select POs with the same currency.",
+      "overReceiptWarning": "Received exceeds ordered ({ordered})",
       "documentInfo": "Document Info",
       "add": "Add GRN",
       "create": "Create GRN",

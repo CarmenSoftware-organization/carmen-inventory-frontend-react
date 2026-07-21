@@ -85,6 +85,20 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
                 </Badge>
               </>
             )}
+            {item._templateType && (
+              <>
+                <span aria-hidden className="text-border">
+                  ·
+                </span>
+                <Badge
+                  variant="outline"
+                  size="sm"
+                  className="text-muted-foreground inline-flex items-center px-1.5 py-0 text-[0.5625rem] font-semibold tracking-wide uppercase"
+                >
+                  {item._templateType}
+                </Badge>
+              </>
+            )}
           </div>
         </div>
       </div>

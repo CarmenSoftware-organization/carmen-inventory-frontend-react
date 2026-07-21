@@ -157,7 +157,7 @@ export function useActivePriceListsByVendor(
         API_ENDPOINTS.PRICE_LIST_ACTIVE_BY_VENDOR(buCode!, vendorId!, date!),
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to load active price lists for vendor",
         );
@@ -181,7 +181,7 @@ export function usePriceListActiveVendors(date: string | undefined) {
         API_ENDPOINTS.PRICE_LIST_ACTIVE_VENDORS(buCode!, date!),
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to load active vendors");
+        throw await ApiError.from(res, "Failed to load active vendors");
       }
       const json = await res.json();
       return json.data ?? [];

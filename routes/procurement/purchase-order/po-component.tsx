@@ -66,9 +66,10 @@ export default function PoComponent() {
   const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<PurchaseOrder | null>(null);
-  const [viewMode, setViewMode] = useState<"my-pending" | "all-document">(
-    "my-pending",
-  );
+  const [viewModeParam, setViewMode] = useURL("view", {
+    defaultValue: "my-pending",
+  });
+  const viewMode = viewModeParam as "my-pending" | "all-document";
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -389,7 +390,6 @@ export default function PoComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

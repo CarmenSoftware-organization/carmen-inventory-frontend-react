@@ -452,6 +452,8 @@
     "maxLength": "{field}ต้องมีไม่เกิน {max} ตัวอักษร",
     "invalidEmail": "รูปแบบอีเมลไม่ถูกต้อง",
     "endDateAfterStart": "วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มต้น",
+    "moqTierPrice": "MOQ ชั้นที่สูงกว่าต้องไม่แพงกว่าชั้นที่ต่ำกว่า",
+    "moqDuplicate": "MOQ ซ้ำกันใน product + หน่วยเดียวกัน",
     "expectedDateAfterSr": "วันที่คาดว่าจะได้รับต้องไม่ก่อนวันที่ SR",
     "atLeastOneItem": "ต้องมี{item}อย่างน้อย 1 รายการ",
     "cityOrDistrictRequired": "กรุณากรอกเมืองหรือเขต",
@@ -820,7 +822,10 @@
       "members": "สมาชิกแผนก",
       "availableUsers": "ผู้ใช้ที่พร้อม",
       "hod": "หัวหน้าแผนก",
-      "notFound": "ไม่พบแผนก"
+      "notFound": "ไม่พบแผนก",
+      "generalDesc": "รหัส ชื่อ รหัสบัญชี และสถานะ",
+      "membersDesc": "ผู้ใช้ที่สังกัดแผนกนี้",
+      "hodDesc": "ผู้ใช้ที่อนุมัติในนามของแผนกนี้"
     },
     "location": {
       "entity": "คลังสินค้า",
@@ -842,7 +847,10 @@
       "typeConsignment": "ฝากขาย",
       "pcYes": "ตรวจนับ: ใช่",
       "pcNo": "ตรวจนับ: ไม่",
-      "activeDescription": "เปิดหรือปิดการใช้งานคลังสินค้านี้สำหรับการดำเนินงานสินค้าคงคลัง"
+      "activeDescription": "เปิดหรือปิดการใช้งานคลังสินค้านี้สำหรับการดำเนินงานสินค้าคงคลัง",
+      "generalDesc": "รหัส ชื่อ ประเภท จุดส่งของ และสถานะ",
+      "usersDesc": "ผู้ใช้ที่เข้าถึงคลังสินค้านี้ได้",
+      "productsDesc": "สินค้าที่เก็บในคลังสินค้านี้"
     },
     "taxProfile": {
       "entity": "โปรไฟล์ภาษี",
@@ -1065,6 +1073,13 @@
           "long": "Hook up your outbound mailserver, manage signing domains, configure DKIM/SPF, edit notification templates per locale. Test-send to any address before going live.",
           "stat": "mail.aureliabay.com · OK",
           "meta": "4 templates · EN + TH"
+        },
+        "interface": {
+          "name": "การเชื่อมต่อระบบภายนอก",
+          "one": "การเชื่อมต่อระบบบัญชี ระบบขายหน้าร้าน และระบบบริหารโรงแรม",
+          "long": "กำหนดว่า Carmen จะคุยกับระบบรอบตัวอย่างไร — บัญชีแยกประเภทที่รับข้อมูลการลงบัญชี ระบบขายหน้าร้านที่รายงานยอดขาย และระบบบริหารโรงแรมที่ถือข้อมูลใบแจ้งหนี้ ตั้งรหัสที่แต่ละระบบต้องใช้และความถี่ในการส่งข้อมูล",
+          "stat": "3 การเชื่อมต่อ",
+          "meta": "บัญชี · ขายหน้าร้าน · บริหารโรงแรม"
         },
         "notifyTemplate": {
           "name": "Notification Templates",
@@ -1316,6 +1331,8 @@
       "slaUnit": "หน่วย",
       "availableActions": "การดำเนินการที่พร้อมใช้",
       "hideFields": "ซ่อนฟิลด์",
+      "showSignatureInReport": "แสดงช่องเซ็นในรายงาน",
+      "signatureLimitReached": "ช่องเซ็นในรายงานได้สูงสุด 5 ช่อง",
       "roleCreate": "สร้าง",
       "roleApprove": "อนุมัติ",
       "rolePurchase": "จัดซื้อ",
@@ -1522,6 +1539,83 @@
       "emptyDesc": "ยังไม่มีชุดข้อมูลแดชบอร์ดสำหรับหน่วยธุรกิจนี้",
       "emptyFilteredTitle": "ไม่พบชุดข้อมูลที่ตรงกัน",
       "emptyFilteredDesc": "ลองเปลี่ยนคำค้นหา"
+    },
+    "interface": {
+      "title": "การเชื่อมต่อระบบภายนอก",
+      "desc": "การเชื่อมต่อระหว่าง Carmen กับระบบบัญชี ระบบขายหน้าร้าน และระบบบริหารโรงแรม",
+      "save": "บันทึก",
+      "saved": "บันทึกการตั้งค่าการเชื่อมต่อแล้ว",
+      "loadError": "โหลดการตั้งค่าการเชื่อมต่อไม่สำเร็จ",
+      "notFound": "ไม่พบการเชื่อมต่อที่ต้องการ",
+      "empty": "ไม่มีการเชื่อมต่อที่เปิดให้ business unit นี้ใช้งาน",
+      "enabled": "เปิดใช้งาน",
+      "endpoint": "ปลายทาง",
+      "apiKey": "API key",
+      "apiKeyHint": "ปล่อยไว้เหมือนเดิมหากไม่ต้องการเปลี่ยน key",
+      "statusEnabled": "เปิดใช้งาน",
+      "statusDisabled": "ปิดใช้งาน",
+      "frequencyOption": {
+        "manual": "ด้วยตนเอง",
+        "hourly": "ทุกชั่วโมง",
+        "daily": "ทุกวัน",
+        "monthly": "ทุกเดือน"
+      },
+      "accounting": {
+        "title": "การเชื่อมต่อระบบบัญชี",
+        "desc": "การส่งข้อมูลความเคลื่อนไหวของสินค้าคงคลังไปยังบัญชีแยกประเภทและเจ้าหนี้",
+        "connection": "การเชื่อมต่อ",
+        "connectionDesc": "ระบบบัญชีที่จะรับข้อมูล",
+        "brand": {
+          "carmen_gl": "Carmen GL",
+          "blueledgers": "BlueLedgers",
+          "external": "ระบบภายนอก"
+        },
+        "defaults": "ค่าเริ่มต้นแทนผู้ขาย",
+        "defaultsDesc": "ใช้เมื่อผู้ขายไม่ได้กำหนดรหัสบัญชี รหัสแผนก หรือมูลค่าใบแจ้งหนี้ไว้เอง",
+        "defaultAccountCode": "รหัสบัญชีเริ่มต้น",
+        "defaultDepartmentCode": "รหัสแผนกเริ่มต้น",
+        "defaultInvoiceValue": "มูลค่าใบแจ้งหนี้เริ่มต้น",
+        "posting": "การส่งข้อมูล",
+        "postingDesc": "รูปแบบไฟล์และความถี่ในการส่ง",
+        "exportFormat": "รูปแบบไฟล์",
+        "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
+        "postingFrequency": "ความถี่ในการส่ง"
+      },
+      "pos": {
+        "title": "การเชื่อมต่อระบบขายหน้าร้าน",
+        "desc": "การนำยอดขายและการใช้วัตถุดิบจากระบบขายหน้าร้านเข้าสู่สินค้าคงคลัง",
+        "connection": "การเชื่อมต่อ",
+        "connectionDesc": "ระบบขายหน้าร้านที่ Carmen จะดึงข้อมูลมา",
+        "brand": {
+          "micros": "Oracle Micros",
+          "infrasys": "Infrasys",
+          "square": "Square"
+        },
+        "sync": "การดึงข้อมูล",
+        "syncDesc": "ความถี่ในการดึงยอดขาย และวิธีตัดสต๊อก",
+        "syncFrequency": "ความถี่ในการดึงข้อมูล",
+        "defaultLocationCode": "รหัสสถานที่เริ่มต้น",
+        "consumptionPosting": "วิธีตัดวัตถุดิบ",
+        "postingOption": {
+          "recipe": "ตามสูตรอาหาร",
+          "direct": "ตัดจากสินค้าโดยตรง"
+        }
+      },
+      "pms": {
+        "title": "การเชื่อมต่อระบบบริหารโรงแรม",
+        "desc": "การนำรายการ City Ledger และบัตรเครดิตจากระบบบริหารโรงแรมเข้าสู่ลูกหนี้",
+        "connection": "การเชื่อมต่อ",
+        "connectionDesc": "ระบบบริหารโรงแรมที่ Carmen จะดึงข้อมูลมา",
+        "brand": {
+          "opera": "Oracle Opera",
+          "protel": "Protel"
+        },
+        "propertyCode": "รหัสโรงแรม",
+        "posting": "การดึงรายการ",
+        "postingDesc": "รายการที่ Carmen จะดึงจากระบบบริหารโรงแรม",
+        "postCityLedger": "ดึงรายการ City Ledger",
+        "postCreditCard": "ดึงรายการบัตรเครดิต"
+      }
     }
   },
   "vendorManagement": {
@@ -2874,8 +2968,8 @@
       "noItemsDesc": "เพิ่มรายการในแม่แบบนี้",
       "removeItem": "ลบรายการ",
       "namePlaceholder": "เช่น แม่แบบอาหาร",
-      "sectionNotes": "รายละเอียด",
-      "sectionNotesSub": "คำอธิบายและสถานะของแม่แบบนี้"
+      "generalDesc": "เวิร์กโฟลว์ ชื่อ คำอธิบาย และสถานะของแม่แบบนี้",
+      "itemsDesc": "สินค้าที่อยู่ในแม่แบบนี้"
     },
     "purchaseOrder": {
       "entity": "ใบสั่งซื้อ",
@@ -3062,13 +3156,15 @@
       "noGrnItemsDesc": "GRN อ้างอิงไม่มีรายการที่รับเข้าให้ทำใบลดหนี้",
       "nItemsSelected": "เลือก {count} รายการ",
       "addNItems": "{count, plural, =0 {เพิ่ม} other {เพิ่ม # รายการ}}",
-      "cnAmount": "จำนวนลดหนี้"
+      "cnAmount": "จำนวนลดหนี้",
+      "overReturnWarning": "คืนเกินจำนวนรับ (รับ {received})"
     },
     "goodsReceiveNote": {
       "entity": "ใบรับสินค้า",
       "title": "ใบรับสินค้า",
       "desc": "จัดการใบรับสินค้าสำหรับจัดซื้อ",
       "mixedCurrencyError": "PO ที่เลือกใช้สกุลเงินต่างกัน กรุณาเลือก PO ที่ใช้สกุลเงินเดียวกัน",
+      "overReceiptWarning": "รับเกินจำนวนสั่ง (สั่ง {ordered})",
       "documentInfo": "ข้อมูลเอกสาร",
       "add": "เพิ่ม GRN",
       "create": "สร้าง GRN",

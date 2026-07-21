@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -42,6 +42,7 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(equipment ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -118,7 +119,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
             form.reset(values);
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -133,17 +133,24 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
             // prop ยัง undefined)
             navigate("/operation-plan/equipment");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     }
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/operation-plan/equipment"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/operation-plan/equipment");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -168,7 +175,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/operation-plan/equipment");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

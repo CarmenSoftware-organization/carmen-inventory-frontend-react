@@ -1,6 +1,6 @@
 
 import type { Dispatch, SetStateAction } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -71,6 +71,7 @@ export function usePoFormHandlers({
   revealErrors,
 }: UsePoFormHandlersOptions) {
   const navigate = useNavigate();
+  const location = useLocation();
   const t = useTranslations("procurement.purchaseOrder");
   const tt = useTranslations("toast");
   const buCode = useBuCode();
@@ -172,7 +173,6 @@ export function usePoFormHandlers({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (mode === "add") {
@@ -193,7 +193,6 @@ export function usePoFormHandlers({
             navigate("/procurement/purchase-order");
           }
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -209,11 +208,19 @@ export function usePoFormHandlers({
     });
   };
 
-  const handleBack = () => {
-    if (mode === "edit" || mode === "add") {
-      discard.confirm(() => navigate("/procurement/purchase-order"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/procurement/purchase-order");
+    }
+  };
+
+  const handleBack = () => {
+    if (mode === "edit" || mode === "add") {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -265,7 +272,6 @@ export function usePoFormHandlers({
         onSuccess: () => {
           toast.success(t("submitted"));
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -322,7 +328,6 @@ export function usePoFormHandlers({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -348,7 +353,6 @@ export function usePoFormHandlers({
           setShowReject(false);
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -377,7 +381,6 @@ export function usePoFormHandlers({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -389,7 +392,6 @@ export function usePoFormHandlers({
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowClose(false);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -400,7 +402,6 @@ export function usePoFormHandlers({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/procurement/purchase-order");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

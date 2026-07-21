@@ -185,12 +185,18 @@ function QtyCell({
   locked: boolean;
 }) {
   "use no memo";
+  const t = useTranslations("procurement.creditNote");
   const quantity = useWatch({
     control: form.control,
     name: `items.${index}.quantity`,
   });
   const unitName =
     useWatch({ control: form.control, name: `items.${index}.unit_name` }) ?? "";
+  const grnReceivedQty =
+    useWatch({
+      control: form.control,
+      name: `items.${index}._grn_received_qty`,
+    }) ?? 0;
   const error = form.formState.errors.items?.[index]?.quantity?.message;
   if (disabled || locked) {
     return (
@@ -201,22 +207,35 @@ function QtyCell({
       />
     );
   }
+  // เตือน (ไม่ block) เมื่อคืนเกินจำนวนที่รับตาม GRN บรรทัดอ้างอิง — backend
+  // เช็คสะสมข้ามใบอีกชั้นตอน submit (เพดานจริงอาจต่ำกว่านี้ถ้าเคยคืนไปแล้ว)
+  const overReturn =
+    grnReceivedQty > 0 && (Number(quantity) || 0) > grnReceivedQty;
   return (
-    <InputSuffixField className="w-full" error={!!error}>
-      <InputSuffixInput
-        id={`items-${index}-quantity`}
-        type="number"
-        inputMode="decimal"
-        min={1}
-        placeholder="0"
-        {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
-      />
-      {unitName && (
-        <InputSuffixAddon>
-          <span className="text-muted-foreground px-2 text-xs">{unitName}</span>
-        </InputSuffixAddon>
+    <>
+      <InputSuffixField className="w-full" error={!!error}>
+        <InputSuffixInput
+          id={`items-${index}-quantity`}
+          type="number"
+          inputMode="decimal"
+          min={1}
+          placeholder="0"
+          {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
+        />
+        {unitName && (
+          <InputSuffixAddon>
+            <span className="text-muted-foreground px-2 text-xs">
+              {unitName}
+            </span>
+          </InputSuffixAddon>
+        )}
+      </InputSuffixField>
+      {overReturn && (
+        <p className="mt-0.5 text-right text-[0.7rem] text-amber-600 dark:text-amber-500">
+          {t("overReturnWarning", { received: grnReceivedQty })}
+        </p>
       )}
-    </InputSuffixField>
+    </>
   );
 }
 

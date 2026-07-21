@@ -200,7 +200,6 @@ export default function UserProfileSetting() {
         toast.success(t("profileUpdated"));
         form.reset(values);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

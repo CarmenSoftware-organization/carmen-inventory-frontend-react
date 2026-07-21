@@ -72,7 +72,7 @@ export function SrRequestDetails({
   const viewFieldGap = isReadOnly ? "gap-1" : undefined;
 
   return (
-    <div className="my-4 grid grid-cols-1 gap-4 sm:grid-cols-5">
+    <div className="my-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
       {isDraft && (
         <Field className={viewFieldGap}>
           <FieldLabel required={!isReadOnly} className={labelMuted}>

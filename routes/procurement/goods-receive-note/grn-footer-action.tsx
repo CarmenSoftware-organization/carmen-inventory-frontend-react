@@ -27,8 +27,10 @@ export function GrnFooterAction({
 
   if (!showActions) return null;
 
+  // ปุ่ม inline — วางเป็น children ของ SummaryFooterBar เพื่ออยู่ line เดียวกับ
+  // สรุปยอด (เหมือน PR footer) แทนการเป็นแถบแยกด้านล่าง
   return (
-    <div className="bg-background sticky bottom-0 z-20 mt-auto flex items-center justify-end gap-2 border-t p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+    <div className="flex shrink-0 items-center gap-2">
       <Button
         type="button"
         variant="success"

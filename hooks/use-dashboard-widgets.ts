@@ -16,7 +16,7 @@ function useDashboardWidgets(module: string) {
         API_ENDPOINTS.DASHBOARD_WIDGETS(buCode!, module),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           `Failed to fetch ${module} dashboard widgets`,
         );

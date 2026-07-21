@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import { Loader2 } from "lucide-react";
 import { useProductUnits, type ProductUnit } from "@/hooks/use-product-units";
 import { cn } from "@/lib/utils";
+import { FieldPlainText } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -70,18 +71,12 @@ export function LookupProductUnit({
     onValueChangeRef.current(units[0].id);
   }, [units, value]);
 
+  // FieldPlainText (ไม่ใช่ <span> เปล่า) เพราะ `Field` จะมุด label ให้ก็ต่อเมื่อ
+  // เจอ data-slot="field-plain-text" เป็น direct child — และมันแสดง "—" เองอยู่แล้ว
   if (readOnly) {
     const selected = units.find((u) => u.id === value);
     return (
-      <span
-        className={cn(
-          "inline-flex min-h-8 items-center text-xs",
-          !selected && "text-muted-foreground",
-          className,
-        )}
-      >
-        {selected?.name ?? "—"}
-      </span>
+      <FieldPlainText className={className}>{selected?.name}</FieldPlainText>
     );
   }
 

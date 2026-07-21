@@ -65,7 +65,7 @@ export function useUpdateBusinessUnit(buId: string | undefined) {
         } catch {
           // JSON parse failed
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage || "Failed to update business unit",
         );

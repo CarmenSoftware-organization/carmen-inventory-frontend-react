@@ -28,7 +28,7 @@ export function useDashboardDatasets(enabled = true) {
         API_ENDPOINTS.DASHBOARD_DATASETS(buCode!),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch dashboard datasets");
+        throw await ApiError.from(res, "Failed to fetch dashboard datasets");
       const json = await res.json();
       return json.data as DashboardDatasetListResponse;
     },
@@ -52,7 +52,7 @@ export function useDashboardDatasetDetail(id: string | undefined) {
         API_ENDPOINTS.DASHBOARD_DATASET_BY_ID(buCode!, id!),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch dataset detail");
+        throw await ApiError.from(res, "Failed to fetch dataset detail");
       const json = await res.json();
       return json.data as DashboardDatasetDetail;
     },

@@ -97,7 +97,6 @@ export function RecipeEquipmentCategoryDialog({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             onOpenChange(false);
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -106,7 +105,6 @@ export function RecipeEquipmentCategoryDialog({
           toast.success(tt("createSuccess", { entity: t("entity") }));
           onOpenChange(false);
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { FormToolbar } from "@/components/ui/form-toolbar";
@@ -20,7 +20,6 @@ import type { FormMode } from "@/types/form";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { PcGeneralFields } from "./pc-general-fields";
 import {
@@ -39,6 +38,7 @@ export function PcForm({ physicalCount }: PcFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(physicalCount ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -65,7 +65,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
-  const errorToast = useErrorToast();
 
   const onSubmit = (values: PhysicalCountFormValues) => {
     const payload = {
@@ -80,7 +79,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: errorToast,
         },
       );
     } else if (isAdd) {
@@ -89,7 +87,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/inventory-management/physical-count");
         },
-        onError: errorToast,
       });
     }
   };
@@ -105,18 +102,27 @@ export function PcForm({ physicalCount }: PcFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() =>
-        navigate("/inventory-management/physical-count"),
-      );
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/inventory-management/physical-count");
     }
   };
 
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
+    }
+  };
+
   return (
-    <div className="space-y-4">
+    // px-4 ให้ทั้ง header+form มี gutter ซ้าย — FormToolbar flush (title ตรง form
+    // body) และปุ่ม back hang ออกซ้ายพอดีในกรอบ ไม่โดน main-content ตัด (pc เป็น
+    // full-width ต่างจาก config forms ที่อยู่ใน centered card ปุ่มลอยนอกได้)
+    <div className="space-y-4 px-4">
       <FormToolbar
         entity={t("entity")}
         mode={mode}
@@ -163,7 +169,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/inventory-management/physical-count");
               },
-              onError: errorToast,
             });
           }}
         />

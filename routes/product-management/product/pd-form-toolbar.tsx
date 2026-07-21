@@ -2,9 +2,10 @@ import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import type { FormMode } from "@/types/form";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
-import { ArrowLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 import { useTranslations } from "use-intl";
 
 interface FormToolbarProps {
@@ -80,101 +81,90 @@ function FormToolbar({
     return isEdit ? tc("save") : t("createProduct");
   }
 
-  return (
-    <div className="flex flex-col gap-2 border-b pt-2 pb-3">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-1 items-start gap-2">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={onBack}
-            aria-label={tc("goBack")}
-            className="mt-0.5 shrink-0"
-          >
-            <ArrowLeft />
-          </Button>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h1
-                className="truncate text-lg font-semibold"
-                title={displayName}
-              >
-                {displayName}
-              </h1>
-              {renderStatusBadge()}
-              {!isAdd && displayCode && (
-                <span className="text-muted-foreground text-xs">
-                  {displayCode}
-                </span>
-              )}
-              {isAdd && (
-                <span className="text-muted-foreground text-xs">
-                  {t("fillRequiredBefore")}
-                </span>
-              )}
-            </div>
-            {isAdd ? (
-              <p className="text-muted-foreground text-xs">{t("neverSaved")}</p>
-            ) : (
-              product?.local_name && (
-                <p
-                  className="text-muted-foreground text-xs"
-                  style={{
-                    fontFamily: '"IBM Plex Sans Thai", var(--font-sans)',
-                  }}
-                >
-                  {product.local_name}
-                </p>
-              )
-            )}
-          </div>
-        </div>
+  // status + code/hint แสดงข้าง title (badges slot)
+  const badges = (
+    <>
+      {renderStatusBadge()}
+      {!isAdd && displayCode && (
+        <span className="text-muted-foreground text-xs">{displayCode}</span>
+      )}
+      {isAdd && (
+        <span className="text-muted-foreground text-xs">
+          {t("fillRequiredBefore")}
+        </span>
+      )}
+    </>
+  );
 
-        <div className="flex shrink-0 items-center gap-2">
-          {isEdit && product && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onDelete}
-              disabled={isPending || deleteIsPending}
-              className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            >
-              <Trash2 aria-hidden="true" />
-              {tc("delete")}
-            </Button>
-          )}
-          {isView ? (
-            <Button size="sm" onClick={onEdit}>
-              <Pencil aria-hidden="true" />
-              {tc("edit")}
-            </Button>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onCancel}
-                disabled={isPending}
-              >
-                <X className="size-4" aria-hidden="true" />
-                {tc("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form="product-form"
-                disabled={saveDisabled}
-              >
-                <Save className="size-4" aria-hidden="true" />
-                {getButtonLabel()}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+  // subtitle: add → neverSaved · view/edit → local_name (custom Thai font)
+  const subtitle = isAdd
+    ? t("neverSaved")
+    : product?.local_name
+      ? (
+          <span
+            style={{ fontFamily: '"IBM Plex Sans Thai", var(--font-sans)' }}
+          >
+            {product.local_name}
+          </span>
+        )
+      : undefined;
+
+  const actions = (
+    <>
+      {isEdit && product && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onDelete}
+          disabled={isPending || deleteIsPending}
+          className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
+          <Trash2 aria-hidden="true" />
+          {tc("delete")}
+        </Button>
+      )}
+      {isView ? (
+        <Button size="sm" onClick={onEdit}>
+          <Pencil aria-hidden="true" />
+          {tc("edit")}
+        </Button>
+      ) : (
+        <>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+            disabled={isPending}
+          >
+            <X className="size-4" aria-hidden="true" />
+            {tc("cancel")}
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            form="product-form"
+            disabled={saveDisabled}
+          >
+            <Save className="size-4" aria-hidden="true" />
+            {getButtonLabel()}
+          </Button>
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <DocFormHeader
+      title={displayName}
+      subtitle={subtitle}
+      backLabel={tc("goBack")}
+      onBack={onBack}
+      badges={badges}
+      actions={actions}
+      flush
+    />
   );
 }
 

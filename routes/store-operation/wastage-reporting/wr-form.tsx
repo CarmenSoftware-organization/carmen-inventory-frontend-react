@@ -8,8 +8,9 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { useTranslations } from "use-intl";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Field,
@@ -138,7 +139,6 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/store-operation/wastage-reporting");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -147,7 +147,6 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/store-operation/wastage-reporting");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -163,74 +162,68 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
 
   const labels = getModeLabels(mode, t("entity"));
 
-  return (
-    <div className="space-y-4">
-      <div className="sticky top-0 z-10 bg-background flex items-center justify-between py-2">
-        <div className="flex items-center gap-2">
+  const statusBadge =
+    !isAdd && wastageReport?.status ? (
+      <Badge className={WR_STATUS_CONFIG[wastageReport.status]?.className}>
+        {WR_STATUS_CONFIG[wastageReport.status]?.label ?? wastageReport.status}
+      </Badge>
+    ) : undefined;
+
+  const actions = (
+    <>
+      {isView ? (
+        <Button size="sm" onClick={() => setMode("edit")}>
+          <Pencil aria-hidden="true" />
+          {tc("edit")}
+        </Button>
+      ) : (
+        <>
           <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={tc("goBack")}
-            onClick={() => navigate("/store-operation/wastage-reporting")}
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleCancel}
+            disabled={isPending}
           >
-            <ArrowLeft />
+            {tc("cancel")}
           </Button>
-          {isAdd ? (
-            <h1 className="font-semibold text-lg">{labels.title}</h1>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <h1 className="font-semibold text-lg">{wastageReport?.wr_no}</h1>
-              {wastageReport?.status && (
-                <Badge
-                  className={WR_STATUS_CONFIG[wastageReport.status]?.className}
-                >
-                  {WR_STATUS_CONFIG[wastageReport.status]?.label ??
-                    wastageReport.status}
-                </Badge>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          {isView ? (
-            <Button size="sm" onClick={() => setMode("edit")}>
-              <Pencil aria-hidden="true" />
-              {tc("edit")}
-            </Button>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-                disabled={isPending}
-              >
-                {tc("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form="wastage-report-form"
-                disabled={isPending}
-              >
-                {isPending ? labels.pending : labels.submit}
-              </Button>
-            </>
-          )}
-          {isEdit && wastageReport && (
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowDelete(true)}
-              disabled={isPending || deleteWr.isPending}
-            >
-              <Trash2 aria-hidden="true" />
-              {tc("delete")}
-            </Button>
-          )}
-        </div>
+          <Button
+            type="submit"
+            size="sm"
+            form="wastage-report-form"
+            disabled={isPending}
+          >
+            {isPending ? labels.pending : labels.submit}
+          </Button>
+        </>
+      )}
+      {isEdit && wastageReport && (
+        <Button
+          type="button"
+          variant="destructive"
+          size="sm"
+          onClick={() => setShowDelete(true)}
+          disabled={isPending || deleteWr.isPending}
+        >
+          <Trash2 aria-hidden="true" />
+          {tc("delete")}
+        </Button>
+      )}
+    </>
+  );
+
+  return (
+    // px-4 ให้ header+form มี gutter (full-width flush เหมือน pc/product)
+    <div className="space-y-4 px-4">
+      <div className="sticky top-0 z-10 bg-background py-2">
+        <DocFormHeader
+          title={isAdd ? labels.title : (wastageReport?.wr_no ?? "")}
+          backLabel={tc("goBack")}
+          onBack={() => navigate("/store-operation/wastage-reporting")}
+          badges={statusBadge}
+          actions={actions}
+          flush
+        />
       </div>
 
       <form
@@ -320,7 +313,6 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/store-operation/wastage-reporting");
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

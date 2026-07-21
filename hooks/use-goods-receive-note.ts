@@ -42,7 +42,7 @@ export function useGoodsReceiveNote(
       const url = buildUrl(API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode!), params);
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch goods receive notes");
+        throw await ApiError.from(res, "Failed to fetch goods receive notes");
       return res.json();
     },
     ...CACHE_DYNAMIC,
@@ -79,7 +79,7 @@ export function useGoodsReceiveNoteByVendor(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch goods receive notes by vendor",
         );
@@ -120,7 +120,7 @@ export function useGoodsReceiveNoteByVendorForCn(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch goods receive notes by vendor for CN",
         );
@@ -156,7 +156,7 @@ export function useGrnProducts(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch GRN products");
+        throw await ApiError.from(res, "Failed to fetch GRN products");
       return res.json();
     },
     enabled: !!buCode && !!grnId,
@@ -201,7 +201,7 @@ export function useGrnProductLocations(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch GRN product locations",
         );
@@ -237,7 +237,7 @@ export function useGrnLocations(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch GRN locations");
+        throw await ApiError.from(res, "Failed to fetch GRN locations");
       return res.json();
     },
     enabled: !!buCode && !!grnId,
@@ -282,7 +282,7 @@ export function useGrnLocationProducts(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch GRN location products",
         );
@@ -311,7 +311,7 @@ export function useGoodsReceiveNoteById(id: string | undefined) {
         `${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode!)}/${id}`,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch goods receive note");
+        throw await ApiError.from(res, "Failed to fetch goods receive note");
       const json = await res.json();
       return json.data;
     },
@@ -403,10 +403,13 @@ export function useSaveGoodsReceiveNote() {
  * confirm.mutate(grnId);
  */
 export function useCommitGoodsReceiveNote() {
-  return useApiMutation<string>({
-    mutationFn: (id, buCode) =>
+  return useApiMutation<{ id: string; doc_version: number }>({
+    // ส่ง body { doc_version } — backend commit ต้องการ object (ไม่งั้น 400
+    // "(root): Required (expected object, received undefined)") เหมือน CN submit
+    mutationFn: ({ id, doc_version }, buCode) =>
       httpClient.patch(
         `${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode)}/${id}/commit`,
+        { doc_version },
       ),
     invalidateKeys: [QUERY_KEYS.GOODS_RECEIVE_NOTES],
     errorMessage: "Failed to confirm goods receive note",
@@ -453,7 +456,7 @@ export function useGoodsReceiveNoteComments(grnId: string | undefined) {
         API_ENDPOINTS.GOODS_RECEIVE_NOTE_COMMENT(buCode, grnId),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch comments");
+        throw await ApiError.from(res, "Failed to fetch comments");
       const json = await res.json();
       return json.data ?? [];
     },
@@ -555,7 +558,7 @@ export function useExportGoodsReceiveNote() {
         const url = buildUrl(API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode), params);
         const res = await httpClient.get(url);
         if (!res.ok)
-          throw ApiError.fromResponse(res, "Failed to fetch goods receive notes");
+          throw await ApiError.from(res, "Failed to fetch goods receive notes");
         const json = await res.json();
         return json.data ?? [];
       },

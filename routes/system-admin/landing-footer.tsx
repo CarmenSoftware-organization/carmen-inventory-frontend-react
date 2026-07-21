@@ -14,7 +14,7 @@ export function LandingFooter({ t }: { readonly t: TFn }) {
       />
       <div className="relative grid items-center gap-4 md:grid-cols-[1fr_auto]">
         <div>
-          <div className="text-info text-[0.5625rem] font-bold tracking-wider uppercase">
+          <div className="text-info text-[0.5625rem] font-semibold tracking-wider uppercase">
             <span
               className="bg-info mr-2 inline-block h-px w-4 align-middle"
               aria-hidden

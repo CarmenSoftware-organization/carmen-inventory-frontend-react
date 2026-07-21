@@ -1,13 +1,7 @@
-
 import { lazy, Suspense, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
-import {
-  Building2,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
@@ -17,11 +11,12 @@ import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import {
   Field,
-  FieldGroup,
   FieldInput,
   FieldLabel,
+  FieldPlainText,
 } from "@/components/ui/field";
 import { FormToolbar } from "@/components/ui/form-toolbar";
+import { SettingSection } from "@/components/ui/setting-section";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { TransferItem } from "@/components/ui/transfer";
@@ -33,7 +28,6 @@ import {
 } from "@/hooks/use-department";
 import { useAllUsers } from "@/hooks/use-all-users";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { cn } from "@/lib/utils";
 import type { Department } from "@/types/department";
 import type { FormMode } from "@/types/form";
 import { transferHandler } from "@/utils/transfer-handler";
@@ -56,6 +50,7 @@ interface DepartmentFormProps {
 
 export function DepartmentForm({ department }: DepartmentFormProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(department ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -183,7 +178,6 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -194,7 +188,6 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           navigate(`/config/department/${id}`, { replace: true });
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -222,120 +215,144 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/config/department"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/config/department");
     }
   };
 
-  const codeBadge = department && !isAdd ? (
-    <Badge
-      variant="secondary"
-      size="sm"
-      className="text-xs"
-      aria-label={tfl("code")}
-    >
-      {department.code}
-    </Badge>
-  ) : undefined;
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
+    }
+  };
+
+  const codeBadge =
+    department && !isAdd ? (
+      <Badge
+        variant="secondary"
+        size="sm"
+        className="text-xs"
+        aria-label={tfl("code")}
+      >
+        {department.code}
+      </Badge>
+    ) : undefined;
 
   return (
-    <div className="relative isolate -mx-3 -my-3">
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <AnimationStyles />
-      <div className="relative px-4 pt-4 pb-8 lg:p-4">
-        {/* ── Toolbar ─────────── */}
-        <Reveal>
-          <FormToolbar
-            entity={department?.name || t("entity")}
-            mode={mode}
-            formId={FORM_ID}
-            isPending={isPending}
-            onBack={handleBack}
-            onCancel={handleCancel}
-            onEdit={() => setMode("edit")}
-            onDelete={department ? () => setShowDelete(true) : undefined}
-            deleteIsPending={deleteDepartment.isPending}
-            statusBadge={codeBadge}
-            editTitle={department?.name}
-            permissionPrefix="configuration.department"
-          />
-        </Reveal>
+      {/* ── Toolbar ─────────── */}
+      <Reveal>
+        <FormToolbar
+          entity={department?.name || t("entity")}
+          mode={mode}
+          formId={FORM_ID}
+          isPending={isPending}
+          onBack={handleBack}
+          onCancel={handleCancel}
+          onEdit={() => setMode("edit")}
+          onDelete={department ? () => setShowDelete(true) : undefined}
+          deleteIsPending={deleteDepartment.isPending}
+          statusBadge={codeBadge}
+          editTitle={department?.name}
+          permissionPrefix="configuration.department"
+        />
+      </Reveal>
 
+      <div className="mt-6">
         {/* ── General Info ─────────── */}
         <Reveal delay={80}>
-          <Panel>
-            <SectionLabel icon={Building2}>{t("entity")}</SectionLabel>
-
-            <form
-              id={FORM_ID}
-              onSubmit={form.handleSubmit(onSubmit, () =>
-                scrollToFirstInvalidField(),
-              )}
+          <form
+            id={FORM_ID}
+            onSubmit={form.handleSubmit(onSubmit, () =>
+              scrollToFirstInvalidField(),
+            )}
+          >
+            <SettingSection
+              first
+              title={tfl("general")}
+              description={t("generalDesc")}
             >
-              <FieldGroup className="gap-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <Field>
-                    <FieldLabel htmlFor="department-code" required>
-                      {tfl("code")}
-                    </FieldLabel>
-                    <FieldInput
-                      id="department-code"
-                      placeholder={t("codePlaceholder")}
-                      className="h-8"
-                      disabled={isDisabled}
-                      error={form.formState.errors.code?.message}
-                      maxLength={10}
-                      {...form.register("code")}
-                    />
-                  </Field>
+              <Field>
+                <FieldLabel htmlFor="department-code" required>
+                  {tfl("code")}
+                </FieldLabel>
+                {isView ? (
+                  <FieldPlainText>{department?.code}</FieldPlainText>
+                ) : (
+                  <FieldInput
+                    id="department-code"
+                    placeholder={t("codePlaceholder")}
+                    disabled={isDisabled}
+                    error={form.formState.errors.code?.message}
+                    maxLength={10}
+                    {...form.register("code")}
+                  />
+                )}
+              </Field>
 
-                  <Field>
-                    <FieldLabel htmlFor="department-name" required>
-                      {tfl("name")}
-                    </FieldLabel>
-                    <FieldInput
-                      id="department-name"
-                      placeholder={t("namePlaceholder")}
-                      className="h-8"
-                      disabled={isDisabled}
-                      error={form.formState.errors.name?.message}
-                      maxLength={100}
-                      {...form.register("name")}
-                    />
-                  </Field>
-                </div>
+              <Field>
+                <FieldLabel htmlFor="department-name" required>
+                  {tfl("name")}
+                </FieldLabel>
+                {isView ? (
+                  <FieldPlainText>{department?.name}</FieldPlainText>
+                ) : (
+                  <FieldInput
+                    id="department-name"
+                    placeholder={t("namePlaceholder")}
+                    disabled={isDisabled}
+                    error={form.formState.errors.name?.message}
+                    maxLength={100}
+                    {...form.register("name")}
+                  />
+                )}
+              </Field>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Field>
-                    <FieldLabel htmlFor="department-account-code">
-                      {tfl("accountCode")}
-                    </FieldLabel>
-                    <FieldInput
-                      id="department-account-code"
-                      placeholder={tfl("optional")}
-                      className="h-8"
-                      disabled={isDisabled}
-                      maxLength={30}
-                      {...form.register("account_code")}
-                    />
-                  </Field>
-                </div>
+              <Field>
+                <FieldLabel htmlFor="department-account-code">
+                  {tfl("accountCode")}
+                </FieldLabel>
+                {isView ? (
+                  <FieldPlainText>{department?.account_code}</FieldPlainText>
+                ) : (
+                  <FieldInput
+                    id="department-account-code"
+                    placeholder={tfl("optional")}
+                    disabled={isDisabled}
+                    maxLength={30}
+                    {...form.register("account_code")}
+                  />
+                )}
+              </Field>
 
-                <Field>
-                  <FieldLabel htmlFor="department-description">
-                    {tfl("description")}
-                  </FieldLabel>
+              <Field className="sm:col-span-2">
+                <FieldLabel htmlFor="department-description">
+                  {tfl("description")}
+                </FieldLabel>
+                {isView ? (
+                  <FieldPlainText className="items-start whitespace-pre-wrap">
+                    {department?.description}
+                  </FieldPlainText>
+                ) : (
                   <Textarea
                     id="department-description"
                     placeholder={tfl("optional")}
+                    rows={2}
                     disabled={isDisabled}
                     maxLength={256}
+                    className="resize-none"
                     {...form.register("description")}
                   />
-                </Field>
+                )}
+              </Field>
 
+              <div className="sm:col-span-2">
                 <Controller
                   control={form.control}
                   name="is_active"
@@ -348,24 +365,23 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                     />
                   )}
                 />
-              </FieldGroup>
-            </form>
-          </Panel>
+              </div>
+            </SettingSection>
+          </form>
         </Reveal>
 
         {/* ── Members ─────────── */}
         <Reveal delay={160}>
-          <Panel>
-            <SectionLabel
-              icon={Users}
-              count={
-                isView
-                  ? (department?.department_users.length ?? 0)
-                  : deptUserTargetKeys.length
-              }
-            >
-              {t("members")}
-            </SectionLabel>
+          <SettingSection
+            wide
+            title={t("members")}
+            description={t("membersDesc")}
+            count={
+              isView
+                ? (department?.department_users.length ?? 0)
+                : deptUserTargetKeys.length
+            }
+          >
             {isView ? (
               <UserTable users={enrichedDeptUsers} />
             ) : (
@@ -380,22 +396,21 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                 />
               </Suspense>
             )}
-          </Panel>
+          </SettingSection>
         </Reveal>
 
         {/* ── HOD ─────────── */}
         <Reveal delay={220}>
-          <Panel>
-            <SectionLabel
-              icon={ShieldCheck}
-              count={
-                isView
-                  ? (department?.hod_users.length ?? 0)
-                  : hodUserTargetKeys.length
-              }
-            >
-              {t("hod")}
-            </SectionLabel>
+          <SettingSection
+            wide
+            title={t("hod")}
+            description={t("hodDesc")}
+            count={
+              isView
+                ? (department?.hod_users.length ?? 0)
+                : hodUserTargetKeys.length
+            }
+          >
             {isView ? (
               <UserTable users={enrichedHodUsers} />
             ) : (
@@ -410,83 +425,30 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                 />
               </Suspense>
             )}
-          </Panel>
+          </SettingSection>
         </Reveal>
-
-        <DiscardDialog {...discard.dialogProps} variant="warning" />
-
-        {department && (
-          <DeleteDialog
-            open={showDelete}
-            onOpenChange={(open) =>
-              !open && !deleteDepartment.isPending && setShowDelete(false)
-            }
-            title={t("deleteTitle")}
-            description={t("deleteConfirm", { name: department?.name ?? "" })}
-            isPending={deleteDepartment.isPending}
-            onConfirm={() => {
-              deleteDepartment.mutate(department.id, {
-                onSuccess: () => {
-                  toast.success(tt("deleteSuccess", { entity: t("entity") }));
-                  navigate("/config/department");
-                },
-                onError: (err) => toast.error(err.message),
-              });
-            }}
-          />
-        )}
       </div>
-    </div>
-  );
-}
 
-/* ── Panel surface (shared card chrome) ─────────── */
+      <DiscardDialog {...discard.dialogProps} variant="warning" />
 
-function Panel({
-  children,
-  className,
-}: {
-  readonly children: React.ReactNode;
-  readonly className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "border-border/60 bg-card mt-4 max-w-5xl rounded-xl border p-4",
-        className,
-      )}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ── Section label atom ─────────── */
-
-function SectionLabel({
-  icon: Icon,
-  children,
-  count,
-}: {
-  readonly icon: React.ComponentType<{ className?: string }>;
-  readonly children: React.ReactNode;
-  readonly count?: number;
-}) {
-  return (
-    <div className="text-muted-foreground mb-3 flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-widest uppercase">
-      <Icon className="size-2.5" aria-hidden="true" />
-      <span>{children}</span>
-      {typeof count === "number" && (
-        <span
-          className={cn(
-            "inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums tracking-wider",
-            count > 0
-              ? "bg-primary/15 text-primary"
-              : "bg-muted text-muted-foreground",
-          )}
-        >
-          {count}
-        </span>
+      {department && (
+        <DeleteDialog
+          open={showDelete}
+          onOpenChange={(open) =>
+            !open && !deleteDepartment.isPending && setShowDelete(false)
+          }
+          title={t("deleteTitle")}
+          description={t("deleteConfirm", { name: department?.name ?? "" })}
+          isPending={deleteDepartment.isPending}
+          onConfirm={() => {
+            deleteDepartment.mutate(department.id, {
+              onSuccess: () => {
+                toast.success(tt("deleteSuccess", { entity: t("entity") }));
+                navigate("/config/department");
+              },
+            });
+          }}
+        />
       )}
     </div>
   );

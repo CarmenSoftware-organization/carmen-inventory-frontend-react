@@ -264,7 +264,6 @@ export function FromPriceListContent() {
           navigate(PO_LIST_PATH);
         }
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

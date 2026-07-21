@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
+import { FieldPlainText } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -53,17 +53,11 @@ export function LookupWorkflow({
   const showErrorTooltip = !!error && !selectOpen;
   const showTooltip = !error && !selectOpen && !!selectedLabel;
 
+  // FieldPlainText (ไม่ใช่ <span> เปล่า) เพราะ `Field` จะมุด label ให้ก็ต่อเมื่อ
+  // เจอ data-slot="field-plain-text" เป็น direct child — และมันแสดง "—" เองอยู่แล้ว
   if (readOnly) {
     return (
-      <span
-        className={cn(
-          "inline-flex min-h-8 items-center text-sm",
-          !selectedLabel && "text-muted-foreground",
-          className,
-        )}
-      >
-        {selectedLabel ?? "—"}
-      </span>
+      <FieldPlainText className={className}>{selectedLabel}</FieldPlainText>
     );
   }
 

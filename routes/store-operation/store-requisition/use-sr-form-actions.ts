@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useTranslations } from "use-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -59,6 +59,7 @@ export function useSrFormActions({
   const t = useTranslations("storeOperation.storeRequisition");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
 
   const isEdit = mode === "edit";
@@ -169,7 +170,6 @@ export function useSrFormActions({
             });
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -182,7 +182,6 @@ export function useSrFormActions({
             navigate(`${SR_LIST_PATH}/${id}`, { replace: true });
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     }
@@ -203,7 +202,6 @@ export function useSrFormActions({
         options?.onDone?.();
         if (!options?.keepOnPage) navigate(SR_LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -306,11 +304,19 @@ export function useSrFormActions({
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate(SR_LIST_PATH));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate(SR_LIST_PATH);
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -321,7 +327,6 @@ export function useSrFormActions({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate(SR_LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

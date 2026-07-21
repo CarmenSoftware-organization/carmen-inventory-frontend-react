@@ -39,7 +39,8 @@ export function WarningDialog({
         </AlertDialogHeader>
         <AlertDialogFooter className="flex! justify-center!">
           <AlertDialogAction
-            className="bg-warning text-warning-foreground hover:bg-warning/90 font-semibold"
+            // text-black to match the warning Button variant — see offline-banner
+            className="bg-warning hover:bg-warning/90 font-semibold text-black"
             onClick={(e) => {
               e.preventDefault();
               onConfirm();

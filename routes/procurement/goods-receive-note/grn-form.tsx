@@ -26,6 +26,7 @@ import { useGrnFormActions } from "./use-grn-form-actions";
 import { useProfile } from "@/hooks/use-profile";
 import { useCurrency } from "@/hooks/use-currency";
 import { GrnHeader } from "./grn-header";
+import { GrnFooterAction } from "./grn-footer-action";
 import { GrnFormHeader } from "./grn-form-header";
 
 interface GrnFormProps {
@@ -195,7 +196,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         goodsReceiveNote={goodsReceiveNote}
         mode={mode}
         isPending={actions.isPending}
-        isActionPending={actions.isActionPending}
         isCommitted={isCommitted}
         isVoid={isVoid}
         deleteIsPending={actions.deleteGrn.isPending}
@@ -206,8 +206,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         onBack={actions.handleBack}
         onEnterEdit={() => setMode("edit")}
         onCancel={actions.handleCancel}
-        onShowCommit={() => actions.setShowCommit(true)}
-        onShowVoid={() => actions.setShowVoid(true)}
         onShowComment={() => actions.setShowComment(true)}
         onShowDelete={() => actions.setShowDelete(true)}
         onSaveDraft={() => actions.handleSubmitWithStatus("draft")}
@@ -325,7 +323,18 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
               suffix: currencyCode,
             },
           ]}
-        />
+        >
+          {/* commit/void อยู่ line เดียวกับ summary (ขวาล่าง เหมือน PR footer) */}
+          <GrnFooterAction
+            isActionPending={actions.isActionPending}
+            hasRecord={!!goodsReceiveNote}
+            isView={mode === "view"}
+            isCommitted={isCommitted}
+            isVoid={isVoid}
+            onCommit={() => actions.setShowCommit(true)}
+            onVoid={() => actions.setShowVoid(true)}
+          />
+        </SummaryFooterBar>
       )}
 
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />

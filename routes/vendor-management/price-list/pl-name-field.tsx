@@ -49,7 +49,7 @@ export function NameField({
     >
       <div
         className={cn(
-          "mb-0.5 flex items-center gap-1 text-[0.5625rem] font-bold tracking-[0.16em] uppercase transition-colors",
+          "mb-0.5 flex items-center gap-1 text-[0.5625rem] font-semibold tracking-[0.16em] uppercase transition-colors",
           labelTone,
         )}
       >

@@ -81,9 +81,11 @@ export default function PurchaseRequestComponent() {
   );
   const [batchApproveOpen, setBatchApproveOpen] = useState(false);
   const [batchRejectOpen, setBatchRejectOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"my-pending" | "all-document">(
-    "my-pending",
-  );
+  // viewMode อยู่ใน URL (?view=) เพื่อให้ปุ่ม back จาก detail กลับมาเจอ tab เดิม
+  const [viewModeParam, setViewMode] = useURL("view", {
+    defaultValue: "my-pending",
+  });
+  const viewMode = viewModeParam as "my-pending" | "all-document";
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const isMobile = useIsMobile();
@@ -435,7 +437,6 @@ export default function PurchaseRequestComponent() {
                 toast.success(tt("approveSuccess", { entity: t("entity") }));
                 setApproveTarget(null);
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}
@@ -461,7 +462,6 @@ export default function PurchaseRequestComponent() {
                 toast.success(tt("rejectSuccess", { entity: t("entity") }));
                 setRejectTarget(null);
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}
@@ -481,7 +481,6 @@ export default function PurchaseRequestComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />
@@ -518,7 +517,6 @@ export default function PurchaseRequestComponent() {
                 setBatchApproveOpen(false);
                 table.resetRowSelection();
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}
@@ -555,7 +553,6 @@ export default function PurchaseRequestComponent() {
                 setBatchRejectOpen(false);
                 table.resetRowSelection();
               },
-              onError: (err) => toast.error(err.message),
             },
           );
         }}

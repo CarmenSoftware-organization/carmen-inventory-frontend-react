@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -46,6 +46,7 @@ export function useGrnFormActions({
   revealErrors,
 }: UseGrnFormActionsParams) {
   const navigate = useNavigate();
+  const location = useLocation();
   const t = useTranslations("procurement.goodsReceiveNote");
   const tt = useTranslations("toast");
 
@@ -248,13 +249,11 @@ export function useGrnFormActions({
             if (values.doc_status === "saved") {
               saveGrn.mutate(goodsReceiveNote.id, {
                 onSuccess: finalize,
-                onError: (err) => toast.error(err.message),
               });
             } else {
               finalize();
             }
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -275,13 +274,11 @@ export function useGrnFormActions({
           if (values.doc_status === "saved" && newId) {
             saveGrn.mutate(newId, {
               onSuccess: finalize,
-              onError: (err) => toast.error(err.message),
             });
           } else {
             finalize();
           }
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -308,11 +305,19 @@ export function useGrnFormActions({
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/procurement/goods-receive-note"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/procurement/goods-receive-note");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -323,19 +328,23 @@ export function useGrnFormActions({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/procurement/goods-receive-note");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
   const handleConfirmCommit = () => {
     if (!goodsReceiveNote) return;
-    commitGrn.mutate(goodsReceiveNote.id, {
-      onSuccess: () => {
-        toast.success(tt("updateSuccess", { entity: t("entity") }));
-        setShowCommit(false);
+    commitGrn.mutate(
+      {
+        id: goodsReceiveNote.id,
+        doc_version: goodsReceiveNote.doc_version ?? 0,
       },
-      onError: (err) => toast.error(err.message),
-    });
+      {
+        onSuccess: () => {
+          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          setShowCommit(false);
+        },
+      },
+    );
   };
 
   const handleConfirmVoid = () => {
@@ -345,7 +354,6 @@ export function useGrnFormActions({
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowVoid(false);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

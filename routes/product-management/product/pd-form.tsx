@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -204,6 +204,7 @@ export function ProductForm({ product }: ProductFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const rawReturnUrl = searchParams.get("returnUrl");
   const returnUrl =
@@ -299,7 +300,6 @@ export function ProductForm({ product }: ProductFormProps) {
             form.reset(normalizedValues);
             setMode("view");
           },
-          onError: (err: Error) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -313,7 +313,6 @@ export function ProductForm({ product }: ProductFormProps) {
             navigate(returnUrl);
           }
         },
-        onError: (err: Error) => toast.error(err.message),
       });
     }
   };
@@ -358,16 +357,26 @@ export function ProductForm({ product }: ProductFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate(returnUrl));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate(returnUrl);
     }
   };
 
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(() => goBack());
+    } else {
+      goBack();
+    }
+  };
+
   return (
-    <div className="space-y-4">
+    // px-4 ให้ header+form มี gutter ซ้าย — ปุ่ม back hang พอดี ไม่โดน main-content
+    // ตัด (product เป็น full-width flush เหมือน pc)
+    <div className="space-y-4 px-4">
       <FormToolbar
         product={product}
         form={form}
@@ -458,7 +467,6 @@ export function ProductForm({ product }: ProductFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate(returnUrl);
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

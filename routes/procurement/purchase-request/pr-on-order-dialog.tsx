@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { useTranslations } from "use-intl";
-import { Building2, FileText, Truck } from "lucide-react";
+import { Building2, FileText } from "lucide-react";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -184,28 +184,13 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
         <div className="relative space-y-4 px-6 pt-10 pb-6">
           <DialogHeader>
             <div className="flex items-start gap-3">
-              <div className="bg-muted text-warning flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <Truck className="size-4.5" />
-              </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-warning/10 text-warning-foreground mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                  {t("onOrder")}
-                </div>
                 <DialogTitle className="text-base">{t("onOrder")}</DialogTitle>
                 <DialogDescription asChild>
                   <div className="mt-1 space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant="outline"
-                        size="xs"
-                        className="text-[0.625rem]"
-                      >
-                        {data?.product_code ?? "—"}
-                      </Badge>
-                      <span className="text-foreground text-sm font-semibold">
-                        {data?.product_name ?? "—"}
-                      </span>
-                    </div>
+                    <span className="text-foreground text-sm font-semibold">
+                      {data?.product_name ?? "—"}
+                    </span>
                     {data?.product_local_name &&
                       data.product_local_name !== data.product_name && (
                         <p className="text-muted-foreground text-xs">
@@ -228,6 +213,7 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
                   </p>
                 </div>
               )}
+
             </div>
           </DialogHeader>
 

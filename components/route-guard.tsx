@@ -45,7 +45,7 @@ function AccessDeniedBlock() {
           <ShieldOff className="size-6" aria-hidden />
         </div>
 
-        <span className="text-muted-foreground text-[0.5625rem] font-bold tracking-widest uppercase">
+        <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
           {t("eyebrow")}
         </span>
 

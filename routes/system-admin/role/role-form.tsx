@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { KeySquare, UserCog } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ interface RoleFormProps {
 
 export function RoleForm({ role }: RoleFormProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const t = useTranslations("systemAdmin.role");
   const tt = useTranslations("toast");
   const [mode, setMode] = useState<FormMode>(role ? "view" : "add");
@@ -83,7 +84,6 @@ export function RoleForm({ role }: RoleFormProps) {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             navigate("/system-admin/role");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isEdit && role) {
@@ -108,7 +108,6 @@ export function RoleForm({ role }: RoleFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/system-admin/role");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     }
@@ -125,11 +124,19 @@ export function RoleForm({ role }: RoleFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/system-admin/role"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/system-admin/role");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -225,7 +232,6 @@ export function RoleForm({ role }: RoleFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/system-admin/role");
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

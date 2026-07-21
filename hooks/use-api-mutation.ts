@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { ApiError } from "@/lib/api-error";
+import type { ApiErrorMeta } from "@/lib/api-error-handler";
 
 /**
  * Helper สำหรับ optimistic update: ลบ item ตาม id ออกจาก paginated list cache
@@ -68,6 +69,8 @@ interface UseApiMutationOptions<TVariables> {
   mutationFn: (variables: TVariables, buCode: string) => Promise<Response>;
   invalidateKeys?: readonly unknown[];
   errorMessage?: string;
+  /** `{ skipGlobalErrorToast: true }` = mutation นี้แสดง error เอง ดู `<ApiErrorToaster />` */
+  meta?: ApiErrorMeta;
   optimistic?: {
     queryKey: readonly unknown[];
     updater: (old: unknown, variables: TVariables) => unknown;
@@ -107,6 +110,7 @@ export function useApiMutation<TVariables, TResponse = unknown>({
   mutationFn,
   invalidateKeys,
   errorMessage = "Request failed",
+  meta,
   optimistic,
   optimisticList,
 }: UseApiMutationOptions<TVariables>) {
@@ -119,22 +123,15 @@ export function useApiMutation<TVariables, TResponse = unknown>({
     TVariables,
     { previous?: unknown; previousList?: [readonly unknown[], unknown][] }
   >({
+    meta,
     mutationFn: async (variables) => {
       if (!buCode)
         throw new ApiError("MISSING_REQUIRED_FIELD", "Missing buCode");
       const res = await mutationFn(variables, buCode);
       if (!res.ok) {
-        let serverMessage: string | undefined;
-        try {
-          const err = await res.json();
-          serverMessage = err.message;
-        } catch {
-          // JSON parse failed — use fallback
-        }
-        throw ApiError.fromResponse(
-          res,
-          cleanServerMessage(serverMessage, errorMessage),
-        );
+        // อย่าอ่าน body ที่นี่ — `ApiError.from` อ่านเอง (ผ่าน clone) และ clone()
+        // จะพังถ้า body ถูก consume ไปแล้ว ทำให้ serverMessage หายเงียบๆ
+        throw await ApiError.from(res, errorMessage, cleanServerMessage);
       }
       const data = await res.json();
       if (

@@ -12,8 +12,8 @@ URL_MAP="${2:-}"
 bun run build
 
 # Guard: ลบ dev config ออกจาก dist กันหลุดขึ้น bucket
-# (vite copies public/ เข้า dist/ ซึ่งรวม config.json และ config.sample.json)
-rm -f dist/config.json dist/config.sample.json
+# (vite copies public/ เข้า dist/ ซึ่งรวม config.json และ config.<env>.json / config.sample.json ทุกตัว)
+rm -f dist/config*.json
 
 # Sync ทุกอย่างยกเว้น index.html / config*.json
 # --exclude เป็น regex และไฟล์ที่ exclude จะ "มองไม่เห็น" ทั้งสองฝั่ง —
@@ -21,7 +21,7 @@ rm -f dist/config.json dist/config.sample.json
 gcloud storage rsync dist "gs://${BUCKET}" \
   --recursive \
   --delete-unmatched-destination-objects \
-  --exclude="^index\.html$|^config\.json$|^config\.sample\.json$"
+  --exclude="^index\.html$|^config[^/]*\.json$"
 
 # Hashed assets — cache ยาว (immutable; ชื่อไฟล์มี hash เปลี่ยนทุก build อยู่แล้ว)
 gcloud storage objects update "gs://${BUCKET}/assets/**" \

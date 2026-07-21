@@ -164,7 +164,6 @@ export default function RunningCodeComponent() {
               onClick={() =>
                 initRunningCode.mutate(undefined, {
                   onSuccess: () => toast.success(t("initSuccess")),
-                  onError: (err) => toast.error(err.message),
                 })
               }
               disabled={initRunningCode.isPending}
@@ -200,7 +199,6 @@ export default function RunningCodeComponent() {
                   onSelect={() =>
                     initRunningCode.mutate(undefined, {
                       onSuccess: () => toast.success(t("initSuccess")),
-                      onError: (err) => toast.error(err.message),
                     })
                   }
                 >
@@ -308,7 +306,6 @@ export default function RunningCodeComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

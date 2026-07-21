@@ -1,4 +1,3 @@
-
 import {
   Activity,
   Clock,
@@ -9,7 +8,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import type { Role, Stage } from "@/types/workflows";
-import { cn } from "@/lib/utils";
 import { formatCycleTime } from "./wf-sla-utils";
 import {
   computeWorkflowInsights,
@@ -17,7 +15,6 @@ import {
   type RecipientKey,
   type WorkflowInsights,
 } from "./wf-insights-utils";
-import { ROLE_SOLID } from "./wf-role-colors";
 
 interface WfInsightsProps {
   readonly stages: Stage[];
@@ -30,13 +27,6 @@ const ROLE_LABEL: Record<Role, string> = {
   approve: "roleApprove",
   purchase: "rolePurchase",
   issue: "roleIssue",
-};
-
-const ACTION_BG: Record<ActionKey, string> = {
-  submit: "bg-primary",
-  approve: "bg-success",
-  reject: "bg-destructive",
-  sendback: "bg-warning",
 };
 
 const ACTION_LABEL: Record<ActionKey, string> = {
@@ -202,7 +192,7 @@ function SlaBreakdown({ insights }: { readonly insights: WorkflowInsights }) {
               </div>
               <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                 <div
-                  className={cn("h-full rounded-full", ROLE_SOLID[row.role])}
+                  className="bg-primary h-full rounded-full"
                   style={{ width: `${pct}%` }}
                   role="progressbar"
                   aria-valuenow={row.minutes}
@@ -246,7 +236,7 @@ function RoleDistribution({
               </div>
               <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                 <div
-                  className={cn("h-full rounded-full", ROLE_SOLID[row.role])}
+                  className="bg-primary h-full rounded-full"
                   style={{ width: `${pct}%` }}
                   role="progressbar"
                   aria-valuenow={row.count}
@@ -283,7 +273,7 @@ function ActionCoverage({ insights }: { readonly insights: WorkflowInsights }) {
               </div>
               <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                 <div
-                  className={cn("h-full rounded-full", ACTION_BG[row.action])}
+                  className={"bg-primary h-full rounded-full"}
                   style={{ width: `${pct}%` }}
                   role="progressbar"
                   aria-valuenow={row.activeCount}

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -38,6 +38,7 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
   const t = useTranslations("operationPlan.cuisine");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(cuisine ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -72,7 +73,6 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/operation-plan/cuisine");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -81,16 +81,23 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/operation-plan/cuisine");
         },
-        onError: (err) => toast.error(err.message),
       });
+    }
+  };
+
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
+    } else {
+      navigate("/operation-plan/cuisine");
     }
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/operation-plan/cuisine"));
+      discard.confirm(goBack);
     } else {
-      navigate("/operation-plan/cuisine");
+      goBack();
     }
   };
 
@@ -114,7 +121,6 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/operation-plan/cuisine");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

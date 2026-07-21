@@ -324,7 +324,6 @@ export default function UserComponent() {
               toast.success(t("deleteSuccess"));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

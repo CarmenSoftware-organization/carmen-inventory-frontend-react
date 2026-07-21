@@ -47,69 +47,104 @@ describe("ApiError", () => {
   });
 });
 
-describe("ApiError.fromResponse", () => {
+describe("ApiError.from", () => {
   /**
-   * สร้าง Response object ปลอมสำหรับเทส โดยกำหนดเฉพาะ status code
+   * Response ปลอมที่รองรับ clone().json() — `from` อ่าน error body จริง
    *
-   * @param status - HTTP status code ที่ต้องการ
-   * @returns Response-like object สำหรับใช้ใน ApiError.fromResponse
+   * @param status - HTTP status code
+   * @param body - error body ที่ backend ส่งกลับมา (undefined = parse ไม่ได้)
    */
-  function fakeResponse(status: number): Response {
-    return { status } as Response;
+  function fakeResponse(status: number, body?: unknown): Response {
+    const res = {
+      status,
+      clone: () => ({
+        json: async () => {
+          if (body === undefined) throw new SyntaxError("not json");
+          return body;
+        },
+      }),
+    };
+    return res as unknown as Response;
   }
 
-  it("maps 401 → UNAUTHORIZED", () => {
-    const err = ApiError.fromResponse(fakeResponse(401), "auth failed");
-    expect(err.code).toBe(ERROR_CODES.UNAUTHORIZED);
-    expect(err.statusCode).toBe(401);
-    expect(err.retryable).toBe(false);
+  it.each([
+    [401, ERROR_CODES.UNAUTHORIZED, false],
+    [403, ERROR_CODES.FORBIDDEN, false],
+    [404, ERROR_CODES.NOT_FOUND, false],
+    [429, ERROR_CODES.RATE_LIMITED, false],
+    [400, ERROR_CODES.VALIDATION_ERROR, false],
+    [422, ERROR_CODES.VALIDATION_ERROR, false],
+    [500, ERROR_CODES.INTERNAL_ERROR, true],
+    [502, ERROR_CODES.INTERNAL_ERROR, true],
+  ])("maps %i → %s (retryable: %s)", async (status, code, retryable) => {
+    const err = await ApiError.from(fakeResponse(status), "fallback");
+    expect(err.code).toBe(code);
+    expect(err.statusCode).toBe(status);
+    expect(err.retryable).toBe(retryable);
   });
 
-  it("maps 403 → FORBIDDEN", () => {
-    const err = ApiError.fromResponse(fakeResponse(403), "forbidden");
-    expect(err.code).toBe(ERROR_CODES.FORBIDDEN);
-    expect(err.statusCode).toBe(403);
-    expect(err.retryable).toBe(false);
-  });
-
-  it("maps 404 → NOT_FOUND", () => {
-    const err = ApiError.fromResponse(fakeResponse(404), "missing");
-    expect(err.code).toBe(ERROR_CODES.NOT_FOUND);
-    expect(err.retryable).toBe(false);
-  });
-
-  it("maps 429 → RATE_LIMITED", () => {
-    const err = ApiError.fromResponse(fakeResponse(429), "rate limited");
-    expect(err.code).toBe(ERROR_CODES.RATE_LIMITED);
-    expect(err.retryable).toBe(false); // 429 < 500
-  });
-
-  it("maps 500 → INTERNAL_ERROR (retryable)", () => {
-    const err = ApiError.fromResponse(fakeResponse(500), "server error");
-    expect(err.code).toBe(ERROR_CODES.INTERNAL_ERROR);
-    expect(err.retryable).toBe(true);
-  });
-
-  it("maps 502 → INTERNAL_ERROR (retryable)", () => {
-    const err = ApiError.fromResponse(fakeResponse(502), "bad gateway");
-    expect(err.code).toBe(ERROR_CODES.INTERNAL_ERROR);
-    expect(err.retryable).toBe(true);
-  });
-
-  it("maps 422 → VALIDATION_ERROR (not retryable)", () => {
-    const err = ApiError.fromResponse(fakeResponse(422), "invalid");
-    expect(err.code).toBe(ERROR_CODES.VALIDATION_ERROR);
-    expect(err.retryable).toBe(false);
-  });
-
-  it("maps 400 → VALIDATION_ERROR (not retryable)", () => {
-    const err = ApiError.fromResponse(fakeResponse(400), "bad request");
-    expect(err.code).toBe(ERROR_CODES.VALIDATION_ERROR);
-    expect(err.retryable).toBe(false);
-  });
-
-  it("uses fallbackMessage as the error message", () => {
-    const err = ApiError.fromResponse(fakeResponse(500), "custom msg");
+  it("falls back to the caller's message when the body has none", async () => {
+    const err = await ApiError.from(fakeResponse(500), "custom msg");
     expect(err.message).toBe("custom msg");
+    expect(err.serverMessage).toBeUndefined();
+  });
+
+  it("prefers the backend message when there is one", async () => {
+    const err = await ApiError.from(
+      fakeResponse(400, { message: "รหัสนี้ถูกใช้แล้ว" }),
+      "Failed to create location",
+    );
+    expect(err.serverMessage).toBe("รหัสนี้ถูกใช้แล้ว");
+    expect(err.message).toBe("รหัสนี้ถูกใช้แล้ว");
+  });
+
+  it("ignores a non-string or blank body message", async () => {
+    expect(
+      (await ApiError.from(fakeResponse(400, { message: 42 }), "fb"))
+        .serverMessage,
+    ).toBeUndefined();
+    expect(
+      (await ApiError.from(fakeResponse(400, { message: "  " }), "fb"))
+        .serverMessage,
+    ).toBeUndefined();
+  });
+
+  it("survives a body that is not JSON", async () => {
+    const err = await ApiError.from(fakeResponse(503), "fb");
+    expect(err.message).toBe("fb");
+  });
+});
+
+describe("userFacingServerMessage", () => {
+  // 5xx messages can carry internal detail — they must never reach a user.
+  it("exposes the backend message for 4xx", () => {
+    const err = new ApiError(
+      ERROR_CODES.VALIDATION_ERROR,
+      "dup",
+      400,
+      false,
+      undefined,
+      "รหัสนี้ถูกใช้แล้ว",
+    );
+    expect(err.userFacingServerMessage).toBe("รหัสนี้ถูกใช้แล้ว");
+  });
+
+  it("hides it for 5xx", () => {
+    const err = new ApiError(
+      ERROR_CODES.INTERNAL_ERROR,
+      "boom",
+      500,
+      true,
+      undefined,
+      "NullPointerException at OrderService.java:412",
+    );
+    expect(err.userFacingServerMessage).toBeUndefined();
+  });
+
+  it("is undefined when the backend said nothing", () => {
+    expect(
+      new ApiError(ERROR_CODES.VALIDATION_ERROR, "x", 400)
+        .userFacingServerMessage,
+    ).toBeUndefined();
   });
 });

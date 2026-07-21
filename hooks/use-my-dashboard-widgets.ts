@@ -25,7 +25,7 @@ export function useMyDashboardWidgets() {
         API_ENDPOINTS.MY_DASHBOARD_WIDGETS(buCode!),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch personal dashboard widgets",
         );
@@ -47,7 +47,7 @@ export function useCreateMyDashboardWidget() {
         dto,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to create personal dashboard widget",
         );
@@ -76,7 +76,7 @@ export function useUpdateMyDashboardWidget() {
         dto,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to update personal dashboard widget",
         );
@@ -100,7 +100,7 @@ export function useDeleteMyDashboardWidget() {
         API_ENDPOINTS.MY_DASHBOARD_WIDGET_BY_ID(buCode!, id),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to delete personal dashboard widget",
         );

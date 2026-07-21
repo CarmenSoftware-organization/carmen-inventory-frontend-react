@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
@@ -52,6 +52,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(creditNote ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -145,7 +146,6 @@ export function CnForm({ creditNote }: CnFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -160,7 +160,6 @@ export function CnForm({ creditNote }: CnFormProps) {
             navigate("/procurement/credit-note");
           }
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -176,11 +175,19 @@ export function CnForm({ creditNote }: CnFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/procurement/credit-note"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/procurement/credit-note");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -202,12 +209,14 @@ export function CnForm({ creditNote }: CnFormProps) {
 
   const handleSubmitCn = () => {
     if (!creditNote) return;
-    submitCn.mutate(creditNote.id, {
-      onSuccess: () => {
-        toast.success(tt("submitSuccess", { entity: t("entity") }));
+    submitCn.mutate(
+      { id: creditNote.id, doc_version: creditNote.doc_version ?? 0 },
+      {
+        onSuccess: () => {
+          toast.success(tt("submitSuccess", { entity: t("entity") }));
+        },
       },
-      onError: (err) => toast.error(err.message),
-    });
+    );
   };
 
   return (
@@ -299,7 +308,6 @@ export function CnForm({ creditNote }: CnFormProps) {
                   toast.success(tt("deleteSuccess", { entity: t("entity") }));
                   navigate("/procurement/credit-note");
                 },
-                onError: (err) => toast.error(err.message),
               });
             }}
           />
