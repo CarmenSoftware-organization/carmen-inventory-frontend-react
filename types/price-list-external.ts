@@ -1,3 +1,10 @@
+export type PricelistExternalTaxProfileOption = {
+  id: string;
+  name: string;
+  // อัตราภาษี (%) — ใช้เซ็ต tax_rate ของแถวเมื่อ vendor เลือก tax profile
+  rate: number;
+};
+
 export type PricelistExternalDto = {
   id: string;
   pricelist_no: string;
@@ -12,6 +19,9 @@ export type PricelistExternalDto = {
   description: string | null;
   note: string | null;
   tb_pricelist_detail: PricelistExternalDetailDto[];
+  // tax profile options ให้ vendor เลือกใน portal (public — เลือกผ่าน auth lookup
+  // ไม่ได้) backend ต้องส่งมากับ check-pricelist response
+  available_tax_profiles?: PricelistExternalTaxProfileOption[];
 };
 
 export type MoqTierDto = {
