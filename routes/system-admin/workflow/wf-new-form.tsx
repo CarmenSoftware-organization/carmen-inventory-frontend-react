@@ -102,7 +102,7 @@ export default function WorkflowNewForm() {
         {/* General */}
         <SettingSection first title={t("general")} description={t("generalDesc")}>
           <Field data-invalid={!!form.formState.errors.name}>
-            <FieldLabel htmlFor="wf-name">{t("workflowName")}</FieldLabel>
+            <FieldLabel htmlFor="wf-name" required>{t("workflowName")}</FieldLabel>
             <Input
               id="wf-name"
               placeholder={t("workflowNamePlaceholder")}
@@ -115,7 +115,7 @@ export default function WorkflowNewForm() {
           </Field>
 
           <Field data-invalid={!!form.formState.errors.workflow_type}>
-            <FieldLabel htmlFor="wf-type">{t("workflowType")}</FieldLabel>
+            <FieldLabel htmlFor="wf-type" required>{t("workflowType")}</FieldLabel>
             <Controller
               control={form.control}
               name="workflow_type"
