@@ -201,21 +201,25 @@ export interface ItemChanges<P> {
 /**
  * เปรียบเทียบ items ปัจจุบันกับ default values เพื่อสร้าง payload { add, update, remove } สำหรับ API
  *
- * ใช้ dirtyFields จาก react-hook-form เป็นหลักเพื่อตัดสินใจว่า item ไหนถูกแก้ไข
- * หากไม่มี dirtyFields จะ fallback เป็น shallow compare
+ * ตรวจว่า item ไหน "update" โดยเทียบ **mapped payload ตาม id** (เอา item ปัจจุบันกับ
+ * default ที่ id เดียวกันมา map แล้วเทียบผลลัพธ์ที่จะส่งจริง) — เป็นการเทียบแบบ
+ * order-independent จึงไม่พังเมื่อมีการ add/remove/reorder แถว
+ *
+ * เดิมใช้ `dirtyFields[index]` ของ react-hook-form ซึ่ง index-based: พอ add แถวใหม่
+ * แทรกหน้าแถวที่แก้ไว้ dirty marker ไม่ shift ตาม → แถวที่แก้เลื่อน index แล้วถูกมองว่า
+ * "ไม่ dirty" → update หลุดหาย (เห็นผลว่า "ต้อง refresh ถึงจะ update"). เทียบค่าที่จะส่ง
+ * จริงตัดปัญหานี้ทิ้ง และไม่มี false-negative
  *
  * @param currentItems - items ปัจจุบันจาก form values (เช่น `values.items`)
  * @param defaultItems - items เดิมจาก default values (เช่น `defaultValues.items`)
- * @param dirtyFields - dirty field markers จาก react-hook-form (`form.formState.dirtyFields.items`)
- * @param mapFn - ฟังก์ชันแปลง form item เป็นรูปแบบ API payload
+ * @param mapFn - ฟังก์ชันแปลง form item เป็นรูปแบบ API payload (index = ตำแหน่งจริงใน array)
  * @returns ItemChanges ที่มี add, update, remove (เฉพาะที่มีข้อมูล)
  * @example
  * ```ts
  * const details = buildItemChanges(
  *   values.items,
  *   defaultValues.items,
- *   form.formState.dirtyFields.items,
- *   (item) => ({ product_id: item.product_id, qty: item.qty }),
+ *   (item, i) => ({ sequence_no: i + 1, product_id: item.product_id, qty: item.qty }),
  * );
  * // { add: [...], update: [...], remove: [...] }
  * ```
@@ -226,7 +230,6 @@ export function buildItemChanges<
 >(
   currentItems: T[],
   defaultItems: T[],
-  dirtyFields: Record<string, unknown>[] | undefined,
   mapFn: (item: T, index: number) => P,
 ): ItemChanges<P> {
   const newItems = currentItems.filter((item) => !item.id);
@@ -242,33 +245,24 @@ export function buildItemChanges<
     )
     .map((item) => ({ id: item.id }));
 
+  // เทียบ payload ที่จะส่งจริง (map แล้ว) ของ item ปัจจุบัน vs default ที่ id เดียวกัน
+  // ต่างเมื่อไหร่ = update — ครอบทั้งค่าที่แก้และตำแหน่ง (sequence) ที่เปลี่ยน
   const updatedItems = existingItems.filter((item) => {
-    const idx = currentItems.findIndex((v) => v.id === item.id);
-
-    // Use dirtyFields when available (react-hook-form subscription active)
-    if (dirtyFields) {
-      const dirty = dirtyFields[idx];
-      return dirty != null && Object.keys(dirty).length > 0;
-    }
-
-    // Fallback: shallow-compare against default item
     const defaultItem = defaultItems.find((d) => d.id === item.id);
     if (!defaultItem) return true;
-    const record = item as unknown as Record<string, unknown>;
-    const defaultRecord = defaultItem as unknown as Record<string, unknown>;
-    return Object.keys(record).some(
-      (key) => key !== "id" && record[key] !== defaultRecord[key],
-    );
+    const curPayload = mapFn(item, currentItems.indexOf(item));
+    const defPayload = mapFn(defaultItem, defaultItems.indexOf(defaultItem));
+    return JSON.stringify(curPayload) !== JSON.stringify(defPayload);
   });
 
   const result: ItemChanges<P> = {};
   if (newItems.length > 0) {
-    result.add = newItems.map((item, i) => mapFn(item, i));
+    result.add = newItems.map((item) => mapFn(item, currentItems.indexOf(item)));
   }
   if (updatedItems.length > 0) {
-    result.update = updatedItems.map((item, i) => ({
+    result.update = updatedItems.map((item) => ({
       id: item.id,
-      ...mapFn(item, i),
+      ...mapFn(item, currentItems.indexOf(item)),
     }));
   }
   if (removedItems.length > 0) {

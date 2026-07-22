@@ -9,26 +9,22 @@ import { mapItemToPayload, type PoFormValues } from "./po-form-schema";
  *
  * @param values - ค่าปัจจุบันของฟอร์ม PoFormValues
  * @param defaultItems - items ชุดเดิมที่โหลดจาก defaultValues ของฟอร์ม
- * @param dirtyItems - dirtyFields.items จาก react-hook-form ใช้ตรวจว่า field ไหนแก้
  * @returns CreatePoDto ที่พร้อมส่งไปยัง API purchase-order
  * @example
  * const payload = buildPoPayload(
  *   form.getValues(),
  *   form.formState.defaultValues?.items ?? [],
- *   form.formState.dirtyFields.items as Record<string, unknown>[],
  * );
  * await createPo(buCode, payload);
  */
 export function buildPoPayload(
   values: PoFormValues,
   defaultItems: PoFormValues["items"],
-  dirtyItems: Record<string, unknown>[] | undefined,
   options?: { po_type?: PO_TYPE },
 ): CreatePoDto {
   const purchaseOrderDetail = buildItemChanges(
     values.items,
     defaultItems,
-    dirtyItems,
     mapItemToPayload,
   );
 

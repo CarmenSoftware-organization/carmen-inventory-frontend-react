@@ -119,8 +119,6 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
     const wastage_report_detail = buildItemChanges(
       values.items,
       defaultValues.items,
-      // RHF 7.78 type drift
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
       mapItemToPayload,
     );
 

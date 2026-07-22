@@ -247,12 +247,7 @@ export function FromPriceListContent() {
       ...values,
       items: (values.items ?? []).map(recomputeItemFromLocations),
     };
-    const payload = buildPoPayload(
-      syncedValues,
-      [],
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
-      { po_type: PO_TYPE.PL },
-    );
+    const payload = buildPoPayload(syncedValues, [], { po_type: PO_TYPE.PL });
     createPo.mutate(payload, {
       onSuccess: (res) => {
         toast.success(tt("createSuccess", { entity: t("entity") }));

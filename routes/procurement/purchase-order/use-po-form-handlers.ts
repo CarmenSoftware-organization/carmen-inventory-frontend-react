@@ -157,12 +157,7 @@ export function usePoFormHandlers({
   };
 
   const onSubmit = (values: PoFormValues) => {
-    const payload = buildPoPayload(
-      values,
-      defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
-      poTypeOption,
-    );
+    const payload = buildPoPayload(values, defaultValues.items, poTypeOption);
 
     if (mode === "edit" && purchaseOrder) {
       updatePo.mutate(
@@ -286,14 +281,7 @@ export function usePoFormHandlers({
         return;
       }
       const values = form.getValues();
-      const payload = buildPoPayload(
-        values,
-        defaultValues.items,
-        form.formState.dirtyFields.items as
-          | Record<string, unknown>[]
-          | undefined,
-        poTypeOption,
-      );
+      const payload = buildPoPayload(values, defaultValues.items, poTypeOption);
       try {
         const saved = await updatePo.mutateAsync({
           id: purchaseOrder.id,

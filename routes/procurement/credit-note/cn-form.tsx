@@ -108,7 +108,6 @@ export function CnForm({ creditNote }: CnFormProps) {
     const items = buildItemChanges(
       values.items,
       defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       mapItemToPayload,
     );
 

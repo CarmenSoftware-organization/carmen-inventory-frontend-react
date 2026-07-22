@@ -77,7 +77,6 @@ export function PrtForm({ template }: PrtFormProps) {
     const purchase_request_template_detail = buildItemChanges(
       values.items,
       defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
       mapItemToPayload,
     );
 

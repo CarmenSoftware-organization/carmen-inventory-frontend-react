@@ -144,7 +144,6 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         values,
         priceList,
         defaultValues,
-        form,
         mutate: updatePriceList.mutate,
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -371,26 +370,19 @@ function submitUpdate({
   values,
   priceList,
   defaultValues,
-  form,
   mutate,
   onSuccess,
 }: {
   values: PriceListFormValues;
   priceList: PriceList;
   defaultValues: PriceListFormValues;
-  form: ReturnType<typeof useForm<PriceListFormValues>>;
   mutate: ReturnType<typeof useUpdatePriceList>["mutate"];
   onSuccess: () => void;
 }) {
   const pricelist_detail = buildItemChanges(
     values.pricelist_detail,
     defaultValues.pricelist_detail,
-    // RHF 7.78 type drift
-    form.formState.dirtyFields.pricelist_detail as Record<string, unknown>[] | undefined,
-    (item, _i) => {
-      const actualIndex = values.pricelist_detail.indexOf(item);
-      return mapDetailToPayload(item, actualIndex >= 0 ? actualIndex : _i);
-    },
+    mapDetailToPayload,
   );
 
   mutate(

@@ -26,12 +26,12 @@ const values: ProductFormValues = {
 
 describe("buildPayload — auto-generated code", () => {
   it("omits code on create (isAdd=true)", () => {
-    const payload = buildPayload(values, undefined, {}, true);
+    const payload = buildPayload(values, undefined, true);
     expect(payload.code).toBeUndefined();
   });
 
   it("keeps the existing code on update (isAdd=false)", () => {
-    const payload = buildPayload(values, undefined, {}, false);
+    const payload = buildPayload(values, undefined, false);
     expect(payload.code).toBe("P001");
   });
 });

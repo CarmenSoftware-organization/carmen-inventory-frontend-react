@@ -120,7 +120,6 @@ export function useGrnFormActions({
     const detail = buildItemChanges(
       values.items,
       defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       (item) => {
         const payload = mapDetailToPayload(item);
         if (isManual) {
@@ -143,7 +142,6 @@ export function useGrnFormActions({
     const extraCostDetail = buildItemChanges(
       values.extra_cost_details,
       defaultValues.extra_cost_details,
-      form.formState.dirtyFields.extra_cost_details as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       mapExtraCostToPayload,
     );
 
