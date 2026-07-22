@@ -2,9 +2,10 @@
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
-import { ArrowLeft, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { Input } from "@/components/ui/input";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,12 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-  FieldError,
-} from "@/components/ui/field";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { SettingSection } from "@/components/ui/setting-section";
 import { toast } from "sonner";
 import { useCreateWorkflow } from "@/hooks/use-workflow";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -63,42 +60,37 @@ export default function WorkflowNewForm() {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={tc("goBack")}
-            onClick={() => navigate("/system-admin/workflow")}
-          >
-            <ArrowLeft className="size-3.5" />
-          </Button>
-          <h1 className="text-lg font-semibold">
-            {tf("addTitle", { entity: t("entity") })}
-          </h1>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/system-admin/workflow")}
-            disabled={isPending}
-            className="text-xs"
-          >
-            {tc("cancel")}
-          </Button>
-          <Button
-            type="submit"
-            size="sm"
-            form="new-workflow-form"
-            disabled={isPending}
-            className="text-xs"
-          >
-            {isPending ? tf("creating") : t("createWorkflow")}
-          </Button>
-        </div>
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="mb-6">
+        <DocFormHeader
+          flush
+          title={tf("addTitle", { entity: t("entity") })}
+          backLabel={tc("goBack")}
+          onBack={() => navigate("/system-admin/workflow")}
+          actions={
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/system-admin/workflow")}
+                disabled={isPending}
+                className="text-xs"
+              >
+                {tc("cancel")}
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                form="new-workflow-form"
+                disabled={isPending}
+                className="text-xs"
+              >
+                {isPending ? tf("creating") : t("createWorkflow")}
+              </Button>
+            </>
+          }
+        />
       </div>
 
       <form
@@ -106,58 +98,56 @@ export default function WorkflowNewForm() {
         onSubmit={form.handleSubmit(onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="max-w-2xl"
       >
-        <FieldGroup className="gap-3">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field data-invalid={!!form.formState.errors.name}>
-              <FieldLabel htmlFor="wf-name">{t("workflowName")}</FieldLabel>
-              <Input
-                id="wf-name"
-                placeholder={t("workflowNamePlaceholder")}
-                className="h-8"
-                disabled={isPending}
-                maxLength={100}
-                {...form.register("name")}
-              />
-              <FieldError>{form.formState.errors.name?.message}</FieldError>
-            </Field>
+        {/* General */}
+        <SettingSection first title={t("general")} description={t("generalDesc")}>
+          <Field data-invalid={!!form.formState.errors.name}>
+            <FieldLabel htmlFor="wf-name">{t("workflowName")}</FieldLabel>
+            <Input
+              id="wf-name"
+              placeholder={t("workflowNamePlaceholder")}
+              className="h-8"
+              disabled={isPending}
+              maxLength={100}
+              {...form.register("name")}
+            />
+            <FieldError>{form.formState.errors.name?.message}</FieldError>
+          </Field>
 
-            <Field data-invalid={!!form.formState.errors.workflow_type}>
-              <FieldLabel htmlFor="wf-type">{t("workflowType")}</FieldLabel>
-              <Controller
-                control={form.control}
-                name="workflow_type"
-                render={({ field }) => (
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isPending}
-                  >
-                    <SelectTrigger id="wf-type" size="sm" className="text-xs">
-                      <SelectValue placeholder={t("selectType")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {workflowTypeField.map((opt) => (
-                        <SelectItem
-                          key={opt.value}
-                          value={opt.value}
-                          className="text-xs"
-                        >
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <FieldError>
-                {form.formState.errors.workflow_type?.message}
-              </FieldError>
-            </Field>
-          </div>
+          <Field data-invalid={!!form.formState.errors.workflow_type}>
+            <FieldLabel htmlFor="wf-type">{t("workflowType")}</FieldLabel>
+            <Controller
+              control={form.control}
+              name="workflow_type"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isPending}
+                >
+                  <SelectTrigger id="wf-type" size="sm" className="text-xs">
+                    <SelectValue placeholder={t("selectType")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {workflowTypeField.map((opt) => (
+                      <SelectItem
+                        key={opt.value}
+                        value={opt.value}
+                        className="text-xs"
+                      >
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            <FieldError>
+              {form.formState.errors.workflow_type?.message}
+            </FieldError>
+          </Field>
 
-          <Field>
+          <Field className="sm:col-span-2">
             <FieldLabel htmlFor="wf-description">
               {tfl("description")}
             </FieldLabel>
@@ -170,33 +160,40 @@ export default function WorkflowNewForm() {
               {...form.register("description")}
             />
           </Field>
+        </SettingSection>
 
-          <Controller
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <StatusSwitch
-                id="wf-is-active"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                disabled={isPending}
-              />
-            )}
-          />
-        </FieldGroup>
-      </form>
+        {/* Status */}
+        <SettingSection title={t("status")} description={t("statusDesc")}>
+          <div className="sm:col-span-2 space-y-3">
+            <Controller
+              control={form.control}
+              name="is_active"
+              render={({ field }) => (
+                <StatusSwitch
+                  id="wf-is-active"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isPending}
+                />
+              )}
+            />
 
-      <div className="border-info/40 bg-info/10 max-w-2xl rounded border px-2 py-1.5">
-        <div className="flex items-start gap-1.5">
-          <Info className="text-info-foreground mt-0.5 size-3.5" />
-          <div className="space-y-0.5 text-xs">
-            <p className="text-info-foreground font-semibold">
-              {t("defaultConfig")}
-            </p>
-            <p className="text-info-foreground/85">{t("defaultConfigDesc")}</p>
+            <div className="border-info/40 bg-info/10 rounded border px-2 py-1.5">
+              <div className="flex items-start gap-1.5">
+                <Info className="text-info-foreground mt-0.5 size-3.5" />
+                <div className="space-y-0.5 text-xs">
+                  <p className="text-info-foreground font-semibold">
+                    {t("defaultConfig")}
+                  </p>
+                  <p className="text-info-foreground/85">
+                    {t("defaultConfigDesc")}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </SettingSection>
+      </form>
     </div>
   );
 }

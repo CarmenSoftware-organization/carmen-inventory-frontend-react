@@ -1452,7 +1452,10 @@
       "noProductsAvailable": "No products available.",
       "uncategorized": "Uncategorized",
       "selectType": "Select type",
-      "newRule": "New Rule {n}"
+      "newRule": "New Rule {n}",
+      "generalDesc": "Name, type and description for this workflow.",
+      "status": "Status",
+      "statusDesc": "Set whether this workflow is active on creation."
     },
     "runningCode": {
       "entity": "Running Code",
