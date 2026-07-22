@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import type {
   MoqTierDto,
   PricelistExternalDto,
@@ -34,6 +36,9 @@ export default function MoqTiersEditor({ form, index }: MoqTiersEditorProps) {
     (useWatch({ control: form.control, name: path }) as
       | MoqTierDto[]
       | undefined) ?? [];
+
+  // index ของ tier ที่รอ confirm ลบ (null = ไม่มี dialog เปิดอยู่)
+  const [tierToDelete, setTierToDelete] = useState<number | null>(null);
 
   const setTiers = (next: MoqTierDto[]) =>
     form.setValue(path, next, { shouldDirty: true });
@@ -111,7 +116,7 @@ export default function MoqTiersEditor({ form, index }: MoqTiersEditorProps) {
                 variant="ghost"
                 size="icon-sm"
                 aria-label="Remove tier"
-                onClick={() => removeTier(i)}
+                onClick={() => setTierToDelete(i)}
                 className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
               >
                 <Trash2 className="size-3.5" />
@@ -131,6 +136,17 @@ export default function MoqTiersEditor({ form, index }: MoqTiersEditorProps) {
           Add tier
         </Button>
       </div>
+
+      <DeleteDialog
+        open={tierToDelete !== null}
+        onOpenChange={(open) => !open && setTierToDelete(null)}
+        onConfirm={() => {
+          if (tierToDelete !== null) removeTier(tierToDelete);
+          setTierToDelete(null);
+        }}
+        title="Remove pricing tier"
+        description="Are you sure you want to remove this pricing tier? This can't be undone."
+      />
     </div>
   );
 }
