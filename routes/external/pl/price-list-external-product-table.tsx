@@ -267,6 +267,7 @@ export default function PriceListExternalProductTable({
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
       },
       {
         accessorKey: "price",
@@ -297,6 +298,7 @@ export default function PriceListExternalProductTable({
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
       },
       {
         accessorKey: "tax_profile_name",
@@ -396,6 +398,7 @@ export default function PriceListExternalProductTable({
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
       },
       {
         id: "amount",
