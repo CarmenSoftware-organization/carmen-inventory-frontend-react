@@ -83,3 +83,14 @@ describe("findBrand", () => {
     expect(findBrand(undefined, "micros")).toBeUndefined();
   });
 });
+
+describe("brand form overrides", () => {
+  it("gives carmen_gl its own form", () => {
+    expect(findBrand("accounting", "carmen_gl")?.form).toBeDefined();
+  });
+
+  it("leaves the other accounting brands on the category form", () => {
+    expect(findBrand("accounting", "blueledgers")?.form).toBeUndefined();
+    expect(findBrand("accounting", "external")?.form).toBeUndefined();
+  });
+});

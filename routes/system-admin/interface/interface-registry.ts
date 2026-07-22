@@ -12,6 +12,8 @@ export type BrandDef = {
   readonly key: string;
   /** key ของ row ใน app_config — `interface_<category>_<brand>` */
   readonly configKey: string;
+  /** form เฉพาะ brand — ถ้าไม่กำหนด ใช้ form ของ category (ดู interface-detail.route.tsx) */
+  readonly form?: LazyExoticComponent<ComponentType>;
 };
 
 /**
@@ -50,7 +52,15 @@ export const INTERFACE_CATEGORIES: readonly InterfaceCategoryDef[] = [
   {
     key: "accounting",
     icon: BookOpen,
-    brands: brands("accounting", ["carmen_gl", "blueledgers", "external"]),
+    brands: [
+      {
+        key: "carmen_gl",
+        configKey: "interface_accounting_carmen_gl",
+        // Carmen 4 legacy — field set ต่างจาก accounting ทั่วไป (ดู spec 2026-07-22)
+        form: lazy(() => import("./carmen-gl-interface-form")),
+      },
+      ...brands("accounting", ["blueledgers", "external"]),
+    ],
     form: lazy(() => import("./accounting-interface-form")),
   },
   {
