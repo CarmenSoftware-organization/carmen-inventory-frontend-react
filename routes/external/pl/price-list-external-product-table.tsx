@@ -51,6 +51,13 @@ const VIEW_LABELS: Record<string, string> = {
   amount: "Amount",
 };
 
+/** จัดรูปเงิน 2 ตำแหน่ง + คั่นหลักพัน (รองรับ 00,000.00 ตามที่ column กว้างพอ) */
+const fmtMoney = (n: number) =>
+  n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
 interface PriceListExternalProductTableProps {
   form: UseFormReturn<PricelistExternalDto>;
   isViewMode?: boolean;
@@ -80,8 +87,8 @@ function RowPWT({
   });
   const pwt = round2((Number(price) || 0) / (1 + (Number(rate) || 0) / 100));
   return (
-    <span className="text-muted-foreground text-xs tabular-nums">
-      {pwt.toFixed(2)}
+    <span className="text-muted-foreground text-sm tabular-nums">
+      {fmtMoney(pwt)}
     </span>
   );
 }
@@ -99,8 +106,8 @@ function RowAmount({
     name: `tb_pricelist_detail.${index}.price`,
   });
   return (
-    <span className="text-foreground text-xs font-semibold tabular-nums">
-      {(Number(price) || 0).toFixed(2)}
+    <span className="text-foreground text-sm font-semibold tabular-nums">
+      {fmtMoney(Number(price) || 0)}
     </span>
   );
 }
@@ -210,7 +217,7 @@ export default function PriceListExternalProductTable({
             )}
           </div>
         ),
-        size: 300,
+        size: 240,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -249,7 +256,7 @@ export default function PriceListExternalProductTable({
               inputMode="decimal"
               min={0}
               placeholder="0"
-              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
+              className="border-border/60 h-9 w-full rounded-md text-right text-sm tabular-nums"
               {...form.register(`tb_pricelist_detail.${fieldIndex}.moq_qty`, {
                 valueAsNumber: true,
               })}
@@ -279,14 +286,14 @@ export default function PriceListExternalProductTable({
               inputMode="decimal"
               min={0}
               placeholder="0.00"
-              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
+              className="border-border/60 h-9 w-full rounded-md text-right text-sm tabular-nums"
               {...form.register(`tb_pricelist_detail.${fieldIndex}.price`, {
                 valueAsNumber: true,
               })}
             />
           );
         },
-        size: 110,
+        size: 124,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -325,7 +332,7 @@ export default function PriceListExternalProductTable({
                     );
                   }}
                   placeholder="—"
-                  className="h-8 text-xs"
+                  className="h-9 w-full text-sm"
                 >
                   <SelectContent>
                     {taxProfiles.map((tp) => (
@@ -339,7 +346,7 @@ export default function PriceListExternalProductTable({
             />
           );
         },
-        size: 140,
+        size: 180,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -353,7 +360,7 @@ export default function PriceListExternalProductTable({
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return <RowPWT form={form} index={fieldIndex} />;
         },
-        size: 90,
+        size: 116,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -377,7 +384,7 @@ export default function PriceListExternalProductTable({
               inputMode="numeric"
               min={0}
               placeholder="0"
-              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
+              className="border-border/60 h-9 w-full rounded-md text-right text-sm tabular-nums"
               {...form.register(
                 `tb_pricelist_detail.${fieldIndex}.lead_time_days`,
                 { valueAsNumber: true },
@@ -403,7 +410,7 @@ export default function PriceListExternalProductTable({
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return <RowAmount form={form} index={fieldIndex} />;
         },
-        size: 120,
+        size: 128,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
