@@ -4,6 +4,7 @@ import {
   Controller,
   type UseFormReturn,
   useFieldArray,
+  useWatch,
 } from "react-hook-form";
 import {
   ColumnDef,
@@ -30,6 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { FieldInput, FieldSelect } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { round2 } from "@/lib/currency-utils";
 import MoqTiersEditor from "./moq-tiers-sub-table";
 import { PLProductGroupedView } from "@/routes/vendor-management/price-list/pl-product-grouped-view";
 import type {
@@ -44,7 +46,7 @@ import type {
 const VIEW_LABELS: Record<string, string> = {
   product: "Product",
   moqPricing: "MOQ Pricing",
-  rate: "Rate",
+  tax: "Tax",
   amount: "Amount",
 };
 
@@ -57,6 +59,57 @@ interface PriceListExternalProductTableProps {
   isSubmitting?: boolean;
   // tax profile options จาก endpoint แยก (check-pricelist/{token}/tax-profiles)
   taxProfiles?: PricelistExternalTaxProfileOption[];
+}
+
+/** ภาษี (จำนวนเงิน) ของ row — computed สดจาก price_without_tax × tax_rate */
+function RowTax({
+  form,
+  index,
+}: {
+  form: UseFormReturn<PricelistExternalDto>;
+  index: number;
+}) {
+  const pwt = useWatch({
+    control: form.control,
+    name: `tb_pricelist_detail.${index}.price_without_tax`,
+  });
+  const rate = useWatch({
+    control: form.control,
+    name: `tb_pricelist_detail.${index}.tax_rate`,
+  });
+  const taxAmt = round2(((Number(pwt) || 0) * (Number(rate) || 0)) / 100);
+  return (
+    <span className="text-muted-foreground text-xs tabular-nums">
+      {taxAmt.toFixed(2)}
+    </span>
+  );
+}
+
+/** ราคารวมภาษีของ row — price_without_tax + tax */
+function RowAmount({
+  form,
+  index,
+}: {
+  form: UseFormReturn<PricelistExternalDto>;
+  index: number;
+}) {
+  const pwt = useWatch({
+    control: form.control,
+    name: `tb_pricelist_detail.${index}.price_without_tax`,
+  });
+  const rate = useWatch({
+    control: form.control,
+    name: `tb_pricelist_detail.${index}.tax_rate`,
+  });
+  const priceNoTax = Number(pwt) || 0;
+  const amount = round2(
+    priceNoTax + round2((priceNoTax * (Number(rate) || 0)) / 100),
+  );
+  return (
+    <span className="text-foreground text-xs font-semibold tabular-nums">
+      {amount.toFixed(2)}
+    </span>
+  );
 }
 
 /**
@@ -220,7 +273,7 @@ export default function PriceListExternalProductTable({
         id: "price_without_tax",
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="Unit Price"
+            title="PWT"
             visibility={false}
             column={column}
           />
@@ -298,6 +351,40 @@ export default function PriceListExternalProductTable({
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
+      },
+      {
+        id: "tax",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Tax" visibility={false} column={column} />
+        ),
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return <RowTax form={form} index={fieldIndex} />;
+        },
+        size: 90,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
+      },
+      {
+        id: "amount",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            title="Amount"
+            visibility={false}
+            column={column}
+          />
+        ),
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return <RowAmount form={form} index={fieldIndex} />;
+        },
+        size: 120,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
       },
       {
         accessorKey: "lead_time_days",

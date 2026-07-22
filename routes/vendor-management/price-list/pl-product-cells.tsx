@@ -263,6 +263,51 @@ export function PriceCell({
   );
 }
 
+/** ดึง price_without_tax + tax_rate ของ row (view=detailRef · edit=watch สด) */
+function useRowPriceParts(
+  form: UseFormReturn<PriceListFormValues>,
+  index: number,
+  isView: boolean,
+  detailRef?: DetailRef,
+) {
+  const pwtWatch = useWatch({
+    control: form.control,
+    name: `pricelist_detail.${index}.price_without_tax`,
+  });
+  const rateWatch = useWatch({
+    control: form.control,
+    name: `pricelist_detail.${index}.tax_rate`,
+  });
+  const priceNoTax = isView
+    ? Number(detailRef?.price_without_tax) || 0
+    : Number(pwtWatch) || 0;
+  const rate = isView ? Number(detailRef?.tax_rate) || 0 : Number(rateWatch) || 0;
+  const taxAmt = round2((priceNoTax * rate) / 100);
+  return { priceNoTax, taxAmt, amount: round2(priceNoTax + taxAmt) };
+}
+
+/** Tax — จำนวนเงินภาษี (computed, read-only) ทั้ง view/edit */
+export function TaxAmountCell({ form, index, isView, detailRef }: CellProps) {
+  "use no memo";
+  const { taxAmt } = useRowPriceParts(form, index, isView, detailRef);
+  return (
+    <span className="text-muted-foreground text-xs tabular-nums">
+      {taxAmt.toFixed(2)}
+    </span>
+  );
+}
+
+/** Amount — ราคารวมภาษี (computed, read-only) ทั้ง view/edit */
+export function AmountCell({ form, index, isView, detailRef }: CellProps) {
+  "use no memo";
+  const { amount } = useRowPriceParts(form, index, isView, detailRef);
+  return (
+    <span className="text-foreground text-xs font-semibold tabular-nums">
+      {amount.toFixed(2)}
+    </span>
+  );
+}
+
 /** Preferred — view: Crown เมื่อ preferred · edit: checkbox toggle ต่อ item */
 export function PreferredCell({
   form,

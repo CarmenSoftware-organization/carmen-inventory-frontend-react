@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import type { PriceList } from "@/types/price-list";
 import type { PriceListFormValues } from "./pl-form-schema";
 import {
+  AmountCell,
   LeadCell,
   MoqCell,
   PreferredCell,
   PriceCell,
   ProductCell,
+  TaxAmountCell,
   TaxCell,
   UnitCell,
   type DetailField,
@@ -100,7 +102,7 @@ export function buildPlProductColumns({
     {
       id: "price",
       size: 128,
-      header: () => tfl("unitPrice"),
+      header: () => tfl("pwt"),
       cell: ({ row }) => (
         <PriceCell
           form={form}
@@ -124,6 +126,36 @@ export function buildPlProductColumns({
           detailRef={detailRefs?.[row.index]}
         />
       ),
+    },
+    {
+      id: "tax",
+      size: 96,
+      header: () => tfl("tax"),
+      cell: ({ row }) => (
+        <TaxAmountCell
+          form={form}
+          index={row.index}
+          isView={isView}
+          isDisabled={isDisabled}
+          detailRef={detailRefs?.[row.index]}
+        />
+      ),
+      meta: { headerClassName: "text-right", cellClassName: "text-right" },
+    },
+    {
+      id: "amount",
+      size: 120,
+      header: () => tfl("amount"),
+      cell: ({ row }) => (
+        <AmountCell
+          form={form}
+          index={row.index}
+          isView={isView}
+          isDisabled={isDisabled}
+          detailRef={detailRefs?.[row.index]}
+        />
+      ),
+      meta: { headerClassName: "text-right", cellClassName: "text-right" },
     },
     {
       id: "lead",

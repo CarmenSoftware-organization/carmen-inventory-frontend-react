@@ -30,7 +30,7 @@ export function PLProductGroupedView({
             <Th className="w-14 text-center">#</Th>
             <Th className="text-left">{tfl("product")}</Th>
             <Th className="text-left">{tfl("moqPricing")}</Th>
-            <Th className="w-20 text-right">{tfl("rate")}</Th>
+            <Th className="w-20 text-right">{tfl("tax")}</Th>
             <Th className="text-right">{tfl("amount")}</Th>
           </tr>
         </thead>
