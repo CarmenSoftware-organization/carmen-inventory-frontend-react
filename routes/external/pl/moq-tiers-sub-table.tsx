@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -49,6 +49,22 @@ export default function MoqTiersSubTable({
   // Track if local changes have been made
   const hasLocalChanges = useRef(false);
 
+  // ref สะท้อน localTiers ล่าสุด — ให้ handler อ่าน/เขียนค่าปัจจุบันได้โดยไม่ต้อง
+  // จับ localTiers ไว้ใน closure (ถ้า handler dep localTiers → columns dep ตาม →
+  // recreate ทุก keystroke → row remount → input หลุด focus ซึ่งเป็นบั๊กที่กำลังแก้)
+  const tiersRef = useRef(localTiers);
+  tiersRef.current = localTiers;
+
+  const commit = useCallback(
+    (updatedTiers: MoqTierDto[]) => {
+      hasLocalChanges.current = true;
+      tiersRef.current = updatedTiers;
+      setLocalTiers(updatedTiers);
+      onTiersUpdate?.(updatedTiers);
+    },
+    [onTiersUpdate],
+  );
+
   // Sync with parent when tiers prop changes (only if no local changes)
   useEffect(() => {
     if (!hasLocalChanges.current) {
@@ -56,7 +72,7 @@ export default function MoqTiersSubTable({
     }
   }, [tiers]);
 
-  const handleToggleEdit = (tierId: string) => {
+  const handleToggleEdit = useCallback((tierId: string) => {
     setEditingTierIds((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(tierId)) {
@@ -66,9 +82,9 @@ export default function MoqTiersSubTable({
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const handleAddNew = () => {
+  const handleAddNew = useCallback(() => {
     const newId = `tier-new-${Date.now()}`;
     const newTier: MoqTierDto = {
       id: newId,
@@ -77,42 +93,33 @@ export default function MoqTiersSubTable({
       lead_time_days: 0,
     };
 
-    const updatedTiers = [...localTiers, newTier];
-    hasLocalChanges.current = true;
-    setLocalTiers(updatedTiers);
-    onTiersUpdate?.(updatedTiers);
+    commit([...tiersRef.current, newTier]);
     setEditingTierIds((prev) => new Set(prev).add(newId));
-  };
+  }, [commit]);
 
-  const handleDeleteClick = (tierId: string) => {
+  const handleDeleteClick = useCallback((tierId: string) => {
     setTierToDelete(tierId);
     setDeleteDialogOpen(true);
-  };
+  }, []);
 
   const handleConfirmDelete = () => {
     if (!tierToDelete) return;
 
-    const updatedTiers = localTiers.filter((tier) => tier.id !== tierToDelete);
-    hasLocalChanges.current = true;
-    setLocalTiers(updatedTiers);
-    onTiersUpdate?.(updatedTiers);
+    commit(tiersRef.current.filter((tier) => tier.id !== tierToDelete));
     setDeleteDialogOpen(false);
     setTierToDelete(null);
   };
 
-  const handleFieldChange = (
-    tierId: string,
-    field: keyof MoqTierDto,
-    value: number,
-  ) => {
-    const updatedTiers = localTiers.map((tier) =>
-      tier.id === tierId ? { ...tier, [field]: value } : tier,
-    );
-
-    hasLocalChanges.current = true;
-    setLocalTiers(updatedTiers);
-    onTiersUpdate?.(updatedTiers);
-  };
+  const handleFieldChange = useCallback(
+    (tierId: string, field: keyof MoqTierDto, value: number) => {
+      commit(
+        tiersRef.current.map((tier) =>
+          tier.id === tierId ? { ...tier, [field]: value } : tier,
+        ),
+      );
+    },
+    [commit],
+  );
 
   const columns = useMemo<ColumnDef<MoqTierDto>[]>(
     () => [
@@ -267,7 +274,10 @@ export default function MoqTiersSubTable({
         size: 80,
       },
     ],
-    [editingTierIds, localTiers],
+    // ไม่ dep localTiers — cell อ่านค่าจาก info.getValue() (table.data) ที่ fresh
+    // ทุก render อยู่แล้ว · columns จึง recreate เฉพาะตอน editingTierIds เปลี่ยน
+    // (toggle edit) ไม่ใช่ทุก keystroke → input ไม่ remount → focus ไม่หลุด
+    [editingTierIds, handleAddNew, handleToggleEdit, handleDeleteClick, handleFieldChange],
   );
 
   const table = useReactTable({
