@@ -16,7 +16,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Save, Send, SquareMinus, SquarePlus } from "lucide-react";
+import { ChevronRight, Plus, Save, Send } from "lucide-react";
 import {
   DataGrid,
   DataGridContainer,
@@ -29,9 +29,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FieldInput, FieldSelect } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
-import MoqTiersSubTable from "./moq-tiers-sub-table";
+import { cn } from "@/lib/utils";
+import MoqTiersEditor from "./moq-tiers-sub-table";
 import { PLProductGroupedView } from "@/routes/vendor-management/price-list/pl-product-grouped-view";
 import type {
+  MoqTierDto,
   PricelistExternalDto,
   PricelistExternalDetailDto,
   PricelistExternalTaxProfileOption,
@@ -102,13 +104,31 @@ export default function PriceListExternalProductTable({
   // เพราะ update() จะ regenerate field id ของแถวนั้น ทำให้ columns (memo บน fields)
   // recreate แล้ว MoqTiersSubTable remount → input ใน tier เสีย focus แบบเดียวกับ
   // cells หลัก setValue เปลี่ยนเฉพาะค่า moq_tiers ไม่แตะ field id
-  const handleTiersUpdate = (
-    itemIndex: number,
-    tiers: PricelistExternalDetailDto["moq_tiers"],
-  ) => {
-    form.setValue(`tb_pricelist_detail.${itemIndex}.moq_tiers`, tiers, {
-      shouldDirty: true,
-    });
+  // เพิ่ม MOQ tier ให้ item ทีเดียวจบ + กาง sub-row ทันที (แทน flow เดิมที่ต้อง
+  // กด expand ก่อนแล้วค่อยหาปุ่ม Add) — vendor คลิก "+ Tier" ครั้งเดียวได้ tier
+  // ว่างพร้อมกรอกเลย
+  const addTierToItem = (itemIndex: number, rowId: string) => {
+    const current =
+      (form.getValues(`tb_pricelist_detail.${itemIndex}.moq_tiers`) as
+        | MoqTierDto[]
+        | undefined) ?? [];
+    form.setValue(
+      `tb_pricelist_detail.${itemIndex}.moq_tiers`,
+      [
+        ...current,
+        {
+          id: `tier-new-${Date.now()}`,
+          minimum_quantity: 0,
+          price: 0,
+          lead_time_days: 0,
+        },
+      ],
+      { shouldDirty: true },
+    );
+    setExpandedRows((prev) => ({
+      ...(prev === true ? {} : prev),
+      [rowId]: true,
+    }));
   };
 
   const columns = useMemo<ColumnDef<PricelistExternalDetailDto>[]>(
@@ -128,7 +148,7 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Product"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
@@ -145,9 +165,9 @@ export default function PriceListExternalProductTable({
           </div>
         ),
         size: 300,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "unit_name",
@@ -155,7 +175,7 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Unit"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
@@ -165,15 +185,15 @@ export default function PriceListExternalProductTable({
           </span>
         ),
         size: 80,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "moq_qty",
         id: "moq_qty",
         header: ({ column }) => (
-          <DataGridColumnHeader title="MOQ" visibility={true} column={column} />
+          <DataGridColumnHeader title="MOQ" visibility={false} column={column} />
         ),
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
@@ -191,9 +211,9 @@ export default function PriceListExternalProductTable({
           );
         },
         size: 80,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "price_without_tax",
@@ -201,7 +221,7 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Unit Price"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
@@ -222,9 +242,9 @@ export default function PriceListExternalProductTable({
           );
         },
         size: 110,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "tax_profile_name",
@@ -232,7 +252,7 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Tax Profile"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
@@ -275,9 +295,9 @@ export default function PriceListExternalProductTable({
           );
         },
         size: 140,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "lead_time_days",
@@ -285,7 +305,7 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Lead Time"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
@@ -306,39 +326,56 @@ export default function PriceListExternalProductTable({
           );
         },
         size: 100,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
-        id: "expand",
-        header: () => null,
+        id: "actions",
+        header: () => (
+          <span className="text-muted-foreground text-[0.6875rem]">
+            Tiers
+          </span>
+        ),
         cell: ({ row }) => {
-          return row.getCanExpand() ? (
-            <Button
-              onClick={row.getToggleExpandedHandler()}
-              size="sm"
-              variant="ghost"
-            >
-              {row.getIsExpanded() ? (
-                <SquareMinus className="h-4 w-4" />
-              ) : (
-                <SquarePlus className="h-4 w-4" />
-              )}
-            </Button>
-          ) : null;
+          const itemIndex = fields.findIndex((f) => f.id === row.original.id);
+          const expanded = row.getIsExpanded();
+          return (
+            <div className="flex items-center justify-end gap-0.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Toggle pricing tiers"
+                onClick={row.getToggleExpandedHandler()}
+                className="text-muted-foreground"
+              >
+                <ChevronRight
+                  className={cn(
+                    "size-4 transition-transform",
+                    expanded && "rotate-90",
+                  )}
+                />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => addTierToItem(itemIndex, row.id)}
+                className="text-primary hover:text-primary hover:bg-primary/5 gap-1 whitespace-nowrap"
+              >
+                <Plus className="size-3.5" />
+                Tier
+              </Button>
+            </div>
+          );
         },
-        size: 50,
+        size: 130,
         enableResizing: false,
         meta: {
           expandedContent: (row: PricelistExternalDetailDto) => {
             const fieldIndex = fields.findIndex((f) => f.id === row.id);
-            return (
-              <MoqTiersSubTable
-                tiers={row.moq_tiers || []}
-                onTiersUpdate={(tiers) => handleTiersUpdate(fieldIndex, tiers)}
-              />
-            );
+            return <MoqTiersEditor form={form} index={fieldIndex} />;
           },
         },
       },
@@ -390,10 +427,10 @@ export default function PriceListExternalProductTable({
       table={editTable}
       recordCount={fields?.length || 0}
       tableLayout={{
-        columnsPinnable: true,
-        columnsResizable: true,
-        columnsMovable: true,
-        columnsVisibility: true,
+        columnsPinnable: false,
+        columnsResizable: false,
+        columnsMovable: false,
+        columnsVisibility: false,
       }}
     >
       <div className="w-full space-y-2">
