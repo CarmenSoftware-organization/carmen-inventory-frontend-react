@@ -78,16 +78,12 @@ export default function PriceListExternalComponent({
   }, [data, form]);
 
   const handleSave = async () => {
+    // vendor save draft ได้ตลอด (ไม่บังคับว่าต้องมีการเปลี่ยนแปลง) — โพสต์ค่าปัจจุบัน
     const formData = form.getValues();
-
-    if (!form.formState.isDirty) {
-      toast.error("No changes to save");
-      return;
-    }
 
     try {
       await updateMutation.mutateAsync(formData);
-      toast.success("Changes saved successfully");
+      toast.success("Draft saved");
       form.reset(formData);
     } catch (err) {
       // surface ข้อความจริงจาก backend (เช่น validation / ลิงก์หมดอายุ) ให้ vendor

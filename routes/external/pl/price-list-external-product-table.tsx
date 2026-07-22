@@ -530,10 +530,10 @@ export default function PriceListExternalProductTable({
             variant="outline"
             size="sm"
             onClick={onSave}
-            disabled={!hasPendingChanges || isSaving}
+            disabled={isSaving}
           >
             <Save className="h-4 w-4" />
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? "Saving..." : "Save Draft"}
           </Button>
           <Button
             size="sm"
