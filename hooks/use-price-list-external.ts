@@ -9,45 +9,82 @@ import type {
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
+/** tier id ที่ขึ้นต้นด้วย `tier-new-` = สร้างในเครื่อง ยังไม่มี row ฝั่ง server */
+const isNewTierId = (id?: string | null) =>
+  !id || String(id).startsWith("tier-new-");
+
 /**
  * แปลงฟอร์มเป็น payload update — โครงเดียวกับ price list ปกติ (เรื่องเดียวกัน
- * ต่างแค่ vendor เป็นคนกรอก): base fields + pricelist_detail.update[] โดย derive
- * price/tax_amt จาก price_without_tax + tax_rate ตอนส่ง (cell ไม่ sync ระหว่างพิมพ์)
+ * ต่างแค่ vendor เป็นคนกรอก). Input `price` เป็นราคารวมภาษี (gross) → derive
+ * price_without_tax + tax_amt กลับตอนส่ง
+ *
+ * MOQ tier (ที่กรอกใน expanded) ถูก flatten เป็น pricelist_detail row แยก — tier
+ * = สินค้าเดิม/หน่วยเดิม/ภาษีเดิมของ parent แต่ MOQ/ราคา/lead เป็นของ tier เอง:
+ * tier ที่มี id server → `update[]`, tier ใหม่ (id `tier-new-*`) → `add[]`
+ * (ไม่มี id) เหมือน buildItemChanges ของ price list ภายใน
  * @param formData - ข้อมูลฟอร์มจาก vendor
  * @returns payload สำหรับ PATCH/submit
  */
 const buildPayload = (formData: PricelistExternalDto) => {
+  const update: Record<string, unknown>[] = [];
+  const add: Record<string, unknown>[] = [];
+  let seq = 0;
+
+  const derive = (gross: number | string, rate: number) => {
+    const price = Number(gross) || 0;
+    const priceNoTax = round2(price / (1 + rate / 100));
+    return { price, price_without_tax: priceNoTax, tax_amt: round2(price - priceNoTax) };
+  };
+
+  for (const d of formData.tb_pricelist_detail) {
+    const rate = Number(d.tax_rate) || 0;
+
+    // base row (ตัว item เอง) — มี id server เสมอ → update
+    // unit_id/tax_profile_id เป็น uuid: ถ้าว่าง (item ยังไม่มี unit) ให้ "ละไว้"
+    // ไม่ส่ง — ส่ง "" backend มองเป็น invalid uuid, ส่ง null มองเป็น expected string
+    update.push({
+      id: d.id,
+      sequence_no: ++seq,
+      product_id: d.product_id,
+      ...(d.unit_id ? { unit_id: d.unit_id } : {}),
+      ...derive(d.price, rate),
+      ...(d.tax_profile_id ? { tax_profile_id: d.tax_profile_id } : {}),
+      tax_rate: d.tax_rate,
+      lead_time_days: d.lead_time_days,
+      moq_qty: d.moq_qty,
+      is_preferred: d.is_preferred,
+    });
+
+    // MOQ tiers → flatten เป็น detail row (ยืม product/unit/tax จาก parent)
+    for (const t of d.moq_tiers ?? []) {
+      const row = {
+        sequence_no: ++seq,
+        product_id: d.product_id,
+        ...(d.unit_id ? { unit_id: d.unit_id } : {}),
+        moq_qty: t.minimum_quantity,
+        ...derive(t.price, rate),
+        ...(d.tax_profile_id ? { tax_profile_id: d.tax_profile_id } : {}),
+        tax_rate: d.tax_rate,
+        lead_time_days: t.lead_time_days ?? 0,
+        is_preferred: false,
+      };
+      if (isNewTierId(t.id)) add.push(row);
+      else update.push({ id: t.id, ...row });
+    }
+  }
+
   return {
     vendor_id: formData.vendor?.id ?? "",
     name: formData.name,
-    description: formData.description,
+    description: formData.description ?? "",
     status: formData.status,
     currency_id: formData.currency_id,
     effective_from_date: formData.effective_from_date,
     effective_to_date: formData.effective_to_date,
-    note: formData.note,
+    note: formData.note ?? "",
     pricelist_detail: {
-      update: formData.tb_pricelist_detail.map((d, i) => {
-        // Input คือ price (รวมภาษี/gross) — derive price_without_tax + tax_amt กลับ
-        const price = Number(d.price) || 0;
-        const rate = Number(d.tax_rate) || 0;
-        const priceNoTax = round2(price / (1 + rate / 100));
-        const taxAmt = round2(price - priceNoTax);
-        return {
-          id: d.id,
-          sequence_no: i + 1,
-          product_id: d.product_id,
-          price,
-          price_without_tax: priceNoTax,
-          unit_id: d.unit_id,
-          tax_profile_id: d.tax_profile_id || "",
-          tax_rate: d.tax_rate,
-          tax_amt: taxAmt,
-          lead_time_days: d.lead_time_days,
-          moq_qty: d.moq_qty,
-          is_preferred: d.is_preferred,
-        };
-      }),
+      ...(update.length ? { update } : {}),
+      ...(add.length ? { add } : {}),
     },
   };
 };
