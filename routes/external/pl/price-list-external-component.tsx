@@ -13,6 +13,7 @@ import type { PricelistExternalDto } from "@/types/price-list-external";
 import { ErrorState } from "@/components/ui/error-state";
 import PriceListExternalHeader from "./price-list-external-header";
 import PriceListExternalProductTable from "./price-list-external-product-table";
+import PriceListExternalSkeleton from "./price-list-external-skeleton";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Eye, Pencil } from "lucide-react";
 
@@ -113,7 +114,7 @@ export default function PriceListExternalComponent({
   };
 
   if (isLoading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading...</div>;
+    return <PriceListExternalSkeleton />;
   }
 
   if (isError) {
