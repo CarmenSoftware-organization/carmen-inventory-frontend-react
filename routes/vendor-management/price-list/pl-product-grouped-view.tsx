@@ -29,9 +29,10 @@ export function PLProductGroupedView({
           <tr className="bg-muted/60 text-muted-foreground border-border/60 border-b">
             <Th className="w-14 text-center">#</Th>
             <Th className="text-left">{tfl("product")}</Th>
-            <Th className="text-left">{tfl("moqPricing")}</Th>
+            <Th className="text-left">{tfl("moq")}</Th>
+            <Th className="w-24 text-right">{tfl("pwt")}</Th>
             <Th className="w-20 text-right">{tfl("tax")}</Th>
-            <Th className="text-right">{tfl("amount")}</Th>
+            <Th className="w-24 text-right">{tfl("amount")}</Th>
           </tr>
         </thead>
         <tbody>
@@ -43,11 +44,11 @@ export function PLProductGroupedView({
                 "py-1",
                 isLast && "border-border/50 border-b",
               );
-              // Rate = ยอดภาษี (คำนวณจาก tax_rate), Amount = ราคา + Rate (รวมภาษี)
-              const priceNoTax = Number(tier.price_without_tax) || 0;
-              const rate = Number(tier.tax_rate) || 0;
-              const taxAmt = round2((priceNoTax * rate) / 100);
-              const amount = round2(priceNoTax + taxAmt);
+              // Amount = price (gross, authoritative) · PWT = ก่อนภาษี ·
+              // Tax = ส่วนต่าง (ค่าเงิน) — ใช้ค่าที่เก็บไว้ตรง ๆ ไม่ recompute จาก rate
+              const pwt = Number(tier.price_without_tax) || 0;
+              const amount = round2(Number(tier.price ?? pwt) || 0);
+              const taxAmt = round2(amount - pwt);
               return (
                 <tr key={tier.id ?? `${group.productId}-${ti}`}>
                   {isFirst && (
@@ -71,7 +72,7 @@ export function PLProductGroupedView({
                       </Td>
                     </>
                   )}
-                  {/* moq + unit → price (lead time) */}
+                  {/* MOQ tier + lead time (ราคาย้ายไปเป็นคอลัมน์ PWT/Amount) */}
                   <Td className={cn("align-middle", tierClass)}>
                     <span className="flex items-center gap-1.5 text-xs tabular-nums">
                       {tier.is_preferred && (
@@ -83,16 +84,21 @@ export function PLProductGroupedView({
                       <span className="text-foreground font-medium">
                         {Number(tier.moq_qty) || 0}+ {tier.unit_name ?? "—"}
                       </span>
-                      <span className="text-muted-foreground">→</span>
-                      <span className="text-foreground font-semibold">
-                        {priceNoTax.toFixed(2)}
-                      </span>
                       <span className="text-muted-foreground text-[0.6875rem]">
-                        ({Number(tier.lead_time_days) || 0}d)
+                        · {Number(tier.lead_time_days) || 0}d
                       </span>
                     </span>
                   </Td>
-                  {/* Rate = ยอดภาษีที่คำนวณจาก tax_rate (ค่าเงิน ไม่ใช่ %) */}
+                  {/* PWT = ราคาก่อนภาษี */}
+                  <Td
+                    className={cn(
+                      "text-foreground text-right align-middle tabular-nums",
+                      tierClass,
+                    )}
+                  >
+                    {pwt.toFixed(2)}
+                  </Td>
+                  {/* Tax = ยอดภาษี (ค่าเงิน) */}
                   <Td
                     className={cn(
                       "text-muted-foreground text-right align-middle tabular-nums",
@@ -101,7 +107,7 @@ export function PLProductGroupedView({
                   >
                     {taxAmt.toFixed(2)}
                   </Td>
-                  {/* Amount = ราคารวมภาษีแล้ว */}
+                  {/* Amount = ราคารวมภาษี (gross) */}
                   <Td
                     className={cn(
                       "text-foreground text-right align-middle font-semibold tabular-nums",

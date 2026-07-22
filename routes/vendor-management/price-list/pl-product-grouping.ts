@@ -12,6 +12,8 @@ export interface GroupableDetail {
   readonly product_code?: string | null;
   readonly unit_name?: string | null;
   readonly moq_qty: number | string;
+  /** ราคารวมภาษี (gross) — authoritative amount */
+  readonly price?: number | string;
   readonly price_without_tax: number | string;
   readonly tax_rate: number | string;
   readonly lead_time_days?: number | string | null;

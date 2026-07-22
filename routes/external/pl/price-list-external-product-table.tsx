@@ -45,7 +45,8 @@ import type {
 // อังกฤษล้วนเหมือน header ส่วนอื่นของหน้านี้
 const VIEW_LABELS: Record<string, string> = {
   product: "Product",
-  moqPricing: "MOQ Pricing",
+  moq: "MOQ",
+  pwt: "PWT",
   tax: "Tax",
   amount: "Amount",
 };
