@@ -14,8 +14,9 @@ import { ErrorState } from "@/components/ui/error-state";
 import PriceListExternalHeader from "./price-list-external-header";
 import PriceListExternalProductTable from "./price-list-external-product-table";
 import PriceListExternalSkeleton from "./price-list-external-skeleton";
+import PriceListExternalExpired from "./price-list-external-expired";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Eye, Pencil } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 
 interface PriceListExternalComponentProps {
   urlToken: string;
@@ -118,15 +119,10 @@ export default function PriceListExternalComponent({
   }
 
   if (isError) {
+    // 401 = ลิงก์หมดอายุ/ใช้ไม่ได้ — โชว์หน้าเป็นมิตร (ไม่พูดถึง token) แทน
+    // error ดิบ · error อื่นค่อยใช้ ErrorState ที่ retry ได้
     if (error instanceof HttpError && error.status === 401) {
-      return (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6">
-          <AlertCircle className="size-8 text-destructive" />
-          <p className="text-sm text-muted-foreground">
-            {error?.message || "This link has expired"}
-          </p>
-        </div>
-      );
+      return <PriceListExternalExpired />;
     }
     return <ErrorState message={error?.message} onRetry={() => refetch()} />;
   }
