@@ -1,7 +1,7 @@
 export enum WORKFLOW_TYPE {
-  PR = "purchase_request_workflow",
-  PO = "purchase_order_workflow",
-  SR = "store_requisition_workflow",
+  PR = "purchase_request",
+  PO = "purchase_order",
+  SR = "store_requisition",
 }
 
 export enum enum_sla_unit {
@@ -216,4 +216,3 @@ export interface WorkflowData {
   notification_templates: Template[];
   products: Product[];
 }
-
