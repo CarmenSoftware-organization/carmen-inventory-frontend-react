@@ -5,6 +5,7 @@ import type { UseFormReturn } from "react-hook-form";
 import PriceListExternalComponent from "./price-list-external-component";
 import {
   usePriceListExternal,
+  useExternalTaxProfiles,
   useUpdatePriceListExternal,
   useSubmitPriceListExternal,
   HttpError,
@@ -20,6 +21,7 @@ vi.mock("@/hooks/use-price-list-external", async (importActual) => {
   return {
     ...actual,
     usePriceListExternal: vi.fn(),
+    useExternalTaxProfiles: vi.fn(),
     useUpdatePriceListExternal: vi.fn(),
     useSubmitPriceListExternal: vi.fn(),
   };
@@ -82,6 +84,9 @@ function stubQuery() {
 beforeEach(() => {
   vi.clearAllMocks();
   stubQuery();
+  vi.mocked(useExternalTaxProfiles).mockReturnValue({
+    data: [],
+  } as unknown as ReturnType<typeof useExternalTaxProfiles>);
   vi.mocked(useSubmitPriceListExternal).mockReturnValue({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,

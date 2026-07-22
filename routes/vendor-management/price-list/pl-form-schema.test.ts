@@ -63,21 +63,18 @@ describe("createPriceListSchema — MOQ tier price", () => {
       const issue = result.error.issues.find(
         (i) => i.message === "moqTierPrice",
       );
-      expect(issue?.path).toEqual([
-        "pricelist_detail",
-        1,
-        "price_without_tax",
-      ]);
+      expect(issue?.path).toEqual(["pricelist_detail", 1, "price"]);
     }
   });
 
-  it("จับราคากลับชั้นจาก net แม้ price (gross) ยังไม่ถูก commit (=0) — regression PL-DOC-03", () => {
-    // ฟอร์ม create กรอกแค่ price_without_tax; price เป็น derived ที่ไม่ commit → คง 0
-    // guard ต้องเทียบ net ไม่งั้น 0 > 0 = false แล้วปล่อยราคากลับชั้นผ่าน
+  it("จับราคากลับชั้นจาก price (gross) แม้ net (price_without_tax) ยังไม่ถูก commit (=0) — regression PL-DOC-03", () => {
+    // model ปัจจุบัน: vendor กรอก price (gross) สด; price_without_tax เป็น derived
+    // ที่คำนวณตอน submit → ระหว่างพิมพ์ยังคง 0 · guard ต้องเทียบ price (field ที่
+    // commit สด) ไม่งั้น 0 > 0 = false แล้วปล่อยราคากลับชั้นผ่าน
     const result = schema.safeParse(
       formValues([
-        detail({ moq_qty: 1, price: 0, price_without_tax: 20 }),
-        detail({ moq_qty: 100, price: 0, price_without_tax: 30 }),
+        detail({ moq_qty: 1, price: 20, price_without_tax: 0 }),
+        detail({ moq_qty: 100, price: 30, price_without_tax: 0 }),
       ]),
     );
     expect(result.success).toBe(false);
