@@ -30,7 +30,7 @@ export function Component() {
     return <ErrorState message={t("notFound")} />;
   }
 
-  const Form = categoryDef.form;
+  const Form = brandDef.form ?? categoryDef.form;
   return (
     <Suspense
       fallback={

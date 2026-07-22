@@ -11,14 +11,15 @@ import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
-import { cn } from "@/lib/utils";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -157,8 +158,11 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         mutate: createPriceList.mutate,
         onSuccess: (id) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
+          // navigate ไป detail ของ record ที่เพิ่งสร้าง (edit route จะ mount ใหม่
+          // แล้วตั้ง mode=view จาก priceList เอง) — อย่า setMode/reset ที่นี่ เพราะ
+          // มันทำให้ navGuard enabled true→false ระหว่าง navigate ยังไม่ commit แล้ว
+          // teardown ของมันยิง history.back() เด้งกลับ /new (ดู use-navigation-guard)
           navigate(`/vendor-management/price-list/${id}`, { replace: true });
-          setMode("view");
         },
       });
     }
@@ -196,43 +200,32 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   const plNo = priceList?.no ?? null;
   const productsHeaderLabels = useProductsHeaderLabels(t);
   const removeItemLabel = t("detail.removeItem");
-  const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
+  const tsStatus = ts as (key: "draft" | "submitted" | "active" | "inactive") => string;
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label={tc("goBack")}
-            onClick={handleBack}
-          >
-            <ChevronLeft />
-          </Button>
-          <h1
-            className={cn(
-              "truncate text-lg font-semibold tracking-tight",
-              watchedName
-                ? "text-foreground"
-                : "text-muted-foreground italic",
+      <div className="mb-6">
+        <DocFormHeader
+          flush
+          title={watchedName || t("namePlaceholder")}
+          titleMuted={!watchedName}
+        backLabel={tc("goBack")}
+        onBack={handleBack}
+        badges={
+          <>
+            {plNo && (
+              <span className="text-muted-foreground shrink-0 text-sm">
+                · {plNo}
+              </span>
             )}
-          >
-            {watchedName || t("namePlaceholder")}
-          </h1>
-          {plNo && (
-            <span className="text-muted-foreground shrink-0 text-sm">
-              · {plNo}
-            </span>
-          )}
-          <Badge variant="secondary" size="sm">
-            {tsStatus(watchedStatus)}
-          </Badge>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {isView ? (
+            <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
+              {tsStatus(watchedStatus)}
+            </StatusDotBadge>
+          </>
+        }
+        actions={
+          isView ? (
             <Button size="sm" onClick={() => setMode("edit")}>
               <Pencil />
               {tc("edit")}
@@ -271,9 +264,10 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
                 </Button>
               )}
             </>
-          )}
-        </div>
-      </header>
+          )
+        }
+        />
+      </div>
 
       <form
         id={FORM_ID}

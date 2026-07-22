@@ -1,6 +1,7 @@
 import { Coins, CalendarClock } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import {
   Card,
   CardAction,
@@ -28,12 +29,6 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-
-  const variantMap: Record<string, "outline" | "success" | "secondary"> = {
-    draft: "outline",
-    active: "success",
-    inactive: "secondary",
-  };
 
   return (
     <Card
@@ -65,13 +60,12 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
           </p>
         )}
         <CardAction>
-          <Badge
-            variant={variantMap[item.status] ?? "outline"}
+          <StatusDotBadge
+            tone={PL_STATUS_TONE[item.status] ?? "neutral"}
             size="xs"
-            className="text-xs"
           >
             {ts(item.status as "draft" | "active" | "inactive")}
-          </Badge>
+          </StatusDotBadge>
         </CardAction>
       </CardHeader>
 

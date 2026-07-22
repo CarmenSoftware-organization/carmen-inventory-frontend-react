@@ -1,6 +1,11 @@
 
 import { useMemo, useState } from "react";
-import { type UseFormReturn, useFieldArray } from "react-hook-form";
+import {
+  Controller,
+  type UseFormReturn,
+  useFieldArray,
+  useWatch,
+} from "react-hook-form";
 import {
   ColumnDef,
   ExpandedState,
@@ -12,7 +17,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Save, Send, SquareMinus, SquarePlus } from "lucide-react";
+import { ChevronRight, Plus, Save, Send } from "lucide-react";
 import {
   DataGrid,
   DataGridContainer,
@@ -23,27 +28,28 @@ import { DataGridPagination } from "@/components/ui/data-grid/data-grid-paginati
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import MoqTiersSubTable from "./moq-tiers-sub-table";
+import { FieldInput, FieldSelect } from "@/components/ui/field";
+import { SelectContent, SelectItem } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { round2 } from "@/lib/currency-utils";
+import MoqTiersEditor from "./moq-tiers-sub-table";
+import { PLProductGroupedView } from "@/routes/vendor-management/price-list/pl-product-grouped-view";
 import type {
+  MoqTierDto,
   PricelistExternalDto,
   PricelistExternalDetailDto,
+  PricelistExternalTaxProfileOption,
 } from "@/types/price-list-external";
 
-// Type for grouped rows in view mode
-interface GroupedProductRow {
-  product_id: string;
-  product_name: string;
-  itemCount: number;
-  prices: string[];
-  prices_without_tax: string[];
-  tax_amts: string[];
-  moq_qtys: string[];
-  unit_names: string[];
-  tax_profile_names: string[];
-  lead_time_days_list: number[];
-  sequence_nos: number[];
-}
+// label ของ grouped view (mirror price list ภายใน) — portal เป็น public ใช้
+// อังกฤษล้วนเหมือน header ส่วนอื่นของหน้านี้
+const VIEW_LABELS: Record<string, string> = {
+  product: "Product",
+  moq: "MOQ",
+  pwt: "PWT",
+  tax: "Tax",
+  amount: "Amount",
+};
 
 interface PriceListExternalProductTableProps {
   form: UseFormReturn<PricelistExternalDto>;
@@ -52,6 +58,51 @@ interface PriceListExternalProductTableProps {
   onSubmit?: () => void;
   isSaving?: boolean;
   isSubmitting?: boolean;
+  // tax profile options จาก endpoint แยก (check-pricelist/{token}/tax-profiles)
+  taxProfiles?: PricelistExternalTaxProfileOption[];
+}
+
+/** PWT (ก่อนภาษี) ของ row — computed สดจาก price (gross) ÷ (1 + rate) */
+function RowPWT({
+  form,
+  index,
+}: {
+  form: UseFormReturn<PricelistExternalDto>;
+  index: number;
+}) {
+  const price = useWatch({
+    control: form.control,
+    name: `tb_pricelist_detail.${index}.price`,
+  });
+  const rate = useWatch({
+    control: form.control,
+    name: `tb_pricelist_detail.${index}.tax_rate`,
+  });
+  const pwt = round2((Number(price) || 0) / (1 + (Number(rate) || 0) / 100));
+  return (
+    <span className="text-muted-foreground text-xs tabular-nums">
+      {pwt.toFixed(2)}
+    </span>
+  );
+}
+
+/** Amount (รวมภาษี) ของ row = price (gross) ที่ vendor กรอก */
+function RowAmount({
+  form,
+  index,
+}: {
+  form: UseFormReturn<PricelistExternalDto>;
+  index: number;
+}) {
+  const price = useWatch({
+    control: form.control,
+    name: `tb_pricelist_detail.${index}.price`,
+  });
+  return (
+    <span className="text-foreground text-xs font-semibold tabular-nums">
+      {(Number(price) || 0).toFixed(2)}
+    </span>
+  );
 }
 
 /**
@@ -79,6 +130,7 @@ export default function PriceListExternalProductTable({
   onSubmit,
   isSaving = false,
   isSubmitting = false,
+  taxProfiles = [],
 }: PriceListExternalProductTableProps) {
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
@@ -87,70 +139,42 @@ export default function PriceListExternalProductTable({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [expandedRows, setExpandedRows] = useState<ExpandedState>({});
 
-  const { fields, update } = useFieldArray({
+  const { fields } = useFieldArray({
     control: form.control,
     name: "tb_pricelist_detail",
   });
 
   const hasPendingChanges = form.formState.isDirty;
 
-  // Grouped table data for view mode only
-  const groupedTableData = useMemo(() => {
-    if (!isViewMode) return [];
-
-    const groupMap = new Map<string, GroupedProductRow>();
-
-    for (const item of fields || []) {
-      const key = item.product_id || `ungrouped-${item.id}`;
-
-      if (groupMap.has(key)) {
-        const group = groupMap.get(key)!;
-        group.itemCount++;
-        group.prices.push(item.price);
-        group.prices_without_tax.push(item.price_without_tax || "0");
-        group.tax_amts.push(item.tax_amt || "0");
-        group.moq_qtys.push(item.moq_qty || "0");
-        group.unit_names.push(item.unit_name || "-");
-        group.tax_profile_names.push(item.tax_profile_name || "-");
-        group.lead_time_days_list.push(item.lead_time_days ?? 0);
-        group.sequence_nos.push(item.sequence_no ?? 0);
-      } else {
-        groupMap.set(key, {
-          product_id: item.product_id || "",
-          product_name: item.product_name || "",
-          itemCount: 1,
-          prices: [item.price],
-          prices_without_tax: [item.price_without_tax || "0"],
-          tax_amts: [item.tax_amt || "0"],
-          moq_qtys: [item.moq_qty || "0"],
-          unit_names: [item.unit_name || "-"],
-          tax_profile_names: [item.tax_profile_name || "-"],
-          lead_time_days_list: [item.lead_time_days ?? 0],
-          sequence_nos: [item.sequence_no ?? 0],
-        });
-      }
-    }
-
-    return Array.from(groupMap.values());
-  }, [fields, isViewMode]);
-
-  // Handler for updating item fields
-  const handleItemFieldChange = (
-    index: number,
-    field: keyof PricelistExternalDetailDto,
-    value: string | number,
-  ) => {
-    const currentItem = fields[index];
-    update(index, { ...currentItem, [field]: value });
-  };
-
-  // Handler for updating MOQ tiers
-  const handleTiersUpdate = (
-    itemIndex: number,
-    tiers: PricelistExternalDetailDto["moq_tiers"],
-  ) => {
-    const currentItem = fields[itemIndex];
-    update(itemIndex, { ...currentItem, moq_tiers: tiers });
+  // Handler for updating MOQ tiers — ใช้ setValue ไม่ใช่ useFieldArray.update()
+  // เพราะ update() จะ regenerate field id ของแถวนั้น ทำให้ columns (memo บน fields)
+  // recreate แล้ว MoqTiersSubTable remount → input ใน tier เสีย focus แบบเดียวกับ
+  // cells หลัก setValue เปลี่ยนเฉพาะค่า moq_tiers ไม่แตะ field id
+  // เพิ่ม MOQ tier ให้ item ทีเดียวจบ + กาง sub-row ทันที (แทน flow เดิมที่ต้อง
+  // กด expand ก่อนแล้วค่อยหาปุ่ม Add) — vendor คลิก "+ Tier" ครั้งเดียวได้ tier
+  // ว่างพร้อมกรอกเลย
+  const addTierToItem = (itemIndex: number, rowId: string) => {
+    const current =
+      (form.getValues(`tb_pricelist_detail.${itemIndex}.moq_tiers`) as
+        | MoqTierDto[]
+        | undefined) ?? [];
+    form.setValue(
+      `tb_pricelist_detail.${itemIndex}.moq_tiers`,
+      [
+        ...current,
+        {
+          id: `tier-new-${Date.now()}`,
+          minimum_quantity: 0,
+          price: 0,
+          lead_time_days: 0,
+        },
+      ],
+      { shouldDirty: true },
+    );
+    setExpandedRows((prev) => ({
+      ...(prev === true ? {} : prev),
+      [rowId]: true,
+    }));
   };
 
   const columns = useMemo<ColumnDef<PricelistExternalDetailDto>[]>(
@@ -170,19 +194,26 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Product"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
         cell: ({ row }) => (
-          <div className="font-semibold text-primary text-xs">
-            {row.original.product_name}
+          <div className="flex flex-col">
+            <span className="text-foreground text-xs font-medium">
+              {row.original.product_name}
+            </span>
+            {row.original.product_code && (
+              <span className="text-muted-foreground text-[0.6875rem]">
+                {row.original.product_code}
+              </span>
+            )}
           </div>
         ),
         size: 300,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "unit_name",
@@ -190,43 +221,45 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Unit"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
         cell: ({ row }) => (
-          <Badge variant="secondary" className="text-xs">
-            {row.original.unit_name || "-"}
-          </Badge>
+          <span className="text-muted-foreground text-xs">
+            {row.original.unit_name || "—"}
+          </span>
         ),
         size: 80,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "moq_qty",
         id: "moq_qty",
         header: ({ column }) => (
-          <DataGridColumnHeader title="MOQ" visibility={true} column={column} />
+          <DataGridColumnHeader title="MOQ" visibility={false} column={column} />
         ),
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return (
-            <Input
-              type="text"
-              value={row.original.moq_qty}
-              onChange={(e) =>
-                handleItemFieldChange(fieldIndex, "moq_qty", e.target.value)
-              }
-              className="h-7 text-xs text-right"
+            <FieldInput
+              type="number"
+              inputMode="decimal"
+              min={0}
+              placeholder="0"
+              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
+              {...form.register(`tb_pricelist_detail.${fieldIndex}.moq_qty`, {
+                valueAsNumber: true,
+              })}
             />
           );
         },
         size: 80,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "price",
@@ -234,113 +267,29 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Price"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return (
-            <Input
-              type="text"
-              value={row.original.price}
-              onChange={(e) =>
-                handleItemFieldChange(fieldIndex, "price", e.target.value)
-              }
-              className="h-7 text-xs text-right font-semibold"
-            />
-          );
-        },
-        size: 100,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "lead_time_days",
-        id: "lead_time_days",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Lead Time"
-            visibility={true}
-            column={column}
-          />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return (
-            <Input
+            <FieldInput
               type="number"
-              value={row.original.lead_time_days}
-              onChange={(e) =>
-                handleItemFieldChange(
-                  fieldIndex,
-                  "lead_time_days",
-                  Number(e.target.value),
-                )
-              }
-              className="h-7 text-xs"
+              inputMode="decimal"
               min={0}
-              placeholder="Days"
+              placeholder="0.00"
+              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
+              {...form.register(`tb_pricelist_detail.${fieldIndex}.price`, {
+                valueAsNumber: true,
+              })}
             />
           );
         },
-        size: 100,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "price_without_tax",
-        id: "price_without_tax",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="PWT" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return (
-            <Input
-              type="text"
-              value={row.original.price_without_tax || ""}
-              onChange={(e) =>
-                handleItemFieldChange(
-                  fieldIndex,
-                  "price_without_tax",
-                  e.target.value,
-                )
-              }
-              className="h-7 text-xs text-right"
-            />
-          );
-        },
-        size: 100,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
-      },
-      {
-        accessorKey: "tax_amt",
-        id: "tax_amt",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Tax" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return (
-            <Input
-              type="text"
-              value={row.original.tax_amt || ""}
-              onChange={(e) =>
-                handleItemFieldChange(fieldIndex, "tax_amt", e.target.value)
-              }
-              className="h-7 text-xs text-right"
-            />
-          );
-        },
-        size: 80,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        size: 110,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
         accessorKey: "tax_profile_name",
@@ -348,167 +297,176 @@ export default function PriceListExternalProductTable({
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Tax Profile"
-            visibility={true}
+            visibility={false}
             column={column}
           />
         ),
-        cell: ({ row }) => (
-          <span className="text-xs">
-            {row.original.tax_profile_name || "-"}
-          </span>
-        ),
-        size: 120,
-        enableSorting: true,
-        enableHiding: true,
-        enableResizing: true,
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          // taxProfiles (prop) มาจาก endpoint แยก — portal public เรียก auth lookup
+          // ไม่ได้ · เลือกแล้ว sync name + rate ของแถว
+          return (
+            <Controller
+              control={form.control}
+              name={`tb_pricelist_detail.${fieldIndex}.tax_profile_id`}
+              render={({ field }) => (
+                <FieldSelect
+                  value={field.value}
+                  onValueChange={(id) => {
+                    field.onChange(id);
+                    const tp = taxProfiles.find((t) => t.id === id);
+                    form.setValue(
+                      `tb_pricelist_detail.${fieldIndex}.tax_profile_name`,
+                      tp?.name ?? null,
+                    );
+                    form.setValue(
+                      `tb_pricelist_detail.${fieldIndex}.tax_rate`,
+                      tp?.tax_rate ?? 0,
+                    );
+                  }}
+                  placeholder="—"
+                  className="h-8 text-xs"
+                >
+                  <SelectContent>
+                    {taxProfiles.map((tp) => (
+                      <SelectItem key={tp.id} value={tp.id}>
+                        {tp.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </FieldSelect>
+              )}
+            />
+          );
+        },
+        size: 140,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
       },
       {
-        id: "expand",
-        header: () => null,
+        id: "pwt",
+        header: ({ column }) => (
+          <DataGridColumnHeader title="PWT" visibility={false} column={column} />
+        ),
         cell: ({ row }) => {
-          return row.getCanExpand() ? (
-            <Button
-              onClick={row.getToggleExpandedHandler()}
-              size="sm"
-              variant="ghost"
-            >
-              {row.getIsExpanded() ? (
-                <SquareMinus className="h-4 w-4" />
-              ) : (
-                <SquarePlus className="h-4 w-4" />
-              )}
-            </Button>
-          ) : null;
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return <RowPWT form={form} index={fieldIndex} />;
         },
-        size: 50,
+        size: 90,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
+      },
+      {
+        accessorKey: "lead_time_days",
+        id: "lead_time_days",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            title="Lead Time"
+            visibility={false}
+            column={column}
+          />
+        ),
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return (
+            <FieldInput
+              type="number"
+              inputMode="numeric"
+              min={0}
+              placeholder="0"
+              className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
+              {...form.register(
+                `tb_pricelist_detail.${fieldIndex}.lead_time_days`,
+                { valueAsNumber: true },
+              )}
+            />
+          );
+        },
+        size: 100,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+      },
+      {
+        id: "amount",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            title="Amount"
+            visibility={false}
+            column={column}
+          />
+        ),
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return <RowAmount form={form} index={fieldIndex} />;
+        },
+        size: 120,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
+      },
+      {
+        id: "actions",
+        header: () => (
+          <span className="text-muted-foreground text-[0.6875rem]">
+            Tiers
+          </span>
+        ),
+        cell: ({ row }) => {
+          const itemIndex = fields.findIndex((f) => f.id === row.original.id);
+          const expanded = row.getIsExpanded();
+          return (
+            <div className="flex items-center justify-end gap-0.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label="Toggle pricing tiers"
+                onClick={row.getToggleExpandedHandler()}
+                className="text-muted-foreground"
+              >
+                <ChevronRight
+                  className={cn(
+                    "size-4 transition-transform",
+                    expanded && "rotate-90",
+                  )}
+                />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => addTierToItem(itemIndex, row.id)}
+                className="text-primary hover:text-primary hover:bg-primary/5 gap-1 whitespace-nowrap"
+              >
+                <Plus className="size-3.5" />
+                Tier
+              </Button>
+            </div>
+          );
+        },
+        size: 130,
         enableResizing: false,
         meta: {
           expandedContent: (row: PricelistExternalDetailDto) => {
             const fieldIndex = fields.findIndex((f) => f.id === row.id);
-            return (
-              <MoqTiersSubTable
-                tiers={row.moq_tiers || []}
-                onTiersUpdate={(tiers) => handleTiersUpdate(fieldIndex, tiers)}
-              />
-            );
+            return <MoqTiersEditor form={form} index={fieldIndex} />;
           },
         },
       },
     ],
-    [fields],
+    // form เป็น stable ref จาก useForm · taxProfiles จาก query cache (ref นิ่งจน
+    // โหลดเสร็จ) — เพิ่มได้โดยไม่ทำให้ columns recreate ต่อ render
+    // (อย่าใส่ handleTiersUpdate ที่ recreate ทุก render ไม่งั้น columns จะ recreate →
+    // row remount → focus หายกลับมา ซึ่งเป็นบั๊กที่เพิ่งแก้)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fields, form, taxProfiles],
   );
 
-  // Columns for view mode (grouped data - displays combined pricing info)
-  const viewModeColumns = useMemo<ColumnDef<GroupedProductRow>[]>(
-    () => [
-      {
-        id: "no",
-        header: "#",
-        cell: ({ row }) => <span className="text-xs">{row.index + 1}</span>,
-        size: 50,
-        enableSorting: false,
-      },
-      {
-        accessorKey: "product_name",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Product"
-            visibility={true}
-            column={column}
-          />
-        ),
-        cell: ({ row }) => (
-          <div className="font-semibold text-primary text-xs">
-            {row.original.product_name}
-          </div>
-        ),
-        size: 300,
-        enableSorting: true,
-      },
-      {
-        id: "pricing",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="MOQ" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col gap-0.5">
-            {row.original.moq_qtys.map((moq, i) => (
-              <span
-                key={`${row.original.product_id}-moq-${row.original.sequence_nos[i]}`}
-                className="text-xs"
-              >
-                {moq}+ {row.original.unit_names[i]}→{row.original.prices[i]}(
-                {row.original.lead_time_days_list[i]}d)
-              </span>
-            ))}
-          </div>
-        ),
-        size: 200,
-      },
-      {
-        accessorKey: "prices_without_tax",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="PWT" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col gap-0.5">
-            {row.original.prices_without_tax.map((p, i) => (
-              <span
-                key={`${row.original.product_id}-pwt-${row.original.sequence_nos[i]}`}
-                className="text-xs"
-              >
-                {p}
-              </span>
-            ))}
-          </div>
-        ),
-        size: 100,
-      },
-      {
-        accessorKey: "tax_amts",
-        header: ({ column }) => (
-          <DataGridColumnHeader title="Tax" visibility={true} column={column} />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col gap-0.5">
-            {row.original.tax_amts.map((t, i) => (
-              <span
-                key={`${row.original.product_id}-tax-${row.original.sequence_nos[i]}`}
-                className="text-xs"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-        ),
-        size: 80,
-      },
-      {
-        accessorKey: "tax_profile_names",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Tax Profile"
-            visibility={true}
-            column={column}
-          />
-        ),
-        cell: ({ row }) => (
-          <div className="flex flex-col gap-0.5">
-            {row.original.tax_profile_names.map((t, i) => (
-              <span
-                key={`${row.original.product_id}-taxprofile-${row.original.sequence_nos[i]}`}
-                className="text-xs"
-              >
-                {t}
-              </span>
-            ))}
-          </div>
-        ),
-        size: 120,
-      },
-    ],
-    [],
-  );
 
   // Table for edit mode
   const editTable = useReactTable({
@@ -532,47 +490,14 @@ export default function PriceListExternalProductTable({
     getSortedRowModel: getSortedRowModel(),
   });
 
-  // Table for view mode (grouped rows)
-  const viewTable = useReactTable({
-    data: groupedTableData,
-    columns: viewModeColumns,
-    pageCount: Math.ceil((groupedTableData?.length || 0) / pagination.pageSize),
-    getRowId: (row) => row.product_id || `ungrouped-${row.product_name}`,
-    state: {
-      pagination,
-      sorting,
-    },
-    columnResizeMode: "onChange",
-    onPaginationChange: setPagination,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
-
   if (isViewMode) {
+    // view mode mirror หน้า price list ภายใน 100% — grouped table เดียวกัน
+    // (# · Product · MOQ Pricing · Rate · Amount, group product ด้วย rowspan)
     return (
-      <DataGrid
-        table={viewTable}
-        recordCount={groupedTableData.length}
-        tableLayout={{
-          columnsPinnable: true,
-          columnsResizable: true,
-          columnsMovable: true,
-          columnsVisibility: true,
-        }}
-      >
-        <div className="w-full space-y-2">
-          <DataGridContainer>
-            <ScrollArea>
-              <DataGridTable />
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          <DataGridPagination />
-          </DataGridContainer>
-        </div>
-      </DataGrid>
+      <PLProductGroupedView
+        detailRefs={fields}
+        tfl={(key) => VIEW_LABELS[key] ?? key}
+      />
     );
   }
 
@@ -581,10 +506,10 @@ export default function PriceListExternalProductTable({
       table={editTable}
       recordCount={fields?.length || 0}
       tableLayout={{
-        columnsPinnable: true,
-        columnsResizable: true,
-        columnsMovable: true,
-        columnsVisibility: true,
+        columnsPinnable: false,
+        columnsResizable: false,
+        columnsMovable: false,
+        columnsVisibility: false,
       }}
     >
       <div className="w-full space-y-2">
@@ -605,15 +530,15 @@ export default function PriceListExternalProductTable({
             variant="outline"
             size="sm"
             onClick={onSave}
-            disabled={!hasPendingChanges || isSaving}
+            disabled={isSaving}
           >
             <Save className="h-4 w-4" />
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? "Saving..." : "Save Draft"}
           </Button>
           <Button
             size="sm"
             onClick={onSubmit}
-            disabled={hasPendingChanges || isSubmitting}
+            disabled={isSaving || isSubmitting}
           >
             <Send className="h-4 w-4" />
             {isSubmitting ? "Submitting..." : "Submit"}

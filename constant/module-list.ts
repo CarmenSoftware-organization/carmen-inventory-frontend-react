@@ -36,6 +36,7 @@ import {
   Calendar,
   Shield,
   Network,
+  Cable,
   ShieldCheck,
   UserCheck,
   ChefHat,
@@ -445,6 +446,12 @@ export const moduleList: ModuleDto[] = [
         name: "workflow",
         path: "/system-admin/workflow",
         icon: Network,
+        permission: PERMISSIONS.system_configuration.view,
+      },
+      {
+        name: "interface",
+        path: "/system-admin/interface",
+        icon: Cable,
         permission: PERMISSIONS.system_configuration.view,
       },
       {

@@ -51,15 +51,38 @@ export function usePltFormActions({
   const isPending = createTemplate.isPending || updateTemplate.isPending;
   const isDeletePending = deleteTemplate.isPending;
 
+  // RHF formState เป็น proxy — ต้อง "access ตอน render" ถึงจะ subscribe/อัปเดต
+  // ถ้าอ่าน dirtyFields แค่ใน onSubmit (callback) มันจะค้าง empty ตลอด →
+  // detailsDirty เป็น false เสมอ → products (add/update item) ไม่ถูกส่งไป backend
+  const { isDirty, dirtyFields } = form.formState;
+
   const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    isDirty,
     isPending: isPending || isDeletePending,
   });
 
   const onSubmit = (values: PltFormValues) => {
     const products = groupDetailsToProducts(values.details);
-    const detailsDirty = Boolean(form.formState.dirtyFields.details);
-    const shouldSendProducts = products.length > 0 && (isAdd || detailsDirty);
+    const detailsDirty = Boolean(dirtyFields.details);
+
+    // products payload:
+    // - create → add ชุดที่กรอก
+    // - update (details เปลี่ยน) → full replace: remove ของเดิมทั้งหมด + add ชุดปัจจุบัน
+    //   (backend มองว่า add คือ "เพิ่ม" ไม่ใช่ "แทนที่" ถ้า add เฉย ๆ จะ duplicate
+    //    ของเดิมทุกครั้งที่ save) · ครอบทั้งเพิ่ม/แก้/ลบ item ในทีเดียว
+    // - update (details ไม่เปลี่ยน) → ไม่แตะ products
+    let productsPayload: CreatePriceListTemplateDto["products"] = {};
+    if (isAdd) {
+      if (products.length > 0) productsPayload = { add: products };
+    } else if (detailsDirty) {
+      const removeIds = (priceListTemplate?.products ?? []).map((p) => ({
+        id: p.id,
+      }));
+      productsPayload = {
+        ...(removeIds.length ? { remove: removeIds } : {}),
+        ...(products.length ? { add: products } : {}),
+      };
+    }
 
     const payload: CreatePriceListTemplateDto = {
       name: values.name,
@@ -68,7 +91,7 @@ export function usePltFormActions({
       currency_id: values.currency_id,
       validity_period: values.validity_period,
       vendor_instruction: values.vendor_instruction,
-      products: shouldSendProducts ? { add: products } : {},
+      products: productsPayload,
     };
 
     if (isEdit && priceListTemplate) {

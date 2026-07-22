@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   usePriceListExternal,
+  useExternalTaxProfiles,
   useUpdatePriceListExternal,
   useSubmitPriceListExternal,
   HttpError,
@@ -12,8 +13,10 @@ import type { PricelistExternalDto } from "@/types/price-list-external";
 import { ErrorState } from "@/components/ui/error-state";
 import PriceListExternalHeader from "./price-list-external-header";
 import PriceListExternalProductTable from "./price-list-external-product-table";
+import PriceListExternalSkeleton from "./price-list-external-skeleton";
+import PriceListExternalExpired from "./price-list-external-expired";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, Eye, Pencil } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 
 interface PriceListExternalComponentProps {
   urlToken: string;
@@ -35,6 +38,7 @@ export default function PriceListExternalComponent({
 }: PriceListExternalComponentProps) {
   const { data, isLoading, isError, error, refetch } =
     usePriceListExternal(urlToken);
+  const { data: taxProfiles } = useExternalTaxProfiles(urlToken);
 
   const updateMutation = useUpdatePriceListExternal(urlToken);
   const submitMutation = useSubmitPriceListExternal(urlToken);
@@ -48,8 +52,8 @@ export default function PriceListExternalComponent({
       pricelist_no: "",
       name: "",
       status: "draft",
-      vendor_id: "",
-      vendor_name: null,
+      vendor: { id: null, name: null },
+      hotel: null,
       currency_id: "",
       currency_code: "",
       effective_from_date: "",
@@ -60,24 +64,26 @@ export default function PriceListExternalComponent({
     },
   });
 
-  // Reset form when data is loaded
+  // Reset form when data is loaded — MOQ ขั้นต่ำ default เป็น 1 (0 ไม่สมเหตุผล)
   useEffect(() => {
     if (data) {
-      form.reset(data);
+      form.reset({
+        ...data,
+        tb_pricelist_detail: data.tb_pricelist_detail.map((d) => ({
+          ...d,
+          moq_qty: d.moq_qty || 1,
+        })),
+      });
     }
   }, [data, form]);
 
   const handleSave = async () => {
+    // vendor save draft ได้ตลอด (ไม่บังคับว่าต้องมีการเปลี่ยนแปลง) — โพสต์ค่าปัจจุบัน
     const formData = form.getValues();
-
-    if (!form.formState.isDirty) {
-      toast.error("No changes to save");
-      return;
-    }
 
     try {
       await updateMutation.mutateAsync(formData);
-      toast.success("Changes saved successfully");
+      toast.success("Draft saved");
       form.reset(formData);
     } catch (err) {
       // surface ข้อความจริงจาก backend (เช่น validation / ลิงก์หมดอายุ) ให้ vendor
@@ -87,15 +93,15 @@ export default function PriceListExternalComponent({
   };
 
   const handleSubmit = async () => {
-    const formData = form.getValues();
-
-    if (form.formState.isDirty) {
-      toast.error("Please save all changes before submitting");
-      return;
-    }
-
     try {
-      await submitMutation.mutateAsync(formData);
+      // ถ้ายังมีการแก้ที่ยังไม่เซฟ → save draft ก่อน แล้วค่อย submit
+      // (submit เอง finalize อย่างเดียว ไม่มี payload) · ไม่ dirty ก็ submit เลย
+      if (form.formState.isDirty) {
+        const formData = form.getValues();
+        await updateMutation.mutateAsync(formData);
+        form.reset(formData);
+      }
+      await submitMutation.mutateAsync();
       toast.success("Price list submitted successfully");
     } catch (err) {
       toast.error(
@@ -105,19 +111,14 @@ export default function PriceListExternalComponent({
   };
 
   if (isLoading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading...</div>;
+    return <PriceListExternalSkeleton />;
   }
 
   if (isError) {
+    // 401 = ลิงก์หมดอายุ/ใช้ไม่ได้ — โชว์หน้าเป็นมิตร (ไม่พูดถึง token) แทน
+    // error ดิบ · error อื่นค่อยใช้ ErrorState ที่ retry ได้
     if (error instanceof HttpError && error.status === 401) {
-      return (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6">
-          <AlertCircle className="size-8 text-destructive" />
-          <p className="text-sm text-muted-foreground">
-            {error?.message || "This link has expired"}
-          </p>
-        </div>
-      );
+      return <PriceListExternalExpired />;
     }
     return <ErrorState message={error?.message} onRetry={() => refetch()} />;
   }
@@ -129,12 +130,17 @@ export default function PriceListExternalComponent({
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <PriceListExternalHeader data={data} />
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-muted-foreground">
+          {isViewMode
+            ? "Items requested for pricing."
+            : "Enter your price and tax for each item, then submit."}
+        </p>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setIsViewMode(!isViewMode)}
-          className="gap-1.5"
+          className="gap-1.5 shrink-0"
         >
           {isViewMode ? (
             <>
@@ -156,6 +162,7 @@ export default function PriceListExternalComponent({
         onSubmit={handleSubmit}
         isSaving={updateMutation.isPending}
         isSubmitting={submitMutation.isPending}
+        taxProfiles={taxProfiles ?? []}
       />
     </div>
   );

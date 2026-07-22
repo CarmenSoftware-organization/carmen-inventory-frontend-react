@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -13,7 +13,7 @@ import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { cn } from "@/lib/utils";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   useCreateVendor,
   useDeleteVendor,
@@ -238,78 +238,67 @@ export function VendorForm({ vendor }: VendorFormProps) {
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
+      <div className="mb-6">
+        <DocFormHeader
+          flush
+          title={watchedName || t("namePlaceholder")}
+          titleMuted={!watchedName}
+          backLabel={tc("goBack")}
+          onBack={handleBack}
+          badges={
+            <>
+              {watchedCode && (
+                <span className="text-muted-foreground shrink-0 text-sm">
+                  · {watchedCode}
+                </span>
+              )}
+              {!isAdd && <StatusBadge active={watchedActive} />}
+            </>
+          }
+          actions={
+            isView ? (
+              <Button size="sm" onClick={() => setMode("edit")}>
+                <Pencil />
+                {tc("edit")}
+              </Button>
+            ) : (
+              <>
                 <Button
                   type="button"
+                  variant="outline"
                   size="sm"
-                  variant="ghost"
-                  className="w-fit"
-                  aria-label={tc("goBack")}
-                  onClick={handleBack}
+                  onClick={handleCancel}
+                  disabled={isPending}
                 >
-                  <ChevronLeft />
+                  <X />
+                  {tc("cancel")}
                 </Button>
-                <h1
-                  className={cn(
-                    "truncate text-lg font-semibold tracking-tight",
-                    watchedName
-                      ? "text-foreground"
-                      : "text-muted-foreground italic",
-                  )}
+                <Button
+                  type="submit"
+                  size="sm"
+                  form={FORM_ID}
+                  disabled={isPending}
                 >
-                  {watchedName || t("namePlaceholder")}
-                </h1>
-                {watchedCode && (
-                  <span className="text-muted-foreground shrink-0 text-sm">
-                    · {watchedCode}
-                  </span>
-                )}
-                {!isAdd && <StatusBadge active={watchedActive} />}
-              </div>
-              <div className="flex items-center gap-2">
-                {isView ? (
-                  <Button size="sm" onClick={() => setMode("edit")}>
-                    <Pencil />
-                    {tc("edit")}
+                  <Save />
+                  {submitLabel}
+                </Button>
+                {isEdit && vendor && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowDelete(true)}
+                    disabled={deleteVendor.isPending || isPending}
+                  >
+                    <Trash2 />
+                    {tc("delete")}
                   </Button>
-                ) : (
-                  <>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCancel}
-                      disabled={isPending}
-                    >
-                      <X />
-                      {tc("cancel")}
-                    </Button>
-                    <Button
-                      type="submit"
-                      size="sm"
-                      form={FORM_ID}
-                      disabled={isPending}
-                    >
-                      <Save />
-                      {submitLabel}
-                    </Button>
-                    {isEdit && vendor && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setShowDelete(true)}
-                        disabled={deleteVendor.isPending || isPending}
-                      >
-                        <Trash2 />
-                        {tc("delete")}
-                      </Button>
-                    )}
-                  </>
                 )}
-              </div>
-      </header>
+              </>
+            )
+          }
+        />
+      </div>
 
       <form
         id={FORM_ID}

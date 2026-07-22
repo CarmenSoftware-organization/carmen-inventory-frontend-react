@@ -53,5 +53,7 @@ export interface CreatePriceListTemplateDto {
         qty: number;
       }[];
     }[];
+    // ลบ product ออกจาก template ด้วย id (ใช้ตอน update: full replace = remove เก่า + add ใหม่)
+    remove?: { id: string }[];
   };
 }

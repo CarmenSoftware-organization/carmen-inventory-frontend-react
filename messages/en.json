@@ -344,6 +344,7 @@
     "active": "Active",
     "inactive": "Inactive",
     "draft": "Draft",
+    "submitted": "Submitted",
     "approved": "Approved",
     "rejected": "Rejected",
     "inProgress": "In Progress",
@@ -548,6 +549,7 @@
     "template": "Template",
     "unitPrice": "Unit Price",
     "unitPriceAbbr": "U.Price",
+    "pwt": "PWT",
     "total": "Total",
     "totalAmount": "Total Amount",
     "netAmount": "Net Amount",
@@ -1579,7 +1581,23 @@
         "postingDesc": "Export format and how often postings are sent.",
         "exportFormat": "Export format",
         "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
-        "postingFrequency": "Posting frequency"
+        "postingFrequency": "Posting frequency",
+        "carmenGl": {
+          "desc": "Connection to the legacy Carmen 4 accounting API.",
+          "connection": "Connection",
+          "connectionDesc": "Carmen 4 API server and authorization.",
+          "apiServer": "API server",
+          "authorizeToken": "Authorize token",
+          "endpoints": "Data endpoints",
+          "endpointsDesc": "Paths under the API server for account codes, departments and vendors.",
+          "accountCodePath": "Account code path",
+          "departmentPath": "Department path",
+          "vendorPath": "Vendor path",
+          "options": "Options",
+          "optionsDesc": "Account mapping and GL posting behavior.",
+          "setAccountMappingAllItems": "Set account mapping for all items",
+          "allowPostingTransferToGl": "Allow posting the transfer to GL"
+        }
       },
       "pos": {
         "title": "POS Interface",
@@ -3756,6 +3774,7 @@
     "role": "Roles",
     "user": "Users",
     "workflow": "Workflows",
+    "interface": "Interfaces",
     "period": "Period",
     "runningCode": "Running Code",
     "userActivity": "User Activity",

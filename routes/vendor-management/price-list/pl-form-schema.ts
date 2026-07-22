@@ -12,6 +12,7 @@ import type { PriceList } from "@/types/price-list";
 function createPriceListDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    doc_version: z.coerce.number().optional(),
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     unit_id: z.string().min(1, tv("required", { field: tf("unit") })),
     moq_qty: z.coerce.number().min(0),
@@ -36,7 +37,7 @@ export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
     .object({
       name: z.string().min(1, tv("required", { field: tf("name") })),
       description: z.string(),
-      status: z.enum(["draft", "active", "inactive"]),
+      status: z.enum(["draft", "submitted", "active", "inactive"]),
       vendor_id: z.string().min(1, tv("required", { field: tf("vendor") })),
       currency_id: z.string().min(1, tv("required", { field: tf("currency") })),
       effective_from_date: z.string().min(1, tv("required", { field: tf("startDate") })),
@@ -78,6 +79,7 @@ export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
               path: ["pricelist_detail", sorted[k], "moq_qty"],
             });
           } else if (cur.price > prev.price) {
+            // เทียบ price (gross) ที่ vendor กรอกจริง — MOQ สูงกว่าต้องราคาไม่แพงกว่า
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: tv("moqTierPrice"),
@@ -121,9 +123,12 @@ export function getDefaultValues(
 ): PriceListFormValues {
   if (priceList) {
     const parts = priceList.effectivePeriod.split(" - ");
+    // เก็บ ISO string ดิบไว้ (แค่ validate ว่า parse ได้) — อย่า round-trip ผ่าน
+    // toISOString().split() เพราะมันบีบเป็น UTC date ทำให้ effective date หล่นไป 1 วัน
+    // บน timezone บวก (UTC+7) เทียบกับ list ที่ formatDate() อ่าน local ตรง ๆ
     const fmt = (s: string) => {
-      const d = new Date(s.trim());
-      return Number.isNaN(d.getTime()) ? "" : d.toISOString().split("T")[0];
+      const trimmed = s.trim();
+      return Number.isNaN(new Date(trimmed).getTime()) ? "" : trimmed;
     };
     const from = parts.length === 2 ? fmt(parts[0]) : "";
     const to = parts.length === 2 ? fmt(parts[1]) : "";
@@ -140,6 +145,7 @@ export function getDefaultValues(
       pricelist_detail:
         priceList.pricelist_detail?.map((d) => ({
           id: d.id,
+          doc_version: d.doc_version,
           product_id: d.product_id,
           unit_id: d.unit_id,
           moq_qty: d.moq_qty,
@@ -183,17 +189,18 @@ export function mapDetailToPayload(
   d: PriceListFormValues["pricelist_detail"][number],
   index: number,
 ) {
-  // Derive tax_amt + price (incl tax) from price_without_tax + tax_rate
-  // Fields เหล่านี้ไม่ sync ระหว่างพิมพ์ใน cell — คำนวณซ้ำที่ submit
-  const priceNoTax = Number(d.price_without_tax) || 0;
+  // Input คือ price (รวมภาษี/gross) — derive price_without_tax (ก่อนภาษี) + tax_amt
+  // กลับที่ submit (cell ไม่ sync field พวกนี้ระหว่างพิมพ์)
+  const price = Number(d.price) || 0;
   const rate = Number(d.tax_rate) || 0;
-  const taxAmt = Math.round(((priceNoTax * rate) / 100) * 100) / 100;
-  const price = Math.round((priceNoTax + taxAmt) * 100) / 100;
+  const priceNoTax = Math.round((price / (1 + rate / 100)) * 100) / 100;
+  const taxAmt = Math.round((price - priceNoTax) * 100) / 100;
   return {
+    ...(d.doc_version != null ? { doc_version: d.doc_version } : {}),
     sequence_no: index + 1,
     product_id: d.product_id,
     price,
-    price_without_tax: d.price_without_tax,
+    price_without_tax: priceNoTax,
     unit_id: d.unit_id,
     tax_profile_id: d.tax_profile_id || "",
     tax_rate: d.tax_rate,

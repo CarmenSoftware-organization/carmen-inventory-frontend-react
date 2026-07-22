@@ -1,17 +1,21 @@
 import { describe, it, expect } from "vitest";
-import { createPriceListSchema } from "./pl-form-schema";
+import { createPriceListSchema, getDefaultValues } from "./pl-form-schema";
+import type { PriceList } from "@/types/price-list";
 
 const tv = (key: string) => key;
 const tf = (key: string) => key;
 const schema = createPriceListSchema(tv, tf);
 
 function detail(overrides: Partial<Record<string, unknown>> = {}) {
+  // ราคาที่ vendor กรอกจริงคือ net (price_without_tax); guard MOQ เทียบตัวนี้
+  // ให้ price mirror ตาม net เมื่อ scenario ระบุแค่ price เพื่อสะท้อน UI จริง
+  const price = (overrides.price as number) ?? 100;
   return {
     product_id: "p1",
     unit_id: "u1",
     moq_qty: 1,
-    price: 100,
-    price_without_tax: 100,
+    price,
+    price_without_tax: (overrides.price_without_tax as number) ?? price,
     tax_profile_id: "tax1",
     tax_rate: 7,
     tax_amt: 7,
@@ -59,7 +63,28 @@ describe("createPriceListSchema — MOQ tier price", () => {
       const issue = result.error.issues.find(
         (i) => i.message === "moqTierPrice",
       );
-      expect(issue?.path).toEqual(["pricelist_detail", 1, "price"]);
+      expect(issue?.path).toEqual([
+        "pricelist_detail",
+        1,
+        "price_without_tax",
+      ]);
+    }
+  });
+
+  it("จับราคากลับชั้นจาก net แม้ price (gross) ยังไม่ถูก commit (=0) — regression PL-DOC-03", () => {
+    // ฟอร์ม create กรอกแค่ price_without_tax; price เป็น derived ที่ไม่ commit → คง 0
+    // guard ต้องเทียบ net ไม่งั้น 0 > 0 = false แล้วปล่อยราคากลับชั้นผ่าน
+    const result = schema.safeParse(
+      formValues([
+        detail({ moq_qty: 1, price: 0, price_without_tax: 20 }),
+        detail({ moq_qty: 100, price: 0, price_without_tax: 30 }),
+      ]),
+    );
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(
+        result.error.issues.some((i) => i.message === "moqTierPrice"),
+      ).toBe(true);
     }
   });
 
@@ -108,5 +133,37 @@ describe("createPriceListSchema — MOQ tier price", () => {
       ]),
     );
     expect(result.success).toBe(true);
+  });
+});
+
+describe("getDefaultValues — effective date", () => {
+  const basePriceList = (effectivePeriod: string): PriceList => ({
+    id: "pl1",
+    no: "PL001",
+    name: "PL",
+    status: "draft",
+    description: "",
+    vendor: { id: "v1", name: "V" },
+    currency: { id: "c1", code: "THB" },
+    effectivePeriod,
+    note: "",
+    pricelist_detail: [],
+  });
+
+  it("เก็บ ISO ดิบจาก effectivePeriod ไม่ round-trip ผ่าน UTC date (กัน off-by-one)", () => {
+    // backend ส่ง full ISO — timezone +7 ทำให้ toISOString().split() หล่นไป 1 วัน
+    const dv = getDefaultValues(
+      basePriceList(
+        "2026-07-19T17:00:00.000Z - 2026-07-24T17:00:00.000Z",
+      ),
+    );
+    expect(dv.effective_from_date).toBe("2026-07-19T17:00:00.000Z");
+    expect(dv.effective_to_date).toBe("2026-07-24T17:00:00.000Z");
+  });
+
+  it("effectivePeriod ที่ parse ไม่ได้ → คืน empty string", () => {
+    const dv = getDefaultValues(basePriceList("ไม่ใช่วันที่ - เลย"));
+    expect(dv.effective_from_date).toBe("");
+    expect(dv.effective_to_date).toBe("");
   });
 });

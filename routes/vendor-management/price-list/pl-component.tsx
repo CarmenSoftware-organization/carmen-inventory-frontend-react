@@ -103,6 +103,7 @@ export default function PriceListComponent() {
 
   const statusOptions = [
     { label: ts("draft"), value: "status|string:draft" },
+    { label: ts("submitted"), value: "status|string:submitted" },
     { label: ts("active"), value: "status|string:active" },
     { label: ts("inactive"), value: "status|string:inactive" },
   ];
@@ -158,7 +159,7 @@ export default function PriceListComponent() {
           },
           {
             header: tfl("status"),
-            value: (r) => ts(r.status as "draft" | "active" | "inactive"),
+            value: (r) => ts(r.status as "draft" | "submitted" | "active" | "inactive"),
             width: 12,
           },
           {

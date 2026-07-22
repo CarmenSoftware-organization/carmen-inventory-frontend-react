@@ -344,6 +344,7 @@
     "active": "ใช้งาน",
     "inactive": "ไม่ใช้งาน",
     "draft": "ฉบับร่าง",
+    "submitted": "ส่งแล้ว",
     "approved": "อนุมัติ",
     "rejected": "ไม่อนุมัติ",
     "inProgress": "กำลังดำเนินการ",
@@ -548,6 +549,7 @@
     "template": "แม่แบบ",
     "unitPrice": "ราคาต่อหน่วย",
     "unitPriceAbbr": "ราคา",
+    "pwt": "PWT",
     "total": "รวม",
     "totalAmount": "ยอดรวม",
     "netAmount": "ยอดสุทธิ",
@@ -1579,7 +1581,23 @@
         "postingDesc": "รูปแบบไฟล์และความถี่ในการส่ง",
         "exportFormat": "รูปแบบไฟล์",
         "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
-        "postingFrequency": "ความถี่ในการส่ง"
+        "postingFrequency": "ความถี่ในการส่ง",
+        "carmenGl": {
+          "desc": "การเชื่อมต่อกับ API ระบบบัญชี Carmen 4 (legacy)",
+          "connection": "การเชื่อมต่อ",
+          "connectionDesc": "เซิร์ฟเวอร์ API ของ Carmen 4 และโทเคนการอนุญาต",
+          "apiServer": "เซิร์ฟเวอร์ API",
+          "authorizeToken": "โทเคนการอนุญาต",
+          "endpoints": "ปลายทางข้อมูล",
+          "endpointsDesc": "เส้นทางใต้เซิร์ฟเวอร์ API สำหรับรหัสบัญชี แผนก และผู้ขาย",
+          "accountCodePath": "เส้นทางรหัสบัญชี",
+          "departmentPath": "เส้นทางแผนก",
+          "vendorPath": "เส้นทางผู้ขาย",
+          "options": "ตัวเลือก",
+          "optionsDesc": "การจับคู่บัญชีและการส่งข้อมูลไปยัง GL",
+          "setAccountMappingAllItems": "ตั้งค่าการจับคู่บัญชีให้ทุกรายการ",
+          "allowPostingTransferToGl": "อนุญาตให้ส่งรายการโอนไปยัง GL"
+        }
       },
       "pos": {
         "title": "การเชื่อมต่อระบบขายหน้าร้าน",
@@ -3745,6 +3763,7 @@
     "role": "บทบาท",
     "user": "ผู้ใช้งาน",
     "workflow": "ลำดับขั้นอนุมัติ",
+    "interface": "การเชื่อมต่อระบบภายนอก",
     "period": "รอบบัญชี",
     "runningCode": "รหัสลำดับ",
     "userActivity": "กิจกรรมผู้ใช้",

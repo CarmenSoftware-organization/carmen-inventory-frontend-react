@@ -8,10 +8,11 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import {
   Field,
   FieldDescription,
@@ -25,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { PRICE_LIST_TEMPLATE_STATUS_OPTIONS } from "@/constant/price-list-template";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { cn } from "@/lib/utils";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useProfile } from "@/hooks/use-profile";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { FormMode } from "@/types/form";
@@ -134,72 +135,62 @@ export function PriceListTemplateForm({
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label={tc("goBack")}
-            onClick={actions.handleBack}
-          >
-            <ChevronLeft />
-          </Button>
-          <h1
-            className={cn(
-              "truncate text-lg font-semibold tracking-tight",
-              watchedName ? "text-foreground" : "text-muted-foreground italic",
-            )}
-          >
-            {watchedName || t("namePlaceholder")}
-          </h1>
-          <Badge variant="secondary" size="sm">
-            {tsStatus(watchedStatus)}
-          </Badge>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {isView ? (
-            <Button size="sm" onClick={() => setMode("edit")}>
-              <Pencil />
-              {tc("edit")}
-            </Button>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={actions.handleCancel}
-                disabled={actions.isPending}
-              >
-                <X />
-                {tc("cancel")}
+      <div className="mb-6">
+        <DocFormHeader
+          flush
+          title={watchedName || t("namePlaceholder")}
+          titleMuted={!watchedName}
+          backLabel={tc("goBack")}
+          onBack={actions.handleBack}
+          badges={
+            <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
+              {tsStatus(watchedStatus)}
+            </StatusDotBadge>
+          }
+          actions={
+            isView ? (
+              <Button size="sm" onClick={() => setMode("edit")}>
+                <Pencil />
+                {tc("edit")}
               </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form={FORM_ID}
-                disabled={actions.isPending}
-              >
-                <Save />
-                {submitLabel}
-              </Button>
-              {isEdit && priceListTemplate && (
+            ) : (
+              <>
                 <Button
                   type="button"
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
-                  onClick={() => actions.setShowDelete(true)}
-                  disabled={actions.isDeletePending || actions.isPending}
+                  onClick={actions.handleCancel}
+                  disabled={actions.isPending}
                 >
-                  <Trash2 />
-                  {tc("delete")}
+                  <X />
+                  {tc("cancel")}
                 </Button>
-              )}
-            </>
-          )}
-        </div>
-      </header>
+                <Button
+                  type="submit"
+                  size="sm"
+                  form={FORM_ID}
+                  disabled={actions.isPending}
+                >
+                  <Save />
+                  {submitLabel}
+                </Button>
+                {isEdit && priceListTemplate && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => actions.setShowDelete(true)}
+                    disabled={actions.isDeletePending || actions.isPending}
+                  >
+                    <Trash2 />
+                    {tc("delete")}
+                  </Button>
+                )}
+              </>
+            )
+          }
+        />
+      </div>
 
       <form
         id={FORM_ID}
@@ -314,9 +305,11 @@ export function PriceListTemplateForm({
             <FieldLabel>{tfl("status")}</FieldLabel>
             {isView ? (
               <div>
-                <Badge variant="secondary" size="sm">
+                <StatusDotBadge
+                  tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}
+                >
                   {tsStatus(watchedStatus)}
-                </Badge>
+                </StatusDotBadge>
               </div>
             ) : (
               <Controller
