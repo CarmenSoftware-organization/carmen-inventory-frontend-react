@@ -59,7 +59,7 @@ export default function MoqTiersEditor({ form, index }: MoqTiersEditorProps) {
     <div className="bg-muted/30 px-6 py-4">
       <div className="max-w-2xl space-y-1.5">
         <div className="text-muted-foreground grid grid-cols-[1fr_1fr_1fr_2rem] gap-3 px-0.5 text-[0.625rem] font-semibold tracking-wider uppercase">
-          <span>Min Qty</span>
+          <span>MOQ</span>
           <span>Price</span>
           <span>Lead Time</span>
           <span />
