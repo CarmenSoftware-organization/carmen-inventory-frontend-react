@@ -3773,6 +3773,7 @@
     "role": "Roles",
     "user": "Users",
     "workflow": "Workflows",
+    "interface": "Interfaces",
     "period": "Period",
     "runningCode": "Running Code",
     "userActivity": "User Activity",
