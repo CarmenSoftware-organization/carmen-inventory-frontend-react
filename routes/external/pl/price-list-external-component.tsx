@@ -85,6 +85,7 @@ export default function PriceListExternalComponent({
       await updateMutation.mutateAsync(formData);
       toast.success("Draft saved");
       form.reset(formData);
+      setIsViewMode(true);
     } catch (err) {
       // surface ข้อความจริงจาก backend (เช่น validation / ลิงก์หมดอายุ) ให้ vendor
       // ภายนอกเห็น แทนข้อความ generic — invalidate/refetch จัดการ reset เอง
@@ -103,6 +104,7 @@ export default function PriceListExternalComponent({
       }
       await submitMutation.mutateAsync();
       toast.success("Price list submitted successfully");
+      setIsViewMode(true);
     } catch (err) {
       toast.error(
         err instanceof HttpError ? err.message : "Failed to submit price list",
