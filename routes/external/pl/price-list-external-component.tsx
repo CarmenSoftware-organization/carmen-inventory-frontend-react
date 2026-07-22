@@ -93,15 +93,15 @@ export default function PriceListExternalComponent({
   };
 
   const handleSubmit = async () => {
-    const formData = form.getValues();
-
-    if (form.formState.isDirty) {
-      toast.error("Please save all changes before submitting");
-      return;
-    }
-
     try {
-      await submitMutation.mutateAsync(formData);
+      // ถ้ายังมีการแก้ที่ยังไม่เซฟ → save draft ก่อน แล้วค่อย submit
+      // (submit เอง finalize อย่างเดียว ไม่มี payload) · ไม่ dirty ก็ submit เลย
+      if (form.formState.isDirty) {
+        const formData = form.getValues();
+        await updateMutation.mutateAsync(formData);
+        form.reset(formData);
+      }
+      await submitMutation.mutateAsync();
       toast.success("Price list submitted successfully");
     } catch (err) {
       toast.error(

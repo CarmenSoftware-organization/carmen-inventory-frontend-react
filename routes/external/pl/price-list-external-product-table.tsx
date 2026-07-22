@@ -538,7 +538,7 @@ export default function PriceListExternalProductTable({
           <Button
             size="sm"
             onClick={onSubmit}
-            disabled={hasPendingChanges || isSubmitting}
+            disabled={isSaving || isSubmitting}
           >
             <Send className="h-4 w-4" />
             {isSubmitting ? "Submitting..." : "Submit"}

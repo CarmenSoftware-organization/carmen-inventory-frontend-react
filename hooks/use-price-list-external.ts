@@ -216,16 +216,16 @@ export function useUpdatePriceListExternal(urlToken: string) {
  * @returns Mutation สำหรับ submit ข้อมูล
  * @example
  * const submit = useSubmitPriceListExternal(urlToken);
- * submit.mutate(formValues);
+ * submit.mutate();
  */
 export function useSubmitPriceListExternal(urlToken: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: PricelistExternalDto) => {
+    mutationFn: async () => {
+      // submit ไม่มี payload — แค่ finalize (การเซฟข้อมูลจัดการโดย save draft ก่อนหน้า)
       const res = await httpClient.post(
         `${API_ENDPOINTS.PRICE_LIST_EXTERNAL(urlToken)}/submit`,
-        buildPayload(formData),
       );
       return handleResponse(res, "Failed to submit price list");
     },
