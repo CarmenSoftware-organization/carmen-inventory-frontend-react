@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Check, CheckCircle2, Copy, ExternalLink, Trash2 } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  Mail,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -56,6 +63,27 @@ export function ContactValue({
     );
   return (
     <span className="text-foreground block truncate text-xs">{value}</span>
+  );
+}
+
+/**
+ * Email cell — reads as an actionable "send email" link at rest (mail icon +
+ * primary tint), not plain text like phone/contact. Opens the user's mail
+ * client via `mailto:`. Em-dash when empty.
+ */
+export function EmailValue({ value }: { readonly value?: string | null }) {
+  "use no memo";
+  if (!value) return EMPTY;
+  return (
+    <a
+      href={`mailto:${value}`}
+      title={`Send email to ${value}`}
+      aria-label={`Send email to ${value}`}
+      className="text-primary/90 hover:text-primary group inline-flex min-w-0 items-center gap-1.5 text-xs underline-offset-2 transition-colors hover:underline"
+    >
+      <Mail className="size-3.5 shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
+      <span className="truncate">{value}</span>
+    </a>
   );
 }
 

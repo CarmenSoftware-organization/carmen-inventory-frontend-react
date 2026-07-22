@@ -19,6 +19,7 @@ import type { RequestPriceListVendor } from "@/types/request-price-list";
 import type { RfpFormValues } from "./rfp-form-schema";
 import {
   ContactValue,
+  EmailValue,
   PricelistCell,
   SubmissionStatusBadge,
   VendorActionsCell,
@@ -106,16 +107,7 @@ export default function RfpVendorTable({
         id: "email",
         size: 220,
         header: () => tfl("email"),
-        cell: ({ row }) => (
-          <ContactValue
-            value={row.original.contact_email}
-            href={
-              row.original.contact_email
-                ? `mailto:${row.original.contact_email}`
-                : undefined
-            }
-          />
-        ),
+        cell: ({ row }) => <EmailValue value={row.original.contact_email} />,
       },
       {
         id: "status",
