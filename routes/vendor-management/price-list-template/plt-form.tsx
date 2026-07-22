@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Controller,
   useFieldArray,
@@ -82,6 +82,21 @@ export function PriceListTemplateForm({
     resolver: zodResolver(createPltSchema(tv, tfl)) as Resolver<PltFormValues>,
     defaultValues,
   });
+
+  // หลัง save (edit) → mutation invalidate → byId refetch → priceListTemplate มา
+  // ใหม่ (full-replace ทำให้ product ได้ id ใหม่) · re-sync form ในโหมด view ให้
+  // โชว์ข้อมูล server จริง และ edit ครั้งถัดไปอ่าน id ใหม่ (ไม่งั้น remove จะใช้ id
+  // เก่าที่ถูกลบไปแล้ว → save ซ้ำ = duplicate) · key ด้วยชุด product id ที่เปลี่ยน
+  // ทุกครั้งที่ item ถูก add/remove/replace
+  const productIdsKey = (priceListTemplate?.products ?? [])
+    .map((p) => p.id)
+    .join(",");
+  useEffect(() => {
+    if (mode === "view" && priceListTemplate) {
+      form.reset(getDefaultValues(priceListTemplate, { defaultCurrencyId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode/defaultCurrencyId อ่านโดยไม่ retrigger
+  }, [productIdsKey, priceListTemplate?.id]);
 
   const {
     fields: detailFields,
