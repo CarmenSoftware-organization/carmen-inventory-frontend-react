@@ -28,16 +28,17 @@ const buildPayload = (formData: PricelistExternalDto) => {
     note: formData.note,
     pricelist_detail: {
       update: formData.tb_pricelist_detail.map((d, i) => {
-        const priceNoTax = Number(d.price_without_tax) || 0;
+        // Input คือ price (รวมภาษี/gross) — derive price_without_tax + tax_amt กลับ
+        const price = Number(d.price) || 0;
         const rate = Number(d.tax_rate) || 0;
-        const taxAmt = round2((priceNoTax * rate) / 100);
-        const price = round2(priceNoTax + taxAmt);
+        const priceNoTax = round2(price / (1 + rate / 100));
+        const taxAmt = round2(price - priceNoTax);
         return {
           id: d.id,
           sequence_no: i + 1,
           product_id: d.product_id,
           price,
-          price_without_tax: d.price_without_tax,
+          price_without_tax: priceNoTax,
           unit_id: d.unit_id,
           tax_profile_id: d.tax_profile_id || "",
           tax_rate: d.tax_rate,

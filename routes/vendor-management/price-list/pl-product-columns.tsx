@@ -11,7 +11,7 @@ import {
   PreferredCell,
   PriceCell,
   ProductCell,
-  TaxAmountCell,
+  PWTCell,
   TaxCell,
   UnitCell,
   type DetailField,
@@ -102,7 +102,7 @@ export function buildPlProductColumns({
     {
       id: "price",
       size: 128,
-      header: () => tfl("pwt"),
+      header: () => tfl("price"),
       cell: ({ row }) => (
         <PriceCell
           form={form}
@@ -128,26 +128,11 @@ export function buildPlProductColumns({
       ),
     },
     {
-      id: "tax",
+      id: "pwt",
       size: 96,
-      header: () => tfl("tax"),
+      header: () => tfl("pwt"),
       cell: ({ row }) => (
-        <TaxAmountCell
-          form={form}
-          index={row.index}
-          isView={isView}
-          isDisabled={isDisabled}
-          detailRef={detailRefs?.[row.index]}
-        />
-      ),
-      meta: { headerClassName: "text-right", cellClassName: "text-right" },
-    },
-    {
-      id: "amount",
-      size: 120,
-      header: () => tfl("amount"),
-      cell: ({ row }) => (
-        <AmountCell
+        <PWTCell
           form={form}
           index={row.index}
           isView={isView}
@@ -163,6 +148,21 @@ export function buildPlProductColumns({
       header: () => tfl("leadTime"),
       cell: ({ row }) => (
         <LeadCell
+          form={form}
+          index={row.index}
+          isView={isView}
+          isDisabled={isDisabled}
+          detailRef={detailRefs?.[row.index]}
+        />
+      ),
+      meta: { headerClassName: "text-right", cellClassName: "text-right" },
+    },
+    {
+      id: "amount",
+      size: 120,
+      header: () => tfl("amount"),
+      cell: ({ row }) => (
+        <AmountCell
           form={form}
           index={row.index}
           isView={isView}

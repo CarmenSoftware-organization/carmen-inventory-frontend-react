@@ -34,15 +34,11 @@ interface CellProps {
 
 /* ── Cells (view = plain text · edit = inputs/lookups) ─────────── */
 
-/** count/min/max ของราคา (incl. tax) ทุก row — ใช้ highlight border สูง/ต่ำ */
+/** count/min/max ของราคา (incl. tax = `price`) ทุก row — ใช้ highlight border สูง/ต่ำ */
 function computePriceMinMax(
   details: PriceListFormValues["pricelist_detail"] | undefined,
 ) {
-  const prices = (details ?? []).map((d) => {
-    const noTax = Number(d?.price_without_tax) || 0;
-    const rate = Number(d?.tax_rate) || 0;
-    return round2(noTax + (noTax * rate) / 100);
-  });
+  const prices = (details ?? []).map((d) => Number(d?.price) || 0);
   const count = prices.length;
   return {
     count,
@@ -198,13 +194,10 @@ export function PriceCell({
   detailRef,
 }: CellProps) {
   "use no memo";
-  const priceWithoutTax = useWatch({
+  // Price = ราคารวมภาษี (gross) ที่ vendor กรอกเอง — PWT/Tax/Amount derive จากตัวนี้
+  const price = useWatch({
     control: form.control,
-    name: `pricelist_detail.${index}.price_without_tax`,
-  });
-  const taxRate = useWatch({
-    control: form.control,
-    name: `pricelist_detail.${index}.tax_rate`,
+    name: `pricelist_detail.${index}.price`,
   });
   // watch ทุก row เพื่อหา min/max ของราคา (incl. tax) สำหรับ highlight border
   // — คำนวณใน cell เอง แทนรับ `stats` ผ่าน column closure ที่ทำให้ columns
@@ -214,15 +207,7 @@ export function PriceCell({
     name: "pricelist_detail",
   });
 
-  const numericPriceNoTax = Number(priceWithoutTax) || 0;
-  const taxAmt = useMemo(
-    () => round2((numericPriceNoTax * (Number(taxRate) || 0)) / 100),
-    [numericPriceNoTax, taxRate],
-  );
-  const numericPrice = useMemo(
-    () => round2(numericPriceNoTax + taxAmt),
-    [numericPriceNoTax, taxAmt],
-  );
+  const numericPrice = Number(price) || 0;
   const { count, min, max } = useMemo(
     () => computePriceMinMax(allDetails),
     [allDetails],
@@ -233,7 +218,7 @@ export function PriceCell({
   if (isView)
     return (
       <span className="text-foreground text-xs font-semibold tabular-nums">
-        {(Number(detailRef?.price_without_tax) || 0).toFixed(2)}
+        {(Number(detailRef?.price) || 0).toFixed(2)}
       </span>
     );
 
@@ -246,16 +231,13 @@ export function PriceCell({
         min={0}
         disabled={isDisabled}
         placeholder="0.00"
-        error={
-          form.formState.errors.pricelist_detail?.[index]?.price_without_tax
-            ?.message
-        }
+        error={form.formState.errors.pricelist_detail?.[index]?.price?.message}
         className={cn(
           "border-border/60 h-8 w-full rounded-md pr-2 pl-6 text-right text-xs font-semibold tabular-nums",
           isHigh && "border-warning/60",
           isLow && "border-success/60",
         )}
-        {...form.register(`pricelist_detail.${index}.price_without_tax`, {
+        {...form.register(`pricelist_detail.${index}.price`, {
           valueAsNumber: true,
         })}
       />
@@ -263,41 +245,44 @@ export function PriceCell({
   );
 }
 
-/** ดึง price_without_tax + tax_rate ของ row (view=detailRef · edit=watch สด) */
+/**
+ * ดึง price (gross) + tax_rate ของ row (view=detailRef · edit=watch สด) แล้ว
+ * derive PWT (ก่อนภาษี) + tax amount กลับ — input คือ price รวมภาษี
+ */
 function useRowPriceParts(
   form: UseFormReturn<PriceListFormValues>,
   index: number,
   isView: boolean,
   detailRef?: DetailRef,
 ) {
-  const pwtWatch = useWatch({
+  const priceWatch = useWatch({
     control: form.control,
-    name: `pricelist_detail.${index}.price_without_tax`,
+    name: `pricelist_detail.${index}.price`,
   });
   const rateWatch = useWatch({
     control: form.control,
     name: `pricelist_detail.${index}.tax_rate`,
   });
-  const priceNoTax = isView
-    ? Number(detailRef?.price_without_tax) || 0
-    : Number(pwtWatch) || 0;
+  const priceGross = isView
+    ? Number(detailRef?.price) || 0
+    : Number(priceWatch) || 0;
   const rate = isView ? Number(detailRef?.tax_rate) || 0 : Number(rateWatch) || 0;
-  const taxAmt = round2((priceNoTax * rate) / 100);
-  return { priceNoTax, taxAmt, amount: round2(priceNoTax + taxAmt) };
+  const pwt = round2(priceGross / (1 + rate / 100));
+  return { priceGross, pwt, taxAmt: round2(priceGross - pwt), amount: priceGross };
 }
 
-/** Tax — จำนวนเงินภาษี (computed, read-only) ทั้ง view/edit */
-export function TaxAmountCell({ form, index, isView, detailRef }: CellProps) {
+/** PWT — ราคาก่อนภาษี (computed จาก price ÷ (1+rate), read-only) */
+export function PWTCell({ form, index, isView, detailRef }: CellProps) {
   "use no memo";
-  const { taxAmt } = useRowPriceParts(form, index, isView, detailRef);
+  const { pwt } = useRowPriceParts(form, index, isView, detailRef);
   return (
     <span className="text-muted-foreground text-xs tabular-nums">
-      {taxAmt.toFixed(2)}
+      {pwt.toFixed(2)}
     </span>
   );
 }
 
-/** Amount — ราคารวมภาษี (computed, read-only) ทั้ง view/edit */
+/** Amount — ราคารวมภาษี (= price gross, read-only) ทั้ง view/edit */
 export function AmountCell({ form, index, isView, detailRef }: CellProps) {
   "use no memo";
   const { amount } = useRowPriceParts(form, index, isView, detailRef);

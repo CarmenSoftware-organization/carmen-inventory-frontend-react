@@ -61,31 +61,31 @@ interface PriceListExternalProductTableProps {
   taxProfiles?: PricelistExternalTaxProfileOption[];
 }
 
-/** ภาษี (จำนวนเงิน) ของ row — computed สดจาก price_without_tax × tax_rate */
-function RowTax({
+/** PWT (ก่อนภาษี) ของ row — computed สดจาก price (gross) ÷ (1 + rate) */
+function RowPWT({
   form,
   index,
 }: {
   form: UseFormReturn<PricelistExternalDto>;
   index: number;
 }) {
-  const pwt = useWatch({
+  const price = useWatch({
     control: form.control,
-    name: `tb_pricelist_detail.${index}.price_without_tax`,
+    name: `tb_pricelist_detail.${index}.price`,
   });
   const rate = useWatch({
     control: form.control,
     name: `tb_pricelist_detail.${index}.tax_rate`,
   });
-  const taxAmt = round2(((Number(pwt) || 0) * (Number(rate) || 0)) / 100);
+  const pwt = round2((Number(price) || 0) / (1 + (Number(rate) || 0) / 100));
   return (
     <span className="text-muted-foreground text-xs tabular-nums">
-      {taxAmt.toFixed(2)}
+      {pwt.toFixed(2)}
     </span>
   );
 }
 
-/** ราคารวมภาษีของ row — price_without_tax + tax */
+/** Amount (รวมภาษี) ของ row = price (gross) ที่ vendor กรอก */
 function RowAmount({
   form,
   index,
@@ -93,21 +93,13 @@ function RowAmount({
   form: UseFormReturn<PricelistExternalDto>;
   index: number;
 }) {
-  const pwt = useWatch({
+  const price = useWatch({
     control: form.control,
-    name: `tb_pricelist_detail.${index}.price_without_tax`,
+    name: `tb_pricelist_detail.${index}.price`,
   });
-  const rate = useWatch({
-    control: form.control,
-    name: `tb_pricelist_detail.${index}.tax_rate`,
-  });
-  const priceNoTax = Number(pwt) || 0;
-  const amount = round2(
-    priceNoTax + round2((priceNoTax * (Number(rate) || 0)) / 100),
-  );
   return (
     <span className="text-foreground text-xs font-semibold tabular-nums">
-      {amount.toFixed(2)}
+      {(Number(price) || 0).toFixed(2)}
     </span>
   );
 }
@@ -269,11 +261,11 @@ export default function PriceListExternalProductTable({
         enableResizing: false,
       },
       {
-        accessorKey: "price_without_tax",
-        id: "price_without_tax",
+        accessorKey: "price",
+        id: "price",
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="PWT"
+            title="Price"
             visibility={false}
             column={column}
           />
@@ -287,10 +279,9 @@ export default function PriceListExternalProductTable({
               min={0}
               placeholder="0.00"
               className="border-border/60 h-8 w-full rounded-md text-right text-xs tabular-nums"
-              {...form.register(
-                `tb_pricelist_detail.${fieldIndex}.price_without_tax`,
-                { valueAsNumber: true },
-              )}
+              {...form.register(`tb_pricelist_detail.${fieldIndex}.price`, {
+                valueAsNumber: true,
+              })}
             />
           );
         },
@@ -353,34 +344,15 @@ export default function PriceListExternalProductTable({
         enableResizing: false,
       },
       {
-        id: "tax",
+        id: "pwt",
         header: ({ column }) => (
-          <DataGridColumnHeader title="Tax" visibility={false} column={column} />
+          <DataGridColumnHeader title="PWT" visibility={false} column={column} />
         ),
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return <RowTax form={form} index={fieldIndex} />;
+          return <RowPWT form={form} index={fieldIndex} />;
         },
         size: 90,
-        enableSorting: false,
-        enableHiding: false,
-        enableResizing: false,
-        meta: { cellClassName: "text-right", headerClassName: "text-right" },
-      },
-      {
-        id: "amount",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Amount"
-            visibility={false}
-            column={column}
-          />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return <RowAmount form={form} index={fieldIndex} />;
-        },
-        size: 120,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -416,6 +388,25 @@ export default function PriceListExternalProductTable({
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
+      },
+      {
+        id: "amount",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            title="Amount"
+            visibility={false}
+            column={column}
+          />
+        ),
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return <RowAmount form={form} index={fieldIndex} />;
+        },
+        size: 120,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
       },
       {
         id: "actions",

@@ -78,14 +78,12 @@ export function createPriceListSchema(tv: TranslationFn, tf: TranslationFn) {
               message: tv("moqDuplicate"),
               path: ["pricelist_detail", sorted[k], "moq_qty"],
             });
-          } else if (cur.price_without_tax > prev.price_without_tax) {
-            // เทียบราคา net (price_without_tax) ที่ vendor กรอกจริง ไม่ใช่ price (gross)
-            // เพราะ price เป็น derived คำนวณตอน render — ในฟอร์ม create มันไม่ถูก commit
-            // เข้า form state (คง 0) ทำให้ guard นี้ไม่เคยจับได้ถ้าเทียบ price
+          } else if (cur.price > prev.price) {
+            // เทียบ price (gross) ที่ vendor กรอกจริง — MOQ สูงกว่าต้องราคาไม่แพงกว่า
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: tv("moqTierPrice"),
-              path: ["pricelist_detail", sorted[k], "price_without_tax"],
+              path: ["pricelist_detail", sorted[k], "price"],
             });
           }
         }
@@ -191,18 +189,18 @@ export function mapDetailToPayload(
   d: PriceListFormValues["pricelist_detail"][number],
   index: number,
 ) {
-  // Derive tax_amt + price (incl tax) from price_without_tax + tax_rate
-  // Fields เหล่านี้ไม่ sync ระหว่างพิมพ์ใน cell — คำนวณซ้ำที่ submit
-  const priceNoTax = Number(d.price_without_tax) || 0;
+  // Input คือ price (รวมภาษี/gross) — derive price_without_tax (ก่อนภาษี) + tax_amt
+  // กลับที่ submit (cell ไม่ sync field พวกนี้ระหว่างพิมพ์)
+  const price = Number(d.price) || 0;
   const rate = Number(d.tax_rate) || 0;
-  const taxAmt = Math.round(((priceNoTax * rate) / 100) * 100) / 100;
-  const price = Math.round((priceNoTax + taxAmt) * 100) / 100;
+  const priceNoTax = Math.round((price / (1 + rate / 100)) * 100) / 100;
+  const taxAmt = Math.round((price - priceNoTax) * 100) / 100;
   return {
     ...(d.doc_version != null ? { doc_version: d.doc_version } : {}),
     sequence_no: index + 1,
     product_id: d.product_id,
     price,
-    price_without_tax: d.price_without_tax,
+    price_without_tax: priceNoTax,
     unit_id: d.unit_id,
     tax_profile_id: d.tax_profile_id || "",
     tax_rate: d.tax_rate,
