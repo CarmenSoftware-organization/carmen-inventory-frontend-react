@@ -14,11 +14,13 @@ export const PRINT_FORM_DOCUMENT_TYPES: readonly PrintDocumentType[] = [
   "GRN",
   "SR",
   "CN",
+  "SI",
+  "SO",
   "IA",
   "PC",
   "SC",
-  "RFQ",
-  "INV",
+  "RFP",
+  "EOP",
 ] as const;
 
 /**

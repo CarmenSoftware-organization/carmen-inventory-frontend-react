@@ -16,11 +16,13 @@ export type PrintDocumentType =
   | "GRN"
   | "SR"
   | "CN"
+  | "SI"
+  | "SO"
   | "IA"
   | "PC"
   | "SC"
-  | "RFQ"
-  | "INV";
+  | "RFP"
+  | "EOP";
 
 export interface PrintMappingResponse {
   data?: {
@@ -69,6 +71,10 @@ export interface PrintDocumentOptions {
  * Document-specific print endpoints that already build the full data
  * payload server-side. When the doc type is in this map and documentId
  * is supplied, we use this path instead of the generic resolve+viewer.
+ *
+ * This is a genuinely partial map by design: SI, SO and EOP deliberately
+ * have no entry (and no report-template rows anywhere yet) — they are
+ * configurable, not printable.
  */
 const DEDICATED_PRINT_ENDPOINTS: Partial<Record<PrintDocumentType, (buCode: string, id: string) => string>> = {
   PR: (bu, id) =>
@@ -87,10 +93,8 @@ const DEDICATED_PRINT_ENDPOINTS: Partial<Record<PrintDocumentType, (buCode: stri
     `/api/proxy/api/${encodeURIComponent(bu)}/physical-counts/${encodeURIComponent(id)}/print-viewer`,
   SC: (bu, id) =>
     `/api/proxy/api/${encodeURIComponent(bu)}/spot-checks/${encodeURIComponent(id)}/print-viewer`,
-  RFQ: (bu, id) =>
+  RFP: (bu, id) =>
     `/api/proxy/api/${encodeURIComponent(bu)}/request-for-pricings/${encodeURIComponent(id)}/print-viewer`,
-  INV: (bu, id) =>
-    `/api/proxy/api/${encodeURIComponent(bu)}/invoice/${encodeURIComponent(id)}/print-viewer`,
 };
 
 export interface PrintDocumentResult {
