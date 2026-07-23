@@ -169,10 +169,27 @@ coincidence, not by meaning.
 
 ## `micro-report`
 
+**This repo owns the report-template rows.** `db/seed/report-templates/_metadata.json` holds 38
+entries, 20 of them form templates — exactly two per group (portrait + landscape) across the old
+ten codes `CN GRN IA INV PC PO PR RFQ SC SR` — each with a fixed UUID, a `builder_key`, an
+`orientation` and a `signature_config`. `cmd/seed` loads that directory. The backend's
+`seed.print-templates.ts` only *looks these up by name* and warns if missing; it does not create
+them.
+
+So the `RFQ` → `RFP` rename lands here as well as in the migration: change `report_group` on the
+two RFQ entries. The migration's `UPDATE` covers databases already seeded; this covers databases
+seeded from now on. Both are needed.
+
+`SI`, `SO` and `EOP` get no entries in this change — authoring a form template means a `.frx`
+content file, a Go builder behind a new `builder_key`, and a signature config. Their dropdowns
+will simply be empty until someone does that work. `INV`'s two entries stay where they are,
+inert.
+
 Delete `model/print_template_mapping.go`, `controller/print_template_mapping_controller.go`,
-`db/print_template_mapping_repo.go`, their route registration, the `/api/print-template-mappings`
-entries in `docs/swagger/docs.go`, and the corresponding case in `routes/routes_test.go`. The
-table they read is gone; leaving them would mean endpoints that error at runtime.
+`db/print_template_mapping_repo.go`, the `PrintTemplateMapping` field and registration in
+`routes/routes.go:22,49-50`, its wiring in `main.go`, the `/api/print-template-mappings` entries
+in `docs/swagger/docs.go`, and the corresponding case in `routes/routes_test.go:45`. The table
+they read is gone; leaving them would mean endpoints that error at runtime.
 
 Also delete the gateway's `GET /api/{bu}/reports/print-template`
 (`reports.controller.ts:388`, `reports.service.ts:541`) and its spec, since its only job was
@@ -215,14 +232,18 @@ Path 2 (no dedicated endpoint for this type):
   no templateId → throw "no print form configured for <TYPE>"
 ```
 
-Three things fall out of this at once. The mapping resolve endpoint loses its final caller.
-`SI`/`SO`/`EOP` — which have no dedicated endpoint — become printable through the generic
-viewer as soon as an admin picks a form, instead of being dead rows. And the previous spec's
-review finding that Path 2 silently discarded a supplied `templateId` is closed.
+Two things fall out of this. The mapping resolve endpoint loses its final caller, which is what
+lets the chain be deleted. And the previous spec's review finding that Path 2 silently discarded
+a supplied `templateId` is closed.
 
-Path 2 renders from the template's own `source_view`/`source_name`, so it does not carry the
-composed header/detail/signature payload the dedicated endpoints build. That is the existing
-behaviour of this path, not a regression.
+**It does not make `SI`/`SO`/`EOP` printable, and the plan must not claim it does.** Every form
+template in `micro-report/db/seed/report-templates/_metadata.json` has `source_name: null` and
+`view_name: null`, and renders through a Go builder named by `builder_key` (e.g. `cn-document`)
+fed by the payload the dedicated endpoints compose. Whether the generic
+`POST /report/viewer` path can render a builder-backed template with no data source is
+**unverified** — `viewReport` hands off to `reportSvc.ViewReport(templateID, buCode, filters)`
+and the answer is a level below that. Until someone confirms it, treat `SI`/`SO`/`EOP` as
+configurable but not printable, exactly the position `INV` held.
 
 ## Deploy ordering
 
@@ -271,7 +292,8 @@ about.** The drop is irreversible and there is no deprecation window by choice.
 | Config keys `print-form.rfq` / `print-form.inv` already stored by some BU | The feature shipped today and no BU has configured a value, so there is nothing to orphan. This is the cheapest possible moment to rename |
 | DROP is irreversible | Back up before running; single-PR drop was an explicit choice |
 | `micro-report` deletions missed, leaving endpoints that query a dropped table | Called out as its own repo section; its `/resolve` callers are both deleted in this change |
-| Path 2 rework changes how endpoint-less types render | It renders from the template's own source view rather than a composed payload — the pre-existing behaviour of that path, but new to `SI`/`SO`/`EOP`, so their templates need a working `source_type`/`source_name` |
+| Assuming `SI`/`SO`/`EOP` become printable | They do not. Form templates render through `builder_key`, and these three have no template entries at all yet. Their rows store a value and their dropdowns stay empty |
+| The RFQ→RFP rename applied in only one of the two places | The migration fixes seeded databases; `_metadata.json` fixes future seeds. Missing either leaves the two out of step |
 
 ## Verification
 
