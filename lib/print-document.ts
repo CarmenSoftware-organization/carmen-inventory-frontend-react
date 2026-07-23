@@ -57,6 +57,12 @@ export interface PrintDocumentOptions {
    * window.open call entirely (caller handles the URL).
    */
   target?: "_blank" | "self" | null;
+  /**
+   * Report template to render with. Normally supplied by usePrintDocument()
+   * from the BU's print-form config; pass it explicitly to override. Omitted
+   * means the server picks the default mapping for this document type.
+   */
+  templateId?: string;
 }
 
 /**
@@ -115,8 +121,11 @@ export async function printDocument(
   // Path 1 — dedicated endpoint that already builds full data payload.
   const dedicated = DEDICATED_PRINT_ENDPOINTS[documentType];
   if (dedicated && options.documentId) {
-    const url = dedicated(buCode, options.documentId);
-    const res = await httpClient.get(url);
+    const endpoint = dedicated(buCode, options.documentId);
+    const requestUrl = options.templateId
+      ? `${endpoint}?template_id=${encodeURIComponent(options.templateId)}`
+      : endpoint;
+    const res = await httpClient.get(requestUrl);
     if (!res.ok) {
       throw new Error(
         `Print failed for ${documentType} (${res.status})${await errorSuffix(res)}`,
