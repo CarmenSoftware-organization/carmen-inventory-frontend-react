@@ -8,7 +8,8 @@ backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migr
 
 ## ภาษาในการสื่อสาร
 
-สื่อสารกับ user เป็น **ภาษาไทย** เสมอ (ยกเว้น code, commit message, PR ใช้ภาษาอังกฤษ)
+สื่อสารกับ user เป็น **ภาษาไทย** เสมอ — รวมถึง commit message (เขียนเป็นภาษาไทย)
+ยกเว้น code / identifier และ **PR ที่ยังใช้ภาษาอังกฤษ**
 
 ## Commands
 
