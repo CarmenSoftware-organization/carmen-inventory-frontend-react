@@ -229,17 +229,20 @@ The comment at `:8-9` currently reads "PR uses an inlined version of this same f
 - [ ] **Step 6: Type-check**
 
 ```bash
-cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2
-bunx tsc --noEmit -p apps/micro-business/tsconfig.json
+cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/micro-business
+bun run check-types
 ```
 Expected: no errors.
 
 - [ ] **Step 7: Run the suites that mock this path**
 
+Test paths are relative to `apps/micro-business`, and the script is `test`, not a bare `jest`:
+
 ```bash
-bunx jest apps/micro-business/src/common/print-report.helper.spec.ts \
-  apps/micro-business/src/procurement/purchase-order/purchase-order.service.spec.ts \
-  apps/micro-business/src/inventory/store-requisition/store-requisition.service.spec.ts
+cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/micro-business
+bun run test src/common/print-report.helper.spec.ts \
+  src/procurement/purchase-order/purchase-order.service.spec.ts \
+  src/inventory/store-requisition/store-requisition.service.spec.ts
 ```
 Expected: PASS. These mock `tb_print_template_mapping.findFirst`, which the no-`templateId` path still calls in exactly the same way.
 
@@ -306,14 +309,16 @@ The code after this block already uses `template.id` / `template.name`; leave it
 - [ ] **Step 4: Type-check**
 
 ```bash
-bunx tsc --noEmit -p apps/micro-business/tsconfig.json
+cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/micro-business
+bun run check-types
 ```
 Expected: no errors.
 
 - [ ] **Step 5: Run the PR suite**
 
 ```bash
-bunx jest apps/micro-business/src/procurement/purchase-request/purchase-request.service.spec.ts
+cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/micro-business
+bun run test src/procurement/purchase-request/purchase-request.service.spec.ts
 ```
 Expected: PASS. The spec at `:1346` mocks `tb_print_template_mapping.findFirst`, which the no-`templateId` path still reaches.
 
@@ -413,14 +418,16 @@ Repeat for CN, GRN, SR, IA, PC, SC and RFQ at the service lines in the table, us
 - [ ] **Step 4: Type-check**
 
 ```bash
-bunx tsc --noEmit -p apps/micro-business/tsconfig.json
+cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/micro-business
+bun run check-types
 ```
 Expected: no errors.
 
 - [ ] **Step 5: Run the micro-business suite**
 
 ```bash
-bunx jest apps/micro-business
+cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/micro-business
+bun run test
 ```
 Expected: PASS — `templateId` is optional everywhere, so every existing call site and mock is unaffected.
 
@@ -526,14 +533,16 @@ Leave the rest of each method untouched. Repeat at each service line in the tabl
 - [ ] **Step 3: Type-check**
 
 ```bash
-bunx tsc --noEmit -p apps/backend-gateway/tsconfig.json
+cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/backend-gateway
+bunx tsc --noEmit
 ```
-Expected: no errors.
+Expected: no errors. (`backend-gateway` has no `check-types` script — only `micro-business` does.)
 
 - [ ] **Step 4: Run the gateway suite**
 
 ```bash
-bunx jest apps/backend-gateway
+cd /Users/samutpra/GitHub/carmensoftware-organize/carmen-turborepo-backend-v2/apps/backend-gateway
+bun run test
 ```
 Expected: PASS. `purchase-requests.service.spec.ts` asserts the microservice payload; if it uses an exact-object matcher it will now also see `template_id: undefined` — if that fails, update the expectation to include `template_id: undefined` rather than dropping the assertion.
 
