@@ -117,11 +117,13 @@ export const CONFIG_SECTIONS: readonly ConfigSection[] = [
         ["GRN", "GRN - Good Received Note", "config.printFormGrn"],
         ["SR", "SR - Store Requisition", "config.printFormSr"],
         ["CN", "CN - Credit Note", "config.printFormCn"],
+        ["SI", "SI - Stock In", "config.printFormSi"],
+        ["SO", "SO - Stock Out", "config.printFormSo"],
         ["IA", "IA - Inventory Adjustment", "config.printFormIa"],
         ["PC", "PC - Physical Count", "config.printFormPc"],
         ["SC", "SC - Spot Check", "config.printFormSc"],
-        ["RFQ", "RFQ - Request For Quotation", "config.printFormRfq"],
-        ["INV", "INV - Invoice", "config.printFormInv"],
+        ["RFP", "RFP - Request For Pricing", "config.printFormRfp"],
+        ["EOP", "EOP - End Of Period", "config.printFormEop"],
       ] as [PrintDocumentType, string, string][]
     ).map(([type, label, labelKey]) => ({
       key: printFormConfigKey(type),

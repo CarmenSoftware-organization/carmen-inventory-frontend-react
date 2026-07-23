@@ -202,11 +202,13 @@ describe("Print Form config registry", () => {
       ["GRN", "config.printFormGrn"],
       ["SR", "config.printFormSr"],
       ["CN", "config.printFormCn"],
+      ["SI", "config.printFormSi"],
+      ["SO", "config.printFormSo"],
       ["IA", "config.printFormIa"],
       ["PC", "config.printFormPc"],
       ["SC", "config.printFormSc"],
-      ["RFQ", "config.printFormRfq"],
-      ["INV", "config.printFormInv"],
+      ["RFP", "config.printFormRfp"],
+      ["EOP", "config.printFormEop"],
     ]);
   });
 

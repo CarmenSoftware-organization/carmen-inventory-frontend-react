@@ -280,7 +280,7 @@ export function RequestPriceListForm({
                 </Button>
                 {requestPriceList?.id && (
                   <PrintDocumentButton
-                    documentType="RFQ"
+                    documentType="RFP"
                     documentId={requestPriceList.id}
                     filters={
                       requestPriceList.name
