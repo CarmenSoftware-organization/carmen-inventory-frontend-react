@@ -888,11 +888,11 @@ export function useReportFormTemplates() {
         throw await ApiError.from(res, "Failed to fetch report form templates");
       }
       const json = await res.json();
-      // paginated StdResponse วาง rows ไว้ที่ `data`; เผื่อ envelope แบบ
-      // `data.items` ที่ app-config list ใช้ (ยืนยันของจริงในเบราว์เซอร์แล้ว)
+      // envelope = { paginate, data: [...], status, success } — backend PR #248
+      // (a2031c4f0) แก้ double-nest แล้วและยิงยืนยันกับ dev stack จริง
       const rows: ReportFormTemplate[] = Array.isArray(json.data)
         ? json.data
-        : (json.data?.items ?? []);
+        : [];
 
       const map = new Map<string, ReportFormOption[]>();
       for (const row of rows) {
@@ -1316,7 +1316,7 @@ Note: the `:4000` backend points at the shared dev database. Reads are fine; the
 
 - [ ] **Step 2: Confirm the response envelope**
 
-Log in, open `/system-admin/default-setting`, and in DevTools → Network inspect the response of `api-system/report-templates/forms?perpage=-1`. Confirm the rows are at `data` (an array). If they are at `data.items` instead, the hook's fallback already handles it — but update the comment in `hooks/use-report-form-templates.ts` to state which shape is real, so the next reader is not misled.
+Log in, open `/system-admin/default-setting`, and in DevTools → Network inspect the response of `api-system/report-templates/forms?perpage=-1`. Expect `{ paginate, data: [...], status, success }` — backend PR #248 (`a2031c4f0`) fixed the previous double-nested shape and verified it against the dev stack, so this is a confirmation, not a discovery. If the rows are anywhere other than `data`, stop and report it rather than adding a fallback: it would mean the backend regressed.
 
 - [ ] **Step 3: Check the section renders**
 
