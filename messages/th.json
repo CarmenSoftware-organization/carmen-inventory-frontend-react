@@ -144,23 +144,23 @@
     "no": "ไม่",
     "sections": {
       "pr": "PR",
-      "prDesc": "การตั้งค่า Purchase Request ของหน่วยธุรกิจนี้",
+      "prDesc": "การตั้งค่าใบขอซื้อของหน่วยธุรกิจนี้",
       "si": "SI",
-      "siDesc": "การตั้งค่า Stock In ของหน่วยธุรกิจนี้",
+      "siDesc": "การตั้งค่าการรับสินค้าเข้าของหน่วยธุรกิจนี้",
       "po": "PO",
-      "poDesc": "การตั้งค่า Purchase Order ของหน่วยธุรกิจนี้",
+      "poDesc": "การตั้งค่าใบสั่งซื้อของหน่วยธุรกิจนี้",
       "printForm": "แบบฟอร์มการพิมพ์",
       "printFormDesc": "แบบฟอร์มรายงานที่ใช้พิมพ์สำหรับเอกสารแต่ละประเภท"
     },
     "config": {
-      "prAllowDuplicateProduct": "อนุญาตให้เลือก product ซ้ำกันได้",
+      "prAllowDuplicateProduct": "อนุญาตให้เลือกสินค้าซ้ำกันได้",
       "siCostFrom": "ราคาเริ่มต้นสำหรับสินค้าที่เพิ่มเข้าไป",
       "siCostFromOptions": {
         "average": "เฉลี่ย",
         "lastReceiving": "รับล่าสุด",
         "lastCost": "ต้นทุนล่าสุด"
       },
-      "poGroupByPrComment": "เพิ่มการจัดกลุ่มตาม pr comment",
+      "poGroupByPrComment": "เพิ่มการจัดกลุ่มตามหมายเหตุของใบขอซื้อ",
       "printFormPr": "PR - ใบขอซื้อ",
       "printFormPo": "PO - ใบสั่งซื้อ",
       "printFormGrn": "GRN - ใบรับสินค้า",
@@ -179,8 +179,8 @@
     }
   },
   "dashboardWidget": {
-    "loadError": "โหลดข้อมูล widget ไม่สำเร็จ: {message}",
-    "empty": "ไม่มีข้อมูล widget",
+    "loadError": "โหลดข้อมูลวิดเจ็ตไม่สำเร็จ: {message}",
+    "empty": "ไม่มีข้อมูลวิดเจ็ต",
     "noData": "ไม่มีข้อมูล",
     "deltaUnchanged": "ไม่เปลี่ยนแปลงจากรอบก่อน",
     "deltaCompare": "เทียบรอบก่อน",
@@ -468,7 +468,7 @@
     "invalidEmail": "รูปแบบอีเมลไม่ถูกต้อง",
     "endDateAfterStart": "วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มต้น",
     "moqTierPrice": "MOQ ชั้นที่สูงกว่าต้องไม่แพงกว่าชั้นที่ต่ำกว่า",
-    "moqDuplicate": "MOQ ซ้ำกันใน product + หน่วยเดียวกัน",
+    "moqDuplicate": "MOQ ซ้ำกันในสินค้าและหน่วยเดียวกัน",
     "expectedDateAfterSr": "วันที่คาดว่าจะได้รับต้องไม่ก่อนวันที่ SR",
     "atLeastOneItem": "ต้องมี{item}อย่างน้อย 1 รายการ",
     "cityOrDistrictRequired": "กรุณากรอกเมืองหรือเขต",
@@ -481,7 +481,7 @@
     "passwordMismatch": "รหัสผ่านไม่ตรงกัน",
     "passwordSameAsCurrent": "รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านปัจจุบัน",
     "confirmPassword": "กรุณายืนยันรหัสผ่าน",
-    "creditNoteTypeRequired": "กรุณาเลือกประเภท Credit Note",
+    "creditNoteTypeRequired": "กรุณาเลือกประเภทใบลดหนี้",
     "symbolMaxLength": "สัญลักษณ์ไม่เกิน {max} ตัวอักษร",
     "aliasMaxLength": "ชื่อย่อไม่เกิน {max} ตัวอักษร",
     "taxRatePositive": "อัตราภาษีต้องเป็นค่าบวก",
@@ -3634,7 +3634,7 @@
     "selectTemplate": "เลือกเทมเพลต...",
     "reportType": "ประเภทรายงาน",
     "format": "รูปแบบ",
-    "cron": "Cron Expression",
+    "cron": "กำหนดเวลาเอง (Cron)",
     "frequency": "ความถี่",
     "daily": "รายวัน",
     "weekly": "รายสัปดาห์",
@@ -3776,7 +3776,7 @@
     "activityLog": "ตรวจสอบกิจกรรม",
     "configEmail": "ตั้งค่าอีเมล",
     "notificationTemplate": "เทมเพลตการแจ้งเตือน",
-    "queryDataset": "ชุดข้อมูล SQL",
+    "queryDataset": "ชุดข้อมูลแบบสอบถาม",
     "dashboardDataset": "ชุดข้อมูลแดชบอร์ด",
     "companyProfile": "ข้อมูลบริษัท",
     "defaultSetting": "ค่าเริ่มต้น",
@@ -3841,7 +3841,7 @@
   },
   "profileError": {
     "missingDepartmentTitle": "ยังไม่มีแผนกที่กำหนด",
-    "missingDepartmentDesc": "คุณยังไม่มีแผนก (department) ในหน่วยงานหลัก ({buName}) กรุณาติดต่อผู้ดูแลระบบ",
+    "missingDepartmentDesc": "คุณยังไม่มีแผนกในหน่วยงานหลัก ({buName}) กรุณาติดต่อผู้ดูแลระบบ",
     "close": "ปิด"
   },
   "widget": {
