@@ -31,6 +31,34 @@ import {
   groupConfigForRender,
   resolveConfigOptions,
 } from "../company-profile/company-profile-config-registry";
+import {
+  useReportFormTemplates,
+  type ReportFormOption,
+} from "@/hooks/use-report-form-templates";
+
+/**
+ * รวม options ของ dropdown แบบฟอร์มการพิมพ์
+ *
+ * ถ้าค่าที่เก็บไว้ไม่อยู่ใน list (template ถูกลบ/ปิดใช้งาน) จะเติม option
+ * สังเคราะห์ไว้หัวรายการ เพื่อไม่ให้ค่าหายตอน Save และให้ admin เห็นว่ามีปัญหา
+ *
+ * @param current - ค่าปัจจุบันของ config item (template id หรือ "")
+ * @param list - options ของ report_group นั้น (undefined = ยังไม่มีข้อมูล)
+ * @param isLoading - hook ยังโหลดอยู่
+ * @param unknownLabel - ป้ายสำหรับค่าที่หาไม่เจอ
+ * @param loadingLabel - ป้ายระหว่างโหลด
+ */
+export function buildPrintFormOptions(
+  current: string,
+  list: ReportFormOption[] | undefined,
+  isLoading: boolean,
+  unknownLabel: string,
+  loadingLabel: string,
+): ReportFormOption[] {
+  const base = list ?? [];
+  if (!current || base.some((o) => o.value === current)) return base;
+  return [{ value: current, label: isLoading ? loadingLabel : unknownLabel }, ...base];
+}
 
 /**
  * หน้า Default Setting (system-admin) — แสดง/แก้ไข operational config (PR/SI/PO)
@@ -51,6 +79,7 @@ export default function DefaultSettingComponent() {
   const buId = defaultBu?.id;
   const { data, isLoading, isError, refetch } = useBusinessUnit(buId);
   const update = useUpdateBusinessUnit(buId);
+  const formTemplates = useReportFormTemplates();
   const [editing, setEditing] = useState(false);
 
   const form = useForm<BusinessSettingFormValues>({
@@ -175,15 +204,31 @@ export default function DefaultSettingComponent() {
               first={i === 0}
               title={t(section.titleKey)}
               description={t(section.descKey)}
+              action={
+                section.id === "printForm" && formTemplates.isError ? (
+                  <p className="text-destructive text-xs">
+                    {t("config.printFormLoadError")}
+                  </p>
+                ) : undefined
+              }
             >
               {section.entries.map((entry) => {
-                const options = entry.options
-                  ? resolveConfigOptions(
-                      entry.options,
-                      data.calculation_method,
+                const group = entry.optionsGroup;
+                const options = group
+                  ? buildPrintFormOptions(
                       entry.item.value,
-                    ).map((o) => ({ value: o.value, label: t(o.labelKey) }))
-                  : undefined;
+                      formTemplates.data?.get(group),
+                      formTemplates.isLoading,
+                      t("config.printFormUnknown", { id: entry.item.value }),
+                      t("config.printFormLoading"),
+                    )
+                  : entry.options
+                    ? resolveConfigOptions(
+                        entry.options,
+                        data.calculation_method,
+                        entry.item.value,
+                      ).map((o) => ({ value: o.value, label: t(o.labelKey) }))
+                    : undefined;
                 return (
                   <ConfigField
                     key={entry.item.key}
@@ -195,6 +240,7 @@ export default function DefaultSettingComponent() {
                     yesLabel={t("yes")}
                     noLabel={t("no")}
                     options={options}
+                    disabled={group !== undefined && formTemplates.isLoading}
                   />
                 );
               })}

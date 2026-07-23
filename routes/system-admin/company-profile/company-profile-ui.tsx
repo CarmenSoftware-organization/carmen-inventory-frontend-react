@@ -364,6 +364,7 @@ export function ConfigField({
   noLabel,
   label,
   options,
+  disabled,
 }: {
   readonly editing: boolean;
   readonly form: Form;
@@ -375,10 +376,11 @@ export function ConfigField({
   readonly label?: string;
   /** สำหรับ enum — options ที่ resolve แล้ว (value + label i18n) */
   readonly options?: readonly { value: string; label: string }[];
+  /** ปิดการแก้ไขชั่วคราว (เช่น options ยังโหลดไม่เสร็จ) */
+  readonly disabled?: boolean;
 }) {
   const isBool = item.datatype === "boolean";
-  const isEnum =
-    item.datatype === "enum" && options != null && options.length > 0;
+  const isEnum = item.datatype === "enum" && options != null;
   const name = `config.${index}.value` as FormName;
   const displayLabel = label ?? item.label;
 
@@ -428,6 +430,7 @@ export function ConfigField({
             <Select
               value={typeof field.value === "string" ? field.value : ""}
               onValueChange={field.onChange}
+              disabled={disabled}
             >
               <SelectTrigger id={name} size="sm" className="w-full text-sm">
                 <SelectValue />
