@@ -2313,7 +2313,7 @@
     "title": "แผนการดำเนินงาน",
     "dashboard": {
       "title": "ภาพรวมการดำเนินงาน",
-      "description": "สถานะ recipe, cuisine และ equipment ที่ใช้ในแผนการผลิต"
+      "description": "สถานะสูตรอาหาร ประเภทอาหาร และอุปกรณ์ที่ใช้ในแผนการผลิต"
     },
     "recipeCategory": {
       "entity": "หมวดหมู่สูตรอาหาร",
@@ -2548,7 +2548,7 @@
       "inactive": "ปิดใช้งาน",
       "deductsStock": "หักสต็อก",
       "advanced": "ตั้งค่าเพิ่มเติม",
-      "advancedDesc": "URL รูปภาพ, ข้อมูล JSON เพิ่มเติม และการจัดการสต็อก",
+      "advancedDesc": "ลิงก์รูปภาพ ข้อมูล JSON เพิ่มเติม และการจัดการสต็อก",
       "tags": "แท็ก",
       "tagSeasonal": "ตามฤดูกาล",
       "tagBestSeller": "ขายดี",
@@ -2573,8 +2573,8 @@
       "margins": "อัตรากำไร",
       "otherMetrics": "ตัวชี้วัดอื่น",
       "suggestedAtTarget": "แนะนำ {price} @ เป้าหมาย {pct}%",
-      "onTargetMessage": "อยู่ในเป้า · margin ดีที่ {pct}%",
-      "aboveTargetMessage": "เกินเป้าหมาย {pts} pts",
+      "onTargetMessage": "อยู่ในเป้า · อัตรากำไรดีที่ {pct}%",
+      "aboveTargetMessage": "เกินเป้าหมาย {pts} จุด",
       "atTargetCap": "ถึงเพดานเป้าหมาย",
       "back": "ย้อนกลับ",
       "recipesBreadcrumb": "สูตรอาหาร",
