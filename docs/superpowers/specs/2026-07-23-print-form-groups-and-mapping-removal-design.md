@@ -3,7 +3,7 @@
 Date: 2026-07-23
 Status: Approved (design), pending spec review
 Repos: `carmen-turborepo-backend-v2` (incl. `packages/prisma-shared-schema-platform`),
-`carmen-platform`, `carmen-inventory-frontend-react`
+`micro-report`, `carmen-platform`, `carmen-inventory-frontend-react`
 Follows: `2026-07-23-print-form-per-document-type-design.md` (shipped today — BE #249, FE #61)
 
 ## Why this exists
@@ -68,7 +68,13 @@ query anywhere**; `display_label` is unused by the print path.
 - `tb_print_template_mapping` blast radius: 12 files in `carmen-turborepo-backend-v2`
   (the `platform_print-template-mappings/` module with 7 endpoints, the resolver, 4 spec files,
   3 seed files, the Prisma model and 2 migrations) and 9 files in `carmen-platform`.
-- The mapping CRUD's only consumer is `carmen-platform`; the inventory frontend never calls it.
+- The gateway's mapping CRUD is consumed only by `carmen-platform`.
+- **`tb_print_template_mapping` is also owned by a fourth repo.** `micro-report` (Go) carries
+  `model/print_template_mapping.go`, `controller/print_template_mapping_controller.go` and
+  `db/print_template_mapping_repo.go` — ~658 lines — exposing `/api/print-template-mappings`
+  and `/api/print-template-mappings/resolve`. Two things call `/resolve`: the gateway module
+  being deleted here (`platform_print-template-mappings.service.ts:157`) and
+  `reports.service.ts:541`, which backs `GET /api/{bu}/reports/print-template`.
 
 ## The 12 groups
 
@@ -161,6 +167,17 @@ for the three new types need defining — mirror the existing ones.
 every RFP template's XML breaks rendering. It shares a string with `documentType` today by
 coincidence, not by meaning.
 
+## `micro-report`
+
+Delete `model/print_template_mapping.go`, `controller/print_template_mapping_controller.go`,
+`db/print_template_mapping_repo.go`, their route registration, the `/api/print-template-mappings`
+entries in `docs/swagger/docs.go`, and the corresponding case in `routes/routes_test.go`. The
+table they read is gone; leaving them would mean endpoints that error at runtime.
+
+Also delete the gateway's `GET /api/{bu}/reports/print-template`
+(`reports.controller.ts:388`, `reports.service.ts:541`) and its spec, since its only job was
+proxying `/resolve`. The frontend change below removes its last caller.
+
 ## `carmen-platform`
 
 - **Add `IA`** to `FORM_REPORT_GROUPS` (`ReportTemplateEdit.tsx:38`) — currently 11 codes, and
@@ -186,21 +203,51 @@ coincidence, not by meaning.
 - `rfp-form.tsx:283`: `documentType="RFQ"` → `"RFP"`.
 - The registry test's expected pairs list grows to 12 and picks up the renames.
 
-Because a document type can now lack an endpoint, `printDocument()` should fail with a clear
-message when `DEDICATED_PRINT_ENDPOINTS` has no entry and no generic filters were supplied,
-rather than silently falling through to the generic viewer path.
+### Path 2 stops resolving a mapping
+
+`printDocument()`'s generic path currently calls `GET .../reports/print-template` to look up a
+mapping, then posts to the viewer. That lookup is the last consumer of the endpoint chain being
+deleted, so the path is reworked rather than removed:
+
+```
+Path 2 (no dedicated endpoint for this type):
+  templateId (from BU config, or the caller) + filters → POST /reports/viewer
+  no templateId → throw "no print form configured for <TYPE>"
+```
+
+Three things fall out of this at once. The mapping resolve endpoint loses its final caller.
+`SI`/`SO`/`EOP` — which have no dedicated endpoint — become printable through the generic
+viewer as soon as an admin picks a form, instead of being dead rows. And the previous spec's
+review finding that Path 2 silently discarded a supplied `templateId` is closed.
+
+Path 2 renders from the template's own `source_view`/`source_name`, so it does not carry the
+composed header/detail/signature payload the dedicated endpoints build. That is the existing
+behaviour of this path, not a regression.
 
 ## Deploy ordering
 
-1. **Backend first.** It carries the migration. Until it lands, nothing else can rely on
-   `is_default` or on `RFP` matching.
-2. **`carmen-platform` immediately after.** Its Print Template Mapping pages break the moment
-   the backend deletes their API. This is an internal admin tool, and the window is the gap
-   between two deploys — accepted, but do not leave it open. Its "set default" toggle needs the
-   new column, so it cannot go first.
-3. **`carmen-inventory-frontend-react` after the backend**, for the reason established in the
-   previous spec: NestJS ignores unknown query parameters, so a frontend that ships ahead of its
-   backend prints the wrong layout with no error anywhere.
+**Order: backend → micro-report → carmen-platform → inventory frontend.**
+
+1. **Backend first.** It carries the migration, which is what creates the RFP-grouped templates
+   and the `is_default` values everything else reads.
+2. **`micro-report` immediately after.** Its mapping endpoints read a table that no longer
+   exists the moment step 1 lands. Nothing calls them by then — the gateway module that did is
+   deleted in step 1, and the frontend's Path 2 lookup is dead code today — but they must not
+   linger as endpoints that error.
+3. **`carmen-platform` immediately after.** Its Print Template Mapping pages break when step 1
+   deletes their API, and its "set default" toggle needs the new column, so it can go neither
+   first nor late. Internal admin tool, one deploy gap — accepted, but do not leave it open.
+4. **Inventory frontend last.**
+
+There is a brief cosmetic gap whichever way the frontend is ordered, and it is harmless in both
+directions: ship it late and the old build asks for group `RFQ`, which the migration has
+renamed, so that one dropdown is empty; ship it early and it asks for `RFP`, which does not exist
+yet, so that dropdown is empty instead. No data is lost either way, because the config keys being
+renamed have no stored values anywhere yet.
+
+What must **not** happen is the previous change's failure mode — a frontend that sends a query
+parameter an older gateway silently ignores. This change does not reintroduce it: the frontend
+only ever sends a `template_id` an admin selected from a list the backend served.
 
 **Back up `tb_print_template_mapping` before running the migration in any environment you care
 about.** The drop is irreversible and there is no deprecation window by choice.
@@ -223,6 +270,8 @@ about.** The drop is irreversible and there is no deprecation window by choice.
 | `datasetPrefix` renamed by pattern-matching | Called out explicitly above; it must stay `'RFQ'` |
 | Config keys `print-form.rfq` / `print-form.inv` already stored by some BU | The feature shipped today and no BU has configured a value, so there is nothing to orphan. This is the cheapest possible moment to rename |
 | DROP is irreversible | Back up before running; single-PR drop was an explicit choice |
+| `micro-report` deletions missed, leaving endpoints that query a dropped table | Called out as its own repo section; its `/resolve` callers are both deleted in this change |
+| Path 2 rework changes how endpoint-less types render | It renders from the template's own source view rather than a composed payload — the pre-existing behaviour of that path, but new to `SI`/`SO`/`EOP`, so their templates need a working `source_type`/`source_name` |
 
 ## Verification
 
