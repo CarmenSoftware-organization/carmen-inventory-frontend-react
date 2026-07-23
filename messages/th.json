@@ -973,122 +973,122 @@
   "systemAdmin": {
     "title": "ผู้ดูแลระบบ",
     "landing": {
-      "kicker": "The control room",
-      "title": "System Admin",
-      "lede": "Everything behind Carmen — the calendars, permissions, workflows, scripts and datasets that make the rest of the building work. Eleven tools, grouped into five chapters by what they do.",
+      "kicker": "ห้องควบคุม",
+      "title": "ผู้ดูแลระบบ",
+      "lede": "ทุกอย่างเบื้องหลัง Carmen — ปฏิทิน สิทธิ์ ลำดับขั้นอนุมัติ สคริปต์ และชุดข้อมูล ที่ทำให้ส่วนอื่นทั้งหมดทำงานได้ 11 เครื่องมือ จัดเป็น 5 หมวดตามหน้าที่",
       "meta": {
-        "module": "Module · System Admin",
+        "module": "โมดูล · ผู้ดูแลระบบ",
         "version": "v2026.05",
-        "summary": "5 chapters · 11 tools"
+        "summary": "5 หมวด · 11 เครื่องมือ"
       },
       "cta": {
-        "open": "Open"
+        "open": "เปิด"
       },
       "kpi": {
         "uptime": {
-          "label": "Uptime · 30 days",
+          "label": "เวลาทำงาน · 30 วัน",
           "value": "99.98%",
-          "sub": "14 min total downtime · 1 incident"
+          "sub": "หยุดทำงานรวม 14 นาที · 1 ครั้ง"
         },
         "users": {
-          "label": "Active users · today",
+          "label": "ผู้ใช้ที่ใช้งาน · วันนี้",
           "value": "247",
-          "sub": "38 admins · 209 staff"
+          "sub": "แอดมิน 38 · พนักงาน 209"
         },
         "jobs": {
-          "label": "Background jobs",
+          "label": "งานเบื้องหลัง",
           "value": "1,284",
-          "sub": "12 queued · 4 retrying"
+          "sub": "รอคิว 12 · กำลังลองใหม่ 4"
         },
         "health": {
-          "label": "System health",
-          "value": "Green",
-          "sub": "all checks passing"
+          "label": "สุขภาพระบบ",
+          "value": "ปกติ",
+          "sub": "ผ่านการตรวจทั้งหมด"
         }
       },
       "chapters": {
         "access": {
-          "kicker": "Access & Identity",
-          "title": "Who can do what",
-          "lede": "Define the permissions of the building and decide who carries which keys. Roles describe capability; assignments map people onto them."
+          "kicker": "การเข้าถึงและตัวตน",
+          "title": "ใครทำอะไรได้บ้าง",
+          "lede": "กำหนดสิทธิ์ทั้งระบบ และตัดสินว่าใครถือกุญแจดอกไหน บทบาทบอกว่าทำอะไรได้ ส่วนการมอบหมายจับคนเข้ากับบทบาท"
         },
         "process": {
-          "kicker": "Process & Lifecycle",
-          "title": "How work moves",
-          "lede": "The rules of the road. Define your fiscal calendar, the approval ladders documents must climb, and where every file lives across its life."
+          "kicker": "กระบวนการและวงจรการทำงาน",
+          "title": "งานเดินอย่างไร",
+          "lede": "กติกาการทำงาน กำหนดปฏิทินบัญชี ลำดับขั้นอนุมัติที่เอกสารต้องผ่าน และที่จัดเก็บของทุกไฟล์ตลอดอายุการใช้งาน"
         },
         "observe": {
-          "kicker": "Observability",
-          "title": "What's happening",
-          "lede": "A pair of windows into the building. One looks at the people; the other looks at the machine. Both keep a record long enough to answer hard questions."
+          "kicker": "การเฝ้าสังเกต",
+          "title": "เกิดอะไรขึ้นบ้าง",
+          "lede": "หน้าต่างสองบานสู่ระบบ บานหนึ่งมองที่คน อีกบานมองที่เครื่อง ทั้งคู่เก็บบันทึกไว้นานพอจะตอบคำถามยากๆ ได้"
         },
         "config": {
-          "kicker": "System Configuration",
-          "title": "Wiring it together",
-          "lede": "The pieces that connect Carmen to the rest of the world — mailservers, scripts that fire on events, scheduled code that runs without a human."
+          "kicker": "การตั้งค่าระบบ",
+          "title": "เชื่อมทุกอย่างเข้าด้วยกัน",
+          "lede": "ส่วนที่เชื่อม Carmen กับโลกภายนอก — เมลเซิร์ฟเวอร์ สคริปต์ที่ทำงานเมื่อมีเหตุการณ์ และโค้ดตามเวลาที่รันเองโดยไม่ต้องมีคน"
         },
         "data": {
-          "kicker": "Data Platform",
-          "title": "Data, ready for use",
-          "lede": "Datasets are the raw material the rest of Carmen reads from. Query them to explore; promote them to a dashboard once they earn it."
+          "kicker": "แพลตฟอร์มข้อมูล",
+          "title": "ข้อมูลพร้อมใช้",
+          "lede": "ชุดข้อมูลคือวัตถุดิบที่ส่วนอื่นของ Carmen ดึงไปใช้ สอบถามเพื่อสำรวจ แล้วเลื่อนขึ้นเป็นแดชบอร์ดเมื่อพร้อม"
         }
       },
       "modules": {
         "roles": {
-          "name": "Roles",
-          "one": "Permission templates by job function.",
-          "long": "Bundle granular permissions into named roles — Buyer, Storekeeper, Receiver, Finance Reviewer. Inherit between roles; lock down by module, action, or specific field.",
-          "stat": "14 roles · 87 permissions",
-          "meta": "last edited 2 days ago"
+          "name": "บทบาท",
+          "one": "เทมเพลตสิทธิ์ตามหน้าที่งาน",
+          "long": "รวมสิทธิ์ย่อยๆ เป็นบทบาทที่ตั้งชื่อได้ — ผู้ซื้อ พนักงานคลัง ผู้รับของ ผู้ตรวจสอบการเงิน สืบทอดระหว่างบทบาทได้ จำกัดสิทธิ์ตามโมดูล การกระทำ หรือเฉพาะฟิลด์ได้",
+          "stat": "14 บทบาท · 87 สิทธิ์",
+          "meta": "แก้ไขล่าสุด 2 วันก่อน"
         },
         "assign": {
-          "name": "Assign Users",
-          "one": "Map people to roles and properties.",
-          "long": "Bulk-assign roles to users, scope them to one or many properties, set effective dates for temporary access, and review who has what at a glance.",
-          "stat": "247 active users · 38 admins",
-          "meta": "3 pending invitations"
+          "name": "มอบหมายผู้ใช้",
+          "one": "จับคนเข้ากับบทบาทและกิจการ",
+          "long": "มอบหมายบทบาทให้ผู้ใช้ทีละหลายคน จำกัดขอบเขตให้กิจการเดียวหรือหลายกิจการ ตั้งวันที่มีผลสำหรับสิทธิ์ชั่วคราว และดูได้ทันทีว่าใครมีสิทธิ์อะไร",
+          "stat": "ผู้ใช้ที่ใช้งาน 247 · แอดมิน 38",
+          "meta": "คำเชิญค้างอยู่ 3 รายการ"
         },
         "period": {
-          "name": "Period",
-          "one": "Fiscal periods, close & reopen.",
-          "long": "Define fiscal months and quarters, freeze them at close, and reopen with a documented reason. Period status drives what every transaction screen will accept.",
-          "stat": "May 2026 · Open",
-          "meta": "next close · 31 May"
+          "name": "รอบบัญชี",
+          "one": "รอบบัญชี ปิดและเปิดใหม่",
+          "long": "กำหนดเดือนและไตรมาสทางบัญชี ล็อกเมื่อปิดรอบ และเปิดใหม่พร้อมบันทึกเหตุผล สถานะของรอบบัญชีกำหนดว่าหน้าจอทำรายการแต่ละหน้าจะรับข้อมูลได้แค่ไหน",
+          "stat": "พ.ค. 2026 · เปิด",
+          "meta": "ปิดรอบถัดไป · 31 พ.ค."
         },
         "workflows": {
-          "name": "Workflows",
-          "one": "Approval chains for every document type.",
-          "long": "Design who approves what, in which order, with conditions on amount, department, and vendor. Reroute, parallel-approve, escalate on SLA breach — all configurable.",
-          "stat": "18 workflows · 6 doc types",
-          "meta": "2 awaiting review"
+          "name": "ลำดับขั้นอนุมัติ",
+          "one": "สายอนุมัติสำหรับเอกสารทุกประเภท",
+          "long": "ออกแบบว่าใครอนุมัติอะไร ลำดับไหน พร้อมเงื่อนไขตามยอดเงิน แผนก และผู้ขาย เปลี่ยนเส้นทาง อนุมัติพร้อมกัน หรือส่งต่อเมื่อเกิน SLA — ตั้งค่าได้ทั้งหมด",
+          "stat": "18 ลำดับขั้น · 6 ประเภทเอกสาร",
+          "meta": "รอตรวจสอบ 2 รายการ"
         },
         "docs": {
-          "name": "Document Management",
-          "one": "Storage, retention and versioning.",
-          "long": "Where attachments live, how long they're kept, who can see them. Set retention by doc type, configure versioning, watermark PDFs and lock originals.",
-          "stat": "124,802 documents",
-          "meta": "38 GB · retention 7 years"
+          "name": "การจัดการเอกสาร",
+          "one": "การจัดเก็บ ระยะเก็บรักษา และเวอร์ชัน",
+          "long": "ไฟล์แนบเก็บที่ไหน เก็บนานแค่ไหน ใครเห็นได้บ้าง กำหนดระยะเก็บตามประเภทเอกสาร ตั้งค่าเวอร์ชัน ใส่ลายน้ำ PDF และล็อกไฟล์ต้นฉบับ",
+          "stat": "124,802 เอกสาร",
+          "meta": "38 GB · เก็บ 7 ปี"
         },
         "userActivity": {
-          "name": "User Activity",
-          "one": "Every action a person took.",
-          "long": "Full audit log per user — sign-ins, edits, approvals, exports, role changes. Filter by user, date range, action class. Export for SOX, PCI and internal audits.",
-          "stat": "8,412 events · today",
-          "meta": "7 sign-in anomalies flagged"
+          "name": "กิจกรรมผู้ใช้",
+          "one": "ทุกการกระทำของแต่ละคน",
+          "long": "บันทึกการตรวจสอบครบทุกคน — การเข้าสู่ระบบ การแก้ไข การอนุมัติ การส่งออก การเปลี่ยนบทบาท กรองตามผู้ใช้ ช่วงวันที่ และประเภทการกระทำ ส่งออกเพื่อการตรวจสอบตามมาตรฐาน SOX, PCI และการตรวจสอบภายใน",
+          "stat": "8,412 เหตุการณ์ · วันนี้",
+          "meta": "พบการเข้าสู่ระบบผิดปกติ 7 รายการ"
         },
         "monitor": {
-          "name": "Activity Monitor",
-          "one": "Live system load and job queues.",
-          "long": "Watch CPU, memory, request latency, background-job throughput in real time. Drill into any spike, replay the timeline, set alert thresholds per service.",
+          "name": "เฝ้าดูการทำงาน",
+          "one": "โหลดระบบและคิวงานแบบเรียลไทม์",
+          "long": "ดู CPU หน่วยความจำ ความหน่วงของคำขอ และปริมาณงานเบื้องหลังแบบเรียลไทม์ เจาะดูจุดที่พุ่งสูง ย้อนดูไทม์ไลน์ และตั้งเกณฑ์แจ้งเตือนของแต่ละบริการ",
           "stat": "CPU 34% · p95 218ms",
-          "meta": "12 jobs queued · 4 retrying"
+          "meta": "รอคิว 12 งาน · กำลังลองใหม่ 4"
         },
         "email": {
-          "name": "Email Config",
-          "one": "SMTP, senders and templates.",
-          "long": "Hook up your outbound mailserver, manage signing domains, configure DKIM/SPF, edit notification templates per locale. Test-send to any address before going live.",
+          "name": "ตั้งค่าอีเมล",
+          "one": "SMTP ผู้ส่ง และเทมเพลต",
+          "long": "เชื่อมเมลเซิร์ฟเวอร์ขาออก จัดการโดเมนสำหรับลงนาม ตั้งค่า DKIM/SPF แก้เทมเพลตแจ้งเตือนแยกตามภาษา ทดสอบส่งไปที่อยู่ใดก็ได้ก่อนใช้งานจริง",
           "stat": "mail.aureliabay.com · OK",
-          "meta": "4 templates · EN + TH"
+          "meta": "4 เทมเพลต · EN + TH"
         },
         "interface": {
           "name": "การเชื่อมต่อระบบภายนอก",
@@ -1098,40 +1098,40 @@
           "meta": "บัญชี · ขายหน้าร้าน · บริหารโรงแรม"
         },
         "notifyTemplate": {
-          "name": "Notification Templates",
-          "one": "Reusable messages for workflow events.",
-          "long": "Author the emails and in-app alerts Carmen sends on submit, approve, reject and SLA breach. Edit subject and body per event, drop in tokens, reuse the same template across every workflow.",
-          "stat": "12 templates · 5 events",
-          "meta": "EN + TH · edited 3d ago"
+          "name": "เทมเพลตการแจ้งเตือน",
+          "one": "ข้อความสำเร็จรูปสำหรับเหตุการณ์ในลำดับขั้นอนุมัติ",
+          "long": "เขียนอีเมลและการแจ้งเตือนในแอปที่ Carmen ส่งตอนส่งเรื่อง อนุมัติ ปฏิเสธ และเมื่อเกิน SLA แก้หัวเรื่องและเนื้อหาแยกตามเหตุการณ์ แทรกตัวแปร และใช้เทมเพลตเดียวกันซ้ำได้ทุกลำดับขั้น",
+          "stat": "12 เทมเพลต · 5 เหตุการณ์",
+          "meta": "EN + TH · แก้ไข 3 วันก่อน"
         },
         "code": {
-          "name": "Running Code",
-          "one": "Scheduled scripts and webhooks.",
-          "long": "Run JavaScript on a cron — nightly data syncs, monthly snapshots, on-event webhooks. Tail logs, replay failures, version-control every script in-place.",
-          "stat": "23 scripts · 11 active",
-          "meta": "last run · 2 min ago"
+          "name": "โค้ดที่รันอัตโนมัติ",
+          "one": "สคริปต์ตามเวลาและ webhook",
+          "long": "รัน JavaScript ตามตารางเวลา (cron) — ซิงก์ข้อมูลรายคืน สแนปช็อตรายเดือน และ webhook เมื่อมีเหตุการณ์ ดูบันทึกแบบเรียลไทม์ รันซ้ำเมื่อล้มเหลว และเก็บเวอร์ชันของทุกสคริปต์",
+          "stat": "23 สคริปต์ · ใช้งาน 11",
+          "meta": "รันล่าสุด · 2 นาทีก่อน"
         },
         "query": {
-          "name": "Query Dataset",
-          "one": "SQL workbench over every Carmen table.",
-          "long": "Browse the catalog, run ad-hoc SQL, save queries, share with teammates. Sandboxed read-only by default — promote a query to a saved dataset when it's right.",
-          "stat": "184 saved queries",
-          "meta": "avg. exec · 1.2s"
+          "name": "สอบถามชุดข้อมูล",
+          "one": "เครื่องมือเขียน SQL บนทุกตารางของ Carmen",
+          "long": "เรียกดูรายการตาราง เขียน SQL เฉพาะกิจ บันทึกคำสั่ง และแชร์กับทีม เริ่มต้นเป็นแบบอ่านอย่างเดียวในแซนด์บ็อกซ์ — เลื่อนคำสั่งขึ้นเป็นชุดข้อมูลที่บันทึกไว้เมื่อพร้อม",
+          "stat": "184 คำสั่งที่บันทึกไว้",
+          "meta": "เวลาเฉลี่ย · 1.2 วิ"
         },
         "dataset": {
-          "name": "Dashboard Dataset",
-          "one": "Curated datasets that power dashboards.",
-          "long": "Promote a query into a named dataset, schedule refresh, document its columns. Reports and dashboards point here — change a dataset, every chart updates.",
-          "stat": "42 datasets · 6 stale",
-          "meta": "next refresh · 17:00"
+          "name": "ชุดข้อมูลแดชบอร์ด",
+          "one": "ชุดข้อมูลที่คัดมาเพื่อป้อนแดชบอร์ด",
+          "long": "เลื่อนคำสั่งขึ้นเป็นชุดข้อมูลที่ตั้งชื่อ ตั้งเวลารีเฟรช และอธิบายคอลัมน์ รายงานและแดชบอร์ดอ้างอิงจากที่นี่ — แก้ชุดข้อมูลครั้งเดียว กราฟทุกอันอัปเดตตาม",
+          "stat": "42 ชุดข้อมูล · เก่า 6",
+          "meta": "รีเฟรชถัดไป · 17:00"
         }
       },
       "footer": {
-        "kicker": "Looking for something else?",
-        "title": "Read the admin handbook, or jump into a sandbox to try changes safely first.",
-        "sub": "Every destructive action requires confirmation. Every config change is versioned and reversible.",
-        "handbook": "Open handbook",
-        "sandbox": "Enter sandbox"
+        "kicker": "กำลังหาอย่างอื่นอยู่?",
+        "title": "อ่านคู่มือผู้ดูแลระบบ หรือเข้าแซนด์บ็อกซ์เพื่อลองแก้แบบปลอดภัยก่อน",
+        "sub": "ทุกการกระทำที่เป็นอันตรายต้องยืนยัน ทุกการเปลี่ยนการตั้งค่าจะเก็บเวอร์ชันและย้อนกลับได้",
+        "handbook": "เปิดคู่มือ",
+        "sandbox": "เข้าแซนด์บ็อกซ์"
       }
     },
     "role": {
