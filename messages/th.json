@@ -176,6 +176,7 @@
       "printFormInv": "INV - ใบแจ้งหนี้",
       "printFormLoading": "กำลังโหลดแบบฟอร์ม…",
       "printFormUnknown": "⚠ ไม่พบเทมเพลต ({id})",
+      "printFormUnavailable": "แบบฟอร์มที่บันทึกไว้ ({id})",
       "printFormLoadError": "โหลดรายการแบบฟอร์มรายงานไม่สำเร็จ"
     }
   },

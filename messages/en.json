@@ -176,6 +176,7 @@
       "printFormInv": "INV - Invoice",
       "printFormLoading": "Loading forms…",
       "printFormUnknown": "⚠ Unknown template ({id})",
+      "printFormUnavailable": "Saved form ({id})",
       "printFormLoadError": "Could not load report forms."
     }
   },

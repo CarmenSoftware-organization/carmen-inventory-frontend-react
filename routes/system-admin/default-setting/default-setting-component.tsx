@@ -36,28 +36,44 @@ import {
   type ReportFormOption,
 } from "@/hooks/use-report-form-templates";
 
+/** input ของ {@link buildPrintFormOptions} — รวมเป็น object เดียวกันจำนวน field ที่มาก */
+export interface BuildPrintFormOptionsParams {
+  /** ค่าปัจจุบันของ config item (template id หรือ "") */
+  current: string;
+  /** options ของ report_group นั้น (undefined = ยังไม่มีข้อมูล) */
+  list: ReportFormOption[] | undefined;
+  /** hook ยังโหลดอยู่ */
+  isLoading: boolean;
+  /** hook ดึงข้อมูลไม่สำเร็จ (แยกจาก "template ถูกลบ/ปิดใช้งาน") */
+  isError: boolean;
+  /** ป้ายสำหรับค่าที่หาไม่เจอในรายการ ทั้งที่โหลดสำเร็จแล้ว (unknown template จริง) */
+  unknownLabel: string;
+  /** ป้ายระหว่างโหลด */
+  loadingLabel: string;
+  /** ป้ายเมื่อโหลดล้มเหลว — ค่าที่เก็บไว้ยังคงอยู่ แต่ยังสรุปไม่ได้ว่า template หายไปจริงหรือไม่ */
+  unavailableLabel: string;
+}
+
 /**
  * รวม options ของ dropdown แบบฟอร์มการพิมพ์
  *
- * ถ้าค่าที่เก็บไว้ไม่อยู่ใน list (template ถูกลบ/ปิดใช้งาน) จะเติม option
- * สังเคราะห์ไว้หัวรายการ เพื่อไม่ให้ค่าหายตอน Save และให้ admin เห็นว่ามีปัญหา
- *
- * @param current - ค่าปัจจุบันของ config item (template id หรือ "")
- * @param list - options ของ report_group นั้น (undefined = ยังไม่มีข้อมูล)
- * @param isLoading - hook ยังโหลดอยู่
- * @param unknownLabel - ป้ายสำหรับค่าที่หาไม่เจอ
- * @param loadingLabel - ป้ายระหว่างโหลด
+ * ถ้าค่าที่เก็บไว้ไม่อยู่ใน list จะเติม option สังเคราะห์ไว้หัวรายการ เพื่อไม่ให้ค่าหายตอน
+ * Save — ป้ายของ option สังเคราะห์นี้ขึ้นกับสาเหตุ: กำลังโหลด, โหลดไม่สำเร็จ (ยังสรุปไม่ได้ว่า
+ * template หายไปจริง), หรือโหลดสำเร็จแล้วแต่ไม่พบค่านี้ในรายการ (unknown template จริง)
  */
-export function buildPrintFormOptions(
-  current: string,
-  list: ReportFormOption[] | undefined,
-  isLoading: boolean,
-  unknownLabel: string,
-  loadingLabel: string,
-): ReportFormOption[] {
+export function buildPrintFormOptions({
+  current,
+  list,
+  isLoading,
+  isError,
+  unknownLabel,
+  loadingLabel,
+  unavailableLabel,
+}: BuildPrintFormOptionsParams): ReportFormOption[] {
   const base = list ?? [];
   if (!current || base.some((o) => o.value === current)) return base;
-  return [{ value: current, label: isLoading ? loadingLabel : unknownLabel }, ...base];
+  const label = isLoading ? loadingLabel : isError ? unavailableLabel : unknownLabel;
+  return [{ value: current, label }, ...base];
 }
 
 /**
@@ -206,7 +222,7 @@ export default function DefaultSettingComponent() {
               description={t(section.descKey)}
               action={
                 section.id === "printForm" && formTemplates.isError ? (
-                  <p className="text-destructive text-xs">
+                  <p className="text-destructive text-xs" role="alert">
                     {t("config.printFormLoadError")}
                   </p>
                 ) : undefined
@@ -215,13 +231,19 @@ export default function DefaultSettingComponent() {
               {section.entries.map((entry) => {
                 const group = entry.optionsGroup;
                 const options = group
-                  ? buildPrintFormOptions(
-                      entry.item.value,
-                      formTemplates.data?.get(group),
-                      formTemplates.isLoading,
-                      t("config.printFormUnknown", { id: entry.item.value }),
-                      t("config.printFormLoading"),
-                    )
+                  ? buildPrintFormOptions({
+                      current: entry.item.value,
+                      list: formTemplates.data?.get(group),
+                      isLoading: formTemplates.isLoading,
+                      isError: formTemplates.isError,
+                      unknownLabel: t("config.printFormUnknown", {
+                        id: entry.item.value,
+                      }),
+                      loadingLabel: t("config.printFormLoading"),
+                      unavailableLabel: t("config.printFormUnavailable", {
+                        id: entry.item.value,
+                      }),
+                    })
                   : entry.options
                     ? resolveConfigOptions(
                         entry.options,
