@@ -3866,9 +3866,9 @@
       "refresh": "รีเฟรช",
       "refreshNow": "รีเฟรชเดี๋ยวนี้",
       "print": "พิมพ์",
-      "printDashboard": "พิมพ์ dashboard",
+      "printDashboard": "พิมพ์แดชบอร์ด",
       "copyUrl": "คัดลอก URL",
-      "copyUrlAria": "คัดลอก URL ของ dashboard",
+      "copyUrlAria": "คัดลอก URL ของแดชบอร์ด",
       "urlCopied": "คัดลอก URL แล้ว",
       "copyUrlFailed": "คัดลอก URL ไม่สำเร็จ",
       "quickRanges": "ช่วงเวลาด่วน",
@@ -3879,7 +3879,7 @@
     },
     "header": {
       "description": "รายละเอียด",
-      "widgetMenu": "เมนู widget",
+      "widgetMenu": "เมนูวิดเจ็ต",
       "commentsCount": "{count} ความเห็น",
       "view": "ดู",
       "refresh": "รีเฟรช",
@@ -3893,14 +3893,14 @@
       "dataStale": "ข้อมูล {time} — ควรรีเฟรช"
     },
     "add": {
-      "addWidget": "เพิ่ม widget",
-      "searchWidgets": "ค้นหา widget...",
-      "noWidgets": "ไม่พบ widget"
+      "addWidget": "เพิ่มวิดเจ็ต",
+      "searchWidgets": "ค้นหาวิดเจ็ต...",
+      "noWidgets": "ไม่พบวิดเจ็ต"
     },
     "empty": {
-      "title": "Dashboard ว่าง",
-      "description": "ยังไม่มี widget ใน dashboard นี้ — เริ่มเพิ่ม widget ตัวแรกได้เลย",
-      "addStockValueWidget": "เพิ่ม widget Stock Value",
+      "title": "แดชบอร์ดว่าง",
+      "description": "ยังไม่มีวิดเจ็ตในแดชบอร์ดนี้ — เริ่มเพิ่มวิดเจ็ตตัวแรกได้เลย",
+      "addStockValueWidget": "เพิ่มวิดเจ็ตมูลค่าสต็อก",
       "enterEditMode": "เข้าโหมดแก้ไข"
     },
     "states": {
@@ -3908,32 +3908,32 @@
       "failedToLoad": "โหลดข้อมูลไม่สำเร็จ"
     },
     "grid": {
-      "resize": "ปรับขนาด widget",
+      "resize": "ปรับขนาดวิดเจ็ต",
       "dragAria": "ลาก {name}",
       "removeAria": "ลบ {name}",
-      "removeTitle": "ลบ widget?",
-      "removeDescription": "ลบ <strong>{name}</strong> ออกจาก dashboard นี้ — config ของ widget นี้จะหายไปด้วย"
+      "removeTitle": "ลบวิดเจ็ต?",
+      "removeDescription": "ลบ <strong>{name}</strong> ออกจากแดชบอร์ดนี้ — การตั้งค่าของวิดเจ็ตนี้จะหายไปด้วย"
     },
     "dashboardManager": {
-      "navAria": "Dashboards",
-      "sharedTitle": "ใช้ร่วมกัน (Business Unit)",
+      "navAria": "แดชบอร์ด",
+      "sharedTitle": "ใช้ร่วมกัน (หน่วยธุรกิจ)",
       "personalTitle": "ส่วนตัว",
-      "createAria": "สร้าง dashboard ใหม่",
-      "manageAria": "จัดการ dashboard",
+      "createAria": "สร้างแดชบอร์ดใหม่",
+      "manageAria": "จัดการแดชบอร์ด",
       "renameCurrent": "เปลี่ยนชื่อปัจจุบัน",
       "exportCurrent": "ส่งออกปัจจุบัน",
-      "importDashboard": "นำเข้า dashboard...",
+      "importDashboard": "นำเข้าแดชบอร์ด...",
       "deleteCurrent": "ลบปัจจุบัน",
-      "createTitle": "สร้าง dashboard ใหม่",
-      "createDescription": "ตั้งชื่อ + เลือกสี accent ของ tab",
-      "renameTitle": "เปลี่ยนชื่อ dashboard",
-      "renameDescription": "เปลี่ยนชื่อ + สี accent ของ dashboard ปัจจุบัน",
-      "deleteTitle": "ลบ dashboard?",
-      "deleteDescription": "ลบ <strong>{name}</strong> และ widget ทั้งหมด — ทำซ้ำไม่ได้",
-      "toastCreated": "สร้าง dashboard \"{name}\" แล้ว",
-      "toastRenamed": "เปลี่ยนชื่อ dashboard แล้ว",
-      "toastDeleted": "ลบ dashboard \"{name}\" แล้ว",
-      "toastExported": "ส่งออก dashboard แล้ว",
+      "createTitle": "สร้างแดชบอร์ดใหม่",
+      "createDescription": "ตั้งชื่อ + เลือกสีของแท็บ",
+      "renameTitle": "เปลี่ยนชื่อแดชบอร์ด",
+      "renameDescription": "เปลี่ยนชื่อ + สีของแดชบอร์ดปัจจุบัน",
+      "deleteTitle": "ลบแดชบอร์ด?",
+      "deleteDescription": "ลบ <strong>{name}</strong> และวิดเจ็ตทั้งหมด — ทำซ้ำไม่ได้",
+      "toastCreated": "สร้างแดชบอร์ด \"{name}\" แล้ว",
+      "toastRenamed": "เปลี่ยนชื่อแดชบอร์ดแล้ว",
+      "toastDeleted": "ลบแดชบอร์ด \"{name}\" แล้ว",
+      "toastExported": "ส่งออกแดชบอร์ดแล้ว",
       "toastImported": "นำเข้า \"{name}\" แล้ว",
       "toastInvalidJson": "JSON ไม่ถูกต้อง",
       "createFailed": "สร้างไม่สำเร็จ",
@@ -3943,22 +3943,22 @@
       "importFailed": "นำเข้าไม่สำเร็จ"
     },
     "workspace": {
-      "title": "Workspaces",
+      "title": "พื้นที่ทำงาน",
       "savedViews": "มุมมองที่บันทึก",
-      "empty": "ยังไม่มี workspace ที่บันทึก",
+      "empty": "ยังไม่มีพื้นที่ทำงานที่บันทึก",
       "saveCurrent": "บันทึกมุมมองปัจจุบัน...",
-      "saveTitle": "บันทึก workspace",
-      "saveDescription": "เก็บ dashboard + range + filter + refresh ปัจจุบันเป็น view ที่บันทึกได้",
-      "name": "ชื่อ workspace",
+      "saveTitle": "บันทึกพื้นที่ทำงาน",
+      "saveDescription": "เก็บแดชบอร์ด + ช่วงเวลา + ตัวกรอง + การรีเฟรช ปัจจุบันเป็นมุมมองที่บันทึกได้",
+      "name": "ชื่อพื้นที่ทำงาน",
       "namePlaceholder": "เช่น เช็คงานช่วงเช้า",
       "removeAria": "ลบ {name}",
-      "toastSaved": "บันทึก workspace \"{name}\" แล้ว",
+      "toastSaved": "บันทึกพื้นที่ทำงาน \"{name}\" แล้ว",
       "toastLoaded": "โหลด \"{name}\" แล้ว",
       "toastRemoved": "ลบ \"{name}\" แล้ว"
     },
     "nameDialog": {
-      "dashboardName": "ชื่อ dashboard",
-      "accentColor": "สี accent",
+      "dashboardName": "ชื่อแดชบอร์ด",
+      "accentColor": "สีเน้น",
       "default": "ค่าเริ่มต้น"
     },
     "config": {
@@ -3998,22 +3998,22 @@
       }
     },
     "links": {
-      "empty": "ยังไม่มีลิงก์ คลิก + เพื่อเพิ่มลิงก์ drill-down",
+      "empty": "ยังไม่มีลิงก์ คลิก + เพื่อเพิ่มลิงก์เจาะลึก",
       "labelPlaceholder": "ป้ายกำกับ",
       "labelAria": "ป้ายกำกับลิงก์",
       "removeAria": "ลบลิงก์",
       "urlPlaceholder": "/inventory?loc={var}",
-      "urlAria": "template URL ของลิงก์",
+      "urlAria": "URL แม่แบบของลิงก์",
       "addLink": "เพิ่มลิงก์"
     },
     "comments": {
       "titleWith": "ความเห็น: {name}",
-      "empty": "ยังไม่มี comment สำหรับ widget นี้",
+      "empty": "ยังไม่มีความคิดเห็นสำหรับวิดเจ็ตนี้",
       "countOne": "1 ความเห็น",
       "countMany": "{count} ความเห็น",
-      "beFirst": "แสดงความเห็นเป็นคนแรก — แสดงให้ทีมเห็นว่าเจออะไรใน widget นี้",
+      "beFirst": "แสดงความเห็นเป็นคนแรก — บอกทีมว่าเจออะไรในวิดเจ็ตนี้",
       "deleteAria": "ลบความเห็น",
-      "placeholder": "พิมพ์ comment...",
+      "placeholder": "พิมพ์ความคิดเห็น...",
       "sendHint": "{count}/280 · ⌘ + Enter เพื่อส่ง",
       "send": "ส่ง"
     },
@@ -4039,12 +4039,12 @@
       "noCache": "ไม่มี cache"
     },
     "importDialog": {
-      "title": "นำเข้า dashboard",
-      "description": "วาง JSON ที่ export มาก่อนหน้า — จะสร้าง dashboard ใหม่จากเนื้อหา",
+      "title": "นำเข้าแดชบอร์ด",
+      "description": "วาง JSON ที่ส่งออกไว้ก่อนหน้า — จะสร้างแดชบอร์ดใหม่จากเนื้อหา",
       "import": "นำเข้า"
     },
     "fullscreen": {
-      "view": "{name} fullscreen view"
+      "view": "มุมมองเต็มจอ {name}"
     },
     "form": {
       "product": "สินค้า",
@@ -4072,7 +4072,7 @@
     "goal": {
       "remaining": "คงเหลือ",
       "daysToGoal": "วันถึงเป้า",
-      "deadline": "Deadline",
+      "deadline": "กำหนดส่ง",
       "passed": "เลยกำหนด",
       "onPace": "ทันกำหนด",
       "buffer": "เหลือ {days} วัน",
@@ -4080,7 +4080,7 @@
       "behindShort": "ขาด {days} วัน"
     },
     "errorBoundary": {
-      "crashed": "Widget เกิดข้อผิดพลาด"
+      "crashed": "วิดเจ็ตเกิดข้อผิดพลาด"
     },
     "stat": {
       "vsLastPeriod": "เทียบช่วงก่อนหน้า"
