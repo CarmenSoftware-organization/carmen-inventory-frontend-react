@@ -3571,7 +3571,7 @@
       "chapter3Bullet2Title": "Status: ok · partial · failed",
       "chapter3Bullet2Desc": "การรันที่ fail จะถูก flag — รู้ปัญหาก่อนที่ผู้รับจะถาม",
       "chapter3Bullet3Title": "Re-run จากประวัติ",
-      "chapter3Bullet3Desc": "คลิก run เดิมเพื่อรันใหม่ด้วย parameter เดียวกัน หรือ download artifact",
+      "chapter3Bullet3Desc": "คลิกการรันครั้งก่อนเพื่อรันใหม่ด้วยค่าเดิม หรือดาวน์โหลดไฟล์ผลลัพธ์",
       "chapter3Cta": "เปิดประวัติ",
       "chapter3Shortcut": "shortcut · ⌘3",
       "footerKicker": "ต้องการสิ่งที่ custom?",

@@ -2733,7 +2733,7 @@
       "addFirstAttribute": "Add first attribute",
       "addFirstLocationHint": "Assign at least one warehouse or location so this product can be received",
       "addFirstConversionHint": "Describe how suppliers ship this product",
-      "addFirstAttributeHint": "Add ad-hoc metadata like brand, shelf life, or dimensions for reporting",
+      "addFirstAttributeHint": "Add extra details like brand, shelf life, or dimensions for reporting",
       "sectionCodesCost": "Codes & cost",
       "skuHint": "Letters, numbers, hyphens. Must be unique.",
       "priceHint": "Used until first PO establishes actual",
@@ -2758,7 +2758,7 @@
       "fillRequiredBefore": "Fill in the required fields to save",
       "createProduct": "Create product",
       "addAttribute": "Add attribute",
-      "addFirstAttributeHintRich": "Add ad-hoc metadata like <code>Hull Type</code> or <code>Max Depth</code> for reporting and filters",
+      "addFirstAttributeHintRich": "Add extra details like <code>Hull Type</code> or <code>Max Depth</code> for reporting and filters",
       "statusToggleDesc": "Active products are available across the system"
     }
   },
@@ -3582,7 +3582,7 @@
       "chapter3Bullet2Title": "Status: ok · partial · failed",
       "chapter3Bullet2Desc": "Failed runs are flagged — find issues before recipients do.",
       "chapter3Bullet3Title": "Re-run from history",
-      "chapter3Bullet3Desc": "Click a past run to re-execute with the same parameters or download the artifact.",
+      "chapter3Bullet3Desc": "Click a past run to run it again with the same settings, or download the result file.",
       "chapter3Cta": "Open the history",
       "chapter3Shortcut": "shortcut · ⌘3",
       "footerKicker": "Need something custom?",
