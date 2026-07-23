@@ -18,7 +18,10 @@ import {
   SettingSection,
   SettingSectionSkeleton,
 } from "@/components/ui/setting-section";
-import { ConfigField } from "../company-profile/company-profile-ui";
+import {
+  ConfigField,
+  CONFIG_ENUM_EMPTY,
+} from "../company-profile/company-profile-ui";
 import {
   createBusinessSettingSchema,
   toFormValues,
@@ -31,6 +34,65 @@ import {
   groupConfigForRender,
   resolveConfigOptions,
 } from "../company-profile/company-profile-config-registry";
+import {
+  useReportFormTemplates,
+  type ReportFormOption,
+} from "@/hooks/use-report-form-templates";
+
+/** input ของ {@link buildPrintFormOptions} — รวมเป็น object เดียวกันจำนวน field ที่มาก */
+export interface BuildPrintFormOptionsParams {
+  /** ค่าปัจจุบันของ config item (template id หรือ "") */
+  current: string;
+  /** options ของ report_group นั้น (undefined = ยังไม่มีข้อมูล) */
+  list: ReportFormOption[] | undefined;
+  /** hook ยังโหลดอยู่ */
+  isLoading: boolean;
+  /** hook ดึงข้อมูลไม่สำเร็จ (แยกจาก "template ถูกลบ/ปิดใช้งาน") */
+  isError: boolean;
+  /** ป้ายสำหรับค่าที่หาไม่เจอในรายการ ทั้งที่โหลดสำเร็จแล้ว (unknown template จริง) */
+  unknownLabel: string;
+  /** ป้ายระหว่างโหลด */
+  loadingLabel: string;
+  /** ป้ายเมื่อโหลดล้มเหลว — ค่าที่เก็บไว้ยังคงอยู่ แต่ยังสรุปไม่ได้ว่า template หายไปจริงหรือไม่ */
+  unavailableLabel: string;
+  /** ป้ายของ option ที่แทนค่าว่าง ("" = ใช้ค่าเริ่มต้นของระบบ) */
+  systemDefaultLabel: string;
+}
+
+/**
+ * รวม options ของ dropdown แบบฟอร์มการพิมพ์
+ *
+ * เติม option แทน "" (ใช้ค่าเริ่มต้นของระบบ — {@link CONFIG_ENUM_EMPTY}) ไว้หัวรายการเสมอ
+ * ไม่ว่าจะกำลังโหลด, โหลดพลาด, หรือโหลดสำเร็จแล้ว เพื่อไม่ให้แถวเป็น Select ว่างที่กดอะไรไม่ได้
+ * และเพื่อให้ผู้ดูแลย้อนกลับไปใช้ค่าเริ่มต้นของระบบได้เสมอ
+ *
+ * ถ้าค่าที่เก็บไว้เป็นค่าที่ไม่ใช่ "" และไม่อยู่ใน list จะเติม option สังเคราะห์อีกตัวต่อจาก
+ * option ค่าเริ่มต้น เพื่อไม่ให้ค่าหายตอน Save — ป้ายของ option สังเคราะห์นี้ขึ้นกับสาเหตุ:
+ * กำลังโหลด, โหลดไม่สำเร็จ (ยังสรุปไม่ได้ว่า template หายไปจริง), หรือโหลดสำเร็จแล้วแต่ไม่พบ
+ * ค่านี้ในรายการ (unknown template จริง) — ค่า "" เองไม่มีวันเข้าเงื่อนไขนี้ เพราะ resolve ไปที่
+ * option ค่าเริ่มต้นที่เติมไว้แล้วเสมอ
+ */
+export function buildPrintFormOptions({
+  current,
+  list,
+  isLoading,
+  isError,
+  unknownLabel,
+  loadingLabel,
+  unavailableLabel,
+  systemDefaultLabel,
+}: BuildPrintFormOptionsParams): ReportFormOption[] {
+  const base = list ?? [];
+  const systemDefault: ReportFormOption = {
+    value: CONFIG_ENUM_EMPTY,
+    label: systemDefaultLabel,
+  };
+  if (!current || base.some((o) => o.value === current)) {
+    return [systemDefault, ...base];
+  }
+  const label = isLoading ? loadingLabel : isError ? unavailableLabel : unknownLabel;
+  return [systemDefault, { value: current, label }, ...base];
+}
 
 /**
  * หน้า Default Setting (system-admin) — แสดง/แก้ไข operational config (PR/SI/PO)
@@ -51,6 +113,7 @@ export default function DefaultSettingComponent() {
   const buId = defaultBu?.id;
   const { data, isLoading, isError, refetch } = useBusinessUnit(buId);
   const update = useUpdateBusinessUnit(buId);
+  const formTemplates = useReportFormTemplates();
   const [editing, setEditing] = useState(false);
 
   const form = useForm<BusinessSettingFormValues>({
@@ -175,15 +238,38 @@ export default function DefaultSettingComponent() {
               first={i === 0}
               title={t(section.titleKey)}
               description={t(section.descKey)}
+              action={
+                section.id === "printForm" && formTemplates.isError ? (
+                  <p className="text-destructive text-xs" role="alert">
+                    {t("config.printFormLoadError")}
+                  </p>
+                ) : undefined
+              }
             >
               {section.entries.map((entry) => {
-                const options = entry.options
-                  ? resolveConfigOptions(
-                      entry.options,
-                      data.calculation_method,
-                      entry.item.value,
-                    ).map((o) => ({ value: o.value, label: t(o.labelKey) }))
-                  : undefined;
+                const group = entry.optionsGroup;
+                const options = group
+                  ? buildPrintFormOptions({
+                      current: entry.item.value,
+                      list: formTemplates.data?.get(group),
+                      isLoading: formTemplates.isLoading,
+                      isError: formTemplates.isError,
+                      unknownLabel: t("config.printFormUnknown", {
+                        id: entry.item.value,
+                      }),
+                      loadingLabel: t("config.printFormLoading"),
+                      unavailableLabel: t("config.printFormUnavailable", {
+                        id: entry.item.value,
+                      }),
+                      systemDefaultLabel: t("config.printFormSystemDefault"),
+                    })
+                  : entry.options
+                    ? resolveConfigOptions(
+                        entry.options,
+                        data.calculation_method,
+                        entry.item.value,
+                      ).map((o) => ({ value: o.value, label: t(o.labelKey) }))
+                    : undefined;
                 return (
                   <ConfigField
                     key={entry.item.key}
@@ -195,6 +281,7 @@ export default function DefaultSettingComponent() {
                     yesLabel={t("yes")}
                     noLabel={t("no")}
                     options={options}
+                    disabled={group !== undefined && formTemplates.isLoading}
                   />
                 );
               })}

@@ -1,3 +1,5 @@
+import { printFormConfigKey } from "@/lib/print-form-config";
+import type { PrintDocumentType } from "@/lib/print-document";
 import type { BusinessUnitConfigItem } from "@/types/business-unit";
 
 /** option ของ enum config (datatype "enum") */
@@ -27,6 +29,11 @@ export interface SeededConfigItem {
   labelKey: string;
   /** สำหรับ datatype "enum" — รายการ option ตามลำดับที่แสดง */
   options?: ConfigOption[];
+  /**
+   * สำหรับ enum ที่ options มาจาก report-template API (ไม่ใช่ static `options`)
+   * ค่าคือ `report_group` ที่ใช้กรอง เช่น "PR" — ใช้พร้อม `options` ไม่ได้
+   */
+  optionsGroup?: string;
 }
 
 /** section ที่จัดกลุ่ม seeded config items */
@@ -99,6 +106,32 @@ export const CONFIG_SECTIONS: readonly ConfigSection[] = [
       },
     ],
   },
+  {
+    id: "printForm",
+    titleKey: "sections.printForm",
+    descKey: "sections.printFormDesc",
+    items: (
+      [
+        ["PR", "PR - Purchase Request", "config.printFormPr"],
+        ["PO", "PO - Purchase Order", "config.printFormPo"],
+        ["GRN", "GRN - Good Received Note", "config.printFormGrn"],
+        ["SR", "SR - Store Requisition", "config.printFormSr"],
+        ["CN", "CN - Credit Note", "config.printFormCn"],
+        ["IA", "IA - Inventory Adjustment", "config.printFormIa"],
+        ["PC", "PC - Physical Count", "config.printFormPc"],
+        ["SC", "SC - Spot Check", "config.printFormSc"],
+        ["RFQ", "RFQ - Request For Quotation", "config.printFormRfq"],
+        ["INV", "INV - Invoice", "config.printFormInv"],
+      ] as [PrintDocumentType, string, string][]
+    ).map(([type, label, labelKey]) => ({
+      key: printFormConfigKey(type),
+      datatype: "enum",
+      defaultValue: "",
+      label,
+      labelKey,
+      optionsGroup: type,
+    })),
+  },
 ];
 
 /** seeded items ทั้งหมด flatten จากทุก section */
@@ -119,6 +152,8 @@ export interface ConfigSectionEntry {
   labelKey: string;
   /** สำหรับ enum — options จาก registry (undefined = ไม่ใช่ enum) */
   options?: ConfigOption[];
+  /** สำหรับ enum ที่ options มาจาก API — report_group ที่ใช้กรอง */
+  optionsGroup?: string;
 }
 
 /** entry ของ config ที่ไม่อยู่ใน registry section (backend-only) */
@@ -162,7 +197,12 @@ export function groupConfigForRender(
     for (const seeded of section.items) {
       const found = indexed.find((e) => e.item.key === seeded.key);
       if (found) {
-        entries.push({ ...found, labelKey: seeded.labelKey, options: seeded.options });
+        entries.push({
+          ...found,
+          labelKey: seeded.labelKey,
+          options: seeded.options,
+          optionsGroup: seeded.optionsGroup,
+        });
       }
     }
     return {

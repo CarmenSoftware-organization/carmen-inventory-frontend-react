@@ -151,7 +151,9 @@
       "si": "SI",
       "siDesc": "Stock In settings for this business unit.",
       "po": "PO",
-      "poDesc": "Purchase Order settings for this business unit."
+      "poDesc": "Purchase Order settings for this business unit.",
+      "printForm": "Print Forms",
+      "printFormDesc": "Report form used when printing each document type."
     },
     "config": {
       "prAllowDuplicateProduct": "Allow selecting duplicate products",
@@ -161,7 +163,22 @@
         "lastReceiving": "Last receiving",
         "lastCost": "Last cost"
       },
-      "poGroupByPrComment": "Group by PR comment"
+      "poGroupByPrComment": "Group by PR comment",
+      "printFormPr": "PR - Purchase Request",
+      "printFormPo": "PO - Purchase Order",
+      "printFormGrn": "GRN - Good Received Note",
+      "printFormSr": "SR - Store Requisition",
+      "printFormCn": "CN - Credit Note",
+      "printFormIa": "IA - Inventory Adjustment",
+      "printFormPc": "PC - Physical Count",
+      "printFormSc": "SC - Spot Check",
+      "printFormRfq": "RFQ - Request For Quotation",
+      "printFormInv": "INV - Invoice",
+      "printFormLoading": "Loading forms…",
+      "printFormUnknown": "⚠ Unknown template ({id})",
+      "printFormUnavailable": "Saved form ({id})",
+      "printFormLoadError": "Could not load report forms.",
+      "printFormSystemDefault": "Use the system default"
     }
   },
   "dashboardWidget": {
