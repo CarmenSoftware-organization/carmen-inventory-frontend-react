@@ -177,7 +177,8 @@
       "printFormLoading": "Loading forms…",
       "printFormUnknown": "⚠ Unknown template ({id})",
       "printFormUnavailable": "Saved form ({id})",
-      "printFormLoadError": "Could not load report forms."
+      "printFormLoadError": "Could not load report forms.",
+      "printFormSystemDefault": "Use the system default"
     }
   },
   "dashboardWidget": {

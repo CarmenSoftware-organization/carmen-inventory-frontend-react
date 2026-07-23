@@ -18,7 +18,10 @@ import {
   SettingSection,
   SettingSectionSkeleton,
 } from "@/components/ui/setting-section";
-import { ConfigField } from "../company-profile/company-profile-ui";
+import {
+  ConfigField,
+  CONFIG_ENUM_EMPTY,
+} from "../company-profile/company-profile-ui";
 import {
   createBusinessSettingSchema,
   toFormValues,
@@ -52,14 +55,22 @@ export interface BuildPrintFormOptionsParams {
   loadingLabel: string;
   /** ป้ายเมื่อโหลดล้มเหลว — ค่าที่เก็บไว้ยังคงอยู่ แต่ยังสรุปไม่ได้ว่า template หายไปจริงหรือไม่ */
   unavailableLabel: string;
+  /** ป้ายของ option ที่แทนค่าว่าง ("" = ใช้ค่าเริ่มต้นของระบบ) */
+  systemDefaultLabel: string;
 }
 
 /**
  * รวม options ของ dropdown แบบฟอร์มการพิมพ์
  *
- * ถ้าค่าที่เก็บไว้ไม่อยู่ใน list จะเติม option สังเคราะห์ไว้หัวรายการ เพื่อไม่ให้ค่าหายตอน
- * Save — ป้ายของ option สังเคราะห์นี้ขึ้นกับสาเหตุ: กำลังโหลด, โหลดไม่สำเร็จ (ยังสรุปไม่ได้ว่า
- * template หายไปจริง), หรือโหลดสำเร็จแล้วแต่ไม่พบค่านี้ในรายการ (unknown template จริง)
+ * เติม option แทน "" (ใช้ค่าเริ่มต้นของระบบ — {@link CONFIG_ENUM_EMPTY}) ไว้หัวรายการเสมอ
+ * ไม่ว่าจะกำลังโหลด, โหลดพลาด, หรือโหลดสำเร็จแล้ว เพื่อไม่ให้แถวเป็น Select ว่างที่กดอะไรไม่ได้
+ * และเพื่อให้ผู้ดูแลย้อนกลับไปใช้ค่าเริ่มต้นของระบบได้เสมอ
+ *
+ * ถ้าค่าที่เก็บไว้เป็นค่าที่ไม่ใช่ "" และไม่อยู่ใน list จะเติม option สังเคราะห์อีกตัวต่อจาก
+ * option ค่าเริ่มต้น เพื่อไม่ให้ค่าหายตอน Save — ป้ายของ option สังเคราะห์นี้ขึ้นกับสาเหตุ:
+ * กำลังโหลด, โหลดไม่สำเร็จ (ยังสรุปไม่ได้ว่า template หายไปจริง), หรือโหลดสำเร็จแล้วแต่ไม่พบ
+ * ค่านี้ในรายการ (unknown template จริง) — ค่า "" เองไม่มีวันเข้าเงื่อนไขนี้ เพราะ resolve ไปที่
+ * option ค่าเริ่มต้นที่เติมไว้แล้วเสมอ
  */
 export function buildPrintFormOptions({
   current,
@@ -69,11 +80,18 @@ export function buildPrintFormOptions({
   unknownLabel,
   loadingLabel,
   unavailableLabel,
+  systemDefaultLabel,
 }: BuildPrintFormOptionsParams): ReportFormOption[] {
   const base = list ?? [];
-  if (!current || base.some((o) => o.value === current)) return base;
+  const systemDefault: ReportFormOption = {
+    value: CONFIG_ENUM_EMPTY,
+    label: systemDefaultLabel,
+  };
+  if (!current || base.some((o) => o.value === current)) {
+    return [systemDefault, ...base];
+  }
   const label = isLoading ? loadingLabel : isError ? unavailableLabel : unknownLabel;
-  return [{ value: current, label }, ...base];
+  return [systemDefault, { value: current, label }, ...base];
 }
 
 /**
@@ -243,6 +261,7 @@ export default function DefaultSettingComponent() {
                       unavailableLabel: t("config.printFormUnavailable", {
                         id: entry.item.value,
                       }),
+                      systemDefaultLabel: t("config.printFormSystemDefault"),
                     })
                   : entry.options
                     ? resolveConfigOptions(

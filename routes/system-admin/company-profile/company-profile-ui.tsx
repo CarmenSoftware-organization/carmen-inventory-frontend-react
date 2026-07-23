@@ -17,6 +17,12 @@ import type { BusinessSettingFormValues } from "./company-profile-form-schema";
 type Form = UseFormReturn<BusinessSettingFormValues>;
 type FormName = FieldPath<BusinessSettingFormValues>;
 
+/**
+ * ค่าแทน "" ใน enum Select — Radix ห้าม SelectItem ที่ value=""
+ * ถ้า options มี option ที่ value นี้ แปลว่า config นั้นยอมรับค่าว่างได้
+ */
+export const CONFIG_ENUM_EMPTY = "__config_enum_empty__";
+
 /** อ่าน error message ของ field (รองรับ nested path เช่น `amount_format.locales`) */
 function fieldError(form: Form, name: FormName): string | undefined {
   let cur: unknown = form.formState.errors;
@@ -389,8 +395,9 @@ export function ConfigField({
     if (isBool) {
       displayValue = item.value === "true" ? yesLabel : noLabel;
     } else if (isEnum) {
+      const lookupValue = item.value === "" ? CONFIG_ENUM_EMPTY : item.value;
       displayValue =
-        options.find((o) => o.value === item.value)?.label ?? item.value;
+        options.find((o) => o.value === lookupValue)?.label ?? item.value;
     } else {
       displayValue = item.value;
     }
@@ -426,24 +433,29 @@ export function ConfigField({
         <Controller
           control={form.control}
           name={name}
-          render={({ field }) => (
-            <Select
-              value={typeof field.value === "string" ? field.value : ""}
-              onValueChange={field.onChange}
-              disabled={disabled}
-            >
-              <SelectTrigger id={name} size="sm" className="w-full text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {options.map((o) => (
-                  <SelectItem key={o.value} value={o.value} className="text-sm">
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          render={({ field }) => {
+            const current = typeof field.value === "string" ? field.value : "";
+            return (
+              <Select
+                value={current === "" ? CONFIG_ENUM_EMPTY : current}
+                onValueChange={(v) =>
+                  field.onChange(v === CONFIG_ENUM_EMPTY ? "" : v)
+                }
+                disabled={disabled}
+              >
+                <SelectTrigger id={name} size="sm" className="w-full text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.map((o) => (
+                    <SelectItem key={o.value} value={o.value} className="text-sm">
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          }}
         />
       </EditShell>
     );
