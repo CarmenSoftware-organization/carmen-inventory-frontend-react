@@ -201,7 +201,7 @@ export function ScForm({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="w-fit"
+                  className="w-fit hover:bg-transparent dark:hover:bg-transparent"
                   aria-label={tc("goBack")}
                   onClick={handleBack}
                 >

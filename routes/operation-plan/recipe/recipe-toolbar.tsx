@@ -73,7 +73,7 @@ export function RecipeToolbar({
         <Button
           size="sm"
           variant="ghost"
-          className="w-fit"
+          className="w-fit hover:bg-transparent dark:hover:bg-transparent"
           type="button"
           aria-label={tc("goBack")}
           onClick={onBack}

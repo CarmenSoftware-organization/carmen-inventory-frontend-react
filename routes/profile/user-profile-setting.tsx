@@ -222,7 +222,7 @@ export default function UserProfileSetting() {
           size="icon-sm"
           onClick={handleBack}
           aria-label={tc("goBack")}
-          className="h-11 w-11 sm:h-8 sm:w-8"
+          className="h-11 w-11 sm:h-8 sm:w-8 hover:bg-transparent dark:hover:bg-transparent"
         >
           <ArrowLeft />
         </Button>

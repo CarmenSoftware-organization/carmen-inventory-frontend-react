@@ -67,7 +67,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
             size="icon-sm"
             onClick={onBack}
             aria-label={tc("goBack")}
-            className="rounded-full"
+            className="rounded-full hover:bg-transparent dark:hover:bg-transparent"
           >
             <ArrowLeft />
           </Button>

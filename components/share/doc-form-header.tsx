@@ -62,7 +62,7 @@ export function DocFormHeader({
             size="icon-sm"
             onClick={onBack}
             aria-label={backLabel}
-            className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.5rem)] -translate-y-1/2"
+            className="absolute top-1/2 left-0 -translate-x-[calc(100%+0.5rem)] -translate-y-1/2 hover:bg-transparent dark:hover:bg-transparent"
           >
             <ArrowLeft />
           </Button>

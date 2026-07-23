@@ -40,7 +40,7 @@ export function PcEntryHeader({
             size="icon-sm"
             onClick={() => navigate("/inventory-management/physical-count")}
             aria-label={tc("goBack")}
-            className="mt-0.5 rounded-full"
+            className="mt-0.5 rounded-full hover:bg-transparent dark:hover:bg-transparent"
           >
             <ArrowLeft />
           </Button>

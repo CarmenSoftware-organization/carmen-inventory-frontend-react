@@ -52,7 +52,7 @@ export function ScEntryHeader({
             size="icon-sm"
             onClick={() => navigate("/inventory-management/spot-check")}
             aria-label={tc("goBack")}
-            className="mt-0.5 rounded-full"
+            className="mt-0.5 rounded-full hover:bg-transparent dark:hover:bg-transparent"
           >
             <ArrowLeft />
           </Button>
