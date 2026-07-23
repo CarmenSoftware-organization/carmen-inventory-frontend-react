@@ -7,6 +7,10 @@ import {
   resolveConfigOptions,
 } from "./company-profile-config-registry";
 import { mergeSeededConfig } from "./company-profile-form-schema";
+import {
+  printFormConfigKey,
+  PRINT_FORM_DOCUMENT_TYPES,
+} from "@/lib/print-form-config";
 import type { BusinessUnitConfigItem } from "@/types/business-unit";
 
 describe("config registry", () => {
@@ -167,5 +171,51 @@ describe("PO config registry", () => {
     expect(item?.defaultValue).toBe("false");
     expect(item?.labelKey).toBe("config.poGroupByPrComment");
     expect(item?.options).toBeUndefined();
+  });
+});
+
+describe("Print Form config registry", () => {
+  const section = CONFIG_SECTIONS.find((s) => s.id === "printForm");
+
+  it("registers one enum item per printable document type", () => {
+    expect(section).toBeDefined();
+    expect(section?.items).toHaveLength(PRINT_FORM_DOCUMENT_TYPES.length);
+    expect(section?.items.map((i) => i.key)).toEqual(
+      PRINT_FORM_DOCUMENT_TYPES.map(printFormConfigKey),
+    );
+  });
+
+  it("defaults every item to empty (use the system default) with no static options", () => {
+    for (const item of section?.items ?? []) {
+      expect(item.datatype).toBe("enum");
+      expect(item.defaultValue).toBe("");
+      expect(item.options).toBeUndefined();
+    }
+  });
+
+  it("points each item at its report_group and its own label key", () => {
+    expect(
+      section?.items.map((i) => [i.optionsGroup, i.labelKey]),
+    ).toEqual([
+      ["PR", "config.printFormPr"],
+      ["PO", "config.printFormPo"],
+      ["GRN", "config.printFormGrn"],
+      ["SR", "config.printFormSr"],
+      ["CN", "config.printFormCn"],
+      ["IA", "config.printFormIa"],
+      ["PC", "config.printFormPc"],
+      ["SC", "config.printFormSc"],
+      ["RFQ", "config.printFormRfq"],
+      ["INV", "config.printFormInv"],
+    ]);
+  });
+
+  it("exposes optionsGroup on rendered entries", () => {
+    const groups = groupConfigForRender(mergeSeededConfig([]));
+    const rendered = groups.sections.find((s) => s.id === "printForm");
+    expect(
+      rendered?.entries.find((e) => e.item.key === "print-form.pr")
+        ?.optionsGroup,
+    ).toBe("PR");
   });
 });
