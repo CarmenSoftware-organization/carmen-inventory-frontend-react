@@ -151,7 +151,9 @@
       "si": "SI",
       "siDesc": "การตั้งค่า Stock In ของหน่วยธุรกิจนี้",
       "po": "PO",
-      "poDesc": "การตั้งค่า Purchase Order ของหน่วยธุรกิจนี้"
+      "poDesc": "การตั้งค่า Purchase Order ของหน่วยธุรกิจนี้",
+      "printForm": "แบบฟอร์มการพิมพ์",
+      "printFormDesc": "แบบฟอร์มรายงานที่ใช้พิมพ์สำหรับเอกสารแต่ละประเภท"
     },
     "config": {
       "prAllowDuplicateProduct": "อนุญาตให้เลือก product ซ้ำกันได้",
@@ -161,7 +163,20 @@
         "lastReceiving": "รับล่าสุด",
         "lastCost": "ต้นทุนล่าสุด"
       },
-      "poGroupByPrComment": "เพิ่มการจัดกลุ่มตาม pr comment"
+      "poGroupByPrComment": "เพิ่มการจัดกลุ่มตาม pr comment",
+      "printFormPr": "PR - ใบขอซื้อ",
+      "printFormPo": "PO - ใบสั่งซื้อ",
+      "printFormGrn": "GRN - ใบรับสินค้า",
+      "printFormSr": "SR - ใบเบิกสินค้า",
+      "printFormCn": "CN - ใบลดหนี้",
+      "printFormIa": "IA - ปรับปรุงสินค้าคงคลัง",
+      "printFormPc": "PC - ตรวจนับสินค้า",
+      "printFormSc": "SC - ตรวจสอบเฉพาะจุด",
+      "printFormRfq": "RFQ - ขอใบเสนอราคา",
+      "printFormInv": "INV - ใบแจ้งหนี้",
+      "printFormLoading": "กำลังโหลดแบบฟอร์ม…",
+      "printFormUnknown": "⚠ ไม่พบเทมเพลต ({id})",
+      "printFormLoadError": "โหลดรายการแบบฟอร์มรายงานไม่สำเร็จ"
     }
   },
   "dashboardWidget": {

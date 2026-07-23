@@ -300,6 +300,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/reports/history`,
   REPORT_TEMPLATES: (buCode: string) =>
     `/api/proxy/api/${buCode}/reports/templates`,
+  /** platform-level form templates (ไม่ผูก BU) — ใช้เลือกแบบฟอร์มการพิมพ์ */
+  REPORT_TEMPLATE_FORMS: "/api/proxy/api-system/report-templates/forms",
   REPORT_LOOKUPS: (buCode: string) =>
     `/api/proxy/api/${buCode}/reports/lookups`,
   REPORT_VIEWER: (buCode: string) => `/api/proxy/api/${buCode}/reports/viewer`,
