@@ -5,6 +5,7 @@ import { useTranslations } from "use-intl";
 import { MoreHorizontal, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
+import { AuditCell } from "@/components/share/audit-cell";
 import {
   selectColumn,
   indexColumn,
@@ -53,7 +54,8 @@ export function usePurchaseRequestTable({
   isMyPending = true,
 }: UsePurchaseRequestTableOptions) {
   "use no memo";
-  const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
+  const { dateFormat, dateTimeFormat, amountFormat, defaultCurrencyCode } =
+    useProfile();
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
 
@@ -172,6 +174,37 @@ export function usePurchaseRequestTable({
         headerClassName: "text-right",
       },
       size: 150,
+    },
+    {
+      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
     },
   ];
 
