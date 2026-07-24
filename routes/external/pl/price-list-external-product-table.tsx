@@ -38,23 +38,13 @@ import {
 import { cn } from "@/lib/utils";
 import { round2 } from "@/lib/currency-utils";
 import MoqTiersEditor from "./moq-tiers-sub-table";
-import { PLProductGroupedView } from "@/routes/vendor-management/price-list/pl-product-grouped-view";
+import PriceListExternalViewTable from "./price-list-external-view-table";
 import type {
   MoqTierDto,
   PricelistExternalDto,
   PricelistExternalDetailDto,
   PricelistExternalTaxProfileOption,
 } from "@/types/price-list-external";
-
-// label ของ grouped view (mirror price list ภายใน) — portal เป็น public ใช้
-// อังกฤษล้วนเหมือน header ส่วนอื่นของหน้านี้
-const VIEW_LABELS: Record<string, string> = {
-  product: "Product",
-  moq: "MOQ",
-  pwt: "Price without Tax",
-  tax: "Tax",
-  amount: "Amount",
-};
 
 /** จัดรูปเงิน 2 ตำแหน่ง + คั่นหลักพัน (รองรับ 00,000.00 ตามที่ column กว้างพอ) */
 const fmtMoney = (n: number) =>
@@ -554,14 +544,9 @@ export default function PriceListExternalProductTable({
   });
 
   if (isViewMode) {
-    // view mode mirror หน้า price list ภายใน 100% — grouped table เดียวกัน
-    // (# · Product · MOQ Pricing · Rate · Amount, group product ด้วย rowspan)
-    return (
-      <PLProductGroupedView
-        detailRefs={fields}
-        tfl={(key) => VIEW_LABELS[key] ?? key}
-      />
-    );
+    // view mode = read-only table คอลัมน์เดียวกับ edit เป๊ะ (แยกจาก grouped view
+    // ของ price list ภายใน เพราะ external มี 1 detail/product ไม่ต้อง group)
+    return <PriceListExternalViewTable details={fields} />;
   }
 
   return (
