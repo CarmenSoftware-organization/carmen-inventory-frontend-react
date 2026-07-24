@@ -1,5 +1,6 @@
 import type { LastAction } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
+import type { Audit } from "./audit";
 
 // --- Workflow ---
 
@@ -158,10 +159,8 @@ export interface GoodsReceiveNote {
   last_action: LastAction | null;
   // Audit
   doc_version?: number;
-  created_at: string;
-  created_by_id: string | null;
-  updated_at: string;
-  updated_by_id: string | null;
+  // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
+  audit?: Audit;
   deleted_at: string | null;
   deleted_by_id: string | null;
   // Detail items (nested: detail → items[])

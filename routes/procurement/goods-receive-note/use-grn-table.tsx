@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
+import { AuditCell } from "@/components/share/audit-cell";
 import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
@@ -34,7 +35,7 @@ export function useGrnTable({
   onEdit,
   onDelete,
 }: UseGrnTableOptions) {
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
 
   const columns: ColumnDef<GoodsReceiveNote>[] = [
@@ -162,6 +163,37 @@ export function useGrnTable({
       },
       size: 200,
     },
+    {
+      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created") },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated") },
+    },
   ];
 
   return useConfigTable<GoodsReceiveNote>({
@@ -172,5 +204,6 @@ export function useGrnTable({
     tableConfig,
     onDelete,
     hideStatus: true,
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
   });
 }

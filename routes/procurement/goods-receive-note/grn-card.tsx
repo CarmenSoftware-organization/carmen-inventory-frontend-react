@@ -1,4 +1,4 @@
-import { CalendarDays, Store, FileBarChart, Receipt } from "lucide-react";
+import { CalendarDays, Store, FileBarChart, Receipt, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -29,7 +29,7 @@ interface GrnCardProps {
 
 export default function GrnCard({ item, index, onEdit }: GrnCardProps) {
   const tfl = useTranslations("field");
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
 
   const status = item.doc_status || "draft";
   const docTypeLabel = getGrnDocTypeLabel(tfl, item.doc_type);
@@ -112,6 +112,20 @@ export default function GrnCard({ item, index, onEdit }: GrnCardProps) {
             </Badge>
           </div>
         </div>
+        {item.audit?.updated?.at && (
+          <div className="flex items-start gap-2">
+            <Clock
+              className="text-muted-foreground mt-0.5 size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
+              <p className="truncate font-semibold">
+                {formatDate(item.audit.updated.at, dateTimeFormat)}
+              </p>
+            </div>
+          </div>
+        )}
       </CardContent>
 
       {totalAmount != null && !Number.isNaN(totalAmount) && (
