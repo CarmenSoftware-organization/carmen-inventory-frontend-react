@@ -1,9 +1,11 @@
-import { Building2, Phone, Mail } from "lucide-react";
+import { Building2, Phone, Mail, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Vendor } from "@/types/vendor";
 
 interface VendorCardProps {
@@ -27,6 +29,7 @@ interface VendorCardProps {
  */
 export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
   const primaryContact = item.tb_vendor_contact?.find((c) => c.is_primary);
 
   return (
@@ -106,6 +109,18 @@ export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
               </div>
             )}
           </>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex min-w-0 items-center gap-1.5">
+            <Clock
+              className="text-muted-foreground mt-0.5 size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground">{tfl("updated")}:</span>
+            <span className="truncate font-semibold">
+              {formatDate(item.audit.updated.at, dateTimeFormat)}
+            </span>
+          </div>
         )}
       </CardContent>
     </Card>
