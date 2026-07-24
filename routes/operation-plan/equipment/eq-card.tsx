@@ -1,4 +1,5 @@
-import { Layers, Tag, MapPin } from "lucide-react";
+import { Layers, Tag, MapPin, Clock } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Card,
@@ -8,6 +9,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Equipment } from "@/types/equipment";
 
 interface EqCardProps {
@@ -30,7 +33,10 @@ export default function EqCard({
   categoryName,
   onEdit,
 }: EqCardProps) {
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
   const brandModel = [item.brand, item.model].filter(Boolean).join(" / ");
+  const updatedAt = item.audit?.updated?.at;
 
   return (
     <Card
@@ -64,7 +70,7 @@ export default function EqCard({
         </CardAction>
       </CardHeader>
 
-      {(categoryName || brandModel || item.station) && (
+      {(categoryName || brandModel || item.station || updatedAt) && (
         <>
           <Separator />
           <CardContent className="space-y-1.5 px-4 py-3 text-xs">
@@ -96,6 +102,17 @@ export default function EqCard({
                 />
                 <span className="text-muted-foreground truncate">
                   {item.station}
+                </span>
+              </div>
+            )}
+            {updatedAt && (
+              <div className="flex items-center gap-1.5">
+                <Clock
+                  className="text-muted-foreground size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-muted-foreground truncate">
+                  {tfl("updated")}: {formatDate(updatedAt, dateTimeFormat)}
                 </span>
               </div>
             )}
