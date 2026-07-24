@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -99,10 +100,15 @@ export function usePoFormHandlers({
     isPending,
   });
 
+  // ระหว่าง submit ตอน create ปิด nav guard — sentinel history entry ที่ guard ดัน
+  // ไว้ที่ /new จะทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → /new ค้างใน
+  // stack → back เด้งกลับ /new (ดู create path ใน onSubmit)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
   // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
   const navGuard = useNavigationGuard(
-    (mode === "add" || mode === "edit") && form.formState.isDirty,
+    (mode === "add" || mode === "edit") && form.formState.isDirty && !isSubmitting,
   );
   const navDiscardDialogProps = {
     open: navGuard.isOpen,
@@ -171,16 +177,18 @@ export function usePoFormHandlers({
         },
       );
     } else if (mode === "add") {
+      // ปิด guard ก่อนยิง mutation → sentinel ที่ /new ถูก teardown ลบระหว่างรอ
+      // network → navigate(replace) ตอนสำเร็จเลยกิน /new จริง ไม่ใช่ sentinel →
+      // stack เหลือ [list, /:id] → back ที่หน้า detail = กลับ list
+      setIsSubmitting(true);
       createPo.mutate(payload, {
         onSuccess: (res) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const body = res as { data?: { id?: string } } | undefined;
           const newId = body?.data?.id;
           if (newId) {
-            // NOTE: อย่าเรียก setMode("view") ตรงนี้ — มันจะ re-render แล้วทำให้
-            // useNavigationGuard teardown เรียก history.back() (ลบ sentinel) ก่อน
-            // ที่ navigate ไป /:id (lazy route, async) จะ commit → เด้งกลับ /new
-            // ปล่อยให้ route /:id mount PoForm ใหม่เป็น view mode เองพอ
+            // ไม่เรียก setMode("view") — ปล่อยให้ route /:id mount PoForm ใหม่เป็น
+            // view mode เอง (setMode จะ re-render + churn item table โดยไม่จำเป็น)
             navigate(`/procurement/purchase-order/${newId}`, {
               replace: true,
             });
@@ -188,6 +196,7 @@ export function usePoFormHandlers({
             navigate("/procurement/purchase-order");
           }
         },
+        onError: () => setIsSubmitting(false), // create fail → guard กลับมาเฝ้า
       });
     }
   };

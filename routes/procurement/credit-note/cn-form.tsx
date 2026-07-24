@@ -88,8 +88,14 @@ export function CnForm({ creditNote }: CnFormProps) {
     isPending,
   });
 
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // guard เฉพาะโหมด add/edit และฟอร์มมีการแก้ไข
-  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
+  );
 
   const cnSyncKey = [
     creditNote?.doc_version ?? "",
@@ -148,17 +154,21 @@ export function CnForm({ creditNote }: CnFormProps) {
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network →
+      // navigate(replace) กิน /new จริง → stack เหลือ [list, /:id] → back = list
+      setIsSubmitting(true);
       createCn.mutate(payload, {
         onSuccess: (data) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const newId = data?.data?.id;
           if (newId) {
+            // ไม่ setMode("view") — route /:id mount CnForm view mode เอง (เลี่ยง churn)
             navigate(`/procurement/credit-note/${newId}`, { replace: true });
-            setMode("view");
           } else {
             navigate("/procurement/credit-note");
           }
         },
+        onError: () => setIsSubmitting(false),
       });
     }
   };

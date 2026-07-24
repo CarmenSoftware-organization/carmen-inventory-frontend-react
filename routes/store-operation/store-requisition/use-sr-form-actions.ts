@@ -102,9 +102,15 @@ export function useSrFormActions({
     isPending,
   });
 
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
   // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
-  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
+  );
   const navDiscardDialogProps = {
     open: navGuard.isOpen,
     onOpenChange: (o: boolean) => {
@@ -171,15 +177,19 @@ export function useSrFormActions({
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network →
+      // navigate(replace) กิน /new จริง → stack เหลือ [list, /:id] → back = list
+      setIsSubmitting(true);
       createSr.mutate(
         { stage_role: "create", details },
         {
           onSuccess: (res) => {
             const { id } = (res as { data: { id: string } }).data;
             toast.success(tt("createSuccess", { entity: t("entity") }));
+            // ไม่ setMode("view") — route /:id mount SrForm view mode เอง (เลี่ยง churn)
             navigate(`${SR_LIST_PATH}/${id}`, { replace: true });
-            setMode("view");
           },
+          onError: () => setIsSubmitting(false),
         },
       );
     }
