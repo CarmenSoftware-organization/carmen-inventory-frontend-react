@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, Users } from "lucide-react";
+import { CalendarDays, Clock, FileText, Users } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,7 +28,7 @@ interface RfpCardProps {
  */
 export default function RfpCard({ item, index, onEdit }: RfpCardProps) {
   const tfl = useTranslations("field");
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
 
   const period = (() => {
     const from = formatDate(item.start_date, dateFormat);
@@ -87,6 +87,22 @@ export default function RfpCard({ item, index, onEdit }: RfpCardProps) {
               {tfl("effectivePeriod")}:
             </span>
             <span className="truncate font-semibold">{period}</span>
+          </CardContent>
+        </>
+      )}
+
+      {item.audit?.updated?.at && (
+        <>
+          <Separator />
+          <CardContent className="flex items-center gap-1.5 px-4 py-2 text-xs">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground">{tfl("updated")}:</span>
+            <span className="truncate font-semibold">
+              {formatDate(item.audit.updated.at, dateTimeFormat)}
+            </span>
           </CardContent>
         </>
       )}
