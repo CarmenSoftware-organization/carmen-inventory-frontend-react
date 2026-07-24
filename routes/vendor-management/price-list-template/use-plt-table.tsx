@@ -14,6 +14,8 @@ import {
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useProfile } from "@/hooks/use-profile";
+import { AuditCell } from "@/components/share/audit-cell";
 
 interface UsePriceListTemplateTableOptions {
   templates: PriceListTemplate[];
@@ -40,6 +42,7 @@ export function usePriceListTemplateTable({
   onDelete,
 }: UsePriceListTemplateTableOptions) {
   "use no memo";
+  const { dateTimeFormat } = useProfile();
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
@@ -117,6 +120,36 @@ export function usePriceListTemplateTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
+    },
+    {
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
     },
   ];
 

@@ -1,3 +1,5 @@
+import type { Audit } from "@/types/audit";
+
 export type PriceListTemplateStatus = "draft" | "active" | "inactive";
 
 export interface PriceListTemplateMoq {
@@ -32,8 +34,7 @@ export interface PriceListTemplate {
   currency: { id: string; code: string };
   products: PriceListTemplateProduct[];
   doc_version?: number;
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreatePriceListTemplateDto {
