@@ -172,6 +172,8 @@ export function usePriceListTable({
     data: priceLists,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
+    // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

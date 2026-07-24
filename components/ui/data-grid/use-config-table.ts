@@ -1,5 +1,6 @@
 import {
   type ColumnDef,
+  type InitialTableState,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -25,6 +26,11 @@ interface UseConfigTableOptions<T> {
   hideStatus?: boolean;
   /** เช่น `"configuration.department"` — เช็ค {prefix}.delete เพื่อ guard ปุ่ม delete ใน row */
   permissionPrefix?: string;
+  /**
+   * initial TanStack state ที่ไม่ถูกคุมแบบ controlled (columnVisibility ฯลฯ)
+   * เช่น ซ่อนคอลัมน์ audit เป็น default: `{ columnVisibility: { created_at: false, updated_at: false } }`
+   */
+  initialState?: InitialTableState;
 }
 
 /**
@@ -61,6 +67,7 @@ export function useConfigTable<T>({
   onDelete,
   hideStatus,
   permissionPrefix,
+  initialState,
 }: UseConfigTableOptions<T>) {
   // "use no memo" opts out of React Compiler's automatic memoization.
   // TanStack Table creates new column/row objects each render; memoizing them
@@ -90,6 +97,7 @@ export function useConfigTable<T>({
     data,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
+    initialState,
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (params.perpage as number)),
   });

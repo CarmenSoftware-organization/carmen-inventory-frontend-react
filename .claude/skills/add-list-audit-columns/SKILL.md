@@ -14,7 +14,9 @@ whenever that decorator is present — reuse the shared `AuditCell` component. S
 and works out of the box because the column's TanStack `id` is sent verbatim as `sort=<id>:asc|desc`
 and the generic Prisma `orderBy` accepts any real column.
 
-Shipped 4×: vendor (PR #64), price-list (#63), price-list-template, request-for-pricing (#65).
+Shipped 5×: vendor (PR #64), price-list (#63), price-list-template, request-for-pricing (#65),
+purchase-request (#67). The two columns are **hidden by default** and opt-in via the Toggle Columns
+menu (see step 1b) — do NOT ship them visible-by-default.
 
 ## When to use
 
@@ -92,6 +94,42 @@ Placement depends on how the hook builds its table:
 `AuditCell` renders the BU-formatted date-time on top and the author name below; it shows `—` when
 `entry?.at` is missing, so unguarded rows never crash.
 
+### 1b. Hide the audit columns by default (REQUIRED)
+
+Created/Updated ship **hidden by default** and opt-in via the **Toggle Columns** menu — else they
+crowd the row on first load. Seed `columnVisibility` keyed by the two column **`id`s** (`created_at` /
+`updated_at` — the same strings you set as `id:` above, NOT `accessorKey`):
+
+- **raw `useReactTable`** (pr, price-list, price-list-template): add `initialState` to the call.
+  It coexists with the controlled `state` from `...tableConfig` (which owns only pagination+sorting),
+  so `columnVisibility` stays uncontrolled and the Toggle Columns menu can flip it:
+
+  ```tsx
+  return useReactTable({
+    data,
+    columns: allColumns,
+    getCoreRowModel: getCoreRowModel(),
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    ...tableConfig,
+    pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
+  });
+  ```
+
+- **`useConfigTable`** (vendor, rfp): pass the same object as the `initialState` prop — the hook
+  forwards it to `useReactTable` (added for this; `initialState?: InitialTableState` in its options):
+
+  ```tsx
+  return useConfigTable<T>({
+    data, columns, totalRecords, params, tableConfig, onDelete, hideStatus: true,
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+  });
+  ```
+
+The hidden columns still appear in `DataGridColumnVisibility` (it lists `getAllColumns()`, not just
+visible ones), so users switch them on from the menu. This relies on each column having an
+`accessorFn` **and** `meta.headerTitle` — both are already in the step-1 snippet, so the menu shows
+"Created" / "Updated" and the toggle works.
+
 ### 2. Grid/mobile card — Updated line (mirror the sibling `<x>-card.tsx`)
 
 Add a bottom row, guarded on `item.audit?.updated?.at`, using `formatDate(item.audit.updated.at,
@@ -116,7 +154,8 @@ bun test:run               # existing suite stays green (skip writing new tests 
 ```
 
 Then browser (local backend on :4000 — a shared dev DB, read-only here so safe):
-- both columns render (date-time + author name; `—` when absent)
+- both columns are **hidden on first load**; open **Toggle Columns** → "Created"/"Updated" appear
+  unchecked; tick one → the column renders (date-time + author name; `—` when absent)
 - click each header asc→desc; Network shows `GET …?…&sort=created_at:asc|desc` / `sort=updated_at:…` → 200
 - grid/mobile card shows the "Updated" line; Export (if done) has the two date columns; no console errors
 
@@ -143,6 +182,13 @@ Then browser (local backend on :4000 — a shared dev DB, read-only here so safe
 - **Author name needs `dateTimeFormat`, not `dateFormat`.** `AuditCell` takes `dateTimeFormat`
   (date+time); the period/effective-date columns use `dateFormat`. A hook may already destructure only
   `dateFormat` — add `dateTimeFormat`.
+- **`columnVisibility` key = the column `id`, not `accessorKey`.** Hide-by-default (step 1b) keys on
+  `created_at` / `updated_at` — the exact `id:` strings. A typo (e.g. `createdAt`) silently no-ops the
+  hide and the column shows up anyway; tsc won't catch it (`columnVisibility` is `Record<string,bool>`).
+  Verify in the browser that both are hidden on first load, not just that tsc passes.
+- **Don't seed `columnVisibility` via controlled `state`.** Put it in `initialState` (uncontrolled).
+  `useDataGridState`'s `tableConfig.state` controls only pagination+sorting; adding `columnVisibility`
+  to a controlled `state` would freeze the Toggle Columns menu (clicks wouldn't stick).
 
 ## Reference
 
