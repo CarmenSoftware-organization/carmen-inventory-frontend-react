@@ -6,7 +6,9 @@ import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import { columnSkeletons } from "@/components/ui/data-grid/columns";
+import { columnSkeletons, statusColumn } from "@/components/ui/data-grid/columns";
+import { AuditCell } from "@/components/share/audit-cell";
+import { useProfile } from "@/hooks/use-profile";
 
 interface UsePrtTableOptions {
   templates: PurchaseRequestTemplate[];
@@ -26,6 +28,7 @@ export function usePrtTable({
   onDelete,
 }: UsePrtTableOptions) {
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
 
   const columns: ColumnDef<PurchaseRequestTemplate>[] = [
     {
@@ -58,6 +61,39 @@ export function usePrtTable({
         skeleton: columnSkeletons.text,
       },
     },
+    // status column แทรกเองก่อน created/updated (useConfigTable ส่ง hideStatus)
+    statusColumn<PurchaseRequestTemplate>(),
+    {
+      // id = ชื่อคอลัมน์จริงของ backend เพื่อให้ sort ส่ง field ถูกต้อง
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
+    },
   ];
 
   return useConfigTable<PurchaseRequestTemplate>({
@@ -67,5 +103,8 @@ export function usePrtTable({
     params,
     tableConfig,
     onDelete,
+    hideStatus: true,
+    // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
   });
 }

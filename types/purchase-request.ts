@@ -150,7 +150,7 @@ export interface PurchaseRequestTemplate {
   info: Record<string, unknown>;
   is_active: boolean;
   doc_version?: number;
-  created_at: string;
+  audit?: Audit;
   purchase_request_template_detail: PurchaseRequestTemplateDetail[];
 }
 
