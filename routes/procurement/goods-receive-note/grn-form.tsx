@@ -7,8 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency, round2 } from "@/lib/currency-utils";
-import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import type { FormMode } from "@/types/form";
@@ -24,9 +22,8 @@ import { GrnItemTable } from "./grn-item-table";
 import { GrnFormDialogs } from "./grn-form-dialogs";
 import { useGrnFormActions } from "./use-grn-form-actions";
 import { useProfile } from "@/hooks/use-profile";
-import { useCurrency } from "@/hooks/use-currency";
 import { GrnHeader } from "./grn-header";
-import { GrnFooterAction } from "./grn-footer-action";
+import { GrnSummaryFooter } from "./grn-summary-footer";
 import { GrnFormHeader } from "./grn-form-header";
 
 interface GrnFormProps {
@@ -146,37 +143,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
       name: "extra_cost_details",
     })?.length ?? 0;
 
-  const { data: currencyData } = useCurrency({ perpage: -1 });
-  const currencies = currencyData?.data?.filter((c) => c.is_active) ?? [];
-
-  // grand summary — รวมยอดจากทุก item (net/discount/tax/total ที่คำนวณไว้แล้ว)
-  const items = useWatch({ control: form.control, name: "items" }) ?? [];
-  // currency code — derive จาก list ตาม currency_id (fallback currency_name)
-  // เหมือน grn-form-header เพราะบาง record ไม่เก็บ currency_name
-  const currencyId = useWatch({ control: form.control, name: "currency_id" });
-  const currencyName =
-    useWatch({ control: form.control, name: "currency_name" }) ?? "";
-  const currencyCode =
-    currencies.find((c) => c.id === currencyId)?.code || currencyName;
-  let totalDiscount = 0;
-  let totalNet = 0;
-  let totalTax = 0;
-  let grandTotal = 0;
-  for (const it of items) {
-    totalDiscount += Number(it?.discount_amount) || 0;
-    totalNet += Number(it?.net_amount) || 0;
-    totalTax += Number(it?.tax_amount) || 0;
-    grandTotal += Number(it?.total_price) || 0;
-  }
-  const summary = {
-    subtotal: round2(totalNet + totalDiscount),
-    totalDiscount: round2(totalDiscount),
-    totalNet: round2(totalNet),
-    totalTax: round2(totalTax),
-    grandTotal: round2(grandTotal),
-  };
-  const hasItems = items.length > 0;
-
   // Clear wizard data on SPA navigation (unmount) but keep on browser refresh
   useEffect(() => {
     let isRefresh = false;
@@ -284,58 +250,16 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         </Tabs>
       </form>
 
-      {hasItems && (
-        <SummaryFooterBar
-          hasRecord
-          items={[
-            {
-              key: "subtotal",
-              label: tfl("subtotal"),
-              value: formatCurrency(summary.subtotal),
-            },
-            {
-              key: "discount",
-              label: tfl("discount"),
-              value:
-                summary.totalDiscount > 0
-                  ? `-${formatCurrency(summary.totalDiscount)}`
-                  : formatCurrency(0),
-              valueClassName:
-                summary.totalDiscount > 0
-                  ? "text-destructive font-semibold"
-                  : "font-semibold",
-            },
-            {
-              key: "net",
-              label: tfl("net"),
-              value: formatCurrency(summary.totalNet),
-            },
-            {
-              key: "tax",
-              label: tfl("tax"),
-              value: formatCurrency(summary.totalTax),
-            },
-            {
-              key: "grandTotal",
-              label: tfl("grandTotal"),
-              value: formatCurrency(summary.grandTotal),
-              emphasis: true,
-              suffix: currencyCode,
-            },
-          ]}
-        >
-          {/* commit/void อยู่ line เดียวกับ summary (ขวาล่าง เหมือน PR footer) */}
-          <GrnFooterAction
-            isActionPending={actions.isActionPending}
-            hasRecord={!!goodsReceiveNote}
-            isView={mode === "view"}
-            isCommitted={isCommitted}
-            isVoid={isVoid}
-            onCommit={() => actions.setShowCommit(true)}
-            onVoid={() => actions.setShowVoid(true)}
-          />
-        </SummaryFooterBar>
-      )}
+      <GrnSummaryFooter
+        form={form}
+        isActionPending={actions.isActionPending}
+        hasRecord={!!goodsReceiveNote}
+        isView={mode === "view"}
+        isCommitted={isCommitted}
+        isVoid={isVoid}
+        onCommit={() => actions.setShowCommit(true)}
+        onVoid={() => actions.setShowVoid(true)}
+      />
 
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />
       <DiscardDialog {...actions.navDiscardDialogProps} variant="warning" />
