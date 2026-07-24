@@ -1,4 +1,4 @@
-import { CalendarDays, Building2, User, Workflow, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { CalendarDays, Building2, User, Workflow, Clock, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,7 +54,8 @@ export default function PrCard({
 }: PrCardProps) {
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
-  const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
+  const { dateFormat, dateTimeFormat, amountFormat, defaultCurrencyCode } =
+    useProfile();
 
   const config = PR_STATUS_CONFIG[item.pr_status] ?? PR_STATUS_CONFIG.draft;
   const totalAmount = item.base_total_amount;
@@ -154,6 +155,20 @@ export default function PrCard({
             </p>
           </div>
         </div>
+        {item.audit?.updated?.at && (
+          <div className="flex items-start gap-2">
+            <Clock
+              className="text-muted-foreground mt-0.5 size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
+              <p className="truncate font-semibold">
+                {formatDate(item.audit.updated.at, dateTimeFormat)}
+              </p>
+            </div>
+          </div>
+        )}
       </CardContent>
 
       {totalAmount != null && !Number.isNaN(Number(totalAmount)) && (

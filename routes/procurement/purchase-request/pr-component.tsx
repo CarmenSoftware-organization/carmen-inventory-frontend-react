@@ -44,6 +44,7 @@ import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
 import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import { FilterStage } from "@/components/filter/filter-stage";
 import { PrFilterStatus } from "./pr-filter-status";
 import { usePrActiveFilters } from "./pr-active-filters";
@@ -69,7 +70,7 @@ export default function PurchaseRequestComponent() {
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
-  const { defaultCurrencyCode } = useProfile();
+  const { defaultCurrencyCode, dateTimeFormat } = useProfile();
   const [deleteTarget, setDeleteTarget] = useState<PurchaseRequest | null>(
     null,
   );
@@ -160,6 +161,22 @@ export default function PurchaseRequestComponent() {
             header: tfl("description"),
             value: (r) => r.description ?? "",
             width: 40,
+          },
+          {
+            header: tfl("created"),
+            value: (r) =>
+              r.audit?.created?.at
+                ? formatDate(r.audit.created.at, dateTimeFormat)
+                : "",
+            width: 18,
+          },
+          {
+            header: tfl("updated"),
+            value: (r) =>
+              r.audit?.updated?.at
+                ? formatDate(r.audit.updated.at, dateTimeFormat)
+                : "",
+            width: 18,
           },
         ],
       });

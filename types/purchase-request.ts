@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import type { Audit } from "./audit";
 import { lastActionSchema } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
 
@@ -191,6 +192,7 @@ export interface PurchaseRequest {
   doc_version: number;
   created_at: string;
   updated_at: string;
+  audit?: Audit;
 }
 
 // --- Zod runtime validation schema (for list API response) ---
