@@ -51,7 +51,7 @@ import type {
 const VIEW_LABELS: Record<string, string> = {
   product: "Product",
   moq: "MOQ",
-  pwt: "PWT",
+  pwt: "Price without Tax",
   tax: "Tax",
   amount: "Amount",
 };
@@ -413,13 +413,17 @@ export default function PriceListExternalProductTable({
       {
         id: "pwt",
         header: ({ column }) => (
-          <DataGridColumnHeader title="PWT" visibility={false} column={column} />
+          <DataGridColumnHeader
+            title="Price without Tax"
+            visibility={false}
+            column={column}
+          />
         ),
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return <RowPWT form={form} index={fieldIndex} />;
         },
-        size: 128,
+        size: 150,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,

@@ -24,7 +24,7 @@ function Meta({ label, value }: { label: string; value: string }) {
 /**
  * Header ของเอกสารคำขอเสนอราคา (RFQ) ที่โรงแรมยื่นให้ vendor กรอกราคา — เรียง
  * ความสำคัญตามที่ vendor ต้องเห็น: (1) นี่คือคำขอเสนอราคา (2) โรงแรมผู้ขอเป็น hero
- * (3) ตอบภายในเมื่อไหร่ + สกุลเงิน · ชื่อ price list เป็นแค่ reference เล็ก ๆ
+ * (3) ช่วงเวลาที่ราคามีผล + สกุลเงิน · ชื่อ price list เป็นแค่ reference เล็ก ๆ
  *
  * @param props - data ของ price list ที่จะแสดงบน header
  * @returns element ของส่วน header
@@ -57,8 +57,11 @@ export default function PriceListExternalHeader({
         <Meta label="Vendor" value={data.vendor?.name || "—"} />
         <Meta label="Currency" value={data.currency_code} />
         <Meta
-          label="Respond by"
-          value={formatDate(data.effective_to_date, DATE_FORMAT)}
+          label="Effective period"
+          value={`${formatDate(data.effective_from_date, DATE_FORMAT)} – ${formatDate(
+            data.effective_to_date,
+            DATE_FORMAT,
+          )}`}
         />
         <Meta label="Reference" value={data.name} />
       </dl>
