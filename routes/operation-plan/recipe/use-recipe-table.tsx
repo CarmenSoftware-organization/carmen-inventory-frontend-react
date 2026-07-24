@@ -2,8 +2,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
+import { AuditCell } from "@/components/share/audit-cell";
 import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
+import { statusColumn } from "@/components/ui/data-grid/columns";
+import { useProfile } from "@/hooks/use-profile";
 import type { Recipe } from "@/types/recipe";
 import type { Cuisine } from "@/types/cuisine";
 import type { RecipeCategory } from "@/types/recipe-category";
@@ -47,6 +50,7 @@ export function useRecipeTable({
 }: UseRecipeTableOptions) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const { dateTimeFormat } = useProfile();
   const cuisineMap = new Map(cuisines.map((c) => [c.id, c.name]));
   const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
 
@@ -127,6 +131,39 @@ export function useRecipeTable({
         cellClassName: "text-center",
       },
     },
+    // Status ก่อน created/updated (hideStatus:true กัน useConfigTable inject ซ้ำ)
+    statusColumn<Recipe>(),
+    {
+      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created") },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated") },
+    },
   ];
 
   return useConfigTable<Recipe>({
@@ -136,5 +173,7 @@ export function useRecipeTable({
     params,
     tableConfig,
     onDelete,
+    hideStatus: true,
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
   });
 }
