@@ -1,3 +1,5 @@
+import type { Audit } from "./audit";
+
 export interface Cuisine {
   id: string;
   doc_version: number;
@@ -10,8 +12,8 @@ export interface Cuisine {
   info: Record<string, unknown> | null;
   dimension: string[] | null;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
+  audit?: Audit;
 }
 
 export interface CreateCuisineDto {
