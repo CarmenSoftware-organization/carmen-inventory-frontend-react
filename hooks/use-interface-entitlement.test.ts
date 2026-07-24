@@ -2,9 +2,9 @@ import { describe, it, expect } from "vitest";
 import { interfaceEntitled } from "./use-interface-entitlement";
 
 describe("interfaceEntitled", () => {
-  it("allows every brand when the field is absent (older gateway)", () => {
-    expect(interfaceEntitled(undefined, "pos", "micros")).toBe(true);
-    expect(interfaceEntitled(undefined, "accounting", "carmen_gl")).toBe(true);
+  it("hides every brand when the field is absent (platform selected none)", () => {
+    expect(interfaceEntitled(undefined, "pos", "micros")).toBe(false);
+    expect(interfaceEntitled(undefined, "accounting", "carmen_gl")).toBe(false);
   });
 
   it("allows nothing when the entitlement list is empty", () => {

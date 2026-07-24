@@ -3,10 +3,13 @@ import { useProfile } from "@/hooks/use-profile";
 /**
  * ตัดสินว่า brand ของ interface เห็นได้ไหมตาม entitlement (license) ของ BU ปัจจุบัน
  *
+ * โชว์เฉพาะ interface ที่ platform เลือกไว้ให้ BU นี้เท่านั้น — ไม่มีในลิสต์ = ไม่โชว์
+ *
  * `enabled` คือ `enabled_interfaces` จาก profile — key รูปแบบ `<category>_<brand>`
  * เช่น `pos_micros`
- * - `undefined` (gateway รุ่นเก่ายังไม่ส่ง field) → โชว์ทุก brand (backward compat)
- * - `[]` → ไม่เห็นอะไรเลย (platform ปิดหมด)
+ * - `undefined`/`null` (backend ยังไม่ส่ง field / platform ยังไม่เลือก) → ไม่โชว์อะไรเลย
+ * - `[]` → ไม่โชว์อะไรเลย (platform ปิดหมด)
+ * - `["pos_micros", ...]` → โชว์เฉพาะที่อยู่ในลิสต์
  *
  * แยกเป็น pure function เพื่อ test ตรง ๆ โดยไม่ต้อง mock profile
  */
@@ -15,8 +18,7 @@ export function interfaceEntitled(
   categoryKey: string,
   brandKey: string,
 ): boolean {
-  if (enabled == null) return true;
-  return enabled.includes(`${categoryKey}_${brandKey}`);
+  return enabled?.includes(`${categoryKey}_${brandKey}`) ?? false;
 }
 
 /**

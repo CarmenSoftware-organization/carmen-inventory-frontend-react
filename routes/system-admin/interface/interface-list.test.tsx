@@ -16,7 +16,7 @@ function config(key: string, value: Record<string, unknown>): AppConfig {
   };
 }
 
-/** show every brand — mirrors an older gateway with no entitlement field */
+/** show every brand — mirrors a BU the platform entitled to all interfaces */
 const allowAll = () => true;
 
 describe("interfaceGroups", () => {

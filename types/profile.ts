@@ -53,8 +53,8 @@ export interface BusinessUnit {
   is_active: boolean;
   /**
    * Per-BU interface entitlement — `<category>_<brand>` keys the platform licensed for this
-   * business unit (e.g. `"pos_micros"`). Absent when the BU has no entitlement configured
-   * (or an older gateway) → the UI shows every shipped brand; an empty array hides all.
+   * business unit (e.g. `"pos_micros"`). The UI shows ONLY the listed brands. Absent (backend
+   * did not send it / platform selected none) or an empty array → the UI shows nothing.
    */
   enabled_interfaces?: string[];
   department: {
