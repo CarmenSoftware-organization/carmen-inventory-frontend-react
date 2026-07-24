@@ -6,15 +6,11 @@ import {
 } from "react-hook-form";
 import { FieldInput, FieldPlainText } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { LookupProduct } from "@/components/lookup/lookup-product";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
-import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { cn } from "@/lib/utils";
-import type { PriceListTemplate } from "@/types/price-list-template";
 import type { PltFormValues } from "./plt-form-schema";
 
 export type DetailField = FieldArrayWithId<PltFormValues, "details", "id">;
-export type ProductRef = NonNullable<PriceListTemplate["products"]>[number];
 
 interface CellProps {
   readonly form: UseFormReturn<PltFormValues>;
@@ -24,50 +20,6 @@ interface CellProps {
 }
 
 /* ── Cells (view = plain text · edit = inputs/lookups) ─────────── */
-
-export function ProductCell({
-  form,
-  index,
-  isView,
-  isDisabled,
-  productRef,
-  confirmDuplicate,
-}: CellProps & {
-  readonly productRef?: ProductRef;
-  readonly confirmDuplicate: (action: () => void, productName?: string) => void;
-}) {
-  "use no memo";
-  const errors = form.formState.errors.details?.[index];
-  if (isView)
-    return (
-      <NameWithSubtext
-        primary={productRef?.product_name ?? ""}
-        secondary={productRef?.product_code}
-      />
-    );
-  return (
-    <Controller
-      control={form.control}
-      name={`details.${index}.product_id`}
-      render={({ field }) => (
-        <LookupProduct
-          value={field.value}
-          onValueChange={(id, product) => {
-            const rows = form.getValues("details");
-            const isDup =
-              !!id && rows.some((r, i) => i !== index && r.product_id === id);
-            if (isDup)
-              confirmDuplicate(() => field.onChange(id), product?.name);
-            else field.onChange(id);
-          }}
-          disabled={isDisabled}
-          className="h-8 w-full text-xs"
-          error={errors?.product_id?.message}
-        />
-      )}
-    />
-  );
-}
 
 export function UnitCell({ form, index, isView, isDisabled }: CellProps) {
   "use no memo";

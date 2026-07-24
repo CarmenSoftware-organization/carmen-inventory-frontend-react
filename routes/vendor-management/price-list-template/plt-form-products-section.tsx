@@ -6,8 +6,8 @@ import type { PriceListTemplate } from "@/types/price-list-template";
 import type { Product } from "@/types/product";
 import type { PltFormValues } from "./plt-form-schema";
 import type { ProductLabels } from "./plt-form-labels";
-import { PltProductTable } from "./plt-product-table";
 import { PltProductCards } from "./plt-product-cards";
+import { PltProductGroupedView } from "./plt-product-grouped-view";
 
 export function PltFormProductsSection({
   form,
@@ -74,13 +74,8 @@ export function PltFormProductsSection({
             addLabel={labels.addLabel}
           />
         ) : (
-          <PltProductTable
-            form={form}
-            detailFields={detailFields}
-            priceListTemplate={priceListTemplate}
-            isView={isView}
-            isDisabled={isDisabled}
-            onRemove={onRemoveTier}
+          <PltProductGroupedView
+            products={priceListTemplate?.products ?? []}
             labels={labels}
           />
         )
