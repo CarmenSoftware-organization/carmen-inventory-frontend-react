@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -22,8 +22,8 @@ const NUMBER_CLASS =
  * Inline editor ของ MOQ pricing tiers (ขั้นต่ำ → ราคา → lead time) ต่อ item
  *
  * ออกแบบตาม DESIGN.md: ไม่มี grid chrome/edit-toggle — vendor อยู่ใน edit mode
- * อยู่แล้ว จึงแก้ได้ตรง ๆ ทุกช่อง · เพิ่ม/ลบ tier ทีเดียวจบ · สีเดียว (ปุ่มเพิ่ม =
- * primary, ลบ = muted จนกว่าจะ hover)
+ * อยู่แล้ว จึงแก้ได้ตรง ๆ ทุกช่อง · การ "เพิ่ม tier" มีที่เดียวคือปุ่ม + ในแถวหลัก
+ * (ที่นี่ทำแค่แก้/ลบ tier ที่มีอยู่) · ปุ่มลบ muted จนกว่าจะ hover
  *
  * State อยู่ที่ form ล้วน (`useWatch` + `setValue`) ไม่มี local state — input เป็น
  * uncontrolled (`defaultValue`) และ row key ด้วย tier.id ที่นิ่ง จึงพิมพ์ได้โดย
@@ -49,24 +49,13 @@ export default function MoqTiersEditor({ form, index }: MoqTiersEditorProps) {
   const removeTier = (i: number) =>
     setTiers(tiers.filter((_, j) => j !== i));
 
-  const addTier = () =>
-    setTiers([
-      ...tiers,
-      {
-        id: `tier-new-${Date.now()}`,
-        minimum_quantity: 0,
-        price: 0,
-        lead_time_days: 0,
-      },
-    ]);
-
   return (
     <div className="bg-muted/30 px-6 py-4">
       <div className="max-w-2xl space-y-1.5">
         <div className="text-muted-foreground grid grid-cols-[1fr_1fr_1fr_2rem] gap-3 px-0.5 text-[0.625rem] font-semibold tracking-wider uppercase">
-          <span>MOQ</span>
-          <span>Price</span>
-          <span>Lead Time</span>
+          <span className="text-right">MOQ</span>
+          <span className="text-right">Price</span>
+          <span className="text-right">Lead Time</span>
           <span />
         </div>
 
@@ -124,17 +113,6 @@ export default function MoqTiersEditor({ form, index }: MoqTiersEditorProps) {
             </div>
           ))
         )}
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={addTier}
-          className="text-primary hover:text-primary hover:bg-primary/5 -ml-1 mt-1 gap-1"
-        >
-          <Plus className="size-3.5" />
-          Add tier
-        </Button>
       </div>
 
       <DeleteDialog

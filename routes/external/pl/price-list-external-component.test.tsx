@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { UseFormReturn } from "react-hook-form";
 import PriceListExternalComponent from "./price-list-external-component";
@@ -146,7 +146,10 @@ describe("PriceListExternalComponent — submit error surfacing", () => {
     render(<PriceListExternalComponent urlToken="tok" />);
 
     // ไม่ type — form ไม่ dirty จึงผ่าน guard ของ submit ได้
+    // กด Submit ที่ตาราง → เปิด confirm dialog → กดยืนยันใน dialog
     await userEvent.click(screen.getByRole("button", { name: "Submit" }));
+    const dialog = await screen.findByRole("alertdialog");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Submit" }));
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("This link has expired"),

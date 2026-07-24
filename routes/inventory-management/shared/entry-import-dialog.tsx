@@ -247,7 +247,7 @@ export function EntryImportDialog({
           />
 
           {file ? (
-            <div className="border-border/60 bg-card relative flex items-start gap-3 rounded-xl border p-3">
+            <div className="border-border/60 bg-card relative flex items-start gap-3 rounded-lg border p-3">
               <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <FileSpreadsheet className="size-5" aria-hidden="true" />
               </div>
@@ -280,16 +280,19 @@ export function EntryImportDialog({
               onClick={() => inputRef.current?.click()}
               aria-label={t("importDropHint")}
               className={cn(
-                "flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed py-10 transition-colors",
+                // neutral โดย default · accent โผล่ตอนลากไฟล์อย่างเดียว (single
+                // signal ตาม DESIGN.md — ไม่คลัสเตอร์สีทั้ง border+bg+ไอคอน)
+                "flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed py-10 transition-colors",
                 isDragging
-                  ? "border-primary bg-primary/15"
-                  : "border-primary/30 bg-primary/5 hover:border-primary hover:bg-primary/10",
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-muted/30 hover:border-muted-foreground/40",
               )}
             >
-              <div className="bg-primary/15 text-primary flex size-12 items-center justify-center rounded-2xl">
-                <FileSpreadsheet className="size-6" aria-hidden="true" />
-              </div>
-              <span className="text-foreground/90 text-xs font-semibold">
+              <FileSpreadsheet
+                className="text-muted-foreground size-8"
+                aria-hidden="true"
+              />
+              <span className="text-foreground text-xs font-semibold">
                 {t("importDropHint")}
               </span>
               <span className="text-muted-foreground text-[0.625rem] tracking-wide uppercase">
@@ -299,13 +302,13 @@ export function EntryImportDialog({
           )}
 
           {result && result.missing.length > 0 && (
-            <div className="border-destructive/40 bg-destructive/5 flex items-start gap-2 rounded-xl border p-2">
+            <div className="border-border bg-muted/40 flex items-start gap-2 rounded-lg border p-2">
               <AlertCircle
                 className="text-destructive mt-0.5 size-4 shrink-0"
                 aria-hidden="true"
               />
               <div className="min-w-0 flex-1 space-y-1">
-                <div className="text-destructive text-[0.6875rem] font-semibold">
+                <div className="text-foreground text-[0.6875rem] font-semibold">
                   {t("importColumnsMissing", {
                     columns: result.missing.join(", "),
                   })}
@@ -390,7 +393,7 @@ function PreviewStat({
     muted: "text-foreground",
   };
   return (
-    <div className="bg-muted/40 border-border/40 flex flex-col items-center justify-center rounded-xl border px-2 py-2">
+    <div className="bg-muted/40 border-border/40 flex flex-col items-center justify-center rounded-lg border px-2 py-2">
       <div className="text-muted-foreground text-[0.5rem] font-semibold tracking-widest uppercase">
         {label}
       </div>

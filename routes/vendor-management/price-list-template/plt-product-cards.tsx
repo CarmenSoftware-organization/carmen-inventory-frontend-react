@@ -64,7 +64,7 @@ export function PltProductCards({
       {groups.map((g) => (
         <div
           key={g.productId}
-          className="border-border rounded-lg border p-2.5 shadow-xs"
+          className="border-border rounded-lg border p-2.5"
         >
           {/* header — ชื่อ product + หน่วยสั่งซื้อ + ลบทั้ง product */}
           <div className="flex items-center gap-2">

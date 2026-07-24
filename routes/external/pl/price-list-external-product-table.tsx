@@ -30,6 +30,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FieldInput, FieldSelect } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { round2 } from "@/lib/currency-utils";
 import MoqTiersEditor from "./moq-tiers-sub-table";
@@ -93,22 +98,72 @@ function RowPWT({
   );
 }
 
-/** Amount (รวมภาษี) ของ row = price (gross) ที่ vendor กรอก */
-function RowAmount({
+/**
+ * Tax cell — เลือก tax profile + โชว์ tax amount ที่คำนวณได้ในเซลล์เดียว (merge)
+ * tax amount = price(gross) − pwt = ส่วนต่างภาษี · watch price + rate ให้ update สด
+ */
+function TaxProfileCell({
   form,
   index,
+  taxProfiles,
 }: {
   form: UseFormReturn<PricelistExternalDto>;
   index: number;
+  taxProfiles: PricelistExternalTaxProfileOption[];
 }) {
+  "use no memo";
   const price = useWatch({
     control: form.control,
     name: `tb_pricelist_detail.${index}.price`,
   });
+  const rate = useWatch({
+    control: form.control,
+    name: `tb_pricelist_detail.${index}.tax_rate`,
+  });
+  const p = Number(price) || 0;
+  const r = Number(rate) || 0;
+  const taxAmt = round2(p - p / (1 + r / 100));
+
   return (
-    <span className="text-foreground text-sm font-semibold tabular-nums">
-      {fmtMoney(Number(price) || 0)}
-    </span>
+    // บรรทัดเดียว: tax amount (คำนวณ) ด้านหน้า · tax profile select ด้านหลัง
+    <div className="flex items-center gap-2">
+      <span className="text-foreground shrink-0 text-sm tabular-nums">
+        {fmtMoney(taxAmt)}
+      </span>
+      <div className="min-w-0 flex-1">
+        <Controller
+          control={form.control}
+          name={`tb_pricelist_detail.${index}.tax_profile_id`}
+          render={({ field }) => (
+            <FieldSelect
+              value={field.value}
+              onValueChange={(id) => {
+                field.onChange(id);
+                const tp = taxProfiles.find((t) => t.id === id);
+                form.setValue(
+                  `tb_pricelist_detail.${index}.tax_profile_name`,
+                  tp?.name ?? null,
+                );
+                form.setValue(
+                  `tb_pricelist_detail.${index}.tax_rate`,
+                  tp?.tax_rate ?? 0,
+                );
+              }}
+              placeholder="—"
+              className="h-9 w-full text-sm"
+            >
+              <SelectContent>
+                {taxProfiles.map((tp) => (
+                  <SelectItem key={tp.id} value={tp.id}>
+                    {tp.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </FieldSelect>
+          )}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -187,10 +242,38 @@ export default function PriceListExternalProductTable({
   const columns = useMemo<ColumnDef<PricelistExternalDetailDto>[]>(
     () => [
       {
+        // chevron พับ/กาง MOQ tiers — column แยกต่างหาก อยู่หน้าสุด
+        id: "expand",
+        header: () => null,
+        cell: ({ row }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Toggle pricing tiers"
+            onClick={row.getToggleExpandedHandler()}
+            className="text-muted-foreground"
+          >
+            <ChevronRight
+              className={cn(
+                "size-4 transition-transform",
+                row.getIsExpanded() && "rotate-90",
+              )}
+            />
+          </Button>
+        ),
+        size: 44,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+      },
+      {
         id: "no",
         header: "#",
         cell: ({ row }) => (
-          <span className="text-xs">{row.original.sequence_no}</span>
+          <span className="text-xs tabular-nums">
+            {row.original.sequence_no}
+          </span>
         ),
         size: 50,
         enableSorting: false,
@@ -263,7 +346,7 @@ export default function PriceListExternalProductTable({
             />
           );
         },
-        size: 80,
+        size: 104,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -294,7 +377,7 @@ export default function PriceListExternalProductTable({
             />
           );
         },
-        size: 124,
+        size: 148,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -313,42 +396,16 @@ export default function PriceListExternalProductTable({
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           // taxProfiles (prop) มาจาก endpoint แยก — portal public เรียก auth lookup
-          // ไม่ได้ · เลือกแล้ว sync name + rate ของแถว
+          // ไม่ได้ · เซลล์รวม select + tax amount ที่คำนวณไว้ในตัวเดียว
           return (
-            <Controller
-              control={form.control}
-              name={`tb_pricelist_detail.${fieldIndex}.tax_profile_id`}
-              render={({ field }) => (
-                <FieldSelect
-                  value={field.value}
-                  onValueChange={(id) => {
-                    field.onChange(id);
-                    const tp = taxProfiles.find((t) => t.id === id);
-                    form.setValue(
-                      `tb_pricelist_detail.${fieldIndex}.tax_profile_name`,
-                      tp?.name ?? null,
-                    );
-                    form.setValue(
-                      `tb_pricelist_detail.${fieldIndex}.tax_rate`,
-                      tp?.tax_rate ?? 0,
-                    );
-                  }}
-                  placeholder="—"
-                  className="h-9 w-full text-sm"
-                >
-                  <SelectContent>
-                    {taxProfiles.map((tp) => (
-                      <SelectItem key={tp.id} value={tp.id}>
-                        {tp.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </FieldSelect>
-              )}
+            <TaxProfileCell
+              form={form}
+              index={fieldIndex}
+              taxProfiles={taxProfiles}
             />
           );
         },
-        size: 180,
+        size: 218,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -362,7 +419,7 @@ export default function PriceListExternalProductTable({
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           return <RowPWT form={form} index={fieldIndex} />;
         },
-        size: 116,
+        size: 128,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -401,25 +458,6 @@ export default function PriceListExternalProductTable({
         meta: { cellClassName: "text-right", headerClassName: "text-right" },
       },
       {
-        id: "amount",
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Amount"
-            visibility={false}
-            column={column}
-          />
-        ),
-        cell: ({ row }) => {
-          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
-          return <RowAmount form={form} index={fieldIndex} />;
-        },
-        size: 128,
-        enableSorting: false,
-        enableHiding: false,
-        enableResizing: false,
-        meta: { cellClassName: "text-right", headerClassName: "text-right" },
-      },
-      {
         id: "actions",
         header: () => (
           <span className="text-muted-foreground text-[0.6875rem]">
@@ -428,38 +466,28 @@ export default function PriceListExternalProductTable({
         ),
         cell: ({ row }) => {
           const itemIndex = fields.findIndex((f) => f.id === row.original.id);
-          const expanded = row.getIsExpanded();
           return (
-            <div className="flex items-center justify-end gap-0.5">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Toggle pricing tiers"
-                onClick={row.getToggleExpandedHandler()}
-                className="text-muted-foreground"
-              >
-                <ChevronRight
-                  className={cn(
-                    "size-4 transition-transform",
-                    expanded && "rotate-90",
-                  )}
-                />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => addTierToItem(itemIndex, row.id)}
-                className="text-primary hover:text-primary hover:bg-primary/5 gap-1 whitespace-nowrap"
-              >
-                <Plus className="size-3.5" />
-                Tier
-              </Button>
+            <div className="flex items-center justify-center">
+              {/* icon plus + tooltip บอกว่าปุ่มนี้ทำอะไร */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Add pricing tier"
+                    onClick={() => addTierToItem(itemIndex, row.id)}
+                    className="text-primary hover:text-primary hover:bg-primary/5"
+                  >
+                    <Plus className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">Add pricing tier</TooltipContent>
+              </Tooltip>
             </div>
           );
         },
-        size: 130,
+        size: 72,
         enableResizing: false,
         meta: {
           expandedContent: (row: PricelistExternalDetailDto) => {

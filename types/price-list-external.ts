@@ -10,7 +10,7 @@ export type PricelistExternalDto = {
   id: string;
   pricelist_no: string;
   name: string;
-  status: "draft" | "active" | "inactive" | "expired";
+  status: "draft" | "submitted" | "active" | "inactive" | "expired";
   vendor: { id: string | null; name: string | null };
   // โรงแรมผู้ขอเสนอราคา (ผู้ยื่นเอกสารให้ vendor กรอก)
   hotel: { name: string; address: string } | null;
