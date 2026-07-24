@@ -58,8 +58,23 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   );
   const fromWizard = !!wizardData;
 
+  // Document info ribbon — buyer/requestor + department แสดงอย่างเดียว (ไม่เข้า payload),
+  // grn_date เป็น field จริง. defaultCurrency* ใช้เป็น currency เริ่มต้นของ GRN ใหม่
+  const {
+    dateFormat,
+    defaultBu,
+    data: profileData,
+    defaultCurrencyId,
+    defaultCurrencyCode,
+  } = useProfile();
+
   const defaultValues = useMemo(() => {
-    const base = getDefaultValues(goodsReceiveNote);
+    // currency default ของ BU set ตั้งแต่ getDefaultValues (mirror PO) — profile
+    // โหลดตั้งแต่ boot จึงพร้อมตอน mount; wizard override ทับทีหลังถ้ามา from wizard
+    const base = getDefaultValues(goodsReceiveNote, {
+      defaultCurrencyId,
+      defaultCurrencyCode,
+    });
     if (goodsReceiveNote) return base;
 
     if (docTypeParam) base.doc_type = docTypeParam;
@@ -75,7 +90,13 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
       base.items = wizardData.items;
     }
     return base;
-  }, [goodsReceiveNote, docTypeParam, wizardData]);
+  }, [
+    goodsReceiveNote,
+    docTypeParam,
+    wizardData,
+    defaultCurrencyId,
+    defaultCurrencyCode,
+  ]);
 
   const form = useForm<GrnFormValues>({
     resolver: zodResolver(createGrnSchema(tv, tfl)) as Resolver<GrnFormValues>,
@@ -103,10 +124,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   });
 
   const isDisabled = isView || actions.isPending;
-
-  // Document info ribbon — buyer/requestor + department แสดงอย่างเดียว (ไม่เข้า payload),
-  // grn_date เป็น field จริง
-  const { dateFormat, defaultBu, data: profileData } = useProfile();
 
   // Rebaseline dirty state หลัง compute-sync ของ location (discount/tax/net/total)
   // settle. RHF คิด isDirty จาก !deepEqual(getValues(), defaultValues) → setValue

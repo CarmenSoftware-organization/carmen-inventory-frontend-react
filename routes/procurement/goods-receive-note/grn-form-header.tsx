@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -20,7 +20,6 @@ import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
 import { formatExchangeRate } from "@/lib/currency-utils";
-import { useProfile } from "@/hooks/use-profile";
 import { useCurrency } from "@/hooks/use-currency";
 import type { GrnFormValues } from "./grn-form-schema";
 
@@ -42,7 +41,6 @@ export function GrnFormHeader({
   const t = useTranslations("procurement.goodsReceiveNote");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const { defaultCurrencyId } = useProfile();
   const errors = form.formState.errors;
 
   const vendorName = useWatch({ control: form.control, name: "vendor_name" });
@@ -62,29 +60,6 @@ export function GrnFormHeader({
   // ให้ reactive ตอนเปลี่ยนสกุลเงิน, fallback เป็น currency_name ที่โหลดมา
   const currencyCode =
     currencies.find((c) => c.id === currencyId)?.code || currencyName;
-
-  useEffect(() => {
-    if (disabled) return;
-    if (currencyId) return;
-    if (!defaultCurrencyId || currencies.length === 0) return;
-    const currency = currencies.find((c) => c.id === defaultCurrencyId);
-    if (!currency) return;
-    if (form.getValues("currency_id") === defaultCurrencyId) return;
-    // ตั้ง currency default เป็น baseline ของฟอร์ม — reset ทั้งก้อน (คงค่าที่กรอกไว้
-    // ผ่าน getValues) โดย**ไม่**ใช้ keepDirtyValues: RHF จะไม่ apply ค่าใหม่ให้ field
-    // ที่ยังไม่ dirty เมื่อ keepDirtyValues=true → currency_id ไม่ติดเลย (เคยเป็น bug
-    // currency ว่างตอน new). ส่วน setValue ตรง ๆ ก็ทำ isDirty ค้าง (RHF คิด isDirty
-    // จาก deepEqual(getValues, defaultValues)) → back เด้ง discard ทั้งที่ยังไม่แตะ.
-    // reset ธรรมดาขยับ baseline ไปพร้อมค่า currency → ติดค่า + ไม่นับ dirty. guard
-    // ด้านบนทำให้รันครั้งเดียว ตอน currency list โหลดเสร็จ (boot) ก่อน user กรอก
-    form.reset({
-      ...form.getValues(),
-      currency_id: defaultCurrencyId,
-      currency_name: currency.code,
-      exchange_rate: currency.exchange_rate,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
-  }, [currencyId, defaultCurrencyId, currencies, disabled]);
 
   const postTypeLabels: Record<string, string> = {
     ap: t("ap"),

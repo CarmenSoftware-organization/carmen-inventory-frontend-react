@@ -178,7 +178,14 @@ const objectToText = (
   return JSON.stringify(value, null, 2);
 };
 
-export function getDefaultValues(grn?: GoodsReceiveNote): GrnFormValues {
+export function getDefaultValues(
+  grn?: GoodsReceiveNote,
+  options?: {
+    /** currency default ของ BU — set เป็น currency เริ่มต้นตอนสร้าง GRN ใหม่ (mirror PO) */
+    defaultCurrencyId?: string;
+    defaultCurrencyCode?: string;
+  },
+): GrnFormValues {
   if (!grn) {
     return {
       grn_date: new Date().toISOString(),
@@ -197,8 +204,8 @@ export function getDefaultValues(grn?: GoodsReceiveNote): GrnFormValues {
       is_active: true,
       vendor_id: null,
       vendor_name: "",
-      currency_id: "",
-      currency_name: "",
+      currency_id: options?.defaultCurrencyId ?? "",
+      currency_name: options?.defaultCurrencyCode ?? "",
       exchange_rate: 1,
       exchange_rate_date: new Date().toISOString(),
       received_at: new Date().toISOString(),
