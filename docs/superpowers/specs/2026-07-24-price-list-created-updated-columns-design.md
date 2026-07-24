@@ -7,7 +7,12 @@
 ## เป้าหมาย
 
 เพิ่มคอลัมน์ **Created** และ **Updated** ในตาราง price list list โดยทั้งสองคอลัมน์
-**sort ได้** (server-side) แสดง relative time + ชื่อผู้สร้าง/แก้ไข พร้อม tooltip วันเวลาเต็ม
+**sort ได้** (server-side) แสดงวันเวลาจริง (ตาม `date_time_format` ของ BU) + ชื่อผู้สร้าง/แก้ไข
+
+> **อัปเดต (หลัง implement):** ดีไซน์เดิมแสดง relative time ("5 months ago") + tooltip
+> วันเวลาเต็ม ต่อมา user ขอเปลี่ยนเป็น **วันเวลาจริง** — cell จึงแสดง
+> `formatDate(at, dateTimeFormat)` ตรงๆ และ **ตัด tooltip ออก** (ข้อมูลซ้ำกับที่ cell แสดงแล้ว)
+> เอกสารนี้สะท้อนสถานะจริงหลังเปลี่ยน
 
 ## ผลตรวจ backend (ยืนยันแล้ว, BU = T02, local gateway :4000)
 
@@ -33,9 +38,9 @@ export interface PriceList { /* ... */ audit?: PriceListAudit; }
 
 | หัวข้อ | เลือก |
 |---|---|
-| รูปแบบแสดงผล | **Relative time + ชื่อ + tooltip** (เหมือน workflow table) |
+| รูปแบบแสดงผล | **วันเวลาจริง** (ตาม `dateTimeFormat` ของ BU) + ชื่อผู้ทำบรรทัดล่าง — ไม่มี tooltip |
 | การมองเห็นเริ่มต้น | **Default visible** (เปิดไว้เลย ปิดได้ผ่าน toggle columns) |
-| Grid/Card view | **ใส่ Updated ในการ์ดด้วย** (relative time, ไม่มี tooltip) |
+| Grid/Card view | **ใส่ Updated ในการ์ดด้วย** (วันเวลาจริง) |
 
 ## Design
 
@@ -51,25 +56,24 @@ TanStack แปลง sorting state → query param โดยใช้ `column.i
 
 **1. `routes/vendor-management/price-list/pl-audit-cell.tsx` (ไฟล์ใหม่, presentational เดี่ยว)**
 
-Cell แสดง relative time + ชื่อ + tooltip วันเวลาเต็ม ใช้ร่วมทั้งคอลัมน์ Created และ Updated
-(แยกเป็น component เดียวเพื่อกัน copy โค้ด block เดิมจาก wf-table 2 รอบ):
+Cell แสดงวันเวลาจริง + ชื่อ (2 บรรทัด, ไม่มี tooltip) ใช้ร่วมทั้งคอลัมน์ Created และ Updated
+(แยกเป็น component เดียวเพื่อกัน copy โค้ด 2 รอบ):
 
 ```tsx
 interface PlAuditCellProps {
   entry: PriceListAuditEntry | undefined;
-  locale: string;
+  dateTimeFormat: string;
 }
 // entry?.at ว่าง → แสดง "—" (muted)
-// มีค่า → บรรทัดบน = formatRelativeTime(entry.at, locale)
+// มีค่า → บรรทัดบน = formatDate(entry.at, dateTimeFormat)
 //         บรรทัดล่าง = entry.name (muted, truncate) ถ้ามี
-//         Tooltip (delayDuration=150) = new Date(entry.at).toLocaleString(locale) [· entry.name]
 ```
 
-ใช้ `formatRelativeTime` จาก `@/lib/relative-time`, `Tooltip*` จาก `@/components/ui/tooltip`
+ใช้ `formatDate` จาก `@/lib/date-utils` (รองรับ pattern เวลา เช่น `HH:mm:ss` ในตัว)
 
 **2. `routes/vendor-management/price-list/use-pl-table.tsx`**
 
-- เพิ่ม `import { useLocale } from "use-intl"` และ `const locale = useLocale()`
+- เพิ่ม `dateTimeFormat` เข้า destructure จาก `useProfile()` (มีอยู่แล้ว, default `"DD/MM/YYYY HH:mm"`)
 - เพิ่ม 2 column defs ต่อท้าย `dataColumns` (หลัง Status):
 
 ```tsx
@@ -77,7 +81,7 @@ interface PlAuditCellProps {
   id: "created_at",
   accessorFn: (row) => row.audit?.created?.at ?? "",
   header: ({ column }) => <DataGridColumnHeader column={column} title={tfl("created")} />,
-  cell: ({ row }) => <PlAuditCell entry={row.original.audit?.created} locale={locale} />,
+  cell: ({ row }) => <PlAuditCell entry={row.original.audit?.created} dateTimeFormat={dateTimeFormat} />,
   size: 160,
   meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
 },
@@ -85,7 +89,7 @@ interface PlAuditCellProps {
   id: "updated_at",
   accessorFn: (row) => row.audit?.updated?.at ?? "",
   header: ({ column }) => <DataGridColumnHeader column={column} title={tfl("updated")} />,
-  cell: ({ row }) => <PlAuditCell entry={row.original.audit?.updated} locale={locale} />,
+  cell: ({ row }) => <PlAuditCell entry={row.original.audit?.updated} dateTimeFormat={dateTimeFormat} />,
   size: 160,
   meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
 },
@@ -95,7 +99,7 @@ sortable โดยปริยาย (ไม่ตั้ง `enableSorting: fals
 
 **3. `routes/vendor-management/price-list/pl-card.tsx`**
 
-เพิ่ม 1 บรรทัดสไตล์การ์ดเดิม (icon `Clock` + label `tfl("updated")` + relative time) ใต้ Effective Period:
+เพิ่ม 1 บรรทัดสไตล์การ์ดเดิม (icon `Clock` + label `tfl("updated")` + วันเวลาจริง) ใต้ Effective Period:
 
 ```tsx
 {item.audit?.updated?.at && (
@@ -103,13 +107,13 @@ sortable โดยปริยาย (ไม่ตั้ง `enableSorting: fals
     <Clock className="text-muted-foreground mt-0.5 size-3 shrink-0" aria-hidden="true" />
     <div className="min-w-0">
       <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
-      <p className="truncate font-semibold">{formatRelativeTime(item.audit.updated.at, locale)}</p>
+      <p className="truncate font-semibold">{formatDate(item.audit.updated.at, dateTimeFormat)}</p>
     </div>
   </div>
 )}
 ```
 
-ต้อง import `Clock` จาก `lucide-react`, `formatRelativeTime`, และ `useLocale` (card ไม่มี tooltip — เหมาะกับ touch)
+ต้อง import `Clock` จาก `lucide-react`; `formatDate` มี import อยู่แล้ว; เพิ่ม `dateTimeFormat` เข้า destructure จาก `useProfile()`
 
 ## i18n (ไม่ต้องแก้)
 
@@ -135,6 +139,6 @@ sortable โดยปริยาย (ไม่ตั้ง `enableSorting: fals
 - `bun test:run` — เทสเดิมทั้งหมดต้องเขียว (ไม่เขียน .test ใหม่ ตามกฎ global)
 - **Browser จริง** (BU T02, admin@zebra.com):
   - คลิก header Created/Updated → เรียงถูก + toggle asc↔desc ได้ + network ส่ง `sort=created_at:...`
-  - Tooltip hover แสดงวันเวลาเต็ม + ชื่อ
-  - Card view (มือถือ) แสดงบรรทัด Updated
+  - Cell แสดงวันเวลาจริง (เช่น `2026-03-03 17:38:45`) + ชื่อผู้ทำบรรทัดล่าง
+  - Card view (มือถือ) แสดงบรรทัด Updated เป็นวันเวลาจริง
   - เช็ค console ไม่มี error
