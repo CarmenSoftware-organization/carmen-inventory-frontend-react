@@ -4,7 +4,9 @@ import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column
 import { CellAction } from "@/components/ui/cell-action";
 import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { columnSkeletons } from "@/components/ui/data-grid/columns";
+import { columnSkeletons, statusColumn } from "@/components/ui/data-grid/columns";
+import { AuditCell } from "@/components/share/audit-cell";
+import { useProfile } from "@/hooks/use-profile";
 import type { Vendor } from "@/types/vendor";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -27,6 +29,7 @@ export function useVendorTable({
   onDelete,
 }: UseVendorTableOptions) {
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
 
   const columns: ColumnDef<Vendor>[] = [
     {
@@ -82,6 +85,39 @@ export function useVendorTable({
         skeleton: columnSkeletons.text,
       },
     },
+    // status column แทรกเองก่อน created/updated (useConfigTable ส่ง hideStatus)
+    statusColumn<Vendor>(),
+    {
+      // id = ชื่อคอลัมน์จริงของ backend เพื่อให้ sort ส่ง field ถูกต้อง
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
+    },
   ];
 
   return useConfigTable<Vendor>({
@@ -91,5 +127,6 @@ export function useVendorTable({
     params,
     tableConfig,
     onDelete,
+    hideStatus: true,
   });
 }
