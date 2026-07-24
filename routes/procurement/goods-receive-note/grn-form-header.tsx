@@ -70,20 +70,19 @@ export function GrnFormHeader({
     const currency = currencies.find((c) => c.id === defaultCurrencyId);
     if (!currency) return;
     if (form.getValues("currency_id") === defaultCurrencyId) return;
-    // reset baseline (ไม่ใช่ setValue) ให้ค่า currency default เป็น default ของฟอร์ม
-    // — RHF คิด isDirty จาก deepEqual(getValues, defaultValues) ทั้งฟอร์ม; setValue
-    // ค่าที่ต่างจาก default จะค้าง dirty ทั้งที่ยังไม่ได้กรอก → back ติด discard
-    // (ดู pr-form.tsx). ใช้ formState.defaultValues เป็น baseline (component นี้เป็น
-    // ลูก ไม่มี defaultValues ตรง ๆ); keepDirtyValues คงค่าที่ผู้ใช้แก้ไว้
-    form.reset(
-      {
-        ...form.formState.defaultValues,
-        currency_id: defaultCurrencyId,
-        currency_name: currency.code,
-        exchange_rate: currency.exchange_rate,
-      },
-      { keepDirtyValues: true },
-    );
+    // ตั้ง currency default เป็น baseline ของฟอร์ม — reset ทั้งก้อน (คงค่าที่กรอกไว้
+    // ผ่าน getValues) โดย**ไม่**ใช้ keepDirtyValues: RHF จะไม่ apply ค่าใหม่ให้ field
+    // ที่ยังไม่ dirty เมื่อ keepDirtyValues=true → currency_id ไม่ติดเลย (เคยเป็น bug
+    // currency ว่างตอน new). ส่วน setValue ตรง ๆ ก็ทำ isDirty ค้าง (RHF คิด isDirty
+    // จาก deepEqual(getValues, defaultValues)) → back เด้ง discard ทั้งที่ยังไม่แตะ.
+    // reset ธรรมดาขยับ baseline ไปพร้อมค่า currency → ติดค่า + ไม่นับ dirty. guard
+    // ด้านบนทำให้รันครั้งเดียว ตอน currency list โหลดเสร็จ (boot) ก่อน user กรอก
+    form.reset({
+      ...form.getValues(),
+      currency_id: defaultCurrencyId,
+      currency_name: currency.code,
+      exchange_rate: currency.exchange_rate,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
   }, [currencyId, defaultCurrencyId, currencies, disabled]);
 
