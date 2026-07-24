@@ -18,6 +18,7 @@ export interface GroupableDetail {
   readonly tax_rate: number | string;
   readonly lead_time_days?: number | string | null;
   readonly is_preferred?: boolean;
+  readonly note?: string | null;
 }
 
 export type DetailRef = GroupableDetail;

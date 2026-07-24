@@ -8,6 +8,8 @@ import { buildProductGroups, type GroupableDetail } from "./pl-product-grouping"
 interface PLProductGroupedViewProps {
   readonly detailRefs: readonly GroupableDetail[];
   readonly tfl: (key: string) => string;
+  /** โชว์คอลัมน์ note ต่อ tier — เปิดเฉพาะ price-list ภายใน (ไม่ใช่ portal) */
+  readonly showNote?: boolean;
 }
 
 /**
@@ -19,6 +21,7 @@ interface PLProductGroupedViewProps {
 export function PLProductGroupedView({
   detailRefs,
   tfl,
+  showNote = false,
 }: PLProductGroupedViewProps) {
   const groups = useMemo(() => buildProductGroups(detailRefs), [detailRefs]);
 
@@ -33,6 +36,7 @@ export function PLProductGroupedView({
             <Th className="w-24 text-right">{tfl("pwt")}</Th>
             <Th className="w-20 text-right">{tfl("tax")}</Th>
             <Th className="w-24 text-right">{tfl("amount")}</Th>
+            {showNote && <Th className="text-left">{tfl("note")}</Th>}
           </tr>
         </thead>
         <tbody>
@@ -116,6 +120,16 @@ export function PLProductGroupedView({
                   >
                     {amount.toFixed(2)}
                   </Td>
+                  {showNote && (
+                    <Td
+                      className={cn(
+                        "text-muted-foreground align-middle",
+                        tierClass,
+                      )}
+                    >
+                      {tier.note || "—"}
+                    </Td>
+                  )}
                 </tr>
               );
             }),
