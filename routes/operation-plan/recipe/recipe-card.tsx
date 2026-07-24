@@ -9,6 +9,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Recipe } from "@/types/recipe";
 import type { Cuisine } from "@/types/cuisine";
 import type { RecipeCategory } from "@/types/recipe-category";
@@ -43,6 +45,8 @@ interface RecipeCardProps {
 export default function RecipeCard({ item, index, cuisines, categories, onEdit }: RecipeCardProps) {
   const t = useTranslations("operationPlan.recipe");
   const ts = useTranslations("status");
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
   const cuisineName = cuisines.find((c) => c.id === item.cuisine_id)?.name;
   const categoryName = categories.find((c) => c.id === item.category_id)?.name;
   const totalTime = (item.prep_time ?? 0) + (item.cook_time ?? 0);
@@ -123,6 +127,17 @@ export default function RecipeCard({ item, index, cuisines, categories, onEdit }
             />
             <span className="text-muted-foreground">
               {totalTime} {t("minShort")}
+            </span>
+          </div>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-center gap-1.5">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
             </span>
           </div>
         )}
