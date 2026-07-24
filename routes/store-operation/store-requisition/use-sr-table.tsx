@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
+import { AuditCell } from "@/components/share/audit-cell";
 import {
   selectColumn,
   indexColumn,
@@ -42,7 +43,7 @@ export function useStoreRequisitionTable({
   onDelete,
 }: UseStoreRequisitionTableOptions) {
   "use no memo";
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
@@ -177,6 +178,37 @@ export function useStoreRequisitionTable({
         cellClassName: "text-center",
       },
     },
+    {
+      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
+    },
   ];
 
   const allColumns: ColumnDef<StoreRequisition>[] = [
@@ -190,6 +222,7 @@ export function useStoreRequisitionTable({
     data: items,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });
