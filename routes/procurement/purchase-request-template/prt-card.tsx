@@ -1,8 +1,10 @@
-import { FileText, GitBranch } from "lucide-react";
+import { Clock, FileText, GitBranch } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { formatDate } from "@/lib/date-utils";
+import { useProfile } from "@/hooks/use-profile";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
 
 interface PrtCardProps {
@@ -18,6 +20,7 @@ interface PrtCardProps {
  */
 export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
   return (
     <Card
       role="button"
@@ -72,6 +75,20 @@ export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
             <div className="min-w-0">
               <p className="text-muted-foreground text-xs">{tfl("department")}</p>
               <p className="truncate font-semibold">{item.department_name}</p>
+            </div>
+          </div>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-start gap-2">
+            <Clock
+              className="text-muted-foreground mt-0.5 size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
+              <p className="truncate font-semibold">
+                {formatDate(item.audit.updated.at, dateTimeFormat)}
+              </p>
             </div>
           </div>
         )}

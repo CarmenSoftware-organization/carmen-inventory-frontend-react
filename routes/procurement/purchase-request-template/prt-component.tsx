@@ -41,6 +41,8 @@ import { Button } from "@/components/ui/button";
 import { usePrt, useDeletePrt, useExportPrt } from "@/hooks/use-prt";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -72,6 +74,7 @@ export default function PrtComponent() {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { dateTimeFormat } = useProfile();
   const deletePrt = useDeletePrt();
   const { exportPrt, isExporting } = useExportPrt();
   const { params, search, setSearch, filter, setFilter, tableConfig } =
@@ -140,6 +143,22 @@ export default function PrtComponent() {
             header: tfl("status"),
             value: (r) => (r.is_active ? ts("active") : ts("inactive")),
             width: 10,
+          },
+          {
+            header: tfl("created"),
+            value: (r) =>
+              r.audit?.created?.at
+                ? formatDate(r.audit.created.at, dateTimeFormat)
+                : "",
+            width: 18,
+          },
+          {
+            header: tfl("updated"),
+            value: (r) =>
+              r.audit?.updated?.at
+                ? formatDate(r.audit.updated.at, dateTimeFormat)
+                : "",
+            width: 18,
           },
         ],
       });
