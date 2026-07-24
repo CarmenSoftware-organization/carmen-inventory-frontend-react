@@ -1,4 +1,4 @@
-import { Coins, CalendarClock } from "lucide-react";
+import { Coins, CalendarClock, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { PL_STATUS_TONE } from "@/constant/price-list";
@@ -10,6 +10,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { PriceListTemplate } from "@/types/price-list-template";
 
 interface PltCardProps {
@@ -29,6 +31,7 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const { dateTimeFormat } = useProfile();
 
   return (
     <Card
@@ -71,7 +74,7 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
 
       <Separator />
 
-      <CardContent className="flex items-center gap-4 px-4 py-3 text-xs">
+      <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 text-xs">
         {item.currency?.code && (
           <div className="flex min-w-0 items-center gap-1.5">
             <Coins
@@ -90,6 +93,18 @@ export default function PltCard({ item, index, onEdit }: PltCardProps) {
             />
             <span className="truncate font-semibold">
               {t("validityDays", { count: item.validity_period })}
+            </span>
+          </div>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex min-w-0 items-center gap-1.5">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground">{tfl("updated")}:</span>
+            <span className="truncate font-semibold">
+              {formatDate(item.audit.updated.at, dateTimeFormat)}
             </span>
           </div>
         )}

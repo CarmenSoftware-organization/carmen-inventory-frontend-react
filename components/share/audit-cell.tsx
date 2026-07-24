@@ -1,20 +1,20 @@
 import { formatDate } from "@/lib/date-utils";
-import type { PriceListAuditEntry } from "@/types/price-list";
+import type { AuditEntry } from "@/types/audit";
 
-interface PlAuditCellProps {
-  readonly entry: PriceListAuditEntry | undefined;
+interface AuditCellProps {
+  readonly entry: AuditEntry | undefined;
   readonly dateTimeFormat: string;
 }
 
 /**
- * Cell แสดง audit entry (created/updated) ในตาราง price list —
+ * Cell แสดง audit entry (created/updated) ในตาราง list —
  * วันเวลาจริง (ตาม dateTimeFormat ของ BU) + ชื่อผู้ทำ
  * @param props - entry (audit.created หรือ audit.updated) และ dateTimeFormat ปัจจุบัน
  * @returns React element ของ cell; แสดง "—" เมื่อไม่มีข้อมูล audit
  * @example
- * <PlAuditCell entry={row.original.audit?.created} dateTimeFormat={dateTimeFormat} />
+ * <AuditCell entry={row.original.audit?.created} dateTimeFormat={dateTimeFormat} />
  */
-export function PlAuditCell({ entry, dateTimeFormat }: PlAuditCellProps) {
+export function AuditCell({ entry, dateTimeFormat }: AuditCellProps) {
   if (!entry?.at) {
     return <span className="text-muted-foreground text-xs">—</span>;
   }
