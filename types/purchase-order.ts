@@ -1,5 +1,6 @@
 import type { ItemMoneyFields } from "./shared-item";
 import type { WorkflowHistoryEntry } from "./purchase-request";
+import type { Audit } from "./audit";
 
 export enum PO_STATUS {
   DRAFT = "draft",
@@ -191,8 +192,11 @@ export interface PurchaseOrder {
   note: string;
   doc_version: number;
   total_amount: number;
+  // flat fields ยังใช้อยู่ในหน้า edit (po-form → PoWorkflowHistory);
+  // list endpoint จะไม่ส่งมา (serializer omit) แต่ enrich เป็น audit object แทน
   created_at: string;
   updated_at: string;
+  audit?: Audit;
   purchase_order_detail: PurchaseOrderDetail[];
 }
 
