@@ -74,9 +74,16 @@ export function useGrnFormActions({
     isPending: isPending || isActionPending,
   });
 
+  // ระหว่าง submit (จนกว่าจะ navigate/เข้า view) ปิด nav guard — ไม่งั้น sentinel
+  // history entry ที่ guard ดันไว้จะทำให้ navigate(replace) หลัง create ไม่กิน /new
+  // จริง → /new ค้างใน stack → back เด้งกลับ /new (ดู finalize ของ create)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
   // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
-  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
+  );
   const navDiscardDialogProps = {
     open: navGuard.isOpen,
     onOpenChange: (o: boolean) => {
@@ -225,6 +232,7 @@ export function useGrnFormActions({
       }
 
       if (Object.keys(patchPayload).length === 0) {
+        setIsSubmitting(false);
         setMode("view");
         return;
       }
@@ -242,16 +250,19 @@ export function useGrnFormActions({
             syncDocVersions(res);
             const finalize = () => {
               toast.success(tt("updateSuccess", { entity: t("entity") }));
+              setIsSubmitting(false);
               setMode("view");
             };
             if (values.doc_status === "saved") {
               saveGrn.mutate(goodsReceiveNote.id, {
                 onSuccess: finalize,
+                onError: () => setIsSubmitting(false),
               });
             } else {
               finalize();
             }
           },
+          onError: () => setIsSubmitting(false),
         },
       );
     } else if (isAdd) {
@@ -263,27 +274,36 @@ export function useGrnFormActions({
           const finalize = () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             if (newId) {
+              // guard ถูกปิดตั้งแต่กด submit (isSubmitting) → sentinel ที่เคยดันไว้ที่
+              // /new ถูก teardown ลบไปแล้ว → replace แทน /new จริง ไม่ใช่ sentinel →
+              // stack เหลือ [list, /:id] → back ที่หน้า detail = กลับ list. route /:id
+              // mount GrnForm เป็น view mode เอง (ไม่ setMode ที่นี่ เลี่ยง churn)
               navigate(`/procurement/goods-receive-note/${newId}`, {
                 replace: true,
               });
-              setMode("view");
             }
           };
           if (values.doc_status === "saved" && newId) {
             saveGrn.mutate(newId, {
               onSuccess: finalize,
+              onError: () => setIsSubmitting(false),
             });
           } else {
             finalize();
           }
         },
+        onError: () => setIsSubmitting(false),
       });
     }
   };
 
   const handleSubmitWithStatus = (status: string) => {
     form.setValue("doc_status", status, { shouldDirty: true });
+    // ปิด guard ตั้งแต่ก่อนยิง mutation → sentinel ถูกลบระหว่างรอ network → พอ
+    // create สำเร็จแล้ว navigate จะ replace /new จริง ไม่ใช่ sentinel
+    setIsSubmitting(true);
     form.handleSubmit(onSubmit, (errs) => {
+      setIsSubmitting(false); // validation ไม่ผ่าน → guard กลับมาเฝ้าเหมือนเดิม
       if (errs.items?.message) {
         toast.error(errs.items.message);
       }
