@@ -98,10 +98,7 @@ function RowPWT({
   );
 }
 
-/**
- * Tax cell — เลือก tax profile + โชว์ tax amount ที่คำนวณได้ในเซลล์เดียว (merge)
- * tax amount = price(gross) − pwt = ส่วนต่างภาษี · watch price + rate ให้ update สด
- */
+/** Tax profile select ของ row — sync name + rate เมื่อเลือก */
 function TaxProfileCell({
   form,
   index,
@@ -112,6 +109,49 @@ function TaxProfileCell({
   taxProfiles: PricelistExternalTaxProfileOption[];
 }) {
   "use no memo";
+  return (
+    <Controller
+      control={form.control}
+      name={`tb_pricelist_detail.${index}.tax_profile_id`}
+      render={({ field }) => (
+        <FieldSelect
+          value={field.value}
+          onValueChange={(id) => {
+            field.onChange(id);
+            const tp = taxProfiles.find((t) => t.id === id);
+            form.setValue(
+              `tb_pricelist_detail.${index}.tax_profile_name`,
+              tp?.name ?? null,
+            );
+            form.setValue(
+              `tb_pricelist_detail.${index}.tax_rate`,
+              tp?.tax_rate ?? 0,
+            );
+          }}
+          placeholder="—"
+          className="h-9 w-full text-sm"
+        >
+          <SelectContent>
+            {taxProfiles.map((tp) => (
+              <SelectItem key={tp.id} value={tp.id}>
+                {tp.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </FieldSelect>
+      )}
+    />
+  );
+}
+
+/** Tax amount ของ row = price(gross) − pwt = ส่วนต่างภาษี · computed สดจาก rate */
+function RowTaxAmount({
+  form,
+  index,
+}: {
+  form: UseFormReturn<PricelistExternalDto>;
+  index: number;
+}) {
   const price = useWatch({
     control: form.control,
     name: `tb_pricelist_detail.${index}.price`,
@@ -122,48 +162,10 @@ function TaxProfileCell({
   });
   const p = Number(price) || 0;
   const r = Number(rate) || 0;
-  const taxAmt = round2(p - p / (1 + r / 100));
-
   return (
-    // บรรทัดเดียว: tax amount (คำนวณ) ด้านหน้า · tax profile select ด้านหลัง
-    <div className="flex items-center gap-2">
-      <span className="text-foreground shrink-0 text-sm tabular-nums">
-        {fmtMoney(taxAmt)}
-      </span>
-      <div className="min-w-0 flex-1">
-        <Controller
-          control={form.control}
-          name={`tb_pricelist_detail.${index}.tax_profile_id`}
-          render={({ field }) => (
-            <FieldSelect
-              value={field.value}
-              onValueChange={(id) => {
-                field.onChange(id);
-                const tp = taxProfiles.find((t) => t.id === id);
-                form.setValue(
-                  `tb_pricelist_detail.${index}.tax_profile_name`,
-                  tp?.name ?? null,
-                );
-                form.setValue(
-                  `tb_pricelist_detail.${index}.tax_rate`,
-                  tp?.tax_rate ?? 0,
-                );
-              }}
-              placeholder="—"
-              className="h-9 w-full text-sm"
-            >
-              <SelectContent>
-                {taxProfiles.map((tp) => (
-                  <SelectItem key={tp.id} value={tp.id}>
-                    {tp.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </FieldSelect>
-          )}
-        />
-      </div>
-    </div>
+    <span className="text-foreground text-sm tabular-nums">
+      {fmtMoney(round2(p - p / (1 + r / 100)))}
+    </span>
   );
 }
 
@@ -396,7 +398,7 @@ export default function PriceListExternalProductTable({
         cell: ({ row }) => {
           const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
           // taxProfiles (prop) มาจาก endpoint แยก — portal public เรียก auth lookup
-          // ไม่ได้ · เซลล์รวม select + tax amount ที่คำนวณไว้ในตัวเดียว
+          // ไม่ได้ · เซลล์นี้เป็น select อย่างเดียว (tax amount แยกไปคอลัมน์หลัง PWT)
           return (
             <TaxProfileCell
               form={form}
@@ -405,7 +407,7 @@ export default function PriceListExternalProductTable({
             />
           );
         },
-        size: 218,
+        size: 160,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
@@ -424,6 +426,25 @@ export default function PriceListExternalProductTable({
           return <RowPWT form={form} index={fieldIndex} />;
         },
         size: 150,
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: false,
+        meta: { cellClassName: "text-right", headerClassName: "text-right" },
+      },
+      {
+        id: "tax_amount",
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            title="Tax Amount"
+            visibility={false}
+            column={column}
+          />
+        ),
+        cell: ({ row }) => {
+          const fieldIndex = fields.findIndex((f) => f.id === row.original.id);
+          return <RowTaxAmount form={form} index={fieldIndex} />;
+        },
+        size: 128,
         enableSorting: false,
         enableHiding: false,
         enableResizing: false,
