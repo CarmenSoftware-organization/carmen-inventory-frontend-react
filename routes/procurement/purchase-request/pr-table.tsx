@@ -280,6 +280,8 @@ export function usePurchaseRequestTable({
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
+    // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });
