@@ -3,6 +3,7 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
+import { AuditCell } from "@/components/share/audit-cell";
 import { Badge } from "@/components/ui/badge";
 import {
   selectColumn,
@@ -13,6 +14,7 @@ import {
 import type { Product } from "@/types/product";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useProfile } from "@/hooks/use-profile";
 import { getProductStatusLabel } from "@/constant/product-status";
 
 interface UseProductTableOptions {
@@ -50,6 +52,7 @@ export function useProductTable({
 
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const { dateTimeFormat } = useProfile();
 
   const dataColumns: ColumnDef<Product>[] = [
     {
@@ -148,6 +151,37 @@ export function useProductTable({
         skeleton: columnSkeletons.badge,
       },
     },
+    {
+      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
+    },
   ];
 
   const allColumns: ColumnDef<Product>[] = [
@@ -161,6 +195,7 @@ export function useProductTable({
     data: products,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

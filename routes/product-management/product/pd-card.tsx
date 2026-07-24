@@ -1,8 +1,10 @@
-import { BoxIcon, Tag } from "lucide-react";
+import { BoxIcon, Tag, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Product } from "@/types/product";
 
 interface ProductCardProps {
@@ -27,6 +29,7 @@ interface ProductCardProps {
 export default function ProductCard({ item, index, onEdit }: ProductCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const { dateTimeFormat } = useProfile();
   const isActive = item.product_status_type === "active";
 
   return (
@@ -104,6 +107,20 @@ export default function ProductCard({ item, index, onEdit }: ProductCardProps) {
               </p>
               <p className="truncate font-semibold">
                 {item.product_item_group.name}
+              </p>
+            </div>
+          </div>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-start gap-2">
+            <Clock
+              className="text-muted-foreground mt-0.5 size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
+              <p className="truncate font-semibold">
+                {formatDate(item.audit.updated.at, dateTimeFormat)}
               </p>
             </div>
           </div>

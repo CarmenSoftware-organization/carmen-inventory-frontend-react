@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { IntlProvider } from "use-intl";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import en from "@/messages/en.json";
 import type { ParamsDto } from "@/types/params";
 import { useProductTable } from "./use-product-table";
@@ -21,11 +22,16 @@ const tableConfig = {
   onSortingChange: () => {},
 };
 
+// useProductTable uses useProfile (needs a QueryClientProvider) besides intl.
+const queryClient = new QueryClient();
+
 function wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <IntlProvider locale="en" messages={en}>
-      {children}
-    </IntlProvider>
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en" messages={en}>
+        {children}
+      </IntlProvider>
+    </QueryClientProvider>
   );
 }
 

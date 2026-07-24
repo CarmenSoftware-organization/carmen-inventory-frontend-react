@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { UseFormReturn } from "react-hook-form";
 
 import type { TranslationFn } from "@/lib/i18n-schema";
+import type { Audit } from "./audit";
 
 export type ProductStatusType = "active" | "inactive";
 
@@ -47,8 +48,8 @@ export interface Product {
   product_item_group: { id?: string; name: string } | null;
   product_sub_category: { id?: string; name: string } | null;
   product_category: { id?: string; name: string } | null;
-  created_at: string;
-  updated_at: string;
+  // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
+  audit?: Audit;
 }
 
 export interface ProductDetail extends Product {
