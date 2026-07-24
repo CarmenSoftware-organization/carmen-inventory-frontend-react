@@ -57,13 +57,16 @@ export function usePriceListTable({
 
   const dataColumns: ColumnDef<PriceList>[] = [
     {
-      accessorKey: "no",
+      // id = ชื่อ column จริงของ backend (`pricelist_no`) เพื่อให้ sort ส่ง field ถูกต้อง;
+      // response ส่งค่ามาใน field `no` (backend alias) จึงอ่านค่าจาก row.no
+      id: "pricelist_no",
+      accessorFn: (row) => row.no,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("no")} />
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
-          {row.getValue("no")}
+          {row.original.no}
         </CellAction>
       ),
       size: 160,

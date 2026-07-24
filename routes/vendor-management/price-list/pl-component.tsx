@@ -68,7 +68,7 @@ export default function PriceListComponent() {
   const deletePriceList = useDeletePriceList();
   const { exportPriceList, isExporting } = useExportPriceList();
   const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
+    useDataGridState({ defaultSort: "pricelist_no:asc" });
   const [vendorFilter, setVendorFilter] = useURL("vendor");
 
   const { data: vendorData } = useVendor({ perpage: -1 });
