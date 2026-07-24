@@ -372,7 +372,6 @@
     "critical": "Critical",
     "warning": "Warning",
     "low": "Low",
-    "submitted": "Submitted",
     "published": "Published",
     "archived": "Archived",
     "easy": "Easy",
@@ -1598,7 +1597,11 @@
         "posting": "Posting",
         "postingDesc": "Export format and how often postings are sent.",
         "exportFormat": "Export format",
-        "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
+        "formatOption": {
+          "csv": "CSV",
+          "xml": "XML",
+          "json": "JSON"
+        },
         "postingFrequency": "Posting frequency",
         "carmenGl": {
           "desc": "Connection to the legacy Carmen 4 accounting API.",
@@ -1861,6 +1864,7 @@
       "removeProductTitle": "Remove Product",
       "removeProductConfirm": "Removing this product will delete all of its MOQ tiers. Continue?",
       "qty": "Qty",
+      "moq": "MOQ",
       "unit": "Unit",
       "product": "Product",
       "notePlaceholder": "Optional note (e.g. weekly draw)",

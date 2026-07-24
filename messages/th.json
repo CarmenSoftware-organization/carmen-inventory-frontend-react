@@ -372,7 +372,6 @@
     "critical": "วิกฤต",
     "warning": "เตือน",
     "low": "ต่ำ",
-    "submitted": "ส่งแล้ว",
     "published": "เผยแพร่",
     "archived": "เก็บถาวร",
     "easy": "ง่าย",
@@ -1598,7 +1597,11 @@
         "posting": "การส่งข้อมูล",
         "postingDesc": "รูปแบบไฟล์และความถี่ในการส่ง",
         "exportFormat": "รูปแบบไฟล์",
-        "formatOption": { "csv": "CSV", "xml": "XML", "json": "JSON" },
+        "formatOption": {
+          "csv": "CSV",
+          "xml": "XML",
+          "json": "JSON"
+        },
         "postingFrequency": "ความถี่ในการส่ง",
         "carmenGl": {
           "desc": "การเชื่อมต่อกับ API ระบบบัญชี Carmen 4 (legacy)",
@@ -1856,6 +1859,7 @@
       "removeProductTitle": "ลบสินค้า",
       "removeProductConfirm": "การลบสินค้านี้จะลบระดับ MOQ ทั้งหมดด้วย ดำเนินการต่อ?",
       "qty": "จำนวน",
+      "moq": "MOQ",
       "unit": "หน่วย",
       "product": "สินค้า",
       "notePlaceholder": "หมายเหตุ (เช่น ส่งรายสัปดาห์)",

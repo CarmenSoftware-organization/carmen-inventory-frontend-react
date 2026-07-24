@@ -80,7 +80,7 @@ export function useProductLabels(
     minimumOrder: t("minimumOrder"),
     tierSingular: t("tierSingular"),
     tierPlural: t("tierPlural"),
-    qty: t("qty"),
+    qty: t("moq"),
     unit: t("unit"),
     notePlaceholder: t("notePlaceholder"),
     product: t("product"),
