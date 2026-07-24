@@ -1,12 +1,11 @@
 import { CalendarDays, Clock, Store } from "lucide-react";
-import { useTranslations, useLocale } from "use-intl";
+import { useTranslations } from "use-intl";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { PL_STATUS_TONE } from "@/constant/price-list";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { formatRelativeTime } from "@/lib/relative-time";
 import type { PriceList } from "@/types/price-list";
 
 interface PriceListCardProps {
@@ -25,8 +24,7 @@ interface PriceListCardProps {
 export default function PriceListCard({ item, index, onEdit }: PriceListCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const { dateFormat } = useProfile();
-  const locale = useLocale();
+  const { dateFormat, dateTimeFormat } = useProfile();
 
   const formatPeriod = (period: string): string => {
     const parts = period.split(" - ");
@@ -108,7 +106,7 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
             <div className="min-w-0">
               <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
               <p className="truncate font-semibold">
-                {formatRelativeTime(item.audit.updated.at, locale)}
+                {formatDate(item.audit.updated.at, dateTimeFormat)}
               </p>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { useTranslations, useLocale } from "use-intl";
+import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
@@ -43,8 +43,7 @@ export function usePriceListTable({
   onDelete,
 }: UsePriceListTableOptions) {
   "use no memo";
-  const { dateFormat } = useProfile();
-  const locale = useLocale();
+  const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
@@ -137,7 +136,10 @@ export function usePriceListTable({
         <DataGridColumnHeader column={column} title={tfl("created")} />
       ),
       cell: ({ row }) => (
-        <PlAuditCell entry={row.original.audit?.created} locale={locale} />
+        <PlAuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
       ),
       size: 160,
       meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
@@ -149,7 +151,10 @@ export function usePriceListTable({
         <DataGridColumnHeader column={column} title={tfl("updated")} />
       ),
       cell: ({ row }) => (
-        <PlAuditCell entry={row.original.audit?.updated} locale={locale} />
+        <PlAuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
       ),
       size: 160,
       meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
