@@ -1,4 +1,4 @@
-import { CalendarDays, MapPin, Package, Tag } from "lucide-react";
+import { CalendarDays, MapPin, Package, Tag, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -30,7 +30,8 @@ interface IaCardProps {
 
 export default function IaCard({ item, index, onEdit }: IaCardProps) {
   const tfl = useTranslations("field");
-  const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
+  const { dateFormat, amountFormat, defaultCurrencyCode, dateTimeFormat } =
+    useProfile();
 
   const typeKey = getAdjustmentType(item);
   const isStockIn = typeKey === "stock-in";
@@ -149,6 +150,17 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             />
             <span className="text-muted-foreground truncate">
               {item.location_name}
+            </span>
+          </div>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
             </span>
           </div>
         )}
