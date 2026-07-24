@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import {
   useFieldArray,
+  useFormState,
   useWatch,
   type Control,
   type UseFormReturn,
@@ -89,6 +90,29 @@ const PoAddButton = memo(function PoAddButton({
     <Button type="button" size="xs" disabled={!vendorId} onClick={onOpen}>
       <Plus aria-hidden="true" /> {hasItems ? t("addMorePo") : t("addFromPo")}
     </Button>
+  );
+});
+
+/**
+ * error ระดับ array ของ items (เช่น "ต้องมีอย่างน้อย 1 รายการ") — subscribe errors
+ * เองในคอมโพเนนต์ย่อยนี้ เพื่อ**ไม่ให้ GrnItemTable อ่าน form.formState.errors
+ * โดยตรง** ซึ่งจะ subscribe แล้ว re-render ทั้งตารางทุกครั้งที่ validation รัน (เช่น
+ * setValue discount/tax แบบ shouldValidate) → columns/groups recompute → product
+ * lookup remount แล้วเด้ง focus. แยกออกมาแล้ว GrnItemTable นิ่ง ไม่ churn ตอนพิมพ์
+ */
+const ItemsArrayError = memo(function ItemsArrayError({
+  control,
+}: {
+  control: Control<GrnFormValues>;
+}) {
+  "use no memo";
+  const { errors } = useFormState({ control, name: "items" });
+  const message = errors.items?.message;
+  if (!message) return null;
+  return (
+    <p className="text-destructive text-xs" role="alert">
+      {message}
+    </p>
   );
 });
 
@@ -245,8 +269,6 @@ export function GrnItemTable({
       />
     ));
 
-  const itemsError = form.formState.errors.items?.message;
-
   return (
     <div className="space-y-2 pt-2">
       <div className="flex flex-wrap items-center justify-end gap-1.5">
@@ -273,11 +295,7 @@ export function GrnItemTable({
         {addAction}
       </div>
 
-      {itemsError && (
-        <p className="text-destructive text-xs" role="alert">
-          {itemsError}
-        </p>
-      )}
+      <ItemsArrayError control={form.control} />
 
       {/* compute sync — 1 ต่อ location index, เขียน derived discount/tax/net/total กลับ form */}
       {itemFields.map((item, i) => (
