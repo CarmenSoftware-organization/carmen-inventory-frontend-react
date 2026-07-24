@@ -1,6 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { useTranslations } from "use-intl";
+import { useTranslations, useLocale } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
@@ -16,6 +16,7 @@ import { formatDate } from "@/lib/date-utils";
 import type { PriceList } from "@/types/price-list";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
+import { PlAuditCell } from "./pl-audit-cell";
 
 interface UsePriceListTableOptions {
   priceLists: PriceList[];
@@ -43,6 +44,7 @@ export function usePriceListTable({
 }: UsePriceListTableOptions) {
   "use no memo";
   const { dateFormat } = useProfile();
+  const locale = useLocale();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
@@ -127,6 +129,30 @@ export function usePriceListTable({
         cellClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
+    },
+    {
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <PlAuditCell entry={row.original.audit?.created} locale={locale} />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <PlAuditCell entry={row.original.audit?.updated} locale={locale} />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
     },
   ];
 
