@@ -11,6 +11,10 @@ export function PltFormDialogs({
   removeDetailIndex,
   setRemoveDetailIndex,
   onConfirmRemoveTier,
+  removeProductId,
+  removeProductName,
+  setRemoveProductId,
+  onConfirmRemoveProduct,
 }: {
   readonly priceListTemplate?: PriceListTemplate;
   readonly showDelete: boolean;
@@ -20,6 +24,10 @@ export function PltFormDialogs({
   readonly removeDetailIndex: number | null;
   readonly setRemoveDetailIndex: (i: number | null) => void;
   readonly onConfirmRemoveTier: () => void;
+  readonly removeProductId: string | null;
+  readonly removeProductName: string;
+  readonly setRemoveProductId: (id: string | null) => void;
+  readonly onConfirmRemoveProduct: () => void;
 }) {
   const t = useTranslations("vendorManagement.priceListTemplate");
 
@@ -46,6 +54,16 @@ export function PltFormDialogs({
         title={t("removeTierTitle")}
         description={t("removeTierConfirm")}
         onConfirm={onConfirmRemoveTier}
+      />
+
+      <DeleteDialog
+        open={removeProductId !== null}
+        onOpenChange={(o) => {
+          if (!o) setRemoveProductId(null);
+        }}
+        title={t("removeProductTitle", { name: removeProductName })}
+        description={t("removeProductConfirm")}
+        onConfirm={onConfirmRemoveProduct}
       />
     </>
   );

@@ -1861,7 +1861,7 @@
       "removeTierTitle": "Remove MOQ Tier",
       "removeTierConfirm": "Are you sure you want to remove this MOQ tier?",
       "removeProduct": "Remove product",
-      "removeProductTitle": "Remove Product",
+      "removeProductTitle": "Remove Product \"{name}\"",
       "removeProductConfirm": "Removing this product will delete all of its MOQ tiers. Continue?",
       "qty": "Qty",
       "moq": "MOQ",

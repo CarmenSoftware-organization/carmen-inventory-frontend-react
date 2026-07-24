@@ -1856,7 +1856,7 @@
       "removeTierTitle": "ลบระดับ MOQ",
       "removeTierConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบระดับ MOQ นี้?",
       "removeProduct": "ลบสินค้า",
-      "removeProductTitle": "ลบสินค้า",
+      "removeProductTitle": "ลบสินค้า \"{name}\"",
       "removeProductConfirm": "การลบสินค้านี้จะลบระดับ MOQ ทั้งหมดด้วย ดำเนินการต่อ?",
       "qty": "จำนวน",
       "moq": "MOQ",

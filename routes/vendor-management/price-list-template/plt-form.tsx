@@ -24,6 +24,7 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
+import { useAllProducts } from "@/hooks/use-all-products";
 import { PRICE_LIST_TEMPLATE_STATUS_OPTIONS } from "@/constant/price-list-template";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { DocFormHeader } from "@/components/share/doc-form-header";
@@ -72,6 +73,7 @@ export function PriceListTemplateForm({
   const [removeDetailIndex, setRemoveDetailIndex] = useState<number | null>(
     null,
   );
+  const [removeProductId, setRemoveProductId] = useState<string | null>(null);
 
   const { defaultCurrencyId } = useProfile();
   const defaultValues = getDefaultValues(priceListTemplate, {
@@ -100,6 +102,7 @@ export function PriceListTemplateForm({
 
   const {
     fields: detailFields,
+    append: appendDetail,
     prepend: prependDetail,
     remove: removeDetail,
   } = useFieldArray({
@@ -127,8 +130,45 @@ export function PriceListTemplateForm({
   const watchedStatus = useWatch({ control: form.control, name: "status" });
   const watchedName = useWatch({ control: form.control, name: "name" });
 
+  const { data: allProducts = [], isLoading: productsLoading } =
+    useAllProducts();
+  const watchedDetails = useWatch({ control: form.control, name: "details" });
+  const selectedProductIds = new Set(
+    (watchedDetails ?? []).map((d) => d.product_id).filter(Boolean),
+  );
+
   const handleAddProduct = () => {
     prependDetail({ ...PLT_DETAIL_EMPTY });
+  };
+
+  // ติ๊ก tree → sync กับ details: product ที่ติ๊กใหม่ = เพิ่มแถวเปล่า (unit
+  // auto-select เองใน UnitCell), product ที่เอาติ๊กออก = ลบทุกแถวของ product นั้น
+  // (รวม moq tier หลายแถว) · group toggle ยิงทิศเดียวเสมอ เพิ่ม/ลบ ไม่ปนกัน
+  const handleTreeSelectionChange = (ids: string[]) => {
+    const next = new Set(ids);
+    const rows = form.getValues("details");
+    const removeIdx = rows.reduce<number[]>((acc, d, i) => {
+      if (d.product_id && !next.has(d.product_id)) acc.push(i);
+      return acc;
+    }, []);
+    const current = new Set(rows.map((d) => d.product_id).filter(Boolean));
+    const added = ids.filter((id) => !current.has(id));
+    if (removeIdx.length) removeDetail(removeIdx);
+    if (added.length)
+      prependDetail(
+        added.map((id) => ({ ...PLT_DETAIL_EMPTY, product_id: id })),
+      );
+  };
+
+  // เพิ่ม MOQ tier อีกหน่วยให้ product เดิม (แถวใหม่ product_id เดียวกัน)
+  // default qty = max ของ tier เดิม +1 กันชนกับ qty ที่มีอยู่แล้วตั้งแต่แรก
+  const handleAddTier = (productId: string) => {
+    const qtys = form
+      .getValues("details")
+      .filter((r) => r.product_id === productId)
+      .map((r) => Number(r.qty) || 0);
+    const nextQty = qtys.length ? Math.max(...qtys) + 1 : 1;
+    appendDetail({ ...PLT_DETAIL_EMPTY, product_id: productId, qty: nextQty });
   };
 
   const handleConfirmRemoveTier = () => {
@@ -137,8 +177,28 @@ export function PriceListTemplateForm({
     setRemoveDetailIndex(null);
   };
 
+  // ลบทั้ง product (ทุก tier) — เท่ากับเอาติ๊กออกจาก tree · confirm ก่อนลบ
+  const handleConfirmRemoveProduct = () => {
+    if (removeProductId === null) return;
+    const idx = form.getValues("details").reduce<number[]>((acc, d, i) => {
+      if (d.product_id === removeProductId) acc.push(i);
+      return acc;
+    }, []);
+    if (idx.length) removeDetail(idx);
+    setRemoveProductId(null);
+  };
+
   const stepperLabels = useStepperLabels(t);
-  const productLabels = useProductLabels(t);
+  const productLabels = useProductLabels(t, tfl);
+
+  // ชื่อ product ที่กำลังจะลบ — ไว้โชว์ใน confirm dialog (master ก่อน, fallback ref)
+  const removeProductName = removeProductId
+    ? (allProducts.find((p) => p.id === removeProductId)?.name ??
+      priceListTemplate?.products?.find(
+        (p) => p.product_id === removeProductId,
+      )?.product_name ??
+      "")
+    : "";
   const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
   const submitLabel = actions.isPending
     ? isAdd
@@ -387,6 +447,12 @@ export function PriceListTemplateForm({
           onAddProduct={handleAddProduct}
           onRemoveTier={setRemoveDetailIndex}
           labels={productLabels}
+          allProducts={allProducts}
+          productsLoading={productsLoading}
+          selectedProductIds={selectedProductIds}
+          onTreeSelectionChange={handleTreeSelectionChange}
+          onAddTier={handleAddTier}
+          onRemoveProduct={setRemoveProductId}
         />
       </form>
 
@@ -411,6 +477,10 @@ export function PriceListTemplateForm({
         removeDetailIndex={removeDetailIndex}
         setRemoveDetailIndex={setRemoveDetailIndex}
         onConfirmRemoveTier={handleConfirmRemoveTier}
+        removeProductId={removeProductId}
+        removeProductName={removeProductName}
+        setRemoveProductId={setRemoveProductId}
+        onConfirmRemoveProduct={handleConfirmRemoveProduct}
       />
     </div>
   );
