@@ -229,7 +229,7 @@ export function usePoItemTable({
       },
       {
         accessorKey: "price",
-        header: tfl("unitPriceAbbr"),
+        header: tfl("unitPrice"),
         size: PO_COL.price,
         meta: rightMeta,
         cell: ({ row }) => (

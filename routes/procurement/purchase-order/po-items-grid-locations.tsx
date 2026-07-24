@@ -352,7 +352,7 @@ export function LocationsEditor({
             <th className="px-2 py-1 text-left">{tfl("location")}</th>
             <th className="px-1 py-1 text-right">{tfl("orderAbbr")}</th>
             <th className="px-1 py-1 text-right">{tfl("receivedAbbr")}</th>
-            <th className="px-2 py-1 text-right">{tfl("unitPriceAbbr")}</th>
+            <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
             <th className="px-2 py-1 text-right">{tfl("subtotalAbbr")}</th>
             <th className="px-2 py-1 text-right">{tfl("discount")}</th>
             <th className="px-2 py-1 text-right">{tfl("netAbbr")}</th>

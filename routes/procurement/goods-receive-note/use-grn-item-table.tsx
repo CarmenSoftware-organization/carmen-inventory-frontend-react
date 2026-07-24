@@ -266,7 +266,7 @@ function GrnGroupLocations({
             <span className="text-destructive"> *</span>
           </th>
           <th className="px-1 py-1 text-right">{tfl("foc")}</th>
-          <th className="px-2 py-1 text-right">{tfl("unitPriceAbbr")}</th>
+          <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
           <th className="px-2 py-1 text-right">{tfl("subtotalAbbr")}</th>
           <th className="px-2 py-1 text-right">{tfl("discount")}</th>
           <th className="px-2 py-1 text-right">{tfl("netAbbr")}</th>
@@ -459,7 +459,7 @@ export function useGrnItemTable({
       {
         // price เป็น per-location (product row โชว์ dash เหมือน PO)
         id: "price",
-        header: tfl("unitPriceAbbr"),
+        header: tfl("unitPrice"),
         size: GRN_COL.price,
         meta: rightMeta,
         cell: () => <span className="text-muted-foreground">—</span>,
