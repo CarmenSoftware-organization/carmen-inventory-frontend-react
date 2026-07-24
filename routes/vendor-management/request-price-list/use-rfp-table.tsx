@@ -6,6 +6,7 @@ import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import { columnSkeletons } from "@/components/ui/data-grid/columns";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
+import { AuditCell } from "@/components/share/audit-cell";
 import type { RequestPriceList } from "@/types/request-price-list";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -35,7 +36,7 @@ export function useRequestPriceListTable({
   onDelete,
 }: UseRequestPriceListTableOptions) {
   "use no memo";
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
 
   const formatPeriod = (startDate: string, endDate: string): string => {
@@ -88,6 +89,37 @@ export function useRequestPriceListTable({
         cellClassName: "text-center",
       },
       size: 70,
+    },
+    {
+      // id = ชื่อคอลัมน์จริงของ backend เพื่อให้ sort ส่ง field ถูกต้อง
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
     },
   ];
 
