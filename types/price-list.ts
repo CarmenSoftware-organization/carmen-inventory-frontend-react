@@ -1,3 +1,5 @@
+import type { AuditEntry, Audit } from "@/types/audit";
+
 export type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
 
 /**
@@ -40,16 +42,8 @@ export interface PriceListDetailItem {
   doc_version?: number;
 }
 
-export interface PriceListAuditEntry {
-  at: string;
-  id: string;
-  name: string;
-}
-
-export interface PriceListAudit {
-  created?: PriceListAuditEntry;
-  updated?: PriceListAuditEntry;
-}
+export type PriceListAuditEntry = AuditEntry;
+export type PriceListAudit = Audit;
 
 export interface PriceList {
   id: string;

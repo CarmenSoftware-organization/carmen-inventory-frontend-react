@@ -16,7 +16,7 @@ import { formatDate } from "@/lib/date-utils";
 import type { PriceList } from "@/types/price-list";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import { PlAuditCell } from "./pl-audit-cell";
+import { AuditCell } from "@/components/share/audit-cell";
 
 interface UsePriceListTableOptions {
   priceLists: PriceList[];
@@ -136,7 +136,7 @@ export function usePriceListTable({
         <DataGridColumnHeader column={column} title={tfl("created")} />
       ),
       cell: ({ row }) => (
-        <PlAuditCell
+        <AuditCell
           entry={row.original.audit?.created}
           dateTimeFormat={dateTimeFormat}
         />
@@ -151,7 +151,7 @@ export function usePriceListTable({
         <DataGridColumnHeader column={column} title={tfl("updated")} />
       ),
       cell: ({ row }) => (
-        <PlAuditCell
+        <AuditCell
           entry={row.original.audit?.updated}
           dateTimeFormat={dateTimeFormat}
         />
