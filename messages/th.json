@@ -2751,7 +2751,15 @@
       "createProduct": "สร้างสินค้า",
       "addAttribute": "เพิ่มข้อมูล",
       "addFirstAttributeHintRich": "เพิ่มข้อมูลเฉพาะ เช่น <code>Hull Type</code> หรือ <code>Max Depth</code> เพื่อใช้ในรายงานและฟิลเตอร์",
-      "statusToggleDesc": "สินค้าที่ใช้งานจะปรากฏในทุกโมดูล"
+      "statusToggleDesc": "สินค้าที่ใช้งานจะปรากฏในทุกโมดูล",
+      "sectionIdentificationDesc": "ชื่อสินค้าและคำอธิบายสั้นๆ ให้พนักงานค้นหาและจำสินค้าได้ง่าย",
+      "sectionClassificationDesc": "จัดกลุ่มสินค้าให้ไปอยู่ในหมวดหมู่และรายงานที่ถูกต้อง",
+      "sectionUnitTaxDesc": "หน่วยที่ใช้นับสินค้า และภาษีที่คิดตอนสั่งซื้อ",
+      "sectionDeviationsDesc": "ราคาหรือจำนวนต่างจากมาตรฐานได้เท่าไหร่ก่อนที่ระบบจะเตือน",
+      "sectionCodesCostDesc": "บาร์โค้ด รหัส SKU และราคามาตรฐานของสินค้า",
+      "sectionFlagsDesc": "เปิด/ปิดการใช้งานสินค้า และกำหนดว่าสินค้าใช้ทำอะไรได้บ้าง",
+      "imgSectionDesc": "รูปสินค้า ให้พนักงานเห็นแล้วจำได้ทันที",
+      "sectionAttributesDesc": "รายละเอียดเพิ่มเติม เช่น ยี่ห้อ ขนาด แหล่งที่มา เพิ่มได้ตามที่ทีมต้องการ"
     }
   },
   "storeOperation": {

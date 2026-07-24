@@ -70,7 +70,8 @@ export function DocFormHeader({
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <h1
               className={cn(
-                "truncate text-xl font-semibold tracking-tight sm:text-2xl",
+                // min-w-0 ให้ truncate ทำงานใน flex — ไม่งั้น title ยาวจะดันเบียด badge
+                "min-w-0 truncate text-xl font-semibold tracking-tight sm:text-2xl",
                 titleMuted && "text-muted-foreground italic",
               )}
               title={title}

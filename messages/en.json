@@ -2756,7 +2756,15 @@
       "createProduct": "Create product",
       "addAttribute": "Add attribute",
       "addFirstAttributeHintRich": "Add extra details like <code>Hull Type</code> or <code>Max Depth</code> for reporting and filters",
-      "statusToggleDesc": "Active products are available across the system"
+      "statusToggleDesc": "Active products are available across the system",
+      "sectionIdentificationDesc": "The product's name and a short description so staff can find and recognize it.",
+      "sectionClassificationDesc": "Group the product so it shows up in the right categories and reports.",
+      "sectionUnitTaxDesc": "The unit you count this product in, and the tax applied when buying it.",
+      "sectionDeviationsDesc": "How far the price or quantity can differ from standard before the system flags it.",
+      "sectionCodesCostDesc": "Barcode, SKU, and the standard price of this product.",
+      "sectionFlagsDesc": "Turn the product on or off and set how it can be used.",
+      "imgSectionDesc": "Photos of the product so staff can recognize it at a glance.",
+      "sectionAttributesDesc": "Extra details like brand, size, or origin — add whatever your team needs."
     }
   },
   "storeOperation": {
