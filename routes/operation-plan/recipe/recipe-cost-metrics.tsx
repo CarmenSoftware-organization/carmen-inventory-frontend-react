@@ -26,7 +26,7 @@ export function RecipeCostMetrics({
   });
 
   return (
-    <Card label={t("otherMetrics")}>
+    <Card label={t("otherMetrics")} description={t("otherMetricsDesc")}>
       <div className="space-y-2 text-xs">
         <InfoRow
           label={t("laborCostRatio")}

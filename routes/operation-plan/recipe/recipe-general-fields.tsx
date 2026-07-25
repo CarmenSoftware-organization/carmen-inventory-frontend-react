@@ -29,7 +29,7 @@ export function RecipeGeneralFields({
   const errors = form.formState.errors;
 
   return (
-    <Card label={t("recipeDetails")}>
+    <Card label={t("recipeDetails")} description={t("recipeDetailsDesc")}>
       <FieldGroup className="gap-3">
         {/* Code + Classification */}
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -197,7 +197,7 @@ function TimeStepper({
       <div
         className={
           accent
-            ? "border-primary/40 bg-primary/5 aria-invalid:border-destructive flex items-center rounded-md border"
+            ? "border-foreground/25 bg-muted/60 aria-invalid:border-destructive flex items-center rounded-md border"
             : "bg-muted/40 aria-invalid:border-destructive flex items-center rounded-md border"
         }
         aria-invalid={!!error}

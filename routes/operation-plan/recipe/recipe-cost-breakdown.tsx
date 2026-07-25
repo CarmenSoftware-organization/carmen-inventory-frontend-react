@@ -39,28 +39,28 @@ export function RecipeCostBreakdown({
   const ovhPct = total > 0 ? (ovh / total) * 100 : 0;
 
   return (
-    <Card label={t("costBreakdown")}>
+    <Card label={t("costBreakdown")} description={t("costBreakdownDesc")}>
       <div
         className="bg-muted mb-3 flex h-2 overflow-hidden rounded-full"
         aria-hidden="true"
       >
         <div
-          className="bg-primary transition-all"
+          className="bg-foreground transition-all"
           style={{ width: `${ingPct}%` }}
         />
         <div
-          className="bg-warning transition-all"
+          className="bg-foreground/55 transition-all"
           style={{ width: `${labPct}%` }}
         />
         <div
-          className="bg-foreground/70 transition-all"
+          className="bg-foreground/25 transition-all"
           style={{ width: `${ovhPct}%` }}
         />
       </div>
 
       <div className="space-y-2">
         <CostRow
-          color="bg-primary"
+          color="bg-foreground"
           label={t("ingredientCost")}
           pct={ingPct}
           input={
@@ -78,7 +78,7 @@ export function RecipeCostBreakdown({
           }
         />
         <CostRow
-          color="bg-warning"
+          color="bg-foreground/55"
           label={t("laborCost")}
           pct={labPct}
           input={
@@ -96,7 +96,7 @@ export function RecipeCostBreakdown({
           }
         />
         <CostRow
-          color="bg-foreground/70"
+          color="bg-foreground/25"
           label={t("overheadCost")}
           pct={ovhPct}
           input={

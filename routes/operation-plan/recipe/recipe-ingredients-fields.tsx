@@ -53,6 +53,7 @@ export function RecipeIngredientsFields({
   return (
     <Card
       label={t("ingredients")}
+      description={t("ingredientsDesc")}
       action={
         !isDisabled && ingredients.length > 0 ? (
           <Button type="button" size="xs" onClick={handleAdd} className="gap-1">

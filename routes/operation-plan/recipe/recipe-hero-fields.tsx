@@ -238,35 +238,18 @@ function QuickStat({
     <div
       className={cn(
         "rounded-md border px-3 py-2",
-        accent
-          ? "border-primary bg-primary text-primary-foreground"
-          : "bg-card",
+        accent ? "border-foreground/20 bg-muted/60" : "bg-card",
       )}
     >
-      <div
-        className={cn(
-          "flex items-center gap-1 text-[0.625rem] font-bold tracking-wider uppercase",
-          accent ? "text-primary-foreground/70" : "text-muted-foreground",
-        )}
-      >
+      <div className="text-muted-foreground flex items-center gap-1 text-[0.625rem] font-bold tracking-wider uppercase">
         <Icon className="size-3" aria-hidden="true" />
         {label}
       </div>
-      <div
-        className={cn(
-          "mt-1 text-xl font-semibold tracking-tight",
-          accent ? "text-primary-foreground" : "text-foreground",
-        )}
-      >
+      <div className="text-foreground mt-1 text-xl font-semibold tracking-tight tabular-nums">
         {value}
       </div>
       {sub && (
-        <div
-          className={cn(
-            "text-[0.6875rem]",
-            accent ? "text-primary-foreground/70" : "text-muted-foreground",
-          )}
-        >
+        <div className="text-muted-foreground text-[0.6875rem] tabular-nums">
           {sub}
         </div>
       )}

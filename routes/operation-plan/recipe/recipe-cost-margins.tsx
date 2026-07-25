@@ -34,7 +34,7 @@ export function RecipeCostMargins({
     targetPct > 0 && foodPct > 0 ? foodPct <= targetPct : foodPct === 0;
 
   return (
-    <Card label={t("margins")}>
+    <Card label={t("margins")} description={t("marginsDesc")}>
       <div className="grid grid-cols-2 gap-2">
         <MarginTile
           label={t("grossMargin")}
@@ -54,14 +54,14 @@ export function RecipeCostMargins({
         className={cn(
           "mt-3 flex items-center gap-2 rounded-md px-3 py-2 text-xs font-semibold",
           onTarget
-            ? "bg-success/10 text-success-foreground"
-            : "bg-destructive/10 text-destructive-foreground",
+            ? "bg-muted text-foreground"
+            : "bg-destructive/10 text-destructive",
         )}
       >
         <span
           className={cn(
             "size-1.5 rounded-full",
-            onTarget ? "bg-success" : "bg-destructive",
+            onTarget ? "bg-muted-foreground/40" : "bg-destructive",
           )}
           aria-hidden="true"
         />
@@ -117,10 +117,8 @@ function MarginTile({
       </div>
       <div
         className={cn(
-          "mt-1 text-xl font-semibold tracking-tight",
-          tone === "success"
-            ? "text-success-foreground"
-            : "text-destructive-foreground",
+          "mt-1 text-xl font-semibold tracking-tight tabular-nums",
+          tone === "success" ? "text-foreground" : "text-destructive",
         )}
       >
         {value}

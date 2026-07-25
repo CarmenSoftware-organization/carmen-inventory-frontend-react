@@ -1,9 +1,8 @@
-
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Sparkles, Pencil } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Sparkles } from "lucide-react";
 import { FieldInput } from "@/components/ui/field";
+import { Card } from "./recipe-card-shell";
 import type { RecipeFormValues } from "./recipe-form-schema";
 import type { RecipeComputed } from "./use-recipe-cost-calc";
 
@@ -13,7 +12,11 @@ interface RecipeCostHeroProps {
   readonly computed: RecipeComputed;
 }
 
-/** Gradient hero — cost per portion + selling price + suggested chip */
+/**
+ * Section ต้นทุน/ราคา — cost per portion (computed) + selling price (input) +
+ * suggested chip · neutral ตาม DESIGN.md (accent อยู่ที่ตัวเลขอย่างเดียว ไม่ใช่
+ * ทั้งบล็อกสีทึบ) เข้าชุดกับ section 2-col อื่นของฟอร์ม
+ */
 export function RecipeCostHero({
   form,
   isDisabled,
@@ -30,52 +33,43 @@ export function RecipeCostHero({
   const suggested = computed.suggestedPrice;
 
   return (
-    <div
-      className={cn(
-        "rounded-md p-5 text-primary-foreground",
-        "bg-primary",
-      )}
-    >
+    <Card label={t("pricing")} description={t("pricingDesc")}>
       <div className="space-y-4">
+        {/* Cost per portion — computed · accent อยู่ที่ตัวเลข */}
         <div>
-          <div className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-primary-foreground/70">
+          <div className="text-muted-foreground text-[0.625rem] font-bold tracking-wider uppercase">
             {t("costPerPortion")}
           </div>
           <div className="mt-1 flex items-baseline gap-1">
-            <span className="text-base text-primary-foreground/70">฿</span>
-            <span className="text-4xl font-semibold tracking-tight">
+            <span className="text-muted-foreground text-base">฿</span>
+            <span className="text-foreground text-3xl font-semibold tracking-tight tabular-nums">
               {portion.toFixed(2)}
             </span>
           </div>
         </div>
 
-        <div className="h-px bg-primary-foreground/20" />
-
+        {/* Selling price — input */}
         <div>
-          <div className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-primary-foreground/70">
+          <div className="text-muted-foreground text-[0.625rem] font-bold tracking-wider uppercase">
             {t("sellingPrice")}
           </div>
-          <div className="mt-1 flex items-center gap-1">
-            <span className="text-sm text-primary-foreground/80">฿</span>
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className="text-muted-foreground text-sm">฿</span>
             <FieldInput
               type="number"
               inputMode="decimal"
               step="0.01"
               disabled={isDisabled}
-              className="h-auto w-32 border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight text-primary-foreground shadow-none focus-visible:ring-0 placeholder:text-primary-foreground/40"
+              className="h-9 w-32 text-lg font-semibold tabular-nums"
               placeholder="0.00"
               aria-label={t("sellingPrice")}
               error={errors.selling_price?.message}
               errorIconAlign="left"
               {...form.register("selling_price")}
             />
-            <Pencil
-              className="size-3 text-primary-foreground/50"
-              aria-hidden="true"
-            />
           </div>
           {suggested != null && suggested > 0 && (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-2 py-1 text-[0.6875rem] font-semibold text-primary-foreground/90">
+            <div className="bg-muted text-muted-foreground mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[0.6875rem] font-semibold">
               <Sparkles className="size-2.5" aria-hidden="true" />
               {t("suggestedAtTarget", {
                 price: `฿${suggested.toFixed(2)}`,
@@ -85,6 +79,6 @@ export function RecipeCostHero({
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

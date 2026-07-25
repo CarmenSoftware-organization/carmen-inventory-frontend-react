@@ -2487,7 +2487,7 @@
       "overheadCostDesc": "Utilities, equipment depreciation, and facility costs",
       "costPerPortion": "Cost per Portion",
       "costPerPortionDesc": "Auto-calculated: total cost / base yield",
-      "pricing": "Pricing",
+      "pricing": "Cost & price",
       "belowCost": "Below cost",
       "sellingPrice": "Selling Price",
       "sellingPriceDesc": "Current menu price charged to customers",
@@ -2589,7 +2589,14 @@
       "tapToEdit": "tap to edit",
       "pressEnterToSave": "Press Enter to save",
       "clickToRename": "Click to rename",
-      "requiredField": "Required field"
+      "requiredField": "Required field",
+      "recipeDetailsDesc": "Name, type, and cooking times — the basics the kitchen needs.",
+      "safetyComplianceDesc": "Allergens and tags so staff can warn guests correctly.",
+      "ingredientsDesc": "The ingredients and amounts in this recipe — used to work out the cost.",
+      "costBreakdownDesc": "Ingredient, labor, and overhead costs that add up to the cost per portion.",
+      "marginsDesc": "Selling price and profit — set a price that hits your target margin.",
+      "otherMetricsDesc": "Extra numbers that help you judge how worthwhile the recipe is.",
+      "pricingDesc": "The cost of one portion and the price you sell it at."
     }
   },
   "productManagement": {
