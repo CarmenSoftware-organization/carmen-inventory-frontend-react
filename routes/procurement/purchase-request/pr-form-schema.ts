@@ -314,8 +314,9 @@ export function getDefaultValues(
   }
   if (template) {
     return {
+      // ไม่ก็อป description ของ template มา — อันนั้นคือคำอธิบายตัว template
+      // ส่วนช่องนี้คือ Notes ของ PR ใบนี้ ต้องให้ผู้ใช้เขียนเอง
       ...EMPTY_FORM,
-      description: template.description ?? "",
       workflow_id: template.workflow_id ?? "",
       department_id: template.department_id ?? "",
       items:
