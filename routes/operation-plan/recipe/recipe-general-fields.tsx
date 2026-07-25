@@ -188,7 +188,9 @@ function NumberField({
 }) {
   return (
     <Field>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <FieldLabel htmlFor={id} className="w-full justify-end">
+        {label}
+      </FieldLabel>
       <Controller
         control={control}
         name={name}
@@ -198,7 +200,7 @@ function NumberField({
             type="number"
             inputMode="decimal"
             min={0}
-            className="h-8"
+            className="h-8 text-right tabular-nums"
             value={(field.value as number | undefined) ?? 0}
             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
             disabled={disabled}
@@ -207,7 +209,9 @@ function NumberField({
           />
         )}
       />
-      {suffix && <FieldDescription>{suffix}</FieldDescription>}
+      {suffix && (
+        <FieldDescription className="text-right">{suffix}</FieldDescription>
+      )}
     </Field>
   );
 }
