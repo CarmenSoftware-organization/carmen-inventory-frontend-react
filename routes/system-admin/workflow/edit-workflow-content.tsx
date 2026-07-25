@@ -1,12 +1,15 @@
 
+import { useTranslations } from "use-intl";
 import { useWorkflowById } from "@/hooks/use-workflow";
 import { useUser } from "@/hooks/use-user";
 import { useProduct } from "@/hooks/use-product";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { parseWorkflowData } from "./wf-form-schema";
 import { WfDetail } from "./wf-detail";
 
 export function EditWorkflowContent({ id }: { id: string }) {
+  const t = useTranslations("systemAdmin.workflow");
   const {
     data: workflow,
     isLoading: wfLoading,
@@ -52,6 +55,9 @@ export function EditWorkflowContent({ id }: { id: string }) {
   if (wfError)
     return <ErrorState message={wfError.message} onRetry={() => wfRefetch()} />;
   if (!workflow) return <ErrorState message="Workflow not found" />;
+  // อ่าน data ไม่ได้ = ห้ามเปิดฟอร์ม ไม่งั้นกด Save แล้วทับ stages จริงด้วยของว่าง
+  if (!parseWorkflowData(workflow.data).success)
+    return <ErrorState message={t("incompatibleData")} />;
 
   return <WfDetail workflow={workflow} users={users} products={products} />;
 }

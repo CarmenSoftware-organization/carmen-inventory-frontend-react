@@ -1323,6 +1323,7 @@
       "edit": "Edit Workflow",
       "deleteTitle": "Delete Workflow",
       "deleteConfirm": "Are you sure you want to delete workflow \"{name}\"? This action cannot be undone.",
+      "incompatibleData": "This workflow was saved in an older format and cannot be opened for editing. Please contact your system administrator.",
       "workflowName": "Workflow Name",
       "workflowNamePlaceholder": "e.g. Purchase Request Approval",
       "workflowType": "Workflow Type",
