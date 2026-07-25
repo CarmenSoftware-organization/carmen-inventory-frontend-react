@@ -454,6 +454,7 @@ export default function ProductComponent() {
                   onEdit={(p) =>
                     navigate(`/product-management/product/${p.id}`)
                   }
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>

@@ -45,6 +45,8 @@ export interface Product {
   local_name: string;
   product_status_type: ProductStatusType;
   inventory_unit: { id: string; name: string };
+  // list endpoint คืนหน่วยเป็น flat string (detail ใช้ inventory_unit object)
+  inventory_unit_name?: string;
   product_item_group: { id?: string; name: string } | null;
   product_sub_category: { id?: string; name: string } | null;
   product_category: { id?: string; name: string } | null;
