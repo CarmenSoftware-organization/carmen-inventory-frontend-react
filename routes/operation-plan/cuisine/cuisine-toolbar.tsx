@@ -1,9 +1,10 @@
 
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import type { FormMode } from "@/types/form";
 import type { CuisineFormValues } from "./cuisine-form-schema";
 
@@ -48,78 +49,60 @@ export function CuisineToolbar({
       ? tc("create")
       : tc("save");
 
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-2">
-      <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          variant="ghost"
-          className="w-fit hover:bg-transparent dark:hover:bg-transparent"
-          type="button"
-          aria-label={tc("goBack")}
-          onClick={onBack}
-        >
-          <ChevronLeft />
-        </Button>
-        <h1
-          lang={isAdd ? undefined : "th"}
-          className="max-w-[20rem] truncate text-lg font-semibold"
-        >
-          {title}
-        </h1>
-        {!isAdd && (
-          <Badge
-            variant={isActive ? "success-light" : "warning-light"}
-            size="xs"
-            className="uppercase tracking-wider"
-          >
-            {isActive ? ts("active") : ts("inactive")}
-          </Badge>
-        )}
-      </div>
+  const badges = !isAdd && (
+    <StatusDotBadge
+      tone={isActive ? "success" : "neutral"}
+      size="xs"
+      className="tracking-wider uppercase"
+    >
+      {isActive ? ts("active") : ts("inactive")}
+    </StatusDotBadge>
+  );
 
-      <div className="flex items-center gap-2">
-        {isView ? (
-          <Button size="sm" onClick={onEdit}>
-            <Pencil />
-            {tc("edit")}
-          </Button>
-        ) : (
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onCancel}
-              disabled={isPending}
-            >
-              <X />
-              {tc("cancel")}
-            </Button>
-            <Button
-              type="submit"
-              size="sm"
-              form="cuisine-form"
-              disabled={isPending}
-            >
-              <Save />
-              {submitLabel}
-            </Button>
-            {isEdit && onDelete && (
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={onDelete}
-                disabled={isDeleting || isPending}
-              >
-                <Trash2 />
-                {tc("delete")}
-              </Button>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+  const actions = isView ? (
+    <Button size="sm" onClick={onEdit}>
+      <Pencil />
+      {tc("edit")}
+    </Button>
+  ) : (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={onCancel}
+        disabled={isPending}
+      >
+        <X />
+        {tc("cancel")}
+      </Button>
+      <Button type="submit" size="sm" form="cuisine-form" disabled={isPending}>
+        <Save />
+        {submitLabel}
+      </Button>
+      {isEdit && onDelete && (
+        <Button
+          type="button"
+          variant="destructive"
+          size="sm"
+          onClick={onDelete}
+          disabled={isDeleting || isPending}
+        >
+          <Trash2 />
+          {tc("delete")}
+        </Button>
+      )}
+    </>
+  );
+
+  return (
+    <DocFormHeader
+      title={title}
+      backLabel={tc("goBack")}
+      onBack={onBack}
+      badges={badges}
+      actions={actions}
+      flush
+    />
   );
 }

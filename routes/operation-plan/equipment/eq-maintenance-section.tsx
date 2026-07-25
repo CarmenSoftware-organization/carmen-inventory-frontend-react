@@ -25,21 +25,7 @@ export function EqMaintenanceSection({
       label={t("maintenance")}
       description={t("maintenanceDesc")}
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <Field className="sm:col-span-2 lg:col-span-3">
-          <FieldLabel htmlFor="equipment-maintenance-schedule">
-            {t("maintenanceSchedule")}
-          </FieldLabel>
-          <Textarea
-            id="equipment-maintenance-schedule"
-            placeholder={tfl("optional")}
-            rows={2}
-            disabled={isDisabled}
-            maxLength={256}
-            {...form.register("maintenance_schedule")}
-          />
-        </Field>
-
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
           <FieldLabel>{t("lastMaintenanceDate")}</FieldLabel>
           <Controller
@@ -73,6 +59,20 @@ export function EqMaintenanceSection({
                 error={errors.next_maintenance_date?.message}
               />
             )}
+          />
+        </Field>
+
+        <Field className="sm:col-span-2">
+          <FieldLabel htmlFor="equipment-maintenance-schedule">
+            {t("maintenanceSchedule")}
+          </FieldLabel>
+          <Textarea
+            id="equipment-maintenance-schedule"
+            placeholder={tfl("optional")}
+            rows={2}
+            disabled={isDisabled}
+            maxLength={256}
+            {...form.register("maintenance_schedule")}
           />
         </Field>
       </div>

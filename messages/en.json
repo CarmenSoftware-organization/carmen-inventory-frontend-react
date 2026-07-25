@@ -2427,7 +2427,12 @@
       "qtySettingsDesc": "How many you have, how many are in use, and usage stats.",
       "instructionsDesc": "How to operate, safety notes, and cleaning steps.",
       "maintenanceDesc": "Maintenance schedule and history for this equipment.",
-      "additionalDesc": "Any other extra details for this equipment."
+      "additionalDesc": "Any other extra details for this equipment.",
+      "specifications": "Specifications",
+      "specificationsDesc": "Where it's used and its technical specs.",
+      "equipmentImage": "Photo",
+      "equipmentImageDesc": "A photo so staff can recognize it at a glance.",
+      "portableDesc": "Can this equipment be moved between stations?"
     },
     "equipmentCategory": {
       "entity": "Equipment Category",
