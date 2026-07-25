@@ -79,20 +79,21 @@ export function CuisineGeneralFields({
           />
         </Field>
 
-        <Field className="sm:col-span-2">
-          <FieldLabel htmlFor="cuisine-description">
-            {tfl("description")}
-          </FieldLabel>
-          <Textarea
-            id="cuisine-description"
-            placeholder={tfl("optional")}
-            rows={2}
-            disabled={isDisabled}
-            maxLength={256}
-            {...form.register("description")}
-          />
-        </Field>
       </div>
+
+      <Field className="mt-4">
+        <FieldLabel htmlFor="cuisine-description">
+          {tfl("description")}
+        </FieldLabel>
+        <Textarea
+          id="cuisine-description"
+          placeholder={tfl("optional")}
+          rows={2}
+          disabled={isDisabled}
+          maxLength={256}
+          {...form.register("description")}
+        />
+      </Field>
     </Card>
   );
 }

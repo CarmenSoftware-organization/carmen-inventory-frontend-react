@@ -62,20 +62,21 @@ export function EqMaintenanceSection({
           />
         </Field>
 
-        <Field className="sm:col-span-2">
-          <FieldLabel htmlFor="equipment-maintenance-schedule">
-            {t("maintenanceSchedule")}
-          </FieldLabel>
-          <Textarea
-            id="equipment-maintenance-schedule"
-            placeholder={tfl("optional")}
-            rows={2}
-            disabled={isDisabled}
-            maxLength={256}
-            {...form.register("maintenance_schedule")}
-          />
-        </Field>
       </div>
+
+      <Field className="mt-3">
+        <FieldLabel htmlFor="equipment-maintenance-schedule">
+          {t("maintenanceSchedule")}
+        </FieldLabel>
+        <Textarea
+          id="equipment-maintenance-schedule"
+          placeholder={tfl("optional")}
+          rows={2}
+          disabled={isDisabled}
+          maxLength={256}
+          {...form.register("maintenance_schedule")}
+        />
+      </Field>
     </Card>
   );
 }

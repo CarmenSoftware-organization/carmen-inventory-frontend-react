@@ -123,20 +123,21 @@ export function EqGeneralSection({
             />
           </Field>
 
-          <Field className="sm:col-span-2">
-            <FieldLabel htmlFor="equipment-description">
-              {tfl("description")}
-            </FieldLabel>
-            <Textarea
-              id="equipment-description"
-              placeholder={tfl("optional")}
-              rows={2}
-              disabled={isDisabled}
-              maxLength={256}
-              {...form.register("description")}
-            />
-          </Field>
         </div>
+
+        <Field className="mt-4">
+          <FieldLabel htmlFor="equipment-description">
+            {tfl("description")}
+          </FieldLabel>
+          <Textarea
+            id="equipment-description"
+            placeholder={tfl("optional")}
+            rows={2}
+            disabled={isDisabled}
+            maxLength={256}
+            {...form.register("description")}
+          />
+        </Field>
       </Card>
 
       {/* Specifications */}
