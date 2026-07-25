@@ -12,9 +12,9 @@ import {
 } from "@/components/dashboard-widget/dashboard-widget-grid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useDashboardDatasetDetail } from "@/hooks/use-dashboard-dataset";
 import { cn } from "@/lib/utils";
 import type {
+  DashboardDatasetDetail,
   DatasetData,
   DatasetMeta,
   DatasetShape,
@@ -25,6 +25,9 @@ const SUPPORTED_SHAPES = new Set(["scalar", "scalar_delta", "categorical"]);
 
 interface SortableWidgetItemProps {
   readonly widget: MyDashboardWidget;
+  /** dataset ที่ resolve แล้ว — parent เป็นคน fetch (ดู `SavedWidgetsSection`) */
+  readonly detail: DashboardDatasetDetail | undefined;
+  readonly isLoading: boolean;
   readonly onDelete: () => void;
 }
 
@@ -58,6 +61,8 @@ function getColSpan(widgetType: string): string {
 
 export function SortableWidgetItem({
   widget,
+  detail,
+  isLoading,
   onDelete,
 }: SortableWidgetItemProps) {
   const t = useTranslations("dashboard.savedWidget");
@@ -69,10 +74,6 @@ export function SortableWidgetItem({
     transition,
     isDragging,
   } = useSortable({ id: widget.id });
-
-  const { data: detail, isLoading } = useDashboardDatasetDetail(
-    widget.dataset_id,
-  );
 
   const style = {
     transform: CSS.Transform.toString(transform),

@@ -15,7 +15,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { BarChart3, Hash, PieChart } from "lucide-react";
 import { useLocale, useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -26,6 +26,8 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { EyeBrow } from "@/components/ui/eye-brow";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/constant/query-keys";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { dashboardDatasetDetailQueryOptions } from "@/hooks/use-dashboard-dataset";
 import { useProfile } from "@/hooks/use-profile";
 import {
   useCreateMyDashboardWidget,
@@ -122,6 +124,7 @@ const SavedWidgetsSection = () => {
   const [pendingDelete, setPendingDelete] = useState<MyDashboardWidget | null>(
     null,
   );
+  const buCode = useBuCode();
   const { data, isLoading, isError, error } = useMyDashboardWidgets();
   const createWidget = useCreateMyDashboardWidget();
   const updateWidget = useUpdateMyDashboardWidget();
@@ -139,6 +142,20 @@ const SavedWidgetsSection = () => {
     .sort((a, b) => a.order_index - b.order_index);
 
   const excludeIds = new Set(items.map((w) => w.dataset_id));
+
+  // dataset ของ widget ที่บันทึกไว้อาจไม่มีใน BU ปัจจุบัน (backend ตอบ 404)
+  // fetch ที่นี่แทนที่จะให้แต่ละ card fetch เอง เพราะต้องรู้ก่อนว่าเหลือกี่ตัว
+  // ถึงจะตัดสินใจได้ว่าโชว์ grid หรือ empty state
+  const detailQueries = useQueries({
+    queries: items.map((w) =>
+      dashboardDatasetDetailQueryOptions(buCode, w.dataset_id),
+    ),
+  });
+
+  // ตัวที่ 404 ทิ้งไปเงียบๆ — ผู้ใช้ยังเห็นมันตอนสลับกลับไป BU เดิม
+  const renderable = items
+    .map((widget, i) => ({ widget, query: detailQueries[i] }))
+    .filter(({ query }) => !query?.isError);
 
   const handleAdd = (ds: { id: string; name: string; shape: string }) => {
     createWidget.mutate(
@@ -208,7 +225,7 @@ const SavedWidgetsSection = () => {
           </h2>
           {data && (
             <span className="text-muted-foreground text-[0.6875rem] tabular-nums">
-              {data.count}
+              {renderable.length}
             </span>
           )}
         </div>
@@ -229,24 +246,26 @@ const SavedWidgetsSection = () => {
         </p>
       )}
 
-      {!isLoading && !isError && items.length === 0 && <EmptyState />}
+      {!isLoading && !isError && renderable.length === 0 && <EmptyState />}
 
-      {items.length > 0 && (
+      {renderable.length > 0 && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={items.map((w) => w.id)}
+            items={renderable.map(({ widget }) => widget.id)}
             strategy={rectSortingStrategy}
           >
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {items.map((w) => (
+              {renderable.map(({ widget, query }) => (
                 <SortableWidgetItem
-                  key={w.id}
-                  widget={w}
-                  onDelete={() => setPendingDelete(w)}
+                  key={widget.id}
+                  widget={widget}
+                  detail={query?.data}
+                  isLoading={query?.isLoading ?? true}
+                  onDelete={() => setPendingDelete(widget)}
                 />
               ))}
             </ul>

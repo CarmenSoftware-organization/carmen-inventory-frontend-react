@@ -38,16 +38,16 @@ export function useDashboardDatasets(enabled = true) {
 }
 
 /**
- * Resolved data ของ dataset เดี่ยว — step 3 ใน flow (preview ก่อน save)
- *
- * ใช้ CACHE_DYNAMIC (1 นาที) เพราะค่าจริงเปลี่ยนได้ตามเวลา
- * คืน `{ meta, data }` พร้อม render ตาม `meta.shape`
+ * Query options ของ dataset เดี่ยว — แยกออกมาให้ `useQueries` ที่ dashboard
+ * เรียกทีเดียวหลาย dataset ได้ (parent ต้องรู้ว่าตัวไหน 404 ก่อนตัดสินใจ layout)
  */
-export function useDashboardDatasetDetail(id: string | undefined) {
-  const buCode = useBuCode();
-  return useQuery<DashboardDatasetDetail>({
+export function dashboardDatasetDetailQueryOptions(
+  buCode: string | undefined,
+  id: string | undefined,
+) {
+  return {
     queryKey: [QUERY_KEYS.DASHBOARD_DATASETS, buCode, id],
-    queryFn: async () => {
+    queryFn: async (): Promise<DashboardDatasetDetail> => {
       const res = await httpClient.get(
         API_ENDPOINTS.DASHBOARD_DATASET_BY_ID(buCode!, id!),
       );
@@ -58,5 +58,16 @@ export function useDashboardDatasetDetail(id: string | undefined) {
     },
     enabled: !!buCode && !!id,
     ...CACHE_DYNAMIC,
-  });
+  };
+}
+
+/**
+ * Resolved data ของ dataset เดี่ยว — step 3 ใน flow (preview ก่อน save)
+ *
+ * ใช้ CACHE_DYNAMIC (1 นาที) เพราะค่าจริงเปลี่ยนได้ตามเวลา
+ * คืน `{ meta, data }` พร้อม render ตาม `meta.shape`
+ */
+export function useDashboardDatasetDetail(id: string | undefined) {
+  const buCode = useBuCode();
+  return useQuery(dashboardDatasetDetailQueryOptions(buCode, id));
 }
