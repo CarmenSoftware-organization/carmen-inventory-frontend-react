@@ -47,6 +47,9 @@ export function usePltFormActions({
   const deleteTemplate = useDeletePriceListTemplate();
 
   const [showDelete, setShowDelete] = useState(false);
+  // ระหว่าง submit ตอน create ต้องปิด navigation guard — ไม่งั้น sentinel ที่ guard
+  // ดันไว้ที่ /new ค้างอยู่ในสแตก แล้ว back หลังสร้างเสร็จเด้งกลับหน้า /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isPending = createTemplate.isPending || updateTemplate.isPending;
   const isDeletePending = deleteTemplate.isPending;
@@ -106,7 +109,10 @@ export function usePltFormActions({
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       createTemplate.mutate(payload, {
+        onError: () => setIsSubmitting(false),
         onSuccess: () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/vendor-management/price-list-template");
@@ -146,6 +152,7 @@ export function usePltFormActions({
 
   return {
     isPending,
+    isSubmitting,
     isDeletePending,
     showDelete,
     setShowDelete,

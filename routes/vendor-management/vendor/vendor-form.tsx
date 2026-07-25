@@ -75,8 +75,12 @@ export function VendorForm({ vendor }: VendorFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty,
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
   );
 
   const {
@@ -188,7 +192,10 @@ export function VendorForm({ vendor }: VendorFormProps) {
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       createVendor.mutate(payload, {
+        onError: () => setIsSubmitting(false),
         onSuccess: (res) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const data = res as unknown as { data?: { id?: string } };

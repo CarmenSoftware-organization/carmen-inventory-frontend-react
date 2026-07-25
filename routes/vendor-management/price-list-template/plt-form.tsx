@@ -120,7 +120,7 @@ export function PriceListTemplateForm({
 
   const isDisabled = isView || actions.isPending;
   const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty,
+    (isAdd || isEdit) && form.formState.isDirty && !actions.isSubmitting,
   );
 
   const watchedValidity = useWatch({

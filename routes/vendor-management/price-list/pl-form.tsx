@@ -85,8 +85,12 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty,
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
   );
 
   useEffect(() => {
@@ -152,9 +156,12 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         },
       });
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       submitCreate({
         values,
         mutate: createPriceList.mutate,
+        onError: () => setIsSubmitting(false),
         onSuccess: (id) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           // navigate ไป detail ของ record ที่เพิ่งสร้าง (edit route จะ mount ใหม่
@@ -400,10 +407,12 @@ function submitCreate({
   values,
   mutate,
   onSuccess,
+  onError,
 }: {
   values: PriceListFormValues;
   mutate: ReturnType<typeof useCreatePriceList>["mutate"];
   onSuccess: (id: string) => void;
+  onError: () => void;
 }) {
   const pricelist_detail: CreatePriceListDto["pricelist_detail"] = {};
   if (values.pricelist_detail.length > 0) {
@@ -419,6 +428,7 @@ function submitCreate({
         const created = data as { data: { id: string } };
         onSuccess(created.data.id);
       },
+      onError,
     },
   );
 }

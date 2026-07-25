@@ -68,9 +68,13 @@ export function PrtForm({ template }: PrtFormProps) {
     isPending,
   });
 
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → URL ค้างที่ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // in-app navigation guard: เตือนก่อนออกเมื่อ add/edit และฟอร์มถูกแก้ไข
   const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty,
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
   );
 
   const onSubmit = (values: PrtFormValues) => {
@@ -99,6 +103,9 @@ export function PrtForm({ template }: PrtFormProps) {
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network →
+      // navigate(replace) กิน /new จริง → URL เป็น /:id และ back = list
+      setIsSubmitting(true);
       createPrt.mutate(payload, {
         onSuccess: (data) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -107,6 +114,7 @@ export function PrtForm({ template }: PrtFormProps) {
           });
           setMode("view");
         },
+        onError: () => setIsSubmitting(false),
       });
     }
   };
