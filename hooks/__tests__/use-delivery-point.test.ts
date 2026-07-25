@@ -36,16 +36,12 @@ const mockDeliveryPoints: DeliveryPoint[] = [
     doc_version: 1,
     name: "Main Warehouse",
     is_active: true,
-    created_at: "2024-01-01T00:00:00Z",
-    updated_at: "2024-01-01T00:00:00Z",
   },
   {
     id: "2",
     doc_version: 1,
     name: "Back Office",
     is_active: false,
-    created_at: "2024-01-02T00:00:00Z",
-    updated_at: "2024-01-02T00:00:00Z",
   },
 ];
 

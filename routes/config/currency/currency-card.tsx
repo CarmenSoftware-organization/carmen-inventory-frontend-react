@@ -1,4 +1,4 @@
-import { Coins } from "lucide-react";
+import { Clock, Coins } from "lucide-react";
 import { useTranslations } from "use-intl";
 
 import {
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Currency } from "@/types/currency";
 
 interface CurrencyCardProps {
@@ -32,6 +34,7 @@ export default function CurrencyCard({
   onEdit,
 }: CurrencyCardProps) {
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
 
   return (
     <Card
@@ -75,6 +78,18 @@ export default function CurrencyCard({
         </div>
         <span className="text-sm font-semibold">{item.symbol}</span>
       </CardContent>
+
+      {item.audit?.updated?.at && (
+        <CardContent className="flex items-center gap-1.5 px-4 pt-0 pb-2 text-xs">
+          <Clock
+            className="text-muted-foreground size-3 shrink-0"
+            aria-hidden="true"
+          />
+          <span className="text-muted-foreground truncate">
+            {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </CardContent>
+      )}
     </Card>
   );
 }

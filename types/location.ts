@@ -1,3 +1,4 @@
+import type { Audit } from "./audit";
 import type { DeliveryPoint } from "@/types/delivery-point";
 import type { TransferPayload } from "@/types/transfer";
 import type { INVENTORY_TYPE } from "@/constant/location";
@@ -38,6 +39,7 @@ export interface Location {
   user_location: UserLocation[];
   product_location: ProductLocation[];
   delivery_point: DeliveryPoint | null;
+  audit?: Audit;
 }
 
 export interface CreateLocationDto {

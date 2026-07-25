@@ -4,10 +4,12 @@ import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column
 import { CellAction } from "@/components/ui/cell-action";
 import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { columnSkeletons } from "@/components/ui/data-grid/columns";
+import { columnSkeletons, statusColumn } from "@/components/ui/data-grid/columns";
+import { AuditCell } from "@/components/share/audit-cell";
 import { ADJUSTMENT_TYPE, type AdjustmentType } from "@/types/adjustment-type";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useProfile } from "@/hooks/use-profile";
 
 interface UseAdjustmentTypeTableOptions {
   data: AdjustmentType[];
@@ -27,6 +29,7 @@ export function useAdjustmentTypeTable({
   onDelete,
 }: UseAdjustmentTypeTableOptions) {
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
   const columns: ColumnDef<AdjustmentType>[] = [
     {
       accessorKey: "code",
@@ -77,6 +80,37 @@ export function useAdjustmentTypeTable({
         skeleton: columnSkeletons.badge,
       },
     },
+    statusColumn<AdjustmentType>(),
+    {
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created") },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated") },
+    },
   ];
 
   return useConfigTable<AdjustmentType>({
@@ -86,5 +120,7 @@ export function useAdjustmentTypeTable({
     params,
     tableConfig,
     onDelete,
+    hideStatus: true,
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
   });
 }

@@ -1,10 +1,11 @@
+import type { Audit } from "./audit";
+
 export interface DeliveryPoint {
   id: string;
   doc_version: number;
   name: string;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateDeliveryPointDto {

@@ -1,4 +1,5 @@
 import z from "zod";
+import type { Audit } from "./audit";
 
 export enum ADJUSTMENT_TYPE {
   // Backend persists/validates these as lowercase enum values
@@ -26,6 +27,7 @@ export type AdjustmentTypeFormValues = z.infer<typeof adjustmentTypeSchema>;
 export interface AdjustmentType extends AdjustmentTypeFormValues {
   id: string;
   doc_version?: number;
+  audit?: Audit;
 }
 
 export interface CreateAdjustmentTypeDto {
