@@ -1,3 +1,5 @@
+import type { Audit } from "./audit";
+
 export interface CreditTerm {
   id: string;
   doc_version: number;
@@ -5,8 +7,7 @@ export interface CreditTerm {
   description: string;
   value: number;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateCreditTermDto {

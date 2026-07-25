@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { Clock, Users } from "lucide-react";
 import { useTranslations } from "use-intl";
 
 import {
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Department } from "@/types/department";
 
 interface DepartmentCardProps {
@@ -38,6 +40,7 @@ export default function DepartmentCard({
 }: DepartmentCardProps) {
   const t = useTranslations("config.department");
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
 
   return (
     <Card
@@ -71,7 +74,8 @@ export default function DepartmentCard({
 
       {((item.department_users?.length ?? 0) > 0 ||
         item.description ||
-        item.account_code) && (
+        item.account_code ||
+        item.audit?.updated?.at) && (
         <>
           <Separator />
           <CardContent className="space-y-2 px-4 py-3 text-xs">
@@ -95,6 +99,18 @@ export default function DepartmentCard({
               <p className="text-muted-foreground line-clamp-2 text-xs">
                 {item.description}
               </p>
+            )}
+            {item.audit?.updated?.at && (
+              <div className="flex items-center gap-2">
+                <Clock
+                  className="text-muted-foreground size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-muted-foreground truncate">
+                  {tfl("updated")}:{" "}
+                  {formatDate(item.audit.updated.at, dateTimeFormat)}
+                </span>
+              </div>
             )}
           </CardContent>
         </>

@@ -38,8 +38,6 @@ const mockCnReasons: CnReason[] = [
     name: "Damaged Goods",
     description: "Items received in damaged condition",
     is_active: true,
-    created_at: "2024-01-01T00:00:00Z",
-    updated_at: "2024-01-01T00:00:00Z",
   },
   {
     id: "2",
@@ -47,8 +45,6 @@ const mockCnReasons: CnReason[] = [
     name: "Wrong Item",
     description: "Incorrect item delivered",
     is_active: true,
-    created_at: "2024-01-02T00:00:00Z",
-    updated_at: "2024-01-02T00:00:00Z",
   },
 ];
 

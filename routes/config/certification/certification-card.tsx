@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Award, Trash2 } from "lucide-react";
+import { Award, Clock, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -12,6 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Certification } from "@/types/certification";
 
 interface CertificationCardProps {
@@ -26,6 +28,8 @@ export default function CertificationCard({
   onDelete,
 }: CertificationCardProps) {
   const tc = useTranslations("common");
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
 
   return (
     <Card
@@ -65,6 +69,17 @@ export default function CertificationCard({
         <p className="text-muted-foreground line-clamp-2 text-xs leading-snug">
           {item.description || "—"}
         </p>
+        {item.audit?.updated?.at && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate text-xs">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
+            </span>
+          </div>
+        )}
       </CardContent>
 
       <Separator />

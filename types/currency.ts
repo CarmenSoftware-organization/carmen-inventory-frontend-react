@@ -1,3 +1,5 @@
+import type { Audit } from "./audit";
+
 export interface Currency {
   id: string;
   code: string;
@@ -8,8 +10,7 @@ export interface Currency {
   decimal_places: number;
   is_active: boolean;
   doc_version: number;
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateCurrencyDto {
