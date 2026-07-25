@@ -1,10 +1,16 @@
+import { Clock } from "lucide-react";
+import { useTranslations } from "use-intl";
 import {
   Card,
   CardAction,
   CardHeader,
   CardTitle,
+  CardContent,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { EquipmentCategory } from "@/types/equipment-category";
 
 interface EquipmentCategoryCardProps {
@@ -25,6 +31,10 @@ export default function EquipmentCategoryCard({
   index,
   onEdit,
 }: EquipmentCategoryCardProps) {
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
+  const updatedAt = item.audit?.updated?.at;
+
   return (
     <Card
       role="button"
@@ -53,6 +63,21 @@ export default function EquipmentCategoryCard({
           <StatusBadge active={item.is_active} />
         </CardAction>
       </CardHeader>
+
+      {updatedAt && (
+        <>
+          <Separator />
+          <CardContent className="flex items-center gap-1.5 px-4 py-2 text-xs">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate">
+              {tfl("updated")}: {formatDate(updatedAt, dateTimeFormat)}
+            </span>
+          </CardContent>
+        </>
+      )}
     </Card>
   );
 }
