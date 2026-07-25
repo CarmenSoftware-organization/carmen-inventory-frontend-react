@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
@@ -63,6 +64,7 @@ function BuAvatar({
 
 export default function BuSwitcher() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { data: profile, isLoading, isError, defaultBu } = useProfile();
   const switchBuMutation = useSwitchBu();
   const [isSwitching, setIsSwitching] = useState(false);
@@ -134,6 +136,8 @@ export default function BuSwitcher() {
                     queryKey: [...profileQueryKey],
                   });
                   toast.success(`Switched to ${bu.name}`);
+                  // ข้อมูลของ BU เดิมถูกล้างไปแล้ว หน้าที่ยืนอยู่อาจอ้างถึง id ที่ไม่มีใน BU ใหม่
+                  navigate("/dashboard");
                 } catch {
                   toast.error("Failed to switch business unit");
                 } finally {
