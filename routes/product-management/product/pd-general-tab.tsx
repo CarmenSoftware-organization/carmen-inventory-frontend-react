@@ -664,9 +664,10 @@ interface ReadOnlyValueProps {
 }
 
 /**
- * ค่าโหมด view = กล่อง read-only สีเทา (pattern เดียวกับ company profile) แทน
- * input disabled · ค่าว่างแสดง `—` สีจาง · รองรับ `suffix` (เช่น %) และ
- * `multiline` (whitespace-pre-wrap สำหรับ description)
+ * ค่าโหมด view = หน้าตาเหมือน disabled input (ขอบ + พื้น bg-muted + จาง) ตรงกับ
+ * disabled input จริงของแอป — จางแบบกดไม่ได้ ต่างจาก input โหมด edit ชัด ·
+ * ใช้ค่าที่ resolve มาแล้ว (product.*.name) ไม่ต้องยิง query lookup ในโหมด view ·
+ * ค่าว่างแสดง `—` · รองรับ `suffix` (เช่น %) และ `multiline` (สำหรับ description)
  */
 function ReadOnlyValue({ value, suffix, multiline }: ReadOnlyValueProps) {
   "use no memo";
@@ -674,9 +675,9 @@ function ReadOnlyValue({ value, suffix, multiline }: ReadOnlyValueProps) {
   return (
     <div
       className={cn(
-        "bg-muted/50 text-foreground min-h-9 rounded-md border px-3 py-1.5 text-sm break-words",
+        "border-input bg-muted/60 min-h-9 cursor-not-allowed rounded-md border px-3 py-1.5 text-sm break-words opacity-60",
         multiline ? "whitespace-pre-wrap" : "flex items-center",
-        isEmpty && "text-muted-foreground/60",
+        isEmpty && "text-muted-foreground",
       )}
     >
       {isEmpty ? (

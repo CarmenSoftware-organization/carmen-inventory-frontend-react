@@ -101,9 +101,7 @@ function FormToolbar({
     ? t("neverSaved")
     : product?.local_name
       ? (
-          <span
-            style={{ fontFamily: '"IBM Plex Sans Thai", var(--font-sans)' }}
-          >
+          <span>
             {product.local_name}
           </span>
         )

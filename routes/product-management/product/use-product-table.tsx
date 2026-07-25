@@ -4,7 +4,12 @@ import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { AuditCell } from "@/components/share/audit-cell";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   selectColumn,
   indexColumn,
@@ -16,6 +21,19 @@ import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { getProductStatusLabel } from "@/constant/product-status";
+
+/** เซลล์ข้อความ truncate … เมื่อยาวเกิน column · hover โชว์ค่าเต็มด้วย Tooltip */
+const truncCell = (value: string) =>
+  value ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="block truncate">{value}</span>
+      </TooltipTrigger>
+      <TooltipContent>{value}</TooltipContent>
+    </Tooltip>
+  ) : (
+    <span className="block truncate">{value}</span>
+  );
 
 interface UseProductTableOptions {
   products: Product[];
@@ -73,11 +91,22 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("name")} />
       ),
-      cell: ({ row }) => (
-        <CellAction onClick={() => onEdit(row.original)}>
-          {row.original.name || "..."}
-        </CellAction>
-      ),
+      cell: ({ row }) => {
+        const name = row.original.name || "...";
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <CellAction
+                onClick={() => onEdit(row.original)}
+                className="block w-full truncate"
+              >
+                {name}
+              </CellAction>
+            </TooltipTrigger>
+            <TooltipContent>{name}</TooltipContent>
+          </Tooltip>
+        );
+      },
       size: 350,
       meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.textShort },
     },
@@ -86,6 +115,7 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("localName")} />
       ),
+      cell: ({ row }) => truncCell(row.original.local_name ?? ""),
       size: 300,
       meta: { headerTitle: tfl("localName"), skeleton: columnSkeletons.text },
     },
@@ -102,6 +132,7 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("category")} />
       ),
+      cell: ({ row }) => truncCell(row.original.product_category?.name ?? ""),
       enableSorting: false,
       meta: { headerTitle: tfl("category"), skeleton: columnSkeletons.text },
     },
@@ -111,6 +142,8 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("subCategory")} />
       ),
+      cell: ({ row }) =>
+        truncCell(row.original.product_sub_category?.name ?? ""),
       enableSorting: false,
       meta: { headerTitle: tfl("subCategory"), skeleton: columnSkeletons.text },
     },
@@ -120,6 +153,7 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("itemGroup")} />
       ),
+      cell: ({ row }) => truncCell(row.original.product_item_group?.name ?? ""),
       enableSorting: false,
       meta: { headerTitle: tfl("itemGroup"), skeleton: columnSkeletons.text },
     },
@@ -136,12 +170,12 @@ export function useProductTable({
       cell: ({ row }) => {
         const status = row.getValue<string>("product_status_type");
         return (
-          <Badge
+          <StatusDotBadge
             size="sm"
-            variant={status === "active" ? "success" : "secondary"}
+            tone={status === "active" ? "success" : "neutral"}
           >
             {getProductStatusLabel(ts, status)}
-          </Badge>
+          </StatusDotBadge>
         );
       },
       size: 100,

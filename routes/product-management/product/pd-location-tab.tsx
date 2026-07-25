@@ -9,7 +9,7 @@ import {
 import { Plus, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
 import { inventoryTypeLabelKey } from "@/constant/location";
 import {
   DataGrid,
@@ -38,10 +38,11 @@ interface LocationRow {
 
 const EMPTY_LOCATIONS: ProductFormValues["locations"] = [];
 
-const TYPE_VARIANT: Record<string, "info" | "warning" | "secondary"> = {
+// tone ของ dot ตาม location type — เก็บสีต่อ type ไว้ที่ dot (chip กลาง)
+const TYPE_TONE: Record<string, DotTone> = {
   inventory: "info",
   direct: "warning",
-  consignment: "secondary",
+  consignment: "neutral",
 };
 
 interface LocationsTabProps {
@@ -159,19 +160,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
         id: "location",
         header: tfl("location"),
         cell: ({ row }) => {
-          const { location_code, location_name, location_type, fieldIndex } =
-            row.original;
-          const typeBadge = location_type ? (
-            <Badge
-              variant={TYPE_VARIANT[location_type] ?? "secondary"}
-              size="xs"
-            >
-              {(() => {
-                const k = inventoryTypeLabelKey(location_type);
-                return k ? tl(k) : location_type.toUpperCase();
-              })()}
-            </Badge>
-          ) : null;
+          const { location_code, location_name, fieldIndex } = row.original;
 
           if (isDisabled) {
             return (
@@ -180,7 +169,6 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
                   <span className="text-muted-foreground">{location_code}</span>
                 )}
                 {location_name}
-                {typeBadge}
               </span>
             );
           }
@@ -233,6 +221,26 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
           );
         },
         size: 300,
+      },
+      {
+        id: "type",
+        header: tfl("type"),
+        cell: ({ row }) => {
+          const type = row.original.location_type;
+          if (!type) return "";
+          const k = inventoryTypeLabelKey(type);
+          return (
+            <StatusDotBadge tone={TYPE_TONE[type] ?? "neutral"} size="xs">
+              {k ? tl(k) : type.toUpperCase()}
+            </StatusDotBadge>
+          );
+        },
+        enableSorting: false,
+        size: 130,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center",
+        },
       },
       {
         id: "min_qty",
@@ -341,9 +349,9 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
           const isActive = row.original.is_active;
           if (isActive === undefined || isActive === null) return "";
           return (
-            <Badge variant={isActive ? "success" : "secondary"}>
+            <StatusDotBadge tone={isActive ? "success" : "neutral"}>
               {isActive ? ts("active") : ts("inactive")}
-            </Badge>
+            </StatusDotBadge>
           );
         },
         enableSorting: false,
@@ -418,7 +426,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
       <DataGrid
         table={table}
         recordCount={fields.length}
-        tableLayout={{ headerSticky: true }}
+        tableLayout={{ headerSticky: true}}
         emptyMessage={
           <EmptyComponent
             title={t("noLocations")}

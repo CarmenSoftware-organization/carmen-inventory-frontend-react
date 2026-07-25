@@ -2736,7 +2736,7 @@
       "priceHint": "Used until first PO establishes actual",
       "nameHint": "English name shown on POs, invoices",
       "codeHint": "Internal reference",
-      "localNameLabel": "Local name · ชื่อภาษาไทย",
+      "localNameLabel": "Local name",
       "descriptionPlaceholder": "Short description, spec sheet summary, etc.",
       "descriptionHint": "Shown on supplier POs and internal reports",
       "itemGroupPlaceholder": "Choose a category…",

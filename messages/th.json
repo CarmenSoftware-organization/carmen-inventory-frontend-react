@@ -2731,7 +2731,7 @@
       "priceHint": "ใช้จนกว่าจะมีใบสั่งซื้อจริง",
       "nameHint": "ชื่อภาษาอังกฤษสำหรับ PO และใบแจ้งหนี้",
       "codeHint": "รหัสอ้างอิงภายใน",
-      "localNameLabel": "ชื่อท้องถิ่น · ชื่อภาษาไทย",
+      "localNameLabel": "ชื่อท้องถิ่น",
       "descriptionPlaceholder": "คำอธิบายสั้น ๆ สรุปสเปก ฯลฯ",
       "descriptionHint": "แสดงใน PO ของซัพพลายเออร์และรายงานภายใน",
       "itemGroupPlaceholder": "เลือกหมวดหมู่…",
