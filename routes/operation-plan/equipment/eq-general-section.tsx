@@ -32,7 +32,11 @@ export function EqGeneralSection({
   const errors = form.formState.errors;
 
   return (
-    <Card label={tf("generalInfo")}>
+    <Card
+      first
+      label={tf("generalInfo")}
+      description={t("generalInfoDesc")}
+    >
       <div className="grid gap-4 lg:grid-cols-[16rem_minmax(0,1fr)]">
         <EqImageField
           disabled={isDisabled}

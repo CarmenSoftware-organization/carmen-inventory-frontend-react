@@ -2351,7 +2351,10 @@
       "back": "Back",
       "noCode": "no code",
       "untitledCategory": "Untitled category",
-      "generalInformation": "General Information"
+      "generalInformation": "General Information",
+      "generalInfoDesc": "Name and details of this recipe category.",
+      "defaultCostSettingsDesc": "Default labor and overhead costs that recipes in this category start with.",
+      "defaultProfitMarginsDesc": "Default profit target for this category — helps price its recipes."
     },
     "cuisine": {
       "regionAsia": "Asia",
@@ -2374,7 +2377,10 @@
       "cuisineDetails": "Cuisine Details",
       "additional": "Additional",
       "back": "Back",
-      "untitledCuisine": "Untitled cuisine"
+      "untitledCuisine": "Untitled cuisine",
+      "generalInfoDesc": "Name and code of this cuisine type (e.g. Thai, Italian).",
+      "cuisineDetailsDesc": "Details about this cuisine type.",
+      "additionalDesc": "Any other extra details for this cuisine type."
     },
     "equipment": {
       "entity": "Equipment",
@@ -2416,7 +2422,12 @@
       "portable": "Portable",
       "back": "Back",
       "noCode": "no code",
-      "untitledEquipment": "Untitled equipment"
+      "untitledEquipment": "Untitled equipment",
+      "generalInfoDesc": "Name, code, and category of this equipment.",
+      "qtySettingsDesc": "How many you have, how many are in use, and usage stats.",
+      "instructionsDesc": "How to operate, safety notes, and cleaning steps.",
+      "maintenanceDesc": "Maintenance schedule and history for this equipment.",
+      "additionalDesc": "Any other extra details for this equipment."
     },
     "equipmentCategory": {
       "entity": "Equipment Category",

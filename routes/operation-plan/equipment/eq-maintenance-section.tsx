@@ -21,7 +21,10 @@ export function EqMaintenanceSection({
   const errors = form.formState.errors;
 
   return (
-    <Card label={t("maintenance")}>
+    <Card
+      label={t("maintenance")}
+      description={t("maintenanceDesc")}
+    >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Field className="sm:col-span-2 lg:col-span-3">
           <FieldLabel htmlFor="equipment-maintenance-schedule">

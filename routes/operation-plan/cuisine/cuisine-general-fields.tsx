@@ -32,7 +32,11 @@ export function CuisineGeneralFields({
   const errors = form.formState.errors;
 
   return (
-    <Card label={tf("generalInfo")}>
+    <Card
+      first
+      label={tf("generalInfo")}
+      description={t("generalInfoDesc")}
+    >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="cuisine-name" required>

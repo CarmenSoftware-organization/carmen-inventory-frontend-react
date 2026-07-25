@@ -2346,7 +2346,10 @@
       "back": "ย้อนกลับ",
       "noCode": "ยังไม่มีรหัส",
       "untitledCategory": "หมวดหมู่ไม่มีชื่อ",
-      "generalInformation": "ข้อมูลทั่วไป"
+      "generalInformation": "ข้อมูลทั่วไป",
+      "generalInfoDesc": "ชื่อและรายละเอียดของหมวดสูตรนี้",
+      "defaultCostSettingsDesc": "ค่าแรงและค่าโสหุ้ยเริ่มต้น ที่สูตรในหมวดนี้จะใช้อัตโนมัติ",
+      "defaultProfitMarginsDesc": "เป้ากำไรเริ่มต้นของหมวดนี้ ใช้ช่วยตั้งราคาสูตร"
     },
     "cuisine": {
       "regionAsia": "เอเชีย",
@@ -2369,7 +2372,10 @@
       "cuisineDetails": "รายละเอียดประเภทอาหาร",
       "additional": "เพิ่มเติม",
       "back": "ย้อนกลับ",
-      "untitledCuisine": "ประเภทอาหารไม่มีชื่อ"
+      "untitledCuisine": "ประเภทอาหารไม่มีชื่อ",
+      "generalInfoDesc": "ชื่อและรหัสของประเภทอาหาร (เช่น ไทย อิตาเลียน)",
+      "cuisineDetailsDesc": "รายละเอียดของประเภทอาหารนี้",
+      "additionalDesc": "ข้อมูลเพิ่มเติมอื่น ๆ ของประเภทอาหารนี้"
     },
     "equipment": {
       "entity": "อุปกรณ์",
@@ -2411,7 +2417,12 @@
       "portable": "พกพาได้",
       "back": "ย้อนกลับ",
       "noCode": "ยังไม่มีรหัส",
-      "untitledEquipment": "อุปกรณ์ไม่มีชื่อ"
+      "untitledEquipment": "อุปกรณ์ไม่มีชื่อ",
+      "generalInfoDesc": "ชื่อ รหัส และหมวดของอุปกรณ์",
+      "qtySettingsDesc": "จำนวนที่มี จำนวนที่ใช้งานอยู่ และสถิติการใช้",
+      "instructionsDesc": "วิธีใช้งาน ข้อควรระวังด้านความปลอดภัย และวิธีทำความสะอาด",
+      "maintenanceDesc": "ตารางและประวัติการบำรุงรักษาอุปกรณ์",
+      "additionalDesc": "ข้อมูลเพิ่มเติมอื่น ๆ ของอุปกรณ์"
     },
     "equipmentCategory": {
       "entity": "หมวดหมู่อุปกรณ์",

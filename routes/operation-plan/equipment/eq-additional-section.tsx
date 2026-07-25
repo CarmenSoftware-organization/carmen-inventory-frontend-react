@@ -22,7 +22,10 @@ export function EqAdditionalSection({
   const tfl = useTranslations("field");
 
   return (
-    <Card label={t("additional")}>
+    <Card
+      label={t("additional")}
+      description={t("additionalDesc")}
+    >
       <FieldGroup className="gap-3">
         <Field>
           <FieldLabel htmlFor="equipment-note">{tfl("note")}</FieldLabel>

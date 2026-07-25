@@ -179,7 +179,7 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <EqToolbar
         form={form}
         mode={mode}
@@ -196,7 +196,6 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
         onSubmit={form.handleSubmit(onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4"
       >
         <EqGeneralSection
           form={form}
