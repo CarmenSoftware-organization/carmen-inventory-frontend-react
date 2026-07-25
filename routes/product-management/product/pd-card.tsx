@@ -11,24 +11,12 @@ import type { Product } from "@/types/product";
 
 interface ProductCardProps {
   readonly item: Product;
-  readonly index?: number;
   readonly onEdit: (item: Product) => void;
   readonly onDelete: (item: Product) => void;
 }
 
-/**
- * Card แสดงข้อมูลสินค้าแบบย่อ (มุมมอง grid/mobile ของหน้ารายการ)
- *
- * แสดง name, code, status (dot badge), local_name, inventory unit, item group
- * ทุก field truncate + `overflow-hidden` ที่ card กันข้อความยาวทะลุกรอบ · เลิกใช้
- * `CardHeader` ของ shadcn ที่เป็น grid `auto` (max-content) ซึ่งทำให้ title
- * ขยายจน truncate ไม่ทำงาน → ใช้ div ธรรมดา + min-w-0 แทน
- *
- * @param props - `item` (Product), `index` (ลำดับ), `onEdit` callback
- */
 export default function ProductCard({
   item,
-  index,
   onEdit,
   onDelete,
 }: ProductCardProps) {
@@ -52,16 +40,11 @@ export default function ProductCard({
     >
       {/* Header */}
       <div className="flex items-start gap-2 px-4 py-3">
-        {typeof index === "number" && (
-          <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
-            {index + 1}
-          </span>
-        )}
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold">
             {item.name || "..."}
           </h3>
-          <div className="mt-1 flex items-center justify-between gap-2">
+          <div className="mt-1 flex items-center gap-2">
             <span className="text-muted-foreground truncate text-xs">
               {item.code}
             </span>

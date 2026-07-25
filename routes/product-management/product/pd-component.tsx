@@ -445,12 +445,11 @@ export default function ProductComponent() {
         )}
         {isGridMode && !grid.isLoading && !grid.error && products.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {products.map((item, i) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((item) => (
                 <ProductCard
                   key={item.id}
                   item={item}
-                  index={i}
                   onEdit={(p) =>
                     navigate(`/product-management/product/${p.id}`)
                   }

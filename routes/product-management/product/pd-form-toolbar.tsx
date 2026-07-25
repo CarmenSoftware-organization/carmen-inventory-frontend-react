@@ -1,7 +1,10 @@
 import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  StatusDotBadge,
+  type DotTone,
+} from "@/components/ui/status-dot-badge";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import type { FormMode } from "@/types/form";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
@@ -52,27 +55,17 @@ function FormToolbar({
   const isDirty = form.formState.isDirty;
   const saveDisabled = isPending || (isEdit && !isDirty);
 
-  function renderStatusBadge() {
-    if (isAdd) {
-      return (
-        <Badge variant="info-light" size="xs">
-          ● {t("draft")}
-        </Badge>
-      );
-    }
-    if (watchedStatus === "active") {
-      return (
-        <Badge variant="success-light" size="xs">
-          ● {t("active")}
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="secondary" size="xs">
-        ○ {t("inactive")}
-      </Badge>
-    );
-  }
+  // status → global dot badge (draft=info · active=success · inactive=neutral)
+  const statusTone: DotTone = isAdd
+    ? "info"
+    : watchedStatus === "active"
+      ? "success"
+      : "neutral";
+  const statusLabel = isAdd
+    ? t("draft")
+    : watchedStatus === "active"
+      ? t("active")
+      : t("inactive");
 
   function getButtonLabel() {
     if (isPending) {
@@ -84,7 +77,9 @@ function FormToolbar({
   // status + code/hint แสดงข้าง title (badges slot)
   const badges = (
     <>
-      {renderStatusBadge()}
+      <StatusDotBadge tone={statusTone} size="xs">
+        {statusLabel}
+      </StatusDotBadge>
       {!isAdd && displayCode && (
         <span className="text-muted-foreground text-xs">{displayCode}</span>
       )}
