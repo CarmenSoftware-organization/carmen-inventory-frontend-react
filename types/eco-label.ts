@@ -1,11 +1,12 @@
+import type { Audit } from "./audit";
+
 export interface EcoLabel {
   id: string;
   code: string;
   name: string;
   description: string;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
   doc_version?: number;
 }
 

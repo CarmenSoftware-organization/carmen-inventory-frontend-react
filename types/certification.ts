@@ -1,3 +1,5 @@
+import type { Audit } from "./audit";
+
 export interface Certification {
   id: string;
   doc_version: number;
@@ -5,8 +7,7 @@ export interface Certification {
   name: string;
   description: string;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateCertificationDto {

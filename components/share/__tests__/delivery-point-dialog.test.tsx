@@ -70,8 +70,6 @@ const mockDeliveryPoint: DeliveryPoint = {
   doc_version: 3,
   name: "Main Warehouse",
   is_active: true,
-  created_at: "2024-01-01T00:00:00Z",
-  updated_at: "2024-01-01T00:00:00Z",
 };
 
 function getDialog() {

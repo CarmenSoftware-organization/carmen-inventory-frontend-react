@@ -1,3 +1,4 @@
+import { Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -9,6 +10,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import { ADJUSTMENT_TYPE, type AdjustmentType } from "@/types/adjustment-type";
 
 interface AdjustmentTypeCardProps {
@@ -23,6 +26,7 @@ export default function AdjustmentTypeCard({
   onEdit,
 }: AdjustmentTypeCardProps) {
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
 
   return (
     <Card
@@ -65,13 +69,27 @@ export default function AdjustmentTypeCard({
         </CardAction>
       </CardHeader>
 
-      {item.description && (
+      {(item.description || item.audit?.updated?.at) && (
         <>
           <Separator />
-          <CardContent className="px-4 py-3">
-            <p className="text-muted-foreground line-clamp-2 text-xs">
-              {item.description}
-            </p>
+          <CardContent className="space-y-1.5 px-4 py-3 text-xs">
+            {item.description && (
+              <p className="text-muted-foreground line-clamp-2 text-xs">
+                {item.description}
+              </p>
+            )}
+            {item.audit?.updated?.at && (
+              <div className="flex items-center gap-1.5">
+                <Clock
+                  className="text-muted-foreground size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-muted-foreground truncate">
+                  {tfl("updated")}:{" "}
+                  {formatDate(item.audit.updated.at, dateTimeFormat)}
+                </span>
+              </div>
+            )}
           </CardContent>
         </>
       )}

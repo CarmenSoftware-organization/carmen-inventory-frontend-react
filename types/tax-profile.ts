@@ -1,11 +1,12 @@
+import type { Audit } from "./audit";
+
 export interface TaxProfile {
   id: string;
   name: string;
   tax_rate: number;
   is_active: boolean;
   doc_version: number;
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateTaxProfileDto {
