@@ -26,9 +26,6 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
-import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
-import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   AlertDialog,
@@ -55,54 +52,13 @@ const PrSelectDialog = lazy(() =>
   import("./pr-select-dialog").then((mod) => ({ default: mod.PrSelectDialog })),
 );
 import EmptyComponent from "@/components/empty-component";
-import {
-  PR_ITEM,
-  computePrItemAmounts,
-  resolveApprovedQty,
-} from "./pr-form-schema";
+import { PR_ITEM } from "./pr-form-schema";
 import { getDeleteDescription } from "@/lib/form-utils";
-import {
-  PR_ITEM_PRICELIST_COMPARE_TYPE,
-  PR_ITEM_STAGE_STATUS,
-} from "@/types/purchase-request";
-import { formatDate } from "@/lib/date-utils";
+import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { PrAskAiMenu } from "./ai/pr-ask-ai-menu";
+import { runPrAutoAllocate } from "./pr-auto-allocate";
 
-/**
- * คำนวณ + set ยอด derive ของ item (discount/tax/net/total) ตอน auto-allocate
- * เพราะ pr-item-expand (ที่ปกติ sync ยอดให้) mount เฉพาะตอน item ถูกขยาย —
- * collapsed row จะไม่ recompute ถ้าไม่ทำตรงนี้
- */
-function applyDerivedAmounts(
-  form: UseFormReturn<PrFormValues>,
-  index: number,
-  item: PrFormValues["items"][number],
-  price: number,
-  taxRate: number,
-) {
-  const qty = resolveApprovedQty(item);
-  const isDiscAdj = item.is_discount_adjustment ?? false;
-  const isTaxAdj = item.is_tax_adjustment ?? false;
-  const amounts = computePrItemAmounts({
-    price,
-    qty,
-    discRate: Number(item.discount_rate) || 0,
-    isDiscAdj,
-    discAmt: Number(item.discount_amount) || 0,
-    taxRate,
-    isTaxAdj,
-    taxAmt: Number(item.tax_amount) || 0,
-  });
-  if (!isDiscAdj) {
-    form.setValue(`items.${index}.discount_amount`, amounts.discountAmount);
-  }
-  if (!isTaxAdj) {
-    form.setValue(`items.${index}.tax_amount`, amounts.taxAmount);
-  }
-  form.setValue(`items.${index}.net_amount`, amounts.netAmount);
-  form.setValue(`items.${index}.total_price`, amounts.totalPrice);
-}
 
 interface PrItemFieldsProps {
   readonly form: UseFormReturn<PrFormValues>;
@@ -211,87 +167,13 @@ export function PrItemFields({
     role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE;
 
   const handleAutoAllocate = async () => {
-    const items = form.getValues("items");
-    if (items.length === 0 || !buCode) return;
-    const bu_code = buCode;
-
     setIsAllocating(true);
-    const toastId = toast.loading(t("allocating", { count: items.length }));
-    let allocated = 0;
-
-    const results = await Promise.allSettled(
-      items.map(async (item, index) => {
-        if (!item.product_id || !item.requested_unit_id || !item.currency_id)
-          return;
-
-        const url = buildUrl(API_ENDPOINTS.PRICE_LIST_COMPARE(bu_code), {
-          product_id: item.product_id,
-          unit_id: item.requested_unit_id,
-          at_date: formatDate(item.delivery_date, "yyyy-MM-dd"),
-          currency_id: item.currency_id,
-        });
-
-        const res = await httpClient.get(url);
-        if (!res.ok) throw new Error("fetch failed");
-
-        const json = await res.json();
-        const selected = json.data?.selected;
-        if (!selected) {
-          form.setValue(`items.${index}.vendor_id`, null);
-          form.setValue(`items.${index}.vendor_name`, "");
-          form.setValue(`items.${index}.pricelist_price`, 0);
-          form.setValue(`items.${index}.pricelist_type`, null);
-          form.setValue(`items.${index}.pricelist_detail_id`, null);
-          form.setValue(`items.${index}.pricelist_no`, null);
-          // ไม่มีราคา → ยอด derive กลับเป็น 0 (tax_rate คงเดิม)
-          applyDerivedAmounts(form, index, item, 0, Number(item.tax_rate) || 0);
-          return;
-        }
-
-        form.setValue(`items.${index}.vendor_id`, selected.vendor_id);
-        form.setValue(`items.${index}.vendor_name`, selected.vendor_name);
-        form.setValue(`items.${index}.pricelist_price`, selected.price);
-
-        form.setValue(
-          `items.${index}.pricelist_type`,
-          PR_ITEM_PRICELIST_COMPARE_TYPE.AUTOMATIC,
-        );
-        form.setValue(
-          `items.${index}.pricelist_detail_id`,
-          selected.pricelist_detail_id,
-        );
-        form.setValue(`items.${index}.pricelist_no`, selected.pricelist_no);
-        form.setValue(`items.${index}.exchange_rate`, selected.exchange_rate);
-        form.setValue(`items.${index}.tax_profile_id`, selected.tax_profile_id);
-        form.setValue(
-          `items.${index}.tax_profile_name`,
-          selected.tax_profile_name,
-        );
-        form.setValue(`items.${index}.tax_rate`, selected.tax_rate);
-        // คำนวณ tax_amount/net/total ทันที (collapsed row ไม่มี pr-item-expand sync ให้)
-        applyDerivedAmounts(
-          form,
-          index,
-          item,
-          selected.price,
-          Number(selected.tax_rate) || 0,
-        );
-        allocated++;
-      }),
-    );
-
-    toast.dismiss(toastId);
-    const failed = results.filter((r) => r.status === "rejected").length;
-    if (allocated > 0) {
-      toast.success(t("allocated", { allocated, total: items.length }));
-    }
-    if (failed > 0) {
-      toast.error(t("allocateFailed", { count: failed }));
-    }
-    if (allocated === 0 && failed === 0) {
-      toast.warning(t("noPriceListFound"));
-    }
-
+    await runPrAutoAllocate(form, buCode, {
+      allocating: (count) => t("allocating", { count }),
+      allocated: (allocated, total) => t("allocated", { allocated, total }),
+      allocateFailed: (count) => t("allocateFailed", { count }),
+      noPriceListFound: t("noPriceListFound"),
+    });
     setIsAllocating(false);
   };
 

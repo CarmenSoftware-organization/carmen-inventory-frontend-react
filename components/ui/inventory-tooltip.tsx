@@ -20,6 +20,12 @@ interface InventoryTooltipProps {
   readonly unitName?: string;
   readonly icon?: "box" | "package";
   readonly className?: string;
+  /**
+   * กด "คงเหลือ" / "กำลังสั่ง" เพื่อดูรายละเอียดต่อ — ไม่ส่งมาก็เป็นข้อความเฉยๆ
+   * (พฤติกรรมเดิม) · เนื้อ tooltip ของ Radix hover ต่อได้อยู่แล้ว จึงกดได้จริง
+   */
+  readonly onOnHandClick?: () => void;
+  readonly onOnOrderClick?: () => void;
 }
 
 export const InventoryTooltip = memo(function InventoryTooltip({
@@ -29,6 +35,8 @@ export const InventoryTooltip = memo(function InventoryTooltip({
   unitName,
   icon = "box",
   className,
+  onOnHandClick,
+  onOnOrderClick,
 }: InventoryTooltipProps) {
   const t = useTranslations("procurement.purchaseRequest");
 
@@ -96,13 +104,26 @@ export const InventoryTooltip = memo(function InventoryTooltip({
               </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[0.6875rem]">
             <div>
-              <span
-                className={
-                  needsReorder ? "text-destructive" : "text-info-foreground"
-                }
-              >
-                {t("onHand")}
-              </span>
+              {onOnHandClick ? (
+                <button
+                  type="button"
+                  onClick={onOnHandClick}
+                  className={cn(
+                    "underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none",
+                    needsReorder ? "text-destructive" : "text-info-foreground",
+                  )}
+                >
+                  {t("onHand")}
+                </button>
+              ) : (
+                <span
+                  className={
+                    needsReorder ? "text-destructive" : "text-info-foreground"
+                  }
+                >
+                  {t("onHand")}
+                </span>
+              )}
               <p
                 className={`text-xs font-semibold tabular-nums ${needsReorder ? "text-destructive" : ""}`}
               >
@@ -116,7 +137,17 @@ export const InventoryTooltip = memo(function InventoryTooltip({
               </p>
             </div>
             <div>
-              <span className="text-info-foreground">{t("onOrder")}</span>
+              {onOnOrderClick ? (
+                <button
+                  type="button"
+                  onClick={onOnOrderClick}
+                  className="text-info-foreground underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
+                >
+                  {t("onOrder")}
+                </button>
+              ) : (
+                <span className="text-info-foreground">{t("onOrder")}</span>
+              )}
               <p className="text-xs font-semibold tabular-nums">
                 {on_order_qty.toLocaleString()}
                 {unitName && (

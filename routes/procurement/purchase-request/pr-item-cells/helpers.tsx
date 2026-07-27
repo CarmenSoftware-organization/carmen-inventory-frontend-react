@@ -52,10 +52,15 @@ export const InventoryTooltipCell = memo(function InventoryTooltipCell({
   control,
   index,
   buCode,
+  onOnHandClick,
+  onOnOrderClick,
 }: {
   control: Control<PrFormValues>;
   index: number;
   buCode?: string;
+  /** กด label ใน tooltip เพื่อเปิด dialog รายละเอียด — ไม่ส่งมาก็เป็นข้อความเฉยๆ */
+  onOnHandClick?: () => void;
+  onOnOrderClick?: () => void;
 }) {
   "use no memo";
   const locationId =
@@ -73,6 +78,8 @@ export const InventoryTooltipCell = memo(function InventoryTooltipCell({
       unitName={unitName}
       icon="package"
       className={productId ? "text-primary" : "text-muted-foreground"}
+      onOnHandClick={onOnHandClick}
+      onOnOrderClick={onOnOrderClick}
     />
   );
 });

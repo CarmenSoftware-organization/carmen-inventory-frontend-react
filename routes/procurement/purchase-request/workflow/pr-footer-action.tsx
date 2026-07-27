@@ -11,6 +11,7 @@ import type { PrFormValues } from "../pr-form-schema";
 import { isAllItemsComplete } from "../pr-form-schema";
 import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { PrActionDialog, type StageOption, type ActionDialogItem } from "./pr-action-dialog";
+import { computePurchaseAction } from "./pr-purchase-action";
 
 interface PrFooterActionProps {
   readonly role?: string;
@@ -37,28 +38,6 @@ type ConfirmConfig = {
   onConfirm: () => void;
 };
 
-/**
- * คำนวณ action รวมของ stage ปัจจุบันจากสถานะของ items ทุกตัวใน PR โดยใช้
- * ลำดับความสำคัญ: review (มีอย่างน้อยหนึ่งรายการขอ review) > rejected
- * (ทุกรายการปฏิเสธ) > approved (ทุกรายการเป็น approve/reject และมีอย่างน้อย
- * หนึ่งรายการ approve) ใช้เพื่อตัดสินใจว่าควรแสดงปุ่ม workflow ปุ่มใดใน footer
- * @param statuses - รายการสถานะ `current_stage_status` ของแต่ละ item ใน PR
- * @returns ค่า `"none" | "review" | "rejected" | "approved"` สะท้อนปุ่มที่ควรแสดง
- * @example
- * computePurchaseAction(["approve", "reject"]); // => "approved"
- * computePurchaseAction(["review", "approve"]); // => "review"
- */
-const computePurchaseAction = (
-  statuses: string[],
-): "none" | "review" | "rejected" | "approved" => {
-  if (statuses.length === 0) return "none";
-  const isReject = (s: string) => s === PR_ITEM_STAGE_STATUS.REJECT || s === PR_ITEM_STAGE_STATUS.REJECTED;
-  const isApprove = (s: string) => s === PR_ITEM_STAGE_STATUS.APPROVE || s === PR_ITEM_STAGE_STATUS.APPROVED;
-  if (statuses.some((s) => s === PR_ITEM_STAGE_STATUS.REVIEW)) return "review";
-  if (statuses.every(isReject)) return "rejected";
-  if (statuses.every((s) => isApprove(s) || isReject(s)) && statuses.some(isApprove)) return "approved";
-  return "none";
-};
 
 /**
  * แถบ footer แบบ sticky ของฟอร์ม PR แสดงยอดรวม (subtotal / discount / net /

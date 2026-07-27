@@ -21,12 +21,18 @@ export const ProductCell = memo(function ProductCell({
   index,
   isDisabled,
   buCode,
+  inventoryActions,
 }: {
   control: Control<PrFormValues>;
   form: UseFormReturn<PrFormValues>;
   index: number;
   isDisabled: boolean;
   buCode?: string;
+  /** กด "คงเหลือ"/"กำลังสั่ง" ใน tooltip สต็อก — ไม่ส่งมาก็เป็นข้อความเฉยๆ */
+  inventoryActions?: {
+    onOnHand?: () => void;
+    onOnOrder?: () => void;
+  };
 }) {
   "use no memo";
   const locationId =
@@ -51,6 +57,8 @@ export const ProductCell = memo(function ProductCell({
             control={control}
             index={index}
             buCode={buCode}
+            onOnHandClick={inventoryActions?.onOnHand}
+            onOnOrderClick={inventoryActions?.onOnOrder}
           />
         </div>
         <p className="text-muted-foreground truncate text-[0.625rem]">
@@ -132,7 +140,13 @@ export const ProductCell = memo(function ProductCell({
           </TooltipProvider>
         )}
       />
-      <InventoryTooltipCell control={control} index={index} buCode={buCode} />
+      <InventoryTooltipCell
+        control={control}
+        index={index}
+        buCode={buCode}
+        onOnHandClick={inventoryActions?.onOnHand}
+        onOnOrderClick={inventoryActions?.onOnOrder}
+      />
     </div>
   );
 });

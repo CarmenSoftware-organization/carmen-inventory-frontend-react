@@ -27,6 +27,8 @@ interface Props {
   readonly index: number;
   readonly role?: string;
   readonly isDisabled: boolean;
+  /** override การจัดวาง — v2 วางปุ่มนี้ในช่องตาราง ไม่ใช่ gutter ของแถวที่กางออก */
+  readonly className?: string;
 }
 
 /**
@@ -39,6 +41,7 @@ export function PrPricelistCompare({
   index,
   role,
   isDisabled,
+  className,
 }: Props) {
   "use no memo";
   const tc = useTranslations("common");
@@ -87,7 +90,7 @@ export function PrPricelistCompare({
   };
 
   return (
-    <div className="pt-3">
+    <div className={className ?? "pt-3"}>
       <TooltipProvider delayDuration={100}>
         <Tooltip>
           <TooltipTrigger asChild>
