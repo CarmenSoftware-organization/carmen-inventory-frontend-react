@@ -76,7 +76,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
               {t("reviewTitle")}
             </h1>
             {(locationCode ?? locationName) && (
-              <p className="text-muted-foreground mt-0.5 text-[0.625rem] tracking-wide uppercase">
+              <p className="text-muted-foreground mt-0.5 text-micro-legal tracking-wide uppercase">
                 {locationCode}
                 {locationCode && locationName && (
                   <>
@@ -127,7 +127,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
             <h2 className="text-foreground text-sm font-semibold tracking-tight">
               {t("varianceDetails")}
             </h2>
-            <span className="bg-muted/60 text-muted-foreground rounded-full px-2 py-0.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted/60 text-muted-foreground rounded-full px-2 py-0.5 text-micro-legal font-semibold tabular-nums">
               {variances}
             </span>
           </div>

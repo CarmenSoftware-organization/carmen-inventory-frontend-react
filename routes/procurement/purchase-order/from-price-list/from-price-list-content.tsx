@@ -298,7 +298,7 @@ export function FromPriceListContent() {
                 <StepperIndicator className={INDICATOR_ACCENT}>
                   {s}
                 </StepperIndicator>
-                <StepperTitle className="text-[0.625rem] font-semibold">
+                <StepperTitle className="text-micro-legal font-semibold">
                   {t(labelKey)}
                 </StepperTitle>
               </StepperTrigger>

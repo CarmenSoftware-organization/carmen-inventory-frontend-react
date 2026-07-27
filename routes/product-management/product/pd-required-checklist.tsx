@@ -59,7 +59,7 @@ function RequiredChecklist({ form }: Props) {
             <span
               key={it.k}
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.6875rem]",
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro",
                 it.done
                   ? "border-success/40 bg-success/10 text-success"
                   : "border-primary/30 bg-background text-muted-foreground",

@@ -192,7 +192,7 @@ export function PoActionDialog({
           <div className="space-y-4 border-t px-5 py-4">
             {hasStages && (
               <section className="space-y-2">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold uppercase tracking-wider">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold uppercase tracking-wider">
                   <Workflow className="size-3" />
                   {tfl("stage")}
                   <span className="text-destructive">*</span>
@@ -236,7 +236,7 @@ export function PoActionDialog({
 
             {showMessage && hasItems && (
               <section className="space-y-2">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold uppercase tracking-wider">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold uppercase tracking-wider">
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                 </div>
@@ -248,7 +248,7 @@ export function PoActionDialog({
                         className="bg-muted/30 space-y-1.5 rounded-lg border p-2"
                       >
                         <div className="flex items-start gap-2">
-                          <div className="bg-background text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md border text-[0.625rem] font-semibold tabular-nums">
+                          <div className="bg-background text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md border text-micro-legal font-semibold tabular-nums">
                             {i + 1}
                           </div>
                           <p className="min-w-0 flex-1 truncate text-xs font-semibold leading-snug">
@@ -275,7 +275,7 @@ export function PoActionDialog({
 
             {showMessage && !hasItems && (
               <section className="space-y-1.5">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold uppercase tracking-wider">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold uppercase tracking-wider">
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                   <span className="text-muted-foreground font-normal normal-case">

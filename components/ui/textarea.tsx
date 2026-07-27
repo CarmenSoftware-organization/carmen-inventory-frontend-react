@@ -57,7 +57,7 @@ function Textarea({
   return (
     <div className="relative">
       {textareaElement}
-      <span className="pointer-events-none absolute bottom-1.5 right-2 text-[0.5625rem] tabular-nums text-muted-foreground/60">
+      <span className="pointer-events-none absolute bottom-1.5 right-2 text-micro-eyebrow tabular-nums text-muted-foreground/60">
         {length}/{maxLength}
       </span>
     </div>

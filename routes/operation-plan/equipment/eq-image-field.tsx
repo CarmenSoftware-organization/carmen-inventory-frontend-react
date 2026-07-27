@@ -84,7 +84,7 @@ export function EqImageField({
 
   return (
     <div className="space-y-2">
-      <span className="block text-[0.625rem] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+      <span className="block text-micro-legal font-bold uppercase tracking-[0.14em] text-muted-foreground">
         {t("image")}
       </span>
 

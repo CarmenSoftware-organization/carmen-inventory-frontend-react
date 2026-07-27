@@ -31,7 +31,7 @@ type VendorAddItem = RfpFormValues["vendors"]["add"][number];
 type DisplayVendor = RequestPriceListVendor | VendorAddItem;
 
 const EMPTY = (
-  <span className="text-muted-foreground text-[0.6875rem] italic">—</span>
+  <span className="text-muted-foreground text-micro italic">—</span>
 );
 
 interface RfpVendorTableProps {

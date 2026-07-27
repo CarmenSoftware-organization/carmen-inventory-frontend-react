@@ -220,11 +220,11 @@ const SavedWidgetsSection = () => {
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-baseline gap-2">
-          <h2 className="text-muted-foreground text-[0.625rem] font-bold tracking-[0.16em] uppercase">
+          <h2 className="text-muted-foreground text-micro-legal font-bold tracking-[0.16em] uppercase">
             {t("section")}
           </h2>
           {data && (
-            <span className="text-muted-foreground text-[0.6875rem] tabular-nums">
+            <span className="text-muted-foreground text-micro tabular-nums">
               {renderable.length}
             </span>
           )}
@@ -309,7 +309,7 @@ function EmptyState() {
             {hints.map((h) => (
               <li
                 key={h.label}
-                className="bg-muted inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold"
+                className="bg-muted inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold"
               >
                 <h.Icon
                   className="size-3"

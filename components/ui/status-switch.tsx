@@ -40,7 +40,7 @@ function StatusSwitch({
         <div>
           <p className="text-xs font-semibold">{resolvedLabel}</p>
           {resolvedDescription && (
-            <p className="text-muted-foreground text-[0.6875rem]">
+            <p className="text-muted-foreground text-micro">
               {resolvedDescription}
             </p>
           )}
@@ -56,7 +56,7 @@ function StatusSwitch({
       {!hideBadge && (
         <Badge
           variant={checked ? "success" : "destructive"}
-          className="px-2 py-0 text-[10px]"
+          className="px-2 py-0 text-micro-legal"
         >
           {checked ? resolvedActiveText : resolvedInactiveText}
         </Badge>

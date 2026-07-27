@@ -140,7 +140,7 @@ export function GrnPoSelectDialog({
                 <PackageCheck className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
+                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold">
                   {t("entity")}
                 </div>
                 <DialogTitle className="text-base">{t("selectPo")}</DialogTitle>
@@ -191,7 +191,7 @@ export function GrnPoSelectDialog({
                   onCheckedChange={toggleAll}
                 />
                 <span className="text-xs font-semibold">{tfl("selectAll")}</span>
-                <span className="text-muted-foreground text-[0.6875rem]">
+                <span className="text-muted-foreground text-micro">
                   · {poList.length} PO · {allDetailIds.length} items
                 </span>
               </label>
@@ -221,7 +221,7 @@ export function GrnPoSelectDialog({
                       <Badge
                         variant="outline"
                         size="xs"
-                        className="text-[0.625rem]"
+                        className="text-micro-legal"
                       >
                         {po.po_no}
                       </Badge>
@@ -235,10 +235,10 @@ export function GrnPoSelectDialog({
                           {po.grn_status.toUpperCase().replaceAll("_", " ")}
                         </Badge>
                       )}
-                      <span className="text-muted-foreground text-[0.6875rem]">
+                      <span className="text-muted-foreground text-micro">
                         {formatDate(po.order_date, dateFormat)}
                       </span>
-                      <span className="text-muted-foreground flex items-center gap-1 text-[0.6875rem]">
+                      <span className="text-muted-foreground flex items-center gap-1 text-micro">
                         <Package className="size-3" aria-hidden="true" />
                         {po.po_detail.length}
                       </span>
@@ -285,7 +285,7 @@ export function GrnPoSelectDialog({
                             <Badge
                               variant="outline"
                               size="xs"
-                              className="text-[0.625rem]"
+                              className="text-micro-legal"
                             >
                               {d.product_code}
                             </Badge>
@@ -295,7 +295,7 @@ export function GrnPoSelectDialog({
                             <span className="w-14 shrink-0 text-right text-xs tabular-nums">
                               {d.order_qty}
                             </span>
-                            <span className="text-muted-foreground w-10 shrink-0 text-center text-[0.6875rem]">
+                            <span className="text-muted-foreground w-10 shrink-0 text-center text-micro">
                               {d.order_unit_name}
                             </span>
                             <span className="w-20 shrink-0 text-right text-xs tabular-nums">

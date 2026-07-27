@@ -226,7 +226,7 @@ export function CnAddItemDialog({
                           </Badge>
                         )}
                       </span>
-                      <span className="text-muted-foreground truncate text-[0.6875rem]">
+                      <span className="text-muted-foreground truncate text-micro">
                         {line.location_name}
                         {line.location_code ? ` · ${line.location_code}` : ""}
                       </span>

@@ -101,7 +101,7 @@ export default function PriceListExternalImportDialog({
           <span className="text-foreground text-xs font-semibold">
             {isImporting ? "Importing…" : "Drop Excel file or click to browse"}
           </span>
-          <span className="text-muted-foreground text-[0.625rem] tracking-wide uppercase">
+          <span className="text-muted-foreground text-micro-legal tracking-wide uppercase">
             .xlsx, .xls
           </span>
         </button>

@@ -53,7 +53,7 @@ export const ProductCell = memo(function ProductCell({
             buCode={buCode}
           />
         </div>
-        <p className="text-muted-foreground truncate text-[0.625rem]">
+        <p className="text-muted-foreground truncate text-micro-legal">
           {productLocalName || <span className="text-muted-foreground">—</span>}
         </p>
       </div>
@@ -108,7 +108,7 @@ export const ProductCell = memo(function ProductCell({
                   className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
                 >
                   <div className="space-y-1">
-                    <p className="text-foreground/60 text-[0.6875rem] font-semibold">
+                    <p className="text-foreground/60 text-micro font-semibold">
                       {productCode}
                     </p>
                     <p className="text-xs leading-snug font-semibold">
@@ -116,7 +116,7 @@ export const ProductCell = memo(function ProductCell({
                     </p>
                   </div>
                   {(productLocalName || unitName) && (
-                    <div className="text-foreground/60 mt-2 flex items-center gap-2 border-t pt-2 text-[0.6875rem]">
+                    <div className="text-foreground/60 mt-2 flex items-center gap-2 border-t pt-2 text-micro">
                       {productLocalName && <span>{productLocalName}</span>}
                       {productLocalName && unitName && (
                         <span aria-hidden="true">·</span>

@@ -40,7 +40,7 @@ export const AmountCell = memo(function AmountCell({
   const currencySelectable = !isDisabled && !isRowLocked;
 
   const baseLine = isForeignCurrency && (
-    <span className="text-muted-foreground text-[0.6875rem] tabular-nums">
+    <span className="text-muted-foreground text-micro tabular-nums">
       {formatCurrency(baseAmount)} {baseCurrencyCode}
     </span>
   );

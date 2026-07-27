@@ -201,7 +201,7 @@ export default function GrnTaxDiscountFields({
                       disabled={disabled}
                       className="size-3.5"
                     />
-                    <span className="text-muted-foreground text-[0.6875rem] select-none">
+                    <span className="text-muted-foreground text-micro select-none">
                       {tfl("override")}
                     </span>
                   </label>
@@ -291,7 +291,7 @@ export default function GrnTaxDiscountFields({
                       disabled={disabled}
                       className="size-3.5"
                     />
-                    <span className="text-muted-foreground text-[0.6875rem] select-none">
+                    <span className="text-muted-foreground text-micro select-none">
                       {tfl("override")}
                     </span>
                   </label>

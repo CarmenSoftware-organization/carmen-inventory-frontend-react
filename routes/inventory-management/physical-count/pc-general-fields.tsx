@@ -37,7 +37,7 @@ export function PcGeneralFields({
         </CardLabel>
         <FieldGroup className="gap-3">
           <Field data-invalid={!!form.formState.errors.department_id}>
-            <FieldLabel className="text-muted-foreground inline-flex items-center gap-1 text-[0.5625rem] font-semibold tracking-widest uppercase">
+            <FieldLabel className="text-muted-foreground inline-flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
               <Building2 className="size-2.5" />
               {tfl("department")}
             </FieldLabel>
@@ -58,7 +58,7 @@ export function PcGeneralFields({
           </Field>
 
           <Field>
-            <FieldLabel className="text-muted-foreground inline-flex items-center gap-1 text-[0.5625rem] font-semibold tracking-widest uppercase">
+            <FieldLabel className="text-muted-foreground inline-flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
               <CalendarRange className="size-2.5" />
               {tfl("physicalCountPeriod")}
             </FieldLabel>

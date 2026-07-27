@@ -25,7 +25,7 @@ export function NotFoundComponent() {
             404
           </div>
 
-          <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
+          <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
             {t("eyebrow")}
           </span>
 
@@ -47,7 +47,7 @@ export function NotFoundComponent() {
         </div>
       </main>
 
-      <footer className="text-muted-foreground border-border border-t px-6 py-3 text-center text-[0.6875rem]">
+      <footer className="text-muted-foreground border-border border-t px-6 py-3 text-center text-micro">
         {t("footer", { year })}
       </footer>
     </div>

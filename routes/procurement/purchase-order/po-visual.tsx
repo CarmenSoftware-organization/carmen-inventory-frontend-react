@@ -107,7 +107,7 @@ export function OrderSummaryCard({
   ];
   return (
     <aside className="border-border/40 bg-muted/20 self-start rounded-xl border p-5">
-      <p className="text-muted-foreground text-[0.625rem] font-semibold">
+      <p className="text-muted-foreground text-micro-legal font-semibold">
         {tfl("orderSummary")}
       </p>
       <dl className="mt-3 space-y-1">
@@ -122,7 +122,7 @@ export function OrderSummaryCard({
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2,
               })}{" "}
-              <span className="text-muted-foreground text-[0.625rem]">
+              <span className="text-muted-foreground text-micro-legal">
                 {currencyCode}
               </span>
             </dd>
@@ -142,7 +142,7 @@ export function OrderSummaryCard({
         </div>
       )}
       <div className="border-border/60 mt-4 border-t pt-3">
-        <p className="text-primary text-[0.625rem] font-semibold">
+        <p className="text-primary text-micro-legal font-semibold">
           {tfl("grandTotal")}
         </p>
         <div className="mt-1 flex items-baseline gap-2">
@@ -156,7 +156,7 @@ export function OrderSummaryCard({
             {currencyCode}
           </span>
         </div>
-        <p className="text-muted-foreground mt-2 text-[0.6875rem]">
+        <p className="text-muted-foreground mt-2 text-micro">
           {t("summaryItemsUnits", { itemCount, qtyCount })}
         </p>
       </div>

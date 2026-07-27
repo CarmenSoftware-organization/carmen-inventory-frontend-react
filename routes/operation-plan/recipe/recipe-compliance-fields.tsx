@@ -121,7 +121,7 @@ export function RecipeComplianceFields({
                 >
                   <Sparkles className="size-3" aria-hidden="true" />
                   {custom}
-                  <span className="text-[0.625rem] font-semibold opacity-70">
+                  <span className="text-micro-legal font-semibold opacity-70">
                     {t("customAllergen")}
                   </span>
                 </span>

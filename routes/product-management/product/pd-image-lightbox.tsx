@@ -175,7 +175,7 @@ export function ImageLightbox({
                   aria-label={t("imgShowAria", { label: img.label })}
                   aria-current={idx === index}
                   className={cn(
-                    "ring-offset-background focus-visible:ring-ring relative flex size-16 shrink-0 cursor-pointer flex-col items-end justify-end overflow-hidden rounded-md border p-1 text-[0.625rem] transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                    "ring-offset-background focus-visible:ring-ring relative flex size-16 shrink-0 cursor-pointer flex-col items-end justify-end overflow-hidden rounded-md border p-1 text-micro-legal transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                     idx === index
                       ? "ring-primary ring-2 ring-offset-1"
                       : "opacity-60 hover:opacity-100",
@@ -198,7 +198,7 @@ export function ImageLightbox({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label={t("imgUploadAria")}
-                    className="text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/5 ring-offset-background focus-visible:ring-ring flex size-16 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed text-[0.625rem] transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/5 ring-offset-background focus-visible:ring-ring flex size-16 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed text-micro-legal transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                   >
                     <Upload className="size-4" aria-hidden="true" />
                     <span>{t("imgUpload")}</span>

@@ -74,7 +74,7 @@ function SummaryCard({
         >
           <Icon className="size-3.5" />
         </div>
-        <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
+        <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
           {title}
         </span>
       </div>
@@ -86,7 +86,7 @@ function SummaryCard({
       >
         {format(display)}
       </div>
-      <p className="text-muted-foreground text-[0.6875rem] leading-snug">
+      <p className="text-muted-foreground text-micro leading-snug">
         {subtitle}
       </p>
     </div>

@@ -77,7 +77,7 @@ export function VoidDialog({
 
         <div className="space-y-3 border-t px-5 py-4">
           <section className="space-y-1.5">
-            <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-wider uppercase">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold tracking-wider uppercase">
               <MessageSquare className="size-3" />
               {tfl("voidReason")}
               <span className="text-destructive">*</span>
@@ -92,7 +92,7 @@ export function VoidDialog({
               maxLength={256}
               disabled={isPending}
             />
-            <p className="text-muted-foreground text-right text-[0.625rem] tabular-nums">
+            <p className="text-muted-foreground text-right text-micro-legal tabular-nums">
               {reason.length}/256
             </p>
           </section>

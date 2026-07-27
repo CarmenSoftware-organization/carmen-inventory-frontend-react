@@ -13,7 +13,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { cn } from "@/lib/utils";
 
 const EMPTY = (
-  <span className="text-muted-foreground text-[0.6875rem] italic">—</span>
+  <span className="text-muted-foreground text-micro italic">—</span>
 );
 
 /** Vendor name (semibold) + code (muted micro) stacked in one cell */
@@ -32,7 +32,7 @@ export function VendorNameCell({
         {name}
       </span>
       {code && (
-        <span className="text-muted-foreground truncate text-[0.625rem] tracking-wide uppercase">
+        <span className="text-muted-foreground truncate text-micro-legal tracking-wide uppercase">
           {code}
         </span>
       )}
@@ -97,7 +97,7 @@ export function SubmissionStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.5625rem] font-semibold tracking-widest uppercase",
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-eyebrow font-semibold tracking-widest uppercase",
         hasSubmitted
           ? "bg-success/15 text-success-foreground"
           : "bg-muted text-muted-foreground",
@@ -133,7 +133,7 @@ export function PricelistCell({
           "noopener,noreferrer",
         )
       }
-      className="truncate text-[0.6875rem]"
+      className="truncate text-micro"
     >
       {pricelist.no}
     </CellAction>

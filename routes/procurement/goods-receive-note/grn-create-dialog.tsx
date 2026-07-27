@@ -40,7 +40,7 @@ export function GrnCreateDialog({
             <FileText className="text-warning size-5" />
             <div className="relative space-y-0.5">
               <h3 className="text-sm font-semibold">{t("manual")}</h3>
-              <p className="text-muted-foreground text-[0.6875rem] font-semibold">
+              <p className="text-muted-foreground text-micro font-semibold">
                 {t("manualSubtitle")}
               </p>
               <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
@@ -57,7 +57,7 @@ export function GrnCreateDialog({
             <ClipboardList className="text-info size-5" />
             <div className="relative space-y-0.5">
               <h3 className="text-sm font-semibold">{t("purchaseOrder")}</h3>
-              <p className="text-muted-foreground text-[0.6875rem] font-semibold">
+              <p className="text-muted-foreground text-micro font-semibold">
                 {t("poSubtitle")}
               </p>
               <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">

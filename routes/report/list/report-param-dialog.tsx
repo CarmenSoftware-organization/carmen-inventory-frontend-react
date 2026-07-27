@@ -306,13 +306,13 @@ function FieldControl({ field, periods }: FieldControlProps) {
     return (
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <span className="text-muted-foreground text-[0.625rem]">
+          <span className="text-muted-foreground text-micro-legal">
             {tc("from")}
           </span>
           <Control node={field.from} periods={periods} />
         </div>
         <div>
-          <span className="text-muted-foreground text-[0.625rem]">
+          <span className="text-muted-foreground text-micro-legal">
             {tc("to")}
           </span>
           <Control node={field.to} periods={periods} />

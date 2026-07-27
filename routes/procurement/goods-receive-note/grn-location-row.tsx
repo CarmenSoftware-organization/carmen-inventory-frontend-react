@@ -268,7 +268,7 @@ const OverReceiptWarning = memo(function OverReceiptWarning({
   if (!comparable || ordered <= 0 || received <= ordered) return null;
 
   return (
-    <p className="mt-0.5 text-right text-[0.7rem] text-amber-600 dark:text-amber-500">
+    <p className="mt-0.5 text-right text-micro text-amber-600 dark:text-amber-500">
       {t("overReceiptWarning", { ordered })}
     </p>
   );
@@ -438,7 +438,7 @@ function GrnLocationTaxCell({
     <div className="flex flex-col gap-0.5">
       {/* rate% + override toggle (label คอลัมน์อยู่ที่ header row) */}
       <div className="flex items-center justify-between gap-2">
-        <span className="text-muted-foreground text-[0.7rem] font-semibold tabular-nums">
+        <span className="text-muted-foreground text-micro font-semibold tabular-nums">
           {rate > 0 ? `${rate}%` : ""}
         </span>
         <OverrideToggle

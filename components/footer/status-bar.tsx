@@ -50,7 +50,7 @@ export function StatusBar() {
       <footer
         role="contentinfo"
         data-slot="status-bar"
-        className="bg-muted/40 text-muted-foreground flex h-6 shrink-0 items-center justify-between border-t px-3 text-[0.6875rem]"
+        className="bg-muted/40 text-muted-foreground flex h-6 shrink-0 items-center justify-between border-t px-3 text-micro"
       >
         <div className="flex items-center gap-1.5 truncate">
           <User aria-hidden="true" className="h-3 w-3" />

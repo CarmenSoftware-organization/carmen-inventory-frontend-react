@@ -76,7 +76,7 @@ export function VendorAddress({
             <div className="text-foreground text-xs font-semibold">
               {t("address.noAddresses")}
             </div>
-            <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
+            <p className="text-muted-foreground mt-0.5 text-micro">
               {t("address.noAddressesDesc")}
             </p>
             {!isView && (
@@ -285,7 +285,7 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
               <RadioGroupItem value="thai" id={`thai-${index}`} />
               <Label
                 htmlFor={`thai-${index}`}
-                className="cursor-pointer text-[0.6875rem] font-normal"
+                className="cursor-pointer text-micro font-normal"
               >
                 {t("address.thailand")}
               </Label>
@@ -297,7 +297,7 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
               />
               <Label
                 htmlFor={`international-${index}`}
-                className="cursor-pointer text-[0.6875rem] font-normal"
+                className="cursor-pointer text-micro font-normal"
               >
                 {t("address.international")}
               </Label>
@@ -424,7 +424,7 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
                   {...form.register(`vendor_address.${index}.city`)}
                 />
                 {form.formState.errors.vendor_address?.[index]?.city && (
-                  <p className="text-destructive text-[0.625rem]">
+                  <p className="text-destructive text-micro-legal">
                     {form.formState.errors.vendor_address[index].city.message}
                   </p>
                 )}

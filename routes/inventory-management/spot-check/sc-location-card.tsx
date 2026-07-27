@@ -91,7 +91,7 @@ export function ScLocationCard({
               </Link>
               <Link
                 to={`/config/location/${item.location_id}`}
-                className="text-muted-foreground hover:text-foreground shrink-0 text-[0.625rem] tracking-wide uppercase transition-colors"
+                className="text-muted-foreground hover:text-foreground shrink-0 text-micro-legal tracking-wide uppercase transition-colors"
               >
                 {item.code}
               </Link>
@@ -113,7 +113,7 @@ export function ScLocationCard({
                 </span>
               )}
             </div>
-            <div className="text-muted-foreground flex items-center gap-1.5 text-[0.6875rem]">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
               <Warehouse className="size-2.5 shrink-0" aria-hidden="true" />
               <span>{locationTypeLabel}</span>
             </div>

@@ -144,7 +144,7 @@ export function CalculatorDialog({
                 <DialogTitle className="text-foreground text-base leading-tight font-semibold tracking-tight">
                   {productName}
                 </DialogTitle>
-                <DialogDescription className="text-muted-foreground text-[0.6875rem] leading-relaxed">
+                <DialogDescription className="text-muted-foreground text-micro leading-relaxed">
                   {t("calculatorDesc")}
                 </DialogDescription>
               </div>
@@ -215,7 +215,7 @@ export function CalculatorDialog({
                   >
                     <SelectTrigger
                       className={cn(
-                        "border-border/40 bg-card h-8 w-20 shrink-0 rounded-md text-[0.6875rem] font-semibold tracking-wide shadow-none",
+                        "border-border/40 bg-card h-8 w-20 shrink-0 rounded-md text-micro font-semibold tracking-wide shadow-none",
                         isBaseUnit &&
                           "border-primary/50 bg-primary/10 text-primary",
                       )}
@@ -247,7 +247,7 @@ export function CalculatorDialog({
 
                 {/* Conversion preview */}
                 {!isBaseUnit && row.qty > 0 && (
-                  <div className="text-muted-foreground border-border/40 flex items-center justify-end border-t pt-1.5 pr-1 text-[0.625rem] tabular-nums">
+                  <div className="text-muted-foreground border-border/40 flex items-center justify-end border-t pt-1.5 pr-1 text-micro-legal tabular-nums">
                     {t("convertedTo", {
                       value: converted.toFixed(2),
                       unit: baseUnitName,
@@ -262,7 +262,7 @@ export function CalculatorDialog({
           <button
             type="button"
             onClick={addRow}
-            className="border-primary/40 hover:border-primary hover:bg-primary/5 text-primary flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed py-2 text-[0.6875rem] font-semibold tracking-wide uppercase transition-all"
+            className="border-primary/40 hover:border-primary hover:bg-primary/5 text-primary flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed py-2 text-micro font-semibold tracking-wide uppercase transition-all"
           >
             <Plus className="size-3.5" />
             {t("addAnotherUnit")}
@@ -272,7 +272,7 @@ export function CalculatorDialog({
         {/* Total */}
         <div className="px-5 pb-3">
           <div className="bg-primary text-primary-foreground flex items-center justify-between gap-3 rounded-lg p-3">
-            <div className="text-primary-foreground/75 text-[0.5625rem] font-semibold tracking-widest uppercase">
+            <div className="text-primary-foreground/75 text-micro-eyebrow font-semibold tracking-widest uppercase">
               {t("calcTotal")}
             </div>
             <div className="flex items-baseline gap-1.5">

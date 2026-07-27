@@ -255,7 +255,7 @@ function GrnGroupLocations({
         <col style={{ width: pct(GRN_COL.amt) }} />
         {showActionCol && <col style={{ width: pct(GRN_COL.action) }} />}
       </colgroup>
-      <thead className="text-muted-foreground text-[0.7rem] font-semibold">
+      <thead className="text-muted-foreground text-micro font-semibold">
         <tr className="border-border/60 border-b">
           <th className="px-2 py-1 text-left">{tfl("location")}</th>
           {isPo && (

@@ -59,7 +59,7 @@ export function CardSubLabel({
   return (
     <div
       className={cn(
-        "text-[0.625rem] font-bold uppercase tracking-[0.12em] text-foreground/80",
+        "text-micro-legal font-bold uppercase tracking-[0.12em] text-foreground/80",
         className,
       )}
     >

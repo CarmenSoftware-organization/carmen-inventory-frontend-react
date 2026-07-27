@@ -268,7 +268,7 @@ export default function PeReview() {
                         )}
                       </div>
                       <div>
-                        <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wide uppercase">
+                        <p className="text-muted-foreground text-micro font-semibold tracking-wide uppercase">
                           {t(`modules.${key}`)}
                         </p>
                         <p className="text-foreground mt-0.5 text-2xl font-semibold tabular-nums">
@@ -391,14 +391,14 @@ function SummaryStat({ label, value, hint, tone }: SummaryStatProps) {
       : "bg-warning/10 text-warning-foreground";
   return (
     <div className="border-border/60 bg-muted/30 space-y-1 rounded-lg border p-3">
-      <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-[0.18em] uppercase">
+      <p className="text-muted-foreground text-micro font-semibold tracking-[0.18em] uppercase">
         {label}
       </p>
       <p className="text-foreground text-2xl font-semibold tabular-nums">
         {value}
       </p>
       <span
-        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.6875rem] font-semibold ${toneClass}`}
+        className={`inline-flex items-center rounded-full px-2 py-0.5 text-micro font-semibold ${toneClass}`}
       >
         {hint}
       </span>

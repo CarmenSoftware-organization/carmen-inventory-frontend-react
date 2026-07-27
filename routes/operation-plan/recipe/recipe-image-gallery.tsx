@@ -77,12 +77,12 @@ export function RecipeImageGallery({
           />
 
           {hero.isPrimary && (
-            <span className="bg-foreground/70 text-background absolute top-2 left-2 inline-flex items-center gap-1 rounded px-2 py-0.5 text-[0.625rem] font-semibold tracking-wider uppercase">
+            <span className="bg-foreground/70 text-background absolute top-2 left-2 inline-flex items-center gap-1 rounded px-2 py-0.5 text-micro-legal font-semibold tracking-wider uppercase">
               <Star className="size-2.5 fill-current" aria-hidden="true" />
               {t("hero")}
             </span>
           )}
-          <span className="bg-foreground/70 text-background absolute top-2 right-2 rounded px-2 py-0.5 text-[0.625rem] tabular-nums">
+          <span className="bg-foreground/70 text-background absolute top-2 right-2 rounded px-2 py-0.5 text-micro-legal tabular-nums">
             {active + 1} / {total}
           </span>
 

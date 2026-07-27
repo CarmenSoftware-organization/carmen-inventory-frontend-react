@@ -74,7 +74,7 @@ export default function PeComponent() {
           style={{ borderLeftColor: "var(--module-inventory)" }}
         >
           <CardHeader>
-            <CardDescription className="text-[0.6875rem] font-semibold tracking-[0.18em] uppercase">
+            <CardDescription className="text-micro font-semibold tracking-[0.18em] uppercase">
               {t("fields.period")}
             </CardDescription>
             <CardTitle className="text-3xl tracking-tight md:text-4xl">
@@ -142,7 +142,7 @@ function RangeField({ icon, label, value }: RangeFieldProps) {
     <div className="border-border/60 bg-card rounded-lg border p-3">
       <p
         className={cn(
-          "text-muted-foreground flex items-center gap-1.5 text-[0.6875rem] font-semibold tracking-wide uppercase",
+          "text-muted-foreground flex items-center gap-1.5 text-micro font-semibold tracking-wide uppercase",
         )}
       >
         {icon}

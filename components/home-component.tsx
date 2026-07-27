@@ -295,7 +295,7 @@ export default function HomeComponent() {
             style={{ animation: "home-fade-up 0.6s ease-out 0.05s both" }}
           >
             <span className="bg-success size-1.5 rounded-full" />
-            <span className="text-primary text-[0.6875rem] font-semibold tracking-wider uppercase">
+            <span className="text-primary text-micro font-semibold tracking-wider uppercase">
               Hotel Inventory ERP
             </span>
           </div>
@@ -351,7 +351,7 @@ export default function HomeComponent() {
             className="mx-auto mt-16 max-w-2xl"
             style={{ animation: "home-fade-up 0.7s ease-out 0.7s both" }}
           >
-            <p className="text-muted-foreground/60 mb-5 text-[0.6875rem] font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground/60 mb-5 text-micro font-semibold tracking-widest uppercase">
               Trusted by hotel chains managing thousands of inventory items
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
@@ -360,7 +360,7 @@ export default function HomeComponent() {
                   <p className="text-foreground text-xl font-bold tracking-tight tabular-nums">
                     {s.value}
                   </p>
-                  <p className="text-muted-foreground text-[0.6875rem]">
+                  <p className="text-muted-foreground text-micro">
                     {s.label}
                   </p>
                 </div>
@@ -374,7 +374,7 @@ export default function HomeComponent() {
       <section className="border-border/50 bg-muted/20 relative border-y py-10 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-6">
           <Reveal>
-            <p className="text-muted-foreground/70 mb-6 text-center text-[0.6875rem] font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground/70 mb-6 text-center text-micro font-semibold tracking-widest uppercase">
               Connects with your hotel stack
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 sm:gap-x-12">
@@ -458,7 +458,7 @@ export default function HomeComponent() {
                       <h3 className="text-foreground text-sm font-semibold tracking-tight">
                         New Purchase Order
                       </h3>
-                      <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.5625rem] font-bold tracking-widest uppercase">
+                      <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro-eyebrow font-bold tracking-widest uppercase">
                         Draft
                       </span>
                     </div>
@@ -469,7 +469,7 @@ export default function HomeComponent() {
                         { label: "Delivery date", value: "2026-04-15" },
                       ].map((field) => (
                         <div key={field.label}>
-                          <p className="text-muted-foreground/80 mb-1 text-[0.5625rem] font-semibold tracking-widest uppercase">
+                          <p className="text-muted-foreground/80 mb-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
                             {field.label}
                           </p>
                           <div className="border-border/40 bg-background/60 flex h-9 items-center rounded-lg border px-3 text-sm">
@@ -560,7 +560,7 @@ export default function HomeComponent() {
                 }}
               />
               <div className="relative">
-                <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.5625rem] font-bold tracking-widest uppercase">
+                <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro-eyebrow font-bold tracking-widest uppercase">
                   <Sparkles className="size-2.5" />
                   Customer story
                 </span>
@@ -603,7 +603,7 @@ export default function HomeComponent() {
           <Reveal>
             <div className="grid items-center gap-12 lg:grid-cols-2">
               <div>
-                <span className="bg-primary/15 text-primary border-primary/20 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.5625rem] font-bold tracking-widest uppercase">
+                <span className="bg-primary/15 text-primary border-primary/20 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro-eyebrow font-bold tracking-widest uppercase">
                   <span>Why Carmen</span>
                 </span>
                 <blockquote className="text-invert-foreground mt-4 text-[clamp(1.5rem,3.5vw,2.25rem)] leading-tight font-semibold tracking-[-0.02em]">
@@ -704,11 +704,11 @@ export default function HomeComponent() {
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="bg-success size-2 rounded-full" />
-                    <span className="text-muted-foreground text-[0.6875rem] font-semibold tracking-widest uppercase">
+                    <span className="text-muted-foreground text-micro font-semibold tracking-widest uppercase">
                       Overview
                     </span>
                   </div>
-                  <span className="text-success/80 text-[0.625rem]">
+                  <span className="text-success/80 text-micro-legal">
                     ● Live
                   </span>
                 </div>
@@ -719,7 +719,7 @@ export default function HomeComponent() {
                         <span className="text-muted-foreground text-xs">
                           {r.label}
                         </span>
-                        <span className="text-foreground text-[0.75rem] font-semibold tabular-nums">
+                        <span className="text-foreground text-xs font-semibold tabular-nums">
                           {r.val}
                         </span>
                       </div>
@@ -739,7 +739,7 @@ export default function HomeComponent() {
               <DashboardCard>
                 <div className="mb-4 flex items-center gap-2">
                   <Activity className="text-muted-foreground size-3.5" />
-                  <span className="text-muted-foreground text-[0.6875rem] font-semibold tracking-widest uppercase">
+                  <span className="text-muted-foreground text-micro font-semibold tracking-widest uppercase">
                     Recent Activity
                   </span>
                 </div>
@@ -750,10 +750,10 @@ export default function HomeComponent() {
                         className={cn("mt-0.5 size-3.5 shrink-0", item.color)}
                       />
                       <div>
-                        <p className="text-foreground text-[0.75rem] font-medium">
+                        <p className="text-foreground text-xs font-medium">
                           {item.text}
                         </p>
-                        <p className="text-muted-foreground text-[0.625rem]">
+                        <p className="text-muted-foreground text-micro-legal">
                           {item.detail} · {item.time}
                         </p>
                       </div>
@@ -766,7 +766,7 @@ export default function HomeComponent() {
             {/* Card: Monthly Savings */}
             <Reveal delay={200}>
               <DashboardCard>
-                <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-widest uppercase">
+                <p className="text-muted-foreground text-micro font-semibold tracking-widest uppercase">
                   F&amp;B cost savings
                 </p>
                 <p className="from-primary to-chart-3 mt-1 bg-linear-to-r bg-clip-text text-3xl font-bold tracking-tight text-transparent tabular-nums">
@@ -883,7 +883,7 @@ export default function HomeComponent() {
               },
             ].map((col) => (
               <div key={col.title}>
-                <p className="text-foreground text-[0.6875rem] font-semibold tracking-widest uppercase">
+                <p className="text-foreground text-micro font-semibold tracking-widest uppercase">
                   {col.title}
                 </p>
                 <ul className="mt-3 space-y-2">
@@ -1006,7 +1006,7 @@ function Eyebrow({
   readonly icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[0.6875rem] font-semibold tracking-widest uppercase backdrop-blur-sm">
+    <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-micro font-semibold tracking-widest uppercase backdrop-blur-sm">
       <Icon className="size-2.5" />
       {children}
     </span>

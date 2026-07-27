@@ -228,7 +228,7 @@ export function EntryImportDialog({
                 <DialogTitle className="text-foreground text-base leading-tight font-semibold tracking-tight">
                   {t("importDialogEyebrow")}
                 </DialogTitle>
-                <DialogDescription className="text-muted-foreground text-[0.6875rem] leading-relaxed">
+                <DialogDescription className="text-muted-foreground text-micro leading-relaxed">
                   {t("importDialogDesc")}
                 </DialogDescription>
               </div>
@@ -255,7 +255,7 @@ export function EntryImportDialog({
                 <div className="text-foreground truncate text-xs font-semibold">
                   {file.name}
                 </div>
-                <div className="text-muted-foreground text-[0.625rem] tabular-nums">
+                <div className="text-muted-foreground text-micro-legal tabular-nums">
                   {formatBytes(file.size)}
                   {isParsing && <span className="ml-1.5">· parsing…</span>}
                 </div>
@@ -295,7 +295,7 @@ export function EntryImportDialog({
               <span className="text-foreground text-xs font-semibold">
                 {t("importDropHint")}
               </span>
-              <span className="text-muted-foreground text-[0.625rem] tracking-wide uppercase">
+              <span className="text-muted-foreground text-micro-legal tracking-wide uppercase">
                 {t("importFormatsHint")}
               </span>
             </button>
@@ -308,12 +308,12 @@ export function EntryImportDialog({
                 aria-hidden="true"
               />
               <div className="min-w-0 flex-1 space-y-1">
-                <div className="text-foreground text-[0.6875rem] font-semibold">
+                <div className="text-foreground text-micro font-semibold">
                   {t("importColumnsMissing", {
                     columns: result.missing.join(", "),
                   })}
                 </div>
-                <div className="text-muted-foreground text-[0.625rem]">
+                <div className="text-muted-foreground text-micro-legal">
                   {t("importColumnLegend")}:{" "}
                   <span>{REQUIRED_COLUMNS.join(", ")}</span>
                 </div>
@@ -343,10 +343,10 @@ export function EntryImportDialog({
 
           {!file && (
             <div className="border-border/40 bg-muted/40 rounded-lg border p-2">
-              <div className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
+              <div className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
                 {t("importColumnLegend")}
               </div>
-              <div className="text-foreground/80 mt-1 text-[0.625rem] leading-relaxed">
+              <div className="text-foreground/80 mt-1 text-micro-legal leading-relaxed">
                 {REQUIRED_COLUMNS.join(", ")}
               </div>
             </div>
@@ -394,7 +394,7 @@ function PreviewStat({
   };
   return (
     <div className="bg-muted/40 border-border/40 flex flex-col items-center justify-center rounded-lg border px-2 py-2">
-      <div className="text-muted-foreground text-[0.5rem] font-semibold tracking-widest uppercase">
+      <div className="text-muted-foreground text-micro-floor font-semibold tracking-widest uppercase">
         {label}
       </div>
       <div

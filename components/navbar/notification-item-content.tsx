@@ -72,7 +72,7 @@ export function NotificationItemContent({
           >
             {sanitizeText(notification.title)}
           </p>
-          <span className="text-muted-foreground shrink-0 text-[0.6875rem] whitespace-nowrap tabular-nums">
+          <span className="text-muted-foreground shrink-0 text-micro whitespace-nowrap tabular-nums">
             {time}
           </span>
         </div>
