@@ -8,6 +8,7 @@ import {
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  DEFAULT_FONT_SCALE,
   FONT_SCALES,
   applyScale,
   readStoredScale,
@@ -38,17 +39,38 @@ const LABEL_KEY = {
 } as const satisfies Record<FontScale, string>;
 
 /**
+ * ระดับที่ "ใช้งานจริงใน tab นี้" — อ่านจาก class บน <html> ไม่ใช่ localStorage
+ *
+ * สอง tab เปิดพร้อมกัน: tab A เปลี่ยนเป็น biggest, tab B ไม่ sync ตาม (ตั้งใจ ไม่ทำ
+ * cross-tab sync) แต่ค่าที่ apply จริงใน tab B ยังเป็นค่าที่ tab B โหลดมา — ถ้าอ่าน
+ * localStorage ตรงๆ เมนูของ tab B จะ checkmark ผิดระดับ (ของ tab A) ทั้งที่หน้าจอ
+ * ตัวเองไม่ได้ขนาดนั้น ไม่มี class `font-scale-*` เลย = `normal` จึง fallback ไป
+ * readStoredScale() (จะได้ "normal" เสมอในเคสนั้น)
+ */
+function readActiveScale(): FontScale {
+  const root = document.documentElement;
+  const active = FONT_SCALES.find(
+    (scale) =>
+      scale !== DEFAULT_FONT_SCALE &&
+      root.classList.contains(`font-scale-${scale}`),
+  );
+  return active ?? readStoredScale();
+}
+
+/**
  * Font scale submenu — ฝังใน DropdownMenu อื่น
  *
  * ถือ state เอง ไม่มี provider: ค่าจริงอยู่บน <html> ไม่ได้อยู่ใน React และไม่มี
  * component อื่นในแอปต้องอ่านมัน เมนูปิดแล้ว component unmount — mount ครั้งหน้า
- * อ่านค่าจาก localStorage ใหม่ จึงตรงเสมอ
+ * อ่าน class บน <html> ใหม่ (readActiveScale) จึงตรงกับ tab นี้เสมอ ไม่ใช่
+ * localStorage ตรงๆ — สอง tab เปิดพร้อมกันแล้วอีก tab เปลี่ยนค่า localStorage
+ * จะไม่ตรงกับ DOM ของ tab นี้อีกต่อไป
  *
  * mirror pattern เดียวกับ ThemeSwitch / LangSwitch
  */
 export function FontScaleSwitch() {
   const t = useTranslations("common");
-  const [scale, setScale] = useState<FontScale>(readStoredScale);
+  const [scale, setScale] = useState<FontScale>(readActiveScale);
 
   const select = (next: FontScale) => {
     applyScale(next);

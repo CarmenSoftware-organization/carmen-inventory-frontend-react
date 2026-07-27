@@ -62,8 +62,12 @@ CSS ล้วน ไม่มี style ที่ JS เขียนทับอ�
   เขียน localStorage แบบ try/catch
 
 ไม่มี provider เพราะไม่มี component อื่นในแอปต้องอ่านค่านี้ — มีแค่ `FontScaleSwitch`
-ที่ต้องรู้ว่าติ๊กถูกไว้ที่บรรทัดไหน และมันถือ state ของตัวเองได้ (init จาก
-`readStoredScale()` ตอน mount) การใส่ context จะเพิ่มไฟล์และชั้นห่อโดยไม่มีผู้บริโภค
+ที่ต้องรู้ว่าติ๊กถูกไว้ที่บรรทัดไหน และมันถือ state ของตัวเองได้ (init จาก class
+`font-scale-*` บน `document.documentElement` ตอน mount — ค่าที่ apply จริงใน tab
+นี้ ไม่ใช่ `readStoredScale()` ตรงๆ เพราะสอง tab เปิดพร้อมกันแล้ว localStorage อาจ
+ไม่ตรงกับ DOM ของ tab นี้อีกต่อไป — fallback ไป `readStoredScale()` เฉพาะตอนไม่มี
+class `font-scale-*` เลย ซึ่งคือกรณี `normal`) การใส่ context จะเพิ่มไฟล์และชั้นห่อ
+โดยไม่มีผู้บริโภค
 
 ### 3. กัน FOUC — inline script ใน `index.html`
 
