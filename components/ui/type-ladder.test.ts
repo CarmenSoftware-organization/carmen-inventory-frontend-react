@@ -170,3 +170,112 @@ describe("arbitrary font sizes do not creep back", () => {
     expect(counts).toEqual(ALLOWED_OFF_LADDER);
   });
 });
+
+/**
+ * Reads the whole `className={…}` expression rather than each string literal
+ * inside it. That distinction is the entire reason this helper exists: a
+ * `cn("… uppercase", cond ? "text-micro-legal" : "text-micro-eyebrow")` puts the
+ * size and the `uppercase` in *different* literals, so a per-literal scan reports
+ * a violation that is not one. (glass-card.tsx was exactly that false positive.)
+ */
+function classNameExpressions(src: string): string[] {
+  const out: string[] = [];
+  const re = /className=/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(src))) {
+    const i = m.index + "className=".length;
+    const q = src[i];
+    if (q === '"' || q === "'") {
+      const end = src.indexOf(q, i + 1);
+      if (end !== -1) out.push(src.slice(i + 1, end));
+      continue;
+    }
+    if (src[i] !== "{") continue;
+    let depth = 0;
+    let j = i;
+    for (; j < src.length; j++) {
+      if (src[j] === "{") depth++;
+      else if (src[j] === "}" && --depth === 0) break;
+    }
+    out.push(src.slice(i + 1, j));
+  }
+  return out;
+}
+
+/**
+ * docs/DESIGN.md sanctions sub-10px type **only** for uppercase eyebrows — the
+ * 600 weight and wide tracking of caps are what keep 9px legible, and running
+ * text has neither. It matters most in Thai, which stacks two levels of marks
+ * above the baseline (สระบน + วรรณยุกต์).
+ *
+ * `uppercase` is a weak proxy for "this is an eyebrow": plenty of legitimate
+ * sub-10px sites are digits or drawings, which are neither uppercase nor running
+ * text. So this does not try to classify — it freezes the known set. Anything NEW
+ * has to be looked at by a person, who then either adds `uppercase` (proving it is
+ * an eyebrow) or adds a line here saying why it is fine. That is the whole job.
+ */
+const ALLOWED_SUB_10PX: Record<string, number> = {
+  // ── Drawings of a UI, not text in a UI ──
+  // Miniature mock interfaces: a fake terminal with macOS traffic-light dots, a
+  // fake SQL editor, fake table rows. Scaling this type up breaks the illustration
+  // — the point is that it reads as a tiny screenshot.
+  "routes/system-admin/landing-visuals.tsx": 20,
+
+  // ── Digits ──
+  // Uniform height, no ascenders/descenders, no diacritics; legible at 9px in a way
+  // running text is not, and most sit in fixed-size chips that 11px would overflow.
+  "components/navbar/notification.tsx": 1, // unread count "9+"
+  "components/ui/input.tsx": 1, // character counter
+  "components/ui/textarea.tsx": 1, // character counter
+  "components/ui/transfer.tsx": 1, // selected count chip
+  "components/ui/tree-product-lookup.tsx": 1, // leaf count chip
+  "routes/inventory-management/shared/entry-notes-dialog.tsx": 1, // file size
+  "routes/inventory-management/shared/filter-pill.tsx": 1, // filter count chip
+  "routes/inventory-management/shared/inv-shared.tsx": 2, // "01" index bubbles
+  "routes/inventory-management/spot-check/sc-product-panel.tsx": 1, // String(length)
+  "routes/operation-plan/recipe/recipe-name-field.tsx": 1, // character counter
+  "routes/report/report-landing.tsx": 1, // "07:30" schedule time
+  "routes/vendor-management/price-list/pl-name-field.tsx": 1, // character counter
+
+  // ── Caps by nature ──
+  "routes/system-admin/workflow/wf-stage-users.tsx": 1, // avatar initials
+};
+
+describe("sub-10px type stays off running text", () => {
+  const offenders = sources.flatMap(({ file, src }) =>
+    classNameExpressions(src)
+      .filter(
+        (e) =>
+          /\b(text-micro-eyebrow|text-micro-floor)\b/.test(e) &&
+          !/\buppercase\b/.test(e),
+      )
+      .map(() => file),
+  );
+
+  it("only allows sub-10px non-uppercase where it is listed with a reason", () => {
+    const counts: Record<string, number> = {};
+    for (const f of offenders) counts[f] = (counts[f] ?? 0) + 1;
+    expect(counts).toEqual(ALLOWED_SUB_10PX);
+  });
+
+  it("does not flag a size and its uppercase sitting in separate cn() arguments", () => {
+    // the glass-card false positive, frozen as a case
+    const src = `<Badge className={cn(base, "rounded-full font-semibold tracking-widest uppercase", large ? "text-micro-legal" : "text-micro-eyebrow")} />`;
+    const flagged = classNameExpressions(src).filter(
+      (e) =>
+        /\b(text-micro-eyebrow|text-micro-floor)\b/.test(e) &&
+        !/\buppercase\b/.test(e),
+    );
+    expect(flagged).toEqual([]);
+  });
+
+  it("still flags a sub-10px class with no uppercase anywhere in the expression", () => {
+    const src = `<p className={cn("text-muted-foreground", "text-micro-eyebrow leading-snug")}>{t("hint")}</p>`;
+    const flagged = classNameExpressions(src).filter(
+      (e) =>
+        /\b(text-micro-eyebrow|text-micro-floor)\b/.test(e) &&
+        !/\buppercase\b/.test(e),
+    );
+    expect(flagged).toHaveLength(1);
+  });
+});
