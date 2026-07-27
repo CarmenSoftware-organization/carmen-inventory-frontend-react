@@ -429,6 +429,45 @@
   animation: pulse-soft 3s ease-in-out infinite;
 }
 
+/* ── Reduced motion ──────────────────────────────────────────────
+   The app carries ~273 `transition-*`, ~142 `animate-*` and four global
+   transition rules, none of which honoured this preference before.
+
+   The blanket rule below is the usual recipe, but the usual recipe is wrong
+   here on its own: `animation-iteration-count: 1` freezes the 81 loading
+   spinners and 12 skeletons after a single cycle, and a frozen spinner reads
+   as a hung request — it removes information rather than motion. So the two
+   animations that REPORT STATE are restored explicitly, referencing the theme
+   vars so they cannot drift from the defaults.
+
+   Everything else stops, judged case by case:
+     animate-pulse-soft  decorative SVG shapes in the empty state
+     animate-ping        a ring behind the current workflow step, whose
+                         "you are here" is already carried by the step's styling
+     animate-float       defined but unused
+     fade-in-*           entrance motion; the content is what matters
+     active:scale-95     press feedback becomes instant instead of animated */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* status indicators keep running — they carry information, not decoration */
+  .animate-spin {
+    animation: var(--animate-spin) !important;
+  }
+  .animate-pulse {
+    animation: var(--animate-pulse) !important;
+  }
+}
+
 /* ERP gradient utilities */
 .space-sidebar-gradient {
   background: var(--sidebar);
