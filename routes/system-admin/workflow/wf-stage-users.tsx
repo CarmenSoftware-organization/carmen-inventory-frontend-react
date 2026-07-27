@@ -162,7 +162,7 @@ export function WfStageUsers({
                   >
                     <div className="flex items-center gap-1.5">
                       <Avatar className="size-5">
-                        <AvatarFallback className="text-[0.5625rem]">
+                        <AvatarFallback className="text-micro-eyebrow">
                           {user.initials}
                         </AvatarFallback>
                       </Avatar>
@@ -170,7 +170,7 @@ export function WfStageUsers({
                         <p className="text-xs leading-tight font-semibold">
                           {user.firstname} {user.lastname}
                         </p>
-                        <p className="text-muted-foreground text-[0.625rem] leading-tight">
+                        <p className="text-muted-foreground text-micro-legal leading-tight">
                           {user.email}
                         </p>
                       </div>
@@ -189,7 +189,7 @@ export function WfStageUsers({
                     {isDisabled && isAssigned && (
                       <Badge
                         variant="secondary"
-                        className="px-1 py-0 text-[0.5625rem]"
+                        className="px-1 py-0 text-micro-eyebrow"
                       >
                         {t("assigned")}
                       </Badge>

@@ -72,7 +72,7 @@ export function SettingField({
     <div className={cn("min-w-0 space-y-1", fullWidth && "sm:col-span-2")}>
       <div className="text-foreground text-xs font-semibold">{label}</div>
       {description && (
-        <p className="text-muted-foreground/80 text-[0.6875rem] leading-snug">
+        <p className="text-muted-foreground/80 text-micro leading-snug">
           {description}
         </p>
       )}
@@ -111,7 +111,7 @@ function EditShell({
         {label}
       </Label>
       {description && (
-        <p className="text-muted-foreground/80 text-[0.6875rem] leading-snug">
+        <p className="text-muted-foreground/80 text-micro leading-snug">
           {description}
         </p>
       )}

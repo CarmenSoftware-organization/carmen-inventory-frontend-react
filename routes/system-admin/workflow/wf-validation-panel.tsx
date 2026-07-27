@@ -160,7 +160,7 @@ export default function WfValidationPanel({
                       )}
                     </p>
                     {issue.stageName && (
-                      <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
+                      <p className="text-muted-foreground mt-0.5 text-micro">
                         {t("stageName")}: {issue.stageName}
                       </p>
                     )}

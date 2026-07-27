@@ -270,7 +270,7 @@ export default function CompanyProfileComponent() {
               <div className="text-foreground text-xs font-semibold">
                 {t("fields.defaultCurrencyId")}
               </div>
-              <p className="text-muted-foreground/80 text-[0.6875rem] leading-snug">
+              <p className="text-muted-foreground/80 text-micro leading-snug">
                 {t("fields.defaultCurrencyIdDesc")}
               </p>
               <Controller
@@ -682,7 +682,7 @@ function BrandImage({
           loading="lazy"
         />
       ) : (
-        <span className="text-muted-foreground/60 text-[0.625rem]">
+        <span className="text-muted-foreground/60 text-micro-legal">
           {t("noImage")}
         </span>
       )}

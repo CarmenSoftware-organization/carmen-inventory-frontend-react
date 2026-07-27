@@ -113,7 +113,7 @@ function StatTile({
 }) {
   return (
     <div className="bg-card rounded border px-3 py-2">
-      <div className="text-muted-foreground flex items-center gap-1.5 text-[0.6875rem]">
+      <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
         <Icon className="size-3" aria-hidden="true" />
         {label}
       </div>
@@ -182,7 +182,7 @@ function SlaBreakdown({ insights }: { readonly insights: WorkflowInsights }) {
           const cycle = formatCycleTime(row.minutes) || "0";
           return (
             <li key={`sla-${row.index}-${row.name}`} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+              <div className="flex items-center justify-between gap-2 text-micro">
                 <span className="truncate" title={row.name}>
                   {row.name}
                 </span>
@@ -228,7 +228,7 @@ function RoleDistribution({
           const pct = total ? Math.round((row.count / total) * 100) : 0;
           return (
             <li key={row.role} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+              <div className="flex items-center justify-between gap-2 text-micro">
                 <span className="capitalize">{t(ROLE_LABEL[row.role])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.count} ({pct}%)
@@ -265,7 +265,7 @@ function ActionCoverage({ insights }: { readonly insights: WorkflowInsights }) {
             : 0;
           return (
             <li key={row.action} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+              <div className="flex items-center justify-between gap-2 text-micro">
                 <span>{t(ACTION_LABEL[row.action])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.activeCount}/{row.totalStages}
@@ -310,7 +310,7 @@ function RecipientCoverage({
             : 0;
           return (
             <li key={row.recipient} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+              <div className="flex items-center justify-between gap-2 text-micro">
                 <span>{t(RECIPIENT_LABEL[row.recipient])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.count}/{row.totalActiveActions}

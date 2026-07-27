@@ -156,7 +156,7 @@ export function useWfTable({
               <div className="flex flex-col gap-0">
                 <span className="text-foreground text-xs">{relative}</span>
                 {updated.name && (
-                  <span className="text-muted-foreground truncate text-[0.6875rem]">
+                  <span className="text-muted-foreground truncate text-micro">
                     {updated.name}
                   </span>
                 )}
