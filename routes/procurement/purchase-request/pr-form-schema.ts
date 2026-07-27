@@ -611,7 +611,6 @@ export function preparePurchaseDetails(
         tax_rate: taxRate,
         tax_amount: tax,
         base_tax_amount: round2(tax * exchangeRate),
-        total_amount: total,
         discount_rate: discRate,
         discount_amount: discount,
         is_discount_adjustment: isDiscAdj,
@@ -625,7 +624,6 @@ export function preparePurchaseDetails(
         base_price: round2(price * exchangeRate),
         foc_qty: Number(item.foc_qty ?? 0),
         foc_unit_id: item.foc_unit_id || null,
-        foc_unit_conversion_rate: 1,
         foc_base_qty: Number(item.foc_qty ?? 0),
         // สอง field นี้ backend บังคับให้ "มี key" ได้ (nullable ไม่ optional)
         pricelist_detail_id: item.pricelist_detail_id || null,

@@ -353,7 +353,8 @@ export interface PurchaseApproveDetail {
   tax_rate: number;
   tax_amount: number;
   base_tax_amount?: number;
-  total_amount?: number;
+  // ไม่มี total_amount / foc_unit_conversion_rate — zod ของ backend รับ แต่ column
+  // ไม่มีจริง (foc ใช้ชื่อ ..._factor) ส่งไปแล้ว Prisma ตีกลับทั้ง payload
   discount_rate: number;
   discount_amount: number;
   is_discount_adjustment: boolean;
@@ -367,7 +368,6 @@ export interface PurchaseApproveDetail {
   base_price?: number;
   foc_qty: number;
   foc_unit_id?: string | null;
-  foc_unit_conversion_rate?: number;
   foc_base_qty?: number;
   pricelist_detail_id?: string | null;
   pricelist_no?: string | null;

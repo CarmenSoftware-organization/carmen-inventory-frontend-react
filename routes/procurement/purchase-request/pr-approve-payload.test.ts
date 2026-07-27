@@ -168,6 +168,15 @@ describe("preparePurchaseDetails", () => {
     }
   });
 
+  it("ไม่ส่ง key ที่ zod รับแต่ไม่มี column จริง", () => {
+    // total_amount กับ foc_unit_conversion_rate อยู่ใน zod ของ gateway แต่
+    // tb_purchase_request_detail ไม่มีสอง column นี้ (foc ใช้ ..._factor) →
+    // /approve spread เข้า Prisma ตรงๆ แล้วตีกลับทั้ง payload
+    const [payload] = preparePurchaseDetails([makeItem({})], "pr1");
+    expect(payload).not.toHaveProperty("total_amount");
+    expect(payload).not.toHaveProperty("foc_unit_conversion_rate");
+  });
+
   it("keeps pricelist_detail_id / pricelist_no as explicit null keys", () => {
     // สอง field นี้ backend เป็น nullable แต่ไม่ optional — key ต้องมี
     const [payload] = preparePurchaseDetails(
