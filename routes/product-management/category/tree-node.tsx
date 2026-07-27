@@ -69,7 +69,7 @@ export function TreeNode({
       regex.test(part) ? (
         <mark
           key={i}
-          className="bg-yellow-200/80 dark:bg-yellow-800/40 rounded-sm px-px"
+          className="bg-highlight rounded-sm px-px"
         >
           {part}
         </mark>
