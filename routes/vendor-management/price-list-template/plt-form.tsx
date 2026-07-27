@@ -360,7 +360,7 @@ export function PriceListTemplateForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{tfl("description")}</FieldLabel>
             {isView ? (
-              <FieldPlainText className="items-start whitespace-pre-wrap">
+              <FieldPlainText className="whitespace-pre-wrap">
                 {priceListTemplate?.description}
               </FieldPlainText>
             ) : (
@@ -422,7 +422,7 @@ export function PriceListTemplateForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{t("vendorInstructionTitle")}</FieldLabel>
             {isView ? (
-              <FieldPlainText className="items-start whitespace-pre-wrap">
+              <FieldPlainText className="whitespace-pre-wrap">
                 {priceListTemplate?.vendor_instructions}
               </FieldPlainText>
             ) : (

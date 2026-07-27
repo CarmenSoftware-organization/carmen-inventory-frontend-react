@@ -180,7 +180,7 @@ export function PLGeneralCard({
       <Field className="sm:col-span-2">
         <FieldLabel>{tfl("description")}</FieldLabel>
         {isView ? (
-          <FieldPlainText className="items-start whitespace-pre-wrap">
+          <FieldPlainText className="whitespace-pre-wrap">
             {priceList?.description}
           </FieldPlainText>
         ) : (

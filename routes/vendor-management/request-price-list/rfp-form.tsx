@@ -456,7 +456,7 @@ export function RequestPriceListForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{t("customMessageTitle")}</FieldLabel>
             {isView ? (
-              <FieldPlainText className="items-start whitespace-pre-wrap">
+              <FieldPlainText className="whitespace-pre-wrap">
                 {requestPriceList?.custom_message}
               </FieldPlainText>
             ) : (

@@ -105,9 +105,19 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const fieldVariants = cva(
-  // In plain-text view mode (a FieldPlainText value is present), mute the label so the
-  // foreground value reads as the emphasis — no per-field className needed.
-  "group/field flex w-full gap-3 data-[invalid=true]:text-destructive has-[>[data-slot=field-plain-text]]:gap-1 has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:text-muted-foreground has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:font-normal",
+  [
+    "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
+    // View mode (มี FieldPlainText เป็นค่า): label เงียบลงให้ value เป็นตัวเด่น
+    // และ label+value ต้องอ่านเป็นก้อนเดียว — จึงดัน value ชิดบนของกล่อง min-h-8
+    // แทนกึ่งกลาง ไม่งั้น dead space ~8px ของกล่องบวกกับ gap จนระยะ label→value
+    // (14px) เกือบเท่าระยะระหว่าง field (26px) แล้วตาจับคู่ผิด ที่ว่างที่เหลือ
+    // ไปกองใต้ value = กลายเป็นตัวคั่นระหว่าง field และความสูงแถวเท่าเดิม
+    // (สลับ view↔edit ไม่กระตุก)
+    "has-[>[data-slot=field-plain-text]]:gap-1.5",
+    "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-plain-text]]:items-start",
+    "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:text-muted-foreground",
+    "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:font-normal",
+  ],
   {
     variants: {
       orientation: {

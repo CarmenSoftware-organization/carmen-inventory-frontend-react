@@ -449,7 +449,7 @@ export function LocationForm({ location }: LocationFormProps) {
                   {tfl("description")}
                 </FieldLabel>
                 {isView ? (
-                  <FieldPlainText className="items-start whitespace-pre-wrap">
+                  <FieldPlainText className="whitespace-pre-wrap">
                     {location?.description}
                   </FieldPlainText>
                 ) : (
