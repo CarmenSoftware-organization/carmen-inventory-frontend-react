@@ -98,6 +98,14 @@ typography:
   # governed, tokenised part is everything at or below 12px; the display end is
   # the afterthought. Sizes below are the ramp — a literal `text-[…]` off this
   # ramp is a design-system bug (enforced, see Principles).
+  #
+  # ROOT SCALE — ตั้งแต่ 2026-07-27 ladder นี้อยู่ใต้ font scale ที่ผู้ใช้ปรับได้เอง
+  # จากเมนูโปรไฟล์ (lib/font-scale.ts + `html.font-scale-*` ใน globals.css)
+  # ขนาด px ทุกค่าข้างล่างคือค่าที่ระดับ `normal` (root 100% = 16px ตาม browser
+  # default) ห้าระดับคือ 93.75 / 100 / 112.5 / 125 / 137.5% ทำให้ทั้ง ladder กวาด
+  # ตามเป็นสัดส่วนเดียว — micro-floor 8px จริงๆ คือช่วง 7.5–11px และ body 17px คือ
+  # 15.9–23.4px ตัวเลขในเอกสารนี้ยังเป็นสัญญาที่ถูกต้อง เพราะสิ่งที่การันตีคือ
+  # *สัดส่วนบน ladder* ไม่ใช่ px สัมบูรณ์บนจอผู้ใช้คนใดคนหนึ่ง
   micro-floor:
     # 8px — the absolute floor, tightest micro-grid cells only (HeroCell, the
     # DataGrid badge). Uppercase/numeric only. Utility: `text-micro-floor`
