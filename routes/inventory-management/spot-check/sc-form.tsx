@@ -270,7 +270,7 @@ export function ScForm({
               <span className="bg-muted-foreground size-0.5 rounded-sm" />
               {t("entity")}
               <span className="text-muted-foreground/60">·</span>
-              <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-normal normal-case">
+              <span className="text-muted-foreground text-micro-legal font-semibold tracking-normal normal-case">
                 {methodConfig.hint}
               </span>
             </div>

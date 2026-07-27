@@ -61,7 +61,7 @@ export function RecipeNameField({
         />
         {labels.nameLabel}
         <span className="text-muted-foreground/60 font-semibold">·</span>
-        <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-normal normal-case">
+        <span className="text-muted-foreground text-micro-legal font-semibold tracking-normal normal-case">
           {disabled ? "" : labels.tapToEdit}
         </span>
       </div>

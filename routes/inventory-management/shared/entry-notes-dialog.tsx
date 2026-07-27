@@ -219,7 +219,7 @@ export function EntryNotesDialog({
                 {t("evidenceLabel")}
               </span>
               {images.length > 0 && (
-                <span className="text-muted-foreground bg-muted/60 rounded-full px-1.5 text-micro-eyebrow font-semibold tabular-nums">
+                <span className="text-muted-foreground bg-muted/60 rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
                   {t("evidenceCount", { count: images.length })}
                 </span>
               )}
@@ -254,7 +254,7 @@ export function EntryNotesDialog({
               <span className="text-foreground/80 text-micro font-semibold">
                 {t("evidenceHint")}
               </span>
-              <span className="text-muted-foreground text-micro-eyebrow">
+              <span className="text-muted-foreground text-micro-legal">
                 {t("evidenceMaxSize")}
               </span>
             </button>
@@ -340,7 +340,7 @@ function ImageThumb({
       {errored ? (
         <div className="bg-muted/40 text-muted-foreground/70 flex size-full flex-col items-center justify-center gap-1 p-1.5">
           <ImageIcon className="size-5 shrink-0" aria-hidden="true" />
-          <span className="line-clamp-2 w-full text-center text-micro-floor leading-tight break-all">
+          <span className="line-clamp-2 w-full text-center text-micro-legal leading-tight break-all">
             {name}
           </span>
         </div>
@@ -356,7 +356,7 @@ function ImageThumb({
       {/* Gradient overlay + filename */}
       {!errored && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent px-1.5 py-1">
-          <div className="truncate text-micro-floor font-semibold text-white">
+          <div className="truncate text-micro-legal font-semibold text-white">
             {name}
           </div>
           <div className="text-micro-floor text-white/80 tabular-nums">{size}</div>

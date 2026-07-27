@@ -412,7 +412,7 @@ function ScheduleVisual() {
                     <div className="text-foreground/70 text-micro-floor font-semibold">
                       {c.t}
                     </div>
-                    <div className="text-foreground text-micro-eyebrow leading-tight font-semibold">
+                    <div className="text-foreground text-micro-legal leading-tight font-semibold">
                       {c.label}
                     </div>
                   </div>
