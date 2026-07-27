@@ -131,3 +131,10 @@ Per-BU config for connections to external systems — **Accounting**, **POS**, *
 - Backend bug (not frontend): `GET /api/me/dashboard-widgets?bu_code=T02` returns 500
   from the gateway itself (verified identical direct vs proxied). Dashboard degrades
   gracefully; report to the carmen-turborepo-backend-v2 team.
+- Backend bug (not frontend): `ValidateSchema.quantity` is `z.number().int()` while the
+  DB columns are `Decimal(20,5)` — any decimal `requested_qty` / `approved_qty` /
+  `foc_qty` 400s at the API gate even though the schema stores it. Decimal quantities
+  are valid business-wise (2.5 kg). Hits every qty-bearing module (PR/PO/GRN/SR/CN);
+  the fix is dropping `.int()` from the 3 copies of `ValidateSchema` in
+  carmen-turborepo-backend-v2 (`backend-gateway`, `micro-business`, `micro-file`).
+  Frontend deliberately does NOT round to compensate — that would corrupt the data.
