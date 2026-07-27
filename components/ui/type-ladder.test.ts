@@ -98,3 +98,75 @@ describe("the 9px micro tier stays at weight 600", () => {
     ).toBe(false);
   });
 });
+
+/**
+ * The app carried ~613 arbitrary `text-[…]` sizes in four near-duplicate values
+ * (10px was spelled two ways) purely because the ladder in docs/DESIGN.md had no
+ * CSS tokens to reach for. Now it does, and 591 of those were swept away.
+ *
+ * Nothing stops the 614th. This is the ratchet: a size with a token can never
+ * come back, and any other arbitrary size must be justified here by name.
+ */
+const TOKENISED: Record<string, string> = {
+  "0.5rem": "text-micro-floor",
+  "0.5625rem": "text-micro-eyebrow",
+  "9px": "text-micro-eyebrow",
+  "0.625rem": "text-micro-legal",
+  "10px": "text-micro-legal",
+  "0.6875rem": "text-micro",
+  "0.7rem": "text-micro",
+  "0.75rem": "text-xs",
+  "0.875rem": "text-sm",
+};
+
+/**
+ * Off-ladder sizes that survived the sweep, with the reason each was left. Counts
+ * are exact, so this fails both ways — a new literal appears, or one of these is
+ * cleaned up and the entry goes stale. Either way somebody has to look.
+ */
+const ALLOWED_OFF_LADDER: Record<string, number> = {
+  // Un-ported source-app landing; nothing imports it (see KNOWN_DEAD above and
+  // CLAUDE.md). Sweeping dead code would only add diff noise.
+  "components/home-component.tsx": 8,
+  // Badge `default` (13px) and `xl` (15px) size variants — part of the component's
+  // public API, chosen deliberately, and they straddle the 12/14 ladder steps.
+  "components/ui/badge.tsx": 2,
+  // shadcn/react-day-picker upstream default (12.8px) on weekday headers.
+  // Changing it diverges from upstream for 0.8px.
+  "components/ui/calendar.tsx": 2,
+  // Login display sizes: 13/28/36/44px. The login screen is the one surface that
+  // is intentionally not dense — DESIGN.md's display end is deliberately loose.
+  "components/login-form.tsx": 4,
+  "components/module-landing.tsx": 1, // 24px section head
+  "components/not-found-component.tsx": 1, // 88px "404" numeral
+  "routes/dashboard/dashboard-component.tsx": 2, // 16px + 32px stat display
+  "routes/inventory-management/spot-check/sc-form.tsx": 1, // 28px count display
+  // 7px inside a decorative miniature mock-UI illustration — it draws a picture of
+  // an interface rather than presenting text, so DESIGN.md's 8px floor (which is
+  // about legibility of real content) does not apply.
+  "routes/system-admin/landing-visuals.tsx": 1,
+};
+
+describe("arbitrary font sizes do not creep back", () => {
+  const found = sources.flatMap(({ file, src }) =>
+    [...src.matchAll(/text-\[([0-9.]+(?:rem|px))\]/g)].map((m) => ({
+      file,
+      size: m[1],
+    })),
+  );
+
+  it("never reintroduces a size that already has a token", () => {
+    const offenders = found
+      .filter((f) => TOKENISED[f.size])
+      .map((f) => `${f.file}: text-[${f.size}] → use ${TOKENISED[f.size]}`);
+    expect(offenders).toEqual([]);
+  });
+
+  it("only allows off-ladder sizes that are listed with a reason", () => {
+    const counts: Record<string, number> = {};
+    for (const f of found.filter((x) => !TOKENISED[x.size])) {
+      counts[f.file] = (counts[f.file] ?? 0) + 1;
+    }
+    expect(counts).toEqual(ALLOWED_OFF_LADDER);
+  });
+});
