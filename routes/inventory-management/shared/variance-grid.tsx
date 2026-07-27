@@ -35,31 +35,31 @@ export function VarianceGrid<T extends VarianceGridItem>({
             <tr>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-[0.625rem] font-semibold tracking-widest uppercase"
+                className="px-3 py-2 text-left text-micro-legal font-semibold tracking-widest uppercase"
               >
                 {t("colProduct")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-right text-[0.625rem] font-semibold tracking-widest uppercase"
+                className="px-3 py-2 text-right text-micro-legal font-semibold tracking-widest uppercase"
               >
                 {t("colSystem")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-right text-[0.625rem] font-semibold tracking-widest uppercase"
+                className="px-3 py-2 text-right text-micro-legal font-semibold tracking-widest uppercase"
               >
                 {t("colActual")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-right text-[0.625rem] font-semibold tracking-widest uppercase"
+                className="px-3 py-2 text-right text-micro-legal font-semibold tracking-widest uppercase"
               >
                 {t("colVariance")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-[0.625rem] font-semibold tracking-widest uppercase"
+                className="px-3 py-2 text-left text-micro-legal font-semibold tracking-widest uppercase"
               >
                 {t("colUnit")}
               </th>
@@ -79,7 +79,7 @@ export function VarianceGrid<T extends VarianceGridItem>({
                       <Badge
                         variant="outline"
                         size="xs"
-                        className="text-[0.5625rem] tracking-widest uppercase"
+                        className="text-micro-eyebrow tracking-widest uppercase"
                       >
                         {item.product_code}
                       </Badge>
@@ -88,7 +88,7 @@ export function VarianceGrid<T extends VarianceGridItem>({
                         {item.product_name}
                       </span>
                       {item.product_local_name && (
-                        <span className="text-muted-foreground text-[0.6875rem]">
+                        <span className="text-muted-foreground text-micro">
                           ({item.product_local_name})
                         </span>
                       )}

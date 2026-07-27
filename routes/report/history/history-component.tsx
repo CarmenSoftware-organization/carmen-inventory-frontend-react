@@ -175,7 +175,7 @@ function GridContent({
               <span>{t("loadingMore")}</span>
             </div>
           ) : (
-            <span className="text-muted-foreground/60 text-[0.6875rem]">
+            <span className="text-muted-foreground/60 text-micro">
               {t("scrollToLoadMore")}
             </span>
           )}

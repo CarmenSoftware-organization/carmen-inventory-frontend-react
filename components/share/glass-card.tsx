@@ -24,7 +24,7 @@ export function CardLabel({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="text-muted-foreground mb-2 text-[0.5625rem] font-semibold tracking-[0.14em] uppercase">
+    <div className="text-muted-foreground mb-2 text-micro-eyebrow font-semibold tracking-[0.14em] uppercase">
       {children}
     </div>
   );
@@ -61,7 +61,7 @@ export function PlainText({
         {value || "—"}
       </div>
       {subtitle && !empty && (
-        <div className="text-muted-foreground mt-0.5 text-[0.6875rem]">
+        <div className="text-muted-foreground mt-0.5 text-micro">
           {subtitle}
         </div>
       )}
@@ -85,8 +85,8 @@ export function StatusPill({
         statusConfig.className,
         "rounded-full border-transparent font-semibold tracking-widest uppercase",
         large
-          ? "px-2 py-0.5 text-[0.625rem]"
-          : "px-1.5 py-0.5 text-[0.5625rem]",
+          ? "px-2 py-0.5 text-micro-legal"
+          : "px-1.5 py-0.5 text-micro-eyebrow",
         inline && "border-0",
       )}
     >
@@ -109,7 +109,7 @@ export function MetaChip({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold",
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold",
         empty
           ? "border-primary/40 bg-primary/5 text-primary/80 border-dashed italic"
           : "border-border bg-muted text-foreground",
@@ -152,7 +152,7 @@ export function DateCard({
     >
       <div
         className={cn(
-          "mb-1 flex items-center gap-1 text-[0.5625rem] font-semibold tracking-widest uppercase",
+          "mb-1 flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase",
           highlight ? "text-primary" : "text-muted-foreground",
         )}
       >
@@ -176,7 +176,7 @@ export function InfoRow({
 }) {
   const isNode = typeof v === "object" && v !== null;
   return (
-    <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+    <div className="flex items-center justify-between gap-2 text-micro">
       <span className="text-muted-foreground shrink-0">{k}</span>
       {isNode ? (
         v

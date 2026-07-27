@@ -37,7 +37,7 @@ export function RecipeCostHero({
       <div className="space-y-4">
         {/* Cost per portion — computed · accent อยู่ที่ตัวเลข */}
         <div>
-          <div className="text-muted-foreground text-[0.625rem] font-bold tracking-wider uppercase">
+          <div className="text-muted-foreground text-micro-legal font-bold tracking-wider uppercase">
             {t("costPerPortion")}
           </div>
           <div className="mt-1 flex items-baseline gap-1">
@@ -50,7 +50,7 @@ export function RecipeCostHero({
 
         {/* Selling price — input */}
         <div>
-          <div className="text-muted-foreground text-[0.625rem] font-bold tracking-wider uppercase">
+          <div className="text-muted-foreground text-micro-legal font-bold tracking-wider uppercase">
             {t("sellingPrice")}
           </div>
           <div className="mt-1 flex items-center gap-1.5">
@@ -69,7 +69,7 @@ export function RecipeCostHero({
             />
           </div>
           {suggested != null && suggested > 0 && (
-            <div className="bg-muted text-muted-foreground mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[0.6875rem] font-semibold">
+            <div className="bg-muted text-muted-foreground mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-micro font-semibold">
               <Sparkles className="size-2.5" aria-hidden="true" />
               {t("suggestedAtTarget", {
                 price: `฿${suggested.toFixed(2)}`,

@@ -76,7 +76,7 @@ export function DiscountOverrideInput({
           onRateChange(clamped);
         }}
       />
-      <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
+      <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-micro-legal">
         %
       </span>
       <div className="bg-border h-4 w-px shrink-0" aria-hidden="true" />

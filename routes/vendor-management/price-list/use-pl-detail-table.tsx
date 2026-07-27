@@ -127,7 +127,7 @@ const PriceCell = memo(function PriceCell({
   });
   const price = Number(raw) || 0;
   return (
-    <span className="block text-right tabular-nums text-[0.6875rem] font-semibold text-positive">
+    <span className="block text-right tabular-nums text-micro font-semibold text-positive">
       {price.toFixed(2)}
     </span>
   );
@@ -170,7 +170,7 @@ const TaxCalcCell = memo(function TaxCalcCell({
   }, [price, form, index]);
 
   return (
-    <span className="block text-right tabular-nums text-[0.6875rem]">
+    <span className="block text-right tabular-nums text-micro">
       {taxAmt.toFixed(2)}
     </span>
   );
@@ -232,7 +232,7 @@ export function usePriceListDetailTable({
             inputMode="decimal"
             min={0}
             placeholder="0"
-            className="h-7 text-right text-[0.6875rem]"
+            className="h-7 text-right text-micro"
             error={form.formState.errors.pricelist_detail?.[row.index]?.moq_qty?.message}
             {...form.register(`pricelist_detail.${row.index}.moq_qty`, {
               valueAsNumber: true,
@@ -252,7 +252,7 @@ export function usePriceListDetailTable({
             min={0}
             step="0.01"
             placeholder="0.00"
-            className="h-7 text-right text-[0.6875rem]"
+            className="h-7 text-right text-micro"
             error={form.formState.errors.pricelist_detail?.[row.index]?.price_without_tax?.message}
             {...form.register(
               `pricelist_detail.${row.index}.price_without_tax`,
@@ -282,7 +282,7 @@ export function usePriceListDetailTable({
           <Input
             type="number" inputMode="decimal"
             placeholder="0"
-            className="h-7 text-right text-[0.6875rem]"
+            className="h-7 text-right text-micro"
             disabled
             {...form.register(`pricelist_detail.${row.index}.tax_rate`, {
               valueAsNumber: true,
@@ -315,7 +315,7 @@ export function usePriceListDetailTable({
             inputMode="decimal"
             min={0}
             placeholder="0"
-            className="h-7 text-right text-[0.6875rem]"
+            className="h-7 text-right text-micro"
             error={form.formState.errors.pricelist_detail?.[row.index]?.lead_time_days?.message}
             {...form.register(`pricelist_detail.${row.index}.lead_time_days`, {
               valueAsNumber: true,

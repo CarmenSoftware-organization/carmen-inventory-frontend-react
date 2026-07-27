@@ -447,15 +447,15 @@ export default function ExchangeRateComponent() {
                             <Badge
                               variant="outline"
                               size="xs"
-                              className="text-[0.625rem]"
+                              className="text-micro-legal"
                             >
                               {c.code}
                             </Badge>
-                            <span className="text-muted-foreground text-[0.6875rem]">
+                            <span className="text-muted-foreground text-micro">
                               → {baseCurrency}
                             </span>
                           </div>
-                          <div className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-[0.6875rem] tabular-nums">
+                          <div className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-micro tabular-nums">
                             <span className="line-through">
                               {formatExchangeRate(c.oldRate)}
                             </span>
@@ -471,7 +471,7 @@ export default function ExchangeRateComponent() {
                             {formatExchangeRate(c.diff)}
                           </p>
                           {!noChange && (
-                            <p className="text-muted-foreground text-[0.625rem] tabular-nums">
+                            <p className="text-muted-foreground text-micro-legal tabular-nums">
                               {isIncrease ? "+" : ""}
                               {c.diffPercent.toFixed(2)}%
                             </p>

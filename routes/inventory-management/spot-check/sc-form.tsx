@@ -207,7 +207,7 @@ export function ScForm({
                 >
                   <ChevronLeft />
                 </Button>
-                <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold tracking-wider uppercase">
+                <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold tracking-wider uppercase">
                   <ClipboardCheck className="size-2.5" />
                   {t("entity")}
                 </span>
@@ -266,11 +266,11 @@ export function ScForm({
             </div>
 
             {/* Title + descriptor */}
-            <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-[0.5625rem] font-semibold tracking-[0.16em] uppercase">
+            <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-micro-eyebrow font-semibold tracking-[0.16em] uppercase">
               <span className="bg-muted-foreground size-0.5 rounded-sm" />
               {t("entity")}
               <span className="text-muted-foreground/60">·</span>
-              <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-normal normal-case">
+              <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-normal normal-case">
                 {methodConfig.hint}
               </span>
             </div>
@@ -393,7 +393,7 @@ export function ScForm({
                   {t("tipTitle")}
                 </span>
               </CardLabel>
-              <p className="text-foreground/80 text-[0.6875rem] leading-relaxed">
+              <p className="text-foreground/80 text-micro leading-relaxed">
                 {methodConfig.tipBody}
               </p>
             </GlassCard>

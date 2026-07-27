@@ -96,7 +96,7 @@ export function PltProductCards({
           {/* MOQ tiers */}
           <div className="mt-2 space-y-1.5">
             {/* column labels — แถวเดียว จัดตรงกับ input ข้างล่าง */}
-            <div className="text-muted-foreground flex items-center gap-1.5 px-0.5 text-[10px] font-medium tracking-wide uppercase">
+            <div className="text-muted-foreground flex items-center gap-1.5 px-0.5 text-micro-legal font-medium tracking-wide uppercase">
               <span className="w-16 shrink-0 text-right">{labels.qty}</span>
               <span className="w-24 shrink-0">{labels.unit}</span>
               <span className="min-w-0 flex-1">{labels.note}</span>

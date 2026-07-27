@@ -8,7 +8,7 @@ export function NameWithSubtext({ primary, secondary }: NameWithSubtextProps) {
     <div className="group w-full text-left">
       <p className="truncate font-semibold">{primary}</p>
       {secondary && (
-        <p className="text-muted-foreground truncate text-[0.625rem]">
+        <p className="text-muted-foreground truncate text-micro-legal">
           {secondary}
         </p>
       )}

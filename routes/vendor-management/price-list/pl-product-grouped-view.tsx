@@ -88,7 +88,7 @@ export function PLProductGroupedView({
                       <span className="text-foreground font-medium">
                         {Number(tier.moq_qty) || 0}+ {tier.unit_name ?? "—"}
                       </span>
-                      <span className="text-muted-foreground text-[0.6875rem]">
+                      <span className="text-muted-foreground text-micro">
                         · {Number(tier.lead_time_days) || 0}d
                       </span>
                     </span>

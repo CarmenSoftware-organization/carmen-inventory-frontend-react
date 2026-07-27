@@ -68,7 +68,7 @@ export const LocationCell = memo(function LocationCell({
           </p>
           {statusSlot}
         </div>
-        <span className="text-muted-foreground truncate text-[0.625rem]">
+        <span className="text-muted-foreground truncate text-micro-legal">
           {locationCode}
         </span>
       </div>
@@ -129,7 +129,7 @@ export const LocationCell = memo(function LocationCell({
                     className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
                   >
                     <div className="space-y-1">
-                      <p className="text-foreground/60 text-[0.6875rem] font-semibold">
+                      <p className="text-foreground/60 text-micro font-semibold">
                         {locationCode}
                       </p>
                       <p className="text-xs leading-snug font-semibold">
@@ -137,14 +137,14 @@ export const LocationCell = memo(function LocationCell({
                       </p>
                     </div>
                     {(locationType || deliveryPointName) && (
-                      <div className="mt-2 flex items-center gap-2 border-t pt-2 text-[0.6875rem]">
+                      <div className="mt-2 flex items-center gap-2 border-t pt-2 text-micro">
                         {locationType && (
                           <Badge
                             size="xs"
                             variant={
                               LOCATION_TYPE_VARIANT[locationType] ?? "secondary"
                             }
-                            className="h-4 px-1.5 text-[0.625rem]"
+                            className="h-4 px-1.5 text-micro-legal"
                           >
                             {(() => {
                               const k = inventoryTypeLabelKey(locationType);

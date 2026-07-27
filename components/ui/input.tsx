@@ -83,7 +83,7 @@ function Input({
       {inputElement}
       <p
         className={cn(
-          "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-[0.5625rem] tabular-nums transition-opacity",
+          "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-micro-eyebrow tabular-nums transition-opacity",
           showValue ? "opacity-100" : "opacity-0",
           nearLimit ? "text-warning" : "text-muted-foreground/60",
           length >= maxLength! && "text-destructive",

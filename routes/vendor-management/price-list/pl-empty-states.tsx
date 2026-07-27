@@ -22,7 +22,7 @@ export function EmptyProducts({
         <Tag className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
-      <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
+      <p className="text-muted-foreground mt-0.5 text-micro">
         {description}
       </p>
       {!disabled && (

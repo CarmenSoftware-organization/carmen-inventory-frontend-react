@@ -232,7 +232,7 @@ function LocationTaxCell({
     <div className="flex flex-col gap-0.5">
       {/* rate% + override toggle (label คอลัมน์อยู่ที่ header row) */}
       <div className="flex items-center justify-between gap-2">
-        <span className="text-muted-foreground text-[0.7rem] font-semibold tabular-nums">
+        <span className="text-muted-foreground text-micro font-semibold tabular-nums">
           {rate > 0 ? `${rate}%` : ""}
         </span>
         <OverrideToggle
@@ -347,7 +347,7 @@ export function LocationsEditor({
           <col style={{ width: pct(PO_COL.amt) }} />
           {showActionCol && <col style={{ width: pct(PO_COL.action) }} />}
         </colgroup>
-        <thead className="text-muted-foreground text-[0.7rem] font-semibold">
+        <thead className="text-muted-foreground text-micro font-semibold">
           <tr className="border-border/60 border-b">
             <th className="px-2 py-1 text-left">{tfl("location")}</th>
             <th className="px-1 py-1 text-right">{tfl("orderAbbr")}</th>

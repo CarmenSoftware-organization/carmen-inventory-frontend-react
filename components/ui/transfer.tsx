@@ -220,12 +220,12 @@ const TransferPanel = ({
           onCheckedChange={toggleAll}
           disabled={disabled || items.length === 0}
         />
-        <span className="text-foreground text-[0.6875rem] font-semibold tracking-widest uppercase">
+        <span className="text-foreground text-micro font-semibold tracking-widest uppercase">
           {title}
         </span>
         <span
           className={cn(
-            "ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-semibold tracking-wider tabular-nums",
+            "ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-micro-eyebrow font-semibold tracking-wider tabular-nums",
             checkedKeys.size > 0
               ? "bg-primary/15 text-primary"
               : "bg-muted text-muted-foreground",
@@ -329,7 +329,7 @@ const PanelLoading = () => {
       <div className="bg-muted/60 relative h-1 w-32 overflow-hidden rounded-full">
         <div className="bg-primary absolute inset-y-0 w-1/2 animate-pulse rounded-full" />
       </div>
-      <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-widest uppercase">
+      <span className="text-muted-foreground text-micro-legal font-semibold tracking-widest uppercase">
         {tc("loading")}
       </span>
     </div>
@@ -344,7 +344,7 @@ const PanelEmpty = ({ hasSearch }: { readonly hasSearch: boolean }) => {
       <div className="bg-muted/60 text-muted-foreground/70 flex size-9 items-center justify-center rounded-full">
         <Icon className="size-4" aria-hidden="true" />
       </div>
-      <span className="text-muted-foreground text-[0.6875rem]">
+      <span className="text-muted-foreground text-micro">
         {hasSearch ? tc("transferNoMatches") : tc("transferNoItems")}
       </span>
     </div>

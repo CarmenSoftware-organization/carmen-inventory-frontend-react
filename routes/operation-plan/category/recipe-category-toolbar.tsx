@@ -51,7 +51,7 @@ export function RecipeCategoryToolbar({
   const badges = (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold tracking-wider uppercase",
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold tracking-wider uppercase",
         code
           ? "bg-foreground text-background"
           : "text-muted-foreground border border-dashed",

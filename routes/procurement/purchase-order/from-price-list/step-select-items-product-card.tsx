@@ -79,7 +79,7 @@ export const ProductCard = memo(function ProductCard({
             <p className="text-sm font-semibold tabular-nums">
               {item.price.toLocaleString()}
             </p>
-            <p className="text-muted-foreground text-[0.6875rem]">
+            <p className="text-muted-foreground text-micro">
               {tfl("price")} / {item.order_unit_name || "—"}
             </p>
           </div>
@@ -96,7 +96,7 @@ export const ProductCard = memo(function ProductCard({
       </div>
 
       <div className="divide-border/40 divide-y">
-        <div className="text-muted-foreground bg-muted/10 grid grid-cols-[1fr_8rem_2rem] gap-2 px-4 py-1 text-[0.625rem] font-semibold tracking-wide uppercase">
+        <div className="text-muted-foreground bg-muted/10 grid grid-cols-[1fr_8rem_2rem] gap-2 px-4 py-1 text-micro-legal font-semibold tracking-wide uppercase">
           <span>{tfl("location")}</span>
           <span className="text-right">{tfl("qty")}</span>
           <span />
@@ -155,7 +155,7 @@ export const ProductCard = memo(function ProductCard({
                   )}
                 />
                 {qtyErr && (
-                  <p className="text-destructive mt-0.5 text-[0.625rem]">
+                  <p className="text-destructive mt-0.5 text-micro-legal">
                     {qtyErr}
                   </p>
                 )}

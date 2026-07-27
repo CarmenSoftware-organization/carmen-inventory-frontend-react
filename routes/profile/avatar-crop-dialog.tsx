@@ -144,7 +144,7 @@ export function AvatarCropDialog({
           >
             <ZoomIn aria-hidden="true" />
           </Button>
-          <span className="text-muted-foreground w-10 text-right text-[0.6875rem] tabular-nums">
+          <span className="text-muted-foreground w-10 text-right text-micro tabular-nums">
             {zoom.toFixed(1)}×
           </span>
         </div>

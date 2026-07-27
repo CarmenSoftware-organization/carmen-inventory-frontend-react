@@ -47,10 +47,10 @@ const badgeVariants = cva(
           "bg-background border-invert/40 text-invert-foreground dark:bg-input/30",
       },
       size: {
-        xs: "px-2 py-0.5 text-[0.6875rem] leading-none h-5 min-w-5 gap-1",
-        sm: "px-2 py-0.5 text-[0.75rem] leading-none h-5.5 min-w-5.5 gap-1",
+        xs: "px-2 py-0.5 text-micro leading-none h-5 min-w-5 gap-1",
+        sm: "px-2 py-0.5 text-xs leading-none h-5.5 min-w-5.5 gap-1",
         default: "px-2 py-0.5 text-[0.8125rem] h-6 min-w-6 gap-1",
-        lg: "px-3 py-0.5 text-[0.875rem] h-6.5 min-w-6.5 gap-1.5",
+        lg: "px-3 py-0.5 text-sm h-6.5 min-w-6.5 gap-1.5",
         xl: "px-3.5 py-1 text-[0.9375rem] h-7.5 min-w-7.5 gap-1.5",
       },
     },

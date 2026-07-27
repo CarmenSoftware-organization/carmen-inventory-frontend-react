@@ -167,7 +167,7 @@ function ContactCard({
                   avatar อยู่แล้ว (ดู docs/DESIGN.md: หนึ่งสัญญาณต่อ element)
                   ป้ายนี้มีไว้ให้ screen reader และคนที่ไม่รู้ว่าดาวแปลว่าอะไร */}
               {isPrimary && (
-                <span className="text-muted-foreground mt-0.5 inline-flex text-[0.5625rem] font-semibold tracking-widest uppercase">
+                <span className="text-muted-foreground mt-0.5 inline-flex text-micro-eyebrow font-semibold tracking-widest uppercase">
                   {t("contact.primary")}
                 </span>
               )}
@@ -192,7 +192,7 @@ function ContactCard({
         {/* Primary checkbox + remove */}
         {!isView && (
           <div className="flex items-center gap-1">
-            <label className="text-muted-foreground hover:text-foreground inline-flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-[0.5625rem] font-semibold tracking-widest uppercase transition-colors">
+            <label className="text-muted-foreground hover:text-foreground inline-flex cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-micro-eyebrow font-semibold tracking-widest uppercase transition-colors">
               <Checkbox
                 checked={isPrimary}
                 onCheckedChange={(c) => onSetPrimary(!!c)}
@@ -269,7 +269,7 @@ function ContactSubField({
   if (isView) {
     if (!value) {
       return (
-        <div className="text-muted-foreground flex items-center gap-2 text-[0.6875rem]">
+        <div className="text-muted-foreground flex items-center gap-2 text-micro">
           <Icon className="size-3 shrink-0" />
           <span className="italic">—</span>
         </div>
@@ -279,7 +279,7 @@ function ContactSubField({
       return (
         <a
           href={href}
-          className="text-muted-foreground hover:text-primary flex items-center gap-2 text-[0.6875rem] transition-colors"
+          className="text-muted-foreground hover:text-primary flex items-center gap-2 text-micro transition-colors"
         >
           <Icon className="size-3 shrink-0" />
           <span className="truncate">{value}</span>
@@ -287,7 +287,7 @@ function ContactSubField({
       );
     }
     return (
-      <div className="text-muted-foreground flex items-center gap-2 text-[0.6875rem]">
+      <div className="text-muted-foreground flex items-center gap-2 text-micro">
         <Icon className="size-3 shrink-0" />
         <span className="truncate">{value}</span>
       </div>
@@ -304,7 +304,7 @@ function ContactSubField({
           disabled={isDisabled}
           maxLength={type === "email" ? 100 : 20}
           className={cn(
-            "border-border/40 hover:border-foreground/50 focus-visible:border-primary h-7 flex-1 rounded-md border bg-transparent text-[0.6875rem] shadow-none transition-colors focus-visible:ring-0",
+            "border-border/40 hover:border-foreground/50 focus-visible:border-primary h-7 flex-1 rounded-md border bg-transparent text-micro shadow-none transition-colors focus-visible:ring-0",
             error && "border-destructive",
           )}
           {...register}
@@ -335,7 +335,7 @@ function EmptyContacts({
         <User className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
-      <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
+      <p className="text-muted-foreground mt-0.5 text-micro">
         {description}
       </p>
       {!isView && (

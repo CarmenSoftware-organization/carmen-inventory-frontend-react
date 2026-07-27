@@ -581,7 +581,7 @@ function GeneralTab({
             <p className="text-muted-foreground text-xs">
               {t.rich("addFirstAttributeHintRich", {
                 code: (chunks) => (
-                  <code className="bg-muted mx-0.5 rounded px-1.5 py-0.5 text-[0.6875rem]">
+                  <code className="bg-muted mx-0.5 rounded px-1.5 py-0.5 text-micro">
                     {chunks}
                   </code>
                 ),
@@ -650,7 +650,7 @@ function ToggleRow({
         >
           {title}
         </div>
-        <div className="text-muted-foreground text-[0.6875rem]">{desc}</div>
+        <div className="text-muted-foreground text-micro">{desc}</div>
       </div>
       {children}
     </div>

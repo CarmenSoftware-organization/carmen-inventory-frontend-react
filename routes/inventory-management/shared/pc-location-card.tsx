@@ -89,7 +89,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
                     : t("notCount"),
               }}
             />
-            <div className="text-muted-foreground flex items-center gap-1.5 text-[0.6875rem]">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
               <Warehouse className="size-2.5 shrink-0" aria-hidden="true" />
               <span>{locationTypeLabel}</span>
             </div>
@@ -98,7 +98,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
 
         <div className="shrink-0">
           {actionType === "done" ? (
-            <span className="text-muted-foreground inline-flex items-center gap-1 text-[0.6875rem] font-semibold tracking-wider uppercase">
+            <span className="text-muted-foreground inline-flex items-center gap-1 text-micro font-semibold tracking-wider uppercase">
               <CheckCircle2
                 className="text-success size-3"
                 aria-hidden="true"
@@ -121,7 +121,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
 
       {/* Row 2: Progress */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-[0.6875rem]">
+        <div className="flex items-center justify-between text-micro">
           <span className="text-muted-foreground tracking-wide uppercase">
             {t("progress")}
           </span>
@@ -133,7 +133,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
       </div>
 
       {/* Row 3: Footer meta */}
-      <div className="border-border/40 text-muted-foreground flex items-center gap-4 border-t pt-2 text-[0.6875rem]">
+      <div className="border-border/40 text-muted-foreground flex items-center gap-4 border-t pt-2 text-micro">
         <span className="flex items-center gap-1">
           <Package className="size-2.5" aria-hidden="true" />
           {t("nItems", { count: total })}

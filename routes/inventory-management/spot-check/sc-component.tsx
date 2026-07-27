@@ -393,7 +393,7 @@ function ViewToggle({
         size="sm"
         variant={view === "locations" ? "default" : "ghost"}
         onClick={() => setView("locations")}
-        className="h-7 rounded-full px-3 text-[0.6875rem] font-semibold tracking-wide"
+        className="h-7 rounded-full px-3 text-micro font-semibold tracking-wide"
       >
         <MapPin className="size-3" aria-hidden="true" />
         {t("viewLocations")}
@@ -403,7 +403,7 @@ function ViewToggle({
         size="sm"
         variant={view === "history" ? "default" : "ghost"}
         onClick={() => setView("history")}
-        className="h-7 rounded-full px-3 text-[0.6875rem] font-semibold tracking-wide"
+        className="h-7 rounded-full px-3 text-micro font-semibold tracking-wide"
       >
         <History className="size-3" aria-hidden="true" />
         {t("viewHistory")}

@@ -16,7 +16,7 @@ import type { SpotCheckFormValues } from "./sc-form-schema";
 import { ScMethodPicker } from "./sc-method-picker";
 
 const LABEL_CLASS = cn(
-  "text-muted-foreground text-[0.625rem] font-semibold tracking-[0.1em] uppercase",
+  "text-muted-foreground text-micro-legal font-semibold tracking-[0.1em] uppercase",
 );
 
 const INPUT_CLASS = cn(

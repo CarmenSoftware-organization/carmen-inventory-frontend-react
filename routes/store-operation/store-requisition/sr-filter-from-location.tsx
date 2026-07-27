@@ -182,7 +182,7 @@ export function SrFilterFromLocation({
               <Badge
                 size="xs"
                 variant={TYPE_VARIANT[loc.location_type]}
-                className="h-4 min-w-0 shrink-0 px-1.5 text-[0.625rem] uppercase"
+                className="h-4 min-w-0 shrink-0 px-1.5 text-micro-legal uppercase"
               >
                 {loc.location_type}
               </Badge>

@@ -140,7 +140,7 @@ export function UserTable({ users, className }: UserTableProps) {
           placeholder={t("search")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-6 pl-8 text-[10px]"
+          className="h-6 pl-8 text-micro-legal"
         />
       </div>
       <DataGrid

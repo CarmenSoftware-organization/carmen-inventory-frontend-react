@@ -286,7 +286,7 @@ export default function PriceListExternalProductTable({
               {row.original.product_name}
             </span>
             {row.original.product_code && (
-              <span className="text-muted-foreground text-[0.6875rem]">
+              <span className="text-muted-foreground text-micro">
                 {row.original.product_code}
               </span>
             )}
@@ -475,7 +475,7 @@ export default function PriceListExternalProductTable({
       {
         id: "actions",
         header: () => (
-          <span className="text-muted-foreground text-[0.6875rem]">
+          <span className="text-muted-foreground text-micro">
             Tiers
           </span>
         ),

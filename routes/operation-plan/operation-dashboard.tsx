@@ -170,7 +170,7 @@ function Section({
 }) {
   return (
     <section className="space-y-2">
-      <h2 className="text-muted-foreground text-[0.625rem] font-bold tracking-[0.16em] uppercase">
+      <h2 className="text-muted-foreground text-micro-legal font-bold tracking-[0.16em] uppercase">
         {heading}
       </h2>
       {children}

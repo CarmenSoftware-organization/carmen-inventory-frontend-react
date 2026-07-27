@@ -42,7 +42,7 @@ export function ActiveFilterBar({
 
   return (
     <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto rounded-md bg-muted/30 px-2 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible">
-      <span className="shrink-0 text-muted-foreground text-[0.625rem] sm:text-[0.6875rem]">
+      <span className="shrink-0 text-muted-foreground text-micro-legal sm:text-micro">
         {tc("activeFilter")}:
       </span>
       {filters.map((filter) => (
@@ -50,7 +50,7 @@ export function ActiveFilterBar({
           key={filter.key}
           variant="secondary"
           size="xs"
-          className="shrink-0 gap-1 text-[0.625rem] sm:text-[0.6875rem]"
+          className="shrink-0 gap-1 text-micro-legal sm:text-micro"
         >
           {filter.label}
           <button
@@ -66,7 +66,7 @@ export function ActiveFilterBar({
       <button
         type="button"
         onClick={onClearAll}
-        className="shrink-0 text-muted-foreground hover:text-foreground text-[0.625rem] underline sm:text-[0.6875rem]"
+        className="shrink-0 text-muted-foreground hover:text-foreground text-micro-legal underline sm:text-micro"
       >
         {tc("clearAll")}
       </button>

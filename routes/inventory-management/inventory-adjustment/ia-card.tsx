@@ -95,12 +95,12 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
                   {docNo}
                 </CardTitle>
                 {typeof index === "number" && (
-                  <span className="text-muted-foreground/70 text-[0.625rem] tabular-nums">
+                  <span className="text-muted-foreground/70 text-micro-legal tabular-nums">
                     #{String(index + 1).padStart(2, "0")}
                   </span>
                 )}
               </div>
-              <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1 text-[0.6875rem]">
+              <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1 text-micro">
                 <CalendarDays
                   className="size-2.5 shrink-0"
                   aria-hidden="true"
@@ -173,7 +173,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <span className="text-muted-foreground text-[0.6875rem]">
+          <span className="text-muted-foreground text-micro">
             {itemCount} {tfl("items")}
           </span>
         </div>
@@ -187,7 +187,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             {formatAmount(item.base_total_cost, amountFormat)}
           </p>
           {defaultCurrencyCode && (
-            <p className="text-muted-foreground/70 mt-1 text-[0.625rem] font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground/70 mt-1 text-micro-legal font-semibold tracking-widest uppercase">
               {defaultCurrencyCode}
             </p>
           )}

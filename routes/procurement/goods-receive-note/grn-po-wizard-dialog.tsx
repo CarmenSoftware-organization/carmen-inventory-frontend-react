@@ -379,7 +379,7 @@ function PoStep({
         <span className="text-foreground text-xs font-medium">
           {tfl("selectAll")}
         </span>
-        <span className="text-muted-foreground text-[0.6875rem]">
+        <span className="text-muted-foreground text-micro">
           {poList.length} PO · {allDetailIds.length} items
         </span>
         {selectedCount > 0 && (
@@ -414,7 +414,7 @@ function PoStep({
                     {po.grn_status.toUpperCase().replaceAll("_", " ")}
                   </Badge>
                 )}
-                <span className="text-muted-foreground text-[0.6875rem]">
+                <span className="text-muted-foreground text-micro">
                   {formatDate(po.order_date, dateFormat)}
                 </span>
                 <span className="ml-auto text-xs font-semibold tabular-nums">
@@ -441,7 +441,7 @@ function PoStep({
                       checked={detailChecked}
                       onCheckedChange={() => toggleDetail(d.id)}
                     />
-                    <span className="text-muted-foreground shrink-0 text-[0.6875rem] tabular-nums">
+                    <span className="text-muted-foreground shrink-0 text-micro tabular-nums">
                       {d.product_code}
                     </span>
                     <span className="text-foreground min-w-0 flex-1 truncate text-xs">
@@ -450,7 +450,7 @@ function PoStep({
                     <span className="w-14 shrink-0 text-right text-xs tabular-nums">
                       {d.order_qty}
                     </span>
-                    <span className="text-muted-foreground w-10 shrink-0 text-center text-[0.6875rem]">
+                    <span className="text-muted-foreground w-10 shrink-0 text-center text-micro">
                       {d.order_unit_name}
                     </span>
                     <span className="w-20 shrink-0 text-right text-xs tabular-nums">

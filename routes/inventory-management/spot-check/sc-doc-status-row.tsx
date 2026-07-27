@@ -43,7 +43,7 @@ export function ScDocStatusRow({
         <span
           className={cn(
             "text-foreground truncate font-semibold tracking-wider",
-            isSm ? "text-[0.75rem]" : "text-sm",
+            isSm ? "text-xs" : "text-sm",
           )}
         >
           {docNo}
@@ -54,7 +54,7 @@ export function ScDocStatusRow({
           variant={status.variant}
           size="xs"
           className={cn(
-            "gap-1 px-2 text-[0.5625rem] font-semibold tracking-wider uppercase",
+            "gap-1 px-2 text-micro-eyebrow font-semibold tracking-wider uppercase",
             status.className,
           )}
         >
@@ -71,7 +71,7 @@ export function ScDocStatusRow({
         <Badge
           variant={methodVis.variant}
           size="xs"
-          className="gap-1 px-2 text-[0.5625rem] font-semibold tracking-wider uppercase"
+          className="gap-1 px-2 text-micro-eyebrow font-semibold tracking-wider uppercase"
         >
           <MethodIcon className="size-2.5" aria-hidden="true" />
           {methodLabel}

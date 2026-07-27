@@ -222,7 +222,7 @@ export function BrowseDialog({
           </div>
           {activeCurrency && (
             <div
-              className="border-warning/30 bg-warning/5 text-warning-foreground flex items-start gap-2 rounded-md border px-3 py-2 text-[0.6875rem]"
+              className="border-warning/30 bg-warning/5 text-warning-foreground flex items-start gap-2 rounded-md border px-3 py-2 text-micro"
               role="status"
               aria-live="polite"
             >
@@ -364,13 +364,13 @@ export function BrowseDialog({
                                   </Badge>
                                 )}
                               </label>
-                              <span className="text-muted-foreground text-[0.6875rem]">
+                              <span className="text-muted-foreground text-micro">
                                 {detail.unit_name ?? "—"}
                               </span>
                               <span className="text-foreground/80 w-20 text-right tabular-nums">
                                 {detail.price.toLocaleString()}
                               </span>
-                              <span className="text-muted-foreground w-10 text-[0.6875rem]">
+                              <span className="text-muted-foreground w-10 text-micro">
                                 {group.currency.code}
                               </span>
                             </div>

@@ -26,7 +26,7 @@ function ChangeList({ items }: { readonly items: readonly ChangeItem[] }) {
       {items.map((item) => (
         <li key={item.hash} className="flex items-start gap-1.5 text-xs leading-snug">
           {item.scope && (
-            <span className="bg-muted text-muted-foreground shrink-0 rounded px-1 py-0.5 text-[0.625rem] font-semibold">
+            <span className="bg-muted text-muted-foreground shrink-0 rounded px-1 py-0.5 text-micro-legal font-semibold">
               {item.scope}
             </span>
           )}
@@ -43,7 +43,7 @@ function VersionBlock({ entry }: { readonly entry: VersionEntry }) {
     <section className="space-y-2">
       <div className="flex items-baseline gap-2">
         <h3 className="text-sm font-semibold">v{entry.version}</h3>
-        <span className="text-muted-foreground text-[0.6875rem]">{entry.date}</span>
+        <span className="text-muted-foreground text-micro">{entry.date}</span>
       </div>
       {sections.length === 0 ? (
         <p className="text-muted-foreground text-xs">

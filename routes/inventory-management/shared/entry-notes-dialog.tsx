@@ -182,7 +182,7 @@ export function EntryNotesDialog({
                 <DialogTitle className="text-foreground text-base leading-tight font-semibold tracking-tight">
                   {productName}
                 </DialogTitle>
-                <DialogDescription className="text-muted-foreground text-[0.6875rem] leading-relaxed">
+                <DialogDescription className="text-muted-foreground text-micro leading-relaxed">
                   {t("notesDialogDesc")}
                 </DialogDescription>
               </div>
@@ -196,7 +196,7 @@ export function EntryNotesDialog({
           <div className="space-y-1.5">
             <label
               htmlFor="entry-note-textarea"
-              className="text-muted-foreground flex items-center gap-1 text-[0.5625rem] font-semibold tracking-widest uppercase"
+              className="text-muted-foreground flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase"
             >
               <MessageSquarePlus className="size-2.5" aria-hidden="true" />
               {t("notesLabel")}
@@ -214,12 +214,12 @@ export function EntryNotesDialog({
           {/* Evidence — multi-image upload with drag & drop */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-muted-foreground flex items-center gap-1 text-[0.5625rem] font-semibold tracking-widest uppercase">
+              <span className="text-muted-foreground flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
                 <ImagePlus className="size-2.5" aria-hidden="true" />
                 {t("evidenceLabel")}
               </span>
               {images.length > 0 && (
-                <span className="text-muted-foreground bg-muted/60 rounded-full px-1.5 text-[0.5625rem] font-semibold tabular-nums">
+                <span className="text-muted-foreground bg-muted/60 rounded-full px-1.5 text-micro-eyebrow font-semibold tabular-nums">
                   {t("evidenceCount", { count: images.length })}
                 </span>
               )}
@@ -251,10 +251,10 @@ export function EntryNotesDialog({
               )}
             >
               <ImagePlus className="text-primary size-5" aria-hidden="true" />
-              <span className="text-foreground/80 text-[0.6875rem] font-semibold">
+              <span className="text-foreground/80 text-micro font-semibold">
                 {t("evidenceHint")}
               </span>
-              <span className="text-muted-foreground text-[0.5625rem]">
+              <span className="text-muted-foreground text-micro-eyebrow">
                 {t("evidenceMaxSize")}
               </span>
             </button>
@@ -340,7 +340,7 @@ function ImageThumb({
       {errored ? (
         <div className="bg-muted/40 text-muted-foreground/70 flex size-full flex-col items-center justify-center gap-1 p-1.5">
           <ImageIcon className="size-5 shrink-0" aria-hidden="true" />
-          <span className="line-clamp-2 w-full text-center text-[0.5rem] leading-tight break-all">
+          <span className="line-clamp-2 w-full text-center text-micro-floor leading-tight break-all">
             {name}
           </span>
         </div>
@@ -356,10 +356,10 @@ function ImageThumb({
       {/* Gradient overlay + filename */}
       {!errored && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent px-1.5 py-1">
-          <div className="truncate text-[0.5rem] font-semibold text-white">
+          <div className="truncate text-micro-floor font-semibold text-white">
             {name}
           </div>
-          <div className="text-[0.5rem] text-white/80 tabular-nums">{size}</div>
+          <div className="text-micro-floor text-white/80 tabular-nums">{size}</div>
         </div>
       )}
       {/* Remove button — เฉพาะรูปที่ user เพิ่งเพิ่ม (ไม่ใช่จาก server) */}

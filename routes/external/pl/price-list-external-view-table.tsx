@@ -54,7 +54,7 @@ export default function PriceListExternalViewTable({
                   <div className="flex flex-col">
                     <span className="font-medium">{d.product_name}</span>
                     {d.product_code && (
-                      <span className="text-muted-foreground text-[0.6875rem]">
+                      <span className="text-muted-foreground text-micro">
                         {d.product_code}
                       </span>
                     )}

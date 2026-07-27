@@ -59,7 +59,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
   return (
     <>
       <SummaryBar
-        className="text-[0.6875rem]"
+        className="text-micro"
         items={[
           {
             key: "onHand",
