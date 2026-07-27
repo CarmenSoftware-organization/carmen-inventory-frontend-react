@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { prepareApproveDetails } from "./pr-form-schema";
+import {
+  prepareApproveDetails,
+  preparePurchaseDetails,
+  resolveApprovedQty,
+} from "./pr-form-schema";
 import type { PrFormValues } from "./pr-form-schema";
 
 // สร้าง item ขั้นต่ำสำหรับทดสอบ prepareApproveDetails — สนใจเฉพาะ field
@@ -90,5 +94,87 @@ describe("prepareApproveDetails null FK omission", () => {
       "pr1",
     );
     expect(payload.tax_profile_id).toBe("tax-1");
+  });
+});
+
+describe("resolveApprovedQty", () => {
+  it("falls back to requested_qty when approver never set approved_qty", () => {
+    expect(resolveApprovedQty({ approved_qty: 0, requested_qty: 5 })).toBe(5);
+  });
+
+  it("uses approved_qty once it is set", () => {
+    expect(resolveApprovedQty({ approved_qty: 3, requested_qty: 5 })).toBe(3);
+  });
+});
+
+describe("preparePurchaseDetails", () => {
+  // จอ (pr-item-expand / pr-item-fields) คิดยอดด้วย approved_qty ที่ fallback ไป
+  // requested_qty — payload ต้องคิดด้วยตัวเดียวกัน ไม่งั้นบันทึกยอดเป็น 0
+  it("prices an untouched item off requested_qty, not zero", () => {
+    const [payload] = preparePurchaseDetails(
+      [
+        makeItem({
+          approved_qty: 0,
+          requested_qty: 4,
+          pricelist_price: 100,
+          tax_rate: 10,
+        }),
+      ],
+      "pr1",
+    );
+
+    expect(payload.approved_qty).toBe(4);
+    expect(payload.sub_total_price).toBe(400);
+    expect(payload.net_amount).toBe(400);
+    expect(payload.tax_amount).toBe(40);
+    expect(payload.total_price).toBe(440);
+  });
+
+  it("embeds purchase_request_id — backend requires it on every detail", () => {
+    const [payload] = preparePurchaseDetails([makeItem({})], "pr1");
+    expect(payload.purchase_request_id).toBe("pr1");
+  });
+
+  it("denormalizes current_stage_status to the backend enum", () => {
+    const [payload] = preparePurchaseDetails(
+      [makeItem({ current_stage_status: "rejected" })],
+      "pr1",
+    );
+    expect(payload.current_stage_status).toBe("reject");
+  });
+
+  it("omits null string FK fields instead of sending null", () => {
+    const [payload] = preparePurchaseDetails(
+      [
+        makeItem({
+          current_stage_status: "rejected",
+          vendor_id: null,
+          currency_id: null,
+          tax_profile_id: null,
+          pricelist_type: null,
+        }),
+      ],
+      "pr1",
+    );
+
+    for (const field of [
+      "vendor_id",
+      "currency_id",
+      "tax_profile_id",
+      "tax_profile_name",
+      "pricelist_type",
+    ] as const) {
+      expect(payload[field], `${field} must not be null`).toBeUndefined();
+    }
+  });
+
+  it("keeps pricelist_detail_id / pricelist_no as explicit null keys", () => {
+    // สอง field นี้ backend เป็น nullable แต่ไม่ optional — key ต้องมี
+    const [payload] = preparePurchaseDetails(
+      [makeItem({ pricelist_detail_id: null, pricelist_no: null })],
+      "pr1",
+    );
+    expect(payload).toHaveProperty("pricelist_detail_id", null);
+    expect(payload).toHaveProperty("pricelist_no", null);
   });
 });

@@ -17,7 +17,11 @@ import { formatCurrency, EXCHANGE_RATE_DECIMALS } from "@/lib/currency-utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
-import { computePrItemAmounts, type PrFormValues } from "./pr-form-schema";
+import {
+  computePrItemAmounts,
+  resolveApprovedQty,
+  type PrFormValues,
+} from "./pr-form-schema";
 import PrInventoryRow from "./pr-inventory-row";
 import { PrItemSummary } from "./pr-item-summary";
 import { PrLastReceivingInfo } from "./pr-last-receiving-info";
@@ -92,8 +96,10 @@ export function PrItemExpand({
   const discRate = watchDiscRate ?? 0;
   const isDiscAdj = watchIsDiscAdj ?? false;
   const discAmt = watchDiscAmt ?? 0;
-  const approvedQty = watchApprovedQty ?? 0;
-  const calcQty = approvedQty > 0 ? approvedQty : qty;
+  const calcQty = resolveApprovedQty({
+    approved_qty: watchApprovedQty ?? 0,
+    requested_qty: qty,
+  });
   const currencyCode = watchCurrencyCode ?? null;
   const exchangeRate = watchExchangeRate ?? 1;
   const isForeignCurrency =

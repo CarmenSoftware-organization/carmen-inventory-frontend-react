@@ -335,6 +335,7 @@ export interface ApproveDetail {
 
 export interface PurchaseApproveDetail {
   id: string;
+  purchase_request_id?: string;
   stage_status: string;
   stage_message: string | null;
   is_tax_adjustment: boolean;

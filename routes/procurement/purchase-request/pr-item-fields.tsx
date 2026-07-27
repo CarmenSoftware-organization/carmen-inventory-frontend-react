@@ -55,7 +55,11 @@ const PrSelectDialog = lazy(() =>
   import("./pr-select-dialog").then((mod) => ({ default: mod.PrSelectDialog })),
 );
 import EmptyComponent from "@/components/empty-component";
-import { PR_ITEM, computePrItemAmounts } from "./pr-form-schema";
+import {
+  PR_ITEM,
+  computePrItemAmounts,
+  resolveApprovedQty,
+} from "./pr-form-schema";
 import { getDeleteDescription } from "@/lib/form-utils";
 import {
   PR_ITEM_PRICELIST_COMPARE_TYPE,
@@ -77,8 +81,7 @@ function applyDerivedAmounts(
   price: number,
   taxRate: number,
 ) {
-  const approvedQty = Number(item.approved_qty) || 0;
-  const qty = approvedQty > 0 ? approvedQty : Number(item.requested_qty) || 0;
+  const qty = resolveApprovedQty(item);
   const isDiscAdj = item.is_discount_adjustment ?? false;
   const isTaxAdj = item.is_tax_adjustment ?? false;
   const amounts = computePrItemAmounts({

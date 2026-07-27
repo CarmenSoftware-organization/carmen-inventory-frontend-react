@@ -203,6 +203,7 @@ export function usePrFormActions({
     if (purchaseRequest?.role === STAGE_ROLE.PURCHASE) {
       return preparePurchaseDetails(
         values.items,
+        purchaseRequest.id,
       ) as unknown as CreatePurchaseRequestDto["details"];
     }
     if (purchaseRequest?.role === STAGE_ROLE.APPROVE) {
@@ -412,7 +413,10 @@ export function usePrFormActions({
         id: purchaseRequest.id,
         stage_role: STAGE_ROLE.PURCHASE,
         doc_version: resolveDocVersion(fresh),
-        details: prepareApproveDetails(
+        // stage_role purchase ต้องใช้ shape เต็ม (vendor/price/tax/base_*) —
+        // ตัวเดียวกับที่ /save ส่ง ไม่งั้น approve เขียนทับยอดของ save ด้วย
+        // ตัวเลขคนละชุด แล้ว sub_total/base_* ค้างค่าเก่า
+        details: preparePurchaseDetails(
           form.getValues("items"),
           purchaseRequest.id,
         ),
