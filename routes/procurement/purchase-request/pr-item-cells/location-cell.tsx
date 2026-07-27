@@ -63,12 +63,19 @@ export const LocationCell = memo(function LocationCell({
     return (
       <div className="flex flex-col gap-1">
         <div className="flex min-w-0 items-center justify-between gap-1.5">
-          <p className="min-w-0 truncate text-xs font-semibold">
+          {/* title = ชื่อเต็ม — เซลล์นี้ truncate ได้ที่ font scale ใหญ่ๆ */}
+          <p
+            className="min-w-0 truncate text-xs font-semibold"
+            title={locationName || undefined}
+          >
             {locationName || <span className="text-muted-foreground">—</span>}
           </p>
           {statusSlot}
         </div>
-        <span className="text-muted-foreground truncate text-micro-legal">
+        <span
+          className="text-muted-foreground truncate text-micro-legal"
+          title={locationCode || undefined}
+        >
           {locationCode}
         </span>
       </div>

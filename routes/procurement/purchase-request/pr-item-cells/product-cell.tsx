@@ -44,7 +44,11 @@ export const ProductCell = memo(function ProductCell({
     return (
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center">
-          <p className="min-w-0 flex-1 truncate text-left text-xs font-semibold">
+          {/* title = ชื่อเต็ม — เซลล์นี้ truncate ได้ที่ font scale ใหญ่ๆ */}
+          <p
+            className="min-w-0 flex-1 truncate text-left text-xs font-semibold"
+            title={productName || undefined}
+          >
             {productName || <span className="text-muted-foreground">—</span>}
           </p>
           <InventoryTooltipCell
@@ -53,7 +57,10 @@ export const ProductCell = memo(function ProductCell({
             buCode={buCode}
           />
         </div>
-        <p className="text-muted-foreground truncate text-micro-legal">
+        <p
+          className="text-muted-foreground truncate text-micro-legal"
+          title={productLocalName || undefined}
+        >
           {productLocalName || <span className="text-muted-foreground">—</span>}
         </p>
       </div>
