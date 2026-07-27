@@ -118,9 +118,11 @@ export function VendorGeneral({ form, isDisabled }: VendorGeneralProps) {
       <Field className="sm:col-span-2">
         <FieldLabel>{tfl("status")}</FieldLabel>
         {isView ? (
-          <div>
+          // ครอบด้วย FieldPlainText เพื่อให้ badge นับเป็น "ค่าโหมด view" เหมือน
+          // field อื่นในหน้าเดียวกัน — label เงียบลงและระยะ label→ค่าเท่ากันทั้ง section
+          <FieldPlainText>
             <StatusBadge active={form.getValues("is_active")} />
-          </div>
+          </FieldPlainText>
         ) : (
           <Controller
             control={form.control}

@@ -608,12 +608,15 @@ function FieldInputGroup({
 }
 
 /**
- * ค่าของ field แบบ plain text สำหรับ view mode — แทน input ด้วยข้อความอ่านอย่างเดียว
+ * ค่าของ field แบบอ่านอย่างเดียวสำหรับ view mode — แทนที่ input ของโหมด edit
  *
  * value เด่น (text-foreground / medium) ให้เกิด lightness+size contrast เหนือ
- * label ที่เงียบ (แบบ CN/PO/GRN) จัดแนวตั้งด้วย min-h-8 ให้สูงเท่าแถว input
- * ค่าว่าง/undefined จะแสดง em dash "—" อัตโนมัติ ขนาด default text-sm ปรับผ่าน
- * className ได้ (เช่น "text-xs" ให้ตรงกับ field ที่ใช้ text-xs)
+ * label ที่เงียบ (แบบ CN/PO/GRN) กล่องสูง min-h-8 เท่าแถว input เพื่อไม่ให้
+ * layout กระตุกตอนสลับ view↔edit — เมื่ออยู่ใน `Field` ค่าจะถูกดันชิดบนกล่อง
+ * (ดู `fieldVariants`) ที่ว่างส่วนเกินจึงไปกองใต้ค่าแทนที่จะแทรกกลาง label กับค่า
+ * children ไม่จำเป็นต้องเป็นข้อความล้วน — badge สถานะก็ครอบด้วยตัวนี้ได้ เพื่อให้
+ * ระยะตรงกับ field อื่นใน section เดียวกัน ค่าว่าง/undefined แสดง em dash "—"
+ * อัตโนมัติ ขนาด default text-xs ปรับผ่าน className ได้
  *
  * @param children - ค่าที่จะแสดง (ว่าง → "—")
  * @param className - class เสริม (override ขนาด/สี/แนว)
