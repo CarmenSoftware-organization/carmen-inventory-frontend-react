@@ -189,7 +189,7 @@ export function WfStageUsers({
                     {isDisabled && isAssigned && (
                       <Badge
                         variant="secondary"
-                        className="px-1 py-0 text-micro-eyebrow"
+                        className="px-1 py-0 text-micro-legal"
                       >
                         {t("assigned")}
                       </Badge>

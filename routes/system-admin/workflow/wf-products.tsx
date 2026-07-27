@@ -317,7 +317,7 @@ const TreeNodeRow = ({
           onClick={() => onToggleExpand(node.id)}
         >
           <span className="text-xs font-semibold">{node.name}</span>
-          <span className="text-muted-foreground text-micro-eyebrow">
+          <span className="text-muted-foreground text-micro">
             ({leafIdsMap.get(node.id)?.length ?? 0})
           </span>
         </button>
