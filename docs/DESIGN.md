@@ -7,6 +7,22 @@ colors:
   # Carmen Inventory ERP — neutral graphite surfaces + Carmen blue accent.
   # Source of truth: styles/globals.css (OKLCH). Hex below are sRGB equivalents.
   #
+  # CONTRAST — the status colours are FILL colours, not text colours.
+  # Each has a matching `-foreground` for the label that sits ON it. Measured as
+  # `text-*` against the light canvas they do not reach WCAG AA (4.5:1):
+  #     warning 1.93 · success 1.99 · positive 3.20 · negative 3.79 · info 4.31
+  # All of them pass comfortably in dark mode (6–10:1), so the light values are
+  # effectively tuned for the dark canvas. `destructive` (5.08) and `primary`
+  # (6.60) are the only status colours safe as light-mode text; `brand` is the
+  # mirror case — fine on light (6.60), 4.28 on dark.
+  # This is why components reach for `text-amber-600` / `text-emerald-600`
+  # instead: the raw palette is DARKER than the token (amber-600 is 3.01 vs
+  # warning's 1.93). Those are not sloppiness — swapping them to the token makes
+  # contrast worse. Do not "clean them up" without fixing the tokens first.
+  # ~121 `text-warning` / `text-success` / `text-info` / `text-positive` call
+  # sites are currently below AA in light mode; the app's dense tier is 10–11px,
+  # which is small text, so the 3:1 large-text allowance does not apply.
+  #
   # USAGE — single accent signal (avoid "neon"): accent & semantic colors
   # (primary / destructive / success / warning) should appear ONCE per element,
   # never clustered. Repeating one color across icon-box + icon + chip on a
