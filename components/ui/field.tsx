@@ -106,14 +106,13 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
 
 const fieldVariants = cva(
   [
-    "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
+    "group/field flex w-full data-[invalid=true]:text-destructive",
     // View mode (มี FieldPlainText เป็นค่า): label เงียบลงให้ value เป็นตัวเด่น
     // และ label+value ต้องอ่านเป็นก้อนเดียว — จึงดัน value ชิดบนของกล่อง min-h-8
     // แทนกึ่งกลาง ไม่งั้น dead space ~8px ของกล่องบวกกับ gap จนระยะ label→value
     // (14px) เกือบเท่าระยะระหว่าง field (26px) แล้วตาจับคู่ผิด ที่ว่างที่เหลือ
     // ไปกองใต้ value = กลายเป็นตัวคั่นระหว่าง field และความสูงแถวเท่าเดิม
     // (สลับ view↔edit ไม่กระตุก)
-    "has-[>[data-slot=field-plain-text]]:gap-1.5",
     "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-plain-text]]:items-start",
     "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:text-muted-foreground",
     "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:font-normal",
@@ -121,14 +120,18 @@ const fieldVariants = cva(
   {
     variants: {
       orientation: {
-        vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
+        // แนวตั้ง label อยู่เหนือ control จึงต้องแคบกว่าระยะระหว่าง field (16px)
+        // มาก ๆ ไม่งั้น label ลอยกึ่งกลางระหว่าง control สองอันจนจับคู่ไม่ติด
+        // — 6px เท่ากับโหมด view ด้วย สลับ view↔edit แล้ว label ไม่ขยับ
+        // ส่วนแนวนอน gap เป็นระยะ label↔control ในแถวเดียวกัน คนละบทบาท คงไว้ 12px
+        vertical: ["flex-col gap-1.5 [&>*]:w-full [&>.sr-only]:w-auto"],
         horizontal: [
-          "flex-row items-center",
+          "flex-row items-center gap-3",
           "[&>[data-slot=field-label]]:flex-auto",
           "has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
         ],
         responsive: [
-          "flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto",
+          "flex-col gap-1.5 [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:gap-3 @md/field-group:[&>*]:w-auto",
           "@md/field-group:[&>[data-slot=field-label]]:flex-auto",
           "@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
         ],
