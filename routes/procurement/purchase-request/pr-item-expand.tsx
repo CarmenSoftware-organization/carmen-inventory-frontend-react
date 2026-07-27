@@ -9,14 +9,9 @@ import { useTranslations } from "use-intl";
 import { PR_ITEM_PRICELIST_COMPARE_TYPE } from "@/types/purchase-request";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { InputAmount } from "@/components/ui/input/input-amount";
-import {
-  InputSuffixField,
-  InputSuffixInput,
-} from "@/components/ui/input/input-suffix";
 import { formatCurrency, EXCHANGE_RATE_DECIMALS } from "@/lib/currency-utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
-import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import {
   computePrItemAmounts,
   resolveApprovedQty,
@@ -25,6 +20,7 @@ import {
 import PrInventoryRow from "./pr-inventory-row";
 import { PrItemSummary } from "./pr-item-summary";
 import { PrLastReceivingInfo } from "./pr-last-receiving-info";
+import { PrDiscountInput, PrTaxInput } from "./pr-money-fields";
 
 type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
 
@@ -150,9 +146,6 @@ export function PrItemExpand({
   const itemErrors = form.formState.errors.items?.[index];
   const vendorError = itemErrors?.vendor_id?.message;
   const priceError = itemErrors?.pricelist_price?.message;
-  const taxProfileError = itemErrors?.tax_profile_id?.message;
-  const taxAmountError = itemErrors?.tax_amount?.message;
-  const discountAmountError = itemErrors?.discount_amount?.message;
 
   const overrideToggle = (
     name:
@@ -356,59 +349,11 @@ export function PrItemExpand({
                 </span>
               </p>
             ) : (
-              <InputSuffixField
-                className="w-full"
-                error={!!discountAmountError}
-              >
-                <InputSuffixInput
-                  id={`items-${index}-discount-rate`}
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="0.01"
-                  placeholder="0"
-                  aria-label={tfl("discPercent")}
-                  max={100}
-                  disabled={isDiscAdj}
-                  className="disabled:bg-muted disabled:text-muted-foreground h-8 w-12 flex-none rounded-none border-0 bg-transparent px-1 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
-                  defaultValue={discRate}
-                  {...form.register(`items.${index}.discount_rate`)}
-                  onChange={(e) => {
-                    const n = e.target.valueAsNumber;
-                    // clamp 0–100 (disc% สูงสุด 100)
-                    const rate = Number.isNaN(n)
-                      ? 0
-                      : Math.min(100, Math.max(0, n));
-                    form.setValue(`items.${index}.discount_rate`, rate, {
-                      shouldDirty: true,
-                      shouldValidate: true,
-                    });
-                  }}
-                />
-                <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-[0.625rem]">
-                  %
-                </span>
-                <div
-                  className="bg-border h-4 w-px shrink-0"
-                  aria-hidden="true"
-                />
-                <div className="min-w-0 flex-1">
-                  <InputAmount
-                    id={`items-${index}-discount-amount`}
-                    decimals={watchCurrencyDecimals}
-                    disabled={!isDiscAdj}
-                    aria-label={tfl("discAmt")}
-                    className="disabled:bg-muted disabled:text-muted-foreground h-8 w-full rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
-                    value={discAmt}
-                    onValueChange={(n) =>
-                      form.setValue(`items.${index}.discount_amount`, n, {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      })
-                    }
-                  />
-                </div>
-              </InputSuffixField>
+              <PrDiscountInput
+                form={form}
+                index={index}
+                decimals={watchCurrencyDecimals}
+              />
             )}
           </Field>
 
@@ -458,54 +403,10 @@ export function PrItemExpand({
                 )}
               </p>
             ) : (
-              <Controller
-                control={form.control}
-                name={`items.${index}.tax_profile_id`}
-                render={({ field }) => (
-                  // tax profile · tax amount (+ rate% เป็น suffix) ในกล่องเดียว
-                  <InputSuffixField
-                    className="w-full"
-                    error={!!taxProfileError || !!taxAmountError}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <LookupTaxProfile
-                        value={field.value ?? ""}
-                        onValueChange={(value, rate, name) => {
-                          // shouldValidate: ล้างกรอบแดง tax ทันทีที่เลือก
-                          form.setValue(
-                            `items.${index}.tax_profile_id`,
-                            value || null,
-                            { shouldDirty: true, shouldValidate: true },
-                          );
-                          form.setValue(`items.${index}.tax_rate`, rate);
-                          form.setValue(
-                            `items.${index}.tax_profile_name`,
-                            name,
-                          );
-                        }}
-                        className="w-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none focus-visible:ring-0"
-                      />
-                    </div>
-                    <div
-                      className="bg-border h-4 w-px shrink-0"
-                      aria-hidden="true"
-                    />
-                    <InputAmount
-                      id={`items-${index}-tax-amount`}
-                      decimals={watchCurrencyDecimals}
-                      disabled={!isTaxAdj}
-                      aria-label={tfl("taxAmt")}
-                      className="disabled:bg-muted disabled:text-muted-foreground h-8 w-20 shrink-0 rounded-none border-0 bg-transparent pr-1 pl-2 text-right text-xs shadow-none focus-visible:ring-0 disabled:cursor-default disabled:opacity-100"
-                      value={taxAmt}
-                      onValueChange={(n) =>
-                        form.setValue(`items.${index}.tax_amount`, n, {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        })
-                      }
-                    />
-                  </InputSuffixField>
-                )}
+              <PrTaxInput
+                form={form}
+                index={index}
+                decimals={watchCurrencyDecimals}
               />
             )}
           </Field>
