@@ -3019,6 +3019,24 @@
         "healthy": "พอใช้",
         "low": "ใกล้หมด",
         "critical": "วิกฤต"
+      },
+      "v2": {
+        "edition": "แก้ไขครั้งที่ {n}",
+        "requestedOn": "ขอเมื่อ",
+        "yourTurn": "ตาคุณแล้ว",
+        "waiting": "รออยู่",
+        "searchPlaceholder": "ค้นหาสินค้า ผู้ขาย คลัง...",
+        "clearFilter": "ล้างตัวกรอง",
+        "noMatch": "ไม่พบรายการที่ตรงกับที่กรองไว้",
+        "itemStatus": {
+          "pending": "รอ",
+          "approved": "อนุมัติ",
+          "rejected": "ปฏิเสธ",
+          "review": "ส่งกลับ"
+        },
+        "nSelected": "เลือกแล้ว {count} รายการ",
+        "clearSelection": "ยกเลิกที่เลือก",
+        "resetStatus": "ล้างสถานะ"
       }
     },
     "purchaseRequestTemplate": {
