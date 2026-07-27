@@ -3,9 +3,10 @@ import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 
 /**
- * docs/DESIGN.md's ladder is 300 / 400 / 600 / 700, and 700 is reserved for
- * `{typography.tagline}` (21px). `{typography.micro-eyebrow}` (9px caps) and
- * `{typography.micro}` (11px numbers) both specify weight 600.
+ * docs/DESIGN.md's weight ladder is 300 / 400 / 500 / 600 / 700, where 500 is the
+ * data-value tier and 700 is reserved for the one-off display sizes (48px/60px).
+ * `{typography.micro-eyebrow}` (9px caps) and `{typography.micro}` (11px numbers)
+ * both specify weight 600 — 700 on a 9px chip is louder than a page title.
  *
  * `font-bold` on those has now been swept three times — inventory-management in
  * June, then thirteen more sites across system-admin / vendor-management /
