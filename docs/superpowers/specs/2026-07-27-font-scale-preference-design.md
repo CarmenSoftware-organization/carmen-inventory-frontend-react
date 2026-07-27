@@ -127,10 +127,22 @@ import module ไม่ได้ — test จะ assert ว่าสองที
 
 ## ผลข้างเคียงที่ตั้งใจรับไว้
 
-1. **breakpoint เลื่อน** — Tailwind v4 นับ breakpoint เป็น `rem` (`sm` = 40rem, …) เมื่อ
-   root โต breakpoint ก็ trigger ที่ความกว้าง px มากขึ้น ที่ระดับ `biggest` จอ 1440px จะ
-   ประพฤติเหมือนจอ ~1150px คือ layout ถอยลงหนึ่งขั้น **ถูกต้องตามเจตนา** เพราะพื้นที่
-   ใช้สอยที่วัดเป็น "จำนวนบรรทัด/คอลัมน์ที่อ่านได้จริง" ลดลงจริง
+1. **breakpoint ไม่เลื่อน (ตรงข้ามกับที่เคยเข้าใจ)** — Tailwind v4 นับ breakpoint
+   เป็น `rem` (`sm` = 40rem, …) แต่ media query คำนวณ `rem` จาก *initial*
+   font-size ของ browser เสมอ ไม่ใช่จากค่าที่ `html { font-size: 137.5% }` ตั้งไว้
+   (CSS Values 4 / Media Queries 4 — ยืนยันจาก build CSS จริงแล้ว) ดังนั้นที่ระดับ
+   `biggest` จอ 1440px ยังคงเป็น `2xl` และ laptop 1280×800 ยังได้ desktop layout
+   เต็มรูปแบบ ขณะที่ทุกมิติที่วัดเป็น rem *ภายใน* layout นั้นโตขึ้น 37.5% พร้อมกัน —
+   **แน่นกว่า** ที่เคยคาดไว้ ไม่ใช่หลวมกว่า
+   ค่า rem ใน property (ไม่ใช่ media query) ยัง scale ตามปกติ — เช่น sidebar
+   `16rem` (`components/ui/sidebar.tsx:28`) กลายเป็น 352px จริงที่ `biggest`
+   ส่วน `@container` (`components/ui/field.tsx:134`) คำนวณจาก computed
+   font-size ของ root จึง scale เหมือน property — เงื่อนไข `min-width: 28rem`
+   สลับ orientation ที่ container กว้าง 616px แทนที่จะเป็น 448px ที่ `biggest`
+   ผลคือครึ่งหนึ่งของระบบ responsive scale อีกครึ่งไม่ — `hooks/use-mobile.ts:4`
+   ที่ hardcode `MOBILE_BREAKPOINT = 768` เป็น px ใน JS จึงยังตรงกับ Tailwind
+   `md:` (48rem) เสมอ เพราะ media query ไม่ขยับ ถ้าโมเดลเดิมถูกต้องจริง JS กับ
+   CSS จะเพี้ยนกัน 288px ที่ระดับ `biggest`
 2. **px literal 8 จุดไม่ scale** — สำรวจแล้วทั้งหมดคือ `border-l-[3px]`, `ring-[3px]`,
    `h-[3px]` (top-loader), `rounded-[1px]`, `w-[9px]`/`h-[7px]` (ภาพประกอบ landing),
    `min-w-[150px]` (dropdown), `max-h-[300px]` (command list) — ทั้งหมดควรคงที่อยู่แล้ว

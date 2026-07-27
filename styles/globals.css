@@ -356,8 +356,14 @@
      หน่วยเป็น % ไม่ใช่ px เพื่อไม่ทับค่า default font size ที่ผู้ใช้ตั้งไว้ใน
      browser (WCAG 1.4.4 Resize Text) — คนที่ตั้งไว้ 20px ยังได้ 20px ที่ระดับ
      normal ไม่ใช่ถูกเราบังคับกลับเป็น 16
-     ทั้ง type ladder ข้างบนและ spacing/breakpoint ของ Tailwind วัดเป็น rem จึง
-     กวาดตามทั้งหมด: micro-floor 8px → 7.5–11px, body 17px → 15.9–23.4px
+     ทั้ง type ladder ข้างบนและ spacing (padding/gap/ฯลฯ) ที่วัดเป็น rem จึงกวาด
+     ตามเป็นสัดส่วนเดียว: micro-floor 8px → 7.5–11px, body 17px → 15.9–23.4px
+     แต่ breakpoint ของ Tailwind (`sm:`, `md:`, …) ไม่ขยับตาม — ตาม CSS Values 4 /
+     Media Queries 4 หน่วย `rem` ใน media query คำนวณจาก initial font-size ของ
+     browser เสมอ ไม่ใช่จากค่าที่ rule นี้ตั้ง (ยืนยันจาก build CSS จริงแล้ว) ส่วน
+     `@container` (เช่น field.tsx) คำนวณจาก computed font-size ของ root จริง จึง
+     scale ตามเหมือน property values — ครึ่งหนึ่งของระบบ responsive scale ตาม
+     อีกครึ่งไม่
      `normal` ไม่มี rule ของตัวเอง — มันคือ 100% ของ html เอง */
   html {
     font-size: 100%;

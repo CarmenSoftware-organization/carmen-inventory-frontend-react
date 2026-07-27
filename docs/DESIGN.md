@@ -105,7 +105,10 @@ typography:
   # default) ห้าระดับคือ 93.75 / 100 / 112.5 / 125 / 137.5% ทำให้ทั้ง ladder กวาด
   # ตามเป็นสัดส่วนเดียว — micro-floor 8px จริงๆ คือช่วง 7.5–11px และ body 17px คือ
   # 15.9–23.4px ตัวเลขในเอกสารนี้ยังเป็นสัญญาที่ถูกต้อง เพราะสิ่งที่การันตีคือ
-  # *สัดส่วนบน ladder* ไม่ใช่ px สัมบูรณ์บนจอผู้ใช้คนใดคนหนึ่ง
+  # *สัดส่วนบน ladder* ไม่ใช่ px สัมบูรณ์บนจอผู้ใช้คนใดคนหนึ่ง — breakpoint ของ
+  # Tailwind (`sm:`, `md:`, …) ไม่อยู่ใน scope นี้: media query คำนวณ rem จาก
+  # initial font-size ของ browser เสมอ ไม่ใช่จาก root ที่ scale แล้ว จึงไม่ขยับตาม
+  # ladder นี้ (รายละเอียดดู note ใน globals.css)
   micro-floor:
     # 8px — the absolute floor, tightest micro-grid cells only (HeroCell, the
     # DataGrid badge). Uppercase/numeric only. Utility: `text-micro-floor`
