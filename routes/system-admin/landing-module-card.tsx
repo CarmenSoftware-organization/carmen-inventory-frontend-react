@@ -42,7 +42,7 @@ export function LandingModuleCard({
           <div className="text-foreground text-micro font-bold">
             {t(`modules.${mod.key}.stat`)}
           </div>
-          <div className="text-muted-foreground mt-0.5 text-micro-eyebrow">
+          <div className="text-muted-foreground mt-0.5 text-micro-legal">
             {t(`modules.${mod.key}.meta`)}
           </div>
         </div>

@@ -221,7 +221,7 @@ export function WfStageGeneral({
                   <FieldLabel>
                     <Badge
                       variant="success"
-                      className="px-1 py-0 text-micro-eyebrow"
+                      className="px-1 py-0 text-micro-legal"
                     >
                       {t("actionApprove")}
                     </Badge>
@@ -242,7 +242,7 @@ export function WfStageGeneral({
                   <FieldLabel>
                     <Badge
                       variant="destructive"
-                      className="px-1 py-0 text-micro-eyebrow"
+                      className="px-1 py-0 text-micro-legal"
                     >
                       {t("actionReject")}
                     </Badge>
@@ -263,7 +263,7 @@ export function WfStageGeneral({
                   <FieldLabel>
                     <Badge
                       variant="warning"
-                      className="px-1 py-0 text-micro-eyebrow"
+                      className="px-1 py-0 text-micro-legal"
                     >
                       {t("actionSendBack")}
                     </Badge>

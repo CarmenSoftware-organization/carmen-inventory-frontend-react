@@ -573,7 +573,7 @@ function ModuleMatrix({
                 >
                   {t(ACTION_TKEY[a])}
                 </span>
-                <span className="text-muted-foreground/70 text-micro-eyebrow tabular-nums">
+                <span className="text-muted-foreground/70 text-micro tabular-nums">
                   {cc.on}/{cc.applicable}
                 </span>
               </button>
