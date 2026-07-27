@@ -210,7 +210,6 @@
   "common": {
     "businessUnit": "Business Unit",
     "language": "Language",
-    "fontSize": "Font Size",
     "theme": "Theme",
     "themeLight": "Light",
     "themeDark": "Dark",
