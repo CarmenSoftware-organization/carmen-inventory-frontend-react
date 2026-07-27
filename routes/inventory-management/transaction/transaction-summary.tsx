@@ -28,8 +28,8 @@ const TONE_MAP: Record<
   },
   success: {
     iconBg: "bg-success/15",
-    iconFg: "text-success",
-    valueText: "text-success",
+    iconFg: "text-success-ink",
+    valueText: "text-success-ink",
   },
   warning: {
     iconBg: "bg-warning/15",

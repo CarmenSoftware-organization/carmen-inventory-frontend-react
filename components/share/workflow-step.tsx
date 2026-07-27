@@ -53,7 +53,7 @@ export function WorkflowStep({
                   "max-w-full truncate text-micro-eyebrow leading-none tracking-wider uppercase",
                   isPrevious && "text-success-foreground/70",
                   currentIsVoided && "text-destructive font-bold",
-                  isCurrent && !currentIsVoided && "text-info font-bold",
+                  isCurrent && !currentIsVoided && "text-info-ink font-bold",
                   !isPrevious && !isCurrent && "text-muted-foreground/40",
                 )}
               >
@@ -98,7 +98,7 @@ export function WorkflowStep({
                     "text-destructive text-micro font-bold line-through",
                   isCurrent &&
                     !currentIsVoided &&
-                    "text-info text-micro font-bold",
+                    "text-info-ink text-micro font-bold",
                   !isPrevious && !isCurrent && "text-muted-foreground/50",
                 )}
               >

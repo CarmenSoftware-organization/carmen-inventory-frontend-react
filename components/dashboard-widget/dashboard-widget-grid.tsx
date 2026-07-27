@@ -612,7 +612,7 @@ function DeltaIndicator({
 
   const isUp = diff > 0;
   const Icon = isUp ? TrendingUp : TrendingDown;
-  const tone = isUp ? "text-emerald-600" : "text-rose-600";
+  const tone = isUp ? "text-positive-ink" : "text-negative-ink";
   const sign = isUp ? "+" : "";
 
   return (

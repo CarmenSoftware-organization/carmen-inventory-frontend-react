@@ -141,7 +141,7 @@ export function useTransactionTable({
           0,
         );
         if (total === 0) return "-";
-        return <span className="text-success">{total}</span>;
+        return <span className="text-success-ink">{total}</span>;
       },
       meta: {
         skeleton: columnSkeletons.text,

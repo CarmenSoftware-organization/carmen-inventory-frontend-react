@@ -15,13 +15,20 @@ colors:
   # effectively tuned for the dark canvas. `destructive` (5.08) and `primary`
   # (6.60) are the only status colours safe as light-mode text; `brand` is the
   # mirror case — fine on light (6.60), 4.28 on dark.
-  # This is why components reach for `text-amber-600` / `text-emerald-600`
-  # instead: the raw palette is DARKER than the token (amber-600 is 3.01 vs
-  # warning's 1.93). Those are not sloppiness — swapping them to the token makes
-  # contrast worse. Do not "clean them up" without fixing the tokens first.
-  # ~121 `text-warning` / `text-success` / `text-info` / `text-positive` call
-  # sites are currently below AA in light mode; the app's dense tier is 10–11px,
-  # which is small text, so the 3:1 large-text allowance does not apply.
+  # RESOLVED by splitting the roles: `--<status>-ink` is the same hue and chroma
+  # at a lightness that clears AA, and the 82 `text-*` call sites now use it.
+  # Fills keep the plain token, so chips and badges are unchanged.
+  #   text-warning-ink · text-success-ink · text-info-ink
+  #   text-positive-ink · text-negative-ink · text-brand-ink
+  # Lightness is solved against the WORST surface the text can land on: in light
+  # mode the DARKEST light surface (`--accent` 0.93), in dark mode the LIGHTEST
+  # dark one (`--accent` 0.29). Solving against the canvas alone yields inks that
+  # pass on the page and fail on every card — a first pass at these values did
+  # exactly that. lib/__tests__/status-ink-contrast.test.ts recomputes all of it
+  # from this CSS and also fails if a fill token is used as `text-*` again.
+  # This also explains why components used to reach for `text-amber-600`: the raw
+  # palette was darker than the token (amber-600 3.01 vs warning 1.93). Those
+  # were not sloppiness, and they are now on `-ink` too.
   #
   # USAGE — single accent signal (avoid "neon"): accent & semantic colors
   # (primary / destructive / success / warning) should appear ONCE per element,

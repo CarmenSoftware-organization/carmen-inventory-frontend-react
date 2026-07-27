@@ -132,7 +132,7 @@ export function UserProfile() {
         <div className="hidden text-xs leading-tight sm:grid">
           <span className="w-content truncate font-semibold">{name}</span>
           <span
-            className={`w-full truncate text-right text-micro-legal ${department ? "text-muted-foreground" : "text-warning"}`}
+            className={`w-full truncate text-right text-micro-legal ${department ? "text-muted-foreground" : "text-warning-ink"}`}
           >
             {department || t("noDepartment")}
           </span>
@@ -164,7 +164,7 @@ export function UserProfile() {
               {profile.email}
             </span>
             <span
-              className={`truncate text-micro ${department ? "text-muted-foreground" : "text-warning"}`}
+              className={`truncate text-micro ${department ? "text-muted-foreground" : "text-warning-ink"}`}
             >
               {department || t("noDepartment")}
             </span>

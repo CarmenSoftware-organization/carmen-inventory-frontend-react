@@ -228,7 +228,7 @@ export function BrowseDialog({
             >
               <AlertTriangle
                 aria-hidden="true"
-                className="text-warning mt-px size-3.5 shrink-0"
+                className="text-warning-ink mt-px size-3.5 shrink-0"
               />
               <span>
                 {t("singleCurrencyHint", { currency: activeCurrency.code })}

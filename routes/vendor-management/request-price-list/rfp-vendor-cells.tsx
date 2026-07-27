@@ -186,7 +186,7 @@ export function VendorActionsCell({
             aria-label={labels.copyUrl}
             className="text-muted-foreground hover:text-foreground rounded-lg"
           >
-            {copied ? <Check className="text-success" /> : <Copy />}
+            {copied ? <Check className="text-success-ink" /> : <Copy />}
           </Button>
           <Button
             type="button"

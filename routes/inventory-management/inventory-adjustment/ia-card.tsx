@@ -59,7 +59,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
     }
   };
 
-  const accentText = isStockIn ? "text-success" : "text-destructive";
+  const accentText = isStockIn ? "text-success-ink" : "text-destructive";
 
   return (
     <Card
@@ -81,7 +81,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
               className={cn(
                 "flex size-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
                 isStockIn
-                  ? "bg-success/10 text-success ring-success/20"
+                  ? "bg-success/10 text-success-ink ring-success/20"
                   : "bg-destructive/10 text-destructive ring-destructive/20",
               )}
               aria-hidden="true"

@@ -262,7 +262,7 @@ export default function PeReview() {
                         </span>
                         {isDone && (
                           <CheckCircle2
-                            className="text-success size-4"
+                            className="text-success-ink size-4"
                             aria-hidden="true"
                           />
                         )}

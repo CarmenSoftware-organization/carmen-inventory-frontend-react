@@ -91,6 +91,26 @@
   /* search-match highlight — was bg-yellow-200/80 inline in tree-node.tsx */
   --highlight: oklch(0.92 0.13 100 / 0.8);
   --highlight-foreground: oklch(0.28 0.06 100);
+
+  /* ── Status inks — the same hues, but as TEXT ──
+     The status tokens above are FILL colours: each has a `-foreground` for the
+     label that sits on it, and their lightness is tuned for that job. Measured
+     as `text-*` on the light canvas they land at warning 1.93 · success 1.99 ·
+     positive 3.20 · info 4.31 — all under WCAG AA's 4.5:1, and this app's dense
+     tier is 10–11px, which is small text, so the 3:1 large-text allowance does
+     not apply. (They all pass in dark mode, so the light values were in effect
+     tuned for the dark canvas only.)
+     Same hue and chroma, lightness solved so the worst surface the text can
+     land on still clears 4.6:1 — in light mode that is `--accent` (0.93), the
+     darkest light surface; in dark mode `--accent` (0.29), the lightest dark
+     one. Use these for `text-*`; keep the plain tokens for `bg-*`/`border-*`.
+     lib/__tests__/status-ink-contrast.test.ts recomputes this from the CSS. */
+  --warning-ink: oklch(0.518 0.15 75);
+  --success-ink: oklch(0.49 0.11 188.43);
+  --info-ink: oklch(0.495 0.135 230);
+  --positive-ink: oklch(0.49 0.18 145);
+  --negative-ink: oklch(0.538 0.2 24.11);
+  --brand-ink: oklch(0.518 0.1794 258.7);
 }
 
 .dark {
@@ -178,6 +198,16 @@
   /* search-match highlight — was bg-yellow-800/40 inline in tree-node.tsx */
   --highlight: oklch(0.45 0.10 100 / 0.4);
   --highlight-foreground: oklch(0.92 0.09 100);
+
+  /* ── Status inks ── see the light-mode block for why these exist.
+     `brand` is the mirror of the others: fine as light-mode text (6.60), 4.28
+     on dark — so it needs an ink here even though the light one is a formality. */
+  --warning-ink: oklch(0.67 0.15 75);
+  --success-ink: oklch(0.652 0.11 188.43);
+  --info-ink: oklch(0.655 0.135 230);
+  --positive-ink: oklch(0.647 0.18 145);
+  --negative-ink: oklch(0.69 0.2 24.11);
+  --brand-ink: oklch(0.67 0.1794 258.7);
 }
 
 @theme inline {
@@ -251,6 +281,13 @@
   --color-overlay: var(--overlay);
   --color-highlight: var(--highlight);
   --color-highlight-foreground: var(--highlight-foreground);
+  /* status inks — for text; the plain status tokens stay for fills */
+  --color-warning-ink: var(--warning-ink);
+  --color-success-ink: var(--success-ink);
+  --color-info-ink: var(--info-ink);
+  --color-positive-ink: var(--positive-ink);
+  --color-negative-ink: var(--negative-ink);
+  --color-brand-ink: var(--brand-ink);
   /* font — Geist loaded by Next.js layout */
   /* Apple-style system stack — SF Pro on Apple platforms, Inter/system fallback.
      Thai families appended: font fallback is PER-GLYPH, so Latin still resolves

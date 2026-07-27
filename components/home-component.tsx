@@ -78,7 +78,7 @@ const moreFeatures = [
     icon: Zap,
     title: "Par-level & low-stock alerts",
     desc: "SMS, email or in-app notifications when minibars, linens or kitchen supplies dip below reorder point.",
-    iconColor: "text-info",
+    iconColor: "text-info-ink",
   },
   {
     icon: Globe,
@@ -184,19 +184,19 @@ const ACTIVITY_ITEMS = [
     text: "Banquet linens restocked",
     detail: "+240 units · Floor 22",
     time: "2m ago",
-    color: "text-success",
+    color: "text-success-ink",
   },
   {
     text: "Minibar 1407 replenished",
     detail: "+85 units · Housekeeping",
     time: "15m ago",
-    color: "text-info",
+    color: "text-info-ink",
   },
   {
     text: "Kitchen supplies received",
     detail: "+120 units · Main Kitchen",
     time: "1h ago",
-    color: "text-warning",
+    color: "text-warning-ink",
   },
 ];
 
@@ -708,7 +708,7 @@ export default function HomeComponent() {
                       Overview
                     </span>
                   </div>
-                  <span className="text-success/80 text-micro-legal">
+                  <span className="text-success-ink/80 text-micro-legal">
                     ● Live
                   </span>
                 </div>
@@ -772,7 +772,7 @@ export default function HomeComponent() {
                 <p className="from-primary to-chart-3 mt-1 bg-linear-to-r bg-clip-text text-3xl font-bold tracking-tight text-transparent tabular-nums">
                   ฿284k
                 </p>
-                <p className="text-success mt-1 text-xs">
+                <p className="text-success-ink mt-1 text-xs">
                   +12.5% vs last month
                 </p>
                 <div className="mt-4 flex h-20 items-end gap-0.75">

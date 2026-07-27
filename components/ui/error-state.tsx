@@ -55,7 +55,7 @@ export function ErrorState({ message, onRetry, errorId }: ErrorStateProps) {
           <span>·</span>
           <span>{errorId}</span>
           {copied ? (
-            <Check className="text-success size-3" aria-hidden="true" />
+            <Check className="text-success-ink size-3" aria-hidden="true" />
           ) : (
             <Copy className="size-3" aria-hidden="true" />
           )}

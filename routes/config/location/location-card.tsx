@@ -66,7 +66,7 @@ export default function LocationCard({ item, index, onEdit }: LocationCardProps)
         <div className="flex items-center gap-2">
           {item.physical_count_type === "yes" ? (
             <CircleCheck
-              className="text-positive size-3 shrink-0"
+              className="text-positive-ink size-3 shrink-0"
               aria-hidden="true"
             />
           ) : (

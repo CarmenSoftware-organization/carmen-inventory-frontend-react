@@ -28,19 +28,19 @@ const badgeVariants = cva(
         // Neutral box (bg-muted) carries no hue; the color appears ONCE, as
         // the label text — a single signal instead of a tinted glowing block.
         "primary-light": "bg-muted border-none text-primary",
-        "warning-light": "bg-muted border-none text-warning",
-        "success-light": "bg-muted border-none text-success",
-        "info-light": "bg-muted border-none text-info",
+        "warning-light": "bg-muted border-none text-warning-ink",
+        "success-light": "bg-muted border-none text-success-ink",
+        "info-light": "bg-muted border-none text-info-ink",
         "destructive-light": "bg-muted border-none text-destructive",
         "invert-light": "bg-muted border-none text-foreground",
         "primary-outline":
           "bg-background border-primary/40 text-primary dark:bg-input/30",
         "warning-outline":
-          "bg-background border-warning/40 text-warning-foreground dark:bg-input/30 dark:text-warning",
+          "bg-background border-warning/40 text-warning-foreground dark:bg-input/30 dark:text-warning-ink",
         "success-outline":
-          "bg-background border-success/40 text-success-foreground dark:bg-input/30 dark:text-success",
+          "bg-background border-success/40 text-success-foreground dark:bg-input/30 dark:text-success-ink",
         "info-outline":
-          "bg-background border-info/40 text-info-foreground dark:bg-input/30 dark:text-info",
+          "bg-background border-info/40 text-info-foreground dark:bg-input/30 dark:text-info-ink",
         "destructive-outline":
           "bg-background border-destructive/40 text-destructive dark:bg-input/30",
         "invert-outline":

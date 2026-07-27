@@ -100,7 +100,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
           {actionType === "done" ? (
             <span className="text-muted-foreground inline-flex items-center gap-1 text-micro font-semibold tracking-wider uppercase">
               <CheckCircle2
-                className="text-success size-3"
+                className="text-success-ink size-3"
                 aria-hidden="true"
               />
               {actionLabel}

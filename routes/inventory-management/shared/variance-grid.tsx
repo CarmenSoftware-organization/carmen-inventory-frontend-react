@@ -104,7 +104,7 @@ export function VarianceGrid<T extends VarianceGridItem>({
                     <span
                       className={cn(
                         "text-sm font-semibold tabular-nums",
-                        variance > 0 && "text-success",
+                        variance > 0 && "text-success-ink",
                         variance < 0 && "text-destructive",
                       )}
                     >

@@ -228,7 +228,7 @@ export function usePurchaseRequestTable({
                 onClick={() => onApprove(item)}
               >
                 <CheckCircle2
-                  className="text-success size-3"
+                  className="text-success-ink size-3"
                   aria-hidden="true"
                 />
                 {tc("approve")}

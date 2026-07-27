@@ -96,7 +96,7 @@ export function useLocationTable({
       cell: ({ row }) =>
         row.original.physical_count_type === "yes" ? (
           <CircleCheck
-            className="text-positive mx-auto size-4"
+            className="text-positive-ink mx-auto size-4"
             aria-label="Yes"
           />
         ) : (

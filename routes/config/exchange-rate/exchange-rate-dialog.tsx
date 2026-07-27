@@ -197,7 +197,7 @@ function EditForm({
                 !hasChange
                   ? "text-muted-foreground"
                   : isIncrease
-                    ? "text-success"
+                    ? "text-success-ink"
                     : "text-destructive"
               }`}
             >

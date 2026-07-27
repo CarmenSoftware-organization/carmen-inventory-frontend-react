@@ -127,7 +127,7 @@ const PriceCell = memo(function PriceCell({
   });
   const price = Number(raw) || 0;
   return (
-    <span className="block text-right tabular-nums text-micro font-semibold text-positive">
+    <span className="block text-right tabular-nums text-micro font-semibold text-positive-ink">
       {price.toFixed(2)}
     </span>
   );

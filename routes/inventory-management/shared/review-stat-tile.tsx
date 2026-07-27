@@ -15,8 +15,8 @@ const STAT_TONE: Record<
   },
   success: {
     iconBg: "bg-success/15",
-    iconFg: "text-success",
-    valueText: "text-success",
+    iconFg: "text-success-ink",
+    valueText: "text-success-ink",
     ring: "border-border/60",
   },
   warning: {

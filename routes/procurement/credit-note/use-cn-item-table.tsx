@@ -231,7 +231,7 @@ function QtyCell({
         )}
       </InputSuffixField>
       {overReturn && (
-        <p className="mt-0.5 text-right text-micro text-amber-600 dark:text-amber-500">
+        <p className="mt-0.5 text-right text-micro text-warning-ink">
           {t("overReturnWarning", { received: grnReceivedQty })}
         </p>
       )}

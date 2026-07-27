@@ -91,7 +91,7 @@ export function IaFormHero({
       className={cn(
         "ring-background flex size-14 shrink-0 items-center justify-center rounded-2xl ring-4 ring-inset",
         isStockIn
-          ? "bg-success/10 text-success ring-success/20"
+          ? "bg-success/10 text-success-ink ring-success/20"
           : "bg-destructive/10 text-destructive ring-destructive/20",
       )}
       aria-hidden="true"
@@ -112,7 +112,7 @@ export function IaFormHero({
       <span
         className={cn(
           "font-semibold tracking-widest uppercase",
-          isStockIn ? "text-success" : "text-destructive",
+          isStockIn ? "text-success-ink" : "text-destructive",
         )}
       >
         {typeLabel}
