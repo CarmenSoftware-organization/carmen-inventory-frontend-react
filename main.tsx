@@ -3,6 +3,15 @@ import "./styles/badge-status.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router/dom";
+import { applyScale, readStoredScale } from "@/lib/font-scale";
+
+// เรียกซ้ำที่นี่แม้ index.html จะมี inline script ทำงานนี้อยู่ก่อนแล้ว (ตั้งใจ
+// ให้ซ้ำซ้อน) — inline script เป็นจุดเดียวที่ apply scale ก่อน React mount ถ้าวันหนึ่ง
+// มี CSP `script-src` แบบไม่มี 'unsafe-inline' (ไม่มีตอนนี้) inline script จะถูกบล็อก
+// เงียบๆ แล้ว <html> ไม่ได้ class เลย ฟอนต์กลับเป็น normal ทุกครั้งที่โหลด ทั้งที่เมนู
+// ยังโชว์ค่าที่ผู้ใช้เลือกไว้ (อ่านจาก localStorage ไม่ใช่ DOM) บรรทัดนี้จึงทำให้
+// inline script เป็นแค่ FOUC optimisation ไม่ใช่จุดเดียวที่พึ่งได้
+applyScale(readStoredScale());
 
 const PRELOAD_RELOAD_KEY = "carmen.preload-reload";
 
