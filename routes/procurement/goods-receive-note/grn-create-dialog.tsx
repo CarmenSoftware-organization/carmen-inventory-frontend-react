@@ -37,7 +37,7 @@ export function GrnCreateDialog({
             onClick={() => onSelect("manual")}
             className="group hover:border-warning/40 bg-card focus-visible:ring-warning/40 flex cursor-pointer flex-col items-start gap-3 rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
           >
-            <FileText className="text-warning size-5" />
+            <FileText className="text-warning-ink size-5" />
             <div className="relative space-y-0.5">
               <h3 className="text-sm font-semibold">{t("manual")}</h3>
               <p className="text-muted-foreground text-micro font-semibold">
@@ -54,7 +54,7 @@ export function GrnCreateDialog({
             onClick={() => onSelect("purchase_order")}
             className="group hover:border-info/40 bg-card focus-visible:ring-info/40 relative flex cursor-pointer flex-col items-start gap-3 rounded-xl border p-4 text-left transition-colors duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2"
           >
-            <ClipboardList className="text-info size-5" />
+            <ClipboardList className="text-info-ink size-5" />
             <div className="relative space-y-0.5">
               <h3 className="text-sm font-semibold">{t("purchaseOrder")}</h3>
               <p className="text-muted-foreground text-micro font-semibold">

@@ -304,7 +304,7 @@ export function PreferredCell({
   "use no memo";
   if (isView)
     return detailRef?.is_preferred ? (
-      <Crown className="text-warning mx-auto size-3.5" aria-label="preferred" />
+      <Crown className="text-warning-ink mx-auto size-3.5" aria-label="preferred" />
     ) : (
       <span className="text-muted-foreground/50">—</span>
     );

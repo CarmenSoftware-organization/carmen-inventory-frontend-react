@@ -388,7 +388,7 @@ function PreviewStat({
   // color appears ONCE — on the number — never clustered across box/border/text.
   const toneText: Record<string, string> = {
     primary: "text-primary",
-    success: "text-success",
+    success: "text-success-ink",
     warning: "text-warning-foreground",
     muted: "text-foreground",
   };

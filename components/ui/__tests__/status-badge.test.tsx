@@ -26,7 +26,7 @@ describe("StatusBadge", () => {
     const { container } = render(<StatusBadge active />);
     expect(container.querySelector(".bg-secondary")).not.toBeNull();
     // label ไม่ถูกย้อมเขียว
-    expect(container.querySelector(".text-success")).toBeNull();
+    expect(container.querySelector(".text-success-ink")).toBeNull();
   });
 
   it("forwards extra className (e.g. layout classes)", () => {

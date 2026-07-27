@@ -434,7 +434,7 @@ export default function ExchangeRateComponent() {
                             noChange
                               ? "text-muted-foreground"
                               : isIncrease
-                                ? "text-success"
+                                ? "text-success-ink"
                                 : "text-destructive"
                           }`}
                         >

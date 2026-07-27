@@ -87,7 +87,7 @@ export function DepartmentsSection({
                     className="border-border/60 bg-muted/20 flex items-center gap-2 rounded-lg border p-2 text-xs"
                   >
                     <Crown
-                      className="text-warning size-3.5 shrink-0"
+                      className="text-warning-ink size-3.5 shrink-0"
                       aria-hidden="true"
                     />
                     <span className="text-micro font-semibold">

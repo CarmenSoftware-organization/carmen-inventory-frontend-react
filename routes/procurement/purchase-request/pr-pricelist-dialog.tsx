@@ -84,7 +84,7 @@ const buildColumns = (
               variant={'ghost'}
               className="gap-1 text-micro-legal"
             >
-              <Crown className="size-3 text-warning" />
+              <Crown className="size-3 text-warning-ink" />
               {/*{t("preferred")}*/}
             </Badge>
           )}

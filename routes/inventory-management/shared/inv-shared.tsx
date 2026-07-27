@@ -14,12 +14,12 @@ type KpiTone = "primary" | "info" | "warning" | "success";
 // appears once — as the icon glyph (single signal), never as a tinted box.
 const KPI_TONE_MAP: Record<KpiTone, { iconBg: string; text: string }> = {
   primary: { iconBg: "bg-muted text-primary", text: "text-primary" },
-  info: { iconBg: "bg-muted text-info", text: "text-info" },
+  info: { iconBg: "bg-muted text-info-ink", text: "text-info-ink" },
   warning: {
-    iconBg: "bg-muted text-warning",
+    iconBg: "bg-muted text-warning-ink",
     text: "text-warning-foreground",
   },
-  success: { iconBg: "bg-muted text-success", text: "text-success" },
+  success: { iconBg: "bg-muted text-success-ink", text: "text-success-ink" },
 };
 
 export function KpiTile({

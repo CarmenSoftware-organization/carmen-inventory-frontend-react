@@ -268,7 +268,7 @@ const OverReceiptWarning = memo(function OverReceiptWarning({
   if (!comparable || ordered <= 0 || received <= ordered) return null;
 
   return (
-    <p className="mt-0.5 text-right text-micro text-amber-600 dark:text-amber-500">
+    <p className="mt-0.5 text-right text-micro text-warning-ink">
       {t("overReceiptWarning", { ordered })}
     </p>
   );

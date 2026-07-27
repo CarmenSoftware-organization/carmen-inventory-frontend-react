@@ -81,7 +81,7 @@ export function PLProductGroupedView({
                     <span className="flex items-center gap-1.5 text-xs tabular-nums">
                       {tier.is_preferred && (
                         <Crown
-                          className="text-warning size-3 shrink-0"
+                          className="text-warning-ink size-3 shrink-0"
                           aria-label="preferred"
                         />
                       )}

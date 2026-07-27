@@ -149,7 +149,7 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
                   <p className="text-muted-foreground text-micro-legal font-semibold tracking-wider uppercase">
                     {tfl("total")}
                   </p>
-                  <p className="text-info text-lg leading-tight font-semibold tabular-nums">
+                  <p className="text-info-ink text-lg leading-tight font-semibold tabular-nums">
                     {totalQty.toLocaleString()}
                   </p>
                   <p className="text-muted-foreground text-micro-legal">

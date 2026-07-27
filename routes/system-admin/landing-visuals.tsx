@@ -451,7 +451,7 @@ function EmailViz() {
           <span className="text-foreground text-micro-eyebrow font-semibold">
             mail.aureliabay.com
           </span>
-          <span className="text-positive inline-flex items-center gap-1 text-micro-floor font-semibold">
+          <span className="text-positive-ink inline-flex items-center gap-1 text-micro-floor font-semibold">
             <span className="bg-positive inline-block size-1.5 rounded-full" />{" "}
             Connected
           </span>
@@ -637,7 +637,7 @@ function QueryViz() {
             <span className="font-bold" style={{ color: ACCENT }}>
               =
             </span>{" "}
-            <span className="text-positive">{`'2026-05'`}</span>
+            <span className="text-positive-ink">{`'2026-05'`}</span>
           </div>
           <div>
             <span className="font-bold" style={{ color: ACCENT }}>

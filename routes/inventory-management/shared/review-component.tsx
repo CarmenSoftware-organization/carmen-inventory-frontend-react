@@ -123,7 +123,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
 
         <section className="space-y-3">
           <div className="flex items-center gap-2 px-1">
-            <AlertTriangle className="text-warning size-4" aria-hidden="true" />
+            <AlertTriangle className="text-warning-ink size-4" aria-hidden="true" />
             <h2 className="text-foreground text-sm font-semibold tracking-tight">
               {t("varianceDetails")}
             </h2>
@@ -134,7 +134,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
 
           {variances === 0 ? (
             <div className="border-success/30 bg-success/5 flex items-center justify-center gap-2 rounded-xl border border-dashed py-8">
-              <CheckCircle2 className="text-success size-4" />
+              <CheckCircle2 className="text-success-ink size-4" />
               <span className="text-foreground/80 text-xs">
                 {t("noVariances")}
               </span>

@@ -29,9 +29,9 @@ export function WarningDialog({
     <AlertDialog open={open}>
       <AlertDialogContent size="sm">
         <AlertDialogHeader>
-          <div className="text-warning flex items-center gap-2">
+          <div className="text-warning-ink flex items-center gap-2">
             <AlertTriangle className="size-5" aria-hidden="true" />
-            <AlertDialogTitle className="text-warning">
+            <AlertDialogTitle className="text-warning-ink">
               {title}
             </AlertDialogTitle>
           </div>

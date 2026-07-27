@@ -72,7 +72,7 @@ const TONE: Record<
   },
   success: {
     iconBg: "bg-muted",
-    iconColor: "text-success",
+    iconColor: "text-success-ink",
     icon: CheckCircle2,
     titleColor: "text-foreground",
   },
@@ -84,13 +84,13 @@ const TONE: Record<
   },
   warning: {
     iconBg: "bg-muted",
-    iconColor: "text-warning",
+    iconColor: "text-warning-ink",
     icon: AlertTriangle,
-    titleColor: "text-warning",
+    titleColor: "text-warning-ink",
   },
   info: {
     iconBg: "bg-muted",
-    iconColor: "text-info",
+    iconColor: "text-info-ink",
     icon: Info,
     titleColor: "text-foreground",
   },
