@@ -62,10 +62,21 @@ function InputSuffixField({
       <div
         role="group"
         data-slot="input-suffix-field"
+        // ตัวช่วยเลื่อนหน้าจอไปหาช่องที่กรอกผิด (`scrollToFirstInvalidField`) มองหา
+        // `[aria-invalid="true"], [data-invalid="true"]` — กล่องนี้เป็น <div> จะใส่
+        // aria-invalid ไม่ได้ และ control ข้างในบางตัวก็ไม่ได้รับ error ไปด้วย
+        // (เช่นช่องภาษี ที่ error อยู่ที่ตัวเลือกโปรไฟล์แต่กล่องเป็นคนวาดกรอบแดง)
+        // ไม่มีตัวนี้ = กรอบแดงขึ้นแต่หน้าจอไม่เลื่อนไปหา หาไม่เจอว่าติดตรงไหน
+        data-invalid={error ? "true" : undefined}
         className={cn(
           "bg-background flex h-8 items-center overflow-hidden rounded-md border transition-[color,box-shadow]",
-          "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
-          error ? "border-destructive" : "border-input",
+          "focus-within:ring-[3px]",
+          // กรอบแดงต้องชนะ focus — คลิกเข้าไปแก้แล้วกรอบหายกลายเป็นน้ำเงิน ทำให้
+          // ช่องที่ยังกรอกไม่ครบดูเหมือนแก้เสร็จแล้วทั้งที่ยังไม่ได้เลือกอะไรเลย
+          // แดงหายก็ต่อเมื่อ error หายจริง (เลือกค่าแล้ว) ไม่ใช่แค่เอาเมาส์ไปคลิก
+          error
+            ? "border-destructive focus-within:border-destructive focus-within:ring-destructive/40"
+            : "border-input focus-within:border-ring focus-within:ring-ring/50",
           disabled && "bg-muted/60 opacity-70",
           className,
         )}
