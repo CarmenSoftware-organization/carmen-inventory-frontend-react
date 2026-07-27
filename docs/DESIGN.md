@@ -501,7 +501,19 @@ Store and shop surfaces retain the same chassis but switch modes. The product co
 - **Weight 300 is real and rare.** Used deliberately on a handful of large-size reads (`{typography.button-large}` at 18px/300 and `{typography.lead-airy}` at 24px/300). It's not an accident — it's a light-atmosphere cue reserved for moments where the content should feel airy.
 - **Weight 600, not 700, for headlines.** Apple's headlines sit at weight 600. Weight 700 is used sparingly for `{typography.tagline}` (21px) when a touch more assertion is needed.
 - **Line-height is context-specific.** Display sizes use 1.07–1.19 (tight). Body uses 1.47. Utility link stacks in the footer/store use an unusually relaxed 2.41 (`{typography.dense-link}`). The 2.41 is not a bug — it's how the footer's dense link columns breathe.
-- **Weight 500 is deliberately absent.** The ladder is 300 / 400 / 600 / 700. Mid-weight readings always use 600.
+- **Weight 500 is the data-value tier (Carmen deviation).** Apple's ladder is 300 / 400 / 600 / 700 with 500 deliberately absent, because a marketing page has no dense data tables — the same reason its size ladder stopped at 12px. Carmen's ladder is **300 / 400 / 500 / 600 / 700**.
+
+  500 has exactly one job: **this is the value, as distinct from its label or its qualifier.** It is already load-bearing — `FieldPlainText` (`components/ui/field.tsx`) bakes it into its base classes and is used ~140×, plus 38 inline sites, all doing the same thing:
+
+  | pattern | example |
+  |---|---|
+  | amount + currency code | `<span class="font-medium tabular-nums">฿1,200<span class="font-normal">THB</span></span>` |
+  | name + code beneath | product / vendor / location name at 500, its code at 400 |
+  | label → value pair | label `text-muted-foreground`, value 500 |
+  | table header `<th>` | `px-3 py-2 font-medium` |
+  | selected state | `checked ? "font-medium" : "text-foreground/90"` |
+
+  Do not use 500 for headings or for running text — that is still 600 and 400. Reach for it when a value has to out-rank something adjacent without shouting; 600 in a dense row reads as a heading and flattens the scan.
 
 ### Note on Font Substitutes
 SF Pro is Apple's proprietary system font. When building off-system:
@@ -642,7 +654,7 @@ Error and validation states were not surfaced in the analyzed pages.
 - Don't introduce a second accent color; every "click me" signal is `{colors.primary}` (Action Blue).
 - Don't add shadows to cards, buttons, or text — shadow is reserved for product imagery.
 - Don't use gradients as decorative backgrounds; atmosphere comes from photography.
-- Don't set body copy at weight 500 — Apple's ladder is 300 / 400 / 600 / 700, with 500 deliberately absent. Body is always 400; strong inline is 600; display is 600.
+- Don't set body copy, headings, or display type at weight 500 — body is always 400, strong inline is 600, display is 600. In Carmen 500 is not absent (Apple's ladder omits it), but it is narrow: it marks a **data value** against its label or qualifier, and nothing else. See the weight principle under Typography.
 - Don't round full-bleed tiles — tiles are rectangular and edge-to-edge; the color change is the divider.
 - Don't tighten line-height below 1.47 for body copy — the editorial leading is part of the brand.
 - Don't mix radii grammars — use `{rounded.sm}` for compact utility, `{rounded.lg}` for utility cards, `{rounded.pill}` for pills, and nothing in between (except the rare `{rounded.md}` Pearl Button).
