@@ -75,7 +75,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -85,7 +85,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
         </div>
         <div className="text-muted-foreground flex items-center gap-1">
           <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
-          <span className="text-[0.6875rem] tabular-nums">
+          <span className="text-micro tabular-nums">
             {formatDate(getLogCreatedAt(log), `${dateFormat} HH:mm`)}
           </span>
         </div>
@@ -100,7 +100,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
           />
           <span className="truncate text-xs font-semibold">{actorName}</span>
           {log.actor_username && actorName !== log.actor_username && (
-            <span className="text-muted-foreground truncate text-[0.6875rem]">
+            <span className="text-muted-foreground truncate text-micro">
               ({log.actor_username})
             </span>
           )}
@@ -117,7 +117,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
         </div>
 
         {log.description && (
-          <p className="text-muted-foreground line-clamp-2 pl-[1.125rem] text-[0.6875rem]">
+          <p className="text-muted-foreground line-clamp-2 pl-[1.125rem] text-micro">
             {log.description}
           </p>
         )}
@@ -130,7 +130,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <span className="text-muted-foreground text-[0.6875rem]">
+          <span className="text-muted-foreground text-micro">
             {log.ip_address}
           </span>
         </div>

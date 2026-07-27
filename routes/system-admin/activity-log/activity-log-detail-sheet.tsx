@@ -71,7 +71,7 @@ function InfoRow({
         aria-hidden="true"
       />
       <div className="min-w-0 flex-1">
-        <p className="text-muted-foreground text-[0.6875rem]">{label}</p>
+        <p className="text-muted-foreground text-micro">{label}</p>
         <div className="text-xs">{children}</div>
       </div>
     </div>
@@ -89,7 +89,7 @@ function JsonBlock({ data }: { data: Record<string, unknown> | null }) {
   if (!data || Object.keys(data).length === 0)
     return <span className="text-muted-foreground">—</span>;
   return (
-    <pre className="bg-muted/50 max-h-60 overflow-x-auto rounded-md border p-2 text-[0.625rem] leading-relaxed">
+    <pre className="bg-muted/50 max-h-60 overflow-x-auto rounded-md border p-2 text-micro-legal leading-relaxed">
       {JSON.stringify(data, null, 2)}
     </pre>
   );
@@ -191,7 +191,7 @@ export function ActivityLogDetailSheet({
                   </InfoRow>
 
                   <InfoRow icon={Hash} label={t("entityId")}>
-                    <span className="text-[0.6875rem] break-all">
+                    <span className="text-micro break-all">
                       {log.entity_id || "—"}
                     </span>
                   </InfoRow>
@@ -202,7 +202,7 @@ export function ActivityLogDetailSheet({
 
                   {log.user_agent && (
                     <InfoRow icon={Monitor} label={t("userAgent")}>
-                      <span className="text-muted-foreground text-[0.6875rem] break-all">
+                      <span className="text-muted-foreground text-micro break-all">
                         {log.user_agent}
                       </span>
                     </InfoRow>
@@ -218,7 +218,7 @@ export function ActivityLogDetailSheet({
 
                     {hasOldData && (
                       <div className="space-y-1">
-                        <p className="text-muted-foreground text-[0.6875rem] font-semibold">
+                        <p className="text-muted-foreground text-micro font-semibold">
                           {t("oldData")}
                         </p>
                         <JsonBlock data={log.old_data} />
@@ -227,7 +227,7 @@ export function ActivityLogDetailSheet({
 
                     {hasNewData && (
                       <div className="space-y-1">
-                        <p className="text-muted-foreground text-[0.6875rem] font-semibold">
+                        <p className="text-muted-foreground text-micro font-semibold">
                           {t("newData")}
                         </p>
                         <JsonBlock data={log.new_data} />

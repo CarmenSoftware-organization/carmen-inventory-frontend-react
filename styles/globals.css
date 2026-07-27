@@ -88,6 +88,9 @@
   --scrollbar-thumb: oklch(0.82 0 0 / 0.6);
   --selected: oklch(0.4714 0.1794 258.7 / 0.08);
   --overlay: oklch(0.16 0 0 / 0.5);
+  /* search-match highlight — was bg-yellow-200/80 inline in tree-node.tsx */
+  --highlight: oklch(0.92 0.13 100 / 0.8);
+  --highlight-foreground: oklch(0.28 0.06 100);
 }
 
 .dark {
@@ -172,6 +175,9 @@
   --scrollbar-thumb: oklch(0.44 0 0 / 0.6);
   --selected: oklch(0.5852 0.1706 253.27 / 0.16);
   --overlay: oklch(0 0 0 / 0.7);
+  /* search-match highlight — was bg-yellow-800/40 inline in tree-node.tsx */
+  --highlight: oklch(0.45 0.10 100 / 0.4);
+  --highlight-foreground: oklch(0.92 0.09 100);
 }
 
 @theme inline {
@@ -243,10 +249,52 @@
   --color-scrollbar-thumb: var(--scrollbar-thumb);
   --color-selected: var(--selected);
   --color-overlay: var(--overlay);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
   /* font — Geist loaded by Next.js layout */
-  /* Apple-style system stack — SF Pro on Apple platforms, Inter/system fallback */
-  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
+  /* Apple-style system stack — SF Pro on Apple platforms, Inter/system fallback.
+     Thai families appended: font fallback is PER-GLYPH, so Latin still resolves
+     from SF Pro/Inter while Thai glyphs (absent there) fall to the first Thai
+     face available. Without these the Thai UI renders in whatever the OS picks
+     first — Thonburi on macOS, Leelawadee UI on Windows, Noto on Android —
+     three different faces with three different vertical metrics. */
+  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "Inter", "Segoe UI", Roboto,
+    "Sarabun", "Noto Sans Thai", "IBM Plex Sans Thai", "Leelawadee UI", "Thonburi", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ── Dense-ERP type ladder — implements the `typography` block of docs/DESIGN.md ──
+     That ladder was documented in prose but never existed as CSS, so dense
+     call-sites hardcode literals instead: text-[0.625rem] ×249, text-[0.6875rem]
+     ×241, text-[0.5625rem] ×80, text-[0.5rem] ×22, text-[10px] ×11 (~635 total,
+     in near-duplicate values — 10px is spelled two ways). The impeccable
+     `design-system-font-size` hook enforces DESIGN.md, so until these tokens
+     exist every dense component is forced to violate it.
+     Names match DESIGN.md exactly — one vocabulary across doc, hook and code.
+
+     LINE-HEIGHT DEVIATION: DESIGN.md sets 1.0 on this tier, inherited from an
+     analysis of Apple's Latin-only marketing pages. Thai stacks two levels of
+     diacritics above the baseline (สระบน + วรรณยุกต์), which clip at 1.0. The
+     tiers that carry Thai sentence text use 1.35; micro-eyebrow keeps 1.0
+     because it is uppercase — a case Thai does not have. */
+  /* A size token sets SIZE and a safe default leading — never weight, never
+     case. DESIGN.md describes micro-eyebrow as "600 + wide tracking uppercase",
+     but baking font-weight into a text-* utility makes it silently restyle any
+     call-site that did not already say font-semibold (32 of 102 in the app), and
+     Tailwind's own text-* utilities never do this. Weight/tracking/case stay
+     explicit at the call-site; the token only guarantees the step is on-ladder. */
+  --text-micro-floor: 0.5rem;         /* 8px — tightest micro-grid cells only */
+  --text-micro-floor--line-height: 1.2;
+  --text-micro-eyebrow: 0.5625rem;    /* 9px — uppercase badge/chip eyebrows */
+  --text-micro-eyebrow--line-height: 1.2;
+  --text-micro-legal: 0.625rem;       /* 10px — inline meta, timestamps, captions */
+  --text-micro-legal--line-height: 1.35;
+  --text-micro-legal--letter-spacing: -0.08px;
+  --text-micro: 0.6875rem;            /* 11px — count chips, tabular numbers */
+  --text-micro--line-height: 1.35;
+  --text-micro--letter-spacing: -0.075px;
+  --text-fine-print: 0.75rem;         /* 12px — dense body; same size as text-xs */
+  --text-fine-print--line-height: 1.4;
+  --text-fine-print--letter-spacing: -0.12px;
   /* radius */
   --radius-sm: calc(var(--radius) - 0.25rem);
   --radius-md: calc(var(--radius) - 0.125rem);
@@ -369,9 +417,12 @@
   background: var(--background);
 }
 
-/* Badge inside DataGrid table: compact size */
+/* Badge inside DataGrid table: compact size.
+   8px is the sanctioned micro-grid floor from docs/DESIGN.md (`micro-eyebrow`
+   "compresses to 8px in the tightest micro-grid cells") — now referenced as a
+   token instead of a literal. Holds counts/short codes, so line-height 1 stays. */
 [data-slot="data-grid-table"] [data-slot="badge"] {
-  font-size: 0.5rem;
+  font-size: var(--text-micro-floor);
   line-height: 1;
   height: 0.875rem;
   min-width: 0.875rem;

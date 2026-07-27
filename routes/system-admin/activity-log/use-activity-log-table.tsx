@@ -79,7 +79,7 @@ export function useActivityLogTable({
         return (
           <div className="leading-tight tabular-nums">
             <p className="text-xs">{date}</p>
-            <p className="text-muted-foreground text-[0.6875rem]">{time}</p>
+            <p className="text-muted-foreground text-micro">{time}</p>
           </div>
         );
       },
@@ -127,7 +127,7 @@ export function useActivityLogTable({
           <div className="leading-tight">
             <p className="text-xs font-semibold">{fullName || "—"}</p>
             {username && fullName !== username && (
-              <p className="text-muted-foreground text-[0.6875rem]">
+              <p className="text-muted-foreground text-micro">
                 {username}
               </p>
             )}
@@ -189,7 +189,7 @@ export function useActivityLogTable({
       cell: ({ row }) => {
         const id: string = row.getValue("entity_id") ?? "";
         return (
-          <span className="text-muted-foreground block max-w-28 truncate text-[0.6875rem]">
+          <span className="text-muted-foreground block max-w-28 truncate text-micro">
             {id ? `${id.slice(0, 8)}…` : "—"}
           </span>
         );
@@ -203,7 +203,7 @@ export function useActivityLogTable({
         <DataGridColumnHeader column={column} title={t("ipAddress")} />
       ),
       cell: ({ row }) => (
-        <span className="text-muted-foreground text-[0.6875rem]">
+        <span className="text-muted-foreground text-micro">
           {row.getValue("ip_address") || "—"}
         </span>
       ),

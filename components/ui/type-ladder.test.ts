@@ -15,10 +15,19 @@ const ROOT = join(import.meta.dirname, "../..");
 
 /**
  * The one sanctioned sub-10px tier: `{typography.micro-eyebrow}` is 9px and
- * "compresses to 8px in the tightest micro-grid cells" — same ladder, so both
- * sizes want weight 600.
+ * `{typography.micro-floor}` is 8px — same ladder, so both sizes want weight 600.
+ *
+ * Two spellings, because the tier is mid-migration: the arbitrary literals this
+ * guard was written against (`text-[0.5625rem]` / `text-[0.5rem]`) are being
+ * replaced by the `text-micro-eyebrow` / `text-micro-floor` utilities now that
+ * the ladder exists in CSS. Matching only the literals would make this guard
+ * pass vacuously for every migrated file — green, and blind. Keep BOTH arms
+ * until the last literal is gone, then drop the first.
+ *
+ * Deliberately does not include a bare `text-micro` arm: that is the 11px tier,
+ * and as a prefix of `text-micro-eyebrow` it would also blur the two together.
  */
-const MICRO_EYEBROW = String.raw`text-\[0\.5(?:625)?rem\]`;
+const MICRO_EYEBROW = String.raw`(?:text-\[0\.5(?:625)?rem\]|text-micro-eyebrow|text-micro-floor)`;
 
 function tsxFiles(dir: string): string[] {
   return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => {
@@ -56,12 +65,36 @@ describe("the 9px micro tier stays at weight 600", () => {
     expect(offenders()).toEqual(KNOWN_DEAD);
   });
 
-  it("still finds the pattern it claims to guard", () => {
+  it("still finds the pattern it claims to guard, in both spellings", () => {
     // guards the regex itself: if it silently stopped matching, the test above
-    // would pass for the wrong reason
-    const probe = `text-[0.5625rem] font-bold tracking-widest uppercase`;
+    // would pass for the wrong reason. Both arms are probed — covering only the
+    // literal is how this guard would go blind as the migration proceeds.
+    const probes = [
+      `text-[0.5625rem] font-bold tracking-widest uppercase`,
+      `text-[0.5rem] font-bold tracking-widest uppercase`,
+      `text-micro-eyebrow font-bold tracking-widest uppercase`,
+      `text-micro-floor font-bold tracking-widest uppercase`,
+    ];
+    for (const probe of probes) {
+      expect(
+        new RegExp(`${MICRO_EYEBROW}[^"'\`]*font-bold`).test(probe),
+        `should flag: ${probe}`,
+      ).toBe(true);
+    }
+  });
+
+  it("does not confuse the 11px tier for the 9px one", () => {
+    // `text-micro` is a prefix of `text-micro-eyebrow`; a sloppy arm would drag
+    // the whole 11px tier (55 sites in system-admin alone) into this guard.
     expect(
-      new RegExp(`${MICRO_EYEBROW}[^"'\`]*font-bold`).test(probe),
-    ).toBe(true);
+      new RegExp(`${MICRO_EYEBROW}[^"'\`]*font-bold`).test(
+        `text-micro font-bold tabular-nums`,
+      ),
+    ).toBe(false);
+    expect(
+      new RegExp(`${MICRO_EYEBROW}[^"'\`]*font-bold`).test(
+        `text-micro-legal font-bold`,
+      ),
+    ).toBe(false);
   });
 });

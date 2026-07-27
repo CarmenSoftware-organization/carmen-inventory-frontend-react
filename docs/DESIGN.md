@@ -33,6 +33,10 @@ colors:
   info: "#007eb0"            # Azure — semantic info/comment, distinct from primary blue
   warning: "#efa831"
   positive: "#23a136"
+  highlight: "#f5e49c"          # search-match background (tree/table filter hits).
+                                # Was inline bg-yellow-200/80 — the only raw-palette
+                                # colour with no semantic home. Not a status colour;
+                                # never use it to mean warning.
   # ── Dark mode (Supabase-style neutral) ──
   dark-primary: "#3894f7"       # Aquatic — brighter on dark so `text-primary` reads
                                 # on the canvas (5.79:1). One token serves both the
@@ -59,6 +63,7 @@ colors:
   dark-info: "#0aa0d2"          # Azure (brighter on dark) — distinct from dark-primary
   dark-warning: "#f5b75b"
   dark-positive: "#68cb6e"
+  dark-highlight: "#6b5a1f"     # search-match background on dark
 
 typography:
   hero-display:
@@ -161,8 +166,16 @@ typography:
   # DESIGN.md's ladder is derived from Apple MARKETING pages, which carry no
   # dense data chips — so it stops at fine-print (12px) / micro-legal (10px).
   # The Carmen ERP needs a sub-fine-print tier for badge eyebrows, count chips,
-  # inline meta and dense tabular numbers. Used ~382× across the app; these are
-  # the live `text-[0.6875rem]` / `text-[0.5625rem]` / `text-[0.5rem]` values.
+  # inline meta and dense tabular numbers.
+  #
+  # IMPLEMENTED IN CSS as of the type-ladder pass — see styles/globals.css.
+  # Until then this tier existed only as prose here, so ~635 call-sites wrote
+  # literals instead (text-[0.625rem] ×249 · text-[0.6875rem] ×241 ·
+  # text-[0.5625rem] ×80 · text-[0.5rem] ×22 · text-[10px] ×11 — note 10px was
+  # spelled two ways). The impeccable `design-system-font-size` hook enforces
+  # THIS file, so a ladder with no tokens forced every dense component to
+  # violate it. Each tier below is now a Tailwind utility; migrate literals to
+  # the utility rather than adding new arbitrary values.
   micro:
     # 11px — workhorse dense size: count chips, inline meta, tabular numbers
     # (pair with `tabular-nums`; weight 600 for numbers, 400 for labels).
@@ -172,11 +185,24 @@ typography:
     lineHeight: 1.0
     letterSpacing: -0.075px
   micro-eyebrow:
-    # 9px uppercase caps for badge/chip eyebrows; compresses to 8px in the
-    # tightest micro-grid cells (e.g. HeroCell). Wide tracking + 600 weight
+    # 9px uppercase caps for badge/chip eyebrows. Wide tracking + 600 weight
     # keep tiny caps legible — the one place sub-10px type is sanctioned.
+    # Utility: `text-micro-eyebrow`
     fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
     fontSize: 9px
+    fontWeight: 600
+    lineHeight: 1.0
+    letterSpacing: 0.04em
+    textTransform: uppercase
+  micro-floor:
+    # 8px — the absolute floor, for the tightest micro-grid cells only (e.g.
+    # HeroCell, the DataGrid badge). Was an unnamed "compresses to 8px" aside
+    # inside micro-eyebrow; promoted to its own step because it is a real,
+    # referenced size (styles/globals.css badge rule) and an unnamed size is
+    # exactly how the 635 literals started. Uppercase/numeric only.
+    # Utility: `text-micro-floor`
+    fontFamily: "SF Pro Text, system-ui, -apple-system, sans-serif"
+    fontSize: 8px
     fontWeight: 600
     lineHeight: 1.0
     letterSpacing: 0.04em
@@ -435,6 +461,19 @@ Store and shop surfaces retain the same chassis but switch modes. The product co
 - **Negative letter-spacing at display sizes.** Every headline at 17px and up carries a slight tracking tighten (`-0.12 → -0.374px`). This produces the iconic "Apple tight" headline cadence. Never used at 12px or below.
 - **Body copy at 17px, not 16px.** Apple breaks the SaaS convention and runs paragraph text at 17px. The extra pixel gives the page an unmistakable "reading, not scanning" pace.
 - **Dense-ERP micro tier — the one sanctioned sub-10px exception.** This analysis was derived from Apple's marketing surfaces, which never render dense data chips, so the public ladder stops at fine-print (12px) / micro-legal (10px). The Carmen ERP genuinely needs smaller: `{typography.micro}` (11px) for count chips / inline meta / tabular numbers, and `{typography.micro-eyebrow}` (9px, 8px floor) for uppercase badge eyebrows. These are intentional and used ~382× app-wide. Sub-10px type is allowed **only** for `micro-eyebrow` uppercase caps (the 600 weight + wide tracking keep them legible) — never for sentence-case body or reading copy. Do not "snap" these to 10/12px; that would coarsen the entire dense-data layer.
+- **Use the utility, not a literal.** Every tier below is a real Tailwind utility now. Reach for the name; a new `text-[…]` arbitrary value is a design-system bug, not a shortcut.
+- **A size token sets size, not weight or case.** The `fontWeight: 600` / `textTransform: uppercase` on `micro-eyebrow` and `micro-floor` above describe the *intended style*, but the utilities deliberately do **not** enforce them — a `text-*` utility that silently restyles weight would have restyled 32 of the 102 existing sub-10px call-sites on migration, and Tailwind's own `text-*` utilities never do it. Keep `font-semibold` / `uppercase` / `tracking-*` explicit at the call-site. The token's only promise is that the *step is on the ladder*.
+
+  | Utility | Size | Use |
+  |---|---|---|
+  | `text-fine-print` | 12px | dense body, form labels (same size as `text-xs`) |
+  | `text-micro` | 11px | count chips, inline meta, tabular numbers |
+  | `text-micro-legal` | 10px | timestamps, captions, legal |
+  | `text-micro-eyebrow` | 9px | uppercase badge/chip eyebrows |
+  | `text-micro-floor` | 8px | tightest micro-grid cells only |
+
+- **Thai needs leading that Apple's ladder does not budget for.** This ladder came from a Latin-only marketing site and sets `line-height: 1.0` across the micro tier. Thai stacks two levels of diacritics above the baseline — สระบน (ิ ี ึ ื) with วรรณยุกต์ (่ ้ ๊ ๋) above them — which clip at 1.0. The tiers that carry Thai sentence text (`micro`, `micro-legal`, `fine-print`) therefore ship at **1.35–1.4**, a deliberate deviation from the values in the YAML above. `micro-eyebrow` and `micro-floor` keep 1.0 because they are uppercase — a case Thai does not have, so they never render Thai.
+- **The font stack names Thai families explicitly.** `--font-sans` appends `Sarabun, Noto Sans Thai, IBM Plex Sans Thai, Leelawadee UI, Thonburi`. Font fallback is per-glyph, so Latin still resolves from SF Pro/Inter; only Thai glyphs fall through. Without this the Thai UI rendered in whatever each OS picked first — Thonburi on macOS, Leelawadee UI on Windows, Noto on Android — three faces with three different vertical metrics, at 9–11px.
 - **Weight 300 is real and rare.** Used deliberately on a handful of large-size reads (`{typography.button-large}` at 18px/300 and `{typography.lead-airy}` at 24px/300). It's not an accident — it's a light-atmosphere cue reserved for moments where the content should feel airy.
 - **Weight 600, not 700, for headlines.** Apple's headlines sit at weight 600. Weight 700 is used sparingly for `{typography.tagline}` (21px) when a touch more assertion is needed.
 - **Line-height is context-specific.** Display sizes use 1.07–1.19 (tight). Body uses 1.47. Utility link stacks in the footer/store use an unusually relaxed 2.41 (`{typography.dense-link}`). The 2.41 is not a bug — it's how the footer's dense link columns breathe.

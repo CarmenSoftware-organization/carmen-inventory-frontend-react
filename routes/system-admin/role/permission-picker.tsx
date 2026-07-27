@@ -339,7 +339,7 @@ export function PermissionPicker({
                 aria-selected={active}
                 onClick={() => setFilterMode(m)}
                 className={cn(
-                  "rounded-full px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
+                  "rounded-full px-2 py-1 text-micro font-semibold transition-colors",
                   active
                     ? "bg-foreground text-background"
                     : "text-muted-foreground hover:text-foreground",
@@ -353,7 +353,7 @@ export function PermissionPicker({
       </div>
 
       {/* Legend */}
-      <div className="border-border/60 bg-muted/30 hidden items-center gap-3 rounded-md border px-3 py-1.5 text-[0.625rem] font-semibold md:flex">
+      <div className="border-border/60 bg-muted/30 hidden items-center gap-3 rounded-md border px-3 py-1.5 text-micro-legal font-semibold md:flex">
         <span className="text-muted-foreground tracking-widest uppercase">
           {t("legendLabel")}
         </span>
@@ -422,11 +422,11 @@ export function PermissionPicker({
             <p className="text-foreground text-xs font-semibold">
               {t("changePreviewTitle")}
             </p>
-            <p className="text-muted-foreground text-[0.6875rem]">
+            <p className="text-muted-foreground text-micro">
               {t("changePreviewDesc", { count: pendingCount })}
             </p>
           </div>
-          <span className="text-muted-foreground/70 hidden text-[0.625rem] tracking-wider sm:inline">
+          <span className="text-muted-foreground/70 hidden text-micro-legal tracking-wider sm:inline">
             {t("rbacFootprint")}
           </span>
         </div>
@@ -510,7 +510,7 @@ function ModuleMatrix({
               {secondaryLabel}
             </span>
           </div>
-          <p className="text-muted-foreground/90 mt-0.5 text-[0.6875rem] tracking-wide tabular-nums">
+          <p className="text-muted-foreground/90 mt-0.5 text-micro tracking-wide tabular-nums">
             {t("moduleStats", {
               resources: group.resources.length,
               granted: selected,
@@ -520,7 +520,7 @@ function ModuleMatrix({
         </div>
         <label
           className={cn(
-            "bg-card text-foreground border-border/60 inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
+            "bg-card text-foreground border-border/60 inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold transition-colors",
             disabled
               ? "cursor-not-allowed opacity-60"
               : "cursor-pointer hover:border-primary/40",
@@ -543,7 +543,7 @@ function ModuleMatrix({
       {/* Desktop matrix table */}
       <div className="hidden md:block">
         {/* Column header row */}
-        <div className="bg-muted/30 text-muted-foreground border-border/60 grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center border-b px-4 py-2 text-[0.625rem] font-semibold tracking-widest uppercase">
+        <div className="bg-muted/30 text-muted-foreground border-border/60 grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center border-b px-4 py-2 text-micro-legal font-semibold tracking-widest uppercase">
           <span>{t("matrixHeaderResource")}</span>
           {MAIN_ACTIONS.map((a, i) => {
             const cc = colCounts[i];
@@ -573,7 +573,7 @@ function ModuleMatrix({
                 >
                   {t(ACTION_TKEY[a])}
                 </span>
-                <span className="text-muted-foreground/70 text-[0.5625rem] tabular-nums">
+                <span className="text-muted-foreground/70 text-micro-eyebrow tabular-nums">
                   {cc.on}/{cc.applicable}
                 </span>
               </button>
@@ -668,7 +668,7 @@ function MatrixRow({
           <p className="text-foreground truncate text-xs font-semibold">
             {label}
           </p>
-          <p className="text-muted-foreground/80 truncate text-[0.625rem]">
+          <p className="text-muted-foreground/80 truncate text-micro-legal">
             {resource.resource}
           </p>
         </div>
@@ -749,12 +749,12 @@ function MobileResourceRow({
             <p className="text-foreground truncate text-xs font-semibold">
               {label}
             </p>
-            <p className="text-muted-foreground/80 truncate text-[0.625rem]">
+            <p className="text-muted-foreground/80 truncate text-micro-legal">
               {resource.resource}
             </p>
           </div>
         </div>
-        <span className="text-muted-foreground text-[0.625rem] tabular-nums">
+        <span className="text-muted-foreground text-micro-legal tabular-nums">
           {rowSelected}/{ids.length}
         </span>
       </div>
@@ -771,7 +771,7 @@ function MobileResourceRow({
               disabled={disabled}
               aria-pressed={on}
               className={cn(
-                "rounded-full border px-2 py-1 text-[0.6875rem] font-semibold transition-colors",
+                "rounded-full border px-2 py-1 text-micro font-semibold transition-colors",
                 on
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border/60 bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",

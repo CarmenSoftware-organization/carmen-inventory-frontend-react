@@ -23,7 +23,7 @@ export function LandingModuleCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <div className="text-muted-foreground text-[0.5625rem] font-semibold tracking-[0.14em] uppercase">
+        <div className="text-muted-foreground text-micro-eyebrow font-semibold tracking-[0.14em] uppercase">
           {mod.key.replace(/([A-Z])/g, "-$1").toLowerCase()}
         </div>
         <h3 className="text-foreground text-sm leading-tight font-semibold tracking-tight">
@@ -32,23 +32,23 @@ export function LandingModuleCard({
         <div className="text-foreground/75 text-xs leading-snug font-semibold">
           {t(`modules.${mod.key}.one`)}
         </div>
-        <p className="text-muted-foreground mt-0.5 text-[0.6875rem] leading-relaxed">
+        <p className="text-muted-foreground mt-0.5 text-micro leading-relaxed">
           {t(`modules.${mod.key}.long`)}
         </p>
       </div>
 
       <div className="border-border-subtle flex items-center justify-between gap-2 border-t px-3 py-2">
         <div className="min-w-0">
-          <div className="text-foreground text-[0.6875rem] font-bold">
+          <div className="text-foreground text-micro font-bold">
             {t(`modules.${mod.key}.stat`)}
           </div>
-          <div className="text-muted-foreground mt-0.5 text-[0.5625rem]">
+          <div className="text-muted-foreground mt-0.5 text-micro-eyebrow">
             {t(`modules.${mod.key}.meta`)}
           </div>
         </div>
         <Link
           to={mod.href}
-          className="text-foreground border-foreground hover:bg-foreground hover:text-background inline-flex shrink-0 items-center gap-1 rounded-sm border px-2 py-1 text-[0.625rem] font-semibold transition-colors"
+          className="text-foreground border-foreground hover:bg-foreground hover:text-background inline-flex shrink-0 items-center gap-1 rounded-sm border px-2 py-1 text-micro-legal font-semibold transition-colors"
         >
           {t("cta.open")}
           <ArrowRight aria-hidden className="size-2.5" />

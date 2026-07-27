@@ -41,7 +41,7 @@ export function DepartmentsSection({
         <div className="space-y-4">
           {/* Member */}
           <div>
-            <p className="text-muted-foreground mb-1.5 text-[0.625rem] font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground mb-1.5 text-micro-legal font-semibold tracking-widest uppercase">
               Member of
             </p>
             {memberDepartment ? (
@@ -50,7 +50,7 @@ export function DepartmentsSection({
                   className="text-muted-foreground size-3.5 shrink-0"
                   aria-hidden="true"
                 />
-                <span className="text-[0.6875rem] font-semibold">
+                <span className="text-micro font-semibold">
                   {memberDepartment.code}
                 </span>
                 <span className="text-muted-foreground/60">·</span>
@@ -66,7 +66,7 @@ export function DepartmentsSection({
           {/* HOD */}
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-widest uppercase">
+              <p className="text-muted-foreground text-micro-legal font-semibold tracking-widest uppercase">
                 Head of Department
               </p>
               {hodDepartments.length > 0 && (
@@ -90,7 +90,7 @@ export function DepartmentsSection({
                       className="text-warning size-3.5 shrink-0"
                       aria-hidden="true"
                     />
-                    <span className="text-[0.6875rem] font-semibold">
+                    <span className="text-micro font-semibold">
                       {dept.code}
                     </span>
                     <span className="text-muted-foreground/60">·</span>
