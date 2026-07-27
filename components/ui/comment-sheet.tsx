@@ -198,7 +198,7 @@ function AttachmentImage({ src, fileName, size = "md" }: AttachmentImageProps) {
         title={fileName}
       >
         <ImageIcon className="size-4 shrink-0" aria-hidden="true" />
-        <span className="line-clamp-2 w-full text-center text-micro-eyebrow leading-tight break-all">
+        <span className="line-clamp-2 w-full text-center text-micro-legal leading-tight break-all">
           {fileName}
         </span>
       </div>

@@ -106,7 +106,7 @@ export function PrHeader({
         className="group hover:bg-muted/60 focus-visible:ring-ring flex cursor-pointer flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {workflowStepEl}
-        <span className="text-muted-foreground group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-micro-eyebrow tracking-wide transition-colors">
+        <span className="text-muted-foreground group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-micro-legal tracking-wide transition-colors">
           <History className="size-2.5" />
           {t("viewHistoryHint")}
         </span>
