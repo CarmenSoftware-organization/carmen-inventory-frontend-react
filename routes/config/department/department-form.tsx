@@ -336,7 +336,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
                   {tfl("description")}
                 </FieldLabel>
                 {isView ? (
-                  <FieldPlainText className="items-start whitespace-pre-wrap">
+                  <FieldPlainText className="whitespace-pre-wrap">
                     {department?.description}
                   </FieldPlainText>
                 ) : (

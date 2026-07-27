@@ -86,7 +86,7 @@ export function PrtGeneralFields({
       <Field className="sm:col-span-2">
         <FieldLabel htmlFor="prt-description">{tfl("description")}</FieldLabel>
         {readOnly ? (
-          <FieldPlainText className="items-start whitespace-pre-wrap">
+          <FieldPlainText className="whitespace-pre-wrap">
             {watchedDescription}
           </FieldPlainText>
         ) : (
