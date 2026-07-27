@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Eye, Scissors, X } from "lucide-react";
+import { Ban, Check, Eye, Scissors } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { STAGE_ROLE } from "@/types/stage-role";
@@ -53,48 +53,59 @@ export function Pr2BulkBar({
 
   return (
     <>
-      <div className="bg-primary/10 border-primary/30 flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2">
+      {/* ไม่มีกล่อง/พื้นหลัง — แถบนี้โผล่มาเฉพาะตอนเลือกแถว การโผล่มาเองก็บอกอยู่
+          แล้วว่ามีของที่เลือกไว้ ใส่กรอบสีทับเข้าไปอีกกลายเป็นแย่งความสนใจกับ
+          แถวที่ถูกเลือกในตาราง ซึ่งเป็นของจริงที่ต้องมอง */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* ปุ่มตัดสิน (อนุมัติ/ปฏิเสธ/ส่งกลับ) ชิดซ้ายสุดเหมือนหน้าเดิม แล้วค่อย
+            บอกว่ากดแล้วจะมีผลกับกี่รายการ — มือไปหาปุ่มก่อนอยู่แล้ว ตัวเลขคือสิ่งที่
+            ต้องยืนยันก่อนกด ไม่ใช่สิ่งที่ต้องหา
+            สีของปุ่มตรงกับหน้าเดิม: อนุมัติ = success, ปฏิเสธ = destructive,
+            ส่งกลับ = warning · สามการกระทำนี้ให้ผลคนละทางกันสิ้นเชิง ใช้สีเดียวกับ
+            ที่คนใช้ชินอยู่แล้วดีกว่าให้ต้องอ่านตัวหนังสือทุกครั้ง */}
+        <Button
+          type="button"
+          size="sm"
+          variant="success"
+          disabled={isPending}
+          onClick={onApprove}
+        >
+          <Check />
+          {tc("approve")}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="destructive"
+          disabled={isPending}
+          onClick={() => setDialog("reject")}
+        >
+          <Ban />
+          {tc("reject")}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="warning"
+          disabled={isPending}
+          onClick={() => setDialog("review")}
+        >
+          <Eye />
+          {tc("sendBack")}
+        </Button>
         <span className="text-sm font-medium">
           {tv2("nSelected", { count })}
         </span>
-        {/* accent เดียวคือปุ่มที่พางานเดินหน้า (อนุมัติ) — ที่เหลือ outline
-            แดงเก็บไว้เฉพาะปฏิเสธซึ่งทำลายจริง ส่งกลับเป็นกลาง (ดู pr2-actions) */}
+
+        {/* ขวาสุด = เครื่องมือจัดการสิ่งที่เลือก ไม่ได้ตัดสินอะไรกับรายการ
+            outline เท่ากับปุ่มตัดสินฝั่งซ้าย เพราะพอถอดกรอบของแถบออกแล้ว ghost
+            จางจนดูเหมือนข้อความ ไม่เหมือนปุ่ม */}
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            disabled={isPending}
-            onClick={onApprove}
-          >
-            <Check />
-            {tc("approve")}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            className="text-destructive hover:text-destructive"
-            disabled={isPending}
-            onClick={() => setDialog("reject")}
-          >
-            <X />
-            {tc("reject")}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={isPending}
-            onClick={() => setDialog("review")}
-          >
-            <Eye />
-            {tc("sendBack")}
-          </Button>
           {onSplit && (
             <Button
               type="button"
               size="sm"
-              variant="ghost"
+              variant="outline"
               disabled={isPending}
               onClick={onSplit}
             >
@@ -102,7 +113,7 @@ export function Pr2BulkBar({
               {t("split")}
             </Button>
           )}
-          <Button type="button" size="sm" variant="ghost" onClick={onClear}>
+          <Button type="button" size="sm" variant="outline" onClick={onClear}>
             {tv2("clearSelection")}
           </Button>
         </div>

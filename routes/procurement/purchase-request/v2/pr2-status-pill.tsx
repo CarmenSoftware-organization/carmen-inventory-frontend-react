@@ -1,5 +1,6 @@
-import { Check, Clock, Eye, X, type LucideIcon } from "lucide-react";
+import { X } from "lucide-react";
 import { useTranslations } from "use-intl";
+import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
 import { cn } from "@/lib/utils";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { normalizeItemStatus } from "./pr2-use-rows";
@@ -12,41 +13,20 @@ const RESETTABLE = new Set<string>([
 ]);
 
 /**
- * สถานะรายการแบบ "ไอคอน + คำ" — ของเดิมเป็นจุดกลมสีล้วนต้องเอาเมาส์ไปจิ้มถึงรู้
- * คนใช้อายุเยอะอ่านคำได้เร็วกว่าจำสีจุด และสีอย่างเดียวไม่ผ่าน a11y อยู่แล้ว
+ * ใช้ `StatusDotBadge` ตัวเดียวกับทั้งแอป — chip สีกลาง + จุดสีนำหน้า
+ *
+ * เคยทำเป็นไอคอน+คำที่ย้อมสีทั้ง chip เอง แล้วมันกลายเป็นสถานะที่หน้าเดียวใน
+ * ระบบแสดงไม่เหมือนที่อื่น · จุดสีอิง semantic tone เดียวกับหน้าเดิม
+ * (`status-cell.tsx`): รอ = info, อนุมัติ = success, ปฏิเสธ = destructive,
+ * ส่งกลับ = warning
  */
-/**
- * สีในตารางเหลือ "สีเดียว" โดยตั้งใจ — ใช้กับสถานะที่เปลี่ยนผลลัพธ์ของบรรทัดเท่านั้น
- *
- * ในสี่สถานะ มีแค่ "ปฏิเสธ" ที่แปลว่าบรรทัดนี้จะไม่ถูกซื้อ อีกสามอันแปลว่ากำลังเดินอยู่
- * หรือเรียบร้อยแล้ว · คนไล่ 100 แถวพลาด "รอ" ไม่เป็นไร (มีตัวกรองให้กด) แต่พลาด
- * "ปฏิเสธ" คืออ่านใบผิดทั้งใบ
- *
- * แยก "รอ" กับ "อนุมัติ" ด้วยความสว่าง ไม่ใช่สี — เสร็จแล้วก็จางลงแล้วถอยไปข้างหลัง
- * (แบบเมลที่อ่านแล้ว) ซึ่งเป็นการไล่ลำดับแบบที่ DESIGN.md ต้องการ: contrast ของ
- * ความสว่าง/ขนาด ไม่ใช่เพิ่ม accent
- *
- * ถ้าอยากได้แบบเงียบสนิท (สีอยู่ที่เส้นทางอนุมัติกับปุ่มเท่านั้น) เปลี่ยน rejected
- * ให้เป็น "text-foreground bg-muted" บรรทัดเดียวจบ
- */
-const PILL: Record<string, { icon: LucideIcon; className: string }> = {
-  pending: {
-    icon: Clock,
-    className: "text-foreground bg-muted",
-  },
-  approved: {
-    icon: Check,
-    className: "text-muted-foreground",
-  },
-  rejected: {
-    icon: X,
-    className: "text-destructive bg-destructive/10",
-  },
-  review: {
-    icon: Eye,
-    className: "text-foreground bg-muted",
-  },
+const TONE: Record<string, DotTone> = {
+  pending: "info",
+  approved: "success",
+  rejected: "destructive",
+  review: "warning",
 };
+
 export function Pr2StatusPill({
   status,
   initialStatus,
@@ -65,9 +45,7 @@ export function Pr2StatusPill({
   // สถานะที่ไม่รู้จัก (เช่น รายการที่เพิ่งเพิ่ม ยังเป็นสตริงว่าง) ให้ตกมาที่ "รอ"
   // ทั้งไอคอนและคำ — ไม่งั้น t() หา key ไม่เจอแล้วโชว์ path ดิบให้คนใช้เห็น
   const raw = normalizeItemStatus(status);
-  const normalized = raw in PILL ? raw : PR_ITEM_STAGE_STATUS.PENDING;
-  const cfg = PILL[normalized];
-  const Icon = cfg.icon;
+  const normalized = raw in TONE ? raw : PR_ITEM_STAGE_STATUS.PENDING;
 
   const initialNormalized = normalizeItemStatus(initialStatus ?? "");
   const lockedFromServer =
@@ -77,14 +55,11 @@ export function Pr2StatusPill({
     !!canEdit && !!onReset && !lockedFromServer && RESETTABLE.has(normalized);
 
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium whitespace-nowrap",
-        cfg.className,
-        className,
-      )}
+    <StatusDotBadge
+      tone={TONE[normalized] ?? "neutral"}
+      size="sm"
+      className={cn("whitespace-nowrap", className)}
     >
-      <Icon className="size-3 shrink-0" aria-hidden />
       {t(`itemStatus.${normalized}` as "itemStatus.pending")}
       {showReset && (
         <button
@@ -97,6 +72,6 @@ export function Pr2StatusPill({
           <X className="size-2.5" />
         </button>
       )}
-    </span>
+    </StatusDotBadge>
   );
 }

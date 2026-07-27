@@ -45,10 +45,19 @@ function sortValue(item: Item, key: string): string | number {
       return Number(item.pricelist_price ?? 0);
     case "exchangeRate":
       return Number(item.exchange_rate ?? 1);
+    case "subtotal":
+      return (
+        Number(item.pricelist_price ?? 0) *
+        (Number(item.approved_qty) || Number(item.requested_qty) || 0)
+      );
+    case "net":
+      return Number(item.net_amount ?? 0);
     case "discount":
       return Number(item.discount_amount ?? 0);
     case "tax":
       return Number(item.tax_amount ?? 0);
+    case "currency":
+      return item.currency_code ?? "";
     case "total":
       return Number(item.total_price ?? 0);
     case "deliveryPoint":

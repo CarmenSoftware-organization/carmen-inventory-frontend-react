@@ -17,6 +17,7 @@ import { Pr2StatusPill } from "./pr2-status-pill";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { usePr2AmountSync } from "./pr2-amount-sync";
 import {
+  Pr2DerivedAmountCell,
   Pr2DiscountCell,
   Pr2ExchangeRateCell,
   Pr2TaxCell,
@@ -28,7 +29,6 @@ import { LocationCell } from "../pr-item-cells/location-cell";
 import { RequestedCell } from "../pr-item-cells/requested-cell";
 import { ApprovedCell } from "../pr-item-cells/approved-cell";
 import { FocCell } from "../pr-item-cells/foc-cell";
-import { AmountCell } from "../pr-item-cells/amount-cell";
 import { CurrencyCell } from "../pr-item-cells/currency-cell";
 import { DeliveryPointCell } from "../pr-item-cells/delivery-point-cell";
 import { DeliveryDateCell } from "../pr-item-cells/delivery-date-cell";
@@ -141,8 +141,7 @@ export const Pr2Row = memo(function Pr2Row({
           />
         );
       case "total":
-        // ยอดรวม + สกุลเงิน — คอลัมน์ `amount` ของหน้าเดิม (AmountCell + CurrencyCell)
-        // ยอดคำนวณเองอยู่แล้ว เลือกได้แค่สกุลเงิน จึงผูกกับ formLocked ตรงๆ
+        // ยอดรวมของรายการ — คำนวณล้วน กรอกไม่ได้ทุกโหมด จึงเป็นข้อความ ไม่ใช่กล่อง
         return (
           <div className="flex items-start justify-end gap-1">
             <Pr2AmountBreakdown
@@ -150,24 +149,23 @@ export const Pr2Row = memo(function Pr2Row({
               index={index}
               baseCurrencyCode={baseCurrencyCode}
             />
-            {/* กล่องยอดยืดเต็มที่ว่าง — flex-1 อยู่ที่ตัวห่อ ไม่ใช่ที่ InputSuffix */}
-            <div className="min-w-0 flex-1">
-              <AmountCell
-                control={control}
-                index={index}
-                baseCurrencyCode={baseCurrencyCode}
-                isDisabled={perms.formLocked}
-                currencySlot={
-                  <CurrencyCell
-                    control={control}
-                    form={form}
-                    index={index}
-                    isDisabled={perms.formLocked}
-                  />
-                }
-              />
-            </div>
+            <Pr2DerivedAmountCell
+              form={form}
+              index={index}
+              kind="total"
+              baseCurrencyCode={baseCurrencyCode}
+            />
           </div>
+        );
+      case "currency":
+        return (
+          <CurrencyCell
+            control={control}
+            form={form}
+            index={index}
+            isDisabled={perms.formLocked}
+            className="h-8 w-full text-xs"
+          />
         );
       case "action":
         // ท้ายแถว = ประวัติรายการ + ปุ่มลบ เหมือนคอลัมน์ action ของหน้าเดิม
@@ -298,6 +296,7 @@ export const Pr2Row = memo(function Pr2Row({
             index={index}
             isDisabled={lockPricing}
             buCode={buCode}
+            baseCurrencyCode={baseCurrencyCode}
           />
         );
       case "exchangeRate":
@@ -309,12 +308,42 @@ export const Pr2Row = memo(function Pr2Row({
             baseCurrencyCode={baseCurrencyCode}
           />
         );
+      case "subtotal":
+        return (
+          <Pr2DerivedAmountCell
+            form={form}
+            index={index}
+            kind="subtotal"
+            baseCurrencyCode={baseCurrencyCode}
+          />
+        );
+      case "net":
+        return (
+          <Pr2DerivedAmountCell
+            form={form}
+            index={index}
+            kind="net"
+            baseCurrencyCode={baseCurrencyCode}
+          />
+        );
       case "discount":
         return (
-          <Pr2DiscountCell form={form} index={index} isDisabled={lockPricing} />
+          <Pr2DiscountCell
+            form={form}
+            index={index}
+            isDisabled={lockPricing}
+            baseCurrencyCode={baseCurrencyCode}
+          />
         );
       case "tax":
-        return <Pr2TaxCell form={form} index={index} isDisabled={lockPricing} />;
+        return (
+          <Pr2TaxCell
+            form={form}
+            index={index}
+            isDisabled={lockPricing}
+            baseCurrencyCode={baseCurrencyCode}
+          />
+        );
       case "deliveryPoint":
         return (
           <DeliveryPointCell
@@ -376,11 +405,20 @@ export const Pr2Row = memo(function Pr2Row({
     }
   };
 
-  // พื้นหลังของช่องที่ตรึงต้องทึบ ไม่งั้นแถวที่เลื่อนผ่านจะทะลุขึ้นมาให้เห็น
+  /**
+   * พื้นหลังของช่องที่ตรึง — ต้องทึบสนิท และต้องเป็น "สีเดียวกับที่แถวแสดงจริง"
+   *
+   * แถวใช้สีโปร่ง (`bg-muted/30`, `bg-primary/5`) ซึ่งได้ผลเพราะมันทับอยู่บนพื้น
+   * ทึบของตาราง แต่ช่องที่ตรึงลอยอยู่เหนือช่องอื่นที่เลื่อนผ่านใต้มัน สีโปร่งจึง
+   * ทำให้ตัวหนังสือของช่องอื่นทะลุขึ้นมาซ้อน
+   *
+   * ใช้สีเต็ม (`bg-muted`) แทนก็ทึบจริง แต่จะเข้มกว่าส่วนที่เหลือของแถวเห็นชัด
+   * เลยผสมสีเองด้วย `color-mix` ให้ได้ผลลัพธ์เท่ากับสีโปร่งที่ทับบนพื้นหลังพอดี
+   */
   const frozenBg = selected
-    ? "bg-primary/10"
+    ? "bg-[color-mix(in_oklab,var(--color-primary)_5%,var(--color-background))]"
     : zebra
-      ? "bg-muted"
+      ? "bg-[color-mix(in_oklab,var(--color-muted)_30%,var(--color-background))]"
       : "bg-background";
 
   return (
@@ -388,7 +426,9 @@ export const Pr2Row = memo(function Pr2Row({
       ref={rowRef}
       data-index={vIndex}
       className={cn(
-        "border-border/60 hover:bg-accent/40 border-b transition-colors",
+        // group: ช่องที่ตรึงต้องเปลี่ยนสีตอน hover ตามแถวด้วย ไม่งั้นชี้แล้ว
+        // ครึ่งซ้ายของแถวไม่สว่างตาม เห็นเป็นรอยต่อกลางแถว
+        "group hover:bg-accent/40 transition-colors",
         zebra && "bg-muted/30",
         selected && "bg-primary/5",
       )}
@@ -399,10 +439,22 @@ export const Pr2Row = memo(function Pr2Row({
           <td
             key={col.key}
             className={cn(
-              "border-border/40 border-r px-2 py-2 align-middle last:border-r-0",
+              "border-r-border/40 border-b-border/60 border-r border-b px-2 py-2 align-middle last:border-r-0",
               col.align === "right" && "text-right",
               col.align === "center" && "text-center",
-              frozen && cn("sticky z-10", frozenBg),
+              frozen &&
+                cn(
+                  // เส้นแบ่งขวาของช่องที่ตรึงต้องทึบด้วยเหตุผลเดียวกับพื้นหลัง —
+                  // `border-border/40` โปร่ง แถวที่เลื่อนผ่านใต้มันจึงโผล่ตรงเส้น
+                  // เห็นเป็นเส้นวิ่งเปลี่ยนสีตามที่เลื่อน
+                  "sticky z-10 transition-colors",
+                  // เส้นของช่องที่ตรึงต้องทึบด้วยเหตุผลเดียวกับพื้นหลัง — ผสมสีให้
+                  // ได้ผลเท่ากับเส้นโปร่งที่ทับบนพื้นหลัง จะได้ไม่เข้มกว่าเส้นอื่น
+                  "border-r-[color:color-mix(in_oklab,var(--color-border)_40%,var(--color-background))]",
+                  "border-b-[color:color-mix(in_oklab,var(--color-border)_60%,var(--color-background))]",
+                  "group-hover:bg-[color-mix(in_oklab,var(--color-accent)_40%,var(--color-background))]",
+                  frozenBg,
+                ),
             )}
             style={frozen ? { left: pr2FrozenOffsets(perms.isCreatorView, perms.showSelectColumn)[i] } : undefined}
           >

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import type { Control, UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -45,6 +45,12 @@ interface Pr2GridProps {
   /** เหตุผลที่เพิ่มรายการยังไม่ได้ — โชว์ปุ่มไว้แต่กดไม่ได้ ดีกว่าซ่อนจนคนใช้ตัน */
   readonly addItemDisabledReason?: string;
   readonly onRemoveItem?: (index: number) => void;
+  /**
+   * ช่องให้ฟอร์มสั่ง "เลื่อนมาที่แถวของ items index นี้" — ตารางเป็นคนเติมฟังก์ชันให้
+   * จำเป็นเพราะโหมด virtualize แถวนอกช่วงที่เรนเดอร์ไม่มีตัวตนใน DOM ใครที่หา
+   * element เอาเองจึงหาไม่เจอ
+   */
+  readonly scrollToRowRef?: RefObject<((itemIndex: number) => void) | null>;
 }
 
 /**
@@ -77,6 +83,7 @@ export function Pr2Grid({
   onAddItem,
   addItemDisabledReason,
   onRemoveItem,
+  scrollToRowRef,
 }: Pr2GridProps) {
   const t = useTranslations("procurement.purchaseRequest");
   const tv2 = useTranslations("procurement.purchaseRequest.v2");
@@ -108,6 +115,57 @@ export function Pr2Grid({
     overscan: 8,
     enabled: virtualize,
   });
+
+  useEffect(() => {
+    if (!scrollToRowRef) return;
+    scrollToRowRef.current = (itemIndex: number) => {
+      const pos = rows.indexOf(itemIndex);
+      if (pos < 0) return;
+
+      // โหมด virtualize แถวนอกช่วงไม่มีตัวตนใน DOM ต้องพามันมาเรนเดอร์ก่อน
+      if (virtualize) virtualizer.scrollToIndex(pos, { align: "center" });
+
+      /**
+       * จัดคอลัมน์ที่ผิดให้มาชิดขอบขวาของคอลัมน์ที่ตรึงไว้
+       *
+       * ปล่อยให้ scrollIntoView จัดเองไม่ได้ มันเลือกระยะที่ "ขยับน้อยที่สุด"
+       * ช่องจึงไปโผล่ริมขวาสุดของจอ ห่างจากชื่อสินค้าคนละฟาก ต้องกวาดตาข้าม
+       * ทั้งจอเพื่อจะรู้ว่าแถวไหน · ชิดคอลัมน์ที่ตรึงคือใกล้บริบทที่สุดเท่าที่ทำได้
+       *
+       * ต้อง retry เพราะทั้งแถวที่เพิ่งถูกพามาเรนเดอร์ และตัวช่วย focus ที่ทำงาน
+       * ก่อนหน้า ต่างก็ใช้เวลาหลายเฟรม — ตัวนี้ต้องเป็นคนสุดท้ายที่แตะ scrollLeft
+       */
+      let tries = 0;
+      const align = () => {
+        const invalid = scrollEl?.querySelector<HTMLElement>(
+          `tr[data-index="${pos}"] [aria-invalid="true"], tr[data-index="${pos}"] [data-invalid="true"]`,
+        );
+        const cell = invalid?.closest("td");
+        if (!cell || !scrollEl) {
+          if (tries++ < 12) requestAnimationFrame(align);
+          return;
+        }
+        const frozenCells =
+          cell.parentElement?.querySelectorAll<HTMLElement>("td.sticky");
+        const lastFrozen = frozenCells?.[frozenCells.length - 1];
+        // คิดจากตำแหน่งบนจอ (getBoundingClientRect) ไม่ใช่ offsetLeft — ช่องที่ตรึง
+        // เป็น position:sticky ค่า offsetLeft ของมันรวมระยะที่ถูกตรึงเลื่อนไปด้วย
+        // เอามาบวกลบเป็นความกว้างไม่ได้ (ลองแล้ว ได้ตัวเลขที่เลื่อนไปไม่ถึง)
+        const stopAt = lastFrozen
+          ? lastFrozen.getBoundingClientRect().right
+          : scrollEl.getBoundingClientRect().left;
+        scrollEl.scrollLeft += cell.getBoundingClientRect().left - stopAt;
+      };
+      // เรียกสองเฟรมติด: เฟรมแรกอาจชนกับการเลื่อนของตัวช่วย focus ที่ทำงานอยู่
+      requestAnimationFrame(() => {
+        align();
+        requestAnimationFrame(align);
+      });
+    };
+    return () => {
+      scrollToRowRef.current = null;
+    };
+  }, [scrollToRowRef, rows, virtualize, virtualizer, scrollEl]);
 
   const virtualItems = virtualizer.getVirtualItems();
   const padTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
@@ -146,8 +204,15 @@ export function Pr2Grid({
       // (chrome สูงไม่เท่ากันระหว่างโหมดดูกับโหมดแก้ — textarea หมายเหตุโผล่มา)
       className="border-border min-h-0 flex-1 overflow-auto rounded-lg border"
     >
+      {/*
+        border-separate ไม่ใช่ border-collapse — collapse ทำให้เส้นขอบกลายเป็นของ
+        "ตาราง" ไม่ใช่ของช่อง ช่องที่ตรึงจึงบังเส้นตรงรอยต่อไม่ได้ แถวที่เลื่อนผ่าน
+        ใต้มันโผล่ขึ้นมาเป็นเส้นตัวหนังสือวิ่งตามการเลื่อน (ย้อมสีเส้นให้ทึบก็ไม่หาย
+        เพราะไม่ใช่เรื่องสี) · separate = แต่ละช่องวาดเส้นของตัวเอง ทับได้จริง
+        แลกกับต้องย้ายเส้นล่างจาก <tr> ไปไว้ที่ <td> เพราะโหมดนี้ไม่วาดเส้นของ <tr>
+      */}
       <table
-        className="w-full table-fixed border-collapse text-sm"
+        className="w-full table-fixed border-separate border-spacing-0 text-sm"
         style={{ minWidth: pr2MinWidth(perms.isCreatorView, showAction, perms.showSelectColumn) }}
       >
         <colgroup>
@@ -165,7 +230,10 @@ export function Pr2Grid({
                   key={col.key}
                   scope="col"
                   className={cn(
-                    "bg-muted border-border/60 border-border sticky top-0 z-30 border-r border-b px-2 py-2 font-medium last:border-r-0",
+                    // สีเส้นต้องทึบ ไม่ใช่ `border-border/60` — ช่องหัวที่ตรึงลอยอยู่เหนือหัว
+                    // คอลัมน์อื่นที่เลื่อนผ่านใต้มัน เส้นโปร่งทำให้ตัวหนังสือโผล่ตรงเส้น
+                    // (เดิมมีทั้ง /60 และตัวทึบใส่ซ้อนกัน ตัวโปร่งชนะ)
+                    "bg-muted border-border sticky top-0 z-30 border-r border-b px-2 py-2 font-medium last:border-r-0",
                     col.align === "right"
                       ? "text-right"
                       : col.align === "center"
@@ -189,7 +257,7 @@ export function Pr2Grid({
                         aria-label={t("selectAllItems")}
                       />
                     )
-                  ) : col.labelKey && col.sortable !== false ? (
+                  ) : (col.labelKey || col.label) && col.sortable !== false ? (
                     // กดหัวคอลัมน์เพื่อเรียง — แทนการจัดกลุ่มตามคลังที่ถอดออกไป
                     // (อยากดูเรียงตามคลังก็กดที่หัวคอลัมน์คลัง)
                     <button
@@ -198,10 +266,11 @@ export function Pr2Grid({
                       className={cn(
                         "hover:text-foreground inline-flex w-full items-center gap-1 transition-colors",
                         col.align === "right" && "justify-end",
+                        col.align === "center" && "justify-center",
                         sort?.key === col.key && "text-foreground",
                       )}
                     >
-                      {tfl(col.labelKey as "product")}
+                      {col.labelKey ? tfl(col.labelKey as "product") : col.label}
                       {sort?.key === col.key ? (
                         sort.dir === "asc" ? (
                           <ArrowUp className="size-3 shrink-0" />
@@ -213,7 +282,7 @@ export function Pr2Grid({
                       )}
                     </button>
                   ) : (
-                    col.labelKey && tfl(col.labelKey as "product")
+                    (col.labelKey ? tfl(col.labelKey as "product") : col.label)
                   )}
                 </th>
               );

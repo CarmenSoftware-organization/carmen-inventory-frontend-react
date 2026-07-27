@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useWatch, type UseFormReturn } from "react-hook-form";
+import { useFormState, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { InputAmount } from "@/components/ui/input/input-amount";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,15 +10,16 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
-import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { PR_ITEM_PRICELIST_COMPARE_TYPE } from "@/types/purchase-request";
 import {
   EXCHANGE_RATE_DECIMALS,
   formatCurrency,
+  round2,
 } from "@/lib/currency-utils";
-import type { PrFormValues } from "../pr-form-schema";
+import { resolveApprovedQty, type PrFormValues } from "../pr-form-schema";
 import { useIsRowLocked } from "../pr-item-cells/helpers";
 import { PrLastReceivingInfo } from "../pr-last-receiving-info";
+import { PrDiscountInput, PrTaxInput } from "../pr-money-fields";
 
 /** ค่าว่างของ "ข้อความ" — ช่องที่เป็นตัวเลขไม่ใช้ ขึ้น 0.00 ตามรูปแบบสกุลเงินแทน */
 const EMPTY = "—";
@@ -27,6 +28,48 @@ interface CellProps {
   readonly form: UseFormReturn<PrFormValues>;
   readonly index: number;
   readonly isDisabled: boolean;
+}
+
+/**
+ * แปลงเป็นสกุลหลักของกิจการ — คืน `null` เมื่อรายการนี้ซื้อด้วยสกุลหลักอยู่แล้ว
+ *
+ * หน้าเดิมโชว์แถวยอดสกุลหลักใต้ Subtotal · Discount · Net · Tax · Total ทั้งแถว
+ * (`pr-item-summary.tsx`) เฉพาะตอนสกุลของรายการต่างจากสกุลหลัก v2 แตกเป็นบรรทัด
+ * เล็กใต้แต่ละคอลัมน์แทน เพราะไม่มีแถวกางให้วางตารางย่อย
+ */
+function useBaseAmount(
+  form: UseFormReturn<PrFormValues>,
+  index: number,
+  baseCurrencyCode?: string,
+): { readonly rate: number; readonly code: string } | null {
+  "use no memo";
+  const [exchangeRate, currencyCode] = useWatch({
+    control: form.control,
+    name: [
+      `items.${index}.exchange_rate`,
+      `items.${index}.currency_code`,
+    ] as const,
+  });
+  if (!baseCurrencyCode || !currencyCode || currencyCode === baseCurrencyCode) {
+    return null;
+  }
+  return { rate: Number(exchangeRate ?? 1), code: baseCurrencyCode };
+}
+
+/** บรรทัดยอดสกุลหลักใต้ช่องเงิน — ไม่ส่ง base มา (สกุลหลักอยู่แล้ว) = ไม่ขึ้นอะไร */
+function BaseAmountLine({
+  value,
+  base,
+}: {
+  readonly value: number;
+  readonly base: { readonly rate: number; readonly code: string } | null;
+}) {
+  if (!base) return null;
+  return (
+    <div className="text-muted-foreground text-[0.6875rem] tabular-nums">
+      {formatCurrency(round2(value * base.rate))} {base.code}
+    </div>
+  );
 }
 
 /**
@@ -48,7 +91,13 @@ export const Pr2VendorCell = memo(function Pr2VendorCell({
     control: form.control,
     name: `items.${index}.pricelist_no`,
   });
-  const error = form.formState.errors.items?.[index]?.vendor_id?.message;
+  // ต้อง subscribe ผ่าน useFormState ไม่ใช่อ่าน form.formState ตรงๆ ไม่งั้นช่องนี้
+  // ไม่ re-render ตอน trigger() กรอบแดงไม่ขึ้นและ aria-invalid ไม่มีใน DOM
+  const { errors } = useFormState({
+    control: form.control,
+    name: `items.${index}.vendor_id`,
+  });
+  const error = errors.items?.[index]?.vendor_id?.message;
   const isRowLocked = useIsRowLocked(form.control, index);
 
   if (isDisabled || isRowLocked) {
@@ -86,21 +135,30 @@ export const Pr2VendorCell = memo(function Pr2VendorCell({
   }
 
   return (
-    <LookupVendor
-      value={value ?? ""}
-      onValueChange={(v) => {
-        form.setValue(`items.${index}.vendor_id`, v, {
-          shouldDirty: true,
-          shouldValidate: true,
-        });
-        if (v) {
-          form.setValue(`items.${index}.stage_status`, "approve");
-          form.setValue(`items.${index}.current_stage_status`, "approve");
-        }
-      }}
-      className="h-8 w-full min-w-0 text-xs"
-      error={error}
-    />
+    <div className="min-w-0">
+      <LookupVendor
+        value={value ?? ""}
+        onValueChange={(v) => {
+          form.setValue(`items.${index}.vendor_id`, v, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          if (v) {
+            form.setValue(`items.${index}.stage_status`, "approve");
+            form.setValue(`items.${index}.current_stage_status`, "approve");
+          }
+        }}
+        className="h-8 w-full min-w-0 text-xs"
+        error={error}
+      />
+      {/* เลขที่ใบเสนอราคาที่ราคานี้มาจาก — หน้าเดิมมีช่อง Pricelist แยกที่เห็น
+          ตลอด ทั้งตอนแก้และตอนอ่าน ไม่ใช่โผล่เฉพาะตอนอ่าน */}
+      {pricelistNo && (
+        <div className="text-muted-foreground mt-0.5 truncate text-[0.6875rem]">
+          {pricelistNo}
+        </div>
+      )}
+    </div>
   );
 });
 
@@ -110,12 +168,14 @@ export const Pr2UnitPriceCell = memo(function Pr2UnitPriceCell({
   index,
   isDisabled,
   buCode,
-}: CellProps & { readonly buCode?: string }) {
+  baseCurrencyCode,
+}: CellProps & {
+  readonly buCode?: string;
+  readonly baseCurrencyCode?: string;
+}) {
   "use no memo";
   const isRowLocked = useIsRowLocked(form.control, index);
-  const currencyCode =
-    useWatch({ control: form.control, name: `items.${index}.currency_code` }) ??
-    "";
+  const base = useBaseAmount(form, index, baseCurrencyCode);
   const [price, decimals] = useWatch({
     control: form.control,
     name: [
@@ -123,7 +183,11 @@ export const Pr2UnitPriceCell = memo(function Pr2UnitPriceCell({
       `items.${index}.currency_decimal_places`,
     ] as const,
   });
-  const error = form.formState.errors.items?.[index]?.pricelist_price?.message;
+  const { errors } = useFormState({
+    control: form.control,
+    name: `items.${index}.pricelist_price`,
+  });
+  const error = errors.items?.[index]?.pricelist_price?.message;
 
   // ต้นทุนครั้งล่าสุดที่รับของเข้ามา — หน้าเดิมแขวนไว้ที่ label "U.Price" ในแถวที่กาง
   // (`pr-item-expand.tsx`) v2 ไม่มีแถวกาง เลยย้ายมาแขวนข้างช่องราคาโดยตรง
@@ -134,22 +198,22 @@ export const Pr2UnitPriceCell = memo(function Pr2UnitPriceCell({
 
   if (isDisabled || isRowLocked) {
     return (
-      <div className="flex items-start justify-end gap-1">
+      <div className="flex items-center justify-between gap-1">
         {lastReceiving}
         <div>
           <div className="tabular-nums">
             {formatCurrency(Number(price ?? 0))}
           </div>
-          {currencyCode && (
-            <div className="text-muted-foreground text-xs">{currencyCode}</div>
-          )}
+          {/* ไม่ย้ำสกุลของรายการที่นี่ — มีคอลัมน์สกุลเงินบอกอยู่แล้ว
+              เหลือแค่ยอดที่แปลงเป็นสกุลหลัก ซึ่งไม่มีคอลัมน์ไหนบอก */}
+          <BaseAmountLine value={Number(price ?? 0)} base={base} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center justify-between gap-1">
       {lastReceiving}
       {/* กล่อง input ต้องยืดเต็มที่ว่าง — flex-1 ต้องอยู่ที่ตัวห่อ ไม่ใช่ที่ input
           (InputAmount ห่อ input ไว้อีกชั้นเมื่อมี error icon) */}
@@ -171,6 +235,7 @@ export const Pr2UnitPriceCell = memo(function Pr2UnitPriceCell({
             );
           }}
         />
+        <BaseAmountLine value={Number(price ?? 0)} base={base} />
       </div>
     </div>
   );
@@ -213,19 +278,19 @@ export const Pr2DiscountCell = memo(function Pr2DiscountCell({
   form,
   index,
   isDisabled,
-}: CellProps) {
+  baseCurrencyCode,
+}: CellProps & { readonly baseCurrencyCode?: string }) {
   "use no memo";
   const isRowLocked = useIsRowLocked(form.control, index);
-  const [rate, isAdj, amount, decimals] = useWatch({
+  const base = useBaseAmount(form, index, baseCurrencyCode);
+  const [rate, amount, decimals] = useWatch({
     control: form.control,
     name: [
       `items.${index}.discount_rate`,
-      `items.${index}.is_discount_adjustment`,
       `items.${index}.discount_amount`,
       `items.${index}.currency_decimal_places`,
     ] as const,
   });
-  const override = isAdj ?? false;
 
   if (isDisabled || isRowLocked) {
     return (
@@ -238,40 +303,16 @@ export const Pr2DiscountCell = memo(function Pr2DiscountCell({
             {rate}%
           </div>
         )}
+        <BaseAmountLine value={Number(amount ?? 0)} base={base} />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col items-end gap-1">
-      {override ? (
-        <InputAmount
-          decimals={decimals ?? 2}
-          className="h-8 w-full text-right text-xs"
-          value={Number(amount ?? 0)}
-          onValueChange={(n) =>
-            form.setValue(`items.${index}.discount_amount`, n, {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-        />
-      ) : (
-        <InputAmount
-          decimals={2}
-          className="h-8 w-full text-right text-xs"
-          value={Number(rate ?? 0)}
-          onValueChange={(n) =>
-            // clamp 0–100 เหมือนหน้าเดิม
-            form.setValue(
-              `items.${index}.discount_rate`,
-              Math.min(100, Math.max(0, n)),
-              { shouldDirty: true, shouldValidate: true },
-            )
-          }
-        />
-      )}
       <OverrideBox form={form} index={index} isDisabled={false} field="is_discount_adjustment" />
+      <PrDiscountInput form={form} index={index} decimals={decimals ?? 2} />
+      <BaseAmountLine value={Number(amount ?? 0)} base={base} />
     </div>
   );
 });
@@ -281,21 +322,20 @@ export const Pr2TaxCell = memo(function Pr2TaxCell({
   form,
   index,
   isDisabled,
-}: CellProps) {
+  baseCurrencyCode,
+}: CellProps & { readonly baseCurrencyCode?: string }) {
   "use no memo";
   const isRowLocked = useIsRowLocked(form.control, index);
-  const [profileId, isAdj, amount, decimals, taxRate] = useWatch({
+  const base = useBaseAmount(form, index, baseCurrencyCode);
+  const [amount, decimals, taxRate, profileName] = useWatch({
     control: form.control,
     name: [
-      `items.${index}.tax_profile_id`,
-      `items.${index}.is_tax_adjustment`,
       `items.${index}.tax_amount`,
       `items.${index}.currency_decimal_places`,
       `items.${index}.tax_rate`,
+      `items.${index}.tax_profile_name`,
     ] as const,
   });
-  const override = isAdj ?? false;
-  const error = form.formState.errors.items?.[index]?.tax_profile_id?.message;
 
   if (isDisabled || isRowLocked) {
     return (
@@ -303,43 +343,25 @@ export const Pr2TaxCell = memo(function Pr2TaxCell({
         <div className="tabular-nums">
           {formatCurrency(Number(amount ?? 0))}
         </div>
-        {!!taxRate && (
-          <div className="text-muted-foreground text-xs tabular-nums">
-            {taxRate}%
+        {/* ชื่อโปรไฟล์ภาษี + อัตรา — หน้าเดิมโหมดอ่านขึ้น "ชื่อโปรไฟล์ · ยอด"
+            ยอดอย่างเดียวบอกไม่ได้ว่าคิดภาษีแบบไหน (vat / ไม่มี / นำเข้า) */}
+        {(profileName || !!taxRate) && (
+          <div className="text-muted-foreground truncate text-xs">
+            {profileName}
+            {profileName && !!taxRate && " · "}
+            {!!taxRate && <span className="tabular-nums">{taxRate}%</span>}
           </div>
         )}
+        <BaseAmountLine value={Number(amount ?? 0)} base={base} />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <LookupTaxProfile
-        value={profileId ?? ""}
-        onValueChange={(value, rate, name) => {
-          form.setValue(`items.${index}.tax_profile_id`, value || null, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-          form.setValue(`items.${index}.tax_rate`, rate);
-          form.setValue(`items.${index}.tax_profile_name`, name);
-        }}
-        className={`h-8 w-full min-w-0 text-xs ${error ? "border-destructive" : ""}`}
-      />
-      {override && (
-        <InputAmount
-          decimals={decimals ?? 2}
-          className="h-8 w-full text-right text-xs"
-          value={Number(amount ?? 0)}
-          onValueChange={(n) =>
-            form.setValue(`items.${index}.tax_amount`, n, {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-        />
-      )}
       <OverrideBox form={form} index={index} isDisabled={false} field="is_tax_adjustment" />
+      <PrTaxInput form={form} index={index} decimals={decimals ?? 2} />
+      <BaseAmountLine value={Number(amount ?? 0)} base={base} />
     </div>
   );
 });
@@ -390,5 +412,61 @@ export const Pr2ExchangeRateCell = memo(function Pr2ExchangeRateCell({
         })
       }
     />
+  );
+});
+
+/**
+ * ช่องเงินที่คำนวณล้วน — ยอดรวมย่อย (ราคา × จำนวน) · สุทธิ · ยอดรวม
+ *
+ * กรอกไม่ได้ทุกกรณีทุกโหมด จึงเป็นข้อความเปล่าเสมอ ไม่มี branch แก้ไข/อ่าน และ
+ * **ไม่ทำเป็นกล่อง input** — หน้าเดิมห่อยอดรวมไว้ในกล่องที่ input อ่านอย่างเดียว
+ * (`amount-cell.tsx`) เพราะต้องเอาช่องเลือกสกุลเงินไปแปะข้างในกล่องเดียวกัน
+ * v2 แยกสกุลเงินเป็นคอลัมน์แล้ว เหตุผลนั้นหมดไป เหลือแต่กล่องที่หลอกตาว่ากรอกได้
+ *
+ * สุทธิกับยอดรวมอ่านจาก `net_amount`/`total_price` ที่ `usePr2AmountSync` เขียนไว้
+ * ไม่คำนวณซ้ำเอง ไม่งั้นสองที่คิดคนละแบบเมื่อ override ส่วนลด/ภาษีเปิดอยู่
+ */
+export const Pr2DerivedAmountCell = memo(function Pr2DerivedAmountCell({
+  form,
+  index,
+  kind,
+  baseCurrencyCode,
+}: Omit<CellProps, "isDisabled"> & {
+  readonly kind: "subtotal" | "net" | "total";
+  readonly baseCurrencyCode?: string;
+}) {
+  "use no memo";
+  const base = useBaseAmount(form, index, baseCurrencyCode);
+  const [price, requestedQty, approvedQty, netAmount, totalPrice] = useWatch({
+    control: form.control,
+    name: [
+      `items.${index}.pricelist_price`,
+      `items.${index}.requested_qty`,
+      `items.${index}.approved_qty`,
+      `items.${index}.net_amount`,
+      `items.${index}.total_price`,
+    ] as const,
+  });
+
+  let value: number;
+  if (kind === "net") value = Number(netAmount ?? 0);
+  else if (kind === "total") value = Number(totalPrice ?? 0);
+  else {
+    value =
+      Number(price ?? 0) *
+      resolveApprovedQty({
+        approved_qty: Number(approvedQty ?? 0),
+        requested_qty: Number(requestedQty ?? 0),
+      });
+  }
+
+  return (
+    <div>
+      {/* ยอดรวมเป็นคำตอบของแถว หนากว่าตัวอื่นในกลุ่มเดียวกัน */}
+      <div className={kind === "total" ? "font-semibold tabular-nums" : "tabular-nums"}>
+        {formatCurrency(value)}
+      </div>
+      <BaseAmountLine value={value} base={base} />
+    </div>
   );
 });

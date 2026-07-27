@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useWatch, type Control } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { Check, Eye, SendHorizonal, ShoppingCart, X } from "lucide-react";
+import { Ban, Check, Eye, SendHorizonal, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
@@ -129,6 +129,7 @@ export function Pr2Actions({
       {showWorkflowActions && canApprove && purchaseAction === "approved" && (
         <Button
           type="button"
+          variant="success"
           disabled={isPending}
           onClick={() =>
             openConfirm({
@@ -150,8 +151,7 @@ export function Pr2Actions({
         purchaseAction === "rejected" && (
           <Button
             type="button"
-            variant="outline"
-            className="text-destructive hover:text-destructive"
+            variant="destructive"
             disabled={isPending}
             onClick={() =>
               openConfirm({
@@ -163,7 +163,7 @@ export function Pr2Actions({
               })
             }
           >
-            <X />
+            <Ban />
             {tc("reject")}
           </Button>
         )}
@@ -173,7 +173,7 @@ export function Pr2Actions({
         purchaseAction === "review" && (
           <Button
             type="button"
-            variant="outline"
+            variant="warning"
             disabled={isPending}
             onClick={() => setReviewOpen(true)}
           >

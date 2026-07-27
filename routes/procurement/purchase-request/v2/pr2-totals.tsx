@@ -60,13 +60,14 @@ export function Pr2Totals({
           </div>
         ))}
 
-        {/* ยอดรวมอยู่ต่อท้ายยอดย่อยฝั่งซ้าย — เป็นตัวเลขพวกเดียวกัน อ่านต่อกัน
-            เป็นบรรทัดเดียว แยกความสำคัญด้วยขนาด ไม่ใช่ด้วยการผลักไปคนละฝั่ง */}
+        {/* ยอดรวมอยู่ต่อท้ายยอดย่อย เป็นตัวเลขพวกเดียวกัน อ่านต่อกันเป็นบรรทัดเดียว
+            ขนาดเท่ากันหมด แยกความสำคัญด้วยน้ำหนักตัวอักษร (semibold) อย่างเดียว —
+            เคยทำเป็น text-2xl แล้วมันดันความสูงของแถบทั้งแถบเพื่อเลขตัวเดียว */}
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground text-sm">
             {tfl("grandTotal")}
           </span>
-          <span className="text-2xl font-semibold tabular-nums">
+          <span className="text-sm font-semibold tabular-nums">
             {formatCurrency(grand)}
           </span>
           {currencyCode && (

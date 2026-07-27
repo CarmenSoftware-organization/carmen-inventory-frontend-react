@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { useFieldArray, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
@@ -96,12 +96,54 @@ export function PurchaseRequestFormV2({
     reValidateMode: "onChange",
   });
 
+  /**
+   * ตารางลงทะเบียนวิธีเลื่อนไปหาแถวไว้ตรงนี้ (ฟอร์มเป็นคนสั่ง ตารางเป็นคนทำ)
+   * เพราะโหมดแก้ไขที่แถวเยอะเรนเดอร์แค่ ~20 แถว แถวนอกช่วงไม่มีตัวตนใน DOM
+   */
+  const scrollToRowRef = useRef<((itemIndex: number) => void) | null>(null);
+
+  /**
+   * พาไปหาช่องแรกที่กรอกไม่ครบ — ต้องทำสองจังหวะ
+   *
+   * `scrollToFirstInvalidField` หา element จาก DOM ตรงๆ ซึ่งใช้ได้กับหน้าเดิมที่
+   * เรนเดอร์ครบทุกแถว แต่ v2 virtualize + มีตัวกรอง แถวที่ผิดจึงอาจไม่อยู่ใน DOM
+   * เลย ผลคือกดบันทึกแล้วไม่มีอะไรเกิดขึ้น ไม่รู้ด้วยซ้ำว่าติดตรงไหน
+   *
+   * จึงหาเลขแถวจาก error ของฟอร์มก่อน ล้างตัวกรองถ้าแถวนั้นถูกกรองหายไป สั่ง
+   * ตารางเลื่อนมาให้แถวโผล่ แล้วค่อยปล่อยให้ตัวช่วยเดิมทำงานต่อ (มัน retry
+   * ให้อยู่แล้ว 12 เฟรม รอ DOM ตามทัน)
+   */
+  const revealFirstInvalidItem = () => {
+    const itemErrors = form.formState.errors.items;
+    if (!itemErrors) return;
+    const invalid = Object.keys(itemErrors)
+      .map(Number)
+      .filter((n) => Number.isInteger(n) && !!itemErrors[n]);
+    if (invalid.length === 0) return;
+    const target = Math.min(...invalid);
+
+    if (!rows.includes(target)) {
+      setSearch("");
+      setStatusFilter(null);
+    }
+    // รอให้ตัวกรองที่เพิ่งล้างมีผลกับรายการแถวก่อน ค่อยสั่งเลื่อน
+    requestAnimationFrame(() => scrollToRowRef.current?.(target));
+  };
+
+  const showFirstInvalid = () => {
+    revealFirstInvalidItem();
+    // behavior "auto" ไม่ใช่ smooth (ค่า default) — smooth คือ animation ที่กิน
+    // เวลาหลายร้อย ms แล้วมันจะไปลงเอยทับตำแหน่งที่ตารางจัดไว้ให้ทีหลัง
+    // (ตัวจัดตำแหน่งใน pr2-grid ต้องเป็นคนสุดท้ายที่แตะ scrollLeft)
+    scrollToFirstInvalidField({ behavior: "auto" });
+  };
+
   const validatePurchase = () =>
     new Promise<boolean>((resolve) => {
       form.handleSubmit(
         () => resolve(true),
         () => {
-          scrollToFirstInvalidField();
+          showFirstInvalid();
           resolve(false);
         },
       )();
@@ -349,13 +391,20 @@ export function PurchaseRequestFormV2({
    * v2 ไม่มีการกางแถว ตรงนี้เลยไม่ต้อง setExpanded เหมือนหน้าเดิม — ทุกช่องเห็นอยู่แล้ว
    */
   const guardSelectedItemErrors = async (): Promise<boolean> => {
-    await form.trigger("items");
+    if (selectedIndexes.length === 0) return false;
+    // ตรวจเฉพาะแถวที่เลือก — `trigger("items")` ทั้งก้อนจะไปทำให้แถวที่ไม่ได้เลือก
+    // ขึ้นกรอบแดงด้วย ทั้งที่คนใช้ยังไม่ได้จะทำอะไรกับมันตอนนี้ (แถวพวกนั้นจะถูก
+    // ตรวจอีกทีตอนกดบันทึกซึ่ง handleSubmit ตรวจทั้งใบอยู่แล้ว)
+    form.clearErrors("items");
+    await form.trigger(
+      selectedIndexes.map((i) => `items.${i}` as `items.${number}`),
+    );
     const errored = selectedIndexes.filter((index) => {
       const itemErr = form.formState.errors.items?.[index];
       return !!itemErr && Object.keys(itemErr).length > 0;
     });
     if (errored.length === 0) return false;
-    scrollToFirstInvalidField();
+    showFirstInvalid();
     toast.warning(t("purchaseIncomplete"));
     return true;
   };
@@ -396,10 +445,18 @@ export function PurchaseRequestFormV2({
     setShowOverQtyWarning(false);
   };
 
+  /**
+   * ปฏิเสธ/ส่งกลับ ไม่ต้องกรอกผู้ขาย ราคา ภาษี ให้ครบ — ไม่ตรวจ (กติกาเดียวกับ
+   * หน้าเดิมที่ข้าม guard ในสองทางนี้) และล้างกรอบแดงที่ค้างจากการกดอนุมัติ
+   * ก่อนหน้าทิ้งด้วย ไม่งั้นแถวยังแดงอยู่ทั้งที่การกระทำนี้ไม่สนใจช่องพวกนั้นเลย
+   */
+  const clearItemValidation = () => form.clearErrors("items");
+
   const handleBulkReviewClick = (
     messages: Record<number, string>,
     desStage: string,
   ) => {
+    clearItemValidation();
     const detailIds = selectedIndexes
       .map((i) => watchedItems?.[i]?.id)
       .filter((id): id is string => !!id);
@@ -495,9 +552,7 @@ export function PurchaseRequestFormV2({
 
       <form
         id="purchase-request-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
+        onSubmit={form.handleSubmit(actions.onSubmit, showFirstInvalid)}
         className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-3"
       >
         <Pr2BulkBar
@@ -509,9 +564,10 @@ export function PurchaseRequestFormV2({
           stagesLoading={stagesLoading}
           onClear={() => setSelected(new Set())}
           onApprove={handleBulkApprove}
-          onReject={(messages) =>
-            setBulkStatus(PR_ITEM_STAGE_STATUS.REJECTED, messages)
-          }
+          onReject={(messages) => {
+            clearItemValidation();
+            setBulkStatus(PR_ITEM_STAGE_STATUS.REJECTED, messages);
+          }}
           onReview={handleBulkReviewClick}
           onSplit={purchaseRequest ? handleBulkSplit : undefined}
         />
@@ -526,6 +582,7 @@ export function PurchaseRequestFormV2({
           selected={selected}
           onSelect={toggleOne}
           onSelectAll={toggleAll}
+          scrollToRowRef={scrollToRowRef}
           dateFormat={dateFormat}
           currencyCode={defaultBu?.config?.default_currency?.code}
           isEmptyDocument={totalCount === 0}

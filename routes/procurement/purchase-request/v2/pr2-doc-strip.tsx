@@ -74,17 +74,22 @@ export function Pr2DocStrip({
 
   return (
     <div className="bg-background border-border sticky top-0 z-30 border-b">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 pt-3 pb-2">
+      {/* ปุ่มย้อนกลับห้อยอยู่ในร่องซ้าย นอกคอลัมน์เนื้อหา — เลขที่ใบจึงเริ่มตรงกับ
+          ผู้ขอ/แผนก/วันที่บรรทัดล่างพอดี (คลาสชุดเดียวกับ `doc-form-header.tsx`
+          ที่ PO กับ PR เดิมใช้) */}
+      <div className="relative flex flex-wrap items-center gap-x-3 gap-y-2 px-4 pt-3 pb-2">
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
           onClick={onBack}
           aria-label={tc("goBack")}
+          className="absolute top-1/2 left-4 -translate-x-[calc(100%+0.5rem)] -translate-y-1/2 hover:bg-transparent dark:hover:bg-transparent"
         >
           <ArrowLeft />
         </Button>
-        <span className="text-muted-foreground text-sm">{t("entity")}</span>
+        {/* ไม่มีคำว่า "ใบขอซื้อ" นำหน้าเลขที่ — คนที่เปิดหน้านี้รู้อยู่แล้วว่ากำลังดู
+            อะไร (มาจากเมนู/รายการใบขอซื้อ) เลขที่ใบคือสิ่งเดียวที่บอกว่า "ใบไหน" */}
         <h1 className="text-xl font-semibold tracking-tight">
           {purchaseRequest?.pr_no ?? t("title")}
         </h1>

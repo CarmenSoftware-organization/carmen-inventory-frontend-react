@@ -1,7 +1,6 @@
-import { Check, ChevronRight, Circle, Dot, X } from "lucide-react";
+import { Ban, ChevronRight } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import { PR_STATUS, type PurchaseRequest } from "@/types/purchase-request";
 
@@ -16,46 +15,64 @@ interface TrailStep {
 }
 
 /**
- * ขั้นที่ผ่านแล้วกับขั้นปัจจุบันใช้ accent เดียวกัน (primary) แยกกันด้วย "ไอคอน"
- * ไม่ใช่ "สี" — เขียวสำหรับ done คือ accent ตัวที่สอง ซึ่ง DESIGN.md ห้าม
- * ขั้นปัจจุบันได้ ring บางๆ ไม่ใช่ ring หนาเรืองแสง
- * ปฏิเสธเป็น semantic จริง จึงคง destructive ไว้ (พื้นทึบ → ใช้ -foreground ได้)
+ * ไม่มีสี ไม่มีวงกลม — แยกสถานะด้วยน้ำหนัก/ความสว่างของตัวอักษรอย่างเดียว
+ *
+ * ของเดิมเป็น stepper: วงกลมทึบ + ไอคอน + ข้อความสองบรรทัดต่อขั้น กินความสูง
+ * ~56px เพื่อบอกเรื่องเดียวคือ "ตอนนี้อยู่ขั้นไหน" ซึ่งเป็นข้อมูลประกอบ ไม่ใช่งานหลัก
+ * ของหน้านี้ · แบบ breadcrumb บรรทัดเดียวบอกเท่ากันด้วยความสูง ~28px
+ *
+ * ปฏิเสธเป็นสถานะเดียวที่คงสีไว้ (destructive) พร้อมไอคอนกำกับ เพราะมันเปลี่ยน
+ * ผลลัพธ์ของทั้งใบ ไม่ใช่แค่บอกว่าเดินไปถึงไหน — และสีอย่างเดียวไม่ผ่าน a11y
  */
-const STATE_STYLE: Record<TrailState, string> = {
-  done: "bg-primary text-primary-foreground",
-  current:
-    "bg-primary text-primary-foreground ring-primary/25 ring-offset-background ring-2 ring-offset-2",
-  pending: "bg-muted text-muted-foreground",
-  rejected: "bg-destructive text-destructive-foreground",
+const STATE_TEXT: Record<TrailState, string> = {
+  done: "text-muted-foreground",
+  current: "text-foreground font-semibold",
+  pending: "text-muted-foreground/60",
+  rejected: "text-destructive font-medium",
 };
 
 /**
- * สร้างลำดับขั้นจากประวัติ workflow + stage ปัจจุบัน/ถัดไป
+ * สามขั้นเท่านั้น: ก่อนหน้า → ปัจจุบัน → ถัดไป (เหมือนหน้าเดิม `WorkflowStep`)
  *
- * ประวัติที่ backend ส่งมาเป็น "การกระทำที่เกิดไปแล้ว" (ใคร ทำอะไร เมื่อไหร่ ที่ stage
- * ไหน) ไม่มีข้อความประกอบระดับเอกสาร — ข้อความมีเฉพาะระดับรายการ จึงไม่โชว์ตรงนี้
+ * เคยไล่ทุกขั้นจากประวัติทั้งเส้น แล้วมันยาวจนต้องเลื่อนแนวนอนในใบที่ผ่านมาหลายมือ
+ * ทั้งที่คนอ่านต้องการรู้แค่ "มาจากใคร ตอนนี้ถึงใคร ต่อไปใคร" — ประวัติเต็มมีปุ่ม
+ * เปิดดูอยู่แล้วทางขวา
+ *
+ * ชื่อขั้นมาจาก field ของเอกสารตรงๆ ส่วนใคร/เมื่อไหร่ของขั้นก่อนหน้าไปหยิบจาก
+ * ประวัติรายการล่าสุดที่เกิดขึ้นที่ขั้นนั้น (หน้าเดิมไม่แสดงส่วนนี้)
  */
 function buildSteps(pr: PurchaseRequest | undefined): TrailStep[] {
-  if (!pr) return [];
+  if (!pr?.workflow_current_stage) return [];
   const history = pr.workflow_history ?? [];
-  const steps: TrailStep[] = history.map((h, i) => ({
-    key: `h-${i}-${h.datetime}`,
-    stage: h.current_stage || h.next_stage || "",
-    who: h.user?.name,
-    at: h.datetime,
-    state: h.action?.toLowerCase().includes("reject") ? "rejected" : "done",
-  }));
+  const steps: TrailStep[] = [];
 
-  if (pr.pr_status !== PR_STATUS.COMPLETED && pr.workflow_current_stage) {
+  const prev = pr.workflow_previous_stage;
+  if (prev && prev !== "-") {
+    const last = [...history]
+      .reverse()
+      .find((h) => (h.current_stage || h.next_stage) === prev);
     steps.push({
-      key: "current",
-      stage: pr.workflow_current_stage,
-      state: "current",
+      key: "prev",
+      stage: prev,
+      who: last?.user?.name,
+      at: last?.datetime,
+      state: last?.action?.toLowerCase().includes("reject")
+        ? "rejected"
+        : "done",
     });
   }
+
+  steps.push({
+    key: "current",
+    stage: pr.workflow_current_stage,
+    state: "current",
+  });
+
+  // จบแล้ว/ยกเลิกแล้วไม่มีขั้นถัดไป (เงื่อนไขเดียวกับ `pr-header.tsx`)
   if (
     pr.workflow_next_stage &&
     pr.workflow_next_stage !== "-" &&
+    pr.pr_status !== PR_STATUS.COMPLETED &&
     pr.pr_status !== PR_STATUS.VOIDED
   ) {
     steps.push({
@@ -64,6 +81,7 @@ function buildSteps(pr: PurchaseRequest | undefined): TrailStep[] {
       state: "pending",
     });
   }
+
   return steps;
 }
 
@@ -89,49 +107,49 @@ export function Pr2Trail({
   if (steps.length === 0) return null;
 
   return (
-    <div className="border-border bg-muted/20 flex items-center gap-1 overflow-x-auto border-b px-4 py-2">
-      {steps.map((step, i) => (
-        <div key={step.key} className="flex shrink-0 items-center gap-1">
-          {i > 0 && (
-            <ChevronRight
-              className="text-muted-foreground/50 size-4 shrink-0"
-              aria-hidden
-            />
-          )}
-          <div className="flex items-center gap-2 px-1">
-            <span
-              className={cn(
-                "flex size-5 shrink-0 items-center justify-center rounded-full",
-                STATE_STYLE[step.state],
+    <div className="border-border flex items-center gap-1.5 overflow-x-auto border-b px-4 py-1 text-xs">
+      {steps.map((step, i) => {
+        const meta =
+          step.state === "current"
+            ? tv2("yourTurn")
+            : step.state === "pending"
+              ? tv2("waiting")
+              : [step.who, step.at ? formatDate(step.at, dateFormat) : null]
+                  .filter(Boolean)
+                  .join(" ");
+        return (
+          <div key={step.key} className="flex min-w-0 items-center gap-1.5">
+            {i > 0 && (
+              <ChevronRight
+                className="text-muted-foreground/60 size-3.5 shrink-0"
+                aria-hidden
+              />
+            )}
+            {step.state === "rejected" && (
+              <Ban className="size-3 shrink-0" aria-hidden />
+            )}
+            {/* ชื่อขั้นบน คนที่ทำ/สถานะล่าง — คนละเรื่องกัน อ่านต่อกันบรรทัดเดียว
+                แล้วสมองต้องแยกเองว่าตรงไหนจบ · กว้างตามเนื้อหาแต่ไม่เกิน 5rem
+                ยาวเกินก็ตัดท้าย (ชื่อคนยาวไม่ควรดันขั้นถัดไปหลุดจอ) */}
+            <div className="flex min-w-0 max-w-20 flex-col leading-tight">
+              <span className={`truncate ${STATE_TEXT[step.state]}`}>
+                {step.stage}
+              </span>
+              {meta && (
+                <span className="text-muted-foreground/70 truncate text-[0.6875rem]">
+                  {meta}
+                </span>
               )}
-              aria-hidden
-            >
-              {step.state === "done" && <Check className="size-3" strokeWidth={3} />}
-              {step.state === "rejected" && <X className="size-3" strokeWidth={3} />}
-              {step.state === "current" && <Dot className="size-4" />}
-              {step.state === "pending" && <Circle className="size-2" />}
-            </span>
-            <div className="min-w-0 leading-tight">
-              <div className="truncate text-sm font-medium">{step.stage}</div>
-              <div className="text-muted-foreground truncate text-xs">
-                {step.state === "current"
-                  ? tv2("yourTurn")
-                  : step.state === "pending"
-                    ? tv2("waiting")
-                    : [step.who, step.at ? formatDate(step.at, dateFormat) : null]
-                        .filter(Boolean)
-                        .join(" · ")}
-              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {onShowHistory && (
         <Button
           type="button"
           variant="ghost"
-          size="sm"
+          size="xs"
           className="ml-auto shrink-0"
           onClick={onShowHistory}
         >

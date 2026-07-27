@@ -15,6 +15,8 @@ export interface Pr2Column {
   readonly key: string;
   /** key ของ i18n namespace "field" — undefined = คอลัมน์ไม่มีหัว (เช่น checkbox) */
   readonly labelKey?: string;
+  /** หัวคอลัมน์ที่เป็นสัญลักษณ์ ไม่ต้องแปล (เช่น "#") — ใช้เมื่อไม่มี labelKey */
+  readonly label?: string;
   /** ความกว้างคงที่ (rem) — ตายตัวทุกคอลัมน์เพราะ offset ของ sticky ต้องคำนวณล่วงหน้า */
   readonly rem: number;
   readonly align?: "right" | "center";
@@ -24,14 +26,16 @@ export interface Pr2Column {
 
 const COL = {
   select: { key: "select", rem: 2.25, align: "center" },
-  seq: { key: "seq", rem: 2.5, align: "right" },
-  status: { key: "status", labelKey: "status", rem: 6.5 },
+  // "#" อ่านออกทุกภาษา ไม่ต้องแปล · เรียงตามลำดับไม่ได้เพราะมันคือลำดับอยู่แล้ว
+  seq: { key: "seq", label: "#", rem: 2.25, align: "center", sortable: false },
+  status: { key: "status", labelKey: "status", rem: 8, align: "center" },
   product: { key: "product", labelKey: "product", rem: 12 },
   location: { key: "location", labelKey: "location", rem: 8 },
   requested: { key: "requested", labelKey: "requestedQty", rem: 8, align: "right" },
   approved: { key: "approved", labelKey: "approvedQty", rem: 8, align: "right" },
   foc: { key: "foc", labelKey: "foc", rem: 8, align: "right" },
-  vendor: { key: "vendor", labelKey: "vendor", rem: 10 },
+  // ชื่อผู้ขาย + เลขที่ใบเสนอราคาใต้ชื่อ ทั้งคู่ยาวกว่าคอลัมน์เดิมเป็นปกติ
+  vendor: { key: "vendor", labelKey: "vendor", rem: 14 },
   unitPrice: { key: "unitPrice", labelKey: "unitPrice", rem: 8, align: "right" },
   /**
    * อัตราแลกเปลี่ยน — หน้าเดิมมีช่องนี้ใน expand row (`pr-item-expand.tsx:310`)
@@ -40,13 +44,27 @@ const COL = {
   exchangeRate: {
     key: "exchangeRate",
     labelKey: "exchangeRate",
-    rem: 7,
+    rem: 9,
     align: "right",
   },
-  discount: { key: "discount", labelKey: "discount", rem: 7.5, align: "right" },
-  tax: { key: "tax", labelKey: "tax", rem: 9, align: "right" },
-  /** ยอด + สกุลเงิน — คอลัมน์ `amount` ของหน้าเดิม (`pr-item-table.tsx:291`) */
-  amount: { key: "total", labelKey: "amountCurShort", rem: 11, align: "right" },
+  /** ราคา × จำนวน ก่อนหักส่วนลด — ช่อง Sub. ของหน้าเดิม */
+  subtotal: { key: "subtotal", labelKey: "subtotal", rem: 7.5, align: "right" },
+  // สองช่องในกล่องเดียว (% + ยอด) เท่ากับหน้าเดิม จึงต้องกว้างพอทั้งคู่
+  discount: { key: "discount", labelKey: "discount", rem: 12, align: "right" },
+  /** ยอดรวมย่อย − ส่วนลด (ยังไม่รวมภาษี) — ช่อง Net ของหน้าเดิม */
+  net: { key: "net", labelKey: "net", rem: 7.5, align: "right" },
+  // โปรไฟล์ภาษี + ยอด อยู่ในกล่องเดียว ชื่อโปรไฟล์ยาวกว่าตัวเลขมาก
+  tax: { key: "tax", labelKey: "tax", rem: 15, align: "right" },
+  /** ยอดรวมของรายการ — คอลัมน์ `amount` ของหน้าเดิม (`pr-item-table.tsx:291`) */
+  amount: { key: "total", labelKey: "amount", rem: 9, align: "right" },
+  /**
+   * สกุลเงินของรายการ — แยกออกจากช่องยอด
+   *
+   * หน้าเดิมยัดสองอย่างไว้ในกล่องเดียว (ยอดเป็น input อ่านอย่างเดียว สกุลเป็น addon
+   * ที่กดเลือกได้) กล่องเดียวจึงมีทั้งส่วนที่แก้ได้และแก้ไม่ได้ ซึ่งอ่านไม่ออกว่า
+   * กดตรงไหนได้ · แยกเป็นคอลัมน์แล้วทั้งสองอย่างชัดในตัวเอง และเรียงตามสกุลได้ด้วย
+   */
+  currency: { key: "currency", labelKey: "currency", rem: 6 },
   deliveryPoint: { key: "deliveryPoint", labelKey: "deliveryPoint", rem: 9 },
   deliveryDate: { key: "deliveryDate", labelKey: "deliveryDate", rem: 9 },
   // หมายเหตุเป็น free text — เรียงแล้วไม่ได้ความหมายอะไร ปิดไป
@@ -92,6 +110,14 @@ function frozenColumns(
  *
  * @param showAction - หน้าเดิมตัดคอลัมน์ action ทิ้งเมื่ออยู่โหมดอ่านและไม่มีรายการ
  *   ไหนมีประวัติเลย (`pr-item-table.tsx:397`) — ไม่มีอะไรให้กดก็ไม่ต้องมีคอลัมน์
+ *
+ * ลำดับคอลัมน์อ่านเป็นเรื่องเดียวกันสามท่อน: **ของอะไร** (ตรึงซ้าย) → **เท่าไร
+ * ส่งเมื่อไร** (จำนวน + จุดส่ง/วันส่ง) → **เท่าไหร่เงิน** (ผู้ขายยันยอดรวม)
+ * จุดส่ง/วันส่งอยู่ท้ายท่อนจำนวนเพราะเป็นเรื่องของ "ของ" ไม่ใช่เรื่องเงิน — ผู้ขอ
+ * กรอกพร้อมจำนวน ส่วนราคาเป็นงานของฝ่ายจัดซื้อที่มาทีหลัง
+ *
+ * สกุลเงินมาก่อนคอลัมน์เงินทุกตัว (เหมือนช่อง Cur. ของหน้าเดิมที่อยู่หน้า U.Price)
+ * — มันคือหน่วยของตัวเลขที่ตามมา อ่านหน่วยก่อนแล้วค่อยอ่านเลขถึงจะถูกลำดับ
  */
 export function pr2Columns(
   isCreatorView = false,
@@ -103,9 +129,10 @@ export function pr2Columns(
     ? [
         ...frozen,
         COL.requested,
-        COL.amount,
+        COL.currency,
         COL.deliveryPoint,
         COL.deliveryDate,
+        COL.amount,
         COL.comment,
       ]
     : [
@@ -113,14 +140,17 @@ export function pr2Columns(
         COL.requested,
         COL.approved,
         COL.foc,
+        COL.currency,
+        COL.deliveryPoint,
+        COL.deliveryDate,
         COL.vendor,
         COL.unitPrice,
         COL.exchangeRate,
+        COL.subtotal,
         COL.discount,
+        COL.net,
         COL.tax,
         COL.amount,
-        COL.deliveryPoint,
-        COL.deliveryDate,
         COL.comment,
       ];
   return showAction ? [...body, COL.action] : body;
