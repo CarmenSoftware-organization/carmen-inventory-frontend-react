@@ -48,7 +48,7 @@ export function PoNotesSummary({
   return (
     <div className="grid grid-cols-2 gap-4">
       {showDescription && (
-        <Field className={plainText ? "gap-1" : undefined}>
+        <Field>
           <FieldLabel
             htmlFor="po-description"
             className={
@@ -73,7 +73,7 @@ export function PoNotesSummary({
         </Field>
       )}
       {showRemarks && (
-        <Field className={plainText ? "gap-1" : undefined}>
+        <Field>
           <FieldLabel
             htmlFor="po-remarks"
             className={
