@@ -352,6 +352,28 @@
 }
 
 @layer base {
+  /* ── Font scale — ผู้ใช้ปรับได้จากเมนูโปรไฟล์ (lib/font-scale.ts) ──
+     หน่วยเป็น % ไม่ใช่ px เพื่อไม่ทับค่า default font size ที่ผู้ใช้ตั้งไว้ใน
+     browser (WCAG 1.4.4 Resize Text) — คนที่ตั้งไว้ 20px ยังได้ 20px ที่ระดับ
+     normal ไม่ใช่ถูกเราบังคับกลับเป็น 16
+     ทั้ง type ladder ข้างบนและ spacing/breakpoint ของ Tailwind วัดเป็น rem จึง
+     กวาดตามทั้งหมด: micro-floor 8px → 7.5–11px, body 17px → 15.9–23.4px
+     `normal` ไม่มี rule ของตัวเอง — มันคือ 100% ของ html เอง */
+  html {
+    font-size: 100%;
+  }
+  html.font-scale-small {
+    font-size: 93.75%; /* 15px เมื่อ browser default = 16 */
+  }
+  html.font-scale-big {
+    font-size: 112.5%; /* 18px */
+  }
+  html.font-scale-bigger {
+    font-size: 125%; /* 20px */
+  }
+  html.font-scale-biggest {
+    font-size: 137.5%; /* 22px */
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -518,6 +540,9 @@
     height: auto !important;
     overflow: visible !important;
     background: white !important;
+    /* งานพิมพ์ต้องได้ขนาดคงที่ ไม่ขึ้นกับ font scale บนจอ — ไม่งั้นเอกสารเดียวกัน
+       พิมพ์จากสองเครื่องได้จำนวนหน้าไม่เท่ากัน */
+    font-size: 100% !important;
   }
 
   /* Hide everything by default */
