@@ -31,6 +31,7 @@ import { formatName } from "@/lib/name";
 import { cn } from "@/lib/utils";
 import { LangSwitch } from "./lang-switch";
 import { ThemeSwitch } from "./theme-switch";
+import { FontScaleSwitch } from "./font-scale-switch";
 
 function UserAvatar({
   avatarUrl,
@@ -195,6 +196,7 @@ export function UserProfile() {
         </DropdownMenuLabel>
         <LangSwitch />
         <ThemeSwitch />
+        <FontScaleSwitch />
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer gap-2 rounded-md px-2 py-2 text-sm"
