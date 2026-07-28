@@ -53,10 +53,10 @@ export function EmptyImage({ onAddFiles }: Props) {
           <p className="text-sm font-semibold">
             {isDragging ? t("imgDrop") : t("imgAdd")}
           </p>
-          <p className="text-[0.6875rem] opacity-80">
+          <p className="text-micro opacity-80">
             {t("imgDragBrowse")}
           </p>
-          <p className="text-[0.625rem] opacity-60">
+          <p className="text-micro-legal opacity-60">
             {ALLOWED_EXTENSIONS.join(", ").toUpperCase()} · max{" "}
             {formatBytes(MAX_FILE_SIZE)}
           </p>

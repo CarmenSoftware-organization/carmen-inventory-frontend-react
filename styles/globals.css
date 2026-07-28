@@ -88,6 +88,29 @@
   --scrollbar-thumb: oklch(0.82 0 0 / 0.6);
   --selected: oklch(0.4714 0.1794 258.7 / 0.08);
   --overlay: oklch(0.16 0 0 / 0.5);
+  /* search-match highlight — was bg-yellow-200/80 inline in tree-node.tsx */
+  --highlight: oklch(0.92 0.13 100 / 0.8);
+  --highlight-foreground: oklch(0.28 0.06 100);
+
+  /* ── Status inks — the same hues, but as TEXT ──
+     The status tokens above are FILL colours: each has a `-foreground` for the
+     label that sits on it, and their lightness is tuned for that job. Measured
+     as `text-*` on the light canvas they land at warning 1.93 · success 1.99 ·
+     positive 3.20 · info 4.31 — all under WCAG AA's 4.5:1, and this app's dense
+     tier is 10–11px, which is small text, so the 3:1 large-text allowance does
+     not apply. (They all pass in dark mode, so the light values were in effect
+     tuned for the dark canvas only.)
+     Same hue and chroma, lightness solved so the worst surface the text can
+     land on still clears 4.6:1 — in light mode that is `--accent` (0.93), the
+     darkest light surface; in dark mode `--accent` (0.29), the lightest dark
+     one. Use these for `text-*`; keep the plain tokens for `bg-*`/`border-*`.
+     lib/__tests__/status-ink-contrast.test.ts recomputes this from the CSS. */
+  --warning-ink: oklch(0.518 0.15 75);
+  --success-ink: oklch(0.49 0.11 188.43);
+  --info-ink: oklch(0.495 0.135 230);
+  --positive-ink: oklch(0.49 0.18 145);
+  --negative-ink: oklch(0.538 0.2 24.11);
+  --brand-ink: oklch(0.518 0.1794 258.7);
 }
 
 .dark {
@@ -172,6 +195,19 @@
   --scrollbar-thumb: oklch(0.44 0 0 / 0.6);
   --selected: oklch(0.5852 0.1706 253.27 / 0.16);
   --overlay: oklch(0 0 0 / 0.7);
+  /* search-match highlight — was bg-yellow-800/40 inline in tree-node.tsx */
+  --highlight: oklch(0.45 0.10 100 / 0.4);
+  --highlight-foreground: oklch(0.92 0.09 100);
+
+  /* ── Status inks ── see the light-mode block for why these exist.
+     `brand` is the mirror of the others: fine as light-mode text (6.60), 4.28
+     on dark — so it needs an ink here even though the light one is a formality. */
+  --warning-ink: oklch(0.67 0.15 75);
+  --success-ink: oklch(0.652 0.11 188.43);
+  --info-ink: oklch(0.655 0.135 230);
+  --positive-ink: oklch(0.647 0.18 145);
+  --negative-ink: oklch(0.69 0.2 24.11);
+  --brand-ink: oklch(0.67 0.1794 258.7);
 }
 
 @theme inline {
@@ -243,10 +279,59 @@
   --color-scrollbar-thumb: var(--scrollbar-thumb);
   --color-selected: var(--selected);
   --color-overlay: var(--overlay);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  /* status inks — for text; the plain status tokens stay for fills */
+  --color-warning-ink: var(--warning-ink);
+  --color-success-ink: var(--success-ink);
+  --color-info-ink: var(--info-ink);
+  --color-positive-ink: var(--positive-ink);
+  --color-negative-ink: var(--negative-ink);
+  --color-brand-ink: var(--brand-ink);
   /* font — Geist loaded by Next.js layout */
-  /* Apple-style system stack — SF Pro on Apple platforms, Inter/system fallback */
-  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
+  /* Apple-style system stack — SF Pro on Apple platforms, Inter/system fallback.
+     Thai families appended: font fallback is PER-GLYPH, so Latin still resolves
+     from SF Pro/Inter while Thai glyphs (absent there) fall to the first Thai
+     face available. Without these the Thai UI renders in whatever the OS picks
+     first — Thonburi on macOS, Leelawadee UI on Windows, Noto on Android —
+     three different faces with three different vertical metrics. */
+  --font-sans: -apple-system, BlinkMacSystemFont, system-ui, "Inter", "Segoe UI", Roboto,
+    "Sarabun", "Noto Sans Thai", "IBM Plex Sans Thai", "Leelawadee UI", "Thonburi", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ── Dense-ERP type ladder — implements the `typography` block of docs/DESIGN.md ──
+     That ladder was documented in prose but never existed as CSS, so dense
+     call-sites hardcode literals instead: text-[0.625rem] ×249, text-[0.6875rem]
+     ×241, text-[0.5625rem] ×80, text-[0.5rem] ×22, text-[10px] ×11 (~635 total,
+     in near-duplicate values — 10px is spelled two ways). The impeccable
+     `design-system-font-size` hook enforces DESIGN.md, so until these tokens
+     exist every dense component is forced to violate it.
+     Names match DESIGN.md exactly — one vocabulary across doc, hook and code.
+
+     LINE-HEIGHT DEVIATION: DESIGN.md sets 1.0 on this tier, inherited from an
+     analysis of Apple's Latin-only marketing pages. Thai stacks two levels of
+     diacritics above the baseline (สระบน + วรรณยุกต์), which clip at 1.0. The
+     tiers that carry Thai sentence text use 1.35; micro-eyebrow keeps 1.0
+     because it is uppercase — a case Thai does not have. */
+  /* A size token sets SIZE and a safe default leading — never weight, never
+     case. DESIGN.md describes micro-eyebrow as "600 + wide tracking uppercase",
+     but baking font-weight into a text-* utility makes it silently restyle any
+     call-site that did not already say font-semibold (32 of 102 in the app), and
+     Tailwind's own text-* utilities never do this. Weight/tracking/case stay
+     explicit at the call-site; the token only guarantees the step is on-ladder. */
+  --text-micro-floor: 0.5rem;         /* 8px — tightest micro-grid cells only */
+  --text-micro-floor--line-height: 1.2;
+  --text-micro-eyebrow: 0.5625rem;    /* 9px — uppercase badge/chip eyebrows */
+  --text-micro-eyebrow--line-height: 1.2;
+  --text-micro-legal: 0.625rem;       /* 10px — inline meta, timestamps, captions */
+  --text-micro-legal--line-height: 1.35;
+  --text-micro-legal--letter-spacing: -0.08px;
+  --text-micro: 0.6875rem;            /* 11px — count chips, tabular numbers */
+  --text-micro--line-height: 1.35;
+  --text-micro--letter-spacing: -0.075px;
+  --text-fine-print: 0.75rem;         /* 12px — dense body; same size as text-xs */
+  --text-fine-print--line-height: 1.4;
+  --text-fine-print--letter-spacing: -0.12px;
   /* radius */
   --radius-sm: calc(var(--radius) - 0.25rem);
   --radius-md: calc(var(--radius) - 0.125rem);
@@ -267,6 +352,34 @@
 }
 
 @layer base {
+  /* ── Font scale — ผู้ใช้ปรับได้จากเมนูโปรไฟล์ (lib/font-scale.ts) ──
+     หน่วยเป็น % ไม่ใช่ px เพื่อไม่ทับค่า default font size ที่ผู้ใช้ตั้งไว้ใน
+     browser (WCAG 1.4.4 Resize Text) — คนที่ตั้งไว้ 20px ยังได้ 20px ที่ระดับ
+     normal ไม่ใช่ถูกเราบังคับกลับเป็น 16
+     ทั้ง type ladder ข้างบนและ spacing (padding/gap/ฯลฯ) ที่วัดเป็น rem จึงกวาด
+     ตามเป็นสัดส่วนเดียว: micro-floor 8px → 7.5–11px, body 17px → 15.9–23.4px
+     แต่ breakpoint ของ Tailwind (`sm:`, `md:`, …) ไม่ขยับตาม — ตาม CSS Values 4 /
+     Media Queries 4 หน่วย `rem` ใน media query คำนวณจาก initial font-size ของ
+     browser เสมอ ไม่ใช่จากค่าที่ rule นี้ตั้ง (ยืนยันจาก build CSS จริงแล้ว) ส่วน
+     `@container` (เช่น field.tsx) คำนวณจาก computed font-size ของ root จริง จึง
+     scale ตามเหมือน property values — ครึ่งหนึ่งของระบบ responsive scale ตาม
+     อีกครึ่งไม่
+     `normal` ไม่มี rule ของตัวเอง — มันคือ 100% ของ html เอง */
+  html {
+    font-size: 100%;
+  }
+  html.font-scale-small {
+    font-size: 93.75%; /* 15px เมื่อ browser default = 16 */
+  }
+  html.font-scale-big {
+    font-size: 112.5%; /* 18px */
+  }
+  html.font-scale-bigger {
+    font-size: 125%; /* 20px */
+  }
+  html.font-scale-biggest {
+    font-size: 137.5%; /* 22px */
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -344,6 +457,45 @@
   animation: pulse-soft 3s ease-in-out infinite;
 }
 
+/* ── Reduced motion ──────────────────────────────────────────────
+   The app carries ~273 `transition-*`, ~142 `animate-*` and four global
+   transition rules, none of which honoured this preference before.
+
+   The blanket rule below is the usual recipe, but the usual recipe is wrong
+   here on its own: `animation-iteration-count: 1` freezes the 81 loading
+   spinners and 12 skeletons after a single cycle, and a frozen spinner reads
+   as a hung request — it removes information rather than motion. So the two
+   animations that REPORT STATE are restored explicitly, referencing the theme
+   vars so they cannot drift from the defaults.
+
+   Everything else stops, judged case by case:
+     animate-pulse-soft  decorative SVG shapes in the empty state
+     animate-ping        a ring behind the current workflow step, whose
+                         "you are here" is already carried by the step's styling
+     animate-float       defined but unused
+     fade-in-*           entrance motion; the content is what matters
+     active:scale-95     press feedback becomes instant instead of animated */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* status indicators keep running — they carry information, not decoration */
+  .animate-spin {
+    animation: var(--animate-spin) !important;
+  }
+  .animate-pulse {
+    animation: var(--animate-pulse) !important;
+  }
+}
+
 /* ERP gradient utilities */
 .space-sidebar-gradient {
   background: var(--sidebar);
@@ -369,9 +521,12 @@
   background: var(--background);
 }
 
-/* Badge inside DataGrid table: compact size */
+/* Badge inside DataGrid table: compact size.
+   8px is the sanctioned micro-grid floor from docs/DESIGN.md (`micro-eyebrow`
+   "compresses to 8px in the tightest micro-grid cells") — now referenced as a
+   token instead of a literal. Holds counts/short codes, so line-height 1 stays. */
 [data-slot="data-grid-table"] [data-slot="badge"] {
-  font-size: 0.5rem;
+  font-size: var(--text-micro-floor);
   line-height: 1;
   height: 0.875rem;
   min-width: 0.875rem;
@@ -391,6 +546,9 @@
     height: auto !important;
     overflow: visible !important;
     background: white !important;
+    /* งานพิมพ์ต้องได้ขนาดคงที่ ไม่ขึ้นกับ font scale บนจอ — ไม่งั้นเอกสารเดียวกัน
+       พิมพ์จากสองเครื่องได้จำนวนหน้าไม่เท่ากัน */
+    font-size: 100% !important;
   }
 
   /* Hide everything by default */

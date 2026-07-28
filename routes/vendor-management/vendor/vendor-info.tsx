@@ -107,7 +107,7 @@ function InfoRow({
       <div className="border-border/40 bg-background/40 grid grid-cols-[1fr_2fr_auto] items-center gap-3 rounded-lg border px-3 py-2">
         <FieldPlainText>{item.label}</FieldPlainText>
         <FieldPlainText>{item.value}</FieldPlainText>
-        <span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-[0.625rem] font-semibold tracking-widest uppercase">
+        <span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-micro-legal font-semibold tracking-widest uppercase">
           {item.data_type}
         </span>
       </div>
@@ -182,7 +182,7 @@ function EmptyInfo({
         <Info className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
-      <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
+      <p className="text-muted-foreground mt-0.5 text-micro">
         {description}
       </p>
       {!isView && (

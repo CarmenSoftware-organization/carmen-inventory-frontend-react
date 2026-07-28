@@ -78,10 +78,10 @@ export function ProductPanel({
           onCheckedChange={toggleAllVisible}
           disabled={disabled || visible.length === 0}
         />
-        <span className="text-foreground text-[0.6875rem] font-semibold tracking-widest uppercase">
+        <span className="text-foreground text-micro font-semibold tracking-widest uppercase">
           {title}
         </span>
-        <span className="bg-primary/15 text-primary ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.5625rem] font-semibold tracking-wider tabular-nums">
+        <span className="bg-primary/15 text-primary ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-micro-eyebrow font-semibold tracking-wider tabular-nums">
           {totalLabel}
         </span>
       </div>
@@ -170,7 +170,7 @@ function PanelEmpty({ hasSearch }: { readonly hasSearch: boolean }) {
       <div className="bg-muted/60 text-muted-foreground/70 flex size-9 items-center justify-center rounded-full">
         <Icon className="size-4" aria-hidden="true" />
       </div>
-      <span className="text-muted-foreground text-[0.6875rem]">
+      <span className="text-muted-foreground text-micro">
         {hasSearch ? tc("transferNoMatches") : tc("transferNoItems")}
       </span>
     </div>

@@ -31,6 +31,7 @@ import { formatName } from "@/lib/name";
 import { cn } from "@/lib/utils";
 import { LangSwitch } from "./lang-switch";
 import { ThemeSwitch } from "./theme-switch";
+import { FontScaleSwitch } from "./font-scale-switch";
 
 function UserAvatar({
   avatarUrl,
@@ -72,7 +73,7 @@ function UserAvatar({
       <AvatarFallback
         className={cn(
           "bg-primary text-primary-foreground font-semibold",
-          isLarge ? "text-sm" : "text-[0.625rem]",
+          isLarge ? "text-sm" : "text-micro-legal",
         )}
       >
         {fallbackText}
@@ -132,7 +133,7 @@ export function UserProfile() {
         <div className="hidden text-xs leading-tight sm:grid">
           <span className="w-content truncate font-semibold">{name}</span>
           <span
-            className={`w-full truncate text-right text-[0.625rem] ${department ? "text-muted-foreground" : "text-warning"}`}
+            className={`w-full truncate text-right text-micro-legal ${department ? "text-muted-foreground" : "text-warning-ink"}`}
           >
             {department || t("noDepartment")}
           </span>
@@ -160,18 +161,18 @@ export function UserProfile() {
           />
           <div className="grid min-w-0 flex-1 gap-0.5 leading-tight">
             <span className="truncate text-sm font-semibold">{name}</span>
-            <span className="text-muted-foreground truncate text-[0.6875rem]">
+            <span className="text-muted-foreground truncate text-micro">
               {profile.email}
             </span>
             <span
-              className={`truncate text-[0.6875rem] ${department ? "text-muted-foreground" : "text-warning"}`}
+              className={`truncate text-micro ${department ? "text-muted-foreground" : "text-warning-ink"}`}
             >
               {department || t("noDepartment")}
             </span>
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-muted-foreground px-2 pt-1 pb-0.5 text-[0.625rem] font-semibold tracking-wider uppercase">
+        <DropdownMenuLabel className="text-muted-foreground px-2 pt-1 pb-0.5 text-micro-legal font-semibold tracking-wider uppercase">
           {t("sectionAccount")}
         </DropdownMenuLabel>
         <DropdownMenuItem
@@ -190,11 +191,12 @@ export function UserProfile() {
           <KeyRound className="size-4" />
           {t("changePassword")}
         </DropdownMenuItem>
-        <DropdownMenuLabel className="text-muted-foreground px-2 pt-2 pb-0.5 text-[0.625rem] font-semibold tracking-wider uppercase">
+        <DropdownMenuLabel className="text-muted-foreground px-2 pt-2 pb-0.5 text-micro-legal font-semibold tracking-wider uppercase">
           {t("sectionPreferences")}
         </DropdownMenuLabel>
         <LangSwitch />
         <ThemeSwitch />
+        <FontScaleSwitch />
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer gap-2 rounded-md px-2 py-2 text-sm"

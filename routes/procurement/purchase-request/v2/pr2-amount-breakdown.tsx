@@ -114,10 +114,10 @@ export const Pr2AmountBreakdown = memo(function Pr2AmountBreakdown({
               {isForeign && (
                 <tr>
                   <td />
-                  <td className="text-muted-foreground pr-2 text-right text-[0.6875rem]">
+                  <td className="text-muted-foreground pr-2 text-right text-micro">
                     {currencyCode}
                   </td>
-                  <td className="text-muted-foreground text-right text-[0.6875rem]">
+                  <td className="text-muted-foreground text-right text-micro">
                     {baseCurrencyCode}
                   </td>
                 </tr>

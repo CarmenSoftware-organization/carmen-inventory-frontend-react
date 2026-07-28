@@ -312,7 +312,7 @@ const InputCustom = forwardRef<HTMLInputElement, InputProps>(
           baseClasses,
           "absolute left-3 pointer-events-none transform-gpu text-muted-foreground",
           derivedStates.shouldShrinkLabel
-            ? "text-[10px] top-0.5 -translate-y-0"
+            ? "text-micro-legal top-0.5 -translate-y-0"
             : "top-2.5 text-xs translate-y-0",
         );
       }

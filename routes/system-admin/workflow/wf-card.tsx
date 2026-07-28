@@ -62,7 +62,7 @@ export default function WfCard({
       <CardHeader className="px-2 py-2">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -134,7 +134,7 @@ export default function WfCard({
           </div>
         </div>
         {updatedRelative && (
-          <div className="text-muted-foreground flex items-center gap-1 text-[0.6875rem]">
+          <div className="text-muted-foreground flex items-center gap-1 text-micro">
             <Clock className="size-2.5" aria-hidden="true" />
             <span>{updatedRelative}</span>
             {updated?.name && (

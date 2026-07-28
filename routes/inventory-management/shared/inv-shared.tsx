@@ -14,12 +14,12 @@ type KpiTone = "primary" | "info" | "warning" | "success";
 // appears once — as the icon glyph (single signal), never as a tinted box.
 const KPI_TONE_MAP: Record<KpiTone, { iconBg: string; text: string }> = {
   primary: { iconBg: "bg-muted text-primary", text: "text-primary" },
-  info: { iconBg: "bg-muted text-info", text: "text-info" },
+  info: { iconBg: "bg-muted text-info-ink", text: "text-info-ink" },
   warning: {
-    iconBg: "bg-muted text-warning",
+    iconBg: "bg-muted text-warning-ink",
     text: "text-warning-foreground",
   },
-  success: { iconBg: "bg-muted text-success", text: "text-success" },
+  success: { iconBg: "bg-muted text-success-ink", text: "text-success-ink" },
 };
 
 export function KpiTile({
@@ -57,7 +57,7 @@ export function KpiTile({
         <Icon className="size-4" />
       </div>
       <div className="min-w-0 flex-1 text-left">
-        <div className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
+        <div className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
           {label}
         </div>
         <div
@@ -99,7 +99,7 @@ export function StatusHero({
 
   return (
     <div className="bg-card hidden rounded-lg border p-4 lg:block">
-      <div className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
+      <div className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
         {labels.progressTitle}
       </div>
       <div className="mt-1 flex items-baseline gap-1.5">
@@ -107,7 +107,7 @@ export function StatusHero({
           {doneDisplay}
         </span>
         <span className="text-muted-foreground text-sm">/ {totalDisplay}</span>
-        <span className="bg-primary/10 text-primary ml-auto rounded-full px-1.5 py-0.5 text-[0.625rem] font-semibold tabular-nums">
+        <span className="bg-primary/10 text-primary ml-auto rounded-full px-1.5 py-0.5 text-micro-legal font-semibold tabular-nums">
           {pct}%
         </span>
       </div>
@@ -125,7 +125,7 @@ export function StatusHero({
         <HeroCell k={labels.done} v={done} />
       </div>
 
-      <div className="text-muted-foreground mt-2 text-[0.6875rem]">
+      <div className="text-muted-foreground mt-2 text-micro">
         {labels.heroFooter}
       </div>
     </div>
@@ -135,12 +135,12 @@ export function StatusHero({
 function HeroCell({ k, v }: { readonly k: string; readonly v: number }) {
   return (
     <div className="bg-card px-2 py-1.5">
-      <div className="text-muted-foreground text-[0.5rem] font-semibold tracking-widest uppercase">
+      <div className="text-muted-foreground text-micro-floor font-semibold tracking-widest uppercase">
         {k}
       </div>
       <div
         className={cn(
-          "mt-0.5 text-[0.6875rem] font-semibold tabular-nums",
+          "mt-0.5 text-micro font-semibold tabular-nums",
           v ? "text-foreground" : "text-muted-foreground/60",
         )}
       >
@@ -304,7 +304,7 @@ export function SectionHeader({
         <h2 className="text-foreground text-sm font-semibold tracking-tight">
           {title}
         </h2>
-        <span className="text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold tabular-nums">
+        <span className="text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5 text-micro-legal font-semibold tabular-nums">
           {count}
         </span>
       </div>
@@ -347,7 +347,7 @@ export function LocationAvatar({
         </div>
       </div>
       {typeof index === "number" && (
-        <div className="bg-foreground text-background absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full text-[0.5625rem] font-semibold">
+        <div className="bg-foreground text-background absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full text-micro-eyebrow font-semibold">
           {String(index + 1).padStart(2, "0")}
         </div>
       )}
@@ -379,7 +379,7 @@ export function LocationHeading({
       </Link>
       <Link
         to={href}
-        className="text-muted-foreground hover:text-foreground shrink-0 text-[0.625rem] tracking-wide uppercase transition-colors"
+        className="text-muted-foreground hover:text-foreground shrink-0 text-micro-legal tracking-wide uppercase transition-colors"
       >
         {code}
       </Link>
@@ -425,7 +425,7 @@ export function ProductAvatar({
         </div>
       </div>
       {typeof index === "number" && (
-        <div className="bg-foreground text-background absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full text-[0.5625rem] font-semibold">
+        <div className="bg-foreground text-background absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full text-micro-eyebrow font-semibold">
           {String(index + 1).padStart(2, "0")}
         </div>
       )}

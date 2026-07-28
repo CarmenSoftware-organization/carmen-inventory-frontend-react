@@ -136,7 +136,7 @@ export function Pr2Trail({
                 {step.stage}
               </span>
               {meta && (
-                <span className="text-muted-foreground/70 truncate text-[0.6875rem]">
+                <span className="text-muted-foreground/70 truncate text-micro">
                   {meta}
                 </span>
               )}

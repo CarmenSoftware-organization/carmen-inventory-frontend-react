@@ -41,18 +41,18 @@ export function ScHistoryCard({ spotCheck, onClick }: ScHistoryCardProps) {
       />
 
       {/* Location */}
-      <div className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-[0.6875rem]">
+      <div className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-micro">
         <MapPin className="size-2.5 shrink-0" aria-hidden="true" />
         <span className="text-foreground/85 font-semibold">
           {spotCheck.location_name}
         </span>
-        <span className="text-muted-foreground/80 text-[0.625rem] uppercase">
+        <span className="text-muted-foreground/80 text-micro-legal uppercase">
           {spotCheck.location_code}
         </span>
       </div>
 
       {/* Footer meta */}
-      <div className="border-border/40 text-muted-foreground mt-2 flex flex-wrap items-center gap-3 border-t pt-2 text-[0.6875rem]">
+      <div className="border-border/40 text-muted-foreground mt-2 flex flex-wrap items-center gap-3 border-t pt-2 text-micro">
         <span className="inline-flex items-center gap-1">
           <Calendar className="size-2.5" aria-hidden="true" />
           <span className="font-semibold">{tfl("startDate")}</span>

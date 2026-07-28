@@ -31,7 +31,7 @@ function TabArrayCount({ form, name }: Props) {
     <Badge
       variant="secondary"
       size="xs"
-      className="ml-1.5 h-4 min-w-4 px-1 text-[0.625rem]"
+      className="ml-1.5 h-4 min-w-4 px-1 text-micro-legal"
     >
       {count}
     </Badge>

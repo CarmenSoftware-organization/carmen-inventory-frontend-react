@@ -1,5 +1,33 @@
 import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { extendTailwindMerge } from "tailwind-merge"
+
+/**
+ * tailwind-merge รู้จักแค่ scale มาตรฐานของ Tailwind กับ arbitrary value —
+ * custom font-size ที่นิยามใน `@theme` (บันได dense-ERP ของ docs/DESIGN.md)
+ * มันไม่รู้จัก จึงไม่ถือว่าขัดแย้งกับ text-sm/text-xs แล้วเก็บไว้ทั้งคู่
+ * ปล่อยให้ลำดับใน CSS ตัดสิน ซึ่งชนะบ้างแพ้บ้างแบบเดาไม่ได้
+ *
+ * เคสจริงที่เจอ: `cn("… text-sm …", "text-micro-legal")` บน AvatarFallback
+ * เก็บทั้งสอง class แล้ว text-sm ชนะ → ตัวย่อในนาวบาร์โตจาก 10px เป็น 14px
+ * ตอนที่ยังเป็น `text-[0.625rem]` ไม่พังเพราะ twMerge รู้จัก arbitrary value
+ * และ dedupe ให้ถูก — พังตอนย้ายมาใช้ token ชื่อเฉพาะ
+ *
+ * ลงทะเบียนบันไดไว้ที่นี่ เพิ่มขั้นใหม่ใน globals.css เมื่อไหร่ ต้องเพิ่มที่นี่ด้วย
+ * (มี lib/__tests__/cn-font-size.test.ts กันไว้)
+ */
+const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      "font-size": [
+        "text-micro-floor",
+        "text-micro-eyebrow",
+        "text-micro-legal",
+        "text-micro",
+        "text-fine-print",
+      ],
+    },
+  },
+})
 
 /**
  * รวม className แบบ conditional และ merge Tailwind classes ที่ซ้อนทับ

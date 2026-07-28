@@ -146,3 +146,9 @@ non-file paths, immutable caching on `/assets/*`, no-cache on `index.html` +
 - Both deploy scripts delete the dev `config.json` from `dist/` before syncing and
   exclude `config.json` from the sync, so the environment's config on the bucket
   is never overwritten.
+- **If a `script-src` CSP is ever introduced** (none exists today, on any target):
+  the inline font-scale script in `index.html` needs its hash allow-listed (or
+  `'unsafe-inline'`), otherwise it gets blocked and the page flashes from `normal`
+  to the user's saved size on every load — `main.tsx` also calls `applyScale` as a
+  fallback, but only after the JS bundle loads, so the flash still happens before
+  React mounts.

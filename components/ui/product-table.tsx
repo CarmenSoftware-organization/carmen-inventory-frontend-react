@@ -181,10 +181,10 @@ export function ProductTable({ products, className }: ProductTableProps) {
             placeholder={t("search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-6 pl-8 text-[10px]"
+            className="h-6 pl-8 text-micro-legal"
           />
         </div>
-        <span className="text-muted-foreground text-[0.6875rem]">
+        <span className="text-muted-foreground text-micro">
           {filteredProducts.length} / {products.length}
         </span>
       </div>

@@ -104,7 +104,7 @@ function PeriodSelectorCard({
             </h2>
             {periodBadge}
           </div>
-          <div className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-[0.6875rem]">
+          <div className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-micro">
             <Calendar className="size-2.5 shrink-0" aria-hidden="true" />
             <span>{t("periodEnds", { date: endDate })}</span>
           </div>
@@ -113,7 +113,7 @@ function PeriodSelectorCard({
         <p className="text-muted-foreground text-xs">{emptyText}</p>
       )}
       <div>
-        <label className="text-muted-foreground mb-1 flex items-center gap-1 text-[0.5625rem] font-semibold tracking-widest uppercase">
+        <label className="text-muted-foreground mb-1 flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
           <CalendarRange className="size-2.5" aria-hidden="true" />
           {tfl("physicalCountPeriod")}
         </label>

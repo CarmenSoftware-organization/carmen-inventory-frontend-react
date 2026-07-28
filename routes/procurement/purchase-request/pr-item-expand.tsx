@@ -380,7 +380,7 @@ export function PrItemExpand({
                 </FieldLabel>
                 {/* tax rate เป็น plain text (มาจาก profile — override ไม่ได้) */}
                 {taxRate > 0 && (
-                  <span className="text-muted-foreground text-[0.625rem] font-semibold tabular-nums">
+                  <span className="text-muted-foreground text-micro-legal font-semibold tabular-nums">
                     {taxRate}%
                   </span>
                 )}

@@ -82,9 +82,9 @@ const buildColumns = (
             <Badge
               size="xs"
               variant={'ghost'}
-              className="gap-1 text-[0.625rem]"
+              className="gap-1 text-micro-legal"
             >
-              <Crown className="size-3 text-warning" />
+              <Crown className="size-3 text-warning-ink" />
               {/*{t("preferred")}*/}
             </Badge>
           )}
@@ -123,7 +123,7 @@ const buildColumns = (
               <Badge
                 variant="success-light"
                 size="xs"
-                className="text-[0.625rem]"
+                className="text-micro-legal"
               >
                 {t("best")}
               </Badge>
@@ -147,7 +147,7 @@ const buildColumns = (
         const f = formatDate(from, dateFormat);
         const toDate = formatDate(to, dateFormat);
         return f && toDate ? (
-          <span className="text-[0.6875rem] tabular-nums">
+          <span className="text-micro tabular-nums">
             {f} → {toDate}
           </span>
         ) : (
@@ -304,7 +304,7 @@ export function PrPricelistDialog({
             <DialogDescription className="sr-only">
               {t("priceListComparison")}
             </DialogDescription>
-            <div className="text-muted-foreground mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem]">
+            <div className="text-muted-foreground mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-micro">
               <span className="inline-flex items-center gap-1">
                 <Package className="size-3" />
                 {tfl("requested")}:{" "}

@@ -143,7 +143,7 @@ export function LookupCurrency({
             side="top"
             className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
           >
-            <p className="text-foreground/60 text-[0.6875rem] font-semibold">
+            <p className="text-foreground/60 text-micro font-semibold">
               {selected?.code} ({selected?.symbol})
             </p>
             <p className="text-xs font-semibold">{selected?.name}</p>

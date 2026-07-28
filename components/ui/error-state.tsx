@@ -47,7 +47,7 @@ export function ErrorState({ message, onRetry, errorId }: ErrorStateProps) {
           type="button"
           onClick={handleCopy}
           aria-label={t("copyErrorId")}
-          className="border-border/60 bg-muted/40 hover:bg-muted text-muted-foreground inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[0.6875rem] transition-colors"
+          className="border-border/60 bg-muted/40 hover:bg-muted text-muted-foreground inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-micro transition-colors"
         >
           <span className="font-semibold tracking-widest uppercase">
             {t("errorId")}
@@ -55,7 +55,7 @@ export function ErrorState({ message, onRetry, errorId }: ErrorStateProps) {
           <span>·</span>
           <span>{errorId}</span>
           {copied ? (
-            <Check className="text-success size-3" aria-hidden="true" />
+            <Check className="text-success-ink size-3" aria-hidden="true" />
           ) : (
             <Copy className="size-3" aria-hidden="true" />
           )}

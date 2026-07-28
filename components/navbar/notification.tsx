@@ -147,7 +147,7 @@ export default function Notification() {
           <Bell className="h-3.5 w-3.5 transition-transform group-hover:-rotate-12" />
           {notificationCount > 0 && (
             <>
-              <span className="bg-destructive ring-background absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[0.5625rem] font-semibold text-white ring-2">
+              <span className="bg-destructive ring-background absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-micro-eyebrow font-semibold text-white ring-2">
                 {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             </>
@@ -166,7 +166,7 @@ export default function Notification() {
               {t("notifications")}
             </span>
             {notificationCount > 0 && (
-              <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[0.625rem] font-semibold tabular-nums">
+              <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-micro-legal font-semibold tabular-nums">
                 {notificationCount}
               </span>
             )}
@@ -263,7 +263,7 @@ export function NotificationDetailDialog({
             )}
           </DialogTitle>
           {data && (
-            <DialogDescription className="flex items-center gap-2 pt-1 text-[0.6875rem]">
+            <DialogDescription className="flex items-center gap-2 pt-1 text-micro">
               <Badge variant={getBadgeVariant(data.type)} size="xs">
                 {data.type}
               </Badge>

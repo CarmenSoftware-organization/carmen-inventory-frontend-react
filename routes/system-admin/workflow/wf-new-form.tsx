@@ -182,7 +182,7 @@ export default function WorkflowNewForm() {
                 icon only; box, border and text stay neutral */}
             <div className="bg-muted/40 rounded-md border px-2.5 py-2">
               <div className="flex items-start gap-2">
-                <Info className="text-info mt-0.5 size-3.5 shrink-0" />
+                <Info className="text-info-ink mt-0.5 size-3.5 shrink-0" />
                 <div className="space-y-0.5 text-xs">
                   <p className="text-foreground font-semibold">
                     {t("defaultConfig")}

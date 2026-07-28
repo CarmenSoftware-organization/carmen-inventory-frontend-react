@@ -99,7 +99,7 @@ function MethodCard({
         >
           {title}
         </div>
-        <p className="text-muted-foreground mt-0.5 text-[0.625rem] leading-snug">
+        <p className="text-muted-foreground mt-0.5 text-micro-legal leading-snug">
           {desc}
         </p>
       </div>

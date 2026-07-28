@@ -202,7 +202,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
                   <span className="text-xs font-semibold">
                     {t("workflowLabel")}
                   </span>
-                  <span className="text-muted-foreground text-[0.625rem]">
+                  <span className="text-muted-foreground text-micro-legal">
                     {t("workflowHint")}
                   </span>
                 </div>
@@ -309,7 +309,7 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
             <div className="flex flex-col items-center gap-1">
               <div
                 className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-full text-[0.6875rem] font-semibold transition-colors",
+                  "flex size-7 shrink-0 items-center justify-center rounded-full text-micro font-semibold transition-colors",
                   // module-procurement accent ให้ตรงกับ Stepper ของ from-price-list
                   isCompleted &&
                     "bg-module-procurement text-primary-foreground",
@@ -324,7 +324,7 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
               </div>
               <span
                 className={cn(
-                  "text-[0.625rem] font-semibold whitespace-nowrap",
+                  "text-micro-legal font-semibold whitespace-nowrap",
                   isCurrent && "text-foreground",
                   !isCurrent && "text-muted-foreground",
                 )}

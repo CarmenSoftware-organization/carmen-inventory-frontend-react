@@ -230,7 +230,7 @@ export default function LoginForm() {
                   </FieldGroup>
                 </form>
 
-                <p className="text-muted-foreground/60 mt-4 text-center text-[0.625rem] leading-relaxed">
+                <p className="text-muted-foreground/60 mt-4 text-center text-micro-legal leading-relaxed">
                   {t.rich("termsLine", {
                     terms: (chunks) => (
                       <span className="text-foreground/70 underline-offset-4 hover:underline">
@@ -309,7 +309,7 @@ export default function LoginForm() {
               style={{ animation: "fade-up-soft 0.7s ease-out 0.9s both" }}
             >
               <div className="bg-primary size-1 rounded-full" />
-              <p className="text-muted-foreground text-[0.6875rem] font-semibold tracking-wide italic">
+              <p className="text-muted-foreground text-micro font-semibold tracking-wide italic">
                 {t("letsBegin")}
               </p>
             </div>
@@ -318,7 +318,7 @@ export default function LoginForm() {
       </div>
 
       {/* Footer */}
-      <p className="text-muted-foreground/40 pointer-events-none absolute right-0 bottom-2 left-0 z-10 text-center text-[0.625rem]">
+      <p className="text-muted-foreground/40 pointer-events-none absolute right-0 bottom-2 left-0 z-10 text-center text-micro-legal">
         {t("platformFooter")}
       </p>
     </div>
@@ -362,7 +362,7 @@ function FloatingLabel({
       className={cn(
         "pointer-events-none absolute left-3 z-10 transition-all duration-150",
         isFloating
-          ? "top-1 text-[0.5625rem] font-semibold tracking-widest uppercase"
+          ? "top-1 text-micro-eyebrow font-semibold tracking-widest uppercase"
           : "top-1/2 -translate-y-1/2 text-xs",
         getLabelTone(isFloating, hasError),
       )}
@@ -526,7 +526,7 @@ function BentoCard({
       <div className="text-foreground text-xs font-semibold tracking-tight">
         {title}
       </div>
-      <p className="text-muted-foreground mt-0.5 text-[0.6875rem] leading-snug">
+      <p className="text-muted-foreground mt-0.5 text-micro leading-snug">
         {desc}
       </p>
     </div>

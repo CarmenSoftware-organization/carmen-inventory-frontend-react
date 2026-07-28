@@ -50,10 +50,10 @@ export function WorkflowStep({
             <div className="flex w-20 flex-col items-center gap-1">
               <span
                 className={cn(
-                  "max-w-full truncate text-[0.5625rem] leading-none tracking-wider uppercase",
+                  "max-w-full truncate text-micro-eyebrow leading-none tracking-wider uppercase",
                   isPrevious && "text-success-foreground/70",
                   currentIsVoided && "text-destructive font-bold",
-                  isCurrent && !currentIsVoided && "text-info font-bold",
+                  isCurrent && !currentIsVoided && "text-info-ink font-bold",
                   !isPrevious && !isCurrent && "text-muted-foreground/40",
                 )}
               >
@@ -92,13 +92,13 @@ export function WorkflowStep({
               <span
                 title={stage}
                 className={cn(
-                  "max-w-full truncate text-[0.625rem]",
+                  "max-w-full truncate text-micro-legal",
                   isPrevious && "text-success-foreground",
                   currentIsVoided &&
-                    "text-destructive text-[0.6875rem] font-bold line-through",
+                    "text-destructive text-micro font-bold line-through",
                   isCurrent &&
                     !currentIsVoided &&
-                    "text-info text-[0.6875rem] font-bold",
+                    "text-info-ink text-micro font-bold",
                   !isPrevious && !isCurrent && "text-muted-foreground/50",
                 )}
               >

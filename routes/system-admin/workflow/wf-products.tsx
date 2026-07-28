@@ -205,7 +205,7 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <span className="text-muted-foreground text-[0.625rem]">
+        <span className="text-muted-foreground text-micro-legal">
           {t("nSelected", { count: selectedProducts?.length ?? 0 })}
         </span>
       </div>
@@ -317,7 +317,7 @@ const TreeNodeRow = ({
           onClick={() => onToggleExpand(node.id)}
         >
           <span className="text-xs font-semibold">{node.name}</span>
-          <span className="text-muted-foreground text-[0.5625rem]">
+          <span className="text-muted-foreground text-micro">
             ({leafIdsMap.get(node.id)?.length ?? 0})
           </span>
         </button>

@@ -106,7 +106,7 @@ export function StepSelectVendors({ form }: StepSelectVendorsProps) {
                     field.onChange("");
                     form.setValue("vendor_name", "");
                   }}
-                  className="text-muted-foreground hover:text-foreground text-[0.6875rem] font-semibold"
+                  className="text-muted-foreground hover:text-foreground text-micro font-semibold"
                 >
                   {tc("clear")}
                 </button>

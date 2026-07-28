@@ -49,7 +49,7 @@ export function NameField({
     >
       <div
         className={cn(
-          "mb-0.5 flex items-center gap-1 text-[0.5625rem] font-semibold tracking-[0.16em] uppercase transition-colors",
+          "mb-0.5 flex items-center gap-1 text-micro-eyebrow font-semibold tracking-[0.16em] uppercase transition-colors",
           labelTone,
         )}
       >
@@ -58,7 +58,7 @@ export function NameField({
         />
         {labels.nameLabel}
         <span className="text-muted-foreground/60 font-semibold">·</span>
-        <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-normal normal-case">
+        <span className="text-muted-foreground text-micro-legal font-semibold tracking-normal normal-case">
           {disabled ? "" : labels.tapToEdit}
         </span>
       </div>
@@ -96,7 +96,7 @@ export function NameField({
         )}
       </div>
 
-      <div className="mt-1 flex items-center justify-between text-[0.625rem]">
+      <div className="mt-1 flex items-center justify-between text-micro-legal">
         <span
           className={cn(
             "font-semibold",
@@ -105,7 +105,7 @@ export function NameField({
         >
           {helperText}
         </span>
-        <span className="text-muted-foreground/70 text-[0.5625rem]">
+        <span className="text-muted-foreground/70 text-micro-eyebrow">
           {value.length}/100
         </span>
       </div>

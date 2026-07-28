@@ -62,7 +62,7 @@ function RolesViz() {
           {perms.map((p) => (
             <span
               key={p}
-              className="text-muted-foreground text-center text-[0.5rem] font-semibold tracking-wider uppercase"
+              className="text-muted-foreground text-center text-micro-floor font-semibold tracking-wider uppercase"
             >
               {p}
             </span>
@@ -75,7 +75,7 @@ function RolesViz() {
               i === 0 ? "" : "border-border-subtle border-t"
             }`}
           >
-            <span className="text-foreground text-[0.625rem] font-semibold">
+            <span className="text-foreground text-micro-legal font-semibold">
               {r}
             </span>
             {matrix[i].map((v, j) => (
@@ -116,7 +116,7 @@ function AssignViz() {
             }`}
           >
             <span
-              className="inline-flex size-4 items-center justify-center rounded-full text-[0.5rem] font-semibold"
+              className="inline-flex size-4 items-center justify-center rounded-full text-micro-floor font-semibold"
               style={{
                 background:
                   "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -125,11 +125,11 @@ function AssignViz() {
             >
               {u.i}
             </span>
-            <span className="text-foreground flex-1 text-[0.625rem] font-semibold">
+            <span className="text-foreground flex-1 text-micro-legal font-semibold">
               {u.n}
             </span>
             <span
-              className="rounded-sm px-1.5 py-0.5 text-[0.5rem] font-semibold tracking-wider uppercase"
+              className="rounded-sm px-1.5 py-0.5 text-micro-floor font-semibold tracking-wider uppercase"
               style={{
                 background:
                   "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -177,7 +177,7 @@ function PeriodViz() {
   return (
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
-        <div className="text-muted-foreground mb-1.5 text-[0.5625rem] font-semibold tracking-wider uppercase">
+        <div className="text-muted-foreground mb-1.5 text-micro-eyebrow font-semibold tracking-wider uppercase">
           FY 2026 · Months
         </div>
         <div className="grid grid-cols-12 gap-0.5">
@@ -199,7 +199,7 @@ function PeriodViz() {
             return (
               <div
                 key={m}
-                className="rounded-[1px] py-1 text-center text-[0.5rem] font-semibold"
+                className="rounded-[1px] py-1 text-center text-micro-floor font-semibold"
                 style={style}
               >
                 {m}
@@ -207,7 +207,7 @@ function PeriodViz() {
             );
           })}
         </div>
-        <div className="text-muted-foreground mt-1.5 flex gap-2 text-[0.5rem]">
+        <div className="text-muted-foreground mt-1.5 flex gap-2 text-micro-floor">
           <span className="inline-flex items-center gap-1">
             <span
               className="inline-block size-2 rounded-[1px]"
@@ -326,7 +326,7 @@ function DocsViz() {
         {tree.map((row, i) => (
           <div
             key={i}
-            className="text-foreground flex items-center gap-1.5 py-0.5 text-[0.5625rem]"
+            className="text-foreground flex items-center gap-1.5 py-0.5 text-micro-eyebrow"
             style={{ paddingLeft: `${0.375 + row.d * 0.75}rem` }}
           >
             <span className="inline-flex size-2.5 items-center justify-center">
@@ -370,7 +370,7 @@ function UserActivityViz() {
             }`}
           >
             <span
-              className="inline-flex size-4 items-center justify-center rounded-full text-[0.5rem] font-semibold"
+              className="inline-flex size-4 items-center justify-center rounded-full text-micro-floor font-semibold"
               style={{
                 background:
                   "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -379,10 +379,10 @@ function UserActivityViz() {
             >
               {e.i}
             </span>
-            <span className="text-foreground flex-1 text-[0.5625rem] leading-snug">
+            <span className="text-foreground flex-1 text-micro-eyebrow leading-snug">
               <span className="font-bold">{e.i}</span> {e.t}
             </span>
-            <span className="text-muted-foreground text-[0.5rem]">{e.m}</span>
+            <span className="text-muted-foreground text-micro-floor">{e.m}</span>
           </div>
         ))}
       </div>
@@ -408,11 +408,11 @@ function MonitorViz() {
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-wider uppercase">
+          <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-wider uppercase">
             CPU · last 30m
           </span>
           <span
-            className="text-[0.6875rem] font-bold"
+            className="text-micro font-bold"
             style={{ color: ACCENT }}
           >
             34%
@@ -448,15 +448,15 @@ function EmailViz() {
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-foreground text-[0.5625rem] font-semibold">
+          <span className="text-foreground text-micro-eyebrow font-semibold">
             mail.aureliabay.com
           </span>
-          <span className="text-positive inline-flex items-center gap-1 text-[0.5rem] font-semibold">
+          <span className="text-positive-ink inline-flex items-center gap-1 text-micro-floor font-semibold">
             <span className="bg-positive inline-block size-1.5 rounded-full" />{" "}
             Connected
           </span>
         </div>
-        <div className="text-muted-foreground grid grid-cols-2 gap-1 text-[0.5rem]">
+        <div className="text-muted-foreground grid grid-cols-2 gap-1 text-micro-floor">
           <div className="bg-muted rounded-[1px] px-1.5 py-1">
             SMTP · 587 TLS
           </div>
@@ -531,11 +531,11 @@ function NotifyViz() {
                 <circle cx="8" cy="11.4" r="1" fill={ACCENT} />
               </svg>
             </span>
-            <span className="text-foreground flex-1 truncate text-[0.625rem] font-semibold">
+            <span className="text-foreground flex-1 truncate text-micro-legal font-semibold">
               {tpl.n}
             </span>
             <span
-              className="rounded-sm px-1 py-0.5 text-[0.5rem] font-semibold"
+              className="rounded-sm px-1 py-0.5 text-micro-floor font-semibold"
               style={{
                 background:
                   "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -544,7 +544,7 @@ function NotifyViz() {
             >
               {tpl.e}
             </span>
-            <span className="text-muted-foreground text-[0.5rem] font-semibold">
+            <span className="text-muted-foreground text-micro-floor font-semibold">
               {tpl.c}
             </span>
           </div>
@@ -596,7 +596,7 @@ function CodeViz() {
         {lines.map((l, i) => (
           <div
             key={i}
-            className="text-[0.5625rem] leading-snug"
+            className="text-micro-eyebrow leading-snug"
             style={{ color: l.color, fontWeight: l.bold ? 700 : 400 }}
           >
             {l.prefix}
@@ -612,7 +612,7 @@ function QueryViz() {
   return (
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
-        <div className="text-foreground text-[0.5625rem] leading-relaxed">
+        <div className="text-foreground text-micro-eyebrow leading-relaxed">
           <div>
             <span className="font-bold" style={{ color: ACCENT }}>
               SELECT
@@ -637,7 +637,7 @@ function QueryViz() {
             <span className="font-bold" style={{ color: ACCENT }}>
               =
             </span>{" "}
-            <span className="text-positive">{`'2026-05'`}</span>
+            <span className="text-positive-ink">{`'2026-05'`}</span>
           </div>
           <div>
             <span className="font-bold" style={{ color: ACCENT }}>
@@ -647,11 +647,11 @@ function QueryViz() {
           </div>
         </div>
         <div className="border-border-subtle mt-1.5 flex items-center justify-between border-t pt-1">
-          <span className="text-muted-foreground text-[0.5rem]">
+          <span className="text-muted-foreground text-micro-floor">
             184 rows · 1.2s
           </span>
           <span
-            className="rounded-[1px] px-1.5 py-0.5 text-[0.5rem] font-semibold"
+            className="rounded-[1px] px-1.5 py-0.5 text-micro-floor font-semibold"
             style={{
               background:
                 "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -677,11 +677,11 @@ function DatasetViz() {
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border px-2 py-1.5">
         <div className="border-border-subtle flex items-center justify-between border-b pb-1">
-          <span className="text-foreground text-[0.5625rem] font-semibold">
+          <span className="text-foreground text-micro-eyebrow font-semibold">
             vendor_spend_monthly
           </span>
           <span
-            className="rounded-[1px] px-1.5 py-0.5 text-[0.5rem] font-semibold"
+            className="rounded-[1px] px-1.5 py-0.5 text-micro-floor font-semibold"
             style={{
               background:
                 "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -716,8 +716,8 @@ function DatasetViz() {
             >
               {c.pk ? "PK" : "·"}
             </span>
-            <span className="text-foreground text-[0.5625rem]">{c.n}</span>
-            <span className="text-muted-foreground text-[0.5rem]">{c.t}</span>
+            <span className="text-foreground text-micro-eyebrow">{c.n}</span>
+            <span className="text-muted-foreground text-micro-floor">{c.t}</span>
           </div>
         ))}
       </div>

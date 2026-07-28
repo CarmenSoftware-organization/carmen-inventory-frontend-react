@@ -248,12 +248,12 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                   className="border-border/40 overflow-hidden rounded-md border"
                 >
                   <div className="bg-muted/20 flex items-center gap-3 border-b px-3 py-2">
-                    <span className="text-muted-foreground w-6 text-center text-[0.6875rem] tabular-nums">
+                    <span className="text-muted-foreground w-6 text-center text-micro tabular-nums">
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground text-[0.6875rem]">
+                        <span className="text-muted-foreground text-micro">
                           {item.product_code}
                         </span>
                         <span className="truncate text-xs font-semibold">
@@ -261,7 +261,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                         </span>
                       </div>
                       {item.product_local_name && (
-                        <p className="text-muted-foreground text-[0.625rem]">
+                        <p className="text-muted-foreground text-micro-legal">
                           {item.product_local_name}
                         </p>
                       )}
@@ -270,7 +270,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                       <p className="text-xs font-semibold tabular-nums">
                         {item.price.toLocaleString()}
                       </p>
-                      <p className="text-muted-foreground text-[0.625rem]">
+                      <p className="text-muted-foreground text-micro-legal">
                         / {item.order_unit_name || "—"}
                       </p>
                     </div>
@@ -280,19 +280,19 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                       <tr className="text-muted-foreground bg-muted/5 border-b">
                         <th
                           scope="col"
-                          className="px-3 py-1 text-left text-[0.625rem] font-semibold tracking-wide uppercase"
+                          className="px-3 py-1 text-left text-micro-legal font-semibold tracking-wide uppercase"
                         >
                           {tfl("location")}
                         </th>
                         <th
                           scope="col"
-                          className="w-20 px-3 py-1 text-right text-[0.625rem] font-semibold tracking-wide uppercase"
+                          className="w-20 px-3 py-1 text-right text-micro-legal font-semibold tracking-wide uppercase"
                         >
                           {tfl("qty")}
                         </th>
                         <th
                           scope="col"
-                          className="w-24 px-3 py-1 text-right text-[0.625rem] font-semibold tracking-wide uppercase"
+                          className="w-24 px-3 py-1 text-right text-micro-legal font-semibold tracking-wide uppercase"
                         >
                           {tfl("total")}
                         </th>
@@ -327,7 +327,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                     </tbody>
                     <tfoot>
                       <tr className="bg-muted/10 border-t">
-                        <td className="text-muted-foreground px-3 py-1.5 text-[0.6875rem]">
+                        <td className="text-muted-foreground px-3 py-1.5 text-micro">
                           {t("totalQty")}
                         </td>
                         <td className="px-3 py-1.5 text-right text-xs font-semibold tabular-nums">
@@ -372,7 +372,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                   </dd>
                 </div>
               </dl>
-              <p className="text-muted-foreground mt-2 inline-flex items-center gap-1 text-[0.6875rem]">
+              <p className="text-muted-foreground mt-2 inline-flex items-center gap-1 text-micro">
                 <Badge variant="secondary" size="xs">
                   {items.length} {tfl("products").toLowerCase()}
                 </Badge>

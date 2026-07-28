@@ -13,7 +13,7 @@ interface PriceListHeaderProps {
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-0.5">
-      <dt className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+      <dt className="text-micro font-semibold uppercase tracking-wider text-muted-foreground">
         {label}
       </dt>
       <dd className="text-sm font-medium text-foreground">{value}</dd>
@@ -36,7 +36,7 @@ export default function PriceListExternalHeader({
     <header className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1.5">
-          <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="text-micro font-semibold uppercase tracking-wider text-muted-foreground">
             Request for Pricing · {data.pricelist_no}
           </p>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">

@@ -231,7 +231,7 @@ function QtyCell({
         )}
       </InputSuffixField>
       {overReturn && (
-        <p className="mt-0.5 text-right text-[0.7rem] text-amber-600 dark:text-amber-500">
+        <p className="mt-0.5 text-right text-micro text-warning-ink">
           {t("overReturnWarning", { received: grnReceivedQty })}
         </p>
       )}
@@ -598,7 +598,7 @@ export function useCnItemTable({
             : () => (
                 <div className="flex w-full items-center justify-between gap-2">
                   <span>{tfl("discount")}</span>
-                  <span className="text-muted-foreground text-[0.7rem] font-normal">
+                  <span className="text-muted-foreground text-micro font-normal">
                     {tfl("override")}
                   </span>
                 </div>
@@ -628,7 +628,7 @@ export function useCnItemTable({
           : () => (
               <div className="flex w-full items-center justify-between gap-2">
                 <span>{tfl("tax")}</span>
-                <span className="text-muted-foreground text-[0.7rem] font-normal">
+                <span className="text-muted-foreground text-micro font-normal">
                   {tfl("override")}
                 </span>
               </div>

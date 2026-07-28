@@ -39,13 +39,13 @@ export function PrItemSummary({
   return (
     <>
       {/* base currency code — คอลัมน์ Currency (col 3) แถวเดียวกับค่า base */}
-      <div className="text-muted-foreground flex items-center justify-end text-[0.6875rem] lg:col-start-3">
+      <div className="text-muted-foreground flex items-center justify-end text-micro lg:col-start-3">
         {baseCurrencyCode}
       </div>
       {metrics.map((m, i) => (
         <div
           key={m.k}
-          className={`text-muted-foreground flex items-center justify-end text-[0.6875rem] tabular-nums ${
+          className={`text-muted-foreground flex items-center justify-end text-micro tabular-nums ${
             i === 0 ? "lg:col-start-6" : ""
           }`}
         >

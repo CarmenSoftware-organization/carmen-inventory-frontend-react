@@ -142,7 +142,7 @@ export function RibbonField({
 }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
+      <p className="text-muted-foreground text-micro-legal font-semibold tracking-wider uppercase">
         {label}
       </p>
       <div className="mt-0.5 truncate text-sm font-semibold">{value}</div>

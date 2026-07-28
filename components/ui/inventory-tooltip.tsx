@@ -93,16 +93,16 @@ export const InventoryTooltip = memo(function InventoryTooltip({
           )}
         >
           {!hasProduct && (
-            <p className="text-muted-foreground text-[0.6875rem]">
+            <p className="text-muted-foreground text-micro">
               {t("selectProductForInventory")}
             </p>
           )}
           {hasProduct && (
             <>
-              <p className="mb-2 text-[0.6875rem] font-semibold">
+              <p className="mb-2 text-micro font-semibold">
                 {t("inventoryInfo")}
               </p>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[0.6875rem]">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-micro">
             <div>
               {onOnHandClick ? (
                 <button
@@ -188,7 +188,7 @@ export const InventoryTooltip = memo(function InventoryTooltip({
             className="mt-2 h-1"
             indicatorClassName={progressColor}
           />
-          <div className="mt-1 flex items-center justify-between text-[0.625rem]">
+          <div className="mt-1 flex items-center justify-between text-micro-legal">
             {needsReorder && (
               <span className="text-destructive font-semibold">
                 {t("needsReorder")}

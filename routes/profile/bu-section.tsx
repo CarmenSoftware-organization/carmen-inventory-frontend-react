@@ -193,7 +193,7 @@ function ImageUploadField({
           <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             {text.title}
           </p>
-          <p className="text-muted-foreground text-[0.625rem]">{text.hint}</p>
+          <p className="text-muted-foreground text-micro-legal">{text.hint}</p>
           <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
             <Button
               type="button"
@@ -292,7 +292,7 @@ function InfoItem({
         <Icon className="text-muted-foreground size-3.5" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <dt className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
+        <dt className="text-muted-foreground text-micro-legal font-semibold tracking-wide uppercase">
           {label}
         </dt>
         <dd

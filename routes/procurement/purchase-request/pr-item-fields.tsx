@@ -532,11 +532,11 @@ export function PrItemFields({
           {" "}
           <div className="p-5">
             <div className="flex items-start gap-3">
-              <div className="bg-muted text-warning flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <div className="bg-muted text-warning-ink flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <AlertTriangle className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <AlertDialogTitle className="text-warning text-base">
+                <AlertDialogTitle className="text-warning-ink text-base">
                   {t("overQtyWarningTitle")}
                 </AlertDialogTitle>
                 <AlertDialogDescription className="mt-1">

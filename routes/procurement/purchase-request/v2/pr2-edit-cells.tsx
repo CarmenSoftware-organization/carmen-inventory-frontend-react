@@ -66,7 +66,7 @@ function BaseAmountLine({
 }) {
   if (!base) return null;
   return (
-    <div className="text-muted-foreground text-[0.6875rem] tabular-nums">
+    <div className="text-muted-foreground text-micro tabular-nums">
       {formatCurrency(round2(value * base.rate))} {base.code}
     </div>
   );
@@ -124,7 +124,7 @@ export const Pr2VendorCell = memo(function Pr2VendorCell({
           >
             <p className="text-xs font-semibold wrap-break-word">{vendorName}</p>
             {pricelistNo && (
-              <p className="text-muted-foreground mt-1 text-[0.6875rem]">
+              <p className="text-muted-foreground mt-1 text-micro">
                 {pricelistNo}
               </p>
             )}
@@ -154,7 +154,7 @@ export const Pr2VendorCell = memo(function Pr2VendorCell({
       {/* เลขที่ใบเสนอราคาที่ราคานี้มาจาก — หน้าเดิมมีช่อง Pricelist แยกที่เห็น
           ตลอด ทั้งตอนแก้และตอนอ่าน ไม่ใช่โผล่เฉพาะตอนอ่าน */}
       {pricelistNo && (
-        <div className="text-muted-foreground mt-0.5 truncate text-[0.6875rem]">
+        <div className="text-muted-foreground mt-0.5 truncate text-micro">
           {pricelistNo}
         </div>
       )}
@@ -266,7 +266,7 @@ function OverrideBox({
         }
         className="size-3"
       />
-      <span className="text-muted-foreground text-[0.625rem] select-none">
+      <span className="text-muted-foreground text-micro-legal select-none">
         {tfl("override")}
       </span>
     </label>

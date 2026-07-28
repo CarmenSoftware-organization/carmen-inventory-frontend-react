@@ -129,7 +129,7 @@ function DatasetCard({ dataset }: { readonly dataset: DashboardDataset }) {
       <p className="text-muted-foreground mt-1 text-xs leading-snug">
         {dataset.description}
       </p>
-      <div className="text-muted-foreground mt-2 flex items-center gap-2 text-[0.6875rem]">
+      <div className="text-muted-foreground mt-2 flex items-center gap-2 text-micro">
         <span>{dataset.id}</span>
         <span aria-hidden>·</span>
         <span>{dataset.unit}</span>

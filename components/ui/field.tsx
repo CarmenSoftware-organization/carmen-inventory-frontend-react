@@ -105,20 +105,33 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const fieldVariants = cva(
-  // In plain-text view mode (a FieldPlainText value is present), mute the label so the
-  // foreground value reads as the emphasis — no per-field className needed.
-  "group/field flex w-full gap-3 data-[invalid=true]:text-destructive has-[>[data-slot=field-plain-text]]:gap-1 has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:text-muted-foreground has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:font-normal",
+  [
+    "group/field flex w-full data-[invalid=true]:text-destructive",
+    // View mode (มี FieldPlainText เป็นค่า): label เงียบลงให้ value เป็นตัวเด่น
+    // และ label+value ต้องอ่านเป็นก้อนเดียว — จึงดัน value ชิดบนของกล่อง min-h-8
+    // แทนกึ่งกลาง ไม่งั้น dead space ~8px ของกล่องบวกกับ gap จนระยะ label→value
+    // (14px) เกือบเท่าระยะระหว่าง field (26px) แล้วตาจับคู่ผิด ที่ว่างที่เหลือ
+    // ไปกองใต้ value = กลายเป็นตัวคั่นระหว่าง field และความสูงแถวเท่าเดิม
+    // (สลับ view↔edit ไม่กระตุก)
+    "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-plain-text]]:items-start",
+    "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:text-muted-foreground",
+    "has-[>[data-slot=field-plain-text]]:[&>[data-slot=field-label]]:font-normal",
+  ],
   {
     variants: {
       orientation: {
-        vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
+        // แนวตั้ง label อยู่เหนือ control จึงต้องแคบกว่าระยะระหว่าง field (16px)
+        // มาก ๆ ไม่งั้น label ลอยกึ่งกลางระหว่าง control สองอันจนจับคู่ไม่ติด
+        // — 6px เท่ากับโหมด view ด้วย สลับ view↔edit แล้ว label ไม่ขยับ
+        // ส่วนแนวนอน gap เป็นระยะ label↔control ในแถวเดียวกัน คนละบทบาท คงไว้ 12px
+        vertical: ["flex-col gap-1.5 [&>*]:w-full [&>.sr-only]:w-auto"],
         horizontal: [
-          "flex-row items-center",
+          "flex-row items-center gap-3",
           "[&>[data-slot=field-label]]:flex-auto",
           "has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
         ],
         responsive: [
-          "flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto",
+          "flex-col gap-1.5 [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:gap-3 @md/field-group:[&>*]:w-auto",
           "@md/field-group:[&>[data-slot=field-label]]:flex-auto",
           "@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
         ],
@@ -598,12 +611,15 @@ function FieldInputGroup({
 }
 
 /**
- * ค่าของ field แบบ plain text สำหรับ view mode — แทน input ด้วยข้อความอ่านอย่างเดียว
+ * ค่าของ field แบบอ่านอย่างเดียวสำหรับ view mode — แทนที่ input ของโหมด edit
  *
  * value เด่น (text-foreground / medium) ให้เกิด lightness+size contrast เหนือ
- * label ที่เงียบ (แบบ CN/PO/GRN) จัดแนวตั้งด้วย min-h-8 ให้สูงเท่าแถว input
- * ค่าว่าง/undefined จะแสดง em dash "—" อัตโนมัติ ขนาด default text-sm ปรับผ่าน
- * className ได้ (เช่น "text-xs" ให้ตรงกับ field ที่ใช้ text-xs)
+ * label ที่เงียบ (แบบ CN/PO/GRN) กล่องสูง min-h-8 เท่าแถว input เพื่อไม่ให้
+ * layout กระตุกตอนสลับ view↔edit — เมื่ออยู่ใน `Field` ค่าจะถูกดันชิดบนกล่อง
+ * (ดู `fieldVariants`) ที่ว่างส่วนเกินจึงไปกองใต้ค่าแทนที่จะแทรกกลาง label กับค่า
+ * children ไม่จำเป็นต้องเป็นข้อความล้วน — badge สถานะก็ครอบด้วยตัวนี้ได้ เพื่อให้
+ * ระยะตรงกับ field อื่นใน section เดียวกัน ค่าว่าง/undefined แสดง em dash "—"
+ * อัตโนมัติ ขนาด default text-xs ปรับผ่าน className ได้
  *
  * @param children - ค่าที่จะแสดง (ว่าง → "—")
  * @param className - class เสริม (override ขนาด/สี/แนว)

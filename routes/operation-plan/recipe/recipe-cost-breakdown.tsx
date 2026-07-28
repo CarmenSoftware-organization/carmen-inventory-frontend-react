@@ -116,7 +116,7 @@ export function RecipeCostBreakdown({
       </div>
 
       <div className="border-foreground mt-3 flex items-baseline justify-between border-t-2 pt-3">
-        <span className="text-foreground/80 text-[0.625rem] font-bold tracking-[0.14em] uppercase">
+        <span className="text-foreground/80 text-micro-legal font-bold tracking-[0.14em] uppercase">
           {t("totalRecipeCost")}
         </span>
         <span className="text-base font-bold">฿{total.toFixed(2)}</span>
@@ -140,7 +140,7 @@ function CostRow({
     <div className="grid grid-cols-[0.5rem_1fr_2.5rem_auto] items-center gap-2">
       <span className={cn("size-2 rounded-sm", color)} aria-hidden="true" />
       <span className="text-foreground/80 text-xs font-semibold">{label}</span>
-      <span className="text-muted-foreground text-right text-[0.6875rem] font-semibold">
+      <span className="text-muted-foreground text-right text-micro font-semibold">
         {pct.toFixed(0)}%
       </span>
       {input}

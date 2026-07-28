@@ -69,7 +69,7 @@ export function TreeNode({
       regex.test(part) ? (
         <mark
           key={i}
-          className="bg-yellow-200/80 dark:bg-yellow-800/40 rounded-sm px-px"
+          className="bg-highlight rounded-sm px-px"
         >
           {part}
         </mark>
@@ -127,7 +127,7 @@ export function TreeNode({
           className="flex items-center gap-1.5 min-w-0 flex-1 text-left"
           onClick={() => toggleExpand(node.id)}
         >
-          <Badge variant={"secondary"} className="text-[0.625rem] h-5 shrink-0">
+          <Badge variant={"secondary"} className="text-micro-legal h-5 shrink-0">
             {highlight(node.code)}
           </Badge>
 
@@ -147,7 +147,7 @@ export function TreeNode({
           <Badge
             variant="secondary"
             size="xs"
-            className="text-[0.625rem] mr-1 shrink-0"
+            className="text-micro-legal mr-1 shrink-0"
           >
             {ts("inactive")}
           </Badge>

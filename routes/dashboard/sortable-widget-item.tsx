@@ -191,10 +191,10 @@ function UnsupportedCard({
           <p className="truncate text-sm font-semibold leading-snug">
             {title}
           </p>
-          <p className="text-muted-foreground text-[0.6875rem] font-semibold uppercase tracking-wide">
+          <p className="text-muted-foreground text-micro font-semibold uppercase tracking-wide">
             {t("unsupportedTitle")}
           </p>
-          <p className="text-muted-foreground text-[0.6875rem] leading-snug">
+          <p className="text-muted-foreground text-micro leading-snug">
             {t("unsupportedDescription", { shape })}
           </p>
         </div>

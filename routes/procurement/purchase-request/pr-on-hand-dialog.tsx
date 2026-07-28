@@ -59,7 +59,7 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
         accessorKey: "location_code",
         header: () => tfl("code"),
         cell: ({ row }) => (
-          <span className="text-[0.6875rem]">
+          <span className="text-micro">
             {row.original.location_code ?? "—"}
           </span>
         ),
@@ -146,13 +146,13 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
 
               {!isLoading && rows.length > 0 && (
                 <div className="text-right">
-                  <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
+                  <p className="text-muted-foreground text-micro-legal font-semibold tracking-wider uppercase">
                     {tfl("total")}
                   </p>
-                  <p className="text-info text-lg leading-tight font-semibold tabular-nums">
+                  <p className="text-info-ink text-lg leading-tight font-semibold tabular-nums">
                     {totalQty.toLocaleString()}
                   </p>
-                  <p className="text-muted-foreground text-[0.625rem]">
+                  <p className="text-muted-foreground text-micro-legal">
                     {summaryUnit}
                   </p>
                 </div>

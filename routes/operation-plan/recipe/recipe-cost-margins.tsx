@@ -90,7 +90,7 @@ export function RecipeCostMargins({
             errorIconAlign="left"
             {...form.register("target_food_cost_percentage")}
           />
-          <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[0.6875rem]">
+          <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-micro">
             %
           </span>
         </div>
@@ -112,7 +112,7 @@ function MarginTile({
 }) {
   return (
     <div className="bg-muted/40 rounded-md border p-3">
-      <div className="text-muted-foreground text-[0.625rem] font-bold tracking-[0.14em] uppercase">
+      <div className="text-muted-foreground text-micro-legal font-bold tracking-[0.14em] uppercase">
         {label}
       </div>
       <div
@@ -123,7 +123,7 @@ function MarginTile({
       >
         {value}
       </div>
-      <div className="text-muted-foreground text-[0.6875rem] font-semibold">
+      <div className="text-muted-foreground text-micro font-semibold">
         {sub}
       </div>
     </div>

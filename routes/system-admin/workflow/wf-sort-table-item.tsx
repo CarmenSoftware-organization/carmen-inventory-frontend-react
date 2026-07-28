@@ -90,13 +90,13 @@ export default function SortableStageItem({
         {isLast ? (
           <CheckCircle2 className="text-muted-foreground size-3 shrink-0" />
         ) : (
-          <span className="text-muted-foreground shrink-0 text-[0.625rem]">
+          <span className="text-muted-foreground shrink-0 text-micro-legal">
             {index + 1}.
           </span>
         )}
         <span className="flex-1 truncate">{name}</span>
         {!isLast && (
-          <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-[0.625rem]">
+          <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-micro-legal">
             {hasWarning && (
               <Tooltip delayDuration={150}>
                 <TooltipTrigger asChild>

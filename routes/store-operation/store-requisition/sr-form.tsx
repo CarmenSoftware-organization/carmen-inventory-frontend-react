@@ -226,7 +226,7 @@ export function StoreRequisitionForm({
 
         {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
         {(!isDescReadOnly || description?.trim()) && (
-          <Field className={isDescReadOnly ? "gap-1" : undefined}>
+          <Field>
             <FieldLabel
               htmlFor="sr-description"
               className={

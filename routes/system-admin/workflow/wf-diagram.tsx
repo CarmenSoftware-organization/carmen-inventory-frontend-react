@@ -83,7 +83,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
       return <Play className="text-muted-foreground size-3 fill-current" />;
     }
     return (
-      <span className="text-[0.6875rem] font-semibold tabular-nums">
+      <span className="text-micro font-semibold tabular-nums">
         {data.index}
       </span>
     );
@@ -144,7 +144,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
       </div>
 
       {!isLast && (
-        <div className="text-muted-foreground flex items-center gap-2 text-[0.625rem]">
+        <div className="text-muted-foreground flex items-center gap-2 text-micro-legal">
           <span className="capitalize">{stage.role}</span>
           {userCount > 0 && !isHod && (
             <span className="inline-flex items-center gap-0.5 tabular-nums">
@@ -316,7 +316,7 @@ export default function WfDiagram({
   return (
     <div className={cn("space-y-1.5", className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[0.6875rem]">
+        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-micro">
           <span className="inline-flex items-center gap-1 tabular-nums">
             <span className="text-foreground font-semibold">
               {stages.length}

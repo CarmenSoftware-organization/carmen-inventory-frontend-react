@@ -95,7 +95,7 @@ export function PltProductGroupedView({
                     <span className="flex items-center gap-1.5">
                       {tier.unit_name || "—"}
                       {orderUnitId && tier.unit_id === orderUnitId && (
-                        <span className="text-muted-foreground text-[0.625rem]">
+                        <span className="text-muted-foreground text-micro-legal">
                           · {labels.orderUnit}
                         </span>
                       )}
