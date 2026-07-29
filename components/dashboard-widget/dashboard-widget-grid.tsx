@@ -1,5 +1,11 @@
 
-import { Minus, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  Minus,
+  TrendingDown,
+  TrendingUp,
+  Undo2,
+  type LucideIcon,
+} from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
   Bar,
@@ -17,6 +23,17 @@ import {
   YAxis,
 } from "recharts";
 import type { UseQueryResult } from "@tanstack/react-query";
+import { useMemo, type ReactNode } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  type ColumnDef,
+} from "@tanstack/react-table";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import {
   Card,
   CardContent,
@@ -26,10 +43,16 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppTile, SubTile } from "@/components/icons/tiles";
+import {
+  StatusTile,
+  WidgetParamsBadges,
+} from "@/components/dashboard-widget/widget-status";
+import { statusOf } from "@/components/dashboard-widget/status-meta";
 import { cn } from "@/lib/utils";
 import {
   isCategoricalData,
   isScalarDeltaData,
+  isTableData,
   isTimeSeriesData,
   type CategoricalPoint,
   type CompositeWidgetItem,
@@ -37,6 +60,8 @@ import {
   type DatasetData,
   type DatasetMeta,
   type DatasetShape,
+  type TableColumn,
+  type TableData,
   type TimeSeriesPoint,
 } from "@/types/dashboard-widget";
 
@@ -220,30 +245,50 @@ function WidgetRouter({
           />
         </div>
       );
+    case "table":
+      return (
+        <div className="sm:col-span-2 lg:col-span-4">
+          <TableCard
+            widget={resolved}
+            moduleName={moduleName}
+            subTileFor={subTileFor}
+          />
+        </div>
+      );
     default:
       return null;
   }
 }
 
 function WidgetHeader({ widget, moduleName, subTileFor }: WidgetCardProps) {
+  // widget กลุ่ม document.* ที่กรอง status → ไอคอนหลักเปลี่ยนตาม workflow status
+  // ที่เหลือ (by-status / series / dataset ทั่วไป) → SubTile รูป doc-type เดิม
+  const status = statusOf(widget.params);
+  // document.* ตรงตัวอยู่แล้ว (ชื่อ + badge สื่อความหมายครบ) → ไม่ต้องมี description
+  const isDocumentWidget = widget.dataset_id.startsWith("document.");
   return (
     <div className="flex items-start gap-3">
       <span className="shrink-0">
-        <SubTile
-          name={subTileFor(widget.dataset_id)}
-          parentName={moduleName}
-          size={32}
-        />
+        {status ? (
+          <StatusTile status={status} size={32} />
+        ) : (
+          <SubTile
+            name={subTileFor(widget.dataset_id)}
+            parentName={moduleName}
+            size={32}
+          />
+        )}
       </span>
       <div className="min-w-0 space-y-0.5">
         <CardTitle className="text-sm leading-snug font-semibold">
           {widget.title}
         </CardTitle>
-        {widget.meta.description && (
+        {!isDocumentWidget && widget.meta.description && (
           <CardDescription className="text-[0.6875rem] leading-snug">
             {widget.meta.description}
           </CardDescription>
         )}
+        <WidgetParamsBadges params={widget.params} />
       </div>
     </div>
   );
@@ -265,7 +310,7 @@ export function KpiCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
       </CardHeader>
       <CardContent className="px-4">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold tabular-nums">
+          <span className="text-3xl font-bold tabular-nums">
             {value.toLocaleString()}
           </span>
           {widget.meta.unit && widget.meta.unit !== "฿" && (
@@ -516,6 +561,107 @@ export function LineCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
               />
             </LineChart>
           </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+type TableRow = Record<string, unknown>;
+
+/** Allowlist of icon names a table dataset may emit via an "icon" column. */
+const TABLE_ICONS: Record<string, LucideIcon> = {
+  "undo-2": Undo2,
+};
+
+function isNumericColumn(type?: TableColumn["type"]): boolean {
+  return type === "number" || type === "currency";
+}
+
+function formatTableCell(value: unknown, type?: TableColumn["type"]): string {
+  if (value === null || value === undefined || value === "") return "—";
+  if (isNumericColumn(type) && typeof value === "number") {
+    const n = value.toLocaleString();
+    return type === "currency" ? `฿${n}` : n;
+  }
+  return String(value);
+}
+
+/** Render a cell — an "icon" column maps its string value to a lucide icon. */
+function renderTableCell(value: unknown, type?: TableColumn["type"]): ReactNode {
+  if (type === "icon") {
+    const Icon = typeof value === "string" ? TABLE_ICONS[value] : undefined;
+    return Icon ? (
+      <Icon className="text-muted-foreground size-4" aria-hidden="true" />
+    ) : null;
+  }
+  return formatTableCell(value, type);
+}
+
+/**
+ * Generic table widget — renders any dataset with `shape === "table"` by building
+ * dynamic columns from `data.columns` and rows from `data.rows`. Reusable for any
+ * table-shaped dataset (the column set is data-driven, not hardcoded).
+ */
+export function TableCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
+  "use no memo";
+  const t = useTranslations("dashboardWidget");
+  const data = isTableData(widget.data) ? (widget.data as TableData) : null;
+
+  const columns = useMemo<ColumnDef<TableRow>[]>(
+    () =>
+      (data?.columns ?? []).map((col) => ({
+        id: col.key,
+        accessorFn: (row: TableRow) => row[col.key],
+        header: col.label,
+        cell: ({ getValue }) => renderTableCell(getValue(), col.type),
+        meta: isNumericColumn(col.type)
+          ? {
+              headerClassName: "text-right",
+              cellClassName: "text-right tabular-nums",
+            }
+          : undefined,
+      })),
+    [data?.columns],
+  );
+
+  const rows = useMemo<TableRow[]>(() => [...(data?.rows ?? [])], [data?.rows]);
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <Card className="gap-2 py-4">
+      <CardHeader className="px-4">
+        <WidgetHeader
+          widget={widget}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
+      </CardHeader>
+      <CardContent className="px-4">
+        {!data || columns.length === 0 ? (
+          <p className="text-muted-foreground py-6 text-center text-xs">
+            {t("noData")}
+          </p>
+        ) : (
+          <DataGrid
+            table={table}
+            recordCount={rows.length}
+            tableLayout={{ dense: true, headerSticky: true, width: "auto" }}
+            emptyMessage={
+              <p className="text-muted-foreground py-6 text-center text-xs">
+                {t("noData")}
+              </p>
+            }
+          >
+            <DataGridContainer border={false} className="max-h-72 text-xs">
+              <DataGridTable />
+            </DataGridContainer>
+          </DataGrid>
         )}
       </CardContent>
     </Card>
