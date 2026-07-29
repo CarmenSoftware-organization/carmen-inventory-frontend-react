@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
+import { toast } from "sonner";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import { PO_STATUS, PO_TYPE } from "@/types/purchase-order";
 import type { FormMode } from "@/types/form";
@@ -16,7 +17,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import {
+  countInvalidItems,
+  scrollToFirstInvalidField,
+} from "@/lib/form-helpers";
 import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
 import { PoItemFields } from "./po-item-fields";
@@ -127,8 +131,12 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   // location ติด error (location field อยู่ใน expanded row เท่านั้น) + scroll
   // bump จากทั้ง 2 path: Save (handleSubmit onInvalid) และ Submit (handleSubmitPo trigger)
   const [revealErrorSignal, setRevealErrorSignal] = useState(0);
-  const revealErrors = () => {
+  const revealErrors = (errors?: Record<string, unknown>) => {
     setRevealErrorSignal((c) => c + 1);
+    const count = countInvalidItems(errors);
+    toast.warning(
+      count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
+    );
     // scroll หา field แรกที่ผิด — retry ข้ามเฟรมจน row ที่ auto-expand mount field เสร็จ
     // (order_qty rollup ระดับ item mark data-invalid ที่ QtyUnitCell ในแถวหลักแล้ว)
     scrollToFirstInvalidField();

@@ -3,6 +3,7 @@ import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
+import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -16,7 +17,10 @@ import {
   type GrnFormValues,
   getDefaultValues,
 } from "./grn-form-schema";
-import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import {
+  countInvalidItems,
+  scrollToFirstInvalidField,
+} from "@/lib/form-helpers";
 import { getSessionItem, removeSessionItem } from "@/lib/safe-storage";
 import { GrnItemTable } from "./grn-item-table";
 import { GrnFormDialogs } from "./grn-form-dialogs";
@@ -108,8 +112,12 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand group ที่
   // location/qty/discount/tax ติด error (field อยู่ใน group expand เท่านั้น) + scroll
   const [revealErrorSignal, setRevealErrorSignal] = useState(0);
-  const revealErrors = () => {
+  const revealErrors = (errors?: Record<string, unknown>) => {
     setRevealErrorSignal((c) => c + 1);
+    const count = countInvalidItems(errors);
+    toast.warning(
+      count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
+    );
     // scroll หา field แรกที่ผิด — retry ข้ามเฟรมจน group ที่ auto-expand mount field เสร็จ
     scrollToFirstInvalidField();
   };

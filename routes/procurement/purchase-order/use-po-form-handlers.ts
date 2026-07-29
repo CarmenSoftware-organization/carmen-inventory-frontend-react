@@ -35,8 +35,8 @@ interface UsePoFormHandlersOptions {
   role: string | undefined;
   setShowReject: Dispatch<SetStateAction<boolean>>;
   setShowClose: Dispatch<SetStateAction<boolean>>;
-  /** เรียกเมื่อ validation ไม่ผ่าน — auto-expand row ที่ location error + scroll */
-  revealErrors: () => void;
+  /** เรียกเมื่อ validation ไม่ผ่าน — auto-expand row ที่ error + scroll + บอกว่าขาดอะไร */
+  revealErrors: (errors?: Record<string, unknown>) => void;
 }
 
 /**
@@ -287,8 +287,8 @@ export function usePoFormHandlers({
     if (form.formState.isDirty) {
       const valid = await form.trigger();
       if (!valid) {
-        revealErrors();
-        toast.error(tt("validationError"));
+        // revealErrors บอกเองแล้วว่าขาดกี่รายการ — toast ซ้ำสองใบไม่ได้ช่วยอะไร
+        revealErrors(form.formState.errors as Record<string, unknown>);
         return;
       }
       const values = form.getValues();

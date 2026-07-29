@@ -498,7 +498,9 @@
     "invalidJson": "{field} must be valid JSON",
     "dateOutsidePeriod": "Date must be within the current period",
     "mustNotExceed": "{field} must not exceed {target}",
-    "formIncomplete": "Please complete all required fields before confirming"
+    "formIncomplete": "Please complete all required fields before confirming",
+    "incompleteItems": "{count, plural, =1 {# item is} other {# items are}} still incomplete — jumped to the first field to fix.",
+    "incompleteDocument": "Some details are missing — jumped to the field to fix."
   },
   "field": {
     "field": "Field",
@@ -2924,8 +2926,6 @@
       "noDepartment": "Your profile does not have a department assigned. Please contact your administrator.",
       "addItem": "Add Item",
       "selectWorkflowFirst": "Please select a workflow before adding items",
-      "incompleteItems": "{count, plural, =1 {# item is} other {# items are}} still incomplete — jumped to the first field to fix.",
-      "incompleteDocument": "The request is missing some details — jumped to the field to fix.",
       "noItems": "No items added yet",
       "noItemsDesc": "Start by adding items to this purchase request.",
       "removeItem": "Remove Item",

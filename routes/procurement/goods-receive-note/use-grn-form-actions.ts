@@ -34,7 +34,7 @@ interface UseGrnFormActionsParams {
   mode: FormMode;
   setMode: (mode: FormMode) => void;
   /** validation ไม่ผ่าน → auto-expand group ที่ error + scroll หา field แรก */
-  revealErrors?: () => void;
+  revealErrors?: (errors?: Record<string, unknown>) => void;
 }
 
 export function useGrnFormActions({
@@ -304,11 +304,9 @@ export function useGrnFormActions({
     setIsSubmitting(true);
     form.handleSubmit(onSubmit, (errs) => {
       setIsSubmitting(false); // validation ไม่ผ่าน → guard กลับมาเฝ้าเหมือนเดิม
-      if (errs.items?.message) {
-        toast.error(errs.items.message);
-      }
-      // location/received_qty/discount/tax อยู่ใน group expand → เผย + scroll หา field
-      revealErrors?.();
+      // location/received_qty/discount/tax อยู่ใน group expand → เผย + scroll +
+      // บอกว่าขาดกี่รายการ (revealErrors พูดคนเดียว ไม่ต้อง toast ซ้อน)
+      revealErrors?.(errs as Record<string, unknown>);
     })();
   };
 

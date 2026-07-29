@@ -307,3 +307,27 @@ export function keyValuesToObject(
   }
   return result;
 }
+
+/**
+ * นับว่ามีกี่รายการที่ยังกรอกไม่ครบ จาก error ของ react-hook-form
+ *
+ * ใช้คู่กับ toast ตอน validate ไม่ผ่าน — ปุ่มที่กดแล้วเงียบหรือเลื่อนหน้าเฉย ๆ
+ * ทำให้คนกรอกต้องไล่เดาเองว่าขาดอะไร ตัวเลขนี้บอกขนาดของงานที่เหลือ ส่วนช่องที่
+ * ผิดจริงมีข้อความของตัวเองติดอยู่แล้ว
+ *
+ * @param errors - `form.formState.errors` หรือ argument ของ onInvalid
+ * @param key - ชื่อ field array (default `items`)
+ * @returns จำนวนแถวที่มี error — 0 แปลว่าผิดที่ระดับเอกสาร ไม่ใช่ในรายการ
+ * @example
+ * ```ts
+ * const count = countInvalidItems(errors);
+ * toast.warning(count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"));
+ * ```
+ */
+export function countInvalidItems(
+  errors: Record<string, unknown> | undefined,
+  key = "items",
+): number {
+  const itemErrors = errors?.[key];
+  return Array.isArray(itemErrors) ? itemErrors.filter(Boolean).length : 0;
+}

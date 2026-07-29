@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { FieldErrors, UseFormReturn } from "react-hook-form";
 import {
   buildItemChanges,
+  countInvalidItems,
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
@@ -64,6 +65,7 @@ export function usePrFormActions({
 }: UsePrFormActionsParams) {
   const t = useTranslations("procurement.purchaseRequest");
   const tt = useTranslations("toast");
+  const tv = useTranslations("validation");
   const navigate = useNavigate();
   const location = useLocation();
   const buCode = useBuCode();
@@ -451,10 +453,9 @@ export function usePrFormActions({
   const revealInvalid = (errors: FieldErrors<PrFormValues>) => {
     if (onRevealInvalid) onRevealInvalid();
     else scrollToFirstInvalidField();
-    const itemErrors = Array.isArray(errors.items) ? errors.items : [];
-    const count = itemErrors.filter(Boolean).length;
+    const count = countInvalidItems(errors as Record<string, unknown>);
     toast.warning(
-      count > 0 ? t("incompleteItems", { count }) : t("incompleteDocument"),
+      count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
     );
   };
 
