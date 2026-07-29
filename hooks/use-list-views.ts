@@ -26,6 +26,10 @@ export interface UseListViewsResult {
   userViews: SavedView[];
   buViews: SavedView[];
   isLoading: boolean;
+  /** true = ยังมี query ใด query หนึ่ง (bu หรือ user) กำลัง fetch/refetch อยู่ —
+   * ต่างจาก `isLoading` (initial load เท่านั้น) ตรงที่ครอบคลุม refetch หลัง
+   * invalidation ด้วย (เช่นตอน saveAs แล้ว query ยัง refetch ค้างอยู่) */
+  isFetching: boolean;
   error: Error | null;
   /** true = admin ของ BU ปัจจุบัน — UI ใช้เพื่อโชว์ปุ่มจัดการ bu-scope view */
   canManageBu: boolean;
@@ -154,6 +158,7 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     userViews,
     buViews,
     isLoading: buQuery.isLoading || userQuery.isLoading,
+    isFetching: buQuery.isFetching || userQuery.isFetching,
     error: buQuery.error ?? userQuery.error,
     canManageBu: isAdmin,
     saveAs,

@@ -195,21 +195,29 @@ export function useListFilters(
   }, [current, apply]);
 
   // Step 3: `sv` ชี้ view ที่หาไม่เจอ (ถูกลบ/ลิงก์ที่แชร์มาเก่าแล้ว) — เตือนครั้งเดียว
-  // ด้วย ref guard แล้วล้าง `sv` ทิ้งเงียบ ๆ ต้องรอ `views.isLoading` เป็น false ก่อน
-  // ไม่งั้นระหว่างโหลด (ยังไม่มี userViews/buViews มาเทียบ) จะเข้าใจผิดว่า "หาไม่เจอ"
+  // ด้วย ref guard แล้วล้าง `sv` ทิ้งเงียบ ๆ ต้องรอทั้ง `views.isLoading` และ
+  // `views.isFetching` เป็น false และไม่มี `views.error` ก่อน — ไม่งั้นระหว่างโหลด/
+  // refetch (เช่นหลัง saveAs แล้ว query ถูก invalidate ยังไม่ทันมี view ใหม่ในแคช)
+  // หรือตอน query error จะเข้าใจผิดว่า "หาไม่เจอ" ทั้งที่จริงยังไม่มีข้อมูลมาเทียบ
   const notFoundHandledRef = useRef(false);
   useEffect(() => {
     if (!sv) {
       notFoundHandledRef.current = false;
       return;
     }
-    if (views.isLoading || notFoundHandledRef.current) return;
+    if (
+      views.isLoading ||
+      views.isFetching ||
+      views.error ||
+      notFoundHandledRef.current
+    )
+      return;
     if (!current) {
       notFoundHandledRef.current = true;
       toast.info(t("listView.viewNotFound"));
       setURLParams({ sv: "" });
     }
-  }, [sv, views.isLoading, current, t]);
+  }, [sv, views.isLoading, views.isFetching, views.error, current, t]);
 
   return {
     values,
