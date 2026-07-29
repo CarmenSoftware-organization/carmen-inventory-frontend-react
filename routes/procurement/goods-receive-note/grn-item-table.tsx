@@ -223,6 +223,16 @@ export function GrnItemTable({
     setOpenLocationKey(groupKey);
   };
 
+  // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — เติมแถวเปล่าให้เลย
+  // ผู้ใช้จะได้เห็นว่าต้องกรอกช่องไหน แทนที่จะได้แค่ toast แล้วหน้าว่าง (กติกา
+  // เดียวกับ PR/PO) · เฉพาะ GRN แบบ manual — แบบอิง PO รายการมาจาก PO ไม่ใช่กรอกเอง
+  const submitCount = form.formState.submitCount;
+  useEffect(() => {
+    if (!submitCount) return;
+    if (itemFields.length === 0 && !disabled && isManual) handleAddItem();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
+  }, [submitCount]);
+
   const handleRemoveGroup = (indices: number[]) => {
     [...indices].sort((a, b) => b - a).forEach((i) => removeItem(i));
   };

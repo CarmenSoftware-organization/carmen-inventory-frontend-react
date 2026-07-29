@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { BoxIcon, Plus } from "lucide-react";
@@ -52,6 +52,16 @@ export function CnItem({ form, disabled }: Props) {
       ),
     [watchedItems],
   );
+
+  // กด Save แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — CN ต่างจาก PR/PO/GRN ตรงที่
+  // รายการต้องเลือกมาจาก GRN เพิ่มแถวเปล่าไม่ได้ จึงเปิด dialog เลือกรายการให้แทน
+  // (ผลลัพธ์เดียวกันคือพาไปยังสิ่งที่ต้องทำต่อ ไม่ปล่อยให้เดาเอง)
+  const submitCount = form.formState.submitCount;
+  useEffect(() => {
+    if (!submitCount) return;
+    if (itemFields.length === 0 && canAddItem) setAddOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
+  }, [submitCount]);
 
   const handleAddLines = (lines: CnGrnLine[]) => {
     if (lines.length === 0) return;
