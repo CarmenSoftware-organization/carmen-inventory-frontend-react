@@ -366,6 +366,10 @@
     "all": "All",
     "voided": "Voided",
     "void": "Voided",
+    "sent": "Sent",
+    "closed": "Closed",
+    "saved": "Saved",
+    "committed": "Committed",
     "stockIn": "Stock In",
     "stockOut": "Stock Out",
     "allType": "All Type"
@@ -3216,7 +3220,21 @@
       "unsupportedDescription": "Widget shape \"{shape}\" cannot be rendered yet",
       "deleteTitle": "Delete Widget",
       "deleteConfirm": "Remove \"{title}\" from your dashboard? This action cannot be undone.",
-      "deleteAria": "Delete widget {title}"
+      "deleteAria": "Delete widget {title}",
+      "configureTitle": "Configure Widget",
+      "configureDescription": "Choose parameters for \"{name}\"",
+      "configureAria": "Configure widget {title}",
+      "paramsAll": "All",
+      "preview": "Preview",
+      "previewError": "Preview failed: {message}",
+      "visAll": "All",
+      "visMine": "Mine",
+      "timeRange": {
+        "today": "Today",
+        "3days": "Last 3 days",
+        "7days": "Last 7 days",
+        "1month": "Last month"
+      }
     },
     "greeting": {
       "morning": "Good Morning",

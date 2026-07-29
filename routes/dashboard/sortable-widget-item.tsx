@@ -1,64 +1,50 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { CircleAlert, GripVertical, Trash2 } from "lucide-react";
+import { CircleAlert, GripVertical, Settings2, Trash2 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
   BarCard,
   KpiCard,
+  LineCard,
   PieCard,
+  TableCard,
   WidgetSkeleton,
   type ResolvedWidget,
 } from "@/components/dashboard-widget/dashboard-widget-grid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useDashboardDatasetDetail } from "@/hooks/use-dashboard-dataset";
+import { useMyDashboardWidgetData } from "@/hooks/use-my-dashboard-widgets";
 import { cn } from "@/lib/utils";
+import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   DatasetData,
   DatasetMeta,
   DatasetShape,
   MyDashboardWidget,
 } from "@/types/dashboard-widget";
-
-const SUPPORTED_SHAPES = new Set(["scalar", "scalar_delta", "categorical"]);
+import { inferModuleName, inferSubTile, SUPPORTED_SHAPES } from "./widget-shape";
 
 interface SortableWidgetItemProps {
   readonly widget: MyDashboardWidget;
   readonly onDelete: () => void;
-}
-
-function inferModuleName(datasetId: string): string {
-  const prefix = datasetId.split(".")[0];
-  if (prefix === "inventory") return "inventoryManagement";
-  return "procurement";
-}
-
-function inferSubTile(datasetId: string): string {
-  if (datasetId.includes("physical-count")) return "physicalCount";
-  if (datasetId.includes("spot-check")) return "spotCheck";
-  if (datasetId.includes("store-requisition")) return "storeRequisition";
-  if (datasetId.includes("low-stock")) return "stockReplenishment";
-  if (datasetId.includes("stock-in") || datasetId.includes("stock-out"))
-    return "transaction";
-  if (datasetId.includes("pr-by-department")) return "department";
-  if (datasetId.includes("by-vendor")) return "vendor";
-  if (datasetId.includes("pr-")) return "purchaseRequest";
-  if (datasetId.includes("po-")) return "purchaseOrder";
-  if (datasetId.includes("grn")) return "goodsReceiveNote";
-  if (datasetId.includes("cn-")) return "creditNote";
-  return "document";
+  /** descriptor ของ dataset — ใช้ตัดสินว่าจะโชว์ปุ่มตั้งค่า param ไหม */
+  readonly dataset?: DashboardDataset;
+  readonly onConfigure?: () => void;
 }
 
 /** col-span ตาม widget_type — match procurement/inventory dashboards */
 function getColSpan(widgetType: string): string {
   if (widgetType === "kpi") return "lg:col-span-1";
+  if (widgetType === "table") return "sm:col-span-2 lg:col-span-4";
   return "sm:col-span-2 lg:col-span-2";
 }
 
 export function SortableWidgetItem({
   widget,
   onDelete,
+  dataset,
+  onConfigure,
 }: SortableWidgetItemProps) {
   const t = useTranslations("dashboard.savedWidget");
   const {
@@ -70,9 +56,9 @@ export function SortableWidgetItem({
     isDragging,
   } = useSortable({ id: widget.id });
 
-  const { data: detail, isLoading } = useDashboardDatasetDetail(
-    widget.dataset_id,
-  );
+  // ยิงตาม widget.id ไม่ใช่ dataset_id — backend resolve `params` ที่เก็บไว้
+  // บน widget ให้เอง
+  const { data: detail, isLoading } = useMyDashboardWidgetData(widget.id);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -103,6 +89,18 @@ export function SortableWidgetItem({
         >
           <GripVertical className="size-3.5" aria-hidden="true" />
         </button>
+        {!!dataset?.params?.length && onConfigure && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            onClick={onConfigure}
+            aria-label={t("configureAria", { title: displayTitle })}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <Settings2 className="size-3.5" aria-hidden="true" />
+          </Button>
+        )}
         <Button
           type="button"
           variant="ghost"
@@ -117,7 +115,9 @@ export function SortableWidgetItem({
 
       {isLoading || !detail ? (
         <WidgetSkeleton />
-      ) : SUPPORTED_SHAPES.has(detail.meta.shape) ? (
+      ) : SUPPORTED_SHAPES.includes(
+          detail.meta.shape as (typeof SUPPORTED_SHAPES)[number],
+        ) ? (
         <WidgetRenderer
           widget={buildFullWidget(widget, detail.meta, detail.data, displayTitle)}
           moduleName={moduleName}
@@ -133,7 +133,7 @@ export function SortableWidgetItem({
   );
 }
 
-function WidgetRenderer({
+export function WidgetRenderer({
   widget,
   moduleName,
   subTileFor,
@@ -162,6 +162,23 @@ function WidgetRenderer({
     case "bar":
       return (
         <BarCard
+          widget={widget}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
+      );
+    case "line":
+    case "area":
+      return (
+        <LineCard
+          widget={widget}
+          moduleName={moduleName}
+          subTileFor={subTileFor}
+        />
+      );
+    case "table":
+      return (
+        <TableCard
           widget={widget}
           moduleName={moduleName}
           subTileFor={subTileFor}
@@ -214,6 +231,7 @@ function buildFullWidget(
     widget_type: saved.widget_type,
     title,
     order_index: saved.order_index,
+    params: saved.params,
     meta,
     data,
   };

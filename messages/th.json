@@ -366,6 +366,10 @@
     "all": "ทั้งหมด",
     "voided": "เป็นโมฆะ",
     "void": "เป็นโมฆะ",
+    "sent": "ส่งแล้ว",
+    "closed": "ปิดแล้ว",
+    "saved": "บันทึกแล้ว",
+    "committed": "ยืนยันแล้ว",
     "stockIn": "รับเข้า",
     "stockOut": "จ่ายออก",
     "allType": "ทุกประเภท"
@@ -3211,7 +3215,21 @@
       "unsupportedDescription": "Widget นี้ shape \"{shape}\" ยังแสดงผลไม่ได้",
       "deleteTitle": "ลบ Widget",
       "deleteConfirm": "ลบ \"{title}\" ออกจาก dashboard? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
-      "deleteAria": "ลบ widget {title}"
+      "deleteAria": "ลบ widget {title}",
+      "configureTitle": "ตั้งค่า Widget",
+      "configureDescription": "เลือกพารามิเตอร์สำหรับ \"{name}\"",
+      "configureAria": "ตั้งค่า widget {title}",
+      "paramsAll": "ทั้งหมด",
+      "preview": "ตัวอย่าง",
+      "previewError": "แสดงตัวอย่างไม่สำเร็จ: {message}",
+      "visAll": "ทั้งหมด",
+      "visMine": "ของฉัน",
+      "timeRange": {
+        "today": "วันนี้",
+        "3days": "3 วันล่าสุด",
+        "7days": "7 วันล่าสุด",
+        "1month": "1 เดือนล่าสุด"
+      }
     },
     "greeting": {
       "morning": "สวัสดีตอนเช้า",

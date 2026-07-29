@@ -31,6 +31,8 @@ interface LookupDatasetProps {
   readonly onValueChange: (value: string) => void;
   readonly onItemChange?: (dataset: DashboardDataset) => void;
   readonly excludeIds?: Set<string>;
+  /** รายการ dataset เพิ่มเติมฝั่ง client (เช่น synthetic group widget) แสดงนำหน้า */
+  readonly extraItems?: readonly DashboardDataset[];
   readonly category?: string;
   readonly shape?: string;
   readonly shapes?: readonly string[];
@@ -46,6 +48,7 @@ export function LookupDataset({
   onValueChange,
   onItemChange,
   excludeIds,
+  extraItems,
   category,
   shape,
   shapes,
@@ -61,7 +64,7 @@ export function LookupDataset({
   const [hasOpened, setHasOpened] = useState(false);
   const { data, isLoading } = useDashboardDatasets(hasOpened);
 
-  const datasets = (data?.items ?? []).filter((d) => {
+  const datasets = [...(extraItems ?? []), ...(data?.items ?? [])].filter((d) => {
     if (excludeIds?.has(d.id)) return false;
     if (category && d.category !== category) return false;
     if (shape && d.shape !== shape) return false;
