@@ -1,5 +1,10 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
-import { useFieldArray, useForm, useWatch, type Resolver } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  useWatch,
+  type Resolver,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import { AlertTriangle, Check } from "lucide-react";
@@ -313,7 +318,6 @@ export function PurchaseRequestFormV2({
   // สิทธิ์รายอย่างตาม role — กฎยกมาจากหน้าเดิมทั้งชุด (ดู pr2-permissions)
   const perms = resolvePr2Permissions({ role, isDisabled, isDraft });
 
-
   const watchedItems = useWatch({ control: form.control, name: "items" });
 
   // นับจากแถวที่แสดงอยู่จริง (กรองแล้ว) เพื่อให้ตัวเลขใน dialog ตรงกับสิ่งที่จะถูก
@@ -492,6 +496,7 @@ export function PurchaseRequestFormV2({
         canEditWorkflow={
           isDraft && !isView && role === STAGE_ROLE.CREATE && !template
         }
+        isAdd={isAdd}
         // หน้าเดิม: notes แก้ได้เฉพาะผู้สร้างและยังไม่ view (pr-form.tsx:127)
         canEditDescription={!isView && role === STAGE_ROLE.CREATE}
         isPending={actions.isPending}

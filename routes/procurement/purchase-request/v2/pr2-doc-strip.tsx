@@ -36,6 +36,8 @@ interface Pr2DocStripProps {
   readonly form: UseFormReturn<PrFormValues>;
   /** draft + ผู้สร้าง เท่านั้นที่เลือกสายอนุมัติได้ (กติกาเดียวกับหน้าเดิม) */
   readonly canEditWorkflow: boolean;
+  /** กำลังสร้างใบใหม่ — สายอนุมัติให้เลือกเฉพาะตัวที่ผู้ใช้เริ่มใบได้ */
+  readonly isAdd?: boolean;
   /** ผู้สร้างเท่านั้นที่แก้หมายเหตุได้ */
   readonly canEditDescription: boolean;
   readonly isPending: boolean;
@@ -58,6 +60,7 @@ export function Pr2DocStrip({
   description,
   form,
   canEditWorkflow,
+  isAdd,
   canEditDescription,
   isPending,
   onBack,
@@ -127,6 +130,7 @@ export function Pr2DocStrip({
                   value={field.value}
                   onValueChange={field.onChange}
                   workflowType={WORKFLOW_TYPE.PR}
+                  creatableOnly={isAdd}
                   disabled={isPending}
                   error={form.formState.errors.workflow_id?.message}
                   className="h-7 w-44 text-xs"

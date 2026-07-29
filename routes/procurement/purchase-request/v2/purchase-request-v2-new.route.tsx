@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { useSearchParams } from "react-router";
+import { useTranslations } from "use-intl";
 import { usePurchaseRequestTemplates } from "@/hooks/use-purchase-request";
+import { CreateWorkflowGate } from "@/components/share/create-workflow-gate";
+import { WORKFLOW_TYPE } from "@/types/workflows";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
 import { PurchaseRequestFormV2 } from "./pr2-form";
 
@@ -24,9 +27,16 @@ function NewPurchaseRequestV2Inner() {
 }
 
 export function Component() {
+  const t = useTranslations("procurement.purchaseRequest");
+
   return (
-    <Suspense fallback={<FormSkeleton />}>
-      <NewPurchaseRequestV2Inner />
-    </Suspense>
+    <CreateWorkflowGate
+      workflowType={WORKFLOW_TYPE.PR}
+      description={t("noCreatableWorkflow")}
+    >
+      <Suspense fallback={<FormSkeleton />}>
+        <NewPurchaseRequestV2Inner />
+      </Suspense>
+    </CreateWorkflowGate>
   );
 }
