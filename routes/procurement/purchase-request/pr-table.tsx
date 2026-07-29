@@ -269,7 +269,8 @@ export function usePurchaseRequestTable({
   });
 
   const allColumns: ColumnDef<PurchaseRequest>[] = [
-    selectColumn<PurchaseRequest>(),
+    // all-document ไม่มี batch approve/reject ให้ทำ เลยไม่ต้องมีช่องติ๊ก
+    ...(isMyPending ? [selectColumn<PurchaseRequest>()] : []),
     indexColumn<PurchaseRequest>(params),
     ...dataColumns,
     ...(isMyPending ? [prActionColumn] : []),
@@ -279,7 +280,7 @@ export function usePurchaseRequestTable({
     data: items,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
-    enableRowSelection: true,
+    enableRowSelection: isMyPending,
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
     initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
