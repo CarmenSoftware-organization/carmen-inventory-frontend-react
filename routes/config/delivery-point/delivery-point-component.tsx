@@ -7,7 +7,9 @@ import {
 import type { DeliveryPoint } from "@/types/delivery-point";
 import { DeliveryPointDialog } from "@/components/share/delivery-point-dialog";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useDeliveryPointTable } from "./use-delivery-point-table";
+import { DELIVERY_POINT_FILTER_FIELDS } from "./delivery-point-filter-fields";
 import DeliveryPointCard from "./delivery-point-card";
 
 /**
@@ -28,6 +30,8 @@ export default function DeliveryPointComponent() {
       useDelete={useDeleteDeliveryPoint}
       useTable={useDeliveryPointTable}
       permissionPrefix="configuration.delivery_point"
+      pageKey={LIST_PAGE_KEYS.DELIVERY_POINT}
+      filterFields={DELIVERY_POINT_FILTER_FIELDS}
       exportColumns={[
         { header: tfl("name"), value: (r) => r.name, width: 28 },
         {

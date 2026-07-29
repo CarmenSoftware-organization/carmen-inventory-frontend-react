@@ -1,48 +1,20 @@
 
 import { useTranslations } from "use-intl";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import type { ActiveFilter } from "@/components/ui/active-filter-bar";
 import {
   useAdjustmentType,
   useDeleteAdjustmentType,
 } from "@/hooks/use-adjustment-type";
-import { useURL } from "@/hooks/use-url";
-import { ADJUSTMENT_TYPE, type AdjustmentType } from "@/types/adjustment-type";
+import type { AdjustmentType } from "@/types/adjustment-type";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useAdjustmentTypeTable } from "./use-adjustment-type-table";
+import { ADJUSTMENT_TYPE_FILTER_FIELDS } from "./adjustment-type-filter-fields";
 import { AdjustmentTypeDialog } from "./adjustment-type-dialog";
 import AdjustmentTypeCard from "./adjustment-type-card";
 
 export default function AdjustmentTypeComponent() {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const [adjType, setAdjType] = useURL("adj_type");
-
-  const TYPE_OPTIONS = [
-    { label: tfl("stockIn"), value: `type|string:${ADJUSTMENT_TYPE.STOCK_IN}` },
-    { label: tfl("stockOut"), value: `type|string:${ADJUSTMENT_TYPE.STOCK_OUT}` },
-  ];
-
-  const extraActiveFilters: ActiveFilter[] = !adjType
-    ? []
-    : adjType
-        .split(",")
-        .map((v) => {
-          const match = TYPE_OPTIONS.find((o) => o.value === v);
-          if (!match) return null;
-          return {
-            key: `adjType-${v}`,
-            label: match.label,
-            onRemove: () =>
-              setAdjType(
-                adjType
-                  .split(",")
-                  .filter((val) => val !== v)
-                  .join(","),
-              ),
-          } satisfies ActiveFilter;
-        })
-        .filter((f): f is ActiveFilter => f !== null);
 
   return (
     <ConfigListTemplate<AdjustmentType>
@@ -52,6 +24,8 @@ export default function AdjustmentTypeComponent() {
       useDelete={useDeleteAdjustmentType}
       useTable={useAdjustmentTypeTable}
       permissionPrefix="configuration.adjustment_type"
+      pageKey={LIST_PAGE_KEYS.ADJUSTMENT_TYPE}
+      filterFields={ADJUSTMENT_TYPE_FILTER_FIELDS}
       defaultSort="code:asc,name:asc"
       exportColumns={[
         { header: tfl("code"), value: (r) => r.code, width: 14 },
@@ -84,17 +58,6 @@ export default function AdjustmentTypeComponent() {
       renderCard={({ item, index, onEdit }) => (
         <AdjustmentTypeCard item={item} index={index} onEdit={onEdit} />
       )}
-      extraFilter={adjType || undefined}
-      extraActiveFilters={extraActiveFilters}
-      onClearExtraFilters={() => setAdjType("")}
-      extraToolbar={
-        <MultiSelectFilter
-          value={adjType}
-          onChange={setAdjType}
-          placeholder={tfl("type")}
-          options={TYPE_OPTIONS}
-        />
-      }
     />
   );
 }

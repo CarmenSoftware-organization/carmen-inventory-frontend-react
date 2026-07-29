@@ -4,7 +4,9 @@ import { useTranslations } from "use-intl";
 import { useTaxProfile, useDeleteTaxProfile } from "@/hooks/use-tax-profile";
 import type { TaxProfile } from "@/types/tax-profile";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useTaxProfileTable } from "./use-tax-profile-table";
+import { TAX_PROFILE_FILTER_FIELDS } from "./tax-profile-filter-fields";
 import TaxProfileCard from "./tax-profile-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
@@ -30,6 +32,8 @@ export default function TaxProfileComponent() {
       useDelete={useDeleteTaxProfile}
       useTable={useTaxProfileTable}
       permissionPrefix="configuration.tax_profile"
+      pageKey={LIST_PAGE_KEYS.TAX_PROFILE}
+      filterFields={TAX_PROFILE_FILTER_FIELDS}
       defaultSort="tax_rate:asc"
       exportColumns={[
         { header: tfl("name"), value: (r) => r.name, width: 28 },

@@ -4,7 +4,9 @@ import { useTranslations } from "use-intl";
 import { useEcoLabel, useDeleteEcoLabel } from "@/hooks/use-eco-label";
 import type { EcoLabel } from "@/types/eco-label";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useEcoLabelTable } from "./use-eco-table";
+import { ECO_FILTER_FIELDS } from "./eco-filter-fields";
 import EcoLabelCard from "./eco-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
@@ -23,6 +25,8 @@ export default function EcoComponent() {
       useList={useEcoLabel}
       useDelete={useDeleteEcoLabel}
       useTable={useEcoLabelTable}
+      pageKey={LIST_PAGE_KEYS.ECO}
+      filterFields={ECO_FILTER_FIELDS}
       defaultSort="code:asc"
       exportColumns={[
         { header: t("iso"), value: (r) => r.code, width: 16 },

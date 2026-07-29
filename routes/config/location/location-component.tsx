@@ -1,83 +1,16 @@
 
 import { useTranslations } from "use-intl";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import type { ActiveFilter } from "@/components/ui/active-filter-bar";
 import { useLocation, useDeleteLocation } from "@/hooks/use-location";
-import { useURL } from "@/hooks/use-url";
 import type { Location } from "@/types/location";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useLocationTable } from "./use-location-table";
+import { LOCATION_FILTER_FIELDS } from "./location-filter-fields";
 import LocationCard from "./location-card";
 
-function buildBadges(
-  raw: string,
-  options: { label: string; value: string }[],
-  prefix: string,
-  setter: (v: string) => void,
-): ActiveFilter[] {
-  if (!raw) return [];
-  return raw.split(",").flatMap((v) => {
-    const match = options.find((o) => o.value === v);
-    if (!match) return [];
-    return {
-      key: `${prefix}-${v}`,
-      label: match.label,
-      onRemove: () =>
-        setter(
-          raw
-            .split(",")
-            .filter((val) => val !== v)
-            .join(","),
-        ),
-    };
-  });
-}
-
 export default function LocationComponent() {
-  const t = useTranslations("config.location");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const [locationType, setLocationType] = useURL("location_type");
-  const [physicalCount, setPhysicalCount] = useURL("physical_count_type");
-
-  const LOCATION_TYPE_OPTIONS = [
-    { label: t("typeInventory"), value: "location_type|string:inventory" },
-    { label: t("typeDirect"), value: "location_type|string:direct" },
-    {
-      label: t("typeConsignment"),
-      value: "location_type|string:consignment",
-    },
-  ];
-
-  const PHYSICAL_COUNT_OPTIONS = [
-    { label: t("pcYes"), value: "physical_count_type|string:yes" },
-    { label: t("pcNo"), value: "physical_count_type|string:no" },
-  ];
-
-  // badge ในแถบ active filter ยืนเดี่ยว ไม่มี placeholder กำกับเหมือนใน dropdown
-  // จึงต้องพ่วงชื่อ filter เข้าไปเอง ไม่งั้นเหลือแค่ "Yes" ซึ่งไม่บอกว่า Yes ของอะไร
-  const PHYSICAL_COUNT_BADGE_OPTIONS = PHYSICAL_COUNT_OPTIONS.map((opt) => ({
-    ...opt,
-    label: `${tfl("physicalCount")}: ${opt.label}`,
-  }));
-
-  const extraFilter =
-    [locationType, physicalCount].filter(Boolean).join(",") || undefined;
-
-  const extraActiveFilters: ActiveFilter[] = [
-    ...buildBadges(
-      locationType,
-      LOCATION_TYPE_OPTIONS,
-      "locationType",
-      setLocationType,
-    ),
-    ...buildBadges(
-      physicalCount,
-      PHYSICAL_COUNT_BADGE_OPTIONS,
-      "physicalCount",
-      setPhysicalCount,
-    ),
-  ];
 
   return (
     <ConfigListTemplate<Location>
@@ -87,6 +20,8 @@ export default function LocationComponent() {
       useDelete={useDeleteLocation}
       useTable={useLocationTable}
       permissionPrefix="configuration.location"
+      pageKey={LIST_PAGE_KEYS.LOCATION}
+      filterFields={LOCATION_FILTER_FIELDS}
       addPath="/config/location/new"
       getEditPath={(loc) => `/config/location/${loc.id}`}
       exportColumns={[
@@ -121,28 +56,6 @@ export default function LocationComponent() {
       renderCard={({ item, index, onEdit }) => (
         <LocationCard item={item} index={index} onEdit={onEdit} />
       )}
-      extraFilter={extraFilter}
-      extraActiveFilters={extraActiveFilters}
-      onClearExtraFilters={() => {
-        setLocationType("");
-        setPhysicalCount("");
-      }}
-      extraToolbar={
-        <>
-          <MultiSelectFilter
-            value={locationType}
-            onChange={setLocationType}
-            placeholder={tfl("locationType")}
-            options={LOCATION_TYPE_OPTIONS}
-          />
-          <MultiSelectFilter
-            value={physicalCount}
-            onChange={setPhysicalCount}
-            placeholder={tfl("physicalCount")}
-            options={PHYSICAL_COUNT_OPTIONS}
-          />
-        </>
-      }
     />
   );
 }

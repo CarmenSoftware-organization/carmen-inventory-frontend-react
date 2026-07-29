@@ -7,7 +7,9 @@ import {
 } from "@/hooks/use-business-type";
 import type { BusinessType } from "@/types/business-type";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useBusinessTypeTable } from "./use-business-type-table";
+import { BUSINESS_TYPE_FILTER_FIELDS } from "./business-type-filter-fields";
 import BusinessTypeCard from "./business-type-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
@@ -33,6 +35,8 @@ export default function BusinessTypeComponent() {
       useDelete={useDeleteBusinessType}
       useTable={useBusinessTypeTable}
       permissionPrefix="configuration.business_type"
+      pageKey={LIST_PAGE_KEYS.BUSINESS_TYPE}
+      filterFields={BUSINESS_TYPE_FILTER_FIELDS}
       defaultSort="name:asc"
       exportColumns={[
         { header: tfl("name"), value: (r) => r.name, width: 28 },
