@@ -1,20 +1,7 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -24,7 +11,6 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   usePriceListTemplate,
@@ -39,17 +25,20 @@ import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { usePriceListTemplateTable } from "./use-plt-table";
 import PltCard from "./plt-card";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function PriceListTemplateComponent() {
   const navigate = useNavigate();
@@ -62,22 +51,69 @@ export default function PriceListTemplateComponent() {
     null,
   );
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deletePriceListTemplate = useDeletePriceListTemplate();
   const { exportPriceListTemplate, isExporting } = useExportPriceListTemplate();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
+  const { params, search, setSearch, tableConfig } = useDataGridState();
+
+  // field เดียว — ไม่มี vendor/business_type/date param อื่นในโค้ดเดิม (grep ทั้ง
+  // ไฟล์ยืนยันแล้ว) labelKey ของ option เป็น i18n key จริง (status.draft ฯลฯ)
+  // จึงใช้ control: "status" ทั่วไปได้ตรง ๆ
+  const priceListTemplateFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "status",
+        labelKey: "common.status",
+        options: [
+          { labelKey: "status.draft", value: "status|string:draft" },
+          { labelKey: "status.active", value: "status|string:active" },
+          { labelKey: "status.inactive", value: "status|string:inactive" },
+        ],
+      },
+    ],
+    [],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.PRICE_LIST_TEMPLATE,
+    fields: priceListTemplateFilterFields,
+  });
+
+  const queryParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const isGridMode = isMobile || displayMode === "grid";
 
-  const { data, isLoading, error, refetch } = usePriceListTemplate(params, {
-    enabled: !isGridMode,
-  });
+  const { data, isLoading, error, refetch } = usePriceListTemplate(
+    queryParams,
+    { enabled: !isGridMode },
+  );
 
   const grid = useGridPagination<PriceListTemplate>({
     useListHook: usePriceListTemplate,
-    params,
+    params: queryParams,
     enabled: isGridMode,
   });
 
@@ -86,28 +122,10 @@ export default function PriceListTemplateComponent() {
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
-  const statusOptions = [
-    { label: ts("draft"), value: "status|string:draft" },
-    { label: ts("active"), value: "status|string:active" },
-    { label: ts("inactive"), value: "status|string:inactive" },
-  ];
-
-  const match = filter
-    ? statusOptions.find((o) => o.value === filter)
-    : undefined;
-
-  const activeFilters: ActiveFilter[] = match
-    ? [{ key: "filter", label: match.label, onRemove: () => setFilter("") }]
-    : [];
-
-  const clearAllFilters = () => {
-    setFilter("");
-  };
-
   const handleExport = async () => {
     try {
       const count = await exportPriceListTemplate({
-        params,
+        params: queryParams,
         columns: [
           { header: tfl("name"), value: (r) => r.name, width: 28 },
           {
@@ -182,53 +200,18 @@ export default function PriceListTemplateComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:block">
-              <StatusFilter
-                value={filter}
-                onChange={setFilter}
-                options={statusOptions}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter
-                    value={filter}
-                    onChange={setFilter}
-                    options={statusOptions}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={priceListTemplateFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -266,7 +249,7 @@ export default function PriceListTemplateComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -311,7 +294,7 @@ export default function PriceListTemplateComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -342,6 +325,16 @@ export default function PriceListTemplateComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

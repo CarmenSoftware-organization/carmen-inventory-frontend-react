@@ -1,20 +1,7 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -24,7 +11,6 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   useVendor,
@@ -35,24 +21,26 @@ import { useBusinessType } from "@/hooks/use-business-type";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import { useURL } from "@/hooks/use-url";
 import type { Vendor, VendorDetail } from "@/types/vendor";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useVendorTable } from "./use-vendor-table";
 import VendorCard from "./vendor-card";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function VendorComponent() {
   const navigate = useNavigate();
@@ -63,26 +51,82 @@ export default function VendorComponent() {
   const tt = useTranslations("toast");
   const [deleteTarget, setDeleteTarget] = useState<Vendor | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deleteVendor = useDeleteVendor();
   const { exportVendor, isExporting } = useExportVendor();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const [btFilter, setBtFilter] = useURL("business_type");
+  const { params, search, setSearch, tableConfig } = useDataGridState();
 
   const isGridMode = isMobile || displayMode === "grid";
 
   const { data: btData } = useBusinessType({ perpage: -1 });
-  const btFilterOptions = (btData?.data ?? [])
-    .filter((bt) => bt.is_active)
-    .map((bt) => ({
-      label: bt.name,
-      value: `business_type_id|string:${bt.id}`,
-    }));
+  // ชื่อ business type เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
+  // array reference เปลี่ยนทุก render จน vendorFilterFields memo ข้างล่างไม่เคย hit
+  const btFilterOptions = useMemo(
+    () =>
+      (btData?.data ?? [])
+        .filter((bt) => bt.is_active)
+        .map((bt) => ({
+          label: bt.name,
+          value: `business_type_id|string:${bt.id}`,
+        })),
+    [btData],
+  );
 
-  const combinedFilters = [params.filter, btFilter].filter(Boolean).join(",");
-  const combinedParams = { ...params, filter: combinedFilters || undefined };
+  // filter (status) ไม่ส่ง options เลย — ใช้ default is_active|bool:true/false
+  // ของ StatusFilter ตรงตัวเหมือนโค้ดเดิมทุกประการ (ts("active")/ts("inactive"))
+  // business_type เป็น literal string จริงจึงต้องใช้ control: "custom" ห่อ
+  // MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
+  // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key — เหมือน pattern
+  // PO_TYPE/CN_TYPE ใน Task 19). ไม่มี `region` filter ในโค้ดเดิม (survey brief
+  // เก่า/ไม่ตรง — grep ทั้งไฟล์ไม่พบ URL param หรือ control นี้เลย)
+  const vendorFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      { key: "filter", control: "status", labelKey: "common.status" },
+      {
+        key: "business_type",
+        control: "custom",
+        labelKey: "field.businessType",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={btFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [btFilterOptions],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.VENDOR,
+    fields: vendorFilterFields,
+  });
+
+  const combinedParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const { data, isLoading, error, refetch } = useVendor(combinedParams, {
     enabled: !isGridMode,
@@ -98,48 +142,6 @@ export default function VendorComponent() {
   const totalRecords = isGridMode
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const STATUS_OPTIONS = [
-    { label: ts("active"), value: "is_active|bool:true" },
-    { label: ts("inactive"), value: "is_active|bool:false" },
-  ];
-
-  const activeFilters: ActiveFilter[] = [];
-
-  if (filter) {
-    const match = STATUS_OPTIONS.find((o) => o.value === filter);
-    if (match) {
-      activeFilters.push({
-        key: `status-${filter}`,
-        label: match.label,
-        onRemove: () => setFilter(""),
-      });
-    }
-  }
-
-  if (btFilter) {
-    for (const v of btFilter.split(",")) {
-      const match = btFilterOptions.find((o) => o.value === v);
-      if (match) {
-        activeFilters.push({
-          key: `bt-${v}`,
-          label: match.label,
-          onRemove: () => {
-            const next = btFilter
-              .split(",")
-              .filter((val) => val !== v)
-              .join(",");
-            setBtFilter(next);
-          },
-        });
-      }
-    }
-  }
-
-  const clearAllFilters = () => {
-    setFilter("");
-    setBtFilter("");
-  };
 
   const handleExport = async () => {
     try {
@@ -205,65 +207,18 @@ export default function VendorComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter
-                value={filter}
-                onChange={setFilter}
-                options={STATUS_OPTIONS}
-              />
-              <MultiSelectFilter
-                value={btFilter}
-                onChange={setBtFilter}
-                placeholder={tfl("businessType")}
-                options={btFilterOptions}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter
-                    value={filter}
-                    onChange={setFilter}
-                    options={STATUS_OPTIONS}
-                  />
-                  <MultiSelectFilter
-                    value={btFilter}
-                    onChange={setBtFilter}
-                    placeholder={tfl("businessType")}
-                    options={btFilterOptions}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={vendorFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -301,7 +256,7 @@ export default function VendorComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -344,7 +299,7 @@ export default function VendorComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -375,6 +330,16 @@ export default function VendorComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );
