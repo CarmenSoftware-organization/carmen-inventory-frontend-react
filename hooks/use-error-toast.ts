@@ -1,19 +1,13 @@
-
 import { useCallback } from "react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import {
-  getDevErrorDetail,
-  getErrorId,
-  getUserErrorMessage,
-} from "@/lib/error-message";
+import { getErrorId, getUserErrorMessage } from "@/lib/error-message";
 
 /**
  * Hook แสดง toast error ด้วยข้อความ user-friendly ตาม i18n
  *
- * - Production: user เห็นแค่ข้อความสั้น ๆ ตาม error code (network/timeout/...)
- * - Development: เพิ่ม description โชว์ raw error + code เพื่อช่วย debug
- * - มี error ID สำหรับ user copy ส่งให้ support
+ * - toast แสดงประโยคเดียวตาม error code เสมอ ไม่มี description
+ * - รายละเอียดดิบ + รหัส error ลง `console.error` ให้ dev ไล่ต่อ
  *
  * @example
  * ```ts
@@ -30,23 +24,16 @@ export function useErrorToast() {
   // ถ้าสร้างใหม่ทุก render จะถอด/ติดตั้ง handler ซ้ำทุกครั้งที่ re-render
   return useCallback(
     (err: unknown) => {
-      // Log ให้ dev เห็นเสมอ (console เป็น sentry แบบลูกทุ่ง)
+      // Log ให้ dev เห็นเสมอ (console เป็น sentry แบบลูกทุ่ง) — รายละเอียดทาง
+      // เทคนิคทั้งหมดอยู่ตรงนี้ที่เดียว ไม่ขึ้นไปอยู่บน toast
       if (import.meta.env.DEV) {
-        console.error("[error-toast]", err);
+        console.error("[error-toast]", getErrorId(err), err);
       }
 
-      const message = getUserErrorMessage(err, t);
-      const detail = getDevErrorDetail(err);
-      const errorId = getErrorId(err);
-
-      // Description: รวม errorId + dev detail (ถ้ามี)
-      const descLines: string[] = [];
-      if (errorId) descLines.push(`${t("errorId")}: ${errorId}`);
-      if (detail) descLines.push(detail);
-      const description =
-        descLines.length > 0 ? descLines.join(" · ") : undefined;
-
-      toast.error(message, { description });
+      // บรรทัดเดียวจบ ไม่มี description — เคยใส่รหัส error + รายละเอียดไว้ข้างล่าง
+      // แล้ว backend ส่ง stack trace มาเป็นสิบบรรทัด toast กินครึ่งจอและไม่มีใคร
+      // อ่าน · 5 วินาทีพอสำหรับประโยคเดียว และยังมีปุ่มปิดถ้าอยากไล่ก่อน
+      toast.error(getUserErrorMessage(err, t), { duration: 5000 });
     },
     [t],
   );
