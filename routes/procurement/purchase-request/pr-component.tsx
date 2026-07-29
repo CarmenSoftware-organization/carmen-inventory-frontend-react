@@ -192,11 +192,13 @@ export default function PurchaseRequestComponent() {
 
   const useInfiniteScroll = !!isMobile;
 
+  // ยิงเฉพาะ endpoint ของ tab ที่เปิดอยู่ — อีก tab รอจนกดถึงค่อย fetch
+  // (ข้อมูลที่เคยโหลดยังอยู่ใน cache สลับกลับมาจึงไม่ยิงซ้ำ)
   const myPendingQuery = useMyPendingPurchaseRequest(queryParams, {
-    enabled: !useInfiniteScroll,
+    enabled: !useInfiniteScroll && viewMode === "my-pending",
   });
   const allDocumentQuery = usePurchaseRequest(queryParams, {
-    enabled: !useInfiniteScroll,
+    enabled: !useInfiniteScroll && viewMode === "all-document",
   });
 
   const { data, isLoading, error, refetch } =
