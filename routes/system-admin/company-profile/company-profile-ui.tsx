@@ -1,4 +1,8 @@
-import { Controller, type UseFormReturn, type FieldPath } from "react-hook-form";
+import {
+  Controller,
+  type UseFormReturn,
+  type FieldPath,
+} from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -107,7 +111,10 @@ function EditShell({
 }) {
   return (
     <div className={cn("min-w-0 space-y-1", fullWidth && "sm:col-span-2")}>
-      <Label htmlFor={htmlFor} className="text-foreground text-xs font-semibold">
+      <Label
+        htmlFor={htmlFor}
+        className="text-foreground text-xs font-semibold"
+      >
         {label}
       </Label>
       {description && (
@@ -165,7 +172,8 @@ export function EditableField({
   const error = fieldError(form, name);
   // default cap ต่อชนิด — number ไม่ cap (counter ไม่ applicable)
   const resolvedMaxLength =
-    maxLength ?? (type === "textarea" ? 256 : type === "text" ? 100 : undefined);
+    maxLength ??
+    (type === "textarea" ? 256 : type === "text" ? 100 : undefined);
   return (
     <EditShell
       label={label}
@@ -179,7 +187,7 @@ export function EditableField({
           maxLength={resolvedMaxLength}
           {...form.register(name)}
           aria-invalid={!!error}
-          className="min-h-16 text-sm"
+          className="min-h-16"
         />
       ) : (
         <Input
@@ -221,7 +229,9 @@ function SelectControl({
       render={({ field }) => {
         const current = typeof field.value === "string" ? field.value : "";
         const merged =
-          current && !options.includes(current) ? [current, ...options] : options;
+          current && !options.includes(current)
+            ? [current, ...options]
+            : options;
         return (
           <Select value={current || undefined} onValueChange={field.onChange}>
             <SelectTrigger id={id} size="sm" className="w-full text-sm">
@@ -345,7 +355,7 @@ export function NumberFormatField({
             valueAsNumber: true,
           })}
           placeholder={digitsPlaceholder}
-          className="h-8 text-sm"
+          className="h-8"
         />
       </div>
     </EditShell>
@@ -448,7 +458,11 @@ export function ConfigField({
                 </SelectTrigger>
                 <SelectContent>
                   {options.map((o) => (
-                    <SelectItem key={o.value} value={o.value} className="text-sm">
+                    <SelectItem
+                      key={o.value}
+                      value={o.value}
+                      className="text-sm"
+                    >
                       {o.label}
                     </SelectItem>
                   ))}
@@ -463,7 +477,7 @@ export function ConfigField({
 
   return (
     <EditShell label={displayLabel} description={item.key} htmlFor={name}>
-      <Input {...form.register(name)} className="h-8 text-sm" />
+      <Input {...form.register(name)} className="h-8" />
     </EditShell>
   );
 }

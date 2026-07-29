@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -96,7 +95,11 @@ export function RunningCodeDialog({
     if (isEdit) {
       updateRunningCode.mutate(
         // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
-        { id: runningCode.id, doc_version: runningCode.doc_version, ...payload },
+        {
+          id: runningCode.id,
+          doc_version: runningCode.doc_version,
+          ...payload,
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -162,7 +165,7 @@ export function RunningCodeDialog({
               </div>
               <Textarea
                 id="rc-config"
-                placeholder='e.g. {"key": "value"}'
+                placeholder='e.g. {"key":"value"}'
                 className="min-h-24 text-xs"
                 rows={4}
                 disabled={isPending}

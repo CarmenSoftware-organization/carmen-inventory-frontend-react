@@ -253,7 +253,7 @@ export function StoreRequisitionForm({
               <Textarea
                 id="sr-description"
                 placeholder={t("optionalDescription")}
-                className="min-h-13 text-sm"
+                className="min-h-13"
                 maxLength={256}
                 disabled={actions.isPending}
                 {...form.register("description")}

@@ -49,6 +49,7 @@ function LazyPlaceholder({
   placeholder,
   disabled,
   className,
+  size,
   error,
   onActivate,
 }: LookupUserLocationProps & { readonly onActivate: () => void }) {
@@ -65,7 +66,12 @@ function LazyPlaceholder({
       onClick={onActivate}
       disabled={disabled}
       className={cn(
-        "flex h-8 items-center justify-between pr-1 pl-3 text-sm",
+        // ต้องสูงเท่า LookupCombobox ที่จะมาแทนหลังกด — ไม่งั้นช่องเด้งขนาด
+        // ตอนถูกกดครั้งแรก และไม่ตรงกับ field ข้าง ๆ ที่ตั้ง size เดียวกัน
+        "flex items-center justify-between pr-1 pl-3 text-xs",
+        size === "default" && "h-9",
+        size === "xs" && "h-6 gap-1 px-2 text-xs",
+        (!size || size === "sm") && "h-8",
         error && "border-destructive pr-7",
         className,
       )}

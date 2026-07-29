@@ -63,7 +63,7 @@ export function PoNotesSummary({
             <Textarea
               id="po-description"
               placeholder={tfl("optional")}
-              className="min-h-13 text-sm"
+              className="min-h-13"
               rows={2}
               disabled={disabled}
               maxLength={256}
@@ -88,7 +88,7 @@ export function PoNotesSummary({
             <Textarea
               id="po-remarks"
               placeholder={tfl("optional")}
-              className="min-h-13 text-sm"
+              className="min-h-13"
               rows={2}
               disabled={disabled}
               maxLength={256}

@@ -11,7 +11,11 @@ function Input({
   className,
   type,
   maxLength,
-  size = "default",
+  // sm (h-8) คือความสูงมาตรฐานของ control ในแอปนี้ — call site ระบุ size="sm"
+  // เองอยู่ 393 จุด เทียบกับ default ไม่ถึงสิบ · default เดิมเป็น h-9 ตาม shadcn
+  // ทำให้ Input/Select สูงกว่า LookupCombobox/DatePicker (ที่ default เป็น sm)
+  // อยู่ 4px ในฟอร์มเดียวกัน ใครลืมระบุ size ก็ได้ช่องเตี้ยสูงสลับกันทันที
+  size = "sm",
   ref: forwardedRef,
   ...props
 }: Omit<React.ComponentProps<"input">, "size"> & {
@@ -40,7 +44,7 @@ function Input({
       data-slot="input"
       maxLength={maxLength}
       className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input disabled:bg-muted/60 w-full min-w-0 rounded-md border bg-background px-3 py-1 text-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-xs file:font-semibold disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground border-input disabled:bg-muted/60 bg-background w-full min-w-0 rounded-md border px-3 py-1 text-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-xs file:font-semibold disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
         // height ตรงกับ Select / LookupCombobox
         size === "default" && "h-9",
         size === "sm" && "h-8",
@@ -86,7 +90,7 @@ function Input({
       {inputElement}
       <p
         className={cn(
-          "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-micro-eyebrow tabular-nums transition-opacity",
+          "text-micro-eyebrow pointer-events-none absolute top-full right-0 mt-0.5 text-right tabular-nums transition-opacity",
           showValue ? "opacity-100" : "opacity-0",
           nearLimit ? "text-warning-ink" : "text-muted-foreground/60",
           length >= maxLength! && "text-destructive",

@@ -85,7 +85,7 @@ export function LookupCreditTerm({
               <SelectTrigger
                 aria-invalid={!!error}
                 className={cn(
-                  className ?? "w-full text-sm",
+                  className ?? "w-full text-xs",
                   error && "border-destructive pr-7",
                 )}
               >

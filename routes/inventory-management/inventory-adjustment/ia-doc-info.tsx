@@ -71,7 +71,7 @@ export function DocumentInfo({
                     onValueChange={field.onChange}
                     disabled={isDisabled}
                     placeholder={tc("selectDate")}
-                    className="h-9 w-full text-xs"
+                    className="w-full text-xs"
                     fromDate={
                       currentPeriodStart
                         ? new Date(currentPeriodStart)
@@ -110,7 +110,6 @@ export function DocumentInfo({
                     onValueChange={field.onChange}
                     disabled={isDisabled}
                     placeholder={tfl("selectAdjustmentType")}
-                    size="default"
                     className="text-xs"
                     error={form.formState.errors.adjustment_type_id?.message}
                   >

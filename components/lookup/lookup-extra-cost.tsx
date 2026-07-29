@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -81,7 +80,7 @@ export function LookupExtraCost({
                 aria-invalid={!!error}
                 size={size}
                 className={cn(
-                  className ?? "h-8 w-full text-sm",
+                  className ?? "h-8 w-full text-xs",
                   error && "border-destructive pr-7",
                 )}
               >
