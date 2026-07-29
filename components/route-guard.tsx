@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import { ArrowLeft, ShieldOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { EyeBrow } from "@/components/ui/eye-brow";
 import { findRouteLeaf } from "@/constant/module-list";
 import { useCan } from "@/hooks/use-can";
 
@@ -51,32 +52,28 @@ export function AccessDeniedBlock({ description }: AccessDeniedBlockProps) {
       role="alert"
       className="flex flex-1 items-center justify-center px-6 py-16"
     >
-      <div className="bg-card flex w-full max-w-sm flex-col items-center rounded-xl border px-8 py-9 text-center">
-        <div className="bg-muted text-destructive mb-4 flex size-14 items-center justify-center rounded-2xl">
-          <ShieldOff className="size-6" aria-hidden />
+      <div className="bg-card flex w-full max-w-sm flex-col items-center rounded-xl border p-6 text-center">
+        <div className="bg-muted text-destructive mb-4 flex size-12 items-center justify-center rounded-xl">
+          <ShieldOff className="size-5" aria-hidden />
         </div>
 
-        <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
-          {t("eyebrow")}
-        </span>
+        <EyeBrow>{t("eyebrow")}</EyeBrow>
 
         <h2 className="text-foreground mt-3 text-base font-semibold tracking-tight">
           {t("title")}
         </h2>
-        <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+        {/* คำอธิบายกับ "ติดต่อผู้ดูแล" เป็นเรื่องเดียวกัน — ชิดกัน (mt-1) ให้อ่านเป็น
+            ก้อนเดียว ไม่ต้องมีเส้นคั่นมาแบ่งของที่ไม่ได้แยกกันจริง */}
+        <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
           {description ?? t("pageDescription")}
         </p>
-
-        <div className="border-border mt-5 w-full border-t" />
-
-        <p className="text-muted-foreground text-micro mt-4 leading-relaxed">
+        <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
           {t("contactAdmin")}
         </p>
 
         <Button
           type="button"
           size="sm"
-          variant="outline"
           onClick={() => navigate(-1)}
           className="mt-5"
         >

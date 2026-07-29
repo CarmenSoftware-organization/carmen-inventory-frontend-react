@@ -3,6 +3,7 @@ import { CarmenLogo } from "@/components/icons/carmen-logo";
 import { useTranslations } from "use-intl";
 import { useProfile } from "@/hooks/use-profile";
 import { Button } from "@/components/ui/button";
+import { EyeBrow } from "@/components/ui/eye-brow";
 
 /**
  * Gate ระดับ layout — Soft Sheet premium loader/error
@@ -53,19 +54,17 @@ function ProfileError({ onRetry }: { readonly onRetry: () => void }) {
       className="flex flex-1 items-center justify-center px-6 py-16"
       role="alert"
     >
-      <div className="bg-card flex w-full max-w-sm flex-col items-center rounded-xl border px-8 py-9 text-center">
-        <div className="bg-muted text-destructive mb-4 flex size-14 items-center justify-center rounded-2xl">
-          <AlertTriangle className="size-6" />
+      <div className="bg-card flex w-full max-w-sm flex-col items-center rounded-xl border p-6 text-center">
+        <div className="bg-muted text-destructive mb-4 flex size-12 items-center justify-center rounded-xl">
+          <AlertTriangle className="size-5" />
         </div>
 
-        <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
-          {t("errorEyebrow")}
-        </span>
+        <EyeBrow>{t("errorEyebrow")}</EyeBrow>
 
         <h2 className="text-foreground mt-3 text-base font-semibold tracking-tight">
           {t("errorTitle")}
         </h2>
-        <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+        <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
           {t("errorDesc")}
         </p>
 
