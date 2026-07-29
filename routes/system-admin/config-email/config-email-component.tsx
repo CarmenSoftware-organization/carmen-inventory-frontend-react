@@ -102,7 +102,6 @@ export default function ConfigEmailComponent() {
       { key: "report_email", value: toApiValue(values) },
       {
         onSuccess: () => toast.success(t("saved")),
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -110,7 +109,6 @@ export default function ConfigEmailComponent() {
   const handleTestEmail = () => {
     testEmail.mutate(undefined as never, {
       onSuccess: () => toast.success(t("testSent")),
-      onError: (err) => toast.error(err.message),
     });
   };
 

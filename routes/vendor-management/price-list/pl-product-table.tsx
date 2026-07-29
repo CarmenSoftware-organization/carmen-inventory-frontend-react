@@ -40,6 +40,7 @@ export function PLProductTable(props: PLProductTableProps) {
       <PLProductGroupedView
         detailRefs={props.detailRefs ?? []}
         tfl={props.tfl}
+        showNote
       />
     );
   return <PLProductEditTable {...props} />;

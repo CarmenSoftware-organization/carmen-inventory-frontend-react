@@ -1,4 +1,3 @@
-
 import {
   Background,
   BackgroundVariant,
@@ -30,10 +29,6 @@ import {
 import type { RoutingRule, Stage } from "@/types/workflows";
 import { cn } from "@/lib/utils";
 import { formatCycleTime, totalSlaMinutes } from "./wf-sla-utils";
-import {
-  ROLE_LABEL_COLOR,
-  ROLE_NODE_BORDER,
-} from "./wf-role-colors";
 
 interface WfDiagramProps {
   readonly stages: Stage[];
@@ -74,22 +69,21 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
     isVertical,
   } = data;
 
-  const containerClass = isLast
-    ? "border-success/60 bg-success/10"
-    : (ROLE_NODE_BORDER[stage.role] ?? ROLE_NODE_BORDER.approve);
-  const labelClass = isLast
-    ? "text-success-foreground"
-    : (ROLE_LABEL_COLOR[stage.role] ?? ROLE_LABEL_COLOR.approve);
+  // โหนดทุกตัวเป็นกลาง — สเต็ปแรก/สุดท้าย/กลาง แยกกันด้วยไอคอน (Play /
+  // CheckCircle2 / เลขลำดับ) ส่วน accent สงวนไว้ให้โหนดที่เลือกอยู่ ซึ่งเป็น
+  // state เดียวในผังนี้ที่ผู้ใช้ทำให้เกิดขึ้นเอง
+  const containerClass = "border-border";
+  const labelClass = "text-foreground";
 
   const renderStepIcon = () => {
     if (isLast) {
-      return <CheckCircle2 className="text-success-foreground size-3" />;
+      return <CheckCircle2 className="text-muted-foreground size-3" />;
     }
     if (isFirst) {
-      return <Play className="text-primary size-3 fill-current" />;
+      return <Play className="text-muted-foreground size-3 fill-current" />;
     }
     return (
-      <span className="text-[0.6875rem] font-semibold tabular-nums">
+      <span className="text-micro font-semibold tabular-nums">
         {data.index}
       </span>
     );
@@ -102,7 +96,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
         containerClass,
         isSelected &&
           "ring-primary ring-offset-background ring-2 ring-offset-2",
-        canDrag && "cursor-grab hover:border-primary/40 active:cursor-grabbing",
+        canDrag && "hover:border-primary/40 cursor-grab active:cursor-grabbing",
       )}
     >
       {!isFirst && (
@@ -143,14 +137,14 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
         </span>
         {isHod && !isLast && (
           <Crown
-            className="text-warning-foreground size-3 shrink-0"
+            className="text-muted-foreground size-3 shrink-0"
             aria-label={t("isHod")}
           />
         )}
       </div>
 
       {!isLast && (
-        <div className="text-muted-foreground flex items-center gap-2 text-[0.625rem]">
+        <div className="text-muted-foreground flex items-center gap-2 text-micro-legal">
           <span className="capitalize">{stage.role}</span>
           {userCount > 0 && !isHod && (
             <span className="inline-flex items-center gap-0.5 tabular-nums">
@@ -322,9 +316,11 @@ export default function WfDiagram({
   return (
     <div className={cn("space-y-1.5", className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[0.6875rem]">
+        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-micro">
           <span className="inline-flex items-center gap-1 tabular-nums">
-            <span className="text-foreground font-semibold">{stages.length}</span>
+            <span className="text-foreground font-semibold">
+              {stages.length}
+            </span>
             {t("stages").toLowerCase()}
           </span>
           {middleCount > 0 && (

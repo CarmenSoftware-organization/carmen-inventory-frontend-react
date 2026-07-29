@@ -11,14 +11,15 @@ import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
-import { cn } from "@/lib/utils";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -84,8 +85,12 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty,
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
   );
 
   useEffect(() => {
@@ -143,25 +148,28 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         values,
         priceList,
         defaultValues,
-        form,
         mutate: updatePriceList.mutate,
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           form.reset(values);
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       });
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       submitCreate({
         values,
         mutate: createPriceList.mutate,
+        onError: () => setIsSubmitting(false),
         onSuccess: (id) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
+          // navigate ไป detail ของ record ที่เพิ่งสร้าง (edit route จะ mount ใหม่
+          // แล้วตั้ง mode=view จาก priceList เอง) — อย่า setMode/reset ที่นี่ เพราะ
+          // มันทำให้ navGuard enabled true→false ระหว่าง navigate ยังไม่ commit แล้ว
+          // teardown ของมันยิง history.back() เด้งกลับ /new (ดู use-navigation-guard)
           navigate(`/vendor-management/price-list/${id}`, { replace: true });
-          setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -179,7 +187,9 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => navigate(-1));
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      discard.confirm(() => navGuard.back());
     } else {
       navigate(-1);
     }
@@ -192,50 +202,38 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/vendor-management/price-list");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
   const plNo = priceList?.no ?? null;
   const productsHeaderLabels = useProductsHeaderLabels(t);
   const removeItemLabel = t("detail.removeItem");
-  const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
+  const tsStatus = ts as (key: "draft" | "submitted" | "active" | "inactive") => string;
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label={tc("goBack")}
-            onClick={handleBack}
-          >
-            <ChevronLeft />
-          </Button>
-          <h1
-            className={cn(
-              "truncate text-lg font-semibold tracking-tight",
-              watchedName
-                ? "text-foreground"
-                : "text-muted-foreground italic",
+      <div className="mb-6">
+        <DocFormHeader
+          flush
+          title={watchedName || t("namePlaceholder")}
+          titleMuted={!watchedName}
+        backLabel={tc("goBack")}
+        onBack={handleBack}
+        badges={
+          <>
+            {plNo && (
+              <span className="text-muted-foreground shrink-0 text-sm">
+                · {plNo}
+              </span>
             )}
-          >
-            {watchedName || t("namePlaceholder")}
-          </h1>
-          {plNo && (
-            <span className="text-muted-foreground shrink-0 text-sm">
-              · {plNo}
-            </span>
-          )}
-          <Badge variant="secondary" size="sm">
-            {tsStatus(watchedStatus)}
-          </Badge>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {isView ? (
+            <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
+              {tsStatus(watchedStatus)}
+            </StatusDotBadge>
+          </>
+        }
+        actions={
+          isView ? (
             <Button size="sm" onClick={() => setMode("edit")}>
               <Pencil />
               {tc("edit")}
@@ -274,9 +272,10 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
                 </Button>
               )}
             </>
-          )}
-        </div>
-      </header>
+          )
+        }
+        />
+      </div>
 
       <form
         id={FORM_ID}
@@ -380,28 +379,19 @@ function submitUpdate({
   values,
   priceList,
   defaultValues,
-  form,
   mutate,
   onSuccess,
-  onError,
 }: {
   values: PriceListFormValues;
   priceList: PriceList;
   defaultValues: PriceListFormValues;
-  form: ReturnType<typeof useForm<PriceListFormValues>>;
   mutate: ReturnType<typeof useUpdatePriceList>["mutate"];
   onSuccess: () => void;
-  onError: (err: Error) => void;
 }) {
   const pricelist_detail = buildItemChanges(
     values.pricelist_detail,
     defaultValues.pricelist_detail,
-    // RHF 7.78 type drift
-    form.formState.dirtyFields.pricelist_detail as Record<string, unknown>[] | undefined,
-    (item, _i) => {
-      const actualIndex = values.pricelist_detail.indexOf(item);
-      return mapDetailToPayload(item, actualIndex >= 0 ? actualIndex : _i);
-    },
+    mapDetailToPayload,
   );
 
   mutate(
@@ -411,7 +401,7 @@ function submitUpdate({
       ...buildBasePayload(values),
       pricelist_detail,
     },
-    { onSuccess, onError },
+    { onSuccess },
   );
 }
 
@@ -424,7 +414,7 @@ function submitCreate({
   values: PriceListFormValues;
   mutate: ReturnType<typeof useCreatePriceList>["mutate"];
   onSuccess: (id: string) => void;
-  onError: (err: Error) => void;
+  onError: () => void;
 }) {
   const pricelist_detail: CreatePriceListDto["pricelist_detail"] = {};
   if (values.pricelist_detail.length > 0) {

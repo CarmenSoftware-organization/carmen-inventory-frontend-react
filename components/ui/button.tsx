@@ -17,9 +17,12 @@ const buttonVariants = cva(
           "border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
           "border border-black/10 bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:border-white/10",
+        // --success is a light teal in BOTH themes → dark label, same as warning
         success:
-          "border border-black/10 bg-success text-white hover:bg-success/90 focus-visible:ring-success/20 dark:focus-visible:ring-success/40 dark:border-white/10",
-        info: "border border-black/10 bg-info text-white hover:bg-info/90 focus-visible:ring-info/20 dark:focus-visible:ring-info/40 dark:border-white/10",
+          "border border-black/10 bg-success text-black hover:bg-success/90 focus-visible:ring-success/20 dark:focus-visible:ring-success/40 dark:border-white/10",
+        // --info is dark azure on light but deliberately brighter on dark (to stay
+        // distinct from dark-primary), so the label has to flip with the theme
+        info: "border border-black/10 bg-info text-white dark:text-black hover:bg-info/90 focus-visible:ring-info/20 dark:focus-visible:ring-info/40 dark:border-white/10",
         warning:
           "border border-black/10 bg-warning text-black hover:bg-warning/90 focus-visible:ring-warning/20 dark:focus-visible:ring-warning/40 dark:border-white/10",
         ghost:

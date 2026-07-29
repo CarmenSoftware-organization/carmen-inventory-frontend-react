@@ -3,7 +3,13 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { Badge } from "@/components/ui/badge";
+import { AuditCell } from "@/components/share/audit-cell";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   selectColumn,
   indexColumn,
@@ -13,7 +19,21 @@ import {
 import type { Product } from "@/types/product";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useProfile } from "@/hooks/use-profile";
 import { getProductStatusLabel } from "@/constant/product-status";
+
+/** เซลล์ข้อความ truncate … เมื่อยาวเกิน column · hover โชว์ค่าเต็มด้วย Tooltip */
+const truncCell = (value: string) =>
+  value ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="block truncate">{value}</span>
+      </TooltipTrigger>
+      <TooltipContent>{value}</TooltipContent>
+    </Tooltip>
+  ) : (
+    <span className="block truncate">{value}</span>
+  );
 
 interface UseProductTableOptions {
   products: Product[];
@@ -50,6 +70,7 @@ export function useProductTable({
 
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const { dateTimeFormat } = useProfile();
 
   const dataColumns: ColumnDef<Product>[] = [
     {
@@ -62,7 +83,6 @@ export function useProductTable({
           {row.original.code}
         </CellAction>
       ),
-      enableSorting: false,
       meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.text },
     },
     {
@@ -71,11 +91,22 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("name")} />
       ),
-      cell: ({ row }) => (
-        <CellAction onClick={() => onEdit(row.original)}>
-          {row.original.name || "..."}
-        </CellAction>
-      ),
+      cell: ({ row }) => {
+        const name = row.original.name || "...";
+        return (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <CellAction
+                onClick={() => onEdit(row.original)}
+                className="block w-full truncate"
+              >
+                {name}
+              </CellAction>
+            </TooltipTrigger>
+            <TooltipContent>{name}</TooltipContent>
+          </Tooltip>
+        );
+      },
       size: 350,
       meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.textShort },
     },
@@ -84,7 +115,7 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("localName")} />
       ),
-      enableSorting: false,
+      cell: ({ row }) => truncCell(row.original.local_name ?? ""),
       size: 300,
       meta: { headerTitle: tfl("localName"), skeleton: columnSkeletons.text },
     },
@@ -93,7 +124,6 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("unit")} />
       ),
-      enableSorting: false,
       meta: { headerTitle: tfl("unit"), skeleton: columnSkeletons.text },
     },
     {
@@ -102,6 +132,7 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("category")} />
       ),
+      cell: ({ row }) => truncCell(row.original.product_category?.name ?? ""),
       enableSorting: false,
       meta: { headerTitle: tfl("category"), skeleton: columnSkeletons.text },
     },
@@ -111,6 +142,8 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("subCategory")} />
       ),
+      cell: ({ row }) =>
+        truncCell(row.original.product_sub_category?.name ?? ""),
       enableSorting: false,
       meta: { headerTitle: tfl("subCategory"), skeleton: columnSkeletons.text },
     },
@@ -120,6 +153,7 @@ export function useProductTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("itemGroup")} />
       ),
+      cell: ({ row }) => truncCell(row.original.product_item_group?.name ?? ""),
       enableSorting: false,
       meta: { headerTitle: tfl("itemGroup"), skeleton: columnSkeletons.text },
     },
@@ -136,21 +170,51 @@ export function useProductTable({
       cell: ({ row }) => {
         const status = row.getValue<string>("product_status_type");
         return (
-          <Badge
+          <StatusDotBadge
             size="sm"
-            variant={status === "active" ? "success" : "secondary"}
+            tone={status === "active" ? "success" : "neutral"}
           >
             {getProductStatusLabel(ts, status)}
-          </Badge>
+          </StatusDotBadge>
         );
       },
       size: 100,
-      enableSorting: false,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
+    },
+    {
+      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
     },
   ];
 
@@ -165,6 +229,7 @@ export function useProductTable({
     data: products,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

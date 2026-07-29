@@ -3,7 +3,8 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import {
   selectColumn,
   indexColumn,
@@ -15,6 +16,7 @@ import { formatDate } from "@/lib/date-utils";
 import type { PriceList } from "@/types/price-list";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
+import { AuditCell } from "@/components/share/audit-cell";
 
 interface UsePriceListTableOptions {
   priceLists: PriceList[];
@@ -41,7 +43,7 @@ export function usePriceListTable({
   onDelete,
 }: UsePriceListTableOptions) {
   "use no memo";
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
@@ -56,13 +58,16 @@ export function usePriceListTable({
 
   const dataColumns: ColumnDef<PriceList>[] = [
     {
-      accessorKey: "no",
+      // id = ชื่อ column จริงของ backend (`pricelist_no`) เพื่อให้ sort ส่ง field ถูกต้อง;
+      // response ส่งค่ามาใน field `no` (backend alias) จึงอ่านค่าจาก row.no
+      id: "pricelist_no",
+      accessorFn: (row) => row.no,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("no")} />
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
-          {row.getValue("no")}
+          {row.original.no}
         </CellAction>
       ),
       size: 160,
@@ -107,18 +112,13 @@ export function usePriceListTable({
       ),
       cell: ({ row }) => {
         const status = row.getValue<string>("status");
-        const variantMap: Record<
-          string,
-          "outline" | "success" | "secondary"
-        > = {
-          draft: "outline",
-          active: "success",
-          inactive: "secondary",
-        };
         return (
-          <Badge size="lg" variant={variantMap[status] ?? "outline"}>
-            {ts(status as "draft" | "active" | "inactive")}
-          </Badge>
+          <StatusDotBadge
+            size="lg"
+            tone={PL_STATUS_TONE[status] ?? "neutral"}
+          >
+            {ts(status as "draft" | "submitted" | "active" | "inactive")}
+          </StatusDotBadge>
         );
       },
       size: 100,
@@ -128,6 +128,36 @@ export function usePriceListTable({
         cellClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
+    },
+    {
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
     },
   ];
 
@@ -142,6 +172,8 @@ export function usePriceListTable({
     data: priceLists,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
+    // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

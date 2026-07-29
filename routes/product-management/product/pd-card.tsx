@@ -1,32 +1,28 @@
-import { BoxIcon, Tag } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { BoxIcon, Tag, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Product } from "@/types/product";
 
 interface ProductCardProps {
   readonly item: Product;
-  readonly index?: number;
   readonly onEdit: (item: Product) => void;
+  readonly onDelete: (item: Product) => void;
 }
 
-/**
- * Card แสดงข้อมูลสินค้าแบบย่อ
- *
- * ใช้ในมุมมอง grid/mobile ของหน้ารายการสินค้า แสดง name, code, status badge,
- * local_name, inventory unit, item group รองรับคลิกและ keyboard (Enter/Space) เพื่อเรียก onEdit
- *
- * @param props - `item` (Product), `index` (ลำดับ แสดงเป็นตัวเลขกลมซ้ายบน), `onEdit` callback
- * @returns JSX ของ product card
- * @example
- * ```tsx
- * <ProductCard item={product} index={0} onEdit={(p) => navigate(`/product-management/product/${p.id}`)} />
- * ```
- */
-export default function ProductCard({ item, index, onEdit }: ProductCardProps) {
+export default function ProductCard({
+  item,
+  onEdit,
+  onDelete,
+}: ProductCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const { dateTimeFormat } = useProfile();
   const isActive = item.product_status_type === "active";
 
   return (
@@ -40,75 +36,107 @@ export default function ProductCard({ item, index, onEdit }: ProductCardProps) {
           onEdit(item);
         }
       }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
+      className="hover:border-primary/30 focus-visible:ring-ring flex cursor-pointer flex-col gap-0 overflow-hidden py-0 transition-colors focus-visible:ring-2"
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
-              {index + 1}
+      {/* Header */}
+      <div className="flex items-start gap-2 px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold">
+            {item.name || "..."}
+          </h3>
+          <div className="mt-1 flex items-center gap-2">
+            <span className="text-muted-foreground truncate text-xs">
+              {item.code}
             </span>
-          )}
-          <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name || "..."}</CardTitle>
+            <StatusDotBadge
+              tone={isActive ? "success" : "neutral"}
+              size="xs"
+              className="shrink-0"
+            >
+              {isActive ? ts("active") : ts("inactive")}
+            </StatusDotBadge>
+          </div>
         </div>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-xs">{item.code}</p>
-          <Badge
-            variant={isActive ? "success" : "secondary"}
-            size="xs"
-            className="text-xs"
-          >
-            {isActive ? ts("active") : ts("inactive")}
-          </Badge>
+        {/* ⋯ menu — Delete อย่างเดียว (คลิกการ์ด = edit อยู่แล้ว) · หยุด
+            propagation ไม่ให้คลิกทะลุไปเปิด edit (เมนู portal ออก body อยู่แล้ว) */}
+        <div
+          className="-mt-1 -mr-1 shrink-0"
+          role="presentation"
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <DataGridRowActions onDelete={() => onDelete(item)} />
         </div>
-      </CardHeader>
+      </div>
 
       <Separator />
 
-      <CardContent className="space-y-2 px-4 py-3 text-xs">
+      {/* Content */}
+      <div className="space-y-2 px-4 py-3 text-xs">
         {item.local_name && (
-          <div className="flex items-start gap-2">
-            <Tag
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">
-                {tfl("localName")}
-              </p>
-              <p className="truncate font-semibold">{item.local_name}</p>
-            </div>
-          </div>
-        )}
-        <div className="flex items-start gap-2">
-          <BoxIcon
-            className="text-muted-foreground mt-0.5 size-3 shrink-0"
-            aria-hidden="true"
+          <InfoRow
+            icon={Tag}
+            label={tfl("localName")}
+            value={item.local_name}
           />
-          <div className="min-w-0">
-            <p className="text-muted-foreground text-xs">{tfl("unit")}</p>
-            <p className="truncate font-semibold">
-              {item.inventory_unit?.name ?? "-"}
-            </p>
-          </div>
-        </div>
-        {item.product_item_group && (
-          <div className="flex items-start gap-2">
-            <Tag
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">
-                {tfl("itemGroup")}
-              </p>
-              <p className="truncate font-semibold">
-                {item.product_item_group.name}
-              </p>
-            </div>
-          </div>
         )}
-      </CardContent>
+        <InfoRow
+          icon={BoxIcon}
+          label={tfl("unit")}
+          value={item.inventory_unit_name ?? item.inventory_unit?.name ?? "-"}
+        />
+        {item.product_category && (
+          <InfoRow
+            icon={Tag}
+            label={tfl("category")}
+            value={item.product_category.name}
+          />
+        )}
+        {item.product_sub_category && (
+          <InfoRow
+            icon={Tag}
+            label={tfl("subCategory")}
+            value={item.product_sub_category.name}
+          />
+        )}
+        {item.product_item_group && (
+          <InfoRow
+            icon={Tag}
+            label={tfl("itemGroup")}
+            value={item.product_item_group.name}
+          />
+        )}
+        {item.audit?.updated?.at && (
+          <InfoRow
+            icon={Clock}
+            label={tfl("updated")}
+            value={formatDate(item.audit.updated.at, dateTimeFormat)}
+          />
+        )}
+      </div>
     </Card>
+  );
+}
+
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  readonly icon: LucideIcon;
+  readonly label: string;
+  readonly value: string;
+}) {
+  return (
+    <div className="flex items-start gap-2">
+      <Icon
+        className="text-muted-foreground mt-0.5 size-3 shrink-0"
+        aria-hidden="true"
+      />
+      <div className="min-w-0 flex-1">
+        <p className="text-muted-foreground">{label}</p>
+        <p className="truncate font-semibold">{value}</p>
+      </div>
+    </div>
   );
 }

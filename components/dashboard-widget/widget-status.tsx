@@ -59,14 +59,14 @@ export function WidgetParamsBadges({
     <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1">
       {status && (
         <span
-          className="text-[0.625rem] font-semibold"
+          className="text-micro-legal font-semibold"
           style={{ color: `var(${statusMeta(status).cssVar})` }}
         >
           {tStatus.has(status) ? tStatus(status) : status}
         </span>
       )}
       {range && (
-        <span className="text-muted-foreground bg-muted inline-flex items-center rounded-md px-1.5 py-0.5 text-[0.625rem] font-medium">
+        <span className="text-muted-foreground bg-muted inline-flex items-center rounded-md px-1.5 py-0.5 text-micro-legal font-medium">
           {rangeKey && tRange.has(rangeKey) ? tRange(rangeKey) : range}
         </span>
       )}

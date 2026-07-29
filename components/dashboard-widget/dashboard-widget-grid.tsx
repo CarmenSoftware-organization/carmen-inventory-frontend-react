@@ -284,7 +284,8 @@ function WidgetHeader({ widget, moduleName, subTileFor }: WidgetCardProps) {
           {widget.title}
         </CardTitle>
         {!isDocumentWidget && widget.meta.description && (
-          <CardDescription className="text-[0.6875rem] leading-snug">
+          <CardDescription className="text-micro leading-snug">
+
             {widget.meta.description}
           </CardDescription>
         )}
@@ -394,13 +395,13 @@ export function PieCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
                         backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
                       }}
                     />
-                    <span className="min-w-0 flex-1 truncate text-[0.6875rem] leading-tight">
+                    <span className="min-w-0 flex-1 truncate text-micro leading-tight">
                       {item.name}
                     </span>
-                    <span className="text-[0.6875rem] font-semibold tabular-nums">
+                    <span className="text-micro font-semibold tabular-nums">
                       {item.value.toLocaleString()}
                     </span>
-                    <span className="text-muted-foreground w-9 text-right text-[0.6875rem] tabular-nums">
+                    <span className="text-muted-foreground w-9 text-right text-micro tabular-nums">
                       {pct}%
                     </span>
                   </li>
@@ -758,7 +759,7 @@ function DeltaIndicator({
 
   const isUp = diff > 0;
   const Icon = isUp ? TrendingUp : TrendingDown;
-  const tone = isUp ? "text-emerald-600" : "text-rose-600";
+  const tone = isUp ? "text-positive-ink" : "text-negative-ink";
   const sign = isUp ? "+" : "";
 
   return (

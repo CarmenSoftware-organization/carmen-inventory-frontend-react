@@ -26,7 +26,7 @@ export function EyeBrow({
     <div
       data-slot="eyebrow"
       className={cn(
-        "text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase",
+        "text-muted-foreground text-micro-legal font-semibold tracking-wider uppercase",
         className,
       )}
       {...props}

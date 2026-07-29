@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useTranslations } from "use-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -59,6 +59,7 @@ export function useSrFormActions({
   const t = useTranslations("storeOperation.storeRequisition");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
 
   const isEdit = mode === "edit";
@@ -101,9 +102,15 @@ export function useSrFormActions({
     isPending,
   });
 
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
   // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
-  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
+  );
   const navDiscardDialogProps = {
     open: navGuard.isOpen,
     onOpenChange: (o: boolean) => {
@@ -138,8 +145,6 @@ export function useSrFormActions({
     const store_requisition_detail = buildItemChanges(
       values.items,
       defaultValues.items,
-      // RHF 7.78 type drift
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
       mapSrItemToPayload,
     );
 
@@ -169,20 +174,22 @@ export function useSrFormActions({
             });
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network →
+      // navigate(replace) กิน /new จริง → stack เหลือ [list, /:id] → back = list
+      setIsSubmitting(true);
       createSr.mutate(
         { stage_role: "create", details },
         {
           onSuccess: (res) => {
             const { id } = (res as { data: { id: string } }).data;
             toast.success(tt("createSuccess", { entity: t("entity") }));
+            // ไม่ setMode("view") — route /:id mount SrForm view mode เอง (เลี่ยง churn)
             navigate(`${SR_LIST_PATH}/${id}`, { replace: true });
-            setMode("view");
           },
-          onError: (err) => toast.error(err.message),
+          onError: () => setIsSubmitting(false),
         },
       );
     }
@@ -203,7 +210,6 @@ export function useSrFormActions({
         options?.onDone?.();
         if (!options?.keepOnPage) navigate(SR_LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -306,11 +312,21 @@ export function useSrFormActions({
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate(SR_LIST_PATH));
+  const goBack = () => {
+    if (location.key !== "default") {
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      navGuard.back();
     } else {
       navigate(SR_LIST_PATH);
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -321,7 +337,6 @@ export function useSrFormActions({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate(SR_LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

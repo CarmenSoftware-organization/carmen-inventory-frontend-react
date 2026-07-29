@@ -36,11 +36,14 @@ const CODE_TO_KEY: Record<ErrorCode, string> = {
 export function getUserErrorMessage(err: unknown, t: TranslationFn): string {
   if (err instanceof ApiError) {
     // Validation errors: server message มักจะอธิบายเฉพาะเจาะจง (เช่น "Email already in use")
+    // ใช้ `userFacingServerMessage` ไม่ใช่ `message` เพราะ `message` จะ fallback
+    // ไปเป็น string ที่ dev hardcode ไว้ ("Failed to create location") ซึ่งไม่แปล
+    // และไม่ได้เขียนให้ user อ่าน — ไม่มี message จริงจาก server ก็ใช้ข้อความกลาง
     if (
       err.code === ERROR_CODES.VALIDATION_ERROR ||
       err.code === ERROR_CODES.MISSING_REQUIRED_FIELD
     ) {
-      return err.message || t("missingField");
+      return err.userFacingServerMessage || t("missingField");
     }
     const key = CODE_TO_KEY[err.code];
     return key ? t(key) : t("unexpected");

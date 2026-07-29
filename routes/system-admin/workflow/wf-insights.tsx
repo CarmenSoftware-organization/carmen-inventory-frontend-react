@@ -1,4 +1,3 @@
-
 import {
   Activity,
   Clock,
@@ -9,7 +8,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import type { Role, Stage } from "@/types/workflows";
-import { cn } from "@/lib/utils";
 import { formatCycleTime } from "./wf-sla-utils";
 import {
   computeWorkflowInsights,
@@ -17,7 +15,6 @@ import {
   type RecipientKey,
   type WorkflowInsights,
 } from "./wf-insights-utils";
-import { ROLE_SOLID } from "./wf-role-colors";
 
 interface WfInsightsProps {
   readonly stages: Stage[];
@@ -30,13 +27,6 @@ const ROLE_LABEL: Record<Role, string> = {
   approve: "roleApprove",
   purchase: "rolePurchase",
   issue: "roleIssue",
-};
-
-const ACTION_BG: Record<ActionKey, string> = {
-  submit: "bg-primary",
-  approve: "bg-success",
-  reject: "bg-destructive",
-  sendback: "bg-warning",
 };
 
 const ACTION_LABEL: Record<ActionKey, string> = {
@@ -123,7 +113,7 @@ function StatTile({
 }) {
   return (
     <div className="bg-card rounded border px-3 py-2">
-      <div className="text-muted-foreground flex items-center gap-1.5 text-[0.6875rem]">
+      <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
         <Icon className="size-3" aria-hidden="true" />
         {label}
       </div>
@@ -192,7 +182,7 @@ function SlaBreakdown({ insights }: { readonly insights: WorkflowInsights }) {
           const cycle = formatCycleTime(row.minutes) || "0";
           return (
             <li key={`sla-${row.index}-${row.name}`} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+              <div className="flex items-center justify-between gap-2 text-micro">
                 <span className="truncate" title={row.name}>
                   {row.name}
                 </span>
@@ -202,7 +192,7 @@ function SlaBreakdown({ insights }: { readonly insights: WorkflowInsights }) {
               </div>
               <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                 <div
-                  className={cn("h-full rounded-full", ROLE_SOLID[row.role])}
+                  className="bg-primary h-full rounded-full"
                   style={{ width: `${pct}%` }}
                   role="progressbar"
                   aria-valuenow={row.minutes}
@@ -238,7 +228,7 @@ function RoleDistribution({
           const pct = total ? Math.round((row.count / total) * 100) : 0;
           return (
             <li key={row.role} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+              <div className="flex items-center justify-between gap-2 text-micro">
                 <span className="capitalize">{t(ROLE_LABEL[row.role])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.count} ({pct}%)
@@ -246,7 +236,7 @@ function RoleDistribution({
               </div>
               <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                 <div
-                  className={cn("h-full rounded-full", ROLE_SOLID[row.role])}
+                  className="bg-primary h-full rounded-full"
                   style={{ width: `${pct}%` }}
                   role="progressbar"
                   aria-valuenow={row.count}
@@ -275,7 +265,7 @@ function ActionCoverage({ insights }: { readonly insights: WorkflowInsights }) {
             : 0;
           return (
             <li key={row.action} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+              <div className="flex items-center justify-between gap-2 text-micro">
                 <span>{t(ACTION_LABEL[row.action])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.activeCount}/{row.totalStages}
@@ -283,7 +273,7 @@ function ActionCoverage({ insights }: { readonly insights: WorkflowInsights }) {
               </div>
               <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                 <div
-                  className={cn("h-full rounded-full", ACTION_BG[row.action])}
+                  className={"bg-primary h-full rounded-full"}
                   style={{ width: `${pct}%` }}
                   role="progressbar"
                   aria-valuenow={row.activeCount}
@@ -320,7 +310,7 @@ function RecipientCoverage({
             : 0;
           return (
             <li key={row.recipient} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-[0.6875rem]">
+              <div className="flex items-center justify-between gap-2 text-micro">
                 <span>{t(RECIPIENT_LABEL[row.recipient])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.count}/{row.totalActiveActions}

@@ -1,4 +1,4 @@
-import { Globe } from "lucide-react";
+import { Globe, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import {
   CUISINE_REGION_CONFIG,
   CUISINE_REGION_LABEL_KEY,
@@ -31,7 +33,10 @@ interface CuisineCardProps {
  */
 export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
   const t = useTranslations("operationPlan.cuisine");
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
   const regionConfig = CUISINE_REGION_CONFIG[item.region];
+  const updatedAt = item.audit?.updated?.at;
 
   return (
     <Card
@@ -49,7 +54,7 @@ export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -62,22 +67,37 @@ export default function CuisineCard({ item, index, onEdit }: CuisineCardProps) {
         </CardAction>
       </CardHeader>
 
-      {item.region && (
+      {(item.region || updatedAt) && (
         <>
           <Separator />
-          <CardContent className="flex items-center gap-1.5 px-4 py-2 text-xs">
-            <Globe
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            {regionConfig ? (
-              <Badge size="xs" className={`${regionConfig.className} text-xs`}>
-                {t(CUISINE_REGION_LABEL_KEY[item.region])}
-              </Badge>
-            ) : (
-              <span className="text-muted-foreground truncate">
-                {item.region}
-              </span>
+          <CardContent className="space-y-1.5 px-4 py-2 text-xs">
+            {item.region && (
+              <div className="flex items-center gap-1.5">
+                <Globe
+                  className="text-muted-foreground size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                {regionConfig ? (
+                  <Badge size="xs" className={`${regionConfig.className} text-xs`}>
+                    {t(CUISINE_REGION_LABEL_KEY[item.region])}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground truncate">
+                    {item.region}
+                  </span>
+                )}
+              </div>
+            )}
+            {updatedAt && (
+              <div className="flex items-center gap-1.5">
+                <Clock
+                  className="text-muted-foreground size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-muted-foreground truncate">
+                  {tfl("updated")}: {formatDate(updatedAt, dateTimeFormat)}
+                </span>
+              </div>
             )}
           </CardContent>
         </>

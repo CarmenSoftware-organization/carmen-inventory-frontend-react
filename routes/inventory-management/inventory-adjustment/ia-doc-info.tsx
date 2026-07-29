@@ -52,7 +52,7 @@ export function DocumentInfo({
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field className={cn(isView && "gap-1")}>
+          <Field>
             <FieldLabel
               required={!isView}
               className={cn(isView && "text-muted-foreground font-normal")}
@@ -87,7 +87,7 @@ export function DocumentInfo({
             )}
           </Field>
 
-          <Field className={cn(isView && "gap-1")}>
+          <Field>
             <FieldLabel
               required={!isView}
               className={cn(isView && "text-muted-foreground font-normal")}
@@ -126,9 +126,7 @@ export function DocumentInfo({
             )}
           </Field>
 
-          <Field
-            className={cn("sm:col-span-2 lg:col-span-1", isView && "gap-1")}
-          >
+          <Field className="sm:col-span-2 lg:col-span-1">
             <FieldLabel
               required={!isView}
               className={cn(isView && "text-muted-foreground font-normal")}

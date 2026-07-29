@@ -47,6 +47,9 @@ function Input({
         size === "xs" && "h-6 px-2",
         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-2",
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        // ...และต้องชนะ focus ด้วย ไม่งั้นคลิกเข้าไปแก้แล้วกรอบแดงหาย ดูเหมือน
+        // ช่องนี้เรียบร้อยแล้วทั้งที่ยังไม่ได้แก้อะไร
+        "aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:ring-destructive/40",
         type === "number" &&
           "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
         className,
@@ -83,9 +86,9 @@ function Input({
       {inputElement}
       <p
         className={cn(
-          "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-[0.5625rem] tabular-nums transition-opacity",
+          "pointer-events-none absolute top-full right-0 mt-0.5 text-right text-micro-eyebrow tabular-nums transition-opacity",
           showValue ? "opacity-100" : "opacity-0",
-          nearLimit ? "text-warning" : "text-muted-foreground/60",
+          nearLimit ? "text-warning-ink" : "text-muted-foreground/60",
           length >= maxLength! && "text-destructive",
         )}
         aria-live="polite"

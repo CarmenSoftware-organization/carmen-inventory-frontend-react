@@ -29,7 +29,7 @@ export function useProductImages(productId: string | undefined) {
         API_ENDPOINTS.PRODUCT_IMAGES(buCode!, productId!),
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to load product images");
+        throw await ApiError.from(res, "Failed to load product images");
       }
       return res.json();
     },
@@ -82,7 +82,7 @@ export function useUploadProductImages() {
         } catch {
           // JSON parse failed — use fallback
         }
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           serverMessage ?? "Failed to upload product images",
         );

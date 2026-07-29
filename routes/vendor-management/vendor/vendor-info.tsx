@@ -1,4 +1,3 @@
-
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Info, Plus, X } from "lucide-react";
@@ -108,7 +107,7 @@ function InfoRow({
       <div className="border-border/40 bg-background/40 grid grid-cols-[1fr_2fr_auto] items-center gap-3 rounded-lg border px-3 py-2">
         <FieldPlainText>{item.label}</FieldPlainText>
         <FieldPlainText>{item.value}</FieldPlainText>
-        <span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-[0.625rem] font-semibold tracking-widest uppercase">
+        <span className="bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-micro-legal font-semibold tracking-widest uppercase">
           {item.data_type}
         </span>
       </div>
@@ -155,7 +154,8 @@ function InfoRow({
         size="icon-xs"
         aria-label={t("info.removeInfo")}
         onClick={onRemove}
-        className="bg-primary/10 text-muted-foreground hover:text-destructive hover:bg-primary/20 mt-0.5 rounded-md"
+        variant="ghost"
+        className="text-muted-foreground hover:text-destructive mt-0.5"
       >
         <X />
       </Button>
@@ -177,21 +177,16 @@ function EmptyInfo({
   readonly onAdd: () => void;
 }) {
   return (
-    <div className="border-primary/35 bg-primary/5 rounded-xl border border-dashed p-6 text-center">
-      <div className="text-primary-foreground mx-auto mb-2 flex size-9 items-center justify-center rounded-xl bg-primary">
+    <div className="border-border/60 bg-muted/20 rounded-xl border border-dashed p-6 text-center">
+      <div className="bg-muted text-muted-foreground/70 mx-auto mb-2 flex size-9 items-center justify-center rounded-xl">
         <Info className="size-4" />
       </div>
       <div className="text-foreground text-xs font-semibold">{title}</div>
-      <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
+      <p className="text-muted-foreground mt-0.5 text-micro">
         {description}
       </p>
       {!isView && (
-        <Button
-          type="button"
-          size="xs"
-          onClick={onAdd}
-          className="mt-2 rounded-full"
-        >
+        <Button type="button" size="xs" onClick={onAdd} className="mt-2">
           <Plus />
           {addLabel}
         </Button>

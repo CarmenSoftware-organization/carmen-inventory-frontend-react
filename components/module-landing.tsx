@@ -39,7 +39,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
           <p className="text-muted-foreground max-w-2xl text-xs leading-relaxed">
             {t(description)}
           </p>
-          <div className="text-muted-foreground/80 mt-1 flex items-center gap-1 text-[0.625rem] tracking-wide">
+          <div className="text-muted-foreground/80 mt-1 flex items-center gap-1 text-micro-legal tracking-wide">
             <span
               className="inline-block size-1 rounded-full"
               style={{ backgroundColor: moduleColor }}

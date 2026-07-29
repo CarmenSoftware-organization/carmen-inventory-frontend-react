@@ -1,5 +1,6 @@
+import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { CheckSquare, ListChecks } from "lucide-react";
+import { CheckSquare, FileEdit, ListChecks } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,48 @@ interface PrSelectDialogProps {
   readonly pendingCount: number;
   readonly onSelectAll: () => void;
   readonly onSelectPending: () => void;
+}
+
+interface ChoiceCardProps {
+  readonly icon: LucideIcon;
+  readonly iconClassName: string;
+  readonly title: string;
+  readonly count: number;
+  readonly badgeVariant: "invert-light" | "primary-light";
+  readonly description: string;
+  readonly onClick: () => void;
+}
+
+/** การ์ดตัวเลือกหนึ่งใบใน dialog เลือก scope */
+function ChoiceCard({
+  icon: Icon,
+  iconClassName,
+  title,
+  count,
+  badgeVariant,
+  description,
+  onClick,
+}: ChoiceCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 flex cursor-pointer flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2"
+    >
+      <Icon className={`size-5 ${iconClassName}`} />
+      <div className="space-y-0.5">
+        <div className="flex items-center gap-2">
+          <h3 className="text-foreground text-sm font-semibold">{title}</h3>
+          <Badge variant={badgeVariant} size="xs" className="tabular-nums">
+            {count}
+          </Badge>
+        </div>
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          {description}
+        </p>
+      </div>
+    </button>
+  );
 }
 
 /**
@@ -55,55 +98,95 @@ export function PrSelectDialog({
           </DialogHeader>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <button
-              type="button"
+            <ChoiceCard
+              icon={ListChecks}
+              iconClassName="text-foreground"
+              title={t("selectAllItems")}
+              count={allCount}
+              badgeVariant="invert-light"
+              description={t("selectAllDesc")}
               onClick={onSelectAll}
-              className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 flex cursor-pointer flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2"
-            >
-              <ListChecks className="text-foreground size-5" />
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-foreground text-sm font-semibold">
-                    {t("selectAllItems")}
-                  </h3>
-                  <Badge
-                    variant="invert-light"
-                    size="xs"
-                    className="tabular-nums"
-                  >
-                    {allCount}
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                  {t("selectAllDesc")}
-                </p>
-              </div>
-            </button>
-
-            <button
-              type="button"
+            />
+            <ChoiceCard
+              icon={CheckSquare}
+              iconClassName="text-primary"
+              title={t("selectPendingOnly")}
+              count={pendingCount}
+              badgeVariant="primary-light"
+              description={t("selectPendingDesc")}
               onClick={onSelectPending}
-              className="group hover:border-primary/40 bg-card focus-visible:ring-primary/40 flex cursor-pointer flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors duration-200 focus:outline-none focus-visible:ring-2"
-            >
-              <CheckSquare className="text-primary size-5" />
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-foreground text-sm font-semibold">
-                    {t("selectPendingOnly")}
-                  </h3>
-                  <Badge
-                    variant="primary-light"
-                    size="xs"
-                    className="tabular-nums"
-                  >
-                    {pendingCount}
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                  {t("selectPendingDesc")}
-                </p>
-              </div>
-            </button>
+            />
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface PrStatusSelectDialogProps {
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly draftCount: number;
+  readonly inProgressCount: number;
+  readonly onSelectDraft: () => void;
+  readonly onSelectInProgress: () => void;
+}
+
+/**
+ * Dialog ถามว่าจะติ๊กทั้งหน้าเป็นใบฉบับร่าง หรือใบที่กำลังดำเนินการ
+ *
+ * ใบสองกลุ่มนี้ทำงานคนละอย่าง (ลบ vs อนุมัติ) จึงเลือกพร้อมกันไม่ได้
+ * ใช้ตอนกด checkbox หัวตารางในหน้ารายการ PR (tab my-pending)
+ *
+ * @param props - draftCount, inProgressCount, open, callbacks
+ * @returns React element ของ dialog
+ * @example
+ * <PrStatusSelectDialog open={open} onOpenChange={setOpen}
+ *   draftCount={3} inProgressCount={5}
+ *   onSelectDraft={selectDrafts} onSelectInProgress={selectInProgress} />
+ */
+export function PrStatusSelectDialog({
+  open,
+  onOpenChange,
+  draftCount,
+  inProgressCount,
+  onSelectDraft,
+  onSelectInProgress,
+}: PrStatusSelectDialogProps) {
+  const t = useTranslations("procurement.purchaseRequest");
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="overflow-hidden p-0 sm:max-w-2xl">
+        <div className="space-y-5 p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              {t("selectStatusTitle")}
+            </DialogTitle>
+            <DialogDescription className="mt-1">
+              {t("selectStatusDesc")}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <ChoiceCard
+              icon={FileEdit}
+              iconClassName="text-foreground"
+              title={t("selectDraft")}
+              count={draftCount}
+              badgeVariant="invert-light"
+              description={t("selectDraftDesc")}
+              onClick={onSelectDraft}
+            />
+            <ChoiceCard
+              icon={CheckSquare}
+              iconClassName="text-primary"
+              title={t("selectInProgress")}
+              count={inProgressCount}
+              badgeVariant="primary-light"
+              description={t("selectInProgressDesc")}
+              onClick={onSelectInProgress}
+            />
           </div>
         </div>
       </DialogContent>

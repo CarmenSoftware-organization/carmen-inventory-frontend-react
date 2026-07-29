@@ -1,6 +1,7 @@
-import { CalendarDays, Store } from "lucide-react";
+import { CalendarDays, Clock, Store } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useProfile } from "@/hooks/use-profile";
@@ -23,7 +24,7 @@ interface PriceListCardProps {
 export default function PriceListCard({ item, index, onEdit }: PriceListCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
 
   const formatPeriod = (period: string): string => {
     const parts = period.split(" - ");
@@ -32,12 +33,6 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
     const to = formatDate(parts[1], dateFormat);
     if (!from && !to) return "—";
     return `${from} - ${to}`;
-  };
-
-  const variantMap: Record<string, "outline" | "success" | "secondary"> = {
-    draft: "outline",
-    active: "success",
-    inactive: "secondary",
   };
 
   return (
@@ -56,7 +51,7 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -64,13 +59,12 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
         </div>
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-xs">{item.no}</p>
-          <Badge
-            variant={variantMap[item.status] ?? "outline"}
+          <StatusDotBadge
+            tone={PL_STATUS_TONE[item.status] ?? "neutral"}
             size="xs"
-            className="text-xs"
           >
-            {ts(item.status as "draft" | "active" | "inactive")}
-          </Badge>
+            {ts(item.status as "draft" | "submitted" | "active" | "inactive")}
+          </StatusDotBadge>
         </div>
       </CardHeader>
 
@@ -100,6 +94,20 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
                 {tfl("effectivePeriod")}
               </p>
               <p className="truncate font-semibold">{formatPeriod(item.effectivePeriod)}</p>
+            </div>
+          </div>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-start gap-2">
+            <Clock
+              className="text-muted-foreground mt-0.5 size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
+              <p className="truncate font-semibold">
+                {formatDate(item.audit.updated.at, dateTimeFormat)}
+              </p>
             </div>
           </div>
         )}

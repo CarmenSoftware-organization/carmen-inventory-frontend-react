@@ -1,5 +1,6 @@
 import type { ItemMoneyFields } from "./shared-item";
 import type { WorkflowHistoryEntry } from "./purchase-request";
+import type { Audit } from "./audit";
 
 export enum PO_STATUS {
   DRAFT = "draft",
@@ -26,6 +27,18 @@ export interface PoDetailLocation {
   order_base_qty: number;
   received_qty: number;
   foc_qty: number;
+  // per-location pricing (optional — POs เก่าอาจไม่มี, load แล้ว fallback ค่า item)
+  discount_rate?: number;
+  discount_amount?: number;
+  is_discount_adjustment?: boolean;
+  tax_profile_id?: string | null;
+  tax_profile_name?: string;
+  tax_rate?: number;
+  tax_amount?: number;
+  is_tax_adjustment?: boolean;
+  sub_total_price?: number;
+  net_amount?: number;
+  total_price?: number;
 }
 
 export interface PurchaseOrderDetail extends ItemMoneyFields {
@@ -89,8 +102,10 @@ export interface PoDetailPayload {
   tax_profile_name: string;
   tax_rate: number;
   tax_amount: number;
+  is_tax_adjustment: boolean;
   discount_rate: number;
   discount_amount: number;
+  is_discount_adjustment: boolean;
   is_foc: boolean;
   pr_detail: PrDetailRef[];
   description: string;
@@ -99,8 +114,22 @@ export interface PoDetailPayload {
 
 export interface PoDetailPayloadLocation {
   location_id: string;
+  location_code: string;
+  location_name: string;
   order_qty: number;
   order_base_qty: number;
+  price: number;
+  discount_rate: number;
+  discount_amount: number;
+  is_discount_adjustment: boolean;
+  tax_profile_id: string | null;
+  tax_profile_name: string;
+  tax_rate: number;
+  tax_amount: number;
+  is_tax_adjustment: boolean;
+  sub_total_price: number;
+  net_amount: number;
+  total_price: number;
 }
 
 export interface CreatePoDto {
@@ -163,8 +192,11 @@ export interface PurchaseOrder {
   note: string;
   doc_version: number;
   total_amount: number;
+  // flat fields ยังใช้อยู่ในหน้า edit (po-form → PoWorkflowHistory);
+  // list endpoint จะไม่ส่งมา (serializer omit) แต่ enrich เป็น audit object แทน
   created_at: string;
   updated_at: string;
+  audit?: Audit;
   purchase_order_detail: PurchaseOrderDetail[];
 }
 

@@ -24,6 +24,8 @@ export interface ProductLabels {
   readonly tierPlural: string;
   readonly qty: string;
   readonly unit: string;
+  readonly orderUnit: string;
+  readonly note: string;
   readonly notePlaceholder: string;
   readonly product: string;
 }
@@ -68,6 +70,7 @@ export function useStepperLabels(
 
 export function useProductLabels(
   t: ReturnType<typeof useTranslations>,
+  tf: ReturnType<typeof useTranslations>,
 ): ProductLabels {
   return {
     sectionTitle: t("productsTitle"),
@@ -80,8 +83,10 @@ export function useProductLabels(
     minimumOrder: t("minimumOrder"),
     tierSingular: t("tierSingular"),
     tierPlural: t("tierPlural"),
-    qty: t("qty"),
+    qty: t("moq"),
     unit: t("unit"),
+    orderUnit: tf("orderUnit"),
+    note: tf("note"),
     notePlaceholder: t("notePlaceholder"),
     product: t("product"),
   };

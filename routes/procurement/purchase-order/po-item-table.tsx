@@ -17,12 +17,13 @@ import {
   InputSuffixField,
   InputSuffixPlain,
 } from "@/components/ui/input/input-suffix";
-import { formatCurrency, round2 } from "@/lib/currency-utils";
+import { formatCurrency } from "@/lib/currency-utils";
 import {
   PO_ITEM_STATUS_CONFIG,
   normalizePoItemStatus,
 } from "@/constant/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
+import { computeItemPricing } from "./po-item-pricing";
 
 /**
  * Read-only display ของชื่อสินค้า — watch แค่ 2 field (name, description)
@@ -40,9 +41,7 @@ const ProductCellDisplay = memo(function ProductCellDisplay({
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   const productLocalName =
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
-  return (
-    <NameWithSubtext primary={productName} secondary={productLocalName} />
-  );
+  return <NameWithSubtext primary={productName} secondary={productLocalName} />;
 });
 
 /**
@@ -240,34 +239,6 @@ export const StatusCell = memo(function StatusCell({
   );
 });
 
-function computeItemPricing(item: PoFormValues["items"][number] | undefined) {
-  const price = Number(item?.price ?? 0);
-  const orderQty = (item?.locations ?? []).reduce(
-    (acc, l) => acc + (Number(l?.order_qty) || 0),
-    0,
-  );
-  const taxRate = Number(item?.tax_rate ?? 0);
-  const discRate = Number(item?.discount_rate ?? 0);
-  const conversion = Number(item?.order_unit_conversion_factor ?? 1);
-
-  const subtotal = round2(price * orderQty);
-  const discountAmount = round2((subtotal * discRate) / 100);
-  const netAmount = round2(subtotal - discountAmount);
-  const taxAmount = round2((netAmount * taxRate) / 100);
-  const totalPrice = round2(netAmount + taxAmount);
-  const baseQty = round2(orderQty * conversion);
-
-  return {
-    orderQty,
-    subtotal,
-    discountAmount,
-    netAmount,
-    taxAmount,
-    totalPrice,
-    baseQty,
-  };
-}
-
 /**
  * Merged qty + order unit (Receiving-style) — qty ระดับ item เป็น read-only
  * sum ของ locations.order_qty; unit (order_unit_id) แก้ได้ใน addon
@@ -303,7 +274,9 @@ export const QtyUnitCell = function QtyUnitCell({
 
   if (disabled || readOnly) {
     const unitName = form.getValues(`items.${index}.order_unit_name`) ?? "";
-    return <InputSuffixPlain className="w-full" value={sum} suffix={unitName} />;
+    return (
+      <InputSuffixPlain className="w-full" value={sum} suffix={unitName} />
+    );
   }
 
   return (
@@ -329,7 +302,53 @@ export const QtyUnitCell = function QtyUnitCell({
   );
 };
 
-/** Read-only display ของ net/tax/total — คำนวณ local เพื่อแสดงผล (ไม่เขียน form) */
+/** Product-row summary: ผลรวม order_qty ของทุก location + unit (read-only) */
+export const OrderSummaryCell = function OrderSummaryCell({
+  control,
+  index,
+}: {
+  control: Control<PoFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const locations =
+    useWatch({ control, name: `items.${index}.locations` }) ?? [];
+  const unitName =
+    useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
+  const sum = locations.reduce((a, l) => a + (Number(l?.order_qty) || 0), 0);
+  return (
+    <InputSuffixPlain
+      className="block w-full text-right"
+      value={sum}
+      suffix={unitName}
+    />
+  );
+};
+
+/** Product-row summary: ผลรวม received_qty ของทุก location + unit (read-only) */
+export const RecSummaryCell = function RecSummaryCell({
+  control,
+  index,
+}: {
+  control: Control<PoFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const locations =
+    useWatch({ control, name: `items.${index}.locations` }) ?? [];
+  const unitName =
+    useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
+  const sum = locations.reduce((a, l) => a + (Number(l?.received_qty) || 0), 0);
+  return (
+    <InputSuffixPlain
+      className="block w-full text-right"
+      value={sum}
+      suffix={unitName}
+    />
+  );
+};
+
+/** Read-only display ของ sub/disc/net/tax/total — คำนวณ local เพื่อแสดงผล (ไม่เขียน form) */
 export const ComputedPricingCell = function ComputedPricingCell({
   control,
   index,
@@ -337,18 +356,28 @@ export const ComputedPricingCell = function ComputedPricingCell({
 }: {
   control: Control<PoFormValues>;
   index: number;
-  field: "net_amount" | "tax_amount" | "total_price";
+  field:
+    | "sub_total_price"
+    | "discount_amount"
+    | "net_amount"
+    | "tax_amount"
+    | "total_price";
 }) {
   "use no memo";
   const item = useWatch({ control, name: `items.${index}` });
-  const { netAmount, taxAmount, totalPrice } = computeItemPricing(item);
+  const { subtotal, discountAmount, netAmount, taxAmount, totalPrice } =
+    computeItemPricing(item);
   const values = {
+    sub_total_price: subtotal,
+    discount_amount: discountAmount,
     net_amount: netAmount,
     tax_amount: taxAmount,
     total_price: totalPrice,
   };
   return (
-    <span className="tabular-nums">{formatCurrency(values[displayField])}</span>
+    <span className="block text-right tabular-nums">
+      {formatCurrency(values[displayField])}
+    </span>
   );
 };
 

@@ -2,43 +2,19 @@ import { PencilLine, ShoppingCart, Stamp, PackageCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Role } from "@/types/workflows";
 
-/** Flat icon per role — used for the compact flow strip (icon, not dot) */
+/**
+ * ไอคอนประจำ role — ตัวแยกหมวดตัวเดียวที่เหลือ
+ *
+ * เดิมไฟล์นี้มี map สีต่อ role อีก 4 ชุด (ROLE_TEXT / ROLE_SOLID /
+ * ROLE_NODE_BORDER / ROLE_LABEL_COLOR) ที่ผูก create→primary, approve→warning,
+ * purchase→info, issue→success — docs/DESIGN.md บอกว่า "no second brand color
+ * exists" และการยืม token เชิงความหมายมาใช้บอกหมวดยังทำให้สื่อผิดด้วย
+ * (approve ไม่ใช่คำเตือน issue ไม่ใช่ความสำเร็จ) — รูปร่างไอคอน + label
+ * ทำหน้าที่นี้ได้อยู่แล้ว
+ */
 export const ROLE_ICON: Record<Role, LucideIcon> = {
   create: PencilLine,
   approve: Stamp,
   purchase: ShoppingCart,
   issue: PackageCheck,
 };
-
-/** Flat text/icon color per role — vivid single tone, no bg/ring (flat look) */
-export const ROLE_TEXT: Record<Role, string> = {
-  create: "text-primary",
-  approve: "text-warning",
-  purchase: "text-info",
-  issue: "text-success",
-};
-
-/** Solid background — used for dots, indicator bars, KPI fills */
-export const ROLE_SOLID: Record<Role, string> = {
-  create: "bg-primary",
-  approve: "bg-warning",
-  purchase: "bg-info",
-  issue: "bg-success",
-};
-
-/** Node border + soft fill — used for diagram nodes */
-export const ROLE_NODE_BORDER: Record<Role, string> = {
-  create: "border-primary/60 bg-primary/10",
-  approve: "border-warning/60 bg-warning/10",
-  purchase: "border-info/60 bg-info/10",
-  issue: "border-success/60 bg-success/10",
-};
-
-/** Label text color — used for diagram labels */
-export const ROLE_LABEL_COLOR: Record<Role, string> = {
-  create: "text-primary",
-  approve: "text-warning-foreground",
-  purchase: "text-info-foreground",
-  issue: "text-success-foreground",
-};
-

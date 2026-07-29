@@ -15,7 +15,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { BarChart3, Hash, PieChart } from "lucide-react";
 import { useLocale, useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { useDashboardDatasets } from "@/hooks/use-dashboard-dataset";
 import { useProfile } from "@/hooks/use-profile";
 import {
+  myDashboardWidgetDataQueryOptions,
   useCreateMyDashboardWidget,
   useDeleteMyDashboardWidget,
   useMyDashboardWidgets,
@@ -162,6 +163,21 @@ const SavedWidgetsSection = () => {
       .map((w) => w.dataset_id),
   );
 
+  // widget ที่บันทึกไว้อาจ resolve ไม่ได้ใน BU ปัจจุบัน (dataset ไม่มีในสคีมานี้ →
+  // backend ตอบ 404) fetch ที่นี่แทนที่จะให้แต่ละการ์ด fetch เอง เพราะต้องรู้ก่อนว่า
+  // เหลือกี่ตัวถึงจะตัดสินใจได้ว่าโชว์ grid หรือ empty state
+  // ยิงตาม widget id ไม่ใช่ dataset id — backend เอา `params` ที่เก็บบน widget ไป exec ให้
+  const detailQueries = useQueries({
+    queries: normalItems.map((w) =>
+      myDashboardWidgetDataQueryOptions(buCode, w.id),
+    ),
+  });
+
+  // ตัวที่พังทิ้งไปเงียบๆ — ผู้ใช้ยังเห็นมันตอนสลับกลับไป BU เดิม
+  const renderable = normalItems
+    .map((widget, i) => ({ widget, query: detailQueries[i] }))
+    .filter(({ query }) => !query?.isError);
+
   const handleAdd = (ds: DashboardDataset) => {
     // group widget → สร้างด้วย params ยืนพื้น (ไม่เปิด config dialog)
     if (isGroupDatasetId(ds.id)) {
@@ -197,7 +213,6 @@ const SavedWidgetsSection = () => {
       {
         onSuccess: () =>
           toast.success(tt("createSuccess", { entity: t("entity") })),
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -277,7 +292,6 @@ const SavedWidgetsSection = () => {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         setPendingDelete(null);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -309,7 +323,6 @@ const SavedWidgetsSection = () => {
         updateWidget.mutate(
           { id: w.id, order_index: w.order_index },
           {
-            onError: (err) => toast.error(err.message),
           },
         );
       }
@@ -326,12 +339,12 @@ const SavedWidgetsSection = () => {
     <section className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-baseline gap-2">
-          <h2 className="text-muted-foreground text-[0.625rem] font-bold tracking-[0.16em] uppercase">
+          <h2 className="text-muted-foreground text-micro-legal font-bold tracking-[0.16em] uppercase">
             {t("section")}
           </h2>
           {data && (
-            <span className="text-muted-foreground text-[0.6875rem] tabular-nums">
-              {data.count}
+            <span className="text-muted-foreground text-micro tabular-nums">
+              {renderable.length}
             </span>
           )}
         </div>
@@ -353,7 +366,10 @@ const SavedWidgetsSection = () => {
         </p>
       )}
 
-      {!isLoading && !isError && items.length === 0 && <EmptyState />}
+      {!isLoading &&
+        !isError &&
+        renderable.length === 0 &&
+        groupItems.length === 0 && <EmptyState />}
 
       {groupItems.length > 0 && (
         <div className="space-y-3">
@@ -375,24 +391,26 @@ const SavedWidgetsSection = () => {
         </div>
       )}
 
-      {normalItems.length > 0 && (
+      {renderable.length > 0 && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={normalItems.map((w) => w.id)}
+            items={renderable.map(({ widget }) => widget.id)}
             strategy={rectSortingStrategy}
           >
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {normalItems.map((w) => (
+              {renderable.map(({ widget, query }) => (
                 <SortableWidgetItem
-                  key={w.id}
-                  widget={w}
-                  dataset={datasetById.get(w.dataset_id)}
-                  onDelete={() => setPendingDelete(w)}
-                  onConfigure={() => setPendingConfig(w)}
+                  key={widget.id}
+                  widget={widget}
+                  dataset={datasetById.get(widget.dataset_id)}
+                  detail={query?.data}
+                  isLoading={query?.isLoading ?? true}
+                  onDelete={() => setPendingDelete(widget)}
+                  onConfigure={() => setPendingConfig(widget)}
                 />
               ))}
             </ul>
@@ -457,7 +475,7 @@ function EmptyState() {
             {hints.map((h) => (
               <li
                 key={h.label}
-                className="bg-muted inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold"
+                className="bg-muted inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold"
               >
                 <h.Icon
                   className="size-3"

@@ -59,7 +59,7 @@ function LocationRow({ loc }: { readonly loc: UserLocationItem }) {
         className="text-muted-foreground size-3.5 shrink-0"
         aria-hidden="true"
       />
-      <span className="text-[0.6875rem] font-semibold">
+      <span className="text-micro font-semibold">
         {loc.location_code}
       </span>
       <span className="text-muted-foreground/60">·</span>
@@ -240,7 +240,7 @@ function LocationsView({
                   )}
                   aria-hidden="true"
                 />
-                <h3 className="text-foreground text-[0.6875rem] font-semibold tracking-widest uppercase">
+                <h3 className="text-foreground text-micro font-semibold tracking-widest uppercase">
                   {LOCATION_TYPE_LABEL[type]}
                 </h3>
               </div>

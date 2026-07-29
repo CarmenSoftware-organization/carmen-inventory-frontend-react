@@ -1,5 +1,10 @@
 
-import { Controller, type UseFormReturn } from "react-hook-form";
+import {
+  Controller,
+  type Control,
+  type FieldPath,
+  type UseFormReturn,
+} from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
   Field,
@@ -29,7 +34,7 @@ export function RecipeGeneralFields({
   const errors = form.formState.errors;
 
   return (
-    <Card label={t("recipeDetails")}>
+    <Card label={t("recipeDetails")} description={t("recipeDetailsDesc")}>
       <FieldGroup className="gap-3">
         {/* Code + Classification */}
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -112,41 +117,33 @@ export function RecipeGeneralFields({
           <FieldDescription>{t("internalNoteDesc")}</FieldDescription>
         </Field>
 
-        {/* Time + yield steppers */}
+        {/* Time + yield */}
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-          <TimeStepper
+          <NumberField
             id="recipe-prep-time"
             label={t("prepTime")}
             suffix={t("min")}
-            value={form.watch("prep_time")}
-            onChange={(v) =>
-              form.setValue("prep_time", v, { shouldDirty: true })
-            }
+            control={form.control}
+            name="prep_time"
             disabled={isDisabled}
             error={errors.prep_time?.message}
           />
-          <TimeStepper
+          <NumberField
             id="recipe-cook-time"
             label={t("cookTime")}
             suffix={t("min")}
-            value={form.watch("cook_time")}
-            onChange={(v) =>
-              form.setValue("cook_time", v, { shouldDirty: true })
-            }
+            control={form.control}
+            name="cook_time"
             disabled={isDisabled}
             error={errors.cook_time?.message}
           />
-          <TimeStepper
+          <NumberField
             id="recipe-base-yield"
             label={t("baseYield")}
-            suffix=""
-            value={form.watch("base_yield")}
-            onChange={(v) =>
-              form.setValue("base_yield", v, { shouldDirty: true })
-            }
+            control={form.control}
+            name="base_yield"
             disabled={isDisabled}
             error={errors.base_yield?.message}
-            accent
           />
 
           <Field>
@@ -172,69 +169,48 @@ export function RecipeGeneralFields({
   );
 }
 
-function TimeStepper({
+function NumberField({
   id,
   label,
   suffix,
-  value,
-  onChange,
+  control,
+  name,
   disabled,
-  accent,
   error,
 }: {
   readonly id: string;
   readonly label: string;
-  readonly suffix: string;
-  readonly value: number | undefined;
-  readonly onChange: (v: number) => void;
+  readonly suffix?: string;
+  readonly control: Control<RecipeFormValues>;
+  readonly name: FieldPath<RecipeFormValues>;
   readonly disabled: boolean;
-  readonly accent?: boolean;
   readonly error?: string;
 }) {
   return (
     <Field>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <div
-        className={
-          accent
-            ? "border-primary/40 bg-primary/5 aria-invalid:border-destructive flex items-center rounded-md border"
-            : "bg-muted/40 aria-invalid:border-destructive flex items-center rounded-md border"
-        }
-        aria-invalid={!!error}
-      >
-        <button
-          type="button"
-          onClick={() => onChange(Math.max(0, (Number(value) || 0) - 1))}
-          disabled={disabled}
-          aria-label="decrement"
-          className="text-muted-foreground hover:text-foreground flex h-8 w-7 items-center justify-center transition-colors disabled:opacity-50"
-        >
-          −
-        </button>
-        <FieldInput
-          id={id}
-          type="number"
-          inputMode="decimal"
-          min={0}
-          className="h-8 flex-1 border-0 bg-transparent text-center text-base font-semibold shadow-none focus-visible:ring-0"
-          value={value ?? 0}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          disabled={disabled}
-          error={error}
-          errorIconAlign="left"
-        />
-        <button
-          type="button"
-          onClick={() => onChange((Number(value) || 0) + 1)}
-          disabled={disabled}
-          aria-label="increment"
-          className="text-muted-foreground hover:text-foreground flex h-8 w-7 items-center justify-center transition-colors disabled:opacity-50"
-        >
-          +
-        </button>
-      </div>
+      <FieldLabel htmlFor={id} className="w-full justify-end">
+        {label}
+      </FieldLabel>
+      <Controller
+        control={control}
+        name={name}
+        render={({ field }) => (
+          <FieldInput
+            id={id}
+            type="number"
+            inputMode="decimal"
+            min={0}
+            className="h-8 text-right tabular-nums"
+            value={(field.value as number | undefined) ?? 0}
+            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+            disabled={disabled}
+            error={error}
+            errorIconAlign="left"
+          />
+        )}
+      />
       {suffix && (
-        <FieldDescription className="text-center">{suffix}</FieldDescription>
+        <FieldDescription className="text-right">{suffix}</FieldDescription>
       )}
     </Field>
   );

@@ -50,7 +50,7 @@ function RequiredChecklist({ form }: Props) {
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <span className="text-primary text-xs font-semibold">
           {t("requiredToSave")}{" "}
-          <span className={complete ? "text-success" : undefined}>
+          <span className={complete ? "text-success-ink" : undefined}>
             · {t("requiredComplete", { done: doneCount, total })}
           </span>
         </span>
@@ -59,9 +59,9 @@ function RequiredChecklist({ form }: Props) {
             <span
               key={it.k}
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.6875rem]",
+                "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro",
                 it.done
-                  ? "border-success/40 bg-success/10 text-success"
+                  ? "border-success/40 bg-success/10 text-success-ink"
                   : "border-primary/30 bg-background text-muted-foreground",
               )}
             >

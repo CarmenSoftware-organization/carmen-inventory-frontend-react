@@ -54,6 +54,13 @@ export default function LocationComponent() {
     { label: t("pcNo"), value: "physical_count_type|string:no" },
   ];
 
+  // badge ในแถบ active filter ยืนเดี่ยว ไม่มี placeholder กำกับเหมือนใน dropdown
+  // จึงต้องพ่วงชื่อ filter เข้าไปเอง ไม่งั้นเหลือแค่ "Yes" ซึ่งไม่บอกว่า Yes ของอะไร
+  const PHYSICAL_COUNT_BADGE_OPTIONS = PHYSICAL_COUNT_OPTIONS.map((opt) => ({
+    ...opt,
+    label: `${tfl("physicalCount")}: ${opt.label}`,
+  }));
+
   const extraFilter =
     [locationType, physicalCount].filter(Boolean).join(",") || undefined;
 
@@ -66,7 +73,7 @@ export default function LocationComponent() {
     ),
     ...buildBadges(
       physicalCount,
-      PHYSICAL_COUNT_OPTIONS,
+      PHYSICAL_COUNT_BADGE_OPTIONS,
       "physicalCount",
       setPhysicalCount,
     ),

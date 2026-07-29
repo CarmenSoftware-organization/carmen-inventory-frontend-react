@@ -79,7 +79,6 @@ export default function ChangePasswordDialog({
           toast.success(t("passwordChanged"));
           logout.mutate();
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };

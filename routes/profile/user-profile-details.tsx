@@ -34,7 +34,7 @@ function InfoItem({
         <Icon className="text-muted-foreground size-3.5" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <dt className="text-muted-foreground text-[0.625rem] font-semibold tracking-wide uppercase">
+        <dt className="text-muted-foreground text-micro-legal font-semibold tracking-wide uppercase">
           {label}
         </dt>
         <dd className="truncate text-xs font-semibold" title={value || undefined}>

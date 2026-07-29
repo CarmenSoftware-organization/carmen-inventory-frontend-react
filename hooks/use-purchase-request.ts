@@ -47,7 +47,7 @@ export function usePurchaseRequest(
         ...params,
       });
       const res = await httpClient.get(url);
-      if (!res.ok) throw ApiError.fromResponse(res, "Failed to fetch purchase requests");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch purchase requests");
       const json = await res.json();
       const entry = json.data?.[0];
 
@@ -96,7 +96,7 @@ export function useMyPendingPurchaseRequest(
       });
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch my pending purchase requests");
+        throw await ApiError.from(res, "Failed to fetch my pending purchase requests");
       const json = await res.json();
       const entry = json.data?.[0];
 
@@ -138,7 +138,7 @@ export function usePurchaseRequestWorkflowStages() {
         API_ENDPOINTS.PURCHASE_REQUEST_WORKFLOW_STAGES(buCode),
       );
       const res = await httpClient.get(url);
-      if (!res.ok) throw ApiError.fromResponse(res, "Failed to fetch workflow stages");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch workflow stages");
       const json = await res.json();
       return json.data ?? [];
     },
@@ -166,7 +166,7 @@ export function usePurchaseRequestTemplates(enabled: boolean = true) {
         API_ENDPOINTS.PURCHASE_REQUEST_TEMPLATES(buCode),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch purchase request templates",
         );
@@ -197,7 +197,7 @@ export function usePurchaseRequestById(id: string | undefined) {
         `${API_ENDPOINTS.PURCHASE_REQUEST(buCode)}/${id}`,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch purchase request");
+        throw await ApiError.from(res, "Failed to fetch purchase request");
       const json = await res.json();
       return json.data;
     },
@@ -253,7 +253,7 @@ export function usePurchaseRequestComments(prId: string | undefined) {
       const res = await httpClient.get(
         API_ENDPOINTS.PURCHASE_REQUEST_COMMENT(buCode, prId),
       );
-      if (!res.ok) throw ApiError.fromResponse(res, "Failed to fetch comments");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch comments");
       const json = await res.json();
       return json.data ?? [];
     },
@@ -376,7 +376,7 @@ export function usePrPreviousStages(
       const res = await httpClient.get(
         API_ENDPOINTS.PURCHASE_REQUEST_PREVIOUS_STAGES(buCode!, prId!),
       );
-      if (!res.ok) throw ApiError.fromResponse(res, "Failed to fetch previous stages");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch previous stages");
       const json = await res.json();
       const data = json.data ?? {};
       return Object.entries(data).map(([key, label]) => ({
@@ -488,7 +488,7 @@ export function useExportPurchaseRequest() {
       fetch: async () => {
         const url = buildUrl(endpoint, { bu_code: buCode, ...params });
         const res = await httpClient.get(url);
-        if (!res.ok) throw ApiError.fromResponse(res, "Failed to fetch purchase requests");
+        if (!res.ok) throw await ApiError.from(res, "Failed to fetch purchase requests");
         const json = await res.json();
         return json.data?.[0]?.data ?? [];
       },

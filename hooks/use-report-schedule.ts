@@ -27,7 +27,7 @@ export function useReportSchedules() {
     queryFn: async () => {
       const res = await httpClient.get(API_ENDPOINTS.REPORT_SCHEDULES(buCode!));
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to fetch report schedules");
+        throw await ApiError.from(res, "Failed to fetch report schedules");
       }
       const json = await res.json();
       return json.data ?? [];
@@ -56,7 +56,7 @@ export function useCreateReportSchedule() {
         dto,
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to create report schedule");
+        throw await ApiError.from(res, "Failed to create report schedule");
       }
       const json = await res.json();
       return json.data ?? json;
@@ -87,7 +87,7 @@ export function useDeleteReportSchedule() {
         API_ENDPOINTS.REPORT_SCHEDULE_BY_ID(buCode!, id),
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to delete report schedule");
+        throw await ApiError.from(res, "Failed to delete report schedule");
       }
     },
     onSuccess: () => {
@@ -117,7 +117,7 @@ export function useReportLookups(sources: readonly string[]) {
       const url = buildUrl(API_ENDPOINTS.REPORT_LOOKUPS(buCode!), { types });
       const res = await httpClient.get(url);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to fetch report lookups");
+        throw await ApiError.from(res, "Failed to fetch report lookups");
       }
       const json = await res.json();
       const data = (json.data ?? json) as Record<string, unknown>;

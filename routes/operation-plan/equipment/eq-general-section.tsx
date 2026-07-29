@@ -32,161 +32,176 @@ export function EqGeneralSection({
   const errors = form.formState.errors;
 
   return (
-    <Card label={tf("generalInfo")}>
-      <div className="grid gap-4 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <EqImageField
-          disabled={isDisabled}
-          serverImageUrl={imageUrl}
-          file={imageFile}
-          removed={imageRemoved}
-          onChange={onImageChange}
-        />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <>
+      {/* Identification */}
+      <Card first label={tf("generalInfo")} description={t("generalInfoDesc")}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field>
-          <FieldLabel htmlFor="equipment-code" required>
-            {tfl("code")}
-          </FieldLabel>
-          <FieldInput
-            id="equipment-code"
-            placeholder={t("codePlaceholder")}
-            className="h-8"
-            disabled={isDisabled}
-            maxLength={10}
-            error={errors.code?.message}
-            {...form.register("code")}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="equipment-name" required>
-            {tfl("name")}
-          </FieldLabel>
-          <FieldInput
-            id="equipment-name"
-            placeholder={t("namePlaceholder")}
-            className="h-8"
-            disabled={isDisabled}
-            maxLength={100}
-            error={errors.name?.message}
-            {...form.register("name")}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel required>{tfl("category")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="category_id"
-            render={({ field }) => (
-              <LookupEquipmentCategory
-                value={field.value ?? ""}
-                onValueChange={field.onChange}
-                disabled={isDisabled}
-                error={errors.category_id?.message}
-              />
-            )}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="equipment-brand">{tfl("brand")}</FieldLabel>
-          <FieldInput
-            id="equipment-brand"
-            placeholder={t("brandPlaceholder")}
-            className="h-8"
-            disabled={isDisabled}
-            maxLength={100}
-            error={errors.brand?.message}
-            {...form.register("brand")}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="equipment-model">{tfl("model")}</FieldLabel>
-          <FieldInput
-            id="equipment-model"
-            placeholder={t("modelPlaceholder")}
-            className="h-8"
-            disabled={isDisabled}
-            maxLength={100}
-            error={errors.model?.message}
-            {...form.register("model")}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="equipment-serial-no">
-            {tfl("serialNo")}
-          </FieldLabel>
-          <FieldInput
-            id="equipment-serial-no"
-            placeholder={t("serialNoPlaceholder")}
-            className="h-8"
-            disabled={isDisabled}
-            maxLength={100}
-            error={errors.serial_no?.message}
-            {...form.register("serial_no")}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="equipment-station">{tfl("station")}</FieldLabel>
-          <FieldInput
-            id="equipment-station"
-            placeholder={t("stationPlaceholder")}
-            className="h-8"
-            disabled={isDisabled}
-            maxLength={100}
-            error={errors.station?.message}
-            {...form.register("station")}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="equipment-capacity">
-            {tfl("capacity")}
-          </FieldLabel>
-          <FieldInput
-            id="equipment-capacity"
-            placeholder={t("capacityPlaceholder")}
-            className="h-8"
-            disabled={isDisabled}
-            maxLength={100}
-            error={errors.capacity?.message}
-            {...form.register("capacity")}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="equipment-power-rating">
-            {tfl("powerRating")}
-          </FieldLabel>
-          <FieldInput
-            id="equipment-power-rating"
-            placeholder={t("powerRatingPlaceholder")}
-            className="h-8"
-            disabled={isDisabled}
-            maxLength={100}
-            error={errors.power_rating?.message}
-            {...form.register("power_rating")}
-          />
-        </Field>
-
-          <Field className="sm:col-span-2">
-            <FieldLabel htmlFor="equipment-description">
-              {tfl("description")}
+            <FieldLabel htmlFor="equipment-code" required>
+              {tfl("code")}
             </FieldLabel>
-            <Textarea
-              id="equipment-description"
-              placeholder={tfl("optional")}
-              rows={2}
+            <FieldInput
+              id="equipment-code"
+              placeholder={t("codePlaceholder")}
+              className="h-8"
               disabled={isDisabled}
-              maxLength={256}
-              {...form.register("description")}
+              maxLength={10}
+              error={errors.code?.message}
+              {...form.register("code")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="equipment-name" required>
+              {tfl("name")}
+            </FieldLabel>
+            <FieldInput
+              id="equipment-name"
+              placeholder={t("namePlaceholder")}
+              className="h-8"
+              disabled={isDisabled}
+              maxLength={100}
+              error={errors.name?.message}
+              {...form.register("name")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel required>{tfl("category")}</FieldLabel>
+            <Controller
+              control={form.control}
+              name="category_id"
+              render={({ field }) => (
+                <LookupEquipmentCategory
+                  value={field.value ?? ""}
+                  onValueChange={field.onChange}
+                  disabled={isDisabled}
+                  error={errors.category_id?.message}
+                />
+              )}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="equipment-brand">{tfl("brand")}</FieldLabel>
+            <FieldInput
+              id="equipment-brand"
+              placeholder={t("brandPlaceholder")}
+              className="h-8"
+              disabled={isDisabled}
+              maxLength={100}
+              error={errors.brand?.message}
+              {...form.register("brand")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="equipment-model">{tfl("model")}</FieldLabel>
+            <FieldInput
+              id="equipment-model"
+              placeholder={t("modelPlaceholder")}
+              className="h-8"
+              disabled={isDisabled}
+              maxLength={100}
+              error={errors.model?.message}
+              {...form.register("model")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="equipment-serial-no">
+              {tfl("serialNo")}
+            </FieldLabel>
+            <FieldInput
+              id="equipment-serial-no"
+              placeholder={t("serialNoPlaceholder")}
+              className="h-8"
+              disabled={isDisabled}
+              maxLength={100}
+              error={errors.serial_no?.message}
+              {...form.register("serial_no")}
+            />
+          </Field>
+
+        </div>
+
+        <Field className="mt-4">
+          <FieldLabel htmlFor="equipment-description">
+            {tfl("description")}
+          </FieldLabel>
+          <Textarea
+            id="equipment-description"
+            placeholder={tfl("optional")}
+            rows={2}
+            disabled={isDisabled}
+            maxLength={256}
+            {...form.register("description")}
+          />
+        </Field>
+      </Card>
+
+      {/* Specifications */}
+      <Card label={t("specifications")} description={t("specificationsDesc")}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="equipment-station">
+              {tfl("station")}
+            </FieldLabel>
+            <FieldInput
+              id="equipment-station"
+              placeholder={t("stationPlaceholder")}
+              className="h-8"
+              disabled={isDisabled}
+              maxLength={100}
+              error={errors.station?.message}
+              {...form.register("station")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="equipment-capacity">
+              {tfl("capacity")}
+            </FieldLabel>
+            <FieldInput
+              id="equipment-capacity"
+              placeholder={t("capacityPlaceholder")}
+              className="h-8"
+              disabled={isDisabled}
+              maxLength={100}
+              error={errors.capacity?.message}
+              {...form.register("capacity")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="equipment-power-rating">
+              {tfl("powerRating")}
+            </FieldLabel>
+            <FieldInput
+              id="equipment-power-rating"
+              placeholder={t("powerRatingPlaceholder")}
+              className="h-8"
+              disabled={isDisabled}
+              maxLength={100}
+              error={errors.power_rating?.message}
+              {...form.register("power_rating")}
             />
           </Field>
         </div>
-      </div>
-    </Card>
+      </Card>
+
+      {/* Photo */}
+      <Card label={t("equipmentImage")} description={t("equipmentImageDesc")}>
+        <div className="max-w-xs">
+          <EqImageField
+            disabled={isDisabled}
+            serverImageUrl={imageUrl}
+            file={imageFile}
+            removed={imageRemoved}
+            onChange={onImageChange}
+          />
+        </div>
+      </Card>
+    </>
   );
 }

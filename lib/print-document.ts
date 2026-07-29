@@ -16,20 +16,13 @@ export type PrintDocumentType =
   | "GRN"
   | "SR"
   | "CN"
+  | "SI"
+  | "SO"
   | "IA"
   | "PC"
   | "SC"
-  | "RFQ"
-  | "INV";
-
-export interface PrintMappingResponse {
-  data?: {
-    id: string;
-    document_type: string;
-    report_template_id: string;
-    template_name?: string | null;
-  };
-}
+  | "RFP"
+  | "EOP";
 
 export interface ViewerResponse {
   data?: { url: string };
@@ -57,12 +50,24 @@ export interface PrintDocumentOptions {
    * window.open call entirely (caller handles the URL).
    */
   target?: "_blank" | "self" | null;
+  /**
+   * Report template to render with. Normally supplied by usePrintDocument()
+   * from the BU's print-form config; pass it explicitly to override. Optional
+   * for Path 1 (the dedicated endpoint already knows its own template).
+   * Required for Path 2 (the generic viewer) — there is no server-side
+   * default mapping to fall back on; omitting it throws.
+   */
+  templateId?: string;
 }
 
 /**
  * Document-specific print endpoints that already build the full data
  * payload server-side. When the doc type is in this map and documentId
  * is supplied, we use this path instead of the generic resolve+viewer.
+ *
+ * This is a genuinely partial map by design: SI, SO and EOP deliberately
+ * have no entry (and no report-template rows anywhere yet) — they are
+ * configurable, not printable.
  */
 const DEDICATED_PRINT_ENDPOINTS: Partial<Record<PrintDocumentType, (buCode: string, id: string) => string>> = {
   PR: (bu, id) =>
@@ -81,10 +86,8 @@ const DEDICATED_PRINT_ENDPOINTS: Partial<Record<PrintDocumentType, (buCode: stri
     `/api/proxy/api/${encodeURIComponent(bu)}/physical-counts/${encodeURIComponent(id)}/print-viewer`,
   SC: (bu, id) =>
     `/api/proxy/api/${encodeURIComponent(bu)}/spot-checks/${encodeURIComponent(id)}/print-viewer`,
-  RFQ: (bu, id) =>
+  RFP: (bu, id) =>
     `/api/proxy/api/${encodeURIComponent(bu)}/request-for-pricings/${encodeURIComponent(id)}/print-viewer`,
-  INV: (bu, id) =>
-    `/api/proxy/api/${encodeURIComponent(bu)}/invoice/${encodeURIComponent(id)}/print-viewer`,
 };
 
 export interface PrintDocumentResult {
@@ -94,13 +97,24 @@ export interface PrintDocumentResult {
 }
 
 /**
- * Resolve which print template applies for (documentType, buCode) and ask the
- * report-viewer endpoint to render it. Returns the viewer URL and (by
- * default) opens it in a new tab.
+ * Print a document. Two paths:
  *
- * Two HTTP round-trips:
- *   1. GET /api/{bu}/report/print-template?document_type=PR → template_id
- *   2. POST /api/{bu}/report/viewer { template_id, filters }   → viewer URL
+ *   1. Dedicated endpoint (documentType is in DEDICATED_PRINT_ENDPOINTS and
+ *      options.documentId is supplied) — the endpoint composes the full data
+ *      payload server-side and returns a ready viewer_url.
+ *   2. Generic fallback (no dedicated endpoint, or no documentId) — posts
+ *      options.templateId (the BU's configured print form, normally supplied
+ *      by usePrintDocument()) straight to POST /api/{bu}/reports/viewer with
+ *      the caller's filters. There is no server-side mapping to resolve a
+ *      template anymore; the caller must already know which one to use.
+ *
+ *      This path renders from the template's own source view/function. Every
+ *      form template in micro-report's seed has source_name: null and
+ *      renders instead through a Go builder_key fed by the payload a
+ *      dedicated endpoint composes — so for SI, SO and EOP (the types with no
+ *      dedicated endpoint) this generic viewer path is NOT known to work
+ *      today. Whether it can render a builder-backed template at all is
+ *      unverified.
  *
  * Throws Error on any failure; callers should toast/log it.
  */
@@ -115,8 +129,11 @@ export async function printDocument(
   // Path 1 — dedicated endpoint that already builds full data payload.
   const dedicated = DEDICATED_PRINT_ENDPOINTS[documentType];
   if (dedicated && options.documentId) {
-    const url = dedicated(buCode, options.documentId);
-    const res = await httpClient.get(url);
+    const endpoint = dedicated(buCode, options.documentId);
+    const requestUrl = options.templateId
+      ? `${endpoint}?template_id=${encodeURIComponent(options.templateId)}`
+      : endpoint;
+    const res = await httpClient.get(requestUrl);
     if (!res.ok) {
       throw new Error(
         `Print failed for ${documentType} (${res.status})${await errorSuffix(res)}`,
@@ -133,25 +150,15 @@ export async function printDocument(
     return { url: viewerUrl, templateId: "", templateName: null };
   }
 
-  // Path 2 — generic resolve + viewer (no per-doc data builder).
-  // 1. Resolve the active mapping for this doc type + BU.
-  const resolveUrl = `${API_ENDPOINTS.REPORTS(buCode)}/print-template?document_type=${encodeURIComponent(documentType)}`;
-  const mappingRes = await httpClient.get(resolveUrl);
-  if (!mappingRes.ok) {
-    throw new Error(
-      `No print template configured for ${documentType} (${mappingRes.status})${await errorSuffix(mappingRes)}`,
-    );
-  }
-  const mappingJson: PrintMappingResponse = await mappingRes.json();
-  const mapping = mappingJson.data ?? (mappingJson as PrintMappingResponse["data"]);
-  if (!mapping?.report_template_id) {
-    throw new Error(`No print template configured for ${documentType}`);
+  // Path 2 — no dedicated endpoint for this type. The template comes from the
+  // BU's print-form config; there is no server-side mapping to fall back on.
+  if (!options.templateId) {
+    throw new Error(`No print form configured for ${documentType}`);
   }
 
-  // 2. Ask the viewer to render that template with the document filters.
   const viewerUrl = `${API_ENDPOINTS.REPORTS(buCode)}/viewer`;
   const viewerRes = await httpClient.post(viewerUrl, {
-    template_id: mapping.report_template_id,
+    template_id: options.templateId,
     filters: options.filters ?? {},
   });
   if (!viewerRes.ok) {
@@ -175,7 +182,7 @@ export async function printDocument(
 
   return {
     url,
-    templateId: mapping.report_template_id,
-    templateName: mapping.template_name ?? null,
+    templateId: options.templateId,
+    templateName: null,
   };
 }

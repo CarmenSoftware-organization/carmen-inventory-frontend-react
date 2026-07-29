@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Leaf, Trash2 } from "lucide-react";
+import { Clock, Leaf, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { EcoLabel } from "@/types/eco-label";
 
 interface EcoLabelCardProps {
@@ -26,6 +28,8 @@ export default function EcoLabelCard({
   onDelete,
 }: EcoLabelCardProps) {
   const tc = useTranslations("common");
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
 
   return (
     <Card
@@ -65,6 +69,17 @@ export default function EcoLabelCard({
         <p className="text-muted-foreground line-clamp-2 text-xs leading-snug">
           {item.description || "—"}
         </p>
+        {item.audit?.updated?.at && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate text-xs">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
+            </span>
+          </div>
+        )}
       </CardContent>
 
       <Separator />

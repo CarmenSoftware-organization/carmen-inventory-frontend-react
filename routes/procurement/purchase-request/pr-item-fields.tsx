@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
+import { PrStageRoleProvider } from "./pr-item-cells";
 import { useTranslations } from "use-intl";
 import {
   AlertTriangle,
@@ -26,9 +27,6 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
-import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
-import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   AlertDialog,
@@ -55,51 +53,12 @@ const PrSelectDialog = lazy(() =>
   import("./pr-select-dialog").then((mod) => ({ default: mod.PrSelectDialog })),
 );
 import EmptyComponent from "@/components/empty-component";
-import { PR_ITEM, computePrItemAmounts } from "./pr-form-schema";
+import { PR_ITEM } from "./pr-form-schema";
 import { getDeleteDescription } from "@/lib/form-utils";
-import {
-  PR_ITEM_PRICELIST_COMPARE_TYPE,
-  PR_ITEM_STAGE_STATUS,
-} from "@/types/purchase-request";
-import { formatDate } from "@/lib/date-utils";
+import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { PrAskAiMenu } from "./ai/pr-ask-ai-menu";
-
-/**
- * คำนวณ + set ยอด derive ของ item (discount/tax/net/total) ตอน auto-allocate
- * เพราะ pr-item-expand (ที่ปกติ sync ยอดให้) mount เฉพาะตอน item ถูกขยาย —
- * collapsed row จะไม่ recompute ถ้าไม่ทำตรงนี้
- */
-function applyDerivedAmounts(
-  form: UseFormReturn<PrFormValues>,
-  index: number,
-  item: PrFormValues["items"][number],
-  price: number,
-  taxRate: number,
-) {
-  const approvedQty = Number(item.approved_qty) || 0;
-  const qty = approvedQty > 0 ? approvedQty : Number(item.requested_qty) || 0;
-  const isDiscAdj = item.is_discount_adjustment ?? false;
-  const isTaxAdj = item.is_tax_adjustment ?? false;
-  const amounts = computePrItemAmounts({
-    price,
-    qty,
-    discRate: Number(item.discount_rate) || 0,
-    isDiscAdj,
-    discAmt: Number(item.discount_amount) || 0,
-    taxRate,
-    isTaxAdj,
-    taxAmt: Number(item.tax_amount) || 0,
-  });
-  if (!isDiscAdj) {
-    form.setValue(`items.${index}.discount_amount`, amounts.discountAmount);
-  }
-  if (!isTaxAdj) {
-    form.setValue(`items.${index}.tax_amount`, amounts.taxAmount);
-  }
-  form.setValue(`items.${index}.net_amount`, amounts.netAmount);
-  form.setValue(`items.${index}.total_price`, amounts.totalPrice);
-}
+import { runPrAutoAllocate } from "./pr-auto-allocate";
 
 interface PrItemFieldsProps {
   readonly form: UseFormReturn<PrFormValues>;
@@ -208,87 +167,13 @@ export function PrItemFields({
     role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE;
 
   const handleAutoAllocate = async () => {
-    const items = form.getValues("items");
-    if (items.length === 0 || !buCode) return;
-    const bu_code = buCode;
-
     setIsAllocating(true);
-    const toastId = toast.loading(t("allocating", { count: items.length }));
-    let allocated = 0;
-
-    const results = await Promise.allSettled(
-      items.map(async (item, index) => {
-        if (!item.product_id || !item.requested_unit_id || !item.currency_id)
-          return;
-
-        const url = buildUrl(API_ENDPOINTS.PRICE_LIST_COMPARE(bu_code), {
-          product_id: item.product_id,
-          unit_id: item.requested_unit_id,
-          at_date: formatDate(item.delivery_date, "yyyy-MM-dd"),
-          currency_id: item.currency_id,
-        });
-
-        const res = await httpClient.get(url);
-        if (!res.ok) throw new Error("fetch failed");
-
-        const json = await res.json();
-        const selected = json.data?.selected;
-        if (!selected) {
-          form.setValue(`items.${index}.vendor_id`, null);
-          form.setValue(`items.${index}.vendor_name`, "");
-          form.setValue(`items.${index}.pricelist_price`, 0);
-          form.setValue(`items.${index}.pricelist_type`, null);
-          form.setValue(`items.${index}.pricelist_detail_id`, null);
-          form.setValue(`items.${index}.pricelist_no`, null);
-          // ไม่มีราคา → ยอด derive กลับเป็น 0 (tax_rate คงเดิม)
-          applyDerivedAmounts(form, index, item, 0, Number(item.tax_rate) || 0);
-          return;
-        }
-
-        form.setValue(`items.${index}.vendor_id`, selected.vendor_id);
-        form.setValue(`items.${index}.vendor_name`, selected.vendor_name);
-        form.setValue(`items.${index}.pricelist_price`, selected.price);
-
-        form.setValue(
-          `items.${index}.pricelist_type`,
-          PR_ITEM_PRICELIST_COMPARE_TYPE.AUTOMATIC,
-        );
-        form.setValue(
-          `items.${index}.pricelist_detail_id`,
-          selected.pricelist_detail_id,
-        );
-        form.setValue(`items.${index}.pricelist_no`, selected.pricelist_no);
-        form.setValue(`items.${index}.exchange_rate`, selected.exchange_rate);
-        form.setValue(`items.${index}.tax_profile_id`, selected.tax_profile_id);
-        form.setValue(
-          `items.${index}.tax_profile_name`,
-          selected.tax_profile_name,
-        );
-        form.setValue(`items.${index}.tax_rate`, selected.tax_rate);
-        // คำนวณ tax_amount/net/total ทันที (collapsed row ไม่มี pr-item-expand sync ให้)
-        applyDerivedAmounts(
-          form,
-          index,
-          item,
-          selected.price,
-          Number(selected.tax_rate) || 0,
-        );
-        allocated++;
-      }),
-    );
-
-    toast.dismiss(toastId);
-    const failed = results.filter((r) => r.status === "rejected").length;
-    if (allocated > 0) {
-      toast.success(t("allocated", { allocated, total: items.length }));
-    }
-    if (failed > 0) {
-      toast.error(t("allocateFailed", { count: failed }));
-    }
-    if (allocated === 0 && failed === 0) {
-      toast.warning(t("noPriceListFound"));
-    }
-
+    await runPrAutoAllocate(form, buCode, {
+      allocating: (count) => t("allocating", { count }),
+      allocated: (allocated, total) => t("allocated", { allocated, total }),
+      allocateFailed: (count) => t("allocateFailed", { count }),
+      noPriceListFound: t("noPriceListFound"),
+    });
     setIsAllocating(false);
   };
 
@@ -460,232 +345,236 @@ export function PrItemFields({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-end gap-1.5">
-          {selectedRows.length > 0 && (
-            <PrAskAiMenu
-              items={selectedRows.map((row) => {
-                const item = form.getValues(`items.${row.index}`);
-                return {
-                  productName: item.product_name,
-                  productLocalName: item.product_local_name,
-                  locationName: item.location_name,
-                };
-              })}
-            />
-          )}
-          {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="xs"
-              onClick={() =>
-                table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
-              }
-            >
-              {table.getIsAllRowsExpanded() ? (
-                <>
-                  <ChevronsDownUp /> {tc("collapseAll")}
-                </>
-              ) : (
-                <>
-                  <ChevronsUpDown /> {tc("expandAll")}
-                </>
-              )}
-            </Button>
-          )}
-          {!isDisabled && role === STAGE_ROLE.CREATE && (
-            <Button
-              type="button"
-              size="xs"
-              disabled={!canAddItem}
-              title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-              onClick={() => handleAddItem()}
-            >
-              <PackagePlus /> {t("addItem")}
-            </Button>
-          )}
-
-          {!isDisabled && role === STAGE_ROLE.PURCHASE && (
-            <Button
-              type="button"
-              size="xs"
-              disabled={isAllocating || itemFields.length === 0}
-              onClick={handleAutoAllocate}
-            >
-              {isAllocating ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <RefreshCcw />
-              )}
-              {t("autoAllocate")}
-            </Button>
-          )}
-        </div>
-        {selectedRows.length > 0 && canBulkAction && (
-          <div className="flex items-center gap-1.5">
-            <Button
-              type="button"
-              variant="success"
-              size="xs"
-              onClick={handleBulkApprove}
-            >
-              <Check />
-              {tc("approve")}
-            </Button>
-            <Button
-              type="button"
-              variant="warning"
-              size="xs"
-              onClick={handleBulkReview}
-            >
-              <Eye />
-              {t("reviewTitle")}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="xs"
-              onClick={handleBulkReject}
-            >
-              <X />
-              {tc("reject")}
-            </Button>
-            {prId && (
+    <PrStageRoleProvider role={role}>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-end gap-1.5">
+            {selectedRows.length > 0 && (
+              <PrAskAiMenu
+                items={selectedRows.map((row) => {
+                  const item = form.getValues(`items.${row.index}`);
+                  return {
+                    productName: item.product_name,
+                    productLocalName: item.product_local_name,
+                    locationName: item.location_name,
+                  };
+                })}
+              />
+            )}
+            {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="xs"
-                onClick={handleBulkSplit}
+                onClick={() =>
+                  table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+                }
               >
-                <Scissors />
-                {t("split")}
+                {table.getIsAllRowsExpanded() ? (
+                  <>
+                    <ChevronsDownUp /> {tc("collapseAll")}
+                  </>
+                ) : (
+                  <>
+                    <ChevronsUpDown /> {tc("expandAll")}
+                  </>
+                )}
+              </Button>
+            )}
+            {!isDisabled && role === STAGE_ROLE.CREATE && (
+              <Button
+                type="button"
+                size="xs"
+                disabled={!canAddItem}
+                title={!canAddItem ? t("selectWorkflowFirst") : undefined}
+                onClick={() => handleAddItem()}
+              >
+                <PackagePlus /> {t("addItem")}
+              </Button>
+            )}
+
+            {!isDisabled && role === STAGE_ROLE.PURCHASE && (
+              <Button
+                type="button"
+                size="xs"
+                disabled={isAllocating || itemFields.length === 0}
+                onClick={handleAutoAllocate}
+              >
+                {isAllocating ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <RefreshCcw />
+                )}
+                {t("autoAllocate")}
               </Button>
             )}
           </div>
-        )}
-      </div>
-
-      <DataGrid
-        table={table}
-        recordCount={itemFields.length}
-        tableLayout={{
-          checkbox: !!prStatus && prStatus !== "draft",
-          columnsResizable: true,
-        }}
-        emptyMessage={
-          <EmptyComponent
-            icon={BoxIcon}
-            title={t("noItems")}
-            description={t("noItemsDesc")}
-            content={
-              !isDisabled &&
-              role === STAGE_ROLE.CREATE && (
+          {selectedRows.length > 0 && canBulkAction && (
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="success"
+                size="xs"
+                onClick={handleBulkApprove}
+              >
+                <Check />
+                {tc("approve")}
+              </Button>
+              <Button
+                type="button"
+                variant="warning"
+                size="xs"
+                onClick={handleBulkReview}
+              >
+                <Eye />
+                {t("reviewTitle")}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="xs"
+                onClick={handleBulkReject}
+              >
+                <X />
+                {tc("reject")}
+              </Button>
+              {prId && (
                 <Button
                   type="button"
+                  variant="outline"
                   size="xs"
-                  disabled={!canAddItem}
-                  title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-                  onClick={() => handleAddItem()}
+                  onClick={handleBulkSplit}
                 >
-                  <Plus /> {t("addItem")}
+                  <Scissors />
+                  {t("split")}
                 </Button>
-              )
-            }
-          />
-        }
-      >
-        {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
+              )}
+            </div>
+          )}
+        </div>
+
+        <DataGrid
+          table={table}
+          recordCount={itemFields.length}
+          tableLayout={{
+            checkbox: !!prStatus && prStatus !== "draft",
+            columnsResizable: true,
+          }}
+          emptyMessage={
+            <EmptyComponent
+              icon={BoxIcon}
+              title={t("noItems")}
+              description={t("noItemsDesc")}
+              content={
+                !isDisabled &&
+                role === STAGE_ROLE.CREATE && (
+                  <Button
+                    type="button"
+                    size="xs"
+                    disabled={!canAddItem}
+                    title={!canAddItem ? t("selectWorkflowFirst") : undefined}
+                    onClick={() => handleAddItem()}
+                  >
+                    <Plus /> {t("addItem")}
+                  </Button>
+                )
+              }
+            />
+          }
+        >
+          {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
             — ไม่ห่อด้วย Radix ScrollArea เพื่อเลี่ยง nested scroll ที่ทำให้ scroll
             แนวนอนสะดุด (เห็นชัดในโหมด edit ที่ตารางกว้าง/หนักกว่า) */}
-        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
-          <DataGridTable />
-        </DataGridContainer>
-      </DataGrid>
+          <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+            <DataGridTable />
+          </DataGridContainer>
+        </DataGrid>
 
-      <DeleteDialog
-        open={deleteIndex !== null}
-        onOpenChange={(o) => {
-          if (!o) setDeleteIndex(null);
-        }}
-        title={t("removeItem")}
-        description={getDeleteDescription(deleteIndex, form)}
-        onConfirm={() => {
-          if (deleteIndex === null) return;
-          removeItem(deleteIndex);
-          setDeleteIndex(null);
-        }}
-      />
-
-      {bulkAction && (
-        <PrActionDialog
-          open={!!bulkAction}
-          onOpenChange={(open) => {
-            if (!open) setBulkAction(null);
+        <DeleteDialog
+          open={deleteIndex !== null}
+          onOpenChange={(o) => {
+            if (!o) setDeleteIndex(null);
           }}
-          onConfirm={handleBulkActionConfirm}
-          items={selectedRows.map(
-            (row): ActionDialogItem => ({
-              index: row.index,
-              productName: form.getValues(`items.${row.index}.product_name`),
-              locationName: form.getValues(`items.${row.index}.location_name`),
-            }),
-          )}
-          {...bulkActionDialogConfig[bulkAction]}
-          {...(bulkAction === PR_ITEM_STAGE_STATUS.REVIEW
-            ? { stages: previousStages, stagesLoading }
-            : {})}
+          title={t("removeItem")}
+          description={getDeleteDescription(deleteIndex, form)}
+          onConfirm={() => {
+            if (deleteIndex === null) return;
+            removeItem(deleteIndex);
+            setDeleteIndex(null);
+          }}
         />
-      )}
 
-      <AlertDialog
-        open={showOverQtyWarning}
-        onOpenChange={setShowOverQtyWarning}
-      >
-        <AlertDialogContent className="gap-0 p-0 sm:max-w-md">
-          {" "}
-          <div className="p-5">
-            <div className="flex items-start gap-3">
-              <div className="bg-muted text-warning flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <AlertTriangle className="size-4.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <AlertDialogTitle className="text-warning text-base">
-                  {t("overQtyWarningTitle")}
-                </AlertDialogTitle>
-                <AlertDialogDescription className="mt-1">
-                  {t("overQtyWarningDesc")}
-                </AlertDialogDescription>
+        {bulkAction && (
+          <PrActionDialog
+            open={!!bulkAction}
+            onOpenChange={(open) => {
+              if (!open) setBulkAction(null);
+            }}
+            onConfirm={handleBulkActionConfirm}
+            items={selectedRows.map(
+              (row): ActionDialogItem => ({
+                index: row.index,
+                productName: form.getValues(`items.${row.index}.product_name`),
+                locationName: form.getValues(
+                  `items.${row.index}.location_name`,
+                ),
+              }),
+            )}
+            {...bulkActionDialogConfig[bulkAction]}
+            {...(bulkAction === PR_ITEM_STAGE_STATUS.REVIEW
+              ? { stages: previousStages, stagesLoading }
+              : {})}
+          />
+        )}
+
+        <AlertDialog
+          open={showOverQtyWarning}
+          onOpenChange={setShowOverQtyWarning}
+        >
+          <AlertDialogContent className="gap-0 p-0 sm:max-w-md">
+            {" "}
+            <div className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="bg-muted text-warning-ink flex size-9 shrink-0 items-center justify-center rounded-lg">
+                  <AlertTriangle className="size-4.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <AlertDialogTitle className="text-warning-ink text-base">
+                    {t("overQtyWarningTitle")}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="mt-1">
+                    {t("overQtyWarningDesc")}
+                  </AlertDialogDescription>
+                </div>
               </div>
             </div>
-          </div>
-          <AlertDialogFooter className="border-t px-5 py-3">
-            <AlertDialogCancel onClick={handleOverQtyCancel}>
-              {tc("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="warning"
-              size="default"
-              onClick={handleOverQtyConfirm}
-            >
-              <Check />
-              {tc("confirm")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            <AlertDialogFooter className="border-t px-5 py-3">
+              <AlertDialogCancel onClick={handleOverQtyCancel}>
+                {tc("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant="warning"
+                size="default"
+                onClick={handleOverQtyConfirm}
+              >
+                <Check />
+                {tc("confirm")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      <Suspense fallback={null}>
-        <PrSelectDialog
-          open={selectDialogOpen}
-          onOpenChange={setSelectDialogOpen}
-          allCount={allCount}
-          pendingCount={pendingCount}
-          onSelectAll={handleSelectAll}
-          onSelectPending={handleSelectPending}
-        />
-      </Suspense>
-    </div>
+        <Suspense fallback={null}>
+          <PrSelectDialog
+            open={selectDialogOpen}
+            onOpenChange={setSelectDialogOpen}
+            allCount={allCount}
+            pendingCount={pendingCount}
+            onSelectAll={handleSelectAll}
+            onSelectPending={handleSelectPending}
+          />
+        </Suspense>
+      </div>
+    </PrStageRoleProvider>
   );
 }

@@ -74,7 +74,6 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
       {
         onSuccess: () =>
           toast.success(t("imgUploaded", { count: valid.length })),
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -88,7 +87,6 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
           toast.success(t("imgDeleted"));
           setDeleteTarget(null);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -125,10 +123,10 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
             alt={active.label}
             className="absolute inset-0 size-full object-cover"
           />
-          <span className="bg-background text-foreground absolute bottom-2 left-2 rounded px-2 py-0.5 text-[0.6875rem] font-semibold">
+          <span className="bg-background text-foreground absolute bottom-2 left-2 rounded px-2 py-0.5 text-micro font-semibold">
             {active.label}
           </span>
-          <span className="bg-background text-muted-foreground absolute right-2 bottom-2 rounded px-2 py-0.5 text-[0.6875rem] tabular-nums">
+          <span className="bg-background text-muted-foreground absolute right-2 bottom-2 rounded px-2 py-0.5 text-micro tabular-nums">
             {safeIndex + 1} / {total}
           </span>
         </button>

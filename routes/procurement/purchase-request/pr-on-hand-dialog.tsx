@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { useTranslations } from "use-intl";
-import { FileText, Warehouse } from "lucide-react";
+import { FileText } from "lucide-react";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -59,7 +59,7 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
         accessorKey: "location_code",
         header: () => tfl("code"),
         cell: ({ row }) => (
-          <span className="text-[0.6875rem]">
+          <span className="text-micro">
             {row.original.location_code ?? "—"}
           </span>
         ),
@@ -127,28 +127,13 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
         <div className="relative space-y-4 px-6 pt-10 pb-6">
           <DialogHeader>
             <div className="flex items-start gap-3">
-              <div className="bg-muted text-info flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <Warehouse className="size-4.5" />
-              </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-info/10 text-info-foreground mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold">
-                  {t("inventoryInfo")}
-                </div>
                 <DialogTitle className="text-base">{t("onHand")}</DialogTitle>
                 <DialogDescription asChild>
                   <div className="mt-1 space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant="outline"
-                        size="xs"
-                        className="text-[0.625rem]"
-                      >
-                        {data?.product_code ?? "—"}
-                      </Badge>
-                      <span className="text-foreground text-sm font-semibold">
-                        {data?.product_name ?? "—"}
-                      </span>
-                    </div>
+                    <span className="text-foreground text-sm font-semibold">
+                      {data?.product_name ?? "—"}
+                    </span>
                     {data?.product_local_name &&
                       data.product_local_name !== data.product_name && (
                         <p className="text-muted-foreground text-xs">
@@ -158,15 +143,16 @@ export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
                   </div>
                 </DialogDescription>
               </div>
+
               {!isLoading && rows.length > 0 && (
                 <div className="text-right">
-                  <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
+                  <p className="text-muted-foreground text-micro-legal font-semibold tracking-wider uppercase">
                     {tfl("total")}
                   </p>
-                  <p className="text-info text-lg leading-tight font-semibold tabular-nums">
+                  <p className="text-info-ink text-lg leading-tight font-semibold tabular-nums">
                     {totalQty.toLocaleString()}
                   </p>
-                  <p className="text-muted-foreground text-[0.625rem]">
+                  <p className="text-muted-foreground text-micro-legal">
                     {summaryUnit}
                   </p>
                 </div>

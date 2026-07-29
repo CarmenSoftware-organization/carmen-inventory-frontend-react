@@ -21,12 +21,18 @@ export const ProductCell = memo(function ProductCell({
   index,
   isDisabled,
   buCode,
+  inventoryActions,
 }: {
   control: Control<PrFormValues>;
   form: UseFormReturn<PrFormValues>;
   index: number;
   isDisabled: boolean;
   buCode?: string;
+  /** กด "คงเหลือ"/"กำลังสั่ง" ใน tooltip สต็อก — ไม่ส่งมาก็เป็นข้อความเฉยๆ */
+  inventoryActions?: {
+    onOnHand?: () => void;
+    onOnOrder?: () => void;
+  };
 }) {
   "use no memo";
   const locationId =
@@ -44,16 +50,25 @@ export const ProductCell = memo(function ProductCell({
     return (
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center">
-          <p className="min-w-0 flex-1 truncate text-left text-xs font-semibold">
+          {/* title = ชื่อเต็ม — เซลล์นี้ truncate ได้ที่ font scale ใหญ่ๆ */}
+          <p
+            className="min-w-0 flex-1 truncate text-left text-xs font-semibold"
+            title={productName || undefined}
+          >
             {productName || <span className="text-muted-foreground">—</span>}
           </p>
           <InventoryTooltipCell
             control={control}
             index={index}
             buCode={buCode}
+            onOnHandClick={inventoryActions?.onOnHand}
+            onOnOrderClick={inventoryActions?.onOnOrder}
           />
         </div>
-        <p className="text-muted-foreground truncate text-[0.625rem]">
+        <p
+          className="text-muted-foreground truncate text-micro-legal"
+          title={productLocalName || undefined}
+        >
           {productLocalName || <span className="text-muted-foreground">—</span>}
         </p>
       </div>
@@ -108,7 +123,7 @@ export const ProductCell = memo(function ProductCell({
                   className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border max-w-[20rem] rounded-lg border px-3 py-2 shadow-md"
                 >
                   <div className="space-y-1">
-                    <p className="text-foreground/60 text-[0.6875rem] font-semibold">
+                    <p className="text-foreground/60 text-micro font-semibold">
                       {productCode}
                     </p>
                     <p className="text-xs leading-snug font-semibold">
@@ -116,7 +131,7 @@ export const ProductCell = memo(function ProductCell({
                     </p>
                   </div>
                   {(productLocalName || unitName) && (
-                    <div className="text-foreground/60 mt-2 flex items-center gap-2 border-t pt-2 text-[0.6875rem]">
+                    <div className="text-foreground/60 mt-2 flex items-center gap-2 border-t pt-2 text-micro">
                       {productLocalName && <span>{productLocalName}</span>}
                       {productLocalName && unitName && (
                         <span aria-hidden="true">·</span>
@@ -132,7 +147,13 @@ export const ProductCell = memo(function ProductCell({
           </TooltipProvider>
         )}
       />
-      <InventoryTooltipCell control={control} index={index} buCode={buCode} />
+      <InventoryTooltipCell
+        control={control}
+        index={index}
+        buCode={buCode}
+        onOnHandClick={inventoryActions?.onOnHand}
+        onOnOrderClick={inventoryActions?.onOnOrder}
+      />
     </div>
   );
 });

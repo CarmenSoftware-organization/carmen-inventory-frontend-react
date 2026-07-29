@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
@@ -39,6 +39,7 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const t = useTranslations("operationPlan.recipeCategory");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(category ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -87,7 +88,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/operation-plan/category");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -96,16 +96,23 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           navigate("/operation-plan/category");
         },
-        onError: (err) => toast.error(err.message),
       });
+    }
+  };
+
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
+    } else {
+      navigate("/operation-plan/category");
     }
   };
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/operation-plan/category"));
+      discard.confirm(goBack);
     } else {
-      navigate("/operation-plan/category");
+      goBack();
     }
   };
 
@@ -129,14 +136,13 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/operation-plan/category");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
   const excludeIds = category ? new Set([category.id]) : undefined;
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <RecipeCategoryToolbar
         form={form}
         mode={mode}
@@ -153,7 +159,6 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
         onSubmit={form.handleSubmit(onSubmit, () =>
           scrollToFirstInvalidField(),
         )}
-        className="space-y-4"
       >
         <RecipeCategoryGeneralFields
           form={form}

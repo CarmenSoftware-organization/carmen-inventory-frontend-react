@@ -8,15 +8,18 @@ backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migr
 
 ## ภาษาในการสื่อสาร
 
-สื่อสารกับ user เป็น **ภาษาไทย** เสมอ (ยกเว้น code, commit message, PR ใช้ภาษาอังกฤษ)
+สื่อสารกับ user เป็น **ภาษาไทย** เสมอ — รวมถึง commit message (เขียนเป็นภาษาไทย)
+ยกเว้น code / identifier และ **PR ที่ยังใช้ภาษาอังกฤษ**
 
 ## Commands
 
 ```bash
-bun dev              # Dev server (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
+bun dev              # Dev server = dev:local (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
+bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/config.<env>.json (prod = dev backend until real prod exists)
 bun run build        # tsc + vite build → dist/
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
+scripts/setup-gcs-cdn.sh <bucket> <config> [domain]   # One-shot GCP infra (CDN+LB+cert) + first deploy (docs/deploy.md)
 scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN · Docker nginx image (docs/deploy.md)
 # e2e: moved to ../carmen-inventory-frontend-e2e (E2E_FRONTEND_DIR=../carmen-inventory-frontend-react bun e2e)
 ```
@@ -80,6 +83,34 @@ rewrite to `lib/compat/*` — don't rely on them for the import step):
    the module's section parent (which carries `RouteErrorBoundaryAdapter`).
 5. `bunx tsc --noEmit && bun test:run` must be clean.
 
+## Interfaces config (`/system-admin/interface`)
+
+Per-BU config for connections to external systems — **Accounting**, **POS**, **PMS**
+(the customer's "HMS"). Config storage only; no sync/test-connection. Lives in
+`routes/system-admin/interface/`.
+
+- **Registry (`interface-registry.ts`)** holds *list metadata only* — `key` (route param),
+  `configKey` (`interface_<key>`), `icon`, and a `lazy()` form. Each interface owns its own
+  form + zod schema (`<name>-interface-form.tsx`), NOT a shared schema. **Add an interface** =
+  one registry entry + one form file (+ its i18n block, + a backend `secretPathsByKey` path if
+  it has a secret). A future interface can render anything (e.g. a mapping table) without
+  touching the others.
+- **Shared bits:** `use-interface-config.ts` (wraps `useAppConfigByKey`/`useUpsertAppConfig`;
+  maps 404 → `isNew`, not an error), `interface-page-layout.tsx` (presentational shell +
+  nav-guard, takes `isDirty`, holds no form state), `interface-fields.tsx`
+  (`TextField`/`EnumField`/`ToggleField` — label+value, not schema-driven). Forms derive
+  dropdown options from `schema.shape.<field>.options` so options and validation can't drift.
+- **Storage:** one `tb_application_config` row per interface. The backend
+  (`carmen-turborepo-backend-v2`) encrypts+masks the `api_key` secret via a generic
+  `secretPathsByKey` registry; a never-configured interface returns `{ enabled: false }`
+  (not 404). **Prod/UAT must set `SECRET_ENCRYPTION_KEY`** or any secret-bearing save (incl.
+  the pre-existing `report_email`) 400s.
+- **List-envelope gotcha:** the app-config *list* endpoint returns `{ data: { items, count } }`
+  — the array is at `json.data.items`, NOT `json.data` (which is the array only in a mental
+  model, never in reality). The *single-key* GET's `json.data` IS the row. `useAppConfigs`
+  reads `.items`; any new list hook must too. A test mocking a bare `{ data: [...] }` passes
+  while the real page crashes — verify list features in a real browser.
+
 ## Known open items
 
 - `/api/time` was a Next route — `use-server-time` is stubbed to client time.
@@ -100,3 +131,10 @@ rewrite to `lib/compat/*` — don't rely on them for the import step):
 - Backend bug (not frontend): `GET /api/me/dashboard-widgets?bu_code=T02` returns 500
   from the gateway itself (verified identical direct vs proxied). Dashboard degrades
   gracefully; report to the carmen-turborepo-backend-v2 team.
+- Backend bug (not frontend): `ValidateSchema.quantity` is `z.number().int()` while the
+  DB columns are `Decimal(20,5)` — any decimal `requested_qty` / `approved_qty` /
+  `foc_qty` 400s at the API gate even though the schema stores it. Decimal quantities
+  are valid business-wise (2.5 kg). Hits every qty-bearing module (PR/PO/GRN/SR/CN);
+  the fix is dropping `.int()` from the 3 copies of `ValidateSchema` in
+  carmen-turborepo-backend-v2 (`backend-gateway`, `micro-business`, `micro-file`).
+  Frontend deliberately does NOT round to compensate — that would corrupt the data.

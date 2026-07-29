@@ -279,7 +279,7 @@ function ChannelRow({
           />
         )}
       />
-      <span className="text-muted-foreground w-12 shrink-0 text-[0.6875rem] font-semibold">
+      <span className="text-muted-foreground w-12 shrink-0 text-micro font-semibold">
         {channelLabel}
       </span>
       <Controller

@@ -1,3 +1,5 @@
+import type { Audit } from "./audit";
+
 export interface RecipeCategory {
   id: string;
   doc_version: number;
@@ -12,8 +14,8 @@ export interface RecipeCategory {
   default_margins: Record<string, unknown> | null;
   info: Record<string, unknown> | null;
   dimension: Record<string, unknown> | null;
-  created_at: string;
-  updated_at: string;
+  // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
+  audit?: Audit;
 }
 
 export interface CreateRecipeCategoryDto {

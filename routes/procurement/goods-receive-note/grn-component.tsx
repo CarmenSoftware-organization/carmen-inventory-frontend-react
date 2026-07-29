@@ -251,7 +251,7 @@ export default function GrnComponent() {
                     <Badge
                       variant="secondary"
                       size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[0.625rem] tabular-nums"
+                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
                     >
                       {activeFilters.length}
                     </Badge>
@@ -421,7 +421,6 @@ export default function GrnComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

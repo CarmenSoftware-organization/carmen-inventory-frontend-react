@@ -8,9 +8,10 @@ export const workflowTypeField = [
 ];
 
 /**
- * Workflow type values as they appear in workflow ROW data (short form).
- * NOTE: the WORKFLOW_TYPE enum holds the long form (`*_workflow`) used by the
- * workflow-type *query* API; list rows return these short values instead.
+ * Workflow type values as they appear in workflow ROW data.
+ * These match the `WORKFLOW_TYPE` enum values one-to-one (both are the short
+ * `purchase_request`/`purchase_order`/`store_requisition` form), so a map keyed
+ * on these values also resolves lookups done with the enum.
  */
 export const WF_ROW_TYPE = {
   PR: "purchase_request",
@@ -21,30 +22,23 @@ export const WF_ROW_TYPE = {
 /**
  * Badge variant per workflow type — semantic `-light` tokens (quiet, single
  * signal per DESIGN.md), distinct color per type: PR=green, PO=amber, SR=blue.
- * Keyed on the short-form row values, with long-form (enum) aliases for safety.
+ * Keyed on the row values, which equal the `WORKFLOW_TYPE` enum values.
  */
 export const WF_TYPE_VARIANT = createVariantMap({
   [WF_ROW_TYPE.PR]: "info",
   [WF_ROW_TYPE.PO]: "warning",
   [WF_ROW_TYPE.SR]: "success",
-  [WORKFLOW_TYPE.PR]: "info",
-  [WORKFLOW_TYPE.PO]: "warning",
-  [WORKFLOW_TYPE.SR]: "success",
 });
 
 /**
  * Dot color per workflow type — for the muted "dot badge" (neutral chip +
  * colored dot, per DESIGN.md "avoid neon"), matching `LocationTypeBadge`.
  * Same color semantics as `WF_TYPE_VARIANT`: PR=info, PO=warning, SR=success.
- * Keyed on both short-form row values and long-form (enum) aliases.
  */
 export const WF_TYPE_DOT_COLOR: Record<string, string> = {
   [WF_ROW_TYPE.PR]: "bg-info",
   [WF_ROW_TYPE.PO]: "bg-warning",
   [WF_ROW_TYPE.SR]: "bg-success",
-  [WORKFLOW_TYPE.PR]: "bg-info",
-  [WORKFLOW_TYPE.PO]: "bg-warning",
-  [WORKFLOW_TYPE.SR]: "bg-success",
 };
 
 type WfI18nFn = (key: string) => string;
@@ -63,16 +57,13 @@ export function getWorkflowTypeOptions(t: WfI18nFn) {
 }
 
 /**
- * i18n key per workflow_type value — covers both short-form row values and
- * long-form (enum) query values so labels resolve in every context.
+ * i18n key per workflow_type value — keyed on the row values, which equal the
+ * `WORKFLOW_TYPE` enum values, so labels resolve in every context.
  */
 const WF_TYPE_I18N_KEY: Record<string, string> = {
   [WF_ROW_TYPE.PR]: "typePurchaseRequest",
   [WF_ROW_TYPE.PO]: "typePurchaseOrder",
   [WF_ROW_TYPE.SR]: "typeStoreRequisition",
-  [WORKFLOW_TYPE.PR]: "typePurchaseRequest",
-  [WORKFLOW_TYPE.PO]: "typePurchaseOrder",
-  [WORKFLOW_TYPE.SR]: "typeStoreRequisition",
 };
 
 export function getWorkflowTypeLabels(t: WfI18nFn): Record<string, string> {

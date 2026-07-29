@@ -100,7 +100,7 @@ export function useInitRunningCode() {
       const url = API_ENDPOINTS.RUNNING_CODES_INIT(buCode!);
       const res = await httpClient.post(url);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to init running code");
+        throw await ApiError.from(res, "Failed to init running code");
       }
       return res.json();
     },

@@ -64,7 +64,7 @@ export function RecipeComplianceFields({
   return (
     <>
       {/* Allergens & tags */}
-      <Card label={t("safetyCompliance")}>
+      <Card label={t("safetyCompliance")} description={t("safetyComplianceDesc")}>
         <FieldGroup className="gap-4">
           <div>
             <CardSubLabel className="flex items-center gap-1.5">
@@ -121,7 +121,7 @@ export function RecipeComplianceFields({
                 >
                   <Sparkles className="size-3" aria-hidden="true" />
                   {custom}
-                  <span className="text-[0.625rem] font-semibold opacity-70">
+                  <span className="text-micro-legal font-semibold opacity-70">
                     {t("customAllergen")}
                   </span>
                 </span>
@@ -160,8 +160,8 @@ export function RecipeComplianceFields({
                     className={cn(
                       "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                       on
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-card text-foreground/70 hover:border-primary/40",
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border bg-card text-foreground/70 hover:border-foreground/40",
                       isDisabled && "cursor-not-allowed opacity-60",
                     )}
                   >

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -100,40 +100,31 @@ const mapLocationToPayload = (l: ProductFormValues["locations"][number]) => ({
   par_qty: l.par_qty ?? null,
 });
 
-type ProductDirtyFields = {
-  locations?: Record<string, unknown>[];
-  order_units?: Record<string, unknown>[];
-  ingredient_units?: Record<string, unknown>[];
-};
-
-const buildPayload = (
+export const buildPayload = (
   values: ProductFormValues,
   product?: ProductDetail,
-  dirtyFields?: ProductDirtyFields,
+  isAdd?: boolean,
 ): CreateProductDto => {
   const locationDiff = buildItemChanges(
     values.locations,
     product?.locations ?? [],
-    dirtyFields?.locations,
     mapLocationToPayload,
   );
 
   const orderDiff = buildItemChanges(
     values.order_units,
     product?.order_units ?? [],
-    dirtyFields?.order_units,
     mapUnitToPayload,
   );
   const ingredientDiff = buildItemChanges(
     values.ingredient_units,
     product?.ingredient_units ?? [],
-    dirtyFields?.ingredient_units,
     mapUnitToPayload,
   );
 
   return {
     name: values.name,
-    code: values.code,
+    code: isAdd ? undefined : values.code,
     local_name: values.local_name,
     description: values.description ?? "",
     inventory_unit_id: values.inventory_unit_id,
@@ -203,6 +194,7 @@ export function ProductForm({ product }: ProductFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const rawReturnUrl = searchParams.get("returnUrl");
   const returnUrl =
@@ -277,12 +269,7 @@ export function ProductForm({ product }: ProductFormProps) {
           }
         : values;
 
-    const dirty = form.formState.dirtyFields as unknown as ProductDirtyFields;
-    const payload = buildPayload(normalizedValues, product, {
-      locations: dirty.locations ?? [],
-      order_units: dirty.order_units ?? [],
-      ingredient_units: dirty.ingredient_units ?? [],
-    });
+    const payload = buildPayload(normalizedValues, product, isAdd);
 
     if (isEdit && product) {
       updateProduct.mutate(
@@ -293,7 +280,6 @@ export function ProductForm({ product }: ProductFormProps) {
             form.reset(normalizedValues);
             setMode("view");
           },
-          onError: (err: Error) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
@@ -307,7 +293,6 @@ export function ProductForm({ product }: ProductFormProps) {
             navigate(returnUrl);
           }
         },
-        onError: (err: Error) => toast.error(err.message),
       });
     }
   };
@@ -352,16 +337,26 @@ export function ProductForm({ product }: ProductFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate(returnUrl));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate(returnUrl);
     }
   };
 
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(() => goBack());
+    } else {
+      goBack();
+    }
+  };
+
   return (
-    <div className="space-y-4">
+    // px-4 ให้ header+form มี gutter ซ้าย · max-w-4xl คุมทั้งฟอร์มให้เท่า
+    // company profile (ทุก tab รวมตาราง units/locations)
+    <div className="mx-auto max-w-4xl space-y-4 px-4">
       <FormToolbar
         product={product}
         form={form}
@@ -452,7 +447,6 @@ export function ProductForm({ product }: ProductFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate(returnUrl);
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

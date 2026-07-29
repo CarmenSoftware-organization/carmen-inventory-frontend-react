@@ -55,3 +55,21 @@ globalThis.ResizeObserver = class ResizeObserver {
   unobserve() {}
   disconnect() {}
 };
+
+// Polyfill IntersectionObserver for scroll-triggered reveal animations
+// (components/share/reveal.tsx)
+globalThis.IntersectionObserver = class IntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+  readonly root = null;
+  readonly rootMargin = "";
+  readonly thresholds: ReadonlyArray<number> = [];
+} as unknown as typeof globalThis.IntersectionObserver;
+
+// jsdom does not implement scrollIntoView; form-helpers' scrollToFirstInvalidField
+// calls it on validation failure. Stub it so submit-with-errors tests don't throw.
+Element.prototype.scrollIntoView = () => {};

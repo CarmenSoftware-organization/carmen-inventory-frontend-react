@@ -11,3 +11,4 @@ export { FocCell } from "./foc-cell";
 export { SelectCell } from "./select-cell";
 export { DeleteCell } from "./delete-cell";
 export { CommentFooterRow } from "./comment-footer-row";
+export { PrStageRoleProvider } from "./helpers";

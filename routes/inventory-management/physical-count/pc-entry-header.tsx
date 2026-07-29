@@ -40,7 +40,7 @@ export function PcEntryHeader({
             size="icon-sm"
             onClick={() => navigate("/inventory-management/physical-count")}
             aria-label={tc("goBack")}
-            className="mt-0.5 rounded-full"
+            className="mt-0.5 rounded-full hover:bg-transparent dark:hover:bg-transparent"
           >
             <ArrowLeft />
           </Button>
@@ -54,7 +54,7 @@ export function PcEntryHeader({
               </Badge>
             </div>
 
-            <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-[0.625rem] tracking-wide uppercase">
+            <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-micro-legal tracking-wide uppercase">
               <p>{locationCode}</p>
               {startCountingAt && (
                 <span className="flex items-center gap-1">
@@ -76,7 +76,7 @@ export function PcEntryHeader({
               / {totalItems}
             </span>
           </p>
-          <p className="text-muted-foreground text-[0.625rem]">
+          <p className="text-muted-foreground text-micro-legal">
             {t("percentComplete", { percent })}
           </p>
         </div>

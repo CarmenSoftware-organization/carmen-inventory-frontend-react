@@ -26,7 +26,7 @@ export function RecipeCostMetrics({
   });
 
   return (
-    <Card label={t("otherMetrics")}>
+    <Card label={t("otherMetrics")} description={t("otherMetricsDesc")}>
       <div className="space-y-2 text-xs">
         <InfoRow
           label={t("laborCostRatio")}
@@ -73,7 +73,7 @@ export function RecipeCostMetrics({
             errorIconAlign="left"
             {...form.register("carbon_footprint")}
           />
-          <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[0.6875rem]">
+          <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-micro">
             {t("kgCo2e")}
           </span>
         </div>

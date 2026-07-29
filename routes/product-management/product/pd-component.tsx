@@ -346,7 +346,7 @@ export default function ProductComponent() {
                     <Badge
                       variant="secondary"
                       size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[0.625rem] tabular-nums"
+                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
                     >
                       {activeFilters.length}
                     </Badge>
@@ -445,15 +445,15 @@ export default function ProductComponent() {
         )}
         {isGridMode && !grid.isLoading && !grid.error && products.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {products.map((item, i) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((item) => (
                 <ProductCard
                   key={item.id}
                   item={item}
-                  index={i}
                   onEdit={(p) =>
                     navigate(`/product-management/product/${p.id}`)
                   }
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>
@@ -511,7 +511,6 @@ export default function ProductComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

@@ -1,9 +1,11 @@
 
 import { useTranslations } from "use-intl";
-import { MessageSquare, Pencil, Save, SendHorizonal, Trash2, X } from "lucide-react";
+import { Pencil, Save, SendHorizonal, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
+import { useCreditNoteComments } from "@/hooks/use-credit-note";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
@@ -15,8 +17,7 @@ import { CN_STATUS, type CreditNoteDetail } from "@/types/credit-note";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
 import {
   DocFormHeader,
-  DocumentRibbon,
-  RibbonCell,
+  RibbonField,
 } from "@/components/share/doc-form-header";
 
 interface CnHeaderProps {
@@ -60,6 +61,7 @@ export function CnHeader({
   const t = useTranslations("procurement.creditNote");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const { data: comments } = useCreditNoteComments(creditNote?.id);
 
   const { can, isAdmin } = useCan();
   const prefix = usePermissionPrefix();
@@ -190,10 +192,7 @@ export function CnHeader({
 
       {/* Always (มี record) — comment + print */}
       {creditNote && (
-        <Button size="sm" variant="info" onClick={onShowComment}>
-          <MessageSquare aria-hidden="true" />
-          {tc("comment")}
-        </Button>
+        <CommentButton count={comments?.length} onClick={onShowComment} />
       )}
       {isView && creditNote?.id && (
         <PrintDocumentButton
@@ -207,13 +206,17 @@ export function CnHeader({
     </>
   );
 
+  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (cn-general-fields, grid-cols-5)
+  // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
+  // gap-x-3 ให้ตรง gap-3 ของ general grid
   const ribbon = (
-    <DocumentRibbon>
-      <RibbonCell label={tfl("createdBy")}>{createdByName || "—"}</RibbonCell>
-      <RibbonCell label={tfl("date")}>
-        {cnDate ? formatDate(cnDate, dateFormat) : "—"}
-      </RibbonCell>
-    </DocumentRibbon>
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
+      <RibbonField label={tfl("createdBy")} value={createdByName || "—"} />
+      <RibbonField
+        label={tfl("date")}
+        value={cnDate ? formatDate(cnDate, dateFormat) : "—"}
+      />
+    </div>
   );
 
   const subtitle =

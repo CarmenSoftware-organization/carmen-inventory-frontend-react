@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type { Workflow, WorkflowDto } from "@/types/workflows";
 import {
   getWorkflowFormDefaults,
+  WorkflowDataParseError,
   type WorkflowCreateModel,
 } from "./wf-form-schema";
 
@@ -63,7 +64,9 @@ export function useWfRowMutations() {
       const detail = await fetchDetail(workflow.id);
       await runner(detail);
     } catch (err) {
-      if (err instanceof Error) toast.error(err.message);
+      // ข้อมูลคนละ shape — บอกให้ชัด ไม่ใช่โยน message ดิบของ schema ใส่หน้าผู้ใช้
+      if (err instanceof WorkflowDataParseError) toast.error(t("incompatibleData"));
+      else if (err instanceof Error) toast.error(err.message);
     } finally {
       setPendingId(null);
     }

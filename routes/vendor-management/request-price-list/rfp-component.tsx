@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import {
   DataGrid,
   DataGridContainer,
@@ -59,6 +61,7 @@ export default function RequestPriceListComponent() {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
+  const { dateTimeFormat } = useProfile();
   const [deleteTarget, setDeleteTarget] = useState<RequestPriceList | null>(
     null,
   );
@@ -119,6 +122,22 @@ export default function RequestPriceListComponent() {
             header: tfl("currency"),
             value: (r) => r.pricelist_template?.currency?.code ?? "",
             width: 10,
+          },
+          {
+            header: tfl("created"),
+            value: (r) =>
+              r.audit?.created?.at
+                ? formatDate(r.audit.created.at, dateTimeFormat)
+                : "",
+            width: 18,
+          },
+          {
+            header: tfl("updated"),
+            value: (r) =>
+              r.audit?.updated?.at
+                ? formatDate(r.audit.updated.at, dateTimeFormat)
+                : "",
+            width: 18,
           },
         ],
       });
@@ -223,7 +242,7 @@ export default function RequestPriceListComponent() {
                     <Badge
                       variant="secondary"
                       size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[0.625rem] tabular-nums"
+                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
                     >
                       {activeFilters.length}
                     </Badge>
@@ -363,7 +382,6 @@ export default function RequestPriceListComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

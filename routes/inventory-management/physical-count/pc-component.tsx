@@ -28,7 +28,6 @@ import {
   usePhysicalCountPeriodDetail,
 } from "@/hooks/use-physical-count-period";
 import { useCreatePhysicalCount } from "@/hooks/use-physical-count";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { useLocale } from "@/hooks/use-locale";
 import { formatDate as formatDateUtil } from "@/lib/date-utils";
 import { ErrorState } from "@/components/ui/error-state";
@@ -105,7 +104,7 @@ function PeriodSelectorCard({
             </h2>
             {periodBadge}
           </div>
-          <div className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-[0.6875rem]">
+          <div className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-micro">
             <Calendar className="size-2.5 shrink-0" aria-hidden="true" />
             <span>{t("periodEnds", { date: endDate })}</span>
           </div>
@@ -114,7 +113,7 @@ function PeriodSelectorCard({
         <p className="text-muted-foreground text-xs">{emptyText}</p>
       )}
       <div>
-        <label className="text-muted-foreground mb-1 flex items-center gap-1 text-[0.5625rem] font-semibold tracking-widest uppercase">
+        <label className="text-muted-foreground mb-1 flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
           <CalendarRange className="size-2.5" aria-hidden="true" />
           {tfl("physicalCountPeriod")}
         </label>
@@ -137,7 +136,6 @@ export default function PcComponent() {
   const [activeFilter, setActiveFilter] = useState<"all" | StatusKey>("all");
   const [showNotImplemented, setShowNotImplemented] = useState(false);
   const [previousPeriodId, setPreviousPeriodId] = useState("");
-  const errorToast = useErrorToast();
 
   const {
     data: currentPeriod,
@@ -236,7 +234,6 @@ export default function PcComponent() {
           const { id } = (res as { data: { id: string } }).data;
           navigate(`/inventory-management/physical-count/${id}/entry`);
         },
-        onError: errorToast,
       },
     );
   };

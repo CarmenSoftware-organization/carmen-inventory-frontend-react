@@ -1,4 +1,4 @@
-import { CalendarDays, MapPin, Package, Tag } from "lucide-react";
+import { CalendarDays, MapPin, Package, Tag, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -30,7 +30,8 @@ interface IaCardProps {
 
 export default function IaCard({ item, index, onEdit }: IaCardProps) {
   const tfl = useTranslations("field");
-  const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
+  const { dateFormat, amountFormat, defaultCurrencyCode, dateTimeFormat } =
+    useProfile();
 
   const typeKey = getAdjustmentType(item);
   const isStockIn = typeKey === "stock-in";
@@ -58,7 +59,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
     }
   };
 
-  const accentText = isStockIn ? "text-success" : "text-destructive";
+  const accentText = isStockIn ? "text-success-ink" : "text-destructive";
 
   return (
     <Card
@@ -80,7 +81,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
               className={cn(
                 "flex size-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
                 isStockIn
-                  ? "bg-success/10 text-success ring-success/20"
+                  ? "bg-success/10 text-success-ink ring-success/20"
                   : "bg-destructive/10 text-destructive ring-destructive/20",
               )}
               aria-hidden="true"
@@ -94,12 +95,12 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
                   {docNo}
                 </CardTitle>
                 {typeof index === "number" && (
-                  <span className="text-muted-foreground/70 text-[0.625rem] tabular-nums">
+                  <span className="text-muted-foreground/70 text-micro-legal tabular-nums">
                     #{String(index + 1).padStart(2, "0")}
                   </span>
                 )}
               </div>
-              <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1 text-[0.6875rem]">
+              <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1 text-micro">
                 <CalendarDays
                   className="size-2.5 shrink-0"
                   aria-hidden="true"
@@ -152,6 +153,17 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             </span>
           </div>
         )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
+            </span>
+          </div>
+        )}
       </CardContent>
 
       {/* ── Footer — items count + emphasized total ── */}
@@ -161,7 +173,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <span className="text-muted-foreground text-[0.6875rem]">
+          <span className="text-muted-foreground text-micro">
             {itemCount} {tfl("items")}
           </span>
         </div>
@@ -175,7 +187,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             {formatAmount(item.base_total_cost, amountFormat)}
           </p>
           {defaultCurrencyCode && (
-            <p className="text-muted-foreground/70 mt-1 text-[0.625rem] font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground/70 mt-1 text-micro-legal font-semibold tracking-widest uppercase">
               {defaultCurrencyCode}
             </p>
           )}

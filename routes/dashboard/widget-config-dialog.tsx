@@ -88,7 +88,7 @@ export function WidgetConfigDialog({
           />
 
           <div className="space-y-1.5">
-            <h3 className="text-muted-foreground text-[0.625rem] font-bold tracking-[0.16em] uppercase">
+            <h3 className="text-muted-foreground text-micro-legal font-bold tracking-[0.16em] uppercase">
               {t("preview")}
             </h3>
             {isError ? (

@@ -6,6 +6,7 @@ interface UseNavigationGuardReturn {
   readonly isOpen: boolean;
   readonly confirm: () => void;
   readonly cancel: () => void;
+  readonly back: () => void;
 }
 
 /**
@@ -16,7 +17,9 @@ interface UseNavigationGuardReturn {
  * - Browser-level events (refresh, close tab) are NOT covered — pair this with
  *   `useUnsavedChanges` for those (they get the browser-native dialog).
  * - Programmatic `navigate()` calls are NOT intercepted — only <a> clicks +
- *   browser back/forward.
+ *   browser back/forward. A programmatic back still trips the popstate listener
+ *   though, so callers that already confirmed with the user must use the
+ *   returned `back()` instead of `navigate(-1)`.
  */
 export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
   const navigate = useNavigate();
@@ -113,9 +116,20 @@ export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
     setPendingBack(false);
   };
 
+  // Programmatic back for a caller that already asked the user (e.g. a toolbar
+  // Back button with its own discard dialog). Plain `navigate(-1)` would pop the
+  // sentinel instead of the real entry — the page stays put — and its popstate
+  // would open this guard's dialog as a second prompt.
+  const back = () => {
+    const onSentinel = window.history.state?.__navGuard === true;
+    if (onSentinel) skipNextPopstateRef.current = true;
+    navigate(onSentinel ? -2 : -1);
+  };
+
   return {
     isOpen: pendingHref !== null || pendingBack,
     confirm,
     cancel,
+    back,
   };
 }

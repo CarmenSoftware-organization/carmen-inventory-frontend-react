@@ -19,7 +19,7 @@ export default function RootLayout() {
         <OfflineBanner />
         <div
           id="main-content"
-          className="m-3 flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-2"
+          className="m-3 flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-4"
         >
           <ProfileGate>
             <RouteGuard>

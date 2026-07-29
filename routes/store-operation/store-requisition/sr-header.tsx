@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { History, MessageCircle, Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CommentButton } from "@/components/comment-button";
+import { useStoreRequisitionComments } from "@/hooks/use-store-requisition";
 import {
   Sheet,
   SheetContent,
@@ -15,8 +17,7 @@ import { WorkflowStep } from "@/components/share/workflow-step";
 import { SrWorkflowHistory } from "./sr-workflow-history";
 import {
   DocFormHeader,
-  DocumentRibbon,
-  RibbonCell,
+  RibbonField,
 } from "@/components/share/doc-form-header";
 import { formatDate } from "@/lib/date-utils";
 import {
@@ -79,6 +80,7 @@ export function SrHeader({
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
+  const { data: comments } = useStoreRequisitionComments(storeRequisition?.id);
 
   const isView = mode === "view";
   const isAdd = mode === "add";
@@ -167,10 +169,7 @@ export function SrHeader({
         </>
       )}
       {storeRequisition && onComment && (
-        <Button type="button" size="sm" variant="info" onClick={onComment}>
-          <MessageCircle aria-hidden="true" />
-          {tc("comment")}
-        </Button>
+        <CommentButton count={comments?.length} onClick={onComment} />
       )}
       {isView && storeRequisition?.id && (
         <PrintDocumentButton
@@ -230,21 +229,30 @@ export function SrHeader({
     );
   })();
 
+  // ribbon เป็น grid คอลัมน์ fixed 10rem → cells ชิดซ้าย compact (เหมือน PO/PR).
+  // ml-4 หักล้าง -ml-4 ของ DocFormHeader. draft = 3 cells; ไม่ draft = 4 (มี workflow)
   const ribbon = (
-    <DocumentRibbon>
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
       {!isDraft && storeRequisition?.workflow_name && (
-        <RibbonCell label={tfl("workflow")}>
-          {storeRequisition.workflow_name}
-        </RibbonCell>
+        <RibbonField
+          label={tfl("workflow")}
+          value={storeRequisition.workflow_name}
+        />
       )}
-      <RibbonCell label={tfl("srDate")}>
-        {srDate ? formatDate(srDate, dateFormat) : "—"}
-      </RibbonCell>
-      <RibbonCell label={tfl("requester")}>
-        {isLoading ? "—" : requesterName || "—"}
-      </RibbonCell>
-      <RibbonCell label={tfl("department")}>{departmentValue}</RibbonCell>
-    </DocumentRibbon>
+      <RibbonField
+        label={tfl("srDate")}
+        value={srDate ? formatDate(srDate, dateFormat) : "—"}
+      />
+      <RibbonField
+        label={tfl("requester")}
+        value={isLoading ? "—" : requesterName || "—"}
+      />
+      <RibbonField
+        label={tfl("department")}
+        value={departmentValue}
+        className="lg:col-span-2"
+      />
+    </div>
   );
 
   const subtitle =
@@ -280,7 +288,7 @@ export function SrHeader({
         className="group hover:bg-muted/60 focus-visible:ring-ring flex flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {workflowStepEl}
-        <span className="text-muted-foreground/50 group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-[0.5625rem] tracking-wide transition-colors">
+        <span className="text-muted-foreground/50 group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-micro-legal tracking-wide transition-colors">
           <History className="size-2.5" />
           {t("viewHistoryHint")}
         </span>
@@ -300,6 +308,7 @@ export function SrHeader({
         actions={actions}
         ribbon={ribbon}
         workflowStep={workflowStep}
+        workflowStepBelow
       />
       {workflowHistorySheet}
     </>

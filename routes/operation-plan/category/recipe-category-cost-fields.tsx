@@ -18,7 +18,10 @@ export function RecipeCategoryCostFields({
   const t = useTranslations("operationPlan.recipeCategory");
 
   return (
-    <Card label={t("defaultCostSettings")}>
+    <Card
+      label={t("defaultCostSettings")}
+      description={t("defaultCostSettingsDesc")}
+    >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <PercentField
           form={form}

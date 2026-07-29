@@ -48,7 +48,7 @@ function RoleToggleCard({
           {role.name}
         </p>
         {role.description && (
-          <p className="text-muted-foreground line-clamp-1 text-[0.6875rem]">
+          <p className="text-muted-foreground line-clamp-1 text-micro">
             {role.description}
           </p>
         )}

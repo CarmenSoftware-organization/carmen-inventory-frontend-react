@@ -120,7 +120,7 @@ export default function CompanyProfileComponent() {
   });
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))] space-y-4">
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">
@@ -252,6 +252,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.info")}
               description={t("fields.infoDesc")}
               displayValue={data.info}
+              maxLength={256}
               fullWidth
             />
             {/* costing method + max license users: read-only เสมอ (แก้ผ่านหน้านี้ไม่ได้) */}
@@ -269,7 +270,7 @@ export default function CompanyProfileComponent() {
               <div className="text-foreground text-xs font-semibold">
                 {t("fields.defaultCurrencyId")}
               </div>
-              <p className="text-muted-foreground/80 text-[0.6875rem] leading-snug">
+              <p className="text-muted-foreground/80 text-micro leading-snug">
                 {t("fields.defaultCurrencyIdDesc")}
               </p>
               <Controller
@@ -323,6 +324,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.hotelAddressLine1")}
               description={t("fields.hotelAddressLine1Desc")}
               displayValue={data.hotel_address_line1}
+              maxLength={256}
               fullWidth
             />
             <EditableField
@@ -332,6 +334,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.hotelAddressLine2")}
               description={t("fields.hotelAddressLine2Desc")}
               displayValue={data.hotel_address_line2}
+              maxLength={256}
               fullWidth
             />
             <EditableField
@@ -437,6 +440,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.companyAddressLine1")}
               description={t("fields.companyAddressLine1Desc")}
               displayValue={data.company_address_line1}
+              maxLength={256}
               fullWidth
             />
             <EditableField
@@ -446,6 +450,7 @@ export default function CompanyProfileComponent() {
               label={t("fields.companyAddressLine2")}
               description={t("fields.companyAddressLine2Desc")}
               displayValue={data.company_address_line2}
+              maxLength={256}
               fullWidth
             />
             <EditableField
@@ -677,7 +682,7 @@ function BrandImage({
           loading="lazy"
         />
       ) : (
-        <span className="text-muted-foreground/60 text-[0.625rem]">
+        <span className="text-muted-foreground/60 text-micro-legal">
           {t("noImage")}
         </span>
       )}

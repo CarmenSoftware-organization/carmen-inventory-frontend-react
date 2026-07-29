@@ -80,7 +80,6 @@ export interface ConfigListTemplateProps<TEntity extends { id: string }> {
       id: string,
       options: {
         onSuccess: () => void;
-        onError: (err: Error) => void;
       },
     ) => void;
     isPending: boolean;

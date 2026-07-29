@@ -70,14 +70,19 @@ const channelConfigSchema = z.object({
   notification_template_id: z.string(),
 });
 
-const recipientNotificationSchema = z.object({
-  is_active: z.boolean(),
-  is_notification: z.boolean(),
-  notification_channel: z.object({
-    app: channelConfigSchema,
-    email: channelConfigSchema,
+// row เก่าเก็บ recipient เป็น boolean ล้วน — ยอมรับแล้วแปลงเป็น object shape ใหม่
+// ไม่งั้น safeParse ตกทั้ง data แล้ว stages หายทั้งชุด (ดู `getWorkflowFormDefaults`)
+const recipientNotificationSchema = z.union([
+  z.boolean().transform((isActive) => emptyRecipientNotification(isActive)),
+  z.object({
+    is_active: z.boolean(),
+    is_notification: z.boolean(),
+    notification_channel: z.object({
+      app: channelConfigSchema,
+      email: channelConfigSchema,
+    }),
   }),
-});
+]);
 
 const recipientsSchema = z.object({
   requestor: recipientNotificationSchema,
@@ -116,6 +121,7 @@ export const wfFormSchema = z.object({
           price_per_unit: z.boolean(),
           total_price: z.boolean(),
         }),
+        is_show_signature: z.boolean().optional(),
         assigned_users: z
           .array(
             z.object({
@@ -211,17 +217,40 @@ export const DEFAULT_WORKFLOW_DATA: WorkflowCreateModel["data"] = {
   products: [],
 };
 
+/** `data` ของ workflow อ่านด้วย schema ปัจจุบันไม่ได้ — คนละรูปแบบกันคนละรุ่น */
+export class WorkflowDataParseError extends Error {
+  constructor() {
+    super("Workflow data does not match the current schema");
+    this.name = "WorkflowDataParseError";
+  }
+}
+
+export function parseWorkflowData(data: unknown) {
+  return wfFormSchema.shape.data.safeParse(data);
+}
+
+/**
+ * แปลง workflow จาก API เป็นค่าตั้งต้นของฟอร์ม
+ *
+ * parse ไม่ผ่านให้ throw ห้าม fallback เป็นค่าว่าง — ค่าที่ได้ตัวนี้ถูกส่งกลับไป
+ * PUT ทั้งก้อน (ทั้งหน้า detail และปุ่ม toggle/duplicate ในหน้า list) ถ้าเงียบไว้
+ * stages จริงในฐานข้อมูลจะโดนเขียนทับด้วยของว่างโดยไม่มีใครรู้
+ *
+ * @throws {WorkflowDataParseError} เมื่อ `workflow.data` ไม่ตรง schema ปัจจุบัน
+ */
 export function getWorkflowFormDefaults(
   workflow: Workflow,
 ): WorkflowCreateModel {
-  const parsedData = wfFormSchema.shape.data.safeParse(workflow.data);
+  const parsedData = parseWorkflowData(workflow.data);
+  if (!parsedData.success) throw new WorkflowDataParseError();
+
   return {
     id: workflow.id,
     name: workflow.name,
     workflow_type: workflow.workflow_type,
     is_active: workflow.is_active,
     description: workflow.description ?? "",
-    data: parsedData.success ? parsedData.data : DEFAULT_WORKFLOW_DATA,
+    data: parsedData.data,
   };
 }
 
@@ -241,6 +270,7 @@ export function buildDefaultStages(): Stage[] {
         sendback: { is_active: false, recipients: makeRecipients(false, false, false) },
       },
       hide_fields: { price_per_unit: false, total_price: false },
+      is_show_signature: false,
       assigned_users: [],
     },
     {
@@ -256,6 +286,7 @@ export function buildDefaultStages(): Stage[] {
         sendback: { is_active: false, recipients: makeRecipients(false, false, false) },
       },
       hide_fields: { price_per_unit: false, total_price: false },
+      is_show_signature: false,
       assigned_users: [],
     },
   ];

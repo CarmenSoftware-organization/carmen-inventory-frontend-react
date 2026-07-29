@@ -9,11 +9,14 @@ export const CurrencyCell = memo(function CurrencyCell({
   form,
   index,
   isDisabled,
+  className,
 }: {
   control: Control<PrFormValues>;
   form: UseFormReturn<PrFormValues>;
   index: number;
   isDisabled: boolean;
+  /** ทับ style ตอนใช้เป็นคอลัมน์เดี่ยว — ไม่ส่งมา = ยังเป็น addon ในกล่องยอดเหมือนเดิม */
+  className?: string;
 }) {
   "use no memo";
   const currencyId =
@@ -49,7 +52,10 @@ export const CurrencyCell = memo(function CurrencyCell({
       }}
       disableTooltip
       size="sm"
-      className="h-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
+      className={
+        className ??
+        "h-full rounded-none border-0 bg-transparent px-2 text-xs shadow-none hover:bg-transparent focus-visible:ring-0"
+      }
     />
   );
 });

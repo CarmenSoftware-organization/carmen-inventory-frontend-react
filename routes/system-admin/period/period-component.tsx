@@ -193,7 +193,6 @@ export default function PeriodComponent() {
                       toast.success(
                         tt("createSuccess", { entity: t("entity") }),
                       ),
-                    onError: (err) => toast.error(err.message),
                   },
                 );
               }}
@@ -257,7 +256,6 @@ export default function PeriodComponent() {
                           toast.success(
                             tt("createSuccess", { entity: t("entity") }),
                           ),
-                        onError: (err) => toast.error(err.message),
                       },
                     )
                   }
@@ -308,7 +306,7 @@ export default function PeriodComponent() {
                   <Badge
                     variant="secondary"
                     size="xs"
-                    className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[0.625rem] tabular-nums"
+                    className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
                   >
                     {activeFilters.length}
                   </Badge>

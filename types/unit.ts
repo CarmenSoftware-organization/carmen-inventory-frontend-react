@@ -1,3 +1,5 @@
+import type { Audit } from "./audit";
+
 export interface UnitDimension {
   name: string;
   value: number;
@@ -13,8 +15,7 @@ export interface Unit {
   is_active: boolean;
   info: Record<string, string | number | boolean>;
   dimension: UnitDimension[];
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateUnitDto {

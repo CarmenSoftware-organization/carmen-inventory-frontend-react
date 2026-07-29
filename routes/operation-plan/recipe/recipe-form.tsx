@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import {
   useCreateRecipe,
   useUpdateRecipe,
@@ -50,7 +48,7 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(recipe ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -101,7 +99,6 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate("/operation-plan/recipe");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else {
@@ -112,17 +109,24 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
             toast.success(tt("createSuccess", { entity: t("entity") }));
             navigate("/operation-plan/recipe");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     }
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/operation-plan/recipe"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate("/operation-plan/recipe");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -147,12 +151,11 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/operation-plan/recipe");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <RecipeToolbar
         form={form}
         mode={mode}
@@ -164,10 +167,11 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
         onDelete={recipe ? () => setShowDelete(true) : undefined}
       />
 
+      {/* flatten หน้าเดียว: hero บนสุด แล้วแต่ละ section เป็น 2-col แบบ company
+          profile (title/desc ซ้าย · เนื้อหาขวา) stack ต่อกันด้วยเส้นคั่น */}
       <form
         id="recipe-form"
         onSubmit={form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())}
-        className="space-y-4"
       >
         <RecipeHeroFields
           form={form}
@@ -175,31 +179,18 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           computed={computed}
           gallery={gallery}
         />
-
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="flex min-w-0 flex-col gap-4">
-            <RecipeGeneralFields form={form} isDisabled={isDisabled} />
-            <RecipeIngredientsFields
-              ingredients={ingredients}
-              onChange={setIngredients}
-              isDisabled={isDisabled}
-            />
-            <RecipeComplianceFields form={form} isDisabled={isDisabled} />
-          </div>
-
-          <div
-            className={cn(
-              "flex flex-col gap-3",
-              !isMobile && "lg:sticky lg:top-4 lg:self-start",
-            )}
-          >
-            <RecipeCostFields
-              form={form}
-              isDisabled={isDisabled}
-              computed={computed}
-            />
-          </div>
-        </div>
+        <RecipeGeneralFields form={form} isDisabled={isDisabled} />
+        <RecipeIngredientsFields
+          ingredients={ingredients}
+          onChange={setIngredients}
+          isDisabled={isDisabled}
+        />
+        <RecipeComplianceFields form={form} isDisabled={isDisabled} />
+        <RecipeCostFields
+          form={form}
+          isDisabled={isDisabled}
+          computed={computed}
+        />
       </form>
 
       {recipe && (

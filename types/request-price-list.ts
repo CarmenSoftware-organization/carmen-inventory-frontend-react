@@ -1,3 +1,5 @@
+import type { Audit } from "@/types/audit";
+
 export interface RequestPriceListVendor {
   id: string;
   sequence_no: number;
@@ -38,8 +40,7 @@ export interface RequestPriceList {
   };
   vendor_count: number;
   vendors: RequestPriceListVendor[];
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateRequestPriceListDto {

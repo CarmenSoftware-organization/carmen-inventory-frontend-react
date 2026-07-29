@@ -15,8 +15,8 @@ const STAT_TONE: Record<
   },
   success: {
     iconBg: "bg-success/15",
-    iconFg: "text-success",
-    valueText: "text-success",
+    iconFg: "text-success-ink",
+    valueText: "text-success-ink",
     ring: "border-border/60",
   },
   warning: {
@@ -75,7 +75,7 @@ export function ReviewStatTile({
       >
         {value}
       </div>
-      <p className="text-muted-foreground text-[0.6875rem] leading-snug">
+      <p className="text-muted-foreground text-micro leading-snug">
         {desc}
       </p>
     </div>

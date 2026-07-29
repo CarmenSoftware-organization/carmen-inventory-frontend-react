@@ -247,12 +247,7 @@ export function FromPriceListContent() {
       ...values,
       items: (values.items ?? []).map(recomputeItemFromLocations),
     };
-    const payload = buildPoPayload(
-      syncedValues,
-      [],
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
-      { po_type: PO_TYPE.PL },
-    );
+    const payload = buildPoPayload(syncedValues, [], { po_type: PO_TYPE.PL });
     createPo.mutate(payload, {
       onSuccess: (res) => {
         toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -264,7 +259,6 @@ export function FromPriceListContent() {
           navigate(PO_LIST_PATH);
         }
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -304,7 +298,7 @@ export function FromPriceListContent() {
                 <StepperIndicator className={INDICATOR_ACCENT}>
                   {s}
                 </StepperIndicator>
-                <StepperTitle className="text-[0.625rem] font-semibold">
+                <StepperTitle className="text-micro-legal font-semibold">
                   {t(labelKey)}
                 </StepperTitle>
               </StepperTrigger>

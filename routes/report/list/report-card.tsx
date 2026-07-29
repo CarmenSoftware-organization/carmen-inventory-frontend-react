@@ -66,7 +66,7 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
               aria-hidden
             />
           </div>
-          <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1.5 text-[0.6875rem]">
+          <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1.5 text-micro">
             <span className="font-semibold tracking-wide uppercase">
               {item.ReportGroup}
             </span>
@@ -78,10 +78,24 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
                 <Badge
                   variant="outline"
                   size="sm"
-                  className="border-primary/30 text-primary inline-flex items-center gap-0.5 px-1.5 py-0 text-[0.5625rem] font-semibold tracking-wide uppercase"
+                  className="border-primary/30 text-primary inline-flex items-center gap-0.5 px-1.5 py-0 text-micro-eyebrow font-semibold tracking-wide uppercase"
                 >
                   <Sparkles className="size-2" aria-hidden />
                   {t("system")}
+                </Badge>
+              </>
+            )}
+            {item._templateType && (
+              <>
+                <span aria-hidden className="text-border">
+                  ·
+                </span>
+                <Badge
+                  variant="outline"
+                  size="sm"
+                  className="text-muted-foreground inline-flex items-center px-1.5 py-0 text-micro-eyebrow font-semibold tracking-wide uppercase"
+                >
+                  {item._templateType}
                 </Badge>
               </>
             )}

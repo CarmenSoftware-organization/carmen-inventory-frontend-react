@@ -105,6 +105,7 @@ export const QUERY_KEYS = {
   REPORTS: "reports",
   REPORT_HISTORY: "report-history",
   REPORT_TEMPLATES: "report-templates",
+  REPORT_TEMPLATE_FORMS: "report-template-forms",
   REPORT_LOOKUPS: "report-lookups",
   REPORT_SCHEDULES: "report-schedules",
   RUNNING_CODES: "running-codes",
@@ -127,6 +128,7 @@ export const QUERY_KEYS = {
   WORKFLOWS: "workflows",
   // External
   PRICE_LIST_EXTERNAL: "price-list-external",
+  PRICE_LIST_EXTERNAL_TAX_PROFILES: "price-list-external-tax-profiles",
 } as const;
 
 export const BU_SWITCH_CHANNEL = "bu-switch";

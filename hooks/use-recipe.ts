@@ -97,7 +97,7 @@ async function sendRecipeMultipart(
     } catch {
       // JSON parse failed — use fallback
     }
-    throw ApiError.fromResponse(res, serverMessage ?? fallbackMessage);
+    throw await ApiError.from(res, serverMessage ?? fallbackMessage);
   }
   return res.json().catch(() => ({}));
 }

@@ -36,7 +36,7 @@ export function useVendorCertificates(
       );
       const res = await httpClient.get(url);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to load vendor certificates");
+        throw await ApiError.from(res, "Failed to load vendor certificates");
       }
       return res.json();
     },
@@ -60,7 +60,7 @@ export function useVendorCertificateById(id: string | undefined) {
         `${API_ENDPOINTS.VENDOR_CERTIFICATES(buCode!)}/${id}`,
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to load vendor certificate");
+        throw await ApiError.from(res, "Failed to load vendor certificate");
       }
       const json = await res.json();
       return json.data;

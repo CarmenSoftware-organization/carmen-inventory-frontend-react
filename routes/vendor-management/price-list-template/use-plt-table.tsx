@@ -3,7 +3,8 @@ import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import {
   selectColumn,
   indexColumn,
@@ -13,6 +14,8 @@ import {
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useProfile } from "@/hooks/use-profile";
+import { AuditCell } from "@/components/share/audit-cell";
 
 interface UsePriceListTemplateTableOptions {
   templates: PriceListTemplate[];
@@ -39,6 +42,7 @@ export function usePriceListTemplateTable({
   onDelete,
 }: UsePriceListTemplateTableOptions) {
   "use no memo";
+  const { dateTimeFormat } = useProfile();
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
@@ -94,23 +98,18 @@ export function usePriceListTemplateTable({
       ),
       cell: ({ row }) => {
         const status = row.getValue<string>("status");
-        const variantMap: Record<
-          string,
-          "outline" | "success" | "secondary"
-        > = {
-          draft: "outline",
-          active: "success",
-          inactive: "secondary",
-        };
         const labelMap: Record<string, string> = {
           draft: ts("draft"),
           active: ts("active"),
           inactive: ts("inactive"),
         };
         return (
-          <Badge size="lg" variant={variantMap[status] ?? "outline"}>
+          <StatusDotBadge
+            size="lg"
+            tone={PL_STATUS_TONE[status] ?? "neutral"}
+          >
             {labelMap[status] ?? status}
-          </Badge>
+          </StatusDotBadge>
         );
       },
       size: 100,
@@ -121,6 +120,36 @@ export function usePriceListTemplateTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
+    },
+    {
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
     },
   ];
 
@@ -135,6 +164,8 @@ export function usePriceListTemplateTable({
     data: templates,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
+    // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

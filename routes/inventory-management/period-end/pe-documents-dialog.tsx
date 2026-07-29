@@ -94,7 +94,7 @@ export function PeDocumentsDialog({
         header: () => tfl("documentNo"),
         cell: ({ row }) => {
           const label = (
-            <span className="text-[0.6875rem]">{row.original.no}</span>
+            <span className="text-micro">{row.original.no}</span>
           );
           if (!basePath) return label;
           return (
@@ -175,7 +175,7 @@ export function PeDocumentsDialog({
               </div>
               <div className="min-w-0 flex-1">
                 <div
-                  className="mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[0.625rem] font-semibold"
+                  className="mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold"
                   style={{
                     background: `color-mix(in oklch, ${color}, transparent 88%)`,
                     color,

@@ -1,11 +1,12 @@
+import type { Audit } from "./audit";
+
 export interface BusinessType {
   id: string;
   /** Optimistic-concurrency token — backend requires it back on PATCH update. */
   doc_version: number;
   name: string;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateBusinessTypeDto {

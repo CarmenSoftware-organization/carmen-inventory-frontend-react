@@ -22,7 +22,7 @@ function PlainNote({ value }: { readonly value?: string }) {
  *
  * แสดง description/remarks/note textareas ทางซ้าย + Hero `OrderSummaryCard`
  * ทางขวา. Summary subscribe items ผ่าน `useWatch` คำนวณ subtotal/net/tax/
- * discount/grand total real-time ตรงกับ pattern เดียวกับ `pr-grand-total.tsx`
+ * discount/grand total real-time ตรงกับ pattern เดียวกับแถบสรุปของ PR
  *
  * @param props.form - RHF instance ของ PO
  * @param props.disabled - disable textarea (view mode / pending)
@@ -48,7 +48,7 @@ export function PoNotesSummary({
   return (
     <div className="grid grid-cols-2 gap-4">
       {showDescription && (
-        <Field className={plainText ? "gap-1" : undefined}>
+        <Field>
           <FieldLabel
             htmlFor="po-description"
             className={
@@ -73,7 +73,7 @@ export function PoNotesSummary({
         </Field>
       )}
       {showRemarks && (
-        <Field className={plainText ? "gap-1" : undefined}>
+        <Field>
           <FieldLabel
             htmlFor="po-remarks"
             className={

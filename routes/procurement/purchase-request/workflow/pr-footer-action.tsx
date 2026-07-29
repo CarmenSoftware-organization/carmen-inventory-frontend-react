@@ -9,8 +9,14 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { PrFormValues } from "../pr-form-schema";
 import { isAllItemsComplete } from "../pr-form-schema";
+import { computePrSummary } from "../pr-summary";
 import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
-import { PrActionDialog, type StageOption, type ActionDialogItem } from "./pr-action-dialog";
+import {
+  PrActionDialog,
+  type StageOption,
+  type ActionDialogItem,
+} from "./pr-action-dialog";
+import { computePurchaseAction } from "./pr-purchase-action";
 
 interface PrFooterActionProps {
   readonly role?: string;
@@ -24,7 +30,10 @@ interface PrFooterActionProps {
   readonly onSubmitPr?: () => void;
   readonly onApprove?: () => void;
   readonly onReject?: () => void;
-  readonly onReview?: (messages: Record<number, string>, desStage: string) => void;
+  readonly onReview?: (
+    messages: Record<number, string>,
+    desStage: string,
+  ) => void;
   readonly onPurchaseApprove?: () => void;
   readonly onValidatePurchase?: () => Promise<boolean>;
 }
@@ -35,29 +44,6 @@ type ConfirmConfig = {
   confirmLabel: string;
   confirmVariant: "default" | "destructive" | "success" | "info" | "warning";
   onConfirm: () => void;
-};
-
-/**
- * คำนวณ action รวมของ stage ปัจจุบันจากสถานะของ items ทุกตัวใน PR โดยใช้
- * ลำดับความสำคัญ: review (มีอย่างน้อยหนึ่งรายการขอ review) > rejected
- * (ทุกรายการปฏิเสธ) > approved (ทุกรายการเป็น approve/reject และมีอย่างน้อย
- * หนึ่งรายการ approve) ใช้เพื่อตัดสินใจว่าควรแสดงปุ่ม workflow ปุ่มใดใน footer
- * @param statuses - รายการสถานะ `current_stage_status` ของแต่ละ item ใน PR
- * @returns ค่า `"none" | "review" | "rejected" | "approved"` สะท้อนปุ่มที่ควรแสดง
- * @example
- * computePurchaseAction(["approve", "reject"]); // => "approved"
- * computePurchaseAction(["review", "approve"]); // => "review"
- */
-const computePurchaseAction = (
-  statuses: string[],
-): "none" | "review" | "rejected" | "approved" => {
-  if (statuses.length === 0) return "none";
-  const isReject = (s: string) => s === PR_ITEM_STAGE_STATUS.REJECT || s === PR_ITEM_STAGE_STATUS.REJECTED;
-  const isApprove = (s: string) => s === PR_ITEM_STAGE_STATUS.APPROVE || s === PR_ITEM_STAGE_STATUS.APPROVED;
-  if (statuses.some((s) => s === PR_ITEM_STAGE_STATUS.REVIEW)) return "review";
-  if (statuses.every(isReject)) return "rejected";
-  if (statuses.every((s) => isApprove(s) || isReject(s)) && statuses.some(isApprove)) return "approved";
-  return "none";
 };
 
 /**
@@ -126,28 +112,7 @@ export function PrFooterAction({
 
   const itemStatuses = items.map((item) => item?.current_stage_status ?? "");
 
-  const hasMixedCurrency = items.some(
-    (item) => item?.currency_code && item.currency_code !== currencyCode,
-  );
-
-  let subtotal = 0;
-  let totalDiscount = 0;
-  let totalNet = 0;
-  let totalTax = 0;
-  let grandTotal = 0;
-
-  for (const item of items) {
-    const rate = hasMixedCurrency ? Number(item?.exchange_rate ?? 1) : 1;
-    const price = Number(item?.pricelist_price ?? 0);
-    const qty = Number(item?.requested_qty ?? 0);
-    subtotal += price * qty * rate;
-    totalDiscount += Number(item?.discount_amount ?? 0) * rate;
-    totalNet += Number(item?.net_amount ?? 0) * rate;
-    totalTax += Number(item?.tax_amount ?? 0) * rate;
-    grandTotal += Number(item?.total_price ?? 0) * rate;
-  }
-
-  const summary = { subtotal, totalDiscount, totalNet, totalTax, grandTotal };
+  const summary = computePrSummary(items);
 
   // const canSubmit = role === STAGE_ROLE.CREATE && prStatus !== "in_progress";
   const canSubmit = role === STAGE_ROLE.CREATE;
@@ -168,12 +133,13 @@ export function PrFooterAction({
   const hasVisibleButton =
     showSubmit ||
     (showWorkflowActions &&
-      ((canApprove && purchaseAction !== "none") ||
-        canPurchaseApprove));
+      ((canApprove && purchaseAction !== "none") || canPurchaseApprove));
 
   const reviewItems: ActionDialogItem[] = items
     .map((item, index) => ({ index, item }))
-    .filter(({ item }) => item?.current_stage_status === PR_ITEM_STAGE_STATUS.REVIEW)
+    .filter(
+      ({ item }) => item?.current_stage_status === PR_ITEM_STAGE_STATUS.REVIEW,
+    )
     .map(({ index, item }) => ({
       index,
       productName: item?.product_name ?? "",
@@ -185,7 +151,11 @@ export function PrFooterAction({
       <SummaryFooterBar
         hasRecord={hasRecord}
         items={[
-          { key: "subtotal", label: tfl("subtotal"), value: formatCurrency(summary.subtotal) },
+          {
+            key: "subtotal",
+            label: tfl("subtotal"),
+            value: formatCurrency(summary.subtotal),
+          },
           {
             key: "discount",
             label: tfl("discount"),
@@ -198,8 +168,16 @@ export function PrFooterAction({
                 ? "text-destructive font-semibold"
                 : "font-semibold",
           },
-          { key: "net", label: tfl("net"), value: formatCurrency(summary.totalNet) },
-          { key: "tax", label: tfl("tax"), value: formatCurrency(summary.totalTax) },
+          {
+            key: "net",
+            label: tfl("net"),
+            value: formatCurrency(summary.totalNet),
+          },
+          {
+            key: "tax",
+            label: tfl("tax"),
+            value: formatCurrency(summary.totalTax),
+          },
           {
             key: "grandTotal",
             label: tfl("grandTotal"),
@@ -288,33 +266,33 @@ export function PrFooterAction({
             )}
 
             {canPurchaseApprove && purchaseAction === "approved" && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="success"
-                  disabled={isPending}
-                  onClick={async () => {
-                    // validate เฉพาะตอนกด approve (action-aware): trigger schema
-                    // เพื่อโชว์กรอบแดงที่ field ที่ขาด แล้วค่อยเปิด confirm
-                    const valid =
-                      (await onValidatePurchase?.()) ?? allItemsReadyForPurchase;
-                    if (!valid) {
-                      toast.warning(t("purchaseIncomplete"));
-                      return;
-                    }
-                    openConfirm({
-                      title: t("purchaseApproveTitle"),
-                      description: t("purchaseApproveConfirm"),
-                      confirmLabel: t("purchaseApproveTitle"),
-                      confirmVariant: "success",
-                      onConfirm: () => onPurchaseApprove?.(),
-                    });
-                  }}
-                >
-                  <ShoppingCart />
-                  {tc("approve")}
-                </Button>
-              )}
+              <Button
+                type="button"
+                size="sm"
+                variant="success"
+                disabled={isPending}
+                onClick={async () => {
+                  // validate เฉพาะตอนกด approve (action-aware): trigger schema
+                  // เพื่อโชว์กรอบแดงที่ field ที่ขาด แล้วค่อยเปิด confirm
+                  const valid =
+                    (await onValidatePurchase?.()) ?? allItemsReadyForPurchase;
+                  if (!valid) {
+                    toast.warning(t("purchaseIncomplete"));
+                    return;
+                  }
+                  openConfirm({
+                    title: t("purchaseApproveTitle"),
+                    description: t("purchaseApproveConfirm"),
+                    confirmLabel: t("purchaseApproveTitle"),
+                    confirmVariant: "success",
+                    onConfirm: () => onPurchaseApprove?.(),
+                  });
+                }}
+              >
+                <ShoppingCart />
+                {tc("approve")}
+              </Button>
+            )}
 
             {canPurchaseApprove && purchaseAction === "rejected" && (
               <Button
@@ -372,7 +350,9 @@ export function PrFooterAction({
 
       <PrActionDialog
         open={!!confirm}
-        onOpenChange={(open) => { if (!open) setConfirm(null); }}
+        onOpenChange={(open) => {
+          if (!open) setConfirm(null);
+        }}
         title={confirm?.title ?? ""}
         description={confirm?.description}
         confirmLabel={confirm?.confirmLabel}

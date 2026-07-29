@@ -11,6 +11,7 @@ export interface Report {
   _templateId?: string;
   _content?: string;
   _columns?: string[];
+  _templateType?: "form" | "list";
 }
 
 export interface CreateReportDto {
@@ -29,6 +30,7 @@ export interface ReportTemplate {
   columns: string[];
   is_standard: boolean;
   is_active: boolean;
+  template_type?: "form" | "list";
 }
 
 /** Payload สำหรับ POST `/reports/viewer` */

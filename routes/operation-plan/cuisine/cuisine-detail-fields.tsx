@@ -20,8 +20,11 @@ export function CuisineDetailFields({
   const tfl = useTranslations("field");
 
   return (
-    <Card label={t("cuisineDetails")}>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <Card
+      label={t("cuisineDetails")}
+      description={t("cuisineDetailsDesc")}
+    >
+      <div className="grid grid-cols-1 gap-4">
         <DetailTextarea
           form={form}
           name="popular_dishes"

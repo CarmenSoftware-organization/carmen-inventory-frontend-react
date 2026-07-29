@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -20,7 +20,6 @@ import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
 import { formatExchangeRate } from "@/lib/currency-utils";
-import { useProfile } from "@/hooks/use-profile";
 import { useCurrency } from "@/hooks/use-currency";
 import type { GrnFormValues } from "./grn-form-schema";
 
@@ -42,7 +41,6 @@ export function GrnFormHeader({
   const t = useTranslations("procurement.goodsReceiveNote");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const { defaultCurrencyId } = useProfile();
   const errors = form.formState.errors;
 
   const vendorName = useWatch({ control: form.control, name: "vendor_name" });
@@ -63,30 +61,6 @@ export function GrnFormHeader({
   const currencyCode =
     currencies.find((c) => c.id === currencyId)?.code || currencyName;
 
-  useEffect(() => {
-    if (disabled) return;
-    if (currencyId) return;
-    if (!defaultCurrencyId || currencies.length === 0) return;
-    const currency = currencies.find((c) => c.id === defaultCurrencyId);
-    if (!currency) return;
-    if (form.getValues("currency_id") === defaultCurrencyId) return;
-    // reset baseline (ไม่ใช่ setValue) ให้ค่า currency default เป็น default ของฟอร์ม
-    // — RHF คิด isDirty จาก deepEqual(getValues, defaultValues) ทั้งฟอร์ม; setValue
-    // ค่าที่ต่างจาก default จะค้าง dirty ทั้งที่ยังไม่ได้กรอก → back ติด discard
-    // (ดู pr-form.tsx). ใช้ formState.defaultValues เป็น baseline (component นี้เป็น
-    // ลูก ไม่มี defaultValues ตรง ๆ); keepDirtyValues คงค่าที่ผู้ใช้แก้ไว้
-    form.reset(
-      {
-        ...form.formState.defaultValues,
-        currency_id: defaultCurrencyId,
-        currency_name: currency.code,
-        exchange_rate: currency.exchange_rate,
-      },
-      { keepDirtyValues: true },
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
-  }, [currencyId, defaultCurrencyId, currencies, disabled]);
-
   const postTypeLabels: Record<string, string> = {
     ap: t("ap"),
     consignment: t("consignment"),
@@ -102,8 +76,8 @@ export function GrnFormHeader({
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Field className={viewFieldGap}>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
+        <Field className={`${viewFieldGap ?? ""} lg:col-span-2`}>
           <FieldLabel className={viewLabelClass} required>
             {tfl("vendor")}
           </FieldLabel>

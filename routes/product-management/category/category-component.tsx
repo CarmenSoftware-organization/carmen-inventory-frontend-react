@@ -154,7 +154,6 @@ export default function CategoryComponent() {
         );
         ok();
       },
-      onError: (e: Error) => toast.error(e.message),
     });
 
     if (isEdit && selectedNode) {
@@ -220,7 +219,6 @@ export default function CategoryComponent() {
         );
         setDeleteTarget(null);
       },
-      onError: (e: Error) => toast.error(e.message),
     };
     const actions = {
       [NODE_TYPE.CATEGORY]: () => deleteCategory.mutate(deleteTarget.id, opts),
@@ -281,7 +279,7 @@ export default function CategoryComponent() {
         {/* Tree */}
         <div className="bg-card rounded-md border">
           {/* Header row */}
-          <div className="bg-muted/40 text-muted-foreground flex h-9 items-center justify-between border-b px-2 text-[0.625rem] font-semibold tracking-wider uppercase">
+          <div className="bg-muted/40 text-muted-foreground flex h-9 items-center justify-between border-b px-2 text-micro-legal font-semibold tracking-wider uppercase">
             <div className="flex items-center">
               <FolderTree className="mr-1.5 h-3 w-3" />
               {t("categoryTree")}

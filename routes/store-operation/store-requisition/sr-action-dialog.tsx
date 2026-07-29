@@ -75,7 +75,7 @@ const TONE: Record<
   },
   success: {
     iconBg: "bg-success/10",
-    iconColor: "text-success",
+    iconColor: "text-success-ink",
     icon: CheckCircle2,
     titleColor: "text-foreground",
   },
@@ -87,13 +87,13 @@ const TONE: Record<
   },
   warning: {
     iconBg: "bg-warning/10",
-    iconColor: "text-warning",
+    iconColor: "text-warning-ink",
     icon: AlertTriangle,
-    titleColor: "text-warning",
+    titleColor: "text-warning-ink",
   },
   info: {
     iconBg: "bg-info/10",
-    iconColor: "text-info",
+    iconColor: "text-info-ink",
     icon: Info,
     titleColor: "text-foreground",
   },
@@ -195,7 +195,7 @@ export function SrActionDialog({
           <div className="flex-1 space-y-4 overflow-y-auto border-t px-5 py-4">
             {showStages && (
               <section className="space-y-2">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-wider uppercase">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold tracking-wider uppercase">
                   <Workflow className="size-3" />
                   {tfl("stage")}
                   <span className="text-destructive">*</span>
@@ -239,7 +239,7 @@ export function SrActionDialog({
 
             {showMessage && hasItems && (
               <section className="space-y-2">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-wider uppercase">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold tracking-wider uppercase">
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                 </div>
@@ -250,7 +250,7 @@ export function SrActionDialog({
                       className="bg-muted/30 space-y-1.5 rounded-lg border p-2"
                     >
                       <div className="flex items-start gap-2">
-                        <div className="bg-background text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md border text-[0.625rem] font-semibold tabular-nums">
+                        <div className="bg-background text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md border text-micro-legal font-semibold tabular-nums">
                           {i + 1}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -275,7 +275,7 @@ export function SrActionDialog({
 
             {showMessage && !hasItems && (
               <section className="space-y-1.5">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-[0.625rem] font-semibold tracking-wider uppercase">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold tracking-wider uppercase">
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                   <span className="text-muted-foreground font-normal normal-case">

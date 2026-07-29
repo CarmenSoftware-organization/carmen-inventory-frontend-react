@@ -125,7 +125,7 @@ export function useNotification(userId: string | undefined) {
         { category: target.category },
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to mark notification as read");
+        throw await ApiError.from(res, "Failed to mark notification as read");
       }
     } catch (err) {
       setNotifications(snapshot); // rollback
@@ -146,7 +146,7 @@ export function useNotification(userId: string | undefined) {
         API_ENDPOINTS.NOTIFICATIONS_MARK_ALL_READ,
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to mark all notifications as read",
         );
@@ -179,7 +179,7 @@ export function useNotificationsList() {
     queryFn: async () => {
       const res = await httpClient.get(API_ENDPOINTS.NOTIFICATIONS);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to load notifications");
+        throw await ApiError.from(res, "Failed to load notifications");
       }
       const json = await res.json();
       return json.data ?? json;
@@ -205,7 +205,7 @@ export function useNotificationDetail(id: string | null | undefined) {
     queryFn: async () => {
       const res = await httpClient.get(API_ENDPOINTS.NOTIFICATION_BY_ID(id!));
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to load notification detail");
+        throw await ApiError.from(res, "Failed to load notification detail");
       }
       const json = await res.json();
       return json.data ?? json;

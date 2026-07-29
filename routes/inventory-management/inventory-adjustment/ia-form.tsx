@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useFormatter, useTranslations } from "use-intl";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -53,6 +53,7 @@ export function InventoryAdjustmentForm({
   inventoryAdjustment,
 }: InventoryAdjustmentFormProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(
     inventoryAdjustment ? "view" : "add",
   );
@@ -164,8 +165,6 @@ export function InventoryAdjustmentForm({
     const details = buildItemChanges(
       values.items,
       defaultValues.items,
-      // RHF 7.78 type drift
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
       mapItemToPayload,
     );
     updateAdj.mutate(
@@ -213,11 +212,19 @@ export function InventoryAdjustmentForm({
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate(INVENTORY_ADJUSTMENT_BASE_PATH));
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
     } else {
       navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 

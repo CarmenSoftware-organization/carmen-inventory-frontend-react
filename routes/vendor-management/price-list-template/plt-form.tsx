@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Controller,
   useFieldArray,
@@ -8,10 +8,11 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { PL_STATUS_TONE } from "@/constant/price-list";
 import {
   Field,
   FieldDescription,
@@ -23,9 +24,10 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
+import { useAllProducts } from "@/hooks/use-all-products";
 import { PRICE_LIST_TEMPLATE_STATUS_OPTIONS } from "@/constant/price-list-template";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { cn } from "@/lib/utils";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useProfile } from "@/hooks/use-profile";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { FormMode } from "@/types/form";
@@ -42,7 +44,6 @@ import { PltValidityStepper } from "./plt-validity-stepper";
 import { PltFormProductsSection } from "./plt-form-products-section";
 import { PltFormDialogs } from "./plt-form-dialogs";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { usePltFormActions } from "./use-plt-form-actions";
 import { FORM_ID } from "./plt-form-helpers";
 import { useProductLabels, useStepperLabels } from "./plt-form-labels";
@@ -71,6 +72,7 @@ export function PriceListTemplateForm({
   const [removeDetailIndex, setRemoveDetailIndex] = useState<number | null>(
     null,
   );
+  const [removeProductId, setRemoveProductId] = useState<string | null>(null);
 
   const { defaultCurrencyId } = useProfile();
   const defaultValues = getDefaultValues(priceListTemplate, {
@@ -82,8 +84,24 @@ export function PriceListTemplateForm({
     defaultValues,
   });
 
+  // หลัง save (edit) → mutation invalidate → byId refetch → priceListTemplate มา
+  // ใหม่ (full-replace ทำให้ product ได้ id ใหม่) · re-sync form ในโหมด view ให้
+  // โชว์ข้อมูล server จริง และ edit ครั้งถัดไปอ่าน id ใหม่ (ไม่งั้น remove จะใช้ id
+  // เก่าที่ถูกลบไปแล้ว → save ซ้ำ = duplicate) · key ด้วยชุด product id ที่เปลี่ยน
+  // ทุกครั้งที่ item ถูก add/remove/replace
+  const productIdsKey = (priceListTemplate?.products ?? [])
+    .map((p) => p.id)
+    .join(",");
+  useEffect(() => {
+    if (mode === "view" && priceListTemplate) {
+      form.reset(getDefaultValues(priceListTemplate, { defaultCurrencyId }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode/defaultCurrencyId อ่านโดยไม่ retrigger
+  }, [productIdsKey, priceListTemplate?.id]);
+
   const {
     fields: detailFields,
+    append: appendDetail,
     prepend: prependDetail,
     remove: removeDetail,
   } = useFieldArray({
@@ -100,9 +118,8 @@ export function PriceListTemplateForm({
   });
 
   const isDisabled = isView || actions.isPending;
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty,
-  );
+  // guard อยู่ใน usePltFormActions — handleBack ที่นั่นต้องใช้ navGuard.back()
+  const navGuard = actions.navGuard;
 
   const watchedValidity = useWatch({
     control: form.control,
@@ -111,8 +128,45 @@ export function PriceListTemplateForm({
   const watchedStatus = useWatch({ control: form.control, name: "status" });
   const watchedName = useWatch({ control: form.control, name: "name" });
 
+  const { data: allProducts = [], isLoading: productsLoading } =
+    useAllProducts();
+  const watchedDetails = useWatch({ control: form.control, name: "details" });
+  const selectedProductIds = new Set(
+    (watchedDetails ?? []).map((d) => d.product_id).filter(Boolean),
+  );
+
   const handleAddProduct = () => {
     prependDetail({ ...PLT_DETAIL_EMPTY });
+  };
+
+  // ติ๊ก tree → sync กับ details: product ที่ติ๊กใหม่ = เพิ่มแถวเปล่า (unit
+  // auto-select เองใน UnitCell), product ที่เอาติ๊กออก = ลบทุกแถวของ product นั้น
+  // (รวม moq tier หลายแถว) · group toggle ยิงทิศเดียวเสมอ เพิ่ม/ลบ ไม่ปนกัน
+  const handleTreeSelectionChange = (ids: string[]) => {
+    const next = new Set(ids);
+    const rows = form.getValues("details");
+    const removeIdx = rows.reduce<number[]>((acc, d, i) => {
+      if (d.product_id && !next.has(d.product_id)) acc.push(i);
+      return acc;
+    }, []);
+    const current = new Set(rows.map((d) => d.product_id).filter(Boolean));
+    const added = ids.filter((id) => !current.has(id));
+    if (removeIdx.length) removeDetail(removeIdx);
+    if (added.length)
+      prependDetail(
+        added.map((id) => ({ ...PLT_DETAIL_EMPTY, product_id: id })),
+      );
+  };
+
+  // เพิ่ม MOQ tier อีกหน่วยให้ product เดิม (แถวใหม่ product_id เดียวกัน)
+  // default qty = max ของ tier เดิม +1 กันชนกับ qty ที่มีอยู่แล้วตั้งแต่แรก
+  const handleAddTier = (productId: string) => {
+    const qtys = form
+      .getValues("details")
+      .filter((r) => r.product_id === productId)
+      .map((r) => Number(r.qty) || 0);
+    const nextQty = qtys.length ? Math.max(...qtys) + 1 : 1;
+    appendDetail({ ...PLT_DETAIL_EMPTY, product_id: productId, qty: nextQty });
   };
 
   const handleConfirmRemoveTier = () => {
@@ -121,8 +175,28 @@ export function PriceListTemplateForm({
     setRemoveDetailIndex(null);
   };
 
+  // ลบทั้ง product (ทุก tier) — เท่ากับเอาติ๊กออกจาก tree · confirm ก่อนลบ
+  const handleConfirmRemoveProduct = () => {
+    if (removeProductId === null) return;
+    const idx = form.getValues("details").reduce<number[]>((acc, d, i) => {
+      if (d.product_id === removeProductId) acc.push(i);
+      return acc;
+    }, []);
+    if (idx.length) removeDetail(idx);
+    setRemoveProductId(null);
+  };
+
   const stepperLabels = useStepperLabels(t);
-  const productLabels = useProductLabels(t);
+  const productLabels = useProductLabels(t, tfl);
+
+  // ชื่อ product ที่กำลังจะลบ — ไว้โชว์ใน confirm dialog (master ก่อน, fallback ref)
+  const removeProductName = removeProductId
+    ? (allProducts.find((p) => p.id === removeProductId)?.name ??
+      priceListTemplate?.products?.find(
+        (p) => p.product_id === removeProductId,
+      )?.product_name ??
+      "")
+    : "";
   const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
   const submitLabel = actions.isPending
     ? isAdd
@@ -134,72 +208,62 @@ export function PriceListTemplateForm({
 
   return (
     <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Button
-            type="button"
-            size="icon-sm"
-            variant="ghost"
-            aria-label={tc("goBack")}
-            onClick={actions.handleBack}
-          >
-            <ChevronLeft />
-          </Button>
-          <h1
-            className={cn(
-              "truncate text-lg font-semibold tracking-tight",
-              watchedName ? "text-foreground" : "text-muted-foreground italic",
-            )}
-          >
-            {watchedName || t("namePlaceholder")}
-          </h1>
-          <Badge variant="secondary" size="sm">
-            {tsStatus(watchedStatus)}
-          </Badge>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          {isView ? (
-            <Button size="sm" onClick={() => setMode("edit")}>
-              <Pencil />
-              {tc("edit")}
-            </Button>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={actions.handleCancel}
-                disabled={actions.isPending}
-              >
-                <X />
-                {tc("cancel")}
+      <div className="mb-6">
+        <DocFormHeader
+          flush
+          title={watchedName || t("namePlaceholder")}
+          titleMuted={!watchedName}
+          backLabel={tc("goBack")}
+          onBack={actions.handleBack}
+          badges={
+            <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
+              {tsStatus(watchedStatus)}
+            </StatusDotBadge>
+          }
+          actions={
+            isView ? (
+              <Button size="sm" onClick={() => setMode("edit")}>
+                <Pencil />
+                {tc("edit")}
               </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form={FORM_ID}
-                disabled={actions.isPending}
-              >
-                <Save />
-                {submitLabel}
-              </Button>
-              {isEdit && priceListTemplate && (
+            ) : (
+              <>
                 <Button
                   type="button"
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
-                  onClick={() => actions.setShowDelete(true)}
-                  disabled={actions.isDeletePending || actions.isPending}
+                  onClick={actions.handleCancel}
+                  disabled={actions.isPending}
                 >
-                  <Trash2 />
-                  {tc("delete")}
+                  <X />
+                  {tc("cancel")}
                 </Button>
-              )}
-            </>
-          )}
-        </div>
-      </header>
+                <Button
+                  type="submit"
+                  size="sm"
+                  form={FORM_ID}
+                  disabled={actions.isPending}
+                >
+                  <Save />
+                  {submitLabel}
+                </Button>
+                {isEdit && priceListTemplate && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => actions.setShowDelete(true)}
+                    disabled={actions.isDeletePending || actions.isPending}
+                  >
+                    <Trash2 />
+                    {tc("delete")}
+                  </Button>
+                )}
+              </>
+            )
+          }
+        />
+      </div>
 
       <form
         id={FORM_ID}
@@ -294,7 +358,7 @@ export function PriceListTemplateForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{tfl("description")}</FieldLabel>
             {isView ? (
-              <FieldPlainText className="items-start whitespace-pre-wrap">
+              <FieldPlainText className="whitespace-pre-wrap">
                 {priceListTemplate?.description}
               </FieldPlainText>
             ) : (
@@ -314,9 +378,11 @@ export function PriceListTemplateForm({
             <FieldLabel>{tfl("status")}</FieldLabel>
             {isView ? (
               <div>
-                <Badge variant="secondary" size="sm">
+                <StatusDotBadge
+                  tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}
+                >
                   {tsStatus(watchedStatus)}
-                </Badge>
+                </StatusDotBadge>
               </div>
             ) : (
               <Controller
@@ -354,7 +420,7 @@ export function PriceListTemplateForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{t("vendorInstructionTitle")}</FieldLabel>
             {isView ? (
-              <FieldPlainText className="items-start whitespace-pre-wrap">
+              <FieldPlainText className="whitespace-pre-wrap">
                 {priceListTemplate?.vendor_instructions}
               </FieldPlainText>
             ) : (
@@ -379,6 +445,12 @@ export function PriceListTemplateForm({
           onAddProduct={handleAddProduct}
           onRemoveTier={setRemoveDetailIndex}
           labels={productLabels}
+          allProducts={allProducts}
+          productsLoading={productsLoading}
+          selectedProductIds={selectedProductIds}
+          onTreeSelectionChange={handleTreeSelectionChange}
+          onAddTier={handleAddTier}
+          onRemoveProduct={setRemoveProductId}
         />
       </form>
 
@@ -403,6 +475,10 @@ export function PriceListTemplateForm({
         removeDetailIndex={removeDetailIndex}
         setRemoveDetailIndex={setRemoveDetailIndex}
         onConfirmRemoveTier={handleConfirmRemoveTier}
+        removeProductId={removeProductId}
+        removeProductName={removeProductName}
+        setRemoveProductId={setRemoveProductId}
+        onConfirmRemoveProduct={handleConfirmRemoveProduct}
       />
     </div>
   );

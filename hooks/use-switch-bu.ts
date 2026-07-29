@@ -52,7 +52,7 @@ export function useSwitchBu() {
       });
 
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to switch business unit");
+        throw await ApiError.from(res, "Failed to switch business unit");
       }
 
       return res.json();

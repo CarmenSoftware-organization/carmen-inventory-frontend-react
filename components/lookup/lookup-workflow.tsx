@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
+import { FieldPlainText } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -29,6 +29,8 @@ interface LookupWorkflowProps {
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
   readonly readOnly?: boolean;
+  /** โหมดสร้างเอกสารใหม่ — โชว์เฉพาะ workflow ที่ผู้ใช้เริ่มเอกสารได้ */
+  readonly creatableOnly?: boolean;
 }
 
 export function LookupWorkflow({
@@ -41,29 +43,29 @@ export function LookupWorkflow({
   size = "sm",
   error,
   readOnly,
+  creatableOnly,
 }: LookupWorkflowProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [selectOpen, setSelectOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
-  const { data: workflows } = useWorkflowTypeQuery(workflowType);
+  const { data: allWorkflows } = useWorkflowTypeQuery(workflowType);
+  // ตัวเลือกกรองตาม can_create ตอนสร้างใหม่ แต่ชื่อที่โชว์อ่านจากรายการเต็มเสมอ —
+  // ใบเก่าอาจผูก workflow ที่คนนี้เริ่มใหม่ไม่ได้ ถ้าอ่านจากรายการที่กรองช่องจะว่าง
+  const workflows = creatableOnly
+    ? allWorkflows?.filter((wf) => wf.can_create !== false)
+    : allWorkflows;
   const resolvedPlaceholder =
     placeholder ?? tl("select", { entity: tfl("workflow") });
-  const selectedLabel = workflows?.find((wf) => wf.id === value)?.name;
+  const selectedLabel = allWorkflows?.find((wf) => wf.id === value)?.name;
   const showErrorTooltip = !!error && !selectOpen;
   const showTooltip = !error && !selectOpen && !!selectedLabel;
 
+  // FieldPlainText (ไม่ใช่ <span> เปล่า) เพราะ `Field` จะมุด label ให้ก็ต่อเมื่อ
+  // เจอ data-slot="field-plain-text" เป็น direct child — และมันแสดง "—" เองอยู่แล้ว
   if (readOnly) {
     return (
-      <span
-        className={cn(
-          "inline-flex min-h-8 items-center text-sm",
-          !selectedLabel && "text-muted-foreground",
-          className,
-        )}
-      >
-        {selectedLabel ?? "—"}
-      </span>
+      <FieldPlainText className={className}>{selectedLabel}</FieldPlainText>
     );
   }
 

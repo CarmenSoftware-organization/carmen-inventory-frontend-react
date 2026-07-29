@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
@@ -59,6 +59,7 @@ export function NotificationTemplateForm({
   const ts = useTranslations("status");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [mode, setMode] = useState<FormMode>(template ? "view" : "add");
   const isView = mode === "view";
@@ -100,7 +101,6 @@ export function NotificationTemplateForm({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             navigate(LIST_PATH);
           },
-          onError: (err) => toast.error(err.message),
         },
       );
       return;
@@ -110,16 +110,23 @@ export function NotificationTemplateForm({
         toast.success(tt("createSuccess", { entity: t("entity") }));
         navigate(LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
+  };
+
+  const goBack = () => {
+    if (location.key !== "default") {
+      navigate(-1);
+    } else {
+      navigate(LIST_PATH);
+    }
   };
 
   const handleBack = () => {
     if (isView) {
-      navigate(LIST_PATH);
+      goBack();
       return;
     }
-    discard.confirm(() => navigate(LIST_PATH));
+    discard.confirm(goBack);
   };
 
   const handleCancel = () => {
@@ -140,7 +147,6 @@ export function NotificationTemplateForm({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate(LIST_PATH);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

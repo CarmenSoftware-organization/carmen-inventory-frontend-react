@@ -10,6 +10,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { CreditTerm } from "@/types/credit-term";
 
 interface CreditTermCardProps {
@@ -32,6 +34,7 @@ export default function CreditTermCard({
   onEdit,
 }: CreditTermCardProps) {
   const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
 
   return (
     <Card
@@ -49,7 +52,7 @@ export default function CreditTermCard({
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -83,6 +86,17 @@ export default function CreditTermCard({
           <p className="text-muted-foreground line-clamp-2 text-xs">
             {item.description}
           </p>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-center gap-1.5">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate text-xs">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
+            </span>
+          </div>
         )}
       </CardContent>
     </Card>

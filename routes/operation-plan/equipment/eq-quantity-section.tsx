@@ -19,7 +19,10 @@ export function EqQuantitySection({
   const tfl = useTranslations("field");
 
   return (
-    <Card label={t("qtySettings")}>
+    <Card
+      label={t("qtySettings")}
+      description={t("qtySettingsDesc")}
+    >
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <NumberField
           form={form}
@@ -72,13 +75,15 @@ function NumberField({
   ]?.message as string | undefined;
   return (
     <Field>
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <FieldLabel htmlFor={id} className="w-full justify-end">
+        {label}
+      </FieldLabel>
       <FieldInput
         id={id}
         type="number"
         inputMode="decimal"
         min={0}
-        className="h-8"
+        className="h-8 text-right tabular-nums"
         disabled={isDisabled}
         error={error}
         errorIconAlign="left"

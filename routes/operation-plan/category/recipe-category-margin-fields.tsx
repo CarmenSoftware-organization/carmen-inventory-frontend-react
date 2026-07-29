@@ -19,7 +19,10 @@ export function RecipeCategoryMarginFields({
   const errors = form.formState.errors;
 
   return (
-    <Card label={t("defaultProfitMargins")}>
+    <Card
+      label={t("defaultProfitMargins")}
+      description={t("defaultProfitMarginsDesc")}
+    >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="rc-margin-min">{t("minProfitMargin")}</FieldLabel>

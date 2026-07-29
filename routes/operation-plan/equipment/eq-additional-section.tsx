@@ -1,7 +1,6 @@
 
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,7 +21,10 @@ export function EqAdditionalSection({
   const tfl = useTranslations("field");
 
   return (
-    <Card label={t("additional")}>
+    <Card
+      label={t("additional")}
+      description={t("additionalDesc")}
+    >
       <FieldGroup className="gap-3">
         <Field>
           <FieldLabel htmlFor="equipment-note">{tfl("note")}</FieldLabel>
@@ -49,23 +51,21 @@ export function EqAdditionalSection({
           )}
         />
 
-        <Field orientation="horizontal">
-          <Controller
-            control={form.control}
-            name="is_portable"
-            render={({ field }) => (
-              <Checkbox
-                id="equipment-is-portable"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-                disabled={isDisabled}
-              />
-            )}
-          />
-          <FieldLabel htmlFor="equipment-is-portable">
-            {t("portable")}
-          </FieldLabel>
-        </Field>
+        <Controller
+          control={form.control}
+          name="is_portable"
+          render={({ field }) => (
+            <StatusSwitch
+              id="equipment-is-portable"
+              label={t("portable")}
+              description={t("portableDesc")}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              disabled={isDisabled}
+              hideBadge
+            />
+          )}
+        />
       </FieldGroup>
     </Card>
   );

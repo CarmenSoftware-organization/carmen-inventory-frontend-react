@@ -117,9 +117,7 @@ export function PurchaseRequestForm({
   // lock หลัง submit (status ≠ draft) เฉพาะ role ผู้สร้าง (CREATE) — role ใน
   // workflow (purchase/approve) ยังต้องเลือก/แก้ item ได้ จึงไม่โดน lock ตรงนี้
   const isDisabled =
-    isView ||
-    actions.isPending ||
-    (!isDraft && role === STAGE_ROLE.CREATE);
+    isView || actions.isPending || (!isDraft && role === STAGE_ROLE.CREATE);
 
   const hasHistory = !!purchaseRequest?.workflow_history?.length;
 
@@ -247,6 +245,7 @@ export function PurchaseRequestForm({
             disabled={actions.isPending}
             role={role}
             fromTemplate={!!template}
+            isAdd={isAdd}
           />
         )}
 

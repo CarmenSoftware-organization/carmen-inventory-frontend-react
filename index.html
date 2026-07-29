@@ -6,6 +6,23 @@
     <link rel="icon" type="image/svg+xml" href="/carmen-logo.svg" />
     <title>Carmen Blue</title>
     <meta name="description" content="Hospitality Supply Chain" />
+    <script>
+      // เติม font-scale class ก่อน paint แรก — main.tsx boot แบบ async
+      // (loadRuntimeConfig → refreshTokens → render) ทั้งสองขั้นแรกเป็น network
+      // call ถ้ารอ React ผู้ใช้จะเห็นหน้าจอที่ขนาด normal ไปแล้วหลายร้อย ms
+      // แล้วค่อยกระโดดเป็นขนาดที่เลือก ทุกครั้งที่โหลดหน้า
+      //
+      // รายชื่อระดับซ้ำกับ FONT_SCALES ใน lib/font-scale.ts เพราะ inline script
+      // import module ไม่ได้ — lib/__tests__/font-scale.test.ts กันไม่ให้ drift
+      try {
+        var s = localStorage.getItem("carmen.font-scale");
+        if (["small", "big", "bigger", "biggest"].indexOf(s) >= 0) {
+          document.documentElement.classList.add("font-scale-" + s);
+        }
+      } catch (e) {
+        /* storage unavailable — ใช้ขนาด normal */
+      }
+    </script>
   </head>
   <body class="antialiased">
     <div id="root"></div>

@@ -14,10 +14,10 @@ import {
 } from "@/components/dashboard-widget/dashboard-widget-grid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useMyDashboardWidgetData } from "@/hooks/use-my-dashboard-widgets";
 import { cn } from "@/lib/utils";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
+  DashboardDatasetDetail,
   DatasetData,
   DatasetMeta,
   DatasetShape,
@@ -27,6 +27,13 @@ import { inferModuleName, inferSubTile, SUPPORTED_SHAPES } from "./widget-shape"
 
 interface SortableWidgetItemProps {
   readonly widget: MyDashboardWidget;
+  /**
+   * ข้อมูลที่ resolve แล้วของ widget นี้ — parent เป็นคน fetch (ดู
+   * `SavedWidgetsSection`) โดยยิงตาม widget id เพื่อให้ backend ใช้ `params`
+   * ที่เก็บไว้บน widget เอง
+   */
+  readonly detail: DashboardDatasetDetail | undefined;
+  readonly isLoading: boolean;
   readonly onDelete: () => void;
   /** descriptor ของ dataset — ใช้ตัดสินว่าจะโชว์ปุ่มตั้งค่า param ไหม */
   readonly dataset?: DashboardDataset;
@@ -42,6 +49,8 @@ function getColSpan(widgetType: string): string {
 
 export function SortableWidgetItem({
   widget,
+  detail,
+  isLoading,
   onDelete,
   dataset,
   onConfigure,
@@ -55,10 +64,6 @@ export function SortableWidgetItem({
     transition,
     isDragging,
   } = useSortable({ id: widget.id });
-
-  // ยิงตาม widget.id ไม่ใช่ dataset_id — backend resolve `params` ที่เก็บไว้
-  // บน widget ให้เอง
-  const { data: detail, isLoading } = useMyDashboardWidgetData(widget.id);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -207,10 +212,10 @@ function UnsupportedCard({
           <p className="truncate text-sm font-semibold leading-snug">
             {title}
           </p>
-          <p className="text-muted-foreground text-[0.6875rem] font-semibold uppercase tracking-wide">
+          <p className="text-muted-foreground text-micro font-semibold uppercase tracking-wide">
             {t("unsupportedTitle")}
           </p>
-          <p className="text-muted-foreground text-[0.6875rem] leading-snug">
+          <p className="text-muted-foreground text-micro leading-snug">
             {t("unsupportedDescription", { shape })}
           </p>
         </div>

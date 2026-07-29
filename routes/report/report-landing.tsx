@@ -99,7 +99,7 @@ function Hero() {
   return (
     <section className="relative p-4">
       {/* Top-right meta strip */}
-      <div className="text-muted-foreground absolute top-12 right-6 hidden gap-3 text-[0.625rem] tracking-wider uppercase sm:right-12 sm:flex">
+      <div className="text-muted-foreground absolute top-12 right-6 hidden gap-3 text-micro-legal tracking-wider uppercase sm:right-12 sm:flex">
         <span>{t("moduleLabel")}</span>
         <span>·</span>
         <span>{t("version")}</span>
@@ -204,7 +204,7 @@ function Chapter({
             <span className="text-primary text-6xl leading-none font-extrabold tracking-tight">
               {n}
             </span>
-            <div className="border-primary text-primary border-t-2 pt-2 text-[0.625rem] font-bold tracking-[0.14em] uppercase">
+            <div className="border-primary text-primary border-t-2 pt-2 text-micro-legal font-bold tracking-[0.14em] uppercase">
               {t(kickerKey)}
             </div>
           </div>
@@ -226,7 +226,7 @@ function Chapter({
                   i !== bulletTitleKeys.length - 1 && "border-b",
                 )}
               >
-                <span className="text-muted-foreground w-7 shrink-0 pt-1 text-[0.625rem] font-semibold">
+                <span className="text-muted-foreground w-7 shrink-0 pt-1 text-micro-legal font-semibold">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
@@ -248,7 +248,7 @@ function Chapter({
                 <ArrowRight className="size-3.5" aria-hidden="true" />
               </Link>
             </Button>
-            <span className="text-muted-foreground text-[0.6875rem] tracking-wider">
+            <span className="text-muted-foreground text-micro tracking-wider">
               {t(shortcutKey)}
             </span>
           </div>
@@ -286,11 +286,11 @@ function MenuVisual() {
       </FloatNote>
 
       <div className="border-border/50 mb-3 flex items-center gap-2 border-b pb-3">
-        <span className="text-primary text-[0.625rem] font-bold tracking-[0.12em] uppercase">
+        <span className="text-primary text-micro-legal font-bold tracking-[0.12em] uppercase">
           {t("menuVisualHeader")}
         </span>
         <span className="flex-1" />
-        <span className="border-border text-muted-foreground rounded border px-1.5 py-0.5 text-[0.625rem]">
+        <span className="border-border text-muted-foreground rounded border px-1.5 py-0.5 text-micro-legal">
           {t("menuVisualBadge")}
         </span>
       </div>
@@ -300,7 +300,7 @@ function MenuVisual() {
           <span
             key={c}
             className={cn(
-              "rounded border px-2 py-0.5 text-[0.6875rem] font-semibold",
+              "rounded border px-2 py-0.5 text-micro font-semibold",
               i === 0
                 ? "border-foreground text-foreground"
                 : "border-border text-muted-foreground",
@@ -326,7 +326,7 @@ function MenuVisual() {
               )}
               aria-hidden="true"
             />
-            <span className="text-foreground/70 text-[0.625rem] font-semibold">
+            <span className="text-foreground/70 text-micro-legal font-semibold">
               {r.code}
             </span>
             <span className="text-foreground text-xs leading-tight font-semibold">
@@ -341,7 +341,7 @@ function MenuVisual() {
         ))}
       </ul>
 
-      <div className="border-border/40 text-muted-foreground mt-3 border-t border-dashed pt-2 text-center text-[0.6875rem] italic">
+      <div className="border-border/40 text-muted-foreground mt-3 border-t border-dashed pt-2 text-center text-micro italic">
         {t("menuVisualFooter")}
       </div>
     </div>
@@ -378,12 +378,12 @@ function ScheduleVisual() {
       </FloatNote>
 
       <div className="border-border/50 mb-3 flex items-center gap-2 border-b pb-3">
-        <span className="text-primary text-[0.625rem] font-bold tracking-[0.12em] uppercase">
+        <span className="text-primary text-micro-legal font-bold tracking-[0.12em] uppercase">
           {t("scheduleVisualHeader")}
         </span>
         <span className="flex-1" />
         <Clock className="text-muted-foreground size-3" aria-hidden="true" />
-        <span className="text-muted-foreground text-[0.625rem]">
+        <span className="text-muted-foreground text-micro-legal">
           {t("scheduleVisualNext")}
         </span>
       </div>
@@ -391,7 +391,7 @@ function ScheduleVisual() {
       <div className="grid grid-cols-7 gap-1">
         {days.map((d, di) => (
           <div key={d}>
-            <div className="text-muted-foreground border-border/40 border-b py-1 text-center text-[0.5625rem] font-bold tracking-wider uppercase">
+            <div className="text-muted-foreground border-border/40 border-b py-1 text-center text-micro-eyebrow font-semibold tracking-wider uppercase">
               {d}
             </div>
             <div className="flex min-h-34 flex-col gap-1 py-1.5">
@@ -409,10 +409,10 @@ function ScheduleVisual() {
                       borderLeft: `2px solid ${c.tone}`,
                     }}
                   >
-                    <div className="text-foreground/70 text-[0.5rem] font-bold">
+                    <div className="text-foreground/70 text-micro-floor font-semibold">
                       {c.t}
                     </div>
-                    <div className="text-foreground text-[0.5625rem] leading-tight font-semibold">
+                    <div className="text-foreground text-micro-legal leading-tight font-semibold">
                       {c.label}
                     </div>
                   </div>
@@ -422,7 +422,7 @@ function ScheduleVisual() {
         ))}
       </div>
 
-      <div className="border-border/40 text-muted-foreground mt-3 flex items-center gap-4 border-t pt-3 text-[0.625rem]">
+      <div className="border-border/40 text-muted-foreground mt-3 flex items-center gap-4 border-t pt-3 text-micro-legal">
         <span>
           <strong className="text-foreground">3</strong>{" "}
           {t("scheduleVisualLegendDaily", { n: "" })}
@@ -503,24 +503,24 @@ function HistoryVisual() {
       </FloatNote>
 
       <div className="border-border/50 mb-3 flex items-center gap-2 border-b pb-3">
-        <span className="text-primary text-[0.625rem] font-bold tracking-[0.12em] uppercase">
+        <span className="text-primary text-micro-legal font-bold tracking-[0.12em] uppercase">
           {t("historyVisualHeader")}
         </span>
         <span className="flex-1" />
         <span
-          className="text-[0.625rem] font-semibold"
+          className="text-micro-legal font-semibold"
           style={{ color: "var(--positive)" }}
         >
           {t("historyVisualOk", { n: 7 })}
         </span>
         <span
-          className="text-[0.625rem] font-semibold"
+          className="text-micro-legal font-semibold"
           style={{ color: "var(--warning)" }}
         >
           · {t("historyVisualPartial", { n: 1 })}
         </span>
         <span
-          className="text-[0.625rem] font-semibold"
+          className="text-micro-legal font-semibold"
           style={{ color: "var(--destructive)" }}
         >
           · {t("historyVisualFailed", { n: 1 })}
@@ -552,14 +552,14 @@ function HistoryVisual() {
               }}
             />
             <div className="flex items-center gap-2">
-              <span className="text-foreground/70 min-w-9 text-[0.625rem] font-semibold">
+              <span className="text-foreground/70 min-w-9 text-micro-legal font-semibold">
                 {r.time}
               </span>
               <span className="text-foreground flex-1 text-xs leading-tight font-semibold">
                 {r.name}
               </span>
               {r.rows != null && (
-                <span className="text-muted-foreground text-[0.625rem]">
+                <span className="text-muted-foreground text-micro-legal">
                   {r.rows.toLocaleString()}
                   {r.size && ` · ${r.size}`}
                 </span>
@@ -569,7 +569,7 @@ function HistoryVisual() {
         ))}
       </ol>
 
-      <div className="border-border/40 text-muted-foreground mt-3 flex justify-between border-t pt-2 text-[0.6875rem]">
+      <div className="border-border/40 text-muted-foreground mt-3 flex justify-between border-t pt-2 text-micro">
         <span>{t("historyVisualRetention")}</span>
         <span>{t("historyVisualDuration")}</span>
       </div>
@@ -587,7 +587,7 @@ function FloatNote({
   return (
     <span
       className={cn(
-        "bg-foreground text-background absolute rounded px-2 py-1 text-[0.625rem] font-semibold whitespace-nowrap",
+        "bg-foreground text-background absolute rounded px-2 py-1 text-micro-legal font-semibold whitespace-nowrap",
         className,
       )}
     >

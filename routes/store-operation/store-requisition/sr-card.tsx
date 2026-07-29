@@ -1,4 +1,11 @@
-import { CalendarDays, Building2, User, Workflow, MapPin } from "lucide-react";
+import {
+  CalendarDays,
+  Building2,
+  User,
+  Workflow,
+  MapPin,
+  Clock,
+} from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -35,7 +42,7 @@ interface SrCardProps {
  */
 export default function SrCard({ item, index, onEdit }: SrCardProps) {
   const tfl = useTranslations("field");
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
 
   const config =
     SR_STATUS_CONFIG[item.doc_status] ?? SR_STATUS_CONFIG.draft;
@@ -64,7 +71,7 @@ export default function SrCard({ item, index, onEdit }: SrCardProps) {
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -126,6 +133,17 @@ export default function SrCard({ item, index, onEdit }: SrCardProps) {
             <span className="text-muted-foreground truncate">
               {item.workflow_name}
               {item.workflow_current_stage && ` / ${item.workflow_current_stage}`}
+            </span>
+          </div>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-center gap-1.5">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
             </span>
           </div>
         )}

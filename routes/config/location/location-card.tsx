@@ -1,9 +1,11 @@
-import { CircleCheck, CircleX, Tag, Truck } from "lucide-react";
+import { CircleCheck, CircleX, Clock, Tag, Truck } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { LocationTypeBadge } from "@/components/ui/location-type-badge";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { Location } from "@/types/location";
 
 interface LocationCardProps {
@@ -28,6 +30,7 @@ interface LocationCardProps {
 export default function LocationCard({ item, index, onEdit }: LocationCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
+  const { dateTimeFormat } = useProfile();
 
   return (
     <Card
@@ -45,7 +48,7 @@ export default function LocationCard({ item, index, onEdit }: LocationCardProps)
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -63,7 +66,7 @@ export default function LocationCard({ item, index, onEdit }: LocationCardProps)
         <div className="flex items-center gap-2">
           {item.physical_count_type === "yes" ? (
             <CircleCheck
-              className="text-positive size-3 shrink-0"
+              className="text-positive-ink size-3 shrink-0"
               aria-hidden="true"
             />
           ) : (
@@ -99,6 +102,17 @@ export default function LocationCard({ item, index, onEdit }: LocationCardProps)
             <Badge variant="secondary" size="sm" className="text-xs">
               {ts("inactive")}
             </Badge>
+          </div>
+        )}
+        {item.audit?.updated?.at && (
+          <div className="flex items-center gap-2">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground truncate">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
+            </span>
           </div>
         )}
       </CardContent>

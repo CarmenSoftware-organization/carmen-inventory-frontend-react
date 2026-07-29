@@ -222,11 +222,12 @@ export function StoreRequisitionForm({
             !storeRequisition?.doc_status ||
             storeRequisition.doc_status === "draft"
           }
+          isAdd={isAdd}
         />
 
         {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
         {(!isDescReadOnly || description?.trim()) && (
-          <Field className={isDescReadOnly ? "gap-1" : undefined}>
+          <Field>
             <FieldLabel
               htmlFor="sr-description"
               className={

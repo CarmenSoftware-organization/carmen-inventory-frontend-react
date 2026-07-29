@@ -36,7 +36,7 @@ export function useProductEcoLabels(
       );
       const res = await httpClient.get(url);
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to load product eco labels");
+        throw await ApiError.from(res, "Failed to load product eco labels");
       }
       return res.json();
     },

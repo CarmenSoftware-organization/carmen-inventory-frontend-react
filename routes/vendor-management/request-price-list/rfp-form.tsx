@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/field";
 import { LookupPrt } from "@/components/lookup/lookup-prt";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
@@ -90,8 +90,12 @@ export function RequestPriceListForm({
     isDirty: form.formState.isDirty,
     isPending,
   });
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty,
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
   );
 
   const today = (() => {
@@ -215,11 +219,13 @@ export function RequestPriceListForm({
             form.reset({ ...values, vendors: { add: [], remove: [] } });
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network
+      setIsSubmitting(true);
       createRfp.mutate(payload, {
+        onError: () => setIsSubmitting(false),
         onSuccess: (res) => {
           const id = (res as { data: { id: string } }).data.id;
           toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -227,7 +233,6 @@ export function RequestPriceListForm({
             replace: true,
           });
         },
-        onError: (err) => toast.error(err.message),
       });
     }
   };
@@ -246,7 +251,9 @@ export function RequestPriceListForm({
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => navigate(-1));
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      discard.confirm(() => navGuard.back());
     } else {
       navigate(-1);
     }
@@ -259,7 +266,6 @@ export function RequestPriceListForm({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/vendor-management/request-price-list");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -267,83 +273,70 @@ export function RequestPriceListForm({
 
   return (
     <div className="mx-auto max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="w-fit"
-            aria-label={tc("goBack")}
-            onClick={handleBack}
-          >
-            <ChevronLeft />
-          </Button>
-          <h1
-            className={cn(
-              "truncate text-lg font-semibold tracking-tight",
-              watchedName ? "text-foreground" : "text-muted-foreground italic",
-            )}
-          >
-            {watchedName || t("namePlaceholder")}
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          {isView ? (
-            <>
-              <Button size="sm" onClick={() => setMode("edit")}>
-                <Pencil />
-                {tc("edit")}
-              </Button>
-              {requestPriceList?.id && (
-                <PrintDocumentButton
-                  documentType="RFQ"
-                  documentId={requestPriceList.id}
-                  filters={
-                    requestPriceList.name
-                      ? { DocumentNo: requestPriceList.name }
-                      : undefined
-                  }
-                />
-              )}
-            </>
-          ) : (
-            <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-                disabled={isPending}
-              >
-                <X />
-                {tc("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form={FORM_ID}
-                disabled={isPending}
-              >
-                <Save />
-                {submitLabel}
-              </Button>
-              {isEdit && requestPriceList && (
+      <div className="mb-6">
+        <DocFormHeader
+          flush
+          title={watchedName || t("namePlaceholder")}
+          titleMuted={!watchedName}
+          backLabel={tc("goBack")}
+          onBack={handleBack}
+          actions={
+            isView ? (
+              <>
+                <Button size="sm" onClick={() => setMode("edit")}>
+                  <Pencil />
+                  {tc("edit")}
+                </Button>
+                {requestPriceList?.id && (
+                  <PrintDocumentButton
+                    documentType="RFP"
+                    documentId={requestPriceList.id}
+                    filters={
+                      requestPriceList.name
+                        ? { DocumentNo: requestPriceList.name }
+                        : undefined
+                    }
+                  />
+                )}
+              </>
+            ) : (
+              <>
                 <Button
                   type="button"
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setShowDelete(true)}
-                  disabled={deleteRfp.isPending || isPending}
+                  onClick={handleCancel}
+                  disabled={isPending}
                 >
-                  <Trash2 />
-                  {tc("delete")}
+                  <X />
+                  {tc("cancel")}
                 </Button>
-              )}
-            </>
-          )}
-        </div>
-      </header>
+                <Button
+                  type="submit"
+                  size="sm"
+                  form={FORM_ID}
+                  disabled={isPending}
+                >
+                  <Save />
+                  {submitLabel}
+                </Button>
+                {isEdit && requestPriceList && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowDelete(true)}
+                    disabled={deleteRfp.isPending || isPending}
+                  >
+                    <Trash2 />
+                    {tc("delete")}
+                  </Button>
+                )}
+              </>
+            )
+          }
+        />
+      </div>
 
       <form
         id={FORM_ID}
@@ -465,7 +458,7 @@ export function RequestPriceListForm({
           <Field className="sm:col-span-2">
             <FieldLabel>{t("customMessageTitle")}</FieldLabel>
             {isView ? (
-              <FieldPlainText className="items-start whitespace-pre-wrap">
+              <FieldPlainText className="whitespace-pre-wrap">
                 {requestPriceList?.custom_message}
               </FieldPlainText>
             ) : (

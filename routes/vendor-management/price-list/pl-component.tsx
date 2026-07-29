@@ -68,7 +68,7 @@ export default function PriceListComponent() {
   const deletePriceList = useDeletePriceList();
   const { exportPriceList, isExporting } = useExportPriceList();
   const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
+    useDataGridState({ defaultSort: "pricelist_no:asc" });
   const [vendorFilter, setVendorFilter] = useURL("vendor");
 
   const { data: vendorData } = useVendor({ perpage: -1 });
@@ -103,6 +103,7 @@ export default function PriceListComponent() {
 
   const statusOptions = [
     { label: ts("draft"), value: "status|string:draft" },
+    { label: ts("submitted"), value: "status|string:submitted" },
     { label: ts("active"), value: "status|string:active" },
     { label: ts("inactive"), value: "status|string:inactive" },
   ];
@@ -158,7 +159,7 @@ export default function PriceListComponent() {
           },
           {
             header: tfl("status"),
-            value: (r) => ts(r.status as "draft" | "active" | "inactive"),
+            value: (r) => ts(r.status as "draft" | "submitted" | "active" | "inactive"),
             width: 12,
           },
           {
@@ -245,7 +246,7 @@ export default function PriceListComponent() {
                     <Badge
                       variant="secondary"
                       size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[0.625rem] tabular-nums"
+                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
                     >
                       {activeFilters.length}
                     </Badge>
@@ -388,7 +389,6 @@ export default function PriceListComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

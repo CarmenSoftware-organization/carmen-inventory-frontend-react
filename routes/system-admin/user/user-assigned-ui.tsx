@@ -1,17 +1,10 @@
-
 import type { ReactNode } from "react";
 import { formatName } from "@/lib/name";
 import { cn } from "@/lib/utils";
 
 /* Re-export shared admin primitives so existing imports from this file
    keep working without churn. */
-export {
-  StatTile,
-  SectionCard,
-  EmptyState,
-  FilterChip,
-  type Tone,
-} from "../shared/admin-ui";
+export { SectionCard, EmptyState, FilterChip } from "../shared/admin-ui";
 
 /* ------------------------------------------------------------------ */
 /* AssignSection — 2-column "settings" row (mirrors company-profile)  */

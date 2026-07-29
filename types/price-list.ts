@@ -1,4 +1,6 @@
-export type PriceListStatus = "draft" | "active" | "inactive";
+import type { AuditEntry, Audit } from "@/types/audit";
+
+export type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
 
 /**
  * Vendor record จาก `/{buCode}/pricelists/active-vendors/{date}` —
@@ -31,23 +33,17 @@ export interface PriceListDetailItem {
   tax_rate: number;
   tax_amt: number;
   lead_time_days: number;
+  is_preferred: boolean;
   is_active: boolean;
   description: string | null;
   note: string | null;
   info: Record<string, unknown>;
   dimension: unknown[];
+  doc_version?: number;
 }
 
-export interface PriceListAuditEntry {
-  at: string;
-  id: string;
-  name: string;
-}
-
-export interface PriceListAudit {
-  created?: PriceListAuditEntry;
-  updated?: PriceListAuditEntry;
-}
+export type PriceListAuditEntry = AuditEntry;
+export type PriceListAudit = Audit;
 
 export interface PriceList {
   id: string;
@@ -86,6 +82,7 @@ export interface CreatePriceListDto {
       tax_amt: number;
       lead_time_days: number;
       moq_qty: number;
+      is_preferred: boolean;
     }[];
     update?: {
       id: string;
@@ -99,6 +96,7 @@ export interface CreatePriceListDto {
       tax_amt: number;
       lead_time_days: number;
       moq_qty: number;
+      is_preferred: boolean;
     }[];
     remove?: { id: string }[];
   };

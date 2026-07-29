@@ -24,7 +24,7 @@ export function ResumeInfoPanel({ latest, dateFormat }: ResumeInfoPanelProps) {
         />
       </div>
 
-      <div className="text-muted-foreground flex items-center justify-between gap-3 px-3 py-2 text-[0.6875rem]">
+      <div className="text-muted-foreground flex items-center justify-between gap-3 px-3 py-2 text-micro">
         <span className="inline-flex items-center gap-1.5">
           <Calendar className="size-3 shrink-0" aria-hidden="true" />
           <span className="font-semibold">{tfl("startDate")}</span>

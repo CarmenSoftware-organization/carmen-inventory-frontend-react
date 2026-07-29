@@ -76,8 +76,15 @@ export function useDataGridState(options?: UseDataGridStateOptions) {
     if (next.length > 0) {
       setSort(`${next[0].id}:${next[0].desc ? "desc" : "asc"}`);
     } else if (options?.defaultSort) {
-      const [id, dir] = options.defaultSort.split(":");
-      setSort(`${id}:${dir === "desc" ? "asc" : "desc"}`);
+      // TanStack ขอ removal (คลิกครั้งที่ 3 ของ column) — เมื่อมี default sort เรา
+      // ไม่ต้องการ state "ไม่เรียง" จึงพลิกทิศจาก sort ปัจจุบันแทน เพื่อให้คลิกสลับ
+      // asc↔desc ได้ตลอด (ถ้าพลิกจากทิศ default คงที่ จะค้างเมื่อ default เป็น asc)
+      const current = sorting[0];
+      if (current) {
+        setSort(`${current.id}:${current.desc ? "asc" : "desc"}`);
+      } else {
+        setSort(options.defaultSort);
+      }
     } else {
       setSort("");
     }

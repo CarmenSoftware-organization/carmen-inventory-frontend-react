@@ -118,7 +118,6 @@ function EditForm({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           onOpenChange(false);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -126,7 +125,7 @@ function EditForm({
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
       {/* Metadata strip */}
-      <div className="text-muted-foreground bg-muted/40 flex flex-wrap items-center gap-x-3 gap-y-1 border-t px-5 py-2 text-[0.6875rem]">
+      <div className="text-muted-foreground bg-muted/40 flex flex-wrap items-center gap-x-3 gap-y-1 border-t px-5 py-2 text-micro">
         <Badge variant="primary-light" size="xs">
           {item?.currency_code ?? "—"}
         </Badge>
@@ -153,7 +152,7 @@ function EditForm({
       <div className="space-y-3 border-t px-5 py-4">
         {/* Current rate display */}
         <div className="bg-muted/40 rounded-lg border p-3 text-center">
-          <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
+          <p className="text-muted-foreground text-micro-legal font-semibold tracking-wider uppercase">
             {t("currencyCode")} · {t("current")}
           </p>
           <p className="mt-1 text-xl leading-tight font-bold tabular-nums">
@@ -198,7 +197,7 @@ function EditForm({
                 !hasChange
                   ? "text-muted-foreground"
                   : isIncrease
-                    ? "text-success"
+                    ? "text-success-ink"
                     : "text-destructive"
               }`}
             >
@@ -209,12 +208,12 @@ function EditForm({
               )}
             </div>
             <div>
-              <p className="text-[0.625rem] font-semibold tracking-wider uppercase">
+              <p className="text-micro-legal font-semibold tracking-wider uppercase">
                 {!hasChange && t("noChange")}
                 {hasChange && isIncrease && t("increase")}
                 {hasChange && !isIncrease && t("decrease")}
               </p>
-              <p className="text-muted-foreground text-[0.625rem]">
+              <p className="text-muted-foreground text-micro-legal">
                 {t("vsCurrentRate")}
               </p>
             </div>
@@ -225,7 +224,7 @@ function EditForm({
               {formatExchangeRate(delta)}
             </p>
             {hasChange && (
-              <p className="text-muted-foreground text-[0.625rem] tabular-nums">
+              <p className="text-muted-foreground text-micro-legal tabular-nums">
                 {isIncrease ? "+" : "−"}
                 {deltaPct.toFixed(2)}%
               </p>
@@ -301,7 +300,6 @@ function CreateForm({
           });
           onOpenChange(false);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };

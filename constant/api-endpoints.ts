@@ -41,8 +41,6 @@ export const API_ENDPOINTS = {
   APP_CONFIGS: (buCode: string) => `/api/proxy/api/config/${buCode}/app-config`,
   APP_CONFIG_BY_KEY: (buCode: string, key: string) =>
     `/api/proxy/api/config/${buCode}/app-config/${key}`,
-  APP_CONFIG_SIGNATURE_CANDIDATES: (buCode: string, docType: string) =>
-    `/api/proxy/api/config/${buCode}/app-config/signature-candidates/${docType}`,
   APP_CONFIG_TEST_EMAIL: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/app-config/test-email`,
   BUSINESS_UNIT: "/api/proxy/api/business-units",
@@ -202,6 +200,8 @@ export const API_ENDPOINTS = {
     `/api/external/api/pricelist-external/${toSafePathSegment(urlToken)}`,
   PRICE_LIST_EXTERNAL_CHECK: (urlToken: string) =>
     `/api/external/api/check-pricelist/${toSafePathSegment(urlToken)}`,
+  PRICE_LIST_EXTERNAL_TAX_PROFILES: (urlToken: string) =>
+    `/api/external/api/check-pricelist/${toSafePathSegment(urlToken)}/tax-profiles`,
   PRICE_LIST_TEMPLATES: (buCode: string) =>
     `/api/proxy/api/${buCode}/pricelist-templates`,
   PRODUCTS: (buCode: string) => `/api/proxy/api/config/${buCode}/products`,
@@ -312,6 +312,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/reports/history`,
   REPORT_TEMPLATES: (buCode: string) =>
     `/api/proxy/api/${buCode}/reports/templates`,
+  /** platform-level form templates (ไม่ผูก BU) — ใช้เลือกแบบฟอร์มการพิมพ์ */
+  REPORT_TEMPLATE_FORMS: "/api/proxy/api-system/report-templates/forms",
   REPORT_LOOKUPS: (buCode: string) =>
     `/api/proxy/api/${buCode}/reports/lookups`,
   REPORT_VIEWER: (buCode: string) => `/api/proxy/api/${buCode}/reports/viewer`,

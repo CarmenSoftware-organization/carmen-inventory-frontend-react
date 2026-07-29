@@ -1,3 +1,5 @@
+import { Clock } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Card,
@@ -7,6 +9,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { CnReason } from "@/types/cn-reason";
 
 interface CreditNoteReasonCardProps {
@@ -28,6 +32,8 @@ export default function CreditNoteReasonCard({
   index,
   onEdit,
 }: CreditNoteReasonCardProps) {
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
   return (
     <Card
       role="button"
@@ -44,7 +50,7 @@ export default function CreditNoteReasonCard({
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -57,13 +63,27 @@ export default function CreditNoteReasonCard({
         </CardAction>
       </CardHeader>
 
-      {item.description && (
+      {(item.description || item.audit?.updated?.at) && (
         <>
           <Separator />
-          <CardContent className="px-4 py-2">
-            <p className="text-muted-foreground line-clamp-2 text-xs">
-              {item.description}
-            </p>
+          <CardContent className="space-y-1.5 px-4 py-2 text-xs">
+            {item.description && (
+              <p className="text-muted-foreground line-clamp-2 text-xs">
+                {item.description}
+              </p>
+            )}
+            {item.audit?.updated?.at && (
+              <div className="flex items-center gap-1.5">
+                <Clock
+                  className="text-muted-foreground size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-muted-foreground truncate">
+                  {tfl("updated")}:{" "}
+                  {formatDate(item.audit.updated.at, dateTimeFormat)}
+                </span>
+              </div>
+            )}
           </CardContent>
         </>
       )}

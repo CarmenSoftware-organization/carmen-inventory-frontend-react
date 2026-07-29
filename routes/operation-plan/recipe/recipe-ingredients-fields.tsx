@@ -53,6 +53,7 @@ export function RecipeIngredientsFields({
   return (
     <Card
       label={t("ingredients")}
+      description={t("ingredientsDesc")}
       action={
         !isDisabled && ingredients.length > 0 ? (
           <Button type="button" size="xs" onClick={handleAdd} className="gap-1">
@@ -78,7 +79,7 @@ export function RecipeIngredientsFields({
             </>
           )}
         </p>
-        <span className="border-warning/30 bg-warning/10 text-warning-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[0.625rem] font-semibold">
+        <span className="border-warning/30 bg-warning/10 text-warning-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro-legal font-semibold">
           <Info className="size-2.5" aria-hidden="true" />
           {t("ingredientsPreviewNote")}
         </span>
@@ -96,7 +97,7 @@ export function RecipeIngredientsFields({
         <div className="overflow-x-auto rounded-md border">
           <table className="w-full min-w-160 text-xs">
             <thead className="bg-muted/60">
-              <tr className="text-foreground/70 text-left text-[0.625rem] font-bold tracking-[0.12em] uppercase">
+              <tr className="text-foreground/70 text-left text-micro-legal font-bold tracking-[0.12em] uppercase">
                 <th scope="col" className="w-8 px-2 py-2">
                   #
                 </th>
@@ -139,7 +140,7 @@ export function RecipeIngredientsFields({
               <tr className="border-foreground bg-muted/40 border-t-2 font-semibold">
                 <td
                   colSpan={4}
-                  className="text-foreground/80 px-2 py-2 text-[0.625rem] tracking-[0.12em] uppercase"
+                  className="text-foreground/80 px-2 py-2 text-micro-legal tracking-[0.12em] uppercase"
                 >
                   {t("totalRecipeCost")}
                 </td>
@@ -172,7 +173,7 @@ function IngredientRow({
   const lowYield = ingredient.yieldPct < 90;
   return (
     <tr className="border-border/60 border-t">
-      <td className="text-muted-foreground px-2 py-1.5 text-[0.6875rem]">
+      <td className="text-muted-foreground px-2 py-1.5 text-micro">
         {String(index).padStart(2, "0")}
       </td>
       <td className="px-2 py-1.5">
@@ -206,7 +207,7 @@ function IngredientRow({
       </td>
       <td className="px-2 py-1.5">
         <div className="relative">
-          <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-[0.625rem]">
+          <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-micro-legal">
             ฿
           </span>
           <FieldInput

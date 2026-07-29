@@ -12,6 +12,7 @@ import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { isoToDateInput } from "@/lib/date-utils";
 import { round2 } from "@/lib/currency-utils";
+import { computeLineAmounts } from "@/lib/line-pricing";
 
 /**
  * สร้าง zod schema สำหรับ detail แต่ละรายการของใบขอซื้อ
@@ -313,8 +314,9 @@ export function getDefaultValues(
   }
   if (template) {
     return {
+      // ไม่ก็อป description ของ template มา — อันนั้นคือคำอธิบายตัว template
+      // ส่วนช่องนี้คือ Notes ของ PR ใบนี้ ต้องให้ผู้ใช้เขียนเอง
       ...EMPTY_FORM,
-      description: template.description ?? "",
       workflow_id: template.workflow_id ?? "",
       department_id: template.department_id ?? "",
       items:
@@ -458,16 +460,20 @@ export interface PrItemAmountInput {
  * เพื่อให้สูตรเดียวกัน ไม่ drift
  */
 export function computePrItemAmounts(input: PrItemAmountInput) {
-  const subtotal = round2(input.price * input.qty);
-  const discountAmount = input.isDiscAdj
-    ? input.discAmt
-    : round2((subtotal * input.discRate) / 100);
-  const netAmount = round2(subtotal - discountAmount);
-  const taxAmount = input.isTaxAdj
-    ? input.taxAmt
-    : round2((netAmount * input.taxRate) / 100);
-  const totalPrice = round2(netAmount + taxAmount);
-  return { subtotal, discountAmount, netAmount, taxAmount, totalPrice };
+  // สูตรกลาง (shared กับ PO) — ดู lib/line-pricing.ts
+  return computeLineAmounts(input);
+}
+
+/**
+ * จำนวนที่ใช้คิดเงินจริงของ item — ผู้อนุมัติยังไม่ระบุ approved_qty (= 0)
+ * ให้ถือว่าอนุมัติเท่าที่ขอ. ต้องใช้ตัวเดียวกันทั้งจอ (pr-item-expand /
+ * pr-item-fields) และ payload ไม่งั้นยอดที่บันทึกไม่ตรงกับที่ผู้ใช้เห็น
+ */
+export function resolveApprovedQty(
+  item: Pick<PrFormValues["items"][number], "approved_qty" | "requested_qty">,
+): number {
+  const approved = Number(item.approved_qty) || 0;
+  return approved > 0 ? approved : Number(item.requested_qty) || 0;
 }
 
 /**
@@ -522,7 +528,7 @@ export function prepareApproveDetails(
       purchase_request_id: purchaseRequestId,
       stage_status: resolveApproveStageStatus(item),
       stage_message: item.stage_message || "",
-      approved_qty: Number(item.approved_qty),
+      approved_qty: resolveApprovedQty(item),
       approved_unit_id: item.approved_unit_id || item.requested_unit_id,
       vendor_id: item.vendor_id || undefined,
       // omit null string FK ทั้งหมด — backend zod รับเป็น string (ห้าม null);
@@ -551,19 +557,22 @@ export function prepareApproveDetails(
 }
 
 /**
- * สร้าง payload สำหรับ workflow action ของ PR (stage role purchase)
- * คำนวณ subtotal/discount/tax/total จากราคาและจำนวนที่อนุมัติ
+ * สร้าง payload สำหรับ stage role purchase — ใช้ทั้ง /save และ /approve
+ * (backend ใช้ schema เดียวกันสองที่ ต่างแค่ /save ตัด stage_status/stage_message ทิ้ง)
+ * คำนวณ subtotal/discount/tax/total ด้วย qty เดียวกับที่จอโชว์ (resolveApprovedQty)
  * @param items - รายการ items ของฟอร์ม PR (เฉพาะรายการที่มี id)
+ * @param purchaseRequestId - id ของ PR — backend บังคับให้มีในทุก detail
  * @returns รายการ PurchaseApproveDetail สำหรับส่งไป API
  */
 export function preparePurchaseDetails(
   items: PrFormValues["items"],
+  purchaseRequestId?: string,
 ): PurchaseApproveDetail[] {
   return items
     .filter((item) => item.id)
     .map((item) => {
       const price = Number(item.pricelist_price ?? 0);
-      const approvedQty = Number(item.approved_qty ?? 0);
+      const approvedQty = resolveApprovedQty(item);
       const discRate = Number(item.discount_rate ?? 0);
       const discAmt = Number(item.discount_amount ?? 0);
       const isDiscAdj = item.is_discount_adjustment ?? false;
@@ -582,6 +591,7 @@ export function preparePurchaseDetails(
 
       return {
         id: item.id!,
+        purchase_request_id: purchaseRequestId,
         stage_status: resolveApproveStageStatus(item),
         stage_message: item.stage_message || null,
         is_tax_adjustment: isTaxAdj,
@@ -590,16 +600,17 @@ export function preparePurchaseDetails(
         approved_unit_id: item.approved_unit_id || item.requested_unit_id,
         approved_base_qty: approvedQty,
         approved_unit_conversion_factor: 1,
-        vendor_id: item.vendor_id || null,
-        currency_id: item.currency_id || null,
+        // omit null string FK ทั้งหมด — backend zod รับเป็น string (ห้าม null);
+        // แถวที่ถูก reject มักยังไม่มี vendor/currency/tax → ต้องไม่ส่ง null
+        vendor_id: item.vendor_id || undefined,
+        currency_id: item.currency_id || undefined,
         exchange_rate: exchangeRate,
         exchange_rate_date: null,
-        tax_profile_id: item.tax_profile_id || null,
-        tax_profile_name: null,
+        tax_profile_id: item.tax_profile_id || undefined,
+        tax_profile_name: item.tax_profile_name || undefined,
         tax_rate: taxRate,
         tax_amount: tax,
         base_tax_amount: round2(tax * exchangeRate),
-        total_amount: total,
         discount_rate: discRate,
         discount_amount: discount,
         is_discount_adjustment: isDiscAdj,
@@ -613,13 +624,15 @@ export function preparePurchaseDetails(
         base_price: round2(price * exchangeRate),
         foc_qty: Number(item.foc_qty ?? 0),
         foc_unit_id: item.foc_unit_id || null,
-        foc_unit_conversion_rate: 1,
         foc_base_qty: Number(item.foc_qty ?? 0),
+        // สอง field นี้ backend บังคับให้ "มี key" ได้ (nullable ไม่ optional)
         pricelist_detail_id: item.pricelist_detail_id || null,
         pricelist_no: item.pricelist_no || null,
         pricelist_price: price,
-        pricelist_type: item.pricelist_type || null,
-        current_stage_status: item.current_stage_status || "pending",
+        pricelist_type: item.pricelist_type || undefined,
+        current_stage_status: denormalizeStageStatus(
+          item.current_stage_status || "pending",
+        ),
       };
     });
 }

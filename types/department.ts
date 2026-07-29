@@ -1,3 +1,4 @@
+import type { Audit } from "./audit";
 import type { TransferPayload } from "@/types/transfer";
 
 export interface DepartmentUser {
@@ -17,10 +18,10 @@ export interface Department {
   name: string;
   description: string;
   is_active: boolean;
+  account_code?: string;
   department_users: DepartmentUser[];
   hod_users: DepartmentUser[];
-  created_at: string;
-  updated_at: string;
+  audit?: Audit;
 }
 
 export interface CreateDepartmentDto {
@@ -28,6 +29,7 @@ export interface CreateDepartmentDto {
   name: string;
   description: string;
   is_active: boolean;
+  account_code?: string;
   department_users: TransferPayload;
   hod_users: TransferPayload;
   /** Only sent on update (PATCH) for optimistic concurrency; absent on create. */

@@ -4,6 +4,7 @@ import { useWatch, type Control } from "react-hook-form";
 import { Check, Eye, SendHorizonal, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
+import { computeItemPricing } from "./po-item-pricing";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { PO_STATUS } from "@/types/purchase-order";
 import { STAGE_ROLE } from "@/types/stage-role";
@@ -65,32 +66,29 @@ export function PoFooterAction({
   const items = useWatch({ control, name: "items" });
   const docCurrencyCode = useWatch({ control, name: "currency_code" }) ?? "";
 
-  // grand summary — คำนวณ live จาก raw leaf fields (qty = sum locations.order_qty)
-  // pattern เดียวกับ po-notes-summary / pr-footer-action
+  // grand summary = ผลรวมของแถว โดยใช้ computeItemPricing ตัวเดียวกับที่ตารางใช้
+  // ห้ามคำนวณเองซ้ำ — ส่วนลด/ภาษีอยู่ระดับ location (แต่ละที่คนละเรต และ override
+  // เป็นจำนวนเงินได้) เขียนสูตรใหม่ที่นี่เมื่อไหร่ ยอดล่างกับยอดในตารางไม่ตรงกันทันที
   let subtotal = 0;
   let totalDiscount = 0;
   let totalNet = 0;
   let totalTax = 0;
   let grandTotal = 0;
   for (const item of items ?? []) {
-    const p = Number(item?.price ?? 0);
-    const q = (item?.locations ?? []).reduce(
-      (acc, l) => acc + (Number(l?.order_qty) || 0),
-      0,
-    );
-    const dr = Number(item?.discount_rate ?? 0);
-    const tr = Number(item?.tax_rate ?? 0);
-    const sub = round2(p * q);
-    const disc = round2((sub * dr) / 100);
-    const net = round2(sub - disc);
-    const tax = round2((net * tr) / 100);
-    subtotal += sub;
-    totalDiscount += disc;
-    totalNet += net;
-    totalTax += tax;
-    grandTotal += round2(net + tax);
+    const line = computeItemPricing(item);
+    subtotal += line.subtotal;
+    totalDiscount += line.discountAmount;
+    totalNet += line.netAmount;
+    totalTax += line.taxAmount;
+    grandTotal += line.totalPrice;
   }
-  const summary = { subtotal, totalDiscount, totalNet, totalTax, grandTotal };
+  const summary = {
+    subtotal: round2(subtotal),
+    totalDiscount: round2(totalDiscount),
+    totalNet: round2(totalNet),
+    totalTax: round2(totalTax),
+    grandTotal: round2(grandTotal),
+  };
 
   const itemStatuses = items.map((item) =>
     typeof item?.current_stage_status === "string"

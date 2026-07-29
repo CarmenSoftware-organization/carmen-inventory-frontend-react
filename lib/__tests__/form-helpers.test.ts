@@ -154,9 +154,8 @@ describe("buildItemChanges", () => {
   it("returns empty object when nothing changed", () => {
     const items: TestItem[] = [{ id: "1", name: "A", qty: 1 }];
     const defaults: TestItem[] = [{ id: "1", name: "A", qty: 1 }];
-    const dirty = [{}]; // no dirty fields
 
-    const result = buildItemChanges(items, defaults, dirty, mapFn);
+    const result = buildItemChanges(items, defaults, mapFn);
     expect(result).toEqual({});
   });
 
@@ -167,9 +166,8 @@ describe("buildItemChanges", () => {
       { id: null, name: "C", qty: 3 },
     ];
     const defaults: TestItem[] = [{ id: "1", name: "A", qty: 1 }];
-    const dirty = [{}];
 
-    const result = buildItemChanges(items, defaults, dirty, mapFn);
+    const result = buildItemChanges(items, defaults, mapFn);
     expect(result.add).toEqual([
       { name: "B", qty: 2 },
       { name: "C", qty: 3 },
@@ -186,12 +184,12 @@ describe("buildItemChanges", () => {
       { id: "3", name: "C", qty: 3 },
     ];
 
-    const result = buildItemChanges(items, defaults, [{}], mapFn);
+    const result = buildItemChanges(items, defaults, mapFn);
     expect(result.remove).toEqual([{ id: "2" }, { id: "3" }]);
     expect(result.add).toBeUndefined();
   });
 
-  it("detects updated items via dirtyFields", () => {
+  it("detects updated items by mapped-value comparison", () => {
     const items: TestItem[] = [
       { id: "1", name: "A-updated", qty: 1 },
       { id: "2", name: "B", qty: 2 },
@@ -200,10 +198,8 @@ describe("buildItemChanges", () => {
       { id: "1", name: "A", qty: 1 },
       { id: "2", name: "B", qty: 2 },
     ];
-    // Only first item is dirty
-    const dirty = [{ name: true }, {}];
 
-    const result = buildItemChanges(items, defaults, dirty, mapFn);
+    const result = buildItemChanges(items, defaults, mapFn);
     expect(result.update).toEqual([
       { id: "1", name: "A-updated", qty: 1 },
     ]);
@@ -211,7 +207,7 @@ describe("buildItemChanges", () => {
     expect(result.remove).toBeUndefined();
   });
 
-  it("falls back to shallow compare when dirtyFields is undefined", () => {
+  it("detects an item whose value changed", () => {
     const items: TestItem[] = [
       { id: "1", name: "A-changed", qty: 1 },
       { id: "2", name: "B", qty: 2 },
@@ -221,7 +217,7 @@ describe("buildItemChanges", () => {
       { id: "2", name: "B", qty: 2 },
     ];
 
-    const result = buildItemChanges(items, defaults, undefined, mapFn);
+    const result = buildItemChanges(items, defaults, mapFn);
     expect(result.update).toEqual([
       { id: "1", name: "A-changed", qty: 1 },
     ]);
@@ -231,10 +227,25 @@ describe("buildItemChanges", () => {
     const items: TestItem[] = [{ id: "99", name: "new-existing", qty: 5 }];
     const defaults: TestItem[] = [];
 
-    const result = buildItemChanges(items, defaults, undefined, mapFn);
+    const result = buildItemChanges(items, defaults, mapFn);
     expect(result.update).toEqual([
       { id: "99", name: "new-existing", qty: 5 },
     ]);
+  });
+
+  // Regression: adding a new row that shifts an already-edited existing row must
+  // not drop the edit. The old index-based dirtyFields check silently lost it.
+  it("keeps an edited existing item when a new row is prepended before it", () => {
+    const items: TestItem[] = [
+      { name: "NEW", qty: 9 }, // prepended add (no id) → pushes id:1 to index 1
+      { id: "1", name: "A-edited", qty: 1 },
+    ];
+    const defaults: TestItem[] = [{ id: "1", name: "A", qty: 1 }];
+
+    const result = buildItemChanges(items, defaults, mapFn);
+    expect(result.add).toEqual([{ name: "NEW", qty: 9 }]);
+    expect(result.update).toEqual([{ id: "1", name: "A-edited", qty: 1 }]);
+    expect(result.remove).toBeUndefined();
   });
 
   it("handles mixed add + update + remove in one call", () => {
@@ -247,9 +258,8 @@ describe("buildItemChanges", () => {
       { id: "1", name: "A", qty: 1 },
       { id: "2", name: "B", qty: 2 },
     ];
-    const dirty = [{ name: true, qty: true }];
 
-    const result = buildItemChanges(items, defaults, dirty, mapFn);
+    const result = buildItemChanges(items, defaults, mapFn);
 
     expect(result.add).toEqual([{ name: "D", qty: 4 }]);
     expect(result.update).toEqual([{ id: "1", name: "A-updated", qty: 10 }]);
@@ -262,12 +272,12 @@ describe("buildItemChanges", () => {
       { id: "2", name: "B", qty: 2 },
     ];
 
-    const result = buildItemChanges(items, items, [{}, {}], mapFn);
+    const result = buildItemChanges(items, items, mapFn);
     expect(result).toEqual({});
   });
 
   it("handles empty arrays", () => {
-    const result = buildItemChanges<TestItem, TestPayload>([], [], undefined, mapFn);
+    const result = buildItemChanges<TestItem, TestPayload>([], [], mapFn);
     expect(result).toEqual({});
   });
 
@@ -277,7 +287,7 @@ describe("buildItemChanges", () => {
       { id: "2", name: "B", qty: 2 },
     ];
 
-    const result = buildItemChanges([], defaults, undefined, mapFn);
+    const result = buildItemChanges([], defaults, mapFn);
     expect(result.remove).toEqual([{ id: "1" }, { id: "2" }]);
     expect(result.add).toBeUndefined();
     expect(result.update).toBeUndefined();
@@ -289,7 +299,7 @@ describe("buildItemChanges", () => {
       { name: "Y", qty: 2 },
     ];
 
-    const result = buildItemChanges(items, [], undefined, mapFn);
+    const result = buildItemChanges(items, [], mapFn);
     expect(result.add).toEqual([
       { name: "X", qty: 1 },
       { name: "Y", qty: 2 },

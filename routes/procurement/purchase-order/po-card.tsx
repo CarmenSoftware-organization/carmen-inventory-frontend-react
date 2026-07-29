@@ -3,6 +3,7 @@ import {
   Store,
   Truck,
   CalendarClock,
+  Clock,
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +47,7 @@ interface PoCardProps {
  */
 export default function PoCard({ item, index, onEdit }: PoCardProps) {
   const tfl = useTranslations("field");
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
 
   const status = item.po_status;
   const config = PO_STATUS_CONFIG[status];
@@ -67,7 +68,7 @@ export default function PoCard({ item, index, onEdit }: PoCardProps) {
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -129,6 +130,20 @@ export default function PoCard({ item, index, onEdit }: PoCardProps) {
             <p className="truncate font-semibold">{item.credit_term_value} {tfl("creditTermDays")}</p>
           </div>
         </div>
+        {item.audit?.updated?.at && (
+          <div className="flex items-start gap-2">
+            <Clock
+              className="text-muted-foreground mt-0.5 size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <div className="min-w-0">
+              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
+              <p className="truncate font-semibold">
+                {formatDate(item.audit.updated.at, dateTimeFormat)}
+              </p>
+            </div>
+          </div>
+        )}
       </CardContent>
 
       {item.total_amount != null && !Number.isNaN(item.total_amount) && (

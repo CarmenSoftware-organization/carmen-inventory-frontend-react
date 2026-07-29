@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { CircleAlert } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
+import { FieldPlainText } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -60,23 +60,18 @@ export function LookupCnReason({
   const [selectOpen, setSelectOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const { data } = useCnReason({ perpage: 30 });
-  const resolvedPlaceholder = placeholder ?? tl("select", { entity: tfl("cnReason") });
+  const resolvedPlaceholder =
+    placeholder ?? tl("select", { entity: tfl("cnReason") });
   const reasons = data?.data ?? [];
   const selectedLabel = reasons.find((r) => r.id === value)?.name;
   const showErrorTooltip = !!error && !selectOpen;
   const showTooltip = !error && !selectOpen && !!selectedLabel;
 
+  // FieldPlainText (ไม่ใช่ <span> เปล่า) เพราะ `Field` จะมุด label ให้ก็ต่อเมื่อ
+  // เจอ data-slot="field-plain-text" เป็น direct child — และมันแสดง "—" เองอยู่แล้ว
   if (readOnly) {
     return (
-      <span
-        className={cn(
-          "inline-flex min-h-8 items-center text-sm",
-          !selectedLabel && "text-muted-foreground",
-          className,
-        )}
-      >
-        {selectedLabel ?? "—"}
-      </span>
+      <FieldPlainText className={className}>{selectedLabel}</FieldPlainText>
     );
   }
 
@@ -106,7 +101,11 @@ export function LookupCnReason({
               </SelectTrigger>
               <SelectContent>
                 {reasons.map((reason) => (
-                  <SelectItem key={reason.id} value={reason.id} className="text-xs">
+                  <SelectItem
+                    key={reason.id}
+                    value={reason.id}
+                    className="text-xs"
+                  >
                     {reason.name}
                   </SelectItem>
                 ))}
@@ -134,7 +133,7 @@ export function LookupCnReason({
         {showTooltip && (
           <TooltipContent
             side="top"
-            className="rounded-lg border bg-popover px-3 py-2 text-popover-foreground shadow-md [&>svg]:fill-popover [&>svg]:text-border"
+            className="bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md"
           >
             <p className="text-xs font-semibold">{selectedLabel}</p>
           </TooltipContent>

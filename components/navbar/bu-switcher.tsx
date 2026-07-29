@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Building2, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
@@ -63,6 +64,7 @@ function BuAvatar({
 
 export default function BuSwitcher() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { data: profile, isLoading, isError, defaultBu } = useProfile();
   const switchBuMutation = useSwitchBu();
   const [isSwitching, setIsSwitching] = useState(false);
@@ -115,7 +117,7 @@ export default function BuSwitcher() {
         className="min-w-64 p-1.5"
       >
         <div className="px-2 py-1.5">
-          <p className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
+          <p className="text-muted-foreground text-micro-legal font-semibold tracking-wider uppercase">
             Business Unit
           </p>
         </div>
@@ -134,6 +136,8 @@ export default function BuSwitcher() {
                     queryKey: [...profileQueryKey],
                   });
                   toast.success(`Switched to ${bu.name}`);
+                  // ข้อมูลของ BU เดิมถูกล้างไปแล้ว หน้าที่ยืนอยู่อาจอ้างถึง id ที่ไม่มีใน BU ใหม่
+                  navigate("/dashboard");
                 } catch {
                   toast.error("Failed to switch business unit");
                 } finally {
@@ -157,7 +161,7 @@ export default function BuSwitcher() {
                 <span className="truncate font-semibold">
                   {bu.alias_name && `${bu.alias_name} -`} {bu.name}
                 </span>
-                <span className="text-muted-foreground truncate text-[0.6875rem]">
+                <span className="text-muted-foreground truncate text-micro">
                   {bu.config?.hotel?.name}
                 </span>
               </div>

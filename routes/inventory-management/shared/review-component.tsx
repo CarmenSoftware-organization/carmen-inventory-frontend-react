@@ -67,7 +67,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
             size="icon-sm"
             onClick={onBack}
             aria-label={tc("goBack")}
-            className="rounded-full"
+            className="rounded-full hover:bg-transparent dark:hover:bg-transparent"
           >
             <ArrowLeft />
           </Button>
@@ -76,7 +76,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
               {t("reviewTitle")}
             </h1>
             {(locationCode ?? locationName) && (
-              <p className="text-muted-foreground mt-0.5 text-[0.625rem] tracking-wide uppercase">
+              <p className="text-muted-foreground mt-0.5 text-micro-legal tracking-wide uppercase">
                 {locationCode}
                 {locationCode && locationName && (
                   <>
@@ -123,18 +123,18 @@ export function ReviewComponent<T extends VarianceGridItem>({
 
         <section className="space-y-3">
           <div className="flex items-center gap-2 px-1">
-            <AlertTriangle className="text-warning size-4" aria-hidden="true" />
+            <AlertTriangle className="text-warning-ink size-4" aria-hidden="true" />
             <h2 className="text-foreground text-sm font-semibold tracking-tight">
               {t("varianceDetails")}
             </h2>
-            <span className="bg-muted/60 text-muted-foreground rounded-full px-2 py-0.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted/60 text-muted-foreground rounded-full px-2 py-0.5 text-micro-legal font-semibold tabular-nums">
               {variances}
             </span>
           </div>
 
           {variances === 0 ? (
             <div className="border-success/30 bg-success/5 flex items-center justify-center gap-2 rounded-xl border border-dashed py-8">
-              <CheckCircle2 className="text-success size-4" />
+              <CheckCircle2 className="text-success-ink size-4" />
               <span className="text-foreground/80 text-xs">
                 {t("noVariances")}
               </span>

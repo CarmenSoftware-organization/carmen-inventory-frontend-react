@@ -1,4 +1,5 @@
-import { ArrowRightLeft, Calendar, Trash2 } from "lucide-react";
+import { ArrowRightLeft, Calendar, Trash2, Clock } from "lucide-react";
+import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -30,7 +31,8 @@ export default function ExchangeRateCard({
   onDelete,
   baseCurrency,
 }: ExchangeRateCardProps) {
-  const { dateFormat } = useProfile();
+  const { dateFormat, dateTimeFormat } = useProfile();
+  const tfl = useTranslations("field");
   return (
     <Card
       role="button"
@@ -47,7 +49,7 @@ export default function ExchangeRateCard({
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[0.6875rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -83,7 +85,7 @@ export default function ExchangeRateCard({
 
       <Separator />
 
-      <CardContent className="flex items-center justify-between gap-2 px-4 py-3 text-xs">
+      <CardContent className="space-y-1.5 px-4 py-3 text-xs">
         <div className="flex items-center gap-2">
           <Calendar
             className="text-muted-foreground size-3 shrink-0"
@@ -93,6 +95,17 @@ export default function ExchangeRateCard({
             {formatDate(item.at_date, dateFormat)}
           </p>
         </div>
+        {item.audit?.updated?.at && (
+          <div className="flex items-center gap-2">
+            <Clock
+              className="text-muted-foreground size-3 shrink-0"
+              aria-hidden="true"
+            />
+            <p className="text-muted-foreground text-xs">
+              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -21,7 +21,10 @@ export function CuisineAdditionalFields({
   const tfl = useTranslations("field");
 
   return (
-    <Card label={t("additional")}>
+    <Card
+      label={t("additional")}
+      description={t("additionalDesc")}
+    >
       <FieldGroup className="gap-3">
         <Field>
           <FieldLabel htmlFor="cuisine-note">{tfl("note")}</FieldLabel>

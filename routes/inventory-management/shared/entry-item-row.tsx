@@ -101,25 +101,25 @@ export const EntryItemRow = memo(function EntryItemRow({
           {detailedHeader ? (
             <>
               <div className="flex flex-wrap items-baseline gap-1.5">
-                <span className="text-muted-foreground/80 text-[0.625rem] font-semibold tabular-nums">
+                <span className="text-muted-foreground/80 text-micro-legal font-semibold tabular-nums">
                   #{String(sequenceNo).padStart(2, "0")}
                 </span>
                 <h3 className="text-foreground text-sm leading-tight font-semibold tracking-tight">
                   {productName}
                 </h3>
                 {productCode && (
-                  <span className="text-muted-foreground text-[0.625rem] tracking-wide uppercase">
+                  <span className="text-muted-foreground text-micro-legal tracking-wide uppercase">
                     {productCode}
                   </span>
                 )}
               </div>
               {showLocalName && (
-                <p className="text-muted-foreground text-[0.6875rem] leading-snug">
+                <p className="text-muted-foreground text-micro leading-snug">
                   {showLocalName}
                 </p>
               )}
               {showSkuLine && (
-                <p className="text-muted-foreground/80 text-[0.625rem] tracking-wide uppercase">
+                <p className="text-muted-foreground/80 text-micro-legal tracking-wide uppercase">
                   {t("sku", { code: productSku })}
                 </p>
               )}
@@ -129,7 +129,7 @@ export const EntryItemRow = memo(function EntryItemRow({
               <h3 className="text-foreground text-sm leading-tight font-semibold tracking-tight">
                 {productName}
               </h3>
-              <p className="text-muted-foreground text-[0.625rem] tracking-wide uppercase">
+              <p className="text-muted-foreground text-micro-legal tracking-wide uppercase">
                 {t("sku", { code: productSku })}
               </p>
             </>
@@ -144,7 +144,7 @@ export const EntryItemRow = memo(function EntryItemRow({
       </div>
 
       <div className="border-border/40 flex items-center gap-2 border-t pt-2">
-        <span className="text-muted-foreground text-[0.625rem] font-semibold tracking-wider uppercase">
+        <span className="text-muted-foreground text-micro-legal font-semibold tracking-wider uppercase">
           {t("actualCount")}
         </span>
         <div className="ml-auto flex">
@@ -190,7 +190,7 @@ export const EntryItemRow = memo(function EntryItemRow({
           </Button>
         </div>
         {inventoryUnitName && (
-          <span className="text-muted-foreground text-[0.6875rem]">
+          <span className="text-muted-foreground text-micro">
             {inventoryUnitName}
           </span>
         )}
@@ -198,7 +198,7 @@ export const EntryItemRow = memo(function EntryItemRow({
 
       <button
         type="button"
-        className="text-primary hover:text-primary/80 inline-flex cursor-pointer items-center gap-1 text-[0.6875rem] font-semibold transition-colors"
+        className="text-primary hover:text-primary/80 inline-flex cursor-pointer items-center gap-1 text-micro font-semibold transition-colors"
         onClick={() => setNotesOpen(true)}
       >
         <MessageSquarePlus className="size-2.5" aria-hidden="true" />
@@ -210,7 +210,7 @@ export const EntryItemRow = memo(function EntryItemRow({
         (savedNote.note.length > 0 || savedNote.images.length > 0) && (
           <div className="border-primary/30 bg-primary/5 relative space-y-1.5 rounded-lg border border-dashed p-2">
             {savedNote.note.length > 0 && (
-              <p className="text-foreground/80 text-[0.6875rem] leading-relaxed whitespace-pre-wrap">
+              <p className="text-foreground/80 text-micro leading-relaxed whitespace-pre-wrap">
                 {savedNote.note}
               </p>
             )}
@@ -229,11 +229,11 @@ export const EntryItemRow = memo(function EntryItemRow({
                   </div>
                 ))}
                 {savedNote.images.length > 4 && (
-                  <div className="border-border/60 bg-muted/60 text-muted-foreground flex size-10 items-center justify-center rounded-md border text-[0.625rem] font-semibold tabular-nums">
+                  <div className="border-border/60 bg-muted/60 text-muted-foreground flex size-10 items-center justify-center rounded-md border text-micro-legal font-semibold tabular-nums">
                     +{savedNote.images.length - 4}
                   </div>
                 )}
-                <span className="text-muted-foreground inline-flex items-center gap-1 text-[0.5625rem] font-semibold tracking-widest uppercase">
+                <span className="text-muted-foreground inline-flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
                   <ImageIcon className="size-2.5" aria-hidden="true" />
                   {t("evidenceCount", { count: savedNote.images.length })}
                 </span>

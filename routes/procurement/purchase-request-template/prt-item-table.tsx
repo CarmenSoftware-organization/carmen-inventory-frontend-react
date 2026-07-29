@@ -313,7 +313,7 @@ export function usePrtItemTable({
       },
       {
         id: "requested_qty",
-        header: tfl("requestedAbbr"),
+        header: tfl("requested"),
         cell: ({ row }) => (
           <QtyUnitCell
             control={form.control}

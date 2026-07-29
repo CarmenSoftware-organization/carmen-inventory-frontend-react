@@ -17,6 +17,12 @@ import type { BusinessSettingFormValues } from "./company-profile-form-schema";
 type Form = UseFormReturn<BusinessSettingFormValues>;
 type FormName = FieldPath<BusinessSettingFormValues>;
 
+/**
+ * ค่าแทน "" ใน enum Select — Radix ห้าม SelectItem ที่ value=""
+ * ถ้า options มี option ที่ value นี้ แปลว่า config นั้นยอมรับค่าว่างได้
+ */
+export const CONFIG_ENUM_EMPTY = "__config_enum_empty__";
+
 /** อ่าน error message ของ field (รองรับ nested path เช่น `amount_format.locales`) */
 function fieldError(form: Form, name: FormName): string | undefined {
   let cur: unknown = form.formState.errors;
@@ -66,7 +72,7 @@ export function SettingField({
     <div className={cn("min-w-0 space-y-1", fullWidth && "sm:col-span-2")}>
       <div className="text-foreground text-xs font-semibold">{label}</div>
       {description && (
-        <p className="text-muted-foreground/80 text-[0.6875rem] leading-snug">
+        <p className="text-muted-foreground/80 text-micro leading-snug">
           {description}
         </p>
       )}
@@ -105,7 +111,7 @@ function EditShell({
         {label}
       </Label>
       {description && (
-        <p className="text-muted-foreground/80 text-[0.6875rem] leading-snug">
+        <p className="text-muted-foreground/80 text-micro leading-snug">
           {description}
         </p>
       )}
@@ -131,6 +137,7 @@ export function EditableField({
   displayValue,
   fullWidth,
   mono,
+  maxLength,
 }: {
   readonly editing: boolean;
   readonly form: Form;
@@ -141,6 +148,8 @@ export function EditableField({
   readonly displayValue?: string | number | null;
   readonly fullWidth?: boolean;
   readonly mono?: boolean;
+  /** character-count cap (โชว์ counter). default: textarea 256 · text 100 */
+  readonly maxLength?: number;
 }) {
   if (!editing) {
     return (
@@ -154,6 +163,9 @@ export function EditableField({
     );
   }
   const error = fieldError(form, name);
+  // default cap ต่อชนิด — number ไม่ cap (counter ไม่ applicable)
+  const resolvedMaxLength =
+    maxLength ?? (type === "textarea" ? 256 : type === "text" ? 100 : undefined);
   return (
     <EditShell
       label={label}
@@ -164,6 +176,7 @@ export function EditableField({
       {type === "textarea" ? (
         <Textarea
           id={name}
+          maxLength={resolvedMaxLength}
           {...form.register(name)}
           aria-invalid={!!error}
           className="min-h-16 text-sm"
@@ -172,6 +185,7 @@ export function EditableField({
         <Input
           id={name}
           type={type === "number" ? "number" : "text"}
+          maxLength={resolvedMaxLength}
           {...form.register(name, { valueAsNumber: type === "number" })}
           aria-invalid={!!error}
           className={cn("h-8 text-sm", mono && "font-mono text-xs")}
@@ -356,6 +370,7 @@ export function ConfigField({
   noLabel,
   label,
   options,
+  disabled,
 }: {
   readonly editing: boolean;
   readonly form: Form;
@@ -367,10 +382,11 @@ export function ConfigField({
   readonly label?: string;
   /** สำหรับ enum — options ที่ resolve แล้ว (value + label i18n) */
   readonly options?: readonly { value: string; label: string }[];
+  /** ปิดการแก้ไขชั่วคราว (เช่น options ยังโหลดไม่เสร็จ) */
+  readonly disabled?: boolean;
 }) {
   const isBool = item.datatype === "boolean";
-  const isEnum =
-    item.datatype === "enum" && options != null && options.length > 0;
+  const isEnum = item.datatype === "enum" && options != null;
   const name = `config.${index}.value` as FormName;
   const displayLabel = label ?? item.label;
 
@@ -379,8 +395,9 @@ export function ConfigField({
     if (isBool) {
       displayValue = item.value === "true" ? yesLabel : noLabel;
     } else if (isEnum) {
+      const lookupValue = item.value === "" ? CONFIG_ENUM_EMPTY : item.value;
       displayValue =
-        options.find((o) => o.value === item.value)?.label ?? item.value;
+        options.find((o) => o.value === lookupValue)?.label ?? item.value;
     } else {
       displayValue = item.value;
     }
@@ -416,23 +433,29 @@ export function ConfigField({
         <Controller
           control={form.control}
           name={name}
-          render={({ field }) => (
-            <Select
-              value={typeof field.value === "string" ? field.value : ""}
-              onValueChange={field.onChange}
-            >
-              <SelectTrigger id={name} size="sm" className="w-full text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {options.map((o) => (
-                  <SelectItem key={o.value} value={o.value} className="text-sm">
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          render={({ field }) => {
+            const current = typeof field.value === "string" ? field.value : "";
+            return (
+              <Select
+                value={current === "" ? CONFIG_ENUM_EMPTY : current}
+                onValueChange={(v) =>
+                  field.onChange(v === CONFIG_ENUM_EMPTY ? "" : v)
+                }
+                disabled={disabled}
+              >
+                <SelectTrigger id={name} size="sm" className="w-full text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {options.map((o) => (
+                    <SelectItem key={o.value} value={o.value} className="text-sm">
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          }}
         />
       </EditShell>
     );

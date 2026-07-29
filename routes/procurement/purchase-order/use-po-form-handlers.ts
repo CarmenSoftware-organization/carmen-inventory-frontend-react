@@ -1,6 +1,7 @@
 
+import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -71,6 +72,7 @@ export function usePoFormHandlers({
   revealErrors,
 }: UsePoFormHandlersOptions) {
   const navigate = useNavigate();
+  const location = useLocation();
   const t = useTranslations("procurement.purchaseOrder");
   const tt = useTranslations("toast");
   const buCode = useBuCode();
@@ -98,10 +100,15 @@ export function usePoFormHandlers({
     isPending,
   });
 
+  // ระหว่าง submit ตอน create ปิด nav guard — sentinel history entry ที่ guard ดัน
+  // ไว้ที่ /new จะทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → /new ค้างใน
+  // stack → back เด้งกลับ /new (ดู create path ใน onSubmit)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
   // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
   const navGuard = useNavigationGuard(
-    (mode === "add" || mode === "edit") && form.formState.isDirty,
+    (mode === "add" || mode === "edit") && form.formState.isDirty && !isSubmitting,
   );
   const navDiscardDialogProps = {
     open: navGuard.isOpen,
@@ -156,12 +163,7 @@ export function usePoFormHandlers({
   };
 
   const onSubmit = (values: PoFormValues) => {
-    const payload = buildPoPayload(
-      values,
-      defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
-      poTypeOption,
-    );
+    const payload = buildPoPayload(values, defaultValues.items, poTypeOption);
 
     if (mode === "edit" && purchaseOrder) {
       updatePo.mutate(
@@ -172,20 +174,21 @@ export function usePoFormHandlers({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (mode === "add") {
+      // ปิด guard ก่อนยิง mutation → sentinel ที่ /new ถูก teardown ลบระหว่างรอ
+      // network → navigate(replace) ตอนสำเร็จเลยกิน /new จริง ไม่ใช่ sentinel →
+      // stack เหลือ [list, /:id] → back ที่หน้า detail = กลับ list
+      setIsSubmitting(true);
       createPo.mutate(payload, {
         onSuccess: (res) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const body = res as { data?: { id?: string } } | undefined;
           const newId = body?.data?.id;
           if (newId) {
-            // NOTE: อย่าเรียก setMode("view") ตรงนี้ — มันจะ re-render แล้วทำให้
-            // useNavigationGuard teardown เรียก history.back() (ลบ sentinel) ก่อน
-            // ที่ navigate ไป /:id (lazy route, async) จะ commit → เด้งกลับ /new
-            // ปล่อยให้ route /:id mount PoForm ใหม่เป็น view mode เองพอ
+            // ไม่เรียก setMode("view") — ปล่อยให้ route /:id mount PoForm ใหม่เป็น
+            // view mode เอง (setMode จะ re-render + churn item table โดยไม่จำเป็น)
             navigate(`/procurement/purchase-order/${newId}`, {
               replace: true,
             });
@@ -193,7 +196,7 @@ export function usePoFormHandlers({
             navigate("/procurement/purchase-order");
           }
         },
-        onError: (err) => toast.error(err.message),
+        onError: () => setIsSubmitting(false), // create fail → guard กลับมาเฝ้า
       });
     }
   };
@@ -209,11 +212,21 @@ export function usePoFormHandlers({
     });
   };
 
-  const handleBack = () => {
-    if (mode === "edit" || mode === "add") {
-      discard.confirm(() => navigate("/procurement/purchase-order"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      navGuard.back();
     } else {
       navigate("/procurement/purchase-order");
+    }
+  };
+
+  const handleBack = () => {
+    if (mode === "edit" || mode === "add") {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -265,7 +278,6 @@ export function usePoFormHandlers({
         onSuccess: () => {
           toast.success(t("submitted"));
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -280,14 +292,7 @@ export function usePoFormHandlers({
         return;
       }
       const values = form.getValues();
-      const payload = buildPoPayload(
-        values,
-        defaultValues.items,
-        form.formState.dirtyFields.items as
-          | Record<string, unknown>[]
-          | undefined,
-        poTypeOption,
-      );
+      const payload = buildPoPayload(values, defaultValues.items, poTypeOption);
       try {
         const saved = await updatePo.mutateAsync({
           id: purchaseOrder.id,
@@ -322,7 +327,6 @@ export function usePoFormHandlers({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -348,7 +352,6 @@ export function usePoFormHandlers({
           setShowReject(false);
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -377,7 +380,6 @@ export function usePoFormHandlers({
           toast.success(tt("updateSuccess", { entity: t("entity") }));
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -389,7 +391,6 @@ export function usePoFormHandlers({
         toast.success(tt("updateSuccess", { entity: t("entity") }));
         setShowClose(false);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
@@ -400,7 +401,6 @@ export function usePoFormHandlers({
         toast.success(tt("deleteSuccess", { entity: t("entity") }));
         navigate("/procurement/purchase-order");
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 

@@ -146,7 +146,7 @@ function actorNameOf(log: ActivityLog): string {
 /** แถวเดียวของ field ที่เปลี่ยน: ชื่อฟิลด์ + ค่าเดิม → ค่าใหม่ */
 function FieldChangeRow({ change }: { change: ActivityFieldChange }) {
   return (
-    <div className="grid grid-cols-[minmax(0,9rem)_1fr] gap-2 py-0.5 text-[0.6875rem]">
+    <div className="grid grid-cols-[minmax(0,9rem)_1fr] gap-2 py-0.5 text-micro">
       <span className="text-muted-foreground truncate" title={change.field}>
         {humanize(change.field)}
       </span>
@@ -164,7 +164,7 @@ function FieldChangeRow({ change }: { change: ActivityFieldChange }) {
 /** แถวที่ถูกเพิ่มหรือลบ — บอกชื่อรายการอย่างเดียว ไม่ต้องกางทุกฟิลด์ */
 function RowMarkLine({ mark, label }: { mark: string; label: string }) {
   return (
-    <p className="py-0.5 text-[0.6875rem]">
+    <p className="py-0.5 text-micro">
       <span className="text-muted-foreground mr-1">{mark}</span>
       {label}
     </p>
@@ -198,7 +198,7 @@ function ChildChangeBlock({
 
   return (
     <div className="space-y-1">
-      <p className="text-[0.6875rem] font-semibold">
+      <p className="text-micro font-semibold">
         {label}{" "}
         <span className="text-muted-foreground font-normal">
           {counts.map((c) => `${c.label} ${c.n}`).join(" · ")}
@@ -223,7 +223,7 @@ function ChildChangeBlock({
 
       {updated.map((row) => (
         <div key={row.id} className="border-muted border-l-2 pl-2">
-          <p className="text-[0.6875rem] font-medium">
+          <p className="text-micro font-medium">
             {rowLabelOf(rowsById.get(row.id), row.id)}
           </p>
           {row.fields.map((f) => (
@@ -242,14 +242,14 @@ function ActivityChanges({ logId }: { logId: string }) {
 
   if (isLoading)
     return (
-      <p className="text-muted-foreground flex items-center gap-2 py-2 text-[0.6875rem]">
+      <p className="text-muted-foreground flex items-center gap-2 py-2 text-micro">
         <Loader2 className="size-3 animate-spin" />
       </p>
     );
 
   if (isError || !data)
     return (
-      <p className="text-destructive py-2 text-[0.6875rem]">
+      <p className="text-destructive py-2 text-micro">
         {t("activityLoadError")}
       </p>
     );
@@ -258,7 +258,7 @@ function ActivityChanges({ logId }: { logId: string }) {
 
   if (!fields.length && !data.changes.children.length)
     return (
-      <p className="text-muted-foreground py-2 text-[0.6875rem]">
+      <p className="text-muted-foreground py-2 text-micro">
         {t("activityNoChanges")}
       </p>
     );
@@ -386,7 +386,7 @@ export function PrActivitySheet({
                       <Badge
                         size="sm"
                         className={cn(
-                          "text-[0.625rem]",
+                          "text-micro-legal",
                           ACTION_CLASS[log.action?.toLowerCase()] ??
                             "bg-muted text-muted-foreground",
                         )}
@@ -396,7 +396,7 @@ export function PrActivitySheet({
                       <span className="text-xs font-medium">
                         {actorNameOf(log)}
                       </span>
-                      <span className="text-muted-foreground text-[0.6875rem]">
+                      <span className="text-muted-foreground text-micro">
                         {formatDate(getLogCreatedAt(log), datetimeFormat)}
                       </span>
                     </div>

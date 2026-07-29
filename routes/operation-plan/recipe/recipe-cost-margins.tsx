@@ -34,7 +34,7 @@ export function RecipeCostMargins({
     targetPct > 0 && foodPct > 0 ? foodPct <= targetPct : foodPct === 0;
 
   return (
-    <Card label={t("margins")}>
+    <Card label={t("margins")} description={t("marginsDesc")}>
       <div className="grid grid-cols-2 gap-2">
         <MarginTile
           label={t("grossMargin")}
@@ -54,14 +54,14 @@ export function RecipeCostMargins({
         className={cn(
           "mt-3 flex items-center gap-2 rounded-md px-3 py-2 text-xs font-semibold",
           onTarget
-            ? "bg-success/10 text-success-foreground"
-            : "bg-destructive/10 text-destructive-foreground",
+            ? "bg-muted text-foreground"
+            : "bg-destructive/10 text-destructive",
         )}
       >
         <span
           className={cn(
             "size-1.5 rounded-full",
-            onTarget ? "bg-success" : "bg-destructive",
+            onTarget ? "bg-muted-foreground/40" : "bg-destructive",
           )}
           aria-hidden="true"
         />
@@ -90,7 +90,7 @@ export function RecipeCostMargins({
             errorIconAlign="left"
             {...form.register("target_food_cost_percentage")}
           />
-          <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-[0.6875rem]">
+          <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-micro">
             %
           </span>
         </div>
@@ -112,20 +112,18 @@ function MarginTile({
 }) {
   return (
     <div className="bg-muted/40 rounded-md border p-3">
-      <div className="text-muted-foreground text-[0.625rem] font-bold tracking-[0.14em] uppercase">
+      <div className="text-muted-foreground text-micro-legal font-bold tracking-[0.14em] uppercase">
         {label}
       </div>
       <div
         className={cn(
-          "mt-1 text-xl font-semibold tracking-tight",
-          tone === "success"
-            ? "text-success-foreground"
-            : "text-destructive-foreground",
+          "mt-1 text-xl font-semibold tracking-tight tabular-nums",
+          tone === "success" ? "text-foreground" : "text-destructive",
         )}
       >
         {value}
       </div>
-      <div className="text-muted-foreground text-[0.6875rem] font-semibold">
+      <div className="text-muted-foreground text-micro font-semibold">
         {sub}
       </div>
     </div>

@@ -17,7 +17,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { useProfile } from "@/hooks/use-profile";
 import { useResetSpotCheck } from "@/hooks/use-spot-check";
 import { getLocationTypeLabel } from "@/constant/location-type";
@@ -54,7 +53,6 @@ export function ScLocationCard({
 }: ScLocationCardProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
   const { dateFormat } = useProfile();
-  const errorToast = useErrorToast();
 
   const latest = item.latest_spot_check;
   const isResume = latest !== null;
@@ -69,7 +67,6 @@ export function ScLocationCard({
         toast.success(t("resetSuccess"));
         setShowResetConfirm(false);
       },
-      onError: errorToast,
     });
   };
 
@@ -94,7 +91,7 @@ export function ScLocationCard({
               </Link>
               <Link
                 to={`/config/location/${item.location_id}`}
-                className="text-muted-foreground hover:text-foreground shrink-0 text-[0.625rem] tracking-wide uppercase transition-colors"
+                className="text-muted-foreground hover:text-foreground shrink-0 text-micro-legal tracking-wide uppercase transition-colors"
               >
                 {item.code}
               </Link>
@@ -116,7 +113,7 @@ export function ScLocationCard({
                 </span>
               )}
             </div>
-            <div className="text-muted-foreground flex items-center gap-1.5 text-[0.6875rem]">
+            <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
               <Warehouse className="size-2.5 shrink-0" aria-hidden="true" />
               <span>{locationTypeLabel}</span>
             </div>

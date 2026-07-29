@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
@@ -105,6 +105,24 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
 
   usePoProfileSync({ form, profileData, purchaseOrder });
 
+  // Rebaseline dirty state หลัง auto-populate (buyer/profile) + computed-sync
+  // ของ item (order_qty/pricing/base_qty) settle. RHF (v7.78) คิด isDirty จาก
+  // !deepEqual(getValues(), defaultValues) ทั้งฟอร์ม → setValue ค่า derived ที่
+  // ต่างจาก default ทำให้ dirty ค้าง (ยังไม่ได้แก้จริง) → back/cancel ติด discard
+  // dialog. reset(getValues, keepDirtyValues) ทำให้ค่า auto/derived เป็น baseline
+  // (ไม่นับ dirty) แต่คงค่าที่ผู้ใช้แก้ไว้ — ทำครั้งเดียวหลัง data พร้อม
+  const didRebaseline = useRef(false);
+  useEffect(() => {
+    if (didRebaseline.current) return;
+    // add mode: รอ profile โหลด (buyer auto-fill) ก่อน rebaseline
+    if (!purchaseOrder && !profileData) return;
+    didRebaseline.current = true;
+    form.reset(form.getValues(), { keepDirtyValues: true });
+    // reset() re-validate ทั้งฟอร์ม → required field ที่ยังว่างโชว์ error แดงทั้งที่
+    // user ยังไม่แตะ → clear (mode onChange จะ validate ใหม่เมื่อ user แก้จริง)
+    form.clearErrors();
+  }, [form, purchaseOrder, profileData]);
+
   // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand row ที่
   // location ติด error (location field อยู่ใน expanded row เท่านั้น) + scroll
   // bump จากทั้ง 2 path: Save (handleSubmit onInvalid) และ Submit (handleSubmitPo trigger)
@@ -193,6 +211,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
             !purchaseOrder?.po_status ||
             purchaseOrder.po_status === PO_STATUS.DRAFT
           }
+          isAdd={!purchaseOrder}
         />
 
         <PoNotesSummary

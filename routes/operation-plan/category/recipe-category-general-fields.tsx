@@ -32,7 +32,11 @@ export function RecipeCategoryGeneralFields({
   const errors = form.formState.errors;
 
   return (
-    <Card label={tf("generalInfo")}>
+    <Card
+      first
+      label={tf("generalInfo")}
+      description={t("generalInfoDesc")}
+    >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Field>
           <FieldLabel htmlFor="rc-code" required>
@@ -86,18 +90,19 @@ export function RecipeCategoryGeneralFields({
           <FieldDescription>{t("parentCategoryDesc")}</FieldDescription>
         </Field>
 
-        <Field className="sm:col-span-2 lg:col-span-3">
-          <FieldLabel htmlFor="rc-description">{tfl("description")}</FieldLabel>
-          <Textarea
-            id="rc-description"
-            placeholder={tfl("optional")}
-            rows={2}
-            disabled={isDisabled}
-            maxLength={256}
-            {...form.register("description")}
-          />
-        </Field>
       </div>
+
+      <Field className="mt-4">
+        <FieldLabel htmlFor="rc-description">{tfl("description")}</FieldLabel>
+        <Textarea
+          id="rc-description"
+          placeholder={tfl("optional")}
+          rows={2}
+          disabled={isDisabled}
+          maxLength={256}
+          {...form.register("description")}
+        />
+      </Field>
     </Card>
   );
 }

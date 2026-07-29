@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
@@ -9,9 +9,6 @@ import {
 } from "@/lib/form-helpers";
 import { FormToolbar } from "@/components/ui/form-toolbar";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
-import { StatusSwitch } from "@/components/ui/status-switch";
 import { toast } from "sonner";
 import { useCreatePrt, useUpdatePrt, useDeletePrt } from "@/hooks/use-prt";
 import type {
@@ -44,6 +41,7 @@ export function PrtForm({ template }: PrtFormProps) {
   const tfl = useTranslations("field");
   const { defaultBu } = useProfile();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(template ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -70,19 +68,19 @@ export function PrtForm({ template }: PrtFormProps) {
     isPending,
   });
 
-  // in-app navigation guard: เตือนก่อนออกเมื่อ add/edit และฟอร์มถูกแก้ไข
-  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → URL ค้างที่ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const watchedDescription = useWatch({
-    control: form.control,
-    name: "description",
-  });
+  // in-app navigation guard: เตือนก่อนออกเมื่อ add/edit และฟอร์มถูกแก้ไข
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
+  );
 
   const onSubmit = (values: PrtFormValues) => {
     const purchase_request_template_detail = buildItemChanges(
       values.items,
       defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined,
       mapItemToPayload,
     );
 
@@ -102,10 +100,12 @@ export function PrtForm({ template }: PrtFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network →
+      // navigate(replace) กิน /new จริง → URL เป็น /:id และ back = list
+      setIsSubmitting(true);
       createPrt.mutate(payload, {
         onSuccess: (data) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -114,7 +114,7 @@ export function PrtForm({ template }: PrtFormProps) {
           });
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
+        onError: () => setIsSubmitting(false),
       });
     }
   };
@@ -130,16 +130,26 @@ export function PrtForm({ template }: PrtFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/procurement/purchase-request-template"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      navGuard.back();
     } else {
       navigate("/procurement/purchase-request-template");
     }
   };
 
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(() => goBack());
+    } else {
+      goBack();
+    }
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <FormToolbar
         entity={template?.name || t("entity")}
         statusBadge={
@@ -155,67 +165,27 @@ export function PrtForm({ template }: PrtFormProps) {
         deleteIsPending={deletePrt.isPending}
       />
 
-      <form
-        id="prt-form"
-        onSubmit={form.handleSubmit(onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
-        className="space-y-4 px-4"
-      >
-        <PrtGeneralFields form={form} readOnly={isView} disabled={isPending} />
-
-        <div className="grid grid-cols-2 gap-4">
-          {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
-          {(!isView || watchedDescription?.trim()) && (
-            <Field className={isView ? "gap-1" : undefined}>
-              <FieldLabel
-                htmlFor="prt-description"
-                className={
-                  isView ? "text-muted-foreground font-normal" : undefined
-                }
-              >
-                {tfl("description")}
-              </FieldLabel>
-              {isView ? (
-                <FieldPlainText className="text-xs">
-                  <span className="whitespace-pre-line">
-                    {watchedDescription}
-                  </span>
-                </FieldPlainText>
-              ) : (
-                <Textarea
-                  id="prt-description"
-                  className="h-20"
-                  placeholder={tfl("optional")}
-                  disabled={isPending}
-                  maxLength={256}
-                  {...form.register("description")}
-                />
-              )}
-            </Field>
+      <div className="mt-6">
+        <form
+          id="prt-form"
+          onSubmit={form.handleSubmit(onSubmit, () =>
+            scrollToFirstInvalidField(),
           )}
-          <div className="mt-7">
-            <Controller
-              control={form.control}
-              name="is_active"
-              render={({ field }) => (
-                <StatusSwitch
-                  id="prt-is-active"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                  disabled={isView || isPending}
-                />
-              )}
-            />
-          </div>
-        </div>
-        <PrtItemFields
-          form={form}
-          readOnly={isView}
-          disabled={isPending}
-          defaultBu={defaultBu}
-        />
-      </form>
+        >
+          <PrtGeneralFields
+            form={form}
+            readOnly={isView}
+            disabled={isPending}
+            workflowName={template?.workflow_name}
+          />
+          <PrtItemFields
+            form={form}
+            readOnly={isView}
+            disabled={isPending}
+            defaultBu={defaultBu}
+          />
+        </form>
+      </div>
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 
@@ -244,7 +214,6 @@ export function PrtForm({ template }: PrtFormProps) {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 navigate("/procurement/purchase-request-template");
               },
-              onError: (err) => toast.error(err.message),
             });
           }}
         />

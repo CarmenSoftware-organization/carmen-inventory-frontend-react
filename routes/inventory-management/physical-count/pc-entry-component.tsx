@@ -162,7 +162,6 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
           );
           toast.success(t("saveForResume"));
         },
-        onError: errorToast,
       },
     );
   };
@@ -258,7 +257,6 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
             physicalCountId;
           navigate(`/inventory-management/physical-count/${newId}/review`);
         },
-        onError: errorToast,
       },
     );
   };

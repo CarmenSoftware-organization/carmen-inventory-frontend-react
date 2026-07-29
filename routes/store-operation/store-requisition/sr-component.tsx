@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -46,6 +45,9 @@ import {
 } from "@/components/ui/active-filter-bar";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { STORE_REQUISITION_STATUS_OPTIONS } from "@/constant/store-requisition";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { useURL } from "@/hooks/use-url";
@@ -82,9 +84,21 @@ export default function StoreRequisitionComponent() {
   const [deleteTarget, setDeleteTarget] = useState<StoreRequisition | null>(
     null,
   );
-  const [viewMode, setViewMode] = useState<"my-pending" | "all-document">(
-    "my-pending",
-  );
+  // ไม่มี workflow ให้เริ่มใบเลย = สร้างไม่ได้ ปุ่มจาง แต่กดแล้วยังบอกเหตุผล
+  // (ซ่อนไปเลยพนักงานจะนึกว่าระบบเสีย)
+  const { canCreate: canCreateSr } = useCreatableWorkflows(WORKFLOW_TYPE.SR);
+
+  const handleAdd = () => {
+    if (!canCreateSr) {
+      dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
+      return;
+    }
+    navigate("/store-operation/store-requisition/new");
+  };
+  const [viewModeParam, setViewMode] = useURL("view", {
+    defaultValue: "my-pending",
+  });
+  const viewMode = viewModeParam as "my-pending" | "all-document";
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -218,9 +232,14 @@ export default function StoreRequisitionComponent() {
     })
     .filter(Boolean);
 
-  const selectedFromLocationIds = !fromLocation?.startsWith(FROM_LOCATION_PREFIX)
+  const selectedFromLocationIds = !fromLocation?.startsWith(
+    FROM_LOCATION_PREFIX,
+  )
     ? []
-    : fromLocation.slice(FROM_LOCATION_PREFIX.length).split(",").filter(Boolean);
+    : fromLocation
+        .slice(FROM_LOCATION_PREFIX.length)
+        .split(",")
+        .filter(Boolean);
 
   const selectedToLocationIds = !toLocation?.startsWith(TO_LOCATION_PREFIX)
     ? []
@@ -315,8 +334,7 @@ export default function StoreRequisitionComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (item) =>
-      navigate(`/store-operation/store-requisition/${item.id}`),
+    onEdit: (item) => navigate(`/store-operation/store-requisition/${item.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -328,15 +346,13 @@ export default function StoreRequisitionComponent() {
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => navigate("/store-operation/store-requisition/new")}
+            onAdd={handleAdd}
             addLabel={t("add")}
+            addDisabled={!canCreateSr}
           />
         </div>
 
@@ -383,7 +399,7 @@ export default function StoreRequisitionComponent() {
                     <Badge
                       variant="secondary"
                       size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[0.625rem] tabular-nums"
+                      className="text-micro-legal absolute -top-1 -right-1 h-4 min-w-4 px-1 tabular-nums"
                     >
                       {activeFilters.length}
                     </Badge>
@@ -540,7 +556,6 @@ export default function StoreRequisitionComponent() {
               toast.success(tt("deleteSuccess", { entity: t("entity") }));
               setDeleteTarget(null);
             },
-            onError: (err) => toast.error(err.message),
           });
         }}
       />

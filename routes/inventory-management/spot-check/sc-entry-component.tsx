@@ -256,7 +256,6 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
           toast.success(t("saveSuccess"));
           navigate("/inventory-management/spot-check");
         },
-        onError: errorToast,
       },
     );
   };
@@ -278,7 +277,6 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
             spotCheckId;
           navigate(`/inventory-management/spot-check/${newId}/review`);
         },
-        onError: errorToast,
       },
     );
   };

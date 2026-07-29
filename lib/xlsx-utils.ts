@@ -53,3 +53,22 @@ export function buildXlsxFileName(prefix: string, date = new Date()): string {
   const dateStr = date.toISOString().slice(0, 10);
   return `${prefix}_${dateStr}`;
 }
+
+/**
+ * Read the first sheet of an uploaded xlsx/xls file into plain row objects
+ * keyed by header text (first row). XLSX is loaded lazily like {@link downloadXlsx}.
+ * Empty cells become "" (defval) so downstream code can keep existing values.
+ * @returns array of row objects — one per data row
+ */
+export async function readXlsxFirstSheet(
+  file: File,
+): Promise<Record<string, unknown>[]> {
+  const XLSX = await import("xlsx");
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: "array" });
+  const first = wb.SheetNames[0];
+  if (!first) return [];
+  return XLSX.utils.sheet_to_json<Record<string, unknown>>(wb.Sheets[first], {
+    defval: "",
+  });
+}

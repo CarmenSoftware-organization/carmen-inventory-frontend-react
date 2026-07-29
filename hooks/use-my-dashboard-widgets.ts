@@ -26,7 +26,7 @@ export function useMyDashboardWidgets() {
         API_ENDPOINTS.MY_DASHBOARD_WIDGETS(buCode!),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to fetch personal dashboard widgets",
         );
@@ -39,28 +39,46 @@ export function useMyDashboardWidgets() {
 }
 
 /**
- * Resolved data ของ widget ที่ save แล้ว — backend อ่าน `params` ที่เก็บไว้บน
+ * Query options ของ widget ที่ save แล้ว — แยกออกมาให้ `useQueries` ที่ dashboard
+ * เรียกทีเดียวหลาย widget ได้ (parent ต้องรู้ว่าตัวไหนพัง เช่น dataset ไม่มีใน BU
+ * นี้ ก่อนจะตัดสินใจ layout)
+ *
+ * ยิงตาม widget id ไม่ใช่ dataset id เพราะ backend อ่าน `params` ที่เก็บไว้บน
  * widget แล้ว execute ให้ จึงไม่ต้องส่ง params ซ้ำจากฝั่ง client
  *
  * ใช้ CACHE_DYNAMIC (1 นาที) เพราะค่าจริงเปลี่ยนได้ตามเวลา
  * คืน `{ meta, data }` พร้อม render ตาม `meta.shape`
+ * @param buCode - รหัส business unit ปัจจุบัน
+ * @param widgetId - ID ของ personal widget
+ * @returns useQuery options ของ widget นั้น
  */
-export function useMyDashboardWidgetData(widgetId: string | undefined) {
-  const buCode = useBuCode();
-  return useQuery<DashboardDatasetDetail>({
+export function myDashboardWidgetDataQueryOptions(
+  buCode: string | undefined,
+  widgetId: string | undefined,
+) {
+  return {
     queryKey: [QUERY_KEYS.MY_DASHBOARD_WIDGET_DATA, buCode, widgetId],
-    queryFn: async () => {
+    queryFn: async (): Promise<DashboardDatasetDetail> => {
       const res = await httpClient.get(
         API_ENDPOINTS.DASHBOARD_LAB_WIDGET_DATA(buCode!, widgetId!),
       );
-      if (!res.ok)
-        throw ApiError.fromResponse(res, "Failed to fetch widget data");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch widget data");
       const json = await res.json();
       return json.data as DashboardDatasetDetail;
     },
     enabled: !!buCode && !!widgetId,
     ...CACHE_DYNAMIC,
-  });
+  };
+}
+
+/**
+ * Resolved data ของ widget เดี่ยว — สำหรับ caller ที่ไม่ต้องรวมหลายตัว
+ * @param widgetId - ID ของ personal widget
+ * @returns UseQueryResult ของ DashboardDatasetDetail
+ */
+export function useMyDashboardWidgetData(widgetId: string | undefined) {
+  const buCode = useBuCode();
+  return useQuery(myDashboardWidgetDataQueryOptions(buCode, widgetId));
 }
 
 export function useCreateMyDashboardWidget() {
@@ -73,7 +91,7 @@ export function useCreateMyDashboardWidget() {
         dto,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to create personal dashboard widget",
         );
@@ -102,7 +120,7 @@ export function useUpdateMyDashboardWidget() {
         dto,
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to update personal dashboard widget",
         );
@@ -126,7 +144,7 @@ export function useDeleteMyDashboardWidget() {
         API_ENDPOINTS.MY_DASHBOARD_WIDGET_BY_ID(buCode!, id),
       );
       if (!res.ok)
-        throw ApiError.fromResponse(
+        throw await ApiError.from(
           res,
           "Failed to delete personal dashboard widget",
         );

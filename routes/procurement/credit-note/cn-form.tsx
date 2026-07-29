@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
@@ -52,6 +52,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
+  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(creditNote ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -87,8 +88,14 @@ export function CnForm({ creditNote }: CnFormProps) {
     isPending,
   });
 
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // guard เฉพาะโหมด add/edit และฟอร์มมีการแก้ไข
-  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
+  );
 
   const cnSyncKey = [
     creditNote?.doc_version ?? "",
@@ -107,7 +114,6 @@ export function CnForm({ creditNote }: CnFormProps) {
     const items = buildItemChanges(
       values.items,
       defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       mapItemToPayload,
     );
 
@@ -126,8 +132,9 @@ export function CnForm({ creditNote }: CnFormProps) {
       description: values.description,
       currency_id: values.currency_code,
       exchange_rate: values.exchange_rate,
-      invoice_no: values.invoice_no,
-      invoice_date: values.invoice_date,
+      // omit ตอนว่าง — backend ไม่รับ "" (invoice_date เป็น ISO-8601 datetime)
+      ...(values.invoice_no ? { invoice_no: values.invoice_no } : {}),
+      ...(values.invoice_date ? { invoice_date: values.invoice_date } : {}),
       tax_invoice_no: values.tax_invoice_no,
       tax_invoice_date: values.tax_invoice_date,
       tax_amount: values.tax_amount,
@@ -144,22 +151,24 @@ export function CnForm({ creditNote }: CnFormProps) {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: (err) => toast.error(err.message),
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network →
+      // navigate(replace) กิน /new จริง → stack เหลือ [list, /:id] → back = list
+      setIsSubmitting(true);
       createCn.mutate(payload, {
         onSuccess: (data) => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           const newId = data?.data?.id;
           if (newId) {
+            // ไม่ setMode("view") — route /:id mount CnForm view mode เอง (เลี่ยง churn)
             navigate(`/procurement/credit-note/${newId}`, { replace: true });
-            setMode("view");
           } else {
             navigate("/procurement/credit-note");
           }
         },
-        onError: (err) => toast.error(err.message),
+        onError: () => setIsSubmitting(false),
       });
     }
   };
@@ -175,11 +184,21 @@ export function CnForm({ creditNote }: CnFormProps) {
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/procurement/credit-note"));
+  const goBack = () => {
+    if (location.key !== "default") {
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      navGuard.back();
     } else {
       navigate("/procurement/credit-note");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -201,12 +220,14 @@ export function CnForm({ creditNote }: CnFormProps) {
 
   const handleSubmitCn = () => {
     if (!creditNote) return;
-    submitCn.mutate(creditNote.id, {
-      onSuccess: () => {
-        toast.success(tt("submitSuccess", { entity: t("entity") }));
+    submitCn.mutate(
+      { id: creditNote.id, doc_version: creditNote.doc_version ?? 0 },
+      {
+        onSuccess: () => {
+          toast.success(tt("submitSuccess", { entity: t("entity") }));
+        },
       },
-      onError: (err) => toast.error(err.message),
-    });
+    );
   };
 
   return (
@@ -298,7 +319,6 @@ export function CnForm({ creditNote }: CnFormProps) {
                   toast.success(tt("deleteSuccess", { entity: t("entity") }));
                   navigate("/procurement/credit-note");
                 },
-                onError: (err) => toast.error(err.message),
               });
             }}
           />

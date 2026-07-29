@@ -208,7 +208,7 @@ export function useUpdateUserLocations() {
         { location_ids: locationIds },
       );
       if (!res.ok) {
-        throw ApiError.fromResponse(res, "Failed to update user locations");
+        throw await ApiError.from(res, "Failed to update user locations");
       }
     },
     onSuccess: (_data, variables) => {

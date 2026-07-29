@@ -53,7 +53,7 @@ export function createConfigApi<T, TCreate>({
   ): Promise<PaginatedResponse<T>> {
     const url = buildUrl(endpoint(buCode), params);
     const res = await httpClient.get(url);
-    if (!res.ok) throw ApiError.fromResponse(res, `Failed to fetch ${label}`);
+    if (!res.ok) throw await ApiError.from(res, `Failed to fetch ${label}`);
     return res.json();
   }
 
@@ -71,7 +71,7 @@ export function createConfigApi<T, TCreate>({
    */
   async function getById(buCode: string, id: string): Promise<T> {
     const res = await httpClient.get(`${endpoint(buCode)}/${id}`);
-    if (!res.ok) throw ApiError.fromResponse(res, `Failed to fetch ${label}`);
+    if (!res.ok) throw await ApiError.from(res, `Failed to fetch ${label}`);
     const json = await res.json();
     return json.data;
   }

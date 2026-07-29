@@ -1,18 +1,24 @@
 import type React from "react";
-import type { ColumnDef } from "@tanstack/react-table";
+import type {
+  ColumnDef,
+  DisplayColumnDef,
+  OnChangeFn,
+  RowSelectionState,
+} from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { MoreHorizontal, CheckCircle2, XCircle, Trash2 } from "lucide-react";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
+import { AuditCell } from "@/components/share/audit-cell";
 import {
-  selectColumn,
   indexColumn,
   columnSkeletons,
   customActionColumn,
 } from "@/components/ui/data-grid/columns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +45,13 @@ interface UsePurchaseRequestTableOptions {
   onApprove?: (item: PurchaseRequest) => void;
   onReject?: (item: PurchaseRequest) => void;
   isMyPending?: boolean;
+  /** ผู้ใช้กดติ๊กหนึ่งแถว — คนเรียกเป็นคนตัดสินว่าจะติ๊กให้จริงไหม */
+  onRowSelect?: (item: PurchaseRequest, next: boolean) => void;
+  /** ผู้ใช้กดติ๊กหัวตาราง */
+  onSelectAll?: () => void;
+  /** selection ถือโดยคนเรียก (key = pr id) เพราะกติกาการเลือกอยู่ที่นั่น */
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
 }
 
 export function usePurchaseRequestTable({
@@ -51,9 +64,14 @@ export function usePurchaseRequestTable({
   onApprove,
   onReject,
   isMyPending = true,
+  onRowSelect,
+  onSelectAll,
+  rowSelection,
+  onRowSelectionChange,
 }: UsePurchaseRequestTableOptions) {
   "use no memo";
-  const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
+  const { dateFormat, dateTimeFormat, amountFormat, defaultCurrencyCode } =
+    useProfile();
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
 
@@ -173,6 +191,37 @@ export function usePurchaseRequestTable({
       },
       size: 150,
     },
+    {
+      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
+      id: "created_at",
+      accessorFn: (row) => row.audit?.created?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("created")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.created}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+    },
+    {
+      id: "updated_at",
+      accessorFn: (row) => row.audit?.updated?.at ?? "",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("updated")} />
+      ),
+      cell: ({ row }) => (
+        <AuditCell
+          entry={row.original.audit?.updated}
+          dateTimeFormat={dateTimeFormat}
+        />
+      ),
+      size: 160,
+      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
+    },
   ];
 
   const prActionColumn = customActionColumn<PurchaseRequest>(({ row }) => {
@@ -195,7 +244,7 @@ export function usePurchaseRequestTable({
                 onClick={() => onApprove(item)}
               >
                 <CheckCircle2
-                  className="text-success size-3"
+                  className="text-success-ink size-3"
                   aria-hidden="true"
                 />
                 {tc("approve")}
@@ -235,8 +284,52 @@ export function usePurchaseRequestTable({
     );
   });
 
+  // ติ๊กเองไม่ได้ทันที — ส่งให้คนเรียกตัดสินก่อน เพราะใบฉบับร่างกับใบที่กำลัง
+  // ดำเนินการทำงานคนละอย่าง จึงเลือกปนกันไม่ได้
+  const prSelectColumn: DisplayColumnDef<PurchaseRequest> = {
+    id: "select",
+    enableSorting: false,
+    enableHiding: false,
+    enableResizing: false,
+    size: 50,
+    meta: {
+      headerClassName: "text-center print:hidden",
+      cellClassName: "text-center print:hidden",
+      skeleton: columnSkeletons.checkbox,
+    },
+    header: ({ table }) => {
+      const isAllSelected = table.getIsAllPageRowsSelected();
+      const isSomeSelected = table.getIsSomePageRowsSelected();
+      return (
+        <Checkbox
+          checked={
+            isSomeSelected && !isAllSelected ? "indeterminate" : isAllSelected
+          }
+          disabled={items.length === 0}
+          onCheckedChange={() => onSelectAll?.()}
+          aria-label={tc("aria.selectAll")}
+          className="align-[inherit]"
+        />
+      );
+    },
+    cell: ({ row }) => (
+      <>
+        {row.getIsSelected() && (
+          <div className="bg-primary absolute start-0 top-0 bottom-0 w-0.5 rounded-full" />
+        )}
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => onRowSelect?.(row.original, !!value)}
+          aria-label={tc("aria.selectRow")}
+          className="align-[inherit]"
+        />
+      </>
+    ),
+  };
+
   const allColumns: ColumnDef<PurchaseRequest>[] = [
-    selectColumn<PurchaseRequest>(),
+    // all-document ไม่มี batch approve/reject ให้ทำ เลยไม่ต้องมีช่องติ๊ก
+    ...(isMyPending ? [prSelectColumn] : []),
     indexColumn<PurchaseRequest>(params),
     ...dataColumns,
     ...(isMyPending ? [prActionColumn] : []),
@@ -246,8 +339,17 @@ export function usePurchaseRequestTable({
     data: items,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
-    enableRowSelection: true,
+    enableRowSelection: isMyPending,
+    // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
+    // key ของ selection เป็น pr id ไม่ใช่เลข index แถว — ข้อมูลถูกลบ/เรียงใหม่แล้ว
+    // ที่ติ๊กไว้ยังชี้ใบเดิม
+    getRowId: (row) => row.id,
+    state: { ...tableConfig.state, rowSelection },
+    onRowSelectionChange,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });
 }

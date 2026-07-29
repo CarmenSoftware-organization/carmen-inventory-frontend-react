@@ -12,6 +12,7 @@ import {
   indexColumn,
 } from "@/components/ui/data-grid/columns";
 import { CellAction } from "@/components/ui/cell-action";
+import { AuditCell } from "@/components/share/audit-cell";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatExchangeRate } from "@/lib/currency-utils";
@@ -96,6 +97,37 @@ export function useExchangeRateTable({
         },
       },
 
+      {
+        // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
+        id: "created_at",
+        accessorFn: (row) => row.audit?.created?.at ?? "",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("created")} />
+        ),
+        cell: ({ row }) => (
+          <AuditCell
+            entry={row.original.audit?.created}
+            dateTimeFormat={dateTimeFormat}
+          />
+        ),
+        size: 160,
+        meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
+      },
+      {
+        id: "updated_at",
+        accessorFn: (row) => row.audit?.updated?.at ?? "",
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("updated")} />
+        ),
+        cell: ({ row }) => (
+          <AuditCell
+            entry={row.original.audit?.updated}
+            dateTimeFormat={dateTimeFormat}
+          />
+        ),
+        size: 160,
+        meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
+      },
       actionColumn<ExchangeRateItem>(onDelete),
     ],
     [params, dateTimeFormat, defaultCurrencyCode, onEdit, onDelete, tfl],
@@ -106,6 +138,7 @@ export function useExchangeRateTable({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
+    initialState: { columnVisibility: { created_at: false, updated_at: false } },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / Number(params.perpage ?? 10)),
   });

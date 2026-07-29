@@ -37,6 +37,26 @@ scripts/deploy-s3.sh <bucket> <distribution-id>
 
 ### One-time infrastructure setup
 
+One command provisions everything (bucket → Cloud CDN → HTTPS LB → managed cert)
+and runs the first deploy:
+
+```bash
+scripts/setup-gcs-cdn.sh <bucket> config.<env>.json            # no domain? auto <LB-IP>.sslip.io
+scripts/setup-gcs-cdn.sh <bucket> config.<env>.json app.example.com
+scripts/setup-gcs-cdn.sh <bucket> --teardown                   # delete LB/CDN (bucket kept)
+```
+
+- Idempotent — safe to re-run; every resource is create-if-missing.
+- `config.json` is uploaded only if absent on the bucket (never overwritten).
+- With a custom domain, point an A record to the printed LB IP; the managed
+  cert activates once DNS resolves. Without one, sslip.io resolves immediately
+  (first cert takes ~15–40 min).
+- Cache mode is `USE_ORIGIN_HEADERS`, so the per-object headers set by
+  `deploy-gcs.sh` (immutable assets, no-cache `index.html`) drive the CDN.
+- Remember the backend CORS prerequisite (Shared notes below).
+
+<details><summary>What the script creates (manual reference)</summary>
+
 1. **GCS bucket**:
    ```bash
    gcloud storage buckets create gs://<bucket> --location=<region> --uniform-bucket-level-access
@@ -60,6 +80,8 @@ scripts/deploy-s3.sh <bucket> <distribution-id>
    ```bash
    gcloud storage cp config.uat.json gs://<bucket>/config.json --cache-control="no-cache"
    ```
+
+</details>
 
 ### Each release
 
@@ -124,3 +146,9 @@ non-file paths, immutable caching on `/assets/*`, no-cache on `index.html` +
 - Both deploy scripts delete the dev `config.json` from `dist/` before syncing and
   exclude `config.json` from the sync, so the environment's config on the bucket
   is never overwritten.
+- **If a `script-src` CSP is ever introduced** (none exists today, on any target):
+  the inline font-scale script in `index.html` needs its hash allow-listed (or
+  `'unsafe-inline'`), otherwise it gets blocked and the page flashes from `normal`
+  to the user's saved size on every load — `main.tsx` also calls `applyScale` as a
+  fallback, but only after the JS bundle loads, so the flash still happens before
+  React mounts.

@@ -7,8 +7,7 @@ import { PR_STATUS, type PurchaseRequest } from "@/types/purchase-request";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import {
   DocFormHeader,
-  DocumentRibbon,
-  RibbonCell,
+  RibbonField,
 } from "@/components/share/doc-form-header";
 
 interface PrHeaderProps {
@@ -59,17 +58,25 @@ export function PrHeader({
     purchaseRequest.pr_status === PR_STATUS.DRAFT;
 
   // แสดง ribbon ทุกโหมด รวม add (requester/department/date seed จาก profile/วันนี้)
+  // ribbon เป็น grid คอลัมน์ fixed 10rem → cells ชิดซ้าย compact + align กับ
+  // general (pr-general-fields) ที่ใช้ track เดียวกัน. ml-4 หักล้าง -ml-4 ของ
+  // DocFormHeader. draft = 3 cells (workflow ไป general); ไม่ draft = 4 (workflow มา ribbon)
   const ribbon = (
-    <DocumentRibbon>
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
       {!isDraft && purchaseRequest?.workflow_name && (
-        <RibbonCell label={tfl("workflow")}>
-          {purchaseRequest.workflow_name}
-        </RibbonCell>
+        <RibbonField
+          label={tfl("workflow")}
+          value={purchaseRequest.workflow_name}
+        />
       )}
-      <RibbonCell label={tfl("requester")}>{reqName || "—"}</RibbonCell>
-      <RibbonCell label={tfl("department")}>{departmentName || "—"}</RibbonCell>
-      <RibbonCell label={tfl("date")}>{prDateDisplay || "—"}</RibbonCell>
-    </DocumentRibbon>
+      <RibbonField label={tfl("requester")} value={reqName || "—"} />
+      <RibbonField
+        label={tfl("department")}
+        value={departmentName || "—"}
+        className="lg:col-span-2"
+      />
+      <RibbonField label={tfl("date")} value={prDateDisplay || "—"} />
+    </div>
   );
 
   const workflowStepEl =
@@ -99,7 +106,7 @@ export function PrHeader({
         className="group hover:bg-muted/60 focus-visible:ring-ring flex cursor-pointer flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {workflowStepEl}
-        <span className="text-muted-foreground group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-[0.5625rem] tracking-wide transition-colors">
+        <span className="text-muted-foreground group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-micro-legal tracking-wide transition-colors">
           <History className="size-2.5" />
           {t("viewHistoryHint")}
         </span>
@@ -123,6 +130,7 @@ export function PrHeader({
       actions={actions}
       ribbon={ribbon}
       workflowStep={workflowStep}
+      workflowStepBelow
     />
   );
 }

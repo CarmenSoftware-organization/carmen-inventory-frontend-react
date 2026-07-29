@@ -298,7 +298,7 @@ export default function TransactionComponent() {
   /* ── Ref type pills (glass) ─────────── */
   const refTypeContent = (
     <div className="space-y-1.5">
-      <span className="text-muted-foreground text-[0.5625rem] font-semibold tracking-widest uppercase">
+      <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
         {t("referenceType")}
       </span>
       <div className="flex flex-wrap items-center gap-1.5">
@@ -310,7 +310,7 @@ export default function TransactionComponent() {
               type="button"
               onClick={() => toggleRefType(opt.value)}
               className={cn(
-                "border-border/40 bg-card hover:bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[0.6875rem] font-semibold tracking-wide transition-all",
+                "border-border/40 bg-card hover:bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold tracking-wide transition-all",
                 active && "border-primary bg-primary/10 text-primary",
               )}
             >
@@ -361,7 +361,7 @@ export default function TransactionComponent() {
                     <Badge
                       variant="secondary"
                       size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[0.625rem] tabular-nums"
+                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
                     >
                       {activeFilters.length}
                     </Badge>

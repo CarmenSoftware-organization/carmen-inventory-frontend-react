@@ -61,6 +61,7 @@ const buildNewStage = (
       sendback: { is_active: true, recipients: makeRecipients(true, false, false) },
     },
     hide_fields: { price_per_unit: false, total_price: false },
+    is_show_signature: false,
     assigned_users: [],
     is_hod: false,
   };

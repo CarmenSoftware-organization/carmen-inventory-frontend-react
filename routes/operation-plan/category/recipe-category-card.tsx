@@ -1,4 +1,5 @@
-import { FolderTree } from "lucide-react";
+import { FolderTree, Clock } from "lucide-react";
+import { useTranslations } from "use-intl";
 import {
   Card,
   CardAction,
@@ -8,6 +9,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
 import type { RecipeCategory } from "@/types/recipe-category";
 
 interface RecipeCategoryCardProps {
@@ -30,6 +33,10 @@ export default function RecipeCategoryCard({
   parentName,
   onEdit,
 }: RecipeCategoryCardProps) {
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
+  const updatedAt = item.audit?.updated?.at;
+
   return (
     <Card
       role="button"
@@ -46,7 +53,7 @@ export default function RecipeCategoryCard({
       <CardHeader className="px-4 py-3">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[0.625rem] font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -62,15 +69,32 @@ export default function RecipeCategoryCard({
         </CardAction>
       </CardHeader>
 
-      {parentName && (
+      {(parentName || updatedAt) && (
         <>
           <Separator />
-          <CardContent className="flex items-center gap-1.5 px-4 py-2 text-xs">
-            <FolderTree
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground truncate">{parentName}</span>
+          <CardContent className="space-y-1.5 px-4 py-2 text-xs">
+            {parentName && (
+              <div className="flex items-center gap-1.5">
+                <FolderTree
+                  className="text-muted-foreground size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-muted-foreground truncate">
+                  {parentName}
+                </span>
+              </div>
+            )}
+            {updatedAt && (
+              <div className="flex items-center gap-1.5">
+                <Clock
+                  className="text-muted-foreground size-3 shrink-0"
+                  aria-hidden="true"
+                />
+                <span className="text-muted-foreground truncate">
+                  {tfl("updated")}: {formatDate(updatedAt, dateTimeFormat)}
+                </span>
+              </div>
+            )}
           </CardContent>
         </>
       )}

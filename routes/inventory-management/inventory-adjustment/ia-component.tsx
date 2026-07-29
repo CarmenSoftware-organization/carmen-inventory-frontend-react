@@ -60,7 +60,6 @@ import {
   type ActiveFilter,
 } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { useInventoryAdjustmentTable } from "./use-ia-table";
 import IaCardList from "./ia-card-list";
 
@@ -77,7 +76,6 @@ export default function InventoryAdjustmentComponent() {
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const isMobile = useIsMobile();
-  const errorToast = useErrorToast();
   const isGridMode = isMobile || displayMode === "grid";
   // Infinite scroll สำหรับทุกโหมด grid (mobile auto + desktop card view)
   // โหมด list (desktop table) ยังคงใช้ pagination ปกติ
@@ -368,7 +366,7 @@ export default function InventoryAdjustmentComponent() {
                     <Badge
                       variant="secondary"
                       size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-[0.625rem] tabular-nums"
+                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
                     >
                       {activeFilters.length}
                     </Badge>
@@ -509,7 +507,6 @@ export default function InventoryAdjustmentComponent() {
                 toast.success(tt("deleteSuccess", { entity: t("entity") }));
                 setDeleteTarget(null);
               },
-              onError: errorToast,
             },
           );
         }}

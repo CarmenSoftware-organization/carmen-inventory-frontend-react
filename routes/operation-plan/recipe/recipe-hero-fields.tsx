@@ -76,7 +76,7 @@ export function RecipeHeroFields({
               >
                 <SelectTrigger
                   size="xs"
-                  className="h-6 gap-1.5 rounded-full px-2 text-[0.6875rem] font-semibold tracking-wider"
+                  className="h-6 gap-1.5 rounded-full px-2 text-micro font-semibold tracking-wider"
                   aria-label={tfl("difficulty")}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -117,7 +117,7 @@ export function RecipeHeroFields({
                 onClick={() => !isDisabled && field.onChange(!field.value)}
                 disabled={isDisabled}
                 className={cn(
-                  "inline-flex h-6 items-center gap-1.5 rounded-full border px-2 text-[0.6875rem] font-semibold transition-colors",
+                  "inline-flex h-6 items-center gap-1.5 rounded-full border px-2 text-micro font-semibold transition-colors",
                   field.value
                     ? "border-foreground bg-foreground text-background"
                     : "border-border bg-card text-muted-foreground",
@@ -140,7 +140,7 @@ export function RecipeHeroFields({
                 onClick={() => !isDisabled && field.onChange(!field.value)}
                 disabled={isDisabled}
                 className={cn(
-                  "inline-flex h-6 items-center gap-1.5 rounded-full border px-2 text-[0.6875rem] font-semibold transition-colors",
+                  "inline-flex h-6 items-center gap-1.5 rounded-full border px-2 text-micro font-semibold transition-colors",
                   field.value
                     ? "border-foreground bg-foreground text-background"
                     : "border-border bg-card text-muted-foreground",
@@ -238,35 +238,18 @@ function QuickStat({
     <div
       className={cn(
         "rounded-md border px-3 py-2",
-        accent
-          ? "border-primary bg-primary text-primary-foreground"
-          : "bg-card",
+        accent ? "border-foreground/20 bg-muted/60" : "bg-card",
       )}
     >
-      <div
-        className={cn(
-          "flex items-center gap-1 text-[0.625rem] font-bold tracking-wider uppercase",
-          accent ? "text-primary-foreground/70" : "text-muted-foreground",
-        )}
-      >
+      <div className="text-muted-foreground flex items-center gap-1 text-micro-legal font-bold tracking-wider uppercase">
         <Icon className="size-3" aria-hidden="true" />
         {label}
       </div>
-      <div
-        className={cn(
-          "mt-1 text-xl font-semibold tracking-tight",
-          accent ? "text-primary-foreground" : "text-foreground",
-        )}
-      >
+      <div className="text-foreground mt-1 text-xl font-semibold tracking-tight tabular-nums">
         {value}
       </div>
       {sub && (
-        <div
-          className={cn(
-            "text-[0.6875rem]",
-            accent ? "text-primary-foreground/70" : "text-muted-foreground",
-          )}
-        >
+        <div className="text-muted-foreground text-micro tabular-nums">
           {sub}
         </div>
       )}

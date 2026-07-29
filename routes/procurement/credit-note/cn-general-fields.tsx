@@ -86,7 +86,7 @@ export function CnGeneralFields({
     : undefined;
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
       <Field className={viewFieldGap}>
         <FieldLabel className={viewLabelClass} required>
           {t("cnType")}
@@ -121,7 +121,7 @@ export function CnGeneralFields({
         />
       </Field>
 
-      <Field className={viewFieldGap}>
+      <Field className={`${viewFieldGap ?? ""} lg:col-span-2`}>
         <FieldLabel className={viewLabelClass} required>
           {tfl("vendor")}
         </FieldLabel>
@@ -158,6 +158,10 @@ export function CnGeneralFields({
                 form.setValue("exchange_rate", grn.exchange_rate ?? 1);
                 form.setValue("invoice_no", grn.invoice_no ?? "");
                 form.setValue("invoice_date", grn.invoice_date ?? "");
+                // เปลี่ยน GRN → ล้าง items เดิม (เป็นของ GRN ก่อนหน้า, product/location
+                // คนละชุด) · onItemChange ยิงเฉพาะตอน user เลือกเอง ไม่ยิงตอน mount
+                // จึงไม่ล้าง items ที่โหลดมาในโหมด edit
+                form.setValue("items", [], { shouldDirty: true });
               }}
               vendorId={vendorId}
               disabled={disabled}

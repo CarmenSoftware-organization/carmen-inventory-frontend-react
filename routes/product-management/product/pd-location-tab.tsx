@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useFieldArray, useWatch } from "react-hook-form";
 import {
@@ -9,7 +9,7 @@ import {
 import { Plus, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
 import { inventoryTypeLabelKey } from "@/constant/location";
 import {
   DataGrid,
@@ -38,10 +38,11 @@ interface LocationRow {
 
 const EMPTY_LOCATIONS: ProductFormValues["locations"] = [];
 
-const TYPE_VARIANT: Record<string, "info" | "warning" | "secondary"> = {
+// tone ของ dot ตาม location type — เก็บสีต่อ type ไว้ที่ dot (chip กลาง)
+const TYPE_TONE: Record<string, DotTone> = {
   inventory: "info",
   direct: "warning",
-  consignment: "secondary",
+  consignment: "neutral",
 };
 
 interface LocationsTabProps {
@@ -68,43 +69,56 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   const [search, setSearch] = useState("");
   const [deleteIdx, setDeleteIdx] = useState<number | null>(null);
 
-  const assignedIds = watchedLocations.map((l) => l.location_id ?? "");
+  // Stable string-key so `assignedIds` (and the memoized `columns` that reads
+  // it) keep their reference when only qty fields change. Rebuilding `columns`
+  // every render remounts the lookup cells, which in the browser triggers a
+  // ResizeObserver render loop that freezes the tab. Mirrors the pattern in
+  // pd-unit-conversion-tab.
+  const assignedIdsKey = watchedLocations
+    .map((l) => l.location_id ?? "")
+    .join("|");
+  const assignedIds = useMemo(() => assignedIdsKey.split("|"), [assignedIdsKey]);
 
-  const allRows: LocationRow[] = fields
-    .map((field, index) => {
-      const watched = watchedLocations[index];
-      return {
-        fieldId: field._fieldKey,
-        fieldIndex: index,
-        location_id: watched?.location_id ?? "",
-        location_code: watched?.location_code ?? "",
-        location_name: watched?.location_name ?? "",
-        location_type: watched?.location_type ?? "",
-        is_active: watched?.is_active,
-        delivery_point: watched?.delivery_point ?? "",
-        min_qty: watched?.min_qty ?? null,
-        max_qty: watched?.max_qty ?? null,
-        re_order_qty: watched?.re_order_qty ?? null,
-        par_qty: watched?.par_qty ?? null,
-      };
-    })
-    .sort(
-      (a, b) =>
-        a.location_code.localeCompare(b.location_code) ||
-        a.location_name.localeCompare(b.location_name),
-    );
+  const allRows = useMemo<LocationRow[]>(
+    () =>
+      fields
+        .map((field, index) => {
+          const watched = watchedLocations[index];
+          return {
+            fieldId: field._fieldKey,
+            fieldIndex: index,
+            location_id: watched?.location_id ?? "",
+            location_code: watched?.location_code ?? "",
+            location_name: watched?.location_name ?? "",
+            location_type: watched?.location_type ?? "",
+            is_active: watched?.is_active,
+            delivery_point: watched?.delivery_point ?? "",
+            min_qty: watched?.min_qty ?? null,
+            max_qty: watched?.max_qty ?? null,
+            re_order_qty: watched?.re_order_qty ?? null,
+            par_qty: watched?.par_qty ?? null,
+          };
+        })
+        .sort(
+          (a, b) =>
+            a.location_code.localeCompare(b.location_code) ||
+            a.location_name.localeCompare(b.location_name),
+        ),
+    [fields, watchedLocations],
+  );
 
-  const q = search.toLowerCase();
-  const tableData = !search
-    ? allRows
-    : allRows.filter((row) => {
-        if (!row.location_id) return true;
-        return (
-          row.location_name.toLowerCase().includes(q) ||
-          row.location_type.toLowerCase().includes(q) ||
-          row.delivery_point.toLowerCase().includes(q)
-        );
-      });
+  const tableData = useMemo(() => {
+    if (!search) return allRows;
+    const q = search.toLowerCase();
+    return allRows.filter((row) => {
+      if (!row.location_id) return true;
+      return (
+        row.location_name.toLowerCase().includes(q) ||
+        row.location_type.toLowerCase().includes(q) ||
+        row.delivery_point.toLowerCase().includes(q)
+      );
+    });
+  }, [allRows, search]);
 
   const handleAdd = () => {
     prepend({
@@ -125,7 +139,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
     }
   };
 
-  const columns: ColumnDef<LocationRow>[] = (() => {
+  const columns = useMemo<ColumnDef<LocationRow>[]>(() => {
     const indexCol: ColumnDef<LocationRow> = {
       id: "index",
       header: "#",
@@ -146,19 +160,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
         id: "location",
         header: tfl("location"),
         cell: ({ row }) => {
-          const { location_code, location_name, location_type, fieldIndex } =
-            row.original;
-          const typeBadge = location_type ? (
-            <Badge
-              variant={TYPE_VARIANT[location_type] ?? "secondary"}
-              size="xs"
-            >
-              {(() => {
-                const k = inventoryTypeLabelKey(location_type);
-                return k ? tl(k) : location_type.toUpperCase();
-              })()}
-            </Badge>
-          ) : null;
+          const { location_code, location_name, fieldIndex } = row.original;
 
           if (isDisabled) {
             return (
@@ -167,7 +169,6 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
                   <span className="text-muted-foreground">{location_code}</span>
                 )}
                 {location_name}
-                {typeBadge}
               </span>
             );
           }
@@ -220,6 +221,26 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
           );
         },
         size: 300,
+      },
+      {
+        id: "type",
+        header: tfl("type"),
+        cell: ({ row }) => {
+          const type = row.original.location_type;
+          if (!type) return "";
+          const k = inventoryTypeLabelKey(type);
+          return (
+            <StatusDotBadge tone={TYPE_TONE[type] ?? "neutral"} size="xs">
+              {k ? tl(k) : type.toUpperCase()}
+            </StatusDotBadge>
+          );
+        },
+        enableSorting: false,
+        size: 130,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center",
+        },
       },
       {
         id: "min_qty",
@@ -328,9 +349,9 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
           const isActive = row.original.is_active;
           if (isActive === undefined || isActive === null) return "";
           return (
-            <Badge variant={isActive ? "success" : "secondary"}>
+            <StatusDotBadge tone={isActive ? "success" : "neutral"}>
               {isActive ? ts("active") : ts("inactive")}
-            </Badge>
+            </StatusDotBadge>
           );
         },
         enableSorting: false,
@@ -365,7 +386,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
     };
 
     return [indexCol, ...dataCols, ...(isDisabled ? [] : [actionCol])];
-  })();
+  }, [t, tfl, ts, tl, isDisabled, form, assignedIds]);
 
   const table = useReactTable({
     data: tableData,
@@ -405,7 +426,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
       <DataGrid
         table={table}
         recordCount={fields.length}
-        tableLayout={{ headerSticky: true }}
+        tableLayout={{ headerSticky: true}}
         emptyMessage={
           <EmptyComponent
             title={t("noLocations")}

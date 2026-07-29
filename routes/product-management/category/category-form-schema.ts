@@ -1,8 +1,9 @@
 import { z } from "zod";
 import type { CategoryNode, CategoryType } from "@/types/category";
+import type { FormMode } from "@/types/form";
 
 export const categorySchema = z.object({
-  code: z.string().min(1, "Code is required"),
+  code: z.string().optional(),
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   is_active: z.boolean(),
@@ -67,4 +68,19 @@ export function getDefaultValues(
     base.product_subcategory_id =
       selectedNode?.product_subcategory_id ?? parentNode?.id ?? "";
   return base;
+}
+
+/**
+ * ตัด field `code` ออกจาก payload เมื่ออยู่ในโหมด add เพื่อให้ backend สร้าง
+ * running-number code ให้อัตโนมัติ ส่วนโหมด edit จะคง code เดิม (server-assigned)
+ * ไว้ไม่เปลี่ยนแปลง
+ * @param mode - โหมดของฟอร์ม (add / edit)
+ * @param data - ค่าจากฟอร์มที่ผ่าน validation แล้ว
+ * @returns payload ที่พร้อมส่ง — ไม่มี code ในโหมด add, คงเดิมในโหมด edit
+ */
+export function stripAutoCode(
+  mode: FormMode,
+  data: CategoryFormValues,
+): CategoryFormValues {
+  return mode === "add" ? { ...data, code: undefined } : data;
 }

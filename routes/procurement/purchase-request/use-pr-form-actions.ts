@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
@@ -56,6 +56,7 @@ export function usePrFormActions({
   const t = useTranslations("procurement.purchaseRequest");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
+  const location = useLocation();
   const buCode = useBuCode();
 
   // GET PR สดจาก DB ก่อนยิง workflow event — กัน 409 optimistic lock จาก
@@ -147,7 +148,12 @@ export function usePrFormActions({
 
   // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
   // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
-  const navGuard = useNavigationGuard((isAdd || isEdit) && form.formState.isDirty);
+  // ระหว่าง submit ตอน create ปิด guard — ไม่งั้น sentinel ที่ guard ดันไว้ที่ /new
+  // ทำให้ navigate(replace) หลัง create ไม่กิน /new จริง → back เด้งกลับ /new
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && form.formState.isDirty && !isSubmitting,
+  );
   const navDiscardDialogProps = {
     open: navGuard.isOpen,
     onOpenChange: (o: boolean) => {
@@ -185,7 +191,6 @@ export function usePrFormActions({
     purchase_request_detail: buildItemChanges(
       values.items,
       defaultValues.items,
-      form.formState.dirtyFields.items as Record<string, unknown>[] | undefined, // RHF 7.78 type drift
       mapItemToPayload,
     ),
   });
@@ -199,6 +204,7 @@ export function usePrFormActions({
     if (purchaseRequest?.role === STAGE_ROLE.PURCHASE) {
       return preparePurchaseDetails(
         values.items,
+        purchaseRequest.id,
       ) as unknown as CreatePurchaseRequestDto["details"];
     }
     if (purchaseRequest?.role === STAGE_ROLE.APPROVE) {
@@ -245,21 +251,25 @@ export function usePrFormActions({
             toast.success(tt("updateSuccess", { entity: t("entity") }));
             setMode("view");
           },
-          onError: handleMutationError,
         },
       );
     } else if (isAdd) {
+      // ปิด guard ก่อนยิง mutation → sentinel ถูก teardown ลบระหว่างรอ network →
+      // navigate(replace) กิน /new จริง → stack เหลือ [list, /:id] → back = list
+      setIsSubmitting(true);
       createPr.mutate(
         { stage_role: "create", details },
         {
           onSuccess: (data) => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
+            // ไม่ setMode("view") — route /:id mount PrForm view mode เอง (เลี่ยง churn)
             if (data?.data?.id) {
-              navigate(`/procurement/purchase-request/${data.data.id}`, { replace: true });
+              navigate(`/procurement/purchase-request/${data.data.id}`, {
+                replace: true,
+              });
             }
-            setMode("view");
           },
-          onError: handleMutationError,
+          onError: () => setIsSubmitting(false),
         },
       );
     }
@@ -276,11 +286,25 @@ export function usePrFormActions({
     });
   };
 
-  const handleBack = () => {
-    if (isEdit || isAdd) {
-      discard.confirm(() => navigate("/procurement/purchase-request"));
+  // กลับ list พร้อม tab/filter/sort ที่ค้างใน URL — back คือ browser back
+  // ไปยัง history entry ของ list (params ถูกเก็บใน URL อยู่แล้ว). ถ้าเข้า detail
+  // ตรง ๆ (deep-link, location.key === "default" คือ entry แรก ไม่มี history ในแอป)
+  // fallback ไป list path เปล่า
+  const goBack = () => {
+    if (location.key !== "default") {
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      navGuard.back();
     } else {
       navigate("/procurement/purchase-request");
+    }
+  };
+
+  const handleBack = () => {
+    if (isEdit || isAdd) {
+      discard.confirm(goBack);
+    } else {
+      goBack();
     }
   };
 
@@ -298,7 +322,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("submitted")),
-        onError: handleMutationError,
       },
     );
   };
@@ -317,18 +340,23 @@ export function usePrFormActions({
           );
           void doSubmitPr(purchaseRequest.id, savedItems);
         },
-        onError: handleMutationError,
       },
     );
   };
 
   const doCreateAndSubmitPr = (values: PrFormValues) => {
     const details = buildCreateDetails(values);
+    // ปิด guard ก่อนยิง mutation → sentinel ถูกลบก่อน navigate(list) ตอนสำเร็จ →
+    // /new ไม่ค้างใน stack → back หลัง create-and-submit ไม่เด้ง /new
+    setIsSubmitting(true);
     createPr.mutate(
       { stage_role: "create", details },
       {
         onSuccess: (data) => {
-          if (!data?.data?.id) return;
+          if (!data?.data?.id) {
+            setIsSubmitting(false);
+            return;
+          }
           const newId = data.data.id;
           const stageDetails = toSubmitStageDetails(
             data.data.purchase_request_detail,
@@ -342,11 +370,11 @@ export function usePrFormActions({
             },
             {
               onSuccess: onSuccessList(t("submitted")),
-              onError: handleMutationError,
+              onError: () => setIsSubmitting(false),
             },
           );
         },
-        onError: handleMutationError,
+        onError: () => setIsSubmitting(false),
       },
     );
   };
@@ -375,7 +403,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("prApproved")),
-        onError: handleMutationError,
       },
     );
   };
@@ -389,14 +416,16 @@ export function usePrFormActions({
         id: purchaseRequest.id,
         stage_role: STAGE_ROLE.PURCHASE,
         doc_version: resolveDocVersion(fresh),
-        details: prepareApproveDetails(
+        // stage_role purchase ต้องใช้ shape เต็ม (vendor/price/tax/base_*) —
+        // ตัวเดียวกับที่ /save ส่ง ไม่งั้น approve เขียนทับยอดของ save ด้วย
+        // ตัวเลขคนละชุด แล้ว sub_total/base_* ค้างค่าเก่า
+        details: preparePurchaseDetails(
           form.getValues("items"),
           purchaseRequest.id,
         ),
       },
       {
         onSuccess: onSuccessList(t("purchaseApproved")),
-        onError: handleMutationError,
       },
     );
   };
@@ -415,7 +444,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("prRejected")),
-        onError: handleMutationError,
       },
     );
   };
@@ -450,7 +478,6 @@ export function usePrFormActions({
       },
       {
         onSuccess: onSuccessList(t("sentBack")),
-        onError: handleMutationError,
       },
     );
   };
@@ -504,7 +531,6 @@ export function usePrFormActions({
         setActionDialog({ type: null });
         setMode("view");
       },
-      onError: handleMutationError,
     });
   };
 
@@ -530,7 +556,6 @@ export function usePrFormActions({
 
           toast.success(t("splitSuccess"));
         },
-        onError: handleMutationError,
       },
     );
   };

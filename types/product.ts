@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { UseFormReturn } from "react-hook-form";
 
 import type { TranslationFn } from "@/lib/i18n-schema";
+import type { Audit } from "./audit";
 
 export type ProductStatusType = "active" | "inactive";
 
@@ -44,11 +45,13 @@ export interface Product {
   local_name: string;
   product_status_type: ProductStatusType;
   inventory_unit: { id: string; name: string };
+  // list endpoint คืนหน่วยเป็น flat string (detail ใช้ inventory_unit object)
+  inventory_unit_name?: string;
   product_item_group: { id?: string; name: string } | null;
   product_sub_category: { id?: string; name: string } | null;
   product_category: { id?: string; name: string } | null;
-  created_at: string;
-  updated_at: string;
+  // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
+  audit?: Audit;
 }
 
 export interface ProductDetail extends Product {
@@ -145,10 +148,7 @@ function createLocationSchema(tv: TranslationFn, tf: TranslationFn) {
 export function createProductSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     name: z.string().min(1, tv("required", { field: tf("name") })),
-    code: z
-      .string()
-      .min(1, tv("required", { field: tf("code") }))
-      .max(10, tv("maxLength", { field: tf("code"), max: 10 })),
+    code: z.string().optional(),
     local_name: z
       .string()
       .min(1, tv("required", { field: tf("localName") }))
@@ -210,7 +210,7 @@ export interface LocationPayload {
 
 export interface CreateProductDto {
   name: string;
-  code: string;
+  code?: string;
   local_name: string;
   description: string;
   inventory_unit_id: string;

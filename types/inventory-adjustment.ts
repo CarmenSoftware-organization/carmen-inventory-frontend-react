@@ -1,3 +1,5 @@
+import type { Audit } from "./audit";
+
 export type InventoryAdjustmentType = "stock-in" | "stock-out";
 export type InventoryAdjustmentStatus =
   | "in_progress"
@@ -46,8 +48,8 @@ export interface InventoryAdjustment {
   stock_out_detail?: InventoryAdjustmentDetail[];
   item_count?: number;
   base_total_cost: number;
-  created_at: string;
-  updated_at: string;
+  // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
+  audit?: Audit;
 }
 
 export interface AdjustmentDetailItemPayload {

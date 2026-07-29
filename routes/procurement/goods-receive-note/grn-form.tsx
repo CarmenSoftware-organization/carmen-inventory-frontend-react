@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "react-router";
@@ -7,8 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency, round2 } from "@/lib/currency-utils";
-import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import type { FormMode } from "@/types/form";
@@ -24,8 +22,8 @@ import { GrnItemTable } from "./grn-item-table";
 import { GrnFormDialogs } from "./grn-form-dialogs";
 import { useGrnFormActions } from "./use-grn-form-actions";
 import { useProfile } from "@/hooks/use-profile";
-import { useCurrency } from "@/hooks/use-currency";
 import { GrnHeader } from "./grn-header";
+import { GrnSummaryFooter } from "./grn-summary-footer";
 import { GrnFormHeader } from "./grn-form-header";
 
 interface GrnFormProps {
@@ -60,8 +58,23 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   );
   const fromWizard = !!wizardData;
 
+  // Document info ribbon — buyer/requestor + department แสดงอย่างเดียว (ไม่เข้า payload),
+  // grn_date เป็น field จริง. defaultCurrency* ใช้เป็น currency เริ่มต้นของ GRN ใหม่
+  const {
+    dateFormat,
+    defaultBu,
+    data: profileData,
+    defaultCurrencyId,
+    defaultCurrencyCode,
+  } = useProfile();
+
   const defaultValues = useMemo(() => {
-    const base = getDefaultValues(goodsReceiveNote);
+    // currency default ของ BU set ตั้งแต่ getDefaultValues (mirror PO) — profile
+    // โหลดตั้งแต่ boot จึงพร้อมตอน mount; wizard override ทับทีหลังถ้ามา from wizard
+    const base = getDefaultValues(goodsReceiveNote, {
+      defaultCurrencyId,
+      defaultCurrencyCode,
+    });
     if (goodsReceiveNote) return base;
 
     if (docTypeParam) base.doc_type = docTypeParam;
@@ -77,7 +90,13 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
       base.items = wizardData.items;
     }
     return base;
-  }, [goodsReceiveNote, docTypeParam, wizardData]);
+  }, [
+    goodsReceiveNote,
+    docTypeParam,
+    wizardData,
+    defaultCurrencyId,
+    defaultCurrencyCode,
+  ]);
 
   const form = useForm<GrnFormValues>({
     resolver: zodResolver(createGrnSchema(tv, tfl)) as Resolver<GrnFormValues>,
@@ -86,19 +105,43 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
     reValidateMode: "onChange",
   });
 
+  // เพิ่มทุกครั้งที่ validation ไม่ผ่าน — ส่งให้ items grid auto-expand group ที่
+  // location/qty/discount/tax ติด error (field อยู่ใน group expand เท่านั้น) + scroll
+  const [revealErrorSignal, setRevealErrorSignal] = useState(0);
+  const revealErrors = () => {
+    setRevealErrorSignal((c) => c + 1);
+    // scroll หา field แรกที่ผิด — retry ข้ามเฟรมจน group ที่ auto-expand mount field เสร็จ
+    scrollToFirstInvalidField();
+  };
+
   const actions = useGrnFormActions({
     form,
     goodsReceiveNote,
     defaultValues,
     mode,
     setMode,
+    revealErrors,
   });
 
   const isDisabled = isView || actions.isPending;
 
-  // Document info ribbon — buyer/requestor + department แสดงอย่างเดียว (ไม่เข้า payload),
-  // grn_date เป็น field จริง
-  const { dateFormat, defaultBu, data: profileData } = useProfile();
+  // Rebaseline dirty state หลัง compute-sync ของ location (discount/tax/net/total)
+  // settle. RHF คิด isDirty จาก !deepEqual(getValues(), defaultValues) → setValue
+  // ค่า derived ที่ต่างจาก default ทำให้ dirty ค้าง → back/cancel ติด discard dialog
+  // เกินจริง. reset(getValues, keepDirtyValues) ทำให้ค่า derived เป็น baseline
+  // (ไม่นับ dirty) แต่คงค่าที่ผู้ใช้แก้ไว้ — ทำครั้งเดียวหลัง data พร้อม (mirror PO)
+  const didRebaseline = useRef(false);
+  useEffect(() => {
+    if (didRebaseline.current) return;
+    if (!goodsReceiveNote && !profileData) return;
+    didRebaseline.current = true;
+    form.reset(form.getValues(), { keepDirtyValues: true });
+    // reset() re-validate ทั้งฟอร์ม → required field ที่ยังว่าง (เช่น currency
+    // default ที่ header เพิ่งจะตั้งทีหลัง) โชว์ error แดงทั้งที่ user ยังไม่แตะ →
+    // clear ทิ้ง (mode onChange จะ validate ใหม่เองเมื่อ user แก้จริง)
+    form.clearErrors();
+  }, [form, goodsReceiveNote, profileData]);
+
   const watchedGrnDate = useWatch({ control: form.control, name: "grn_date" });
   const watchedDescription = useWatch({
     control: form.control,
@@ -116,37 +159,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
       control: form.control,
       name: "extra_cost_details",
     })?.length ?? 0;
-
-  const { data: currencyData } = useCurrency({ perpage: -1 });
-  const currencies = currencyData?.data?.filter((c) => c.is_active) ?? [];
-
-  // grand summary — รวมยอดจากทุก item (net/discount/tax/total ที่คำนวณไว้แล้ว)
-  const items = useWatch({ control: form.control, name: "items" }) ?? [];
-  // currency code — derive จาก list ตาม currency_id (fallback currency_name)
-  // เหมือน grn-form-header เพราะบาง record ไม่เก็บ currency_name
-  const currencyId = useWatch({ control: form.control, name: "currency_id" });
-  const currencyName =
-    useWatch({ control: form.control, name: "currency_name" }) ?? "";
-  const currencyCode =
-    currencies.find((c) => c.id === currencyId)?.code || currencyName;
-  let totalDiscount = 0;
-  let totalNet = 0;
-  let totalTax = 0;
-  let grandTotal = 0;
-  for (const it of items) {
-    totalDiscount += Number(it?.discount_amount) || 0;
-    totalNet += Number(it?.net_amount) || 0;
-    totalTax += Number(it?.tax_amount) || 0;
-    grandTotal += Number(it?.total_price) || 0;
-  }
-  const summary = {
-    subtotal: round2(totalNet + totalDiscount),
-    totalDiscount: round2(totalDiscount),
-    totalNet: round2(totalNet),
-    totalTax: round2(totalTax),
-    grandTotal: round2(grandTotal),
-  };
-  const hasItems = items.length > 0;
 
   // Clear wizard data on SPA navigation (unmount) but keep on browser refresh
   useEffect(() => {
@@ -167,7 +179,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         goodsReceiveNote={goodsReceiveNote}
         mode={mode}
         isPending={actions.isPending}
-        isActionPending={actions.isActionPending}
         isCommitted={isCommitted}
         isVoid={isVoid}
         deleteIsPending={actions.deleteGrn.isPending}
@@ -178,8 +189,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         onBack={actions.handleBack}
         onEnterEdit={() => setMode("edit")}
         onCancel={actions.handleCancel}
-        onShowCommit={() => actions.setShowCommit(true)}
-        onShowVoid={() => actions.setShowVoid(true)}
         onShowComment={() => actions.setShowComment(true)}
         onShowDelete={() => actions.setShowDelete(true)}
         onSaveDraft={() => actions.handleSubmitWithStatus("draft")}
@@ -188,9 +197,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
 
       <form
         id="grn-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
+        onSubmit={form.handleSubmit(actions.onSubmit, revealErrors)}
         className="space-y-3 px-4"
       >
         <GrnFormHeader
@@ -251,6 +258,7 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
               form={form}
               disabled={isDisabled}
               plainText={isView}
+              revealErrorSignal={revealErrorSignal}
             />
           </TabsContent>
           <TabsContent value="extra-cost">
@@ -259,47 +267,16 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         </Tabs>
       </form>
 
-      {hasItems && (
-        <SummaryFooterBar
-          hasRecord
-          items={[
-            {
-              key: "subtotal",
-              label: tfl("subtotal"),
-              value: formatCurrency(summary.subtotal),
-            },
-            {
-              key: "discount",
-              label: tfl("discount"),
-              value:
-                summary.totalDiscount > 0
-                  ? `-${formatCurrency(summary.totalDiscount)}`
-                  : formatCurrency(0),
-              valueClassName:
-                summary.totalDiscount > 0
-                  ? "text-destructive font-semibold"
-                  : "font-semibold",
-            },
-            {
-              key: "net",
-              label: tfl("net"),
-              value: formatCurrency(summary.totalNet),
-            },
-            {
-              key: "tax",
-              label: tfl("tax"),
-              value: formatCurrency(summary.totalTax),
-            },
-            {
-              key: "grandTotal",
-              label: tfl("grandTotal"),
-              value: formatCurrency(summary.grandTotal),
-              emphasis: true,
-              suffix: currencyCode,
-            },
-          ]}
-        />
-      )}
+      <GrnSummaryFooter
+        form={form}
+        isActionPending={actions.isActionPending}
+        hasRecord={!!goodsReceiveNote}
+        isView={mode === "view"}
+        isCommitted={isCommitted}
+        isVoid={isVoid}
+        onCommit={() => actions.setShowCommit(true)}
+        onVoid={() => actions.setShowVoid(true)}
+      />
 
       <DiscardDialog {...actions.discardDialogProps} variant="warning" />
       <DiscardDialog {...actions.navDiscardDialogProps} variant="warning" />

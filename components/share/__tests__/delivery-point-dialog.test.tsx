@@ -70,8 +70,6 @@ const mockDeliveryPoint: DeliveryPoint = {
   doc_version: 3,
   name: "Main Warehouse",
   is_active: true,
-  created_at: "2024-01-01T00:00:00Z",
-  updated_at: "2024-01-01T00:00:00Z",
 };
 
 function getDialog() {
@@ -167,7 +165,6 @@ describe("DeliveryPointDialog", () => {
         { name: "New Delivery Point", is_active: true },
         expect.objectContaining({
           onSuccess: expect.any(Function),
-          onError: expect.any(Function),
         }),
       );
     });
@@ -195,7 +192,6 @@ describe("DeliveryPointDialog", () => {
         { id: "1", doc_version: 3, name: "Updated Warehouse", is_active: true },
         expect.objectContaining({
           onSuccess: expect.any(Function),
-          onError: expect.any(Function),
         }),
       );
     });

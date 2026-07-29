@@ -32,7 +32,11 @@ export function CuisineGeneralFields({
   const errors = form.formState.errors;
 
   return (
-    <Card label={tf("generalInfo")}>
+    <Card
+      first
+      label={tf("generalInfo")}
+      description={t("generalInfoDesc")}
+    >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="cuisine-name" required>
@@ -75,20 +79,21 @@ export function CuisineGeneralFields({
           />
         </Field>
 
-        <Field className="sm:col-span-2">
-          <FieldLabel htmlFor="cuisine-description">
-            {tfl("description")}
-          </FieldLabel>
-          <Textarea
-            id="cuisine-description"
-            placeholder={tfl("optional")}
-            rows={2}
-            disabled={isDisabled}
-            maxLength={256}
-            {...form.register("description")}
-          />
-        </Field>
       </div>
+
+      <Field className="mt-4">
+        <FieldLabel htmlFor="cuisine-description">
+          {tfl("description")}
+        </FieldLabel>
+        <Textarea
+          id="cuisine-description"
+          placeholder={tfl("optional")}
+          rows={2}
+          disabled={isDisabled}
+          maxLength={256}
+          {...form.register("description")}
+        />
+      </Field>
     </Card>
   );
 }

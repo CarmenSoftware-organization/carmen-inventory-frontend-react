@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import type { Audit } from "./audit";
 import { lastActionSchema } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
 
@@ -149,7 +150,7 @@ export interface PurchaseRequestTemplate {
   info: Record<string, unknown>;
   is_active: boolean;
   doc_version?: number;
-  created_at: string;
+  audit?: Audit;
   purchase_request_template_detail: PurchaseRequestTemplateDetail[];
 }
 
@@ -191,6 +192,7 @@ export interface PurchaseRequest {
   doc_version: number;
   created_at: string;
   updated_at: string;
+  audit?: Audit;
 }
 
 // --- Zod runtime validation schema (for list API response) ---
@@ -333,6 +335,7 @@ export interface ApproveDetail {
 
 export interface PurchaseApproveDetail {
   id: string;
+  purchase_request_id?: string;
   stage_status: string;
   stage_message: string | null;
   is_tax_adjustment: boolean;
@@ -350,7 +353,8 @@ export interface PurchaseApproveDetail {
   tax_rate: number;
   tax_amount: number;
   base_tax_amount?: number;
-  total_amount?: number;
+  // ไม่มี total_amount / foc_unit_conversion_rate — zod ของ backend รับ แต่ column
+  // ไม่มีจริง (foc ใช้ชื่อ ..._factor) ส่งไปแล้ว Prisma ตีกลับทั้ง payload
   discount_rate: number;
   discount_amount: number;
   is_discount_adjustment: boolean;
@@ -364,7 +368,6 @@ export interface PurchaseApproveDetail {
   base_price?: number;
   foc_qty: number;
   foc_unit_id?: string | null;
-  foc_unit_conversion_rate?: number;
   foc_base_qty?: number;
   pricelist_detail_id?: string | null;
   pricelist_no?: string | null;

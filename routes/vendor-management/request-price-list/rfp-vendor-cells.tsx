@@ -1,12 +1,19 @@
 import { useState } from "react";
-import { Check, CheckCircle2, Copy, ExternalLink, Trash2 } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  Mail,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { cn } from "@/lib/utils";
 
 const EMPTY = (
-  <span className="text-muted-foreground text-[0.6875rem] italic">—</span>
+  <span className="text-muted-foreground text-micro italic">—</span>
 );
 
 /** Vendor name (semibold) + code (muted micro) stacked in one cell */
@@ -25,7 +32,7 @@ export function VendorNameCell({
         {name}
       </span>
       {code && (
-        <span className="text-muted-foreground truncate text-[0.625rem] tracking-wide uppercase">
+        <span className="text-muted-foreground truncate text-micro-legal tracking-wide uppercase">
           {code}
         </span>
       )}
@@ -59,6 +66,27 @@ export function ContactValue({
   );
 }
 
+/**
+ * Email cell — reads as an actionable "send email" link at rest (mail icon +
+ * primary tint), not plain text like phone/contact. Opens the user's mail
+ * client via `mailto:`. Em-dash when empty.
+ */
+export function EmailValue({ value }: { readonly value?: string | null }) {
+  "use no memo";
+  if (!value) return EMPTY;
+  return (
+    <a
+      href={`mailto:${value}`}
+      title={`Send email to ${value}`}
+      aria-label={`Send email to ${value}`}
+      className="text-primary/90 hover:text-primary group flex min-w-0 items-center gap-1.5 text-xs underline-offset-2 transition-colors hover:underline"
+    >
+      <Mail className="size-3.5 shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
+      <span className="min-w-0 truncate">{value}</span>
+    </a>
+  );
+}
+
 export function SubmissionStatusBadge({
   hasSubmitted,
   labels,
@@ -69,7 +97,7 @@ export function SubmissionStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[0.5625rem] font-semibold tracking-widest uppercase",
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-eyebrow font-semibold tracking-widest uppercase",
         hasSubmitted
           ? "bg-success/15 text-success-foreground"
           : "bg-muted text-muted-foreground",
@@ -105,7 +133,7 @@ export function PricelistCell({
           "noopener,noreferrer",
         )
       }
-      className="truncate text-[0.6875rem]"
+      className="truncate text-micro"
     >
       {pricelist.no}
     </CellAction>
@@ -158,7 +186,7 @@ export function VendorActionsCell({
             aria-label={labels.copyUrl}
             className="text-muted-foreground hover:text-foreground rounded-lg"
           >
-            {copied ? <Check className="text-success" /> : <Copy />}
+            {copied ? <Check className="text-success-ink" /> : <Copy />}
           </Button>
           <Button
             type="button"

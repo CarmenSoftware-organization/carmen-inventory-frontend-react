@@ -1,7 +1,7 @@
 export enum WORKFLOW_TYPE {
-  PR = "purchase_request_workflow",
-  PO = "purchase_order_workflow",
-  SR = "store_requisition_workflow",
+  PR = "purchase_request",
+  PO = "purchase_order",
+  SR = "store_requisition",
 }
 
 export enum enum_sla_unit {
@@ -117,6 +117,7 @@ export interface Stage {
   creator_access?: CreatorAccess;
   available_actions: AvailableActions;
   hide_fields: HideFields;
+  is_show_signature?: boolean;
   assigned_users?: User[];
   is_hod?: boolean;
   sla_warning_notification?: SLAWarningNotification;
@@ -167,6 +168,8 @@ export interface WorkflowDto {
   description?: string;
   data?: WorkflowData;
   audit?: AuditInfo;
+  /** ผู้ใช้ที่ล็อกอินอยู่เริ่มเอกสารด้วย workflow นี้ได้ไหม (backend ตอบมาต่อคน) */
+  can_create?: boolean;
 }
 
 export interface Workflow {
@@ -215,4 +218,3 @@ export interface WorkflowData {
   notification_templates: Template[];
   products: Product[];
 }
-

@@ -17,6 +17,7 @@ import type { PrFormValues } from "./pr-form-schema";
 import { PrItemExpand } from "./pr-item-expand";
 import { PrPricelistCompare } from "./pr-pricelist-compare";
 import { PrItemHistorySheet } from "./workflow/pr-item-history";
+import { isRowLocked } from "./pr-item-cells/helpers";
 import {
   SelectCell,
   StatusCell,
@@ -73,8 +74,11 @@ export function usePrItemTable({
   const tc = useTranslations("common");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
 
-  const allCount = itemFields.length;
-  const pendingCount = itemFields.filter((item) => {
+  // นับเฉพาะแถวที่ติ๊กได้จริง — แถวที่ถูกตัดสินมาแล้วไม่มี checkbox ให้กด
+  // นับรวมไปก็หลอกตาว่าจะเลือกได้มากกว่าที่เลือกได้จริง
+  const selectableItems = itemFields.filter((item) => !isRowLocked(item, role));
+  const allCount = selectableItems.length;
+  const pendingCount = selectableItems.filter((item) => {
     const status = item.current_stage_status ?? "";
     return !status || status === PR_ITEM_STAGE_STATUS.PENDING;
   }).length;
@@ -97,11 +101,18 @@ export function usePrItemTable({
               isSomeSelected && !isAllSelected ? "indeterminate" : isAllSelected
             }
             onCheckedChange={(checked) => {
-              if (checked) {
-                setSelectDialogOpen(true);
-              } else {
+              if (!checked) {
                 t.toggleAllPageRowsSelected(false);
+                return;
               }
+              // ถามว่า "ทั้งหมด หรือเฉพาะที่ยังรอ" ก็ต่อเมื่อสองอย่างนี้ไม่เท่ากัน
+              // ที่ stage purchase ทุกใบผ่าน approve มาแล้ว ที่ยังรอจึงเป็นศูนย์
+              // ถามไปก็มีคำตอบเดียว เลือกให้เลยดีกว่า
+              if (pendingCount === 0 || pendingCount === allCount) {
+                t.toggleAllPageRowsSelected(true);
+                return;
+              }
+              setSelectDialogOpen(true);
             }}
             aria-label={tc("aria.selectAll")}
             className="align-[inherit]"
@@ -113,7 +124,7 @@ export function usePrItemTable({
       cell: ({ row }) => (
         // 1 element (view: chevron เดียว) → center · 2 elements (edit:
         // checkbox+chevron) → ดันลงล่าง (justify-end + chevron only:my-auto)
-        <div className="absolute inset-0 flex flex-col items-center justify-end gap-0.5 py-1">
+        <div className="inset-0 flex flex-col items-center justify-end gap-0.5 px-2 py-1">
           <SelectCell
             control={form.control}
             index={row.index}
@@ -146,7 +157,7 @@ export function usePrItemTable({
       size: NARROW_COL_SIZE,
       meta: {
         headerClassName: "text-center",
-        cellClassName: "relative text-center",
+        cellClassName: "text-center",
         // คอลัมน์ select ถือ chevron ด้วย — expand content เริ่มที่ Location
         // (เว้น select + index) ไม่มีคอลัมน์ expand แยกแล้ว
         expandedColStart: 2,
@@ -236,7 +247,7 @@ export function usePrItemTable({
       },
       {
         id: "requested",
-        header: tfl("requestedShort"),
+        header: tfl("requested"),
         cell: ({ row }) => (
           <RequestedCell
             control={form.control}
@@ -253,7 +264,7 @@ export function usePrItemTable({
       },
       {
         id: "approved",
-        header: tfl("approvedShort"),
+        header: tfl("approved"),
         cell: ({ row }) => (
           <ApprovedCell
             control={form.control}
@@ -289,7 +300,7 @@ export function usePrItemTable({
       },
       {
         id: "amount",
-        header: tfl("amountCurShort"),
+        header: tfl("amountCur"),
         cell: ({ row }) => (
           <AmountCell
             control={form.control}
@@ -438,6 +449,8 @@ export function usePrItemTable({
     itemFields,
     onDelete,
     setSelectDialogOpen,
+    allCount,
+    pendingCount,
     today,
     isLockedAfterCreate,
     tfl,
@@ -449,7 +462,10 @@ export function usePrItemTable({
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    enableRowSelection: true,
+    // แถวที่ถูกตัดสินมาแล้วไม่มี checkbox ให้กด แต่ toggleAllPageRowsSelected ไม่รู้
+    // เรื่องนั้น — ถ้าไม่บอกไว้ "เลือกทั้งหมด" จะกวาดแถวที่ผู้ใช้มองไม่เห็นและ
+    // เอาออกเองไม่ได้เข้าไปใน bulk action ด้วย
+    enableRowSelection: (row) => !isRowLocked(row.original, role),
   });
 
   // Auto-expand แถวที่มี validation error เมื่อ submit fail

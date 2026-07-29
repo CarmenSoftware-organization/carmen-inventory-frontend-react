@@ -65,7 +65,6 @@ export function VendorCertificateSection({
         toast.success(tt("deleteSuccess", { entity: tfl("certificate") }));
         setDeleteItem(null);
       },
-      onError: (err) => toast.error(err.message),
     });
   };
 
