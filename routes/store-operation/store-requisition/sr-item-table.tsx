@@ -31,7 +31,6 @@ const ProductCell = memo(function ProductCell({
   form,
   index,
   disabled,
-  hasError,
   fromLocationId,
   toLocationId,
 }: {
@@ -39,7 +38,6 @@ const ProductCell = memo(function ProductCell({
   form: UseFormReturn<SrFormValues>;
   index: number;
   disabled: boolean;
-  hasError: boolean;
   fromLocationId: string;
   toLocationId: string;
 }) {
@@ -57,7 +55,7 @@ const ProductCell = memo(function ProductCell({
     <Controller
       control={control}
       name={`items.${index}.product_id`}
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <LookupLocationPairProduct
           value={field.value ?? ""}
           onValueChange={(value, product) => {
@@ -76,7 +74,11 @@ const ProductCell = memo(function ProductCell({
           fromLocationId={fromLocationId}
           toLocationId={toLocationId}
           disabled={disabled}
-          className={`h-6 w-full text-xs${hasError ? "ring-destructive rounded-md ring-1" : ""}`}
+          // ใช้ error ของ RHF ตรง ๆ (กรอบแดง + ไอคอน + tooltip เหมือนทุก lookup
+          // ในแอป) — ของเดิมต่อ string เองแล้วลืมเว้นวรรค ได้ class
+          // "text-xsring-destructive" ซึ่งไม่มีอยู่จริง กรอบแดงเลยไม่เคยขึ้น
+          error={fieldState.error?.message}
+          className="w-full"
         />
       )}
     />
@@ -281,8 +283,6 @@ export function useSrItemTable({
         accessorKey: "product_id",
         header: tfl("product"),
         cell: ({ row }) => {
-          const hasError =
-            !!form.formState.errors.items?.[row.index]?.product_id;
           return (
             <div data-product-cell-index={row.index}>
               <ProductCell
@@ -290,7 +290,6 @@ export function useSrItemTable({
                 form={form}
                 index={row.index}
                 disabled={disabled || lockNonApproved}
-                hasError={hasError}
                 fromLocationId={fromLocationId}
                 toLocationId={toLocationId}
               />
@@ -328,7 +327,7 @@ export function useSrItemTable({
               inputMode="decimal"
               min={1}
               placeholder={tfl("qty")}
-              className="h-6 text-right text-xs md:text-xs"
+              className="text-right"
               disabled={disabled}
               error={qtyError}
               {...form.register(`items.${row.index}.requested_qty`, {
@@ -362,7 +361,8 @@ export function useSrItemTable({
                     inputMode="decimal"
                     min={0}
                     placeholder={tfl("qty")}
-                    className="h-6 text-right text-xs md:text-xs"
+                    size="xs"
+                    className="text-right"
                     disabled={disabled}
                     error={
                       form.formState.errors.items?.[row.index]?.approved_qty
@@ -403,7 +403,8 @@ export function useSrItemTable({
                     inputMode="decimal"
                     min={0}
                     placeholder={tfl("qty")}
-                    className="h-6 text-right text-xs md:text-xs"
+                    size="xs"
+                    className="text-right"
                     disabled={disabled}
                     error={
                       form.formState.errors.items?.[row.index]?.issued_qty
