@@ -26,6 +26,12 @@ const toSafePathSegment = (value: string): string => {
 
 export const API_ENDPOINTS = {
   ACTIVITY_LOGS: (buCode: string) => `/api/proxy/api/${buCode}/activity-logs`,
+  /** ประวัติกิจกรรมของเอกสารเดียว (เรียงเก่า→ใหม่ตาม backend) */
+  ACTIVITY_LOGS_BY_RECORD: (buCode: string, entityId: string) =>
+    `/api/proxy/api/${buCode}/activity-logs/record/${entityId}`,
+  /** log รายการเดียว + `changes` (diff ของ old_data/new_data ที่ backend คำนวณให้) */
+  ACTIVITY_LOG_DETAIL: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/activity-logs/${id}/detail`,
   ADJUSTMENT_TYPES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/adjustment-types`,
   APPLICATION_ROLES: (buCode: string) =>

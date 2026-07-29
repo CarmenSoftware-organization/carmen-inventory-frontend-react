@@ -125,6 +125,7 @@ export function usePrFormActions({
   const [showDelete, setShowDelete] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
   const [actionDialog, setActionDialog] = useState<ActionDialogState>({
     type: null,
   });
@@ -543,6 +544,8 @@ export function usePrFormActions({
     setShowComment,
     showHistory,
     setShowHistory,
+    showActivity,
+    setShowActivity,
     discardDialogProps: discard.dialogProps,
     navDiscardDialogProps,
     actionDialog,

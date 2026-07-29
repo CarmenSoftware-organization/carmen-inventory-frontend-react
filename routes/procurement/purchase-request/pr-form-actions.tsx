@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { MessageSquare, Pencil, Save, Trash2, X } from "lucide-react";
+import { History, MessageSquare, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { STAGE_ROLE } from "@/types/stage-role";
@@ -21,25 +21,27 @@ interface PrFormActionsProps {
   readonly onCancel: () => void;
   readonly onDelete: () => void;
   readonly onComment: () => void;
+  readonly onActivity: () => void;
 }
 
 /**
  * แถบปุ่ม action ด้านบนของฟอร์มใบขอซื้อ โดยเปลี่ยนชุดปุ่มตาม `FormMode`
  * (view/edit), `role` ของผู้ใช้ และสถานะ `prStatus` รองรับปุ่ม edit, save
  * (submit ของฟอร์ม `purchase-request-form`), cancel, delete (เฉพาะ draft)
- * และปุ่ม comment เมื่อ record มีอยู่แล้ว ซ่อนปุ่ม edit เมื่อ voided หรือ
- * ผู้ใช้เป็น view-only role
+ * ปุ่ม comment และ activity เมื่อ record มีอยู่แล้ว ซ่อนปุ่ม edit เมื่อ voided
+ * หรือผู้ใช้เป็น view-only role
  * @param props - คุณสมบัติของแถบปุ่ม
  * @param props.mode - โหมดฟอร์ม view หรือ edit (`FormMode`)
  * @param props.role - stage role ปัจจุบันของผู้ใช้
  * @param props.prStatus - สถานะของ PR ใช้ตรวจ draft/voided
  * @param props.isPending - สถานะกำลังบันทึก (disable ปุ่ม)
  * @param props.isDeletePending - สถานะกำลังลบ (disable ปุ่ม delete)
- * @param props.hasRecord - มี record แล้วหรือยัง ควบคุมการแสดงปุ่ม comment
+ * @param props.hasRecord - มี record แล้วหรือยัง ควบคุมการแสดงปุ่ม comment/activity
  * @param props.onEdit - callback เปลี่ยนเป็นโหมด edit
  * @param props.onCancel - callback ยกเลิกการแก้ไข
  * @param props.onDelete - callback ลบ PR
  * @param props.onComment - callback เปิด comment sheet
+ * @param props.onActivity - callback เปิด activity sheet
  * @returns React element ของแถบปุ่ม action สำหรับฟอร์ม PR
  * @example
  * <PrFormActions
@@ -53,6 +55,7 @@ interface PrFormActionsProps {
  *   onCancel={handleCancel}
  *   onDelete={handleDelete}
  *   onComment={() => setCommentOpen(true)}
+ *   onActivity={() => setActivityOpen(true)}
  * />
  */
 export function PrFormActions({
@@ -70,7 +73,9 @@ export function PrFormActions({
   onCancel,
   onDelete,
   onComment,
+  onActivity,
 }: PrFormActionsProps) {
+  const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
   const isView = mode === "view";
   const isVoided = prStatus === PR_STATUS.VOIDED;
@@ -129,6 +134,13 @@ export function PrFormActions({
         <Button type="button" size="sm" variant="info" onClick={onComment}>
           <MessageSquare />
           {tc("comment")}
+        </Button>
+      )}
+
+      {hasRecord && (
+        <Button type="button" size="sm" variant="outline" onClick={onActivity}>
+          <History />
+          {t("activity")}
         </Button>
       )}
 

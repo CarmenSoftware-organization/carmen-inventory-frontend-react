@@ -1,5 +1,7 @@
 export const QUERY_KEYS = {
   ACTIVITY_LOGS: "activity-logs",
+  ACTIVITY_LOGS_BY_RECORD: "activity-logs-by-record",
+  ACTIVITY_LOG_DETAIL: "activity-log-detail",
   NOTIFICATIONS: "notifications",
   NOTIFICATION_DETAIL: "notification-detail",
   NOTIFICATION_TEMPLATES: "notification-templates",

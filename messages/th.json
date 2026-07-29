@@ -2856,7 +2856,15 @@
         "healthy": "พอใช้",
         "low": "ใกล้หมด",
         "critical": "วิกฤต"
-      }
+      },
+      "activity": "กิจกรรม",
+      "activityDesc": "ทุกอย่างที่ทำกับใบขอซื้อนี้ ล่าสุดอยู่บนสุด",
+      "activityEmpty": "ยังไม่มีกิจกรรม",
+      "activityNoChanges": "ไม่มีอะไรเปลี่ยน",
+      "activityLoadError": "โหลดกิจกรรมไม่สำเร็จ",
+      "activityAdded": "เพิ่ม",
+      "activityRemoved": "ลบ",
+      "activityUpdated": "แก้ไข"
     },
     "purchaseRequestTemplate": {
       "entity": "แม่แบบใบขอซื้อ",

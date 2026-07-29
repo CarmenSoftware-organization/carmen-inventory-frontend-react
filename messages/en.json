@@ -2861,7 +2861,15 @@
         "healthy": "Healthy",
         "low": "Low Stock",
         "critical": "Critical"
-      }
+      },
+      "activity": "Activity",
+      "activityDesc": "Everything done to this request, newest first",
+      "activityEmpty": "No activity recorded yet",
+      "activityNoChanges": "Nothing changed",
+      "activityLoadError": "Could not load activity",
+      "activityAdded": "added",
+      "activityRemoved": "removed",
+      "activityUpdated": "updated"
     },
     "purchaseRequestTemplate": {
       "entity": "Purchase Request Template",
