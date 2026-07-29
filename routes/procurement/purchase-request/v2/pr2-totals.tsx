@@ -3,6 +3,7 @@ import { useWatch, type Control } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { PrFormValues } from "../pr-form-schema";
+import { computePrSummary } from "../pr-summary";
 
 /**
  * แถบยอดรวม + ปุ่ม action ติดล่างจอ
@@ -24,28 +25,14 @@ export function Pr2Totals({
   const tfl = useTranslations("field");
   const items = useWatch({ control, name: "items" }) ?? [];
 
-  let subtotal = 0;
-  let discount = 0;
-  let net = 0;
-  let tax = 0;
-  let grand = 0;
-
-  for (const item of items) {
-    if (!item) continue;
-    const rate = Number(item.exchange_rate ?? 1);
-    const qty = Number(item.approved_qty) || Number(item.requested_qty) || 0;
-    subtotal += Number(item.pricelist_price ?? 0) * qty * rate;
-    discount += Number(item.discount_amount ?? 0) * rate;
-    net += Number(item.net_amount ?? 0) * rate;
-    tax += Number(item.tax_amount ?? 0) * rate;
-    grand += Number(item.total_price ?? 0) * rate;
-  }
+  const { subtotal, totalDiscount, totalNet, totalTax, grandTotal } =
+    computePrSummary(items);
 
   const minor = [
     { key: "subtotal", label: tfl("subtotal"), value: subtotal },
-    { key: "discount", label: tfl("discount"), value: discount },
-    { key: "net", label: tfl("net"), value: net },
-    { key: "tax", label: tfl("tax"), value: tax },
+    { key: "discount", label: tfl("discount"), value: totalDiscount },
+    { key: "net", label: tfl("net"), value: totalNet },
+    { key: "tax", label: tfl("tax"), value: totalTax },
   ];
 
   return (
@@ -68,7 +55,7 @@ export function Pr2Totals({
             {tfl("grandTotal")}
           </span>
           <span className="text-sm font-semibold tabular-nums">
-            {formatCurrency(grand)}
+            {formatCurrency(grandTotal)}
           </span>
           {currencyCode && (
             <span className="text-muted-foreground text-sm">
@@ -77,7 +64,9 @@ export function Pr2Totals({
           )}
         </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div>
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {actions}
+        </div>
       </div>
     </div>
   );
