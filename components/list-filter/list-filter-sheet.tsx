@@ -58,6 +58,14 @@ export function ListFilterSheet({
   const tc = useTranslations("common");
   const tv = useTranslations("listView");
 
+  const visibleFields = fields.filter((f) => !f.hidden);
+
+  // ไม่มี field ให้ filter เลย (เช่น credit-note-reason, approval) — ปุ่ม Filter
+  // ไม่มีประโยชน์ ซ่อนทั้งปุ่มไป ViewSelector ยังคง sort ได้ตามปกติ
+  if (visibleFields.length === 0) {
+    return null;
+  }
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -86,7 +94,7 @@ export function ListFilterSheet({
           {/* field ที่ hidden: true คือ "hidden holder" ของอีก field หนึ่ง (เช่น
              created_at_to คู่กับ created_at_from) — ไม่ render อะไรเลยในชีทนี้
              (ค่ายังคง "จริง" ใน values/encode/saved-views ปกติ ดู FilterFieldDef) */}
-          {fields.filter((f) => !f.hidden).map((f) =>
+          {visibleFields.map((f) =>
             /* labelKey ว่าง = field ไม่มี label ของตัวเอง (เช่น custom control ที่
                จัดการ label ภายในตัวเองอยู่แล้ว หรือซ่อนทั้ง field ด้วย breakpoint
                class) — render control เปล่า ๆ ไม่ห่อ wrapper `space-y-1.5` เพื่อไม่ให้
