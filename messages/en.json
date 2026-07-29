@@ -2905,6 +2905,7 @@
       "lastReceivingNone": "No receiving history",
       "documentInfo": "Document Info",
       "add": "Add Request",
+      "noCreatableWorkflow": "None of the approval flows let you start a purchase request.",
       "edit": "Edit Purchase Request",
       "deleteTitle": "Delete Purchase Request",
       "deleteConfirm": "Are you sure you want to delete \"{prNo}\"? This action cannot be undone.",

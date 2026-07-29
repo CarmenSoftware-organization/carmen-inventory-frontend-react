@@ -30,6 +30,9 @@ import {
   useBatchRejectPurchaseRequest,
   useExportPurchaseRequest,
 } from "@/hooks/use-purchase-request";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
@@ -301,6 +304,18 @@ export default function PurchaseRequestComponent() {
     onRowSelectionChange: setRowSelection,
   });
 
+  // ไม่มี workflow ให้เริ่มใบเลย = สร้างไม่ได้ ปุ่มจาง แต่กดแล้วยังบอกเหตุผล
+  // (ซ่อนไปเลยพนักงานจะนึกว่าระบบเสีย)
+  const { canCreate: canCreatePr } = useCreatableWorkflows(WORKFLOW_TYPE.PR);
+
+  const handleAdd = () => {
+    if (!canCreatePr) {
+      dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
+      return;
+    }
+    setCreateDialogOpen(true);
+  };
+
   const handleBatchApprove = () => {
     setBatchApproveOpen(true);
   };
@@ -320,8 +335,9 @@ export default function PurchaseRequestComponent() {
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => setCreateDialogOpen(true)}
+            onAdd={handleAdd}
             addLabel={t("add")}
+            addDisabled={!canCreatePr}
           />
         </div>
 

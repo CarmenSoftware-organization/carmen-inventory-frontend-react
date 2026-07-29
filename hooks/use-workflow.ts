@@ -74,6 +74,24 @@ export function useWorkflowTypeQuery(
 }
 
 /**
+ * Hook ดึงเฉพาะ workflow ที่ผู้ใช้คนนี้เริ่มเอกสารใหม่ได้
+ *
+ * backend ตอบ `can_create` มากับ workflow แต่ละตัว (ต่อผู้ใช้) — ถ้าไม่ส่งมาเลย
+ * ถือว่าสร้างได้ตามเดิม เพื่อไม่ให้ล็อกทุกคนออกตอน API ยังไม่อัปเดต
+ *
+ * @param type - ประเภทของ workflow
+ * @returns `workflows` ที่กรองแล้ว, `canCreate` (มีสักตัวไหม) และ isLoading
+ * @example
+ * const { workflows, canCreate } = useCreatableWorkflows(WORKFLOW_TYPE.PR);
+ */
+export function useCreatableWorkflows(type: WORKFLOW_TYPE | undefined) {
+  const { data, isLoading } = useWorkflowTypeQuery(type);
+  const workflows = (data ?? []).filter((wf) => wf.can_create !== false);
+
+  return { workflows, canCreate: workflows.length > 0, isLoading };
+}
+
+/**
  * Hook ดึงข้อมูล workflow ตามรหัส รวมรายละเอียด stage
  * Unwrap data จาก response จะไม่ fetch จนกว่า buCode และ id จะพร้อม
  * @param id - รหัส workflow
@@ -124,7 +142,9 @@ export function useCreateWorkflow() {
  * update.mutate({ id, ...values });
  */
 export function useUpdateWorkflow() {
-  return useApiMutation<WorkflowCreateModel & { id: string; doc_version?: number }>({
+  return useApiMutation<
+    WorkflowCreateModel & { id: string; doc_version?: number }
+  >({
     mutationFn: ({ id, ...data }, buCode) =>
       httpClient.put(`${API_ENDPOINTS.WORKFLOWS(buCode)}/${id}`, data),
     invalidateKeys: [QUERY_KEYS.WORKFLOWS],

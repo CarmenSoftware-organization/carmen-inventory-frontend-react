@@ -14,6 +14,8 @@ interface PrGeneralFieldsProps {
   readonly disabled: boolean;
   readonly role?: string;
   readonly fromTemplate?: boolean;
+  /** กำลังสร้างใบใหม่ — workflow ให้เลือกเฉพาะตัวที่ผู้ใช้เริ่มใบได้ */
+  readonly isAdd?: boolean;
 }
 
 export function PrGeneralFields({
@@ -22,6 +24,7 @@ export function PrGeneralFields({
   disabled,
   role,
   fromTemplate,
+  isAdd,
 }: PrGeneralFieldsProps) {
   const tfl = useTranslations("field");
 
@@ -51,6 +54,7 @@ export function PrGeneralFields({
               onValueChange={field.onChange}
               workflowType={WORKFLOW_TYPE.PR}
               readOnly={workflowReadOnly}
+              creatableOnly={isAdd}
               disabled={disabled}
               error={form.formState.errors.workflow_id?.message}
               className="text-xs"

@@ -168,6 +168,8 @@ export interface WorkflowDto {
   description?: string;
   data?: WorkflowData;
   audit?: AuditInfo;
+  /** ผู้ใช้ที่ล็อกอินอยู่เริ่มเอกสารด้วย workflow นี้ได้ไหม (backend ตอบมาต่อคน) */
+  can_create?: boolean;
 }
 
 export interface Workflow {

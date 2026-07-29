@@ -1,4 +1,3 @@
-
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { ArrowLeft, ShieldOff } from "lucide-react";
@@ -31,7 +30,19 @@ export function RouteGuard({ children }: RouteGuardProps) {
   return <AccessDeniedBlock />;
 }
 
-function AccessDeniedBlock() {
+interface AccessDeniedBlockProps {
+  /** แทนคำอธิบาย default ("หน้านี้เข้าไม่ได้") เมื่อเหตุผลเจาะจงกว่านั้น */
+  readonly description?: string;
+}
+
+/**
+ * บล็อกเต็มหน้าเมื่อผู้ใช้เข้าถึงสิ่งที่ไม่มีสิทธิ์
+ *
+ * สัญญาณสีแดงมีจุดเดียวคือไอคอน กล่องรอบ ๆ เป็น neutral ตาม docs/DESIGN.md
+ * ใช้ทั้งจาก `RouteGuard` (สิทธิ์ระดับหน้า) และจากหน้าที่ gate ตัวเองด้วยเงื่อนไข
+ * ที่ moduleList ไม่รู้ เช่น หน้าสร้าง PR ที่ไม่มี workflow ให้เริ่มเลยสักตัว
+ */
+export function AccessDeniedBlock({ description }: AccessDeniedBlockProps) {
   const t = useTranslations("permissionDenied");
   const navigate = useNavigate();
 
@@ -53,12 +64,12 @@ function AccessDeniedBlock() {
           {t("title")}
         </h2>
         <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-          {t("pageDescription")}
+          {description ?? t("pageDescription")}
         </p>
 
         <div className="border-border mt-5 w-full border-t" />
 
-        <p className="text-muted-foreground mt-4 text-micro leading-relaxed">
+        <p className="text-muted-foreground text-micro mt-4 leading-relaxed">
           {t("contactAdmin")}
         </p>
 

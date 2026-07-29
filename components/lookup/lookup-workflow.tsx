@@ -29,6 +29,8 @@ interface LookupWorkflowProps {
   readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
   readonly readOnly?: boolean;
+  /** โหมดสร้างเอกสารใหม่ — โชว์เฉพาะ workflow ที่ผู้ใช้เริ่มเอกสารได้ */
+  readonly creatableOnly?: boolean;
 }
 
 export function LookupWorkflow({
@@ -41,15 +43,21 @@ export function LookupWorkflow({
   size = "sm",
   error,
   readOnly,
+  creatableOnly,
 }: LookupWorkflowProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [selectOpen, setSelectOpen] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
-  const { data: workflows } = useWorkflowTypeQuery(workflowType);
+  const { data: allWorkflows } = useWorkflowTypeQuery(workflowType);
+  // ตัวเลือกกรองตาม can_create ตอนสร้างใหม่ แต่ชื่อที่โชว์อ่านจากรายการเต็มเสมอ —
+  // ใบเก่าอาจผูก workflow ที่คนนี้เริ่มใหม่ไม่ได้ ถ้าอ่านจากรายการที่กรองช่องจะว่าง
+  const workflows = creatableOnly
+    ? allWorkflows?.filter((wf) => wf.can_create !== false)
+    : allWorkflows;
   const resolvedPlaceholder =
     placeholder ?? tl("select", { entity: tfl("workflow") });
-  const selectedLabel = workflows?.find((wf) => wf.id === value)?.name;
+  const selectedLabel = allWorkflows?.find((wf) => wf.id === value)?.name;
   const showErrorTooltip = !!error && !selectOpen;
   const showTooltip = !error && !selectOpen && !!selectedLabel;
 
