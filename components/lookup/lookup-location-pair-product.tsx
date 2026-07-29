@@ -24,6 +24,8 @@ interface LookupLocationPairProductProps {
   readonly modal?: boolean;
   readonly defaultLabel?: string;
   readonly error?: string;
+  /** เลือกเสร็จแล้วส่งโฟกัสต่อไปช่องถัดไป — ดู lib/field-focus */
+  readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
 /**
@@ -61,6 +63,7 @@ export function LookupLocationPairProduct({
   modal,
   defaultLabel,
   error,
+  nextFocusRef,
 }: LookupLocationPairProductProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -130,6 +133,7 @@ export function LookupLocationPairProduct({
       modal={modal}
       defaultLabel={defaultLabel}
       error={error}
+      nextFocusRef={nextFocusRef}
     />
   );
 }

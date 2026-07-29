@@ -26,6 +26,8 @@ interface LookupUserLocationProps {
   readonly locationTypes?: INVENTORY_TYPE[];
   readonly disableTooltip?: boolean;
   readonly error?: string;
+  /** เลือกเสร็จแล้วส่งโฟกัสต่อไปช่องถัดไป — ดู lib/field-focus */
+  readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
   /**
    * Lazy mode — แสดงปุ่ม placeholder ก่อน, mount Combobox จริง (เริ่ม fetch API)
    * เมื่อผู้ใช้คลิก. ใช้ลด API call ในฟอร์มที่ผู้ใช้อาจไม่ได้เปลี่ยน location
@@ -114,6 +116,7 @@ function LookupUserLocationInner({
   locationTypes,
   disableTooltip,
   error,
+  nextFocusRef,
   defaultOpen,
 }: LookupUserLocationProps & { readonly defaultOpen?: boolean }) {
   const tl = useTranslations("lookup");
@@ -181,6 +184,7 @@ function LookupUserLocationInner({
       defaultLabel={defaultLabel}
       disableTooltip={disableTooltip}
       error={error}
+      nextFocusRef={nextFocusRef}
       defaultOpen={defaultOpen}
     />
   );

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
+import { fieldFocusRef } from "@/lib/field-focus";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { inventoryTypeLabelKey } from "@/constant/location";
 import type { PrFormValues } from "../pr-form-schema";
@@ -125,6 +126,9 @@ export const LocationCell = memo(function LocationCell({
                         );
                       }
                     }}
+                    nextFocusRef={fieldFocusRef(
+                      `items.${index}.requested_qty`,
+                    )}
                     className="h-7 w-full text-xs"
                     popoverWidth="w-[26.25rem]"
                     defaultLabel={locationName}

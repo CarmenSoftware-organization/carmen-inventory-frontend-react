@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FieldInput, FieldPlainText } from "@/components/ui/field";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
+import { fieldFocusRef } from "@/lib/field-focus";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { StoreRequisitionStatus } from "@/types/store-requisition";
 import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
@@ -78,6 +79,9 @@ const ProductCell = memo(function ProductCell({
           // ในแอป) — ของเดิมต่อ string เองแล้วลืมเว้นวรรค ได้ class
           // "text-xsring-destructive" ซึ่งไม่มีอยู่จริง กรอบแดงเลยไม่เคยขึ้น
           error={fieldState.error?.message}
+          // เลือกสินค้าเสร็จ → เด้งไปช่องจำนวนที่ขอของแถวเดียวกันต่อเลย
+          // (SR ไม่มีสถานที่รายแถว มาจากหัวเอกสาร จำนวนจึงเป็นช่องถัดไปจริง ๆ)
+          nextFocusRef={fieldFocusRef(`items.${index}.requested_qty`)}
           className="w-full"
         />
       )}

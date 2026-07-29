@@ -12,6 +12,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
 import { getDeleteDescription } from "@/lib/form-utils";
 import type { CnFormValues } from "./cn-form-schema";
+import { fieldFocusRef } from "@/lib/field-focus";
 import { CN_ITEM } from "./cn-form-schema";
 import { CnItemComputedSync, useCnItemTable } from "./use-cn-item-table";
 import { CnAddItemDialog, type CnGrnLine } from "./cn-add-item-dialog";
@@ -89,6 +90,12 @@ export function CnItem({ form, disabled }: Props) {
         tax_rate: line.tax_rate,
       })),
     );
+    // prepend → รายการแรกที่เลือกอยู่บนสุด · เด้งไปช่องจำนวนของแถวนั้นเลย เพราะ
+    // จำนวนคือสิ่งเดียวที่ต้องกรอกเองหลังเลือกรายการมาจาก GRN (สินค้า/สถานที่/
+    // ราคามาครบแล้ว) · รอเฟรมถัดไปให้แถวใหม่ mount ก่อน
+    requestAnimationFrame(() => {
+      fieldFocusRef<HTMLInputElement>("items.0.quantity").current?.focus();
+    });
   };
 
   const table = useCnItemTable({

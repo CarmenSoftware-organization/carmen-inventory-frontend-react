@@ -16,6 +16,7 @@ import {
   InputSuffixPlain,
 } from "@/components/ui/input/input-suffix";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
+import { fieldFocusRef } from "@/lib/field-focus";
 import {
   DiscountOverrideInput,
   OverrideToggle,
@@ -404,6 +405,9 @@ export function LocationsEditor({
                         excludeIds={(watchedLocations ?? [])
                           .map((l, i) => (i === locIndex ? null : l?.id))
                           .filter((id): id is string => !!id)}
+                        nextFocusRef={fieldFocusRef(
+                          `items.${index}.locations.${locIndex}.order_qty`,
+                        )}
                         className="w-full text-xs"
                         error={fieldState.error?.message ?? locIdError}
                       />
