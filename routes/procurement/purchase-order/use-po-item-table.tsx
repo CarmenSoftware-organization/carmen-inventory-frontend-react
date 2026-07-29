@@ -114,6 +114,9 @@ interface UsePoItemTableOptions {
   onDelete: (index: number) => void;
 }
 
+/** ความกว้างของช่องเล็กหัวแถว (expand · # · checkbox) — ต้องเท่ากันทั้งสาม */
+const PO_LEADING_COL = 33;
+
 export function usePoItemTable({
   form,
   itemFields,
@@ -129,7 +132,8 @@ export function usePoItemTable({
   // indent ของ expanded content ให้ตรงขอบซ้าย column Product — คิดเป็น % ของผลรวม
   // column size เพราะ table เป็น table-fixed w-full (column scale ตามสัดส่วน)
   const preProductSize =
-    36 /* expand */ + 36 /* index */ + (showApproveCheckbox ? 50 : 0);
+    PO_LEADING_COL * 2 /* expand + index */ +
+    (showApproveCheckbox ? PO_LEADING_COL : 0);
   const showAction = !disabled && !readOnly; // action column (ลบ item)
   const totalSize =
     preProductSize + PO_COL_DATA_TOTAL + (showAction ? PO_COL.action : 0);
@@ -156,7 +160,7 @@ export function usePoItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 36,
+      size: PO_LEADING_COL,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -180,7 +184,7 @@ export function usePoItemTable({
       cell: ({ row }) => row.index + 1,
       enableSorting: false,
       enableResizing: false,
-      size: 36,
+      size: PO_LEADING_COL,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",
@@ -334,7 +338,16 @@ export function usePoItemTable({
     const baseCols = [
       // ใส่ select เฉพาะตอนมี checkbox — ไม่งั้น getTotalSize() นับ 50px ผี
       // ทำให้ product row กว้างไม่ตรงกับ location table (expand)
-      ...(showApproveCheckbox ? [selectColumn<PoItemField>()] : []),
+      // ย่อ checkbox ให้เท่า expand/index — ของกลางกว้าง 50 ทำให้สามช่องหัวแถว
+      // กว้างไม่เท่ากันทั้งที่เป็นช่องเล็กชุดเดียวกัน ตาสะดุดตั้งแต่คอลัมน์แรก
+      ...(showApproveCheckbox
+        ? [
+            {
+              ...selectColumn<PoItemField>(),
+              size: PO_LEADING_COL,
+            } as ColumnDef<PoItemField>,
+          ]
+        : []),
       expandColumn,
       indexColumn,
       ...dataColumns,
