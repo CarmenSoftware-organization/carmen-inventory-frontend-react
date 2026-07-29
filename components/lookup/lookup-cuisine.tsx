@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useCuisine } from "@/hooks/use-cuisine";
@@ -11,6 +10,8 @@ interface LookupCuisineProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
@@ -36,6 +37,7 @@ export function LookupCuisine({
   disabled,
   placeholder,
   className,
+  size,
   error,
 }: LookupCuisineProps) {
   const tl = useTranslations("lookup");
@@ -44,17 +46,23 @@ export function LookupCuisine({
   // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
   const [hasOpened, setHasOpened] = useState(false);
 
-  const { items: cuisines, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination({
-      useListHook: useCuisine,
-      search,
-      perpage: 30,
-      enabled: hasOpened || !!value,
-      filter: (v: { is_active: boolean }) => v.is_active,
-    });
+  const {
+    items: cuisines,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination({
+    useListHook: useCuisine,
+    search,
+    perpage: 30,
+    enabled: hasOpened || !!value,
+    filter: (v: { is_active: boolean }) => v.is_active,
+  });
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id) => onValueChange(id)}
       onOpenChange={(open) => {

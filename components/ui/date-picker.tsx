@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { CalendarIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,7 +73,7 @@ export function DatePicker({
     return (
       <span
         className={cn(
-          "inline-flex min-h-8 items-center text-sm",
+          "inline-flex min-h-8 items-center text-xs",
           !value && "text-muted-foreground",
           className,
         )}
@@ -132,7 +131,7 @@ export function DatePicker({
         {value && !disabled && !hideClear && (
           <button
             type="button"
-            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100"
+            className="absolute top-1/2 right-2 -translate-y-1/2 opacity-50 hover:opacity-100"
             onClick={() => onValueChange?.("")}
             aria-label="Clear"
           >
@@ -157,7 +156,7 @@ export function DatePicker({
               type="time"
               value={timeValue}
               onChange={handleTimeChange}
-              className="h-8 text-sm"
+              className="h-8 text-xs"
               disabled={!selected}
             />
           </div>

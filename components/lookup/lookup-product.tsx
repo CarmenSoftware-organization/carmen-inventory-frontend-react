@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
@@ -14,6 +13,8 @@ interface LookupProductProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly error?: string;
   /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม item ใหม่) */
@@ -46,6 +47,7 @@ export function LookupProduct({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   error,
   defaultOpen,
@@ -57,21 +59,27 @@ export function LookupProduct({
   const [hasOpened, setHasOpened] = useState(false);
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const { items: products, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Product>({
-      useListHook: useProduct,
-      search,
-      perpage: 30,
-      enabled: hasOpened || !!value || !!defaultOpen,
-      filter: (p: Product) => {
-        if (p.product_status_type !== "active") return false;
-        if (excludedSet && excludedSet.has(p.id)) return false;
-        return true;
-      },
-    });
+  const {
+    items: products,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<Product>({
+    useListHook: useProduct,
+    search,
+    perpage: 30,
+    enabled: hasOpened || !!value || !!defaultOpen,
+    filter: (p: Product) => {
+      if (p.product_status_type !== "active") return false;
+      if (excludedSet && excludedSet.has(p.id)) return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={onValueChange}
       defaultOpen={defaultOpen}

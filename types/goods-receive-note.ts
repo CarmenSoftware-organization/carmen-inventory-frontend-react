@@ -80,6 +80,9 @@ export interface GoodsReceiveNoteDetail {
   product_local_name: string | null;
   product_sku: string | null;
   items: GrnDetailItem[];
+  /** optimistic lock ของ "แถวสินค้า" — ตัวที่หลังบ้านเทียบตอน PATCH
+      (ไม่ใช่ doc_version ของ items ข้างในซึ่งเดินคนละเลข) */
+  doc_version?: number;
 }
 
 // --- Extra Cost ---

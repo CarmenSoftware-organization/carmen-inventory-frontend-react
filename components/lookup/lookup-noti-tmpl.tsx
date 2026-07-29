@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useNotificationTemplates } from "@/hooks/use-notification-template";
@@ -18,6 +17,8 @@ interface LookupNotificationTemplateProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
@@ -28,6 +29,7 @@ export function LookupNotificationTemplate({
   disabled,
   placeholder,
   className,
+  size,
   error,
 }: LookupNotificationTemplateProps) {
   const tl = useTranslations("lookup");
@@ -48,6 +50,7 @@ export function LookupNotificationTemplate({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={onValueChange}
       onOpenChange={(open) => {

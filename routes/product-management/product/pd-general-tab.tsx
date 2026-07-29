@@ -225,7 +225,7 @@ function GeneralTab({
                 rows={3}
                 maxLength={256}
                 aria-invalid={!!form.formState.errors.description}
-                className="resize-none text-sm"
+                className="resize-none"
                 style={{
                   fontFamily: '"IBM Plex Sans Thai", var(--font-sans)',
                 }}
@@ -416,7 +416,7 @@ function GeneralTab({
             <ReadOnlyValue value={v.sku} />
           ) : (
             <Input
-              className="h-9 text-sm"
+              className="h-9"
               placeholder={t("skuPlaceholder")}
               {...form.register("sku")}
             />
@@ -429,7 +429,7 @@ function GeneralTab({
             <ReadOnlyValue value={v.barcode} />
           ) : (
             <Input
-              className="h-9 text-sm"
+              className="h-9"
               placeholder={t("barcodePlaceholder")}
               {...form.register("barcode")}
             />
@@ -581,7 +581,7 @@ function GeneralTab({
             <p className="text-muted-foreground text-xs">
               {t.rich("addFirstAttributeHintRich", {
                 code: (chunks) => (
-                  <code className="bg-muted mx-0.5 rounded px-1.5 py-0.5 text-micro">
+                  <code className="bg-muted text-micro mx-0.5 rounded px-1.5 py-0.5">
                     {chunks}
                   </code>
                 ),
@@ -685,7 +685,9 @@ function ReadOnlyValue({ value, suffix, multiline }: ReadOnlyValueProps) {
       ) : (
         <>
           {value}
-          {suffix && <span className="text-muted-foreground ml-1">{suffix}</span>}
+          {suffix && (
+            <span className="text-muted-foreground ml-1">{suffix}</span>
+          )}
         </>
       )}
     </div>

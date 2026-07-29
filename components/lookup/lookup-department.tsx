@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useDepartment } from "@/hooks/use-department";
@@ -10,6 +9,8 @@ interface LookupDepartmentProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
@@ -43,6 +44,7 @@ export function LookupDepartment({
   disabled,
   placeholder,
   className,
+  size,
   error,
 }: LookupDepartmentProps) {
   const tl = useTranslations("lookup");
@@ -56,6 +58,7 @@ export function LookupDepartment({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id) => onValueChange(id)}
       onOpenChange={(open) => {

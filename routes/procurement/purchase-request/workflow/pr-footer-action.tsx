@@ -8,7 +8,6 @@ import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { PrFormValues } from "../pr-form-schema";
-import { isAllItemsComplete } from "../pr-form-schema";
 import { computePrSummary } from "../pr-summary";
 import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import {
@@ -120,8 +119,6 @@ export function PrFooterAction({
   const canPurchaseApprove = role === STAGE_ROLE.PURCHASE;
   const purchaseAction = computePurchaseAction(itemStatuses);
 
-  const allItemsComplete = isAllItemsComplete(items);
-
   const allItemsReadyForPurchase =
     items.length > 0 &&
     items.every(
@@ -194,7 +191,7 @@ export function PrFooterAction({
                 type="button"
                 size="sm"
                 variant="info"
-                disabled={isPending || !allItemsComplete}
+                disabled={isPending}
                 onClick={() =>
                   openConfirm({
                     title: t("submitTitle"),

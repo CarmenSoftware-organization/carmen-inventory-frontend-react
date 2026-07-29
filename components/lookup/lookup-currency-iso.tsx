@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { currenciesIso } from "@/constant/currencies-iso";
 import { LookupCombobox } from "./lookup-combobox";
@@ -9,6 +8,8 @@ interface LookupCurrencyIsoProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
@@ -34,6 +35,7 @@ export function LookupCurrencyIso({
   disabled,
   placeholder,
   className,
+  size,
   error,
 }: LookupCurrencyIsoProps) {
   const tl = useTranslations("lookup");
@@ -41,6 +43,7 @@ export function LookupCurrencyIso({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id) => onValueChange(id)}
       items={currenciesIso}

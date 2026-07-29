@@ -16,12 +16,24 @@ const CODE_TO_KEY: Record<ErrorCode, string> = {
   [ERROR_CODES.NOT_FOUND]: "notFound",
 };
 
+/** ข้อความกลางเมื่อไม่รู้ว่าเกิดอะไร — บอกว่าให้ทำอะไรต่อ ดีกว่าบอกว่าอะไรพัง */
+function fallbackKey(code: ErrorCode, statusCode?: number): string {
+  // 400 ทั่วไปไม่ได้แปลว่า "กรอกไม่ครบ" เสมอไป กรอกครบแต่ค่าผิดก็ 400 —
+  // บอกให้ตรวจฟอร์มอีกรอบตรงกว่า ส่วนโค้ดที่บอกชัดว่าขาด field ค่อยใช้ missingField
+  if (code === ERROR_CODES.MISSING_REQUIRED_FIELD) return "missingField";
+  if (statusCode === 409) return "documentChanged";
+  return "invalidForm";
+}
+
 /**
  * แปลง error ใดๆ ให้เป็นข้อความ user-friendly ตาม i18n
  *
  * - `ApiError` → match code กับ `errors.*` namespace
- * - VALIDATION_ERROR: ใช้ message จาก server โดยตรง (มักจะ user-friendly อยู่แล้ว)
+ * - 400/422/409: ใช้ข้อความกลางของเราเสมอ ไม่ส่งต่อข้อความจาก server
  * - Error อื่นๆ → fallback `errors.unexpected`
+ *
+ * ข้อความดิบไม่ได้หายไปไหน — dev ยังเห็นครบใน description ผ่าน
+ * `getDevErrorDetail` และผู้ใช้ยังได้ error id ไว้แจ้งทีมงานเสมอ
  *
  * @param err - error ที่จับได้
  * @param t - useTranslations("errors") instance
@@ -35,33 +47,23 @@ const CODE_TO_KEY: Record<ErrorCode, string> = {
  */
 export function getUserErrorMessage(err: unknown, t: TranslationFn): string {
   if (err instanceof ApiError) {
-    // Validation errors: server message มักจะอธิบายเฉพาะเจาะจง (เช่น "Email already in use")
-    // ใช้ `userFacingServerMessage` ไม่ใช่ `message` เพราะ `message` จะ fallback
-    // ไปเป็น string ที่ dev hardcode ไว้ ("Failed to create location") ซึ่งไม่แปล
-    // และไม่ได้เขียนให้ user อ่าน — ไม่มี message จริงจาก server ก็ใช้ข้อความกลาง
     if (
       err.code === ERROR_CODES.VALIDATION_ERROR ||
       err.code === ERROR_CODES.MISSING_REQUIRED_FIELD
     ) {
-      return err.userFacingServerMessage || t("missingField");
+      // ไม่เอา message จาก server มาโชว์เลย — backend ส่ง stack trace ของ Prisma
+      // กลับมาใน 400 ได้จริง ("1482 await prisma.tb_purchase_request_detail
+      // .updateMany(... Unique constraint failed on the fields: ...") ซึ่งพนักงาน
+      // หน้างานอ่านไม่รู้เรื่อง · ข้อความกลางที่บอกว่าให้ทำอะไรต่อใช้ได้จริงกว่า
+      // ต่อไปถ้าจะแปลบางเคสให้เจาะจงขึ้น (เช่น unique constraint ของ
+      // product+location = "ใบนี้มีสินค้าตัวนี้ในคลังนี้อยู่แล้ว") ให้ map เป็นคีย์
+      // i18n ที่นี่ ไม่ใช่ปล่อยข้อความดิบผ่านไป
+      return t(fallbackKey(err.code, err.statusCode));
     }
     const key = CODE_TO_KEY[err.code];
     return key ? t(key) : t("unexpected");
   }
   return t("unexpected");
-}
-
-/**
- * ดึงรายละเอียดเชิงเทคนิคของ error สำหรับโชว์ใน dev mode (description)
- * Production: คืน undefined (user ไม่ต้องเห็น)
- */
-export function getDevErrorDetail(err: unknown): string | undefined {
-  if (!import.meta.env.DEV) return undefined;
-  if (err instanceof Error) {
-    const ext = err instanceof ApiError ? ` [${err.code}]` : "";
-    return `${err.message}${ext}`;
-  }
-  return String(err);
 }
 
 /**

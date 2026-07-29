@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
@@ -15,6 +14,8 @@ interface LookupGrnProductProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
   readonly defaultLabel?: string;
@@ -42,6 +43,7 @@ export function LookupGrnProduct({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   modal,
   defaultLabel,
@@ -55,23 +57,32 @@ export function LookupGrnProduct({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: { search?: string; perpage: number; page?: number }) =>
-    useGrnProducts(grnId, params);
+  const useListHook = (params: {
+    search?: string;
+    perpage: number;
+    page?: number;
+  }) => useGrnProducts(grnId, params);
 
-  const { items: products, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<GrnProductItem>({
-      useListHook,
-      search,
-      perpage: 30,
-      resetDeps: [grnId],
-      filter: (p: GrnProductItem) => {
-        if (excludedSet && excludedSet.has(p.product_id)) return false;
-        return true;
-      },
-    });
+  const {
+    items: products,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<GrnProductItem>({
+    useListHook,
+    search,
+    perpage: 30,
+    resetDeps: [grnId],
+    filter: (p: GrnProductItem) => {
+      if (excludedSet && excludedSet.has(p.product_id)) return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={onValueChange}
       items={products}
@@ -87,7 +98,7 @@ export function LookupGrnProduct({
           <Badge size="xs" variant="secondary" className="shrink-0">
             {p.product_code}
           </Badge>
-          <span className="flex-1 text-left truncate">{p.product_name}</span>
+          <span className="flex-1 truncate text-left">{p.product_name}</span>
         </>
       )}
       placeholder={placeholder ?? tl("select", { entity: tfl("product") })}

@@ -1,4 +1,5 @@
 import { useTranslations } from "use-intl";
+import { cn } from "@/lib/utils";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { FieldSelect } from "@/components/ui/field";
 import { useTaxProfile } from "@/hooks/use-tax-profile";
@@ -42,7 +43,7 @@ export function LookupTaxProfile({
       }}
       disabled={disabled}
       placeholder={resolvedPlaceholder}
-      className={className ?? "text-xs"}
+      className={cn("w-full text-xs", className)}
       size={size}
       error={error}
     >

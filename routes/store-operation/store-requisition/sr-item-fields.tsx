@@ -1,8 +1,4 @@
-import {
-  forwardRef,
-  useImperativeHandle,
-  useState,
-} from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { BoxIcon, Check, Eye, Plus, X } from "lucide-react";
@@ -44,9 +40,9 @@ export const SrItemFields = forwardRef<SrItemFieldsHandle, SrItemFieldsProps>(
     const t = useTranslations("storeOperation.storeRequisition");
     const tc = useTranslations("common");
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-    const [bulkAction, setBulkAction] = useState<
-      "approve" | "reject" | null
-    >(null);
+    const [bulkAction, setBulkAction] = useState<"approve" | "reject" | null>(
+      null,
+    );
 
     const {
       fields: itemFields,
@@ -57,6 +53,15 @@ export const SrItemFields = forwardRef<SrItemFieldsHandle, SrItemFieldsProps>(
     const handleAddItem = () => {
       prependItem({ ...SR_ITEM });
     };
+
+    // กด Save แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — เติมแถวเปล่าให้เห็นว่าต้อง
+    // กรอกอะไร (กติกาเดียวกับ PR/PO) · ต้องเลือกคลังต้นทาง/ปลายทางก่อนถึงจะเพิ่มได้
+    const submitCount = form.formState.submitCount;
+    useEffect(() => {
+      if (!submitCount) return;
+      if (itemFields.length === 0 && !disabled && !disableAdd) handleAddItem();
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
+    }, [submitCount]);
 
     useImperativeHandle(
       ref,
@@ -87,8 +92,7 @@ export const SrItemFields = forwardRef<SrItemFieldsHandle, SrItemFieldsProps>(
 
     const selectedRows = table.getSelectedRowModel().rows;
     const canBulkAction =
-      !disabled &&
-      (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
+      !disabled && (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
 
     const getSelectedIndices = () =>
       table.getSelectedRowModel().rows.map((row) => row.index);
@@ -227,7 +231,6 @@ export const SrItemFields = forwardRef<SrItemFieldsHandle, SrItemFieldsProps>(
             handleBulkReject();
           }}
         />
-
       </div>
     );
   },

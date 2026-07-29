@@ -23,7 +23,6 @@ import {
   createPrSchema,
   type PrFormValues,
   getDefaultValues,
-  isAllItemsComplete,
 } from "./pr-form-schema";
 import { useProfile } from "@/hooks/use-profile";
 import { usePrPreviousStages } from "@/hooks/use-purchase-request";
@@ -128,18 +127,6 @@ export function PurchaseRequestForm({
     name: "description",
   });
 
-  const workflowId = useWatch({ control: form.control, name: "workflow_id" });
-  const watchedItems = useWatch({ control: form.control, name: "items" });
-  const hasWorkflow = !!workflowId;
-  const allItemsComplete = isAllItemsComplete(watchedItems ?? []);
-  const canSave = hasWorkflow && allItemsComplete;
-
-  const saveDisabledTitle = (() => {
-    if (!hasWorkflow) return t("selectWorkflowFirst");
-    if (!allItemsComplete) return t("completeAllItemsFirst");
-    return undefined;
-  })();
-
   const requestorName = profile
     ? `${profile.user_info.firstname} ${profile.user_info.lastname}`
     : "";
@@ -221,8 +208,6 @@ export function PurchaseRequestForm({
             isPending={actions.isPending}
             isDeletePending={actions.deletePr.isPending}
             hasRecord={!!purchaseRequest}
-            canSave={canSave}
-            saveDisabledTitle={saveDisabledTitle}
             onEdit={() => setMode("edit")}
             onCancel={actions.handleCancel}
             onDelete={() => actions.setShowDelete(true)}
@@ -232,9 +217,11 @@ export function PurchaseRequestForm({
       />
       <form
         id="purchase-request-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
+        onSubmit={(e) => {
+          // เติมค่าที่ระบบรู้เองก่อน แล้วค่อยตรวจ — เหลือให้คนกรอกเฉพาะที่เดาแทนไม่ได้
+          actions.fillKnownItemDefaults();
+          form.handleSubmit(actions.onSubmit, actions.revealInvalid)(e);
+        }}
         className="space-y-4 px-4"
       >
         {isDraft && (

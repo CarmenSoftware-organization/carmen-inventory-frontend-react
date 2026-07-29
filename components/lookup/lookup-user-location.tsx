@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { ChevronsUpDown, CircleAlert, Warehouse } from "lucide-react";
@@ -19,12 +18,16 @@ interface LookupUserLocationProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: Set<string>;
   readonly popoverWidth?: string;
   readonly defaultLabel?: string;
   readonly locationTypes?: INVENTORY_TYPE[];
   readonly disableTooltip?: boolean;
   readonly error?: string;
+  /** เลือกเสร็จแล้วส่งโฟกัสต่อไปช่องถัดไป — ดู lib/field-focus */
+  readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
   /**
    * Lazy mode — แสดงปุ่ม placeholder ก่อน, mount Combobox จริง (เริ่ม fetch API)
    * เมื่อผู้ใช้คลิก. ใช้ลด API call ในฟอร์มที่ผู้ใช้อาจไม่ได้เปลี่ยน location
@@ -48,12 +51,14 @@ function LazyPlaceholder({
   placeholder,
   disabled,
   className,
+  size,
   error,
   onActivate,
 }: LookupUserLocationProps & { readonly onActivate: () => void }) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  const label = defaultLabel ?? placeholder ?? tl("select", { entity: tfl("location") });
+  const label =
+    defaultLabel ?? placeholder ?? tl("select", { entity: tfl("location") });
 
   return (
     <Button
@@ -63,7 +68,12 @@ function LazyPlaceholder({
       onClick={onActivate}
       disabled={disabled}
       className={cn(
-        "flex h-8 items-center justify-between pr-1 pl-3 text-sm",
+        // ต้องสูงเท่า LookupCombobox ที่จะมาแทนหลังกด — ไม่งั้นช่องเด้งขนาด
+        // ตอนถูกกดครั้งแรก และไม่ตรงกับ field ข้าง ๆ ที่ตั้ง size เดียวกัน
+        "flex items-center justify-between pr-1 pl-3 text-xs",
+        size === "default" && "h-9",
+        size === "xs" && "h-6 gap-1 px-2 text-xs",
+        (!size || size === "sm") && "h-8",
         error && "border-destructive pr-7",
         className,
       )}
@@ -99,12 +109,14 @@ function LookupUserLocationInner({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   popoverWidth = DEFAULT_POPOVER_WIDTH,
   defaultLabel,
   locationTypes,
   disableTooltip,
   error,
+  nextFocusRef,
   defaultOpen,
 }: LookupUserLocationProps & { readonly defaultOpen?: boolean }) {
   const tl = useTranslations("lookup");
@@ -132,6 +144,7 @@ function LookupUserLocationInner({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);
@@ -171,6 +184,7 @@ function LookupUserLocationInner({
       defaultLabel={defaultLabel}
       disableTooltip={disableTooltip}
       error={error}
+      nextFocusRef={nextFocusRef}
       defaultOpen={defaultOpen}
     />
   );

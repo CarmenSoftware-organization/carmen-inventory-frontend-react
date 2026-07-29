@@ -39,7 +39,7 @@ export const PriceCell = memo(function PriceCell({
       min={0}
       step="0.01"
       placeholder="0.00"
-      className="h-7 text-right tabular-nums"
+      className="h-8 text-right tabular-nums"
       disabled={disabled}
       defaultValue={price}
       {...form.register(`items.${index}.price`)}

@@ -108,7 +108,7 @@ const ProductCellEditable = memo(function ProductCellEditable({
             }
           }}
           excludeIds={excludeIds}
-          className="h-7 w-full text-xs"
+          className="h-8 w-full text-xs"
           error={fieldState.error?.message}
         />
       )}
@@ -213,7 +213,7 @@ export const TaxProfileCell = memo(function TaxProfileCell({
             form.setValue(`items.${index}.tax_rate`, rate);
           }}
           disabled={disabled}
-          className="h-7 w-full text-xs"
+          className="h-8 w-full text-xs"
           error={fieldState.error?.message}
         />
       )}

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { WarehouseIcon } from "lucide-react";
@@ -17,6 +16,8 @@ interface LookupVendorProps {
   readonly placeholder?: string;
   readonly defaultLabel?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
   readonly readOnly?: boolean;
 }
@@ -30,6 +31,7 @@ export function LookupVendor({
   placeholder,
   defaultLabel,
   className,
+  size,
   error,
   readOnly,
 }: LookupVendorProps) {
@@ -59,6 +61,7 @@ export function LookupVendor({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);

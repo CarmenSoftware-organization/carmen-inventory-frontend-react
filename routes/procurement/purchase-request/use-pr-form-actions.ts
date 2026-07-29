@@ -1,13 +1,17 @@
-
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import type { UseFormReturn } from "react-hook-form";
-import { buildItemChanges } from "@/lib/form-helpers";
+import type { FieldErrors, UseFormReturn } from "react-hook-form";
+import {
+  buildItemChanges,
+  countInvalidItems,
+  scrollToFirstInvalidField,
+} from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
+import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import {
@@ -43,6 +47,11 @@ interface UsePrFormActionsParams {
   mode: FormMode;
   setMode: (mode: FormMode) => void;
   role: string;
+  /**
+   * พาไปหาช่องที่ผิด — หน้าเดิมเลื่อนหา field ตรง ๆ ส่วน v2 ต้องพาแถวมาเรนเดอร์
+   * ก่อน (ตารางเป็น virtualized) ค่า default คือเลื่อนหา field เฉย ๆ
+   */
+  onRevealInvalid?: () => void;
 }
 
 export function usePrFormActions({
@@ -52,12 +61,15 @@ export function usePrFormActions({
   mode,
   setMode,
   role,
+  onRevealInvalid,
 }: UsePrFormActionsParams) {
   const t = useTranslations("procurement.purchaseRequest");
   const tt = useTranslations("toast");
+  const tv = useTranslations("validation");
   const navigate = useNavigate();
   const location = useLocation();
   const buCode = useBuCode();
+  const { defaultBu } = useProfile();
 
   // GET PR สดจาก DB ก่อนยิง workflow event — กัน 409 optimistic lock จาก
   // doc_version ที่ค้างเก่าใน form/prop หลัง /save bump (แบบเดียวกับ PO)
@@ -97,7 +109,8 @@ export function usePrFormActions({
       }
     )?.data;
     if (!data) return;
-    if (data.doc_version != null) form.setValue("doc_version", data.doc_version);
+    if (data.doc_version != null)
+      form.setValue("doc_version", data.doc_version);
     const items = form.getValues("items");
     for (const d of data.purchase_request_detail ?? []) {
       const idx = items.findIndex((it) => it.id === d.id);
@@ -378,12 +391,81 @@ export function usePrFormActions({
     );
   };
 
+  /**
+   * เติมค่าที่ระบบรู้อยู่แล้วให้เอง ก่อนตรวจความครบ
+   *
+   * สกุลเงิน (ค่าเริ่มต้นของ BU), วันที่ส่ง (พรุ่งนี้) และหน่วย (หน่วยนับของสินค้า)
+   * ไม่ใช่เรื่องที่ต้องถามคนกรอก — ถามไปก็ได้คำตอบเดิมทุกครั้ง เหลือไว้ให้กรอกเอง
+   * เฉพาะที่ระบบเดาแทนไม่ได้จริง ๆ (สินค้า คลัง จุดส่งของ จำนวน)
+   *
+   * เรียกตอนกด Save/Submit ไม่ใช่ตอนโหลดฟอร์ม — setValue ตอน mount ทำให้ฟอร์ม
+   * กลายเป็น dirty เองทั้งที่ผู้ใช้ยังไม่ได้แตะ แล้วเด้ง discard dialog ตอนกดออก
+   */
+  const fillKnownItemDefaults = () => {
+    const items = form.getValues("items");
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const currency = defaultBu?.config?.default_currency;
+
+    items.forEach((item, index) => {
+      if (!item.currency_id && defaultBu?.config?.default_currency_id) {
+        form.setValue(
+          `items.${index}.currency_id`,
+          defaultBu.config.default_currency_id,
+          { shouldDirty: true },
+        );
+        if (currency) {
+          form.setValue(`items.${index}.currency_code`, currency.code);
+          form.setValue(
+            `items.${index}.currency_decimal_places`,
+            currency.decimal_places ?? 2,
+          );
+        }
+      }
+      if (!item.delivery_date) {
+        form.setValue(`items.${index}.delivery_date`, tomorrow.toISOString(), {
+          shouldDirty: true,
+        });
+      }
+      if (!item.requested_unit_id && item.inventory_unit_id) {
+        form.setValue(
+          `items.${index}.requested_unit_id`,
+          item.inventory_unit_id,
+          { shouldDirty: true },
+        );
+        form.setValue(
+          `items.${index}.requested_unit_name`,
+          item.inventory_unit_name,
+        );
+      }
+    });
+  };
+
+  /**
+   * กรอกไม่ครบ → บอกให้รู้ว่าอะไรขาดและพาไปหาที่นั่น
+   *
+   * เดิมปุ่ม Save/Submit ถูก disable ไว้เฉย ๆ ผู้ใช้กดไม่ได้และไม่รู้ว่าเพราะอะไร
+   * ตอนนี้กดได้เสมอ แล้ว zod เป็นคนบอกว่าขาดอะไร — ปุ่มที่กดไม่ได้และไม่อธิบาย
+   * คือทางตัน กดได้แล้วอธิบายดีกว่าเสมอ
+   *
+   * แถวที่ผิดถูกกางให้เองอยู่แล้วผ่าน submitCount ใน pr-item-table
+   */
+  const revealInvalid = (errors: FieldErrors<PrFormValues>) => {
+    if (onRevealInvalid) onRevealInvalid();
+    else scrollToFirstInvalidField();
+    const count = countInvalidItems(errors as Record<string, unknown>);
+    toast.warning(
+      count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
+    );
+  };
+
   const handleSubmitPr = () => {
+    fillKnownItemDefaults();
     if (purchaseRequest) {
-      form.handleSubmit(doSaveAndSubmitPr)();
+      form.handleSubmit(doSaveAndSubmitPr, revealInvalid)();
       return;
     }
-    form.handleSubmit(doCreateAndSubmitPr)();
+    form.handleSubmit(doCreateAndSubmitPr, revealInvalid)();
   };
 
   const handleApprove = async () => {
@@ -576,6 +658,8 @@ export function usePrFormActions({
     handleCancel,
     handleBack,
     handleSubmitPr,
+    revealInvalid,
+    fillKnownItemDefaults,
     handleApprove,
     handlePurchaseApprove,
     handleReject,

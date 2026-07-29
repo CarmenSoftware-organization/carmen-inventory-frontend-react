@@ -93,7 +93,8 @@ export function LookupCnReason({
                 aria-invalid={!!error}
                 size={size}
                 className={cn(
-                  className ?? "h-8 w-full text-sm",
+                  "w-full text-xs",
+                  className,
                   error && "border-destructive pr-7",
                 )}
               >

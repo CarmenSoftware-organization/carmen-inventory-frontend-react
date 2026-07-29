@@ -15,6 +15,8 @@ interface LookupGrnByVendorForCnProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
   readonly readOnly?: boolean;
 }
@@ -50,6 +52,7 @@ export function LookupGrnByVendorForCn({
   disabled,
   placeholder,
   className,
+  size,
   error,
   readOnly,
 }: LookupGrnByVendorForCnProps) {
@@ -78,6 +81,7 @@ export function LookupGrnByVendorForCn({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);

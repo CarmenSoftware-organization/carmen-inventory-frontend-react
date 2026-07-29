@@ -133,6 +133,9 @@ export function Pr2DocStrip({
                   creatableOnly={isAdd}
                   disabled={isPending}
                   error={form.formState.errors.workflow_id?.message}
+                  // h-7 จงใจ ไม่ใช่ size="sm" (h-8) — doc strip บีบสองบรรทัดเพื่อคืน
+                  // ความสูงให้ตาราง ตรงนี้เตี้ยกว่าที่อื่นได้ ส่วน size ที่มีให้เลือก
+                  // (xs=h-6 · sm=h-8) ไม่มีค่ากลาง
                   className="h-7 w-44 text-xs"
                 />
               )}

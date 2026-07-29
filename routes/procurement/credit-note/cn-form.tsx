@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   buildItemChanges,
+  countInvalidItems,
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { toast } from "sonner";
@@ -251,9 +252,15 @@ export function CnForm({ creditNote }: CnFormProps) {
 
       <form
         id="cn-form"
-        onSubmit={form.handleSubmit(onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
+        onSubmit={form.handleSubmit(onSubmit, (errors) => {
+          scrollToFirstInvalidField();
+          const count = countInvalidItems(errors as Record<string, unknown>);
+          toast.warning(
+            count > 0
+              ? tv("incompleteItems", { count })
+              : tv("incompleteDocument"),
+          );
+        })}
         className="space-y-3 px-4"
       >
         <CnGeneralFields form={form} disabled={isDisabled} plainText={isView} />

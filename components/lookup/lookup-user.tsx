@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { UserSearch } from "lucide-react";
@@ -25,6 +24,8 @@ interface LookupUserProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
@@ -53,6 +54,7 @@ export function LookupUser({
   disabled,
   placeholder,
   className,
+  size,
   error,
 }: LookupUserProps) {
   const tl = useTranslations("lookup");
@@ -67,6 +69,7 @@ export function LookupUser({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, user) => {
         onValueChange(id);

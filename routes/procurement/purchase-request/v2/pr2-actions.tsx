@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import type { PrFormValues } from "../pr-form-schema";
-import { isAllItemsComplete } from "../pr-form-schema";
 import {
   PrActionDialog,
   type StageOption,
@@ -89,13 +88,11 @@ export function Pr2Actions({
   const canApprove = role === STAGE_ROLE.APPROVE;
   const canPurchaseApprove = role === STAGE_ROLE.PURCHASE;
   const purchaseAction = computePurchaseAction(itemStatuses);
-  const allItemsComplete = isAllItemsComplete(items);
 
   const reviewItems: ActionDialogItem[] = items
     .map((item, index) => ({ index, item }))
     .filter(
-      ({ item }) =>
-        item?.current_stage_status === PR_ITEM_STAGE_STATUS.REVIEW,
+      ({ item }) => item?.current_stage_status === PR_ITEM_STAGE_STATUS.REVIEW,
     )
     .map(({ index, item }) => ({
       index,
@@ -110,7 +107,7 @@ export function Pr2Actions({
       {canSubmit && !isVoided && (
         <Button
           type="button"
-          disabled={isPending || !allItemsComplete}
+          disabled={isPending}
           onClick={() =>
             openConfirm({
               title: t("submitTitle"),

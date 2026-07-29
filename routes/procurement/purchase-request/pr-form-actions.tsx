@@ -17,8 +17,6 @@ interface PrFormActionsProps {
   readonly isPending: boolean;
   readonly isDeletePending: boolean;
   readonly hasRecord: boolean;
-  readonly canSave?: boolean;
-  readonly saveDisabledTitle?: string;
   readonly onEdit: () => void;
   readonly onCancel: () => void;
   readonly onDelete: () => void;
@@ -66,8 +64,6 @@ export function PrFormActions({
   isPending,
   isDeletePending,
   hasRecord,
-  canSave = true,
-  saveDisabledTitle,
   onEdit,
   onCancel,
   onDelete,
@@ -108,8 +104,7 @@ export function PrFormActions({
             type="submit"
             size="sm"
             form="purchase-request-form"
-            disabled={isPending || !canSave}
-            title={!canSave ? saveDisabledTitle : undefined}
+            disabled={isPending}
           >
             <Save />
             {tc("save")}

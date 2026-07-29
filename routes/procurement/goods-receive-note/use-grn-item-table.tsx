@@ -38,11 +38,13 @@ const ManualProductCell = memo(function ManualProductCell({
   indices,
   disabled,
   defaultOpen,
+  onPicked,
 }: {
   form: UseFormReturn<GrnFormValues>;
   indices: number[];
   disabled: boolean;
   defaultOpen?: boolean;
+  onPicked?: () => void;
 }) {
   "use no memo";
   const primaryIndex = indices[0];
@@ -76,6 +78,7 @@ const ManualProductCell = memo(function ManualProductCell({
                 });
               }
             }
+            if (value) onPicked?.();
           }}
           disabled={disabled}
           defaultOpen={defaultOpen}
@@ -93,11 +96,13 @@ function ProductGroupCell({
   group,
   disabled,
   autoOpen,
+  onPicked,
 }: {
   form: UseFormReturn<GrnFormValues>;
   group: GrnGroup;
   disabled: boolean;
   autoOpen: boolean;
+  onPicked: () => void;
 }) {
   "use no memo";
   const primaryIdx = group.indices[0];
@@ -120,6 +125,7 @@ function ProductGroupCell({
         indices={group.indices}
         disabled={disabled}
         defaultOpen={autoOpen}
+        onPicked={onPicked}
       />
     );
   }
@@ -178,6 +184,42 @@ const GroupQtySum = memo(function GroupQtySum({
   return <InputSuffixPlain value={total} suffix={unitName} />;
 });
 
+/**
+ * ราคาต่อหน่วยของ product row — ราคาอยู่ระดับ location จึงถัวเฉลี่ยตามจำนวนที่รับ
+ * (ยอดก่อนส่วนลดรวม ÷ จำนวนรับรวม) ไม่ใช่เฉลี่ยเปล่า ๆ ไม่งั้นแถวที่รับ 1 หน่วย
+ * จะถ่วงเท่าแถวที่รับ 100 · ยังไม่ได้กรอกจำนวน = ยังเฉลี่ยไม่ได้ → โชว์ราคาเดียว
+ * ที่มี (ทุกแถวราคาเท่ากันอยู่แล้วในกรณีปกติ), ไม่มีอะไรเลย = 0.00
+ */
+const GroupUnitPrice = memo(function GroupUnitPrice({
+  control,
+  indices,
+}: {
+  control: Control<GrnFormValues>;
+  indices: number[];
+}) {
+  "use no memo";
+  const prices = useWatch({
+    control,
+    name: indices.map((i) => `items.${i}.unit_price` as const),
+  });
+  const qtys = useWatch({
+    control,
+    name: indices.map((i) => `items.${i}.received_qty` as const),
+  });
+  const priceList = (prices ?? []).map((p) => Number(p) || 0);
+  const qtyList = (qtys ?? []).map((q) => Number(q) || 0);
+  const totalQty = qtyList.reduce((a, n) => a + n, 0);
+  const avg =
+    totalQty > 0
+      ? priceList.reduce((a, p, i) => a + p * (qtyList[i] ?? 0), 0) / totalQty
+      : (priceList.find((p) => p > 0) ?? 0);
+  return (
+    <span className="text-foreground text-xs font-medium tabular-nums">
+      {formatCurrency(avg)}
+    </span>
+  );
+});
+
 type GrnAmountField =
   | "net_amount"
   | "discount_amount"
@@ -219,6 +261,8 @@ function GrnGroupLocations({
   plainText,
   isPo,
   autoOpenLocationKey,
+  openLocationKey,
+  onLocationOpenChange,
   onDeleteItem,
 }: {
   group: GrnGroup;
@@ -228,6 +272,8 @@ function GrnGroupLocations({
   plainText: boolean;
   isPo: boolean;
   autoOpenLocationKey: string | null;
+  openLocationKey: string | null;
+  onLocationOpenChange: (groupKey: string, open: boolean) => void;
   onDeleteItem: (index: number) => void;
 }) {
   "use no memo";
@@ -237,8 +283,7 @@ function GrnGroupLocations({
   // คอลัมน์ align กับ group row — % ของ (data + action ถ้ามี); order นับเฉพาะ isPo
   const denom = grnColDataTotal(isPo) + (showActionCol ? GRN_COL.action : 0);
   const pct = (px: number) => `${(px / denom) * 100}%`;
-  const colCount =
-    9 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
+  const colCount = 9 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
 
   return (
     <table className="w-full table-fixed text-xs">
@@ -258,9 +303,7 @@ function GrnGroupLocations({
       <thead className="text-muted-foreground text-micro font-semibold">
         <tr className="border-border/60 border-b">
           <th className="px-2 py-1 text-left">{tfl("location")}</th>
-          {isPo && (
-            <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>
-          )}
+          {isPo && <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>}
           <th className="px-1 py-1 text-right">
             {tfl("receivedQty")}
             <span className="text-destructive"> *</span>
@@ -299,6 +342,15 @@ function GrnGroupLocations({
             groupIndices={group.indices}
             plainText={plainText}
             autoOpenLocation={group.key === autoOpenLocationKey}
+            locationOpen={
+              // เปิดเฉพาะแถวแรกของกลุ่ม — เลือกสินค้าครั้งเดียวไม่ควรเปิดทุกคลัง
+              idx === group.indices[0] && group.key === openLocationKey
+                ? true
+                : undefined
+            }
+            onLocationOpenChange={(open) =>
+              onLocationOpenChange(group.key, open)
+            }
           />
         ))}
       </tbody>
@@ -315,6 +367,11 @@ interface UseGrnItemTableOptions {
   isPo: boolean;
   autoOpenProductKey: string | null;
   autoOpenLocationKey: string | null;
+  /** กลุ่มที่ location lookup ต้องเปิดอยู่ (คุมจากข้างนอก) */
+  openLocationKey: string | null;
+  onLocationOpenChange: (groupKey: string, open: boolean) => void;
+  /** เลือกสินค้าของกลุ่มเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
+  onProductPicked: (groupKey: string) => void;
   onAddLocation: (group: GrnGroup) => void;
   onDeleteGroup: (group: GrnGroup) => void;
   onDeleteItem: (index: number) => void;
@@ -329,6 +386,9 @@ export function useGrnItemTable({
   isPo,
   autoOpenProductKey,
   autoOpenLocationKey,
+  openLocationKey,
+  onLocationOpenChange,
+  onProductPicked,
   onAddLocation,
   onDeleteGroup,
   onDeleteItem,
@@ -373,6 +433,8 @@ export function useGrnItemTable({
             plainText={plainText}
             isPo={isPo}
             autoOpenLocationKey={autoOpenLocationKey}
+            openLocationKey={openLocationKey}
+            onLocationOpenChange={onLocationOpenChange}
             onDeleteItem={onDeleteItem}
           />
         ),
@@ -407,6 +469,7 @@ export function useGrnItemTable({
             group={row.original}
             disabled={disabled}
             autoOpen={row.original.key === autoOpenProductKey}
+            onPicked={() => onProductPicked(row.original.key)}
           />
         ),
       },
@@ -457,12 +520,16 @@ export function useGrnItemTable({
         ),
       },
       {
-        // price เป็น per-location (product row โชว์ dash เหมือน PO)
         id: "price",
         header: tfl("unitPrice"),
         size: GRN_COL.price,
         meta: rightMeta,
-        cell: () => <span className="text-muted-foreground">—</span>,
+        cell: ({ row }) => (
+          <GroupUnitPrice
+            control={form.control}
+            indices={row.original.indices}
+          />
+        ),
       },
       {
         id: "subtotal",

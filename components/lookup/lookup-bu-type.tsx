@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -78,7 +77,10 @@ export function LookupBuType({
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
   const [search, setSearch] = useState("");
-  const { data, isLoading } = useBusinessType({ search: search || undefined, perpage: 30 });
+  const { data, isLoading } = useBusinessType({
+    search: search || undefined,
+    perpage: 30,
+  });
   const businessTypes = data?.data?.filter((b) => b.is_active) ?? [];
 
   const [open, setOpen] = useState(false);
@@ -109,7 +111,7 @@ export function LookupBuType({
                 aria-expanded={open}
                 aria-invalid={!!error}
                 className={cn(
-                  "h-auto min-h-8 flex justify-between items-center pl-3 pr-1 text-sm py-1",
+                  "flex h-auto min-h-8 items-center justify-between py-1 pr-1 pl-3 text-xs",
                   error && "border-destructive",
                   className,
                 )}
@@ -124,7 +126,7 @@ export function LookupBuType({
                           role="button"
                           tabIndex={0}
                           aria-label={tl("remove", { name: item.name })}
-                          className="ml-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                          className="focus-visible:ring-ring/50 ml-1 rounded-full focus-visible:ring-2 focus-visible:outline-none"
                           onMouseDown={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -140,19 +142,20 @@ export function LookupBuType({
                             }
                           }}
                         >
-                          <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                          <X className="text-muted-foreground hover:text-foreground h-3 w-3" />
                         </span>
                       </Badge>
                     ))
                   ) : (
                     <span className="text-muted-foreground">
-                      {placeholder ?? tl("select", { entity: tfl("businessType") })}
+                      {placeholder ??
+                        tl("select", { entity: tfl("businessType") })}
                     </span>
                   )}
                 </div>
                 {error ? (
                   <CircleAlert
-                    className="size-4 shrink-0 text-destructive"
+                    className="text-destructive size-4 shrink-0"
                     aria-hidden="true"
                   />
                 ) : (
@@ -189,7 +192,7 @@ export function LookupBuType({
           <CommandList>
             {isLoading ? (
               <div className="flex items-center justify-center py-3">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
               </div>
             ) : (
               <>
@@ -211,7 +214,7 @@ export function LookupBuType({
                       >
                         <div
                           className={cn(
-                            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                            "border-primary mr-2 flex h-4 w-4 items-center justify-center rounded-sm border",
                             isSelected
                               ? "bg-primary text-primary-foreground"
                               : "opacity-50 [&_svg]:invisible",

@@ -9,11 +9,9 @@ const t = (key: string) => key;
 
 const apiError = (
   code: (typeof ERROR_CODES)[keyof typeof ERROR_CODES],
-  {
-    status,
-    serverMessage,
-  }: { status?: number; serverMessage?: string } = {},
-) => new ApiError(code, "dev fallback", status, false, undefined, serverMessage);
+  { status, serverMessage }: { status?: number; serverMessage?: string } = {},
+) =>
+  new ApiError(code, "dev fallback", status, false, undefined, serverMessage);
 
 describe("getUserErrorMessage", () => {
   it.each([
@@ -35,22 +33,40 @@ describe("getUserErrorMessage", () => {
     expect(getUserErrorMessage("just a string", t)).toBe("unexpected");
   });
 
-  // The whole point of reading the backend body: a 4xx that explains itself
-  // should reach the user verbatim instead of a generic line.
-  it("shows the backend message for a 4xx validation error", () => {
-    const err = apiError(ERROR_CODES.VALIDATION_ERROR, {
-      status: 400,
-      serverMessage: "รหัสนี้ถูกใช้แล้ว",
-    });
-    expect(getUserErrorMessage(err, t)).toBe("รหัสนี้ถูกใช้แล้ว");
-  });
-
   // Regression guard: `message` is the dev's hardcoded English string
   // ("Failed to create location") — never show it just because it is there.
   it("uses the generic line when the backend said nothing", () => {
     const err = apiError(ERROR_CODES.VALIDATION_ERROR, { status: 400 });
     expect(err.message).toBe("dev fallback");
+    expect(getUserErrorMessage(err, t)).toBe("invalidForm");
+  });
+
+  it("keeps errors.missingField for the code that means exactly that", () => {
+    const err = apiError(ERROR_CODES.MISSING_REQUIRED_FIELD, { status: 400 });
     expect(getUserErrorMessage(err, t)).toBe("missingField");
+  });
+
+  // ─── ข้อความจาก server ไม่ถูกส่งต่อให้ผู้ใช้ ─────────────────────────────
+  // ของจริงที่เจอ: backend ส่ง stack trace ของ Prisma กลับมาทั้งดุ้นใน 400
+  const PRISMA_LEAK =
+    "1479 }\\n  1480 const now = new Date().toISOString();\\n  1481 await this.prismaService.$transaction(async (prisma)=>{\\n→ 1482     await prisma.tb_purchase_request_detail.updateMany(\nUnique constraint failed on the fields: (purchase_request_id, product_id, location_id, dimension, deleted_at)";
+
+  it.each([
+    PRISMA_LEAK,
+    "Unique constraint failed on the fields: (code, deleted_at)",
+    "at Object.handler (/app/src/pr.service.ts:1482)",
+    "รหัสนี้ถูกใช้แล้ว",
+  ])("uses our own wording instead of the backend message", (raw) => {
+    const err = apiError(ERROR_CODES.VALIDATION_ERROR, {
+      status: 400,
+      serverMessage: raw,
+    });
+    expect(getUserErrorMessage(err, t)).toBe("invalidForm");
+  });
+
+  it("says the document changed on a 409, not that the form is wrong", () => {
+    const err = apiError(ERROR_CODES.VALIDATION_ERROR, { status: 409 });
+    expect(getUserErrorMessage(err, t)).toBe("documentChanged");
   });
 
   it("never leaks a 5xx server message", () => {

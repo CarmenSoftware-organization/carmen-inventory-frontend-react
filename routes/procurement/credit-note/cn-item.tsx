@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { BoxIcon, Plus } from "lucide-react";
@@ -12,6 +12,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
 import { getDeleteDescription } from "@/lib/form-utils";
 import type { CnFormValues } from "./cn-form-schema";
+import { fieldFocusRef } from "@/lib/field-focus";
 import { CN_ITEM } from "./cn-form-schema";
 import { CnItemComputedSync, useCnItemTable } from "./use-cn-item-table";
 import { CnAddItemDialog, type CnGrnLine } from "./cn-add-item-dialog";
@@ -53,6 +54,16 @@ export function CnItem({ form, disabled }: Props) {
     [watchedItems],
   );
 
+  // กด Save แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — CN ต่างจาก PR/PO/GRN ตรงที่
+  // รายการต้องเลือกมาจาก GRN เพิ่มแถวเปล่าไม่ได้ จึงเปิด dialog เลือกรายการให้แทน
+  // (ผลลัพธ์เดียวกันคือพาไปยังสิ่งที่ต้องทำต่อ ไม่ปล่อยให้เดาเอง)
+  const submitCount = form.formState.submitCount;
+  useEffect(() => {
+    if (!submitCount) return;
+    if (itemFields.length === 0 && canAddItem) setAddOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
+  }, [submitCount]);
+
   const handleAddLines = (lines: CnGrnLine[]) => {
     if (lines.length === 0) return;
     const currencyCode = form.getValues("currency_code") ?? "";
@@ -79,6 +90,12 @@ export function CnItem({ form, disabled }: Props) {
         tax_rate: line.tax_rate,
       })),
     );
+    // prepend → รายการแรกที่เลือกอยู่บนสุด · เด้งไปช่องจำนวนของแถวนั้นเลย เพราะ
+    // จำนวนคือสิ่งเดียวที่ต้องกรอกเองหลังเลือกรายการมาจาก GRN (สินค้า/สถานที่/
+    // ราคามาครบแล้ว) · รอเฟรมถัดไปให้แถวใหม่ mount ก่อน
+    requestAnimationFrame(() => {
+      fieldFocusRef<HTMLInputElement>("items.0.quantity").current?.focus();
+    });
   };
 
   const table = useCnItemTable({

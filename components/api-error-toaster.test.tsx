@@ -63,7 +63,9 @@ describe("ApiErrorToaster", () => {
     );
   });
 
-  it("shows a backend 4xx message verbatim", async () => {
+  // ข้อความจาก backend ไม่ถูกส่งต่อให้ผู้ใช้ — มันเป็นภาษาอังกฤษของ dev บ้าง
+  // stack trace ของ Prisma บ้าง อ่านไม่รู้เรื่องทั้งคู่ (ดู lib/error-message.ts)
+  it("uses our own wording instead of the backend 4xx message", async () => {
     renderFailingMutation(
       new ApiError(
         ERROR_CODES.VALIDATION_ERROR,
@@ -76,10 +78,20 @@ describe("ApiErrorToaster", () => {
     );
 
     await waitFor(() => expect(toast.error).toHaveBeenCalled());
-    expect(toast.error).toHaveBeenCalledWith(
-      "This code is already in use",
-      expect.anything(),
+    const [message] = vi.mocked(toast.error).mock.calls[0];
+    expect(message).not.toBe("This code is already in use");
+    expect(message).not.toBe("Failed to create location");
+  });
+
+  // toast เป็นประโยคเดียว ไม่มี description — รายละเอียดดิบอยู่ใน console เท่านั้น
+  it("ขึ้นบรรทัดเดียว ค้าง 5 วิ ไม่มีรายละเอียดทางเทคนิคห้อยท้าย", async () => {
+    renderFailingMutation(
+      new ApiError(ERROR_CODES.INTERNAL_ERROR, "boom", 500),
     );
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalled());
+    const [, options] = vi.mocked(toast.error).mock.calls[0];
+    expect(options).toEqual({ duration: 5000 });
   });
 
   // 401/403 already redirect to login / open PermissionDeniedDialog — a toast

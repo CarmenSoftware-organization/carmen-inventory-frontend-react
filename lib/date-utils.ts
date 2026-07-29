@@ -113,6 +113,25 @@ export function daysBetween(a: string, b: string): number {
 }
 
 /**
+ * บวกวันเข้ากับวันที่ ISO — ใช้คำนวณวันครบกำหนดจากเทอมเครดิต
+ *
+ * @param iso - ISO date string ตั้งต้น
+ * @param days - จำนวนวันที่บวก (ติดลบได้)
+ * @returns ISO string ของวันที่ใหม่ · คืน "" ถ้า parse ไม่ได้
+ * @example
+ * ```ts
+ * addDays("2026-06-25", 30); // "2026-07-25T..."
+ * ```
+ */
+export function addDays(iso: string, days: number): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  d.setDate(d.getDate() + days);
+  return d.toISOString();
+}
+
+/**
  * แปลง ISO date string เป็นรูปแบบ YYYY-MM-DD สำหรับ HTML `<input type="date">`
  *
  * ตัดเฉพาะส่วนวันที่จาก ISO string คืน empty string หาก parse ไม่ได้

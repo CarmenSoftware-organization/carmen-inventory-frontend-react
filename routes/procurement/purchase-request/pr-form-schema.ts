@@ -42,7 +42,13 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     _initial_stage_status: z.string().optional(),
     stage_message: z.string().optional(),
     des_stage: z.string().optional(),
-    location_id: z.string().nullable(),
+    // 5 ช่องด้านล่างเคยถูกบังคับด้วย `isAllItemsComplete` (boolean เขียนมือ) ที่ใช้
+    // ปิดปุ่ม Save/Submit เฉย ๆ — zod ไม่รู้เรื่องด้วย จึงบอกไม่ได้ว่าขาดอะไร
+    // ย้ายกฎมาไว้ที่ zod ที่เดียว: ปุ่มกดได้เสมอ กดแล้วขึ้นข้อความที่ช่องที่ขาดจริง
+    location_id: z
+      .string()
+      .nullable()
+      .refine((v) => !!v, tv("required", { field: tf("location") })),
     location_code: z.string(),
     location_name: z.string(),
     location_type: z.string(),
@@ -50,7 +56,10 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     requested_qty: z.coerce
       .number()
       .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
-    requested_unit_id: z.string().nullable(),
+    requested_unit_id: z
+      .string()
+      .nullable()
+      .refine((v) => !!v, tv("required", { field: tf("unit") })),
     requested_unit_name: z.string(),
     inventory_unit_id: z.string().nullable(),
     inventory_unit_name: z.string(),
@@ -60,12 +69,20 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     approved_qty: z.coerce.number().min(0),
     approved_unit_id: z.string().nullable(),
     approved_unit_name: z.string(),
-    currency_id: z.string().nullable(),
+    currency_id: z
+      .string()
+      .nullable()
+      .refine((v) => !!v, tv("required", { field: tf("currency") })),
     currency_code: z.string().nullable(),
     currency_decimal_places: z.coerce.number().optional(),
     exchange_rate: z.coerce.number(),
-    delivery_point_id: z.string().nullable(),
-    delivery_date: z.string(),
+    delivery_point_id: z
+      .string()
+      .nullable()
+      .refine((v) => !!v, tv("required", { field: tf("deliveryPoint") })),
+    delivery_date: z
+      .string()
+      .min(1, tv("required", { field: tf("deliveryDate") })),
     pricelist_detail_id: z.string().nullable(),
     pricelist_no: z.string().nullable(),
     pricelist_type: z.string().nullable(),
@@ -118,49 +135,54 @@ export function createPrSchema(
     department_id: z
       .string()
       .min(1, tv("required", { field: tf("department") })),
-    items: z.array(createDetailSchema(tv, tf)).superRefine((items, ctx) => {
-      if (!isPurchase) return;
-      items.forEach((item, i) => {
-        // แถวที่ถูกทำเครื่องหมาย reject หรือ send back (review) ไม่ต้องกรอก
-        // vendor/price/currency/tax — validate เฉพาะแถวที่กำลังจะอนุมัติ
-        const status = item.current_stage_status ?? "";
-        if (
-          status === PR_ITEM_STAGE_STATUS.REJECT ||
-          status === PR_ITEM_STAGE_STATUS.REJECTED ||
-          status === PR_ITEM_STAGE_STATUS.REVIEW
-        ) {
-          return;
-        }
-        if (!item.vendor_id) {
-          ctx.addIssue({
-            code: "custom",
-            path: [i, "vendor_id"],
-            message: tv("required", { field: tf("vendor") }),
-          });
-        }
-        if (!item.pricelist_price || item.pricelist_price <= 0) {
-          ctx.addIssue({
-            code: "custom",
-            path: [i, "pricelist_price"],
-            message: tv("minNumber", { field: tf("unitPrice"), min: 0 }),
-          });
-        }
-        if (!item.currency_id) {
-          ctx.addIssue({
-            code: "custom",
-            path: [i, "currency_id"],
-            message: tv("required", { field: tf("currency") }),
-          });
-        }
-        if (!item.tax_profile_id) {
-          ctx.addIssue({
-            code: "custom",
-            path: [i, "tax_profile_id"],
-            message: tv("required", { field: tf("taxProfile") }),
-          });
-        }
-      });
-    }),
+    // ใบเปล่าไม่ควรบันทึกได้ — เดิมกฎนี้อยู่ใน isAllItemsComplete (items.length > 0)
+    // ที่ใช้ปิดปุ่มเฉย ๆ ย้ายมาไว้ที่ zod พร้อมกับอีก 5 ช่อง
+    items: z
+      .array(createDetailSchema(tv, tf))
+      .min(1, tv("atLeastOneItem", { item: tf("items") }))
+      .superRefine((items, ctx) => {
+        if (!isPurchase) return;
+        items.forEach((item, i) => {
+          // แถวที่ถูกทำเครื่องหมาย reject หรือ send back (review) ไม่ต้องกรอก
+          // vendor/price/currency/tax — validate เฉพาะแถวที่กำลังจะอนุมัติ
+          const status = item.current_stage_status ?? "";
+          if (
+            status === PR_ITEM_STAGE_STATUS.REJECT ||
+            status === PR_ITEM_STAGE_STATUS.REJECTED ||
+            status === PR_ITEM_STAGE_STATUS.REVIEW
+          ) {
+            return;
+          }
+          if (!item.vendor_id) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, "vendor_id"],
+              message: tv("required", { field: tf("vendor") }),
+            });
+          }
+          if (!item.pricelist_price || item.pricelist_price <= 0) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, "pricelist_price"],
+              message: tv("minNumber", { field: tf("unitPrice"), min: 0 }),
+            });
+          }
+          if (!item.currency_id) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, "currency_id"],
+              message: tv("required", { field: tf("currency") }),
+            });
+          }
+          if (!item.tax_profile_id) {
+            ctx.addIssue({
+              code: "custom",
+              path: [i, "tax_profile_id"],
+              message: tv("required", { field: tf("taxProfile") }),
+            });
+          }
+        });
+      }),
   });
 }
 
@@ -419,30 +441,6 @@ function resolveApproveStageStatus(
   return PR_ITEM_STAGE_STATUS.APPROVE;
 }
 
-/**
- * ตรวจสอบว่ารายการทั้งหมดของ PR กรอกข้อมูลครบถ้วนหรือยัง
- * ใช้ร่วมกันระหว่างปุ่ม Save และ Submit เพื่อให้เงื่อนไขตรงกันเสมอ
- * @param items - รายการ items ของ PR
- * @returns true เมื่อมี item อย่างน้อย 1 รายการ และทุก item มี product, location, qty, unit, currency, delivery point และ delivery date
- */
-export function isAllItemsComplete(
-  items: PrFormValues["items"],
-): boolean {
-  return (
-    items.length > 0 &&
-    items.every(
-      (item) =>
-        !!item.product_id &&
-        !!item.location_id &&
-        item.requested_qty > 0 &&
-        !!item.requested_unit_id &&
-        !!item.currency_id &&
-        !!item.delivery_point_id &&
-        !!item.delivery_date,
-    )
-  );
-}
-
 export interface PrItemAmountInput {
   readonly price: number;
   readonly qty: number;
@@ -649,7 +647,9 @@ export function mapItemToPayload(
     pricelist_price: item.pricelist_price,
     vendor_id: item.vendor_id || null,
     pricelist_detail_id: item.pricelist_detail_id || null,
-    current_stage_status: denormalizeStageStatus(item.current_stage_status || "pending"),
+    current_stage_status: denormalizeStageStatus(
+      item.current_stage_status || "pending",
+    ),
     location_id: item.location_id || null,
     delivery_point_id: item.delivery_point_id || null,
     delivery_date: item.delivery_date,

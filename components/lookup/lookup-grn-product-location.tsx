@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
@@ -16,6 +15,8 @@ interface LookupGrnProductLocationProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
   readonly defaultLabel?: string;
@@ -45,6 +46,7 @@ export function LookupGrnProductLocation({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   modal,
   defaultLabel,
@@ -58,23 +60,32 @@ export function LookupGrnProductLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: { search?: string; perpage: number; page?: number }) =>
-    useGrnProductLocations(grnId, productId, params);
+  const useListHook = (params: {
+    search?: string;
+    perpage: number;
+    page?: number;
+  }) => useGrnProductLocations(grnId, productId, params);
 
-  const { items: locations, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<GrnLocationItem>({
-      useListHook,
-      search,
-      perpage: 30,
-      resetDeps: [grnId, productId],
-      filter: (l: GrnLocationItem) => {
-        if (excludedSet && excludedSet.has(l.location_id)) return false;
-        return true;
-      },
-    });
+  const {
+    items: locations,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<GrnLocationItem>({
+    useListHook,
+    search,
+    perpage: 30,
+    resetDeps: [grnId, productId],
+    filter: (l: GrnLocationItem) => {
+      if (excludedSet && excludedSet.has(l.location_id)) return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={onValueChange}
       items={locations}
@@ -90,7 +101,7 @@ export function LookupGrnProductLocation({
           <Badge size="xs" variant="secondary" className="shrink-0">
             {l.location_code}
           </Badge>
-          <span className="flex-1 text-left truncate">{l.location_name}</span>
+          <span className="flex-1 truncate text-left">{l.location_name}</span>
         </>
       )}
       placeholder={placeholder ?? tl("select", { entity: tfl("location") })}

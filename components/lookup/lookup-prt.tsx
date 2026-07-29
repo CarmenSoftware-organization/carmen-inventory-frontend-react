@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { usePriceListTemplate } from "@/hooks/use-price-list-template";
@@ -8,13 +7,12 @@ import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupPrtProps {
   readonly value: string;
-  readonly onValueChange: (
-    value: string,
-    template?: PriceListTemplate,
-  ) => void;
+  readonly onValueChange: (value: string, template?: PriceListTemplate) => void;
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
@@ -41,6 +39,7 @@ export function LookupPrt({
   disabled,
   placeholder,
   className,
+  size,
   error,
 }: LookupPrtProps) {
   const tl = useTranslations("lookup");
@@ -49,17 +48,23 @@ export function LookupPrt({
   // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
   const [hasOpened, setHasOpened] = useState(false);
 
-  const { items: templates, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<PriceListTemplate>({
-      useListHook: usePriceListTemplate,
-      search,
-      perpage: 30,
-      enabled: hasOpened || !!value,
-      filter: (t: PriceListTemplate) => t.status === "active",
-    });
+  const {
+    items: templates,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<PriceListTemplate>({
+    useListHook: usePriceListTemplate,
+    search,
+    perpage: 30,
+    enabled: hasOpened || !!value,
+    filter: (t: PriceListTemplate) => t.status === "active",
+  });
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, item) => onValueChange(id, item)}
       onOpenChange={(open) => {

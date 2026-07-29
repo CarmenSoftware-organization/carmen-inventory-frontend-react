@@ -7,7 +7,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { scrollToFirstInvalidField } from "@/lib/form-helpers";
+import {
+  countInvalidItems,
+  scrollToFirstInvalidField,
+} from "@/lib/form-helpers";
 import { useProfile } from "@/hooks/use-profile";
 import {
   SR_TYPE,
@@ -202,9 +205,15 @@ export function StoreRequisitionForm({
 
       <form
         id="store-requisition-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, () =>
-          scrollToFirstInvalidField(),
-        )}
+        onSubmit={form.handleSubmit(actions.onSubmit, (errors) => {
+          scrollToFirstInvalidField();
+          const count = countInvalidItems(errors as Record<string, unknown>);
+          toast.warning(
+            count > 0
+              ? tv("incompleteItems", { count })
+              : tv("incompleteDocument"),
+          );
+        })}
         className="space-y-4 px-4"
       >
         <SrRequestDetails
@@ -244,7 +253,7 @@ export function StoreRequisitionForm({
               <Textarea
                 id="sr-description"
                 placeholder={t("optionalDescription")}
-                className="min-h-13 text-sm"
+                className="min-h-13"
                 maxLength={256}
                 disabled={actions.isPending}
                 {...form.register("description")}

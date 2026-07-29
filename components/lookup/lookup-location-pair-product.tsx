@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
@@ -19,10 +18,14 @@ interface LookupLocationPairProductProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
   readonly defaultLabel?: string;
   readonly error?: string;
+  /** เลือกเสร็จแล้วส่งโฟกัสต่อไปช่องถัดไป — ดู lib/field-focus */
+  readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
 /**
@@ -55,10 +58,12 @@ export function LookupLocationPairProduct({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   modal,
   defaultLabel,
   error,
+  nextFocusRef,
 }: LookupLocationPairProductProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -66,7 +71,11 @@ export function LookupLocationPairProduct({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: { search?: string; perpage: number; page?: number }) =>
+  const useListHook = (params: {
+    search?: string;
+    perpage: number;
+    page?: number;
+  }) =>
     useLocationPairProducts(
       fromLocationId || undefined,
       toLocationId || undefined,
@@ -92,6 +101,7 @@ export function LookupLocationPairProduct({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={onValueChange}
       items={products}
@@ -123,6 +133,7 @@ export function LookupLocationPairProduct({
       modal={modal}
       defaultLabel={defaultLabel}
       error={error}
+      nextFocusRef={nextFocusRef}
     />
   );
 }

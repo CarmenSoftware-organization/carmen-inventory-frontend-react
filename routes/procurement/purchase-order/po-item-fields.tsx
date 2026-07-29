@@ -107,6 +107,16 @@ export function PoItemFields({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [addSignal]);
 
+  // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — เติมแถวเปล่าให้เลย
+  // ผู้ใช้จะได้เห็นว่าต้องกรอกช่องไหนบ้าง แทนที่จะได้แค่ toast แล้วหน้าว่างเปล่า
+  // (กติกาเดียวกับ PR)
+  const submitCount = form.formState.submitCount;
+  useEffect(() => {
+    if (!submitCount) return;
+    if (itemFields.length === 0 && !disabled) handleAddItem();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
+  }, [submitCount]);
+
   // validation ไม่ผ่าน: field location/order_qty อยู่ในส่วน expand → auto-expand
   // แถวที่ติด error ให้ scrollToFirstInvalidField เจอ field
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import {
   Controller,
   useFormState,
@@ -112,7 +112,15 @@ export const GrnItemComputedSync = memo(function GrnItemComputedSync({
       form.setValue(`items.${index}.total_price`, totalPrice);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
-  }, [index, discountAmount, taxAmount, netAmount, totalPrice, isDiscAdj, isTaxAdj]);
+  }, [
+    index,
+    discountAmount,
+    taxAmount,
+    netAmount,
+    totalPrice,
+    isDiscAdj,
+    isTaxAdj,
+  ]);
 
   return null;
 });
@@ -191,6 +199,7 @@ function QtyUnitCell({
   plainText,
   error,
   min = 0,
+  inputRef,
 }: {
   form: UseFormReturn<GrnFormValues>;
   index: number;
@@ -200,6 +209,8 @@ function QtyUnitCell({
   plainText?: boolean;
   error?: string;
   min?: number;
+  /** ให้ caller โฟกัสช่องนี้ได้ — ต่อ ref ของ RHF ไม่ทับกัน */
+  inputRef?: React.RefObject<HTMLInputElement | null>;
 }) {
   "use no memo";
   if (plainText) {
@@ -220,9 +231,19 @@ function QtyUnitCell({
         min={min}
         placeholder="0"
         disabled={disabled}
-        {...form.register(`items.${index}.${qtyField}`, {
-          valueAsNumber: true,
-        })}
+        {...(() => {
+          const { ref, ...field } = form.register(
+            `items.${index}.${qtyField}`,
+            { valueAsNumber: true },
+          );
+          return {
+            ...field,
+            ref: (el: HTMLInputElement | null) => {
+              ref(el);
+              if (inputRef) inputRef.current = el;
+            },
+          };
+        })()}
       />
       <InputSuffixAddon>
         <WatchedProductUnit
@@ -268,7 +289,7 @@ const OverReceiptWarning = memo(function OverReceiptWarning({
   if (!comparable || ordered <= 0 || received <= ordered) return null;
 
   return (
-    <p className="mt-0.5 text-right text-micro text-warning-ink">
+    <p className="text-micro text-warning-ink mt-0.5 text-right">
       {t("overReceiptWarning", { ordered })}
     </p>
   );
@@ -487,6 +508,12 @@ interface GrnLocationRowProps {
   readonly plainText?: boolean;
   /** เปิด location lookup อัตโนมัติตอน mount (row ที่เพิ่งเพิ่ม) */
   readonly autoOpenLocation?: boolean;
+  /**
+   * คุมเปิด/ปิด location lookup จากข้างนอก — ใช้ตอนแถว mount ไปแล้วแต่เพิ่งเลือก
+   * สินค้าเสร็จ (`autoOpenLocation` ยิงแค่ตอน mount จึงช่วยไม่ได้)
+   */
+  readonly locationOpen?: boolean;
+  readonly onLocationOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -505,9 +532,14 @@ export const GrnLocationRow = memo(function GrnLocationRow({
   groupIndices,
   plainText,
   autoOpenLocation,
+  locationOpen,
+  onLocationOpenChange,
 }: GrnLocationRowProps) {
   "use no memo";
   const tfl = useTranslations("field");
+  // เลือกคลังเสร็จ → โฟกัสช่องจำนวนต่อ ไม่ปล่อยให้ focus ค้างที่ปุ่มที่เพิ่งใช้เสร็จ
+  // (Radix คืน focus ให้ trigger เป็นค่า default) ไม่งั้นตัวเลขที่พิมพ์ต่อหายเงียบ
+  const receivedQtyRef = useRef<HTMLInputElement | null>(null);
 
   const locationName =
     useWatch({ control: form.control, name: `items.${index}.location_name` }) ??
@@ -553,7 +585,10 @@ export const GrnLocationRow = memo(function GrnLocationRow({
               <LookupProductLocation
                 productId={productId}
                 value={field.value ?? ""}
-                onValueChange={field.onChange}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  if (value) onLocationOpenChange?.(false);
+                }}
                 onItemChange={(location) => {
                   form.setValue(`items.${index}.location_name`, location.name);
                   form.setValue(`items.${index}.location_code`, location.code);
@@ -566,6 +601,9 @@ export const GrnLocationRow = memo(function GrnLocationRow({
                 excludeIds={excludeLocationIds}
                 disabled={!productId}
                 defaultOpen={autoOpenLocation}
+                open={locationOpen}
+                onOpenChange={onLocationOpenChange}
+                nextFocusRef={receivedQtyRef}
                 className="h-8 w-full text-xs"
                 modal
                 error={fieldState.error?.message}
@@ -612,6 +650,7 @@ export const GrnLocationRow = memo(function GrnLocationRow({
           plainText={plainText}
           error={receivedQtyError}
           min={1}
+          inputRef={receivedQtyRef}
         />
         {!disabled && !plainText && (
           <OverReceiptWarning control={form.control} index={index} />
@@ -647,7 +686,11 @@ export const GrnLocationRow = memo(function GrnLocationRow({
 
       {/* Discount combo (rate/amount + override) */}
       <td className="px-1 py-1">
-        <GrnLocationDiscountCell form={form} index={index} editable={editable} />
+        <GrnLocationDiscountCell
+          form={form}
+          index={index}
+          editable={editable}
+        />
       </td>
 
       {/* Net */}

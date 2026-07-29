@@ -35,7 +35,6 @@ import {
   PR_ITEM,
   createPrSchema,
   getDefaultValues,
-  isAllItemsComplete,
   type PrFormValues,
 } from "../pr-form-schema";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
@@ -169,6 +168,8 @@ export function PurchaseRequestFormV2({
     mode,
     setMode,
     role,
+    // ตารางเป็น virtualized — ต้องพาแถวมาเรนเดอร์ก่อนถึงจะเลื่อนหา field เจอ
+    onRevealInvalid: showFirstInvalid,
   });
 
   const { data: previousStages, isLoading: stagesLoading } =
@@ -360,8 +361,6 @@ export function PurchaseRequestFormV2({
   const showAction = !isDisabled || hasAnyHistory;
 
   const workflowId = useWatch({ control: form.control, name: "workflow_id" });
-  // ปุ่มบันทึกกดได้เมื่อเลือกสายอนุมัติแล้วและทุกรายการกรอกครบ (กติกาเดิม)
-  const canSave = !!workflowId && isAllItemsComplete(watchedItems ?? []);
   // หน้าเดิมกันเพิ่มรายการก่อนเลือกสายอนุมัติ (pr-item-fields.tsx:112)
   const canAddItem = !!workflowId;
 
@@ -385,6 +384,15 @@ export function PurchaseRequestFormV2({
     productName: watchedItems?.[index]?.product_name ?? "",
     locationName: watchedItems?.[index]?.location_name ?? "",
   }));
+
+  // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — เติมแถวเปล่าให้เลย
+  // ผู้ใช้จะได้เห็นว่าต้องกรอกช่องไหนบ้าง แทนที่จะได้แค่ toast แล้วหน้าว่างเปล่า
+  const submitCount = form.formState.submitCount;
+  useEffect(() => {
+    if (!submitCount) return;
+    if ((watchedItems?.length ?? 0) === 0 && canAddItem) handleAddItem();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
+  }, [submitCount]);
 
   // ตั้งสถานะรายแถวตรงๆ เหมือนหน้าเดิม — ยังไม่ยิง API รอกดปุ่ม action ที่ footer
   const setBulkStatus = (status: string, messages?: Record<number, string>) => {
@@ -527,7 +535,6 @@ export function PurchaseRequestFormV2({
             isPending={actions.isPending}
             isDeletePending={actions.deletePr.isPending}
             hasRecord={!!purchaseRequest}
-            canSave={canSave}
             onEdit={() => setMode("edit")}
             onCancel={actions.handleCancel}
             onDelete={() => actions.setShowDelete(true)}
@@ -573,7 +580,10 @@ export function PurchaseRequestFormV2({
 
       <form
         id="purchase-request-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, showFirstInvalid)}
+        onSubmit={(e) => {
+          actions.fillKnownItemDefaults();
+          form.handleSubmit(actions.onSubmit, actions.revealInvalid)(e);
+        }}
         className="flex min-h-0 flex-1 flex-col gap-3 px-4 py-3"
       >
         <Pr2BulkBar

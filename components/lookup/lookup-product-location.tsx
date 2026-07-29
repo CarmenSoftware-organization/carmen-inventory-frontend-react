@@ -16,6 +16,8 @@ interface LookupProductLocationProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
   readonly defaultLabel?: string;
@@ -23,6 +25,11 @@ interface LookupProductLocationProps {
   readonly readOnly?: boolean;
   /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม location ใหม่) */
   readonly defaultOpen?: boolean;
+  /** คุมเปิด/ปิดจากข้างนอก — สั่งเปิดหลัง mount ได้ (ต้องคุมปิดเองด้วย) */
+  readonly open?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
+  /** ปิดแล้วโฟกัสไปช่องถัดไปแทนการเด้งกลับปุ่มเดิม */
+  readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
 /**
@@ -51,12 +58,16 @@ export function LookupProductLocation({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   modal,
   defaultLabel,
   error,
   readOnly,
   defaultOpen,
+  open,
+  onOpenChange,
+  nextFocusRef,
 }: LookupProductLocationProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -88,6 +99,7 @@ export function LookupProductLocation({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);
@@ -129,6 +141,9 @@ export function LookupProductLocation({
       error={error}
       readOnly={readOnly}
       defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={onOpenChange}
+      nextFocusRef={nextFocusRef}
     />
   );
 }
