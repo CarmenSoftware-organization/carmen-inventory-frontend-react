@@ -4,7 +4,9 @@ import { useTranslations } from "use-intl";
 import { useExtraCost, useDeleteExtraCost } from "@/hooks/use-extra-cost";
 import type { ExtraCost } from "@/types/extra-cost";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useExtraCostTable } from "./use-extra-cost-table";
+import { EXTRA_COST_FILTER_FIELDS } from "./extra-cost-filter-fields";
 import ExtraCostCard from "./extra-cost-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
@@ -30,6 +32,8 @@ export default function ExtraCostComponent() {
       useDelete={useDeleteExtraCost}
       useTable={useExtraCostTable}
       permissionPrefix="configuration.extra_cost"
+      pageKey={LIST_PAGE_KEYS.EXTRA_COST}
+      filterFields={EXTRA_COST_FILTER_FIELDS}
       defaultSort="name:asc"
       exportColumns={[
         { header: tfl("name"), value: (r) => r.name, width: 28 },

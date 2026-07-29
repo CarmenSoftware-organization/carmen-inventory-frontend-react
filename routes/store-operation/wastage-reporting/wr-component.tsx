@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -23,8 +23,16 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import DisplayTemplate from "@/components/display-template";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { WASTAGE_REPORT_STATUS_OPTIONS } from "@/constant/wastage-reporting";
 import { useWastageReportTable } from "./use-wr-table";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 /**
  * คอมโพเนนต์หลักของหน้ารายการรายงานของเสีย
@@ -41,10 +49,63 @@ export default function WrComponent() {
   const t = useTranslations("storeOperation.wastageReporting");
   const tt = useTranslations("toast");
   const [deleteTarget, setDeleteTarget] = useState<WastageReport | null>(null);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const deleteWr = useDeleteWastageReport();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const { data, isLoading, error, refetch } = useWastageReport(params);
+  const { params, search, setSearch, tableConfig } = useDataGridState();
+
+  // WASTAGE_REPORT_STATUS_OPTIONS มา createStatusFilterOptions — label เป็น
+  // literal string ล้วน ไม่ใช่ i18n key (เหมือนเดิมก่อน migrate) จึงต้องห่อด้วย
+  // control: "custom" แทน control: "status" ทั่วไป (ตัวนั้นจะเรียก t() กับ label
+  // ที่ไม่ใช่ key จริง ทำให้ console error) — เหมือน pattern ของ PO_TYPE/CN_TYPE ใน
+  // Task 19
+  const wrFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "custom",
+        labelKey: "common.status",
+        render: (value, onChange) => (
+          <StatusFilter
+            value={value}
+            onChange={onChange}
+            options={WASTAGE_REPORT_STATUS_OPTIONS}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.WASTAGE_REPORTING,
+    fields: wrFilterFields,
+  });
+
+  const queryParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
+
+  const { data, isLoading, error, refetch } = useWastageReport(queryParams);
 
   const items = data?.data ?? [];
   const totalRecords = data?.paginate?.total ?? 0;
@@ -69,12 +130,22 @@ export default function WrComponent() {
       toolbar={
         <>
           <SearchInput defaultValue={search} onSearch={setSearch} />
-          <StatusFilter
-            value={filter}
-            onChange={setFilter}
-            options={WASTAGE_REPORT_STATUS_OPTIONS}
+          <ViewSelector
+            view={lf.view}
+            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+          />
+          <ListFilterSheet
+            fields={wrFilterFields}
+            values={lf.values}
+            setValue={lf.setValue}
+            onClearAll={lf.clearAll}
+            onSaveClick={() => setSaveViewDialogOpen(true)}
+            activeCount={lf.activeFilters.length}
           />
         </>
+      }
+      filterBar={
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       }
       actions={
         <Button
@@ -117,6 +188,16 @@ export default function WrComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </DisplayTemplate>
   );

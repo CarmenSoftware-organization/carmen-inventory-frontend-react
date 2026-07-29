@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslations } from "use-intl";
 import {
   ClipboardList,
@@ -19,6 +20,32 @@ import DisplayTemplate from "@/components/display-template";
 import type { ApprovalPendingSummary } from "@/types/approval";
 import ApprovalQueueList from "./approve-queue-list";
 import { cn } from "@/lib/utils";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
+
+// หน้านี้ไม่มี filter field จริงให้ลง sheet — ตัวกรอง doc_type ขับเคลื่อนด้วยการ์ด
+// สรุปด้านบน ผ่าน useDataGridState's setFilter ที่เขียน URL param "filter" ตรง ๆ
+// (ไม่ใช่ clause แบบ key|type:value เหมือนหน้าอื่น จึงไม่พอร์ตเข้า lf.filterParam)
+// ประกาศเป็น hidden field คีย์ "filter" (ชื่อ param เดียวกับที่ useDataGridState ใช้)
+// เพื่อให้ saved view จับ/คืนค่า/ล้าง param นี้ได้ด้วย โดยไม่โผล่เป็น control ใน sheet
+const APPROVAL_FILTER_FIELDS: FilterFieldDef[] = [
+  // ตัวกรอง doc_type ของหน้านี้ขับด้วยการคลิก summary card (ไม่มี control ใน sheet)
+  // ประกาศเป็น hidden field เพื่อให้ saved view จับ/คืนค่า/ล้าง param นี้ได้
+  {
+    key: "filter",
+    labelKey: "",
+    control: "custom",
+    hidden: true,
+    toClause: () => "",
+    render: () => null,
+  },
+];
 
 /**
  * คอมโพเนนต์หลักหน้าอนุมัติ แสดงสรุปจำนวนรายการรออนุมัติและคิวเอกสาร
@@ -70,6 +97,37 @@ export default function ApprovalComponent() {
     setFilter(key === "total" ? "" : `doc_type:${key}`);
   };
 
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
+
+  // fields ว่าง (ดู APPROVAL_FILTER_FIELDS) — ให้แค่ ViewSelector/ListFilterSheet/
+  // saved-views ครบตาม sweep เดียวกับหน้าอื่น doc_type ยังกรองผ่านการ์ดสรุปด้านบน
+  // เหมือนเดิมทั้งหมด ไม่ผ่าน lf.filterParam
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.APPROVAL,
+    fields: APPROVAL_FILTER_FIELDS,
+  });
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
+
   const { data, isLoading, error, refetch } = useApprovalPending(params);
   const { data: summary, isLoading: summaryLoading } =
     useApprovalPendingSummary();
@@ -90,13 +148,30 @@ export default function ApprovalComponent() {
       title={t("title")}
       description={t("desc")}
       toolbar={
-        <SearchInput
-          defaultValue={search}
-          onSearch={(value) => {
-            if (value) setFilter("");
-            setSearch(value);
-          }}
-        />
+        <>
+          <SearchInput
+            defaultValue={search}
+            onSearch={(value) => {
+              if (value) setFilter("");
+              setSearch(value);
+            }}
+          />
+          <ViewSelector
+            view={lf.view}
+            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+          />
+          <ListFilterSheet
+            fields={APPROVAL_FILTER_FIELDS}
+            values={lf.values}
+            setValue={lf.setValue}
+            onClearAll={lf.clearAll}
+            onSaveClick={() => setSaveViewDialogOpen(true)}
+            activeCount={lf.activeFilters.length}
+          />
+        </>
+      }
+      filterBar={
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       }
     >
       {/* Summary Stats */}
@@ -152,6 +227,16 @@ export default function ApprovalComponent() {
         dateFormat={dateFormat}
         params={params}
         tableConfig={tableConfig}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </DisplayTemplate>
   );

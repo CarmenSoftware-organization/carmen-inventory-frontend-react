@@ -1,9 +1,8 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Columns3,
   Download,
-  Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
@@ -26,13 +25,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,16 +32,12 @@ import {
   useExportUserActivity,
 } from "@/hooks/use-user-activity";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useURL } from "@/hooks/use-url";
 import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { ModuleTileIcon } from "@/components/ui/module-tile";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { ActivityCardSkeletonGrid } from "@/components/loader/activity-card-skeleton";
 import { useAllUsers } from "@/hooks/use-all-users";
 import { getUserFullName } from "@/components/lookup/lookup-user";
@@ -59,6 +47,13 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { UserActivityCard } from "./user-activity-card";
 import { UserActivityDetailSheet } from "./user-activity-detail-sheet";
 import { getLogCreatedAt, type ActivityLog } from "@/types/activity-log";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 type DisplayMode = "list" | "grid";
 
@@ -77,32 +72,101 @@ export default function UserActivityComponent() {
   const isMobile = useIsMobile();
   const [displayMode, setDisplayMode] = useState<DisplayMode>("list");
   const [selectedLog, setSelectedLog] = useState<ActivityLog | null>(null);
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const { params, search, setSearch, tableConfig } = useDataGridState({
     defaultSort: "-created_at",
   });
-  const [actionFilter, setActionFilter] = useURL("action");
-  const [actorFilter, setActorFilter] = useURL("actor_id");
   const { data: allUsers = [] } = useAllUsers();
   const { exportUserActivity, isExporting } = useExportUserActivity();
   const t = useTranslations("systemAdmin.userActivity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
 
-  const userOptions = allUsers.map((u) => ({
-    label: getUserFullName(u),
-    value: u.user_id,
-  }));
+  const userOptions = useMemo(
+    () =>
+      allUsers.map((u) => ({
+        label: getUserFullName(u),
+        value: u.user_id,
+      })),
+    [allUsers],
+  );
+
+  // action/actor_id เป็น literal string/ชื่อผู้ใช้จริง (ไม่ใช่ i18n key) จึงต้อง
+  // ใช้ control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน pattern ของ
+  // activity-log ด้านบน ทั้ง 2 field ไม่ผ่าน filter|type:value clause — backend
+  // รับเป็น query param แยก (action=, actor_id=) จึงอ่านค่าดิบจาก lf.values แทน
+  const userActivityFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "action",
+        control: "custom",
+        labelKey: "systemAdmin.userActivity.action",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={t("action")}
+            options={ACTION_OPTIONS}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "actor_id",
+        control: "custom",
+        labelKey: "systemAdmin.userActivity.user",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={t("user")}
+            options={userOptions}
+            searchable
+            searchPlaceholder={t("searchUser")}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [t, userOptions],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.USER_ACTIVITY,
+    fields: userActivityFilterFields,
+  });
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const queryParams = (() => {
     const p = { ...params } as Record<string, unknown>;
     // Use entity_type=auth to get only login/logout records
     p.entity_type = "auth";
     // If user picks a specific action (login OR logout), send single value
+    const actionFilter = lf.values.action;
     if (actionFilter && !actionFilter.includes(",")) {
       p.action = actionFilter;
     }
-    if (actorFilter) p.actor_id = actorFilter;
+    if (lf.values.actor_id) p.actor_id = lf.values.actor_id;
     return p;
   })();
 
@@ -122,49 +186,6 @@ export default function UserActivityComponent() {
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const activeFilters: ActiveFilter[] = [];
-  if (actionFilter) {
-    for (const v of actionFilter.split(",")) {
-      const match = ACTION_OPTIONS.find((o) => o.value === v);
-      if (match) {
-        activeFilters.push({
-          key: `action:${v}`,
-          label: match.label,
-          onRemove: () => {
-            const next = actionFilter
-              .split(",")
-              .filter((val) => val !== v)
-              .join(",");
-            setActionFilter(next);
-          },
-        });
-      }
-    }
-  }
-  if (actorFilter) {
-    for (const v of actorFilter.split(",")) {
-      const match = userOptions.find((o) => o.value === v);
-      if (match) {
-        activeFilters.push({
-          key: `actor:${v}`,
-          label: match.label,
-          onRemove: () => {
-            const next = actorFilter
-              .split(",")
-              .filter((val) => val !== v)
-              .join(",");
-            setActorFilter(next);
-          },
-        });
-      }
-    }
-  }
-
-  const clearAllFilters = () => {
-    setActionFilter("");
-    setActorFilter("");
-  };
 
   const handleExport = async () => {
     try {
@@ -290,71 +311,18 @@ export default function UserActivityComponent() {
             <SearchInput defaultValue={search} onSearch={setSearch} />
           </div>
           <span className="bg-border hidden h-4 w-px sm:block" />
-          <div className="hidden sm:flex sm:items-center sm:gap-2">
-            <MultiSelectFilter
-              value={actionFilter}
-              onChange={setActionFilter}
-              placeholder={t("action")}
-              options={ACTION_OPTIONS}
-            />
-            <MultiSelectFilter
-              value={actorFilter}
-              onChange={setActorFilter}
-              placeholder={t("user")}
-              options={userOptions}
-              searchable
-              searchPlaceholder={t("searchUser")}
-            />
-          </div>
-          <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-            <SheetTrigger asChild>
-              <Button
-                size="icon"
-                variant="outline"
-                className="relative h-11 w-11 shrink-0 sm:hidden"
-                aria-label={tc("aria.openFilters")}
-              >
-                <FilterIcon aria-hidden="true" />
-                {activeFilters.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                  >
-                    {activeFilters.length}
-                  </Badge>
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="max-h-[80vh]">
-              <SheetHeader>
-                <SheetTitle>{tc("filter")}</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-3 p-4">
-                <MultiSelectFilter
-                  value={actionFilter}
-                  onChange={setActionFilter}
-                  placeholder={t("action")}
-                  options={ACTION_OPTIONS}
-                />
-                <MultiSelectFilter
-                  value={actorFilter}
-                  onChange={setActorFilter}
-                  placeholder={t("user")}
-                  options={userOptions}
-                  searchable
-                  searchPlaceholder={t("searchUser")}
-                />
-                <Button
-                  variant="outline"
-                  className="h-11 w-full"
-                  onClick={() => setFilterSheetOpen(false)}
-                >
-                  {tc("done")}
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <ViewSelector
+            view={lf.view}
+            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+          />
+          <ListFilterSheet
+            fields={userActivityFilterFields}
+            values={lf.values}
+            setValue={lf.setValue}
+            onClearAll={lf.clearAll}
+            onSaveClick={() => setSaveViewDialogOpen(true)}
+            activeCount={lf.activeFilters.length}
+          />
         </div>
         <div className="hidden shrink-0 items-center gap-2 sm:flex">
           {displayMode === "list" && (
@@ -393,7 +361,7 @@ export default function UserActivityComponent() {
       </div>
 
       {/* Active filter badges */}
-      <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+      <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -410,7 +378,7 @@ export default function UserActivityComponent() {
           <DataGridContainer
             className={cn(
               "flex flex-col",
-              activeFilters.length > 0
+              lf.activeFilters.length > 0
                 ? "max-h-[calc(100vh-13rem-3rem)]"
                 : "max-h-[calc(100vh-10rem-3rem)]",
             )}
@@ -463,6 +431,16 @@ export default function UserActivityComponent() {
         onOpenChange={(open) => {
           if (!open) setSelectedLog(null);
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

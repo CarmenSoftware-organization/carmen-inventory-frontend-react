@@ -1,20 +1,7 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -23,7 +10,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   useProduct,
@@ -36,19 +22,14 @@ import { useItemGroup } from "@/hooks/use-item-group";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import { useURL } from "@/hooks/use-url";
 import { cn } from "@/lib/utils";
 import type { Product, ProductDetail } from "@/types/product";
 import { getProductStatusLabel } from "@/constant/product-status";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
-import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
@@ -56,11 +37,13 @@ import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-co
 import { useProductTable } from "./use-product-table";
 import EmptyComponent from "@/components/empty-component";
 import ProductCard from "./pd-card";
-
-const PRODUCT_STATUS_OPTIONS = [
-  { labelKey: "active" as const, value: "product_status_type|str:active" },
-  { labelKey: "inactive" as const, value: "product_status_type|str:inactive" },
-];
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function ProductComponent() {
   const t = useTranslations("productManagement.product");
@@ -71,32 +54,11 @@ export default function ProductComponent() {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deleteProduct = useDeleteProduct();
   const { exportProduct, isExporting } = useExportProduct();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const [categoryFilter, setCategoryFilterRaw] = useURL("category");
-  const [subCategoryFilter, setSubCategoryFilterRaw] = useURL("sub_category");
-  const [itemGroupFilter, setItemGroupFilterRaw] = useURL("item_group");
-  const [, setPage] = useURL("page");
-
-  // ห่อ setter ให้ reset page ด้วย (เหมือน status filter/search ที่ผ่าน
-  // useListPageState) ไม่งั้นถ้าผู้ใช้อยู่ page > 1 แล้วเปลี่ยน filter จะค้างหน้า
-  // เดิมซึ่งอาจไม่มีข้อมูล
-  const setCategoryFilter = (v: string) => {
-    setCategoryFilterRaw(v);
-    setPage("");
-  };
-  const setSubCategoryFilter = (v: string) => {
-    setSubCategoryFilterRaw(v);
-    setPage("");
-  };
-  const setItemGroupFilter = (v: string) => {
-    setItemGroupFilterRaw(v);
-    setPage("");
-  };
+  const { params, search, setSearch, tableConfig } = useDataGridState();
 
   const isGridMode = isMobile || displayMode === "grid";
 
@@ -104,101 +66,134 @@ export default function ProductComponent() {
   const { data: subCategoryData } = useSubCategory({ perpage: -1 });
   const { data: itemGroupData } = useItemGroup({ perpage: -1 });
 
-  const categoryFilterOptions = (categoryData?.data ?? [])
-    .filter((c) => c.is_active)
-    .map((c) => ({
-      label: c.name,
-      value: `product_category_id|string:${c.id}`,
-    }));
+  // ค่า option มาจาก query data (ชื่อจริง ไม่ใช่ i18n key) — memo กันไม่ให้ array
+  // reference เปลี่ยนทุก render จน productFilterFields memo ข้างล่างไม่เคย hit
+  const categoryFilterOptions = useMemo(
+    () =>
+      (categoryData?.data ?? [])
+        .filter((c) => c.is_active)
+        .map((c) => ({
+          label: c.name,
+          value: `product_category_id|string:${c.id}`,
+        })),
+    [categoryData],
+  );
 
-  const subCategoryFilterOptions = (subCategoryData?.data ?? [])
-    .filter((c) => c.is_active)
-    .map((c) => ({
-      label: c.name,
-      value: `product_sub_category_id|string:${c.id}`,
-    }));
+  const subCategoryFilterOptions = useMemo(
+    () =>
+      (subCategoryData?.data ?? [])
+        .filter((c) => c.is_active)
+        .map((c) => ({
+          label: c.name,
+          value: `product_sub_category_id|string:${c.id}`,
+        })),
+    [subCategoryData],
+  );
 
-  const itemGroupFilterOptions = (itemGroupData?.data ?? [])
-    .filter((c) => c.is_active)
-    .map((c) => ({
-      label: c.name,
-      value: `product_item_group_id|string:${c.id}`,
-    }));
+  const itemGroupFilterOptions = useMemo(
+    () =>
+      (itemGroupData?.data ?? [])
+        .filter((c) => c.is_active)
+        .map((c) => ({
+          label: c.name,
+          value: `product_item_group_id|string:${c.id}`,
+        })),
+    [itemGroupData],
+  );
 
-  const combinedFilter =
-    [params.filter, categoryFilter, subCategoryFilter, itemGroupFilter]
-      .filter(Boolean)
-      .join(",") || undefined;
-  const combinedParams = { ...params, filter: combinedFilter };
+  // category/sub_category/item_group เป็น 3 filter อิสระต่อกัน (ไม่มี cascade ใน
+  // โค้ดเดิม — เดิม sub_category/item_group ดึงข้อมูล *ทั้งหมด* เสมอ ไม่กรองตาม
+  // category ที่เลือกเลย) จึงไม่มี linkedKeys ระหว่างกัน ผู้ใช้เลือก/ล้างแต่ละ field
+  // ได้อิสระเหมือนเดิมทุกประการ ค่า literal string (ชื่อ category จริง) ทำให้ต้องใช้
+  // control: "custom" ห่อ MultiSelectFilter ตรง ๆ แทน control: "multi-select"
+  // ทั่วไป (ตัวนั้นเรียก t(option.labelKey) กับทุก option ซึ่งจะ error ถ้า label
+  // ไม่ใช่ i18n key จริง — เหมือน pattern PO_TYPE/CN_TYPE ใน Task 19)
+  const productFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "status",
+        labelKey: "common.status",
+        options: [
+          {
+            labelKey: "status.active",
+            value: "product_status_type|str:active",
+          },
+          {
+            labelKey: "status.inactive",
+            value: "product_status_type|str:inactive",
+          },
+        ],
+      },
+      {
+        key: "category",
+        control: "custom",
+        labelKey: "field.category",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={categoryFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "sub_category",
+        control: "custom",
+        labelKey: "field.subCategory",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={subCategoryFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "item_group",
+        control: "custom",
+        labelKey: "field.itemGroup",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={itemGroupFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [categoryFilterOptions, subCategoryFilterOptions, itemGroupFilterOptions],
+  );
 
-  const activeFilters: ActiveFilter[] = (() => {
-    const filters: ActiveFilter[] = [];
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.PRODUCT,
+    fields: productFilterFields,
+  });
 
-    if (filter) {
-      const match = PRODUCT_STATUS_OPTIONS.find((o) => o.value === filter);
-      if (match) {
-        filters.push({
-          key: `status-${filter}`,
-          label: ts(match.labelKey),
-          onRemove: () => setFilter(""),
+  const combinedParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
         });
       }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
     }
-
-    const urlFilters: {
-      value: string;
-      options: { label: string; value: string }[];
-      key: string;
-      setter: (v: string) => void;
-    }[] = [
-      {
-        value: categoryFilter,
-        options: categoryFilterOptions,
-        key: "category",
-        setter: setCategoryFilter,
-      },
-      {
-        value: subCategoryFilter,
-        options: subCategoryFilterOptions,
-        key: "sub_category",
-        setter: setSubCategoryFilter,
-      },
-      {
-        value: itemGroupFilter,
-        options: itemGroupFilterOptions,
-        key: "item_group",
-        setter: setItemGroupFilter,
-      },
-    ];
-
-    for (const { value, options, key, setter } of urlFilters) {
-      if (!value) continue;
-      for (const v of value.split(",")) {
-        const match = options.find((o) => o.value === v);
-        if (match) {
-          filters.push({
-            key: `${key}-${v}`,
-            label: match.label,
-            onRemove: () => {
-              const next = value
-                .split(",")
-                .filter((val) => val !== v)
-                .join(",");
-              setter(next);
-            },
-          });
-        }
-      }
-    }
-
-    return filters;
-  })();
-
-  const clearAllFilters = () => {
-    setFilter("");
-    setCategoryFilter("");
-    setSubCategoryFilter("");
-    setItemGroupFilter("");
   };
 
   const { data, isLoading, error, refetch } = useProduct(combinedParams, {
@@ -305,95 +300,18 @@ export default function ProductComponent() {
             <div className="flex-1 sm:flex-initial">
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter
-                value={filter}
-                onChange={setFilter}
-                options={PRODUCT_STATUS_OPTIONS.map((opt) => ({
-                  label: ts(opt.labelKey),
-                  value: opt.value,
-                }))}
-              />
-              <MultiSelectFilter
-                value={categoryFilter}
-                onChange={setCategoryFilter}
-                placeholder={tfl("category")}
-                options={categoryFilterOptions}
-              />
-              <MultiSelectFilter
-                value={subCategoryFilter}
-                onChange={setSubCategoryFilter}
-                placeholder={tfl("subCategory")}
-                options={subCategoryFilterOptions}
-              />
-              <MultiSelectFilter
-                value={itemGroupFilter}
-                onChange={setItemGroupFilter}
-                placeholder={tfl("itemGroup")}
-                options={itemGroupFilterOptions}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter
-                    value={filter}
-                    onChange={setFilter}
-                    options={PRODUCT_STATUS_OPTIONS.map((opt) => ({
-                      label: ts(opt.labelKey),
-                      value: opt.value,
-                    }))}
-                  />
-                  <MultiSelectFilter
-                    value={categoryFilter}
-                    onChange={setCategoryFilter}
-                    placeholder={tfl("category")}
-                    options={categoryFilterOptions}
-                  />
-                  <MultiSelectFilter
-                    value={subCategoryFilter}
-                    onChange={setSubCategoryFilter}
-                    placeholder={tfl("subCategory")}
-                    options={subCategoryFilterOptions}
-                  />
-                  <MultiSelectFilter
-                    value={itemGroupFilter}
-                    onChange={setItemGroupFilter}
-                    placeholder={tfl("itemGroup")}
-                    options={itemGroupFilterOptions}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={productFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -431,7 +349,7 @@ export default function ProductComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -480,7 +398,7 @@ export default function ProductComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -513,6 +431,16 @@ export default function ProductComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

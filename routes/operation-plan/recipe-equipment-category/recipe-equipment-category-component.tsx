@@ -1,5 +1,5 @@
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { Download, Plus, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -20,9 +20,16 @@ import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { StatusFilter } from "@/components/ui/status-filter";
 import DisplayTemplate from "@/components/display-template";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { useRecipeEquipmentCategoryTable } from "./use-recipe-equipment-category-table";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
 const RecipeEquipmentCategoryDialog = lazy(() =>
@@ -45,13 +52,49 @@ export default function RecipeEquipmentCategoryComponent() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editCategory, setEditCategory] =
     useState<RecipeEquipmentCategory | null>(null);
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const { data, isLoading, error, refetch } =
-    useRecipeEquipmentCategory(params);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
+  const { params, search, setSearch, tableConfig } = useDataGridState();
   const t = useTranslations("operationPlan.recipeEquipmentCategory");
   const tc = useTranslations("common");
   const tt = useTranslations("toast");
+
+  // filter (status) ไม่ส่ง options เลย — ใช้ default is_active|bool:true/false
+  // ของ StatusFilter ตรงตัวเหมือนโค้ดเดิมทุกประการ
+  const recipeEquipmentCategoryFilterFields = useMemo<FilterFieldDef[]>(
+    () => [{ key: "filter", control: "status", labelKey: "common.status" }],
+    [],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.RECIPE_EQUIPMENT_CATEGORY,
+    fields: recipeEquipmentCategoryFilterFields,
+  });
+
+  const combinedParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
+
+  const { data, isLoading, error, refetch } =
+    useRecipeEquipmentCategory(combinedParams);
 
   const categories = data?.data ?? [];
   const totalRecords = data?.paginate?.total ?? 0;
@@ -78,8 +121,22 @@ export default function RecipeEquipmentCategoryComponent() {
       toolbar={
         <>
           <SearchInput defaultValue={search} onSearch={setSearch} />
-          <StatusFilter value={filter} onChange={setFilter} />
+          <ViewSelector
+            view={lf.view}
+            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+          />
+          <ListFilterSheet
+            fields={recipeEquipmentCategoryFilterFields}
+            values={lf.values}
+            setValue={lf.setValue}
+            onClearAll={lf.clearAll}
+            onSaveClick={() => setSaveViewDialogOpen(true)}
+            activeCount={lf.activeFilters.length}
+          />
         </>
+      }
+      filterBar={
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       }
       actions={
         <>
@@ -144,6 +201,16 @@ export default function RecipeEquipmentCategoryComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </DisplayTemplate>
   );

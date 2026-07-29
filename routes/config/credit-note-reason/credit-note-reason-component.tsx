@@ -6,8 +6,10 @@ import {
 } from "@/hooks/use-cn-reason-config";
 import type { CnReason } from "@/types/cn-reason";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { CreditNoteReasonDialog } from "./credit-note-reason-dialog";
 import { useCreditNoteReasonTable } from "./use-credit-note-reason-table";
+import { CREDIT_NOTE_REASON_FILTER_FIELDS } from "./credit-note-reason-filter-fields";
 import CreditNoteReasonCard from "./credit-note-reason-card";
 
 /**
@@ -27,8 +29,9 @@ export default function CreditNoteReasonComponent() {
       useList={useCnReasonConfig}
       useDelete={useDeleteCnReasonConfig}
       useTable={useCreditNoteReasonTable}
+      pageKey={LIST_PAGE_KEYS.CREDIT_NOTE_REASON}
+      filterFields={CREDIT_NOTE_REASON_FILTER_FIELDS}
       defaultSort="name:asc"
-      hideStatusFilter
       exportColumns={[
         { header: tfl("name"), value: (r) => r.name, width: 28 },
         {

@@ -1,20 +1,7 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -24,7 +11,6 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   usePriceList,
@@ -32,7 +18,6 @@ import {
   useExportPriceList,
 } from "@/hooks/use-price-list";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useURL } from "@/hooks/use-url";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { useVendor } from "@/hooks/use-vendor";
@@ -42,17 +27,20 @@ import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { usePriceListTable } from "./use-pl-table";
 import PriceListCard from "./pl-card";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function PriceListComponent() {
   const navigate = useNavigate();
@@ -63,26 +51,92 @@ export default function PriceListComponent() {
   const tt = useTranslations("toast");
   const [deleteTarget, setDeleteTarget] = useState<PriceList | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deletePriceList = useDeletePriceList();
   const { exportPriceList, isExporting } = useExportPriceList();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState({ defaultSort: "pricelist_no:asc" });
-  const [vendorFilter, setVendorFilter] = useURL("vendor");
+  const { params, search, setSearch, tableConfig } = useDataGridState({
+    defaultSort: "pricelist_no:asc",
+  });
 
   const { data: vendorData } = useVendor({ perpage: -1 });
-  const vendorOptions = (vendorData?.data ?? [])
-    .filter((v) => v.is_active)
-    .map((v) => ({
-      label: v.name,
-      value: `vendor_id|string:${v.id}`,
-    }));
+  // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array
+  // reference เปลี่ยนทุก render จน priceListFilterFields memo ข้างล่างไม่เคย hit
+  const vendorOptions = useMemo(
+    () =>
+      (vendorData?.data ?? [])
+        .filter((v) => v.is_active)
+        .map((v) => ({
+          label: v.name,
+          value: `vendor_id|string:${v.id}`,
+        })),
+    [vendorData],
+  );
 
-  const combinedFilter =
-    [params.filter, vendorFilter].filter(Boolean).join(",") || undefined;
+  // vendor เป็น literal string จริง จึงต้องใช้ control: "custom" ห่อ
+  // MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
+  // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key — เหมือน pattern
+  // PO_TYPE/CN_TYPE ใน Task 19). filter (status) ใช้ labelKey จริง (status.draft
+  // ฯลฯ) จึงใช้ control: "status" ทั่วไปได้ตรง ๆ
+  const priceListFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "status",
+        labelKey: "common.status",
+        options: [
+          { labelKey: "status.draft", value: "status|string:draft" },
+          { labelKey: "status.submitted", value: "status|string:submitted" },
+          { labelKey: "status.active", value: "status|string:active" },
+          { labelKey: "status.inactive", value: "status|string:inactive" },
+        ],
+      },
+      {
+        key: "vendor",
+        control: "custom",
+        labelKey: "field.vendor",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={vendorOptions}
+            searchable
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [vendorOptions],
+  );
 
-  const queryParams = { ...params, filter: combinedFilter };
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.PRICE_LIST,
+    fields: priceListFilterFields,
+    defaultSort: "pricelist_no:asc",
+  });
+
+  const queryParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const isGridMode = isMobile || displayMode === "grid";
 
@@ -100,45 +154,6 @@ export default function PriceListComponent() {
   const totalRecords = isGridMode
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const statusOptions = [
-    { label: ts("draft"), value: "status|string:draft" },
-    { label: ts("submitted"), value: "status|string:submitted" },
-    { label: ts("active"), value: "status|string:active" },
-    { label: ts("inactive"), value: "status|string:inactive" },
-  ];
-
-  const activeFilters: ActiveFilter[] = [];
-
-  if (filter) {
-    const match = statusOptions.find((o) => o.value === filter);
-    if (match) {
-      activeFilters.push({
-        key: "filter",
-        label: match.label,
-        onRemove: () => setFilter(""),
-      });
-    }
-  }
-
-  if (vendorFilter) {
-    for (const v of vendorFilter.split(",")) {
-      const opt = vendorOptions.find((o) => o.value === v);
-      if (opt) {
-        activeFilters.push({
-          key: `vendor-${v}`,
-          label: `${tfl("vendor")}: ${opt.label}`,
-          onRemove: () => {
-            const next = vendorFilter
-              .split(",")
-              .filter((x) => x !== v)
-              .join(",");
-            setVendorFilter(next);
-          },
-        });
-      }
-    }
-  }
 
   const handleExport = async () => {
     try {
@@ -179,11 +194,6 @@ export default function PriceListComponent() {
     }
   };
 
-  const clearAllFilters = () => {
-    setFilter("");
-    setVendorFilter("");
-  };
-
   const table = usePriceListTable({
     priceLists,
     totalRecords,
@@ -219,67 +229,18 @@ export default function PriceListComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter
-                value={filter}
-                onChange={setFilter}
-                options={statusOptions}
-              />
-              <MultiSelectFilter
-                value={vendorFilter}
-                onChange={setVendorFilter}
-                placeholder={tfl("vendor")}
-                options={vendorOptions}
-                searchable
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter
-                    value={filter}
-                    onChange={setFilter}
-                    options={statusOptions}
-                  />
-                  <MultiSelectFilter
-                    value={vendorFilter}
-                    onChange={setVendorFilter}
-                    placeholder={tfl("vendor")}
-                    options={vendorOptions}
-                    searchable
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={priceListFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -317,7 +278,7 @@ export default function PriceListComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -360,7 +321,7 @@ export default function PriceListComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -391,6 +352,16 @@ export default function PriceListComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

@@ -121,6 +121,7 @@ export const QUERY_KEYS = {
   VENDORS: "vendors",
   WASTAGE_REPORTS: "wastage-reports",
   APP_CONFIGS: "app-configs",
+  APP_USER_CONFIGS: "app-user-configs",
   WORKFLOWS: "workflows",
   // External
   PRICE_LIST_EXTERNAL: "price-list-external",

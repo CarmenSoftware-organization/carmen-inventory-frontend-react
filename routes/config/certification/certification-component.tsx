@@ -7,7 +7,9 @@ import {
 } from "@/hooks/use-certification";
 import type { Certification } from "@/types/certification";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useCertificationTable } from "./use-certification-table";
+import { CERTIFICATION_FILTER_FIELDS } from "./certification-filter-fields";
 import CertificationCard from "./certification-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
@@ -25,6 +27,8 @@ export default function CertificationComponent() {
       useList={useCertification}
       useDelete={useDeleteCertification}
       useTable={useCertificationTable}
+      pageKey={LIST_PAGE_KEYS.CERTIFICATION}
+      filterFields={CERTIFICATION_FILTER_FIELDS}
       defaultSort="code:asc"
       exportColumns={[
         { header: tfl("code"), value: (r) => r.code, width: 16 },

@@ -2,13 +2,9 @@ import type { ReactNode } from "react";
 import type { Table } from "@tanstack/react-table";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import type { ActiveFilter } from "@/components/ui/active-filter-bar";
 import type { XlsxColumn } from "@/lib/xlsx-utils";
-
-export interface StatusOption {
-  label: string;
-  value: string;
-}
+import type { ListPageKey } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
 
 /** Standardized options passed to entity table hooks by templates. */
 export interface ConfigTableHookOptions<TEntity> {
@@ -96,23 +92,11 @@ export interface ConfigListTemplateProps<TEntity extends { id: string }> {
   addPath?: string;
   /** Function returning page route for editing an entity (page-based mode). */
   getEditPath?: (entity: TEntity) => string;
-  /** Extra filter expression(s) joined to the URL `filter` param (comma-separated) */
-  extraFilter?: string;
-  /** Extra active filter chips merged into the active filter bar */
-  extraActiveFilters?: ActiveFilter[];
-  /** Called when "Clear all" is clicked, in addition to clearing the status filter */
-  onClearExtraFilters?: () => void;
   /** Render the mobile card for an entity (omit to always show DataGrid) */
   renderCard?: (props: CardRenderProps<TEntity>) => ReactNode;
 
-  /** Additional toolbar items (after SearchInput + StatusFilter) */
-  extraToolbar?: ReactNode;
   /** Additional action buttons (after Add/Export/Print) */
   extraActions?: ReactNode;
-  /** Override status filter options */
-  statusOptions?: StatusOption[];
-  /** Hide the status filter dropdown */
-  hideStatusFilter?: boolean;
   /** Hide export/print buttons entirely (overrides exportColumns) */
   hideExportPrint?: boolean;
   /** xlsx column definitions for the Export action. When omitted, the Export
@@ -131,4 +115,9 @@ export interface ConfigListTemplateProps<TEntity extends { id: string }> {
    * ไม่ระบุ = ไม่ guard (ใช้ตอน BE ยังไม่บังคับ perm)
    */
   permissionPrefix?: string;
+
+  /** pageKey ของ saved views — ระบุ registry entry สำหรับหน้านี้ (bu/user scope) */
+  pageKey: ListPageKey;
+  /** field definitions สำหรับ filter sheet + saved views แบบ registry */
+  filterFields: FilterFieldDef[];
 }

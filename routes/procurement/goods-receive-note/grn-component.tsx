@@ -1,22 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -24,7 +11,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   useGoodsReceiveNote,
@@ -32,14 +18,12 @@ import {
   useExportGoodsReceiveNote,
 } from "@/hooks/use-goods-receive-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useURL } from "@/hooks/use-url";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { GRN_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
-import { StatusFilter } from "@/components/ui/status-filter";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { setSessionItem } from "@/lib/safe-storage";
@@ -49,11 +33,17 @@ import { useGrnTable } from "./use-grn-table";
 import GrnCardList from "./grn-card-list";
 import EmptyComponent from "@/components/empty-component";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import { useGrnActiveFilters } from "./grn-active-filters";
 import { GrnPoWizardDialog } from "./grn-po-wizard-dialog";
 import { GrnCreateDialog } from "./grn-create-dialog";
 import { mapPoDetailToItems } from "./grn-item-table";
 import type { PoForGrn } from "@/types/purchase-order";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function GrnComponent() {
   const t = useTranslations("procurement.goodsReceiveNote");
@@ -67,27 +57,75 @@ export default function GrnComponent() {
     null,
   );
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const isGridMode = isMobile || displayMode === "grid";
   const useInfiniteScroll = !!isMobile;
   const deleteGrn = useDeleteGoodsReceiveNote();
   const { exportGoodsReceiveNote, isExporting } = useExportGoodsReceiveNote();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState({ defaultSort: "grn_date:desc" });
-  const [grnStatus, setGrnStatus] = useURL("grn_status");
+  const { params, search, setSearch, tableConfig } = useDataGridState({
+    defaultSort: "grn_date:desc",
+  });
 
-  const grnStatusOptions = Object.entries(GRN_STATUS_CONFIG).map(
-    ([key, cfg]) => ({
-      label: cfg.label,
-      value: `grn_status|string:${key}`,
-    }),
+  // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
+  // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
+  const grnStatusOptions = useMemo(
+    () =>
+      Object.entries(GRN_STATUS_CONFIG).map(([key, cfg]) => ({
+        label: cfg.label,
+        value: `grn_status|string:${key}`,
+      })),
+    [],
   );
 
-  // empty string → undefined (ต้องใช้ || ไม่ใช่ ?? เพราะ "" ต้องตกเป็น undefined)
-  const combinedFilter =
-    [params.filter, grnStatus].filter(Boolean).join(",") || undefined;
-  const queryParams = { ...params, filter: combinedFilter };
+  const grnFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      { key: "filter", control: "status", labelKey: "common.status" },
+      {
+        key: "grn_status",
+        control: "custom",
+        labelKey: "procurement.goodsReceiveNote.status",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={grnStatusOptions}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [grnStatusOptions],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.GOODS_RECEIVE_NOTE,
+    fields: grnFilterFields,
+    defaultSort: "grn_date:desc",
+  });
+
+  const queryParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const { data, isLoading, error, refetch } = useGoodsReceiveNote(queryParams, {
     enabled: !useInfiniteScroll,
@@ -103,16 +141,6 @@ export default function GrnComponent() {
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const { activeFilters, clearAllFilters } = useGrnActiveFilters({
-    filter,
-    setFilter,
-    grnStatus,
-    setGrnStatus,
-    search,
-    setSearch,
-    statusOptions: grnStatusOptions,
-  });
 
   const handleExport = async () => {
     try {
@@ -224,62 +252,23 @@ export default function GrnComponent() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-            <div className="flex-1 sm:flex-initial">
+          <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+            <div className="w-full sm:w-auto sm:flex-initial">
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter value={filter} onChange={setFilter} />
-              <MultiSelectFilter
-                value={grnStatus}
-                onChange={setGrnStatus}
-                placeholder={t("status")}
-                options={grnStatusOptions}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter value={filter} onChange={setFilter} />
-                  <MultiSelectFilter
-                    value={grnStatus}
-                    onChange={setGrnStatus}
-                    placeholder={t("status")}
-                    options={grnStatusOptions}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={grnFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             <DataGridColumnVisibility
@@ -315,7 +304,7 @@ export default function GrnComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -330,7 +319,7 @@ export default function GrnComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-11rem-3rem)]",
               )}
@@ -372,7 +361,7 @@ export default function GrnComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-11rem-3rem)]",
               )}
@@ -423,6 +412,16 @@ export default function GrnComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

@@ -1,20 +1,7 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { useProfile } from "@/hooks/use-profile";
@@ -25,7 +12,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   useRequestPriceList,
@@ -33,7 +19,6 @@ import {
   useExportRequestPriceList,
 } from "@/hooks/use-request-price-list";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useURL } from "@/hooks/use-url";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { usePriceListTemplate } from "@/hooks/use-price-list-template";
@@ -45,15 +30,19 @@ import EmptyComponent from "@/components/empty-component";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useRequestPriceListTable } from "./use-rfp-table";
 import RfpCard from "./rfp-card";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function RequestPriceListComponent() {
   const navigate = useNavigate();
@@ -66,22 +55,75 @@ export default function RequestPriceListComponent() {
     null,
   );
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deleteRequestPriceList = useDeleteRequestPriceList();
   const { exportRequestPriceList, isExporting } = useExportRequestPriceList();
   const { params, search, setSearch, tableConfig } = useDataGridState();
-  const [templateFilter, setTemplateFilter] = useURL("template");
 
   const { data: templateData } = usePriceListTemplate({ perpage: -1 });
-  const templateOptions = (templateData?.data ?? []).map((tmpl) => ({
-    label: tmpl.name,
-    value: `pricelist_template_id|string:${tmpl.id}`,
-  }));
+  // ชื่อ template เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
+  // array reference เปลี่ยนทุก render จน rfpFilterFields memo ข้างล่างไม่เคย hit
+  const templateOptions = useMemo(
+    () =>
+      (templateData?.data ?? []).map((tmpl) => ({
+        label: tmpl.name,
+        value: `pricelist_template_id|string:${tmpl.id}`,
+      })),
+    [templateData],
+  );
 
-  const combinedFilter =
-    [params.filter, templateFilter].filter(Boolean).join(",") || undefined;
-  const queryParams = { ...params, filter: combinedFilter };
+  // ไม่มี status/vendor filter ในโค้ดเดิม (grep ทั้งไฟล์ยืนยันแล้ว — brief เก่า/
+  // ไม่ตรง) มีแค่ template เดียว literal string จริง จึงต้องใช้ control: "custom"
+  // ห่อ MultiSelectFilter ตรง ๆ แทน control: "multi-select" (ตัวนั้นเรียก
+  // t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key)
+  const rfpFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "template",
+        control: "custom",
+        labelKey: "field.template",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={templateOptions}
+            searchable
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [templateOptions],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.REQUEST_PRICE_LIST,
+    fields: rfpFilterFields,
+  });
+
+  const queryParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const isGridMode = isMobile || displayMode === "grid";
 
@@ -95,10 +137,27 @@ export default function RequestPriceListComponent() {
     enabled: isGridMode,
   });
 
+  // เดิมมี "Clear All" ที่ล้าง search ด้วย (ไม่ใช่แค่ template) — lf.clearAll ไม่รู้
+  // จัก search (อยู่นอก field registry) จึงยังต้องเรียก setSearch("") ต่อเอง เพื่อ
+  // รักษาพฤติกรรมเดิมทุกประการ
   const clearAllFilters = () => {
-    setTemplateFilter("");
+    lf.clearAll();
     setSearch("");
   };
+
+  // เดิมมี chip แสดงคำค้นหา (search) แยกจาก template — ไม่ใช่ FilterFieldDef
+  // (search เป็นกลไกแยกทุกหน้า ไม่ใช่ "filter" ใน registry) จึงต่อ chip นี้เข้ากับ
+  // lf.activeFilters เอง เพื่อรักษาพฤติกรรมเดิม (คลิก chip ลบแค่คำค้นหา)
+  const activeFilters = search
+    ? [
+        ...lf.activeFilters,
+        {
+          key: `search-${search}`,
+          label: `"${search}"`,
+          onRemove: () => setSearch(""),
+        },
+      ]
+    : lf.activeFilters;
 
   const handleExport = async () => {
     try {
@@ -151,33 +210,6 @@ export default function RequestPriceListComponent() {
     }
   };
 
-  const activeFilters: ActiveFilter[] = [];
-  if (templateFilter) {
-    for (const v of templateFilter.split(",")) {
-      const opt = templateOptions.find((o) => o.value === v);
-      if (opt) {
-        activeFilters.push({
-          key: `template-${v}`,
-          label: `${tfl("template")}: ${opt.label}`,
-          onRemove: () => {
-            const next = templateFilter
-              .split(",")
-              .filter((x) => x !== v)
-              .join(",");
-            setTemplateFilter(next);
-          },
-        });
-      }
-    }
-  }
-  if (search) {
-    activeFilters.push({
-      key: `search-${search}`,
-      label: `"${search}"`,
-      onRemove: () => setSearch(""),
-    });
-  }
-
   const items = isGridMode ? grid.items : (data?.data ?? []);
   const totalRecords = isGridMode
     ? grid.totalRecords
@@ -220,57 +252,18 @@ export default function RequestPriceListComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:block">
-              <MultiSelectFilter
-                value={templateFilter}
-                onChange={setTemplateFilter}
-                placeholder={tfl("template")}
-                options={templateOptions}
-                searchable
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <MultiSelectFilter
-                    value={templateFilter}
-                    onChange={setTemplateFilter}
-                    placeholder={tfl("template")}
-                    options={templateOptions}
-                    searchable
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={rfpFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={clearAllFilters}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -384,6 +377,16 @@ export default function RequestPriceListComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

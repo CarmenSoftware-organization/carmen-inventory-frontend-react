@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Columns3,
-  Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
@@ -17,30 +16,22 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import { useListFilters } from "@/hooks/use-list-filters";
 import SearchInput from "@/components/search-input";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
-import { StatusFilter } from "@/components/ui/status-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { cn } from "@/lib/utils";
 import { downloadXlsx, buildXlsxFileName } from "@/lib/xlsx-utils";
@@ -49,6 +40,7 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { buildPermissionKey } from "@/constant/permissions";
 import type { CardRenderProps, ConfigListTemplateProps } from "./types";
+import type { ViewScope } from "@/types/list-view";
 
 interface GridContentArgs<TEntity extends { id: string }> {
   readonly isLoading: boolean;
@@ -105,6 +97,73 @@ function renderGridContent<TEntity extends { id: string }>({
   );
 }
 
+interface DeleteFlowArgs<TEntity extends { id: string }> {
+  readonly deleteTarget: TEntity | null;
+  readonly setDeleteTarget: (entity: TEntity | null) => void;
+  readonly deleteMutation: ReturnType<ConfigListTemplateProps<TEntity>["useDelete"]>;
+  readonly renderDeleteDialog?: ConfigListTemplateProps<TEntity>["renderDeleteDialog"];
+  readonly entityNameField: keyof TEntity & string;
+  readonly t: ReturnType<typeof useTranslations>;
+  readonly tt: ReturnType<typeof useTranslations>;
+}
+
+/**
+ * Render delete confirmation flow (custom `renderDeleteDialog` หรือ `DeleteDialog` กลาง)
+ *
+ * แยกออกจาก ConfigListTemplate เพื่อลดความยาวของ component หลัก
+ */
+function renderDeleteFlow<TEntity extends { id: string }>({
+  deleteTarget,
+  setDeleteTarget,
+  deleteMutation,
+  renderDeleteDialog,
+  entityNameField,
+  t,
+  tt,
+}: DeleteFlowArgs<TEntity>) {
+  const onOpenChange = (open: boolean) => {
+    if (!open && !deleteMutation.isPending) setDeleteTarget(null);
+  };
+  const onConfirm = () => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        toast.success(tt("deleteSuccess", { entity: t("entity") }));
+        setDeleteTarget(null);
+      },
+    });
+  };
+
+  if (renderDeleteDialog) {
+    return renderDeleteDialog({
+      target: deleteTarget,
+      open: !!deleteTarget,
+      onOpenChange,
+      isPending: deleteMutation.isPending,
+      onConfirm,
+    });
+  }
+
+  return (
+    <DeleteDialog
+      open={!!deleteTarget}
+      onOpenChange={onOpenChange}
+      title={t("deleteTitle")}
+      description={t("deleteConfirm", {
+        name: deleteTarget ? String(deleteTarget[entityNameField] ?? "") : "",
+      })}
+      isPending={deleteMutation.isPending}
+      onConfirm={onConfirm}
+    />
+  );
+}
+
+/**
+ * ConfigListTemplate — generic list page (search/filter/sort/paginate/export/CRUD)
+ * ขับเคลื่อนด้วย registry: `pageKey` + `filterFields` เปิด saved views (bu/user
+ * scope) และ filter sheet ที่ประกาศ field ผ่าน `FilterFieldDef[]` แทนการเขียน
+ * filter bar เฉพาะหน้าเอง
+ */
 export function ConfigListTemplate<TEntity extends { id: string }>({
   translationNamespace,
   entityNameField,
@@ -114,10 +173,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   renderDialog,
   renderDeleteDialog,
   renderCard,
-  extraToolbar,
   extraActions,
-  statusOptions: statusOptionsProp,
-  hideStatusFilter,
   hideExportPrint,
   exportColumns,
   exportFileNamePrefix,
@@ -125,10 +181,9 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   defaultSort,
   addPath,
   getEditPath,
-  extraFilter,
-  extraActiveFilters,
-  onClearExtraFilters,
   permissionPrefix,
+  pageKey,
+  filterFields,
 }: Readonly<ConfigListTemplateProps<TEntity>>) {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<TEntity | null>(null);
@@ -136,17 +191,18 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editEntity, setEditEntity] = useState<TEntity | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const isMobile = useIsMobile();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState({ defaultSort });
+  const { params, search, setSearch, tableConfig } = useDataGridState({
+    defaultSort,
+  });
 
-  const mergedParams = (() => {
-    if (!extraFilter) return params;
-    const combined = [params.filter, extraFilter].filter(Boolean).join(",");
-    return { ...params, filter: combined || undefined };
-  })();
+  const lf = useListFilters({ pageKey, fields: filterFields, defaultSort });
+
+  // useDataGridState ยังให้ pagination/sort/search params อยู่ แต่ filter ต้อง
+  // ใช้ค่าที่ encode จาก registry (lf.filterParam) แทน
+  const mergedParams = { ...params, filter: lf.filterParam };
 
   // grid/card view (mobile หรือ desktop grid mode) → infinite scroll
   // (โหลดเพิ่มเมื่อ scroll ถึง sentinel ล่างสุด แทน pagination ของ table)
@@ -164,7 +220,6 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
 
   const t = useTranslations(translationNamespace);
   const tc = useTranslations("common");
-  const ts = useTranslations("status");
   const tt = useTranslations("toast");
 
   const entities = useInfiniteScroll
@@ -178,33 +233,6 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   const isLoading = useInfiniteScroll ? grid.isLoading : directQuery.isLoading;
   const error = directQuery.error;
   const refetch = directQuery.refetch;
-
-  const STATUS_OPTIONS = statusOptionsProp ?? [
-    { label: ts("active"), value: "is_active|bool:true" },
-    { label: ts("inactive"), value: "is_active|bool:false" },
-  ];
-
-  const activeFilterTag = filter
-    ? STATUS_OPTIONS.find((o) => o.value === filter)
-    : null;
-
-  const clearAllFilters = () => {
-    setFilter("");
-    onClearExtraFilters?.();
-  };
-
-  const activeFiltersBase: ActiveFilter[] = activeFilterTag
-    ? [
-        {
-          key: "filter",
-          label: activeFilterTag.label,
-          onRemove: () => setFilter(""),
-        },
-      ]
-    : [];
-  const activeFilters: ActiveFilter[] = extraActiveFilters
-    ? [...activeFiltersBase, ...extraActiveFilters]
-    : activeFiltersBase;
 
   const handleEdit = (entity: TEntity) => {
     if (getEditPath) {
@@ -280,8 +308,29 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   if (error)
     return <ErrorState message={error.message} onRetry={() => refetch()} />;
 
-  const filterCount = activeFilters.length;
-  const hasInlineFilters = !hideStatusFilter || !!extraToolbar;
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ ViewSelector's handleSaveViewDialogSave — instance นี้แยกต่างหาก
+   *  เพราะ ListFilterSheet's "save current view" ต้องเปิด dialog ของตัวเอง ไม่ใช่
+   *  ตัวที่ ViewSelector ถือ local state ไว้ภายในของมันเอง) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      // อัปเดต view อื่นที่ไม่ใช่ view ปัจจุบัน — ต้อง apply ต่อให้ URL ชี้ตาม
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   return (
     <div
@@ -334,63 +383,20 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            {/* Desktop inline filters */}
-            {!hideStatusFilter && (
-              <div className="hidden sm:block">
-                <StatusFilter
-                  value={filter}
-                  onChange={setFilter}
-                  options={STATUS_OPTIONS}
-                />
-              </div>
-            )}
-            <div className="hidden sm:contents">{extraToolbar}</div>
-            {/* Mobile filter sheet trigger */}
-            {hasInlineFilters && (
-              <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="relative h-11 w-11 shrink-0 sm:hidden"
-                    aria-label={tc("aria.openFilters")}
-                  >
-                    <FilterIcon aria-hidden="true" />
-                    {filterCount > 0 && (
-                      <Badge
-                        variant="secondary"
-                        size="xs"
-                        className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                      >
-                        {filterCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="max-h-[80vh]">
-                  <SheetHeader>
-                    <SheetTitle>{tc("filter")}</SheetTitle>
-                  </SheetHeader>
-                  <div className="flex flex-col gap-3 p-4">
-                    {!hideStatusFilter && (
-                      <StatusFilter
-                        value={filter}
-                        onChange={setFilter}
-                        options={STATUS_OPTIONS}
-                      />
-                    )}
-                    {extraToolbar}
-                    <Button
-                      variant="outline"
-                      className="h-11 w-full"
-                      onClick={() => setFilterSheetOpen(false)}
-                    >
-                      {tc("done")}
-                    </Button>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
+            {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
+                (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={filterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -430,8 +436,8 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
           </div>
         </div>
 
-        {/* Active filter badges */}
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        {/* Active filter badges — driven by registry field values, not statusOptions */}
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       {/* Content */}
@@ -456,7 +462,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -477,45 +483,25 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
         readOnly: !!editEntity && updateDenied,
       })}
 
-      {(() => {
-        const onOpenChange = (open: boolean) => {
-          if (!open && !deleteMutation.isPending) setDeleteTarget(null);
-        };
-        const onConfirm = () => {
-          if (!deleteTarget) return;
-          deleteMutation.mutate(deleteTarget.id, {
-            onSuccess: () => {
-              toast.success(tt("deleteSuccess", { entity: t("entity") }));
-              setDeleteTarget(null);
-            },
-          });
-        };
+      {renderDeleteFlow({
+        deleteTarget,
+        setDeleteTarget,
+        deleteMutation,
+        renderDeleteDialog,
+        entityNameField,
+        t,
+        tt,
+      })}
 
-        if (renderDeleteDialog) {
-          return renderDeleteDialog({
-            target: deleteTarget,
-            open: !!deleteTarget,
-            onOpenChange,
-            isPending: deleteMutation.isPending,
-            onConfirm,
-          });
+      <SaveViewDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
         }
-
-        return (
-          <DeleteDialog
-            open={!!deleteTarget}
-            onOpenChange={onOpenChange}
-            title={t("deleteTitle")}
-            description={t("deleteConfirm", {
-              name: deleteTarget
-                ? String(deleteTarget[entityNameField] ?? "")
-                : "",
-            })}
-            isPending={deleteMutation.isPending}
-            onConfirm={onConfirm}
-          />
-        );
-      })()}
+        onSave={handleSaveViewDialogSave}
+      />
     </div>
   );
 }

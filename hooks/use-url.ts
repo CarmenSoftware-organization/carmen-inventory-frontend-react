@@ -1,7 +1,7 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 
-const URL_CHANGE_EVENT = "useurl:change";
+export const URL_CHANGE_EVENT = "useurl:change";
 
 /**
  * อ่านค่า query parameter จาก URL ปัจจุบัน
@@ -21,6 +21,37 @@ function getURLParam(paramName: string, defaultValue: string): string {
   return (
     new URLSearchParams(window.location.search).get(paramName) ?? defaultValue
   );
+}
+
+/**
+ * เขียน/ลบหลาย query param ใน replaceState ครั้งเดียว (ค่าว่าง = ลบ param)
+ * แล้ว dispatch useurl:change ครั้งเดียว — ใช้ตอน apply saved view เพื่อไม่ยิง
+ * event/render ทีละ param
+ *
+ * @param entries - Record ของ param name -> value (empty string = ลบ param)
+ * @example
+ * ```ts
+ * setURLParams({ search: "vendor-a", page: "1" });
+ * setURLParams({ search: "" }); // ลบ search param
+ * ```
+ */
+export function setURLParams(entries: Record<string, string>): void {
+  const url = new URL(window.location.href);
+  for (const [k, v] of Object.entries(entries)) {
+    if (v) {
+      url.searchParams.set(k, v);
+    } else {
+      url.searchParams.delete(k);
+    }
+  }
+  const search = Array.from(url.searchParams.entries())
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
+  const nextHref = `${url.origin}${url.pathname}${search ? `?${search}` : ""}${url.hash}`;
+  if (nextHref !== window.location.href) {
+    window.history.replaceState({ ...window.history.state }, "", nextHref);
+    window.dispatchEvent(new CustomEvent(URL_CHANGE_EVENT));
+  }
 }
 
 type URLStateOptions = {
@@ -70,29 +101,7 @@ export const useURL = (paramName: string, options: URLStateOptions = {}) => {
   const value = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const updateValue = (newValue: string) => {
-    const url = new URL(window.location.href);
-    if (newValue) {
-      url.searchParams.set(paramName, newValue);
-    } else {
-      url.searchParams.delete(paramName);
-    }
-
-    // Build search string ด้วย encodeURIComponent (space → `%20` ตาม RFC 3986)
-    // แทนการใช้ url.search ที่ URLSearchParams encode space เป็น `+`
-    const search = Array.from(url.searchParams.entries())
-      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-      .join("&");
-    const nextHref = `${url.origin}${url.pathname}${search ? `?${search}` : ""}${url.hash}`;
-
-    if (nextHref !== window.location.href) {
-      window.history.replaceState(
-        { ...window.history.state },
-        "",
-        nextHref,
-      );
-      window.dispatchEvent(new CustomEvent(URL_CHANGE_EVENT));
-    }
-
+    setURLParams({ [paramName]: newValue });
     onUpdate?.(newValue);
   };
 

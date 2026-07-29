@@ -3,7 +3,9 @@ import { useTranslations } from "use-intl";
 import { useCurrency, useDeleteCurrency } from "@/hooks/use-currency";
 import type { Currency } from "@/types/currency";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useCurrencyTable } from "./use-currency-table";
+import { CURRENCY_FILTER_FIELDS } from "./currency-filter-fields";
 import CurrencyCard from "./currency-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
@@ -29,6 +31,8 @@ export default function CurrencyComponent() {
       useDelete={useDeleteCurrency}
       useTable={useCurrencyTable}
       permissionPrefix="configuration.currency"
+      pageKey={LIST_PAGE_KEYS.CURRENCY}
+      filterFields={CURRENCY_FILTER_FIELDS}
       defaultSort="code:asc"
       exportColumns={[
         { header: tfl("code"), value: (r) => r.code, width: 10 },

@@ -1,10 +1,9 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   Columns3,
   Download,
-  Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
@@ -18,13 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -34,14 +26,12 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEquipment, useDeleteEquipment } from "@/hooks/use-equipment";
 import { useEquipmentCategory } from "@/hooks/use-equipment-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import { useURL } from "@/hooks/use-url";
 import type { Equipment } from "@/types/equipment";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -50,14 +40,18 @@ import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useEquipmentTable } from "./use-eq-table";
 import EqCard from "./eq-card";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 /**
  * คอมโพเนนต์หลักของหน้ารายการอุปกรณ์ รองรับ list/grid view และ filter ตามหมวดหมู่
@@ -74,25 +68,96 @@ export default function EquipmentComponent() {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Equipment | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deleteEquipment = useDeleteEquipment();
   const tfl = useTranslations("field");
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const [categoryFilter, setCategoryFilter] = useURL("category");
+  const { params, search, setSearch, tableConfig } = useDataGridState();
   const { data: categoryData } = useEquipmentCategory({ perpage: -1 });
 
   const isGridMode = isMobile || displayMode === "grid";
 
   const categories = new Map((categoryData?.data ?? []).map((c) => [c.id, c.name]));
 
-  const categoryFilterOptions = (categoryData?.data ?? [])
-    .filter((c) => c.is_active)
-    .map((c) => ({ label: c.name, value: `category_id|string:${c.id}` }));
+  const categoryFilterOptions = useMemo(
+    () =>
+      (categoryData?.data ?? [])
+        .filter((c) => c.is_active)
+        .map((c) => ({ label: c.name, value: `category_id|string:${c.id}` })),
+    [categoryData],
+  );
 
-  const combinedCategoryFilters = [params.filter, categoryFilter].filter(Boolean).join(",");
-  const combinedParams = { ...params, filter: combinedCategoryFilters || undefined };
+  const STATUS_OPTIONS = useMemo(
+    () => [
+      { label: ts("active"), value: "is_active|bool:true" },
+      { label: ts("inactive"), value: "is_active|bool:false" },
+    ],
+    [ts],
+  );
+
+  // category เป็นชื่อ literal string จริง (ไม่ใช่ i18n key) จึงต้องใช้
+  // control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน pattern ของ
+  // PO_TYPE/CN_TYPE ใน Task 19
+  const equipmentFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "custom",
+        labelKey: "common.status",
+        render: (value, onChange) => (
+          <StatusFilter
+            value={value}
+            onChange={onChange}
+            options={STATUS_OPTIONS}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "category",
+        control: "custom",
+        labelKey: "field.category",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={tfl("category")}
+            options={categoryFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [STATUS_OPTIONS, categoryFilterOptions, tfl],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.EQUIPMENT,
+    fields: equipmentFilterFields,
+  });
+
+  const combinedParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const { data, isLoading, error, refetch } = useEquipment(combinedParams, {
     enabled: !isGridMode,
@@ -108,52 +173,6 @@ export default function EquipmentComponent() {
   const totalRecords = isGridMode
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const STATUS_OPTIONS = [
-    { label: ts("active"), value: "is_active|bool:true" },
-    { label: ts("inactive"), value: "is_active|bool:false" },
-  ];
-
-  const activeFilters: ActiveFilter[] = (() => {
-    const filters: ActiveFilter[] = [];
-
-    if (filter) {
-      const match = STATUS_OPTIONS.find((o) => o.value === filter);
-      if (match) {
-        filters.push({
-          key: `status-${filter}`,
-          label: match.label,
-          onRemove: () => setFilter(""),
-        });
-      }
-    }
-
-    if (categoryFilter) {
-      for (const v of categoryFilter.split(",")) {
-        const match = categoryFilterOptions.find((o) => o.value === v);
-        if (match) {
-          filters.push({
-            key: `category-${v}`,
-            label: match.label,
-            onRemove: () => {
-              const next = categoryFilter
-                .split(",")
-                .filter((val) => val !== v)
-                .join(",");
-              setCategoryFilter(next);
-            },
-          });
-        }
-      }
-    }
-
-    return filters;
-  })();
-
-  const clearAllFilters = () => {
-    setFilter("");
-    setCategoryFilter("");
-  };
 
   const table = useEquipmentTable({
     equipments,
@@ -236,65 +255,18 @@ export default function EquipmentComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter
-                value={filter}
-                onChange={setFilter}
-                options={STATUS_OPTIONS}
-              />
-              <MultiSelectFilter
-                value={categoryFilter}
-                onChange={setCategoryFilter}
-                placeholder={tfl("category")}
-                options={categoryFilterOptions}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter
-                    value={filter}
-                    onChange={setFilter}
-                    options={STATUS_OPTIONS}
-                  />
-                  <MultiSelectFilter
-                    value={categoryFilter}
-                    onChange={setCategoryFilter}
-                    placeholder={tfl("category")}
-                    options={categoryFilterOptions}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={equipmentFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -332,7 +304,7 @@ export default function EquipmentComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -380,7 +352,7 @@ export default function EquipmentComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -411,6 +383,16 @@ export default function EquipmentComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );
