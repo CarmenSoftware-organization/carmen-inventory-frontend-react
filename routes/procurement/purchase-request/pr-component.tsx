@@ -6,6 +6,7 @@ import {
   Columns3,
   LayoutGrid,
   LayoutList,
+  Trash2,
   XCircle,
   Loader2,
 } from "lucide-react";
@@ -32,8 +33,11 @@ import {
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
+import { PR_STATUS } from "@/types/purchase-request";
 import SearchInput from "@/components/search-input";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { PrStatusSelectDialog } from "./pr-select-dialog";
 import { PrActionDialog } from "./workflow/pr-action-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import { usePurchaseRequestTable } from "./pr-table";
@@ -82,6 +86,15 @@ export default function PurchaseRequestComponent() {
   );
   const [batchApproveOpen, setBatchApproveOpen] = useState(false);
   const [batchRejectOpen, setBatchRejectOpen] = useState(false);
+  const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+  // ใบที่กด "ลบ" ไปแล้ว — ยังไม่มี API จริง จึงซ่อนจากตารางไว้ก่อน
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
+  // ใบที่ผู้ใช้กดติ๊กทั้งที่คนละกลุ่มกับที่เลือกค้างไว้ (รอยืนยันว่าจะสลับกลุ่ม)
+  const [switchTarget, setSwitchTarget] = useState<PurchaseRequest | null>(
+    null,
+  );
+  const [selectAllOpen, setSelectAllOpen] = useState(false);
   // viewMode อยู่ใน URL (?view=) เพื่อให้ปุ่ม back จาก detail กลับมาเจอ tab เดิม
   const [viewModeParam, setViewMode] = useURL("view", {
     defaultValue: "my-pending",
@@ -230,10 +243,47 @@ export default function PurchaseRequestComponent() {
     setPrDate,
   });
 
-  const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
+  const allItems = useInfiniteScroll ? grid.items : (data?.data ?? []);
+  const items = allItems.filter((item) => !removedIds.includes(item.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
+
+  // ใบฉบับร่างลบได้อย่างเดียว ใบที่เหลืออนุมัติ/ไม่อนุมัติได้ — ปุ่มคนละชุด
+  // จึงติ๊กปนกันไม่ได้
+  const groupOf = (item: PurchaseRequest) =>
+    item.pr_status === PR_STATUS.DRAFT ? "draft" : "in_progress";
+
+  const selectedItems = items.filter((item) => rowSelection[item.id]);
+  const hasSelection = selectedItems.length > 0;
+  const selectedGroup = selectedItems.length ? groupOf(selectedItems[0]) : null;
+  const draftItems = items.filter((item) => groupOf(item) === "draft");
+  const inProgressItems = items.filter(
+    (item) => groupOf(item) === "in_progress",
+  );
+
+  const selectOnly = (list: PurchaseRequest[]) =>
+    setRowSelection(Object.fromEntries(list.map((item) => [item.id, true])));
+
+  const handleRowSelect = (item: PurchaseRequest, next: boolean) => {
+    if (!next) {
+      setRowSelection(({ [item.id]: _removed, ...rest }) => rest);
+      return;
+    }
+    if (selectedGroup && selectedGroup !== groupOf(item)) {
+      setSwitchTarget(item);
+      return;
+    }
+    setRowSelection((prev) => ({ ...prev, [item.id]: true }));
+  };
+
+  const handleSelectAll = () => {
+    if (hasSelection) {
+      setRowSelection({});
+      return;
+    }
+    setSelectAllOpen(true);
+  };
 
   const table = usePurchaseRequestTable({
     items,
@@ -245,10 +295,11 @@ export default function PurchaseRequestComponent() {
     onApprove: setApproveTarget,
     onReject: setRejectTarget,
     isMyPending: viewMode === "my-pending",
+    onRowSelect: handleRowSelect,
+    onSelectAll: handleSelectAll,
+    rowSelection,
+    onRowSelectionChange: setRowSelection,
   });
-
-  const selectedRows = table.getSelectedRowModel().rows;
-  const hasSelection = selectedRows.length > 0;
 
   const handleBatchApprove = () => {
     setBatchApproveOpen(true);
@@ -373,16 +424,37 @@ export default function PurchaseRequestComponent() {
         {hasSelection && viewMode === "my-pending" && (
           <div className="flex items-center justify-end gap-2">
             <span className="text-muted-foreground text-xs">
-              {selectedRows.length} {t("selected")}
+              {selectedItems.length} {t("selected")}
             </span>
-            <Button size="sm" variant="success" onClick={handleBatchApprove}>
-              <CheckCircle2 aria-hidden="true" />
-              {tc("approve")}
-            </Button>
-            <Button size="sm" variant="destructive" onClick={handleBatchReject}>
-              <XCircle aria-hidden="true" />
-              {tc("reject")}
-            </Button>
+            {selectedGroup === "draft" ? (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => setBatchDeleteOpen(true)}
+              >
+                <Trash2 aria-hidden="true" />
+                {tc("delete")}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  size="sm"
+                  variant="success"
+                  onClick={handleBatchApprove}
+                >
+                  <CheckCircle2 aria-hidden="true" />
+                  {tc("approve")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleBatchReject}
+                >
+                  <XCircle aria-hidden="true" />
+                  {tc("reject")}
+                </Button>
+              </>
+            )}
           </div>
         )}
 
@@ -514,10 +586,10 @@ export default function PurchaseRequestComponent() {
         title={t("batchApproveTitle")}
         description={
           <div className="space-y-2">
-            <p>{t("batchApproveConfirm", { count: selectedRows.length })}</p>
+            <p>{t("batchApproveConfirm", { count: selectedItems.length })}</p>
             <ul className="space-y-1 text-xs">
-              {selectedRows.map((row) => (
-                <li key={row.original.id}>{row.original.pr_no}</li>
+              {selectedItems.map((item) => (
+                <li key={item.id}>{item.pr_no}</li>
               ))}
             </ul>
           </div>
@@ -527,14 +599,14 @@ export default function PurchaseRequestComponent() {
         showMessage={false}
         isPending={batchApprovePurchaseRequest.isPending}
         onConfirm={() => {
-          const selectedIds = selectedRows.map((row) => row.original.id);
+          const selectedIds = selectedItems.map((item) => item.id);
           batchApprovePurchaseRequest.mutate(
             { pr_ids: selectedIds },
             {
               onSuccess: () => {
                 toast.success(tt("approveSuccess", { entity: t("entity") }));
                 setBatchApproveOpen(false);
-                table.resetRowSelection();
+                setRowSelection({});
               },
             },
           );
@@ -551,10 +623,10 @@ export default function PurchaseRequestComponent() {
         title={t("batchRejectTitle")}
         description={
           <div className="space-y-2">
-            <p>{t("batchRejectConfirm", { count: selectedRows.length })}</p>
+            <p>{t("batchRejectConfirm", { count: selectedItems.length })}</p>
             <ul className="space-y-1 text-xs">
-              {selectedRows.map((row) => (
-                <li key={row.original.id}>{row.original.pr_no}</li>
+              {selectedItems.map((item) => (
+                <li key={item.id}>{item.pr_no}</li>
               ))}
             </ul>
           </div>
@@ -563,17 +635,72 @@ export default function PurchaseRequestComponent() {
         confirmLabel={tc("reject")}
         isPending={batchRejectPurchaseRequest.isPending}
         onConfirm={(messages) => {
-          const selectedIds = selectedRows.map((row) => row.original.id);
+          const selectedIds = selectedItems.map((item) => item.id);
           batchRejectPurchaseRequest.mutate(
             { pr_ids: selectedIds, reject_message: messages[0] ?? "" },
             {
               onSuccess: () => {
                 toast.success(tt("rejectSuccess", { entity: t("entity") }));
                 setBatchRejectOpen(false);
-                table.resetRowSelection();
+                setRowSelection({});
               },
             },
           );
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!switchTarget}
+        onOpenChange={(open) => !open && setSwitchTarget(null)}
+        title={t("switchSelectionTitle")}
+        description={t("switchSelectionDesc", {
+          count: selectedItems.length,
+          from:
+            selectedGroup === "draft"
+              ? t("selectDraft")
+              : t("selectInProgress"),
+        })}
+        confirmText={t("switchSelectionConfirm", {
+          to:
+            switchTarget && groupOf(switchTarget) === "draft"
+              ? t("selectDraft")
+              : t("selectInProgress"),
+        })}
+        onConfirm={() => {
+          if (!switchTarget) return;
+          setRowSelection({ [switchTarget.id]: true });
+          setSwitchTarget(null);
+        }}
+      />
+
+      <PrStatusSelectDialog
+        open={selectAllOpen}
+        onOpenChange={setSelectAllOpen}
+        draftCount={draftItems.length}
+        inProgressCount={inProgressItems.length}
+        onSelectDraft={() => {
+          selectOnly(draftItems);
+          setSelectAllOpen(false);
+        }}
+        onSelectInProgress={() => {
+          selectOnly(inProgressItems);
+          setSelectAllOpen(false);
+        }}
+      />
+
+      <DeleteDialog
+        open={batchDeleteOpen}
+        onOpenChange={setBatchDeleteOpen}
+        title={t("batchDeleteTitle")}
+        description={t("batchDeleteConfirm", { count: selectedItems.length })}
+        onConfirm={() => {
+          // ยังไม่มี API ลบหลายใบ — payload ที่จะยิงคือ [{ id }] ตามที่ตกลงไว้
+          // ระหว่างนี้เอาแถวออกจากตารางไปก่อน (refetch แล้วใบจะกลับมา)
+          const payload = selectedItems.map((item) => ({ id: item.id }));
+          setRemovedIds((prev) => [...prev, ...payload.map((row) => row.id)]);
+          setRowSelection({});
+          setBatchDeleteOpen(false);
+          toast.success(tt("deleteSuccess", { entity: t("entity") }));
         }}
       />
 
