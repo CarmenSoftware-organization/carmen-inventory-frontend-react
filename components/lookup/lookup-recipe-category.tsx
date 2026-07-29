@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useRecipeCategory } from "@/hooks/use-recipe-category";
@@ -11,6 +10,8 @@ interface LookupRecipeCategoryProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: Set<string>;
   readonly error?: string;
 }
@@ -37,6 +38,7 @@ export function LookupRecipeCategory({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   error,
 }: LookupRecipeCategoryProps) {
@@ -46,21 +48,27 @@ export function LookupRecipeCategory({
   // Lazy: ยิง API ตอนเปิด popover ครั้งแรก หรือเมื่อมีค่าเลือกไว้แล้ว (resolve label)
   const [hasOpened, setHasOpened] = useState(false);
 
-  const { items: categories, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination({
-      useListHook: useRecipeCategory,
-      search,
-      perpage: 30,
-      enabled: hasOpened || !!value,
-      filter: (v: { id: string; is_active: boolean }) => {
-        if (!v.is_active) return false;
-        if (excludeIds?.has(v.id)) return false;
-        return true;
-      },
-    });
+  const {
+    items: categories,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination({
+    useListHook: useRecipeCategory,
+    search,
+    perpage: 30,
+    enabled: hasOpened || !!value,
+    filter: (v: { id: string; is_active: boolean }) => {
+      if (!v.is_active) return false;
+      if (excludeIds?.has(v.id)) return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id) => onValueChange(id)}
       onOpenChange={(open) => {

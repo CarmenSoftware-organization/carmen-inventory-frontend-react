@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
@@ -19,6 +18,8 @@ interface LookupLocationPairProductProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
   readonly defaultLabel?: string;
@@ -55,6 +56,7 @@ export function LookupLocationPairProduct({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   modal,
   defaultLabel,
@@ -66,7 +68,11 @@ export function LookupLocationPairProduct({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: { search?: string; perpage: number; page?: number }) =>
+  const useListHook = (params: {
+    search?: string;
+    perpage: number;
+    page?: number;
+  }) =>
     useLocationPairProducts(
       fromLocationId || undefined,
       toLocationId || undefined,
@@ -92,6 +98,7 @@ export function LookupLocationPairProduct({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={onValueChange}
       items={products}

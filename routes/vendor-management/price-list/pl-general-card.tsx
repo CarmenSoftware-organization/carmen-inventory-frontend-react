@@ -91,7 +91,8 @@ export function PLGeneralCard({
                 disabled={isDisabled}
                 // h-9 ให้เท่า currency/name/status (field มาตรฐานของฟอร์ม) —
                 // combobox default เป็น h-8 (สำหรับ table) จึง override ที่ call site
-                className="h-9 w-full"
+                size="default"
+                className="w-full"
                 defaultLabel={priceList?.vendor?.name}
                 error={form.formState.errors.vendor_id?.message}
               />
@@ -141,7 +142,7 @@ export function PLGeneralCard({
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={isDisabled}
-                className="h-9 w-full"
+                className="w-full"
                 placeholder={tfl("pickDate")}
                 error={form.formState.errors.effective_from_date?.message}
               />
@@ -166,7 +167,7 @@ export function PLGeneralCard({
                 value={field.value}
                 onValueChange={field.onChange}
                 disabled={isDisabled}
-                className="h-9 w-full"
+                className="w-full"
                 placeholder={tfl("pickDate")}
                 fromDate={watchedFrom ? new Date(watchedFrom) : undefined}
                 error={form.formState.errors.effective_to_date?.message}

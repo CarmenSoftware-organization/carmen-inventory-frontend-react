@@ -1,4 +1,3 @@
-
 import { useState, type ComponentProps } from "react";
 import { DatabaseIcon } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -38,6 +37,8 @@ interface LookupDatasetProps {
   readonly placeholder?: string;
   readonly defaultLabel?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
@@ -53,6 +54,7 @@ export function LookupDataset({
   placeholder,
   defaultLabel,
   className,
+  size,
   error,
 }: LookupDatasetProps) {
   const tl = useTranslations("lookup");
@@ -71,6 +73,7 @@ export function LookupDataset({
 
   return (
     <LookupCombobox<DashboardDataset>
+      size={size}
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);

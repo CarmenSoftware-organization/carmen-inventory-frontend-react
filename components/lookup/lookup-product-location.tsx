@@ -16,6 +16,8 @@ interface LookupProductLocationProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
   readonly defaultLabel?: string;
@@ -56,6 +58,7 @@ export function LookupProductLocation({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   modal,
   defaultLabel,
@@ -96,6 +99,7 @@ export function LookupProductLocation({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);

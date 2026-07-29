@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { ChevronsUpDown, CircleAlert, Warehouse } from "lucide-react";
@@ -19,6 +18,8 @@ interface LookupUserLocationProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: Set<string>;
   readonly popoverWidth?: string;
   readonly defaultLabel?: string;
@@ -53,7 +54,8 @@ function LazyPlaceholder({
 }: LookupUserLocationProps & { readonly onActivate: () => void }) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
-  const label = defaultLabel ?? placeholder ?? tl("select", { entity: tfl("location") });
+  const label =
+    defaultLabel ?? placeholder ?? tl("select", { entity: tfl("location") });
 
   return (
     <Button
@@ -99,6 +101,7 @@ function LookupUserLocationInner({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   popoverWidth = DEFAULT_POPOVER_WIDTH,
   defaultLabel,
@@ -132,6 +135,7 @@ function LookupUserLocationInner({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);

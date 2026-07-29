@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import {
   useThaiSubDistricts,
@@ -12,6 +11,8 @@ interface LookupThaiSubDistrictProps {
   readonly onValueChange: (subdistrictCode: number) => void;
   readonly disabled?: boolean;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly onItemChange?: (subdistrict: ThaiSubDistrict) => void;
   readonly error?: string;
 }
@@ -42,6 +43,7 @@ export function LookupThaiSubDistrict({
   onValueChange,
   disabled,
   className,
+  size,
   onItemChange,
   error,
 }: LookupThaiSubDistrictProps) {
@@ -62,6 +64,7 @@ export function LookupThaiSubDistrict({
 
   return (
     <LookupCombobox<ThaiSubDistrict>
+      size={size}
       value={value.toString()}
       onValueChange={handleChange}
       items={data ?? []}

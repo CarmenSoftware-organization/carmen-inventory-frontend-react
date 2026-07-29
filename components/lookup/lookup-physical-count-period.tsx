@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { usePhysicalCountPeriod } from "@/hooks/use-physical-count-period";
@@ -13,6 +12,8 @@ interface LookupPhysicalCountPeriodProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly error?: string;
 }
 
@@ -51,6 +52,7 @@ export function LookupPhysicalCountPeriod({
   disabled,
   placeholder,
   className,
+  size,
   error,
 }: LookupPhysicalCountPeriodProps) {
   const tl = useTranslations("lookup");
@@ -73,6 +75,7 @@ export function LookupPhysicalCountPeriod({
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={(id, item) => {
         onValueChange(id);
@@ -85,7 +88,9 @@ export function LookupPhysicalCountPeriod({
       getId={(p) => p.id}
       getLabel={formatPeriodLabel}
       getSearchValue={(p) => formatPeriodLabel(p)}
-      placeholder={placeholder ?? tl("select", { entity: tfl("physicalCountPeriod") })}
+      placeholder={
+        placeholder ?? tl("select", { entity: tfl("physicalCountPeriod") })
+      }
       searchPlaceholder={tl("search", { entity: tfl("physicalCountPeriod") })}
       disabled={disabled}
       className={className}

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
@@ -15,6 +14,8 @@ interface LookupProductInLocationProps {
   readonly disabled?: boolean;
   readonly placeholder?: string;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
   readonly modal?: boolean;
   readonly defaultLabel?: string;
@@ -48,6 +49,7 @@ export function LookupProductInLocation({
   disabled,
   placeholder,
   className,
+  size,
   excludeIds,
   modal,
   defaultLabel,
@@ -61,22 +63,31 @@ export function LookupProductInLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const useListHook = (params: { search?: string; perpage: number; page?: number }) =>
-    useProductsByLocation(locationId || undefined, params);
+  const useListHook = (params: {
+    search?: string;
+    perpage: number;
+    page?: number;
+  }) => useProductsByLocation(locationId || undefined, params);
 
-  const { items: products, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Product>({
-      useListHook,
-      search,
-      perpage: 30,
-      filter: (p: Product) => {
-        if (excludedSet && excludedSet.has(p.id)) return false;
-        return true;
-      },
-    });
+  const {
+    items: products,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<Product>({
+    useListHook,
+    search,
+    perpage: 30,
+    filter: (p: Product) => {
+      if (excludedSet && excludedSet.has(p.id)) return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox
+      size={size}
       value={value}
       onValueChange={onValueChange}
       items={products}
@@ -92,7 +103,7 @@ export function LookupProductInLocation({
           <Badge size="xs" variant="secondary" className="shrink-0">
             {p.code}
           </Badge>
-          <span className="flex-1 text-left truncate">{p.name}</span>
+          <span className="flex-1 truncate text-left">{p.name}</span>
         </>
       )}
       placeholder={placeholder ?? tl("select", { entity: tfl("product") })}

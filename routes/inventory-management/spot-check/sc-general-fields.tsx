@@ -1,4 +1,3 @@
-
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -7,11 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import { cn } from "@/lib/utils";
 import { getSpotCheckMethodLabel } from "@/constant/spot-check-method";
-import {
-  CardLabel,
-  GlassCard,
-  PlainText,
-} from "@/components/share/glass-card";
+import { CardLabel, GlassCard, PlainText } from "@/components/share/glass-card";
 import type { SpotCheckFormValues } from "./sc-form-schema";
 import { ScMethodPicker } from "./sc-method-picker";
 
@@ -94,7 +89,7 @@ export function ScGeneralFields({
                     value={field.value}
                     onValueChange={field.onChange}
                     disabled={disabled}
-                    className="h-8 w-full text-xs"
+                    className="w-full text-xs"
                   />
                 )}
               />
@@ -180,4 +175,3 @@ export function ScGeneralFields({
     </GlassCard>
   );
 }
-

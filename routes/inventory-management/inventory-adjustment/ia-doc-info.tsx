@@ -110,7 +110,8 @@ export function DocumentInfo({
                     onValueChange={field.onChange}
                     disabled={isDisabled}
                     placeholder={tfl("selectAdjustmentType")}
-                    className="h-9 text-xs"
+                    size="default"
+                    className="text-xs"
                     error={form.formState.errors.adjustment_type_id?.message}
                   >
                     <SelectContent>
@@ -146,7 +147,7 @@ export function DocumentInfo({
                     value={field.value}
                     onValueChange={field.onChange}
                     disabled={isDisabled}
-                    className="h-9 text-xs"
+                    className="text-xs"
                     locationTypes={[
                       INVENTORY_TYPE.INVENTORY,
                       INVENTORY_TYPE.CONSIGNMENT,

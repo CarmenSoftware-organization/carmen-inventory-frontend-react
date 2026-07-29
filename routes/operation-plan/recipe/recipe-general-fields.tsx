@@ -1,4 +1,3 @@
-
 import {
   Controller,
   type Control,
@@ -45,7 +44,6 @@ export function RecipeGeneralFields({
             <FieldInput
               id="recipe-code"
               placeholder={t("codePlaceholder")}
-              className="h-8"
               disabled={isDisabled}
               maxLength={10}
               error={errors.code?.message}
@@ -64,7 +62,6 @@ export function RecipeGeneralFields({
                   onValueChange={field.onChange}
                   disabled={isDisabled}
                   error={errors.cuisine_id?.message}
-                  className="h-8"
                 />
               )}
             />
@@ -81,7 +78,6 @@ export function RecipeGeneralFields({
                   onValueChange={field.onChange}
                   disabled={isDisabled}
                   error={errors.category_id?.message}
-                  className="h-8"
                 />
               )}
             />
@@ -158,7 +154,6 @@ export function RecipeGeneralFields({
                   disabled={isDisabled}
                   placeholder={t("selectUnit")}
                   error={errors.base_yield_unit?.message}
-                  className="h-8"
                 />
               )}
             />

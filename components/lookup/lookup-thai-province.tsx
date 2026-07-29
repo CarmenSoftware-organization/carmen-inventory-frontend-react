@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { useThaiProvinces, type ThaiProvince } from "@/hooks/use-thai-address";
 import { LookupCombobox } from "./lookup-combobox";
@@ -8,6 +7,8 @@ interface LookupThaiProvinceProps {
   readonly onValueChange: (provinceCode: number) => void;
   readonly disabled?: boolean;
   readonly className?: string;
+  /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
+  readonly size?: "xs" | "sm" | "default";
   readonly onItemChange?: (province: ThaiProvince) => void;
   readonly error?: string;
 }
@@ -31,6 +32,7 @@ export function LookupThaiProvince({
   onValueChange,
   disabled,
   className,
+  size,
   onItemChange,
   error,
 }: LookupThaiProvinceProps) {
@@ -49,6 +51,7 @@ export function LookupThaiProvince({
 
   return (
     <LookupCombobox<ThaiProvince>
+      size={size}
       value={value.toString()}
       onValueChange={handleChange}
       items={data ?? []}
