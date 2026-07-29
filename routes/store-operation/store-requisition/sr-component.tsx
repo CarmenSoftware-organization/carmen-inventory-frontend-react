@@ -337,14 +337,16 @@ export default function StoreRequisitionComponent() {
           />
         </div>
 
-        {/* Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
+        {/* Toolbar — ระยะระหว่างกลุ่ม (ค้นหา/กรอง vs มุมมอง) กว้างกว่าระยะในกลุ่ม
+            ไม่งั้นจอแคบลงมาสองก้อนชนกันที่ 8px แล้วอ่านเป็นแถวเดียวกันหมด */}
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          <div className="flex w-full min-w-0 items-center gap-2">
             <div className="flex-1 sm:flex-initial">
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
+            {/* กรองเยอะจนไม่พอ ให้ตัวกรองขึ้นบรรทัดใหม่กันเอง อย่าไปดัน toggle ตก */}
+            <div className="hidden sm:flex sm:min-w-0 sm:flex-wrap sm:items-center sm:gap-2">
               <Button
                 size="sm"
                 variant={viewMode === "my-pending" ? "default" : "outline"}
@@ -373,22 +375,26 @@ export default function StoreRequisitionComponent() {
               activeCount={lf.activeFilters.length}
             />
           </div>
-          <div className="hidden shrink-0 items-center gap-2 sm:flex">
+          {/* กลุ่มขวา = เครื่องมือมุมมอง อยู่บรรทัดใต้ช่องค้นหา ชิดขวา (ml-auto)
+              ปิดท้ายด้วย toggle list/grid ให้เป็นของขวาสุดเสมอ */}
+          <div className="ml-auto hidden shrink-0 items-center gap-2 sm:flex">
             {displayMode === "list" && (
-              <DataGridColumnVisibility
-                table={table}
-                trigger={
-                  <Button
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={tc("aria.toggleColumns")}
-                  >
-                    <Columns3 className="size-4" />
-                  </Button>
-                }
-              />
+              <div className="hidden sm:block">
+                <DataGridColumnVisibility
+                  table={table}
+                  trigger={
+                    <Button
+                      size="icon-sm"
+                      variant="outline"
+                      aria-label={tc("aria.toggleColumns")}
+                    >
+                      <Columns3 className="size-4" />
+                    </Button>
+                  }
+                />
+              </div>
             )}
-            <div className="flex items-center rounded-md border">
+            <div className="hidden items-center rounded-md border sm:flex">
               <Button
                 size="icon-sm"
                 variant={displayMode === "list" ? "secondary" : "ghost"}
@@ -421,6 +427,10 @@ export default function StoreRequisitionComponent() {
             recordCount={totalRecords}
             isLoading={isLoading}
             tableLayout={{ headerSticky: true }}
+            // 11 คอลัมน์ ยัดให้พอดีจอทำให้ทุกช่องถูกบีบจนอ่านไม่ออก — min-w-max
+            // ให้ตารางกว้างเท่าผลรวม size ของคอลัมน์ที่เปิดอยู่ แล้วเลื่อนแนวนอนเอา
+            // (ผูกกับ column visibility เอง ไม่ต้องฮาร์ดโค้ดตัวเลข)
+            tableClassNames={{ base: "min-w-max" }}
             emptyMessage={<EmptyComponent />}
           >
             <DataGridContainer
@@ -431,7 +441,8 @@ export default function StoreRequisitionComponent() {
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
             >
-              <div className="flex-1 overflow-auto">
+              {/* pb-3 กันแถบเลื่อนทับแถวสุดท้าย + แถบบางจาง ตามที่ PO/PR/GRN ใช้ */}
+              <div className="flex-1 [scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] overflow-auto pb-3">
                 <DataGridTable />
               </div>
               <DataGridPagination />

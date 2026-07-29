@@ -59,7 +59,7 @@ export function useStoreRequisitionTable({
         </CellAction>
       ),
       meta: { headerTitle: tfl("srNo"), skeleton: columnSkeletons.text },
-      size: 200,
+      size: 120,
     },
     {
       accessorKey: "sr_type",
@@ -87,6 +87,7 @@ export function useStoreRequisitionTable({
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.badge,
         cellClassName: "text-center",
+        headerClassName: "text-center"
       },
       size: 100,
     },
@@ -145,6 +146,7 @@ export function useStoreRequisitionTable({
         headerTitle: tfl("status"),
         skeleton: columnSkeletons.badge,
         cellClassName: "text-center",
+        headerClassName: "text-center"
       },
       size: 80,
     },
