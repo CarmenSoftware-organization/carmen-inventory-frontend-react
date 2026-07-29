@@ -20,7 +20,7 @@ interface Props {
 }
 
 /**
- * ไอคอน info ข้าง label U.Price — hover แล้วยิง API last-receiving (per inventory
+ * ไอคอน info ข้าง label ราคาต่อหน่วย — hover แล้วยิง API last-receiving (per inventory
  * unit) แบบ lazy และแสดง tooltip ต้นทุนต่อหน่วยครั้งล่าสุดที่รับเข้า + เอกสารต้นทาง
  */
 export function PrLastReceivingInfo({ control, index, buCode }: Props) {

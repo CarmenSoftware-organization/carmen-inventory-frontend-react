@@ -175,7 +175,7 @@ export function PrItemExpand({
       {/* Vendor · Unit Price · Pricelist · Discount · Tax — แถวเดียว
           Inventory · Summary อยู่แถบล่าง */}
       <div className="space-y-4">
-        <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[5rem_19.5rem_3rem_minmax(4.5rem,1fr)_minmax(4rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
+        <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[5rem_19.5rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
           {/* Pricelist */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
@@ -232,10 +232,12 @@ export function PrItemExpand({
             )}
           </Field>
 
-          {/* Currency — สกุลเงินของรายการ (เริ่ม col 3 = ตรง Req column) */}
+          {/* Currency — สกุลเงินของรายการ (เริ่ม col 3 = ตรงคอลัมน์ Requested)
+              คอลัมน์นี้ 5rem ไม่ใช่ 3rem: ป้ายเต็ม "Currency"/"สกุลเงิน" ไม่พอใน 3rem
+              แล้วหักบรรทัด ทำให้แถวสูงไม่เท่ากันแล้วแต่ใบ */}
           <Field className={`lg:col-start-3 ${isFieldDisabled ? "gap-1" : ""}`}>
             <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
-              Cur.
+              {tfl("currency")}
             </FieldLabel>
             <p
               className={`flex items-center justify-end text-xs font-medium ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}
@@ -250,7 +252,7 @@ export function PrItemExpand({
               htmlFor={`items-${index}-pricelist-price`}
               className="text-muted-foreground flex min-h-6 items-center justify-end gap-1 text-xs tracking-wide"
             >
-              U.Price
+              {tfl("unitPrice")}
               <PrLastReceivingInfo
                 control={form.control}
                 index={index}
@@ -289,7 +291,7 @@ export function PrItemExpand({
               htmlFor={`items-${index}-exchange-rate`}
               className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide"
             >
-              Ex. Rate
+              {tfl("exchangeRate")}
             </FieldLabel>
             {isFieldDisabled ? (
               <p
@@ -318,7 +320,7 @@ export function PrItemExpand({
           {/* Subtotal — plaintext (คำนวณ ไม่แก้ไข) */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel className="text-muted-foreground flex min-h-6 items-center justify-end text-xs tracking-wide">
-              Sub.
+              {tfl("subtotal")}
             </FieldLabel>
             <p
               className={`flex items-center justify-end text-xs font-medium tabular-nums ${isFieldDisabled ? "min-h-6" : "min-h-8"}`}

@@ -554,7 +554,7 @@ export function useCnItemTable({
       },
       {
         id: "quantity",
-        header: tfl("receivedAbbr"),
+        header: tfl("receivedQty"),
         size: 160,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -577,7 +577,7 @@ export function useCnItemTable({
       },
       {
         id: "net_amount",
-        header: isAmountDiscount ? t("cnAmount") : tfl("subtotalAbbr"),
+        header: isAmountDiscount ? t("cnAmount") : tfl("subtotal"),
         size: 130,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -646,7 +646,7 @@ export function useCnItemTable({
       },
       {
         id: "total_amount",
-        header: tfl("amountAbbr"),
+        header: tfl("amount"),
         size: 120,
         meta: rightMeta,
         cell: ({ row }) => (

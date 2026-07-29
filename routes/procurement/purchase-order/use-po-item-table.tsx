@@ -211,7 +211,7 @@ export function usePoItemTable({
       },
       {
         id: "order",
-        header: tfl("orderAbbr"),
+        header: tfl("orderQty"),
         size: PO_COL.order,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -220,7 +220,7 @@ export function usePoItemTable({
       },
       {
         id: "received",
-        header: tfl("receivedAbbr"),
+        header: tfl("receivedQty"),
         size: PO_COL.rec,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -243,7 +243,7 @@ export function usePoItemTable({
       },
       {
         id: "subtotal",
-        header: tfl("subtotalAbbr"),
+        header: tfl("subtotal"),
         size: PO_COL.sub,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -269,7 +269,7 @@ export function usePoItemTable({
       },
       {
         id: "net",
-        header: tfl("netAbbr"),
+        header: tfl("net"),
         size: PO_COL.net,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -295,7 +295,7 @@ export function usePoItemTable({
       },
       {
         id: "amount",
-        header: tfl("amountAbbr"),
+        header: tfl("amount"),
         size: PO_COL.amt,
         meta: {
           headerClassName: "text-right",

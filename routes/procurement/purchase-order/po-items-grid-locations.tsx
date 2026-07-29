@@ -350,14 +350,14 @@ export function LocationsEditor({
         <thead className="text-muted-foreground text-micro font-semibold">
           <tr className="border-border/60 border-b">
             <th className="px-2 py-1 text-left">{tfl("location")}</th>
-            <th className="px-1 py-1 text-right">{tfl("orderAbbr")}</th>
-            <th className="px-1 py-1 text-right">{tfl("receivedAbbr")}</th>
+            <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>
+            <th className="px-1 py-1 text-right">{tfl("receivedQty")}</th>
             <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
-            <th className="px-2 py-1 text-right">{tfl("subtotalAbbr")}</th>
+            <th className="px-2 py-1 text-right">{tfl("subtotal")}</th>
             <th className="px-2 py-1 text-right">{tfl("discount")}</th>
-            <th className="px-2 py-1 text-right">{tfl("netAbbr")}</th>
+            <th className="px-2 py-1 text-right">{tfl("net")}</th>
             <th className="px-2 py-1 text-right">{tfl("tax")}</th>
-            <th className="px-2 py-1 text-right">{tfl("amountAbbr")}</th>
+            <th className="px-2 py-1 text-right">{tfl("amount")}</th>
             {showActionCol && <th className="px-1 py-1" />}
           </tr>
         </thead>

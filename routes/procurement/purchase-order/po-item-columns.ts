@@ -9,7 +9,7 @@
 export const PO_COL = {
   product: 200,
   order: 96,
-  rec: 80,
+  rec: 104, // "Received Qty" เต็มคำ ไม่ใช่ "Rec"
   price: 92,
   sub: 96,
   discount: 176, // combo: [override] rate% | amount

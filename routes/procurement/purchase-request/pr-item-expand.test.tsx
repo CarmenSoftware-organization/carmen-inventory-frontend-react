@@ -21,7 +21,7 @@ type Item = PrFormValues["items"][number];
 
 const money = (n: number) => formatCurrency(n);
 
-/** ค่าใน Field ที่เป็น plain <p> (Sub. / Net / Total) — ค้นจาก label แล้วอ่าน <p> */
+/** ค่าใน Field ที่เป็น plain <p> (Subtotal / Net / Total) — ค้นจาก label แล้วอ่าน <p> */
 function fieldValue(labelText: string): string {
   const label = screen
     .getAllByText(labelText)
@@ -93,7 +93,7 @@ describe("PrItemExpand — numeric correctness on events", () => {
     renderExpand({ requested_qty: 3 });
     setNum(priceInput(), "10");
     // sub 30, net 30, total 30
-    expect(fieldValue("Sub.")).toBe(money(30));
+    expect(fieldValue("Subtotal")).toBe(money(30));
     expect(fieldValue("Net")).toBe(money(30));
     expect(fieldValue("Total")).toBe(money(30));
   });
@@ -103,7 +103,7 @@ describe("PrItemExpand — numeric correctness on events", () => {
     renderExpand({ requested_qty: 3, tax_rate: 7 });
     setNum(priceInput(), "10");
     setNum(discRateInput(), "10");
-    expect(fieldValue("Sub.")).toBe(money(30));
+    expect(fieldValue("Subtotal")).toBe(money(30));
     expect(fieldValue("Net")).toBe(money(27));
     expect(fieldValue("Total")).toBe(money(28.89));
   });
@@ -114,7 +114,7 @@ describe("PrItemExpand — numeric correctness on events", () => {
     renderExpand({ requested_qty: 3, tax_rate: 7 });
     setNum(priceInput(), "3.33");
     setNum(discRateInput(), "10");
-    expect(fieldValue("Sub.")).toBe(money(9.99));
+    expect(fieldValue("Subtotal")).toBe(money(9.99));
     expect(fieldValue("Net")).toBe(money(8.99));
     expect(fieldValue("Total")).toBe(money(9.62));
   });
@@ -151,13 +151,13 @@ describe("PrItemExpand — numeric correctness on events", () => {
     // approved 5 > 0 → calcQty 5; price 10 → sub 50
     renderExpand({ requested_qty: 3, approved_qty: 5 });
     setNum(priceInput(), "10");
-    expect(fieldValue("Sub.")).toBe(money(50));
+    expect(fieldValue("Subtotal")).toBe(money(50));
     expect(fieldValue("Total")).toBe(money(50));
   });
 
   it("amount fields show fixed decimals when not focused (10 → 10.00)", () => {
     renderExpand({ requested_qty: 1, currency_decimal_places: 2 });
-    // U.Price: type 10, blur → displays 10.00
+    // Unit Price: type 10, blur → displays 10.00
     fireEvent.change(priceInput(), { target: { value: "10" } });
     fireEvent.blur(priceInput());
     expect(priceInput().value).toBe("10.00");
@@ -197,7 +197,7 @@ describe("PrItemExpand — numeric correctness on events", () => {
     // tax 5% → round2(0.90)=0.90; total 18.90
     setNum(exRateInput(), "35");
     // item-currency amounts
-    expect(fieldValue("Sub.")).toBe(money(20));
+    expect(fieldValue("Subtotal")).toBe(money(20));
     expect(fieldValue("Net")).toBe(money(18));
     expect(fieldValue("Total")).toBe(money(18.9));
     // base-currency row (unrounded × rate, formatted): 700 / 70 / 630 / 31.50 / 661.50

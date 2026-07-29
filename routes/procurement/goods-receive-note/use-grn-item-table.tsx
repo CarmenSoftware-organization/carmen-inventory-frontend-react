@@ -259,19 +259,19 @@ function GrnGroupLocations({
         <tr className="border-border/60 border-b">
           <th className="px-2 py-1 text-left">{tfl("location")}</th>
           {isPo && (
-            <th className="px-1 py-1 text-right">{tfl("orderAbbr")}</th>
+            <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>
           )}
           <th className="px-1 py-1 text-right">
-            {tfl("receivedAbbr")}
+            {tfl("receivedQty")}
             <span className="text-destructive"> *</span>
           </th>
           <th className="px-1 py-1 text-right">{tfl("foc")}</th>
           <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
-          <th className="px-2 py-1 text-right">{tfl("subtotalAbbr")}</th>
+          <th className="px-2 py-1 text-right">{tfl("subtotal")}</th>
           <th className="px-2 py-1 text-right">{tfl("discount")}</th>
-          <th className="px-2 py-1 text-right">{tfl("netAbbr")}</th>
+          <th className="px-2 py-1 text-right">{tfl("net")}</th>
           <th className="px-2 py-1 text-right">{tfl("tax")}</th>
-          <th className="px-2 py-1 text-right">{tfl("amountAbbr")}</th>
+          <th className="px-2 py-1 text-right">{tfl("amount")}</th>
           {showActionCol && <th className="px-1 py-1" />}
         </tr>
       </thead>
@@ -414,7 +414,7 @@ export function useGrnItemTable({
         ? [
             {
               id: "order",
-              header: tfl("orderAbbr"),
+              header: tfl("orderQty"),
               size: GRN_COL.order,
               meta: rightMeta,
               cell: ({ row }) => (
@@ -430,7 +430,7 @@ export function useGrnItemTable({
         : []),
       {
         id: "received",
-        header: tfl("receivedAbbr"),
+        header: tfl("receivedQty"),
         size: GRN_COL.received,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -466,7 +466,7 @@ export function useGrnItemTable({
       },
       {
         id: "subtotal",
-        header: tfl("subtotalAbbr"),
+        header: tfl("subtotal"),
         size: GRN_COL.sub,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -492,7 +492,7 @@ export function useGrnItemTable({
       },
       {
         id: "net",
-        header: tfl("netAbbr"),
+        header: tfl("net"),
         size: GRN_COL.net,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -518,7 +518,7 @@ export function useGrnItemTable({
       },
       {
         id: "amount",
-        header: tfl("amountAbbr"),
+        header: tfl("amount"),
         size: GRN_COL.amt,
         meta: rightMeta,
         cell: ({ row }) => (

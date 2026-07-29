@@ -247,7 +247,7 @@ export function usePrItemTable({
       },
       {
         id: "requested",
-        header: tfl("requestedShort"),
+        header: tfl("requested"),
         cell: ({ row }) => (
           <RequestedCell
             control={form.control}
@@ -264,7 +264,7 @@ export function usePrItemTable({
       },
       {
         id: "approved",
-        header: tfl("approvedShort"),
+        header: tfl("approved"),
         cell: ({ row }) => (
           <ApprovedCell
             control={form.control}
@@ -300,7 +300,7 @@ export function usePrItemTable({
       },
       {
         id: "amount",
-        header: tfl("amountCurShort"),
+        header: tfl("amountCur"),
         cell: ({ row }) => (
           <AmountCell
             control={form.control}
