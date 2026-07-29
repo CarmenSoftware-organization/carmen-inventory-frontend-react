@@ -83,16 +83,29 @@ export function ListFilterSheet({
           <SheetTitle>{tc("filter")}</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 px-4 pb-4">
-          {fields.map((f) => (
-            <div key={f.key} className="space-y-1.5">
-              <FieldLabel className="text-xs">{t(f.labelKey)}</FieldLabel>
+          {fields.map((f) =>
+            /* labelKey ว่าง = field ไม่มี label ของตัวเอง (เช่น custom control ที่
+               จัดการ label ภายในตัวเองอยู่แล้ว หรือซ่อนทั้ง field ด้วย breakpoint
+               class) — render control เปล่า ๆ ไม่ห่อ wrapper `space-y-1.5` เพื่อไม่ให้
+               เหลือช่องว่างลอย ๆ เมื่อ control ข้างในถูกซ่อนไปด้วย */
+            f.labelKey ? (
+              <div key={f.key} className="space-y-1.5">
+                <FieldLabel className="text-xs">{t(f.labelKey)}</FieldLabel>
+                <FilterFieldControl
+                  field={f}
+                  value={values[f.key] ?? ""}
+                  onChange={(v) => setValue(f.key, v)}
+                />
+              </div>
+            ) : (
               <FilterFieldControl
+                key={f.key}
                 field={f}
                 value={values[f.key] ?? ""}
                 onChange={(v) => setValue(f.key, v)}
               />
-            </div>
-          ))}
+            ),
+          )}
           <div className="flex flex-col gap-2 pt-2">
             <Button variant="outline" onClick={onClearAll}>
               {tc("clearAll")}

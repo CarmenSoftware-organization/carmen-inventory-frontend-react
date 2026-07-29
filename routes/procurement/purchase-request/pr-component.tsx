@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
@@ -43,6 +43,7 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { PrStatusSelectDialog } from "./pr-select-dialog";
 import { PrActionDialog } from "./workflow/pr-action-dialog";
 import { ErrorState } from "@/components/ui/error-state";
+import { FieldLabel } from "@/components/ui/field";
 import { usePurchaseRequestTable } from "./pr-table";
 import PrCardList from "./pr-card-list";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
@@ -107,6 +108,10 @@ export default function PurchaseRequestComponent() {
     defaultValue: "my-pending",
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
+  // setViewMode (จาก useURL) ได้ reference ใหม่ทุก render — เก็บไว้ใน ref กัน
+  // ไม่ให้หลุดเข้า useMemo deps ของ prFilterFields ข้างล่าง (ไม่งั้น memo ไม่เคย hit)
+  const setViewModeRef = useRef(setViewMode);
+  setViewModeRef.current = setViewMode;
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
@@ -132,23 +137,29 @@ export default function PurchaseRequestComponent() {
       {
         key: "view_mode_toggle",
         control: "custom",
-        labelKey: "common.view",
+        // labelKey ว่างเจตนา — ListFilterSheet จะไม่ render <FieldLabel> ลอย ๆ ให้
+        // (control นี้ sm:hidden อยู่แล้ว มี label "View" ของตัวเองอยู่ข้างในสำหรับ
+        // มือถือเท่านั้น ไม่งั้น desktop จะเห็น label ค้างแต่ไม่มี control ข้างใต้)
+        labelKey: "",
         render: () => (
-          <div className="grid grid-cols-2 gap-2 sm:hidden">
-            <Button
-              size="sm"
-              variant={viewMode === "my-pending" ? "default" : "outline"}
-              onClick={() => setViewMode("my-pending")}
-            >
-              {t("myPending")}
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === "all-document" ? "default" : "outline"}
-              onClick={() => setViewMode("all-document")}
-            >
-              {t("allDocuments")}
-            </Button>
+          <div className="space-y-1.5 sm:hidden">
+            <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                size="sm"
+                variant={viewMode === "my-pending" ? "default" : "outline"}
+                onClick={() => setViewModeRef.current("my-pending")}
+              >
+                {t("myPending")}
+              </Button>
+              <Button
+                size="sm"
+                variant={viewMode === "all-document" ? "default" : "outline"}
+                onClick={() => setViewModeRef.current("all-document")}
+              >
+                {t("allDocuments")}
+              </Button>
+            </div>
           </div>
         ),
       },
@@ -181,7 +192,7 @@ export default function PurchaseRequestComponent() {
         fieldKey: "pr_date",
       },
     ],
-    [stages, viewMode, t, setViewMode],
+    [stages, viewMode, t, tc],
   );
 
   const lf = useListFilters({
