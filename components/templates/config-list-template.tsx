@@ -30,6 +30,7 @@ import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
+import { useListFilters } from "@/hooks/use-list-filters";
 import SearchInput from "@/components/search-input";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
@@ -41,6 +42,9 @@ import {
   ActiveFilterBar,
   type ActiveFilter,
 } from "@/components/ui/active-filter-bar";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { cn } from "@/lib/utils";
 import { downloadXlsx, buildXlsxFileName } from "@/lib/xlsx-utils";
@@ -49,6 +53,9 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { buildPermissionKey } from "@/constant/permissions";
 import type { CardRenderProps, ConfigListTemplateProps } from "./types";
+import type { ListPageKey } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 interface GridContentArgs<TEntity extends { id: string }> {
   readonly isLoading: boolean;
@@ -105,7 +112,91 @@ function renderGridContent<TEntity extends { id: string }>({
   );
 }
 
-export function ConfigListTemplate<TEntity extends { id: string }>({
+interface DeleteFlowArgs<TEntity extends { id: string }> {
+  readonly deleteTarget: TEntity | null;
+  readonly setDeleteTarget: (entity: TEntity | null) => void;
+  readonly deleteMutation: ReturnType<ConfigListTemplateProps<TEntity>["useDelete"]>;
+  readonly renderDeleteDialog?: ConfigListTemplateProps<TEntity>["renderDeleteDialog"];
+  readonly entityNameField: keyof TEntity & string;
+  readonly t: ReturnType<typeof useTranslations>;
+  readonly tt: ReturnType<typeof useTranslations>;
+}
+
+/**
+ * Render delete confirmation flow (custom `renderDeleteDialog` หรือ `DeleteDialog` กลาง)
+ *
+ * แชร์ระหว่าง `ConfigListLegacy` และ `ConfigListWithRegistry` — โลจิกเหมือนกันทุกประการ
+ * (t/tt namespace ผูกกับ translationNamespace/"toast" ของแต่ละ variant เอง)
+ */
+function renderDeleteFlow<TEntity extends { id: string }>({
+  deleteTarget,
+  setDeleteTarget,
+  deleteMutation,
+  renderDeleteDialog,
+  entityNameField,
+  t,
+  tt,
+}: DeleteFlowArgs<TEntity>) {
+  const onOpenChange = (open: boolean) => {
+    if (!open && !deleteMutation.isPending) setDeleteTarget(null);
+  };
+  const onConfirm = () => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        toast.success(tt("deleteSuccess", { entity: t("entity") }));
+        setDeleteTarget(null);
+      },
+    });
+  };
+
+  if (renderDeleteDialog) {
+    return renderDeleteDialog({
+      target: deleteTarget,
+      open: !!deleteTarget,
+      onOpenChange,
+      isPending: deleteMutation.isPending,
+      onConfirm,
+    });
+  }
+
+  return (
+    <DeleteDialog
+      open={!!deleteTarget}
+      onOpenChange={onOpenChange}
+      title={t("deleteTitle")}
+      description={t("deleteConfirm", {
+        name: deleteTarget ? String(deleteTarget[entityNameField] ?? "") : "",
+      })}
+      isPending={deleteMutation.isPending}
+      onConfirm={onConfirm}
+    />
+  );
+}
+
+/**
+ * ConfigListTemplate — thin wrapper ที่เลือกระหว่างสอง variant
+ *
+ * `pageKey` + `filterFields` ทั้งคู่ → `ConfigListWithRegistry` (saved views + filter
+ * sheet แบบ registry) ไม่งั้น → `ConfigListLegacy` (StatusFilter + extraToolbar เดิม
+ * ทำงานเหมือนเดิมทุกอย่าง ไม่มีการเปลี่ยนพฤติกรรม)
+ */
+export function ConfigListTemplate<TEntity extends { id: string }>(
+  props: Readonly<ConfigListTemplateProps<TEntity>>,
+) {
+  if (props.pageKey && props.filterFields) {
+    return (
+      <ConfigListWithRegistry
+        {...props}
+        pageKey={props.pageKey}
+        filterFields={props.filterFields}
+      />
+    );
+  }
+  return <ConfigListLegacy {...props} />;
+}
+
+function ConfigListLegacy<TEntity extends { id: string }>({
   translationNamespace,
   entityNameField,
   useList,
@@ -477,45 +568,363 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
         readOnly: !!editEntity && updateDenied,
       })}
 
-      {(() => {
-        const onOpenChange = (open: boolean) => {
-          if (!open && !deleteMutation.isPending) setDeleteTarget(null);
-        };
-        const onConfirm = () => {
-          if (!deleteTarget) return;
-          deleteMutation.mutate(deleteTarget.id, {
-            onSuccess: () => {
-              toast.success(tt("deleteSuccess", { entity: t("entity") }));
-              setDeleteTarget(null);
-            },
-          });
-        };
+      {renderDeleteFlow({
+        deleteTarget,
+        setDeleteTarget,
+        deleteMutation,
+        renderDeleteDialog,
+        entityNameField,
+        t,
+        tt,
+      })}
+    </div>
+  );
+}
 
-        if (renderDeleteDialog) {
-          return renderDeleteDialog({
-            target: deleteTarget,
-            open: !!deleteTarget,
-            onOpenChange,
-            isPending: deleteMutation.isPending,
-            onConfirm,
-          });
-        }
+type RegistryProps<TEntity extends { id: string }> =
+  ConfigListTemplateProps<TEntity> & {
+    pageKey: ListPageKey;
+    filterFields: FilterFieldDef[];
+  };
 
-        return (
-          <DeleteDialog
-            open={!!deleteTarget}
-            onOpenChange={onOpenChange}
-            title={t("deleteTitle")}
-            description={t("deleteConfirm", {
-              name: deleteTarget
-                ? String(deleteTarget[entityNameField] ?? "")
-                : "",
-            })}
-            isPending={deleteMutation.isPending}
-            onConfirm={onConfirm}
+function ConfigListWithRegistry<TEntity extends { id: string }>({
+  translationNamespace,
+  entityNameField,
+  useList,
+  useDelete,
+  useTable,
+  renderDialog,
+  renderDeleteDialog,
+  renderCard,
+  extraActions,
+  hideExportPrint,
+  exportColumns,
+  exportFileNamePrefix,
+  exportSheetName,
+  defaultSort,
+  addPath,
+  getEditPath,
+  permissionPrefix,
+  pageKey,
+  filterFields,
+}: Readonly<RegistryProps<TEntity>>) {
+  const navigate = useNavigate();
+  const [deleteTarget, setDeleteTarget] = useState<TEntity | null>(null);
+  const deleteMutation = useDelete();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editEntity, setEditEntity] = useState<TEntity | null>(null);
+  const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const isMobile = useIsMobile();
+  const { params, search, setSearch, tableConfig } = useDataGridState({
+    defaultSort,
+  });
+
+  const lf = useListFilters({ pageKey, fields: filterFields, defaultSort });
+
+  // useDataGridState ยังให้ pagination/sort/search params อยู่ แต่ filter ต้อง
+  // ใช้ค่าที่ encode จาก registry (lf.filterParam) แทน — ไม่ merge กับ extraFilter เดิม
+  const mergedParams = { ...params, filter: lf.filterParam };
+
+  // grid/card view (mobile หรือ desktop grid mode) → infinite scroll
+  // (โหลดเพิ่มเมื่อ scroll ถึง sentinel ล่างสุด แทน pagination ของ table)
+  const isGridMode = !!renderCard && (!!isMobile || displayMode === "grid");
+  const useInfiniteScroll = isGridMode;
+
+  const directQuery = useList(mergedParams, { enabled: !useInfiniteScroll });
+  const grid = useGridPagination<TEntity>({
+    useListHook: useList as Parameters<
+      typeof useGridPagination<TEntity>
+    >[0]["useListHook"],
+    params: mergedParams,
+    enabled: !!useInfiniteScroll,
+  });
+
+  const t = useTranslations(translationNamespace);
+  const tc = useTranslations("common");
+  const tt = useTranslations("toast");
+
+  const entities = useInfiniteScroll
+    ? grid.items
+    : (directQuery.data?.data ?? []);
+
+  const totalRecords = useInfiniteScroll
+    ? grid.totalRecords
+    : (directQuery.data?.paginate?.total ?? 0);
+
+  const isLoading = useInfiniteScroll ? grid.isLoading : directQuery.isLoading;
+  const error = directQuery.error;
+  const refetch = directQuery.refetch;
+
+  const handleEdit = (entity: TEntity) => {
+    if (getEditPath) {
+      navigate(getEditPath(entity));
+      return;
+    }
+    setEditEntity(entity);
+    setDialogOpen(true);
+  };
+
+  const handleAdd = () => {
+    if (addPath) {
+      navigate(addPath);
+      return;
+    }
+    setEditEntity(null);
+    setDialogOpen(true);
+  };
+
+  const handleExport = () => {
+    if (!exportColumns) return;
+    if (entities.length === 0) {
+      toast.warning(tc("exportNoData"));
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const prefix =
+        exportFileNamePrefix ??
+        translationNamespace.split(".").pop() ??
+        "export";
+      downloadXlsx({
+        rows: entities,
+        columns: exportColumns,
+        sheetName: exportSheetName ?? t("title"),
+        fileName: buildXlsxFileName(prefix),
+      });
+      toast.success(tc("exportSuccess", { count: entities.length }));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : tc("exportFailed"));
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const { can, isAdmin } = useCan();
+  const autoPrefix = usePermissionPrefix();
+  const prefix = permissionPrefix ?? autoPrefix;
+  const createPermission = prefix
+    ? buildPermissionKey(prefix, "create")
+    : undefined;
+  const createDenied = !!createPermission && !isAdmin && !can(createPermission);
+  const updatePermission = prefix
+    ? buildPermissionKey(prefix, "update")
+    : undefined;
+  const updateDenied = !!updatePermission && !isAdmin && !can(updatePermission);
+
+  const table = useTable({
+    data: entities,
+    totalRecords,
+    params,
+    tableConfig,
+    onEdit: handleEdit,
+    onDelete: setDeleteTarget,
+    permissionPrefix: prefix,
+  });
+
+  const pullRefresh = usePullToRefresh({
+    onRefresh: refetch,
+    disabled: !isMobile,
+  });
+
+  if (error)
+    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ ViewSelector's handleSaveViewDialogSave — instance นี้แยกต่างหาก
+   *  เพราะ ListFilterSheet's "save current view" ต้องเปิด dialog ของตัวเอง ไม่ใช่
+   *  ตัวที่ ViewSelector ถือ local state ไว้ภายในของมันเอง) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      // อัปเดต view อื่นที่ไม่ใช่ view ปัจจุบัน — ต้อง apply ต่อให้ URL ชี้ตาม
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
+
+  return (
+    <div
+      ref={pullRefresh.containerRef}
+      className="pb-[max(1rem,env(safe-area-inset-bottom))]"
+    >
+      {isMobile && (pullRefresh.distance > 0 || pullRefresh.isRefreshing) && (
+        <div
+          className="text-muted-foreground flex items-center justify-center overflow-hidden transition-all"
+          style={{
+            height: pullRefresh.isRefreshing ? 48 : pullRefresh.distance,
+          }}
+          aria-hidden={!pullRefresh.isRefreshing}
+        >
+          <RefreshCw
+            className={cn("size-4", pullRefresh.isRefreshing && "animate-spin")}
+            style={{
+              transform: pullRefresh.isRefreshing
+                ? undefined
+                : `rotate(${pullRefresh.progress * 360}deg)`,
+            }}
           />
-        );
-      })()}
+        </div>
+      )}
+      {/* Sticky top section on mobile */}
+      <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
+        {/* Header */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <DocumentListHeader title={t("title")} description={t("desc")} />
+          <DocumentListActions
+            onAdd={
+              createDenied
+                ? () => dispatchPermissionDenied(createPermission)
+                : handleAdd
+            }
+            addDisabled={createDenied}
+            addLabel={t("add")}
+            onExport={handleExport}
+            isExporting={isExporting}
+            showExport={!!exportColumns}
+            hideExportPrint={hideExportPrint}
+            extraActions={extraActions}
+          />
+        </div>
+
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
+            <div className="flex-1 sm:flex-initial">
+              <SearchInput defaultValue={search} onSearch={setSearch} />
+            </div>
+            <span className="bg-border hidden h-4 w-px sm:block" />
+            {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
+                (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={filterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
+          </div>
+          <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            {!isGridMode && (
+              <DataGridColumnVisibility
+                table={table}
+                trigger={
+                  <Button
+                    size="icon-sm"
+                    variant="outline"
+                    aria-label={tc("aria.toggleColumns")}
+                  >
+                    <Columns3 className="size-4" />
+                  </Button>
+                }
+              />
+            )}
+            {renderCard && (
+              <div className="flex items-center rounded-md border">
+                <Button
+                  size="icon-sm"
+                  variant={displayMode === "list" ? "secondary" : "ghost"}
+                  onClick={() => setDisplayMode("list")}
+                  aria-label={tc("aria.listView")}
+                >
+                  <LayoutList className="size-4" />
+                </Button>
+                <Button
+                  size="icon-sm"
+                  variant={displayMode === "grid" ? "secondary" : "ghost"}
+                  onClick={() => setDisplayMode("grid")}
+                  aria-label={tc("aria.gridView")}
+                >
+                  <LayoutGrid className="size-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Active filter badges — driven by registry field values, not statusOptions */}
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+      </div>
+
+      {/* Content */}
+      <div className="mt-3 space-y-3">
+        {isGridMode ? (
+          renderGridContent({
+            isLoading,
+            entities,
+            renderCard,
+            handleEdit,
+            handleDelete: setDeleteTarget,
+            useInfiniteScroll,
+            grid,
+          })
+        ) : (
+          <DataGrid
+            table={table}
+            recordCount={totalRecords}
+            isLoading={isLoading}
+            tableLayout={{ headerSticky: true }}
+          >
+            <DataGridContainer
+              className={cn(
+                "flex flex-col",
+                lf.activeFilters.length > 0
+                  ? "max-h-[calc(100vh-13rem-3rem)]"
+                  : "max-h-[calc(100vh-10rem-3rem)]",
+              )}
+            >
+              <div className="flex-1 overflow-auto">
+                <DataGridTable />
+              </div>
+              <DataGridPagination />
+            </DataGridContainer>
+          </DataGrid>
+        )}
+      </div>
+
+      {renderDialog?.({
+        open: dialogOpen,
+        onOpenChange: setDialogOpen,
+        entity: editEntity,
+        readOnly: !!editEntity && updateDenied,
+      })}
+
+      {renderDeleteFlow({
+        deleteTarget,
+        setDeleteTarget,
+        deleteMutation,
+        renderDeleteDialog,
+        entityNameField,
+        t,
+        tt,
+      })}
+
+      <SaveViewDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
+      />
     </div>
   );
 }

@@ -4,6 +4,8 @@ import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import type { ActiveFilter } from "@/components/ui/active-filter-bar";
 import type { XlsxColumn } from "@/lib/xlsx-utils";
+import type { ListPageKey } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
 
 export interface StatusOption {
   label: string;
@@ -131,4 +133,9 @@ export interface ConfigListTemplateProps<TEntity extends { id: string }> {
    * ไม่ระบุ = ไม่ guard (ใช้ตอน BE ยังไม่บังคับ perm)
    */
   permissionPrefix?: string;
+
+  /** pageKey ของ saved views — ต้องส่งคู่กับ filterFields จึงเปิดโหมดใหม่ */
+  pageKey?: ListPageKey;
+  /** เปิด filter sheet + saved views แบบ registry (แทน statusOptions/extraToolbar เดิม) */
+  filterFields?: FilterFieldDef[];
 }
