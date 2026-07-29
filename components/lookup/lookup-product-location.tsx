@@ -23,6 +23,11 @@ interface LookupProductLocationProps {
   readonly readOnly?: boolean;
   /** เปิด popover อัตโนมัติตอน mount (เช่น auto-focus หลังเพิ่ม location ใหม่) */
   readonly defaultOpen?: boolean;
+  /** คุมเปิด/ปิดจากข้างนอก — สั่งเปิดหลัง mount ได้ (ต้องคุมปิดเองด้วย) */
+  readonly open?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
+  /** ปิดแล้วโฟกัสไปช่องถัดไปแทนการเด้งกลับปุ่มเดิม */
+  readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
 /**
@@ -57,6 +62,9 @@ export function LookupProductLocation({
   error,
   readOnly,
   defaultOpen,
+  open,
+  onOpenChange,
+  nextFocusRef,
 }: LookupProductLocationProps) {
   const tl = useTranslations("lookup");
   const tfl = useTranslations("field");
@@ -129,6 +137,9 @@ export function LookupProductLocation({
       error={error}
       readOnly={readOnly}
       defaultOpen={defaultOpen}
+      open={open}
+      onOpenChange={onOpenChange}
+      nextFocusRef={nextFocusRef}
     />
   );
 }

@@ -38,11 +38,13 @@ const ManualProductCell = memo(function ManualProductCell({
   indices,
   disabled,
   defaultOpen,
+  onPicked,
 }: {
   form: UseFormReturn<GrnFormValues>;
   indices: number[];
   disabled: boolean;
   defaultOpen?: boolean;
+  onPicked?: () => void;
 }) {
   "use no memo";
   const primaryIndex = indices[0];
@@ -76,6 +78,7 @@ const ManualProductCell = memo(function ManualProductCell({
                 });
               }
             }
+            if (value) onPicked?.();
           }}
           disabled={disabled}
           defaultOpen={defaultOpen}
@@ -93,11 +96,13 @@ function ProductGroupCell({
   group,
   disabled,
   autoOpen,
+  onPicked,
 }: {
   form: UseFormReturn<GrnFormValues>;
   group: GrnGroup;
   disabled: boolean;
   autoOpen: boolean;
+  onPicked: () => void;
 }) {
   "use no memo";
   const primaryIdx = group.indices[0];
@@ -120,6 +125,7 @@ function ProductGroupCell({
         indices={group.indices}
         disabled={disabled}
         defaultOpen={autoOpen}
+        onPicked={onPicked}
       />
     );
   }
@@ -219,6 +225,8 @@ function GrnGroupLocations({
   plainText,
   isPo,
   autoOpenLocationKey,
+  openLocationKey,
+  onLocationOpenChange,
   onDeleteItem,
 }: {
   group: GrnGroup;
@@ -228,6 +236,8 @@ function GrnGroupLocations({
   plainText: boolean;
   isPo: boolean;
   autoOpenLocationKey: string | null;
+  openLocationKey: string | null;
+  onLocationOpenChange: (groupKey: string, open: boolean) => void;
   onDeleteItem: (index: number) => void;
 }) {
   "use no memo";
@@ -237,8 +247,7 @@ function GrnGroupLocations({
   // คอลัมน์ align กับ group row — % ของ (data + action ถ้ามี); order นับเฉพาะ isPo
   const denom = grnColDataTotal(isPo) + (showActionCol ? GRN_COL.action : 0);
   const pct = (px: number) => `${(px / denom) * 100}%`;
-  const colCount =
-    9 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
+  const colCount = 9 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
 
   return (
     <table className="w-full table-fixed text-xs">
@@ -258,9 +267,7 @@ function GrnGroupLocations({
       <thead className="text-muted-foreground text-micro font-semibold">
         <tr className="border-border/60 border-b">
           <th className="px-2 py-1 text-left">{tfl("location")}</th>
-          {isPo && (
-            <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>
-          )}
+          {isPo && <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>}
           <th className="px-1 py-1 text-right">
             {tfl("receivedQty")}
             <span className="text-destructive"> *</span>
@@ -299,6 +306,15 @@ function GrnGroupLocations({
             groupIndices={group.indices}
             plainText={plainText}
             autoOpenLocation={group.key === autoOpenLocationKey}
+            locationOpen={
+              // เปิดเฉพาะแถวแรกของกลุ่ม — เลือกสินค้าครั้งเดียวไม่ควรเปิดทุกคลัง
+              idx === group.indices[0] && group.key === openLocationKey
+                ? true
+                : undefined
+            }
+            onLocationOpenChange={(open) =>
+              onLocationOpenChange(group.key, open)
+            }
           />
         ))}
       </tbody>
@@ -315,6 +331,11 @@ interface UseGrnItemTableOptions {
   isPo: boolean;
   autoOpenProductKey: string | null;
   autoOpenLocationKey: string | null;
+  /** กลุ่มที่ location lookup ต้องเปิดอยู่ (คุมจากข้างนอก) */
+  openLocationKey: string | null;
+  onLocationOpenChange: (groupKey: string, open: boolean) => void;
+  /** เลือกสินค้าของกลุ่มเสร็จแล้ว — ใช้พา focus ไปช่องถัดไป */
+  onProductPicked: (groupKey: string) => void;
   onAddLocation: (group: GrnGroup) => void;
   onDeleteGroup: (group: GrnGroup) => void;
   onDeleteItem: (index: number) => void;
@@ -329,6 +350,9 @@ export function useGrnItemTable({
   isPo,
   autoOpenProductKey,
   autoOpenLocationKey,
+  openLocationKey,
+  onLocationOpenChange,
+  onProductPicked,
   onAddLocation,
   onDeleteGroup,
   onDeleteItem,
@@ -373,6 +397,8 @@ export function useGrnItemTable({
             plainText={plainText}
             isPo={isPo}
             autoOpenLocationKey={autoOpenLocationKey}
+            openLocationKey={openLocationKey}
+            onLocationOpenChange={onLocationOpenChange}
             onDeleteItem={onDeleteItem}
           />
         ),
@@ -407,6 +433,7 @@ export function useGrnItemTable({
             group={row.original}
             disabled={disabled}
             autoOpen={row.original.key === autoOpenProductKey}
+            onPicked={() => onProductPicked(row.original.key)}
           />
         ),
       },

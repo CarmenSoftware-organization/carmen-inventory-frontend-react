@@ -148,6 +148,9 @@ export function GrnItemTable({
   const [autoOpenLocationKey, setAutoOpenLocationKey] = useState<string | null>(
     null,
   );
+  // กลุ่มที่ location lookup ต้องเปิดอยู่ตอนนี้ (คุมจากข้างนอก ไม่ใช่ defaultOpen
+  // เพราะแถวถูก mount ไปแล้วตั้งแต่ตอนกดเพิ่มรายการ)
+  const [openLocationKey, setOpenLocationKey] = useState<string | null>(null);
 
   const {
     fields: itemFields,
@@ -207,6 +210,19 @@ export function GrnItemTable({
     setAutoOpenProductKey(null);
   };
 
+  /**
+   * เลือกสินค้าเสร็จ → พาไปช่องถัดไปที่ต้องกรอกจริง
+   *
+   * Radix คืน focus ให้ปุ่มที่เพิ่งกดเป็นค่า default ซึ่งกลายเป็นทางตัน: ผู้ใช้พิมพ์
+   * จำนวนต่อทันทีแล้วตัวเลขหายไปเฉย ๆ เพราะ focus ยังค้างที่ปุ่มเลือกสินค้า
+   * ที่นี่จึงเปิด location ต่อให้เลย (เพิ่งกดได้เพราะ lookup ปลดล็อกตาม product_id)
+   * แล้วพอเลือกคลังเสร็จ GrnLocationRow จะโฟกัสช่องจำนวนต่อเอง
+   */
+  const handleProductPicked = (groupKey: string) => {
+    setAutoOpenProductKey(null);
+    setOpenLocationKey(groupKey);
+  };
+
   const handleRemoveGroup = (indices: number[]) => {
     [...indices].sort((a, b) => b - a).forEach((i) => removeItem(i));
   };
@@ -220,6 +236,9 @@ export function GrnItemTable({
     isPo: !isManual,
     autoOpenProductKey,
     autoOpenLocationKey,
+    openLocationKey,
+    onLocationOpenChange: (key, open) => setOpenLocationKey(open ? key : null),
+    onProductPicked: handleProductPicked,
     onAddLocation: handleAddLocation,
     onDeleteGroup: setDeleteGroup,
     onDeleteItem: removeItem,

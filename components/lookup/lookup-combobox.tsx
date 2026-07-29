@@ -83,6 +83,20 @@ interface LookupComboboxProps<T> {
   readonly onOpenChange?: (open: boolean) => void;
   /** เริ่มต้นเปิด popover ทันทีที่ mount (ใช้คู่กับ lazy mode ของ caller) */
   readonly defaultOpen?: boolean;
+  /**
+   * ปิดแล้วให้ focus ไปที่ element นี้แทนที่จะเด้งกลับปุ่มเดิม
+   *
+   * default ของ Radix คือคืน focus ให้ trigger ซึ่งถูกในกรณีทั่วไป แต่ในฟอร์มที่
+   * กรอกไล่ทีละช่อง (เลือกสินค้า → เลือกคลัง → ใส่จำนวน) มันกลายเป็นทางตัน
+   * ผู้ใช้พิมพ์ต่อทันทีแล้วตัวอักษรหายเงียบเพราะ focus ค้างอยู่ที่ปุ่ม
+   */
+  readonly nextFocusRef?: React.RefObject<HTMLElement | null>;
+  /**
+   * คุมสถานะเปิด/ปิดจากข้างนอก — ใช้เมื่อต้องสั่งเปิดทีหลัง ตอน component mount
+   * ไปแล้ว (`defaultOpen` ยิงแค่ตอน mount) เช่นพากรอกทีละช่องหลังเลือกสินค้าเสร็จ
+   * ส่งมาแล้วต้องคุมปิดเองด้วยผ่าน `onOpenChange`
+   */
+  readonly open?: boolean;
   /** Render plain text แทน popover (สำหรับ view mode) — ไม่กระทบ submit pending */
   readonly readOnly?: boolean;
   /** ความสูงโดยประมาณของแต่ละ item — ส่งต่อไป virtualizer (default 32) */
@@ -130,11 +144,16 @@ export function LookupCombobox<T>({
   error,
   onOpenChange,
   defaultOpen,
+  open: controlledOpen,
+  nextFocusRef,
   readOnly,
   estimateSize,
   maxHeight,
 }: LookupComboboxProps<T>) {
-  const [open, setOpen] = useState(defaultOpen ?? false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(
+    defaultOpen ?? false,
+  );
+  const open = controlledOpen ?? uncontrolledOpen;
   const [search, setSearch] = useState("");
 
   const t = useTranslations("lookup");
@@ -191,7 +210,7 @@ export function LookupCombobox<T>({
     <Popover
       open={open}
       onOpenChange={(o) => {
-        setOpen(o);
+        setUncontrolledOpen(o);
         if (!o) setSearch("");
         onOpenChange?.(o);
       }}
@@ -268,6 +287,14 @@ export function LookupCombobox<T>({
       <PopoverContent
         className={cn(popoverWidth, "p-0", popoverClassName)}
         align={popoverAlign}
+        onCloseAutoFocus={(e) => {
+          const next = nextFocusRef?.current;
+          if (!next) return;
+          // ต้องดักที่ event ของ Radix ไม่ใช่สั่ง focus เองหลังปิด — Radix คืน
+          // focus ให้ trigger ทีหลัง แล้วทับของเราเสมอ (ลองมาแล้ว)
+          e.preventDefault();
+          next.focus();
+        }}
       >
         <Command shouldFilter={false}>
           <div className="relative w-full">
@@ -315,7 +342,11 @@ export function LookupCombobox<T>({
                         value === id ? "" : id,
                         value === id ? undefined : item,
                       );
-                      setOpen(false);
+                      // ปิดทั้งสองทาง: uncontrolled ปิดเอง ส่วน controlled ให้
+                      // caller เป็นคนปิดผ่าน onOpenChange
+                      setUncontrolledOpen(false);
+                      setSearch("");
+                      onOpenChange?.(false);
                     }}
                   >
                     {renderItem ? renderItem(item) : getLabel(item)}
