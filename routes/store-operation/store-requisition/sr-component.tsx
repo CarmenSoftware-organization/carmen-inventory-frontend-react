@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
@@ -85,9 +85,16 @@ export default function StoreRequisitionComponent() {
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
   // setViewMode (จาก useURL) ได้ reference ใหม่ทุก render — เก็บไว้ใน ref กันไม่ให้
-  // หลุดเข้า useMemo deps ของ srFilterFields ข้างล่าง (mirror ของ PR pilot)
+  // หลุดเข้า useMemo deps ของ srFilterFields ข้างล่าง (mirror ของ PR pilot) อัปเดต
+  // ref ใน useEffect (หลัง render เสร็จ) แทนเขียนตรงกลาง render — mirror ของวิธีแก้
+  // ใน transaction-component.tsx (Task 20 review finding 3: เขียนตรงกลาง render
+  // ปลอดภัยในทางปฏิบัติเพราะอ่านผ่าน ref เฉพาะตอน user โต้ตอบ event handler เท่านั้น
+  // แต่เป็น anti-pattern ที่ transaction ไฟล์เดียวกันเจอ eslint react-hooks/refs ฟ้อง
+  // จริง — แก้ให้สอดคล้องกันทั้งสองไฟล์)
   const setViewModeRef = useRef(setViewMode);
-  setViewModeRef.current = setViewMode;
+  useEffect(() => {
+    setViewModeRef.current = setViewMode;
+  });
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();

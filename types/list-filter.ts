@@ -12,6 +12,19 @@ interface FilterFieldBase {
    * field แบบ CSV ดิบต้องประกาศเอง เช่น (v) => `doc_status|enum:${v}`
    */
   readonly toClause?: (value: string) => string;
+  /**
+   * field นี้ยังคง "จริง" ในแง่ values/encode(toClause)/saved-views/dirty ตามปกติ
+   * แต่**ไม่ render อะไรเลย**ใน ListFilterSheet และ**ไม่ผลิต chip**ใน ActiveFilterBar
+   * ใช้กับ field คู่ที่เป็น "hidden holder" ของอีก field หนึ่ง เช่น date-range สอง
+   * key (`created_at_from`/`created_at_to`) ที่มี UI ควบคุมร่วมกันจุดเดียว
+   */
+  readonly hidden?: boolean;
+  /**
+   * key อื่นที่ต้องถูกล้างไปพร้อมกันเมื่อ chip ของ field นี้ใน ActiveFilterBar ถูกกด
+   * ลบ (ดู `useListFilters`'s `activeFilters.onRemove`) — กันไม่ให้ key คู่กัน (เช่น
+   * `created_at_to` ของ `created_at_from`) ค้างค่าเก่าไว้เดี่ยว ๆ หลังผู้ใช้กดลบแค่ chip เดียว
+   */
+  readonly linkedKeys?: readonly string[];
 }
 
 /** นิยาม field หนึ่งตัวใน filter sheet ของหน้า list */

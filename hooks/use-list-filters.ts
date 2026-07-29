@@ -157,11 +157,26 @@ export function useListFilters(
   const activeFilters: ActiveFilter[] = useMemo(
     () =>
       fields
-        .filter((f) => !!values[f.key]?.trim())
+        // field hidden ไม่ผลิต chip (ดู FilterFieldDef.hidden) — ค่ายังนับใน
+        // filterParam/saved-views ตามปกติ แค่ไม่โผล่ใน ActiveFilterBar
+        .filter((f) => !f.hidden && !!values[f.key]?.trim())
         .map((f) => ({
           key: f.key,
           label: t(f.labelKey),
-          onRemove: () => setValue(f.key, ""),
+          onRemove: () => {
+            // field ที่มี linkedKeys (เช่น created_at_from คู่กับ created_at_to
+            // ที่ถูกซ่อนไว้) ต้องล้างทั้งคู่พร้อมกันใน setURLParams ครั้งเดียว ไม่งั้น
+            // key คู่จะค้างค่าเก่าไว้เดี่ยว ๆ หลังผู้ใช้กดลบแค่ chip เดียว
+            if (f.linkedKeys?.length) {
+              setURLParams({
+                [f.key]: "",
+                ...Object.fromEntries(f.linkedKeys.map((k) => [k, ""])),
+                page: "",
+              });
+            } else {
+              setValue(f.key, "");
+            }
+          },
         })),
     [fields, values, t, setValue],
   );

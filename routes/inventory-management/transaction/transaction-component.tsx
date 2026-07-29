@@ -124,13 +124,17 @@ export default function TransactionComponent() {
   // จริงให้ในรอบนี้เพราะ plumbing ทั้งหมดมีอยู่แล้วครบ (state, clause builder, i18n
   // key ที่ไม่เคยถูกใช้) ต่างจาก GRN/PRT ที่ไม่มี plumbing ให้ port เลย
   //
-  // two-key hidden holder: created_at_to ใช้ labelKey เดียวกับ created_at_from
-  // (ไม่ใช่ "" ตามสูตรตั้งต้น) เพราะ activeFilters ของ useListFilters สร้าง chip ให้
-  // ทุก field ที่ values[key] ไม่ว่าง — ถ้าผู้ใช้กดลบ chip ของ created_at_from เฉย ๆ
-  // (onRemove ของ field ที่ล้างแค่ key ตัวเอง) created_at_to จะค้างมีค่ออยู่ตัวเดียว
-  // แล้วโผล่เป็น chip ที่สอง; ถ้า labelKey ว่างจะเรียก t("") → console error (ดู
-  // Task 19 report เรื่อง i18n-provider ไม่ swallow error) ให้ label เดียวกันแทน
-  // เพื่อไม่ error และยังอ่านเข้าใจได้ถ้าเผลอเห็น chip ซ้ำ — กด clear ได้ปกติ
+  // two-key hidden holder (แก้จาก Task 20 review finding): created_at_to ใช้
+  // `hidden: true` + `labelKey: ""` จริง ๆ ตอนนี้แล้ว — ก่อนหน้านี้เคยให้ labelKey
+  // เดียวกับ created_at_from เป็นทางเลี่ยง เพราะ ListFilterSheet/activeFilters เดิม
+  // ไม่รู้จัก "field ที่ไม่ต้อง render/ไม่ต้องมี chip" มาก่อน ทำให้ label ซ้ำโผล่ในชีท
+  // (2 แถว "Select date range") และ chip ซ้ำใน ActiveFilterBar หลังเลือกช่วงวันที่
+  // ตอนนี้ framework รองรับ `hidden` แล้ว (ListFilterSheet ข้าม field นี้ทั้งหมด,
+  // useListFilters.activeFilters ก็กรองออกด้วย) จึง labelKey ว่างได้จริงโดยไม่มี
+  // ผลข้างเคียง (t("") ไม่ถูกเรียกเพราะ hidden field ไม่เข้าทั้งสองที่นั้นเลย) —
+  // created_at_from ยังประกาศ `linkedKeys: ["created_at_to"]` เพิ่ม เพื่อให้ปุ่ม X
+  // บน chip ของ created_at_from ล้าง created_at_to ไปด้วยพร้อมกัน (ไม่งั้นกดลบ chip
+  // เดียวจะเหลือ created_at_to ค้างค่าเก่าไว้แบบมองไม่เห็น)
   const transactionFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -150,6 +154,7 @@ export default function TransactionComponent() {
         control: "custom",
         labelKey: "inventoryManagement.transaction.selectDateRange",
         toClause: () => "",
+        linkedKeys: ["created_at_to"],
         render: (value, onChange) => (
           <DateRangePicker
             value={{ from: value, to: createdAtToRaw }}
@@ -165,7 +170,8 @@ export default function TransactionComponent() {
       {
         key: "created_at_to",
         control: "custom",
-        labelKey: "inventoryManagement.transaction.selectDateRange",
+        labelKey: "",
+        hidden: true,
         toClause: () => "",
         render: () => null,
       },

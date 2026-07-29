@@ -83,7 +83,10 @@ export function ListFilterSheet({
           <SheetTitle>{tc("filter")}</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 px-4 pb-4">
-          {fields.map((f) =>
+          {/* field ที่ hidden: true คือ "hidden holder" ของอีก field หนึ่ง (เช่น
+             created_at_to คู่กับ created_at_from) — ไม่ render อะไรเลยในชีทนี้
+             (ค่ายังคง "จริง" ใน values/encode/saved-views ปกติ ดู FilterFieldDef) */}
+          {fields.filter((f) => !f.hidden).map((f) =>
             /* labelKey ว่าง = field ไม่มี label ของตัวเอง (เช่น custom control ที่
                จัดการ label ภายในตัวเองอยู่แล้ว หรือซ่อนทั้ง field ด้วย breakpoint
                class) — render control เปล่า ๆ ไม่ห่อ wrapper `space-y-1.5` เพื่อไม่ให้

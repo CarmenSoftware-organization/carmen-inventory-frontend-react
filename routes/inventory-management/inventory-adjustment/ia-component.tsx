@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
@@ -51,6 +51,7 @@ import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-co
 import { useInventoryAdjustmentTable } from "./use-ia-table";
 import IaCardList from "./ia-card-list";
 import { useListFilters } from "@/hooks/use-list-filters";
+import { setURLParams } from "@/hooks/use-url";
 import { ViewSelector } from "@/components/list-filter/view-selector";
 import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
@@ -83,9 +84,9 @@ export default function InventoryAdjustmentComponent() {
   // ของเดิมเก็บ type+status ปนกันใน "filter" ตัวเดียว (CSV) — แยกเป็น 2 URL param
   // ("filter" คง status, "adj_type" ใหม่คง type) ตามชื่อที่ตั้งไว้ในหน้า config
   // adjustment-type (adj_type) เพื่อให้แต่ละ field มี chip ลบเองอิสระได้ (ของเดิม
-  // ลบได้ทีละตัวอยู่แล้วผ่าน activeFilters เดิม) ลิงก์เก่าที่มี "filter" รวมทั้งคู่
-  // ยังกรองข้อมูลถูกอยู่ (ค่าดิบไหลเข้า filterParam ตรง ๆ) แค่ dropdown ในชีทอาจไม่
-  // ขึ้น selected state ให้จนกว่าจะกดเลือกใหม่
+  // ลบได้ทีละตัวอยู่แล้วผ่าน activeFilters เดิม) ลิงก์เก่าที่มี "filter" รวมทั้งคู่ถูก
+  // แยกออกให้อัตโนมัติตอน mount โดย effect ข้างล่าง (oldBookmarkNormalizedRef) —
+  // ทั้ง pre-select ในชีทและ filterParam จึงถูกต้องทั้งคู่ ไม่ต้องกดเลือกใหม่
   const iaFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -125,6 +126,33 @@ export default function InventoryAdjustmentComponent() {
     pageKey: LIST_PAGE_KEYS.INVENTORY_ADJUSTMENT,
     fields: iaFilterFields,
   });
+
+  // ลิงก์เก่าก่อน migrate เก็บ type+status ปนกันใน "filter" ตัวเดียว (CSV เช่น
+  // "doc_status|string:completed,type|string:stock-in") ถ้าเปิดลิงก์นั้นแล้วผู้ใช้
+  // แก้แค่ adj_type อย่างเดียว encodeFilterParam จะปล่อยทั้ง clause ใหม่ของ adj_type
+  // และ clause "type|string:..." เก่าที่ยังค้างอยู่ใน filter ออกไปพร้อมกัน → backend
+  // เห็น clause "type" ขัดแย้งกันสองอัน (ผลลัพธ์ผิดเงียบ ๆ) แยกออกครั้งเดียวตอน mount:
+  // ส่วน doc_status เขียนกลับ "filter" ส่วน type ย้ายไป "adj_type" ใน setURLParams
+  // ครั้งเดียว — ลิงก์เก่าจะ pre-select ถูกทั้งคู่ในชีท และไม่ชนกันอีกต่อไป
+  const oldBookmarkNormalizedRef = useRef(false);
+  useEffect(() => {
+    if (oldBookmarkNormalizedRef.current) return;
+    oldBookmarkNormalizedRef.current = true;
+    const rawFilter = lf.values.filter;
+    if (rawFilter?.includes("type|string:")) {
+      const parts = rawFilter
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean);
+      const typePart = parts.find((p) => p.startsWith("type|string:")) ?? "";
+      const statusParts = parts.filter((p) => !p.startsWith("type|string:"));
+      setURLParams({
+        filter: statusParts.join(","),
+        adj_type: typePart,
+        page: "",
+      });
+    }
+  }, [lf.values.filter]);
 
   const queryParams = { ...params, filter: lf.filterParam };
 
