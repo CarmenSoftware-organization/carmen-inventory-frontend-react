@@ -358,7 +358,9 @@ export function usePoItemTable({
       ...col,
       meta: {
         ...col.meta,
-        cellClassName: cn("py-2 align-middle", col.meta?.cellClassName),
+        // py-1 เท่าแถว location ข้างล่าง — เดิม py-2 ทำให้แถวสินค้าสูงกว่าแถวคลัง
+        // ทั้งที่เป็นตารางเดียวกัน อ่านแล้วสะดุดตรงรอยต่อ
+        cellClassName: cn("py-1 align-middle", col.meta?.cellClassName),
       },
     }));
   }, [
