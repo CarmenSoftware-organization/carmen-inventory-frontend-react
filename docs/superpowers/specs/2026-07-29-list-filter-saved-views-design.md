@@ -146,7 +146,8 @@ interface ListViewsConfigValue { views: SavedView[] }
 - **เก็บค่าดิบต่อ field ไม่ใช่ filter string สำเร็จรูป** — grammar backend เปลี่ยน
   หรือเพิ่มโหมด advanced ทีหลังได้โดยไม่ migrate ข้อมูลลูกค้า
 - **1 config key ต่อ 1 หน้า ต่อ 1 scope**: `list_views_<pageKey>` — จำกัดรัศมี
-  ชนกันของการเซฟทับทั้งก้อน (OCC `doc_version` ยังคุมชั้นในสุด)
+  ชนกันของการเซฟทับทั้งก้อน (backend ไม่มี OCC ตรวจ `doc_version` ให้ —
+  ป้องกัน lost-update ด้วย fetch-fresh-before-write ฝั่ง client แทน ดู Edge cases)
 - cap 50 views ต่อ key — บังคับทั้ง client และ **server**
 
 | | BU view | User view |
@@ -189,7 +190,12 @@ Plan แบ่ง wave: (0) backend API → (1) framework + types + hooks + comp
 - โหลด views ล้มเหลว → dropdown แสดงแถว "โหลดไม่สำเร็จ — ลองใหม่";
   filter ปกติใช้ได้ไม่ผูกกัน
 - ยังไม่มี view → empty state ใน dropdown "ยังไม่มี view — ตั้ง filter แล้วกดบันทึก"
-- OCC ชน (`doc_version`) → refetch + retry อัตโนมัติ 1 ครั้ง; ไม่ผ่าน → toast
+- backend ไม่มี OCC ตรวจ `doc_version` (last-write-wins ล้วน ๆ ต่อ key) — `useListViews`
+  จึงลดหน้าต่างชนกันเองฝั่ง client: ก่อนเขียนทุกครั้ง (`saveAs`/`update`/`rename`/
+  `remove`) บังคับ `queryClient.fetchQuery({ staleTime: 0 })` อ่าน array ล่าสุดจาก
+  server ก่อนเสมอ (ไม่ใช้ cache ที่ render อยู่ซึ่ง stale ได้ถึง 30 นาทีตาม
+  `CACHE_STATIC`) แล้วค่อยแก้ไข/เขียนทับ — สองแท็บ/สองคนแก้พร้อมกันยังชนกันได้
+  (ไม่มี retry อัตโนมัติ) แค่โอกาสน้อยลงมาก ไม่ใช่หายขาด
 - BU view ถูก admin แก้ระหว่างที่ user เปิดค้าง → ค่าใหม่มาตอน refetch ปกติ
   (CACHE_STATIC + invalidate หลัง save) ไม่ทำ realtime
 - สลับ BU → views เป็นของ BU ใหม่เอง (query key มี buCode อยู่แล้วทั้งสอง hook)

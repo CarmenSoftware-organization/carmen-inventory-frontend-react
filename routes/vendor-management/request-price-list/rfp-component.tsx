@@ -260,7 +260,7 @@ export default function RequestPriceListComponent() {
               fields={rfpFilterFields}
               values={lf.values}
               setValue={lf.setValue}
-              onClearAll={lf.clearAll}
+              onClearAll={clearAllFilters}
               onSaveClick={() => setSaveViewDialogOpen(true)}
               activeCount={lf.activeFilters.length}
             />

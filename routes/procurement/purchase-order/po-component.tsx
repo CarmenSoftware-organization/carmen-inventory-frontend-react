@@ -109,6 +109,9 @@ export default function PoComponent() {
         key: "view_mode_toggle",
         control: "custom",
         labelKey: "",
+        // ไม่มี value จริง (ปุ่ม toggle ไม่ผ่าน setValue) — ประกาศ toClause ว่างชัดเจน
+        // ให้ตรงกับ pattern ของ field หลอกตัวอื่น (เช่น transaction's dateRange)
+        toClause: () => "",
         render: () => (
           <div className="space-y-1.5 sm:hidden">
             <FieldLabel className="text-xs">{tc("view")}</FieldLabel>

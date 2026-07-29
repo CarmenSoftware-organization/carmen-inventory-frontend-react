@@ -141,6 +141,11 @@ export default function PurchaseRequestComponent() {
         // (control นี้ sm:hidden อยู่แล้ว มี label "View" ของตัวเองอยู่ข้างในสำหรับ
         // มือถือเท่านั้น ไม่งั้น desktop จะเห็น label ค้างแต่ไม่มี control ข้างใต้)
         labelKey: "",
+        // field นี้ไม่มี value จริง (ปุ่ม toggle ไม่ผ่าน setValue) จึงไม่ควรมี clause
+        // ลง filterParam — ถ้าไม่ประกาศ toClause ค่า default คือ pass-through ตรง
+        // ซึ่งจะไม่มีวันเกิดขึ้นเพราะ values[key] ว่างเสมออยู่แล้ว แต่ประกาศไว้ชัดเจน
+        // ให้ตรงกับ pattern ของ field หลอกตัวอื่น (เช่น transaction's dateRange)
+        toClause: () => "",
         render: () => (
           <div className="space-y-1.5 sm:hidden">
             <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
@@ -204,7 +209,7 @@ export default function PurchaseRequestComponent() {
   const queryParams = { ...params, filter: lf.filterParam };
 
   /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
-   *  (mirror ของ ConfigListWithRegistry's handleSaveViewDialogSave) */
+   *  (mirror ของ ConfigListTemplate's handleSaveViewDialogSave) */
   const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
     const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
     const existing = list.find((v) => v.name === name);

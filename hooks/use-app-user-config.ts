@@ -11,19 +11,28 @@ import type { AppConfig } from "@/types/app-config";
 /**
  * Config ต่อ user ปัจจุบัน (tb_application_user_config) — key เดียว
  * ไม่เคยบันทึกจะได้ default { views: [] } จาก backend (ไม่ 404)
+ *
+ * Fetch มาตรฐานรายตัว แยกออกมาจาก hook เพื่อให้ `useListViews` เรียกซ้ำผ่าน
+ * `queryClient.fetchQuery` แบบ force-fresh ก่อนเขียนทับได้ โดยไม่ต้อง copy logic
+ * (ดู "BU-view lost-update window" ที่ `hooks/use-list-views.ts`)
  */
+export async function fetchAppUserConfigByKey(
+  buCode: string,
+  key: string,
+): Promise<AppConfig> {
+  const res = await httpClient.get(
+    API_ENDPOINTS.APP_USER_CONFIG_BY_KEY(buCode, key),
+  );
+  if (!res.ok) throw await ApiError.from(res, "Failed to fetch app user config");
+  const json = await res.json();
+  return json.data;
+}
+
 export function useAppUserConfigByKey(key: string | undefined) {
   const buCode = useBuCode();
   return useQuery<AppConfig>({
     queryKey: [QUERY_KEYS.APP_USER_CONFIGS, buCode, key],
-    queryFn: async () => {
-      const res = await httpClient.get(
-        API_ENDPOINTS.APP_USER_CONFIG_BY_KEY(buCode!, key!),
-      );
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch app user config");
-      const json = await res.json();
-      return json.data;
-    },
+    queryFn: () => fetchAppUserConfigByKey(buCode!, key!),
     ...CACHE_STATIC,
     enabled: !!buCode && !!key,
   });

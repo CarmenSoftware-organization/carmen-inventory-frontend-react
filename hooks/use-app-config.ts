@@ -8,18 +8,26 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_STATIC } from "@/lib/cache-config";
 import type { AppConfig } from "@/types/app-config";
 
+/**
+ * Fetch มาตรฐานของ app-config รายตัว (แยกจาก hook เพื่อให้ `useListViews` เรียกซ้ำ
+ * ผ่าน `queryClient.fetchQuery` แบบ force-fresh ก่อนเขียนทับได้ โดยไม่ต้อง copy
+ * logic — ดู "BU-view lost-update window" ที่ `hooks/use-list-views.ts`)
+ */
+export async function fetchAppConfigByKey(
+  buCode: string,
+  key: string,
+): Promise<AppConfig> {
+  const res = await httpClient.get(API_ENDPOINTS.APP_CONFIG_BY_KEY(buCode, key));
+  if (!res.ok) throw await ApiError.from(res, "Failed to fetch app config");
+  const json = await res.json();
+  return json.data;
+}
+
 export function useAppConfigByKey(key: string | undefined) {
   const buCode = useBuCode();
   return useQuery<AppConfig>({
     queryKey: [QUERY_KEYS.APP_CONFIGS, buCode, key],
-    queryFn: async () => {
-      const res = await httpClient.get(
-        API_ENDPOINTS.APP_CONFIG_BY_KEY(buCode!, key!),
-      );
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch app config");
-      const json = await res.json();
-      return json.data;
-    },
+    queryFn: () => fetchAppConfigByKey(buCode!, key!),
     ...CACHE_STATIC,
     enabled: !!buCode && !!key,
   });

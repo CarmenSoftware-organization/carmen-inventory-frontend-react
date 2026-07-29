@@ -1,12 +1,20 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
-import { useAppConfigByKey, useUpsertAppConfig } from "@/hooks/use-app-config";
+import { useBuCode } from "@/hooks/use-bu-code";
 import {
+  fetchAppConfigByKey,
+  useAppConfigByKey,
+  useUpsertAppConfig,
+} from "@/hooks/use-app-config";
+import {
+  fetchAppUserConfigByKey,
   useAppUserConfigByKey,
   useUpsertAppUserConfig,
 } from "@/hooks/use-app-user-config";
 import { useCan } from "@/hooks/use-can";
 import { useProfile } from "@/hooks/use-profile";
+import { QUERY_KEYS } from "@/constant/query-keys";
 import {
   listViewsConfigKey,
   MAX_VIEWS_PER_KEY,
@@ -52,12 +60,12 @@ export interface UseListViewsResult {
  * ผู้ใช้คนเดียว) และ `bu` (องค์กร ผูกกับ business unit ทุกคนเห็นเหมือนกัน)
  *
  * แต่ละ scope เก็บเป็น app-config key เดียว (`list_views_<pageKey>`) ที่มี array
- * `views` ทั้งหมดอยู่ข้างใน — mutation ทุกตัวเป็น **read-modify-write**: อ่าน
- * array ปัจจุบันจาก React Query cache, แก้เฉพาะ view ที่เกี่ยว, แล้วเขียนทั้ง
- * array กลับทีเดียว ไม่ต้อง `queryClient.fetchQuery` บังคับ refetch ก่อนเขียน
- * เพราะ backend เป็น last-write-wins ต่อ key อยู่แล้ว และ key แยกต่อหน้า/ต่อ
- * user แล้ว (ชนกันเฉพาะ 2 แท็บของ user เดียวกันแก้ view เดียวกันพร้อมกัน ซึ่ง
- * เป็นเคสที่ยอมรับความเสี่ยงได้)
+ * `views` ทั้งหมดอยู่ข้างใน — mutation ทุกตัวเป็น **read-modify-write** แต่ "read"
+ * ไม่ใช้ React Query cache ที่ render อยู่ตรง ๆ (อาจ stale ได้ถึง 30 นาทีตาม
+ * `CACHE_STATIC`) เพราะ backend ไม่มี OCC (`doc_version`) คอยกันชนให้ — ก่อนเขียน
+ * ทุกครั้ง `writeViews` จะ `queryClient.fetchQuery` บังคับ fetch ใหม่ (staleTime: 0)
+ * แล้วแก้ไข "ผลลัพธ์สดนั้น" ก่อนเขียนทับกลับ (last-write-wins ต่อ key เหมือนเดิม
+ * แค่ลดหน้าต่างที่สอง client เห็น snapshot คนละเวลากันแล้วเขียนทับกันเอง)
  *
  * @param pageKey - identity ถาวรของหน้า list (ดู `LIST_PAGE_KEYS`) — ห้ามเปลี่ยน
  * ค่าที่ ship แล้วเพราะ view ที่ลูกค้าบันทึกไว้จะหาไม่เจอ
@@ -72,6 +80,8 @@ export interface UseListViewsResult {
  */
 export function useListViews(pageKey: ListPageKey): UseListViewsResult {
   const key = listViewsConfigKey(pageKey);
+  const buCode = useBuCode();
+  const queryClient = useQueryClient();
   const buQuery = useAppConfigByKey(key);
   const userQuery = useAppUserConfigByKey(key);
   const upsertBu = useUpsertAppConfig();
@@ -86,7 +96,44 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
   const buViews = readViews(buQuery.data?.value);
   const userViews = readViews(userQuery.data?.value);
 
-  const writeViews = async (scope: ViewScope, next: SavedView[]) => {
+  /** ตัดคีย์ค่าว่าง/เว้นวรรคออกจาก snapshot ก่อนเก็บลง saved view — กัน filter
+   * chip ว่าง ๆ ค้างอยู่ใน view (จุดเดียว ผู้เรียกทั้ง 28 จุดยังส่ง `lf.values`
+   * ทั้งก้อนมาเหมือนเดิม ไม่ต้องแก้ที่เรียก) */
+  const normalizeFilters = (
+    filters: Record<string, string>,
+  ): Record<string, string> =>
+    Object.fromEntries(
+      Object.entries(filters).filter(([, v]) => v.trim() !== ""),
+    );
+
+  /** อ่าน array ของ scope นั้นแบบ fresh เสมอ (บังคับ network fetch ด้วย
+   * `staleTime: 0` ผ่าน queryFn เดียวกับที่ query hook ของ scope นั้นใช้จริง
+   * ไม่ copy logic) แทนการอ่านจาก cache ที่ render อยู่ (`buViews`/`userViews`
+   * ด้านบน) ซึ่งอาจ stale ได้ถึง 30 นาทีตาม `CACHE_STATIC` — ดู note บนสุดของไฟล์ */
+  const fetchFreshViews = async (scope: ViewScope): Promise<SavedView[]> => {
+    if (!buCode) return scope === "bu" ? buViews : userViews;
+    const value =
+      scope === "bu"
+        ? await queryClient.fetchQuery({
+            queryKey: [QUERY_KEYS.APP_CONFIGS, buCode, key],
+            queryFn: () => fetchAppConfigByKey(buCode, key),
+            staleTime: 0,
+          })
+        : await queryClient.fetchQuery({
+            queryKey: [QUERY_KEYS.APP_USER_CONFIGS, buCode, key],
+            queryFn: () => fetchAppUserConfigByKey(buCode, key),
+            staleTime: 0,
+          });
+    return readViews(value.value);
+  };
+
+  /** fetch fresh → แก้ไขด้วย `modify` → เขียนทับกลับ (ดู `fetchFreshViews`) */
+  const writeViews = async (
+    scope: ViewScope,
+    modify: (fresh: SavedView[]) => SavedView[],
+  ) => {
+    const fresh = await fetchFreshViews(scope);
+    const next = modify(fresh);
     if (next.length > MAX_VIEWS_PER_KEY) {
       toast.error(t("limitReached", { max: MAX_VIEWS_PER_KEY }));
       throw new Error("view limit reached");
@@ -104,16 +151,15 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     scope: ViewScope,
     snapshot: ViewSnapshot,
   ): Promise<SavedView> => {
-    const base = scope === "bu" ? buViews : userViews;
     const view: SavedView = {
       id: crypto.randomUUID(),
       name,
-      filters: snapshot.filters,
+      filters: normalizeFilters(snapshot.filters),
       sort: snapshot.sort,
       created_at: new Date().toISOString(),
       created_by_id: userId,
     };
-    await writeViews(scope, [...base, view]);
+    await writeViews(scope, (fresh) => [...fresh, view]);
     toast.success(t("saved", { name }));
     return view;
   };
@@ -124,13 +170,12 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     scope: ViewScope,
     snapshot: ViewSnapshot,
   ): Promise<void> => {
-    const base = scope === "bu" ? buViews : userViews;
-    const next = base.map((v) =>
-      v.id === viewId
-        ? { ...v, filters: snapshot.filters, sort: snapshot.sort }
-        : v,
+    const filters = normalizeFilters(snapshot.filters);
+    await writeViews(scope, (fresh) =>
+      fresh.map((v) =>
+        v.id === viewId ? { ...v, filters, sort: snapshot.sort } : v,
+      ),
     );
-    await writeViews(scope, next);
     toast.success(t("updated"));
   };
 
@@ -140,17 +185,15 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     scope: ViewScope,
     name: string,
   ): Promise<void> => {
-    const base = scope === "bu" ? buViews : userViews;
-    const next = base.map((v) => (v.id === viewId ? { ...v, name } : v));
-    await writeViews(scope, next);
+    await writeViews(scope, (fresh) =>
+      fresh.map((v) => (v.id === viewId ? { ...v, name } : v)),
+    );
     toast.success(t("renamed"));
   };
 
   /** ลบ view ออกจาก array ของ scope นั้น */
   const remove = async (viewId: string, scope: ViewScope): Promise<void> => {
-    const base = scope === "bu" ? buViews : userViews;
-    const next = base.filter((v) => v.id !== viewId);
-    await writeViews(scope, next);
+    await writeViews(scope, (fresh) => fresh.filter((v) => v.id !== viewId));
     toast.success(t("deleted"));
   };
 
