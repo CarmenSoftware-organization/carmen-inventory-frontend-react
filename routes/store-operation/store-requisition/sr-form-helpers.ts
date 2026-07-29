@@ -1,3 +1,4 @@
+import { addDays } from "@/lib/date-utils";
 import type { StoreRequisition } from "@/types/store-requisition";
 import type { SrFormValues } from "./sr-form-schema";
 
@@ -12,9 +13,11 @@ export function buildSrDefaultValues(
   defaultDepartmentId: string,
 ): SrFormValues {
   if (!storeRequisition) {
+    const today = new Date().toISOString();
     return {
-      sr_date: new Date().toISOString(),
-      expected_date: "",
+      sr_date: today,
+      // ตั้งต้นเป็นพรุ่งนี้ — เบิกวันนี้ของถึงเร็วสุดคือวันรุ่งขึ้น
+      expected_date: addDays(today, 1),
       description: "",
       workflow_id: "",
       requestor_id: defaultRequestorId,

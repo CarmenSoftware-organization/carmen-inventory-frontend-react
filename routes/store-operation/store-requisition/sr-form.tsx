@@ -7,10 +7,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  countInvalidItems,
-  scrollToFirstInvalidField,
-} from "@/lib/form-helpers";
 import { useProfile } from "@/hooks/use-profile";
 import {
   SR_TYPE,
@@ -157,10 +153,13 @@ export function StoreRequisitionForm({
     t,
   ]);
 
+  // ปุ่ม Submit ค้างไว้ตั้งแต่ใบใหม่ — กดแล้วระบบ save ให้ก่อนค่อยส่ง (เหมือน PR)
   const canSubmit =
-    isView &&
-    (storeRequisition?.doc_status === "draft" ||
-      storeRequisition?.doc_status === "in_progress");
+    isAdd ||
+    mode === "edit" ||
+    (isView &&
+      (storeRequisition?.doc_status === "draft" ||
+        storeRequisition?.doc_status === "in_progress"));
 
   let derivedSrType: StoreRequisitionType | undefined;
   if (toLocInfo.location_type === INVENTORY_TYPE.DIRECT) {
@@ -205,15 +204,7 @@ export function StoreRequisitionForm({
 
       <form
         id="store-requisition-form"
-        onSubmit={form.handleSubmit(actions.onSubmit, (errors) => {
-          scrollToFirstInvalidField();
-          const count = countInvalidItems(errors as Record<string, unknown>);
-          toast.warning(
-            count > 0
-              ? tv("incompleteItems", { count })
-              : tv("incompleteDocument"),
-          );
-        })}
+        onSubmit={form.handleSubmit(actions.onSubmit, actions.revealInvalid)}
         className="space-y-4 px-4"
       >
         <SrRequestDetails
@@ -284,10 +275,10 @@ export function StoreRequisitionForm({
 
       <SrFooter
         canSubmit={!!canSubmit}
-        isPending={actions.isWorkflowActionPending}
+        isPending={actions.isPending}
         role={storeRequisition?.role}
         action={computeSrAction(items.map((i) => i.stage_status ?? ""))}
-        onSubmit={() => actions.setShowSubmit(true)}
+        onSubmit={actions.openSubmitDialog}
         onApprove={() => actions.setActionDialog("approve")}
         onIssue={() => actions.setActionDialog("issue")}
         onReject={() => actions.setActionDialog("reject")}

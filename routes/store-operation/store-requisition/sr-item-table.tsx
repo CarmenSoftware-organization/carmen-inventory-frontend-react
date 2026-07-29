@@ -329,7 +329,8 @@ export function useSrItemTable({
             <FieldInput
               type="number"
               inputMode="decimal"
-              min={1}
+              min={0}
+              step="any"
               placeholder={tfl("qty")}
               className="text-right"
               disabled={disabled}
@@ -364,6 +365,7 @@ export function useSrItemTable({
                     type="number"
                     inputMode="decimal"
                     min={0}
+                    step="any"
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"
@@ -406,6 +408,7 @@ export function useSrItemTable({
                     type="number"
                     inputMode="decimal"
                     min={0}
+                    step="any"
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"

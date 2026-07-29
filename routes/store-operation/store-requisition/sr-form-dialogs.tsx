@@ -76,7 +76,7 @@ export function SrFormDialogs({
         onOpenChange={actions.setShowSubmit}
         srNo={storeRequisition?.sr_no}
         isPending={actions.submitIsPending}
-        onConfirm={actions.handleSubmitSr}
+        onConfirm={actions.confirmSubmitSr}
       />
 
       <SrActionDialog

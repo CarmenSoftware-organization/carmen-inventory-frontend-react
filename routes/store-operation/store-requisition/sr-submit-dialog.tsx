@@ -39,13 +39,9 @@ export function SrSubmitDialog({
       onOpenChange={(o) => !o && !isPending && onOpenChange(false)}
     >
       <AlertDialogContent className="gap-0 p-0 sm:max-w-md">
-        <span
-          aria-hidden
-          className="bg-primary absolute inset-x-0 top-0 z-20 h-0.5"
-        />
         <div className="p-5">
           <div className="flex items-start gap-3">
-            <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
+            <div className="bg-info/10 text-info-ink flex size-9 shrink-0 items-center justify-center rounded-lg">
               <Send className="size-4.5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -68,6 +64,7 @@ export function SrSubmitDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             size="default"
+            variant="info"
             onClick={(e) => {
               e.preventDefault();
               onConfirm();
