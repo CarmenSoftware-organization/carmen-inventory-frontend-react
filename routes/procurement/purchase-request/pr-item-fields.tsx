@@ -2,7 +2,7 @@
 // cause stale closure issues when auto-memoized.
 "use no memo";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { PrStageRoleProvider } from "./pr-item-cells";
 import { useTranslations } from "use-intl";
@@ -141,6 +141,17 @@ export function PrItemFields({
       }
     }, 0);
   };
+
+  // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — ขึ้น toast อย่างเดียว
+  // ผู้ใช้ยังไม่เห็นอยู่ดีว่าต้องกรอกอะไรบ้าง เพราะยังไม่มีแถวให้ดู เติมแถวเปล่า
+  // ให้เลยแล้วช่องที่ต้องกรอกจะขึ้นกรอบแดงเอง (แถวที่มี error ถูกกางให้อยู่แล้ว
+  // ผ่าน submitCount ใน pr-item-table)
+  const submitCount = form.formState.submitCount;
+  useEffect(() => {
+    if (!submitCount) return;
+    if (itemFields.length === 0 && canAddItem) handleAddItem();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
+  }, [submitCount]);
 
   const {
     table,
