@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
@@ -46,17 +46,21 @@ import { ErrorState } from "@/components/ui/error-state";
 import { usePurchaseRequestTable } from "./pr-table";
 import PrCardList from "./pr-card-list";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { PrFilterSheet } from "./pr-filter-sheet";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { FilterStage } from "@/components/filter/filter-stage";
 import { PrFilterStatus } from "./pr-filter-status";
-import { usePrActiveFilters } from "./pr-active-filters";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DocumentListHeader } from "@/components/share/document-list-header";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const CreatePRDialog = lazy(() =>
@@ -104,6 +108,7 @@ export default function PurchaseRequestComponent() {
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const isMobile = useIsMobile();
   const isGridMode = isMobile || displayMode === "grid";
@@ -112,31 +117,101 @@ export default function PurchaseRequestComponent() {
   const batchRejectPurchaseRequest = useBatchRejectPurchaseRequest();
   const { exportPurchaseRequest, isExporting } = useExportPurchaseRequest();
 
-  const {
-    params,
-    search,
-    setSearch,
-    filter,
-    setFilter,
-    stage,
-    setStage,
-    userId,
-    setUserId,
-    tableConfig,
-  } = useDataGridState({
+  const { params, search, setSearch, tableConfig } = useDataGridState({
     defaultSort: viewMode === "my-pending" ? "pr_date:desc" : "pr_no:desc",
   });
 
-  const [departmentId, setDepartmentId] = useURL("department");
-  const [workflowId, setWorkflowId] = useURL("workflow");
-  const [prDate, setPrDate] = useURL("pr_date");
-
   const { data: stages } = usePurchaseRequestWorkflowStages();
-  const filterStr =
-    [params.filter, departmentId, workflowId, prDate]
-      .filter(Boolean)
-      .join(";") || undefined;
-  const queryParams = { ...params, filter: filterStr };
+
+  // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
+  // ListFilterSheet เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
+  // เหมือนที่เคยอยู่ใน PrFilterSheet เดิม) ไม่มี value จริงจึงไม่ถูกนับใน
+  // filterParam/activeFilters — key ตั้งไม่ให้ชนกับ "view" (ของ tab บน URL จริง)
+  const prFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "view_mode_toggle",
+        control: "custom",
+        labelKey: "common.view",
+        render: () => (
+          <div className="grid grid-cols-2 gap-2 sm:hidden">
+            <Button
+              size="sm"
+              variant={viewMode === "my-pending" ? "default" : "outline"}
+              onClick={() => setViewMode("my-pending")}
+            >
+              {t("myPending")}
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === "all-document" ? "default" : "outline"}
+              onClick={() => setViewMode("all-document")}
+            >
+              {t("allDocuments")}
+            </Button>
+          </div>
+        ),
+      },
+      {
+        key: "filter",
+        control: "custom",
+        labelKey: "common.status",
+        render: (value, onChange) => (
+          <PrFilterStatus value={value} onChange={onChange} className="w-full" />
+        ),
+      },
+      {
+        key: "workflow_current_stage",
+        control: "stage",
+        labelKey: "procurement.purchaseRequest.stage",
+        stages: stages ?? [],
+      },
+      {
+        key: "workflow",
+        control: "workflow",
+        labelKey: "field.workflow",
+        workflowType: WORKFLOW_TYPE.PR,
+      },
+      { key: "department", control: "department", labelKey: "field.department" },
+      { key: "user_id", control: "requester", labelKey: "common.requester" },
+      {
+        key: "pr_date",
+        control: "date-range",
+        labelKey: "field.prDate",
+        fieldKey: "pr_date",
+      },
+    ],
+    [stages, viewMode, t, setViewMode],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.PURCHASE_REQUEST,
+    fields: prFilterFields,
+    defaultSort: viewMode === "my-pending" ? "pr_date:desc" : "pr_no:desc",
+  });
+
+  const queryParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ ConfigListWithRegistry's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const handleExport = async () => {
     try {
@@ -229,21 +304,6 @@ export default function PurchaseRequestComponent() {
     useListHook: activeListHook,
     params: queryParams,
     enabled: useInfiniteScroll,
-  });
-
-  const { activeFilters, clearAllFilters } = usePrActiveFilters({
-    filter,
-    setFilter,
-    stage,
-    setStage,
-    userId,
-    setUserId,
-    departmentId,
-    setDepartmentId,
-    workflowId,
-    setWorkflowId,
-    prDate,
-    setPrDate,
   });
 
   const allItems = useInfiniteScroll ? grid.items : (data?.data ?? []);
@@ -362,57 +422,36 @@ export default function PurchaseRequestComponent() {
               >
                 {t("allDocuments")}
               </Button>
-              {viewMode === "all-document" && (
-                <div className="hidden sm:block">
-                  <PrFilterStatus
-                    value={filter}
-                    onChange={setFilter}
-                    className="w-26"
-                  />
-                </div>
-              )}
-              <div className="hidden sm:block">
-                <FilterStage
-                  value={stage}
-                  onChange={setStage}
-                  stages={stages ?? []}
-                />
-              </div>
             </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <PrFilterSheet
-              filter={filter}
-              onFilterChange={setFilter}
-              stage={stage}
-              onStageChange={setStage}
-              stages={stages}
-              requesterId={userId}
-              onRequesterIdChange={setUserId}
-              departmentId={departmentId}
-              onDepartmentIdChange={setDepartmentId}
-              workflowId={workflowId}
-              onWorkflowIdChange={setWorkflowId}
-              prDate={prDate}
-              onPrDateChange={setPrDate}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
+            {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
+                (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <div className="hidden sm:block">
-              <DataGridColumnVisibility
-                table={table}
-                trigger={
-                  <Button
-                    size="icon-sm"
-                    variant="outline"
-                    aria-label={tc("aria.toggleColumns")}
-                  >
-                    <Columns3 className="size-4" />
-                  </Button>
-                }
-              />
-            </div>
-            <div className="hidden items-center rounded-md border sm:flex">
+            <ListFilterSheet
+              fields={prFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
+          </div>
+          <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridColumnVisibility
+              table={table}
+              trigger={
+                <Button
+                  size="icon-sm"
+                  variant="outline"
+                  aria-label={tc("aria.toggleColumns")}
+                >
+                  <Columns3 className="size-4" />
+                </Button>
+              }
+            />
+            <div className="flex items-center rounded-md border">
               <Button
                 size="icon-sm"
                 variant={displayMode === "list" ? "secondary" : "ghost"}
@@ -433,7 +472,7 @@ export default function PurchaseRequestComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -485,7 +524,7 @@ export default function PurchaseRequestComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -726,6 +765,16 @@ export default function PurchaseRequestComponent() {
           onOpenChange={setCreateDialogOpen}
         />
       </Suspense>
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
+      />
     </div>
   );
 }
