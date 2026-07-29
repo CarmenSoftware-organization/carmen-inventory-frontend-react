@@ -184,6 +184,42 @@ const GroupQtySum = memo(function GroupQtySum({
   return <InputSuffixPlain value={total} suffix={unitName} />;
 });
 
+/**
+ * ราคาต่อหน่วยของ product row — ราคาอยู่ระดับ location จึงถัวเฉลี่ยตามจำนวนที่รับ
+ * (ยอดก่อนส่วนลดรวม ÷ จำนวนรับรวม) ไม่ใช่เฉลี่ยเปล่า ๆ ไม่งั้นแถวที่รับ 1 หน่วย
+ * จะถ่วงเท่าแถวที่รับ 100 · ยังไม่ได้กรอกจำนวน = ยังเฉลี่ยไม่ได้ → โชว์ราคาเดียว
+ * ที่มี (ทุกแถวราคาเท่ากันอยู่แล้วในกรณีปกติ), ไม่มีอะไรเลย = 0.00
+ */
+const GroupUnitPrice = memo(function GroupUnitPrice({
+  control,
+  indices,
+}: {
+  control: Control<GrnFormValues>;
+  indices: number[];
+}) {
+  "use no memo";
+  const prices = useWatch({
+    control,
+    name: indices.map((i) => `items.${i}.unit_price` as const),
+  });
+  const qtys = useWatch({
+    control,
+    name: indices.map((i) => `items.${i}.received_qty` as const),
+  });
+  const priceList = (prices ?? []).map((p) => Number(p) || 0);
+  const qtyList = (qtys ?? []).map((q) => Number(q) || 0);
+  const totalQty = qtyList.reduce((a, n) => a + n, 0);
+  const avg =
+    totalQty > 0
+      ? priceList.reduce((a, p, i) => a + p * (qtyList[i] ?? 0), 0) / totalQty
+      : (priceList.find((p) => p > 0) ?? 0);
+  return (
+    <span className="text-foreground text-xs font-medium tabular-nums">
+      {formatCurrency(avg)}
+    </span>
+  );
+});
+
 type GrnAmountField =
   | "net_amount"
   | "discount_amount"
@@ -484,12 +520,16 @@ export function useGrnItemTable({
         ),
       },
       {
-        // price เป็น per-location (product row โชว์ dash เหมือน PO)
         id: "price",
         header: tfl("unitPrice"),
         size: GRN_COL.price,
         meta: rightMeta,
-        cell: () => <span className="text-muted-foreground">—</span>,
+        cell: ({ row }) => (
+          <GroupUnitPrice
+            control={form.control}
+            indices={row.original.indices}
+          />
+        ),
       },
       {
         id: "subtotal",

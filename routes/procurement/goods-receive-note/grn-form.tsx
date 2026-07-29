@@ -150,6 +150,17 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
     form.clearErrors();
   }, [form, goodsReceiveNote, profileData]);
 
+  // ข้อมูลที่ refetch มาหลังบันทึก (PATCH แล้วตามด้วย /save — หลังบ้านเดิน
+  // doc_version ทั้งของใบและของแต่ละแถว) ต้อง rebase เข้าฟอร์มด้วย ไม่งั้นฟอร์ม
+  // ถือ doc_version ของรอบก่อน แล้วการแก้รอบถัดไปชน 409 "มีคนอื่นแก้เอกสารนี้"
+  // ทุกครั้งจนกว่าจะ refresh หน้า · เงื่อนไขคือ "ไม่มีของค้าง" ไม่ใช่ "โหมดอ่าน" —
+  // ระหว่างผู้ใช้กรอกค้างห้ามทับ แต่หลังบันทึกเสร็จ (dirty ถูกล้าง) ต้อง rebase
+  // ให้ได้แม้ยังอยู่หน้าเดิม
+  useEffect(() => {
+    if (!goodsReceiveNote || form.formState.isDirty) return;
+    form.reset(defaultValues);
+  }, [goodsReceiveNote, defaultValues, form]);
+
   const watchedGrnDate = useWatch({ control: form.control, name: "grn_date" });
   const watchedDescription = useWatch({
     control: form.control,

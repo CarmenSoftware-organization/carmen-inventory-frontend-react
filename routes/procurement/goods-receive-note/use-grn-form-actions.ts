@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -93,34 +92,6 @@ export function useGrnFormActions({
     onCancel: navGuard.cancel,
   };
 
-  // re-sync doc_version จาก response /save กลับเข้า form (header + ราย item
-  // ที่อยู่ใน good_received_note_detail[].items[] จับคู่ด้วย id) — กัน save ซ้ำ
-  // ส่ง doc_version เก่า → 409 optimistic lock (แบบเดียวกับ PO)
-  const syncDocVersions = (saved: unknown) => {
-    const data = (
-      saved as {
-        data?: {
-          doc_version?: number;
-          good_received_note_detail?: {
-            items?: { id: string; doc_version?: number }[];
-          }[];
-        };
-      }
-    )?.data;
-    if (!data) return;
-    if (data.doc_version != null) form.setValue("doc_version", data.doc_version);
-    const versionById = new Map<string, number>();
-    for (const grp of data.good_received_note_detail ?? []) {
-      for (const it of grp.items ?? []) {
-        if (it.doc_version != null) versionById.set(it.id, it.doc_version);
-      }
-    }
-    form.getValues("items").forEach((it, idx) => {
-      const v = it.id ? versionById.get(it.id) : undefined;
-      if (v != null) form.setValue(`items.${idx}.doc_version`, v);
-    });
-  };
-
   const onSubmit = (values: GrnFormValues) => {
     const isManual = values.doc_type === "manual";
 
@@ -213,6 +184,15 @@ export function useGrnFormActions({
         }
       }
 
+      // ขั้น "ร่าง → บันทึกแล้ว" เป็นหน้าที่ของ /save เท่านั้น — มันไม่ได้แค่เปลี่ยน
+      // ป้ายสถานะ แต่ลงรายการสต๊อกกับตัดยอดรับของ PO ด้วย · ถ้าปล่อยให้ PATCH
+      // เขียน doc_status ไปก่อน ใบจะขึ้นเป็น "บันทึกแล้ว" โดยของไม่เคยเข้าสต๊อก
+      // แล้ว /save ที่ยิงตามก็เจอว่าไม่ใช่ร่างแล้ว ตอบ "Only draft GRN can be saved"
+      const willCallSave =
+        values.doc_status === "saved" &&
+        goodsReceiveNote.doc_status === "draft";
+      if (willCallSave) delete patchPayload.doc_status;
+
       const hasItemChanges = !!(detail.add || detail.update || detail.remove);
       const hasExtraCostChanges = !!(
         extraCostDetail.add ||
@@ -231,7 +211,19 @@ export function useGrnFormActions({
         };
       }
 
+      // ไม่มีอะไรเปลี่ยนเลย — ข้าม PATCH ไปทำขั้นบันทึกต่อได้เลย (ถ้ามี)
       if (Object.keys(patchPayload).length === 0) {
+        if (willCallSave) {
+          saveGrn.mutate(goodsReceiveNote.id, {
+            onSuccess: () => {
+              toast.success(tt("updateSuccess", { entity: t("entity") }));
+              setIsSubmitting(false);
+              setMode("view");
+            },
+            onError: () => setIsSubmitting(false),
+          });
+          return;
+        }
         setIsSubmitting(false);
         setMode("view");
         return;
@@ -246,14 +238,16 @@ export function useGrnFormActions({
           ...(patchPayload as unknown as CreateGrnDto),
         },
         {
-          onSuccess: (res) => {
-            syncDocVersions(res);
+          onSuccess: () => {
             const finalize = () => {
               toast.success(tt("updateSuccess", { entity: t("entity") }));
               setIsSubmitting(false);
               setMode("view");
+              // ล้าง dirty ให้ baseline = ค่าที่เพิ่งบันทึก — ไม่งั้นฟอร์มยังนับว่า
+              // มีของค้าง แล้ว rebase จากข้อมูลสด (ที่มี doc_version ใหม่) จะไม่ทำงาน
+              form.reset(form.getValues());
             };
-            if (values.doc_status === "saved") {
+            if (willCallSave) {
               saveGrn.mutate(goodsReceiveNote.id, {
                 onSuccess: finalize,
                 onError: () => setIsSubmitting(false),

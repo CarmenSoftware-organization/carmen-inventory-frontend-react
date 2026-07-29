@@ -17,6 +17,8 @@ import {
   InputSuffixPlain,
 } from "@/components/ui/input/input-suffix";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
+import { addDays } from "@/lib/date-utils";
+import { cn } from "@/lib/utils";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
 import { formatExchangeRate } from "@/lib/currency-utils";
@@ -47,6 +49,9 @@ export function GrnFormHeader({
   const docType = useWatch({ control: form.control, name: "doc_type" });
   const isPo = docType === "purchase_order";
   const currencyId = useWatch({ control: form.control, name: "currency_id" });
+  // ใช้จำกัดช่วงของช่องวันครบกำหนด — ต้องเป็น watch ไม่ใช่ getValues ไม่งั้นเปลี่ยน
+  // วันที่ใบแจ้งหนี้แล้วปฏิทินยังล็อกช่วงเดิมอยู่
+  const invoiceDate = useWatch({ control: form.control, name: "invoice_date" });
   const currencyName = useWatch({
     control: form.control,
     name: "currency_name",
@@ -69,14 +74,40 @@ export function GrnFormHeader({
 
   // view mode → คู่ label↔value ชิด (gap-1) + label เงียบ (เทา/ปกติ) ให้ value
   // เด่นกว่า สร้าง proximity grouping + lightness contrast แบบ Apple (เหมือน CN)
-  const viewFieldGap = plainText ? "gap-1" : undefined;
+  // ระยะ label↔value 4px เท่ากันทั้งสองโหมด — ของเดิมโหมดอ่าน 4px โหมดแก้ 6px
+  // (ค่า default ของ Field) พอสลับโหมดแล้วบล็อกขยับ และไม่ตรงกับแถบ ribbon ข้างบน
+  const viewFieldGap = "gap-1";
+
+  /**
+   * วันครบกำหนด = วันที่ใบแจ้งหนี้ + เทอมเครดิต
+   *
+   * คิดตอนผู้ใช้เปลี่ยนค่าเท่านั้น ไม่ทำใน useEffect — setValue ตอน mount จะทำให้
+   * ฟอร์มกลายเป็น dirty เองแล้วเด้ง discard dialog ตอนกดออก และจะไปทับวันครบ
+   * กำหนดที่บันทึกไว้แล้วของใบเก่าด้วย · ช่องยังแก้เองได้ตามปกติ
+   */
+  const syncDueDate = (invoiceDate?: string | null, days?: number | null) => {
+    if (!invoiceDate || days == null) return;
+    form.setValue("payment_due_date", addDays(invoiceDate, days), {
+      shouldDirty: true,
+    });
+  };
   const viewLabelClass = plainText
     ? "text-muted-foreground font-normal"
     : undefined;
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
+      {/* โหมดแก้ = ช่องมีกรอบ ยืดเต็มความกว้างแล้วอ่านเป็นตารางเรียบร้อย
+          โหมดอ่าน = ข้อความเปล่า ไม่มีกรอบ ถ้ายืดเต็มจอค่าจะกระจายห่างกันจนตา
+          ต้องกวาดไปมา บีบเป็นคอลัมน์ละ 10rem ชิดซ้ายให้ค่าอยู่ใกล้กัน (proximity) */}
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-3 sm:grid-cols-2",
+          plainText
+            ? "lg:grid-cols-[repeat(5,minmax(0,10rem))]"
+            : "lg:grid-cols-5",
+        )}
+      >
         <Field className={`${viewFieldGap ?? ""} lg:col-span-2`}>
           <FieldLabel className={viewLabelClass} required>
             {tfl("vendor")}
@@ -93,7 +124,7 @@ export function GrnFormHeader({
                 disabled={disabled || isPo}
                 readOnly={plainText}
                 error={errors.vendor_id?.message}
-                className="h-9 text-xs"
+                className="text-xs"
               />
             )}
           />
@@ -112,7 +143,7 @@ export function GrnFormHeader({
                 disabled={disabled}
                 readOnly={plainText}
                 placeholder={tc("selectDate")}
-                className="h-9 w-full text-xs"
+                className="w-full text-xs"
                 error={errors.received_at?.message}
               />
             )}
@@ -135,7 +166,7 @@ export function GrnFormHeader({
             <FieldInput
               id="grn-invoice-no"
               placeholder={t("invoiceNoPlaceholder")}
-              className="h-9"
+              className="w-full"
               disabled={disabled}
               error={errors.invoice_no?.message}
               {...form.register("invoice_no")}
@@ -153,11 +184,14 @@ export function GrnFormHeader({
             render={({ field }) => (
               <FieldDatePicker
                 value={field.value ?? ""}
-                onValueChange={field.onChange}
+                onValueChange={(v) => {
+                  field.onChange(v);
+                  syncDueDate(v, form.getValues("credit_term_days"));
+                }}
                 disabled={disabled}
                 readOnly={plainText}
                 placeholder={tc("selectDate")}
-                className="h-9 w-full text-xs"
+                className="w-full text-xs"
                 error={errors.invoice_date?.message}
               />
             )}
@@ -179,7 +213,7 @@ export function GrnFormHeader({
             />
           ) : (
             <InputSuffixField
-              className="h-9"
+              className="w-full"
               disabled={disabled}
               error={!!errors.currency_id?.message}
             >
@@ -232,9 +266,13 @@ export function GrnFormHeader({
                     if (creditTerm) {
                       form.setValue("credit_term_name", creditTerm.name);
                       form.setValue("credit_term_days", creditTerm.value);
+                      syncDueDate(
+                        form.getValues("invoice_date"),
+                        creditTerm.value,
+                      );
                     }
                   }}
-                  className="h-9 w-full text-xs"
+                  className="w-full text-xs"
                   disabled={disabled}
                 />
               )}
@@ -243,7 +281,9 @@ export function GrnFormHeader({
         </Field>
 
         <Field className={viewFieldGap}>
-          <FieldLabel className={viewLabelClass}>{t("dueDate")}</FieldLabel>
+          <FieldLabel className={viewLabelClass} required>
+            {t("dueDate")}
+          </FieldLabel>
           <Controller
             control={form.control}
             name="payment_due_date"
@@ -254,7 +294,10 @@ export function GrnFormHeader({
                 disabled={disabled}
                 readOnly={plainText}
                 placeholder={tc("selectDate")}
-                className="h-9 w-full text-xs"
+                // เลือกเองทับค่าที่คำนวณให้ได้ แต่ห้ามก่อนวันที่ใบแจ้งหนี้ —
+                // ครบกำหนดจ่ายก่อนวันที่ออกใบแจ้งหนี้ไม่มีอยู่จริง
+                fromDate={invoiceDate ? new Date(invoiceDate) : undefined}
+                className="w-full text-xs"
               />
             )}
           />
@@ -275,7 +318,7 @@ export function GrnFormHeader({
                   value={field.value}
                   onValueChange={field.onChange}
                   disabled={disabled}
-                  className="h-9 w-full text-xs"
+                  className="w-full text-xs"
                   error={errors.post_type?.message}
                 >
                   <SelectContent>

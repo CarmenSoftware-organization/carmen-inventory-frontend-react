@@ -244,11 +244,22 @@ export function getDefaultValues(
     dimension: objectToText(grn.dimension),
     allocate_extra_cost_type:
       grn.extra_cost?.[0]?.allocate_extra_cost_type ?? "by_qty",
+    // หนึ่งแถว = หนึ่ง detail ไม่ใช่หนึ่ง item — id ที่ส่งกลับตอน PATCH
+    // (good_received_note_detail.update/remove) หลังบ้านเอาไปหาใน
+    // tb_good_received_note_detail ถ้าส่ง id ของ items ข้างในไปจะ 404
+    // GRN_DETAIL_NOT_FOUND_LIST ทุกครั้งที่แก้แถวเดิม · หลังบ้านเองก็ทำ 1:1 —
+    // ตอน add สร้าง detail 1 แถวคู่กับ item 1 แถว ตอน update ก็ findFirst
+    // item ตัวแรกของ detail นั้นมาแก้ ตัวที่เกินมาไม่มีใครแตะอยู่แล้ว
     items:
-      grn.good_received_note_detail?.flatMap((detail) =>
-        detail.items.map((item) => ({
-          id: item.id,
-          doc_version: item.doc_version,
+      grn.good_received_note_detail?.map((detail) => {
+        // detail ที่ item ถูกลบไปแล้วยังต้องแสดงเป็นแถว (ค่าเป็น 0) ไม่ใช่หายไป
+        // เงียบ ๆ — ไม่งั้นแถวนั้นกลายเป็น remove ตอน save ทั้งที่ผู้ใช้ไม่ได้ลบ
+        const item = detail.items?.[0];
+        return {
+          id: detail.id,
+          // doc_version ของ detail ไม่ใช่ของ item — หลังบ้านล็อกด้วยเลขของ
+          // tb_good_received_note_detail ส่งเลขของ item ไปจะ 409 ทุกครั้ง
+          doc_version: detail.doc_version,
           _group_key: detail.product_id,
           purchase_order_id: detail.purchase_order_id,
           purchase_order_no: detail.po_no ?? "",
@@ -260,33 +271,34 @@ export function getDefaultValues(
           location_name: detail.location_name ?? "",
           location_code: detail.location_code ?? "",
           location_type: detail.location_type ?? "",
-          foc_qty: item.foc_qty,
-          foc_unit_id: item.foc_unit_id,
-          foc_unit_conversion_factor: item.foc_unit_conversion_factor,
-          approved_qty: item.order_qty,
-          approved_unit_id: item.order_unit_id,
-          received_qty: item.received_qty,
-          received_unit_id: item.received_unit_id,
-          received_base_qty: item.received_base_qty,
+          foc_qty: item?.foc_qty ?? 0,
+          foc_unit_id: item?.foc_unit_id ?? null,
+          foc_unit_conversion_factor: item?.foc_unit_conversion_factor ?? 0,
+          approved_qty: item?.order_qty ?? 0,
+          approved_unit_id: item?.order_unit_id ?? null,
+          received_qty: item?.received_qty ?? 0,
+          received_unit_id: item?.received_unit_id ?? null,
+          received_base_qty: item?.received_base_qty ?? 0,
           received_base_unit_id: null,
-          received_unit_conversion_factor: item.received_unit_conversion_factor,
-          tax_profile_id: item.tax_profile_id,
-          tax_rate: item.tax_rate,
-          tax_amount: item.tax_amount,
-          is_tax_adjustment: item.is_tax_adjustment,
-          discount_rate: item.discount_rate ?? 0,
-          discount_amount: item.discount_amount ?? 0,
-          is_discount_adjustment: item.is_discount_adjustment ?? false,
+          received_unit_conversion_factor:
+            item?.received_unit_conversion_factor ?? 0,
+          tax_profile_id: item?.tax_profile_id ?? null,
+          tax_rate: item?.tax_rate ?? 0,
+          tax_amount: item?.tax_amount ?? 0,
+          is_tax_adjustment: item?.is_tax_adjustment ?? false,
+          discount_rate: item?.discount_rate ?? 0,
+          discount_amount: item?.discount_amount ?? 0,
+          is_discount_adjustment: item?.is_discount_adjustment ?? false,
           unit_price:
-            item.received_qty > 0
+            item && item.received_qty > 0
               ? round2(item.sub_total_price / item.received_qty)
               : 0,
-          net_amount: item.net_amount ?? 0,
-          total_price: item.total_price,
+          net_amount: item?.net_amount ?? 0,
+          total_price: item?.total_price ?? 0,
           description: "",
-          note: item.note ?? "",
-        })),
-      ) ?? [],
+          note: item?.note ?? "",
+        };
+      }) ?? [],
     extra_cost_details:
       grn.extra_cost_detail?.map((d) => ({
         id: d.id,
