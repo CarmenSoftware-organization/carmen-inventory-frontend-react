@@ -423,9 +423,11 @@ export function PrItemExpand({
             </p>
           </Field>
 
-          {/* Inventory — อยู่แถวเดียวกับ base summary (currency diff): inventory
-              ซ้าย (col 1-2), base amounts ขวา (col 6-10) */}
-          <div className="lg:col-span-2 lg:col-start-1">
+          {/* Inventory — กินเต็มแถว ไม่แชร์แถวกับ base summary เหมือนเดิม: 4 ค่า
+              ยัดใน 2 คอลัมน์ (24.5rem) ไม่พอ ใบที่ตัวเลขยาวหน่อยก็ตกบรรทัด กลาย
+              เป็นบางใบสูง 1 บรรทัด บางใบ 2 · เต็มแถวแล้วได้ 1 บรรทัดเสมอ และมีแต่
+              ใบสกุลต่างประเทศที่เสียความสูงเพิ่ม (PrItemSummary คืน null ถ้าไม่ใช่) */}
+          <div className="lg:col-span-full lg:col-start-1">
             <PrInventoryRow
               control={form.control}
               index={index}

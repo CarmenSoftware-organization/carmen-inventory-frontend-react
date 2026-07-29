@@ -59,7 +59,9 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
   return (
     <>
       <SummaryBar
-        className="text-micro"
+        // nowrap ที่ราก — ป้ายอย่าง "REORDER PT" เป็นสองคำ flex item ยอมหดลงถึง
+        // ความกว้างคำที่ยาวที่สุด แล้วหักบรรทัดเองถ้าที่ไม่พอ
+        className="text-micro whitespace-nowrap"
         items={[
           {
             key: "onHand",
