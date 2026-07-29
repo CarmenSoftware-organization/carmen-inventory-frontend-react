@@ -1,11 +1,10 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
   Download,
-  Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
@@ -20,13 +19,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -36,7 +28,6 @@ import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   useInventoryAdjustment,
   useDeleteInventoryAdjustment,
@@ -55,13 +46,17 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { useInventoryAdjustmentTable } from "./use-ia-table";
 import IaCardList from "./ia-card-list";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function InventoryAdjustmentComponent() {
   const navigate = useNavigate();
@@ -74,7 +69,7 @@ export default function InventoryAdjustmentComponent() {
     null,
   );
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const isGridMode = isMobile || displayMode === "grid";
   // Infinite scroll สำหรับทุกโหมด grid (mobile auto + desktop card view)
@@ -83,70 +78,81 @@ export default function InventoryAdjustmentComponent() {
   const deleteInventoryAdjustment = useDeleteInventoryAdjustment();
   const { exportInventoryAdjustment, isExporting } =
     useExportInventoryAdjustment();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
+  const { params, search, setSearch, tableConfig } = useDataGridState();
 
-  const filterParts = filter ? filter.split(",") : [];
-  const statusValue =
-    filterParts.find((f) => f.startsWith("doc_status|")) ?? "";
-  const typeValue = filterParts.find((f) => f.startsWith("type|")) ?? "";
+  // ของเดิมเก็บ type+status ปนกันใน "filter" ตัวเดียว (CSV) — แยกเป็น 2 URL param
+  // ("filter" คง status, "adj_type" ใหม่คง type) ตามชื่อที่ตั้งไว้ในหน้า config
+  // adjustment-type (adj_type) เพื่อให้แต่ละ field มี chip ลบเองอิสระได้ (ของเดิม
+  // ลบได้ทีละตัวอยู่แล้วผ่าน activeFilters เดิม) ลิงก์เก่าที่มี "filter" รวมทั้งคู่
+  // ยังกรองข้อมูลถูกอยู่ (ค่าดิบไหลเข้า filterParam ตรง ๆ) แค่ dropdown ในชีทอาจไม่
+  // ขึ้น selected state ให้จนกว่าจะกดเลือกใหม่
+  const iaFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "adj_type",
+        control: "custom",
+        labelKey: "field.type",
+        render: (value, onChange) => (
+          <StatusFilter
+            value={value}
+            onChange={onChange}
+            options={[
+              { label: ts("stockIn"), value: "type|string:stock-in" },
+              { label: ts("stockOut"), value: "type|string:stock-out" },
+            ]}
+            placeholder={tfl("type")}
+            defaultLabel={ts("allType")}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "filter",
+        control: "status",
+        labelKey: "common.status",
+        options: [
+          { labelKey: "status.in_progress", value: "doc_status|string:in_progress" },
+          { labelKey: "status.completed", value: "doc_status|string:completed" },
+          { labelKey: "status.draft", value: "doc_status|string:draft" },
+          { labelKey: "status.voided", value: "doc_status|string:voided" },
+        ],
+      },
+    ],
+    [ts, tfl],
+  );
 
-  const handleStatusChange = (value: string) => {
-    setFilter([value, typeValue].filter(Boolean).join(","));
-  };
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.INVENTORY_ADJUSTMENT,
+    fields: iaFilterFields,
+  });
 
-  const handleTypeChange = (value: string) => {
-    setFilter([statusValue, value].filter(Boolean).join(","));
-  };
+  const queryParams = { ...params, filter: lf.filterParam };
 
-  const STATUS_OPTIONS = [
-    { label: ts("in_progress"), value: "doc_status|string:in_progress" },
-    { label: ts("completed"), value: "doc_status|string:completed" },
-    { label: ts("draft"), value: "doc_status|string:draft" },
-    { label: ts("voided"), value: "doc_status|string:voided" },
-  ];
-
-  const TYPE_OPTIONS = [
-    { label: ts("stockIn"), value: "type|string:stock-in" },
-    { label: ts("stockOut"), value: "type|string:stock-out" },
-  ];
-
-  const activeFilters: ActiveFilter[] = (() => {
-    const filters: ActiveFilter[] = [];
-
-    if (typeValue) {
-      const match = TYPE_OPTIONS.find((o) => o.value === typeValue);
-      if (match) {
-        filters.push({
-          key: "type",
-          label: match.label,
-          onRemove: () => handleTypeChange(""),
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
         });
       }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
     }
-
-    if (statusValue) {
-      const match = STATUS_OPTIONS.find((o) => o.value === statusValue);
-      if (match) {
-        filters.push({
-          key: "status",
-          label: match.label,
-          onRemove: () => handleStatusChange(""),
-        });
-      }
-    }
-
-    return filters;
-  })();
-
-  const clearAllFilters = () => {
-    setFilter("");
   };
 
   const handleExport = async () => {
     try {
       const count = await exportInventoryAdjustment({
-        params,
+        params: queryParams,
         columns: [
           {
             header: tfl("adjustment"),
@@ -206,13 +212,16 @@ export default function InventoryAdjustmentComponent() {
     }
   };
 
-  const { data, isLoading, error, refetch } = useInventoryAdjustment(params, {
-    enabled: !useInfiniteScroll,
-  });
+  const { data, isLoading, error, refetch } = useInventoryAdjustment(
+    queryParams,
+    {
+      enabled: !useInfiniteScroll,
+    },
+  );
 
   const grid = useGridPagination<InventoryAdjustment>({
     useListHook: useInventoryAdjustment,
-    params,
+    params: queryParams,
     enabled: useInfiniteScroll,
   });
 
@@ -339,67 +348,18 @@ export default function InventoryAdjustmentComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter
-                value={typeValue}
-                onChange={handleTypeChange}
-                options={TYPE_OPTIONS}
-                placeholder={tfl("type")}
-                defaultLabel={ts("allType")}
-              />
-              <StatusFilter
-                value={statusValue}
-                onChange={handleStatusChange}
-                options={STATUS_OPTIONS}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter
-                    value={typeValue}
-                    onChange={handleTypeChange}
-                    options={TYPE_OPTIONS}
-                    placeholder={tfl("type")}
-                    defaultLabel={ts("allType")}
-                  />
-                  <StatusFilter
-                    value={statusValue}
-                    onChange={handleStatusChange}
-                    options={STATUS_OPTIONS}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={iaFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {displayMode === "list" && (
@@ -438,7 +398,7 @@ export default function InventoryAdjustmentComponent() {
         </div>
 
         {/* Active filter badges */}
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -454,7 +414,7 @@ export default function InventoryAdjustmentComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -510,6 +470,16 @@ export default function InventoryAdjustmentComponent() {
             },
           );
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

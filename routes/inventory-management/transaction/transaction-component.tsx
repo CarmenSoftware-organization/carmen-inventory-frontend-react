@@ -1,7 +1,5 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
-import { useURL } from "@/hooks/use-url";
-import { Filter as FilterIcon } from "lucide-react";
 import {
   DataGrid,
   DataGridContainer,
@@ -10,22 +8,11 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { useTransaction } from "@/hooks/use-transaction";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useURL } from "@/hooks/use-url";
 import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
-import { Badge } from "@/components/ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { type DateRange } from "@/components/ui/date-range-picker";
-import { Button } from "@/components/ui/button";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
+import { DateRangePicker, type DateRange } from "@/components/ui/date-range-picker";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupCategory } from "@/components/lookup/lookup-category";
 import { cn } from "@/lib/utils";
@@ -36,6 +23,13 @@ import { useTransactionTable } from "./use-transaction-table";
 import { TransactionSummary } from "./transaction-summary";
 import type { TransactionSummary as TransactionSummaryType } from "@/types/transaction";
 import { DateRangeFilter, type DateRangeValue } from "./date-range-filter";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 const EMPTY_SUMMARY: TransactionSummaryType = {
   total_transactions: 0,
@@ -61,26 +55,14 @@ function toDateOnly(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-interface BuildFilterArgs {
-  pickerDateRange: DateRange | undefined;
-  dateRange: DateRangeValue | "";
-  txnType: string;
-  location: string;
-  category: string;
-  refTypes: Set<string>;
-}
-
-function buildTransactionFilter({
-  pickerDateRange,
-  dateRange,
-  txnType,
-  location,
-  category,
-  refTypes,
-}: BuildFilterArgs): string {
-  const parts: string[] = [];
-
-  // Date range (custom picker > preset) — output `YYYY-MM-DD`
+/**
+ * ตัด clause `created_at|daterange:from,to` จากช่วงวันที่ — custom picker (ถ้ามี)
+ * มาก่อน preset เสมอ (ของเดิม `buildTransactionFilter` ก่อน migrate)
+ */
+function buildDateRangeClause(
+  pickerDateRange: DateRange | undefined,
+  dateRange: DateRangeValue | "",
+): string {
   let fromStr: string | null = null;
   let toStr: string | null = null;
   if (pickerDateRange?.from) {
@@ -104,152 +86,221 @@ function buildTransactionFilter({
       fromStr = toDateOnly(from);
     }
   }
-  if (fromStr && toStr) {
-    parts.push(`created_at|daterange:${fromStr},${toStr}`);
-  }
-
-  // Direction (inbound / outbound)
-  if (txnType) parts.push(`direction:${txnType}`);
-
-  // Location + Category single-select
-  if (location) parts.push(`location_id:${location}`);
-  if (category) parts.push(`category_id:${category}`);
-
-  // Ref type multi-select
-  if (refTypes.size > 0) {
-    parts.push(`inventory_doc_type|in:${[...refTypes].join(",")}`);
-  }
-
-  return parts.join(";");
+  if (fromStr && toStr) return `created_at|daterange:${fromStr},${toStr}`;
+  return "";
 }
 
 export default function TransactionComponent() {
   const t = useTranslations("inventoryManagement.transaction");
-  const tc = useTranslations("common");
-  // URL-backed state — ชื่อ key ตรงกับ API field name
-  const [dateRangeRaw, setDateRangeRaw] = useURL("dateRange");
-  const [dateFrom, setDateFrom] = useURL("created_at_from");
-  const [dateTo, setDateTo] = useURL("created_at_to");
-  const [txnType, setTxnType] = useURL("direction");
-  const [location, setLocation] = useURL("location_id");
-  const [category, setCategory] = useURL("category_id");
-  const [refTypesRaw, setRefTypesRaw] = useURL("inventory_doc_type");
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const { params, search, setSearch, tableConfig } = useDataGridState();
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   // Cache label จาก Lookup onItemChange เพื่อ active filter chip
   // (URL เก็บแค่ id; refresh จะรีเซ็ต label เหลือ id ก็ยังกรองได้)
   const [locationLabel, setLocationLabel] = useState("");
   const [categoryLabel, setCategoryLabel] = useState("");
+  // อ่านคู่กับ "created_at_from" ไว้เฉย ๆ สำหรับ render ปุ่มเลือกช่วงวันที่แบบกำหนดเอง
+  // (ต้องใช้ทั้ง from และ to พร้อมกัน แต่ field ของ registry ส่ง value ของ key ตัวเองมา
+  // ให้ตัวเดียว) อ่านตรงจาก URL ผ่าน useURL แยกต่างหาก (reactive, อัปเดตทุกครั้งที่
+  // URL เปลี่ยน ไม่ผ่าน lf.values เพื่อเลี่ยง stale closure — fields useMemo จะถูกสร้าง
+  // ใหม่ทุกครั้งที่ค่านี้เปลี่ยนผ่าน dependency array) เขียนค่าจริงผ่าน setValueRef
+  // (lf.setValue) เสมอ เพื่อให้ page reset เหมือนกับทุก field อื่นในหน้านี้
+  const [createdAtToRaw] = useURL("created_at_to");
 
-  // Derive typed/composite values from URL strings
-  const dateRange = (dateRangeRaw ?? "") as DateRangeValue | "";
-  const setDateRange = (v: DateRangeValue | "") => setDateRangeRaw(v);
-  const pickerDateRange: DateRange | undefined =
-    dateFrom || dateTo ? { from: dateFrom, to: dateTo } : undefined;
-  const setPickerDateRange = (v: DateRange | undefined) => {
-    setDateFrom(v?.from ?? "");
-    setDateTo(v?.to ?? "");
-  };
-  const refTypes = new Set(
-    refTypesRaw ? refTypesRaw.split(",").filter(Boolean) : [],
-  );
-  const setRefTypes = (next: Set<string>) =>
-    setRefTypesRaw([...next].join(","));
-
-  const toggleRefType = (value: string) => {
-    const next = new Set(refTypes);
-    if (next.has(value)) next.delete(value);
-    else next.add(value);
-    setRefTypes(next);
-  };
-
-  const activeFilters = ((): ActiveFilter[] => {
-    const filters: ActiveFilter[] = [];
-
-    if (pickerDateRange?.from) {
-      filters.push({
+  // field ของหน้านี้แบ่งเป็น 2 กลุ่ม:
+  // (1) location_id / category_id / inventory_doc_type — ค่าที่เก็บใน URL ไม่ใช่
+  //     clause เต็ม (เก็บ id ดิบ/CSV ดิบ) จึงประกาศ toClause แปลงเป็น clause ตอน
+  //     encode เข้า lf.filterParam
+  // (2) dateRange (preset) / created_at_from / created_at_to — สองแหล่งนี้แข่งกัน
+  //     เป็น "created_at|daterange:..." clause เดียว โดย custom picker ชนะ preset
+  //     เสมอ (ของเดิมก่อน migrate) เขียนเป็น toClause เดียวใน encodeFilterParam ไม่ได้
+  //     (field หนึ่งไม่รู้ค่าอีก field) จึงให้ toClause คืนค่าว่างเสมอ (ไม่หลุดเข้า
+  //     lf.filterParam) แล้วคำนวณ clause จริงแยกต่างหากด้วย buildDateRangeClause
+  //     จาก lf.values ตอนประกอบ queryParams — ทั้ง 3 field ยังคง "จริง" ในแง่ values/
+  //     activeFilters/clearAll/saved-views ปกติ
+  //
+  // created_at_from / created_at_to ("เลือกช่วงวันที่กำหนดเอง") มีสถานะ, clause
+  // logic และ i18n key ("selectDateRange") อยู่ในหน้านี้มาตั้งแต่ก่อน migrate แต่ไม่มี
+  // <DateRangePicker> render จริงสักที่ (เทียบกับปุ่ม preset ที่ยังอยู่) — เติม control
+  // จริงให้ในรอบนี้เพราะ plumbing ทั้งหมดมีอยู่แล้วครบ (state, clause builder, i18n
+  // key ที่ไม่เคยถูกใช้) ต่างจาก GRN/PRT ที่ไม่มี plumbing ให้ port เลย
+  //
+  // two-key hidden holder: created_at_to ใช้ labelKey เดียวกับ created_at_from
+  // (ไม่ใช่ "" ตามสูตรตั้งต้น) เพราะ activeFilters ของ useListFilters สร้าง chip ให้
+  // ทุก field ที่ values[key] ไม่ว่าง — ถ้าผู้ใช้กดลบ chip ของ created_at_from เฉย ๆ
+  // (onRemove ของ field ที่ล้างแค่ key ตัวเอง) created_at_to จะค้างมีค่ออยู่ตัวเดียว
+  // แล้วโผล่เป็น chip ที่สอง; ถ้า labelKey ว่างจะเรียก t("") → console error (ดู
+  // Task 19 report เรื่อง i18n-provider ไม่ swallow error) ให้ label เดียวกันแทน
+  // เพื่อไม่ error และยังอ่านเข้าใจได้ถ้าเผลอเห็น chip ซ้ำ — กด clear ได้ปกติ
+  const transactionFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
         key: "dateRange",
-        label: t("dateRange"),
-        onRemove: () => setPickerDateRange(undefined),
-      });
-    }
-
-    if (txnType) {
-      const label = txnType === "inbound" ? t("inbound") : t("outbound");
-      filters.push({
-        key: txnType,
-        label,
-        onRemove: () => setTxnType(""),
-      });
-    }
-
-    if (location) {
-      filters.push({
-        key: location,
-        label: locationLabel || location,
-        onRemove: () => {
-          setLocation("");
-          setLocationLabel("");
-        },
-      });
-    }
-
-    if (category) {
-      filters.push({
-        key: category,
-        label: categoryLabel || category,
-        onRemove: () => {
-          setCategory("");
-          setCategoryLabel("");
-        },
-      });
-    }
-
-    for (const v of refTypes) {
-      const match = REF_TYPE_OPTIONS.find((o) => o.value === v);
-      if (match) {
-        filters.push({
-          key: `refType-${v}`,
-          label: match.label,
-          onRemove: () => {
+        control: "custom",
+        labelKey: "inventoryManagement.transaction.dateRange",
+        toClause: () => "",
+        render: (value, onChange) => (
+          <DateRangeFilter
+            value={value as DateRangeValue | ""}
+            onChange={(v) => onChange(v)}
+          />
+        ),
+      },
+      {
+        key: "created_at_from",
+        control: "custom",
+        labelKey: "inventoryManagement.transaction.selectDateRange",
+        toClause: () => "",
+        render: (value, onChange) => (
+          <DateRangePicker
+            value={{ from: value, to: createdAtToRaw }}
+            onValueChange={(range) => {
+              onChange(range.from ?? "");
+              setValueRef.current("created_at_to", range.to ?? "");
+            }}
+            placeholder={t("selectDateRange")}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "created_at_to",
+        control: "custom",
+        labelKey: "inventoryManagement.transaction.selectDateRange",
+        toClause: () => "",
+        render: () => null,
+      },
+      {
+        key: "location_id",
+        control: "custom",
+        labelKey: "field.location",
+        toClause: (v) => `location_id:${v}`,
+        render: (value, onChange) => (
+          <LookupLocation
+            value={value}
+            defaultLabel={locationLabel || value}
+            onValueChange={(id) => {
+              onChange(id);
+              if (!id) setLocationLabel("");
+            }}
+            onItemChange={(loc) => setLocationLabel(loc.name)}
+            placeholder={t("allLocations")}
+            size="sm"
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "category_id",
+        control: "custom",
+        labelKey: "field.category",
+        toClause: (v) => `category_id:${v}`,
+        render: (value, onChange) => (
+          <LookupCategory
+            value={value}
+            defaultLabel={categoryLabel || value}
+            onValueChange={(id, item) => {
+              onChange(id);
+              if (!id) setCategoryLabel("");
+              else if (item) setCategoryLabel(item.name);
+            }}
+            size="sm"
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "inventory_doc_type",
+        control: "custom",
+        labelKey: "inventoryManagement.transaction.referenceType",
+        toClause: (v) => `inventory_doc_type|in:${v}`,
+        render: (value, onChange) => {
+          const refTypes = new Set(value ? value.split(",").filter(Boolean) : []);
+          const toggle = (v: string) => {
             const next = new Set(refTypes);
-            next.delete(v);
-            setRefTypes(next);
-          },
+            if (next.has(v)) next.delete(v);
+            else next.add(v);
+            onChange([...next].join(","));
+          };
+          return (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {REF_TYPE_OPTIONS.map((opt) => {
+                const active = refTypes.has(opt.value);
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => toggle(opt.value)}
+                    className={cn(
+                      "border-border/40 bg-card hover:bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold tracking-wide transition-all",
+                      active && "border-primary bg-primary/10 text-primary",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        },
+      },
+    ],
+    [t, locationLabel, categoryLabel, createdAtToRaw],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.INVENTORY_TRANSACTION,
+    fields: transactionFilterFields,
+  });
+
+  // setValue (จาก useListFilters) ได้ reference ใหม่ทุก render — เก็บไว้ใน ref กัน
+  // ไม่ให้หลุดเข้า useMemo deps ข้างบน (chicken-and-egg: fields ต้องมีอยู่ก่อน
+  // useListFilters ถึงจะสร้าง lf ได้ จึงอ้าง lf.setValue ผ่าน ref แทนเรียกตรง ๆ)
+  // อัปเดต ref ใน useEffect (หลัง render เสร็จ) ไม่ใช่เขียนตรงกลาง render —
+  // ต่างจาก PR/SR pilot ที่เขียนตรง ๆ (`ref.current = value`) เพราะบรรทัดนั้นชน
+  // eslint react-hooks/refs ("Cannot access refs during render") ในไฟล์นี้
+  // (ทำไมไฟล์อื่นไม่ชนไม่แน่ใจ — อาจเป็นเพราะ React Compiler bail out ไปก่อนถึง
+  // จุดนั้นด้วยเหตุผลอื่นในไฟล์นั้น) useEffect ให้ผลเหมือนกันและปลอดภัยกว่าแน่นอน —
+  // ตัว render closure เรียก setValueRef.current หลัง user โต้ตอบเท่านั้น (event
+  // handler) ซึ่งเกิดหลัง effect ของ render นั้นทำงานเสมอ
+  const setValueRef = useRef(lf.setValue);
+  useEffect(() => {
+    setValueRef.current = lf.setValue;
+  });
+
+  const dateClause = buildDateRangeClause(
+    lf.values.created_at_from || lf.values.created_at_to
+      ? { from: lf.values.created_at_from, to: lf.values.created_at_to }
+      : undefined,
+    (lf.values.dateRange || "") as DateRangeValue | "",
+  );
+
+  const queryParams = {
+    ...params,
+    filter: [lf.filterParam, dateClause].filter(Boolean).join(";") || undefined,
+  };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
         });
       }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
     }
-
-    return filters;
-  })();
-
-  const clearAllFilters = () => {
-    setPickerDateRange(undefined);
-    setDateRange("");
-    setTxnType("");
-    setLocation("");
-    setLocationLabel("");
-    setCategory("");
-    setCategoryLabel("");
-    setRefTypes(new Set());
   };
 
-  // Build filter string from local state for BE — convention:
-  // `field:value;field|op:val1,val2` (semicolons separate filters)
-  const filterStr = buildTransactionFilter({
-    pickerDateRange,
-    dateRange,
-    txnType,
-    location,
-    category,
-    refTypes,
-  });
-  const mergedParams = {
-    ...params,
-    filter: [params.filter, filterStr].filter(Boolean).join(";") || undefined,
-  };
-
-  const { data, isLoading, error, refetch } = useTransaction(mergedParams);
+  const { data, isLoading, error, refetch } = useTransaction(queryParams);
 
   const items = data?.data ?? [];
   const totalRecords = data?.paginate?.total ?? 0;
@@ -264,64 +315,6 @@ export default function TransactionComponent() {
   if (error)
     return <ErrorState message={error.message} onRetry={() => refetch()} />;
 
-  /* ── Inline filters (desktop) ─────────── */
-  const filtersContent = (
-    <>
-      <div className="w-full sm:w-56">
-        <LookupLocation
-          value={location}
-          defaultLabel={locationLabel || location}
-          onValueChange={(id) => {
-            setLocation(id);
-            if (!id) setLocationLabel("");
-          }}
-          onItemChange={(loc) => setLocationLabel(loc.name)}
-          placeholder={t("allLocations")}
-          size="sm"
-        />
-      </div>
-      <div className="w-full sm:w-56">
-        <LookupCategory
-          value={category}
-          defaultLabel={categoryLabel || category}
-          onValueChange={(id, item) => {
-            setCategory(id);
-            if (!id) setCategoryLabel("");
-            else if (item) setCategoryLabel(item.name);
-          }}
-          size="sm"
-        />
-      </div>
-    </>
-  );
-
-  /* ── Ref type pills (glass) ─────────── */
-  const refTypeContent = (
-    <div className="space-y-1.5">
-      <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
-        {t("referenceType")}
-      </span>
-      <div className="flex flex-wrap items-center gap-1.5">
-        {REF_TYPE_OPTIONS.map((opt) => {
-          const active = refTypes.has(opt.value);
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => toggleRefType(opt.value)}
-              className={cn(
-                "border-border/40 bg-card hover:bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold tracking-wide transition-all",
-                active && "border-primary bg-primary/10 text-primary",
-              )}
-            >
-              {opt.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-
   return (
     <div className="relative isolate -mx-3 -my-3">
       <AnimationStyles />
@@ -331,10 +324,10 @@ export default function TransactionComponent() {
           <DocumentListHeader title={t("title")} description={t("desc")} />
         </Reveal>
 
-        {/* ── Search + DateRange + Mobile Filter ─────────── */}
+        {/* ── Search + filters ─────────── */}
         <Reveal delay={60}>
-          <div className="mt-4 flex w-full items-center gap-2">
-            <div className="flex-1 [&>div]:w-full">
+          <div className="mt-4 flex w-full flex-wrap items-center gap-2">
+            <div className="min-w-0 flex-1 [&>div]:w-full">
               <SearchInput
                 defaultValue={search}
                 onSearch={setSearch}
@@ -342,92 +335,42 @@ export default function TransactionComponent() {
                 inputClassName="border-border/40 hover:border-foreground/50 focus-visible:border-primary bg-card h-9 rounded-lg border pr-9 text-sm shadow-none transition-colors focus-visible:ring-0"
               />
             </div>
-            <div className="hidden sm:block">
-              <DateRangeFilter
-                value={dateRange}
-                onChange={(v) => setDateRange(v)}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="border-border/40 bg-card hover:bg-card relative size-9 shrink-0 rounded-lg sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="bottom"
-                className="max-h-[85vh] overflow-auto"
-              >
-                <SheetHeader>
-                  <SheetTitle>{t("title")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <DateRangeFilter
-                    value={dateRange}
-                    onChange={(v) => setDateRange(v)}
-                  />
-                  {filtersContent}
-                  {refTypeContent}
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full rounded-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={transactionFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
-        </Reveal>
-
-        {/* ── Inline filters (desktop) ─────────── */}
-        <Reveal delay={120}>
-          <div className="mt-3 hidden sm:flex sm:flex-wrap sm:items-center sm:gap-2">
-            {filtersContent}
-          </div>
-        </Reveal>
-
-        {/* ── Ref type pills (desktop) ─────────── */}
-        <Reveal delay={160}>
-          <div className="mt-3 hidden sm:block">{refTypeContent}</div>
         </Reveal>
 
         {/* ── Active filter bar ─────────── */}
-        {activeFilters.length > 0 && (
-          <Reveal delay={200}>
+        {lf.activeFilters.length > 0 && (
+          <Reveal delay={120}>
             <div className="mt-3">
               <ActiveFilterBar
-                filters={activeFilters}
-                onClearAll={clearAllFilters}
+                filters={lf.activeFilters}
+                onClearAll={lf.clearAll}
               />
             </div>
           </Reveal>
         )}
 
         {/* ── Summary stats ─────────── */}
-        <Reveal delay={240}>
+        <Reveal delay={180}>
           <div className="mt-4">
             <TransactionSummary data={data?.summary ?? EMPTY_SUMMARY} />
           </div>
         </Reveal>
 
         {/* ── Data grid (glass card) ─────────── */}
-        <Reveal delay={280}>
+        <Reveal delay={240}>
           <div className="border-border/60 bg-card mt-4 overflow-hidden rounded-xl border">
             <DataGrid
               table={table}
@@ -444,6 +387,16 @@ export default function TransactionComponent() {
           </div>
         </Reveal>
       </div>
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
+      />
     </div>
   );
 }

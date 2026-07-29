@@ -1,22 +1,9 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -26,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   useStoreRequisition,
   useMyPendingStoreRequisition,
@@ -39,29 +25,28 @@ import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
-import { STORE_REQUISITION_STATUS_OPTIONS } from "@/constant/store-requisition";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { useURL } from "@/hooks/use-url";
-import { useLocation } from "@/hooks/use-location";
+import { FieldLabel } from "@/components/ui/field";
 import { SrFilterStatus } from "./sr-filter-status";
 import { SrFilterFromLocation } from "./sr-filter-from-location";
 import { SrFilterToLocation } from "./sr-filter-to-location";
 import { SrFilterType } from "./sr-filter-type";
 import { useStoreRequisitionTable } from "./use-sr-table";
 import SrCardList from "./sr-card-list";
-
-const FROM_LOCATION_PREFIX = "from_location_id|string:";
-const TO_LOCATION_PREFIX = "to_location_id|string:";
-const SR_TYPE_PREFIX = "sr_type|string:";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 /**
  * คอมโพเนนต์หลักของหน้ารายการใบเบิกสินค้า
@@ -99,35 +84,132 @@ export default function StoreRequisitionComponent() {
     defaultValue: "my-pending",
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
+  // setViewMode (จาก useURL) ได้ reference ใหม่ทุก render — เก็บไว้ใน ref กันไม่ให้
+  // หลุดเข้า useMemo deps ของ srFilterFields ข้างล่าง (mirror ของ PR pilot)
+  const setViewModeRef = useRef(setViewMode);
+  setViewModeRef.current = setViewMode;
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const isGridMode = isMobile || displayMode === "grid";
   const useInfiniteScroll = !!isMobile;
   const deleteStoreRequisition = useDeleteStoreRequisition();
   const { exportStoreRequisition, isExporting } = useExportStoreRequisition();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const [fromLocation, setFromLocation] = useURL("from_location");
-  const [toLocation, setToLocation] = useURL("to_location");
-  const [srTypeFilter, setSrTypeFilter] = useURL("sr_type");
+  const { params, search, setSearch, tableConfig } = useDataGridState();
 
-  const hasSelectedLocations =
-    !!fromLocation?.startsWith(FROM_LOCATION_PREFIX) ||
-    !!toLocation?.startsWith(TO_LOCATION_PREFIX);
-  const { data: locationData } = useLocation(
-    { perpage: -1 },
-    { enabled: hasSelectedLocations },
+  // ของเดิม 4 popover (status/sr_type/from_location/to_location) แต่ละตัวมี
+  // value/onChange เป็น URL filter string ของตัวเองอยู่แล้ว (คนละ URL param) —
+  // ใช้ control: "custom" ห่อ component เดิมตรง ๆ ไม่ต้องเขียน UI ใหม่
+  const srFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        // field แรกเป็น custom control ล้วน ๆ — ยืม slot ใน ListFilterSheet เพื่อวาง
+        // toggle my-pending/all-document สำหรับมือถือเท่านั้น (ของเดิมอยู่ใน sheet
+        // มือถือคู่กับปุ่ม inline บน desktop) ไม่มี value จริงจึงไม่ถูกนับใน
+        // filterParam/activeFilters — key ตั้งไม่ให้ชนกับ "view" ของ tab บน URL จริง
+        key: "view_mode_toggle",
+        control: "custom",
+        labelKey: "",
+        render: () => (
+          <div className="space-y-1.5 sm:hidden">
+            <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                size="sm"
+                variant={viewMode === "my-pending" ? "default" : "outline"}
+                onClick={() => setViewModeRef.current("my-pending")}
+              >
+                {t("myPending")}
+              </Button>
+              <Button
+                size="sm"
+                variant={viewMode === "all-document" ? "default" : "outline"}
+                onClick={() => setViewModeRef.current("all-document")}
+              >
+                {t("allDocuments")}
+              </Button>
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: "sr_type",
+        control: "custom",
+        labelKey: "common.type",
+        render: (value, onChange) => (
+          <SrFilterType value={value} onChange={onChange} className="w-full" />
+        ),
+      },
+      {
+        key: "filter",
+        control: "custom",
+        labelKey: "common.status",
+        render: (value, onChange) => (
+          <SrFilterStatus
+            value={value}
+            onChange={onChange}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "from_location",
+        control: "custom",
+        labelKey: "field.fromLocation",
+        render: (value, onChange) => (
+          <SrFilterFromLocation
+            value={value}
+            onChange={onChange}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "to_location",
+        control: "custom",
+        labelKey: "field.toLocation",
+        render: (value, onChange) => (
+          <SrFilterToLocation
+            value={value}
+            onChange={onChange}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [viewMode, t, tc],
   );
 
-  const combinedFilter =
-    [params.filter, fromLocation, toLocation, srTypeFilter]
-      .filter(Boolean)
-      .join(",") || undefined;
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.STORE_REQUISITION,
+    fields: srFilterFields,
+  });
+
   const queryParams = {
     ...params,
-    filter: combinedFilter,
+    filter: lf.filterParam,
     sort: params.sort ?? "sr_date:desc",
+  };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
   };
 
   // gate แต่ละ query ตาม viewMode ด้วย — ก่อนหน้านี้ทั้งสอง query ยิงพร้อมกันทุก
@@ -218,117 +300,6 @@ export default function StoreRequisitionComponent() {
     }
   };
 
-  // Active filters
-  const selectedStatuses = filter?.startsWith("doc_status|string:")
-    ? filter.slice("doc_status|string:".length).split(",").filter(Boolean)
-    : [];
-
-  const selectedStatusLabels = selectedStatuses
-    .map((key) => {
-      const opt = STORE_REQUISITION_STATUS_OPTIONS.find(
-        (o) => o.value === `doc_status|string:${key}`,
-      );
-      return opt?.label ?? null;
-    })
-    .filter(Boolean);
-
-  const selectedFromLocationIds = !fromLocation?.startsWith(
-    FROM_LOCATION_PREFIX,
-  )
-    ? []
-    : fromLocation
-        .slice(FROM_LOCATION_PREFIX.length)
-        .split(",")
-        .filter(Boolean);
-
-  const selectedToLocationIds = !toLocation?.startsWith(TO_LOCATION_PREFIX)
-    ? []
-    : toLocation.slice(TO_LOCATION_PREFIX.length).split(",").filter(Boolean);
-
-  const locationLabelMap = (() => {
-    const map = new Map<string, string>();
-    for (const loc of locationData?.data ?? []) {
-      map.set(loc.id, `${loc.code} — ${loc.name}`);
-    }
-    return map;
-  })();
-
-  const fromLocationLabelMap = locationLabelMap;
-
-  const selectedSrTypes = !srTypeFilter?.startsWith(SR_TYPE_PREFIX)
-    ? []
-    : srTypeFilter.slice(SR_TYPE_PREFIX.length).split(",").filter(Boolean);
-
-  const clearAllFilters = () => {
-    setFilter("");
-    setFromLocation("");
-    setToLocation("");
-    setSrTypeFilter("");
-  };
-
-  const removeSrTypeAt = (index: number) => {
-    const next = selectedSrTypes.filter((_, j) => j !== index);
-    setSrTypeFilter(
-      next.length > 0 ? `${SR_TYPE_PREFIX}${next.join(",")}` : "",
-    );
-  };
-
-  const removeStatusAt = (index: number) => {
-    const next = selectedStatuses.filter((_, j) => j !== index);
-    setFilter(next.length > 0 ? `doc_status|string:${next.join(",")}` : "");
-  };
-
-  const removeFromLocationAt = (index: number) => {
-    const next = selectedFromLocationIds.filter((_, j) => j !== index);
-    setFromLocation(
-      next.length > 0 ? `${FROM_LOCATION_PREFIX}${next.join(",")}` : "",
-    );
-  };
-
-  const removeToLocationAt = (index: number) => {
-    const next = selectedToLocationIds.filter((_, j) => j !== index);
-    setToLocation(
-      next.length > 0 ? `${TO_LOCATION_PREFIX}${next.join(",")}` : "",
-    );
-  };
-
-  const activeFilters: ActiveFilter[] = [];
-  for (let i = 0; i < selectedStatusLabels.length; i++) {
-    const label = selectedStatusLabels[i];
-    if (!label) continue;
-    activeFilters.push({
-      key: `status-${selectedStatuses[i]}`,
-      label,
-      onRemove: () => removeStatusAt(i),
-    });
-  }
-  for (let i = 0; i < selectedFromLocationIds.length; i++) {
-    const id = selectedFromLocationIds[i];
-    const label = fromLocationLabelMap.get(id) ?? id;
-    activeFilters.push({
-      key: `from-location-${id}`,
-      label,
-      onRemove: () => removeFromLocationAt(i),
-    });
-  }
-  for (let i = 0; i < selectedToLocationIds.length; i++) {
-    const id = selectedToLocationIds[i];
-    const label = locationLabelMap.get(id) ?? id;
-    activeFilters.push({
-      key: `to-location-${id}`,
-      label,
-      onRemove: () => removeToLocationAt(i),
-    });
-  }
-  for (let i = 0; i < selectedSrTypes.length; i++) {
-    const type = selectedSrTypes[i];
-    activeFilters.push({
-      key: `sr-type-${type}`,
-      label: tc(type),
-      onRemove: () => removeSrTypeAt(i),
-    });
-  }
-
   const table = useStoreRequisitionTable({
     items,
     totalRecords,
@@ -378,82 +349,19 @@ export default function StoreRequisitionComponent() {
               >
                 {t("allDocuments")}
               </Button>
-              <SrFilterType value={srTypeFilter} onChange={setSrTypeFilter} />
-              <SrFilterStatus value={filter} onChange={setFilter} />
-              <SrFilterFromLocation
-                value={fromLocation}
-                onChange={setFromLocation}
-              />
-              <SrFilterToLocation value={toLocation} onChange={setToLocation} />
             </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="text-micro-legal absolute -top-1 -right-1 h-4 min-w-4 px-1 tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      size="sm"
-                      variant={
-                        viewMode === "my-pending" ? "default" : "outline"
-                      }
-                      onClick={() => setViewMode("my-pending")}
-                    >
-                      {t("myPending")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={
-                        viewMode === "all-document" ? "default" : "outline"
-                      }
-                      onClick={() => setViewMode("all-document")}
-                    >
-                      {t("allDocuments")}
-                    </Button>
-                  </div>
-                  <SrFilterType
-                    value={srTypeFilter}
-                    onChange={setSrTypeFilter}
-                  />
-                  <SrFilterStatus value={filter} onChange={setFilter} />
-                  <SrFilterFromLocation
-                    value={fromLocation}
-                    onChange={setFromLocation}
-                  />
-                  <SrFilterToLocation
-                    value={toLocation}
-                    onChange={setToLocation}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={srFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {displayMode === "list" && (
@@ -492,7 +400,7 @@ export default function StoreRequisitionComponent() {
         </div>
 
         {/* Active filter badges */}
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -508,7 +416,7 @@ export default function StoreRequisitionComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -558,6 +466,16 @@ export default function StoreRequisitionComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );
