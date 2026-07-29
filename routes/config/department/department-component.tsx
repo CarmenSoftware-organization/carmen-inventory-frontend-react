@@ -3,7 +3,9 @@ import { useTranslations } from "use-intl";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { useDepartment, useDeleteDepartment } from "@/hooks/use-department";
 import type { Department } from "@/types/department";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useDepartmentTable } from "./use-department-table";
+import { DEPARTMENT_FILTER_FIELDS } from "./department-filter-fields";
 import DepartmentCard from "./department-card";
 
 /**
@@ -30,6 +32,8 @@ export default function DepartmentComponent() {
       useDelete={useDeleteDepartment}
       useTable={useDepartmentTable}
       permissionPrefix="configuration.department"
+      pageKey={LIST_PAGE_KEYS.DEPARTMENT}
+      filterFields={DEPARTMENT_FILTER_FIELDS}
       addPath="/config/department/new"
       getEditPath={(d) => `/config/department/${d.id}`}
       exportColumns={[
