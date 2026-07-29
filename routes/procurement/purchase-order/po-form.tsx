@@ -211,6 +211,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
             !purchaseOrder?.po_status ||
             purchaseOrder.po_status === PO_STATUS.DRAFT
           }
+          isAdd={!purchaseOrder}
         />
 
         <PoNotesSummary

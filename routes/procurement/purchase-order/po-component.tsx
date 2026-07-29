@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -51,6 +50,9 @@ import { usePoTable } from "./use-po-table";
 import PoCardList from "./po-card-list";
 import { usePoActiveFilters } from "./po-active-filters";
 import { DocumentListActions } from "@/components/share/document-list-actions";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { lazy, Suspense } from "react";
 
 // next/dynamic → lazy+Suspense (Batch D hand-fix)
@@ -65,6 +67,17 @@ export default function PoComponent() {
   const tt = useTranslations("toast");
   const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
+  // ไม่มี workflow ให้เริ่มใบเลย = สร้างไม่ได้ ปุ่มจาง แต่กดแล้วยังบอกเหตุผล
+  // (ซ่อนไปเลยพนักงานจะนึกว่าระบบเสีย)
+  const { canCreate: canCreatePo } = useCreatableWorkflows(WORKFLOW_TYPE.PO);
+
+  const handleAdd = () => {
+    if (!canCreatePo) {
+      dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
+      return;
+    }
+    setCreateOpen(true);
+  };
   const [deleteTarget, setDeleteTarget] = useState<PurchaseOrder | null>(null);
   const [viewModeParam, setViewMode] = useURL("view", {
     defaultValue: "my-pending",
@@ -184,15 +197,13 @@ export default function PoComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() => setCreateOpen(true)}
+            onAdd={handleAdd}
             addLabel={t("add")}
+            addDisabled={!canCreatePo}
           />
         </div>
 
@@ -239,7 +250,7 @@ export default function PoComponent() {
                     <Badge
                       variant="secondary"
                       size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
+                      className="text-micro-legal absolute -top-1 -right-1 h-4 min-w-4 px-1 tabular-nums"
                     >
                       {activeFilters.length}
                     </Badge>
@@ -356,9 +367,7 @@ export default function PoComponent() {
             <PoCardList
               items={purchaseOrders}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
-              onEdit={(po) =>
-                navigate(`/procurement/purchase-order/${po.id}`)
-              }
+              onEdit={(po) => navigate(`/procurement/purchase-order/${po.id}`)}
             />
             {useInfiniteScroll && grid.hasMore && (
               <div ref={grid.sentinelRef} className="flex justify-center py-4">

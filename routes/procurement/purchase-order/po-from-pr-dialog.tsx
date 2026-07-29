@@ -212,6 +212,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
                   value={workflowId}
                   onValueChange={setWorkflowId}
                   workflowType={WORKFLOW_TYPE.PO}
+                  creatableOnly
                   disabled={isGrouping}
                   className="w-full text-xs"
                 />
@@ -309,7 +310,7 @@ const StepIndicator = ({ currentStep }: { currentStep: 1 | 2 }) => {
             <div className="flex flex-col items-center gap-1">
               <div
                 className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-full text-micro font-semibold transition-colors",
+                  "text-micro flex size-7 shrink-0 items-center justify-center rounded-full font-semibold transition-colors",
                   // module-procurement accent ให้ตรงกับ Stepper ของ from-price-list
                   isCompleted &&
                     "bg-module-procurement text-primary-foreground",

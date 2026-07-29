@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import {
@@ -56,6 +55,7 @@ export function StepOrderDetails({ form }: StepOrderDetailsProps) {
                     if (fieldState.error) form.trigger("workflow_id");
                   }}
                   workflowType={WORKFLOW_TYPE.PO}
+                  creatableOnly
                   className="w-full text-xs"
                   error={fieldState.error?.message}
                 />

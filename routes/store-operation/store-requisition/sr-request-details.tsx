@@ -35,6 +35,8 @@ interface SrRequestDetailsProps {
   readonly role?: string;
   /** draft/add เท่านั้นที่แสดง workflow picker — ไม่ draft ย้ายไป ribbon cell */
   readonly isDraft?: boolean;
+  /** กำลังสร้างใบใหม่ — workflow ให้เลือกเฉพาะตัวที่ผู้ใช้เริ่มใบได้ */
+  readonly isAdd?: boolean;
 }
 
 export function SrRequestDetails({
@@ -49,6 +51,7 @@ export function SrRequestDetails({
   onToLocInfoChange,
   role,
   isDraft = true,
+  isAdd = false,
 }: SrRequestDetailsProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
@@ -89,6 +92,7 @@ export function SrRequestDetails({
                   value={field.value}
                   onValueChange={field.onChange}
                   workflowType={WORKFLOW_TYPE.SR}
+                  creatableOnly={isAdd}
                   disabled={disabled}
                   error={errors.workflow_id?.message}
                   className="text-xs"

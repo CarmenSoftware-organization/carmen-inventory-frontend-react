@@ -33,6 +33,8 @@ interface PoGeneralFieldsProps {
   readonly plainText?: boolean;
   /** draft/add เท่านั้นที่แสดง workflow picker — ไม่ draft ย้ายไป ribbon cell */
   readonly isDraft?: boolean;
+  /** กำลังสร้างใบใหม่ — workflow ให้เลือกเฉพาะตัวที่ผู้ใช้เริ่มใบได้ */
+  readonly isAdd?: boolean;
 }
 
 /** Field ที่แสดงค่าเป็น plain text (ใช้ใน view/locked mode) */
@@ -66,6 +68,7 @@ export function PoGeneralFields({
   readOnly = false,
   plainText = false,
   isDraft = true,
+  isAdd = false,
 }: PoGeneralFieldsProps) {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
@@ -161,6 +164,7 @@ export function PoGeneralFields({
                 value={field.value}
                 onValueChange={field.onChange}
                 workflowType={WORKFLOW_TYPE.PO}
+                creatableOnly={isAdd}
                 disabled={manualFieldDisabled}
                 className="w-full text-xs"
                 error={fieldState.error?.message}
