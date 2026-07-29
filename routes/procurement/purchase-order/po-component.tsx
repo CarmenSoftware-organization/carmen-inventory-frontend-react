@@ -1,22 +1,9 @@
-import { useState } from "react";
+import { useMemo, useRef, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -24,7 +11,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   usePurchaseOrder,
@@ -34,26 +20,31 @@ import {
 } from "@/hooks/use-purchase-order";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useURL } from "@/hooks/use-url";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
-import { StatusFilter } from "@/components/ui/status-filter";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { usePoTable } from "./use-po-table";
 import PoCardList from "./po-card-list";
-import { usePoActiveFilters } from "./po-active-filters";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
-import { lazy, Suspense } from "react";
+import { FieldLabel } from "@/components/ui/field";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 // next/dynamic → lazy+Suspense (Batch D hand-fix)
 const CreatePODialog = lazy(() =>
@@ -83,26 +74,109 @@ export default function PoComponent() {
     defaultValue: "my-pending",
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
+  // setViewMode (จาก useURL) ได้ reference ใหม่ทุก render — เก็บไว้ใน ref กัน
+  // ไม่ให้หลุดเข้า useMemo deps ของ poFilterFields ข้างล่าง (ไม่งั้น memo ไม่เคย hit)
+  const setViewModeRef = useRef(setViewMode);
+  setViewModeRef.current = setViewMode;
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const isGridMode = isMobile || displayMode === "grid";
   const useInfiniteScroll = !!isMobile;
   const deletePo = useDeletePurchaseOrder();
   const { exportPurchaseOrder, isExporting } = useExportPurchaseOrder();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState({ defaultSort: "po_no:desc" });
-  const [poType, setPoType] = useURL("po_type");
+  const { params, search, setSearch, tableConfig } = useDataGridState({
+    defaultSort: "po_no:desc",
+  });
 
-  const poTypeOptions = Object.entries(PO_TYPE_CONFIG).map(([key, cfg]) => ({
-    label: cfg.label,
-    value: `po_type|string:${key}`,
-  }));
+  // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
+  // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
+  const poTypeOptions = useMemo(
+    () =>
+      Object.entries(PO_TYPE_CONFIG).map(([key, cfg]) => ({
+        label: cfg.label,
+        value: `po_type|string:${key}`,
+      })),
+    [],
+  );
 
-  // empty string → undefined (ต้องใช้ || ไม่ใช่ ?? เพราะ "" ต้องตกเป็น undefined)
-  const combinedFilter =
-    [params.filter, poType].filter(Boolean).join(",") || undefined;
-  const queryParams = { ...params, filter: combinedFilter };
+  // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
+  // ListFilterSheet เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
+  // เหมือน PR pilot) ไม่มี value จริงจึงไม่ถูกนับใน filterParam/activeFilters
+  const poFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "view_mode_toggle",
+        control: "custom",
+        labelKey: "",
+        render: () => (
+          <div className="space-y-1.5 sm:hidden">
+            <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                size="sm"
+                variant={viewMode === "my-pending" ? "default" : "outline"}
+                onClick={() => setViewModeRef.current("my-pending")}
+              >
+                {t("myPending")}
+              </Button>
+              <Button
+                size="sm"
+                variant={viewMode === "all-document" ? "default" : "outline"}
+                onClick={() => setViewModeRef.current("all-document")}
+              >
+                {t("allDocuments")}
+              </Button>
+            </div>
+          </div>
+        ),
+      },
+      { key: "filter", control: "status", labelKey: "common.status" },
+      {
+        key: "po_type",
+        control: "custom",
+        labelKey: "procurement.purchaseOrder.type",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={poTypeOptions}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [viewMode, poTypeOptions, t, tc],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.PURCHASE_ORDER,
+    fields: poFilterFields,
+    defaultSort: "po_no:desc",
+  });
+
+  const queryParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const myPendingQuery = useMyPendingPurchaseOrder(queryParams, {
     enabled: !useInfiniteScroll,
@@ -127,16 +201,6 @@ export default function PoComponent() {
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const { activeFilters, clearAllFilters } = usePoActiveFilters({
-    filter,
-    setFilter,
-    poType,
-    setPoType,
-    search,
-    setSearch,
-    typeOptions: poTypeOptions,
-  });
 
   const handleExport = async () => {
     try {
@@ -208,20 +272,12 @@ export default function PoComponent() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-            <div className="flex-1 sm:flex-initial">
+          <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+            <div className="w-full sm:w-auto sm:flex-initial">
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter value={filter} onChange={setFilter} />
-              <MultiSelectFilter
-                value={poType}
-                onChange={setPoType}
-                placeholder={t("type")}
-                options={poTypeOptions}
-              />
-              <span className="bg-border hidden h-4 w-px sm:block" />
+            <div className="hidden items-center gap-2 sm:flex">
               <Button
                 size="sm"
                 variant={viewMode === "my-pending" ? "default" : "outline"}
@@ -237,68 +293,18 @@ export default function PoComponent() {
                 {t("allDocuments")}
               </Button>
             </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="text-micro-legal absolute -top-1 -right-1 h-4 min-w-4 px-1 tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      size="sm"
-                      variant={
-                        viewMode === "my-pending" ? "default" : "outline"
-                      }
-                      onClick={() => setViewMode("my-pending")}
-                    >
-                      {t("myPending")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={
-                        viewMode === "all-document" ? "default" : "outline"
-                      }
-                      onClick={() => setViewMode("all-document")}
-                    >
-                      {t("allDocuments")}
-                    </Button>
-                  </div>
-                  <StatusFilter value={filter} onChange={setFilter} />
-                  <MultiSelectFilter
-                    value={poType}
-                    onChange={setPoType}
-                    placeholder={t("type")}
-                    options={poTypeOptions}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={poFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             <DataGridColumnVisibility
@@ -334,7 +340,7 @@ export default function PoComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -349,7 +355,7 @@ export default function PoComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -401,6 +407,16 @@ export default function PoComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

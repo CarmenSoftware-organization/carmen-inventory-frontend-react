@@ -1,23 +1,9 @@
-
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import {
-  Columns3,
-  Filter as FilterIcon,
-  LayoutGrid,
-  LayoutList,
-  Loader2,
-} from "lucide-react";
+import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -25,7 +11,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   useCreditNote,
@@ -33,14 +18,12 @@ import {
   useExportCreditNote,
 } from "@/hooks/use-credit-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useURL } from "@/hooks/use-url";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { CN_STATUS_CONFIG, CN_TYPE_CONFIG } from "@/constant/credit-note";
 import type { CreditNote } from "@/types/credit-note";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
-import { StatusFilter } from "@/components/ui/status-filter";
-import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { DocumentListHeader } from "@/components/share/document-list-header";
@@ -49,7 +32,13 @@ import { useCnTable } from "./use-cn-table";
 import CnCardList from "./cn-card-list";
 import EmptyComponent from "@/components/empty-component";
 import { DocumentListActions } from "@/components/share/document-list-actions";
-import { useCnActiveFilters } from "./cn-active-filters";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function CnComponent() {
   const t = useTranslations("procurement.creditNote");
@@ -59,32 +48,94 @@ export default function CnComponent() {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<CreditNote | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const isGridMode = isMobile || displayMode === "grid";
   const useInfiniteScroll = !!isMobile;
   const deleteCn = useDeleteCreditNote();
   const { exportCreditNote, isExporting } = useExportCreditNote();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const [cnType, setCnType] = useURL("cn_type");
-  const [cnStatus, setCnStatus] = useURL("cn_status");
+  const { params, search, setSearch, tableConfig } = useDataGridState();
 
-  const cnTypeOptions = Object.entries(CN_TYPE_CONFIG).map(([key, cfg]) => ({
-    label: cfg.label,
-    value: `credit_note_type|string:${key}`,
-  }));
-
-  const cnStatusOptions = Object.entries(CN_STATUS_CONFIG).map(
-    ([key, cfg]) => ({
-      label: cfg.label,
-      value: `cn_status|string:${key}`,
-    }),
+  // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
+  // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
+  const cnTypeOptions = useMemo(
+    () =>
+      Object.entries(CN_TYPE_CONFIG).map(([key, cfg]) => ({
+        label: cfg.label,
+        value: `credit_note_type|string:${key}`,
+      })),
+    [],
   );
 
-  const combinedFilter =
-    [params.filter, cnType, cnStatus].filter(Boolean).join(",") || undefined;
-  const queryParams = { ...params, filter: combinedFilter };
+  const cnStatusOptions = useMemo(
+    () =>
+      Object.entries(CN_STATUS_CONFIG).map(([key, cfg]) => ({
+        label: cfg.label,
+        value: `cn_status|string:${key}`,
+      })),
+    [],
+  );
+
+  const cnFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      { key: "filter", control: "status", labelKey: "common.status" },
+      {
+        key: "cn_type",
+        control: "custom",
+        labelKey: "procurement.creditNote.type",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={cnTypeOptions}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "cn_status",
+        control: "custom",
+        labelKey: "procurement.creditNote.status",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={cnStatusOptions}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [cnTypeOptions, cnStatusOptions],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.CREDIT_NOTE,
+    fields: cnFilterFields,
+  });
+
+  const queryParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const { data, isLoading, error, refetch } = useCreditNote(queryParams, {
     enabled: !useInfiniteScroll,
@@ -100,19 +151,6 @@ export default function CnComponent() {
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const { activeFilters, clearAllFilters } = useCnActiveFilters({
-    filter,
-    setFilter,
-    cnType,
-    setCnType,
-    cnStatus,
-    setCnStatus,
-    search,
-    setSearch,
-    typeOptions: cnTypeOptions,
-    statusOptions: cnStatusOptions,
-  });
 
   const handleExport = async () => {
     try {
@@ -193,74 +231,23 @@ export default function CnComponent() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex w-full flex-1 items-center gap-2 sm:w-auto">
-            <div className="flex-1 sm:flex-initial">
+          <div className="flex w-full flex-1 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+            <div className="w-full sm:w-auto sm:flex-initial">
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter value={filter} onChange={setFilter} />
-              <MultiSelectFilter
-                value={cnType}
-                onChange={setCnType}
-                placeholder={t("type")}
-                options={cnTypeOptions}
-              />
-              <MultiSelectFilter
-                value={cnStatus}
-                onChange={setCnStatus}
-                placeholder={t("status")}
-                options={cnStatusOptions}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter value={filter} onChange={setFilter} />
-                  <MultiSelectFilter
-                    value={cnType}
-                    onChange={setCnType}
-                    placeholder={t("type")}
-                    options={cnTypeOptions}
-                  />
-                  <MultiSelectFilter
-                    value={cnStatus}
-                    onChange={setCnStatus}
-                    placeholder={t("status")}
-                    options={cnStatusOptions}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={cnFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             <DataGridColumnVisibility
@@ -296,7 +283,7 @@ export default function CnComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -311,7 +298,7 @@ export default function CnComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -353,7 +340,7 @@ export default function CnComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -390,6 +377,16 @@ export default function CnComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );
