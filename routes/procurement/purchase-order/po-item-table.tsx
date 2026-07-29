@@ -17,13 +17,13 @@ import {
   InputSuffixField,
   InputSuffixPlain,
 } from "@/components/ui/input/input-suffix";
-import { formatCurrency, round2 } from "@/lib/currency-utils";
-import { computeLineAmounts } from "@/lib/line-pricing";
+import { formatCurrency } from "@/lib/currency-utils";
 import {
   PO_ITEM_STATUS_CONFIG,
   normalizePoItemStatus,
 } from "@/constant/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
+import { computeItemPricing } from "./po-item-pricing";
 
 /**
  * Read-only display ของชื่อสินค้า — watch แค่ 2 field (name, description)
@@ -41,9 +41,7 @@ const ProductCellDisplay = memo(function ProductCellDisplay({
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   const productLocalName =
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
-  return (
-    <NameWithSubtext primary={productName} secondary={productLocalName} />
-  );
+  return <NameWithSubtext primary={productName} secondary={productLocalName} />;
 });
 
 /**
@@ -242,54 +240,6 @@ export const StatusCell = memo(function StatusCell({
 });
 
 /**
- * item-level pricing = ผลรวมของทุก location (แต่ละ location มี Disc%/Tax ของตัวเอง)
- * price เป็นระดับ item; qty/disc%/tax% มาจาก location
- */
-function computeItemPricing(item: PoFormValues["items"][number] | undefined) {
-  const price = Number(item?.price ?? 0);
-  const conversion = Number(item?.order_unit_conversion_factor ?? 1);
-
-  let orderQty = 0;
-  let subtotal = 0;
-  let discountAmount = 0;
-  let netAmount = 0;
-  let taxAmount = 0;
-  let totalPrice = 0;
-
-  for (const loc of item?.locations ?? []) {
-    const qty = Number(loc?.order_qty) || 0;
-    const line = computeLineAmounts({
-      price,
-      qty,
-      discRate: Number(loc?.discount_rate) || 0,
-      isDiscAdj: loc?.is_discount_adjustment ?? false,
-      discAmt: Number(loc?.discount_amount) || 0,
-      taxRate: Number(loc?.tax_rate) || 0,
-      isTaxAdj: loc?.is_tax_adjustment ?? false,
-      taxAmt: Number(loc?.tax_amount) || 0,
-    });
-    orderQty += qty;
-    subtotal += line.subtotal;
-    discountAmount += line.discountAmount;
-    netAmount += line.netAmount;
-    taxAmount += line.taxAmount;
-    totalPrice += line.totalPrice;
-  }
-
-  const baseQty = round2(orderQty * conversion);
-
-  return {
-    orderQty,
-    subtotal: round2(subtotal),
-    discountAmount: round2(discountAmount),
-    netAmount: round2(netAmount),
-    taxAmount: round2(taxAmount),
-    totalPrice: round2(totalPrice),
-    baseQty,
-  };
-}
-
-/**
  * Merged qty + order unit (Receiving-style) — qty ระดับ item เป็น read-only
  * sum ของ locations.order_qty; unit (order_unit_id) แก้ได้ใน addon
  */
@@ -324,7 +274,9 @@ export const QtyUnitCell = function QtyUnitCell({
 
   if (disabled || readOnly) {
     const unitName = form.getValues(`items.${index}.order_unit_name`) ?? "";
-    return <InputSuffixPlain className="w-full" value={sum} suffix={unitName} />;
+    return (
+      <InputSuffixPlain className="w-full" value={sum} suffix={unitName} />
+    );
   }
 
   return (
@@ -359,7 +311,8 @@ export const OrderSummaryCell = function OrderSummaryCell({
   index: number;
 }) {
   "use no memo";
-  const locations = useWatch({ control, name: `items.${index}.locations` }) ?? [];
+  const locations =
+    useWatch({ control, name: `items.${index}.locations` }) ?? [];
   const unitName =
     useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
   const sum = locations.reduce((a, l) => a + (Number(l?.order_qty) || 0), 0);
@@ -381,7 +334,8 @@ export const RecSummaryCell = function RecSummaryCell({
   index: number;
 }) {
   "use no memo";
-  const locations = useWatch({ control, name: `items.${index}.locations` }) ?? [];
+  const locations =
+    useWatch({ control, name: `items.${index}.locations` }) ?? [];
   const unitName =
     useWatch({ control, name: `items.${index}.order_unit_name` }) ?? "";
   const sum = locations.reduce((a, l) => a + (Number(l?.received_qty) || 0), 0);

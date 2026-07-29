@@ -54,45 +54,6 @@ export const PriceCell = memo(function PriceCell({
   );
 });
 
-/** Inline discount-percent cell — 0-100, right-align */
-export const DiscountRateCell = memo(function DiscountRateCell({
-  form,
-  index,
-  disabled,
-  readOnly,
-}: CellProps) {
-  "use no memo";
-  const rate =
-    useWatch({
-      control: form.control,
-      name: `items.${index}.discount_rate`,
-    }) ?? 0;
-  if (disabled || readOnly) {
-    return <span className="tabular-nums">{rate}%</span>;
-  }
-  return (
-    <Input
-      type="number"
-      inputMode="decimal"
-      min={0}
-      max={100}
-      step="0.01"
-      placeholder="0"
-      className="h-7 text-right tabular-nums"
-      disabled={disabled}
-      defaultValue={rate}
-      {...form.register(`items.${index}.discount_rate`)}
-      onChange={(e) => {
-        const n = e.target.valueAsNumber;
-        form.setValue(`items.${index}.discount_rate`, Number.isNaN(n) ? 0 : n, {
-          shouldDirty: true,
-          shouldValidate: true,
-        });
-      }}
-    />
-  );
-});
-
 interface ProductHeaderCellProps extends CellProps {
   readonly isFoc: boolean;
   readonly showStatusBadge: boolean;
