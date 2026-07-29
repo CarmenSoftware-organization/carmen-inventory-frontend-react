@@ -28,6 +28,7 @@ import {
   useDeletePurchaseRequest,
   useBatchApprovePurchaseRequest,
   useBatchRejectPurchaseRequest,
+  useBatchDeletePurchaseRequest,
   useExportPurchaseRequest,
 } from "@/hooks/use-purchase-request";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
@@ -91,8 +92,6 @@ export default function PurchaseRequestComponent() {
   const [batchRejectOpen, setBatchRejectOpen] = useState(false);
   const [batchDeleteOpen, setBatchDeleteOpen] = useState(false);
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
-  // ใบที่กด "ลบ" ไปแล้ว — ยังไม่มี API จริง จึงซ่อนจากตารางไว้ก่อน
-  const [removedIds, setRemovedIds] = useState<string[]>([]);
   // ใบที่ผู้ใช้กดติ๊กทั้งที่คนละกลุ่มกับที่เลือกค้างไว้ (รอยืนยันว่าจะสลับกลุ่ม)
   const [switchTarget, setSwitchTarget] = useState<PurchaseRequest | null>(
     null,
@@ -110,6 +109,7 @@ export default function PurchaseRequestComponent() {
   const deletePurchaseRequest = useDeletePurchaseRequest();
   const batchApprovePurchaseRequest = useBatchApprovePurchaseRequest();
   const batchRejectPurchaseRequest = useBatchRejectPurchaseRequest();
+  const batchDeletePurchaseRequest = useBatchDeletePurchaseRequest();
   const { exportPurchaseRequest, isExporting } = useExportPurchaseRequest();
 
   const {
@@ -246,8 +246,7 @@ export default function PurchaseRequestComponent() {
     setPrDate,
   });
 
-  const allItems = useInfiniteScroll ? grid.items : (data?.data ?? []);
-  const items = allItems.filter((item) => !removedIds.includes(item.id));
+  const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
@@ -706,17 +705,31 @@ export default function PurchaseRequestComponent() {
 
       <DeleteDialog
         open={batchDeleteOpen}
-        onOpenChange={setBatchDeleteOpen}
+        onOpenChange={(open) =>
+          !open &&
+          !batchDeletePurchaseRequest.isPending &&
+          setBatchDeleteOpen(false)
+        }
         title={t("batchDeleteTitle")}
         description={t("batchDeleteConfirm", { count: selectedItems.length })}
+        isPending={batchDeletePurchaseRequest.isPending}
         onConfirm={() => {
-          // ยังไม่มี API ลบหลายใบ — payload ที่จะยิงคือ [{ id }] ตามที่ตกลงไว้
-          // ระหว่างนี้เอาแถวออกจากตารางไปก่อน (refetch แล้วใบจะกลับมา)
-          const payload = selectedItems.map((item) => ({ id: item.id }));
-          setRemovedIds((prev) => [...prev, ...payload.map((row) => row.id)]);
-          setRowSelection({});
-          setBatchDeleteOpen(false);
-          toast.success(tt("deleteSuccess", { entity: t("entity") }));
+          // ลบทั้งหน้า = หน้านี้จะว่างหลัง refetch ต้องถอยไปหน้าก่อนหน้าเอง
+          // ไม่งั้นคนใช้เจอหน้าเปล่าแล้วนึกว่าข้อมูลหายหมด
+          const clearsPage = selectedItems.length === items.length;
+          batchDeletePurchaseRequest.mutate(
+            { ids: selectedItems.map((item) => item.id) },
+            {
+              onSuccess: () => {
+                toast.success(tt("deleteSuccess", { entity: t("entity") }));
+                setRowSelection({});
+                setBatchDeleteOpen(false);
+                if (clearsPage && table.getState().pagination.pageIndex > 0) {
+                  table.previousPage();
+                }
+              },
+            },
+          );
         }}
       />
 

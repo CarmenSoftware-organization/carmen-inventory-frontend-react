@@ -47,7 +47,8 @@ export function usePurchaseRequest(
         ...params,
       });
       const res = await httpClient.get(url);
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch purchase requests");
+      if (!res.ok)
+        throw await ApiError.from(res, "Failed to fetch purchase requests");
       const json = await res.json();
       const entry = json.data?.[0];
 
@@ -96,7 +97,10 @@ export function useMyPendingPurchaseRequest(
       });
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw await ApiError.from(res, "Failed to fetch my pending purchase requests");
+        throw await ApiError.from(
+          res,
+          "Failed to fetch my pending purchase requests",
+        );
       const json = await res.json();
       const entry = json.data?.[0];
 
@@ -138,7 +142,8 @@ export function usePurchaseRequestWorkflowStages() {
         API_ENDPOINTS.PURCHASE_REQUEST_WORKFLOW_STAGES(buCode),
       );
       const res = await httpClient.get(url);
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch workflow stages");
+      if (!res.ok)
+        throw await ApiError.from(res, "Failed to fetch workflow stages");
       const json = await res.json();
       return json.data ?? [];
     },
@@ -364,10 +369,7 @@ export interface PrPreviousStage {
  * @example
  * const { data } = usePrPreviousStages(prId, isOpen);
  */
-export function usePrPreviousStages(
-  prId: string | undefined,
-  enabled = true,
-) {
+export function usePrPreviousStages(prId: string | undefined, enabled = true) {
   const buCode = useBuCode();
 
   return useQuery<PrPreviousStage[]>({
@@ -376,7 +378,8 @@ export function usePrPreviousStages(
       const res = await httpClient.get(
         API_ENDPOINTS.PURCHASE_REQUEST_PREVIOUS_STAGES(buCode!, prId!),
       );
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch previous stages");
+      if (!res.ok)
+        throw await ApiError.from(res, "Failed to fetch previous stages");
       const json = await res.json();
       const data = json.data ?? {};
       return Object.entries(data).map(([key, label]) => ({
@@ -434,7 +437,10 @@ interface BatchRejectPayload {
 export function useBatchApprovePurchaseRequest() {
   return useApiMutation<BatchApprovePayload>({
     mutationFn: (data, buCode) =>
-      httpClient.post(API_ENDPOINTS.PURCHASE_REQUEST_SWIPE_APPROVE(buCode), data),
+      httpClient.post(
+        API_ENDPOINTS.PURCHASE_REQUEST_SWIPE_APPROVE(buCode),
+        data,
+      ),
     invalidateKeys: PR_INVALIDATE_KEYS,
     errorMessage: "Failed to batch approve purchase requests",
   });
@@ -451,9 +457,35 @@ export function useBatchApprovePurchaseRequest() {
 export function useBatchRejectPurchaseRequest() {
   return useApiMutation<BatchRejectPayload>({
     mutationFn: (data, buCode) =>
-      httpClient.post(API_ENDPOINTS.PURCHASE_REQUEST_SWIPE_REJECT(buCode), data),
+      httpClient.post(
+        API_ENDPOINTS.PURCHASE_REQUEST_SWIPE_REJECT(buCode),
+        data,
+      ),
     invalidateKeys: PR_INVALIDATE_KEYS,
     errorMessage: "Failed to batch reject purchase requests",
+  });
+}
+
+/**
+ * Hook ลบ PR หลายใบพร้อมกัน
+ *
+ * DELETE ไปที่ `/{buCode}/purchase-requests/batch` พร้อม body `{ ids }` —
+ * invalidate ทั้ง list และ my-pending ให้ backend เป็นคนเติมแถวที่หายให้ครบหน้า
+ * (ไม่ทำ optimistic เพราะลบทีละหลายใบ ถ้าพลาดกลางทางแถวจะหายไปทั้งที่ยังอยู่)
+ *
+ * @returns Mutation สำหรับลบ PR หลายใบ
+ * @example
+ * const batch = useBatchDeletePurchaseRequest();
+ * batch.mutate({ ids: selectedIds });
+ */
+export function useBatchDeletePurchaseRequest() {
+  return useApiMutation<{ ids: string[] }>({
+    mutationFn: (data, buCode) =>
+      httpClient.delete(API_ENDPOINTS.PURCHASE_REQUEST_BATCH(buCode), {
+        body: data,
+      }),
+    invalidateKeys: PR_INVALIDATE_KEYS,
+    errorMessage: "Failed to delete purchase requests",
   });
 }
 
@@ -488,7 +520,8 @@ export function useExportPurchaseRequest() {
       fetch: async () => {
         const url = buildUrl(endpoint, { bu_code: buCode, ...params });
         const res = await httpClient.get(url);
-        if (!res.ok) throw await ApiError.from(res, "Failed to fetch purchase requests");
+        if (!res.ok)
+          throw await ApiError.from(res, "Failed to fetch purchase requests");
         const json = await res.json();
         return json.data?.[0]?.data ?? [];
       },

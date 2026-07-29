@@ -60,8 +60,7 @@ export const API_ENDPOINTS = {
   CUISINES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/recipe-cuisines`,
   CURRENCIES: (buCode: string) => `/api/proxy/api/config/${buCode}/currencies`,
-  DASHBOARD_DATASETS: (buCode: string) =>
-    `/api/proxy/api/${buCode}/datasets`,
+  DASHBOARD_DATASETS: (buCode: string) => `/api/proxy/api/${buCode}/datasets`,
   DASHBOARD_DATASET_BY_ID: (buCode: string, id: string) =>
     `/api/proxy/api/${buCode}/datasets/${id}`,
   DASHBOARD_WIDGETS: (buCode: string, module: string) =>
@@ -280,6 +279,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/purchase-requests/for-po`,
   PURCHASE_REQUEST_PREVIOUS_STAGES: (buCode: string, prId: string) =>
     `/api/proxy/api/${buCode}/purchase-requests/${prId}/previous-stages`,
+  PURCHASE_REQUEST_BATCH: (buCode: string) =>
+    `/api/proxy/api/${buCode}/purchase-requests/batch`,
   PURCHASE_REQUEST_SWIPE_APPROVE: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-requests/swipe-approve`,
   PURCHASE_REQUEST_SWIPE_REJECT: (buCode: string) =>
