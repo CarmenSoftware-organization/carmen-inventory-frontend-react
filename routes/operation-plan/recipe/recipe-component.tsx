@@ -1,11 +1,10 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
   Download,
-  Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
@@ -19,13 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -34,7 +26,6 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useRecipe, useDeleteRecipe } from "@/hooks/use-recipe";
 import { useCuisine } from "@/hooks/use-cuisine";
@@ -42,7 +33,6 @@ import { useRecipeCategory } from "@/hooks/use-recipe-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
-import { useURL } from "@/hooks/use-url";
 import type { Recipe } from "@/types/recipe";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { RECIPE_DIFFICULTY_OPTIONS } from "@/constant/recipe";
@@ -53,13 +43,17 @@ import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { useRecipeTable } from "./use-recipe-table";
 import RecipeCard from "./recipe-card";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 /**
  * คอมโพเนนต์หลักของหน้ารายการสูตรอาหาร รองรับ list/grid view และ filter หลายระดับ
@@ -79,42 +73,141 @@ export default function RecipeComponent() {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Recipe | null>(null);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deleteRecipe = useDeleteRecipe();
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const [cuisineFilter, setCuisineFilter] = useURL("cuisine");
-  const [categoryFilter, setCategoryFilter] = useURL("category");
-  const [difficultyFilter, setDifficultyFilter] = useURL("difficulty");
+  const { params, search, setSearch, tableConfig } = useDataGridState();
 
   const isGridMode = isMobile || displayMode === "grid";
 
   const { data: cuisineData } = useCuisine({ perpage: -1 });
   const { data: categoryData } = useRecipeCategory({ perpage: -1 });
 
-  const cuisineFilterOptions = (cuisineData?.data ?? [])
-    .filter((c) => c.is_active)
-    .map((c) => ({ label: c.name, value: `cuisine_id|string:${c.id}` }));
+  const cuisineFilterOptions = useMemo(
+    () =>
+      (cuisineData?.data ?? [])
+        .filter((c) => c.is_active)
+        .map((c) => ({ label: c.name, value: `cuisine_id|string:${c.id}` })),
+    [cuisineData],
+  );
 
-  const categoryFilterOptions = (categoryData?.data ?? [])
-    .filter((c) => c.is_active)
-    .map((c) => ({ label: c.name, value: `category_id|string:${c.id}` }));
+  const categoryFilterOptions = useMemo(
+    () =>
+      (categoryData?.data ?? [])
+        .filter((c) => c.is_active)
+        .map((c) => ({ label: c.name, value: `category_id|string:${c.id}` })),
+    [categoryData],
+  );
 
-  const difficultyFilterOptions = RECIPE_DIFFICULTY_OPTIONS.map((o) => ({
-    label: o.label,
-    value: `difficulty|string:${o.value}`,
-  }));
+  const difficultyFilterOptions = useMemo(
+    () =>
+      RECIPE_DIFFICULTY_OPTIONS.map((o) => ({
+        label: o.label,
+        value: `difficulty|string:${o.value}`,
+      })),
+    [],
+  );
 
-  const combinedRecipeFilters = [
-    params.filter,
-    cuisineFilter,
-    categoryFilter,
-    difficultyFilter,
-  ]
-    .filter(Boolean)
-    .join(",");
-  const combinedParams = { ...params, filter: combinedRecipeFilters || undefined };
+  const STATUS_OPTIONS = useMemo(
+    () => [
+      { label: ts("active"), value: "is_active|bool:true" },
+      { label: ts("inactive"), value: "is_active|bool:false" },
+    ],
+    [ts],
+  );
+
+  // cuisine/category/difficulty เป็นชื่อ/label literal จริง (ไม่ใช่ i18n key)
+  // จึงต้องใช้ control: "custom" ห่อ MultiSelectFilter ตรง ๆ — เหมือน pattern
+  // ของ PO_TYPE/CN_TYPE ใน Task 19 filter (status) ก็ literal เช่นกันเพราะมา
+  // จาก ts() ที่ resolve เป็น string ธรรมดาแล้วก่อนถึง options
+  const recipeFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "custom",
+        labelKey: "common.status",
+        render: (value, onChange) => (
+          <StatusFilter
+            value={value}
+            onChange={onChange}
+            options={STATUS_OPTIONS}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "cuisine",
+        control: "custom",
+        labelKey: "field.cuisine",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={tfl("cuisine")}
+            options={cuisineFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "category",
+        control: "custom",
+        labelKey: "field.category",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={tfl("category")}
+            options={categoryFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "difficulty",
+        control: "custom",
+        labelKey: "field.difficulty",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={tfl("difficulty")}
+            options={difficultyFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [STATUS_OPTIONS, cuisineFilterOptions, categoryFilterOptions, difficultyFilterOptions, tfl],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.RECIPE,
+    fields: recipeFilterFields,
+  });
+
+  const combinedParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const { data, isLoading, error, refetch } = useRecipe(combinedParams, {
     enabled: !isGridMode,
@@ -130,81 +223,6 @@ export default function RecipeComponent() {
   const totalRecords = isGridMode
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const STATUS_OPTIONS = [
-    { label: ts("active"), value: "is_active|bool:true" },
-    { label: ts("inactive"), value: "is_active|bool:false" },
-  ];
-
-  const activeFilters: ActiveFilter[] = (() => {
-    const filters: ActiveFilter[] = [];
-
-    if (filter) {
-      const match = STATUS_OPTIONS.find((o) => o.value === filter);
-      if (match) {
-        filters.push({
-          key: `status-${filter}`,
-          label: match.label,
-          onRemove: () => setFilter(""),
-        });
-      }
-    }
-
-    const urlFilters: {
-      value: string;
-      options: { label: string; value: string }[];
-      key: string;
-      setter: (v: string) => void;
-    }[] = [
-      {
-        value: cuisineFilter,
-        options: cuisineFilterOptions,
-        key: "cuisine",
-        setter: setCuisineFilter,
-      },
-      {
-        value: categoryFilter,
-        options: categoryFilterOptions,
-        key: "category",
-        setter: setCategoryFilter,
-      },
-      {
-        value: difficultyFilter,
-        options: difficultyFilterOptions,
-        key: "difficulty",
-        setter: setDifficultyFilter,
-      },
-    ];
-
-    for (const { value, options, key, setter } of urlFilters) {
-      if (!value) continue;
-      for (const v of value.split(",")) {
-        const match = options.find((o) => o.value === v);
-        if (match) {
-          filters.push({
-            key: `${key}-${v}`,
-            label: match.label,
-            onRemove: () => {
-              const next = value
-                .split(",")
-                .filter((val) => val !== v)
-                .join(",");
-              setter(next);
-            },
-          });
-        }
-      }
-    }
-
-    return filters;
-  })();
-
-  const clearAllFilters = () => {
-    setFilter("");
-    setCuisineFilter("");
-    setCategoryFilter("");
-    setDifficultyFilter("");
-  };
 
   const table = useRecipeTable({
     recipes,
@@ -287,89 +305,18 @@ export default function RecipeComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:flex sm:items-center sm:gap-2">
-              <StatusFilter
-                value={filter}
-                onChange={setFilter}
-                options={STATUS_OPTIONS}
-              />
-              <MultiSelectFilter
-                value={cuisineFilter}
-                onChange={setCuisineFilter}
-                placeholder={tfl("cuisine")}
-                options={cuisineFilterOptions}
-              />
-              <MultiSelectFilter
-                value={categoryFilter}
-                onChange={setCategoryFilter}
-                placeholder={tfl("category")}
-                options={categoryFilterOptions}
-              />
-              <MultiSelectFilter
-                value={difficultyFilter}
-                onChange={setDifficultyFilter}
-                placeholder={tfl("difficulty")}
-                options={difficultyFilterOptions}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter
-                    value={filter}
-                    onChange={setFilter}
-                    options={STATUS_OPTIONS}
-                  />
-                  <MultiSelectFilter
-                    value={cuisineFilter}
-                    onChange={setCuisineFilter}
-                    placeholder={tfl("cuisine")}
-                    options={cuisineFilterOptions}
-                  />
-                  <MultiSelectFilter
-                    value={categoryFilter}
-                    onChange={setCategoryFilter}
-                    placeholder={tfl("category")}
-                    options={categoryFilterOptions}
-                  />
-                  <MultiSelectFilter
-                    value={difficultyFilter}
-                    onChange={setDifficultyFilter}
-                    placeholder={tfl("difficulty")}
-                    options={difficultyFilterOptions}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={recipeFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -407,7 +354,7 @@ export default function RecipeComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -449,7 +396,7 @@ export default function RecipeComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -480,6 +427,16 @@ export default function RecipeComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

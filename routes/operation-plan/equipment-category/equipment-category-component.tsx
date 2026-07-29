@@ -1,10 +1,9 @@
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import {
   Columns3,
   Download,
-  Filter as FilterIcon,
   LayoutGrid,
   LayoutList,
   Loader2,
@@ -18,13 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -33,7 +25,6 @@ import {
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   useEquipmentCategory,
@@ -49,14 +40,18 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useEquipmentCategoryTable } from "./use-equipment-category-table";
 import EquipmentCategoryCard from "./equipment-category-card";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
 const EquipmentCategoryDialog = lazy(() =>
@@ -81,25 +76,85 @@ export default function EquipmentCategoryComponent() {
     null,
   );
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const deleteEquipmentCategory = useDeleteEquipmentCategory();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editCategory, setEditCategory] = useState<EquipmentCategory | null>(
     null,
   );
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
+  const { params, search, setSearch, tableConfig } = useDataGridState();
 
   const isGridMode = isMobile || displayMode === "grid";
 
-  const { data, isLoading, error, refetch } = useEquipmentCategory(params, {
-    enabled: !isGridMode,
+  // STATUS_OPTIONS ใช้ ts() แปลเป็น string จริงแล้วก่อนถึง options (ไม่ใช่
+  // i18n key) จึงต้องใช้ control: "custom" ห่อ StatusFilter ตรง ๆ — เหมือน
+  // pattern ของ PO_TYPE/CN_TYPE ใน Task 19
+  const STATUS_OPTIONS = useMemo(
+    () => [
+      { label: ts("active"), value: "is_active|bool:true" },
+      { label: ts("inactive"), value: "is_active|bool:false" },
+    ],
+    [ts],
+  );
+
+  const equipmentCategoryFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "custom",
+        labelKey: "common.status",
+        render: (value, onChange) => (
+          <StatusFilter
+            value={value}
+            onChange={onChange}
+            options={STATUS_OPTIONS}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [STATUS_OPTIONS],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.EQUIPMENT_CATEGORY,
+    fields: equipmentCategoryFilterFields,
   });
+
+  const combinedParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
+
+  const { data, isLoading, error, refetch } = useEquipmentCategory(
+    combinedParams,
+    {
+      enabled: !isGridMode,
+    },
+  );
 
   const grid = useGridPagination<EquipmentCategory>({
     useListHook: useEquipmentCategory,
-    params,
+    params: combinedParams,
     enabled: isGridMode,
   });
 
@@ -107,28 +162,6 @@ export default function EquipmentCategoryComponent() {
   const totalRecords = isGridMode
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
-
-  const STATUS_OPTIONS = [
-    { label: ts("active"), value: "is_active|bool:true" },
-    { label: ts("inactive"), value: "is_active|bool:false" },
-  ];
-
-  const activeFilters: ActiveFilter[] = (() => {
-    if (!filter) return [];
-    const match = STATUS_OPTIONS.find((o) => o.value === filter);
-    if (!match) return [];
-    return [
-      {
-        key: "filter",
-        label: match.label,
-        onRemove: () => setFilter(""),
-      },
-    ];
-  })();
-
-  const clearAllFilters = () => {
-    setFilter("");
-  };
 
   const handleEdit = (ec: EquipmentCategory) => {
     setEditCategory(ec);
@@ -217,53 +250,18 @@ export default function EquipmentCategoryComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:block">
-              <StatusFilter
-                value={filter}
-                onChange={setFilter}
-                options={STATUS_OPTIONS}
-              />
-            </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="relative h-11 w-11 shrink-0 sm:hidden"
-                  aria-label={tc("aria.openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {activeFilters.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {activeFilters.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80vh]">
-                <SheetHeader>
-                  <SheetTitle>{tc("filter")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <StatusFilter
-                    value={filter}
-                    onChange={setFilter}
-                    options={STATUS_OPTIONS}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {tc("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={equipmentCategoryFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             {!isGridMode && (
@@ -301,7 +299,7 @@ export default function EquipmentCategoryComponent() {
           </div>
         </div>
 
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -342,7 +340,7 @@ export default function EquipmentCategoryComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -383,6 +381,16 @@ export default function EquipmentCategoryComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

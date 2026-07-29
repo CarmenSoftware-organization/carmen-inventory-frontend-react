@@ -1,7 +1,6 @@
 
 import * as React from "react";
-import { useState } from "react";
-import { Filter as FilterIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   DataGrid,
@@ -15,26 +14,26 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { LayoutGrid, LayoutList } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useTranslations } from "use-intl";
 import SearchInput from "@/components/search-input";
-import { Badge } from "@/components/ui/badge";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import type { Report, ReportTemplate } from "@/types/report";
 import { useReportTemplates, useRunReportMutation } from "@/hooks/use-report";
 import { useReportTable } from "./use-report-table";
 import { ReportParamDialog } from "./report-param-dialog";
 import ReportCard from "./report-card";
 import { ReportGroupFilter } from "./report-group-filter";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 const templateToReport = (t: ReportTemplate): Report => {
   return {
@@ -59,26 +58,84 @@ export default function ReportComponent() {
   const isMobile = useIsMobile();
   const buCode = useBuCode();
   const [search, setSearch] = useURL("search");
-  const [groupsRaw, setGroupsRaw] = useURL("groups");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const { params, tableConfig } = useDataGridState({ defaultPerpage: 10 });
-
-  const groupFilter = groupsRaw ? groupsRaw.split(",").filter(Boolean) : [];
-  const setGroupFilter = (values: string[]) => setGroupsRaw(values.join(","));
 
   // Server-side pagination — ส่ง page/perpage/search ไป BE
   const queryParams = { ...params, search: search || undefined };
   const templatesQuery = useReportTemplates(queryParams);
   const runReport = useRunReportMutation();
 
-  const reports = (templatesQuery.data?.data ?? []).map(templateToReport);
+  const reports = useMemo(
+    () => (templatesQuery.data?.data ?? []).map(templateToReport),
+    [templatesQuery.data],
+  );
   const totalRecords = templatesQuery.data?.paginate?.total ?? 0;
   const pageCount = templatesQuery.data?.paginate?.pages ?? 0;
 
-  const reportGroups = [...new Set(reports.map((r) => r.ReportGroup))];
+  const reportGroups = useMemo(
+    () => [...new Set(reports.map((r) => r.ReportGroup))],
+    [reports],
+  );
+
+  // groups เป็น client-side filter ล้วน (ไม่เคยส่งเป็น backend filter param —
+  // filteredReports กรองใน browser จาก reports ของ page ปัจจุบันเท่านั้น) ค่า
+  // URL เก็บเป็น CSV ของชื่อ group จริง (ไม่ใช่ "key|type:value" clause) —
+  // toClause ปล่อย default (passthrough) เพราะ filterParam ไม่ถูกใช้เลย
+  // ReportGroupFilter รับ/คืนค่าเป็น string[] (single-select ปัจจุบัน) จึงแปลง
+  // CSV<->array ในตัว render เอง
+  const reportFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "groups",
+        control: "custom",
+        labelKey: "report.allTypes",
+        render: (value, onChange) => (
+          <ReportGroupFilter
+            value={value ? value.split(",").filter(Boolean) : []}
+            onChange={(values) => onChange(values.join(","))}
+            groups={reportGroups}
+            allTypesLabel={t("allTypes")}
+            noTypesFoundLabel={t("noTypesFound")}
+          />
+        ),
+      },
+    ],
+    [reportGroups, t],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.REPORT_LIST,
+    fields: reportFilterFields,
+  });
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
+
+  const groupFilter = lf.values.groups
+    ? lf.values.groups.split(",").filter(Boolean)
+    : [];
 
   // BE จัดการ search แล้ว — group filter ยัง client-side
   // (filters เฉพาะ items ใน page ปัจจุบัน เพราะ BE ยังไม่รองรับ group filter)
@@ -157,15 +214,18 @@ export default function ReportComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden sm:block">
-              <ReportGroupFilter
-                value={groupFilter}
-                onChange={setGroupFilter}
-                groups={reportGroups}
-                allTypesLabel={t("allTypes")}
-                noTypesFoundLabel={t("noTypesFound")}
-              />
-            </div>
+            <ViewSelector
+              view={lf.view}
+              snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+            />
+            <ListFilterSheet
+              fields={reportFilterFields}
+              values={lf.values}
+              setValue={lf.setValue}
+              onClearAll={lf.clearAll}
+              onSaveClick={() => setSaveViewDialogOpen(true)}
+              activeCount={lf.activeFilters.length}
+            />
             <div className="hidden items-center rounded-md border sm:flex">
               <Button
                 size="icon-sm"
@@ -184,49 +244,9 @@ export default function ReportComponent() {
                 <LayoutGrid className="size-4" />
               </Button>
             </div>
-            <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="sm:hidden"
-                  aria-label={t("openFilters")}
-                >
-                  <FilterIcon aria-hidden="true" />
-                  {groupFilter.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      size="xs"
-                      className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                    >
-                      {groupFilter.length}
-                    </Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="max-h-[80dvh]">
-                <SheetHeader>
-                  <SheetTitle>{t("allTypes")}</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-3 p-4">
-                  <ReportGroupFilter
-                    value={groupFilter}
-                    onChange={setGroupFilter}
-                    groups={reportGroups}
-                    allTypesLabel={t("allTypes")}
-                    noTypesFoundLabel={t("noTypesFound")}
-                  />
-                  <Button
-                    variant="outline"
-                    className="h-11 w-full"
-                    onClick={() => setFilterSheetOpen(false)}
-                  >
-                    {t("done")}
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
           </div>
+
+          <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
         </div>
 
         {/* Content */}
@@ -279,6 +299,16 @@ export default function ReportComponent() {
         report={selectedReport}
         buCode={buCode}
         onRun={handleRunReport}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </>
   );

@@ -1,6 +1,6 @@
 
-import { useRef, useState } from "react";
-import { Filter as FilterIcon, Upload } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -12,13 +12,6 @@ import { DataGridPagination } from "@/components/ui/data-grid/data-grid-paginati
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
   useDocument,
   useUploadDocument,
   useDeleteDocument,
@@ -27,7 +20,6 @@ import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import DocumentCard from "./document-card";
-import { useURL } from "@/hooks/use-url";
 import type { DocumentFile } from "@/types/document";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -35,15 +27,19 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { ModuleTileIcon } from "@/components/ui/module-tile";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { useDocumentTable } from "./use-document-table";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 type FileTypeKey = "pdf" | "xls" | "doc" | "image" | "txt" | "archive" | "code";
 
@@ -60,6 +56,16 @@ const FILE_TYPE_MATCHERS: Record<FileTypeKey, (ct: string) => boolean> = {
     ct.includes("json") || ct.includes("xml") || ct.includes("html"),
 };
 
+const TYPE_OPTIONS: { label: string; value: FileTypeKey }[] = [
+  { label: "PDF", value: "pdf" },
+  { label: "Excel / CSV", value: "xls" },
+  { label: "Word", value: "doc" },
+  { label: "Image", value: "image" },
+  { label: "Text", value: "txt" },
+  { label: "Archive", value: "archive" },
+  { label: "Code", value: "code" },
+];
+
 /**
  * Component หลักของหน้าเอกสาร (Document) รองรับ upload, delete และ filter ประเภทไฟล์
  * @returns React element ของหน้า Document
@@ -72,7 +78,7 @@ export default function DocumentComponent() {
   const deleteDocument = useDeleteDocument();
   const uploadDocument = useUploadDocument();
   const isMobile = useIsMobile();
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const useInfiniteScroll = !!isMobile;
   const { data, isLoading, error, refetch } = useDocument(params, {
@@ -87,21 +93,63 @@ export default function DocumentComponent() {
     enabled: useInfiniteScroll,
   });
   const t = useTranslations("systemAdmin.document");
-  const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
-  const [typeFilter, setTypeFilter] = useURL("type");
 
-  const TYPE_OPTIONS: { label: string; value: FileTypeKey }[] = [
-    { label: "PDF", value: "pdf" },
-    { label: "Excel / CSV", value: "xls" },
-    { label: "Word", value: "doc" },
-    { label: "Image", value: "image" },
-    { label: "Text", value: "txt" },
-    { label: "Archive", value: "archive" },
-    { label: "Code", value: "code" },
-  ];
+  // type เป็น literal string จริง (ไม่ใช่ i18n key) จึงต้องใช้ control: "custom"
+  // ห่อ MultiSelectFilter ตรง ๆ แทน control: "multi-select" ทั่วไป — เหมือน
+  // pattern ของ PO_TYPE/CN_TYPE ใน Task 19 ค่า `type` ถูกใช้ client-side ล้วน
+  // (กรอง allDocuments ในเบราว์เซอร์ ไม่เคยส่งเป็น backend filter param) —
+  // toClause ปล่อย default (passthrough) เพราะ filterParam ไม่ถูกใช้เลย
+  const documentFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "type",
+        control: "custom",
+        labelKey: "field.type",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={tfl("type")}
+            options={TYPE_OPTIONS}
+            searchable
+            searchPlaceholder={t("searchType")}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [t, tfl],
+  );
 
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.DOCUMENT,
+    fields: documentFilterFields,
+  });
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
+
+  const typeFilter = lf.values.type;
   const selectedTypes = new Set(typeFilter ? typeFilter.split(",") : []);
 
   const allDocuments = useInfiniteScroll ? grid.items : (data?.data ?? []);
@@ -119,30 +167,6 @@ export default function DocumentComponent() {
         ? grid.totalRecords
         : (data?.paginate?.total ?? 0)
       : documents.length;
-
-  const activeFilters: ActiveFilter[] = [];
-  if (typeFilter) {
-    for (const v of typeFilter.split(",")) {
-      const match = TYPE_OPTIONS.find((o) => o.value === v);
-      if (match) {
-        activeFilters.push({
-          key: v,
-          label: match.label,
-          onRemove: () => {
-            const next = typeFilter
-              .split(",")
-              .filter((val) => val !== v)
-              .join(",");
-            setTypeFilter(next);
-          },
-        });
-      }
-    }
-  }
-
-  const clearAllFilters = () => {
-    setTypeFilter("");
-  };
 
   const table = useDocumentTable({
     documents,
@@ -215,63 +239,22 @@ export default function DocumentComponent() {
             <SearchInput defaultValue={search} onSearch={setSearch} />
           </div>
           <span className="bg-border hidden h-4 w-px sm:block" />
-          <div className="hidden sm:block">
-            <MultiSelectFilter
-              value={typeFilter}
-              onChange={setTypeFilter}
-              placeholder={tfl("type")}
-              options={TYPE_OPTIONS}
-              searchable
-              searchPlaceholder={t("searchType")}
-            />
-          </div>
-          <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-            <SheetTrigger asChild>
-              <Button
-                size="icon"
-                variant="outline"
-                className="relative h-11 w-11 shrink-0 sm:hidden"
-                aria-label={tc("aria.openFilters")}
-              >
-                <FilterIcon aria-hidden="true" />
-                {activeFilters.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                  >
-                    {activeFilters.length}
-                  </Badge>
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="max-h-[80vh]">
-              <SheetHeader>
-                <SheetTitle>{tc("filter")}</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-3 p-4">
-                <MultiSelectFilter
-                  value={typeFilter}
-                  onChange={setTypeFilter}
-                  placeholder={tfl("type")}
-                  options={TYPE_OPTIONS}
-                  searchable
-                  searchPlaceholder={t("searchType")}
-                />
-                <Button
-                  variant="outline"
-                  className="h-11 w-full"
-                  onClick={() => setFilterSheetOpen(false)}
-                >
-                  {tc("done")}
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <ViewSelector
+            view={lf.view}
+            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+          />
+          <ListFilterSheet
+            fields={documentFilterFields}
+            values={lf.values}
+            setValue={lf.setValue}
+            onClearAll={lf.clearAll}
+            onSaveClick={() => setSaveViewDialogOpen(true)}
+            activeCount={lf.activeFilters.length}
+          />
         </div>
 
         {/* Active filter badges */}
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -315,7 +298,7 @@ export default function DocumentComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                activeFilters.length > 0
+                lf.activeFilters.length > 0
                   ? "max-h-[calc(100vh-13rem-3rem)]"
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
@@ -348,6 +331,16 @@ export default function DocumentComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { Filter as FilterIcon, Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -12,19 +12,11 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useWorkflow, useDeleteWorkflow } from "@/hooks/use-workflow";
 import type { WorkflowDto } from "@/types/workflows";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useURL } from "@/hooks/use-url";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import WfCard from "./wf-card";
 import SearchInput from "@/components/search-input";
@@ -38,35 +30,99 @@ import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { useWfTable } from "./wf-table";
 import { useWfRowMutations } from "./use-wf-row-mutations";
-import {
-  STATUS_OPTIONS,
-  WF_TYPE_OPTIONS,
-  buildActiveFilters,
-} from "./wf-filter-options";
+import { STATUS_OPTIONS, WF_TYPE_OPTIONS } from "./wf-filter-options";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 export default function WorkflowComponent() {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<WorkflowDto | null>(null);
   const deleteWorkflow = useDeleteWorkflow();
   const isMobile = useIsMobile();
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const t = useTranslations("systemAdmin.workflow");
-  const tc = useTranslations("common");
   const tt = useTranslations("toast");
   const ts = useTranslations("status");
-  const statusOptions = STATUS_OPTIONS.map((o) => ({
-    ...o,
-    label: o.value.endsWith("true") ? ts("active") : ts("inactive"),
-  }));
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
-  const [wfType, setWfType] = useURL("workflow_type");
+  const statusOptions = useMemo(
+    () =>
+      STATUS_OPTIONS.map((o) => ({
+        ...o,
+        label: o.value.endsWith("true") ? ts("active") : ts("inactive"),
+      })),
+    [ts],
+  );
+  const { params, search, setSearch, tableConfig } = useDataGridState();
   const { pendingId, toggleActive, duplicate } = useWfRowMutations();
 
-  const combinedFilter = [params.filter, wfType].filter(Boolean).join(",");
-  const combinedParams = {
-    ...params,
-    filter: combinedFilter || undefined,
+  // STATUS_OPTIONS/WF_TYPE_OPTIONS มา createStatusFilterOptions/literal array —
+  // label ไม่ใช่ i18n key ล้วน (status ยัง derive จาก ts() แต่ workflow_type เป็น
+  // literal string จริง) จึงต้องใช้ control: "custom" ห่อ StatusFilter/
+  // MultiSelectFilter ตรง ๆ แทน control ทั่วไป — เหมือน pattern ของ PO_TYPE/CN_TYPE
+  // ใน Task 19
+  const workflowFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "custom",
+        labelKey: "common.status",
+        render: (value, onChange) => (
+          <StatusFilter
+            value={value}
+            onChange={onChange}
+            options={statusOptions}
+            className="w-full"
+          />
+        ),
+      },
+      {
+        key: "workflow_type",
+        control: "custom",
+        labelKey: "systemAdmin.workflow.workflowType",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={t("workflowType")}
+            options={WF_TYPE_OPTIONS}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [statusOptions, t],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.WORKFLOW,
+    fields: workflowFilterFields,
+  });
+
+  const combinedParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
   };
 
   const useInfiniteScroll = !!isMobile;
@@ -80,25 +136,13 @@ export default function WorkflowComponent() {
     enabled: useInfiniteScroll,
   });
 
-  const activeFilters = buildActiveFilters({
-    filter,
-    wfType,
-    setFilter,
-    setWfType,
-  });
-
-  const clearAllFilters = () => {
-    setFilter("");
-    setWfType("");
-  };
-
   const workflows = useInfiniteScroll ? grid.items : (data?.data ?? []);
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
 
   const gridMaxHeight =
-    activeFilters.length > 0
+    lf.activeFilters.length > 0
       ? "max-h-[calc(100vh-13rem-3rem)]"
       : "max-h-[calc(100vh-10rem-3rem)]";
 
@@ -153,69 +197,22 @@ export default function WorkflowComponent() {
             <SearchInput defaultValue={search} onSearch={setSearch} />
           </div>
           <span className="bg-border hidden h-4 w-px sm:block" />
-          <div className="hidden sm:flex sm:items-center sm:gap-2">
-            <StatusFilter
-              value={filter}
-              onChange={setFilter}
-              options={statusOptions}
-            />
-            <MultiSelectFilter
-              value={wfType}
-              onChange={setWfType}
-              placeholder={t("workflowType")}
-              options={WF_TYPE_OPTIONS}
-            />
-          </div>
-          <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-            <SheetTrigger asChild>
-              <Button
-                size="icon"
-                variant="outline"
-                className="relative h-11 w-11 shrink-0 sm:hidden"
-                aria-label={tc("aria.openFilters")}
-              >
-                <FilterIcon aria-hidden="true" />
-                {activeFilters.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                  >
-                    {activeFilters.length}
-                  </Badge>
-                )}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="max-h-[80vh]">
-              <SheetHeader>
-                <SheetTitle>{tc("filter")}</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-3 p-4">
-                <StatusFilter
-                  value={filter}
-                  onChange={setFilter}
-                  options={statusOptions}
-                />
-                <MultiSelectFilter
-                  value={wfType}
-                  onChange={setWfType}
-                  placeholder={t("workflowType")}
-                  options={WF_TYPE_OPTIONS}
-                />
-                <Button
-                  variant="outline"
-                  className="h-11 w-full"
-                  onClick={() => setFilterSheetOpen(false)}
-                >
-                  {tc("done")}
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <ViewSelector
+            view={lf.view}
+            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+          />
+          <ListFilterSheet
+            fields={workflowFilterFields}
+            values={lf.values}
+            setValue={lf.setValue}
+            onClearAll={lf.clearAll}
+            onSaveClick={() => setSaveViewDialogOpen(true)}
+            activeCount={lf.activeFilters.length}
+          />
         </div>
 
         {/* Active filter badges */}
-        <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -289,6 +286,16 @@ export default function WorkflowComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );

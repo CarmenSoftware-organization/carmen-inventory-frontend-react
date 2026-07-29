@@ -1,12 +1,7 @@
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  Download,
-  Filter as FilterIcon,
-  MoreHorizontal,
-  Printer,
-} from "lucide-react";
+import { Download, MoreHorizontal, Printer } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -23,13 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useUser, useDeleteUser } from "@/hooks/use-user";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
@@ -45,12 +33,16 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { ModuleTileIcon } from "@/components/ui/module-tile";
 import { StatusFilter } from "@/components/ui/status-filter";
-import {
-  ActiveFilterBar,
-  type ActiveFilter,
-} from "@/components/ui/active-filter-bar";
+import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { useUserTable } from "./use-user-table";
+import { useListFilters } from "@/hooks/use-list-filters";
+import { ViewSelector } from "@/components/list-filter/view-selector";
+import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
+import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
+import type { FilterFieldDef } from "@/types/list-filter";
+import type { ViewScope } from "@/types/list-view";
 
 /**
  * คอมโพเนนต์หลักของหน้า User list รองรับ DataGrid (desktop), infinite card (mobile) และตัวกรองแผนก
@@ -63,48 +55,87 @@ export default function UserComponent() {
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const deleteUser = useDeleteUser();
   const isMobile = useIsMobile();
-  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const t = useTranslations("systemAdmin.user");
   const tc = useTranslations("common");
-  const { params, search, setSearch, filter, setFilter, tableConfig } =
-    useDataGridState();
+  const { params, search, setSearch, tableConfig } = useDataGridState();
+
+  const { data: deptData } = useDepartment({ perpage: -1 });
+  // department เป็นชื่อ literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
+  // array reference เปลี่ยนทุก render จน userFilterFields memo ข้างล่างไม่เคย hit
+  const deptOptions = useMemo(
+    () =>
+      (deptData?.data ?? [])
+        .filter((d) => d.is_active)
+        .map((d) => ({
+          label: `${d.code} - ${d.name}`,
+          value: `department_id|string:${d.id}`,
+        })),
+    [deptData],
+  );
+
+  // filter (department) เป็น single-select (StatusFilter ไม่ใช่ MultiSelectFilter)
+  // เหมือนโค้ดเดิมทุกประการ — label เป็น literal string จริงจึงต้องใช้
+  // control: "custom" ห่อ StatusFilter ตรง ๆ แทน control: "status" ทั่วไป (ตัวนั้น
+  // เรียก t(option.labelKey) ซึ่งจะ error ถ้า label ไม่ใช่ i18n key)
+  const userFilterFields = useMemo<FilterFieldDef[]>(
+    () => [
+      {
+        key: "filter",
+        control: "custom",
+        labelKey: "systemAdmin.user.department",
+        render: (value, onChange) => (
+          <StatusFilter
+            value={value}
+            onChange={onChange}
+            placeholder={t("department")}
+            options={deptOptions}
+            className="w-full"
+          />
+        ),
+      },
+    ],
+    [deptOptions, t],
+  );
+
+  const lf = useListFilters({
+    pageKey: LIST_PAGE_KEYS.USER,
+    fields: userFilterFields,
+  });
+
+  const combinedParams = { ...params, filter: lf.filterParam };
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
+  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
+    if (existing) {
+      await lf.view.update(existing.id, scope, snapshot);
+      if (existing.id !== lf.view.current?.id) {
+        lf.view.apply({
+          ...existing,
+          filters: snapshot.filters,
+          sort: snapshot.sort,
+        });
+      }
+    } else {
+      const saved = await lf.view.saveAs(name, scope, snapshot);
+      lf.view.apply(saved);
+    }
+  };
 
   const useInfiniteScroll = !!isMobile;
-  const { data, isLoading, error, refetch } = useUser(params, {
+  const { data, isLoading, error, refetch } = useUser(combinedParams, {
     enabled: !useInfiniteScroll,
   });
 
   const grid = useGridPagination<User>({
     useListHook: useUser,
-    params,
+    params: combinedParams,
     enabled: useInfiniteScroll,
   });
-
-  const { data: deptData } = useDepartment({ perpage: -1 });
-  const deptOptions = (deptData?.data ?? [])
-    .filter((d) => d.is_active)
-    .map((d) => ({
-      label: `${d.code} - ${d.name}`,
-      value: `department_id|string:${d.id}`,
-    }));
-
-  const activeFilterTag = filter
-    ? deptOptions.find((o) => o.value === filter)
-    : null;
-
-  const clearAllFilters = () => {
-    setFilter("");
-  };
-
-  const activeFilters: ActiveFilter[] = activeFilterTag
-    ? [
-        {
-          key: "filter",
-          label: activeFilterTag.label,
-          onRemove: () => setFilter(""),
-        },
-      ]
-    : [];
 
   const users = useInfiniteScroll ? grid.items : (data?.data ?? []);
   const totalRecords = useInfiniteScroll
@@ -190,59 +221,22 @@ export default function UserComponent() {
           <SearchInput defaultValue={search} onSearch={setSearch} />
         </div>
         <span className="bg-border hidden h-4 w-px sm:block" />
-        <div className="hidden sm:block">
-          <StatusFilter
-            value={filter}
-            onChange={setFilter}
-            placeholder={t("department")}
-            options={deptOptions}
-          />
-        </div>
-        <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
-          <SheetTrigger asChild>
-            <Button
-              size="icon"
-              variant="outline"
-              className="relative h-11 w-11 shrink-0 sm:hidden"
-              aria-label={tc("aria.openFilters")}
-            >
-              <FilterIcon aria-hidden="true" />
-              {activeFilters.length > 0 && (
-                <Badge
-                  variant="secondary"
-                  size="xs"
-                  className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
-                >
-                  {activeFilters.length}
-                </Badge>
-              )}
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="max-h-[80vh]">
-            <SheetHeader>
-              <SheetTitle>{tc("filter")}</SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col gap-3 p-4">
-              <StatusFilter
-                value={filter}
-                onChange={setFilter}
-                placeholder={t("department")}
-                options={deptOptions}
-              />
-              <Button
-                variant="outline"
-                className="h-11 w-full"
-                onClick={() => setFilterSheetOpen(false)}
-              >
-                {tc("done")}
-              </Button>
-            </div>
-          </SheetContent>
-        </Sheet>
+        <ViewSelector
+          view={lf.view}
+          snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+        />
+        <ListFilterSheet
+          fields={userFilterFields}
+          values={lf.values}
+          setValue={lf.setValue}
+          onClearAll={lf.clearAll}
+          onSaveClick={() => setSaveViewDialogOpen(true)}
+          activeCount={lf.activeFilters.length}
+        />
       </div>
 
       {/* Active filter badges */}
-      <ActiveFilterBar filters={activeFilters} onClearAll={clearAllFilters} />
+      <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
@@ -290,7 +284,7 @@ export default function UserComponent() {
           <DataGridContainer
             className={cn(
               "flex flex-col",
-              activeFilters.length > 0
+              lf.activeFilters.length > 0
                 ? "max-h-[calc(100vh-13rem-3rem)]"
                 : "max-h-[calc(100vh-10rem-3rem)]",
             )}
@@ -326,6 +320,16 @@ export default function UserComponent() {
             },
           });
         }}
+      />
+
+      <SaveViewDialog
+        open={saveViewDialogOpen}
+        onOpenChange={setSaveViewDialogOpen}
+        canManageBu={lf.view.canManageBu}
+        existingNames={(s) =>
+          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
+        }
+        onSave={handleSaveViewDialogSave}
       />
     </div>
   );
