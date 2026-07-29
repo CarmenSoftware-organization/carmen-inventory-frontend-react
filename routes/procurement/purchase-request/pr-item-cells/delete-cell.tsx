@@ -3,7 +3,7 @@ import type { Control } from "react-hook-form";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PrFormValues } from "../pr-form-schema";
-import { useIsRowLocked } from "./helpers";
+import { useIsRowSettled } from "./helpers";
 
 export const DeleteCell = memo(function DeleteCell({
   control,
@@ -15,7 +15,9 @@ export const DeleteCell = memo(function DeleteCell({
   onDelete: (index: number) => void;
 }) {
   "use no memo";
-  const isRowLocked = useIsRowLocked(control, index);
+  // ใช้เกณฑ์ "ตัดสินมาแล้ว" ไม่ใช่ useIsRowLocked — stage purchase แก้แถวที่ approve
+  // มาได้ก็จริง แต่ลบใบที่คนอื่นอนุมัติไปแล้วทิ้งไม่ได้
+  const isRowLocked = useIsRowSettled(control, index);
 
   return (
     <Button

@@ -30,6 +30,7 @@ const TONE: Record<string, DotTone> = {
 export function Pr2StatusPill({
   status,
   initialStatus,
+  canOverrideApproved,
   canEdit,
   onReset,
   className,
@@ -37,6 +38,8 @@ export function Pr2StatusPill({
   readonly status: string;
   /** สถานะตอนโหลดจาก server — ถ้าตัดสินไปแล้วห้ามล้าง (กติกาเดียวกับหน้าเดิม) */
   readonly initialStatus?: string;
+  /** stage นี้ล้างสถานะของแถวที่ approve มาได้ (stage purchase) */
+  readonly canOverrideApproved?: boolean;
   readonly canEdit?: boolean;
   readonly onReset?: () => void;
   readonly className?: string;
@@ -49,7 +52,8 @@ export function Pr2StatusPill({
 
   const initialNormalized = normalizeItemStatus(initialStatus ?? "");
   const lockedFromServer =
-    initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED ||
+    (initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED &&
+      !canOverrideApproved) ||
     initialNormalized === PR_ITEM_STAGE_STATUS.REJECTED;
   const showReset =
     !!canEdit && !!onReset && !lockedFromServer && RESETTABLE.has(normalized);

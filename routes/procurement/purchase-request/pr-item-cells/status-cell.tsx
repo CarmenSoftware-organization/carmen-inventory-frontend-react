@@ -53,8 +53,11 @@ export const StatusCell = memo(function StatusCell({
   const canEdit =
     !!form && (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE);
 
+  // stage purchase เปลี่ยนสถานะแถวที่ approve มาได้ (ผลของ stage ก่อนหน้า ไม่ใช่
+  // คำตัดสินของ stage นี้) — แถวที่ถูก reject มายังล็อก ตรงกับ useIsRowLocked
   const isLockedFromServer =
-    initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED ||
+    (initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED &&
+      role !== STAGE_ROLE.PURCHASE) ||
     initialNormalized === PR_ITEM_STAGE_STATUS.REJECTED;
 
   const handleReset = () => {

@@ -9,6 +9,7 @@ import { Empty } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 import type { PrFormValues } from "../pr-form-schema";
 import { Pr2Row } from "./pr2-row";
+import { PrStageRoleProvider } from "../pr-item-cells/helpers";
 import type { Pr2Sort } from "./pr2-use-rows";
 import type { Pr2Permissions } from "./pr2-permissions";
 import {
@@ -88,7 +89,11 @@ export function Pr2Grid({
   const t = useTranslations("procurement.purchaseRequest");
   const tv2 = useTranslations("procurement.purchaseRequest.v2");
   const tfl = useTranslations("field");
-  const columns = pr2Columns(perms.isCreatorView, showAction, perms.showSelectColumn);
+  const columns = pr2Columns(
+    perms.isCreatorView,
+    showAction,
+    perms.showSelectColumn,
+  );
 
   const allSelected = rows.length > 0 && rows.every((i) => selected.has(i));
   const someSelected = rows.some((i) => selected.has(i));
@@ -198,169 +203,198 @@ export function Pr2Grid({
   }
 
   return (
-    <div
-      ref={setScrollEl}
-      // ความสูงมาจาก flex ของ parent ไม่ใช่ calc(vh) ที่ต้องเดาความสูง chrome
-      // (chrome สูงไม่เท่ากันระหว่างโหมดดูกับโหมดแก้ — textarea หมายเหตุโผล่มา)
-      className="border-border min-h-0 flex-1 overflow-auto rounded-lg border"
-    >
-      {/*
+    // stage role ให้ cell ทุกใบรู้ผ่าน context — `useIsRowLocked` ใช้ตัดสินว่าแถวที่
+    // approve มาจาก stage ก่อนหน้ายังแก้ได้ไหม (stage purchase แก้ได้)
+    <PrStageRoleProvider role={role}>
+      <div
+        ref={setScrollEl}
+        // ความสูงมาจาก flex ของ parent ไม่ใช่ calc(vh) ที่ต้องเดาความสูง chrome
+        // (chrome สูงไม่เท่ากันระหว่างโหมดดูกับโหมดแก้ — textarea หมายเหตุโผล่มา)
+        className="border-border min-h-0 flex-1 overflow-auto rounded-lg border"
+      >
+        {/*
         border-separate ไม่ใช่ border-collapse — collapse ทำให้เส้นขอบกลายเป็นของ
         "ตาราง" ไม่ใช่ของช่อง ช่องที่ตรึงจึงบังเส้นตรงรอยต่อไม่ได้ แถวที่เลื่อนผ่าน
         ใต้มันโผล่ขึ้นมาเป็นเส้นตัวหนังสือวิ่งตามการเลื่อน (ย้อมสีเส้นให้ทึบก็ไม่หาย
         เพราะไม่ใช่เรื่องสี) · separate = แต่ละช่องวาดเส้นของตัวเอง ทับได้จริง
         แลกกับต้องย้ายเส้นล่างจาก <tr> ไปไว้ที่ <td> เพราะโหมดนี้ไม่วาดเส้นของ <tr>
       */}
-      <table
-        className="w-full table-fixed border-separate border-spacing-0 text-sm"
-        style={{ minWidth: pr2MinWidth(perms.isCreatorView, showAction, perms.showSelectColumn) }}
-      >
-        <colgroup>
-          {columns.map((col) => (
-            <col key={col.key} style={{ width: `${col.rem}rem` }} />
-          ))}
-        </colgroup>
+        <table
+          className="w-full table-fixed border-separate border-spacing-0 text-sm"
+          style={{
+            minWidth: pr2MinWidth(
+              perms.isCreatorView,
+              showAction,
+              perms.showSelectColumn,
+            ),
+          }}
+        >
+          <colgroup>
+            {columns.map((col) => (
+              <col key={col.key} style={{ width: `${col.rem}rem` }} />
+            ))}
+          </colgroup>
 
-        <thead>
-          <tr className="text-muted-foreground text-xs font-medium">
-            {columns.map((col, i) => {
-              const frozen = i < pr2FrozenCount(perms.isCreatorView, perms.showSelectColumn);
-              return (
-                <th
-                  key={col.key}
-                  scope="col"
-                  className={cn(
-                    // สีเส้นต้องทึบ ไม่ใช่ `border-border/60` — ช่องหัวที่ตรึงลอยอยู่เหนือหัว
-                    // คอลัมน์อื่นที่เลื่อนผ่านใต้มัน เส้นโปร่งทำให้ตัวหนังสือโผล่ตรงเส้น
-                    // (เดิมมีทั้ง /60 และตัวทึบใส่ซ้อนกัน ตัวโปร่งชนะ)
-                    "bg-muted border-border sticky top-0 z-30 border-r border-b px-2 py-2 font-medium last:border-r-0",
-                    col.align === "right"
-                      ? "text-right"
-                      : col.align === "center"
-                        ? "text-center"
-                        : "text-left",
-                    frozen && "z-40",
-                  )}
-                  style={frozen ? { left: pr2FrozenOffsets(perms.isCreatorView, perms.showSelectColumn)[i] } : undefined}
-                >
-                  {col.key === "select" ? (
-                    perms.canSelectRows && (
-                      <Checkbox
-                        checked={
-                          allSelected
-                            ? true
-                            : someSelected
-                              ? "indeterminate"
-                              : false
-                        }
-                        onCheckedChange={(c) => onSelectAll(c === true)}
-                        aria-label={t("selectAllItems")}
-                      />
-                    )
-                  ) : (col.labelKey || col.label) && col.sortable !== false ? (
-                    // กดหัวคอลัมน์เพื่อเรียง — แทนการจัดกลุ่มตามคลังที่ถอดออกไป
-                    // (อยากดูเรียงตามคลังก็กดที่หัวคอลัมน์คลัง)
-                    <button
-                      type="button"
-                      onClick={() => onSort(col.key)}
-                      className={cn(
-                        "hover:text-foreground inline-flex w-full items-center gap-1 transition-colors",
-                        col.align === "right" && "justify-end",
-                        col.align === "center" && "justify-center",
-                        sort?.key === col.key && "text-foreground",
-                      )}
-                    >
-                      {col.labelKey ? tfl(col.labelKey as "product") : col.label}
-                      {sort?.key === col.key ? (
-                        sort.dir === "asc" ? (
-                          <ArrowUp className="size-3 shrink-0" />
+          <thead>
+            <tr className="text-muted-foreground text-xs font-medium">
+              {columns.map((col, i) => {
+                const frozen =
+                  i <
+                  pr2FrozenCount(perms.isCreatorView, perms.showSelectColumn);
+                return (
+                  <th
+                    key={col.key}
+                    scope="col"
+                    className={cn(
+                      // สีเส้นต้องทึบ ไม่ใช่ `border-border/60` — ช่องหัวที่ตรึงลอยอยู่เหนือหัว
+                      // คอลัมน์อื่นที่เลื่อนผ่านใต้มัน เส้นโปร่งทำให้ตัวหนังสือโผล่ตรงเส้น
+                      // (เดิมมีทั้ง /60 และตัวทึบใส่ซ้อนกัน ตัวโปร่งชนะ)
+                      "bg-muted border-border sticky top-0 z-30 border-r border-b px-2 py-2 font-medium last:border-r-0",
+                      col.align === "right"
+                        ? "text-right"
+                        : col.align === "center"
+                          ? "text-center"
+                          : "text-left",
+                      frozen && "z-40",
+                    )}
+                    style={
+                      frozen
+                        ? {
+                            left: pr2FrozenOffsets(
+                              perms.isCreatorView,
+                              perms.showSelectColumn,
+                            )[i],
+                          }
+                        : undefined
+                    }
+                  >
+                    {col.key === "select" ? (
+                      perms.canSelectRows && (
+                        <Checkbox
+                          checked={
+                            allSelected
+                              ? true
+                              : someSelected
+                                ? "indeterminate"
+                                : false
+                          }
+                          onCheckedChange={(c) => onSelectAll(c === true)}
+                          aria-label={t("selectAllItems")}
+                        />
+                      )
+                    ) : (col.labelKey || col.label) &&
+                      col.sortable !== false ? (
+                      // กดหัวคอลัมน์เพื่อเรียง — แทนการจัดกลุ่มตามคลังที่ถอดออกไป
+                      // (อยากดูเรียงตามคลังก็กดที่หัวคอลัมน์คลัง)
+                      <button
+                        type="button"
+                        onClick={() => onSort(col.key)}
+                        className={cn(
+                          "hover:text-foreground inline-flex w-full items-center gap-1 transition-colors",
+                          col.align === "right" && "justify-end",
+                          col.align === "center" && "justify-center",
+                          sort?.key === col.key && "text-foreground",
+                        )}
+                      >
+                        {col.labelKey
+                          ? tfl(col.labelKey as "product")
+                          : col.label}
+                        {sort?.key === col.key ? (
+                          sort.dir === "asc" ? (
+                            <ArrowUp className="size-3 shrink-0" />
+                          ) : (
+                            <ArrowDown className="size-3 shrink-0" />
+                          )
                         ) : (
-                          <ArrowDown className="size-3 shrink-0" />
-                        )
-                      ) : (
-                        <ChevronsUpDown className="size-3 shrink-0 opacity-30" />
-                      )}
-                    </button>
-                  ) : (
-                    (col.labelKey ? tfl(col.labelKey as "product") : col.label)
-                  )}
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-
-        {rows.length === 0 ? (
-          <tbody>
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="text-muted-foreground px-4 py-10 text-center"
-              >
-                {tv2("noMatch")}
-              </td>
+                          <ChevronsUpDown className="size-3 shrink-0 opacity-30" />
+                        )}
+                      </button>
+                    ) : col.labelKey ? (
+                      tfl(col.labelKey as "product")
+                    ) : (
+                      col.label
+                    )}
+                  </th>
+                );
+              })}
             </tr>
-          </tbody>
-        ) : (
-          <tbody>
-            {/* แถวเว้นระยะบน/ล่าง — เทคนิคนี้ทำให้ <table> ยัง layout คอลัมน์เอง
+          </thead>
+
+          {rows.length === 0 ? (
+            <tbody>
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="text-muted-foreground px-4 py-10 text-center"
+                >
+                  {tv2("noMatch")}
+                </td>
+              </tr>
+            </tbody>
+          ) : (
+            <tbody>
+              {/* แถวเว้นระยะบน/ล่าง — เทคนิคนี้ทำให้ <table> ยัง layout คอลัมน์เอง
                 ได้ตามปกติ (ถ้าใช้ absolute positioning แถวจะหลุดออกจาก colgroup
                 แล้วคอลัมน์เพี้ยนทั้งตาราง) */}
-            {padTop > 0 && (
-              <tr aria-hidden>
-                <td colSpan={columns.length} style={{ height: padTop }} />
-              </tr>
-            )}
+              {padTop > 0 && (
+                <tr aria-hidden>
+                  <td colSpan={columns.length} style={{ height: padTop }} />
+                </tr>
+              )}
 
-            {(virtualize
-              ? virtualItems.map((v) => ({ index: rows[v.index], pos: v.index }))
-              : rows.map((index, pos) => ({ index, pos }))
-            ).map(({ index, pos }) => (
-              <Pr2Row
-                key={index}
-                rowRef={virtualize ? virtualizer.measureElement : undefined}
-                vIndex={pos}
-                control={control}
-                form={form}
-                index={index}
-                selected={selected.has(index)}
-                onSelect={onSelect}
-                dateFormat={dateFormat}
-                zebra={pos % 2 === 1}
-                perms={perms}
-                showAction={showAction}
-                buCode={buCode}
-                baseCurrencyCode={currencyCode}
-                today={today}
-                role={role}
-                onRemove={onRemoveItem}
-              />
-            ))}
+              {(virtualize
+                ? virtualItems.map((v) => ({
+                    index: rows[v.index],
+                    pos: v.index,
+                  }))
+                : rows.map((index, pos) => ({ index, pos }))
+              ).map(({ index, pos }) => (
+                <Pr2Row
+                  key={index}
+                  rowRef={virtualize ? virtualizer.measureElement : undefined}
+                  vIndex={pos}
+                  control={control}
+                  form={form}
+                  index={index}
+                  selected={selected.has(index)}
+                  onSelect={onSelect}
+                  dateFormat={dateFormat}
+                  zebra={pos % 2 === 1}
+                  perms={perms}
+                  showAction={showAction}
+                  buCode={buCode}
+                  baseCurrencyCode={currencyCode}
+                  today={today}
+                  role={role}
+                  onRemove={onRemoveItem}
+                />
+              ))}
 
-            {padBottom > 0 && (
-              <tr aria-hidden>
-                <td colSpan={columns.length} style={{ height: padBottom }} />
-              </tr>
-            )}
-          </tbody>
+              {padBottom > 0 && (
+                <tr aria-hidden>
+                  <td colSpan={columns.length} style={{ height: padBottom }} />
+                </tr>
+              )}
+            </tbody>
+          )}
+        </table>
+
+        {onAddItem && (
+          <div className="border-border/60 border-t px-2 py-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={!!addItemDisabledReason}
+              title={addItemDisabledReason}
+              onClick={onAddItem}
+            >
+              <Plus />
+              {t("addItem")}
+            </Button>
+          </div>
         )}
-      </table>
-
-      {onAddItem && (
-        <div className="border-border/60 border-t px-2 py-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={!!addItemDisabledReason}
-            title={addItemDisabledReason}
-            onClick={onAddItem}
-          >
-            <Plus />
-            {t("addItem")}
-          </Button>
-        </div>
-      )}
-    </div>
+      </div>
+    </PrStageRoleProvider>
   );
 }

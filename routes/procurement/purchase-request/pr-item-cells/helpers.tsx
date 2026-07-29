@@ -1,10 +1,11 @@
 import { useController, useWatch, type Control } from "react-hook-form";
-import { memo, type ReactNode } from "react";
+import { createContext, memo, useContext, type ReactNode } from "react";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { useProductUnits } from "@/hooks/use-product-units";
 import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
+import { STAGE_ROLE } from "@/types/stage-role";
 import type { PrFormValues } from "../pr-form-schema";
 
 type PrUnitField = "requested_unit_id" | "approved_unit_id" | "foc_unit_id";
@@ -24,7 +25,35 @@ export const LOCATION_TYPE_VARIANT: Record<
   consignment: "secondary",
 };
 
-export function useIsRowLocked(
+const PrStageRoleContext = createContext<string | undefined>(undefined);
+
+/**
+ * บอก stage role ของฟอร์มให้ cell ทุกใบรู้ โดยไม่ต้องส่ง prop ไล่ทีละชั้น
+ *
+ * role เป็นของทั้งฟอร์ม ไม่ใช่ของ cell ใด cell หนึ่ง และ cell ที่ต้องใช้มีสิบกว่าใบ
+ * ถ้าไล่ส่ง prop แล้วลืมไปใบเดียวจะได้แถวที่ปลดล็อกครึ่งเดียว ซึ่งแย่กว่าล็อกทั้งแถว
+ */
+export function PrStageRoleProvider({
+  role,
+  children,
+}: {
+  readonly role?: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <PrStageRoleContext.Provider value={role}>
+      {children}
+    </PrStageRoleContext.Provider>
+  );
+}
+
+/**
+ * แถวนี้ถูกตัดสิน (approve/reject) มาจาก server แล้วหรือยัง
+ *
+ * ใช้กับ action ที่ไม่ควรทำกับของที่ตัดสินไปแล้วไม่ว่า stage ไหน เช่น ปุ่มลบ —
+ * ไม่สนใจ stage role ต่างจาก `useIsRowLocked`
+ */
+export function useIsRowSettled(
   control: Control<PrFormValues>,
   index: number,
 ): boolean {
@@ -46,6 +75,36 @@ export function useIsRowLocked(
     initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED ||
     initialNormalized === PR_ITEM_STAGE_STATUS.REJECTED
   );
+}
+
+/**
+ * แถวนี้แก้ไข/ติ๊กเลือกไม่ได้แล้วหรือยัง
+ *
+ * ปกติคือ "ตัดสินมาจาก server แล้ว" ยกเว้น **stage purchase**: ใบที่มาถึงฝ่ายจัดซื้อ
+ * ล้วนผ่าน approve มาแล้ว การ approve นั้นเป็นผลของ stage ก่อนหน้า ไม่ใช่คำตัดสิน
+ * ของ stage นี้ — ฝ่ายจัดซื้อต้องแก้จำนวน/ยอดเงินได้ และต้องส่งกลับหรือไม่อนุมัติได้
+ * ถ้าหาของไม่ได้ จึงไม่ล็อก ส่วนใบที่ถูก reject มายังล็อกไว้เหมือนเดิม เพราะเป็น
+ * คำตัดสินของคนอนุมัติ ไม่ใช่เรื่องของฝ่ายจัดซื้อ
+ */
+export function useIsRowLocked(
+  control: Control<PrFormValues>,
+  index: number,
+): boolean {
+  "use no memo";
+  const role = useContext(PrStageRoleContext);
+  const settled = useIsRowSettled(control, index);
+  const initialStageStatus =
+    useWatch({ control, name: `items.${index}._initial_stage_status` }) ?? "";
+  const initialNormalized =
+    STATUS_NORMALIZE[initialStageStatus] ?? initialStageStatus;
+
+  if (
+    role === STAGE_ROLE.PURCHASE &&
+    initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED
+  ) {
+    return false;
+  }
+  return settled;
 }
 
 export const InventoryTooltipCell = memo(function InventoryTooltipCell({
@@ -147,5 +206,7 @@ export const QtyUnitPlain = memo(function QtyUnitPlain({
     useWatch({ control, name: `items.${index}.${unitField}` }) ?? "";
   const { data: units = [] } = useProductUnits(productId || undefined);
   const unitName = units.find((u) => u.id === unitId)?.name ?? "";
-  return <InputSuffixPlain className="w-full" value={value} suffix={unitName} />;
+  return (
+    <InputSuffixPlain className="w-full" value={value} suffix={unitName} />
+  );
 });

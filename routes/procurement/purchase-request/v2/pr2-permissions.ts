@@ -31,6 +31,14 @@ export interface Pr2Permissions {
   /** โชว์คอลัมน์ checkbox — ต้องแก้ไขได้ด้วย ไม่ใช่แค่ role ถูก */
   readonly showSelectColumn: boolean;
   /**
+   * แถวที่ approve มาจาก stage ก่อนหน้ายังแก้/เปลี่ยนสถานะได้ไหม
+   *
+   * stage purchase ได้ — การ approve นั้นเป็นผลของ stage ก่อน ไม่ใช่คำตัดสินของ
+   * stage นี้ ฝ่ายจัดซื้อต้องส่งกลับหรือไม่อนุมัติได้ถ้าหาของไม่ได้
+   * (แถวที่ถูก reject มายังล็อกทุก role)
+   */
+  readonly canOverrideApprovedRows: boolean;
+  /**
    * ใบยังเป็นร่าง หรือคนดูคือผู้สร้าง — หน้าเดิมตัดคอลัมน์ approved/foc/checkbox
    * และไม่เคยมีคอลัมน์ผู้ขาย/ราคา/ส่วนลด/ภาษีเลยในกรณีนี้
    */
@@ -58,7 +66,7 @@ export function resolvePr2Permissions({
     canAutoAllocate: !isDisabled && isPurchase,
     canSelectRows: isApprove || isPurchase,
     showSelectColumn: (isApprove || isPurchase) && !isDisabled,
+    canOverrideApprovedRows: isPurchase,
     isCreatorView: isDraft || isCreateRole,
   };
 }
-

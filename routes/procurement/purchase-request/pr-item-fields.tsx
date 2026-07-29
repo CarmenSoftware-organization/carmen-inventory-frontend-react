@@ -4,6 +4,7 @@
 
 import { useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
+import { PrStageRoleProvider } from "./pr-item-cells";
 import { useTranslations } from "use-intl";
 import {
   AlertTriangle,
@@ -58,7 +59,6 @@ import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { PrAskAiMenu } from "./ai/pr-ask-ai-menu";
 import { runPrAutoAllocate } from "./pr-auto-allocate";
-
 
 interface PrItemFieldsProps {
   readonly form: UseFormReturn<PrFormValues>;
@@ -345,232 +345,236 @@ export function PrItemFields({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-end gap-1.5">
-          {selectedRows.length > 0 && (
-            <PrAskAiMenu
-              items={selectedRows.map((row) => {
-                const item = form.getValues(`items.${row.index}`);
-                return {
-                  productName: item.product_name,
-                  productLocalName: item.product_local_name,
-                  locationName: item.location_name,
-                };
-              })}
-            />
-          )}
-          {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="xs"
-              onClick={() =>
-                table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
-              }
-            >
-              {table.getIsAllRowsExpanded() ? (
-                <>
-                  <ChevronsDownUp /> {tc("collapseAll")}
-                </>
-              ) : (
-                <>
-                  <ChevronsUpDown /> {tc("expandAll")}
-                </>
-              )}
-            </Button>
-          )}
-          {!isDisabled && role === STAGE_ROLE.CREATE && (
-            <Button
-              type="button"
-              size="xs"
-              disabled={!canAddItem}
-              title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-              onClick={() => handleAddItem()}
-            >
-              <PackagePlus /> {t("addItem")}
-            </Button>
-          )}
-
-          {!isDisabled && role === STAGE_ROLE.PURCHASE && (
-            <Button
-              type="button"
-              size="xs"
-              disabled={isAllocating || itemFields.length === 0}
-              onClick={handleAutoAllocate}
-            >
-              {isAllocating ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <RefreshCcw />
-              )}
-              {t("autoAllocate")}
-            </Button>
-          )}
-        </div>
-        {selectedRows.length > 0 && canBulkAction && (
-          <div className="flex items-center gap-1.5">
-            <Button
-              type="button"
-              variant="success"
-              size="xs"
-              onClick={handleBulkApprove}
-            >
-              <Check />
-              {tc("approve")}
-            </Button>
-            <Button
-              type="button"
-              variant="warning"
-              size="xs"
-              onClick={handleBulkReview}
-            >
-              <Eye />
-              {t("reviewTitle")}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="xs"
-              onClick={handleBulkReject}
-            >
-              <X />
-              {tc("reject")}
-            </Button>
-            {prId && (
+    <PrStageRoleProvider role={role}>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-end gap-1.5">
+            {selectedRows.length > 0 && (
+              <PrAskAiMenu
+                items={selectedRows.map((row) => {
+                  const item = form.getValues(`items.${row.index}`);
+                  return {
+                    productName: item.product_name,
+                    productLocalName: item.product_local_name,
+                    locationName: item.location_name,
+                  };
+                })}
+              />
+            )}
+            {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="xs"
-                onClick={handleBulkSplit}
+                onClick={() =>
+                  table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+                }
               >
-                <Scissors />
-                {t("split")}
+                {table.getIsAllRowsExpanded() ? (
+                  <>
+                    <ChevronsDownUp /> {tc("collapseAll")}
+                  </>
+                ) : (
+                  <>
+                    <ChevronsUpDown /> {tc("expandAll")}
+                  </>
+                )}
+              </Button>
+            )}
+            {!isDisabled && role === STAGE_ROLE.CREATE && (
+              <Button
+                type="button"
+                size="xs"
+                disabled={!canAddItem}
+                title={!canAddItem ? t("selectWorkflowFirst") : undefined}
+                onClick={() => handleAddItem()}
+              >
+                <PackagePlus /> {t("addItem")}
+              </Button>
+            )}
+
+            {!isDisabled && role === STAGE_ROLE.PURCHASE && (
+              <Button
+                type="button"
+                size="xs"
+                disabled={isAllocating || itemFields.length === 0}
+                onClick={handleAutoAllocate}
+              >
+                {isAllocating ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <RefreshCcw />
+                )}
+                {t("autoAllocate")}
               </Button>
             )}
           </div>
-        )}
-      </div>
-
-      <DataGrid
-        table={table}
-        recordCount={itemFields.length}
-        tableLayout={{
-          checkbox: !!prStatus && prStatus !== "draft",
-          columnsResizable: true,
-        }}
-        emptyMessage={
-          <EmptyComponent
-            icon={BoxIcon}
-            title={t("noItems")}
-            description={t("noItemsDesc")}
-            content={
-              !isDisabled &&
-              role === STAGE_ROLE.CREATE && (
+          {selectedRows.length > 0 && canBulkAction && (
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="success"
+                size="xs"
+                onClick={handleBulkApprove}
+              >
+                <Check />
+                {tc("approve")}
+              </Button>
+              <Button
+                type="button"
+                variant="warning"
+                size="xs"
+                onClick={handleBulkReview}
+              >
+                <Eye />
+                {t("reviewTitle")}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="xs"
+                onClick={handleBulkReject}
+              >
+                <X />
+                {tc("reject")}
+              </Button>
+              {prId && (
                 <Button
                   type="button"
+                  variant="outline"
                   size="xs"
-                  disabled={!canAddItem}
-                  title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-                  onClick={() => handleAddItem()}
+                  onClick={handleBulkSplit}
                 >
-                  <Plus /> {t("addItem")}
+                  <Scissors />
+                  {t("split")}
                 </Button>
-              )
-            }
-          />
-        }
-      >
-        {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
+              )}
+            </div>
+          )}
+        </div>
+
+        <DataGrid
+          table={table}
+          recordCount={itemFields.length}
+          tableLayout={{
+            checkbox: !!prStatus && prStatus !== "draft",
+            columnsResizable: true,
+          }}
+          emptyMessage={
+            <EmptyComponent
+              icon={BoxIcon}
+              title={t("noItems")}
+              description={t("noItemsDesc")}
+              content={
+                !isDisabled &&
+                role === STAGE_ROLE.CREATE && (
+                  <Button
+                    type="button"
+                    size="xs"
+                    disabled={!canAddItem}
+                    title={!canAddItem ? t("selectWorkflowFirst") : undefined}
+                    onClick={() => handleAddItem()}
+                  >
+                    <Plus /> {t("addItem")}
+                  </Button>
+                )
+              }
+            />
+          }
+        >
+          {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
             — ไม่ห่อด้วย Radix ScrollArea เพื่อเลี่ยง nested scroll ที่ทำให้ scroll
             แนวนอนสะดุด (เห็นชัดในโหมด edit ที่ตารางกว้าง/หนักกว่า) */}
-        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
-          <DataGridTable />
-        </DataGridContainer>
-      </DataGrid>
+          <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+            <DataGridTable />
+          </DataGridContainer>
+        </DataGrid>
 
-      <DeleteDialog
-        open={deleteIndex !== null}
-        onOpenChange={(o) => {
-          if (!o) setDeleteIndex(null);
-        }}
-        title={t("removeItem")}
-        description={getDeleteDescription(deleteIndex, form)}
-        onConfirm={() => {
-          if (deleteIndex === null) return;
-          removeItem(deleteIndex);
-          setDeleteIndex(null);
-        }}
-      />
-
-      {bulkAction && (
-        <PrActionDialog
-          open={!!bulkAction}
-          onOpenChange={(open) => {
-            if (!open) setBulkAction(null);
+        <DeleteDialog
+          open={deleteIndex !== null}
+          onOpenChange={(o) => {
+            if (!o) setDeleteIndex(null);
           }}
-          onConfirm={handleBulkActionConfirm}
-          items={selectedRows.map(
-            (row): ActionDialogItem => ({
-              index: row.index,
-              productName: form.getValues(`items.${row.index}.product_name`),
-              locationName: form.getValues(`items.${row.index}.location_name`),
-            }),
-          )}
-          {...bulkActionDialogConfig[bulkAction]}
-          {...(bulkAction === PR_ITEM_STAGE_STATUS.REVIEW
-            ? { stages: previousStages, stagesLoading }
-            : {})}
+          title={t("removeItem")}
+          description={getDeleteDescription(deleteIndex, form)}
+          onConfirm={() => {
+            if (deleteIndex === null) return;
+            removeItem(deleteIndex);
+            setDeleteIndex(null);
+          }}
         />
-      )}
 
-      <AlertDialog
-        open={showOverQtyWarning}
-        onOpenChange={setShowOverQtyWarning}
-      >
-        <AlertDialogContent className="gap-0 p-0 sm:max-w-md">
-          {" "}
-          <div className="p-5">
-            <div className="flex items-start gap-3">
-              <div className="bg-muted text-warning-ink flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <AlertTriangle className="size-4.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <AlertDialogTitle className="text-warning-ink text-base">
-                  {t("overQtyWarningTitle")}
-                </AlertDialogTitle>
-                <AlertDialogDescription className="mt-1">
-                  {t("overQtyWarningDesc")}
-                </AlertDialogDescription>
+        {bulkAction && (
+          <PrActionDialog
+            open={!!bulkAction}
+            onOpenChange={(open) => {
+              if (!open) setBulkAction(null);
+            }}
+            onConfirm={handleBulkActionConfirm}
+            items={selectedRows.map(
+              (row): ActionDialogItem => ({
+                index: row.index,
+                productName: form.getValues(`items.${row.index}.product_name`),
+                locationName: form.getValues(
+                  `items.${row.index}.location_name`,
+                ),
+              }),
+            )}
+            {...bulkActionDialogConfig[bulkAction]}
+            {...(bulkAction === PR_ITEM_STAGE_STATUS.REVIEW
+              ? { stages: previousStages, stagesLoading }
+              : {})}
+          />
+        )}
+
+        <AlertDialog
+          open={showOverQtyWarning}
+          onOpenChange={setShowOverQtyWarning}
+        >
+          <AlertDialogContent className="gap-0 p-0 sm:max-w-md">
+            {" "}
+            <div className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="bg-muted text-warning-ink flex size-9 shrink-0 items-center justify-center rounded-lg">
+                  <AlertTriangle className="size-4.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <AlertDialogTitle className="text-warning-ink text-base">
+                    {t("overQtyWarningTitle")}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="mt-1">
+                    {t("overQtyWarningDesc")}
+                  </AlertDialogDescription>
+                </div>
               </div>
             </div>
-          </div>
-          <AlertDialogFooter className="border-t px-5 py-3">
-            <AlertDialogCancel onClick={handleOverQtyCancel}>
-              {tc("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="warning"
-              size="default"
-              onClick={handleOverQtyConfirm}
-            >
-              <Check />
-              {tc("confirm")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            <AlertDialogFooter className="border-t px-5 py-3">
+              <AlertDialogCancel onClick={handleOverQtyCancel}>
+                {tc("cancel")}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant="warning"
+                size="default"
+                onClick={handleOverQtyConfirm}
+              >
+                <Check />
+                {tc("confirm")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
-      <Suspense fallback={null}>
-        <PrSelectDialog
-          open={selectDialogOpen}
-          onOpenChange={setSelectDialogOpen}
-          allCount={allCount}
-          pendingCount={pendingCount}
-          onSelectAll={handleSelectAll}
-          onSelectPending={handleSelectPending}
-        />
-      </Suspense>
-    </div>
+        <Suspense fallback={null}>
+          <PrSelectDialog
+            open={selectDialogOpen}
+            onOpenChange={setSelectDialogOpen}
+            allCount={allCount}
+            pendingCount={pendingCount}
+            onSelectAll={handleSelectAll}
+            onSelectPending={handleSelectPending}
+          />
+        </Suspense>
+      </div>
+    </PrStageRoleProvider>
   );
 }

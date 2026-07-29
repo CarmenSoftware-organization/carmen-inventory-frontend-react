@@ -105,7 +105,11 @@ export const Pr2Row = memo(function Pr2Row({
 
   const item = useWatch({ control, name: `items.${index}` });
   const isRowLocked = useIsRowLocked(control, index);
-  const columns = pr2Columns(perms.isCreatorView, showAction, perms.showSelectColumn);
+  const columns = pr2Columns(
+    perms.isCreatorView,
+    showAction,
+    perms.showSelectColumn,
+  );
 
   // แถวที่ถูกอนุมัติ/ปฏิเสธมาจาก server แล้ว แก้ไม่ได้ (กติกาเดียวกับหน้าเดิม)
   const rowLocked = perms.formLocked || isRowLocked;
@@ -202,6 +206,7 @@ export const Pr2Row = memo(function Pr2Row({
           <Pr2StatusPill
             status={item.current_stage_status || "pending"}
             initialStatus={item._initial_stage_status}
+            canOverrideApproved={perms.canOverrideApprovedRows}
             canEdit={perms.canSelectRows && !perms.formLocked}
             onReset={() => {
               form.setValue(
@@ -369,7 +374,9 @@ export const Pr2Row = memo(function Pr2Row({
         // แถวถูกตัดสินแล้ว) ไม่ผูกกับ role เพราะทุก stage คอมเมนต์ได้
         if (rowLocked) {
           if (!item.comment) {
-            return <span className="text-muted-foreground text-xs">{EMPTY}</span>;
+            return (
+              <span className="text-muted-foreground text-xs">{EMPTY}</span>
+            );
           }
           // ตัดท้ายในเซลล์ ไม่ดันความกว้างคอลัมน์ — อยากอ่านเต็มก็ hover
           return (
@@ -434,7 +441,8 @@ export const Pr2Row = memo(function Pr2Row({
       )}
     >
       {columns.map((col, i) => {
-        const frozen = i < pr2FrozenCount(perms.isCreatorView, perms.showSelectColumn);
+        const frozen =
+          i < pr2FrozenCount(perms.isCreatorView, perms.showSelectColumn);
         return (
           <td
             key={col.key}
@@ -456,7 +464,16 @@ export const Pr2Row = memo(function Pr2Row({
                   frozenBg,
                 ),
             )}
-            style={frozen ? { left: pr2FrozenOffsets(perms.isCreatorView, perms.showSelectColumn)[i] } : undefined}
+            style={
+              frozen
+                ? {
+                    left: pr2FrozenOffsets(
+                      perms.isCreatorView,
+                      perms.showSelectColumn,
+                    )[i],
+                  }
+                : undefined
+            }
           >
             {cellContent(col)}
             {i === 0 && item.product_id && (
