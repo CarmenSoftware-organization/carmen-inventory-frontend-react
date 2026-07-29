@@ -66,6 +66,12 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/datasets`,
   DASHBOARD_DATASET_BY_ID: (buCode: string, id: string) =>
     `/api/proxy/api/${buCode}/datasets/${id}`,
+  DASHBOARD_LAB_DATASETS: (buCode: string) =>
+    `/api/proxy/api/${buCode}/dashboard-lab/datasets`,
+  DASHBOARD_LAB_DATASET_EXEC: (buCode: string, id: string) =>
+    `/api/proxy/api/${buCode}/dashboard-lab/datasets/${id}`,
+  DASHBOARD_LAB_WIDGET_DATA: (buCode: string, widgetId: string) =>
+    `/api/proxy/api/${buCode}/dashboard-lab/widgets/${widgetId}/data?scope=personal`,
   DASHBOARD_WIDGETS: (buCode: string, module: string) =>
     `/api/proxy/api/${buCode}/dashboard-widgets/${module}`,
   DELIVERY_POINTS: (buCode: string) =>

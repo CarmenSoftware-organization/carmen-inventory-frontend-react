@@ -7,6 +7,7 @@ import { CACHE_DYNAMIC } from "@/lib/cache-config";
 import { httpClient } from "@/lib/http-client";
 import type {
   CreateMyDashboardWidgetDto,
+  DashboardDatasetDetail,
   MyDashboardWidget,
   MyDashboardWidgetListResponse,
   UpdateMyDashboardWidgetDto,
@@ -33,6 +34,31 @@ export function useMyDashboardWidgets() {
       return json.data as MyDashboardWidgetListResponse;
     },
     enabled: !!buCode,
+    ...CACHE_DYNAMIC,
+  });
+}
+
+/**
+ * Resolved data ของ widget ที่ save แล้ว — backend อ่าน `params` ที่เก็บไว้บน
+ * widget แล้ว execute ให้ จึงไม่ต้องส่ง params ซ้ำจากฝั่ง client
+ *
+ * ใช้ CACHE_DYNAMIC (1 นาที) เพราะค่าจริงเปลี่ยนได้ตามเวลา
+ * คืน `{ meta, data }` พร้อม render ตาม `meta.shape`
+ */
+export function useMyDashboardWidgetData(widgetId: string | undefined) {
+  const buCode = useBuCode();
+  return useQuery<DashboardDatasetDetail>({
+    queryKey: [QUERY_KEYS.MY_DASHBOARD_WIDGET_DATA, buCode, widgetId],
+    queryFn: async () => {
+      const res = await httpClient.get(
+        API_ENDPOINTS.DASHBOARD_LAB_WIDGET_DATA(buCode!, widgetId!),
+      );
+      if (!res.ok)
+        throw ApiError.fromResponse(res, "Failed to fetch widget data");
+      const json = await res.json();
+      return json.data as DashboardDatasetDetail;
+    },
+    enabled: !!buCode && !!widgetId,
     ...CACHE_DYNAMIC,
   });
 }

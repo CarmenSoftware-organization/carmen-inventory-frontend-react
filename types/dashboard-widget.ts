@@ -2,14 +2,15 @@
 // Dashboard types — canonical schema synced with backend enums
 // =============================================================
 
-/** 6 shapes — backend enum_dataset_shape */
+/** 7 shapes — backend enum_dataset_shape */
 export type DatasetShape =
   | "scalar"
   | "scalar_delta"
   | "time_series"
   | "categorical"
   | "ranked"
-  | "matrix";
+  | "matrix"
+  | "table";
 
 /** 9 widget types — backend enum_dashboard_widget_type */
 export type WidgetType =
@@ -42,6 +43,23 @@ export interface DatasetMeta {
   readonly category: DatasetCategory;
   readonly unit?: string;
 }
+
+// -------------------------------------------------------------
+// Dataset parameters — descriptors drive the widget param form,
+// values are stored on the widget (`params` jsonb) and sent to exec
+// -------------------------------------------------------------
+/** One parameter a dataset accepts. `options` present → render a dropdown. */
+export interface DatasetParam {
+  readonly name: string;
+  readonly label: string;
+  readonly type: "text" | "int";
+  readonly required: boolean;
+  readonly default?: string | number;
+  readonly options?: readonly string[];
+}
+
+/** Config-sourced param values — widget `params` jsonb / exec request body. */
+export type WidgetParams = Record<string, string | number>;
 
 // -------------------------------------------------------------
 // Dataset data — discriminated by shape
@@ -80,6 +98,26 @@ export interface MatrixData {
   readonly values: readonly (readonly number[])[];
 }
 
+export type TableColumnType =
+  | "text"
+  | "number"
+  | "currency"
+  | "date"
+  | "icon";
+
+/** One column of a table-shaped dataset (header label + the row key it reads). */
+export interface TableColumn {
+  readonly key: string;
+  readonly label: string;
+  readonly type?: TableColumnType;
+}
+
+/** Arbitrary-column table payload — column metadata + row objects keyed by column key. */
+export interface TableData {
+  readonly columns: readonly TableColumn[];
+  readonly rows: readonly Record<string, unknown>[];
+}
+
 export type DatasetData<S extends DatasetShape> = S extends "scalar"
   ? ScalarData
   : S extends "scalar_delta"
@@ -92,7 +130,9 @@ export type DatasetData<S extends DatasetShape> = S extends "scalar"
           ? readonly RankedPoint[]
           : S extends "matrix"
             ? MatrixData
-            : never;
+            : S extends "table"
+              ? TableData
+              : never;
 
 // -------------------------------------------------------------
 // Response — GET /api/:bu/datasets/:id (single resolved dataset)
@@ -113,6 +153,7 @@ export interface WidgetConfig {
   readonly widget_type: WidgetType;
   readonly title?: string | null;
   readonly order_index: number;
+  readonly params?: WidgetParams | null;
 }
 
 export interface CreateWidgetDto {
@@ -120,11 +161,13 @@ export interface CreateWidgetDto {
   readonly widget_type: WidgetType;
   readonly title?: string;
   readonly order_index?: number;
+  readonly params?: WidgetParams;
 }
 
 export interface UpdateWidgetDto {
   readonly title?: string;
   readonly order_index?: number;
+  readonly params?: WidgetParams;
 }
 
 export interface WidgetConfigListResponse {
@@ -151,13 +194,15 @@ export interface CompositeWidgetListResponse {
 // -------------------------------------------------------------
 // Shape ↔ Widget type compatibility (picker filter)
 // -------------------------------------------------------------
+/** First entry of each list is the default widget type for that shape. */
 export const SUPPORTED_WIDGETS: Record<DatasetShape, readonly WidgetType[]> = {
   scalar: ["kpi", "gauge"],
   scalar_delta: ["kpi", "gauge"],
   time_series: ["line", "area", "sparkline"],
-  categorical: ["bar", "pie"],
+  categorical: ["pie", "bar"],
   ranked: ["bar", "table"],
   matrix: ["heatmap", "table"],
+  table: ["table"],
 };
 
 export function getWidgetsForShape(
@@ -189,7 +234,12 @@ export function isScalarDeltaData(data: unknown): data is ScalarDeltaData {
 export function isCategoricalData(
   data: unknown,
 ): data is readonly CategoricalPoint[] {
-  return Array.isArray(data);
+  return (
+    Array.isArray(data) &&
+    (data.length === 0 ||
+      (typeof (data[0] as CategoricalPoint).label === "string" &&
+        typeof (data[0] as CategoricalPoint).value === "number"))
+  );
 }
 
 /** Time-series guard — data is an array of {date, value}. */
@@ -201,6 +251,17 @@ export function isTimeSeriesData(
     (data.length === 0 ||
       (typeof (data[0] as TimeSeriesPoint).date === "string" &&
         typeof (data[0] as TimeSeriesPoint).value === "number"))
+  );
+}
+
+/** Table guard — object with array `columns` and `rows` (rejects matrix and array shapes). */
+export function isTableData(data: unknown): data is TableData {
+  return (
+    !!data &&
+    typeof data === "object" &&
+    !Array.isArray(data) &&
+    Array.isArray((data as TableData).columns) &&
+    Array.isArray((data as TableData).rows)
   );
 }
 

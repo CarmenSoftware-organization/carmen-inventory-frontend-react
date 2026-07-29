@@ -1,3 +1,5 @@
+import type { DatasetParam } from "@/types/dashboard-widget";
+
 export type DashboardDatasetShape = "scalar" | "scalar_delta" | (string & {});
 export type DashboardDatasetCategory =
   | "workflow"
@@ -11,4 +13,6 @@ export interface DashboardDataset {
   readonly shape: DashboardDatasetShape;
   readonly category: DashboardDatasetCategory;
   readonly unit: string;
+  /** Parameters the dataset accepts — empty for datasets that take none. */
+  readonly params?: readonly DatasetParam[];
 }
