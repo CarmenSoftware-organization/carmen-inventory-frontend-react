@@ -10,6 +10,7 @@ import {
   useUpdatePriceListTemplate,
 } from "@/hooks/use-price-list-template";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import type {
   CreatePriceListTemplateDto,
   PriceListTemplate,
@@ -63,6 +64,11 @@ export function usePltFormActions({
     isDirty,
     isPending: isPending || isDeletePending,
   });
+
+  // in-app navigation guard: เตือนก่อนออกเมื่อ add/edit และฟอร์มถูกแก้ไข
+  const navGuard = useNavigationGuard(
+    (isAdd || isEdit) && isDirty && !isSubmitting,
+  );
 
   const onSubmit = (values: PltFormValues) => {
     const products = groupDetailsToProducts(values.details);
@@ -134,7 +140,9 @@ export function usePltFormActions({
 
   const handleBack = () => {
     if (isEdit || isAdd) {
-      discard.confirm(() => navigate(-1));
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      discard.confirm(() => navGuard.back());
     } else {
       navigate(-1);
     }
@@ -160,6 +168,7 @@ export function usePltFormActions({
     handleCancel,
     handleBack,
     handleConfirmDelete,
+    navGuard,
     discardDialogProps: discard.dialogProps,
   };
 }

@@ -44,7 +44,6 @@ import { PltValidityStepper } from "./plt-validity-stepper";
 import { PltFormProductsSection } from "./plt-form-products-section";
 import { PltFormDialogs } from "./plt-form-dialogs";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { usePltFormActions } from "./use-plt-form-actions";
 import { FORM_ID } from "./plt-form-helpers";
 import { useProductLabels, useStepperLabels } from "./plt-form-labels";
@@ -119,9 +118,8 @@ export function PriceListTemplateForm({
   });
 
   const isDisabled = isView || actions.isPending;
-  const navGuard = useNavigationGuard(
-    (isAdd || isEdit) && form.formState.isDirty && !actions.isSubmitting,
-  );
+  // guard อยู่ใน usePltFormActions — handleBack ที่นั่นต้องใช้ navGuard.back()
+  const navGuard = actions.navGuard;
 
   const watchedValidity = useWatch({
     control: form.control,

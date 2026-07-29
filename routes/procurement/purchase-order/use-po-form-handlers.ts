@@ -214,7 +214,9 @@ export function usePoFormHandlers({
 
   const goBack = () => {
     if (location.key !== "default") {
-      navigate(-1);
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      navGuard.back();
     } else {
       navigate("/procurement/purchase-order");
     }

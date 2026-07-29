@@ -285,13 +285,15 @@ export function usePrFormActions({
     });
   };
 
-  // กลับ list พร้อม tab/filter/sort ที่ค้างใน URL — navigate(-1) คือ browser back
+  // กลับ list พร้อม tab/filter/sort ที่ค้างใน URL — back คือ browser back
   // ไปยัง history entry ของ list (params ถูกเก็บใน URL อยู่แล้ว). ถ้าเข้า detail
   // ตรง ๆ (deep-link, location.key === "default" คือ entry แรก ไม่มี history ในแอป)
   // fallback ไป list path เปล่า
   const goBack = () => {
     if (location.key !== "default") {
-      navigate(-1);
+      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
+      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
+      navGuard.back();
     } else {
       navigate("/procurement/purchase-request");
     }
