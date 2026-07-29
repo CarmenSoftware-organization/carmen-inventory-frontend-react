@@ -24,6 +24,7 @@ import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { formatDate } from "@/lib/date-utils";
 import { STAGE_ROLE } from "@/types/stage-role";
+import { isRowLocked } from "../pr-item-cells/helpers";
 import { type FormMode } from "@/types/form";
 import {
   PR_STATUS,
@@ -286,8 +287,20 @@ export function PurchaseRequestFormV2({
   const [showOverQtyWarning, setShowOverQtyWarning] = useState(false);
 
   const toggleAll = (checked: boolean) => {
-    if (checked) setSelectDialogOpen(true);
-    else setSelected(new Set());
+    if (!checked) {
+      setSelected(new Set());
+      return;
+    }
+    // ถามว่า "ทั้งหมด หรือเฉพาะที่ยังรอ" ก็ต่อเมื่อสองอย่างนี้ไม่เท่ากัน — ที่ stage
+    // purchase ทุกใบผ่าน approve มาแล้ว ที่ยังรอจึงเป็นศูนย์ ถามไปก็มีคำตอบเดียว
+    if (
+      pendingRows.length === 0 ||
+      pendingRows.length === selectableRows.length
+    ) {
+      setSelected(new Set(selectableRows));
+      return;
+    }
+    setSelectDialogOpen(true);
   };
 
   const { prepend: prependItem, remove: removeItem } = useFieldArray({
@@ -320,15 +333,18 @@ export function PurchaseRequestFormV2({
 
   const watchedItems = useWatch({ control: form.control, name: "items" });
 
-  // นับจากแถวที่แสดงอยู่จริง (กรองแล้ว) เพื่อให้ตัวเลขใน dialog ตรงกับสิ่งที่จะถูก
-  // เลือกจริง — เท่ากับหน้าเดิมเมื่อไม่ได้กรองอะไร
-  const pendingRows = rows.filter((i) => {
+  // นับจากแถวที่แสดงอยู่จริง (กรองแล้ว) และติ๊กได้จริง เพื่อให้ตัวเลขใน dialog ตรงกับ
+  // สิ่งที่จะถูกเลือกจริง — แถวที่ถูกตัดสินมาแล้วเลือกไม่ได้ นับรวมไปก็หลอกตา
+  const selectableRows = rows.filter(
+    (i) => !isRowLocked(watchedItems?.[i] ?? {}, role),
+  );
+  const pendingRows = selectableRows.filter((i) => {
     const status = watchedItems?.[i]?.current_stage_status ?? "";
     return !status || status === PR_ITEM_STAGE_STATUS.PENDING;
   });
 
   const handleSelectAll = () => {
-    setSelected(new Set(rows));
+    setSelected(new Set(selectableRows));
     setSelectDialogOpen(false);
   };
 
@@ -665,7 +681,7 @@ export function PurchaseRequestFormV2({
         <PrSelectDialog
           open={selectDialogOpen}
           onOpenChange={setSelectDialogOpen}
-          allCount={rows.length}
+          allCount={selectableRows.length}
           pendingCount={pendingRows.length}
           onSelectAll={handleSelectAll}
           onSelectPending={handleSelectPending}

@@ -53,15 +53,10 @@ export function PrStageRoleProvider({
  * ใช้กับ action ที่ไม่ควรทำกับของที่ตัดสินไปแล้วไม่ว่า stage ไหน เช่น ปุ่มลบ —
  * ไม่สนใจ stage role ต่างจาก `useIsRowLocked`
  */
-export function useIsRowSettled(
-  control: Control<PrFormValues>,
-  index: number,
+export function isRowSettled(
+  currentStageStatus: string,
+  initialStageStatus: string,
 ): boolean {
-  "use no memo";
-  const currentStageStatus =
-    useWatch({ control, name: `items.${index}.current_stage_status` }) ?? "";
-  const initialStageStatus =
-    useWatch({ control, name: `items.${index}._initial_stage_status` }) ?? "";
   const normalized = STATUS_NORMALIZE[currentStageStatus] ?? currentStageStatus;
   if (
     normalized !== PR_ITEM_STAGE_STATUS.APPROVED &&
@@ -75,6 +70,40 @@ export function useIsRowSettled(
     initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED ||
     initialNormalized === PR_ITEM_STAGE_STATUS.REJECTED
   );
+}
+
+/** ตรรกะเดียวกับ `useIsRowLocked` แต่รับค่ามาตรง ๆ — ใช้นอก React เช่นตอนบอก
+ *  TanStack ว่าแถวไหนติ๊กเลือกได้ */
+export function isRowLocked(
+  item: { current_stage_status?: string; _initial_stage_status?: string },
+  role?: string,
+): boolean {
+  const initialNormalized =
+    STATUS_NORMALIZE[item._initial_stage_status ?? ""] ??
+    item._initial_stage_status ??
+    "";
+  if (
+    role === STAGE_ROLE.PURCHASE &&
+    initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED
+  ) {
+    return false;
+  }
+  return isRowSettled(
+    item.current_stage_status ?? "",
+    item._initial_stage_status ?? "",
+  );
+}
+
+export function useIsRowSettled(
+  control: Control<PrFormValues>,
+  index: number,
+): boolean {
+  "use no memo";
+  const currentStageStatus =
+    useWatch({ control, name: `items.${index}.current_stage_status` }) ?? "";
+  const initialStageStatus =
+    useWatch({ control, name: `items.${index}._initial_stage_status` }) ?? "";
+  return isRowSettled(currentStageStatus, initialStageStatus);
 }
 
 /**
@@ -92,19 +121,18 @@ export function useIsRowLocked(
 ): boolean {
   "use no memo";
   const role = useContext(PrStageRoleContext);
-  const settled = useIsRowSettled(control, index);
+  const currentStageStatus =
+    useWatch({ control, name: `items.${index}.current_stage_status` }) ?? "";
   const initialStageStatus =
     useWatch({ control, name: `items.${index}._initial_stage_status` }) ?? "";
-  const initialNormalized =
-    STATUS_NORMALIZE[initialStageStatus] ?? initialStageStatus;
 
-  if (
-    role === STAGE_ROLE.PURCHASE &&
-    initialNormalized === PR_ITEM_STAGE_STATUS.APPROVED
-  ) {
-    return false;
-  }
-  return settled;
+  return isRowLocked(
+    {
+      current_stage_status: currentStageStatus,
+      _initial_stage_status: initialStageStatus,
+    },
+    role,
+  );
 }
 
 export const InventoryTooltipCell = memo(function InventoryTooltipCell({
