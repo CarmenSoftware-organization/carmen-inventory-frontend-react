@@ -201,6 +201,9 @@ describe("PrActivitySheet", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /Anong/ }));
 
+    // หัวข้อตารางลูกต้องไม่ใช่ชื่อตารางจริง
+    expect(screen.getByText(/^Detail/)).toBeInTheDocument();
+    expect(screen.queryByText(/tb_/)).not.toBeInTheDocument();
     // แถวที่ถูกแก้ต้องบอกได้ว่าเป็นรายการไหน ไม่ใช่แค่ตัวเลขที่เปลี่ยน
     expect(screen.getByText("#2 · Coffee Beans")).toBeInTheDocument();
     expect(screen.getByText("Approved Qty")).toBeInTheDocument();

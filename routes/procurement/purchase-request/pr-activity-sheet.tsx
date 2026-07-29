@@ -73,6 +73,23 @@ function humanize(value: string): string {
     .join(" ");
 }
 
+/**
+ * ชื่อตารางลูก → หัวข้อที่ผู้ใช้อ่านรู้เรื่อง เช่น `tb_purchase_request_detail`
+ * → `Detail` โดยตัด `tb_` และชื่อเอกสารแม่ที่ซ้ำอยู่ข้างหน้าออก (ผู้ใช้ไม่รู้จัก
+ * ชื่อตารางจริง และรู้อยู่แล้วว่ากำลังดูเอกสารใบไหน)
+ * @param relation - ชื่อ relation จาก diff
+ * @param entityType - entity_type ของ log ใช้ตัดคำนำหน้าที่ซ้ำ
+ * @returns หัวข้อของบล็อกตารางลูก
+ */
+function relationLabel(relation: string, entityType: string): string {
+  const parent = entityType.replace(/^tb_/, "");
+  const name = relation.replace(/^tb_/, "");
+  const stripped = name.startsWith(`${parent}_`)
+    ? name.slice(parent.length + 1)
+    : name;
+  return humanize(stripped || name);
+}
+
 /** ค่าจาก snapshot → ข้อความสั้นพอจะอ่านในบรรทัดเดียว */
 function formatValue(value: unknown): string {
   if (value === null || value === undefined || value === "") return "—";
@@ -157,9 +174,11 @@ function RowMarkLine({ mark, label }: { mark: string; label: string }) {
 /** สรุปสิ่งที่เกิดกับตารางลูกหนึ่งตาราง (เช่น รายการสินค้าของ PR) */
 function ChildChangeBlock({
   child,
+  label,
   rowsById,
 }: {
   child: ActivityChildChange;
+  label: string;
   rowsById: Map<string, Record<string, unknown>>;
 }) {
   const t = useTranslations("procurement.purchaseRequest");
@@ -180,7 +199,7 @@ function ChildChangeBlock({
   return (
     <div className="space-y-1">
       <p className="text-[0.6875rem] font-semibold">
-        {humanize(child.relation)}{" "}
+        {label}{" "}
         <span className="text-muted-foreground font-normal">
           {counts.map((c) => `${c.label} ${c.n}`).join(" · ")}
         </span>
@@ -257,6 +276,7 @@ function ActivityChanges({ logId }: { logId: string }) {
         <ChildChangeBlock
           key={child.relation}
           child={child}
+          label={relationLabel(child.relation, data.entity_type)}
           rowsById={indexRows(data.new_data, child.relation)}
         />
       ))}
