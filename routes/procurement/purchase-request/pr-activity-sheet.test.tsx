@@ -21,23 +21,28 @@ vi.mock("@/hooks/use-activity-log", () => ({
   useActivityLogDetail: (...args: unknown[]) => useActivityLogDetail(...args),
 }));
 
-function log(id: string, action: string, description: string) {
+function log(
+  id: string,
+  action: string,
+  actorFirstname: string,
+  newData: Record<string, unknown> | null = null,
+) {
   return {
     id,
     action,
-    description,
+    description: `${action} on tb_purchase_request (${id})`,
     entity_type: "tb_purchase_request",
     entity_id: "pr-1",
     actor_id: null,
     actor_username: "somchai",
-    actor_firstname: "Somchai",
+    actor_firstname: actorFirstname,
     actor_middlename: null,
     actor_lastname: "S",
     ip_address: "127.0.0.1",
     user_agent: null,
     meta_data: null,
     old_data: null,
-    new_data: null,
+    new_data: newData,
     audit: { created: { at: "2026-07-29T03:00:00.000Z", id: null, name: null }, updated: { at: "" } },
   };
 }
@@ -78,7 +83,7 @@ describe("PrActivitySheet", () => {
   it("lists the newest entry first (backend returns oldest first)", () => {
     useActivityLogByRecord.mockReturnValue({
       data: {
-        data: [log("a", "create", "created"), log("b", "update", "submitted")],
+        data: [log("a", "create", "Anong"), log("b", "update", "Boonmee")],
         paginate: { total: 2, page: 1, perpage: 50, pages: 1 },
       },
       isLoading: false,
@@ -86,8 +91,21 @@ describe("PrActivitySheet", () => {
     });
     renderSheet();
     const entries = screen.getAllByRole("button");
-    expect(entries[0]).toHaveTextContent("submitted");
-    expect(entries[1]).toHaveTextContent("created");
+    expect(entries[0]).toHaveTextContent("Boonmee");
+    expect(entries[1]).toHaveTextContent("Anong");
+  });
+
+  it("never shows the raw description — it names the backing table", () => {
+    useActivityLogByRecord.mockReturnValue({
+      data: {
+        data: [log("a", "update", "Anong")],
+        paginate: { total: 1, page: 1, perpage: 50, pages: 1 },
+      },
+      isLoading: false,
+      isError: false,
+    });
+    renderSheet();
+    expect(screen.queryByText(/tb_purchase_request/)).not.toBeInTheDocument();
   });
 
   it("shows the empty state when the document has no activity", () => {
@@ -100,10 +118,10 @@ describe("PrActivitySheet", () => {
     expect(screen.getByText("activityEmpty")).toBeInTheDocument();
   });
 
-  it("loads the diff only for the expanded entry and hides housekeeping fields", async () => {
+  it("loads the diff only for the expanded entry and hides noisy fields", async () => {
     useActivityLogByRecord.mockReturnValue({
       data: {
-        data: [log("a", "update", "edited")],
+        data: [log("a", "update", "Anong")],
         paginate: { total: 1, page: 1, perpage: 50, pages: 1 },
       },
       isLoading: false,
@@ -111,11 +129,12 @@ describe("PrActivitySheet", () => {
     });
     useActivityLogDetail.mockReturnValue({
       data: {
-        ...log("a", "update", "edited"),
+        ...log("a", "update", "Anong"),
         changes: {
           fields: [
             { field: "pr_status", old: "draft", new: "in_progress" },
             { field: "doc_version", old: 1, new: 2 },
+            { field: "workflow_history", old: [], new: [{ action: "submit" }] },
           ],
           children: [],
           has_changes: true,
@@ -128,11 +147,65 @@ describe("PrActivitySheet", () => {
 
     expect(useActivityLogDetail).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByRole("button", { name: /edited/ }));
+    await userEvent.click(screen.getByRole("button", { name: /Anong/ }));
 
     expect(useActivityLogDetail).toHaveBeenCalledWith("a");
     expect(screen.getByText("Pr Status")).toBeInTheDocument();
     expect(screen.getByText("in_progress")).toBeInTheDocument();
     expect(screen.queryByText("Doc Version")).not.toBeInTheDocument();
+    expect(screen.queryByText("Workflow History")).not.toBeInTheDocument();
+  });
+
+  it("names the item row an array change belongs to", async () => {
+    const newData = {
+      tb_purchase_request_detail: [
+        { id: "row-1", sequence_no: 2, product_name: "Coffee Beans" },
+      ],
+    };
+    useActivityLogByRecord.mockReturnValue({
+      data: {
+        data: [log("a", "update", "Anong", newData)],
+        paginate: { total: 1, page: 1, perpage: 50, pages: 1 },
+      },
+      isLoading: false,
+      isError: false,
+    });
+    useActivityLogDetail.mockReturnValue({
+      data: {
+        ...log("a", "update", "Anong", newData),
+        changes: {
+          fields: [],
+          children: [
+            {
+              relation: "tb_purchase_request_detail",
+              added: [{ id: "row-2", sequence_no: 3, product_name: "Sugar" }],
+              removed: [],
+              updated: [
+                {
+                  id: "row-1",
+                  fields: [
+                    { field: "approved_qty", old: 5, new: 8 },
+                    { field: "history", old: [], new: [{ at: "now" }] },
+                  ],
+                },
+              ],
+            },
+          ],
+          has_changes: true,
+        },
+      },
+      isLoading: false,
+      isError: false,
+    });
+    renderSheet();
+
+    await userEvent.click(screen.getByRole("button", { name: /Anong/ }));
+
+    // แถวที่ถูกแก้ต้องบอกได้ว่าเป็นรายการไหน ไม่ใช่แค่ตัวเลขที่เปลี่ยน
+    expect(screen.getByText("#2 · Coffee Beans")).toBeInTheDocument();
+    expect(screen.getByText("Approved Qty")).toBeInTheDocument();
+    expect(screen.queryByText("History")).not.toBeInTheDocument();
+    // แถวที่เพิ่มเข้ามาก็บอกชื่อ ไม่ใช่แค่จำนวน
+    expect(screen.getByText("#3 · Sugar")).toBeInTheDocument();
   });
 });

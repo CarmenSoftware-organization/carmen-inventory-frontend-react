@@ -40,14 +40,29 @@ const ACTION_CLASS: Record<string, string> = {
 };
 
 /**
- * ฟิลด์ที่ขยับทุกครั้งที่บันทึกและไม่ได้บอกว่าผู้ใช้แก้อะไร — ตรงกับ
- * HOUSEKEEPING_FIELDS ฝั่ง backend ที่ไม่นับรวมใน `has_changes`
+ * ฟิลด์ที่ไม่เอามาแสดง
+ * - updated_at/updated_by_id/doc_version: ขยับทุกครั้งที่บันทึก ไม่ได้บอกว่าผู้ใช้
+ *   แก้อะไร (ตรงกับ HOUSEKEEPING_FIELDS ฝั่ง backend ที่ไม่นับใน `has_changes`)
+ * - history/workflow_history: JSON ก้อนใหญ่ที่ระบบเขียนเอง อ่านไม่รู้เรื่องใน diff
+ *   และประวัติ workflow มีหน้าเฉพาะของมันอยู่แล้ว
  */
-const HOUSEKEEPING_FIELDS = new Set([
+const HIDDEN_FIELDS = new Set([
   "updated_at",
   "updated_by_id",
   "doc_version",
+  "history",
+  "workflow_history",
 ]);
+
+/** ฟิลด์ที่ใช้เรียกชื่อแถวลูก ไล่ตามลำดับความชัดเจน */
+const ROW_NAME_FIELDS = [
+  "product_name",
+  "product_local_name",
+  "name",
+  "product_code",
+  "location_name",
+  "description",
+];
 
 /** snake_case → คำอ่านได้ เช่น `pr_status` → `Pr Status` */
 function humanize(value: string): string {
@@ -63,6 +78,44 @@ function formatValue(value: unknown): string {
   if (value === null || value === undefined || value === "") return "—";
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
+}
+
+/**
+ * ชื่อเรียกแถวลูกให้คนอ่านรู้ว่าเป็นแถวไหน เช่น `#2 · Coffee Beans`
+ * diff ของแถวที่ถูกแก้ให้มาแค่ id กับฟิลด์ที่เปลี่ยน จึงต้องหาแถวจริงใน snapshot
+ * มาตั้งชื่อ ไม่งั้นผู้ใช้เห็นแค่ตัวเลขที่เปลี่ยนโดยไม่รู้ว่าของรายการไหน
+ * @param row - แถวจาก snapshot (undefined ได้ถ้าหาไม่เจอ)
+ * @param fallbackId - id ของแถว ใช้เมื่อไม่มีฟิลด์ชื่อให้อ่าน
+ * @returns ข้อความสั้นสำหรับหัวแถว
+ */
+function rowLabelOf(
+  row: Record<string, unknown> | undefined,
+  fallbackId: string,
+): string {
+  const sequence = row?.sequence_no;
+  const name = ROW_NAME_FIELDS.map((key) => row?.[key]).find(
+    (value) => typeof value === "string" && value.trim(),
+  );
+  const parts: string[] = [];
+  if (sequence !== null && sequence !== undefined && sequence !== "")
+    parts.push(`#${String(sequence)}`);
+  if (name) parts.push(String(name));
+  return parts.length ? parts.join(" · ") : fallbackId.slice(0, 8);
+}
+
+/** แถวลูกของ relation หนึ่ง จาก snapshot ทั้งก้อน จัดดัชนีด้วย id */
+function indexRows(
+  snapshot: Record<string, unknown> | null,
+  relation: string,
+): Map<string, Record<string, unknown>> {
+  const rows = snapshot?.[relation];
+  const byId = new Map<string, Record<string, unknown>>();
+  if (!Array.isArray(rows)) return byId;
+  for (const row of rows) {
+    if (row && typeof row === "object" && typeof row.id === "string")
+      byId.set(row.id, row as Record<string, unknown>);
+  }
+  return byId;
 }
 
 /** ชื่อเต็มของผู้กระทำ ถ้าไม่มีค่อยตกไปที่ username */
@@ -91,14 +144,38 @@ function FieldChangeRow({ change }: { change: ActivityFieldChange }) {
   );
 }
 
+/** แถวที่ถูกเพิ่มหรือลบ — บอกชื่อรายการอย่างเดียว ไม่ต้องกางทุกฟิลด์ */
+function RowMarkLine({ mark, label }: { mark: string; label: string }) {
+  return (
+    <p className="py-0.5 text-[0.6875rem]">
+      <span className="text-muted-foreground mr-1">{mark}</span>
+      {label}
+    </p>
+  );
+}
+
 /** สรุปสิ่งที่เกิดกับตารางลูกหนึ่งตาราง (เช่น รายการสินค้าของ PR) */
-function ChildChangeBlock({ child }: { child: ActivityChildChange }) {
+function ChildChangeBlock({
+  child,
+  rowsById,
+}: {
+  child: ActivityChildChange;
+  rowsById: Map<string, Record<string, unknown>>;
+}) {
   const t = useTranslations("procurement.purchaseRequest");
   const counts = [
     { label: t("activityAdded"), n: child.added.length },
     { label: t("activityRemoved"), n: child.removed.length },
     { label: t("activityUpdated"), n: child.updated.length },
   ].filter((c) => c.n > 0);
+
+  // แถวที่เหลือแต่ฟิลด์ที่ซ่อนอยู่แล้ว = ไม่มีอะไรให้ดู
+  const updated = child.updated
+    .map((row) => ({
+      ...row,
+      fields: row.fields.filter((f) => !HIDDEN_FIELDS.has(f.field)),
+    }))
+    .filter((row) => row.fields.length > 0);
 
   return (
     <div className="space-y-1">
@@ -108,13 +185,31 @@ function ChildChangeBlock({ child }: { child: ActivityChildChange }) {
           {counts.map((c) => `${c.label} ${c.n}`).join(" · ")}
         </span>
       </p>
-      {child.updated.map((row) => (
+
+      {child.added.map((row, i) => (
+        <RowMarkLine
+          key={`added-${String(row.id ?? i)}`}
+          mark="+"
+          label={rowLabelOf(row, String(row.id ?? ""))}
+        />
+      ))}
+
+      {child.removed.map((row, i) => (
+        <RowMarkLine
+          key={`removed-${String(row.id ?? i)}`}
+          mark="−"
+          label={rowLabelOf(row, String(row.id ?? ""))}
+        />
+      ))}
+
+      {updated.map((row) => (
         <div key={row.id} className="border-muted border-l-2 pl-2">
-          {row.fields
-            .filter((f) => !HOUSEKEEPING_FIELDS.has(f.field))
-            .map((f) => (
-              <FieldChangeRow key={f.field} change={f} />
-            ))}
+          <p className="text-[0.6875rem] font-medium">
+            {rowLabelOf(rowsById.get(row.id), row.id)}
+          </p>
+          {row.fields.map((f) => (
+            <FieldChangeRow key={f.field} change={f} />
+          ))}
         </div>
       ))}
     </div>
@@ -140,9 +235,7 @@ function ActivityChanges({ logId }: { logId: string }) {
       </p>
     );
 
-  const fields = data.changes.fields.filter(
-    (f) => !HOUSEKEEPING_FIELDS.has(f.field),
-  );
+  const fields = data.changes.fields.filter((f) => !HIDDEN_FIELDS.has(f.field));
 
   if (!fields.length && !data.changes.children.length)
     return (
@@ -161,7 +254,11 @@ function ActivityChanges({ logId }: { logId: string }) {
         </div>
       )}
       {data.changes.children.map((child) => (
-        <ChildChangeBlock key={child.relation} child={child} />
+        <ChildChangeBlock
+          key={child.relation}
+          child={child}
+          rowsById={indexRows(data.new_data, child.relation)}
+        />
       ))}
     </div>
   );
@@ -262,30 +359,26 @@ export function PrActivitySheet({
                       )}
                       aria-hidden="true"
                     />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge
-                          size="sm"
-                          className={cn(
-                            "text-[0.625rem]",
-                            ACTION_CLASS[log.action?.toLowerCase()] ??
-                              "bg-muted text-muted-foreground",
-                          )}
-                        >
-                          {log.action}
-                        </Badge>
-                        <span className="text-xs font-medium">
-                          {actorNameOf(log)}
-                        </span>
-                        <span className="text-muted-foreground text-[0.6875rem]">
-                          {formatDate(getLogCreatedAt(log), datetimeFormat)}
-                        </span>
-                      </div>
-                      {log.description && (
-                        <p className="text-muted-foreground mt-0.5 text-[0.6875rem]">
-                          {log.description}
-                        </p>
-                      )}
+                    {/* ไม่แสดง log.description — backend สร้างเป็น
+                        "update on tb_purchase_request (uuid)" ซึ่งเผยชื่อตาราง
+                        ภายในและไม่ได้บอกอะไรเกินจาก action badge */}
+                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                      <Badge
+                        size="sm"
+                        className={cn(
+                          "text-[0.625rem]",
+                          ACTION_CLASS[log.action?.toLowerCase()] ??
+                            "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {log.action}
+                      </Badge>
+                      <span className="text-xs font-medium">
+                        {actorNameOf(log)}
+                      </span>
+                      <span className="text-muted-foreground text-[0.6875rem]">
+                        {formatDate(getLogCreatedAt(log), datetimeFormat)}
+                      </span>
                     </div>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="pr-1 pl-6">
