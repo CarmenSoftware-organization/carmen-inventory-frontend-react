@@ -4,6 +4,7 @@
  * กฎเหล็ก: analytics ห้ามทำแอปพัง — ทุกทางเข้า fail เงียบ ไม่มี error UI
  * ห้ามเก็บค่าจาก input/form (กัน PII) — เก็บเฉพาะ identity ของ element / path / label
  */
+import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { tokenStore } from "@/lib/auth/token-store";
 import { httpClient } from "@/lib/http-client";
@@ -19,6 +20,13 @@ const MAX_QUEUE_SIZE = 500;
 const MAX_ID_LENGTH = 100;
 const MAX_TEXT_LENGTH = 200;
 const CLICKABLE_SELECTOR = '[data-track], button, a, [role="button"]';
+/** โค้ด error ที่ requeue ได้ (ชั่วคราว/เครือข่าย) — อย่างอื่น (auth/validation) ทิ้ง batch กันวน re-trigger dialog/redirect */
+const RETRYABLE_ERROR_CODES = new Set<string>([
+  ERROR_CODES.NETWORK_ERROR,
+  ERROR_CODES.TIMEOUT,
+  ERROR_CODES.BACKEND_UNAVAILABLE,
+  ERROR_CODES.RATE_LIMITED,
+]);
 
 type AnalyticsEventType = "click" | "page_view";
 
@@ -131,9 +139,13 @@ async function flush(useKeepalive = false): Promise<void> {
       { events: batch },
       useKeepalive ? { keepalive: true } : undefined,
     );
-  } catch {
-    // network/timeout/client-rate-limit: คืน batch เข้าคิวรอรอบหน้า (cap คิวกันบวม)
-    queue = batch.concat(queue).slice(0, MAX_QUEUE_SIZE);
+  } catch (error) {
+    // requeue เฉพาะ error ชั่วคราว (network/timeout/rate-limit) — auth/validation ทิ้งเลย
+    // กันวน re-trigger permission dialog หรือ retry payload ที่ผิดรูปซ้ำ ๆ
+    // หมายเหตุ eviction: requeue วาง batch เดิมไว้หัวคิวแล้วตัดท้าย (ต่างจาก enqueue ที่ทิ้งของเก่าสุด) — ตั้งใจ
+    if (error instanceof ApiError && RETRYABLE_ERROR_CODES.has(error.code)) {
+      queue = batch.concat(queue).slice(0, MAX_QUEUE_SIZE);
+    }
   } finally {
     flushing = false;
   }
