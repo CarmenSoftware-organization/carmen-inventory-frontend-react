@@ -2834,6 +2834,7 @@
       "myPending": "My pending",
       "allDocuments": "All Documents",
       "tabItems": "Items",
+      "tabStock": "Stock",
       "tabWorkflowHistory": "Workflow History",
       "viewHistoryHint": "Tap to view full workflow history",
       "noWorkflowHistory": "No workflow history",

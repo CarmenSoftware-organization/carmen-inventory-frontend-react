@@ -2829,6 +2829,7 @@
       "myPending": "รอดำเนินการของฉัน",
       "allDocuments": "เอกสารทั้งหมด",
       "tabItems": "รายการ",
+      "tabStock": "สต๊อก",
       "tabWorkflowHistory": "ประวัติเวิร์กโฟลว์",
       "viewHistoryHint": "แตะเพื่อดูประวัติเวิร์กโฟลว์ทั้งหมด",
       "noWorkflowHistory": "ไม่มีประวัติเวิร์กโฟลว์",
