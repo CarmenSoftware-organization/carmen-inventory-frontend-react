@@ -1,4 +1,5 @@
 import { Outlet } from "react-router";
+import { AnalyticsBridge } from "@/components/analytics-bridge";
 import { StatusBar } from "@/components/footer/status-bar";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
 import { MissingDepartmentDialog } from "@/components/missing-department-dialog";
@@ -13,6 +14,7 @@ import { SidebarInset } from "@/components/ui/sidebar";
 export default function RootLayout() {
   return (
     <SidebarShell>
+      <AnalyticsBridge />
       <AppSidebar />
       <SidebarInset className="space-main-gradient relative h-dvh overflow-hidden">
         <Navbar />
