@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { BoxIcon, Plus } from "lucide-react";
-import { toast } from "sonner";
+import { BoxIcon } from "lucide-react";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -13,7 +12,6 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { FieldPlainText } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import SearchInput from "@/components/search-input";
@@ -245,13 +243,6 @@ export function SrStockTable({
             disabled={!srId}
             filters={srNo ? { DocumentNo: srNo } : undefined}
           />
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => toast.info(tc("comingSoon"))}
-          >
-            <Plus aria-hidden="true" /> {t("addItem")}
-          </Button>
         </div>
       </div>
 
