@@ -53,8 +53,8 @@ Browser (SPA)                    backend-gateway            micro-business      
 
 ### Page view capture
 
-- ผูกกับ React Router data router: `router.subscribe` ใน `main.tsx` — ยิง event `page_view` เมื่อ `location.pathname` เปลี่ยน
-- `props.route_pattern` เก็บ route pattern แบบ normalize (เช่น `/procurement/purchase-request/:id`) จาก `router.state.matches` (best effort) — จำเป็นสำหรับ funnel ข้ามเอกสาร
+- ผ่าน bridge component (`components/analytics-bridge.tsx`) mount ใน `RootLayout` (ProtectedShell) — ใช้ `useLocation()` ยิง event `page_view` เมื่อ `pathname` เปลี่ยน (แก้จากร่างแรกที่ใช้ `router.subscribe` ใน `main.tsx` — bridge ได้ทั้งการเริ่มหลัง login โดยอัตโนมัติ และเข้าถึง `useParams` สำหรับ route pattern)
+- `props.route_pattern` เก็บ route pattern แบบ normalize (เช่น `/procurement/purchase-request/:id`) โดยเทียบ `useParams` กับ pathname ทีละ segment — จำเป็นสำหรับ funnel ข้ามเอกสาร
 
 ### Session & identity
 
@@ -91,7 +91,7 @@ Browser (SPA)                    backend-gateway            micro-business      
 - **`user_id` ประทับจาก token ฝั่ง server** — ไม่รับจาก payload; `server_ts` ประทับตอน insert
 - Gateway → TCP → **micro-business** (อยู่ร่วมโดเมน logging เดิม) → เขียนผ่าน platform Prisma client
 - Insert ด้วย `createMany({ skipDuplicates: true })` อาศัย unique index บน `event_id` → client retry ไม่สร้าง duplicate
-- ตอบ `204` ทันทีหลัง insert — ห้ามมี logic หนักขวางทาง
+- ตอบ `201` + `{ count }` ทันทีหลัง insert — ห้ามมี logic หนักขวางทาง (ปรับจากร่างแรกที่ระบุ 204 ให้เข้า pattern `Result` + `respond()` ของ gateway)
 
 ### ตาราง `tb_activity_event` (prisma-shared-schema-platform)
 
@@ -120,15 +120,19 @@ Index: unique(`event_id`), (`server_ts`), (`bu_code`, `server_ts`), (`user_id`, 
 
 คอลัมน์: `day` (date), `bu_code`, `event_type`, `page_path`, `element_id`, `clicks` (count), `sessions` (distinct session), `users` (distinct user) — unique บน (`day`, `bu_code`, `event_type`, `page_path`, `element_id`)
 
-### Cron jobs (รันใน micro-cronjobs, เวลา UTC)
+### Cron jobs (รันใน micro-cronjobs)
 
-1. **Rollup รายวัน** (02:30 UTC): คำนวณสรุปของเมื่อวานแล้ว upsert — idempotent รันซ้ำได้
-2. **Retention** (03:00 UTC): ลบ raw event ที่ `server_ts` เก่ากว่า **365 วัน** — ลบเป็น batch (เช่นครั้งละ 10,000 rows) กัน lock ยาว
+หมายเหตุ: scheduler ของ micro-cronjobs รันใน timezone ของ HQ BU (ปกติ Asia/Bangkok) ไม่ใช่ UTC — เวลาข้างล่างจึงเป็นเวลา scheduler ส่วน**ขอบเขต "วัน" ของข้อมูลสรุปเป็น UTC date** ตามกฎ timezone องค์กร
+
+1. **Rollup รายวัน** (03:30 เวลา scheduler): recompute สรุปของ 2 วัน UTC ล่าสุดที่จบแล้ว (self-heal event ที่มาช้า) upsert ด้วย ON CONFLICT — idempotent รันซ้ำได้
+2. **Retention** (04:00 เวลา scheduler): ลบ raw event ที่ `server_ts` เก่ากว่า **365 วัน** — ลบเป็น batch ครั้งละ 10,000 rows กัน lock ยาว
 3. ตารางสรุปเก็บตลอดไป (ขนาดเล็ก)
 
 **ต้องเปิด retention job พร้อมกับ tracking ตั้งแต่วันแรก** — ไม่ใช่ค่อยตามแก้ทีหลัง
 
 ## การทดสอบ
+
+หมายเหตุการ execute: ตามกฎ workflow ของ user (Skip Automated Tests During Plan Execution) — Phase 1 implement โดย**ไม่สร้าง test file** ใช้ static checks + manual/browser verify เป็นหลัก; รายการ unit test ข้างล่างคงไว้เป็น coverage ที่ควรมีหากตัดสินใจเติม test ภายหลัง
 
 - **Frontend unit (Vitest):** derive `element_id` ตามลำดับ priority, queue/flush ตาม threshold+interval, cap 500, requeue เมื่อ network fail, ทิ้งเมื่อ 4xx, ไม่ track ก่อน auth
 - **Backend:** Zod schema (เกิน 100 → 400, ISO ts ผิดรูป → 400), service test (`user_id` มาจาก token ไม่ใช่ payload, skipDuplicates)
