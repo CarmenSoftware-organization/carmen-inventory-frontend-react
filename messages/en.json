@@ -281,6 +281,7 @@
     "converted": "converted",
     "commit": "Commit",
     "void": "Void",
+    "voidWarning": "This can't be undone, and it will be recorded under your name.",
     "next": "Next",
     "back": "Back",
     "comment": "Comment",

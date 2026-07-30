@@ -87,7 +87,6 @@ export function AdjItemFields({
           <DataGrid
             table={table}
             recordCount={itemFields.length}
-            tableClassNames={{ headerRow: "h-10", bodyRow: "h-10" }}
             emptyMessage={
               <EmptyComponent
                 icon={BoxIcon}
