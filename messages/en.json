@@ -2828,6 +2828,7 @@
       "allDocuments": "All Documents",
       "tabItems": "Items",
       "tabStock": "Stock Movement",
+      "stockNeedsCompleted": "Stock movement shows after this requisition is completed",
       "tabWorkflowHistory": "Workflow History",
       "viewHistoryHint": "Tap to view full workflow history",
       "noWorkflowHistory": "No workflow history",

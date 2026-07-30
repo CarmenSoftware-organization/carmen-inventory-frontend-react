@@ -18,6 +18,7 @@ import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
 import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
+import type { StoreRequisitionStatus } from "@/types/store-requisition";
 import type { SrFormValues } from "./sr-form-schema";
 import { srItemUnitPrice } from "./sr-form-helpers";
 
@@ -44,6 +45,7 @@ interface SrStockTableProps {
   /** ใบที่ยังไม่บันทึกไม่มี id — ปุ่มพิมพ์เลยกดไม่ได้ */
   readonly srId?: string;
   readonly srNo?: string;
+  readonly docStatus?: StoreRequisitionStatus;
 }
 
 /** ตัวกรองทิศทาง — ค่าว่าง = ทั้งเข้าและออก */
@@ -61,6 +63,7 @@ export function SrStockTable({
   toLocationName,
   srId,
   srNo,
+  docStatus,
 }: SrStockTableProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
@@ -217,6 +220,14 @@ export function SrStockTable({
     getRowId: (row) => row.key,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  // ของยังไม่ขยับจริงจนกว่าใบจะจ่ายครบ — โชว์ตารางที่เป็นศูนย์ทั้งใบไว้ก่อน
+  // มีแต่ทำให้เข้าใจผิดว่าตัดสต๊อกไปแล้ว บอกตรง ๆ ว่าต้องรอดีกว่า
+  if (docStatus !== "completed") {
+    return (
+      <EmptyComponent icon={BoxIcon} title={t("stockNeedsCompleted")} />
+    );
+  }
 
   return (
     <div className="space-y-3">

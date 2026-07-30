@@ -2823,6 +2823,7 @@
       "allDocuments": "เอกสารทั้งหมด",
       "tabItems": "รายการ",
       "tabStock": "การเคลื่อนไหวสต๊อก",
+      "stockNeedsCompleted": "การเคลื่อนไหวสต๊อกจะขึ้นหลังใบเบิกนี้จ่ายของครบแล้ว",
       "tabWorkflowHistory": "ประวัติเวิร์กโฟลว์",
       "viewHistoryHint": "แตะเพื่อดูประวัติเวิร์กโฟลว์ทั้งหมด",
       "noWorkflowHistory": "ไม่มีประวัติเวิร์กโฟลว์",
