@@ -234,7 +234,7 @@ export const API_ENDPOINTS = {
   ) =>
     `/api/proxy/api/${buCode}/cost/product/${productId}/location/${locationId}/qty/${qty}`,
   PRODUCT_INVENTORY: (buCode: string, locationId: string, productId: string) =>
-    `/api/proxy/api/${buCode}/user-locations/${locationId}/product/${productId}/inventory`,
+    `/api/proxy/api/${buCode}/inventory-info/${productId}/${locationId}`,
   PRODUCT_INVENTORY_MOVEMENT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/products/${productId}/inventory-movement`,
   PRODUCT_ITEM_GROUPS: (buCode: string) =>
