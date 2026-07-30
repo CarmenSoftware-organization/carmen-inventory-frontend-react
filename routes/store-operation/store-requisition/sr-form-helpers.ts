@@ -59,6 +59,22 @@ export function buildSrDefaultValues(
 }
 
 /**
+ * ยอดเงินของรายการ SR
+ *
+ * backend ยังไม่ส่งราคาต่อหน่วยมากับ store_requisition_detail เลยคง 0 ไว้ก่อน
+ * ทั้งคอลัมน์ amount ในตารางและยอดรวมท้ายฟอร์มเรียกตัวนี้ตัวเดียว — วันไหนมีราคา
+ * มาแล้วแก้ที่นี่จุดเดียว ยอดในตารางกับยอดรวมจะไม่หลุดกันเอง (บทเรียนจาก PO)
+ */
+export function srItemAmount(_item: SrFormValues["items"][number]): number {
+  return 0;
+}
+
+/** ยอดรวมทั้งใบ = ผลรวม srItemAmount ของทุกแถว */
+export function srGrandTotal(items: SrFormValues["items"]): number {
+  return items.reduce((sum, item) => sum + srItemAmount(item), 0);
+}
+
+/**
  * Map item form value → payload ที่ส่ง backend
  */
 export function mapSrItemToPayload(item: SrFormValues["items"][number]) {

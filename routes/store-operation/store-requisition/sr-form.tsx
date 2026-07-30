@@ -21,7 +21,7 @@ import {
   computeSrAction,
   type SrFormValues,
 } from "./sr-form-schema";
-import { buildSrDefaultValues } from "./sr-form-helpers";
+import { buildSrDefaultValues, srGrandTotal } from "./sr-form-helpers";
 import { useSrFormActions } from "./use-sr-form-actions";
 import { SrItemFields, type SrItemFieldsHandle } from "./sr-item-fields";
 import { SrHeader } from "./sr-header";
@@ -278,6 +278,8 @@ export function StoreRequisitionForm({
         isPending={actions.isPending}
         role={storeRequisition?.role}
         action={computeSrAction(items.map((i) => i.stage_status ?? ""))}
+        grandTotal={srGrandTotal(items)}
+        hasItems={items.length > 0}
         onSubmit={actions.openSubmitDialog}
         onApprove={() => actions.setActionDialog("approve")}
         onIssue={() => actions.setActionDialog("issue")}

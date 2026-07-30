@@ -19,9 +19,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FieldInput, FieldPlainText } from "@/components/ui/field";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
 import { fieldFocusRef } from "@/lib/field-focus";
+import { formatCurrency } from "@/lib/currency-utils";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { StoreRequisitionStatus } from "@/types/store-requisition";
 import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
+import { srItemAmount } from "./sr-form-helpers";
 import { Badge } from "@/components/ui/badge";
 import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
 import { SrItemHistorySheet } from "./sr-item-history";
@@ -430,6 +432,17 @@ export function useSrItemTable({
               },
             },
           ] satisfies ColumnDef<SrItemField>[])),
+      {
+        id: "amount",
+        header: tfl("amount"),
+        cell: ({ row }) => (
+          <FieldPlainText className="justify-end font-semibold tabular-nums">
+            {formatCurrency(srItemAmount(row.original))}
+          </FieldPlainText>
+        ),
+        size: 110,
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
+      },
       {
         accessorKey: "current_stage_status",
         header: tfl("status"),
