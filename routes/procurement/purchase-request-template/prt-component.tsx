@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -347,16 +346,14 @@ export default function PrtComponent() {
           ) : (
             <>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {templates.map((item, i) => (
+                {templates.map((item) => (
                   <PrtCard
                     key={item.id}
                     item={item}
-                    index={i}
                     onEdit={(t) =>
-                      navigate(
-                        `/procurement/purchase-request-template/${t.id}`,
-                      )
+                      navigate(`/procurement/purchase-request-template/${t.id}`)
                     }
+                    onDelete={setDeleteTarget}
                   />
                 ))}
               </div>
@@ -395,16 +392,16 @@ export default function PrtComponent() {
                   <EmptyComponent />
                 ) : (
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {templates.map((item, i) => (
+                    {templates.map((item) => (
                       <PrtCard
                         key={item.id}
                         item={item}
-                        index={i}
                         onEdit={(t) =>
                           navigate(
                             `/procurement/purchase-request-template/${t.id}`,
                           )
                         }
+                        onDelete={setDeleteTarget}
                       />
                     ))}
                   </div>

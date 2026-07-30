@@ -1,98 +1,64 @@
-import { Clock, FileText, GitBranch } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
 
 interface PrtCardProps {
   readonly item: PurchaseRequestTemplate;
-  readonly index?: number;
   readonly onEdit: (item: PurchaseRequestTemplate) => void;
+  readonly onDelete: (item: PurchaseRequestTemplate) => void;
 }
 
 /**
- * การ์ดแสดงข้อมูลเทมเพลต PR สำหรับ mobile view
- * @param props - ข้อมูลเทมเพลต, ลำดับ และ callback แก้ไข
- * @returns React element ของการ์ด PRT
+ * การ์ดเทมเพลต PR 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
+ *
+ * ใช้ `ListCard` ตัวเดียวกับการ์ด PR/SR/IA — ไฟล์นี้เหลือแค่ว่าข้อมูลอะไรอยู่แถวไหน
+ *
+ * @param props.item - ข้อมูลเทมเพลต
+ * @param props.onEdit - callback เมื่อคลิกการ์ด
+ * @param props.onDelete - callback เมื่อกดปุ่มลบ
  */
-export default function PrtCard({ item, index, onEdit }: PrtCardProps) {
+export default function PrtCard({ item, onEdit, onDelete }: PrtCardProps) {
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
+
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={<StatusBadge active={item.is_active} />}
+      onOpen={() => onEdit(item)}
+      onDelete={() => onDelete(item)}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name || "..."}</CardTitle>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground truncate text-xs">
-            {item.description || "-"}
-          </p>
-          <StatusBadge active={item.is_active} className="shrink-0" />
-        </div>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="space-y-2 px-4 py-3 text-xs">
-        {item.workflow_name && (
-          <div className="flex items-start gap-2">
-            <GitBranch
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">{tfl("workflow")}</p>
-              <p className="truncate font-semibold">{item.workflow_name}</p>
-            </div>
-          </div>
-        )}
-        {item.department_name && (
-          <div className="flex items-start gap-2">
-            <FileText
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">{tfl("department")}</p>
-              <p className="truncate font-semibold">{item.department_name}</p>
-            </div>
-          </div>
-        )}
-        {item.audit?.updated?.at && (
-          <div className="flex items-start gap-2">
-            <Clock
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
-              <p className="truncate font-semibold">
-                {formatDate(item.audit.updated.at, dateTimeFormat)}
-              </p>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {item.workflow_name && (
+        <ListCardRow label={tfl("workflow")}>{item.workflow_name}</ListCardRow>
+      )}
+      {item.department_name && (
+        <ListCardRow label={tfl("department")}>
+          {item.department_name}
+        </ListCardRow>
+      )}
+      {item.description && (
+        <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

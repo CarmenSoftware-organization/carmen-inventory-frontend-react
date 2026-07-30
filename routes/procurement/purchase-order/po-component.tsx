@@ -377,6 +377,7 @@ export default function PoComponent() {
               items={purchaseOrders}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
               onEdit={(po) => navigate(`/procurement/purchase-order/${po.id}`)}
+              onDelete={setDeleteTarget}
             />
             {useInfiniteScroll && grid.hasMore && (
               <div ref={grid.sentinelRef} className="flex justify-center py-4">

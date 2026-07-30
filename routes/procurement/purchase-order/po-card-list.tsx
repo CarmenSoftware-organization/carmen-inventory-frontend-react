@@ -1,62 +1,13 @@
 import type { PurchaseOrder } from "@/types/purchase-order";
 import EmptyComponent from "@/components/empty-component";
+import { ListCardSkeleton } from "@/components/share/list-card";
 import PoCard from "./po-card";
 
 interface PoCardListProps {
   readonly items: PurchaseOrder[];
   readonly isLoading?: boolean;
   readonly onEdit: (item: PurchaseOrder) => void;
-}
-
-/**
- * Skeleton การ์ด PO ระหว่างโหลดข้อมูล
- * ใช้ animate-pulse เลียนโครงการ์ดจริง เพื่อป้องกัน layout shift
- *
- * @returns React element ของ skeleton การ์ด PO
- * @example
- * {isLoading && <PoCardSkeleton />}
- */
-function PoCardSkeleton() {
-  return (
-    <div className="animate-pulse rounded-xl border bg-card">
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="space-y-1.5">
-          <div className="h-4 w-28 rounded bg-muted" />
-          <div className="h-3 w-20 rounded bg-muted" />
-        </div>
-        <div className="h-5 w-16 rounded-full bg-muted" />
-      </div>
-      <div className="border-t" />
-      <div className="space-y-3 px-4 py-3">
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-12 rounded bg-muted" />
-            <div className="h-3 w-32 rounded bg-muted" />
-          </div>
-        </div>
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-16 rounded bg-muted" />
-            <div className="h-3 w-24 rounded bg-muted" />
-          </div>
-        </div>
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-14 rounded bg-muted" />
-            <div className="h-3 w-20 rounded bg-muted" />
-          </div>
-        </div>
-      </div>
-      <div className="border-t" />
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="h-3 w-14 rounded bg-muted" />
-        <div className="h-4 w-24 rounded bg-muted" />
-      </div>
-    </div>
-  );
+  readonly onDelete: (item: PurchaseOrder) => void;
 }
 
 /**
@@ -75,12 +26,13 @@ export default function PoCardList({
   items,
   isLoading,
   onEdit,
+  onDelete,
 }: PoCardListProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <PoCardSkeleton key={`skeleton-${i}`} />
+          <ListCardSkeleton key={`skeleton-${i}`} />
         ))}
       </div>
     );
@@ -92,8 +44,8 @@ export default function PoCardList({
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {items.map((item, i) => (
-        <PoCard key={item.id} item={item} index={i} onEdit={onEdit} />
+      {items.map((item) => (
+        <PoCard key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} />
       ))}
     </div>
   );

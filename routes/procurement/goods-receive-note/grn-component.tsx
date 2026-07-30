@@ -340,6 +340,7 @@ export default function GrnComponent() {
               onEdit={(grn) =>
                 navigate(`/procurement/goods-receive-note/${grn.id}`)
               }
+              onDelete={setDeleteTarget}
             />
             {grid.hasMore && (
               <div ref={grid.sentinelRef} className="flex justify-center py-4">
@@ -373,6 +374,7 @@ export default function GrnComponent() {
                   onEdit={(grn) =>
                     navigate(`/procurement/goods-receive-note/${grn.id}`)
                   }
+                  onDelete={setDeleteTarget}
                 />
               </div>
               <DataGridPagination />
