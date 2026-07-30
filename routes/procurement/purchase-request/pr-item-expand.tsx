@@ -176,11 +176,12 @@ export function PrItemExpand({
           Inventory · Summary อยู่แถบล่าง */}
       <div className="space-y-4">
         {/* คอลัมน์ 1 (Pricelist) = 9.375rem (150px) เท่าคอลัมน์ Delivery Date ของ
-            ตารางข้างบน — เลขที่ price list ยาวกว่า 5rem เดิมจนโดนตัด · ถอนความ
-            กว้างที่เพิ่มออกจากคอลัมน์ 2 (Vendor) เท่ากันเป๊ะ ให้ยอดรวมสองคอลัมน์
-            แรกยังเป็น 24.5rem คอลัมน์ 3 (Currency) จะได้ยังตรงกับคอลัมน์
-            Requested ของตารางข้างบนเหมือนเดิม */}
-        <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[9.375rem_15.125rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
+            ตารางข้างบน — เลขที่ price list ยาวกว่า 5rem เดิมจนโดนตัด
+            คอลัมน์ 2 (Vendor) 19.5rem เดิมกว้างเกินความจำเป็น หดเหลือ 12rem
+            (ชื่อผู้ขายที่ยาวกว่านั้น lookup ตัดให้เอง) · ผลคือคอลัมน์ 3
+            (Currency) ไม่ตรงกับคอลัมน์ Requested ของตารางข้างบนแล้ว แลกกับ
+            การไม่ปล่อยให้ Vendor กินที่ฟรีทั้งแถว */}
+        <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 lg:grid-cols-[9.375rem_12rem_5rem_minmax(4.5rem,1fr)_minmax(7rem,1fr)_minmax(4rem,0.7fr)_minmax(9rem,1.4fr)_minmax(4rem,0.7fr)_minmax(11rem,2fr)_minmax(5rem,1fr)]">
           {/* Pricelist */}
           <Field className={isFieldDisabled ? "gap-1" : undefined}>
             <FieldLabel className="text-muted-foreground flex min-h-6 items-center text-xs tracking-wide">
@@ -237,7 +238,7 @@ export function PrItemExpand({
             )}
           </Field>
 
-          {/* Currency — สกุลเงินของรายการ (เริ่ม col 3 = ตรงคอลัมน์ Requested)
+          {/* Currency — สกุลเงินของรายการ (เริ่ม col 3 คือหลัง Pricelist·Vendor)
               คอลัมน์นี้ 5rem ไม่ใช่ 3rem: ป้ายเต็ม "Currency"/"สกุลเงิน" ไม่พอใน 3rem
               แล้วหักบรรทัด ทำให้แถวสูงไม่เท่ากันแล้วแต่ใบ */}
           <Field className={`lg:col-start-3 ${isFieldDisabled ? "gap-1" : ""}`}>

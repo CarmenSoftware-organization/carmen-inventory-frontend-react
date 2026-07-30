@@ -48,7 +48,19 @@ export type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
  * ต่างกัน (เดิม 80/60/40) UI จึงกว้างไม่เท่ากัน
  */
 const NARROW_COL_SIZE = 35;
-const QTY_SIZE = 150;
+
+/**
+ * ความกว้างคอลัมน์ที่มีช่องกรอก (Requested / Approved / FOC / Delivery Point)
+ *
+ * view mode เหลือแค่ข้อความ ไม่มี input กับ dropdown จึงไม่ต้องกว้างเท่าโหมด
+ * แก้ไข — คืนที่ให้คอลัมน์อื่นไป
+ */
+const INPUT_COL_SIZE = 150;
+const INPUT_COL_SIZE_VIEW = 120;
+
+/** คอลัมน์ action — edit มีปุ่มลบคู่กับปุ่มประวัติ view เหลือปุ่มประวัติปุ่มเดียว */
+const ACTION_COL_SIZE = 60;
+const ACTION_COL_SIZE_VIEW = 40;
 
 type PrItem = PrFormValues["items"][number];
 
@@ -138,6 +150,7 @@ export function usePrItemTable({
     isDisabled || (!!role && role !== STAGE_ROLE.CREATE);
 
   const allColumns = useMemo<ColumnDef<ItemField>[]>(() => {
+    const inputColSize = isDisabled ? INPUT_COL_SIZE_VIEW : INPUT_COL_SIZE;
     const prSelectColumn: ColumnDef<ItemField> = {
       id: "select",
       header: ({ table: t }) => {
@@ -318,7 +331,7 @@ export function usePrItemTable({
             isDisabled={isLockedAfterCreate}
           />
         ),
-        size: QTY_SIZE,
+        size: inputColSize,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
@@ -336,7 +349,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: QTY_SIZE,
+        size: inputColSize,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
@@ -354,7 +367,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: QTY_SIZE,
+        size: inputColSize,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
@@ -409,9 +422,8 @@ export function usePrItemTable({
             isDisabled={isDisabled}
           />
         ),
-        // เท่าคอลัมน์ Delivery Date ที่อยู่ติดกัน — 110 เดิมแคบสุดในตาราง
-        // ชื่อจุดส่งของยาวกว่านั้นเกือบทุกอัน
-        size: 150,
+        // 110 เดิมแคบสุดในตาราง ชื่อจุดส่งของยาวกว่านั้นเกือบทุกอัน
+        size: inputColSize,
       },
       {
         accessorKey: "delivery_date",
@@ -455,7 +467,7 @@ export function usePrItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 80,
+      size: isDisabled ? ACTION_COL_SIZE_VIEW : ACTION_COL_SIZE,
       meta: {
         headerClassName: "text-right",
         cellClassName: "text-right",
