@@ -1,57 +1,27 @@
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { useTranslations } from "use-intl";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import type { RunningCode } from "@/types/running-code";
 
-interface RunningCodeCardProps {
+interface Props {
   readonly item: RunningCode;
-  readonly index?: number;
   readonly onEdit: (item: RunningCode) => void;
+  readonly onDelete?: (item: RunningCode) => void;
 }
 
 /**
- * การ์ดแสดงข้อมูล Running Code สำหรับ mobile view
- * @param props - ข้อมูล item, ลำดับ index และ callback onEdit เมื่อคลิกการ์ด
- * @returns React element ของการ์ด Running Code
- * @example
- * <RunningCodeCard item={rc} index={0} onEdit={handleEdit} />
+ * การ์ดรูปแบบเลขที่เอกสาร 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
+ * ไม่มีสถานะ จึงไม่มี badge มุมขวาบน
  */
-export default function RunningCodeCard({ item, index, onEdit }: RunningCodeCardProps) {
+export default function RunningCodeCard({ item, onEdit, onDelete }: Props) {
+  const tfl = useTranslations("field");
+
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
+    <ListCard
+      title={item.type}
+      onOpen={() => onEdit(item)}
+      onDelete={onDelete ? () => onDelete(item) : undefined}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <CardTitle className="truncate text-sm">{item.type}</CardTitle>
-        </div>
-      </CardHeader>
-      {item.note && (
-        <>
-          <Separator />
-          <CardContent className="px-4 py-3 text-xs">
-            <p className="text-muted-foreground line-clamp-2">{item.note}</p>
-          </CardContent>
-        </>
-      )}
-    </Card>
+      {item.note && <ListCardRow label={tfl("note")}>{item.note}</ListCardRow>}
+    </ListCard>
   );
 }

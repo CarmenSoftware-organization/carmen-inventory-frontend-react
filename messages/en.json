@@ -208,6 +208,8 @@
     "footer": "© {year} Carmen Inventory · ERP for Hospitality"
   },
   "common": {
+    "yes": "Yes",
+    "no": "No",
     "businessUnit": "Business Unit",
     "language": "Language",
     "theme": "Theme",

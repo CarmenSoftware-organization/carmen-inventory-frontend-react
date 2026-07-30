@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
 import { useExtraCost, useDeleteExtraCost } from "@/hooks/use-extra-cost";
@@ -11,7 +10,9 @@ import ExtraCostCard from "./extra-cost-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
 const ExtraCostDialog = lazy(() =>
-  import("./extra-cost-dialog").then((mod) => ({ default: mod.ExtraCostDialog })),
+  import("./extra-cost-dialog").then((mod) => ({
+    default: mod.ExtraCostDialog,
+  })),
 );
 
 /**
@@ -53,8 +54,8 @@ export default function ExtraCostComponent() {
           />
         </Suspense>
       )}
-      renderCard={({ item, index, onEdit }) => (
-        <ExtraCostCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <ExtraCostCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

@@ -1,85 +1,58 @@
-import { Calendar } from "lucide-react";
-
-import { formatDate } from "@/lib/date-utils";
-import { useProfile } from "@/hooks/use-profile";
+import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardAction,
-  CardContent,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
+import { PERIOD_STATUS_CONFIG } from "@/constant/period";
 import type { Period } from "@/types/period";
 
-const STATUS_VARIANT: Record<Period["status"], "success" | "secondary" | "destructive"> = {
-  open: "success",
-  closed: "secondary",
-  locked: "destructive",
-};
-
-interface PeriodCardProps {
+interface Props {
   readonly item: Period;
-  readonly index?: number;
   readonly onEdit: (item: Period) => void;
+  readonly onDelete?: (item: Period) => void;
 }
 
 /**
- * การ์ดแสดงข้อมูลงวดบัญชี (Period) สำหรับ mobile view
- * @param props - ข้อมูล item งวดบัญชี, ลำดับ index และ callback onEdit เมื่อคลิกการ์ด
- * @returns React element ของการ์ด Period
- * @example
- * <PeriodCard item={period} index={0} onEdit={handleEdit} />
+ * การ์ดงวดบัญชี 1 งวด สำหรับหน้ารายการโหมด grid/mobile
+ *
+ * สถานะ (open/closed/locked) เป็น lifecycle ของเอกสาร ใช้ dot-chip จาก
+ * `PERIOD_STATUS_CONFIG` (badge-status.css) ตัวเดียวกับที่ตารางและหน้า
+ * period-end ใช้ — ของเดิม map เป็น success/secondary/destructive ซึ่งยืม token
+ * ความหมาย "สำเร็จ/ผิดพลาด" มาใช้กับ lifecycle ผิดชั้นสีตาม DESIGN.md
  */
-export default function PeriodCard({ item, index, onEdit }: PeriodCardProps) {
+export default function PeriodCard({ item, onEdit, onDelete }: Props) {
+  const t = useTranslations("systemAdmin.period");
   const { dateFormat } = useProfile();
+
+  const statusConfig = PERIOD_STATUS_CONFIG[item.status];
+
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
+    <ListCard
+      title={item.period}
+      badge={
+        <Badge size="xs" className={statusConfig?.className}>
+          {statusConfig?.label ?? item.status}
+        </Badge>
+      }
+      onOpen={() => onEdit(item)}
+      onDelete={onDelete ? () => onDelete(item) : undefined}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-sm">{item.period}</CardTitle>
-            <p className="text-muted-foreground text-xs">
-              FY {item.fiscal_year} · M{item.fiscal_month}
-            </p>
-          </div>
-        </div>
-        <CardAction>
-          <Badge variant={STATUS_VARIANT[item.status]} size="sm" className="text-xs">
-            {item.status}
-          </Badge>
-        </CardAction>
-      </CardHeader>
-      <Separator />
-      <CardContent className="space-y-2 px-4 py-3 text-xs">
-        <div className="flex items-center gap-2">
-          <Calendar
-            className="text-muted-foreground size-3 shrink-0"
-            aria-hidden="true"
-          />
-          <p className="text-muted-foreground">
-            {formatDate(item.start_at, dateFormat)} –{" "}
-            {formatDate(item.end_at, dateFormat)}
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+      <ListCardRow label={t("fiscalYear")}>
+        <span className="tabular-nums">{item.fiscal_year}</span>
+      </ListCardRow>
+      <ListCardRow label={t("fiscalMonth")}>
+        <span className="tabular-nums">{item.fiscal_month}</span>
+      </ListCardRow>
+      <ListCardRow label={t("startAt")}>
+        <span className="tabular-nums">
+          {formatDate(item.start_at, dateFormat)}
+        </span>
+      </ListCardRow>
+      <ListCardRow label={t("endAt")}>
+        <span className="tabular-nums">
+          {formatDate(item.end_at, dateFormat)}
+        </span>
+      </ListCardRow>
+    </ListCard>
   );
 }

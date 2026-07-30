@@ -1,112 +1,69 @@
-import { ArrowRightLeft, Calendar, Trash2, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { ExchangeRateItem } from "@/types/exchange-rate";
 
-interface ExchangeRateCardProps {
+interface Props {
   readonly item: ExchangeRateItem;
-  readonly index?: number;
+  readonly baseCurrency?: string;
   readonly onEdit: (item: ExchangeRateItem) => void;
   readonly onDelete?: (item: ExchangeRateItem) => void;
-  readonly baseCurrency: string;
 }
 
 /**
- * การ์ดแสดงข้อมูล Exchange Rate สำหรับมุมมอง mobile พร้อมสกุลเงินฐาน
- * @param props - ข้อมูล item, index, baseCurrency และ callback onEdit
- * @returns React element ของการ์ด Exchange Rate
- * @example
- * // route: /config/exchange-rate (mobile card view)
- * <ExchangeRateCard item={item} index={0} baseCurrency="USD" onEdit={handleEdit} />
+ * การ์ดอัตราแลกเปลี่ยน 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
+ *
+ * ไม่มีสถานะ active/inactive จึงไม่มี badge มุมขวาบน — หัวการ์ดเป็นรหัสสกุลเงิน
  */
 export default function ExchangeRateCard({
   item,
-  index,
+  baseCurrency,
   onEdit,
   onDelete,
-  baseCurrency,
-}: ExchangeRateCardProps) {
-  const { dateFormat, dateTimeFormat } = useProfile();
+}: Props) {
   const tfl = useTranslations("field");
+  const { dateFormat, dateTimeFormat } = useProfile();
+
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 outline-none transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.currency_code}
+      onOpen={() => onEdit(item)}
+      onDelete={onDelete ? () => onDelete(item) : undefined}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-sm">
-              {item.currency_code}
-            </CardTitle>
-            <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <ArrowRightLeft className="size-3 shrink-0" aria-hidden="true" />
-              <span className="tabular-nums">
-                1 {item.currency_code} = {formatCurrency(item.exchange_rate, 4)}{" "}
-                {baseCurrency}
-              </span>
-            </div>
-          </div>
-          {onDelete && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              aria-label="Remove"
-              className="text-muted-foreground hover:text-destructive shrink-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(item);
-              }}
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="space-y-1.5 px-4 py-3 text-xs">
-        <div className="flex items-center gap-2">
-          <Calendar
-            className="text-muted-foreground size-3 shrink-0"
-            aria-hidden="true"
-          />
-          <p className="text-muted-foreground text-xs">
+      <ListCardRow label={tfl("exchangeRate")}>
+        <span className="tabular-nums">
+          1 {item.currency_code} = {formatCurrency(item.exchange_rate, 4)}{" "}
+          <span className="text-muted-foreground font-normal">
+            {baseCurrency}
+          </span>
+        </span>
+      </ListCardRow>
+      {item.at_date && (
+        <ListCardRow label={tfl("date")}>
+          <span className="tabular-nums">
             {formatDate(item.at_date, dateFormat)}
-          </p>
-        </div>
-        {item.audit?.updated?.at && (
-          <div className="flex items-center gap-2">
-            <Clock
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <p className="text-muted-foreground text-xs">
-              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

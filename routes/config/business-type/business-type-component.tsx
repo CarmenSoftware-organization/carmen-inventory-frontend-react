@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -14,7 +13,9 @@ import BusinessTypeCard from "./business-type-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
 const BusinessTypeDialog = lazy(() =>
-  import("./business-type-dialog").then((mod) => ({ default: mod.BusinessTypeDialog })),
+  import("./business-type-dialog").then((mod) => ({
+    default: mod.BusinessTypeDialog,
+  })),
 );
 
 /**
@@ -56,8 +57,8 @@ export default function BusinessTypeComponent() {
           />
         </Suspense>
       )}
-      renderCard={({ item, index, onEdit }) => (
-        <BusinessTypeCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <BusinessTypeCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

@@ -1,4 +1,3 @@
-
 import { lazy, Suspense, useMemo, useState } from "react";
 import {
   CalendarPlus,
@@ -345,11 +344,10 @@ export default function PeriodComponent() {
           ) : periods.length > 0 ? (
             <>
               <div className="grid grid-cols-1 gap-3">
-                {periods.map((p, i) => (
+                {periods.map((p) => (
                   <PeriodCard
                     key={p.id}
                     item={p}
-                    index={i}
                     onEdit={(period) => {
                       setEditPeriod(period);
                       setDialogOpen(true);

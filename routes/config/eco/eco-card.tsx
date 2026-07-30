@@ -1,103 +1,52 @@
 import { useTranslations } from "use-intl";
-import { Clock, Leaf, Trash2 } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { EcoLabel } from "@/types/eco-label";
 
-interface EcoLabelCardProps {
+interface Props {
   readonly item: EcoLabel;
   readonly onEdit: (item: EcoLabel) => void;
-  readonly onDelete: (item: EcoLabel) => void;
+  readonly onDelete?: (item: EcoLabel) => void;
 }
 
-export default function EcoLabelCard({
-  item,
-  onEdit,
-  onDelete,
-}: EcoLabelCardProps) {
-  const tc = useTranslations("common");
+/**
+ * การ์ด config 1 รายการ สำหรับ `ConfigListTemplate` โหมด grid/mobile
+ * ใช้ `ListCard` ตัวเดียวกับการ์ดทุกโมดูล
+ */
+export default function EcoCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        // ข้าม keydown ที่มาจาก child (ปุ่ม footer) ไม่ให้ trigger edit
-        if (e.target !== e.currentTarget) return;
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="group hover:border-primary/40 focus-visible:ring-ring flex h-full cursor-pointer flex-col gap-0 overflow-hidden py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={<StatusBadge active={item.is_active} />}
+      onOpen={() => onEdit(item)}
+      onDelete={onDelete ? () => onDelete(item) : undefined}
     >
-      <CardHeader className="px-4 pt-4 pb-3">
-        <div className="flex items-start gap-3">
-          <div className="bg-muted text-primary group-hover:bg-accent flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors">
-            <Leaf className="size-4.5" aria-hidden="true" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <CardTitle className="line-clamp-2 min-h-10 text-sm leading-snug font-semibold">
-              {item.name || "..."}
-            </CardTitle>
-            <Badge variant="secondary" size="xs" className="mt-1 font-normal">
-              {item.code}
-            </Badge>
-          </div>
-          <StatusBadge active={item.is_active} className="shrink-0" />
-        </div>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="flex-1 px-4 py-3">
-        <p className="text-muted-foreground line-clamp-2 text-xs leading-snug">
-          {item.description || "—"}
-        </p>
-        {item.audit?.updated?.at && (
-          <div className="mt-2 flex items-center gap-1.5">
-            <Clock
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground truncate text-xs">
-              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
-            </span>
-          </div>
-        )}
-      </CardContent>
-
-      <Separator />
-
-      <CardFooter className="justify-end px-2 py-1.5">
-        <Button
-          type="button"
-          variant="destructive"
-          size="xs"
-          aria-label={tc("delete")}
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(item);
-          }}
-        >
-          <Trash2 aria-hidden="true" />
-        </Button>
-      </CardFooter>
-    </Card>
+      {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
+      {item.description && (
+        <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

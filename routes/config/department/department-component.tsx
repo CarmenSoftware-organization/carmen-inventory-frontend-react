@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { useDepartment, useDeleteDepartment } from "@/hooks/use-department";
@@ -50,8 +49,8 @@ export default function DepartmentComponent() {
           width: 10,
         },
       ]}
-      renderCard={({ item, index, onEdit }) => (
-        <DepartmentCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <DepartmentCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

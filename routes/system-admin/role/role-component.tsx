@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Plus } from "lucide-react";
@@ -119,12 +118,12 @@ export default function RoleComponent() {
           ) : items.length > 0 ? (
             <>
               <div className="grid grid-cols-1 gap-3">
-                {items.map((item, i) => (
+                {items.map((item) => (
                   <RoleCard
                     key={item.id}
                     item={item}
-                    index={i}
                     onEdit={(r) => navigate(`/system-admin/role/${r.id}`)}
+                    onDelete={setDeleteTarget}
                   />
                 ))}
               </div>

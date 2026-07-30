@@ -1,98 +1,60 @@
-import { Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardAction,
-  CardContent,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { ADJUSTMENT_TYPE, type AdjustmentType } from "@/types/adjustment-type";
+import { ADJUSTMENT_TYPE } from "@/types/adjustment-type";
+import type { AdjustmentType } from "@/types/adjustment-type";
 
-interface AdjustmentTypeCardProps {
+interface Props {
   readonly item: AdjustmentType;
-  readonly index?: number;
   readonly onEdit: (item: AdjustmentType) => void;
+  readonly onDelete?: (item: AdjustmentType) => void;
 }
 
-export default function AdjustmentTypeCard({
-  item,
-  index,
-  onEdit,
-}: AdjustmentTypeCardProps) {
+/**
+ * การ์ดประเภทการปรับปรุงสต๊อก สำหรับ `ConfigListTemplate` โหมด grid/mobile
+ *
+ * ชนิด (รับเข้า/จ่ายออก) เป็นข้อความ ไม่ใช่ badge สี — ของเดิมใช้ variant
+ * default/warning ทำให้หัวการ์ดมี badge สองใบและมีสองสีต่อใบ
+ */
+export default function AdjustmentTypeCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={<StatusBadge active={item.is_active} />}
+      onOpen={() => onEdit(item)}
+      onDelete={onDelete ? () => onDelete(item) : undefined}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-sm">{item.name || "..."}</CardTitle>
-            <p className="text-muted-foreground text-xs">{item.code}</p>
-          </div>
-        </div>
-        <CardAction className="flex items-center gap-1.5">
-          <Badge
-            size="sm"
-            className="text-xs"
-            variant={
-              item.type === ADJUSTMENT_TYPE.STOCK_IN ? "default" : "warning"
-            }
-          >
-            {item.type === ADJUSTMENT_TYPE.STOCK_IN
-              ? tfl("stockIn")
-              : tfl("stockOut")}
-          </Badge>
-          <StatusBadge active={item.is_active} />
-        </CardAction>
-      </CardHeader>
-
-      {(item.description || item.audit?.updated?.at) && (
-        <>
-          <Separator />
-          <CardContent className="space-y-1.5 px-4 py-3 text-xs">
-            {item.description && (
-              <p className="text-muted-foreground line-clamp-2 text-xs">
-                {item.description}
-              </p>
-            )}
-            {item.audit?.updated?.at && (
-              <div className="flex items-center gap-1.5">
-                <Clock
-                  className="text-muted-foreground size-3 shrink-0"
-                  aria-hidden="true"
-                />
-                <span className="text-muted-foreground truncate">
-                  {tfl("updated")}:{" "}
-                  {formatDate(item.audit.updated.at, dateTimeFormat)}
-                </span>
-              </div>
-            )}
-          </CardContent>
-        </>
+      {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
+      <ListCardRow label={tfl("type")}>
+        {item.type === ADJUSTMENT_TYPE.STOCK_IN
+          ? tfl("stockIn")
+          : tfl("stockOut")}
+      </ListCardRow>
+      {item.description && (
+        <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>
       )}
-    </Card>
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

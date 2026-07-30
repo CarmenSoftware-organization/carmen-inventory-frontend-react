@@ -208,6 +208,8 @@
     "footer": "© {year} Carmen Inventory · ระบบ ERP สำหรับธุรกิจโรงแรม"
   },
   "common": {
+    "yes": "ใช่",
+    "no": "ไม่",
     "businessUnit": "หน่วยธุรกิจ",
     "language": "ภาษา",
     "theme": "ธีม",

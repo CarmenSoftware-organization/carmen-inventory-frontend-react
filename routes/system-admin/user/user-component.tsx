@@ -255,10 +255,10 @@ export default function UserComponent() {
                 <UserCard
                   key={u.user_id}
                   item={u}
-                  index={i}
                   onEdit={(user) =>
                     navigate(`/system-admin/user/${user.user_id}`)
                   }
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>
