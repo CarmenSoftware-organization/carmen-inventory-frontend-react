@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -187,10 +186,7 @@ export default function CuisineComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
@@ -306,13 +302,13 @@ export default function CuisineComponent() {
         {isGridMode && grid.isLoading && <CardSkeletonGrid />}
         {isGridMode && !grid.isLoading && cuisines.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {cuisines.map((item, i) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {cuisines.map((item) => (
                 <CuisineCard
                   key={item.id}
                   item={item}
-                  index={i}
                   onEdit={(c) => navigate(`/operation-plan/cuisine/${c.id}`)}
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>

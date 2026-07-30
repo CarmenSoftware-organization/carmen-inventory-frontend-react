@@ -651,6 +651,7 @@
     "unitCost": "Unit Cost",
     "lossValue": "Loss Value",
     "totalQty": "Total Qty",
+    "totalTime": "Total Time",
     "parLevel": "Par Level",
     "need": "Need",
     "current": "Current",

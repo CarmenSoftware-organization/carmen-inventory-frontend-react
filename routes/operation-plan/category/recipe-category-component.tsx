@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -186,8 +185,7 @@ export default function RecipeCategoryComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (category) =>
-      navigate(`/operation-plan/category/${category.id}`),
+    onEdit: (category) => navigate(`/operation-plan/category/${category.id}`),
     onDelete: setDeleteTarget,
   });
 
@@ -198,10 +196,7 @@ export default function RecipeCategoryComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
@@ -317,18 +312,16 @@ export default function RecipeCategoryComponent() {
         {isGridMode && grid.isLoading && <CardSkeletonGrid />}
         {isGridMode && !grid.isLoading && categories.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {categories.map((item, i) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((item) => (
                 <RecipeCategoryCard
                   key={item.id}
                   item={item}
-                  index={i}
                   parentName={
                     item.parent_id ? parentMap.get(item.parent_id) : undefined
                   }
-                  onEdit={(c) =>
-                    navigate(`/operation-plan/category/${c.id}`)
-                  }
+                  onEdit={(c) => navigate(`/operation-plan/category/${c.id}`)}
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>
