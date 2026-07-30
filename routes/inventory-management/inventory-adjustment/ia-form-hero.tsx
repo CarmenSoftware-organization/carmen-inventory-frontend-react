@@ -102,18 +102,8 @@ export function IaFormHero({
       )}
       {canPrint && (
         <PrintDocumentButton
-          documentType="IA"
+          documentType={adjustmentType === "stock-in" ? "SI" : "SO"}
           documentId={inventoryAdjustment!.id}
-          filters={
-            inventoryAdjustment!.si_no || inventoryAdjustment!.so_no
-              ? {
-                  DocumentNo:
-                    inventoryAdjustment!.si_no ??
-                    inventoryAdjustment!.so_no ??
-                    "",
-                }
-              : undefined
-          }
         />
       )}
       {isView && !isReadOnly ? (
