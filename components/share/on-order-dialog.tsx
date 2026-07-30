@@ -36,7 +36,7 @@ interface Props {
   readonly productId: string;
 }
 
-export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
+export function OnOrderDialog({ open, onOpenChange, productId }: Props) {
   const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
@@ -213,7 +213,6 @@ export function PrOnOrderDialog({ open, onOpenChange, productId }: Props) {
                   </p>
                 </div>
               )}
-
             </div>
           </DialogHeader>
 

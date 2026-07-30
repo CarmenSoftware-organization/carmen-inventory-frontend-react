@@ -5,8 +5,8 @@ import { PrFormValues } from "./pr-form-schema";
 import { useProductInventory } from "@/hooks/use-product-inventory";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SummaryBar } from "@/components/ui/summary-bar";
-import { PrOnHandDialog } from "./pr-on-hand-dialog";
-import { PrOnOrderDialog } from "./pr-on-order-dialog";
+import { OnHandDialog } from "@/components/share/on-hand-dialog";
+import { OnOrderDialog } from "@/components/share/on-order-dialog";
 
 interface Props {
   readonly control: Control<PrFormValues>;
@@ -50,7 +50,7 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
     <button
       type="button"
       onClick={onClick}
-      className="tracking-wide text-primary uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
+      className="text-primary tracking-wide uppercase underline-offset-4 hover:cursor-pointer hover:underline focus-visible:underline focus-visible:outline-none"
     >
       {label}
     </button>
@@ -94,12 +94,12 @@ export default function PrInventoryRow({ control, index, buCode }: Props) {
         ]}
       />
 
-      <PrOnHandDialog
+      <OnHandDialog
         open={onHandOpen}
         onOpenChange={setOnHandOpen}
         productId={productId}
       />
-      <PrOnOrderDialog
+      <OnOrderDialog
         open={onOrderOpen}
         onOpenChange={setOnOrderOpen}
         productId={productId}

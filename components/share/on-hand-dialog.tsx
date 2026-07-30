@@ -32,7 +32,7 @@ interface Props {
   readonly productId: string;
 }
 
-export function PrOnHandDialog({ open, onOpenChange, productId }: Props) {
+export function OnHandDialog({ open, onOpenChange, productId }: Props) {
   const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");

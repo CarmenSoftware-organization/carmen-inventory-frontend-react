@@ -18,6 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FieldInput, FieldPlainText } from "@/components/ui/field";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
+import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
+import { OnHandDialog } from "@/components/share/on-hand-dialog";
+import { OnOrderDialog } from "@/components/share/on-order-dialog";
+import { useBuCode } from "@/hooks/use-bu-code";
 import { fieldFocusRef } from "@/lib/field-focus";
 import { formatCurrency } from "@/lib/currency-utils";
 import { STAGE_ROLE } from "@/types/stage-role";
@@ -45,49 +49,98 @@ const ProductCell = memo(function ProductCell({
   toLocationId: string;
 }) {
   "use no memo";
+  const buCode = useBuCode();
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   const productLocalName =
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
+  const unitName =
+    useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
+  const [onHandOpen, setOnHandOpen] = useState(false);
+  const [onOrderOpen, setOnOrderOpen] = useState(false);
+
+  // ยอดคงเหลือ/กำลังสั่ง — hover แล้วยิง API เหมือน PR v2 (กด label ใน tooltip
+  // เปิด dialog รายละเอียดต่อได้) SR ไม่มีคลังรายแถว ยอดจึงอ้างคลังต้นทางของใบ
+  const inventory = (
+    <>
+      <InventoryTooltip
+        buCode={buCode}
+        locationId={fromLocationId}
+        productId={productId}
+        unitName={unitName}
+        icon="package"
+        className={productId ? "text-primary" : "text-muted-foreground"}
+        onOnHandClick={productId ? () => setOnHandOpen(true) : undefined}
+        onOnOrderClick={productId ? () => setOnOrderOpen(true) : undefined}
+      />
+      {productId && (
+        <>
+          <OnHandDialog
+            open={onHandOpen}
+            onOpenChange={setOnHandOpen}
+            productId={productId}
+          />
+          <OnOrderDialog
+            open={onOrderOpen}
+            onOpenChange={setOnOrderOpen}
+            productId={productId}
+          />
+        </>
+      )}
+    </>
+  );
+
   if (disabled) {
     return (
-      <NameWithSubtext primary={productName} secondary={productLocalName} />
+      <div className="flex items-center gap-0.5">
+        <div className="min-w-0 flex-1">
+          <NameWithSubtext primary={productName} secondary={productLocalName} />
+        </div>
+        {inventory}
+      </div>
     );
   }
   return (
-    <Controller
-      control={control}
-      name={`items.${index}.product_id`}
-      render={({ field, fieldState }) => (
-        <LookupLocationPairProduct
-          value={field.value ?? ""}
-          onValueChange={(value, product) => {
-            field.onChange(value);
-            if (product) {
-              form.setValue(
-                `items.${index}.product_name`,
-                product.product_name,
-              );
-              form.setValue(
-                `items.${index}.unit_name`,
-                product.inventory_unit_name,
-              );
-            }
-          }}
-          fromLocationId={fromLocationId}
-          toLocationId={toLocationId}
-          disabled={disabled}
-          // ใช้ error ของ RHF ตรง ๆ (กรอบแดง + ไอคอน + tooltip เหมือนทุก lookup
-          // ในแอป) — ของเดิมต่อ string เองแล้วลืมเว้นวรรค ได้ class
-          // "text-xsring-destructive" ซึ่งไม่มีอยู่จริง กรอบแดงเลยไม่เคยขึ้น
-          error={fieldState.error?.message}
-          // เลือกสินค้าเสร็จ → เด้งไปช่องจำนวนที่ขอของแถวเดียวกันต่อเลย
-          // (SR ไม่มีสถานที่รายแถว มาจากหัวเอกสาร จำนวนจึงเป็นช่องถัดไปจริง ๆ)
-          nextFocusRef={fieldFocusRef(`items.${index}.requested_qty`)}
-          className="w-full"
+    <div className="flex items-center gap-0.5">
+      <div className="min-w-0 flex-1">
+        <Controller
+          control={control}
+          name={`items.${index}.product_id`}
+          render={({ field, fieldState }) => (
+            <LookupLocationPairProduct
+              value={field.value ?? ""}
+              onValueChange={(value, product) => {
+                field.onChange(value);
+                if (product) {
+                  form.setValue(
+                    `items.${index}.product_name`,
+                    product.product_name,
+                  );
+                  form.setValue(
+                    `items.${index}.unit_name`,
+                    product.inventory_unit_name,
+                  );
+                }
+              }}
+              fromLocationId={fromLocationId}
+              toLocationId={toLocationId}
+              disabled={disabled}
+              // ใช้ error ของ RHF ตรง ๆ (กรอบแดง + ไอคอน + tooltip เหมือนทุก lookup
+              // ในแอป) — ของเดิมต่อ string เองแล้วลืมเว้นวรรค ได้ class
+              // "text-xsring-destructive" ซึ่งไม่มีอยู่จริง กรอบแดงเลยไม่เคยขึ้น
+              error={fieldState.error?.message}
+              // เลือกสินค้าเสร็จ → เด้งไปช่องจำนวนที่ขอของแถวเดียวกันต่อเลย
+              // (SR ไม่มีสถานที่รายแถว มาจากหัวเอกสาร จำนวนจึงเป็นช่องถัดไปจริง ๆ)
+              nextFocusRef={fieldFocusRef(`items.${index}.requested_qty`)}
+              className="w-full"
+            />
+          )}
         />
-      )}
-    />
+      </div>
+      {inventory}
+    </div>
   );
 });
 
@@ -302,7 +355,8 @@ export function useSrItemTable({
             </div>
           );
         },
-        size: 180,
+        // +20 จากเดิม เผื่อที่ปุ่มยอดคงเหลือท้ายเซลล์ ไม่ให้ไปบีบกล่องเลือกสินค้า
+        size: 200,
       },
       {
         accessorKey: "unit_name",

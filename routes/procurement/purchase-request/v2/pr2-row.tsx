@@ -35,8 +35,8 @@ import { DeliveryDateCell } from "../pr-item-cells/delivery-date-cell";
 import { useIsRowLocked } from "../pr-item-cells/helpers";
 import { PrPricelistCompare } from "../pr-pricelist-compare";
 import { PrItemHistorySheet } from "../workflow/pr-item-history";
-import { PrOnHandDialog } from "../pr-on-hand-dialog";
-import { PrOnOrderDialog } from "../pr-on-order-dialog";
+import { OnHandDialog } from "@/components/share/on-hand-dialog";
+import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import {
   pr2FrozenCount,
   pr2FrozenOffsets,
@@ -478,12 +478,12 @@ export const Pr2Row = memo(function Pr2Row({
             {cellContent(col)}
             {i === 0 && item.product_id && (
               <>
-                <PrOnHandDialog
+                <OnHandDialog
                   open={onHandOpen}
                   onOpenChange={setOnHandOpen}
                   productId={item.product_id}
                 />
-                <PrOnOrderDialog
+                <OnOrderDialog
                   open={onOrderOpen}
                   onOpenChange={setOnOrderOpen}
                   productId={item.product_id}
