@@ -123,7 +123,9 @@ export const SrItemFields = forwardRef<SrItemFieldsHandle, SrItemFieldsProps>(
     return (
       <div className="space-y-2">
         {selectedRows.length > 0 && canBulkAction && (
-          <div className="flex flex-wrap items-center justify-end gap-1.5">
+          // ปุ่มตัดสินชิดซ้ายเหมือน PR — มือไปหาปุ่มก่อน ไม่ต้องกวาดตาไปสุดขวา
+          // ลำดับตาม PR ด้วย: อนุมัติ → ปฏิเสธ → ส่งกลับ
+          <div className="flex flex-wrap items-center gap-1.5">
             <Button
               type="button"
               variant="success"
@@ -135,21 +137,21 @@ export const SrItemFields = forwardRef<SrItemFieldsHandle, SrItemFieldsProps>(
             </Button>
             <Button
               type="button"
-              variant="warning"
-              size="xs"
-              onClick={handleBulkReview}
-            >
-              <Eye />
-              {tc("sendBack")}
-            </Button>
-            <Button
-              type="button"
               variant="destructive"
               size="xs"
               onClick={() => setBulkAction("reject")}
             >
               <X />
               {tc("reject")}
+            </Button>
+            <Button
+              type="button"
+              variant="warning"
+              size="xs"
+              onClick={handleBulkReview}
+            >
+              <Eye />
+              {tc("sendBack")}
             </Button>
           </div>
         )}

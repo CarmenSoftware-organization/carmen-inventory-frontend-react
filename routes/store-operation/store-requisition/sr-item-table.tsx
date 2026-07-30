@@ -270,6 +270,9 @@ const UnitCell = memo(function UnitCell({
   return <span className="text-muted-foreground text-xs">{unitName}</span>;
 });
 
+/** ความกว้างช่องแคบหัวตาราง (checkbox / #) — พอดีตัว checkbox 16px + px-2 สองข้าง */
+const SR_NARROW_COL = 28;
+
 export type SrItemField = FieldArrayWithId<SrFormValues, "items", "id">;
 
 interface UseSrItemTableOptions {
@@ -330,7 +333,9 @@ export function useSrItemTable({
       header: "#",
       cell: ({ row }) => row.index + 1,
       enableSorting: false,
-      size: 32,
+      // checkbox กับ # กว้างเท่ากัน (SR_NARROW_COL) — สองช่องนี้อยู่ติดกันหัวตาราง
+      // กว้างไม่เท่ากันเห็นชัดว่าเบี้ยว และไม่ต้องเผื่อที่ให้อะไรมากกว่านี้
+      size: SR_NARROW_COL,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",
@@ -581,7 +586,7 @@ export function useSrItemTable({
       enableSorting: false,
       enableHiding: false,
       enableResizing: false,
-      size: 50,
+      size: SR_NARROW_COL,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
