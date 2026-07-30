@@ -59,6 +59,10 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
     }
   };
 
+  // สีของ type ปรากฏ "ครั้งเดียว" ต่อการ์ด — ที่ label type ตัวเดียว เพราะมันมี
+  // ทั้งคำและสี อ่านได้แม้ตาแยกสีไม่ออก ส่วนเส้นซ้ายสี / กล่องไอคอนย้อมสี /
+  // ยอดเงินสี ถอดออกหมด (DESIGN.md single accent: สีเดิมซ้ำบน icon-box + icon +
+  // chip บนพื้น neutral อ่านเป็น neon)
   const accentText = isStockIn ? "text-success-ink" : "text-destructive";
 
   return (
@@ -67,27 +71,16 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
-      className={cn(
-        "group focus-visible:ring-ring relative cursor-pointer gap-0 overflow-hidden border-l-[3px] py-0 transition-colors hover:-translate-y-0.5 hover:border-primary/40 focus-visible:ring-2 focus-visible:outline-none",
-        isStockIn ? "border-l-success" : "border-l-destructive",
-      )}
+      className="group focus-visible:ring-ring hover:border-primary/40 relative cursor-pointer gap-0 overflow-hidden py-0 transition-colors focus-visible:ring-2 focus-visible:outline-none"
     >
       {/* ── Header ─────────────────────────────── */}
       <CardHeader className="relative space-y-0 px-4 py-3">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            {/* Type icon block — replaces the type Badge for stronger visual */}
-            <div
-              className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset",
-                isStockIn
-                  ? "bg-success/10 text-success-ink ring-success/20"
-                  : "bg-destructive/10 text-destructive ring-destructive/20",
-              )}
+          <div className="flex min-w-0 items-start gap-2">
+            <TypeIcon
+              className="text-muted-foreground mt-0.5 size-4 shrink-0"
               aria-hidden="true"
-            >
-              <TypeIcon className="size-5" />
-            </div>
+            />
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-baseline gap-1.5">
@@ -95,16 +88,13 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
                   {docNo}
                 </CardTitle>
                 {typeof index === "number" && (
-                  <span className="text-muted-foreground/70 text-micro-legal tabular-nums">
+                  <span className="text-muted-foreground text-micro-legal tabular-nums">
                     #{String(index + 1).padStart(2, "0")}
                   </span>
                 )}
               </div>
-              <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1 text-micro">
-                <CalendarDays
-                  className="size-2.5 shrink-0"
-                  aria-hidden="true"
-                />
+              <div className="text-muted-foreground text-micro mt-1 flex flex-wrap items-center gap-1">
+                <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
                 <span>{docDate && formatDate(docDate, dateFormat)}</span>
                 {typeConfig?.label && (
                   <>
@@ -138,7 +128,7 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
             className="text-muted-foreground size-3 shrink-0"
             aria-hidden="true"
           />
-          <span className="text-foreground/90 truncate font-semibold">
+          <span className="truncate font-medium">
             {item.adjustment_type_name}
           </span>
         </div>
@@ -160,14 +150,15 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
               aria-hidden="true"
             />
             <span className="text-muted-foreground truncate">
-              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
+              {tfl("updated")}:{" "}
+              {formatDate(item.audit.updated.at, dateTimeFormat)}
             </span>
           </div>
         )}
       </CardContent>
 
       {/* ── Footer — items count + emphasized total ── */}
-      <CardFooter className="bg-muted/30 border-border/60 relative items-end justify-between gap-2 border-t px-4 py-2">
+      <CardFooter className="relative items-end justify-between gap-2 border-t px-4 py-2">
         <div className="flex items-center gap-1.5">
           <Package
             className="text-muted-foreground size-3 shrink-0"
@@ -178,16 +169,11 @@ export default function IaCard({ item, index, onEdit }: IaCardProps) {
           </span>
         </div>
         <div className="text-right">
-          <p
-            className={cn(
-              "text-base leading-none font-semibold tabular-nums",
-              accentText,
-            )}
-          >
+          <p className="text-base leading-none font-semibold tabular-nums">
             {formatAmount(item.base_total_cost, amountFormat)}
           </p>
           {defaultCurrencyCode && (
-            <p className="text-muted-foreground/70 mt-1 text-micro-legal font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground text-micro-legal mt-1 font-semibold tracking-widest uppercase">
               {defaultCurrencyCode}
             </p>
           )}

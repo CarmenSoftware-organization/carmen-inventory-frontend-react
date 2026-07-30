@@ -1,6 +1,6 @@
 import { useTranslations } from "use-intl";
 import { Controller, useForm, useWatch, type Control } from "react-hook-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SettingSection } from "@/components/ui/setting-section";
 import {
   Field,
   FieldLabel,
@@ -13,7 +13,6 @@ import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
 import { INVENTORY_TYPE } from "@/constant/location";
-import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import type { InventoryAdjustment } from "@/types/inventory-adjustment";
 import type { AdjFormValues } from "./ia-form-schema";
@@ -45,152 +44,127 @@ export function DocumentInfo({
   tc,
   tfl,
 }: DocumentInfoProps) {
+  // section แบบเดียวกับ price-list / company-profile: ไม่มี Card — หัวข้อ+คำอธิบาย
+  // อยู่คอลัมน์ซ้าย field อยู่ขวา คั่น section ด้วยเส้นบน (SettingSection จัดให้)
+  // label ใน view mode ไม่ต้องใส่ text-muted-foreground/font-normal เอง — Field
+  // หุบให้อัตโนมัติเมื่อลูกเป็น FieldPlainText
   return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle className="text-sm">{t("docInfo")}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field>
-            <FieldLabel
-              required={!isView}
-              className={cn(isView && "text-muted-foreground font-normal")}
-            >
-              {tfl("date")}
-            </FieldLabel>
-            {isView ? (
-              <PlainDateValue control={form.control} dateFormat={dateFormat} />
-            ) : (
-              <Controller
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FieldDatePicker
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isDisabled}
-                    placeholder={tc("selectDate")}
-                    className="w-full text-xs"
-                    fromDate={
-                      currentPeriodStart
-                        ? new Date(currentPeriodStart)
-                        : undefined
-                    }
-                    toDate={
-                      currentPeriodEnd ? new Date(currentPeriodEnd) : undefined
-                    }
-                    error={form.formState.errors.date?.message}
-                  />
-                )}
-              />
-            )}
-          </Field>
-
-          <Field>
-            <FieldLabel
-              required={!isView}
-              className={cn(isView && "text-muted-foreground font-normal")}
-            >
-              {tfl("reason")}
-            </FieldLabel>
-            {isView ? (
-              <PlainReasonValue
-                control={form.control}
-                adjTypes={adjTypes}
-                fallback={inventoryAdjustment?.adjustment_type_name}
-              />
-            ) : (
-              <Controller
-                control={form.control}
-                name="adjustment_type_id"
-                render={({ field }) => (
-                  <FieldSelect
-                    value={field.value ?? ""}
-                    onValueChange={field.onChange}
-                    disabled={isDisabled}
-                    placeholder={tfl("selectAdjustmentType")}
-                    className="text-xs"
-                    error={form.formState.errors.adjustment_type_id?.message}
-                  >
-                    <SelectContent>
-                      {adjTypes.map((at) => (
-                        <SelectItem key={at.id} value={at.id}>
-                          {at.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </FieldSelect>
-                )}
-              />
-            )}
-          </Field>
-
-          <Field className="sm:col-span-2 lg:col-span-1">
-            <FieldLabel
-              required={!isView}
-              className={cn(isView && "text-muted-foreground font-normal")}
-            >
-              {tfl("location")}
-            </FieldLabel>
-            {isView ? (
-              <FieldPlainText className="min-h-9 text-sm">
-                {inventoryAdjustment?.location_name}
-              </FieldPlainText>
-            ) : (
-              <Controller
-                control={form.control}
-                name="location_id"
-                render={({ field }) => (
-                  <LookupUserLocation
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={isDisabled}
-                    className="text-xs"
-                    locationTypes={[
-                      INVENTORY_TYPE.INVENTORY,
-                      INVENTORY_TYPE.CONSIGNMENT,
-                    ]}
-                    defaultLabel={inventoryAdjustment?.location_name}
-                    error={form.formState.errors.location_id?.message}
-                    lazy
-                  />
-                )}
-              />
-            )}
-          </Field>
-        </div>
-
-        <Field className={cn(isView && "gap-1")}>
-          <FieldLabel
-            htmlFor="inv-adj-description"
-            className={cn(isView && "text-muted-foreground font-normal")}
-          >
-            {tfl("description")}
-          </FieldLabel>
-          {isView ? (
-            <PlainDescriptionValue control={form.control} />
-          ) : (
-            <>
-              <Textarea
-                id="inv-adj-description"
-                placeholder={tfl("optional")}
-                className="text-xs"
+    <SettingSection first title={t("docInfo")} description={t("docInfoDesc")}>
+      <Field>
+        <FieldLabel required={!isView}>{tfl("date")}</FieldLabel>
+        {isView ? (
+          <PlainDateValue control={form.control} dateFormat={dateFormat} />
+        ) : (
+          <Controller
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FieldDatePicker
+                value={field.value}
+                onValueChange={field.onChange}
                 disabled={isDisabled}
-                maxLength={256}
-                aria-invalid={!!form.formState.errors.description}
-                {...form.register("description")}
+                placeholder={tc("selectDate")}
+                className="w-full text-xs"
+                fromDate={
+                  currentPeriodStart ? new Date(currentPeriodStart) : undefined
+                }
+                toDate={
+                  currentPeriodEnd ? new Date(currentPeriodEnd) : undefined
+                }
+                error={form.formState.errors.date?.message}
               />
-              {form.formState.errors.description?.message && (
-                <FieldError>
-                  {form.formState.errors.description.message}
-                </FieldError>
-              )}
-            </>
-          )}
-        </Field>
-      </CardContent>
-    </Card>
+            )}
+          />
+        )}
+      </Field>
+
+      <Field>
+        <FieldLabel required={!isView}>{tfl("reason")}</FieldLabel>
+        {isView ? (
+          <PlainReasonValue
+            control={form.control}
+            adjTypes={adjTypes}
+            fallback={inventoryAdjustment?.adjustment_type_name}
+          />
+        ) : (
+          <Controller
+            control={form.control}
+            name="adjustment_type_id"
+            render={({ field }) => (
+              <FieldSelect
+                value={field.value ?? ""}
+                onValueChange={field.onChange}
+                disabled={isDisabled}
+                placeholder={tfl("selectAdjustmentType")}
+                className="text-xs"
+                error={form.formState.errors.adjustment_type_id?.message}
+              >
+                <SelectContent>
+                  {adjTypes.map((at) => (
+                    <SelectItem key={at.id} value={at.id}>
+                      {at.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </FieldSelect>
+            )}
+          />
+        )}
+      </Field>
+
+      <Field className="sm:col-span-2">
+        <FieldLabel required={!isView}>{tfl("location")}</FieldLabel>
+        {isView ? (
+          <FieldPlainText>{inventoryAdjustment?.location_name}</FieldPlainText>
+        ) : (
+          <Controller
+            control={form.control}
+            name="location_id"
+            render={({ field }) => (
+              <LookupUserLocation
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isDisabled}
+                className="text-xs"
+                locationTypes={[
+                  INVENTORY_TYPE.INVENTORY,
+                  INVENTORY_TYPE.CONSIGNMENT,
+                ]}
+                defaultLabel={inventoryAdjustment?.location_name}
+                error={form.formState.errors.location_id?.message}
+                lazy
+              />
+            )}
+          />
+        )}
+      </Field>
+
+      <Field className="sm:col-span-2">
+        <FieldLabel htmlFor="inv-adj-description">
+          {tfl("description")}
+        </FieldLabel>
+        {isView ? (
+          <PlainDescriptionValue control={form.control} />
+        ) : (
+          <>
+            <Textarea
+              id="inv-adj-description"
+              placeholder={tfl("optional")}
+              className="text-xs"
+              disabled={isDisabled}
+              maxLength={256}
+              aria-invalid={!!form.formState.errors.description}
+              {...form.register("description")}
+            />
+            {form.formState.errors.description?.message && (
+              <FieldError>
+                {form.formState.errors.description.message}
+              </FieldError>
+            )}
+          </>
+        )}
+      </Field>
+    </SettingSection>
   );
 }
 
@@ -203,9 +177,7 @@ function PlainDateValue({
 }) {
   const date = useWatch({ control, name: "date" });
   return (
-    <FieldPlainText className="min-h-9 text-sm">
-      {date ? formatDate(date, dateFormat) : ""}
-    </FieldPlainText>
+    <FieldPlainText>{date ? formatDate(date, dateFormat) : ""}</FieldPlainText>
   );
 }
 
@@ -220,11 +192,7 @@ function PlainReasonValue({
 }) {
   const adjustmentTypeId = useWatch({ control, name: "adjustment_type_id" });
   const name = adjTypes.find((at) => at.id === adjustmentTypeId)?.name;
-  return (
-    <FieldPlainText className="min-h-9 text-sm">
-      {name ?? fallback}
-    </FieldPlainText>
-  );
+  return <FieldPlainText>{name ?? fallback}</FieldPlainText>;
 }
 
 function PlainDescriptionValue({
@@ -234,7 +202,7 @@ function PlainDescriptionValue({
 }) {
   const description = useWatch({ control, name: "description" });
   return (
-    <FieldPlainText className="min-h-9 text-sm">
+    <FieldPlainText>
       {description ? (
         <span className="whitespace-pre-wrap">{description}</span>
       ) : (

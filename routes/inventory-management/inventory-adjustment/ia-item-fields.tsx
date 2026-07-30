@@ -3,12 +3,7 @@ import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { SettingSection } from "@/components/ui/setting-section";
 import {
   DataGrid,
   DataGridContainer,
@@ -64,15 +59,13 @@ export function AdjItemFields({
 
   return (
     <>
-      <CardHeader className="border-b">
-        <CardTitle className="text-sm">
-          {tfl("items")}{" "}
-          <span className="text-muted-foreground font-normal">
-            ({itemFields.length})
-          </span>
-        </CardTitle>
-        {!disabled && (
-          <CardAction>
+      <SettingSection
+        wide
+        title={tfl("items")}
+        description={t("noItemsDesc")}
+        count={itemFields.length}
+        action={
+          !disabled ? (
             <Button
               type="button"
               size="xs"
@@ -81,45 +74,46 @@ export function AdjItemFields({
             >
               <Plus /> {t("addItem")}
             </Button>
-          </CardAction>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {itemsRootMessage && (
-          <p className="text-destructive text-xs" role="alert">
-            {itemsRootMessage}
-          </p>
-        )}
+          ) : undefined
+        }
+      >
+        <div className="space-y-2">
+          {itemsRootMessage && (
+            <p className="text-destructive text-xs" role="alert">
+              {itemsRootMessage}
+            </p>
+          )}
 
-        <DataGrid
-          table={table}
-          recordCount={itemFields.length}
-          tableClassNames={{ headerRow: "h-10", bodyRow: "h-10" }}
-          emptyMessage={
-            <EmptyComponent
-              icon={BoxIcon}
-              title={t("noItems")}
-              description={t("noItemsDesc")}
-              content={
-                !disabled && (
-                  <Button
-                    type="button"
-                    size="xs"
-                    onClick={handleAddItem}
-                    disabled={!hasLocation}
-                  >
-                    <Plus /> {t("addItem")}
-                  </Button>
-                )
-              }
-            />
-          }
-        >
-          <DataGridContainer>
-            <DataGridTable />
-          </DataGridContainer>
-        </DataGrid>
-      </CardContent>
+          <DataGrid
+            table={table}
+            recordCount={itemFields.length}
+            tableClassNames={{ headerRow: "h-10", bodyRow: "h-10" }}
+            emptyMessage={
+              <EmptyComponent
+                icon={BoxIcon}
+                title={t("noItems")}
+                description={t("noItemsDesc")}
+                content={
+                  !disabled && (
+                    <Button
+                      type="button"
+                      size="xs"
+                      onClick={handleAddItem}
+                      disabled={!hasLocation}
+                    >
+                      <Plus /> {t("addItem")}
+                    </Button>
+                  )
+                }
+              />
+            }
+          >
+            <DataGridContainer>
+              <DataGridTable />
+            </DataGridContainer>
+          </DataGrid>
+        </div>
+      </SettingSection>
 
       <DeleteDialog
         open={deleteIndex !== null}

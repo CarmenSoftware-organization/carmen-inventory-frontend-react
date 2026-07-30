@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { PrintDocumentButton } from "@/components/print-document-button";
-import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import {
   IA_STATUS_CONFIG,
@@ -65,7 +64,8 @@ export function IaFormHero({
   onVoid,
 }: IaFormHeroProps) {
   const tc = useTranslations("common");
-  const isStockIn = adjustmentType === "stock-in";
+  // ไม่ใช้ common.commit เพราะภาษาไทยของ key นั้นคือ "ยืนยันรับสินค้า" (ของ GRN)
+  const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const isView = mode === "view";
   const isEdit = mode === "edit";
   const TypeIcon = IA_TYPE_ICON[adjustmentType];
@@ -85,19 +85,11 @@ export function IaFormHero({
     ? IA_STATUS_CONFIG[inventoryAdjustment.doc_status]
     : null;
 
-  // type icon block (สี success/destructive ตาม type) → leading slot
   const leading = (
-    <div
-      className={cn(
-        "ring-background flex size-14 shrink-0 items-center justify-center rounded-2xl ring-4 ring-inset",
-        isStockIn
-          ? "bg-success/10 text-success-ink ring-success/20"
-          : "bg-destructive/10 text-destructive ring-destructive/20",
-      )}
+    <TypeIcon
+      className="text-muted-foreground size-5 shrink-0"
       aria-hidden="true"
-    >
-      <TypeIcon className="size-6" strokeWidth={2.25} />
-    </div>
+    />
   );
 
   const badges = statusConfig ? (
@@ -106,27 +98,14 @@ export function IaFormHero({
     </Badge>
   ) : undefined;
 
-  // meta row: type (สี) · วันที่ · location → subtitle slot
+  // meta row: วันที่ · location → subtitle slot
   const subtitle = (
     <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-      <span
-        className={cn(
-          "font-semibold tracking-widest uppercase",
-          isStockIn ? "text-success-ink" : "text-destructive",
-        )}
-      >
-        {typeLabel}
-      </span>
       {watchedDate && (
-        <>
-          <span aria-hidden="true" className="opacity-50">
-            ·
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
-            {formatDate(watchedDate, dateFormat)}
-          </span>
-        </>
+        <span className="inline-flex items-center gap-1">
+          <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
+          {formatDate(watchedDate, dateFormat)}
+        </span>
       )}
       {inventoryAdjustment?.location_name && (
         <>
@@ -153,7 +132,6 @@ export function IaFormHero({
           size="sm"
           onClick={onVoid}
           disabled={isPending || voidIsPending}
-          className="border-warning/50 bg-warning/10 text-warning-foreground hover:bg-warning/20 hover:text-warning-foreground"
         >
           <Ban />
           {tc("void")}
@@ -211,7 +189,7 @@ export function IaFormHero({
             onClick={submitWith("completed")}
           >
             <Check />
-            {tc("submit")}
+            {t("commit")}
           </Button>
         </>
       ) : null}
@@ -230,25 +208,18 @@ export function IaFormHero({
     </>
   );
 
-  // section คง colored left-border (บอก type) + bg card; DocFormHeader flush
-  // เพราะ p-5 จัด padding ให้แล้ว
+  // ไม่มีกล่อง card ครอบ header แล้ว — วางบนพื้นหน้าตรง ๆ เหมือน price-list /
+  // company-profile (flush ให้ title align กับ field ใน SettingSection ข้างล่าง)
   return (
-    <section
-      className={cn(
-        "bg-card relative rounded-lg border border-l-[3px] p-5",
-        isStockIn ? "border-l-success" : "border-l-destructive",
-      )}
-    >
-      <DocFormHeader
-        leading={leading}
-        title={docNo || typeLabel}
-        subtitle={subtitle}
-        backLabel={tc("goBack")}
-        onBack={onBack}
-        badges={badges}
-        actions={actions}
-        flush
-      />
-    </section>
+    <DocFormHeader
+      leading={leading}
+      title={docNo || typeLabel}
+      subtitle={subtitle}
+      backLabel={tc("goBack")}
+      onBack={onBack}
+      badges={badges}
+      actions={actions}
+      flush
+    />
   );
 }

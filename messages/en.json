@@ -1964,14 +1964,10 @@
       "noItems": "No Items Yet",
       "noItemsDesc": "Add items to this inventory adjustment.",
       "removeItem": "Remove Item",
+      "commit": "Commit",
       "docInfo": "Document Information",
-      "summary": "Summary",
-      "grandTotal": "Grand Total",
-      "lines": "Lines",
-      "postingWillIncrease": "Posting will increase stock",
-      "postingWillDecrease": "Posting will decrease stock",
-      "postingInfoStockIn": "Once posted, on-hand at {location} will rise by {qty} units. The average cost will recalculate.",
-      "postingInfoStockOut": "Once posted, on-hand at {location} will fall by {qty} units."
+      "docInfoDesc": "Date, reason, location and a note for this adjustment.",
+      "grandTotal": "Grand Total"
     },
     "physicalCount": {
       "entity": "Physical Count",

@@ -1959,14 +1959,10 @@
       "noItems": "ยังไม่มีรายการ",
       "noItemsDesc": "เพิ่มรายการในการปรับปรุงนี้",
       "removeItem": "ลบรายการ",
+      "commit": "ยืนยันปรับปรุง",
       "docInfo": "ข้อมูลเอกสาร",
-      "summary": "สรุป",
-      "grandTotal": "รวมทั้งสิ้น",
-      "lines": "จำนวนรายการ",
-      "postingWillIncrease": "เมื่อโพสต์จะเพิ่มสต๊อก",
-      "postingWillDecrease": "เมื่อโพสต์จะลดสต๊อก",
-      "postingInfoStockIn": "เมื่อโพสต์แล้ว ยอดคงเหลือที่ {location} จะเพิ่มขึ้น {qty} หน่วย และต้นทุนเฉลี่ยจะถูกคำนวณใหม่",
-      "postingInfoStockOut": "เมื่อโพสต์แล้ว ยอดคงเหลือที่ {location} จะลดลง {qty} หน่วย"
+      "docInfoDesc": "วันที่ เหตุผล คลัง และหมายเหตุของใบนี้",
+      "grandTotal": "รวมทั้งสิ้น"
     },
     "physicalCount": {
       "entity": "ตรวจนับสินค้า",
