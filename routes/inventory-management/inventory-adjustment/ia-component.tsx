@@ -461,6 +461,7 @@ export default function InventoryAdjustmentComponent() {
               items={items}
               isLoading={useInfiniteScroll ? grid.isLoading : isLoading}
               onEdit={navigateToItem}
+              onDelete={setDeleteTarget}
             />
             {useInfiniteScroll && grid.hasMore && (
               <div ref={grid.sentinelRef} className="flex justify-center py-4">

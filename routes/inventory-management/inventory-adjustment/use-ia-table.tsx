@@ -45,7 +45,8 @@ export function useInventoryAdjustmentTable({
   onEdit,
   onDelete,
 }: UseInventoryAdjustmentTableOptions) {
-  const { dateFormat, amountFormat, dateTimeFormat } = useProfile();
+  const { dateFormat, amountFormat, dateTimeFormat, defaultCurrencyCode } =
+    useProfile();
   const tfl = useTranslations("field");
 
   const columns: ColumnDef<InventoryAdjustment>[] = [
@@ -134,18 +135,6 @@ export function useInventoryAdjustmentTable({
       },
     },
     {
-      accessorKey: "base_total_cost",
-      header: tfl("total"),
-      cell: ({ row }) =>
-        formatAmount(row.original.base_total_cost, amountFormat),
-      meta: {
-        headerTitle: tfl("total"),
-        skeleton: columnSkeletons.text,
-        cellClassName: "text-right",
-        headerClassName: "text-right",
-      },
-    },
-    {
       accessorKey: "doc_status",
       header: tfl("status"),
       enableSorting: false,
@@ -163,6 +152,29 @@ export function useInventoryAdjustmentTable({
         skeleton: columnSkeletons.badge,
         cellClassName: "text-center",
         headerClassName: "text-center",
+      },
+    },
+    {
+      accessorKey: "base_total_cost",
+      header: tfl("total"),
+      // ยอด + รหัสสกุลเงินของ BU (สกุลเดียวทั้งใบ ไม่มีต่อรายการ) แบบเดียวกับ PR
+      cell: ({ row }) => (
+        <>
+          <span className="font-medium">
+            {formatAmount(row.original.base_total_cost, amountFormat)}
+          </span>
+          {defaultCurrencyCode && (
+            <span className="text-muted-foreground ms-1 text-xs font-normal">
+              {defaultCurrencyCode}
+            </span>
+          )}
+        </>
+      ),
+      meta: {
+        headerTitle: tfl("total"),
+        skeleton: columnSkeletons.text,
+        cellClassName: "text-right",
+        headerClassName: "text-right",
       },
     },
     {
@@ -206,6 +218,8 @@ export function useInventoryAdjustmentTable({
     tableConfig,
     onDelete,
     hideStatus: true,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
   });
 }
