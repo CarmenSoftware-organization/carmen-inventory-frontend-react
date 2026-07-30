@@ -1,20 +1,10 @@
-import { useWatch, type UseFormReturn } from "react-hook-form";
+import { type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import {
-  Ban,
-  CalendarDays,
-  Check,
-  MapPin,
-  Pencil,
-  Save,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Ban, Check, Pencil, Save, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { PrintDocumentButton } from "@/components/print-document-button";
-import { formatDate } from "@/lib/date-utils";
 import {
   IA_STATUS_CONFIG,
   IA_TYPE_ICON,
@@ -31,7 +21,6 @@ interface IaFormHeroProps {
   readonly inventoryAdjustment?: InventoryAdjustment;
   readonly form: UseFormReturn<AdjFormValues>;
   readonly typeLabel: string;
-  readonly dateFormat: string;
   readonly mode: FormMode;
   readonly isReadOnly: boolean;
   readonly isPending: boolean;
@@ -50,7 +39,6 @@ export function IaFormHero({
   inventoryAdjustment,
   form,
   typeLabel,
-  dateFormat,
   mode,
   isReadOnly,
   isPending,
@@ -78,9 +66,6 @@ export function IaFormHero({
   const submitWith = (docStatus: "draft" | "completed") => () =>
     form.setValue("doc_status", docStatus);
 
-  /* useWatch subscribes only to `date` so re-render is scoped */
-  const watchedDate = useWatch({ control: form.control, name: "date" });
-
   const statusConfig = inventoryAdjustment
     ? IA_STATUS_CONFIG[inventoryAdjustment.doc_status]
     : null;
@@ -97,31 +82,6 @@ export function IaFormHero({
       {statusConfig.label}
     </Badge>
   ) : undefined;
-
-  // meta row: วันที่ · location → subtitle slot
-  const subtitle = (
-    <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-      {watchedDate && (
-        <span className="inline-flex items-center gap-1">
-          <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
-          {formatDate(watchedDate, dateFormat)}
-        </span>
-      )}
-      {inventoryAdjustment?.location_name && (
-        <>
-          <span aria-hidden="true" className="opacity-50">
-            ·
-          </span>
-          <span className="inline-flex items-center gap-1 truncate">
-            <MapPin className="size-3 shrink-0" aria-hidden="true" />
-            <span className="truncate">
-              {inventoryAdjustment.location_name}
-            </span>
-          </span>
-        </>
-      )}
-    </span>
-  );
 
   const actions = (
     <>
@@ -214,7 +174,6 @@ export function IaFormHero({
     <DocFormHeader
       leading={leading}
       title={docNo || typeLabel}
-      subtitle={subtitle}
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}

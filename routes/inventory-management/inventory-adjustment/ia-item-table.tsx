@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
 import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
+import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProfile } from "@/hooks/use-profile";
 import {
   useProductCostByLocationQty,
@@ -86,11 +87,9 @@ const StockInCostProbe = memo(function StockInCostProbe({
   );
   useEffect(() => {
     if (!data) return;
-    form.setValue(
-      `items.${index}.cost_per_unit`,
-      data.average_cost_per_unit,
-      { shouldDirty: true },
-    );
+    form.setValue(`items.${index}.cost_per_unit`, data.average_cost_per_unit, {
+      shouldDirty: true,
+    });
     form.setValue(`items.${index}.total_cost`, data.total_cost, {
       shouldDirty: true,
     });
@@ -144,6 +143,8 @@ const ProductCell = memo(function ProductCell({
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
+  const productLocalName =
+    useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
   const CostProbe =
     adjustmentType === "stock-out" ? StockOutCostProbe : StockInCostProbe;
   if (disabled) {
@@ -153,7 +154,13 @@ const ProductCell = memo(function ProductCell({
     // untouched rows dirty). The probe is only for auto-filling during add/edit.
     return (
       <div className="flex items-center justify-between gap-1.5 text-xs">
-        <span className="truncate">{productName || "—"}</span>
+        <div className="min-w-0 flex-1">
+          {/* ชื่อสินค้า + ชื่อท้องถิ่นบรรทัดล่าง ใช้ primitive ตัวเดียวกับ PO/SR */}
+          <NameWithSubtext
+            primary={productName || "—"}
+            secondary={productLocalName}
+          />
+        </div>
         <ProductInventoryTooltip control={control} index={index} />
       </div>
     );
@@ -179,7 +186,9 @@ const ProductCell = memo(function ProductCell({
                 // (ดู types/product.ts) — อ่านทั้งสองทางไว้
                 form.setValue(
                   `items.${index}.unit_name`,
-                  product.inventory_unit?.name ?? product.inventory_unit_name ?? "",
+                  product.inventory_unit?.name ??
+                    product.inventory_unit_name ??
+                    "",
                 );
               }
             }}
@@ -291,6 +300,10 @@ export function useAdjItemTable({
           <UnitCell control={form.control} index={row.index} />
         ),
         size: 80,
+        meta: {
+          cellClassName: "text-center",
+          headerClassName: "text-center",
+        },
       },
       {
         accessorKey: "qty",
@@ -324,7 +337,7 @@ export function useAdjItemTable({
           );
         },
         size: 80,
-        meta: { headerClassName: "text-right" },
+        meta: { headerClassName: "text-right", cellClassName: "text-right" },
       },
       {
         id: "cost_per_unit",

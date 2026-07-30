@@ -237,7 +237,6 @@ export function InventoryAdjustmentForm({
         inventoryAdjustment={inventoryAdjustment}
         form={form}
         typeLabel={typeLabel}
-        dateFormat={dateFormat}
         mode={mode}
         isReadOnly={isReadOnly}
         isPending={isPending}
