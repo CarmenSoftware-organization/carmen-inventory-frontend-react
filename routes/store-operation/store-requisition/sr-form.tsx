@@ -2,11 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { Construction, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EmptyComponent from "@/components/empty-component";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { useProfile } from "@/hooks/use-profile";
@@ -30,6 +29,7 @@ import { SrHeader } from "./sr-header";
 import { SrRequestDetails } from "./sr-request-details";
 import { SrFooter } from "./sr-footer";
 import { SrFormDialogs } from "./sr-form-dialogs";
+import { SrStockTable } from "./sr-stock-table";
 
 interface StoreRequisitionFormProps {
   readonly storeRequisition?: StoreRequisition;
@@ -46,7 +46,6 @@ export function StoreRequisitionForm({
 }: StoreRequisitionFormProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
-  const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const tv = useTranslations("validation");
   const { data: profile, defaultBu, hasDepartment, dateFormat } = useProfile();
@@ -300,7 +299,11 @@ export function StoreRequisitionForm({
           </TabsContent>
 
           <TabsContent value="stock">
-            <EmptyComponent icon={Construction} title={tc("comingSoon")} />
+            <SrStockTable
+              items={items}
+              fromLocationName={fromLocInfo.name}
+              toLocationName={toLocInfo.name}
+            />
           </TabsContent>
         </Tabs>
       </form>
