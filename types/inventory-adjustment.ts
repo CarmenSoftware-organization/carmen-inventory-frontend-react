@@ -24,6 +24,8 @@ export interface InventoryAdjustmentDetail {
   product_sku: string;
   description: string | null;
   qty: number;
+  /** ชื่อหน่วยนับ (inventory unit) — ใช้แสดงคอลัมน์ Unit ในฟอร์ม ไม่ได้ส่งกลับ */
+  inventory_unit_name?: string;
   cost_per_unit: number;
   total_cost: number;
   info: unknown;

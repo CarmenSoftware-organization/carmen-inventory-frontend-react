@@ -94,6 +94,9 @@ const StockInCostProbe = memo(function StockInCostProbe({
     form.setValue(`items.${index}.total_cost`, data.total_cost, {
       shouldDirty: true,
     });
+    if (data.unit_name && !form.getValues(`items.${index}.unit_name`)) {
+      form.setValue(`items.${index}.unit_name`, data.unit_name);
+    }
   }, [data, form, index]);
   return null;
 });
@@ -172,6 +175,12 @@ const ProductCell = memo(function ProductCell({
                   `items.${index}.product_local_name`,
                   product.local_name ?? "",
                 );
+                // list endpoint คืนหน่วยเป็น flat string ส่วน detail เป็น object
+                // (ดู types/product.ts) — อ่านทั้งสองทางไว้
+                form.setValue(
+                  `items.${index}.unit_name`,
+                  product.inventory_unit?.name ?? product.inventory_unit_name ?? "",
+                );
               }
             }}
             disabled={!locationId}
@@ -185,6 +194,21 @@ const ProductCell = memo(function ProductCell({
       <ProductInventoryTooltip control={control} index={index} />
       <CostProbe form={form} index={index} />
     </div>
+  );
+});
+
+/** หน่วยนับของแถว — แสดงผลอย่างเดียว มาจากสินค้าที่เลือก */
+const UnitCell = memo(function UnitCell({
+  control,
+  index,
+}: {
+  control: Control<AdjFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const unitName = useWatch({ control, name: `items.${index}.unit_name` });
+  return (
+    <span className="text-muted-foreground text-xs">{unitName || "—"}</span>
   );
 });
 
@@ -260,6 +284,15 @@ export function useAdjItemTable({
         size: 200,
       },
       {
+        accessorKey: "unit_name",
+        header: tfl("unit"),
+        // แสดงผลอย่างเดียว — ได้ค่าจากสินค้าที่เลือก (inventory unit) แก้ไม่ได้
+        cell: ({ row }) => (
+          <UnitCell control={form.control} index={row.index} />
+        ),
+        size: 80,
+      },
+      {
         accessorKey: "qty",
         header: tfl("qty"),
         cell: ({ row }) => {
@@ -273,7 +306,8 @@ export function useAdjItemTable({
             <FieldInput
               type="number"
               inputMode="decimal"
-              min={1}
+              min={0}
+              step="any"
               placeholder={tfl("qty")}
               className={cn(
                 "h-6 text-right text-xs md:text-xs",

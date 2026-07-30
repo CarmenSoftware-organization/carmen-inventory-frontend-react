@@ -11,9 +11,14 @@ function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     product_name: z.string(),
     product_local_name: z.string(),
+    /** ชื่อหน่วยนับจากสินค้าที่เลือก — แสดงผลเท่านั้น ไม่อยู่ใน payload */
+    unit_name: z.string(),
+    // ห้ามติดลบ แต่ 0 ผ่านได้ — แถวใหม่เริ่มที่ 0 จะได้ไม่ขึ้น error ทันทีที่กด
+    // เพิ่มรายการ (กติกาเดียวกับ SR) · ทศนิยมใส่ได้ ไม่ปัดให้ (ดู CLAUDE.md
+    // เรื่อง ValidateSchema.quantity ของ backend ที่ยังเป็น int)
     qty: z.coerce
       .number()
-      .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
     cost_per_unit: z.coerce
       .number()
       .min(0, tv("minZero", { field: tf("costPerUnit") })),
@@ -63,7 +68,8 @@ export const ADJ_ITEM: AdjFormValues["items"][number] = {
   product_id: "",
   product_name: "",
   product_local_name: "",
-  qty: 1,
+  unit_name: "",
+  qty: 0,
   cost_per_unit: 0,
   total_cost: 0,
   description: "",
@@ -73,6 +79,7 @@ export function mapItemToPayload(
   item: AdjFormValues["items"][number],
 ): AdjustmentDetailItemPayload {
   return {
+    // unit_name ไม่อยู่ในนี้ — เป็นคอลัมน์แสดงผลอย่างเดียว
     product_id: item.product_id,
     qty: item.qty,
     cost_per_unit: item.cost_per_unit,
@@ -110,6 +117,7 @@ export function getDefaultValues(
         product_id: d.product_id,
         product_name: d.product_name,
         product_local_name: d.product_local_name,
+        unit_name: d.inventory_unit_name ?? "",
         qty: d.qty,
         cost_per_unit: d.cost_per_unit,
         total_cost: d.total_cost,
