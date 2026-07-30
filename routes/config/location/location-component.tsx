@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { useLocation, useDeleteLocation } from "@/hooks/use-location";
@@ -53,8 +52,8 @@ export default function LocationComponent() {
           width: 10,
         },
       ]}
-      renderCard={({ item, index, onEdit }) => (
-        <LocationCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <LocationCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

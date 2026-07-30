@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
 import { useTaxProfile, useDeleteTaxProfile } from "@/hooks/use-tax-profile";
@@ -11,7 +10,9 @@ import TaxProfileCard from "./tax-profile-card";
 
 // แทน next/dynamic ด้วย React.lazy (code-split dialog chunk เหมือนเดิม)
 const TaxProfileDialog = lazy(() =>
-  import("./tax-profile-dialog").then((mod) => ({ default: mod.TaxProfileDialog })),
+  import("./tax-profile-dialog").then((mod) => ({
+    default: mod.TaxProfileDialog,
+  })),
 );
 
 /**
@@ -58,8 +59,8 @@ export default function TaxProfileComponent() {
           />
         </Suspense>
       )}
-      renderCard={({ item, index, onEdit }) => (
-        <TaxProfileCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <TaxProfileCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

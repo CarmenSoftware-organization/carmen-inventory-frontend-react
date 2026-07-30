@@ -218,10 +218,7 @@ export default function CnComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
@@ -319,6 +316,7 @@ export default function CnComponent() {
               items={creditNotes}
               isLoading={grid.isLoading}
               onEdit={(cn) => navigate(`/procurement/credit-note/${cn.id}`)}
+              onDelete={setDeleteTarget}
             />
             {grid.hasMore && (
               <div ref={grid.sentinelRef} className="flex justify-center py-4">
@@ -349,9 +347,8 @@ export default function CnComponent() {
                 <CnCardList
                   items={creditNotes}
                   isLoading={isLoading}
-                  onEdit={(cn) =>
-                    navigate(`/procurement/credit-note/${cn.id}`)
-                  }
+                  onEdit={(cn) => navigate(`/procurement/credit-note/${cn.id}`)}
+                  onDelete={setDeleteTarget}
                 />
               </div>
               <DataGridPagination />

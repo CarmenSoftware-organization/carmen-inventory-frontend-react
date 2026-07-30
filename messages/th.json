@@ -208,6 +208,8 @@
     "footer": "© {year} Carmen Inventory · ระบบ ERP สำหรับธุรกิจโรงแรม"
   },
   "common": {
+    "yes": "ใช่",
+    "no": "ไม่",
     "businessUnit": "หน่วยธุรกิจ",
     "language": "ภาษา",
     "theme": "ธีม",
@@ -651,6 +653,7 @@
     "unitCost": "ต้นทุนต่อหน่วย",
     "lossValue": "มูลค่าสูญเสีย",
     "totalQty": "จำนวนรวม",
+    "totalTime": "เวลารวม",
     "parLevel": "ระดับ Par",
     "need": "ต้องการ",
     "current": "คงเหลือ",

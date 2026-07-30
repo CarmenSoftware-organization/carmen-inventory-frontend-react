@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   ArrowRight,
@@ -295,12 +294,11 @@ export default function ExchangeRateComponent() {
         {isGridMode && grid.isLoading && <CardSkeletonGrid />}
         {isGridMode && !grid.isLoading && items.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {items.map((item, i) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((item) => (
                 <ExchangeRateCard
                   key={item.id}
                   item={item}
-                  index={i}
                   baseCurrency={baseCurrency}
                   onEdit={(rate) => {
                     setEditItem(rate);
@@ -455,7 +453,7 @@ export default function ExchangeRateComponent() {
                               → {baseCurrency}
                             </span>
                           </div>
-                          <div className="text-muted-foreground mt-0.5 flex items-center gap-1.5 text-micro tabular-nums">
+                          <div className="text-muted-foreground text-micro mt-0.5 flex items-center gap-1.5 tabular-nums">
                             <span className="line-through">
                               {formatExchangeRate(c.oldRate)}
                             </span>

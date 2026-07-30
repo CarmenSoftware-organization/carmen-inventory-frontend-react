@@ -1,10 +1,6 @@
-import type { LucideIcon } from "lucide-react";
-import { BoxIcon, Tag, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { Product } from "@/types/product";
@@ -15,6 +11,16 @@ interface ProductCardProps {
   readonly onDelete: (item: Product) => void;
 }
 
+/**
+ * การ์ดสินค้า 1 รายการ สำหรับหน้ารายการโหมด grid/mobile
+ *
+ * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/SR/IA — ไฟล์นี้เหลือแค่ว่า
+ * ข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตารางสินค้า
+ *
+ * @param props.item - ข้อมูลสินค้า
+ * @param props.onEdit - callback เมื่อคลิกการ์ด
+ * @param props.onDelete - callback เมื่อกดปุ่มลบ
+ */
 export default function ProductCard({
   item,
   onEdit,
@@ -23,120 +29,58 @@ export default function ProductCard({
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   const { dateTimeFormat } = useProfile();
+
   const isActive = item.product_status_type === "active";
+  const unitName = item.inventory_unit_name ?? item.inventory_unit?.name;
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring flex cursor-pointer flex-col gap-0 overflow-hidden py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={
+        <StatusDotBadge tone={isActive ? "success" : "neutral"} size="xs">
+          {isActive ? ts("active") : ts("inactive")}
+        </StatusDotBadge>
+      }
+      onOpen={() => onEdit(item)}
+      onDelete={() => onDelete(item)}
     >
-      {/* Header */}
-      <div className="flex items-start gap-2 px-4 py-3">
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold">
-            {item.name || "..."}
-          </h3>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="text-muted-foreground truncate text-xs">
-              {item.code}
-            </span>
-            <StatusDotBadge
-              tone={isActive ? "success" : "neutral"}
-              size="xs"
-              className="shrink-0"
-            >
-              {isActive ? ts("active") : ts("inactive")}
-            </StatusDotBadge>
-          </div>
-        </div>
-        {/* ⋯ menu — Delete อย่างเดียว (คลิกการ์ด = edit อยู่แล้ว) · หยุด
-            propagation ไม่ให้คลิกทะลุไปเปิด edit (เมนู portal ออก body อยู่แล้ว) */}
-        <div
-          className="-mt-1 -mr-1 shrink-0"
-          role="presentation"
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={(e) => e.stopPropagation()}
-        >
-          <DataGridRowActions onDelete={() => onDelete(item)} />
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Content */}
-      <div className="space-y-2 px-4 py-3 text-xs">
-        {item.local_name && (
-          <InfoRow
-            icon={Tag}
-            label={tfl("localName")}
-            value={item.local_name}
-          />
-        )}
-        <InfoRow
-          icon={BoxIcon}
-          label={tfl("unit")}
-          value={item.inventory_unit_name ?? item.inventory_unit?.name ?? "-"}
-        />
-        {item.product_category && (
-          <InfoRow
-            icon={Tag}
-            label={tfl("category")}
-            value={item.product_category.name}
-          />
-        )}
-        {item.product_sub_category && (
-          <InfoRow
-            icon={Tag}
-            label={tfl("subCategory")}
-            value={item.product_sub_category.name}
-          />
-        )}
-        {item.product_item_group && (
-          <InfoRow
-            icon={Tag}
-            label={tfl("itemGroup")}
-            value={item.product_item_group.name}
-          />
-        )}
-        {item.audit?.updated?.at && (
-          <InfoRow
-            icon={Clock}
-            label={tfl("updated")}
-            value={formatDate(item.audit.updated.at, dateTimeFormat)}
-          />
-        )}
-      </div>
-    </Card>
-  );
-}
-
-function InfoRow({
-  icon: Icon,
-  label,
-  value,
-}: {
-  readonly icon: LucideIcon;
-  readonly label: string;
-  readonly value: string;
-}) {
-  return (
-    <div className="flex items-start gap-2">
-      <Icon
-        className="text-muted-foreground mt-0.5 size-3 shrink-0"
-        aria-hidden="true"
-      />
-      <div className="min-w-0 flex-1">
-        <p className="text-muted-foreground">{label}</p>
-        <p className="truncate font-semibold">{value}</p>
-      </div>
-    </div>
+      <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>
+      {item.local_name && (
+        <ListCardRow label={tfl("localName")}>{item.local_name}</ListCardRow>
+      )}
+      {unitName && <ListCardRow label={tfl("unit")}>{unitName}</ListCardRow>}
+      {item.product_category && (
+        <ListCardRow label={tfl("category")}>
+          {item.product_category.name}
+        </ListCardRow>
+      )}
+      {item.product_sub_category && (
+        <ListCardRow label={tfl("subCategory")}>
+          {item.product_sub_category.name}
+        </ListCardRow>
+      )}
+      {item.product_item_group && (
+        <ListCardRow label={tfl("itemGroup")}>
+          {item.product_item_group.name}
+        </ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

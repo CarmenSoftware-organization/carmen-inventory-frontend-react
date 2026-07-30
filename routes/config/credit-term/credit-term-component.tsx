@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { useCreditTerm, useDeleteCreditTerm } from "@/hooks/use-credit-term";
 import type { CreditTerm } from "@/types/credit-term";
@@ -55,8 +54,8 @@ export default function CreditTermComponent() {
           readOnly={readOnly}
         />
       )}
-      renderCard={({ item, index, onEdit }) => (
-        <CreditTermCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <CreditTermCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

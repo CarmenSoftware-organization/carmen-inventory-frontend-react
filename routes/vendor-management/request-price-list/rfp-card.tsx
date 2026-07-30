@@ -1,32 +1,29 @@
-import { CalendarDays, Clock, FileText, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardAction,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { RequestPriceList } from "@/types/request-price-list";
 
 interface RfpCardProps {
   readonly item: RequestPriceList;
-  readonly index?: number;
   readonly onEdit: (item: RequestPriceList) => void;
+  readonly onDelete: (item: RequestPriceList) => void;
 }
 
 /**
- * การ์ดแสดง request price list สำหรับ grid view พร้อมช่วงวันที่และจำนวน vendor
- * @param props - ข้อมูล RFP, index และ callback เมื่อกดแก้ไข
- * @returns React element ของการ์ด RFP
- * @example
- * <RfpCard item={rfp} index={0} onEdit={(r) => navigate(`/vendor-management/request-price-list/${r.id}`)} />
+ * การ์ดใบขอราคา 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
+ *
+ * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/product/vendor/price-list —
+ * ไฟล์นี้เหลือแค่ว่าข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตาราง
+ * RFP ไม่มีสถานะเอกสาร มุมขวาบนจึงเป็นจำนวน vendor ที่ถูกส่งขอราคา
+ *
+ * @param props.item - ข้อมูลใบขอราคา
+ * @param props.onEdit - callback เมื่อคลิกการ์ด
+ * @param props.onDelete - callback เมื่อกดปุ่มลบ
  */
-export default function RfpCard({ item, index, onEdit }: RfpCardProps) {
+export default function RfpCard({ item, onEdit, onDelete }: RfpCardProps) {
   const tfl = useTranslations("field");
   const { dateFormat, dateTimeFormat } = useProfile();
 
@@ -38,74 +35,47 @@ export default function RfpCard({ item, index, onEdit }: RfpCardProps) {
   })();
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={
+        <Badge variant="secondary" size="xs" className="gap-1">
+          <Users aria-hidden="true" />
+          <span className="tabular-nums">{item.vendor_count}</span>
+        </Badge>
+      }
+      onOpen={() => onEdit(item)}
+      onDelete={() => onDelete(item)}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <CardTitle className="text-sm flex-1 min-w-0 break-words leading-tight">
-            {item.name || "..."}
-          </CardTitle>
-        </div>
-        {item.pricelist_template?.name && (
-          <p className="text-muted-foreground flex items-center gap-1 text-xs">
-            <FileText className="size-3 shrink-0" aria-hidden="true" />
-            <span className="truncate">{item.pricelist_template.name}</span>
-          </p>
-        )}
-        <CardAction>
-          <Badge variant="secondary" size="xs" className="gap-1 text-xs">
-            <Users className="size-3" aria-hidden="true" />
-            {item.vendor_count}
-          </Badge>
-        </CardAction>
-      </CardHeader>
-
+      {item.pricelist_template?.name && (
+        <ListCardRow label={tfl("template")}>
+          {item.pricelist_template.name}
+        </ListCardRow>
+      )}
       {period && (
-        <>
-          <Separator />
-          <CardContent className="flex items-center gap-1.5 px-4 py-2 text-xs">
-            <CalendarDays
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground">
-              {tfl("effectivePeriod")}:
-            </span>
-            <span className="truncate font-semibold">{period}</span>
-          </CardContent>
-        </>
+        <ListCardRow label={tfl("effectivePeriod")}>
+          <span className="tabular-nums">{period}</span>
+        </ListCardRow>
       )}
-
+      <ListCardRow label={tfl("vendorCount")}>
+        <span className="tabular-nums">{item.vendor_count}</span>
+      </ListCardRow>
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
       {item.audit?.updated?.at && (
-        <>
-          <Separator />
-          <CardContent className="flex items-center gap-1.5 px-4 py-2 text-xs">
-            <Clock
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground">{tfl("updated")}:</span>
-            <span className="truncate font-semibold">
-              {formatDate(item.audit.updated.at, dateTimeFormat)}
-            </span>
-          </CardContent>
-        </>
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
       )}
-    </Card>
+    </ListCard>
   );
 }

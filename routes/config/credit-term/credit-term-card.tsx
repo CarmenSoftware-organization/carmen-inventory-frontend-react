@@ -1,104 +1,58 @@
-import { Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
-
 import { StatusBadge } from "@/components/ui/status-badge";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardAction,
-  CardContent,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { CreditTerm } from "@/types/credit-term";
 
-interface CreditTermCardProps {
+interface Props {
   readonly item: CreditTerm;
-  readonly index?: number;
   readonly onEdit: (item: CreditTerm) => void;
+  readonly onDelete?: (item: CreditTerm) => void;
 }
 
-/**
- * การ์ดแสดงข้อมูล Credit Term สำหรับมุมมอง mobile
- * @param props - ข้อมูล item, index และ callback onEdit
- * @returns React element ของการ์ด Credit Term
- * @example
- * // route: /config/credit-term (mobile card view)
- * <CreditTermCard item={item} index={0} onEdit={handleEdit} />
- */
-export default function CreditTermCard({
-  item,
-  index,
-  onEdit,
-}: CreditTermCardProps) {
+/** การ์ดเครดิตเทอม สำหรับ `ConfigListTemplate` โหมด grid/mobile */
+export default function CreditTermCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={<StatusBadge active={item.is_active} />}
+      onOpen={() => onEdit(item)}
+      onDelete={onDelete ? () => onDelete(item) : undefined}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <CardTitle className="min-w-0 flex-1 truncate text-sm">
-            {item.name || "..."}
-          </CardTitle>
-        </div>
-        <CardAction>
-          <StatusBadge active={item.is_active} />
-        </CardAction>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="space-y-2 px-4 py-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Clock
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground text-xs">
+      {item.value != null && (
+        <ListCardRow label={tfl("creditTerm")}>
+          <span className="tabular-nums">
+            {item.value}{" "}
+            <span className="text-muted-foreground font-normal">
               {tfl("creditTermDays")}
             </span>
-          </div>
-          <span className="text-sm font-semibold tabular-nums">
-            {item.value}
           </span>
-        </div>
-        {item.description && (
-          <p className="text-muted-foreground line-clamp-2 text-xs">
-            {item.description}
-          </p>
-        )}
-        {item.audit?.updated?.at && (
-          <div className="flex items-center gap-1.5">
-            <Clock
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground truncate text-xs">
-              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        </ListCardRow>
+      )}
+      {item.description && (
+        <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

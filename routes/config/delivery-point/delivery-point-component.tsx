@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import {
   useDeliveryPoint,
@@ -48,8 +47,8 @@ export default function DeliveryPointComponent() {
           readOnly={readOnly}
         />
       )}
-      renderCard={({ item, index, onEdit }) => (
-        <DeliveryPointCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <DeliveryPointCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import {
   useCnReasonConfig,
@@ -53,8 +52,8 @@ export default function CreditNoteReasonComponent() {
           readOnly={readOnly}
         />
       )}
-      renderCard={({ item, index, onEdit }) => (
-        <CreditNoteReasonCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <CreditNoteReasonCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

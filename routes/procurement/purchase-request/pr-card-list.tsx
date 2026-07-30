@@ -1,5 +1,6 @@
 import type { PurchaseRequest } from "@/types/purchase-request";
 import EmptyComponent from "@/components/empty-component";
+import { ListCardSkeleton } from "@/components/share/list-card";
 import PrCard from "./pr-card";
 
 interface PrCardListProps {
@@ -10,55 +11,6 @@ interface PrCardListProps {
   readonly onReject?: (item: PurchaseRequest) => void;
   readonly onDelete?: (item: PurchaseRequest) => void;
   readonly isMyPending?: boolean;
-}
-
-/**
- * Skeleton สำหรับแสดงระหว่างโหลดการ์ด PR ใน grid view
- * @returns React element ของ skeleton การ์ด PR
- * @example
- * <PrCardSkeleton />
- */
-function PrCardSkeleton() {
-  return (
-    <div className="animate-pulse rounded-lg border bg-card">
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="space-y-1.5">
-          <div className="h-4 w-28 rounded bg-muted" />
-          <div className="h-3 w-20 rounded bg-muted" />
-        </div>
-        <div className="h-5 w-16 rounded-full bg-muted" />
-      </div>
-      <div className="border-t" />
-      <div className="space-y-3 px-4 py-3">
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-12 rounded bg-muted" />
-            <div className="h-3 w-24 rounded bg-muted" />
-          </div>
-        </div>
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-14 rounded bg-muted" />
-            <div className="h-3 w-32 rounded bg-muted" />
-          </div>
-        </div>
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-16 rounded bg-muted" />
-            <div className="h-3 w-28 rounded bg-muted" />
-          </div>
-        </div>
-      </div>
-      <div className="border-t" />
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="h-3 w-14 rounded bg-muted" />
-        <div className="h-4 w-24 rounded bg-muted" />
-      </div>
-    </div>
-  );
 }
 
 /**
@@ -88,7 +40,7 @@ export default function PrCardList({
     return (
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
-          <PrCardSkeleton key={`skeleton-${i}`} />
+          <ListCardSkeleton key={`skeleton-${i}`} />
         ))}
       </div>
     );
@@ -100,11 +52,10 @@ export default function PrCardList({
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {items.map((item, i) => (
+      {items.map((item) => (
         <PrCard
           key={item.id}
           item={item}
-          index={i}
           onEdit={onEdit}
           onApprove={onApprove}
           onReject={onReject}

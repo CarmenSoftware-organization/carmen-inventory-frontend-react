@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { useUnit, useDeleteUnit } from "@/hooks/use-unit";
 import type { Unit } from "@/types/unit";
@@ -56,8 +55,8 @@ export default function UnitComponent() {
           readOnly={readOnly}
         />
       )}
-      renderCard={({ item, index, onEdit }) => (
-        <UnitCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <UnitCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );

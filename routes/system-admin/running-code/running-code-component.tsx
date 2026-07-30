@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Download, MoreHorizontal, Play, Plus, Printer } from "lucide-react";
 import { toast } from "sonner";
@@ -241,15 +240,15 @@ export default function RunningCodeComponent() {
           ) : runningCodes.length > 0 ? (
             <>
               <div className="grid grid-cols-1 gap-3">
-                {runningCodes.map((rc, i) => (
+                {runningCodes.map((rc) => (
                   <RunningCodeCard
                     key={rc.id}
                     item={rc}
-                    index={i}
                     onEdit={(item) => {
                       setEditRunningCode(item);
                       setDialogOpen(true);
                     }}
+                    onDelete={setDeleteTarget}
                   />
                 ))}
               </div>

@@ -3,8 +3,16 @@ import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { Badge } from "@/components/ui/badge";
+import {
+  IA_TYPE_CONFIG,
+  IA_TYPE_ICON,
+  IA_TYPE_ICON_COLOR,
+} from "@/constant/inventory-adjustment";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { columnSkeletons, statusColumn } from "@/components/ui/data-grid/columns";
+import {
+  columnSkeletons,
+  statusColumn,
+} from "@/components/ui/data-grid/columns";
 import { AuditCell } from "@/components/share/audit-cell";
 import { ADJUSTMENT_TYPE, type AdjustmentType } from "@/types/adjustment-type";
 import type { ParamsDto } from "@/types/params";
@@ -60,13 +68,20 @@ export function useAdjustmentTypeTable({
           className="justify-center"
         />
       ),
+      // chip เดียวกับคอลัมน์ Type ของ inventory-adjustment: กล่อง neutral +
+      // ไอคอนสี (สีอยู่ที่ไอคอนที่เดียว) ของเดิมเป็น badge ทึบ variant
+      // default/warning ซึ่งเอาสี primary "กดได้" มาใช้กับข้อมูล และเสียงดัง
+      // กว่าทุกอย่างในตาราง · label ยังเป็นข้อความที่แปลแล้ว (IA hardcode อังกฤษ)
       cell: ({ row }) => {
         const type = row.getValue<string>("type");
+        const iaType =
+          type === ADJUSTMENT_TYPE.STOCK_IN ? "stock-in" : "stock-out";
+        const Icon = IA_TYPE_ICON[iaType];
         return (
-          <Badge
-            size="lg"
-            variant={type === ADJUSTMENT_TYPE.STOCK_IN ? "default" : "warning"}
-          >
+          <Badge size="sm" className={IA_TYPE_CONFIG[iaType]?.className}>
+            {Icon && (
+              <Icon className={IA_TYPE_ICON_COLOR[iaType]} aria-hidden="true" />
+            )}
             {type === ADJUSTMENT_TYPE.STOCK_IN
               ? tfl("stockIn")
               : tfl("stockOut")}
@@ -121,6 +136,8 @@ export function useAdjustmentTypeTable({
     tableConfig,
     onDelete,
     hideStatus: true,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
   });
 }

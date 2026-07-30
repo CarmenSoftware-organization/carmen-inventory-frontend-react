@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -178,7 +177,13 @@ export default function RecipeComponent() {
         ),
       },
     ],
-    [STATUS_OPTIONS, cuisineFilterOptions, categoryFilterOptions, difficultyFilterOptions, tfl],
+    [
+      STATUS_OPTIONS,
+      cuisineFilterOptions,
+      categoryFilterOptions,
+      difficultyFilterOptions,
+      tfl,
+    ],
   );
 
   const lf = useListFilters({
@@ -242,10 +247,7 @@ export default function RecipeComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
@@ -361,15 +363,15 @@ export default function RecipeComponent() {
         {isGridMode && grid.isLoading && <CardSkeletonGrid />}
         {isGridMode && !grid.isLoading && recipes.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {recipes.map((item, i) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {recipes.map((item) => (
                 <RecipeCard
                   key={item.id}
                   item={item}
-                  index={i}
                   cuisines={cuisineData?.data ?? []}
                   categories={categoryData?.data ?? []}
                   onEdit={(r) => navigate(`/operation-plan/recipe/${r.id}`)}
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>

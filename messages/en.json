@@ -208,6 +208,8 @@
     "footer": "© {year} Carmen Inventory · ERP for Hospitality"
   },
   "common": {
+    "yes": "Yes",
+    "no": "No",
     "businessUnit": "Business Unit",
     "language": "Language",
     "theme": "Theme",
@@ -651,6 +653,7 @@
     "unitCost": "Unit Cost",
     "lossValue": "Loss Value",
     "totalQty": "Total Qty",
+    "totalTime": "Total Time",
     "parLevel": "Par Level",
     "need": "Need",
     "current": "Current",

@@ -1,121 +1,64 @@
-import { CircleCheck, CircleX, Clock, Tag, Truck } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { LocationTypeBadge } from "@/components/ui/location-type-badge";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { Location } from "@/types/location";
 
-interface LocationCardProps {
+interface Props {
   readonly item: Location;
-  readonly index?: number;
   readonly onEdit: (item: Location) => void;
+  readonly onDelete?: (item: Location) => void;
 }
 
 /**
- * การ์ดแสดงข้อมูล Location สำหรับมุมมอง mobile พร้อม badge ประเภทคลัง
+ * การ์ดคลัง/สถานที่ สำหรับ `ConfigListTemplate` โหมด grid/mobile
  *
- * ใช้ภายใน `ConfigListTemplate` ผ่าน prop `renderCard` เมื่ออยู่ในมุมมอง
- * card (มือถือ) แสดง name, code, type, physical count, delivery point
- *
- * @param props - ข้อมูล item, index และ callback onEdit
- * @returns React element ของการ์ด Location
- * @example
- * ```tsx
- * <LocationCard item={location} index={0} onEdit={handleEdit} />
- * ```
+ * badge มุมขวาบนเป็นสถานะ (เหมือนการ์ดทุกใบ) ส่วนประเภทคลังเป็นแถวข้อมูล —
+ * `LocationTypeBadge` เป็น badge ที่มี label แปลแล้ว จึงใช้เป็นค่าในแถวได้เลย
  */
-export default function LocationCard({ item, index, onEdit }: LocationCardProps) {
+export default function LocationCard({ item, onEdit, onDelete }: Props) {
+  const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const ts = useTranslations("status");
   const { dateTimeFormat } = useProfile();
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={<StatusBadge active={item.is_active} />}
+      onOpen={() => onEdit(item)}
+      onDelete={onDelete ? () => onDelete(item) : undefined}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <CardTitle className="truncate text-sm flex-1 min-w-0">{item.name || "..."}</CardTitle>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-xs">{item.code}</p>
-          <LocationTypeBadge type={item.location_type} size="xs" />
-        </div>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="space-y-2 px-4 py-3 text-xs">
-        <div className="flex items-center gap-2">
-          {item.physical_count_type === "yes" ? (
-            <CircleCheck
-              className="text-positive-ink size-3 shrink-0"
-              aria-hidden="true"
-            />
-          ) : (
-            <CircleX
-              className="text-muted-foreground/50 size-3 shrink-0"
-              aria-hidden="true"
-            />
-          )}
-          <p className="text-muted-foreground text-xs">
-            {tfl("physicalCount")}
-          </p>
-        </div>
-        <div className="flex items-start gap-2">
-          <Truck
-            className="text-muted-foreground mt-0.5 size-3 shrink-0"
-            aria-hidden="true"
-          />
-          <div className="min-w-0">
-            <p className="text-muted-foreground text-xs">
-              {tfl("deliveryPoint")}
-            </p>
-            <p className="truncate font-semibold">
-              {item.delivery_point?.name ?? "-"}
-            </p>
-          </div>
-        </div>
-        {!item.is_active && (
-          <div className="flex items-start gap-2">
-            <Tag
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <Badge variant="secondary" size="sm" className="text-xs">
-              {ts("inactive")}
-            </Badge>
-          </div>
-        )}
-        {item.audit?.updated?.at && (
-          <div className="flex items-center gap-2">
-            <Clock
-              className="text-muted-foreground size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground truncate">
-              {tfl("updated")}: {formatDate(item.audit.updated.at, dateTimeFormat)}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
+      <ListCardRow label={tfl("type")}>
+        <LocationTypeBadge type={item.location_type} size="xs" />
+      </ListCardRow>
+      <ListCardRow label={tfl("physicalCount")}>
+        {item.physical_count_type === "yes" ? tc("yes") : tc("no")}
+      </ListCardRow>
+      {item.delivery_point?.name && (
+        <ListCardRow label={tfl("deliveryPoint")}>
+          {item.delivery_point.name}
+        </ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

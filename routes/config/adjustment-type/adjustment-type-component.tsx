@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import {
@@ -55,8 +54,8 @@ export default function AdjustmentTypeComponent() {
           readOnly={readOnly}
         />
       )}
-      renderCard={({ item, index, onEdit }) => (
-        <AdjustmentTypeCard item={item} index={index} onEdit={onEdit} />
+      renderCard={({ item, onEdit, onDelete }) => (
+        <AdjustmentTypeCard item={item} onEdit={onEdit} onDelete={onDelete} />
       )}
     />
   );
