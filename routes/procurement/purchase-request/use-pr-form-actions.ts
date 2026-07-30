@@ -47,11 +47,6 @@ interface UsePrFormActionsParams {
   mode: FormMode;
   setMode: (mode: FormMode) => void;
   role: string;
-  /**
-   * พาไปหาช่องที่ผิด — หน้าเดิมเลื่อนหา field ตรง ๆ ส่วน v2 ต้องพาแถวมาเรนเดอร์
-   * ก่อน (ตารางเป็น virtualized) ค่า default คือเลื่อนหา field เฉย ๆ
-   */
-  onRevealInvalid?: () => void;
 }
 
 export function usePrFormActions({
@@ -61,7 +56,6 @@ export function usePrFormActions({
   mode,
   setMode,
   role,
-  onRevealInvalid,
 }: UsePrFormActionsParams) {
   const t = useTranslations("procurement.purchaseRequest");
   const tt = useTranslations("toast");
@@ -452,8 +446,7 @@ export function usePrFormActions({
    * แถวที่ผิดถูกกางให้เองอยู่แล้วผ่าน submitCount ใน pr-item-table
    */
   const revealInvalid = (errors: FieldErrors<PrFormValues>) => {
-    if (onRevealInvalid) onRevealInvalid();
-    else scrollToFirstInvalidField();
+    scrollToFirstInvalidField();
     const count = countInvalidItems(errors as Record<string, unknown>);
     toast.warning(
       count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),

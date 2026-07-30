@@ -88,8 +88,6 @@ export const router = createBrowserRouter([
               { path: "purchase-order/:id", lazy: () => import("./procurement/purchase-order/purchase-order-edit.route") },
               { path: "purchase-request", lazy: () => import("./procurement/purchase-request/purchase-request.route") },
               { path: "purchase-request/new", lazy: () => import("./procurement/purchase-request/purchase-request-new.route") },
-              { path: "purchase-request/v2/new", lazy: () => import("./procurement/purchase-request/v2/purchase-request-v2-new.route") },
-              { path: "purchase-request/v2/:id", lazy: () => import("./procurement/purchase-request/v2/purchase-request-v2.route") },
               { path: "purchase-request/:id", lazy: () => import("./procurement/purchase-request/purchase-request-edit.route") },
               { path: "approval", lazy: () => import("./procurement/approval/approval.route") },
             ],

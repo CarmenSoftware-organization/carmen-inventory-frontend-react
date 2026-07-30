@@ -61,7 +61,7 @@ const ProductCell = memo(function ProductCell({
   const [onHandOpen, setOnHandOpen] = useState(false);
   const [onOrderOpen, setOnOrderOpen] = useState(false);
 
-  // ยอดคงเหลือ/กำลังสั่ง — hover แล้วยิง API เหมือน PR v2 (กด label ใน tooltip
+  // ยอดคงเหลือ/กำลังสั่ง — hover แล้วยิง API เหมือนหน้า PR (กด label ใน tooltip
   // เปิด dialog รายละเอียดต่อได้) SR ไม่มีคลังรายแถว ยอดจึงอ้างคลังต้นทางของใบ
   const inventory = (
     <>

@@ -3047,25 +3047,7 @@
       "activityLoadError": "Could not load activity",
       "activityAdded": "added",
       "activityRemoved": "removed",
-      "activityUpdated": "updated",
-      "v2": {
-        "edition": "Edition {n}",
-        "requestedOn": "Requested",
-        "yourTurn": "Your turn",
-        "waiting": "Waiting",
-        "searchPlaceholder": "Search product, vendor, location...",
-        "clearFilter": "Clear filter",
-        "noMatch": "No items match the current filter",
-        "itemStatus": {
-          "pending": "Pending",
-          "approved": "Approved",
-          "rejected": "Rejected",
-          "review": "Sent back"
-        },
-        "nSelected": "{count} selected",
-        "clearSelection": "Clear selection",
-        "resetStatus": "Reset status"
-      }
+      "activityUpdated": "updated"
     },
     "purchaseRequestTemplate": {
       "entity": "Purchase Request Template",
