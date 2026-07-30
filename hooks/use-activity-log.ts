@@ -47,6 +47,8 @@ export function useActivityLog(
  * Hook ดึงประวัติกิจกรรมของเอกสารเดียว (ทุก action ที่เคยทำกับ record นั้น)
  * ไม่ส่ง entity_type ไปด้วยเพราะ entity_id เป็น UUID ที่ไม่ซ้ำข้ามตารางอยู่แล้ว
  * และ backend เรียงจากเก่าไปใหม่ให้ — caller ที่อยากได้ล่าสุดก่อนต้อง reverse เอง
+ *
+ * ยิงใหม่ทุกครั้งที่ caller เปิดดู (staleTime 0) — ดูเหตุผลที่ตัว option
  * @param entityId - รหัสเอกสาร (ส่ง undefined เพื่อยังไม่ fetch เช่นตอน sheet ปิดอยู่)
  * @param params - พารามิเตอร์ pagination (ค่าเริ่มต้นของ backend คือ 20 รายการ)
  * @returns UseQueryResult ของ PaginatedResponse<ActivityLog>
@@ -71,6 +73,13 @@ export function useActivityLogByRecord(
       return res.json();
     },
     ...CACHE_DYNAMIC,
+    // ผู้ใช้กดเปิด sheet เพื่อ "ดูว่าเพิ่งเกิดอะไรขึ้น" — ถ้าใช้ staleTime 1 นาที
+    // ตาม CACHE_DYNAMIC การกดเปิดซ้ำภายในนาทีเดียวจะได้ list เดิมจาก cache ทั้งที่
+    // เพิ่ง save/approve ไปสด ๆ ในหน้าเดียวกัน. staleTime 0 = ทุกครั้งที่ entityId
+    // กลับมาจาก undefined (sheet เปิด) จะยิงใหม่เสมอ และเพราะ gcTime ยัง 5 นาที
+    // ผู้ใช้ยังเห็น list เดิมทันทีระหว่างรอของใหม่ ไม่ต้องกลับไปเจอ skeleton
+    // (refetchOnWindowFocus ปิดไว้ทั้งแอปแล้ว จึงไม่กลายเป็นยิงรัวตอน focus)
+    staleTime: 0,
     enabled: !!buCode && !!entityId,
   });
 }

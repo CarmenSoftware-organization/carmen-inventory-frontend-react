@@ -33,7 +33,8 @@ export interface PrintDocumentOptions {
   /**
    * Document UUID — preferred when present. When set, we hit the
    * document-specific print endpoint that builds full data payload
-   * (header + details + signatures) — currently wired for PR.
+   * (header + details + signatures) — see DEDICATED_PRINT_ENDPOINTS for the
+   * types that have one.
    */
   documentId?: string;
   /**
@@ -65,9 +66,10 @@ export interface PrintDocumentOptions {
  * payload server-side. When the doc type is in this map and documentId
  * is supplied, we use this path instead of the generic resolve+viewer.
  *
- * This is a genuinely partial map by design: SI, SO and EOP deliberately
- * have no entry (and no report-template rows anywhere yet) — they are
- * configurable, not printable.
+ * EOP is the only type still missing on purpose — it has no dedicated
+ * endpoint and no report-template row, so it is configurable, not printable.
+ * (SI and SO were in that state until the backend grew
+ * `stock-{ins,outs}/:id/print-viewer` plus their SI/SO form templates.)
  */
 const DEDICATED_PRINT_ENDPOINTS: Partial<Record<PrintDocumentType, (buCode: string, id: string) => string>> = {
   PR: (bu, id) =>
@@ -80,6 +82,10 @@ const DEDICATED_PRINT_ENDPOINTS: Partial<Record<PrintDocumentType, (buCode: stri
     `/api/proxy/api/${encodeURIComponent(bu)}/store-requisitions/${encodeURIComponent(id)}/print-viewer`,
   CN: (bu, id) =>
     `/api/proxy/api/${encodeURIComponent(bu)}/credit-notes/${encodeURIComponent(id)}/print-viewer`,
+  SI: (bu, id) =>
+    `/api/proxy/api/${encodeURIComponent(bu)}/stock-ins/${encodeURIComponent(id)}/print-viewer`,
+  SO: (bu, id) =>
+    `/api/proxy/api/${encodeURIComponent(bu)}/stock-outs/${encodeURIComponent(id)}/print-viewer`,
   IA: (bu, id) =>
     `/api/proxy/api/${encodeURIComponent(bu)}/inventory-adjustments/${encodeURIComponent(id)}/print-viewer`,
   PC: (bu, id) =>
@@ -109,12 +115,10 @@ export interface PrintDocumentResult {
  *      template anymore; the caller must already know which one to use.
  *
  *      This path renders from the template's own source view/function. Every
- *      form template in micro-report's seed has source_name: null and
- *      renders instead through a Go builder_key fed by the payload a
- *      dedicated endpoint composes — so for SI, SO and EOP (the types with no
- *      dedicated endpoint) this generic viewer path is NOT known to work
- *      today. Whether it can render a builder-backed template at all is
- *      unverified.
+ *      form template in micro-report's seed has source_name: null and renders
+ *      instead from the payload a dedicated endpoint composes — so for EOP (the
+ *      only remaining type with no dedicated endpoint) this generic viewer path
+ *      is NOT known to work today.
  *
  * Throws Error on any failure; callers should toast/log it.
  */
