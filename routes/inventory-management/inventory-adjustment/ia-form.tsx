@@ -25,6 +25,7 @@ import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useErrorToast } from "@/hooks/use-error-toast";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { VoidDialog } from "@/components/share/void-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   buildItemChanges,
   scrollToFirstInvalidField,
@@ -65,6 +66,7 @@ export function InventoryAdjustmentForm({
   const voidAdj = useVoidInventoryAdjustment();
   const [showDelete, setShowDelete] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
+  const [showCommit, setShowCommit] = useState(false);
   const isPending = createAdj.isPending || updateAdj.isPending;
   const isDisabled = isView || isPending;
 
@@ -199,6 +201,21 @@ export function InventoryAdjustmentForm({
     if (isAdd) return submitCreate(values);
   };
 
+  // กด Commit = ปิดเอกสารเข้าสต๊อกจริงและแก้ไม่ได้อีก จึงต้องถามก่อน — validate
+  // ให้ผ่านก่อนเปิด dialog (กติกาเดียวกับ SR) ไม่งั้นกดยืนยันแล้วเจอ error แดง
+  // เอา doc_status ไปตั้งตอนยืนยันจริง ถ้ายกเลิกฟอร์มจะไม่ค้างสถานะ completed
+  const openCommitDialog = () =>
+    form.handleSubmit(
+      () => setShowCommit(true),
+      () => scrollToFirstInvalidField(),
+    )();
+
+  const confirmCommit = () => {
+    setShowCommit(false);
+    form.setValue("doc_status", "completed");
+    form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())();
+  };
+
   const handleCancel = () => {
     discard.confirm(() => {
       if (isEdit && inventoryAdjustment) {
@@ -248,6 +265,7 @@ export function InventoryAdjustmentForm({
         onEdit={() => setMode("edit")}
         onDelete={() => setShowDelete(true)}
         onVoid={() => setShowVoid(true)}
+        onCommit={openCommitDialog}
       />
 
       <form
@@ -344,6 +362,16 @@ export function InventoryAdjustmentForm({
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={showCommit}
+        onOpenChange={(open) => !open && setShowCommit(false)}
+        title={t("commitTitle")}
+        description={t("commitConfirm")}
+        confirmText={t("commit")}
+        isPending={isPending}
+        onConfirm={confirmCommit}
+      />
     </div>
   );
 }

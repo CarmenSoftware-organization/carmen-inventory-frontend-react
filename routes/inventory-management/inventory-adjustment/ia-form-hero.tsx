@@ -32,6 +32,8 @@ interface IaFormHeroProps {
   readonly onEdit: () => void;
   readonly onDelete: () => void;
   readonly onVoid: () => void;
+  /** กด Commit — ฟอร์มเป็นคนเปิด confirm dialog เอง (ไม่ submit ตรง) */
+  readonly onCommit: () => void;
 }
 
 export function IaFormHero({
@@ -50,6 +52,7 @@ export function IaFormHero({
   onEdit,
   onDelete,
   onVoid,
+  onCommit,
 }: IaFormHeroProps) {
   const tc = useTranslations("common");
   // ไม่ใช้ common.commit เพราะภาษาไทยของ key นั้นคือ "ยืนยันรับสินค้า" (ของ GRN)
@@ -62,9 +65,9 @@ export function IaFormHero({
   const canVoid = isEdit && !!inventoryAdjustment && !isReadOnly;
   const canPrint = isView && !!inventoryAdjustment?.id;
 
-  /** Save = ฉบับร่าง (draft) / Submit = ปิดเอกสาร (completed) — ตั้ง doc_status ก่อน submit */
-  const submitWith = (docStatus: "draft" | "completed") => () =>
-    form.setValue("doc_status", docStatus);
+  /** Save = เซฟเป็นฉบับร่าง — ตั้ง doc_status ก่อน submit ฟอร์ม
+   *  (Commit ไม่ผ่านทางนี้ ฟอร์มตั้ง completed ตอนผู้ใช้ยืนยันใน dialog) */
+  const saveAsDraft = () => form.setValue("doc_status", "draft");
 
   const statusConfig = inventoryAdjustment
     ? IA_STATUS_CONFIG[inventoryAdjustment.doc_status]
@@ -136,17 +139,16 @@ export function IaFormHero({
             size="sm"
             form={formId}
             disabled={isPending}
-            onClick={submitWith("draft")}
+            onClick={saveAsDraft}
           >
             <Save />
             {tc("save")}
           </Button>
           <Button
-            type="submit"
+            type="button"
             size="sm"
-            form={formId}
             disabled={isPending}
-            onClick={submitWith("completed")}
+            onClick={onCommit}
           >
             <Check />
             {t("commit")}

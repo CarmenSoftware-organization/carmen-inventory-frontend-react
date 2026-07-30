@@ -700,6 +700,7 @@
     "buyer": "Buyer",
     "receivedBy": "Received By",
     "createdBy": "Created By",
+    "by": "By",
     "stage": "Stage",
     "subtotal": "Subtotal",
     "discount": "Discount",
@@ -1965,6 +1966,8 @@
       "noItemsDesc": "Add items to this inventory adjustment.",
       "removeItem": "Remove Item",
       "commit": "Commit",
+      "commitTitle": "Commit Inventory Adjustment",
+      "commitConfirm": "Once committed this adjustment posts to stock and can no longer be edited. Continue?",
       "docInfo": "Document Information",
       "docInfoDesc": "Date, reason, location and a note for this adjustment.",
       "grandTotal": "Grand Total"
