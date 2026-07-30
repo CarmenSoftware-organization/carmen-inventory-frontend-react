@@ -4,14 +4,18 @@ import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
+  type SortingState,
   getCoreRowModel,
   getExpandedRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { cn } from "@/lib/utils";
 import type { PrFormValues } from "./pr-form-schema";
 import { PrItemExpand } from "./pr-item-expand";
@@ -46,6 +50,45 @@ export type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
 const NARROW_COL_SIZE = 35;
 const QTY_SIZE = 150;
 
+type PrItem = PrFormValues["items"][number];
+
+/**
+ * ค่าปัจจุบันของแถว — อ่านจากฟอร์มตรง ๆ ไม่ใช่จาก `row.original`
+ *
+ * `fields` ของ useFieldArray เป็น snapshot ตอน mount/reset ไม่ขยับตาม `setValue`
+ * ที่ cell เขียนลงไป · เปลี่ยนสินค้าในแถวแล้วค้น/เรียงด้วย `row.original`
+ * จะได้ชื่อเก่า
+ */
+function liveItem(
+  form: UseFormReturn<PrFormValues>,
+  index: number,
+): PrItem | undefined {
+  return form.getValues(`items.${index}`);
+}
+
+/**
+ * ค้นหาในรายการของใบนี้ — ฝั่ง client ล้วน (items ทั้งใบอยู่ในฟอร์มอยู่แล้ว
+ * ไม่ต้องยิง API) กวาดชื่อสินค้า/ชื่อท้องถิ่น/รหัส/คำอธิบาย/คลัง/ผู้ขาย
+ */
+function matchesSearch(item: PrItem | undefined, term: string): boolean {
+  const q = term.trim().toLowerCase();
+  if (!q) return true;
+  if (!item) return false;
+  return [
+    item.product_name,
+    item.product_local_name,
+    item.product_code,
+    item.description,
+    item.location_name,
+    item.vendor_name,
+  ].some((field) => (field ?? "").toLowerCase().includes(q));
+}
+
+/** ยอดที่เทียบกันได้ข้ามสกุลเงิน — ยอดในสกุลของแถว × เรต = ยอดสกุลฐาน */
+function baseAmountOf(item: PrItem | undefined): number {
+  return Number(item?.total_price ?? 0) * Number(item?.exchange_rate ?? 1);
+}
+
 interface UsePrItemTableOptions {
   form: UseFormReturn<PrFormValues>;
   itemFields: ItemField[];
@@ -73,10 +116,16 @@ export function usePrItemTable({
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   // นับเฉพาะแถวที่ติ๊กได้จริง — แถวที่ถูกตัดสินมาแล้วไม่มี checkbox ให้กด
-  // นับรวมไปก็หลอกตาว่าจะเลือกได้มากกว่าที่เลือกได้จริง
-  const selectableItems = itemFields.filter((item) => !isRowLocked(item, role));
+  // นับรวมไปก็หลอกตาว่าจะเลือกได้มากกว่าที่เลือกได้จริง · ระหว่างค้นหาก็นับเฉพาะ
+  // แถวที่เห็นอยู่ ให้ตรงกับ checkbox หัวตารางที่กวาดเฉพาะแถวที่ผ่านตัวกรอง
+  const selectableItems = itemFields.filter(
+    (item, index) =>
+      !isRowLocked(item, role) && matchesSearch(liveItem(form, index), search),
+  );
   const allCount = selectableItems.length;
   const pendingCount = selectableItems.filter((item) => {
     const status = item.current_stage_status ?? "";
@@ -200,7 +249,14 @@ export function usePrItemTable({
     const dataColumns: ColumnDef<ItemField>[] = [
       {
         accessorKey: "location_id",
-        header: tfl("location"),
+        // เรียงตามชื่อคลัง ไม่ใช่ค่าใน accessor (location_id เป็น uuid เรียงแล้วมั่ว)
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("location")} />
+        ),
+        sortingFn: (a, b) =>
+          (liveItem(form, a.index)?.location_name ?? "").localeCompare(
+            liveItem(form, b.index)?.location_name ?? "",
+          ),
         cell: ({ row }) => (
           <LocationCell
             control={form.control}
@@ -233,7 +289,13 @@ export function usePrItemTable({
       },
       {
         accessorKey: "product_id",
-        header: tfl("product"),
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("product")} />
+        ),
+        sortingFn: (a, b) =>
+          (liveItem(form, a.index)?.product_name ?? "").localeCompare(
+            liveItem(form, b.index)?.product_name ?? "",
+          ),
         cell: ({ row }) => (
           <ProductCell
             control={form.control}
@@ -300,7 +362,20 @@ export function usePrItemTable({
       },
       {
         id: "amount",
-        header: tfl("amountCur"),
+        // TanStack ยอมให้ sort เฉพาะคอลัมน์ที่มี accessorFn — คอลัมน์นี้เดิมเป็น
+        // display ล้วน ต้องมี accessor ถึงจะกดเรียงได้ (ค่าจริงใช้ sortingFn ข้างล่าง)
+        accessorFn: (item) => item.total_price,
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            column={column}
+            title={tfl("amountCur")}
+            className="justify-end"
+          />
+        ),
+        // เทียบเป็นสกุลฐาน ไม่งั้นใบที่มีหลายสกุลจะเรียงเลขที่คนละหน่วยกัน
+        sortingFn: (a, b) =>
+          baseAmountOf(liveItem(form, a.index)) -
+          baseAmountOf(liveItem(form, b.index)),
         cell: ({ row }) => (
           <AmountCell
             control={form.control}
@@ -334,7 +409,9 @@ export function usePrItemTable({
             isDisabled={isDisabled}
           />
         ),
-        size: 110,
+        // เท่าคอลัมน์ Delivery Date ที่อยู่ติดกัน — 110 เดิมแคบสุดในตาราง
+        // ชื่อจุดส่งของยาวกว่านั้นเกือบทุกอัน
+        size: 150,
       },
       {
         accessorKey: "delivery_date",
@@ -460,7 +537,17 @@ export function usePrItemTable({
   const table = useReactTable({
     data: itemFields,
     columns: allColumns,
+    state: { globalFilter: search, sorting },
+    onGlobalFilterChange: setSearch,
+    onSortingChange: setSorting,
+    // กรองทั้งแถวทีเดียว ไม่สนว่า column ไหนเป็นคนเรียก — ทุกคอลัมน์ได้คำตอบ
+    // เดียวกัน · กรอง/เรียงที่ table ไม่ใช่ที่ `data` เพราะ `row.index` ต้องคงเป็น
+    // index ใน form array (ทุก cell ผูก `items.${index}` ไว้)
+    globalFilterFn: (row, _columnId, value: string) =>
+      matchesSearch(liveItem(form, row.index), value),
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     // แถวที่ถูกตัดสินมาแล้วไม่มี checkbox ให้กด แต่ toggleAllPageRowsSelected ไม่รู้
     // เรื่องนั้น — ถ้าไม่บอกไว้ "เลือกทั้งหมด" จะกวาดแถวที่ผู้ใช้มองไม่เห็นและ
@@ -475,6 +562,8 @@ export function usePrItemTable({
     if (!submitCount) return;
     const itemErrors = form.formState.errors.items;
     if (!itemErrors) return;
+    // แถวที่ผิดอาจโดนตัวกรองซ่อนอยู่ — กางให้ก็ไม่เห็น ล้างคำค้นทิ้งก่อน
+    setSearch("");
     const next: Record<string, boolean> = {};
     if (Array.isArray(itemErrors)) {
       itemErrors.forEach((err, i) => {
@@ -502,6 +591,7 @@ export function usePrItemTable({
   const handleSelectPending = () => {
     const selection: Record<string, boolean> = {};
     for (let i = 0; i < itemFields.length; i++) {
+      if (!matchesSearch(liveItem(form, i), search)) continue;
       const status = itemFields[i].current_stage_status ?? "";
       if (!status || status === PR_ITEM_STAGE_STATUS.PENDING) {
         selection[i] = true;
@@ -513,6 +603,9 @@ export function usePrItemTable({
 
   return {
     table,
+    search,
+    setSearch,
+    visibleCount: table.getFilteredRowModel().rows.length,
     selectDialogOpen,
     setSelectDialogOpen,
     allCount,

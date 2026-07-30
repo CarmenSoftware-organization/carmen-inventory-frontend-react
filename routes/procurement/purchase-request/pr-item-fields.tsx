@@ -53,6 +53,7 @@ const PrSelectDialog = lazy(() =>
   import("./pr-select-dialog").then((mod) => ({ default: mod.PrSelectDialog })),
 );
 import EmptyComponent from "@/components/empty-component";
+import SearchInput from "@/components/search-input";
 import { PR_ITEM } from "./pr-form-schema";
 import { getDeleteDescription } from "@/lib/form-utils";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
@@ -112,6 +113,8 @@ export function PrItemFields({
   const canAddItem = !!workflowId;
 
   const handleAddItem = () => {
+    // แถวใหม่ยังว่าง ไม่มีทางตรงคำค้น — ค้างตัวกรองไว้ก็เหมือนกดเพิ่มแล้วไม่มีอะไรขึ้น
+    setSearch("");
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -155,6 +158,9 @@ export function PrItemFields({
 
   const {
     table,
+    search,
+    setSearch,
+    visibleCount,
     selectDialogOpen,
     setSelectDialogOpen,
     allCount,
@@ -360,6 +366,18 @@ export function PrItemFields({
       <div className="space-y-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-end gap-1.5">
+            {itemFields.length > 0 && (
+              // SearchInput ห่อตัวเองด้วย div flex อยู่แล้ว — mr-auto ต้องอยู่ชั้นนอก
+              // ไม่งั้นดันไม่ออก (containerClassName อยู่ลึกไปหนึ่งชั้น)
+              <div className="mr-auto">
+                <SearchInput
+                  defaultValue={search}
+                  onSearch={setSearch}
+                  onInputChange={setSearch}
+                  containerClassName="w-48 sm:w-64"
+                />
+              </div>
+            )}
             {selectedRows.length > 0 && (
               <PrAskAiMenu
                 items={selectedRows.map((row) => {
@@ -466,31 +484,50 @@ export function PrItemFields({
 
         <DataGrid
           table={table}
-          recordCount={itemFields.length}
+          recordCount={visibleCount}
           tableLayout={{
             checkbox: !!prStatus && prStatus !== "draft",
             columnsResizable: true,
           }}
           emptyMessage={
-            <EmptyComponent
-              icon={BoxIcon}
-              title={t("noItems")}
-              description={t("noItemsDesc")}
-              content={
-                !isDisabled &&
-                role === STAGE_ROLE.CREATE && (
+            // มีรายการอยู่แต่กรองแล้วไม่เหลือ = หาไม่เจอ ไม่ใช่ใบเปล่า
+            // ชวนให้กด "เพิ่มรายการ" ตอนนั้นคือชวนผิดเรื่อง
+            itemFields.length > 0 ? (
+              <EmptyComponent
+                icon={BoxIcon}
+                title={tc("noSearchResult")}
+                content={
                   <Button
                     type="button"
+                    variant="outline"
                     size="xs"
-                    disabled={!canAddItem}
-                    title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-                    onClick={() => handleAddItem()}
+                    onClick={() => setSearch("")}
                   >
-                    <Plus /> {t("addItem")}
+                    {tc("clearSearch")}
                   </Button>
-                )
-              }
-            />
+                }
+              />
+            ) : (
+              <EmptyComponent
+                icon={BoxIcon}
+                title={t("noItems")}
+                description={t("noItemsDesc")}
+                content={
+                  !isDisabled &&
+                  role === STAGE_ROLE.CREATE && (
+                    <Button
+                      type="button"
+                      size="xs"
+                      disabled={!canAddItem}
+                      title={!canAddItem ? t("selectWorkflowFirst") : undefined}
+                      onClick={() => handleAddItem()}
+                    >
+                      <Plus /> {t("addItem")}
+                    </Button>
+                  )
+                }
+              />
+            )
           }
         >
           {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
