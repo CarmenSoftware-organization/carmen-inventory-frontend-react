@@ -174,6 +174,14 @@ export function SrStockTable({
         size: 100,
       },
       {
+        // ยังไม่มี lot มากับ store_requisition_detail — ตั้งคอลัมน์ไว้ก่อน
+        // วันไหน backend ส่งมาค่อยเปลี่ยนขีดเป็นค่าจริงที่เดียว
+        id: "lotNo",
+        header: tfl("lotNo"),
+        cell: () => <span className="text-muted-foreground">—</span>,
+        size: 120,
+      },
+      {
         accessorKey: "stockIn",
         header: tfl("in"),
         cell: ({ row }) => qtyCell(row.original.stockIn),

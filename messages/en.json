@@ -565,6 +565,7 @@
     "vendorCount": "Vendor Count",
     "product": "Product",
     "unit": "Unit",
+    "lotNo": "Lot No.",
     "currency": "Currency",
     "status": "Status",
     "phone": "Phone",
