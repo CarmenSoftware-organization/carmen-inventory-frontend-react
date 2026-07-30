@@ -13,6 +13,8 @@ const BASE_DEFAULTS: ProductFormValues = {
   local_name: "",
   description: "",
   inventory_unit_id: "",
+  product_category_id: "",
+  product_sub_category_id: "",
   product_item_group_id: "",
   product_status_type: "active",
   tax_profile_id: "",

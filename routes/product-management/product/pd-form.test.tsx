@@ -8,6 +8,8 @@ const values: ProductFormValues = {
   local_name: "เอสเพรสโซ",
   description: "",
   inventory_unit_id: "u1",
+  product_category_id: "",
+  product_sub_category_id: "",
   product_item_group_id: "ig1",
   product_status_type: "active",
   tax_profile_id: "",

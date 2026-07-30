@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import {
   Controller,
   useFieldArray,
+  useFormState,
   useWatch,
   type FieldArrayWithId,
 } from "react-hook-form";
@@ -47,6 +48,11 @@ function UnitConversionTab({
   isDisabled,
 }: UnitConversionTabProps) {
   "use no memo";
+  // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
+  // และ props (form/isDisabled) เป็น ref นิ่ง กด save แล้ว validation fail ตัว
+  // parent re-render แต่ตัวนี้ถูก memo กั้นไว้ กรอบแดงเลยไม่ขึ้นจนกว่าจะสลับแท็บ
+  // ไปกลับ (remount แล้วอ่านใหม่) · useFormState subscribe ที่ component นี้เอง
+  const { errors } = useFormState({ control: form.control });
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
   const { fields, prepend, remove } = useFieldArray({
@@ -180,7 +186,7 @@ function UnitConversionTab({
             usedIds={usedSelectableIds}
             unitMap={unitMap}
             error={
-              form.formState.errors[name]?.[row.index]?.from_unit_id?.message
+              errors[name]?.[row.index]?.from_unit_id?.message
             }
           />
         ),
@@ -216,7 +222,7 @@ function UnitConversionTab({
             usedIds={usedSelectableIds}
             unitMap={unitMap}
             error={
-              form.formState.errors[name]?.[row.index]?.to_unit_id?.message
+              errors[name]?.[row.index]?.to_unit_id?.message
             }
           />
         ),
@@ -234,7 +240,7 @@ function UnitConversionTab({
             );
           }
           const errorMessage =
-            form.formState.errors[name]?.[row.index]?.to_unit_qty?.message;
+            errors[name]?.[row.index]?.to_unit_qty?.message;
           return (
             <div className="flex items-center">
               <FieldInput
@@ -357,6 +363,9 @@ function UnitConversionTab({
     inventoryUnitName,
     unitMap,
     usedSelectableIds,
+    // cell ปิดทับ errors ไว้ ไม่ใส่ใน deps แล้ว columns ไม่สร้างใหม่ตอน
+    // validation fail — error ที่ส่งเข้า cell ค้างเป็นค่าเก่า
+    errors,
   ]);
 
   const table = useReactTable({

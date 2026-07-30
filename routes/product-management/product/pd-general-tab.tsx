@@ -1,7 +1,12 @@
 import { memo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { Percent, Plus } from "lucide-react";
-import { Controller, useFieldArray } from "react-hook-form";
+import {
+  Controller,
+  useFieldArray,
+  useFormState,
+  useWatch,
+} from "react-hook-form";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
 import type {
@@ -54,6 +59,11 @@ function GeneralTab({
   onGroupChange,
 }: GeneralTabProps) {
   "use no memo";
+  // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
+  // และ props (form/isDisabled) เป็น ref นิ่ง กด save แล้ว validation fail ตัว
+  // parent re-render แต่ตัวนี้ถูก memo กั้นไว้ กรอบแดงเลยไม่ขึ้นจนกว่าจะสลับแท็บ
+  // ไปกลับ (remount แล้วอ่านใหม่) · useFormState subscribe ที่ component นี้เอง
+  const { errors } = useFormState({ control: form.control });
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
 
@@ -66,31 +76,36 @@ function GeneralTab({
 
   const isAdd = !product;
 
-  const [categoryId, setCategoryId] = useState(
-    product?.product_category?.id ?? "",
-  );
-  const [subCategoryId, setSubCategoryId] = useState(
-    product?.product_sub_category?.id ?? "",
-  );
+  // id ของ category/sub-category อยู่ในฟอร์ม (ไม่ใช่ useState) เพื่อให้ zod
+  // ตรวจได้เหมือนช่องอื่น · ส่วน "ชื่อ" ยังเป็น state เพราะใช้แค่โชว์ตอน view
+  const [categoryId, subCategoryId] = useWatch({
+    control: form.control,
+    name: ["product_category_id", "product_sub_category_id"],
+  });
+
+  const setField = (
+    name:
+      | "product_category_id"
+      | "product_sub_category_id"
+      | "product_item_group_id",
+    value: string,
+  ) => {
+    form.setValue(name, value, { shouldDirty: true, shouldValidate: true });
+  };
 
   const handleCategoryChange = (id: string, item?: CategoryDto) => {
-    setCategoryId(id);
+    setField("product_category_id", id);
     setCategoryName(item?.name ?? "");
-    setSubCategoryId("");
+    // เปลี่ยนหมวดแล้วหมวดย่อย/กลุ่มเดิมไม่เกี่ยวกันอีกต่อไป ล้างทิ้ง
+    setField("product_sub_category_id", "");
     setSubCategoryName("");
-    form.setValue("product_item_group_id", "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    setField("product_item_group_id", "");
   };
 
   const handleSubCategoryChange = (id: string, item?: SubCategoryDto) => {
-    setSubCategoryId(id);
+    setField("product_sub_category_id", id);
     setSubCategoryName(item?.name ?? "");
-    form.setValue("product_item_group_id", "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    setField("product_item_group_id", "");
   };
 
   const handleItemGroupChange = (id: string, item?: ItemGroupDto) => {
@@ -110,6 +125,11 @@ function GeneralTab({
         form.setValue("tax_profile_id", item.tax_profile_id);
       setCategoryName(item.category?.name ?? "");
       setSubCategoryName(item.sub_category?.name ?? "");
+      // เลือกกลุ่มสินค้าตรง ๆ (โหมดแก้ไข) ก็ต้องเติม id หมวดตามไปด้วย ไม่งั้น
+      // ช่องหมวดว่างแล้ว validate ไม่ผ่านทั้งที่ผู้ใช้เลือกครบแล้ว
+      if (item.category?.id) setField("product_category_id", item.category.id);
+      if (item.sub_category?.id)
+        setField("product_sub_category_id", item.sub_category.id);
       if (item.category)
         onGroupChange?.(item.category.name, item.sub_category?.name ?? "—");
     } else {
@@ -163,7 +183,7 @@ function GeneralTab({
         title={t("sectionIdentification")}
         description={t("sectionIdentificationDesc")}
       >
-        <Field data-invalid={!!form.formState.errors.name}>
+        <Field data-invalid={!!errors.name}>
           <FieldLabel required>{tfl("name")}</FieldLabel>
           {isDisabled ? (
             <ReadOnlyValue value={v.name} />
@@ -172,7 +192,7 @@ function GeneralTab({
               className="h-9 text-sm"
               maxLength={100}
               placeholder={t("namePlaceholder")}
-              error={form.formState.errors.name?.message}
+              error={errors.name?.message}
               {...form.register("name")}
             />
           )}
@@ -192,7 +212,7 @@ function GeneralTab({
         </Field>
 
         <Field
-          data-invalid={!!form.formState.errors.local_name}
+          data-invalid={!!errors.local_name}
           className="sm:col-span-2"
         >
           <FieldLabel required>{t("localNameLabel")}</FieldLabel>
@@ -206,14 +226,14 @@ function GeneralTab({
               }}
               maxLength={100}
               placeholder={t("localNamePlaceholder")}
-              error={form.formState.errors.local_name?.message}
+              error={errors.local_name?.message}
               {...form.register("local_name")}
             />
           )}
         </Field>
 
         <Field
-          data-invalid={!!form.formState.errors.description}
+          data-invalid={!!errors.description}
           className="sm:col-span-2"
         >
           <FieldLabel>{tfl("description")}</FieldLabel>
@@ -224,7 +244,7 @@ function GeneralTab({
               <Textarea
                 rows={3}
                 maxLength={256}
-                aria-invalid={!!form.formState.errors.description}
+                aria-invalid={!!errors.description}
                 className="resize-none"
                 style={{
                   fontFamily: '"IBM Plex Sans Thai", var(--font-sans)',
@@ -233,7 +253,7 @@ function GeneralTab({
                 {...form.register("description")}
               />
               <FieldError>
-                {form.formState.errors.description?.message}
+                {errors.description?.message}
               </FieldError>
             </>
           )}
@@ -245,8 +265,8 @@ function GeneralTab({
         title={t("sectionClassification")}
         description={t("sectionClassificationDesc")}
       >
-        <Field>
-          <FieldLabel>{tfl("category")}</FieldLabel>
+        <Field data-invalid={!!errors.product_category_id}>
+          <FieldLabel required>{tfl("category")}</FieldLabel>
           {isDisabled ? (
             <ReadOnlyValue value={categoryName} />
           ) : (
@@ -255,12 +275,13 @@ function GeneralTab({
               onValueChange={handleCategoryChange}
               defaultLabel={product?.product_category?.name}
               className="w-full"
+              error={errors.product_category_id?.message}
             />
           )}
         </Field>
 
-        <Field>
-          <FieldLabel>{tfl("subCategory")}</FieldLabel>
+        <Field data-invalid={!!errors.product_sub_category_id}>
+          <FieldLabel required>{tfl("subCategory")}</FieldLabel>
           {isDisabled ? (
             <ReadOnlyValue value={subCategoryName} />
           ) : (
@@ -271,6 +292,7 @@ function GeneralTab({
               disabled={!categoryId}
               defaultLabel={product?.product_sub_category?.name}
               className="w-full"
+              error={errors.product_sub_category_id?.message}
             />
           )}
         </Field>
@@ -291,7 +313,7 @@ function GeneralTab({
                   disabled={!subCategoryId && !field.value}
                   defaultLabel={product?.product_item_group?.name}
                   placeholder={t("itemGroupPlaceholder")}
-                  error={form.formState.errors.product_item_group_id?.message}
+                  error={errors.product_item_group_id?.message}
                 />
               )}
             />
@@ -316,7 +338,7 @@ function GeneralTab({
                 <LookupUnit
                   value={field.value}
                   onValueChange={field.onChange}
-                  error={form.formState.errors.inventory_unit_id?.message}
+                  error={errors.inventory_unit_id?.message}
                 />
               )}
             />
@@ -348,7 +370,7 @@ function GeneralTab({
         title={t("sectionDeviations")}
         description={t("sectionDeviationsDesc")}
       >
-        <Field data-invalid={!!form.formState.errors.price_deviation_limit}>
+        <Field data-invalid={!!errors.price_deviation_limit}>
           <FieldLabel>{t("priceDeviationShort")}</FieldLabel>
           {isDisabled ? (
             <ReadOnlyValue value={v.price_deviation_limit} suffix="%" />
@@ -362,9 +384,9 @@ function GeneralTab({
                 max="100"
                 placeholder="0"
                 className={`h-9 pr-8 text-right text-sm ${
-                  form.formState.errors.price_deviation_limit ? "pl-8" : ""
+                  errors.price_deviation_limit ? "pl-8" : ""
                 }`}
-                error={form.formState.errors.price_deviation_limit?.message}
+                error={errors.price_deviation_limit?.message}
                 errorIconAlign="left"
                 {...form.register("price_deviation_limit")}
               />
@@ -376,7 +398,7 @@ function GeneralTab({
           )}
         </Field>
 
-        <Field data-invalid={!!form.formState.errors.qty_deviation_limit}>
+        <Field data-invalid={!!errors.qty_deviation_limit}>
           <FieldLabel>{t("qtyDeviationShort")}</FieldLabel>
           {isDisabled ? (
             <ReadOnlyValue value={v.qty_deviation_limit} suffix="%" />
@@ -390,9 +412,9 @@ function GeneralTab({
                 max="100"
                 placeholder="0"
                 className={`h-9 pr-8 text-right text-sm ${
-                  form.formState.errors.qty_deviation_limit ? "pl-8" : ""
+                  errors.qty_deviation_limit ? "pl-8" : ""
                 }`}
-                error={form.formState.errors.qty_deviation_limit?.message}
+                error={errors.qty_deviation_limit?.message}
                 errorIconAlign="left"
                 {...form.register("qty_deviation_limit")}
               />
@@ -436,7 +458,7 @@ function GeneralTab({
           )}
         </Field>
 
-        <Field data-invalid={!!form.formState.errors.price}>
+        <Field data-invalid={!!errors.price}>
           <FieldLabel>{tfl("price")}</FieldLabel>
           {isDisabled ? (
             <ReadOnlyValue value={v.price} />
@@ -448,7 +470,7 @@ function GeneralTab({
               min="0"
               placeholder="0.00"
               className="h-9 pr-3 pl-8 text-right text-sm"
-              error={form.formState.errors.price?.message}
+              error={errors.price?.message}
               errorIconAlign="left"
               {...form.register("price")}
             />

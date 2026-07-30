@@ -161,6 +161,15 @@ export function createProductSchema(tv: TranslationFn, tf: TranslationFn) {
     inventory_unit_id: z
       .string()
       .min(1, tv("required", { field: tf("inventoryUnit") })),
+    // category/sub-category ไม่ได้ส่งไป backend (item group บอกอยู่แล้วว่าอยู่
+    // หมวดไหน) แต่ต้องอยู่ในฟอร์มเพื่อให้ validate ได้เหมือนช่องอื่น — เดิมเป็น
+    // useState ในแท็บ กรอกไม่ครบก็ไม่มีอะไรเตือน
+    product_category_id: z
+      .string()
+      .min(1, tv("required", { field: tf("category") })),
+    product_sub_category_id: z
+      .string()
+      .min(1, tv("required", { field: tf("subCategory") })),
     product_item_group_id: z
       .string()
       .min(1, tv("required", { field: tf("itemGroup") })),

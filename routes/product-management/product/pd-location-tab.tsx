@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { Controller, useFieldArray, useWatch } from "react-hook-form";
+import { Controller, useFieldArray, useFormState, useWatch } from "react-hook-form";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -52,6 +52,11 @@ interface LocationsTabProps {
 
 function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   "use no memo";
+  // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
+  // และ props (form/isDisabled) เป็น ref นิ่ง กด save แล้ว validation fail ตัว
+  // parent re-render แต่ตัวนี้ถูก memo กั้นไว้ กรอบแดงเลยไม่ขึ้นจนกว่าจะสลับแท็บ
+  // ไปกลับ (remount แล้วอ่านใหม่) · useFormState subscribe ที่ component นี้เอง
+  const { errors } = useFormState({ control: form.control });
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
@@ -174,7 +179,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
           }
 
           const errorMessage =
-            form.formState.errors.locations?.[fieldIndex]?.location_id?.message;
+            errors.locations?.[fieldIndex]?.location_id?.message;
           return (
             <Controller
               control={form.control}
@@ -386,7 +391,9 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
     };
 
     return [indexCol, ...dataCols, ...(isDisabled ? [] : [actionCol])];
-  }, [t, tfl, ts, tl, isDisabled, form, assignedIds]);
+    // errors ต้องอยู่ใน deps — cell ปิดทับค่านี้ไว้ ถ้าไม่ใส่ columns จะไม่สร้างใหม่
+    // ตอน validation fail แล้ว error ที่ส่งเข้า cell ค้างเป็นค่าเก่า
+  }, [t, tfl, ts, tl, isDisabled, form, assignedIds, errors]);
 
   const table = useReactTable({
     data: tableData,

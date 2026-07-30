@@ -30,7 +30,6 @@ import FormToolbar from "./pd-form-toolbar";
 import GeneralTab from "./pd-general-tab";
 import LocationsTab from "./pd-location-tab";
 import UnitConversionTab from "./pd-unit-conversion-tab";
-import RequiredChecklist from "./pd-required-checklist";
 import TabArrayCount from "./pd-tab-count";
 import { ProductEcoLabelSection } from "./pd-eco-label-section";
 
@@ -42,6 +41,8 @@ const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
       local_name: "",
       description: "",
       inventory_unit_id: "",
+      product_category_id: "",
+      product_sub_category_id: "",
       product_item_group_id: "",
       product_status_type: "active",
       tax_profile_id: "",
@@ -65,6 +66,8 @@ const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
     local_name: product.local_name ?? "",
     description: product.description ?? "",
     inventory_unit_id: product.inventory_unit.id ?? "",
+    product_category_id: product.product_category?.id ?? "",
+    product_sub_category_id: product.product_sub_category?.id ?? "",
     product_item_group_id: product.product_item_group?.id ?? "",
     product_status_type: product.product_status_type,
     tax_profile_id: product.tax_profile_id ?? "",
@@ -234,6 +237,8 @@ export function ProductForm({ product }: ProductFormProps) {
     "price",
     "inventory_unit_id",
     "tax_profile_id",
+    "product_category_id",
+    "product_sub_category_id",
     "product_item_group_id",
     "product_status_type",
     "price_deviation_limit",
@@ -302,27 +307,14 @@ export function ProductForm({ product }: ProductFormProps) {
     isPending,
   });
 
-  const onInvalid = (errors: Record<string, unknown>) => {
-    const messages: string[] = [];
-    for (const [key, val] of Object.entries(errors)) {
-      const err = val as { message?: string; root?: { message?: string } };
-      if (err?.message) {
-        messages.push(err.message);
-      } else if (Array.isArray(val)) {
-        const nested = val.flatMap(
-          (item: Record<string, { message?: string }> | undefined) =>
-            item
-              ? Object.values(item)
-                  .map((v) => v?.message)
-                  .filter(Boolean)
-              : [],
-        );
-        if (nested.length > 0) messages.push(`${key}: ${nested[0]}`);
-      } else {
-        messages.push(key);
-      }
-    }
-    toast.error(messages.join(", ") || t("fillRequired"));
+  /**
+   * กรอกไม่ครบ → บอกสั้น ๆ ว่าไม่ครบแล้วพาไปที่ช่องแรกที่ผิด (กติกาเดียวกับ PR)
+   *
+   * เดิมไล่ยิงทุก message มาต่อกันเป็นพรืดใน toast เดียว — ยาวจนอ่านไม่ทัน
+   * และซ้ำกับกรอบแดง/ข้อความใต้ช่องที่บอกอยู่แล้วว่าช่องไหนขาด
+   */
+  const onInvalid = () => {
+    toast.warning(tv("incompleteDocument"));
     scrollToFirstInvalidField();
   };
 
@@ -368,8 +360,6 @@ export function ProductForm({ product }: ProductFormProps) {
         onCancel={handleCancel}
         onDelete={() => setShowDelete(true)}
       />
-
-      {isAdd && <RequiredChecklist form={form} />}
 
       <form
         id="product-form"
