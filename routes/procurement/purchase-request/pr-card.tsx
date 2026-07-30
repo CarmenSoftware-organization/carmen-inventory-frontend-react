@@ -1,16 +1,8 @@
-import { CalendarDays, Building2, User, Workflow, Clock, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardAction,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
@@ -20,7 +12,6 @@ import { PR_STATUS } from "@/types/purchase-request";
 
 interface PrCardProps {
   readonly item: PurchaseRequest;
-  readonly index?: number;
   readonly onEdit: (item: PurchaseRequest) => void;
   readonly onApprove?: (item: PurchaseRequest) => void;
   readonly onReject?: (item: PurchaseRequest) => void;
@@ -29,23 +20,22 @@ interface PrCardProps {
 }
 
 /**
- * การ์ดแสดงข้อมูล PR 1 รายการสำหรับ mobile/grid card view
- * แสดงเลขที่ PR, วันที่, requester, department, workflow, total และปุ่ม approve/reject/delete ตามสถานะ
- * @param props - Props ของ `PrCard`
+ * การ์ดใบขอซื้อ 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
+ *
+ * ใช้ `ListCard` ตัวเดียวกับการ์ด SR/IA — ไฟล์นี้เหลือแค่ "ข้อมูลอะไรอยู่แถวไหน"
+ * กับปุ่มพิเศษของ PR (approve/reject ใน view my-pending)
+ *
  * @param props.item - ข้อมูลใบขอซื้อ
- * @param props.index - ลำดับการ์ดในรายการ (ใช้แสดงเลขลำดับ)
- * @param props.onEdit - callback เมื่อคลิกการ์ดเพื่อแก้ไข
+ * @param props.onEdit - callback เมื่อคลิกการ์ด
  * @param props.onApprove - callback เมื่อกด approve
  * @param props.onReject - callback เมื่อกด reject
- * @param props.onDelete - callback เมื่อกด delete (เฉพาะ draft)
+ * @param props.onDelete - callback เมื่อกด delete (เฉพาะ draft ใน my-pending)
  * @param props.isMyPending - flag ว่าอยู่ใน view my-pending
- * @returns React element ของการ์ด PR
  * @example
- * <PrCard item={pr} index={0} onEdit={handleEdit} isMyPending />
+ * <PrCard item={pr} onEdit={handleEdit} isMyPending />
  */
 export default function PrCard({
   item,
-  index,
   onEdit,
   onApprove,
   onReject,
@@ -59,190 +49,111 @@ export default function PrCard({
 
   const config = PR_STATUS_CONFIG[item.pr_status] ?? PR_STATUS_CONFIG.draft;
   const totalAmount = item.base_total_amount;
+  const hasTotal = totalAmount != null && !Number.isNaN(Number(totalAmount));
   const isDraft = item.pr_status === PR_STATUS.DRAFT;
   const isPendingApproval = item.pr_status === PR_STATUS.IN_PROGRESS;
-  const showApproveReject = isMyPending && isPendingApproval && (onApprove || onReject);
-  const showDelete = isMyPending && isDraft && onDelete;
-
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Don't trigger if clicking on buttons
-    const target = e.target as HTMLElement;
-    if (target.closest("button")) return;
-    onEdit(item);
-  };
-
-  const handleCardKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onEdit(item);
-    }
-  };
+  // ตัดสินรายใบได้เฉพาะใน view my-pending และเฉพาะสถานะที่ตรงกับการกระทำนั้น
+  const showApproveReject =
+    isMyPending && isPendingApproval && (onApprove || onReject);
+  const canDelete = isMyPending && isDraft && !!onDelete;
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={handleCardClick}
-      onKeyDown={handleCardKeyDown}
-      className="cursor-pointer gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <div className="min-w-0 flex-1">
-            <CardTitle className="truncate text-sm">{item.pr_no}</CardTitle>
-            <div className="text-muted-foreground flex items-center gap-1 text-xs">
-              <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
-              {formatDate(item.pr_date, dateFormat)}
-            </div>
-          </div>
-        </div>
-        <CardAction>
-          <Badge className={`${config.className} text-xs`} size="sm">
-            {config.label}
-          </Badge>
-        </CardAction>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="space-y-2 px-4 py-3 text-xs">
-        <div className="flex items-start gap-2">
-          <User
-            className="text-muted-foreground mt-0.5 size-3 shrink-0"
-            aria-hidden="true"
-          />
-          <div className="min-w-0">
-            <p className="text-muted-foreground text-xs">
-              {tfl("requester")}
-            </p>
-            <p className="truncate font-semibold">{item.requestor_name}</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-2">
-          <Building2
-            className="text-muted-foreground mt-0.5 size-3 shrink-0"
-            aria-hidden="true"
-          />
-          <div className="min-w-0">
-            <p className="text-muted-foreground text-xs">
-              {tfl("department")}
-            </p>
-            <p className="truncate font-semibold">{item.department_name}</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-2">
-          <Workflow
-            className="text-muted-foreground mt-0.5 size-3 shrink-0"
-            aria-hidden="true"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-muted-foreground text-xs">
-              {tfl("type")} / {tfl("stage")}
-            </p>
-            <p className="truncate font-semibold">
-              {item.workflow_name}
-              {item.workflow_current_stage && (
-                <span className="text-muted-foreground">
-                  {" "}
-                  / {item.workflow_current_stage}
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-        {item.audit?.updated?.at && (
-          <div className="flex items-start gap-2">
-            <Clock
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
-              <p className="truncate font-semibold">
-                {formatDate(item.audit.updated.at, dateTimeFormat)}
-              </p>
-            </div>
-          </div>
-        )}
-      </CardContent>
-
-      {totalAmount != null && !Number.isNaN(Number(totalAmount)) && (
-        <>
-          <Separator />
-          <CardFooter className="justify-between px-4 py-2">
-            <span className="text-muted-foreground text-xs">
-              {tfl("totalAmount")}
-            </span>
-            <span className="text-sm font-semibold tabular-nums">
-              {formatAmount(totalAmount, amountFormat)}
-              {defaultCurrencyCode && (
-                <span className="text-muted-foreground ml-1 text-xs font-normal">
-                  {defaultCurrencyCode}
-                </span>
-              )}
-            </span>
-          </CardFooter>
-        </>
-      )}
-
-      {(showApproveReject || showDelete) && (
-        <>
-          <Separator />
-          <div className="flex gap-2 px-4 py-2">
-            {showApproveReject && (
-              <>
-                {onApprove && (
-                  <Button
-                    size="xs"
-                    variant="success"
-                    className="flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onApprove(item);
-                    }}
-                  >
-                    <CheckCircle2 className="size-3" aria-hidden="true" />
-                    {tc("approve")}
-                  </Button>
-                )}
-                {onReject && (
-                  <Button
-                    size="xs"
-                    variant="destructive"
-                    className="flex-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onReject(item);
-                    }}
-                  >
-                    <XCircle className="size-3" aria-hidden="true" />
-                    {tc("reject")}
-                  </Button>
-                )}
-              </>
-            )}
-            {showDelete && onDelete && (
+    <ListCard
+      title={item.pr_no}
+      badge={
+        <Badge size="xs" className={config.className}>
+          {config.label}
+        </Badge>
+      }
+      onOpen={() => onEdit(item)}
+      onDelete={canDelete ? () => onDelete?.(item) : undefined}
+      actions={
+        showApproveReject ? (
+          <>
+            {onApprove && (
               <Button
+                type="button"
                 size="xs"
-                variant="destructive"
-                className="flex-1"
+                variant="success"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete(item);
+                  onApprove(item);
                 }}
               >
-                <Trash2 className="size-3" aria-hidden="true" />
-                {tc("delete")}
+                <CheckCircle2 aria-hidden="true" />
+                {tc("approve")}
               </Button>
             )}
-          </div>
-        </>
+            {onReject && (
+              <Button
+                type="button"
+                size="xs"
+                variant="destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReject(item);
+                }}
+              >
+                <XCircle aria-hidden="true" />
+                {tc("reject")}
+              </Button>
+            )}
+          </>
+        ) : undefined
+      }
+    >
+      <ListCardRow label={tfl("date")}>
+        <span className="tabular-nums">
+          {formatDate(item.pr_date, dateFormat)}
+        </span>
+      </ListCardRow>
+      {item.requestor_name && (
+        <ListCardRow label={tfl("requester")}>
+          {item.requestor_name}
+        </ListCardRow>
       )}
-    </Card>
+      {item.department_name && (
+        <ListCardRow label={tfl("department")}>
+          {item.department_name}
+        </ListCardRow>
+      )}
+      {item.workflow_name && (
+        <ListCardRow label={tfl("type")}>{item.workflow_name}</ListCardRow>
+      )}
+      {item.workflow_current_stage && (
+        <ListCardRow label={tfl("stage")}>
+          {item.workflow_current_stage}
+        </ListCardRow>
+      )}
+      {hasTotal && (
+        <ListCardRow label={tfl("totalAmount")}>
+          <span className="font-semibold tabular-nums">
+            {formatAmount(Number(totalAmount), amountFormat)}
+            {defaultCurrencyCode && (
+              <span className="text-muted-foreground ml-1 font-normal">
+                {defaultCurrencyCode}
+              </span>
+            )}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }
