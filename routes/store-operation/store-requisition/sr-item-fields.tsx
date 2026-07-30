@@ -183,7 +183,6 @@ export function SrItemFields({
         table={table}
         recordCount={visibleCount}
         tableLayout={{ checkbox: !disabled }}
-        tableClassNames={{ headerRow: "h-10", bodyRow: "h-10" }}
         emptyMessage={
           // มีรายการอยู่แต่ค้นแล้วไม่เหลือ = หาไม่เจอ ไม่ใช่ใบเปล่า
           // ชวนกด "เพิ่มรายการ" ตอนนั้นคือชวนผิดเรื่อง

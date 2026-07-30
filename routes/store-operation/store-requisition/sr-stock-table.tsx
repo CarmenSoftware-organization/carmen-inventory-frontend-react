@@ -258,7 +258,6 @@ export function SrStockTable({
       <DataGrid
         table={table}
         recordCount={visibleRows.length}
-        tableClassNames={{ headerRow: "h-10", bodyRow: "h-11" }}
         emptyMessage={
           // มีแถวอยู่แต่กรองแล้วไม่เหลือ = หาไม่เจอ ไม่ใช่ใบเปล่า
           rows.length > 0 ? (
