@@ -6,6 +6,7 @@ interface SrCardListProps {
   readonly items: StoreRequisition[];
   readonly isLoading?: boolean;
   readonly onEdit: (item: StoreRequisition) => void;
+  readonly onDelete: (item: StoreRequisition) => void;
 }
 
 /**
@@ -18,42 +19,29 @@ interface SrCardListProps {
  */
 function SrCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-lg border bg-card">
-      <div className="flex items-center justify-between px-4 py-3">
+    <div className="bg-card animate-pulse overflow-hidden rounded-xl border">
+      <div className="flex items-start justify-between gap-2 px-3.5 py-3">
         <div className="space-y-1.5">
-          <div className="h-4 w-28 rounded bg-muted" />
-          <div className="h-3 w-20 rounded bg-muted" />
+          <div className="bg-muted h-4 w-28 rounded" />
+          <div className="bg-muted h-3 w-24 rounded" />
         </div>
-        <div className="h-5 w-16 rounded-full bg-muted" />
+        <div className="bg-muted h-5 w-20 rounded-md" />
       </div>
       <div className="border-t" />
-      <div className="space-y-3 px-4 py-3">
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-12 rounded bg-muted" />
-            <div className="h-3 w-24 rounded bg-muted" />
+      <div className="space-y-2 px-3.5 py-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={`row-${i}`}
+            className="flex items-center justify-between gap-3"
+          >
+            <div className="bg-muted h-3 w-16 rounded" />
+            <div className="bg-muted h-3 w-24 rounded" />
           </div>
-        </div>
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-14 rounded bg-muted" />
-            <div className="h-3 w-32 rounded bg-muted" />
-          </div>
-        </div>
-        <div className="flex items-start gap-2">
-          <div className="mt-0.5 size-3 rounded bg-muted" />
-          <div className="space-y-1">
-            <div className="h-2.5 w-16 rounded bg-muted" />
-            <div className="h-3 w-28 rounded bg-muted" />
-          </div>
-        </div>
+        ))}
       </div>
       <div className="border-t" />
-      <div className="flex items-center justify-between px-4 py-2">
-        <div className="h-3 w-14 rounded bg-muted" />
-        <div className="h-4 w-8 rounded bg-muted" />
+      <div className="flex items-center justify-end px-2 py-1.5">
+        <div className="bg-muted h-6 w-9 rounded-md" />
       </div>
     </div>
   );
@@ -63,18 +51,20 @@ function SrCardSkeleton() {
  * แสดงรายการใบเบิกสินค้าแบบ grid ของการ์ด พร้อม skeleton และ empty state
  * ใช้ใน sr-component เมื่ออยู่ในโหมด grid หรือบน mobile
  *
- * @param props - items, isLoading, onEdit handler
+ * @param props - items, isLoading, onEdit/onDelete handler
  * @param props.items - รายการ StoreRequisition
  * @param props.isLoading - สถานะกำลังโหลด
  * @param props.onEdit - callback เมื่อคลิกการ์ด
+ * @param props.onDelete - callback เมื่อกดปุ่มลบในการ์ด
  * @returns คอมโพเนนต์ list ของการ์ด SR
  * @example
- * <SrCardList items={items} isLoading={false} onEdit={(it) => navigate(`/.../${it.id}`)} />
+ * <SrCardList items={items} isLoading={false} onEdit={(it) => navigate(`/.../${it.id}`)} onDelete={setDeleteTarget} />
  */
 export default function SrCardList({
   items,
   isLoading,
   onEdit,
+  onDelete,
 }: SrCardListProps) {
   if (isLoading) {
     return (
@@ -92,8 +82,8 @@ export default function SrCardList({
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {items.map((item, i) => (
-        <SrCard key={item.id} item={item} index={i} onEdit={onEdit} />
+      {items.map((item) => (
+        <SrCard key={item.id} item={item} onEdit={onEdit} onDelete={onDelete} />
       ))}
     </div>
   );

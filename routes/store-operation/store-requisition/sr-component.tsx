@@ -99,7 +99,10 @@ export default function StoreRequisitionComponent() {
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
   const isGridMode = isMobile || displayMode === "grid";
-  const useInfiniteScroll = !!isMobile;
+  // โหมดการ์ดไม่มีแถบ pagination ให้กด — เดิม infinite scroll ติดแค่บนมือถือ
+  // ทำให้การ์ดบน desktop ค้างอยู่หน้าแรกหน้าเดียว ไม่มีทางดูรายการที่เหลือ
+  // ผูกกับ isGridMode ไปเลย (ตามที่ inventory-adjustment / activity-log ใช้)
+  const useInfiniteScroll = isGridMode;
   const deleteStoreRequisition = useDeleteStoreRequisition();
   const { exportStoreRequisition, isExporting } = useExportStoreRequisition();
   const { params, search, setSearch, tableConfig } = useDataGridState();
@@ -252,6 +255,10 @@ export default function StoreRequisitionComponent() {
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
+  // โหมดการ์ดยิง query ผ่าน useGridPagination — error/refetch ต้องเอาจากตัวนั้น
+  // ไม่ใช่ query ที่ถูก disable ไว้ ไม่งั้นโหลดพลาดในโหมดการ์ดจะเงียบ จอว่างเปล่า
+  const listError = useInfiniteScroll ? grid.error : error;
+  const listRefetch = useInfiniteScroll ? grid.refetch : refetch;
 
   const handleExport = async () => {
     try {
@@ -319,8 +326,10 @@ export default function StoreRequisitionComponent() {
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (listError)
+    return (
+      <ErrorState message={listError.message} onRetry={() => listRefetch?.()} />
+    );
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -458,6 +467,7 @@ export default function StoreRequisitionComponent() {
               onEdit={(item) =>
                 navigate(`/store-operation/store-requisition/${item.id}`)
               }
+              onDelete={setDeleteTarget}
             />
             {useInfiniteScroll && grid.hasMore && (
               <div ref={grid.sentinelRef} className="flex justify-center py-4">
