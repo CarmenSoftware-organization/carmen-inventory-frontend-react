@@ -145,8 +145,20 @@ export function ListCard({
       className="hover:border-primary/40 focus-visible:ring-ring cursor-pointer gap-0 overflow-hidden py-0 transition-colors focus-visible:ring-2 focus-visible:outline-none"
     >
       <CardHeader className="gap-0 px-3.5 py-3">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="min-w-0 truncate text-sm">{title}</CardTitle>
+        {/* min-w-0 ต้องมีทั้งตัวนี้และตัว title — CardHeader เป็น grid ที่คอลัมน์
+            กว้างตาม min-content ของลูก ถ้าแถวนี้ไม่ยอมยุบ ชื่อยาว ๆ จะดันทั้งแถว
+            กว้างเกินการ์ด (badge ถูกเบียดหลุดไปขวา) แล้ว truncate ของ title
+            ก็ไม่มีโอกาสทำงานเลย */}
+        <div className="flex min-w-0 items-start justify-between gap-2">
+          {/* ยาวเกินการ์ด = ตัดท้ายด้วย … (ไม่ตัดคำขึ้นบรรทัดใหม่ ไม่งั้นความสูง
+              หัวการ์ดไม่เท่ากันทั้งกริด) · ชื่อที่เป็น string ใส่ title ให้ hover
+              อ่านเต็มได้ เพราะไม่มีทางอื่นให้เห็นส่วนที่ถูกตัด */}
+          <CardTitle
+            className="min-w-0 truncate text-sm"
+            title={typeof title === "string" ? title : undefined}
+          >
+            {title}
+          </CardTitle>
           {badge}
         </div>
       </CardHeader>

@@ -1,128 +1,86 @@
-import { Building2, Phone, Mail, Clock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { Vendor } from "@/types/vendor";
 
 interface VendorCardProps {
   readonly item: Vendor;
-  readonly index?: number;
   readonly onEdit: (item: Vendor) => void;
+  readonly onDelete: (item: Vendor) => void;
 }
 
 /**
- * การ์ดแสดงข้อมูล vendor สำหรับ grid view
+ * การ์ดผู้ขาย 1 ราย สำหรับหน้ารายการโหมด grid/mobile
  *
- * รายละเอียด: แสดงชื่อ รหัส สถานะ active/inactive, ประเภทธุรกิจ (business_type)
- * และผู้ติดต่อหลัก (primary contact) พร้อมรองรับการคลิก/กด Enter เพื่อเปิดแก้ไข
+ * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/product — ไฟล์นี้เหลือแค่ว่า
+ * ข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตารางผู้ขาย + ผู้ติดต่อหลัก
  *
- * @param props - `item` ข้อมูล vendor, `index` ลำดับในกริด (optional), `onEdit` callback เมื่อคลิกการ์ด
- * @returns React element ของการ์ด vendor
- * @example
- * ```tsx
- * <VendorCard item={vendor} index={0} onEdit={(v) => navigate(`/vendor-management/vendor/${v.id}`)} />
- * ```
+ * @param props.item - ข้อมูลผู้ขาย
+ * @param props.onEdit - callback เมื่อคลิกการ์ด
+ * @param props.onDelete - callback เมื่อกดปุ่มลบ
  */
-export default function VendorCard({ item, index, onEdit }: VendorCardProps) {
+export default function VendorCard({
+  item,
+  onEdit,
+  onDelete,
+}: VendorCardProps) {
   const tfl = useTranslations("field");
   const { dateTimeFormat } = useProfile();
+
   const primaryContact = item.tb_vendor_contact?.find((c) => c.is_primary);
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={<StatusBadge active={item.is_active} />}
+      onOpen={() => onEdit(item)}
+      onDelete={() => onDelete(item)}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <CardTitle className="text-sm flex-1 min-w-0 break-words">{item.name || "..."}</CardTitle>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-xs">{item.code}</p>
-          <StatusBadge active={item.is_active} />
-        </div>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="space-y-2 px-4 py-3 text-xs">
-        {item.business_type?.length > 0 && (
-          <div className="flex items-start gap-2">
-            <Building2
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">
-                {tfl("businessType")}
-              </p>
-              <div className="mt-0.5 flex flex-wrap gap-1">
-                {item.business_type.map((bt) => (
-                  <Badge key={bt.id} variant="outline" size="xs">
-                    {bt.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-        {primaryContact && (
-          <>
-            {primaryContact.phone && (
-              <div className="flex items-start gap-2">
-                <Phone
-                  className="text-muted-foreground mt-0.5 size-3 shrink-0"
-                  aria-hidden="true"
-                />
-                <div className="min-w-0">
-                  <p className="text-muted-foreground text-xs">{primaryContact.name}</p>
-                  <p className="truncate font-semibold">{primaryContact.phone}</p>
-                </div>
-              </div>
-            )}
-            {primaryContact.email && (
-              <div className="flex items-start gap-2">
-                <Mail
-                  className="text-muted-foreground mt-0.5 size-3 shrink-0"
-                  aria-hidden="true"
-                />
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">{primaryContact.email}</p>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-        {item.audit?.updated?.at && (
-          <div className="flex min-w-0 items-center gap-1.5">
-            <Clock
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground">{tfl("updated")}:</span>
-            <span className="truncate font-semibold">
-              {formatDate(item.audit.updated.at, dateTimeFormat)}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>
+      {item.business_type?.length > 0 && (
+        <ListCardRow label={tfl("businessType")}>
+          <span className="flex flex-wrap justify-end gap-1">
+            {item.business_type.map((bt) => (
+              <Badge key={bt.id} variant="outline" size="xs">
+                {bt.name}
+              </Badge>
+            ))}
+          </span>
+        </ListCardRow>
+      )}
+      {primaryContact?.name && (
+        <ListCardRow label={tfl("contactPerson")}>
+          {primaryContact.name}
+        </ListCardRow>
+      )}
+      {primaryContact?.phone && (
+        <ListCardRow label={tfl("phone")}>
+          <span className="tabular-nums">{primaryContact.phone}</span>
+        </ListCardRow>
+      )}
+      {primaryContact?.email && (
+        <ListCardRow label={tfl("email")}>{primaryContact.email}</ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

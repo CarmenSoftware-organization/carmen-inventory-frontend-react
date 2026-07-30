@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
@@ -189,10 +188,7 @@ export default function VendorComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
@@ -264,14 +260,12 @@ export default function VendorComponent() {
         {isGridMode && !grid.isLoading && vendors.length > 0 && (
           <>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {vendors.map((item, i) => (
+              {vendors.map((item) => (
                 <VendorCard
                   key={item.id}
                   item={item}
-                  index={i}
-                  onEdit={(v) =>
-                    navigate(`/vendor-management/vendor/${v.id}`)
-                  }
+                  onEdit={(v) => navigate(`/vendor-management/vendor/${v.id}`)}
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>

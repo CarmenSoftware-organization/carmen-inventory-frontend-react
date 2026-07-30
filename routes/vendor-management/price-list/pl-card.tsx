@@ -1,31 +1,37 @@
-import { CalendarDays, Clock, Store } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { PL_STATUS_TONE } from "@/constant/price-list";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type { PriceList } from "@/types/price-list";
 
 interface PriceListCardProps {
   readonly item: PriceList;
-  readonly index?: number;
   readonly onEdit: (item: PriceList) => void;
+  readonly onDelete: (item: PriceList) => void;
 }
 
 /**
- * การ์ดแสดงข้อมูล price list สำหรับ grid view พร้อม vendor และช่วงวันที่
- * @param props - ข้อมูล price list, index และ callback เมื่อกดแก้ไข
- * @returns React element ของการ์ด price list
- * @example
- * <PriceListCard item={priceList} index={0} onEdit={(p) => navigate(`/vendor-management/price-list/${p.id}`)} />
+ * การ์ด price list 1 ใบ สำหรับหน้ารายการโหมด grid/mobile
+ *
+ * ใช้ `ListCard` ตัวเดียวกับการ์ดของ procurement/product/vendor — ไฟล์นี้เหลือ
+ * แค่ว่าข้อมูลอะไรอยู่แถวไหน ครบเท่าคอลัมน์ของตาราง price list
+ *
+ * @param props.item - ข้อมูล price list
+ * @param props.onEdit - callback เมื่อคลิกการ์ด
+ * @param props.onDelete - callback เมื่อกดปุ่มลบ
  */
-export default function PriceListCard({ item, index, onEdit }: PriceListCardProps) {
+export default function PriceListCard({
+  item,
+  onEdit,
+  onDelete,
+}: PriceListCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
   const { dateFormat, dateTimeFormat } = useProfile();
 
+  /** effectivePeriod มาเป็น string "from - to" — จัดรูปแบบวันที่ตาม BU ทั้งสองฝั่ง */
   const formatPeriod = (period: string): string => {
     const parts = period.split(" - ");
     if (parts.length !== 2) return period;
@@ -36,82 +42,47 @@ export default function PriceListCard({ item, index, onEdit }: PriceListCardProp
   };
 
   return (
-    <Card
-      role="button"
-      tabIndex={0}
-      onClick={() => onEdit(item)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onEdit(item);
-        }
-      }}
-      className="hover:border-primary/30 focus-visible:ring-ring cursor-pointer gap-0 py-0 transition-colors focus-visible:ring-2"
+    <ListCard
+      title={item.name || "..."}
+      badge={
+        <StatusDotBadge
+          tone={PL_STATUS_TONE[item.status] ?? "neutral"}
+          size="xs"
+        >
+          {ts(item.status as "draft" | "submitted" | "active" | "inactive")}
+        </StatusDotBadge>
+      }
+      onOpen={() => onEdit(item)}
+      onDelete={() => onDelete(item)}
     >
-      <CardHeader className="px-4 py-3">
-        <div className="flex items-start gap-2">
-          {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
-              {index + 1}
-            </span>
-          )}
-          <CardTitle className="text-sm flex-1 min-w-0 break-words">{item.name || "..."}</CardTitle>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-xs">{item.no}</p>
-          <StatusDotBadge
-            tone={PL_STATUS_TONE[item.status] ?? "neutral"}
-            size="xs"
-          >
-            {ts(item.status as "draft" | "submitted" | "active" | "inactive")}
-          </StatusDotBadge>
-        </div>
-      </CardHeader>
-
-      <Separator />
-
-      <CardContent className="space-y-2 px-4 py-3 text-xs">
-        {item.vendor?.name && (
-          <div className="flex items-start gap-2">
-            <Store
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">{tfl("vendor")}</p>
-              <p className="truncate font-semibold">{item.vendor.name}</p>
-            </div>
-          </div>
-        )}
-        {item.effectivePeriod && (
-          <div className="flex items-start gap-2">
-            <CalendarDays
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">
-                {tfl("effectivePeriod")}
-              </p>
-              <p className="truncate font-semibold">{formatPeriod(item.effectivePeriod)}</p>
-            </div>
-          </div>
-        )}
-        {item.audit?.updated?.at && (
-          <div className="flex items-start gap-2">
-            <Clock
-              className="text-muted-foreground mt-0.5 size-3 shrink-0"
-              aria-hidden="true"
-            />
-            <div className="min-w-0">
-              <p className="text-muted-foreground text-xs">{tfl("updated")}</p>
-              <p className="truncate font-semibold">
-                {formatDate(item.audit.updated.at, dateTimeFormat)}
-              </p>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {item.no && <ListCardRow label={tfl("no")}>{item.no}</ListCardRow>}
+      {item.vendor?.name && (
+        <ListCardRow label={tfl("vendor")}>{item.vendor.name}</ListCardRow>
+      )}
+      {item.effectivePeriod && (
+        <ListCardRow label={tfl("effectivePeriod")}>
+          <span className="tabular-nums">
+            {formatPeriod(item.effectivePeriod)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {item.audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
+      )}
+      {item.audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(item.audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </ListCard>
   );
 }

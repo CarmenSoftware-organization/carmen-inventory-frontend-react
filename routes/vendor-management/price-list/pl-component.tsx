@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
@@ -174,7 +173,8 @@ export default function PriceListComponent() {
           },
           {
             header: tfl("status"),
-            value: (r) => ts(r.status as "draft" | "submitted" | "active" | "inactive"),
+            value: (r) =>
+              ts(r.status as "draft" | "submitted" | "active" | "inactive"),
             width: 12,
           },
           {
@@ -211,10 +211,7 @@ export default function PriceListComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
@@ -285,15 +282,15 @@ export default function PriceListComponent() {
         {isGridMode && grid.isLoading && <CardSkeletonGrid />}
         {isGridMode && !grid.isLoading && priceLists.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {priceLists.map((item, i) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {priceLists.map((item) => (
                 <PriceListCard
                   key={item.id}
                   item={item}
-                  index={i}
                   onEdit={(pl) =>
                     navigate(`/vendor-management/price-list/${pl.id}`)
                   }
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>

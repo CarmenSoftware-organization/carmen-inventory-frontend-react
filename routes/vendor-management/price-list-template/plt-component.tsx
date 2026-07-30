@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
@@ -180,16 +179,11 @@ export default function PriceListTemplateComponent() {
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
-            onAdd={() =>
-              navigate("/vendor-management/price-list-template/new")
-            }
+            onAdd={() => navigate("/vendor-management/price-list-template/new")}
             addLabel={t("add")}
           />
         </div>
@@ -256,17 +250,15 @@ export default function PriceListTemplateComponent() {
         {isGridMode && grid.isLoading && <CardSkeletonGrid />}
         {isGridMode && !grid.isLoading && templates.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {templates.map((item, i) => (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {templates.map((item) => (
                 <PltCard
                   key={item.id}
                   item={item}
-                  index={i}
                   onEdit={(tpl) =>
-                    navigate(
-                      `/vendor-management/price-list-template/${tpl.id}`,
-                    )
+                    navigate(`/vendor-management/price-list-template/${tpl.id}`)
                   }
+                  onDelete={setDeleteTarget}
                 />
               ))}
             </div>
