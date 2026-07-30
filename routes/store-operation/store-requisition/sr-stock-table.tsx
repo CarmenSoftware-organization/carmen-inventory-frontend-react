@@ -1,6 +1,7 @@
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { BoxIcon } from "lucide-react";
+import { BoxIcon, Plus } from "lucide-react";
+import { toast } from "sonner";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -12,6 +13,10 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { FieldPlainText } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+import { StatusFilter } from "@/components/ui/status-filter";
+import { PrintDocumentButton } from "@/components/print-document-button";
+import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
 import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
@@ -38,10 +43,16 @@ interface SrStockTableProps {
   readonly items: SrFormValues["items"];
   readonly fromLocationName: string;
   readonly toLocationName: string;
+  /** ใบที่ยังไม่บันทึกไม่มี id — ปุ่มพิมพ์เลยกดไม่ได้ */
+  readonly srId?: string;
+  readonly srNo?: string;
 }
 
+/** ตัวกรองทิศทาง — ค่าว่าง = ทั้งเข้าและออก */
+type StockDirection = "" | "in" | "out";
+
 /**
- * ตารางการเคลื่อนไหวสต๊อกของใบเบิก (แท็บ Stock)
+ * ตารางการเคลื่อนไหวสต๊อกของใบเบิก (แท็บ Stock Movement)
  *
  * จำนวนที่ใช้คือ `issued_qty` — ของที่จ่ายจริงเท่านั้นที่เคลื่อนไหว ใบที่ยังไม่ถึง
  * ขั้น issue จึงขึ้น 0 ทั้งตาราง ซึ่งตรงกับความจริงว่ายังไม่มีอะไรขยับ
@@ -50,10 +61,15 @@ export function SrStockTable({
   items,
   fromLocationName,
   toLocationName,
+  srId,
+  srNo,
 }: SrStockTableProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
+  const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const [search, setSearch] = useState("");
+  const [direction, setDirection] = useState<StockDirection>("");
 
   const rows = useMemo<StockRow[]>(() => {
     const dash = "—";
@@ -85,21 +101,31 @@ export function SrStockTable({
     });
   }, [items, fromLocationName, toLocationName]);
 
-  const columns = useMemo<ColumnDef<StockRow>[]>(() => {
-    const qtyText = (value: number | null): ReactNode =>
-      value == null ? <span className="text-muted-foreground">—</span> : value;
+  // ค้นหา/กรองฝั่ง client ล้วน — แถวพวกนี้คำนวณจาก items ในฟอร์มอยู่แล้ว
+  // ไม่มี API ให้ยิง · กรองที่ data ตรง ๆ ได้เพราะไม่มี cell ไหนผูก index
+  // ของฟอร์ม (ต่างจากตาราง PR/SR ที่ต้องกรองที่ table)
+  const visibleRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return rows.filter((row) => {
+      if (direction === "in" && row.stockIn == null) return false;
+      if (direction === "out" && row.stockOut == null) return false;
+      if (!q) return true;
+      return [row.locationName, row.productName, row.unitName].some((field) =>
+        field.toLowerCase().includes(q),
+      );
+    });
+  }, [rows, search, direction]);
 
-    /**
-     * In กับ Out อยู่ในช่องเดียวกัน คั่นด้วยขีด — ครึ่งซ้าย/ครึ่งขวากว้างเท่ากัน
-     * ทั้งคู่ชิดขวาแบบคอลัมน์ตัวเลข หลักหน่วยจึงตรงกันทุกแถว และหัวตารางใช้
-     * ตัวเดียวกัน In/Out เลยลอยตรงกับค่าข้างล่างเสมอ
-     */
-    const stockPair = (left: ReactNode, right: ReactNode) => (
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 tabular-nums">
-        <span className="text-right">{left}</span>
-        <span className="text-muted-foreground/40 font-normal">|</span>
-        <span className="text-right">{right}</span>
-      </div>
+  const columns = useMemo<ColumnDef<StockRow>[]>(() => {
+    /** ขีด = ขานี้ไม่ใช่ทางที่ของวิ่ง (ไม่ใช่ 0 ซึ่งแปลว่าวิ่งแต่เป็นศูนย์) */
+    const qtyCell = (value: number | null) => (
+      <FieldPlainText className="justify-end tabular-nums">
+        {value == null ? (
+          <span className="text-muted-foreground">—</span>
+        ) : (
+          value
+        )}
+      </FieldPlainText>
     );
     const moneyCell = (value: number) => (
       <FieldPlainText className="justify-end tabular-nums">
@@ -146,22 +172,19 @@ export function SrStockTable({
         ),
         size: 100,
       },
-      // คอลัมน์เดียว หัวสองบรรทัด: "Stock" คร่อมอยู่บน ใต้เส้นเป็น In | Out
-      // เข้ากับออกคือค่าคู่ของเรื่องเดียวกัน แยกเป็นสองคอลัมน์อ่านแล้วเหมือน
-      // คนละเรื่อง · หัวกับค่าใช้ layout เดียวกัน In/Out จึงตรงหลักกันเสมอ
       {
-        id: "stock",
-        header: () => (
-          <div className="w-full">
-            <div className="border-border/60 border-b py-1.5 text-center">
-              {tfl("stock")}
-            </div>
-            <div className="py-1.5">{stockPair(tfl("in"), tfl("out"))}</div>
-          </div>
-        ),
-        cell: ({ row }) =>
-          stockPair(qtyText(row.original.stockIn), qtyText(row.original.stockOut)),
-        size: 200,
+        accessorKey: "stockIn",
+        header: tfl("in"),
+        cell: ({ row }) => qtyCell(row.original.stockIn),
+        size: 110,
+        meta: rightAligned,
+      },
+      {
+        accessorKey: "stockOut",
+        header: tfl("out"),
+        cell: ({ row }) => qtyCell(row.original.stockOut),
+        size: 110,
+        meta: rightAligned,
       },
       {
         accessorKey: "unitPrice",
@@ -191,28 +214,68 @@ export function SrStockTable({
   }, [tfl]);
 
   const table = useReactTable({
-    data: rows,
+    data: visibleRows,
     columns,
     getRowId: (row) => row.key,
     getCoreRowModel: getCoreRowModel(),
   });
 
   return (
-    <DataGrid
-      table={table}
-      recordCount={rows.length}
-      tableClassNames={{ headerRow: "h-16", bodyRow: "h-11" }}
-      emptyMessage={
-        <EmptyComponent
-          icon={BoxIcon}
-          title={t("noItems")}
-          description={t("noItemsDesc")}
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <SearchInput
+          defaultValue={search}
+          onSearch={setSearch}
+          onInputChange={setSearch}
+          containerClassName="w-48 sm:w-64"
         />
-      }
-    >
-      <DataGridContainer>
-        <DataGridTable />
-      </DataGridContainer>
-    </DataGrid>
+        <StatusFilter
+          value={direction}
+          onChange={(value) => setDirection(value as StockDirection)}
+          placeholder={tfl("stock")}
+          options={[
+            { label: tfl("in"), value: "in" },
+            { label: tfl("out"), value: "out" },
+          ]}
+        />
+        <div className="ms-auto flex items-center gap-2">
+          <PrintDocumentButton
+            documentType="SR"
+            documentId={srId}
+            disabled={!srId}
+            filters={srNo ? { DocumentNo: srNo } : undefined}
+          />
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => toast.info(tc("comingSoon"))}
+          >
+            <Plus aria-hidden="true" /> {t("addItem")}
+          </Button>
+        </div>
+      </div>
+
+      <DataGrid
+        table={table}
+        recordCount={visibleRows.length}
+        tableClassNames={{ headerRow: "h-10", bodyRow: "h-11" }}
+        emptyMessage={
+          // มีแถวอยู่แต่กรองแล้วไม่เหลือ = หาไม่เจอ ไม่ใช่ใบเปล่า
+          rows.length > 0 ? (
+            <EmptyComponent icon={BoxIcon} title={tc("noSearchResult")} />
+          ) : (
+            <EmptyComponent
+              icon={BoxIcon}
+              title={t("noItems")}
+              description={t("noItemsDesc")}
+            />
+          )
+        }
+      >
+        <DataGridContainer>
+          <DataGridTable />
+        </DataGridContainer>
+      </DataGrid>
+    </div>
   );
 }

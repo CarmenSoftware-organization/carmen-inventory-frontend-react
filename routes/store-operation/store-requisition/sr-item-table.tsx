@@ -9,6 +9,7 @@ import {
   type ColumnDef,
   type Row,
   getCoreRowModel,
+  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { memo, useCallback, useMemo, useState } from "react";
@@ -275,6 +276,31 @@ const SR_NARROW_COL = 28;
 
 export type SrItemField = FieldArrayWithId<SrFormValues, "items", "id">;
 
+/**
+ * ค้นหาในรายการของใบนี้ — ฝั่ง client ล้วน (items ทั้งใบอยู่ในฟอร์มแล้ว
+ * ไม่ต้องยิง API) กวาดชื่อสินค้า/ชื่อท้องถิ่น/หน่วย/คำอธิบาย
+ *
+ * อ่านค่าจาก `form.getValues` ไม่ใช่ `row.original` เพราะ `fields` ของ
+ * useFieldArray เป็น snapshot ตอน mount/reset — เปลี่ยนสินค้าในแถวแล้วค้นด้วย
+ * ค่าเดิมจะได้ชื่อเก่า
+ */
+function matchesSrSearch(
+  form: UseFormReturn<SrFormValues>,
+  index: number,
+  term: string,
+): boolean {
+  const q = term.trim().toLowerCase();
+  if (!q) return true;
+  const item = form.getValues(`items.${index}`);
+  if (!item) return false;
+  return [
+    item.product_name,
+    item.product_local_name,
+    item.unit_name,
+    item.description,
+  ].some((field) => (field ?? "").toLowerCase().includes(q));
+}
+
 interface UseSrItemTableOptions {
   form: UseFormReturn<SrFormValues>;
   itemFields: SrItemField[];
@@ -299,9 +325,15 @@ export function useSrItemTable({
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const allCount = itemFields.length;
-  const pendingCount = itemFields.filter((item) => {
+  // ระหว่างค้นหานับเฉพาะแถวที่เห็นอยู่ ให้ตรงกับ checkbox หัวตารางที่กวาด
+  // เฉพาะแถวที่ผ่านตัวกรอง
+  const matchedItems = itemFields.filter((_item, index) =>
+    matchesSrSearch(form, index, search),
+  );
+  const allCount = matchedItems.length;
+  const pendingCount = matchedItems.filter((item) => {
     const status = item.current_stage_status ?? "";
     return !status || status === "pending";
   }).length;
@@ -624,7 +656,15 @@ export function useSrItemTable({
   const table = useReactTable({
     data: itemFields,
     columns: allColumns,
+    state: { globalFilter: search },
+    onGlobalFilterChange: setSearch,
+    // กรองทั้งแถวทีเดียว ไม่สนว่า column ไหนเป็นคนเรียก · กรองที่ table ไม่ใช่
+    // ที่ `data` เพราะ `row.index` ต้องคงเป็น index ใน form array (ทุก cell
+    // ผูก `items.${index}` ไว้)
+    globalFilterFn: (row, _columnId, value: string) =>
+      matchesSrSearch(form, row.index, value),
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: (row) =>
       !isItemLocked(
@@ -640,7 +680,7 @@ export function useSrItemTable({
 
   const handleSelectPending = () => {
     const selection: Record<string, boolean> = {};
-    for (const field of itemFields) {
+    for (const field of matchedItems) {
       const status = field.current_stage_status ?? "";
       if (!status || status === "pending") {
         selection[field.id] = true;
@@ -652,6 +692,9 @@ export function useSrItemTable({
 
   return {
     table,
+    search,
+    setSearch,
+    visibleCount: table.getFilteredRowModel().rows.length,
     selectDialogOpen,
     setSelectDialogOpen,
     allCount,

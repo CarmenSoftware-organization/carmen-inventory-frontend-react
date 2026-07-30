@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,7 +22,7 @@ import {
 } from "./sr-form-schema";
 import { buildSrDefaultValues, srGrandTotal } from "./sr-form-helpers";
 import { useSrFormActions } from "./use-sr-form-actions";
-import { SrItemFields, type SrItemFieldsHandle } from "./sr-item-fields";
+import { SrItemFields } from "./sr-item-fields";
 import { SrHeader } from "./sr-header";
 import { SrRequestDetails } from "./sr-request-details";
 import { SrFooter } from "./sr-footer";
@@ -85,7 +83,6 @@ export function StoreRequisitionForm({
   });
   const isDisabled = isView || actions.isPending;
 
-  const itemsRef = useRef<SrItemFieldsHandle>(null);
   const [tab, setTab] = useState("items");
 
   // Radix ถอด TabsContent ที่ไม่ได้เลือกออกจาก DOM — กด submit ค้างอยู่แท็บ Stock
@@ -183,7 +180,6 @@ export function StoreRequisitionForm({
   }
 
   const itemFieldsProps = {
-    ref: itemsRef,
     form,
     disabled: isDisabled,
     disableAdd: !fromLocationId || !toLocationId,
@@ -266,28 +262,14 @@ export function StoreRequisitionForm({
         )}
 
         <Tabs value={tab} onValueChange={setTab}>
-          {/* ปุ่มเพิ่มรายการอยู่แถวเดียวกับ tab — เป็นการกระทำของแท็บ Items
-              ไม่ใช่ของทั้งฟอร์ม */}
-          <div className="flex items-center justify-between gap-2">
-            <TabsList variant="line">
-              <TabsTrigger value="items" className="text-xs">
-                {t("tabItems")}
-              </TabsTrigger>
-              <TabsTrigger value="stock" className="text-xs">
-                {t("tabStock")}
-              </TabsTrigger>
-            </TabsList>
-            {!isDisabled && (
-              <Button
-                type="button"
-                size="xs"
-                onClick={() => itemsRef.current?.addItem()}
-                disabled={!fromLocationId || !toLocationId}
-              >
-                <Plus /> {t("addItem")}
-              </Button>
-            )}
-          </div>
+          <TabsList variant="line">
+            <TabsTrigger value="items" className="text-xs">
+              {t("tabItems")}
+            </TabsTrigger>
+            <TabsTrigger value="stock" className="text-xs">
+              {t("tabStock")}
+            </TabsTrigger>
+          </TabsList>
 
           <TabsContent value="items" className="space-y-4">
             {form.formState.errors.items?.message && (
@@ -303,6 +285,8 @@ export function StoreRequisitionForm({
               items={items}
               fromLocationName={fromLocInfo.name}
               toLocationName={toLocInfo.name}
+              srId={storeRequisition?.id}
+              srNo={storeRequisition?.sr_no}
             />
           </TabsContent>
         </Tabs>
