@@ -28,6 +28,12 @@ const PrCommentSheet = lazy(() =>
   import("./pr-comment-sheet").then((mod) => ({ default: mod.PrCommentSheet })),
 );
 
+const PrActivitySheet = lazy(() =>
+  import("./pr-activity-sheet").then((mod) => ({
+    default: mod.PrActivitySheet,
+  })),
+);
+
 const PrWorkflowHistory = lazy(() =>
   import("./workflow/pr-workflow-history").then((mod) => ({
     default: mod.PrWorkflowHistory,
@@ -45,6 +51,8 @@ interface PrFormDialogsProps {
   setShowComment: (open: boolean) => void;
   showHistory: boolean;
   setShowHistory: (open: boolean) => void;
+  showActivity: boolean;
+  setShowActivity: (open: boolean) => void;
   workflowHistory?: WorkflowHistoryEntry[];
   requestorName?: string;
   createdAt?: string;
@@ -69,6 +77,8 @@ export function PrFormDialogs({
   setShowComment,
   showHistory,
   setShowHistory,
+  showActivity,
+  setShowActivity,
   workflowHistory,
   requestorName,
   createdAt,
@@ -133,6 +143,15 @@ export function PrFormDialogs({
           prId={purchaseRequest?.id}
           open={showComment}
           onOpenChange={setShowComment}
+        />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <PrActivitySheet
+          prId={purchaseRequest?.id}
+          prNo={purchaseRequest?.pr_no}
+          open={showActivity}
+          onOpenChange={setShowActivity}
         />
       </Suspense>
 

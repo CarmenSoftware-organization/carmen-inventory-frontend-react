@@ -1,5 +1,7 @@
 export const QUERY_KEYS = {
   ACTIVITY_LOGS: "activity-logs",
+  ACTIVITY_LOGS_BY_RECORD: "activity-logs-by-record",
+  ACTIVITY_LOG_DETAIL: "activity-log-detail",
   NOTIFICATIONS: "notifications",
   NOTIFICATION_DETAIL: "notification-detail",
   NOTIFICATION_TEMPLATES: "notification-templates",
@@ -20,8 +22,10 @@ export const QUERY_KEYS = {
   CUISINES: "cuisines",
   CURRENCIES: "currencies",
   DASHBOARD_DATASETS: "dashboard-datasets",
+  DASHBOARD_DATASET_PREVIEW: "dashboard-dataset-preview",
   DASHBOARD_WIDGETS: "dashboard-widgets",
   MY_DASHBOARD_WIDGETS: "my-dashboard-widgets",
+  MY_DASHBOARD_WIDGET_DATA: "my-dashboard-widget-data",
   RECIPE_CATEGORIES: "recipe-categories",
   RECIPE_EQUIPMENT: "recipe-equipment",
   EQUIPMENT_CATEGORIES: "equipment-categories",

@@ -6,7 +6,7 @@ import { buildUrl } from "@/utils/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
-import type { ActivityLog } from "@/types/activity-log";
+import type { ActivityLog, ActivityLogDetail } from "@/types/activity-log";
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 
 /**
@@ -40,6 +40,64 @@ export function useActivityLog(
     ...CACHE_DYNAMIC,
     ...options,
     enabled: !!buCode && (options?.enabled ?? true),
+  });
+}
+
+/**
+ * Hook ดึงประวัติกิจกรรมของเอกสารเดียว (ทุก action ที่เคยทำกับ record นั้น)
+ * ไม่ส่ง entity_type ไปด้วยเพราะ entity_id เป็น UUID ที่ไม่ซ้ำข้ามตารางอยู่แล้ว
+ * และ backend เรียงจากเก่าไปใหม่ให้ — caller ที่อยากได้ล่าสุดก่อนต้อง reverse เอง
+ * @param entityId - รหัสเอกสาร (ส่ง undefined เพื่อยังไม่ fetch เช่นตอน sheet ปิดอยู่)
+ * @param params - พารามิเตอร์ pagination (ค่าเริ่มต้นของ backend คือ 20 รายการ)
+ * @returns UseQueryResult ของ PaginatedResponse<ActivityLog>
+ * @example
+ * const { data } = useActivityLogByRecord(open ? prId : undefined, { perpage: 50 });
+ */
+export function useActivityLogByRecord(
+  entityId: string | undefined,
+  params?: ParamsDto,
+) {
+  const buCode = useBuCode();
+
+  return useQuery<PaginatedResponse<ActivityLog>>({
+    queryKey: [QUERY_KEYS.ACTIVITY_LOGS_BY_RECORD, buCode, entityId, params],
+    queryFn: async () => {
+      const url = buildUrl(
+        API_ENDPOINTS.ACTIVITY_LOGS_BY_RECORD(buCode!, entityId!),
+        params,
+      );
+      const res = await httpClient.get(url);
+      if (!res.ok) throw new Error("Failed to fetch activity logs");
+      return res.json();
+    },
+    ...CACHE_DYNAMIC,
+    enabled: !!buCode && !!entityId,
+  });
+}
+
+/**
+ * Hook ดึง log รายการเดียวพร้อม `changes` ที่ backend diff ให้แล้ว
+ * โหลดแบบ lazy (ส่ง id ต่อเมื่อผู้ใช้กางรายการนั้น) เพราะ snapshot ของเอกสารใหญ่
+ * @param id - รหัส activity log (undefined = ยังไม่ fetch)
+ * @returns UseQueryResult ของ ActivityLogDetail
+ * @example
+ * const { data } = useActivityLogDetail(expandedId);
+ */
+export function useActivityLogDetail(id: string | undefined) {
+  const buCode = useBuCode();
+
+  return useQuery<ActivityLogDetail>({
+    queryKey: [QUERY_KEYS.ACTIVITY_LOG_DETAIL, buCode, id],
+    queryFn: async () => {
+      const res = await httpClient.get(
+        API_ENDPOINTS.ACTIVITY_LOG_DETAIL(buCode!, id!),
+      );
+      if (!res.ok) throw new Error("Failed to fetch activity log detail");
+      const json = await res.json();
+      return json.data as ActivityLogDetail;
+    },
+    ...CACHE_DYNAMIC,
+    enabled: !!buCode && !!id,
   });
 }
 

@@ -387,6 +387,10 @@
     "all": "ทั้งหมด",
     "voided": "เป็นโมฆะ",
     "void": "เป็นโมฆะ",
+    "sent": "ส่งแล้ว",
+    "closed": "ปิดแล้ว",
+    "saved": "บันทึกแล้ว",
+    "committed": "ยืนยันแล้ว",
     "stockIn": "รับเข้า",
     "stockOut": "จ่ายออก",
     "allType": "ทุกประเภท"
@@ -3029,6 +3033,14 @@
         "low": "ใกล้หมด",
         "critical": "วิกฤต"
       },
+      "activity": "กิจกรรม",
+      "activityDesc": "ทุกอย่างที่ทำกับใบขอซื้อนี้ ล่าสุดอยู่บนสุด",
+      "activityEmpty": "ยังไม่มีกิจกรรม",
+      "activityNoChanges": "ไม่มีอะไรเปลี่ยน",
+      "activityLoadError": "โหลดกิจกรรมไม่สำเร็จ",
+      "activityAdded": "เพิ่ม",
+      "activityRemoved": "ลบ",
+      "activityUpdated": "แก้ไข",
       "v2": {
         "edition": "แก้ไขครั้งที่ {n}",
         "requestedOn": "ขอเมื่อ",
@@ -3411,7 +3423,21 @@
       "unsupportedDescription": "วิดเจ็ตนี้รูปแบบ \"{shape}\" ยังแสดงผลไม่ได้",
       "deleteTitle": "ลบวิดเจ็ต",
       "deleteConfirm": "ลบ \"{title}\" ออกจากแดชบอร์ด? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
-      "deleteAria": "ลบวิดเจ็ต {title}"
+      "deleteAria": "ลบวิดเจ็ต {title}",
+      "configureTitle": "ตั้งค่าวิดเจ็ต",
+      "configureDescription": "เลือกพารามิเตอร์สำหรับ \"{name}\"",
+      "configureAria": "ตั้งค่าวิดเจ็ต {title}",
+      "paramsAll": "ทั้งหมด",
+      "preview": "ตัวอย่าง",
+      "previewError": "แสดงตัวอย่างไม่สำเร็จ: {message}",
+      "visAll": "ทั้งหมด",
+      "visMine": "ของฉัน",
+      "timeRange": {
+        "today": "วันนี้",
+        "3days": "3 วันล่าสุด",
+        "7days": "7 วันล่าสุด",
+        "1month": "1 เดือนล่าสุด"
+      }
     },
     "greeting": {
       "morning": "สวัสดีตอนเช้า",
