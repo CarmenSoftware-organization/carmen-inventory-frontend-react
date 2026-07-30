@@ -20,11 +20,10 @@ const MAX_QUEUE_SIZE = 500;
 const MAX_ID_LENGTH = 100;
 const MAX_TEXT_LENGTH = 200;
 const CLICKABLE_SELECTOR = '[data-track], button, a, [role="button"]';
-/** โค้ด error ที่ requeue ได้ (ชั่วคราว/เครือข่าย) — อย่างอื่น (auth/validation) ทิ้ง batch กันวน re-trigger dialog/redirect */
+/** โค้ด error ที่ requeue ได้ (ชั่วคราว/เครือข่าย) — 5xx ไม่มาทางนี้ (http-client คืน Response ปกติ → batch ถูกทิ้ง) */
 const RETRYABLE_ERROR_CODES = new Set<string>([
   ERROR_CODES.NETWORK_ERROR,
   ERROR_CODES.TIMEOUT,
-  ERROR_CODES.BACKEND_UNAVAILABLE,
   ERROR_CODES.RATE_LIMITED,
 ]);
 
@@ -47,6 +46,8 @@ let currentBuCode: string | undefined;
 let flushTimer: ReturnType<typeof setInterval> | undefined;
 let started = false;
 let flushing = false;
+/** ปิดถาวรทั้ง session เมื่อ auth ปฏิเสธ (401/403 เช่น allowlist ไม่ครบตอน deploy) — กัน dialog เด้งวนจาก telemetry เบื้องหลัง */
+let disabled = false;
 
 /** session ต่อแท็บ รอด reload (sessionStorage) — จบเมื่อปิดแท็บ */
 function getSessionId(): string {
@@ -66,7 +67,7 @@ export function setAnalyticsBuCode(buCode: string | undefined): void {
 function enqueue(event_type: AnalyticsEventType, fields: Partial<AnalyticsEvent>): void {
   try {
     // เก็บเฉพาะหลัง login — event ก่อนมี token ทิ้ง (endpoint ต้องการ auth)
-    if (!started || !tokenStore.get()) return;
+    if (disabled || !started || !tokenStore.get()) return;
     queue.push({
       event_id: crypto.randomUUID(),
       session_id: getSessionId(),
@@ -102,7 +103,7 @@ function deriveElementId(el: HTMLElement): string | undefined {
 
 /** เก็บเฉพาะ data-track-* extras (ไม่กวาด dataset ทั้งก้อน — กัน radix state/ข้อมูลไม่เกี่ยวปนเข้ามา) */
 function collectTrackProps(el: HTMLElement): Record<string, unknown> | undefined {
-  const entries = Object.entries(el.dataset).filter(([key]) => key !== "track" && key.startsWith("track"));
+  const entries = Object.entries(el.dataset).filter(([key]) => key !== "track" && /^track[A-Z]/.test(key));
   return entries.length > 0 ? Object.fromEntries(entries) : undefined;
 }
 
@@ -124,6 +125,10 @@ function handleDocumentClick(event: MouseEvent): void {
 }
 
 async function flush(useKeepalive = false): Promise<void> {
+  if (disabled) {
+    queue = [];
+    return;
+  }
   if (flushing || queue.length === 0) return;
   if (!tokenStore.get()) {
     queue = [];
@@ -140,12 +145,19 @@ async function flush(useKeepalive = false): Promise<void> {
       useKeepalive ? { keepalive: true } : undefined,
     );
   } catch (error) {
-    // requeue เฉพาะ error ชั่วคราว (network/timeout/rate-limit) — auth/validation ทิ้งเลย
-    // กันวน re-trigger permission dialog หรือ retry payload ที่ผิดรูปซ้ำ ๆ
-    // หมายเหตุ eviction: requeue วาง batch เดิมไว้หัวคิวแล้วตัดท้าย (ต่างจาก enqueue ที่ทิ้งของเก่าสุด) — ตั้งใจ
     if (error instanceof ApiError && RETRYABLE_ERROR_CODES.has(error.code)) {
+      // error ชั่วคราว (network/timeout/rate-limit): คืน batch เข้าคิวรอรอบหน้า
+      // หมายเหตุ eviction: requeue วาง batch เดิมไว้หัวคิวแล้วตัดท้าย (ต่างจาก enqueue ที่ทิ้งของเก่าสุด) — ตั้งใจ
       queue = batch.concat(queue).slice(0, MAX_QUEUE_SIZE);
+    } else if (
+      error instanceof ApiError &&
+      (error.code === ERROR_CODES.UNAUTHORIZED || error.code === ERROR_CODES.FORBIDDEN)
+    ) {
+      // auth ปฏิเสธ: ปิด analytics ทั้ง session — dialog แรกห้ามไม่ได้ แต่ต้องไม่วนซ้ำ
+      disabled = true;
+      queue = [];
     }
+    // อื่น ๆ (validation ฯลฯ): ทิ้ง batch เฉย ๆ — retry ไปก็ผิดเหมือนเดิม
   } finally {
     flushing = false;
   }
@@ -158,7 +170,7 @@ function handleVisibilityChange(): void {
 
 /** เริ่มดัก event — idempotent, เรียกจาก AnalyticsBridge ตอน mount (ใน ProtectedShell เท่านั้น) */
 export function startAnalytics(): void {
-  if (started) return;
+  if (disabled || started) return;
   started = true;
   // capture phase — ให้ได้ event แม้ component ข้างในจะ stopPropagation
   document.addEventListener("click", handleDocumentClick, true);
