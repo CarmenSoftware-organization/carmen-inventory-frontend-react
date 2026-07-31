@@ -41,6 +41,8 @@ interface PoItemFieldsProps {
   locationsDisabled?: boolean;
   role?: string;
   poStatus?: string;
+  /** อยู่โหมดแก้ไขไหม — checkbox ตัดสินรายการโผล่เฉพาะตอนแก้ได้ */
+  isEditMode?: boolean;
   onApprove?: () => void;
   onReject?: () => void;
   onClose?: (reason: string) => void;
@@ -54,6 +56,7 @@ export function PoItemFields({
   locationsDisabled = disabled,
   role,
   poStatus,
+  isEditMode = false,
   onApprove,
   onReject,
   onClose,
@@ -74,7 +77,9 @@ export function PoItemFields({
   } = useFieldArray({ control: form.control, name: "items" });
 
   const readOnly = role === STAGE_ROLE.APPROVE;
-  const showApproveCheckbox = !!poStatus && poStatus !== "draft";
+  // ต้องอยู่โหมดแก้ไขก่อน ถึงจะเห็น checkbox — ใบที่เปิดอ่านเฉย ๆ ติ๊กไปก็ทำ
+  // อะไรต่อไม่ได้ · จากนั้นค่อยดูว่าใบพ้น draft แล้ว (draft ยังไม่มีอะไรให้ตัดสิน)
+  const showApproveCheckbox = isEditMode && !!poStatus && poStatus !== "draft";
 
   const table = usePoItemTable({
     form,

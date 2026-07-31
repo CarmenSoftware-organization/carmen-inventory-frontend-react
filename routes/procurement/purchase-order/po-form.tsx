@@ -236,6 +236,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           locationsDisabled={locationsDisabled}
           role={role}
           poStatus={purchaseOrder?.po_status}
+          isEditMode={isEditMode}
           isPending={isPending}
           onApprove={purchaseOrder ? handleApprovePo : undefined}
           onReject={
