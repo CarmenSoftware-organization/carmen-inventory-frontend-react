@@ -258,14 +258,11 @@ export function InventoryAdjustmentForm({
         isReadOnly={isReadOnly}
         isPending={isPending}
         deleteIsPending={deleteAdj.isPending}
-        voidIsPending={voidAdj.isPending}
         formId="inventory-adjustment-form"
         onBack={handleBack}
         onCancel={handleCancel}
         onEdit={() => setMode("edit")}
         onDelete={() => setShowDelete(true)}
-        onVoid={() => setShowVoid(true)}
-        onCommit={openCommitDialog}
       />
 
       <form
@@ -300,7 +297,17 @@ export function InventoryAdjustmentForm({
       </form>
 
       {/* footer อยู่นอก form เป็นพี่น้องกัน (โครงเดียวกับ po-form) */}
-      <AdjSummaryFooter form={form} formatter={formatter} t={t} />
+      <AdjSummaryFooter
+        form={form}
+        formatter={formatter}
+        t={t}
+        canVoid={isEdit && !!inventoryAdjustment && !isReadOnly}
+        canCommit={!isView}
+        isPending={isPending}
+        voidIsPending={voidAdj.isPending}
+        onVoid={() => setShowVoid(true)}
+        onCommit={openCommitDialog}
+      />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 

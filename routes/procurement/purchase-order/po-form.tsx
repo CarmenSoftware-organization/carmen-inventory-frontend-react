@@ -174,6 +174,11 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const isPriceListLocked =
     purchaseOrder?.po_type === PO_TYPE.PL && !isReadOnly && !isViewOnly;
   const fieldsDisabled = isDisabled || isPriceListLocked;
+
+  // พ้น draft แล้ว workflow ล็อกถาวร — PoGeneralFields ใช้ค่านี้สั่ง disabled
+  // ไม่ได้ใช้ซ่อน ฟิลด์จึงอยู่ที่เดิมทุกโหมด
+  const isPoDraft =
+    !purchaseOrder?.po_status || purchaseOrder.po_status === PO_STATUS.DRAFT;
   // PO ที่มาจาก PR (!isManual): เนื้อหามาจาก PR หมดแล้ว ล็อกทุกอย่าง (items,
   // locations, notes) — ยกเว้น currency rate ที่ปลดไว้ใน PoGeneralFields
   // (gate ที่ fieldsDisabled ไม่ใช่ contentLocked) ให้ override เรตได้
@@ -211,14 +216,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
       >
         <PoGeneralFields
           form={form}
-          disabled={fieldsDisabled}
+          disabled={fieldsDisabled || isView}
           isManual={isManual}
           readOnly={isReadOnly}
-          plainText={isView || isReadOnly}
-          isDraft={
-            !purchaseOrder?.po_status ||
-            purchaseOrder.po_status === PO_STATUS.DRAFT
-          }
+          isDraft={isPoDraft}
           isAdd={!purchaseOrder}
         />
 
@@ -235,6 +236,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           locationsDisabled={locationsDisabled}
           role={role}
           poStatus={purchaseOrder?.po_status}
+          isEditMode={isEditMode}
           isPending={isPending}
           onApprove={purchaseOrder ? handleApprovePo : undefined}
           onReject={

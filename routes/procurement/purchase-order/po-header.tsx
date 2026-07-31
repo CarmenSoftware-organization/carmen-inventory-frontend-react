@@ -1,20 +1,19 @@
 import { useTranslations } from "use-intl";
-import { History, Lock, Pencil, Save, Trash2, X } from "lucide-react";
+import { Lock, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
-import { WorkflowStep } from "@/components/share/workflow-step";
+import { WorkflowTrack } from "@/components/share/workflow-track";
 import { useProfile } from "@/hooks/use-profile";
 import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
 import { formatDate } from "@/lib/date-utils";
 import { PO_STATUS, type PurchaseOrder } from "@/types/purchase-order";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { FormMode } from "@/types/form";
-import {
-  DocFormHeader,
-  RibbonField,
-} from "@/components/share/doc-form-header";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 
 interface PoHeaderProps {
   readonly purchaseOrder?: PurchaseOrder;
@@ -33,9 +32,9 @@ interface PoHeaderProps {
   readonly onShowClose: () => void;
   readonly onShowComment: () => void;
   readonly onShowDelete: () => void;
-  /** มี workflow history ให้ดูไหม — คุมว่า WorkflowStep กดได้หรือไม่ */
+  /** มี workflow history ให้ดูไหม — คุมว่าแถบขั้นตอนกดได้หรือไม่ */
   readonly hasHistory?: boolean;
-  /** เปิด workflow history sheet (แตะที่ WorkflowStep) */
+  /** เปิด workflow history sheet (กดที่แถบขั้นตอน) */
   readonly onShowHistory?: () => void;
 }
 
@@ -68,10 +67,6 @@ export function PoHeader({
   const isView = mode === "view";
   const isEditMode = mode === "edit";
   const isAdd = !purchaseOrder;
-  const isDraft =
-    !purchaseOrder?.po_status ||
-    purchaseOrder.po_status === PO_STATUS.DRAFT;
-
   const headerTitle = purchaseOrder?.po_no ?? t("entity");
   const poStatusConfig = purchaseOrder
     ? PO_STATUS_CONFIG[purchaseOrder.po_status]
@@ -91,6 +86,13 @@ export function PoHeader({
         <Badge className={poTypeConfig.className} size="sm">
           {poTypeConfig.label}
         </Badge>
+      )}
+      {/* รุ่นเอกสารย้ายมาอยู่แถวเดียวกับเลขที่ใบ เพื่อคืนบรรทัด subtitle
+          ให้แถบขั้นตอน — เลขที่ใบ · สถานะ · รุ่น คือตัวตนของเอกสารชุดเดียวกัน */}
+      {purchaseOrder?.doc_version != null && (
+        <span className="text-muted-foreground text-xs">
+          {tfl("version")} {purchaseOrder.doc_version}
+        </span>
       )}
     </>
   );
@@ -184,38 +186,33 @@ export function PoHeader({
   );
 
   // ribbon เป็น grid คอลัมน์เดียวกับ general fields (po-general-fields) → cells
-  // align ตรงกับ fields ด้านล่าง. คอลัมน์: draft = 5 (workflow ไป general),
-  // ไม่ draft = 4 (workflow มาอยู่ ribbon) — sync กับ lgGridCols ของ general.
-  // ml-4 หักล้าง -ml-4 ของ DocFormHeader (ที่ไว้ชดเชย px-4 ของ RibbonCell flex
-  // เดิม ซึ่ง grid cell ไม่มี)
-  // department span-2 → draft(buyer/dept2/date)=4, non-draft(workflow/buyer/dept2/date)=5
-  // units; cols-6 ทั้งคู่ให้ ribbon↔general (po-general) align track เดียวกัน
+  // align ตรงกับ fields ด้านล่าง · ml-4 หักล้าง -ml-4 ของ DocFormHeader
+  // workflow ไม่อยู่ที่นี่ — อยู่ในบล็อกฟอร์มด้านล่างที่เดียว ทุกโหมด
   const ribbonCols = "lg:grid-cols-[repeat(6,minmax(0,10rem))]";
   const ribbon = (
     <div
-      className={`ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 ${ribbonCols}`}
+      className={`ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${ribbonCols}`}
     >
-      {!isDraft && purchaseOrder?.workflow_name && (
-        <RibbonField
-          label={tfl("workflow")}
-          value={purchaseOrder.workflow_name}
+      <Field>
+        <FieldLabel>{tfl("buyer")}</FieldLabel>
+        <Input value={buyerName || "—"} disabled />
+      </Field>
+      <Field>
+        <FieldLabel>{tfl("department")}</FieldLabel>
+        <Input value={departmentName || "—"} disabled />
+      </Field>
+      <Field>
+        <FieldLabel>{tfl("orderDate")}</FieldLabel>
+        <Input
+          value={orderDate ? formatDate(orderDate, dateFormat) : "—"}
+          disabled
         />
-      )}
-      <RibbonField label={tfl("buyer")} value={buyerName || "—"} />
-      <RibbonField
-        label={tfl("department")}
-        value={departmentName || "—"}
-        className="lg:col-span-2"
-      />
-      <RibbonField
-        label={tfl("orderDate")}
-        value={orderDate ? formatDate(orderDate, dateFormat) : "—"}
-      />
+      </Field>
     </div>
   );
 
   const workflowStepEl = purchaseOrder?.workflow_current_stage ? (
-    <WorkflowStep
+    <WorkflowTrack
       previousStage={purchaseOrder.workflow_previous_stage}
       currentStage={purchaseOrder.workflow_current_stage}
       nextStage={
@@ -226,7 +223,9 @@ export function PoHeader({
     />
   ) : undefined;
 
-  // แตะที่ workflow step → เปิด history sheet (progressive disclosure)
+  // กดที่แถบขั้นตอน = เปิดประวัติ · ไม่มีข้อความบอกว่า "กดเพื่อดู" แล้ว —
+  // ถ้าต้องติดป้ายบอกว่ากดได้ แปลว่า affordance ยังไม่พอ ให้ hover/cursor กับ
+  // tooltip ทำหน้าที่แทน · -ml-1 หักล้าง px-1 ของตัวเอง ให้แถบชิดซ้ายเสมอ title
   const workflowStep =
     workflowStepEl && hasHistory && onShowHistory ? (
       <button
@@ -234,34 +233,23 @@ export function PoHeader({
         onClick={onShowHistory}
         title={t("tabWorkflowHistory")}
         aria-label={t("tabWorkflowHistory")}
-        className="group hover:bg-muted/60 focus-visible:ring-ring flex flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        className="hover:bg-muted/60 focus-visible:ring-ring -ml-1 w-fit cursor-pointer rounded-lg px-1 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {workflowStepEl}
-        <span className="text-muted-foreground/50 group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-micro-legal tracking-wide transition-colors">
-          <History className="size-2.5" />
-          {t("viewHistoryHint")}
-        </span>
       </button>
     ) : (
       workflowStepEl
     );
 
-  const subtitle =
-    purchaseOrder?.doc_version != null
-      ? `${tfl("version")} ${purchaseOrder.doc_version}`
-      : undefined;
-
   return (
     <DocFormHeader
       title={headerTitle}
-      subtitle={subtitle}
+      subtitle={workflowStep}
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}
       actions={actions}
       ribbon={ribbon}
-      workflowStep={workflowStep}
-      workflowStepBelow
     />
   );
 }

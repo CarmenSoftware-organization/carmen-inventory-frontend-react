@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { BoxIcon, Plus } from "lucide-react";
-import { toast } from "sonner";
+import { BoxIcon } from "lucide-react";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -13,13 +12,13 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { FieldPlainText } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
 import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
+import type { StoreRequisitionStatus } from "@/types/store-requisition";
 import type { SrFormValues } from "./sr-form-schema";
 import { srItemUnitPrice } from "./sr-form-helpers";
 
@@ -46,6 +45,7 @@ interface SrStockTableProps {
   /** ใบที่ยังไม่บันทึกไม่มี id — ปุ่มพิมพ์เลยกดไม่ได้ */
   readonly srId?: string;
   readonly srNo?: string;
+  readonly docStatus?: StoreRequisitionStatus;
 }
 
 /** ตัวกรองทิศทาง — ค่าว่าง = ทั้งเข้าและออก */
@@ -63,6 +63,7 @@ export function SrStockTable({
   toLocationName,
   srId,
   srNo,
+  docStatus,
 }: SrStockTableProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
@@ -173,6 +174,14 @@ export function SrStockTable({
         size: 100,
       },
       {
+        // ยังไม่มี lot มากับ store_requisition_detail — ตั้งคอลัมน์ไว้ก่อน
+        // วันไหน backend ส่งมาค่อยเปลี่ยนขีดเป็นค่าจริงที่เดียว
+        id: "lotNo",
+        header: tfl("lotNo"),
+        cell: () => <span className="text-muted-foreground">—</span>,
+        size: 120,
+      },
+      {
         accessorKey: "stockIn",
         header: tfl("in"),
         cell: ({ row }) => qtyCell(row.original.stockIn),
@@ -220,6 +229,14 @@ export function SrStockTable({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // ของยังไม่ขยับจริงจนกว่าใบจะจ่ายครบ — โชว์ตารางที่เป็นศูนย์ทั้งใบไว้ก่อน
+  // มีแต่ทำให้เข้าใจผิดว่าตัดสต๊อกไปแล้ว บอกตรง ๆ ว่าต้องรอดีกว่า
+  if (docStatus !== "completed") {
+    return (
+      <EmptyComponent icon={BoxIcon} title={t("stockNeedsCompleted")} />
+    );
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -245,13 +262,6 @@ export function SrStockTable({
             disabled={!srId}
             filters={srNo ? { DocumentNo: srNo } : undefined}
           />
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => toast.info(tc("comingSoon"))}
-          >
-            <Plus aria-hidden="true" /> {t("addItem")}
-          </Button>
         </div>
       </div>
 

@@ -15,7 +15,9 @@ import type { FormMode } from "@/types/form";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { GRN_FORM_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
-import { DocFormHeader, RibbonField } from "@/components/share/doc-form-header";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 
 interface GrnHeaderProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
@@ -204,17 +206,22 @@ export function GrnHeader({
   // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
   // gap-x-3 ให้ตรง gap-3 ของ general grid
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
-      <RibbonField label={tfl("receivedBy")} value={receivedByName || "—"} />
-      <RibbonField
-        label={tfl("department")}
-        value={departmentName || "—"}
-        className="lg:col-span-2"
-      />
-      <RibbonField
-        label={tfl("grnDate")}
-        value={grnDate ? formatDate(grnDate, dateFormat) : "—"}
-      />
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(6,minmax(0,10rem))]">
+      <Field>
+        <FieldLabel>{tfl("receivedBy")}</FieldLabel>
+        <Input value={receivedByName || "—"} disabled />
+      </Field>
+      <Field>
+        <FieldLabel>{tfl("department")}</FieldLabel>
+        <Input value={departmentName || "—"} disabled />
+      </Field>
+      <Field>
+        <FieldLabel>{tfl("grnDate")}</FieldLabel>
+        <Input
+          value={grnDate ? formatDate(grnDate, dateFormat) : "—"}
+          disabled
+        />
+      </Field>
     </div>
   );
 

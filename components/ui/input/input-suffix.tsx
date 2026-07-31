@@ -77,7 +77,9 @@ function InputSuffixField({
           error
             ? "border-destructive focus-within:border-destructive focus-within:ring-destructive/40"
             : "border-input focus-within:border-ring focus-within:ring-ring/50",
-          disabled && "bg-muted/60 opacity-70",
+          // ใช้ค่าเดียวกับ disabled ของ Input (bg-muted/60 + opacity-50)
+          // ไม่งั้นช่องที่มี suffix จะจางคนละระดับกับช่องธรรมดาที่อยู่ข้างกัน
+          disabled && "bg-muted/60 opacity-50",
           className,
         )}
         {...props}

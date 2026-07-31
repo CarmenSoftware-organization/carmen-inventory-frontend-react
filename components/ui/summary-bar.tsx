@@ -18,30 +18,33 @@ interface SummaryBarProps {
 
 export function SummaryBar({ items, className }: SummaryBarProps) {
   return (
+    // ทุกบรรทัดอยู่ที่ 12px เท่ากันหมด (text-xs = body จริงของแอปตาม DESIGN.md)
+    // ยอดรวมแยกตัวเองด้วย "น้ำหนัก" ไม่ใช่ "ขนาด" — ของเดิมรายการย่อยไม่ได้ระบุ
+    // ขนาดเลย จึงตกไปกิน body 17px ที่ globals.css ทำให้ตัวประกอบใหญ่กว่ายอดรวม
+    // ที่ระบุ text-sm (14px) ไว้ ซึ่งกลับหัวลำดับความสำคัญ
     <div
-      className={cn("flex items-center gap-4 tabular-nums", className)}
+      className={cn(
+        "flex items-center gap-4 text-xs tabular-nums",
+        className,
+      )}
     >
       {items.map((item, i) => (
         <Fragment key={item.key}>
           {i > 0 && <span className="text-border">|</span>}
-          <div
-            className={[
-              "flex items-center gap-1.5",
-              item.emphasis ? "text-sm" : undefined,
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          >
+          <div className="flex items-center gap-1.5">
+            {/* label muted + value 500 = คู่ label→value มาตรฐานของ DESIGN.md
+                (ของเดิม label เป็น 600 เท่าค่า ป้ายเลยดังเท่าตัวเลข) */}
+            <span className="text-muted-foreground">{item.label}</span>
             <span
-              className="font-semibold"
+              className={cn(
+                item.emphasis ? "text-foreground font-semibold" : "font-medium",
+                item.valueClassName,
+              )}
             >
-              {item.label}
-            </span>
-            <span className={item.valueClassName ?? "font-semibold"}>
               {item.value}
             </span>
             {item.suffix && (
-              <span className="text-muted-foreground text-xs font-normal">
+              <span className="text-muted-foreground font-normal">
                 {item.suffix}
               </span>
             )}

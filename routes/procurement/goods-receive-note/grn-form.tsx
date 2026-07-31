@@ -221,9 +221,8 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
       >
         <GrnFormHeader
           form={form}
-          disabled={isDisabled}
+          disabled={isDisabled || isView}
           fromWizard={fromWizard}
-          plainText={isView}
         />
 
         {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}

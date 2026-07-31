@@ -166,40 +166,44 @@ const ProductCell = memo(function ProductCell({
     );
   }
   return (
-    <div className="flex items-center gap-1.5 pr-4">
-      <Controller
-        control={control}
-        name={`items.${index}.product_id`}
-        render={({ field }) => (
-          <LookupProductInLocation
-            locationId={locationId}
-            value={field.value ?? ""}
-            onValueChange={(value, product) => {
-              field.onChange(value);
-              if (product) {
-                form.setValue(`items.${index}.product_name`, product.name);
-                form.setValue(
-                  `items.${index}.product_local_name`,
-                  product.local_name ?? "",
-                );
-                // list endpoint คืนหน่วยเป็น flat string ส่วน detail เป็น object
-                // (ดู types/product.ts) — อ่านทั้งสองทางไว้
-                form.setValue(
-                  `items.${index}.unit_name`,
-                  product.inventory_unit?.name ??
-                    product.inventory_unit_name ??
-                    "",
-                );
-              }
-            }}
-            disabled={!locationId}
-            excludeIds={excludeIds}
-            defaultLabel={productName}
-            className="h-6 w-full text-xs"
-            error={errorMessage}
-          />
-        )}
-      />
+    // ช่องเลือกสินค้าชิดซ้าย กล่องยอดคงเหลือชิดขวา — แนวเดียวกับโหมด view
+    // (CostProbe คืน null ไม่กินที่ในแถว)
+    <div className="flex items-center justify-between gap-1.5 pr-4">
+      <div className="min-w-0 flex-1">
+        <Controller
+          control={control}
+          name={`items.${index}.product_id`}
+          render={({ field }) => (
+            <LookupProductInLocation
+              locationId={locationId}
+              value={field.value ?? ""}
+              onValueChange={(value, product) => {
+                field.onChange(value);
+                if (product) {
+                  form.setValue(`items.${index}.product_name`, product.name);
+                  form.setValue(
+                    `items.${index}.product_local_name`,
+                    product.local_name ?? "",
+                  );
+                  // list endpoint คืนหน่วยเป็น flat string ส่วน detail เป็น object
+                  // (ดู types/product.ts) — อ่านทั้งสองทางไว้
+                  form.setValue(
+                    `items.${index}.unit_name`,
+                    product.inventory_unit?.name ??
+                      product.inventory_unit_name ??
+                      "",
+                  );
+                }
+              }}
+              disabled={!locationId}
+              excludeIds={excludeIds}
+              defaultLabel={productName}
+              className="w-full text-xs"
+              error={errorMessage}
+            />
+          )}
+        />
+      </div>
       <ProductInventoryTooltip control={control} index={index} />
       <CostProbe form={form} index={index} />
     </div>
@@ -290,7 +294,7 @@ export function useAdjItemTable({
             />
           );
         },
-        size: 200,
+        size: 240,
       },
       {
         accessorKey: "unit_name",
@@ -299,7 +303,7 @@ export function useAdjItemTable({
         cell: ({ row }) => (
           <UnitCell control={form.control} index={row.index} />
         ),
-        size: 80,
+        size: 40,
         meta: {
           cellClassName: "text-center",
           headerClassName: "text-center",
@@ -323,7 +327,7 @@ export function useAdjItemTable({
               step="any"
               placeholder={tfl("qty")}
               className={cn(
-                "h-6 text-right text-xs md:text-xs",
+                "text-right text-xs md:text-xs",
                 errorMessage && "pl-7",
               )}
               error={errorMessage}
@@ -362,7 +366,7 @@ export function useAdjItemTable({
               min={0}
               placeholder={tfl("costPerUnit")}
               className={cn(
-                "h-6 text-right text-xs md:text-xs",
+                "text-right text-xs md:text-xs",
                 errorMessage && "pl-7",
               )}
               error={errorMessage}
