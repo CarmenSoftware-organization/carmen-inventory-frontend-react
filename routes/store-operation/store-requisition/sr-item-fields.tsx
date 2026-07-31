@@ -135,12 +135,7 @@ export function SrItemFields({
           </div>
         )}
         {!disabled && (
-          <Button
-            type="button"
-            onClick={handleAddItem}
-            disabled={disableAdd}
-            size={'sm'}
-          >
+          <Button type="button" onClick={handleAddItem} size={'sm'}>
             <Plus /> {t("addItem")}
           </Button>
         )}
@@ -208,12 +203,7 @@ export function SrItemFields({
               description={t("noItemsDesc")}
               content={
                 !disabled && (
-                  <Button
-                    type="button"
-                    size="xs"
-                    onClick={handleAddItem}
-                    disabled={disableAdd}
-                  >
+                  <Button type="button" size="xs" onClick={handleAddItem}>
                     <Plus /> {t("addItem")}
                   </Button>
                 )

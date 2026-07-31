@@ -229,7 +229,7 @@ export function CnHeader({
 
   // แถบข้อมูลของเดิมยังอยู่ครบ — ผู้สร้าง/วันที่โผล่ทั้งใต้เลขที่ใบและในแถบนี้
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
       <Field>
         <FieldLabel>{tfl("createdBy")}</FieldLabel>
         <Input value={createdByName || "—"} disabled />

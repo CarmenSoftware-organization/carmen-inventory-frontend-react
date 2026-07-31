@@ -106,12 +106,7 @@ export function CnItem({ form, disabled }: Props) {
   });
 
   const addAction = !disabled && (
-    <Button
-      type="button"
-      size="xs"
-      onClick={() => setAddOpen(true)}
-      disabled={!canAddItem}
-    >
+    <Button type="button" size="xs" onClick={() => setAddOpen(true)}>
       <Plus aria-hidden="true" /> {t("addItem")}
     </Button>
   );

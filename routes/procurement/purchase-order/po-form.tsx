@@ -25,7 +25,6 @@ import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
 import { PoItemFields } from "./po-item-fields";
 import { PoFooterAction } from "./po-footer-action";
-import { PoNotesSummary } from "./po-notes-summary";
 import {
   createPoSchema,
   type PoFormValues,
@@ -221,12 +220,6 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           readOnly={isReadOnly}
           isDraft={isPoDraft}
           isAdd={!purchaseOrder}
-        />
-
-        <PoNotesSummary
-          form={form}
-          disabled={contentLocked}
-          plainText={isView || isReadOnly}
         />
 
         {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบ (ผู้ขาย/สกุลเงิน/วันที่/หมายเหตุ)

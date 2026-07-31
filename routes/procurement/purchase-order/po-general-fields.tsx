@@ -6,6 +6,7 @@ import {
   FieldLabel,
   FieldDatePicker,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
@@ -75,17 +76,9 @@ export function PoGeneralFields({
   // ไม่ใช่ซ่อนแล้วไปโผล่บนแถบหัว (ฟิลด์เดียวกันไม่ควรมีสองที่อยู่)
   const workflowDisabled = manualFieldDisabled || !isDraft;
 
-  // คอลัมน์กว้างคงที่ 12rem (ไม่ยืดเต็มแถว) → fields ชิดซ้าย compact และ align
-  // ตรงกับ ribbon (po-header ใช้ track เดียวกัน). draft = 5 คอลัมน์ (มี workflow);
-  // ไม่ draft = 4 (workflow ย้ายไป ribbon)
-  // vendor span-2 → draft(workflow/vendor2/creditTerm/delivery/currency)=6,
-  // non-draft(vendor2/creditTerm/delivery/currency)=5 units; cols-6 ทั้งคู่ให้ align
-  // กับ ribbon (po-header)
-  const lgGridCols = "lg:grid-cols-[repeat(6,minmax(0,10rem))]";
-
   return (
     <div
-      className={`grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${lgGridCols}`}
+      className={`grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6`}
     >
       <Field>
         <FieldLabel required>{tfl("workflow")}</FieldLabel>
@@ -198,6 +191,33 @@ export function PoGeneralFields({
             />
           </InputSuffixAddon>
         </InputSuffixField>
+      </Field>
+
+      {/* คำอธิบาย/หมายเหตุ อยู่ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยกใต้ฟอร์ม —
+          เป็นช่องบรรทัดเดียวกว้าง 2 คอลัมน์ ไม่ใช่ Textarea เพราะทั้งคู่เป็น
+          ข้อความสั้น (จำกัด 256 ตัวอักษรอยู่แล้ว) ไม่ใช่บันทึกยาว */}
+      <Field className="lg:col-span-2">
+        <FieldLabel htmlFor="po-description">{tfl("description")}</FieldLabel>
+        <Input
+          id="po-description"
+          placeholder={tfl("optional")}
+          maxLength={256}
+          disabled={fieldDisabled}
+          className="text-xs"
+          {...form.register("description")}
+        />
+      </Field>
+
+      <Field className="lg:col-span-2">
+        <FieldLabel htmlFor="po-remarks">{tfl("remarks")}</FieldLabel>
+        <Input
+          id="po-remarks"
+          placeholder={tfl("optional")}
+          maxLength={256}
+          disabled={fieldDisabled}
+          className="text-xs"
+          {...form.register("remarks")}
+        />
       </Field>
     </div>
   );

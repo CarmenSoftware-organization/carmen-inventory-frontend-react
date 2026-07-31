@@ -7,6 +7,8 @@
  * ยอดรวม, location row โชว์ combo แก้ได้ (ไม่ซ้ำ rate/amount แยกคอลัมน์)
  */
 
+import { comboColWidth } from "../combo-col-width";
+
 /** คอลัมน์เงินที่เป็นตัวเลขล้วน (sub/net/amt) กว้างเท่านี้พอ */
 const MONEY_COL = 96;
 
@@ -26,9 +28,9 @@ export function poItemCols(editable: boolean) {
     rec: 104, // "Received Qty" เต็มคำ ไม่ใช่ "Rec"
     price: 92,
     sub: MONEY_COL,
-    discount: editable ? 176 : MONEY_COL, // combo: [override] rate% | amount
+    discount: comboColWidth("discount", editable),
     net: MONEY_COL,
-    tax: editable ? 196 : MONEY_COL, // combo: [override] tax-profile | amount
+    tax: comboColWidth("tax", editable),
     amt: 100,
     action: 48,
   } as const;

@@ -13,6 +13,7 @@ import {
   InputSuffixField,
   InputSuffixInput,
 } from "@/components/ui/input/input-suffix";
+import { Input } from "@/components/ui/input";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { addDays } from "@/lib/date-utils";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
@@ -65,10 +66,10 @@ export function GrnFormHeader({
 
   return (
     <div className="space-y-2">
-      {/* คอลัมน์ละ 10rem ชิดซ้าย ไม่ยืดเต็มจอ — ค่าอยู่ใกล้กันพอให้กวาดตารวดเดียว
-          และ track ตรงกับแถบข้อมูลบนหัว (grn-header) · โหมดอ่านใช้ช่องชุดเดียวกัน
-          แค่ disabled จึงไม่ต้องสลับ grid ให้เลย์เอาต์ขยับตอนเปลี่ยนโหมด */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(6,minmax(0,10rem))]">
+      {/* 6 คอลัมน์ยืดเต็มความกว้าง track เดียวกับแถบข้อมูลบนหัว (grn-header)
+          โหมดอ่านใช้ช่องชุดเดียวกันแค่ disabled จึงไม่ต้องสลับ grid ให้เลย์เอาต์
+          ขยับตอนเปลี่ยนโหมด */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
         <Field className={`${viewFieldGap ?? ""} lg:col-span-2`}>
           <FieldLabel required>{tfl("vendor")}</FieldLabel>
           <Controller
@@ -244,6 +245,23 @@ export function GrnFormHeader({
                 </SelectContent>
               </FieldSelect>
             )}
+          />
+        </Field>
+
+        {/* คำอธิบายอยู่ต่อจาก Post Type ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยก
+            ใต้ฟอร์ม — เป็นช่องบรรทัดเดียวกว้าง 3 คอลัมน์ ไม่ใช่ Textarea เต็ม
+            ความกว้าง เพราะคำอธิบายใบเป็นข้อความสั้น ไม่ใช่บันทึกยาว */}
+        <Field className="lg:col-span-3">
+          <FieldLabel htmlFor="grn-description">
+            {tfl("description")}
+          </FieldLabel>
+          <Input
+            id="grn-description"
+            placeholder={t("descriptionPlaceholder")}
+            maxLength={256}
+            disabled={disabled}
+            className="text-xs"
+            {...form.register("description")}
           />
         </Field>
       </div>

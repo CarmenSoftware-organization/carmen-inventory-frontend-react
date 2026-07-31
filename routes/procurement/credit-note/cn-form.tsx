@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useForm, useWatch, type Resolver } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useLocation } from "react-router";
 import { useTranslations } from "use-intl";
@@ -21,8 +21,6 @@ import {
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
@@ -77,11 +75,6 @@ export function CnForm({ creditNote }: CnFormProps) {
     defaultValues,
     mode: "onChange",
     reValidateMode: "onChange",
-  });
-
-  const watchedDescription = useWatch({
-    control: form.control,
-    name: "description",
   });
 
   const discard = useDiscardConfirm({
@@ -265,34 +258,10 @@ export function CnForm({ creditNote }: CnFormProps) {
       >
         <CnGeneralFields form={form} disabled={isDisabled || isView} />
 
-        {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
-        {(!isView || watchedDescription?.trim()) && (
-          <Field className={isView ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor="cn-description"
-              className={
-                isView ? "text-muted-foreground font-normal" : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {isView ? (
-              <p className="min-h-8 text-xs whitespace-pre-wrap">
-                {watchedDescription}
-              </p>
-            ) : (
-              <Textarea
-                id="cn-description"
-                placeholder={tfl("optional")}
-                className="text-xs"
-                rows={2}
-                disabled={isDisabled}
-                maxLength={256}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        )}
+        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO/GRN)
+            สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ ก้อนล่างกวาดตาทีละแถว */}
+        <hr className="border-border" />
+
         <CnItem form={form} disabled={isDisabled} />
       </form>
 

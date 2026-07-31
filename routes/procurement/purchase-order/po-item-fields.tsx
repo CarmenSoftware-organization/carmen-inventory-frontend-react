@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import {
+  BoxIcon,
   Check,
   ChevronsDownUp,
   ChevronsUpDown,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import EmptyComponent from "@/components/empty-component";
 import {
   DataGrid,
   DataGridContainer,
@@ -238,6 +240,14 @@ export function PoItemFields({
 
   const itemsError = form.formState.errors.items?.message;
 
+  // ปุ่มเดียวใช้สองที่ — บน toolbar และในสถานะว่าง (เหมือน GRN) ตารางเปล่า
+  // ที่ไม่มีทางออกให้กดคือทางตัน
+  const addAction = (!role || role === STAGE_ROLE.CREATE) && !disabled && (
+    <Button type="button" size="xs" onClick={handleAddItem}>
+      <Plus /> {t("addItem")}
+    </Button>
+  );
+
   return (
     <div className="space-y-3">
       {/* แถวเดียว: ปุ่มตัดสิน (อนุมัติ/ส่งกลับ/ปฏิเสธ/ปิด) ชิดซ้าย — เป็นการ
@@ -333,11 +343,7 @@ export function PoItemFields({
               )}
             </Button>
           )}
-          {(!role || role === STAGE_ROLE.CREATE) && !disabled && (
-            <Button type="button" size="xs" onClick={handleAddItem}>
-              <Plus /> {t("addItem")}
-            </Button>
-          )}
+          {addAction}
         </div>
       </div>
 
@@ -368,9 +374,12 @@ export function PoItemFields({
             columnsResizable: true,
           }}
           emptyMessage={
-            <div className="text-muted-foreground py-10 text-center text-sm">
-              {t("noItems")}
-            </div>
+            <EmptyComponent
+              icon={BoxIcon}
+              title={t("noItems")}
+              description={t("noItemsDesc")}
+              content={addAction}
+            />
           }
         >
           {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ

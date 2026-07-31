@@ -27,6 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { formatCurrency } from "@/lib/currency-utils";
+import { COMBO_COL } from "../combo-col-width";
 import type { CnFormValues } from "./cn-form-schema";
 import {
   computeCnItemAmounts,
@@ -510,6 +511,9 @@ export function useCnItemTable({
   "use no memo";
   const t = useTranslations("procurement.creditNote");
   const tfl = useTranslations("field");
+  // ยังไม่มีแถวก็ยังไม่มี combo ให้กว้าง — ใช้ความกว้างโหมดอ่านไปก่อน
+  // พอมีรายการแรกค่อยขยาย (กติกาเดียวกับ PO/GRN)
+  const narrowCombo = disabled || itemFields.length === 0;
   const type = useWatch({
     control: form.control,
     name: "credit_note_type",
@@ -603,7 +607,9 @@ export function useCnItemTable({
                   </span>
                 </div>
               ),
-        size: 200,
+        // โหมดอ่านไม่มี combo (override + rate + ยอด) เหลือแค่ยอดเดียว —
+        // ย่อเท่า PO/GRN ด้วยค่าจาก combo-col-width ตัวเดียวกัน
+        size: narrowCombo ? COMBO_COL.readOnly : 200,
         meta: rightMeta,
         cell: ({ row }) => (
           <DiscountCell
@@ -633,7 +639,7 @@ export function useCnItemTable({
                 </span>
               </div>
             ),
-        size: 250,
+        size: narrowCombo ? COMBO_COL.readOnly : 250,
         meta: rightMeta,
         cell: ({ row }) => (
           <TaxCell

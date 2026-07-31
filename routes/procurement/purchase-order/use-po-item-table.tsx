@@ -144,7 +144,13 @@ export function usePoItemTable({
   const showAction = !disabled && !readOnly; // action column (ลบ item)
   // ความกว้างขึ้นกับว่าแถว location แก้ได้ไหม — เกณฑ์เดียวกับ showActionCol ที่
   // ส่งให้ LocationsEditor ทั้งสองตารางจึงได้ track เดียวกันเสมอ
-  const { col: PO_COL, dataTotal } = poItemCols(showAction);
+  //
+  // ยังไม่มีแถวก็ยังไม่มีช่องกรอกให้กว้าง — ใช้ความกว้างโหมดอ่านไปก่อน พอมี
+  // รายการแรกค่อยขยาย · ตาราง location ใช้แค่ showActionCol ได้เพราะมัน render
+  // ก็ต่อเมื่อมีรายการอยู่แล้ว สองตารางจึงตรงกันเสมอ
+  const { col: PO_COL, dataTotal } = poItemCols(
+    showAction && itemFields.length > 0,
+  );
   const totalSize = preProductSize + dataTotal + (showAction ? PO_COL.action : 0);
   const leftInsetPct = (preProductSize / totalSize) * 100;
 

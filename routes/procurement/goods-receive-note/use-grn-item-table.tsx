@@ -22,7 +22,7 @@ import { useProductUnits } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
 import { GrnLocationRow } from "./grn-location-row";
-import { GRN_COL, grnColDataTotal } from "./grn-item-columns";
+import { grnItemCols } from "./grn-item-columns";
 
 /** 1 product group = 1 แถวใน DataGrid (product + N location indices) */
 export interface GrnGroup {
@@ -281,7 +281,9 @@ function GrnGroupLocations({
   const showActionCol = !disabled;
 
   // คอลัมน์ align กับ group row — % ของ (data + action ถ้ามี); order นับเฉพาะ isPo
-  const denom = grnColDataTotal(isPo) + (showActionCol ? GRN_COL.action : 0);
+  // ความกว้าง combo (discount/tax) ย่อในโหมดอ่าน ใช้เกณฑ์เดียวกับ showActionCol
+  const { col: GRN_COL, dataTotal } = grnItemCols(isPo, showActionCol);
+  const denom = dataTotal + (showActionCol ? GRN_COL.action : 0);
   const pct = (px: number) => `${(px / denom) * 100}%`;
   const colCount = 9 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
 
@@ -458,6 +460,13 @@ export function useGrnItemTable({
       headerClassName: "text-right",
       cellClassName: "text-right",
     };
+    // ยังไม่มีแถวก็ยังไม่มีช่องกรอกให้กว้าง — ใช้ความกว้างโหมดอ่านไปก่อน
+    // พอมีรายการแรกค่อยขยาย · ตาราง location ด้านล่างใช้แค่ !disabled ได้
+    // เพราะมันจะ render ก็ต่อเมื่อมีรายการอยู่แล้ว สองตารางจึงตรงกันเสมอ
+    const { col: GRN_COL } = grnItemCols(
+      isPo,
+      !disabled && itemFields.length > 0,
+    );
     const dataColumns: ColumnDef<GrnGroup>[] = [
       {
         id: "product",

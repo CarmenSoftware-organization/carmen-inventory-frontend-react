@@ -251,6 +251,11 @@ export function PurchaseRequestForm({
         }}
         className="space-y-4 px-4"
       >
+        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบ (แถบบนหัว) ออกจากตารางรายการ
+            เหมือน PO/GRN — สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ
+            ก้อนล่างกวาดตาทีละแถว */}
+        <hr className="border-border" />
+
         <PrItemFields
           form={form}
           isDisabled={isDisabled}

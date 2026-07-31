@@ -137,7 +137,12 @@ export function useStoreRequisitionTable({
       cell: ({ row }) => {
         const status = row.getValue("doc_status") as StoreRequisitionStatus;
         return (
-          <Badge className={SR_STATUS_CONFIG[status]?.className} size="sm">
+          // uppercase ด้วย CSS ไม่ใช่ .toUpperCase() — ค่าที่ export/คัดลอก
+          // ยังเป็นข้อความเดิม และภาษาไทยที่ไม่มีตัวพิมพ์ใหญ่ก็ไม่โดนแตะ
+          <Badge
+            className={`uppercase ${SR_STATUS_CONFIG[status]?.className ?? ""}`}
+            size="sm"
+          >
             {ts(status)}
           </Badge>
         );

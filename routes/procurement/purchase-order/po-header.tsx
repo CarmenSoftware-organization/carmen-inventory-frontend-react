@@ -185,13 +185,9 @@ export function PoHeader({
     </>
   );
 
-  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (po-general-fields) → cells
-  // align ตรงกับ fields ด้านล่าง · ml-4 หักล้าง -ml-4 ของ DocFormHeader
-  // workflow ไม่อยู่ที่นี่ — อยู่ในบล็อกฟอร์มด้านล่างที่เดียว ทุกโหมด
-  const ribbonCols = "lg:grid-cols-[repeat(6,minmax(0,10rem))]";
   const ribbon = (
     <div
-      className={`ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${ribbonCols}`}
+      className={`ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6`}
     >
       <Field>
         <FieldLabel>{tfl("buyer")}</FieldLabel>

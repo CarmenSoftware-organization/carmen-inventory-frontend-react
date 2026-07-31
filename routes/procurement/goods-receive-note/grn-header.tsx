@@ -202,11 +202,11 @@ export function GrnHeader({
     </>
   );
 
-  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (grn-form-header, grid-cols-4)
+  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (grn-form-header, grid-cols-6)
   // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
   // gap-x-3 ให้ตรง gap-3 ของ general grid
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(6,minmax(0,10rem))]">
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
       <Field>
         <FieldLabel>{tfl("receivedBy")}</FieldLabel>
         <Input value={receivedByName || "—"} disabled />

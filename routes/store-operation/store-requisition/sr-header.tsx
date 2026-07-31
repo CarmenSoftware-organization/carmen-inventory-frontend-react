@@ -228,7 +228,7 @@ export function SrHeader({
   // ml-4 หักล้าง -ml-4 ของ DocFormHeader · workflow ไม่อยู่ที่นี่ — อยู่ในบล็อก
   // ฟอร์มด้านล่างที่เดียวทุกโหมด
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
       <Field>
         <FieldLabel>{tfl("srDate")}</FieldLabel>
         <Input value={srDate ? formatDate(srDate, dateFormat) : "—"} disabled />

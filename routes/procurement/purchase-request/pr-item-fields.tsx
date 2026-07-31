@@ -411,13 +411,7 @@ export function PrItemFields({
               </Button>
             )}
             {!isDisabled && role === STAGE_ROLE.CREATE && (
-              <Button
-                type="button"
-                size="xs"
-                disabled={!canAddItem}
-                title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-                onClick={() => handleAddItem()}
-              >
+              <Button type="button" size="xs" onClick={() => handleAddItem()}>
                 <PackagePlus /> {t("addItem")}
               </Button>
             )}
@@ -518,8 +512,6 @@ export function PrItemFields({
                     <Button
                       type="button"
                       size="xs"
-                      disabled={!canAddItem}
-                      title={!canAddItem ? t("selectWorkflowFirst") : undefined}
                       onClick={() => handleAddItem()}
                     >
                       <Plus /> {t("addItem")}
