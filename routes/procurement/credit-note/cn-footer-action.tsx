@@ -1,5 +1,7 @@
 import { useTranslations } from "use-intl";
 import { useWatch, type Control } from "react-hook-form";
+import { SendHorizonal } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency-utils";
 import { useCurrency } from "@/hooks/use-currency";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
@@ -7,9 +9,19 @@ import type { CnFormValues } from "./cn-form-schema";
 
 interface CnFooterActionProps {
   readonly control: Control<CnFormValues>;
+  /** ส่งใบได้เฉพาะใบร่างที่เปิดอ่านอยู่ (ไม่ใช่กลางคันตอนแก้) */
+  readonly canSubmit: boolean;
+  readonly isPending: boolean;
+  readonly onSubmitCn: () => void;
 }
 
-export function CnFooterAction({ control }: CnFooterActionProps) {
+export function CnFooterAction({
+  control,
+  canSubmit,
+  isPending,
+  onSubmitCn,
+}: CnFooterActionProps) {
+  const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const items = useWatch({ control, name: "items" });
   // currency_code เก็บ id → resolve เป็นตัวอักษรสกุลเงินสำหรับต่อท้าย total
@@ -75,6 +87,22 @@ export function CnFooterAction({ control }: CnFooterActionProps) {
           suffix: currencyCode,
         },
       ]}
-    />
+    >
+      {/* ส่งใบอยู่ line เดียวกับสรุปยอด (ขวาล่าง เหมือน PR/PO/GRN/SR) — เป็นการ
+          ตัดสินใจหลังอ่านยอดจบ ไม่ใช่คำสั่งจัดการใบแบบแก้ไข/ลบที่อยู่หัวใบ */}
+      {canSubmit && (
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            disabled={isPending}
+            onClick={onSubmitCn}
+          >
+            <SendHorizonal aria-hidden="true" />
+            {tc("submit")}
+          </Button>
+        </div>
+      )}
+    </SummaryFooterBar>
   );
 }

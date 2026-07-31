@@ -3239,7 +3239,9 @@
       "nItemsSelected": "เลือก {count} รายการ",
       "addNItems": "{count, plural, =0 {เพิ่ม} other {เพิ่ม # รายการ}}",
       "cnAmount": "จำนวนลดหนี้",
-      "overReturnWarning": "คืนเกินจำนวนรับ (รับ {received})"
+      "overReturnWarning": "คืนเกินจำนวนรับ (รับ {received})",
+      "submitTitle": "ส่งใบลดหนี้",
+      "submitConfirm": "จะส่งใบลดหนี้เพื่ออนุมัติ คุณแน่ใจหรือไม่?"
     },
     "goodsReceiveNote": {
       "entity": "ใบรับสินค้า",
@@ -3249,7 +3251,6 @@
       "overReceiptWarning": "รับเกินจำนวนสั่ง (สั่ง {ordered})",
       "documentInfo": "ข้อมูลเอกสาร",
       "add": "เพิ่ม GRN",
-      "create": "สร้าง GRN",
       "edit": "แก้ไขใบรับสินค้า",
       "status": "สถานะ",
       "deleteTitle": "ลบใบรับสินค้า",

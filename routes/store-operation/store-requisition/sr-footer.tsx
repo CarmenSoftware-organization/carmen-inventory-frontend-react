@@ -115,7 +115,6 @@ export function SrFooter({
             <Button
               type="button"
               size="sm"
-              variant="info"
               disabled={isPending}
               onClick={onSubmit}
             >

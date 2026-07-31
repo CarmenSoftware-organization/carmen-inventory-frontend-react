@@ -87,7 +87,12 @@ export function PrFormActions({
       {isView ? (
         <>
           {!isViewOnly && !isVoided && (
-            <Button type="button" size="sm" onClick={onEdit}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={onEdit}
+            >
               <Pencil />
               {tc("edit")}
             </Button>

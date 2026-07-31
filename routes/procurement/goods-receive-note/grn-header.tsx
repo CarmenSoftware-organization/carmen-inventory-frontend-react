@@ -112,6 +112,7 @@ export function GrnHeader({
       {isView && goodsReceiveNote && canEdit && (
         <Button
           size="sm"
+          variant="outline"
           onClick={
             editDenied
               ? () => dispatchPermissionDenied(updatePermission)
@@ -159,7 +160,7 @@ export function GrnHeader({
                 onClick={onSave}
               >
                 <Save aria-hidden="true" />
-                {isEdit ? tc("save") : t("create")}
+                {isEdit ? tc("save") : tc("create")}
               </Button>
             </>
           )}

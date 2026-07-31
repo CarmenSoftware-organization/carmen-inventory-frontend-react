@@ -64,7 +64,6 @@ export function SrSubmitDialog({
           </AlertDialogCancel>
           <AlertDialogAction
             size="default"
-            variant="info"
             onClick={(e) => {
               e.preventDefault();
               onConfirm();

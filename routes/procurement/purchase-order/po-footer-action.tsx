@@ -172,7 +172,7 @@ export function PoFooterAction({
                     title: t("submitTitle"),
                     description: t("submitConfirm"),
                     confirmLabel: tc("submit"),
-                    confirmVariant: "info",
+                    confirmVariant: "default",
                     onConfirm: () => onSubmit?.(),
                   })
                 }

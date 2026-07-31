@@ -169,13 +169,6 @@ export function SrItemFields({
             icon={BoxIcon}
             title={t("noItems")}
             description={t("noItemsDesc")}
-            content={
-              !disabled && (
-                <Button type="button" size="sm" onClick={handleAddItem}>
-                  <Plus /> {t("addItem")}
-                </Button>
-              )
-            }
           />
         }
       >

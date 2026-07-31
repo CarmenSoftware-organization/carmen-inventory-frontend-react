@@ -356,7 +356,6 @@ export function GrnItemTable({
             icon={BoxIcon}
             title={t("noItems")}
             description={t("noItemsDesc")}
-            content={addAction}
           />
         }
       >

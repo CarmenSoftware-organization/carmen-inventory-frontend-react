@@ -104,7 +104,7 @@ export function PoHeader({
           {canClose && purchaseOrder.po_status === PO_STATUS.SENT && (
             <Button
               size="sm"
-              variant="warning"
+              variant="outline"
               disabled={isPending}
               onClick={onShowClose}
             >
@@ -124,7 +124,12 @@ export function PoHeader({
             />
           )}
           {isView && canEdit && (
-            <Button size="sm" onClick={onEnterEdit} disabled={isPending}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onEnterEdit}
+              disabled={isPending}
+            >
               <Pencil aria-hidden="true" />
               {tc("edit")}
             </Button>

@@ -3,15 +3,14 @@ import {
   CalendarDays,
   Pencil,
   Save,
-  SendHorizonal,
   Trash2,
   User,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+// import { Field, FieldLabel } from "@/components/ui/field";
+// import { Input } from "@/components/ui/input";
 import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { useCreditNoteComments } from "@/hooks/use-credit-note";
@@ -22,7 +21,7 @@ import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import type { FormMode } from "@/types/form";
-import { CN_STATUS, type CreditNoteDetail } from "@/types/credit-note";
+import type { CreditNoteDetail } from "@/types/credit-note";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 
@@ -41,7 +40,6 @@ interface CnHeaderProps {
   readonly onCancel: () => void;
   readonly onShowDelete: () => void;
   readonly onShowComment: () => void;
-  readonly onSubmitCn: () => void;
 }
 
 /**
@@ -62,7 +60,6 @@ export function CnHeader({
   onCancel,
   onShowDelete,
   onShowComment,
-  onSubmitCn,
 }: CnHeaderProps) {
   const t = useTranslations("procurement.creditNote");
   const tc = useTranslations("common");
@@ -108,35 +105,22 @@ export function CnHeader({
 
   const actions = (
     <>
-      {/* View — submit (draft) + edit */}
+      {/* View — edit (ส่งใบย้ายไป footer ขวาล่าง = CnFooterAction) */}
       {isView && !isLocked && (
-        <>
-          {creditNote?.doc_status === CN_STATUS.DRAFT && (
-            <Button
-              type="button"
-              size="sm"
-              variant="info"
-              disabled={isPending}
-              onClick={onSubmitCn}
-            >
-              <SendHorizonal aria-hidden="true" />
-              {tc("submit")}
-            </Button>
-          )}
-          <Button
-            size="sm"
-            onClick={
-              editDenied
-                ? () => dispatchPermissionDenied(updatePermission)
-                : onEnterEdit
-            }
-            aria-disabled={editDenied || undefined}
-            className={cn(editDenied && "opacity-50")}
-          >
-            <Pencil aria-hidden="true" />
-            {tc("edit")}
-          </Button>
-        </>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={
+            editDenied
+              ? () => dispatchPermissionDenied(updatePermission)
+              : onEnterEdit
+          }
+          aria-disabled={editDenied || undefined}
+          className={cn(editDenied && "opacity-50")}
+        >
+          <Pencil aria-hidden="true" />
+          {tc("edit")}
+        </Button>
       )}
 
       {/* Edit / add — cancel + save + delete */}
@@ -228,18 +212,18 @@ export function CnHeader({
     ) : undefined;
 
   // แถบข้อมูลของเดิมยังอยู่ครบ — ผู้สร้าง/วันที่โผล่ทั้งใต้เลขที่ใบและในแถบนี้
-  const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
-      <Field>
-        <FieldLabel>{tfl("createdBy")}</FieldLabel>
-        <Input value={createdByName || "—"} disabled />
-      </Field>
-      <Field>
-        <FieldLabel>{tfl("date")}</FieldLabel>
-        <Input value={cnDate ? formatDate(cnDate, dateFormat) : "—"} disabled />
-      </Field>
-    </div>
-  );
+  // const ribbon = (
+  //   <div className="ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
+  //     <Field>
+  //       <FieldLabel>{tfl("createdBy")}</FieldLabel>
+  //       <Input value={createdByName || "—"} disabled />
+  //     </Field>
+  //     <Field>
+  //       <FieldLabel>{tfl("date")}</FieldLabel>
+  //       <Input value={cnDate ? formatDate(cnDate, dateFormat) : "—"} disabled />
+  //     </Field>
+  //   </div>
+  // );
 
   return (
     <DocFormHeader
@@ -249,7 +233,7 @@ export function CnHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      ribbon={ribbon}
+      // ribbon={ribbon}
     />
   );
 }

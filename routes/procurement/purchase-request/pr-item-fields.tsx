@@ -448,6 +448,7 @@ export function PrItemFields({
               <Button
                 type="button"
                 size="xs"
+                variant="outline"
                 disabled={isAllocating || itemFields.length === 0}
                 onClick={handleAutoAllocate}
               >
@@ -474,18 +475,6 @@ export function PrItemFields({
               icon={BoxIcon}
               title={t("noItems")}
               description={t("noItemsDesc")}
-              content={
-                !isDisabled &&
-                role === STAGE_ROLE.CREATE && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => handleAddItem()}
-                  >
-                    <Plus /> {t("addItem")}
-                  </Button>
-                )
-              }
             />
           }
         >

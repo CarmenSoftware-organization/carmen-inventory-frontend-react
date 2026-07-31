@@ -21,6 +21,7 @@ import {
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
@@ -47,6 +48,7 @@ interface CnFormProps {
 
 export function CnForm({ creditNote }: CnFormProps) {
   const t = useTranslations("procurement.creditNote");
+  const tc = useTranslations("common");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -62,6 +64,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   const deleteCn = useDeleteCreditNote();
   const submitCn = useSubmitCreditNote();
   const [showDelete, setShowDelete] = useState(false);
+  const [showSubmit, setShowSubmit] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const isPending =
     createCn.isPending || updateCn.isPending || submitCn.isPending;
@@ -224,7 +227,11 @@ export function CnForm({ creditNote }: CnFormProps) {
           toast.success(tt("submitSuccess", { entity: t("entity") }));
           navigate("/procurement/credit-note");
         },
-        onError: () => setIsSubmitting(false),
+        onError: () => {
+          // ปิด dialog ให้ด้วย ไม่งั้นค้างทับ toast แจ้ง error ที่เพิ่งขึ้น
+          setShowSubmit(false);
+          setIsSubmitting(false);
+        },
       },
     );
   };
@@ -245,7 +252,6 @@ export function CnForm({ creditNote }: CnFormProps) {
         onCancel={handleCancel}
         onShowDelete={() => setShowDelete(true)}
         onShowComment={() => setShowComment(true)}
-        onSubmitCn={handleSubmitCn}
       />
 
       <form
@@ -270,7 +276,25 @@ export function CnForm({ creditNote }: CnFormProps) {
         <CnItem form={form} disabled={isDisabled} />
       </form>
 
-      <CnFooterAction control={form.control} />
+      <CnFooterAction
+        control={form.control}
+        canSubmit={
+          isView && !isLocked && creditNote?.doc_status === CN_STATUS.DRAFT
+        }
+        isPending={isPending}
+        onSubmitCn={() => setShowSubmit(true)}
+      />
+
+      {/* ส่งใบแล้วย้อนไม่ได้ — ถามก่อนหนึ่งครั้ง เหมือน PR/PO/SR */}
+      <ConfirmDialog
+        open={showSubmit}
+        onOpenChange={setShowSubmit}
+        title={t("submitTitle")}
+        description={t("submitConfirm")}
+        confirmText={tc("submit")}
+        isPending={submitCn.isPending}
+        onConfirm={handleSubmitCn}
+      />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 

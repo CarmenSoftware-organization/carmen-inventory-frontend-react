@@ -190,14 +190,13 @@ export function PrFooterAction({
               <Button
                 type="button"
                 size="sm"
-                variant="info"
                 disabled={isPending}
                 onClick={() =>
                   openConfirm({
                     title: t("submitTitle"),
                     description: t("submitConfirm"),
                     confirmLabel: tc("submit"),
-                    confirmVariant: "info",
+                    confirmVariant: "default",
                     onConfirm: () => onSubmitPr?.(),
                   })
                 }

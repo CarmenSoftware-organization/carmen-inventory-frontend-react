@@ -240,8 +240,6 @@ export function PoItemFields({
 
   const itemsError = form.formState.errors.items?.message;
 
-  // ปุ่มเดียวใช้สองที่ — บน toolbar และในสถานะว่าง (เหมือน GRN) ตารางเปล่า
-  // ที่ไม่มีทางออกให้กดคือทางตัน
   const addAction = (!role || role === STAGE_ROLE.CREATE) && !disabled && (
     <Button type="button" size="sm" onClick={handleAddItem}>
       <Plus /> {t("addItem")}
@@ -307,7 +305,7 @@ export function PoItemFields({
             {canClose && (
               <Button
                 type="button"
-                variant="warning"
+                variant="outline"
                 size="xs"
                 disabled={isPending}
                 onClick={(e) => {
@@ -378,7 +376,6 @@ export function PoItemFields({
               icon={BoxIcon}
               title={t("noItems")}
               description={t("noItemsDesc")}
-              content={addAction}
             />
           }
         >

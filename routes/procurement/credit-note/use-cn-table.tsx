@@ -45,7 +45,7 @@ export function useCnTable({
           {row.original.cn_no}
         </CellAction>
       ),
-      size: 200,
+      size: 100,
       meta: { headerTitle: tfl("cnNo"), skeleton: columnSkeletons.text },
     },
     {
@@ -53,7 +53,7 @@ export function useCnTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      size: 300,
+      size: 200,
       meta: { headerTitle: tfl("vendor"), skeleton: columnSkeletons.text },
     },
     {
@@ -74,7 +74,6 @@ export function useCnTable({
           </Badge>
         );
       },
-      size: 180,
       meta: {
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.text,
@@ -91,7 +90,6 @@ export function useCnTable({
         />
       ),
       cell: ({ row }) => formatDate(row.original.cn_date, dateFormat),
-      size: 160,
       meta: {
         headerTitle: tfl("docDate"),
         skeleton: columnSkeletons.text,
@@ -110,7 +108,6 @@ export function useCnTable({
           </Badge>
         );
       },
-      size: 160,
       meta: {
         headerTitle: tfl("status"),
         skeleton: columnSkeletons.text,
@@ -147,7 +144,6 @@ export function useCnTable({
         skeleton: columnSkeletons.text,
         cellClassName: "text-right",
       },
-      size: 200,
     },
     {
       // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
@@ -162,7 +158,6 @@ export function useCnTable({
           dateTimeFormat={dateTimeFormat}
         />
       ),
-      size: 160,
       meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
     },
     {
@@ -177,7 +172,6 @@ export function useCnTable({
           dateTimeFormat={dateTimeFormat}
         />
       ),
-      size: 160,
       meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
     },
   ];
