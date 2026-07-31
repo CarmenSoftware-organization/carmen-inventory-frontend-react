@@ -66,50 +66,17 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
 
 ## Migrating a module from the source app
 
-All sections are already ported **and colocated**. For a new/updated module, follow the
-colocated convention (the `scripts/codemods/*` helpers predate the compat removal and still
-rewrite to `lib/compat/*` — don't rely on them for the import step):
-
-1. Copy the module's components, hooks and types from `../carmen-inventory-frontend` into
-   `routes/<module>/<feature>/` — flat, no `_components/` wrapper.
-2. Rewrite Next APIs to react-router directly (see "Imports" above): `next/link`→`Link`
-   (`to`), `next/navigation`→`useNavigate`/`useLocation`/`useParams`/`useSearchParams`,
-   `next-intl`→`use-intl`. `next/dynamic` → `lazy()` + `<Suspense fallback={null}>` (see
-   `routes/config/currency/currency-component.tsx`). Drop no-op `router.refresh()` calls
-   (data comes from TanStack Query invalidation).
-3. Name each route file `<feature>.route.tsx` exporting `Component`. Dynamic routes use
-   `useParams` + native `:id` (see `routes/config/department/department-edit.route.tsx`).
-4. Register routes in `routes/router.tsx` with `lazy: () => import("./<...>.route")`, under
-   the module's section parent (which carries `RouteErrorBoundaryAdapter`).
-5. `bunx tsc --noEmit && bun test:run` must be clean.
+Use the `migrate-source-module` skill (`.claude/skills/migrate-source-module/`) — it carries
+the full colocated-route convention and Next→react-router rewrite steps. Gate: `bunx tsc
+--noEmit && bun test:run` must be clean. (The `scripts/codemods/*` helpers predate the
+compat removal — don't rely on them for the import step.)
 
 ## Interfaces config (`/system-admin/interface`)
 
-Per-BU config for connections to external systems — **Accounting**, **POS**, **PMS**
-(the customer's "HMS"). Config storage only; no sync/test-connection. Lives in
-`routes/system-admin/interface/`.
-
-- **Registry (`interface-registry.ts`)** holds *list metadata only* — `key` (route param),
-  `configKey` (`interface_<key>`), `icon`, and a `lazy()` form. Each interface owns its own
-  form + zod schema (`<name>-interface-form.tsx`), NOT a shared schema. **Add an interface** =
-  one registry entry + one form file (+ its i18n block, + a backend `secretPathsByKey` path if
-  it has a secret). A future interface can render anything (e.g. a mapping table) without
-  touching the others.
-- **Shared bits:** `use-interface-config.ts` (wraps `useAppConfigByKey`/`useUpsertAppConfig`;
-  maps 404 → `isNew`, not an error), `interface-page-layout.tsx` (presentational shell +
-  nav-guard, takes `isDirty`, holds no form state), `interface-fields.tsx`
-  (`TextField`/`EnumField`/`ToggleField` — label+value, not schema-driven). Forms derive
-  dropdown options from `schema.shape.<field>.options` so options and validation can't drift.
-- **Storage:** one `tb_application_config` row per interface. The backend
-  (`carmen-turborepo-backend-v2`) encrypts+masks the `api_key` secret via a generic
-  `secretPathsByKey` registry; a never-configured interface returns `{ enabled: false }`
-  (not 404). **Prod/UAT must set `SECRET_ENCRYPTION_KEY`** or any secret-bearing save (incl.
-  the pre-existing `report_email`) 400s.
-- **List-envelope gotcha:** the app-config *list* endpoint returns `{ data: { items, count } }`
-  — the array is at `json.data.items`, NOT `json.data` (which is the array only in a mental
-  model, never in reality). The *single-key* GET's `json.data` IS the row. `useAppConfigs`
-  reads `.items`; any new list hook must too. A test mocking a bare `{ data: [...] }` passes
-  while the real page crashes — verify list features in a real browser.
+Per-BU external-system config (Accounting / POS / PMS). Conventions, storage model, and the
+list-envelope gotcha live in `routes/system-admin/interface/CLAUDE.md` (loads when working
+in that folder). One cross-cutting deploy note: **Prod/UAT must set `SECRET_ENCRYPTION_KEY`**
+or any secret-bearing app-config save (incl. the pre-existing `report_email`) 400s.
 
 ## Known open items
 

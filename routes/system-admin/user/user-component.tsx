@@ -251,7 +251,7 @@ export default function UserComponent() {
         ) : users.length > 0 ? (
           <>
             <div className="grid grid-cols-1 gap-3">
-              {users.map((u, i) => (
+              {users.map((u) => (
                 <UserCard
                   key={u.user_id}
                   item={u}
