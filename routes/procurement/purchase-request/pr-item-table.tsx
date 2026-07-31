@@ -7,7 +7,6 @@ import {
   type SortingState,
   getCoreRowModel,
   getExpandedRowModel,
-  getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -78,24 +77,6 @@ function liveItem(
   return form.getValues(`items.${index}`);
 }
 
-/**
- * ค้นหาในรายการของใบนี้ — ฝั่ง client ล้วน (items ทั้งใบอยู่ในฟอร์มอยู่แล้ว
- * ไม่ต้องยิง API) กวาดชื่อสินค้า/ชื่อท้องถิ่น/รหัส/คำอธิบาย/คลัง/ผู้ขาย
- */
-function matchesSearch(item: PrItem | undefined, term: string): boolean {
-  const q = term.trim().toLowerCase();
-  if (!q) return true;
-  if (!item) return false;
-  return [
-    item.product_name,
-    item.product_local_name,
-    item.product_code,
-    item.description,
-    item.location_name,
-    item.vendor_name,
-  ].some((field) => (field ?? "").toLowerCase().includes(q));
-}
-
 /** ยอดที่เทียบกันได้ข้ามสกุลเงิน — ยอดในสกุลของแถว × เรต = ยอดสกุลฐาน */
 function baseAmountOf(item: PrItem | undefined): number {
   return Number(item?.total_price ?? 0) * Number(item?.exchange_rate ?? 1);
@@ -128,16 +109,11 @@ export function usePrItemTable({
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
   // นับเฉพาะแถวที่ติ๊กได้จริง — แถวที่ถูกตัดสินมาแล้วไม่มี checkbox ให้กด
-  // นับรวมไปก็หลอกตาว่าจะเลือกได้มากกว่าที่เลือกได้จริง · ระหว่างค้นหาก็นับเฉพาะ
-  // แถวที่เห็นอยู่ ให้ตรงกับ checkbox หัวตารางที่กวาดเฉพาะแถวที่ผ่านตัวกรอง
-  const selectableItems = itemFields.filter(
-    (item, index) =>
-      !isRowLocked(item, role) && matchesSearch(liveItem(form, index), search),
-  );
+  // นับรวมไปก็หลอกตาว่าจะเลือกได้มากกว่าที่เลือกได้จริง
+  const selectableItems = itemFields.filter((item) => !isRowLocked(item, role));
   const allCount = selectableItems.length;
   const pendingCount = selectableItems.filter((item) => {
     const status = item.current_stage_status ?? "";
@@ -549,16 +525,11 @@ export function usePrItemTable({
   const table = useReactTable({
     data: itemFields,
     columns: allColumns,
-    state: { globalFilter: search, sorting },
-    onGlobalFilterChange: setSearch,
+    state: { sorting },
     onSortingChange: setSorting,
-    // กรองทั้งแถวทีเดียว ไม่สนว่า column ไหนเป็นคนเรียก — ทุกคอลัมน์ได้คำตอบ
-    // เดียวกัน · กรอง/เรียงที่ table ไม่ใช่ที่ `data` เพราะ `row.index` ต้องคงเป็น
-    // index ใน form array (ทุก cell ผูก `items.${index}` ไว้)
-    globalFilterFn: (row, _columnId, value: string) =>
-      matchesSearch(liveItem(form, row.index), value),
+    // เรียงที่ table ไม่ใช่ที่ `data` เพราะ `row.index` ต้องคงเป็น index ใน form
+    // array (ทุก cell ผูก `items.${index}` ไว้)
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     // แถวที่ถูกตัดสินมาแล้วไม่มี checkbox ให้กด แต่ toggleAllPageRowsSelected ไม่รู้
@@ -574,8 +545,6 @@ export function usePrItemTable({
     if (!submitCount) return;
     const itemErrors = form.formState.errors.items;
     if (!itemErrors) return;
-    // แถวที่ผิดอาจโดนตัวกรองซ่อนอยู่ — กางให้ก็ไม่เห็น ล้างคำค้นทิ้งก่อน
-    setSearch("");
     const next: Record<string, boolean> = {};
     if (Array.isArray(itemErrors)) {
       itemErrors.forEach((err, i) => {
@@ -603,7 +572,6 @@ export function usePrItemTable({
   const handleSelectPending = () => {
     const selection: Record<string, boolean> = {};
     for (let i = 0; i < itemFields.length; i++) {
-      if (!matchesSearch(liveItem(form, i), search)) continue;
       const status = itemFields[i].current_stage_status ?? "";
       if (!status || status === PR_ITEM_STAGE_STATUS.PENDING) {
         selection[i] = true;
@@ -615,9 +583,6 @@ export function usePrItemTable({
 
   return {
     table,
-    search,
-    setSearch,
-    visibleCount: table.getFilteredRowModel().rows.length,
     selectDialogOpen,
     setSelectDialogOpen,
     allCount,

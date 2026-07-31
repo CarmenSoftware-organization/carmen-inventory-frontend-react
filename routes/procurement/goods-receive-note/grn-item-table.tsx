@@ -299,7 +299,7 @@ export function GrnItemTable({
   const addAction =
     !disabled &&
     (isManual ? (
-      <Button type="button" size="xs" onClick={handleAddItem}>
+      <Button type="button" size="sm" onClick={handleAddItem}>
         <Plus /> {t("addItem")}
       </Button>
     ) : (

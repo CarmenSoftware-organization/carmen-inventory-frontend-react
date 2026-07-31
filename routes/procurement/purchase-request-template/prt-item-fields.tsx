@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
-import { BoxIcon, PackagePlus, Plus } from "lucide-react";
+import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DataGrid,
@@ -71,11 +71,11 @@ export function PrtItemFields({
         !readOnly ? (
           <Button
             type="button"
-            size="xs"
+            size="sm"
             disabled={disabled}
             onClick={handleAddItem}
           >
-            <PackagePlus /> {t("addItem")}
+            <Plus /> {t("addItem")}
           </Button>
         ) : undefined
       }
@@ -92,7 +92,7 @@ export function PrtItemFields({
               !readOnly && (
                 <Button
                   type="button"
-                  size="xs"
+                  size="sm"
                   disabled={disabled}
                   onClick={handleAddItem}
                 >

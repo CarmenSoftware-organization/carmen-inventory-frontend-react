@@ -243,7 +243,7 @@ export function PoItemFields({
   // ปุ่มเดียวใช้สองที่ — บน toolbar และในสถานะว่าง (เหมือน GRN) ตารางเปล่า
   // ที่ไม่มีทางออกให้กดคือทางตัน
   const addAction = (!role || role === STAGE_ROLE.CREATE) && !disabled && (
-    <Button type="button" size="xs" onClick={handleAddItem}>
+    <Button type="button" size="sm" onClick={handleAddItem}>
       <Plus /> {t("addItem")}
     </Button>
   );

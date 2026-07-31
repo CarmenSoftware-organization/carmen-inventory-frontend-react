@@ -14,7 +14,6 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { FieldPlainText } from "@/components/ui/field";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { PrintDocumentButton } from "@/components/print-document-button";
-import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
 import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
@@ -69,7 +68,6 @@ export function SrStockTable({
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const [search, setSearch] = useState("");
   const [direction, setDirection] = useState<StockDirection>("");
 
   const rows = useMemo<StockRow[]>(() => {
@@ -102,20 +100,14 @@ export function SrStockTable({
     });
   }, [items, fromLocationName, toLocationName]);
 
-  // ค้นหา/กรองฝั่ง client ล้วน — แถวพวกนี้คำนวณจาก items ในฟอร์มอยู่แล้ว
-  // ไม่มี API ให้ยิง · กรองที่ data ตรง ๆ ได้เพราะไม่มี cell ไหนผูก index
-  // ของฟอร์ม (ต่างจากตาราง PR/SR ที่ต้องกรองที่ table)
+  // กรองฝั่ง client ล้วน — แถวพวกนี้คำนวณจาก items ในฟอร์มอยู่แล้ว ไม่มี API
+  // ให้ยิง · กรองที่ data ตรง ๆ ได้เพราะไม่มี cell ไหนผูก index ของฟอร์ม
   const visibleRows = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return rows.filter((row) => {
-      if (direction === "in" && row.stockIn == null) return false;
-      if (direction === "out" && row.stockOut == null) return false;
-      if (!q) return true;
-      return [row.locationName, row.productName, row.unitName].some((field) =>
-        field.toLowerCase().includes(q),
-      );
-    });
-  }, [rows, search, direction]);
+    if (!direction) return rows;
+    return rows.filter((row) =>
+      direction === "in" ? row.stockIn != null : row.stockOut != null,
+    );
+  }, [rows, direction]);
 
   const columns = useMemo<ColumnDef<StockRow>[]>(() => {
     /** ขีด = ขานี้ไม่ใช่ทางที่ของวิ่ง (ไม่ใช่ 0 ซึ่งแปลว่าวิ่งแต่เป็นศูนย์) */
@@ -240,12 +232,6 @@ export function SrStockTable({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <SearchInput
-          defaultValue={search}
-          onSearch={setSearch}
-          onInputChange={setSearch}
-          containerClassName="w-48 sm:w-64"
-        />
         <StatusFilter
           value={direction}
           onChange={(value) => setDirection(value as StockDirection)}
@@ -271,7 +257,9 @@ export function SrStockTable({
         emptyMessage={
           // มีแถวอยู่แต่กรองแล้วไม่เหลือ = หาไม่เจอ ไม่ใช่ใบเปล่า
           rows.length > 0 ? (
-            <EmptyComponent icon={BoxIcon} title={tc("noSearchResult")} />
+            // ไม่มีช่องค้นหาแล้ว เหลือแค่ตัวกรองทิศทาง — ข้อความจึงเป็น
+            // "ไม่พบข้อมูล" ไม่ใช่ "ไม่พบผลลัพธ์การค้นหา"
+            <EmptyComponent icon={BoxIcon} title={tc("noDataFound")} />
           ) : (
             <EmptyComponent
               icon={BoxIcon}
