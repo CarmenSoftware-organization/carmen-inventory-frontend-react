@@ -4,10 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { PR_STATUS, type PurchaseRequest } from "@/types/purchase-request";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
-import {
-  DocFormHeader,
-  RibbonField,
-} from "@/components/share/doc-form-header";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 
 interface PrHeaderProps {
   readonly purchaseRequest?: PurchaseRequest;
@@ -25,9 +24,9 @@ interface PrHeaderProps {
   readonly descriptionField?: ReactNode;
   /** ปุ่ม action (PrFormActions) — caller ประกอบเอง */
   readonly actions: ReactNode;
-  /** มี workflow history ให้ดูไหม — คุมว่า WorkflowStep กดได้หรือไม่ */
+  /** มี workflow history ให้ดูไหม — คุมว่าแถบขั้นตอนกดได้หรือไม่ */
   readonly hasHistory?: boolean;
-  /** เปิด workflow history sheet (แตะที่ WorkflowStep) */
+  /** เปิด workflow history sheet (กดที่แถบขั้นตอน) */
   readonly onShowHistory?: () => void;
 }
 
@@ -81,29 +80,41 @@ export function PrHeader({
   const workflowCell =
     workflowField ??
     (workflowName ? (
-      <RibbonField label={tfl("workflow")} value={workflowName} />
+      <Field>
+        <FieldLabel>{tfl("workflow")}</FieldLabel>
+        <Input value={workflowName} disabled />
+      </Field>
     ) : null);
 
   const descriptionCell =
     descriptionField ??
     (description?.trim() ? (
-      <RibbonField
-        label={tfl("description")}
-        value={description}
-        className="lg:col-span-2"
-      />
+      <Field className="lg:col-span-2">
+        <FieldLabel>{tfl("description")}</FieldLabel>
+        <Input value={description} disabled />
+      </Field>
     ) : null);
 
   // สองแถวเป็นคนละ grid แต่ track เดียวกัน — บังคับให้ workflow/description
   // ขึ้นบรรทัดใหม่เสมอ ไม่ว่าแถวบนจะมีกี่ช่อง (ถ้าใช้ grid เดียวแล้วปล่อยไหลเอง
   // ช่องจะเลื่อนไปต่อท้ายแถวบนเมื่อจอกว้างพอ) · ml-4 หักล้าง -ml-4 ของ DocFormHeader
-  const ribbonRow = "grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6";
+  const ribbonRow =
+    "grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6";
   const ribbon = (
     <div className="ml-4 w-full space-y-4">
       <div className={ribbonRow}>
-        <RibbonField label={tfl("requester")} value={reqName || "—"} />
-        <RibbonField label={tfl("department")} value={departmentName || "—"} />
-        <RibbonField label={tfl("date")} value={prDateDisplay || "—"} />
+        <Field>
+          <FieldLabel>{tfl("requester")}</FieldLabel>
+          <Input value={reqName || "—"} disabled />
+        </Field>
+        <Field>
+          <FieldLabel>{tfl("department")}</FieldLabel>
+          <Input value={departmentName || "—"} disabled />
+        </Field>
+        <Field>
+          <FieldLabel>{tfl("date")}</FieldLabel>
+          <Input value={prDateDisplay || "—"} disabled />
+        </Field>
       </div>
       {(workflowCell || descriptionCell) && (
         <div className={ribbonRow}>

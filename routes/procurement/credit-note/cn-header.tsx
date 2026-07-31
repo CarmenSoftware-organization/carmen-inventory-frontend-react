@@ -1,8 +1,17 @@
-
 import { useTranslations } from "use-intl";
-import { Pencil, Save, SendHorizonal, Trash2, X } from "lucide-react";
+import {
+  CalendarDays,
+  Pencil,
+  Save,
+  SendHorizonal,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { useCreditNoteComments } from "@/hooks/use-credit-note";
@@ -15,10 +24,7 @@ import { formatDate } from "@/lib/date-utils";
 import type { FormMode } from "@/types/form";
 import { CN_STATUS, type CreditNoteDetail } from "@/types/credit-note";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
-import {
-  DocFormHeader,
-  RibbonField,
-} from "@/components/share/doc-form-header";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 
 interface CnHeaderProps {
   readonly creditNote?: CreditNoteDetail;
@@ -80,16 +86,9 @@ export function CnHeader({
     : undefined;
   const saveDenied = !!savePermission && !isAdmin && !can(savePermission);
   const editDenied = !!updatePermission && !isAdmin && !can(updatePermission);
-  const deleteDenied =
-    !!deletePermission && !isAdmin && !can(deletePermission);
+  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
 
-  const statusCfg = creditNote
-    ? CN_STATUS_CONFIG[creditNote.doc_status]
-    : null;
-  const typeLabel =
-    creditNote?.credit_note_type === "amount_discount"
-      ? t("amountDiscount")
-      : t("quantityReturn");
+  const statusCfg = creditNote ? CN_STATUS_CONFIG[creditNote.doc_status] : null;
 
   const badges = (
     <>
@@ -98,10 +97,11 @@ export function CnHeader({
           {statusCfg.label ?? creditNote?.doc_status}
         </Badge>
       )}
-      {creditNote && (
-        <Badge variant="info-light" size="sm">
-          {typeLabel}
-        </Badge>
+      {/* เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด */}
+      {creditNote?.doc_version != null && (
+        <span className="text-muted-foreground text-xs">
+          {tfl("version")} {creditNote.doc_version}
+        </span>
       )}
     </>
   );
@@ -206,23 +206,40 @@ export function CnHeader({
     </>
   );
 
-  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (cn-general-fields, grid-cols-5)
-  // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
-  // gap-x-3 ให้ตรง gap-3 ของ general grid
+  // ไอคอนบอกว่าอันไหนคือคนสร้าง อันไหนคือวันที่สร้าง — บรรทัดนี้ไม่มี label
+  // กำกับ ถ้าปล่อยเป็นข้อความเปล่าสองก้อนคั่นด้วยจุด คนอ่านต้องเดาเอง
+  // (ไอคอนขนาดเท่าตัวอักษร สีเดียวกับข้อความ ไม่ใช่ signal สีแยก)
+  const subtitle =
+    createdByName || cnDate ? (
+      <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+        {createdByName && (
+          <span className="flex items-center gap-1">
+            <User className="size-3 shrink-0" aria-hidden="true" />
+            {createdByName}
+          </span>
+        )}
+        {cnDate && (
+          <span className="flex items-center gap-1">
+            <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
+            {formatDate(cnDate, dateFormat)}
+          </span>
+        )}
+      </span>
+    ) : undefined;
+
+  // แถบข้อมูลของเดิมยังอยู่ครบ — ผู้สร้าง/วันที่โผล่ทั้งใต้เลขที่ใบและในแถบนี้
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
-      <RibbonField label={tfl("createdBy")} value={createdByName || "—"} />
-      <RibbonField
-        label={tfl("date")}
-        value={cnDate ? formatDate(cnDate, dateFormat) : "—"}
-      />
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
+      <Field>
+        <FieldLabel>{tfl("createdBy")}</FieldLabel>
+        <Input value={createdByName || "—"} disabled />
+      </Field>
+      <Field>
+        <FieldLabel>{tfl("date")}</FieldLabel>
+        <Input value={cnDate ? formatDate(cnDate, dateFormat) : "—"} disabled />
+      </Field>
     </div>
   );
-
-  const subtitle =
-    creditNote?.doc_version != null
-      ? `${tfl("version")} ${creditNote.doc_version}`
-      : undefined;
 
   return (
     <DocFormHeader

@@ -263,7 +263,7 @@ export function CnForm({ creditNote }: CnFormProps) {
         })}
         className="space-y-3 px-4"
       >
-        <CnGeneralFields form={form} disabled={isDisabled} plainText={isView} />
+        <CnGeneralFields form={form} disabled={isDisabled || isView} />
 
         {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
         {(!isView || watchedDescription?.trim()) && (

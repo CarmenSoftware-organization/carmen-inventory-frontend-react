@@ -219,10 +219,6 @@ export function StoreRequisitionForm({
           form={form}
           readOnly={isView}
           disabled={actions.isPending}
-          dateFormat={dateFormat}
-          workflowName={storeRequisition?.workflow_name}
-          fromLocInfo={fromLocInfo}
-          toLocInfo={toLocInfo}
           onFromLocInfoChange={setFromLocInfo}
           onToLocInfoChange={setToLocInfo}
           role={storeRequisition?.role ?? STAGE_ROLE.CREATE}

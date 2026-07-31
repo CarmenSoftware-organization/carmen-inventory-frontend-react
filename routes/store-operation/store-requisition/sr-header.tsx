@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -13,12 +13,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { PrintDocumentButton } from "@/components/print-document-button";
-import { WorkflowStep } from "@/components/share/workflow-step";
+import { WorkflowTrack } from "@/components/share/workflow-track";
 import { SrWorkflowHistory } from "./sr-workflow-history";
-import {
-  DocFormHeader,
-  RibbonField,
-} from "@/components/share/doc-form-header";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { formatDate } from "@/lib/date-utils";
 import {
   SR_STATUS_CONFIG,
@@ -120,6 +119,13 @@ export function SrHeader({
           {t("breadcrumbNew")}
         </Badge>
       )}
+      {/* เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด
+          เพื่อคืนบรรทัด subtitle ให้แถบขั้นตอน */}
+      {storeRequisition?.doc_version != null && (
+        <span className="text-muted-foreground text-xs">
+          {tfl("version")} {storeRequisition.doc_version}
+        </span>
+      )}
     </>
   );
 
@@ -208,62 +214,44 @@ export function SrHeader({
     </Sheet>
   ) : null;
 
-  const departmentValue = (() => {
-    if (isLoading) return "—";
-    if (!departmentName) {
-      return (
-        <span className="text-destructive font-semibold" role="alert">
-          {t("noDepartment")}
-        </span>
-      );
-    }
-    return (
-      <span>
-        {departmentName}
-        {departmentCode && (
-          <span className="text-muted-foreground ml-2 text-xs font-normal">
-            {departmentCode}
-          </span>
-        )}
-      </span>
-    );
-  })();
+  // ไม่มีแผนก = กรอกใบต่อไม่ได้ ต้องเตือน แต่ไม่ต้องเปลี่ยนเป็นข้อความสีแดง
+  // คนละชนิดกับช่องอื่น — ใช้ Input เหมือนกันหมดแล้วให้ aria-invalid วาดกรอบแดง
+  // (กติกาเดียวกับช่องที่ยังกรอกไม่ครบทั้งแอป)
+  const departmentMissing = !isLoading && !departmentName;
+  const departmentValue = isLoading
+    ? "—"
+    : departmentName
+      ? `${departmentName}${departmentCode ? ` (${departmentCode})` : ""}`
+      : t("noDepartment");
 
   // ribbon เป็น grid คอลัมน์ fixed 10rem → cells ชิดซ้าย compact (เหมือน PO/PR).
-  // ml-4 หักล้าง -ml-4 ของ DocFormHeader. draft = 3 cells; ไม่ draft = 4 (มี workflow)
+  // ml-4 หักล้าง -ml-4 ของ DocFormHeader · workflow ไม่อยู่ที่นี่ — อยู่ในบล็อก
+  // ฟอร์มด้านล่างที่เดียวทุกโหมด
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
-      {!isDraft && storeRequisition?.workflow_name && (
-        <RibbonField
-          label={tfl("workflow")}
-          value={storeRequisition.workflow_name}
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
+      <Field>
+        <FieldLabel>{tfl("srDate")}</FieldLabel>
+        <Input value={srDate ? formatDate(srDate, dateFormat) : "—"} disabled />
+      </Field>
+      <Field>
+        <FieldLabel>{tfl("requester")}</FieldLabel>
+        <Input value={isLoading ? "—" : requesterName || "—"} disabled />
+      </Field>
+      <Field>
+        <FieldLabel>{tfl("department")}</FieldLabel>
+        <Input
+          value={departmentValue}
+          disabled
+          aria-invalid={departmentMissing || undefined}
         />
-      )}
-      <RibbonField
-        label={tfl("srDate")}
-        value={srDate ? formatDate(srDate, dateFormat) : "—"}
-      />
-      <RibbonField
-        label={tfl("requester")}
-        value={isLoading ? "—" : requesterName || "—"}
-      />
-      <RibbonField
-        label={tfl("department")}
-        value={departmentValue}
-        className="lg:col-span-2"
-      />
+      </Field>
     </div>
   );
-
-  const subtitle =
-    storeRequisition?.doc_version != null
-      ? `${tfl("version")} ${storeRequisition.doc_version}`
-      : undefined;
 
   // workflow stepper ใน header (เหมือน PR) — แสดงเส้นทาง prev → current → next
   const workflowStepEl =
     !isDraft && storeRequisition?.workflow_current_stage ? (
-      <WorkflowStep
+      <WorkflowTrack
         previousStage={storeRequisition.workflow_previous_stage}
         currentStage={storeRequisition.workflow_current_stage}
         nextStage={
@@ -277,7 +265,9 @@ export function SrHeader({
       />
     ) : undefined;
 
-  // แตะที่ workflow step → เปิด history sheet (progressive disclosure, เหมือน PR)
+  // กดที่แถบขั้นตอน = เปิดประวัติ · ไม่มีข้อความบอกว่า "กดเพื่อดู" แล้ว —
+  // ถ้าต้องติดป้ายบอกว่ากดได้ แปลว่า affordance ยังไม่พอ ให้ hover/cursor กับ
+  // tooltip ทำหน้าที่แทน · -ml-1 หักล้าง px-1 ของตัวเอง ให้แถบชิดซ้ายเสมอ title
   const workflowStep =
     workflowStepEl && hasHistory ? (
       <button
@@ -285,13 +275,9 @@ export function SrHeader({
         onClick={() => setShowHistory(true)}
         title={t("tabWorkflowHistory")}
         aria-label={t("tabWorkflowHistory")}
-        className="group hover:bg-muted/60 focus-visible:ring-ring flex flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        className="hover:bg-muted/60 focus-visible:ring-ring -ml-1 w-fit cursor-pointer rounded-lg px-1 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {workflowStepEl}
-        <span className="text-muted-foreground/50 group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-micro-legal tracking-wide transition-colors">
-          <History className="size-2.5" />
-          {t("viewHistoryHint")}
-        </span>
       </button>
     ) : (
       workflowStepEl
@@ -301,14 +287,12 @@ export function SrHeader({
     <>
       <DocFormHeader
         title={storeRequisition?.sr_no ?? t("title")}
-        subtitle={subtitle}
+        subtitle={workflowStep}
         backLabel={tc("goBack")}
         onBack={onBack}
         badges={badges}
         actions={actions}
         ribbon={ribbon}
-        workflowStep={workflowStep}
-        workflowStepBelow
       />
       {workflowHistorySheet}
     </>

@@ -2,8 +2,6 @@ import { type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Field, FieldLabel } from "@/components/ui/field";
 
 interface DocFormHeaderProps {
   readonly title: string;
@@ -105,7 +103,7 @@ export function DocFormHeader({
             // min-h เผื่อความสูง workflowStep (absolute ไม่กินที่) กัน content ถัดไป
             // (เช่น item table ตอนไม่มี general fields คั่น) ถูก step ทับ
             <div
-              className={cn("relative pt-4", workflowStep && "min-h-[6.5rem]")}
+              className={cn("relative pt-4", workflowStep && "min-h-26")}
             >
               <div className="-ml-4 flex w-full min-w-0 items-center">
                 {ribbon}
@@ -124,39 +122,5 @@ export function DocFormHeader({
           ))}
       </div>
     </div>
-  );
-}
-
-/**
- * ribbon cell ของแถบข้อมูลหัวเอกสาร — label + ค่าที่อ่านอย่างเดียว
- *
- * ค่าเป็น `Input` ที่ disabled ไว้ (ไม่ใช่ข้อความเปล่า) เพื่อให้แถบนี้หน้าตา
- * เท่ากับช่องกรอกในฟอร์มข้างล่างเป๊ะ ๆ สลับ view/edit แล้วไม่มีอะไรขยับ
- * ไม่มี px — spacing มาจาก grid gap ของ container → คอลัมน์ align กับ form body
- * ที่ใช้ grid track เดียวกัน (PO/PR/GRN/CN/SR)
- */
-export function RibbonField({
-  label,
-  value,
-  className,
-}: {
-  readonly label: string;
-  /** ข้อความปกติจะเข้า Input · ส่ง node มาได้ในเคสที่ต้องตกแต่ง (เช่น เตือนสีแดง) */
-  readonly value: ReactNode;
-  /** เช่น "lg:col-span-2" สำหรับ cell ที่ค่ายาว (department/vendor) */
-  readonly className?: string;
-}) {
-  const isPlain = typeof value === "string" || typeof value === "number";
-  return (
-    <Field className={className}>
-      <FieldLabel>{label}</FieldLabel>
-      {isPlain ? (
-        <Input value={String(value)} disabled />
-      ) : (
-        // node ใส่ใน Input ไม่ได้ — เคสนี้ (เช่นข้อความเตือนสีแดงของ SR) เลย
-        // เป็นข้อความธรรมดา สูงเท่า Input เพื่อไม่ให้แถวเบี้ยว
-        <div className="flex h-8 min-w-0 items-center text-xs">{value}</div>
-      )}
-    </Field>
   );
 }
