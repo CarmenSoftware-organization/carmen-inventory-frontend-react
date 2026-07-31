@@ -46,16 +46,16 @@ export function WorkflowTrack({
   const currentIndex = stages.indexOf(currentStage);
 
   return (
-    <div className="flex min-w-0 items-center gap-1 text-micro">
+    <div className="text-micro flex min-w-0 items-center gap-1">
       {stages.map((stage, i) => {
         const isCurrent = i === currentIndex;
         const currentIsVoided = isCurrent && isVoided;
 
         return (
-          <div key={`${i}-${stage}`} className="flex min-w-0 items-center gap-1">
+          <div key={stage} className="flex min-w-0 items-center gap-1">
             {i > 0 && (
               <ChevronRight
-                className="text-muted-foreground/40 size-3 shrink-0"
+                className="size-3 shrink-0 opacity-40"
                 aria-hidden="true"
               />
             )}
@@ -65,11 +65,9 @@ export function WorkflowTrack({
                 "max-w-32 truncate",
                 // ขั้นที่ยังไม่ถึงจางกว่าขั้นที่ผ่านมาแล้ว — อดีตยังเป็นข้อมูล
                 // ที่อ่านได้ อนาคตเป็นแค่การบอกว่ายังมีต่อ
-                i > currentIndex
-                  ? "text-muted-foreground/60"
-                  : "text-muted-foreground",
-                isCurrent && "text-foreground font-medium",
-                currentIsVoided && "text-destructive line-through",
+                i > currentIndex ? "opacity-50" : "opacity-70",
+                isCurrent && "font-medium opacity-100",
+                currentIsVoided && "text-destructive line-through opacity-100",
               )}
             >
               {stage}

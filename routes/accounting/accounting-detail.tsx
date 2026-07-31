@@ -59,7 +59,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { WorkflowStep } from "@/components/share/workflow-step";
+import { WorkflowTrack } from "@/components/share/workflow-track";
 import {
   accountingDocumentFromPath,
   accountingDetailInitialMode,
@@ -732,7 +732,7 @@ export default function AccountingDetail() {
                   <p className="mb-2 text-xs font-medium">
                     {t("approvalWorkflow")}
                   </p>
-                  <WorkflowStep
+                  <WorkflowTrack
                     previousStage={t("approvalPrepared")}
                     currentStage={t("approvalController")}
                     nextStage={t("approvalApproved")}
