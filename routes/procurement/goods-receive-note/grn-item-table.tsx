@@ -44,8 +44,15 @@ export const mapPoDetailToItems = (
         received_base_unit_id: d.base_unit_id,
         approved_qty: d.order_qty,
         approved_unit_id: d.order_unit_id,
-        net_amount: d.net_amount,
-        total_price: d.net_amount,
+        // ยอดทั้งหมดของ GRN คิดจาก unit_price × received_qty (computeLineAmounts
+        // แล้ว GrnItemComputedSync เขียน net/total กลับเข้าฟอร์ม) — ไม่หยิบราคา
+        // จาก PO มาใส่ ทุกยอดในใบเลยเป็นศูนย์ทั้งที่ PO มีราคาอยู่
+        //
+        // net/total ปล่อยศูนย์ ให้ตัว sync เป็นคนคำนวณที่เดียว — seed ค่ามาจาก
+        // PO ก็ถูกเขียนทับอยู่ดี มีแต่จะเห็นตัวเลขเก่าแวบหนึ่งตอนโหลด
+        unit_price: d.price,
+        net_amount: 0,
+        total_price: 0,
       },
     ];
   }
@@ -69,6 +76,11 @@ export const mapPoDetailToItems = (
     approved_qty: loc.requested_qty ?? loc.order_qty,
     approved_unit_id: loc.request_unit_id || d.order_unit_id,
     foc_qty: loc.foc_qty ?? 0,
+    // ราคาต่อหน่วยเป็นของ product ไม่ใช่ของ location — PO ใบหนึ่งมีราคาเดียว
+    // ทุก location ของรายการเดียวกันจึงใช้ราคาเดียวกัน ส่วน net/total ปล่อย
+    // ศูนย์ไว้ได้เพราะ GrnItemComputedSync คำนวณทับตามจำนวนที่รับจริงของแต่ละ
+    // location
+    unit_price: d.price,
     net_amount: 0,
     total_price: 0,
   }));
