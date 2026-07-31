@@ -326,6 +326,74 @@ export const moduleList: ModuleDto[] = [
     ],
   },
   {
+    name: "accounting",
+    path: "/accounting",
+    icon: BookOpen,
+    subModules: [
+      {
+        name: "journalVoucher",
+        path: "/accounting/journal-voucher",
+        icon: FileText,
+      },
+      {
+        name: "templateVoucher",
+        path: "/accounting/template-voucher",
+        icon: FileSpreadsheet,
+      },
+      {
+        name: "recurringVoucher",
+        path: "/accounting/recurring-voucher",
+        icon: Clock,
+      },
+      {
+        name: "allocationVoucher",
+        path: "/accounting/allocation-voucher",
+        icon: ArrowLeftRight,
+      },
+      {
+        name: "accountsPayable",
+        path: "/accounting/accounts-payable",
+        icon: BadgeDollarSign,
+        separatorBefore: true,
+        subModules: [
+          {
+            name: "apInvoice",
+            path: "/accounting/accounts-payable/invoice",
+            icon: FileInput,
+          },
+          {
+            name: "apPayment",
+            path: "/accounting/accounts-payable/payment",
+            icon: DollarSign,
+          },
+        ],
+      },
+      {
+        name: "accountsReceivable",
+        path: "/accounting/accounts-receivable",
+        icon: Receipt,
+        subModules: [
+          {
+            name: "arInvoice",
+            path: "/accounting/accounts-receivable/invoice",
+            icon: FileText,
+          },
+          {
+            name: "arReceipt",
+            path: "/accounting/accounts-receivable/receipt",
+            icon: BadgeDollarSign,
+          },
+        ],
+      },
+      {
+        name: "financialReports",
+        path: "/accounting/financial-reports",
+        icon: Files,
+        separatorBefore: true,
+      },
+    ],
+  },
+  {
     name: "config",
     path: "/config",
     icon: Settings2,

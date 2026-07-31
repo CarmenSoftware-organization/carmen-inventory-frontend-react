@@ -1,4 +1,3 @@
-
 import { Link } from "react-router";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -39,7 +38,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
           <p className="text-muted-foreground max-w-2xl text-xs leading-relaxed">
             {t(description)}
           </p>
-          <div className="text-muted-foreground/80 mt-1 flex items-center gap-1 text-micro-legal tracking-wide">
+          <div className="text-muted-foreground/80 text-micro-legal mt-1 flex items-center gap-1 tracking-wide">
             <span
               className="inline-block size-1 rounded-full"
               style={{ backgroundColor: moduleColor }}

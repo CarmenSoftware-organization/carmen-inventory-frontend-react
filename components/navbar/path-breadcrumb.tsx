@@ -40,16 +40,16 @@ function isIdSegment(segment: string) {
 
 /** Map URL path segment → modules translation key */
 const SEGMENT_TO_KEY: Record<string, string> = {};
-for (const mod of moduleList) {
-  const segment = mod.path.split("/").pop()!;
-  SEGMENT_TO_KEY[segment] = mod.name;
-  if (mod.subModules) {
-    for (const sub of mod.subModules) {
-      const subSegment = sub.path.split("/").pop()!;
-      SEGMENT_TO_KEY[subSegment] = sub.name;
+function addModuleSegments(modules: typeof moduleList) {
+  for (const mod of modules) {
+    const segment = mod.path.split("/").pop()!;
+    SEGMENT_TO_KEY[segment] = mod.name;
+    if (mod.subModules) {
+      addModuleSegments(mod.subModules);
     }
   }
 }
+addModuleSegments(moduleList);
 
 /**
  * Breadcrumb ของหน้าปัจจุบัน

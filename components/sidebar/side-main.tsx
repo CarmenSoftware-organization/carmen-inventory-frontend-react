@@ -9,6 +9,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { moduleList } from "@/constant/module-list";
 import { getModuleColor } from "@/constant/module-color-map";
@@ -73,6 +76,57 @@ export function SideMain() {
             {visibleSubs.map((sub) => {
               const isActive =
                 pathname === sub.path || pathname.startsWith(sub.path + "/");
+              if (sub.subModules?.length) {
+                return (
+                  <Fragment key={sub.path}>
+                    {sub.separatorBefore && (
+                      <div className="my-1.5 flex items-center gap-2 px-2 group-data-[collapsible=icon]:hidden">
+                        <span className="bg-border h-px flex-1" />
+                        <Sparkles className="text-muted-foreground/60 size-2.5" />
+                        <span className="bg-border h-px flex-1" />
+                      </div>
+                    )}
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={t(sub.name)}
+                        isActive={isActive}
+                        className="rounded-lg data-[active=true]:font-semibold"
+                      >
+                        <Link to={sub.subModules[0].path}>
+                          <sub.icon
+                            aria-hidden="true"
+                            className={cn(
+                              "size-5 shrink-0",
+                              isActive ? "text-primary" : "text-muted-foreground",
+                            )}
+                          />
+                          <span className="text-xs font-semibold group-data-[collapsible=icon]:hidden">
+                            {t(sub.name)}
+                          </span>
+                        </Link>
+                      </SidebarMenuButton>
+                      <SidebarMenuSub>
+                        {sub.subModules.map((child) => {
+                          const childActive =
+                            pathname === child.path ||
+                            pathname.startsWith(child.path + "/");
+                          return (
+                            <SidebarMenuSubItem key={child.path}>
+                              <SidebarMenuSubButton asChild isActive={childActive}>
+                                <Link to={child.path}>
+                                  <child.icon className="size-4" aria-hidden="true" />
+                                  <span>{t(child.name)}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          );
+                        })}
+                      </SidebarMenuSub>
+                    </SidebarMenuItem>
+                  </Fragment>
+                );
+              }
               return (
                 <Fragment key={sub.path}>
                   {sub.separatorBefore && (
