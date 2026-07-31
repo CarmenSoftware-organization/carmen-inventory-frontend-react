@@ -11,9 +11,10 @@ import {
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
-import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
-import { PrGeneralFields } from "./pr-general-fields";
+import {
+  PrDescriptionField,
+  PrWorkflowField,
+} from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
 import { PrFormActions } from "./pr-form-actions";
 import { PrFooterAction } from "./workflow/pr-footer-action";
@@ -38,7 +39,6 @@ export function PurchaseRequestForm({
   purchaseRequest,
   template,
 }: PurchaseRequestFormProps) {
-  const t = useTranslations("procurement.purchaseRequest");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const {
@@ -122,6 +122,12 @@ export function PurchaseRequestForm({
 
   // Notes (description) — view หรือหลัง submit (role != CREATE) แสดงเป็น plain text
   const descriptionReadOnly = isView || role !== STAGE_ROLE.CREATE;
+
+  // workflow แก้ได้เฉพาะใบ draft ที่ผู้สร้างกำลังแก้อยู่และไม่ได้มาจาก template
+  // นอกนั้นเป็นค่าอ่านอย่างเดียว → ไปอยู่ในแถบข้อมูลบนหัวรวมกับฟิลด์อื่น
+  // (ไม่ใช่ปล่อยเป็น field เดี่ยวลอยอยู่ใต้คำอธิบาย ซึ่งอ่านเหมือนของตกหล่น)
+  const workflowEditable =
+    isDraft && !isView && role === STAGE_ROLE.CREATE && !template;
   const watchedDescription = useWatch({
     control: form.control,
     name: "description",
@@ -196,6 +202,26 @@ export function PurchaseRequestForm({
         reqName={reqName}
         departmentName={departmentName ?? ""}
         prDateDisplay={prDateDisplay}
+        description={descriptionReadOnly ? watchedDescription : undefined}
+        workflowName={purchaseRequest?.workflow_name}
+        workflowField={
+          workflowEditable ? (
+            <PrWorkflowField
+              form={form}
+              disabled={actions.isPending}
+              isAdd={isAdd}
+            />
+          ) : undefined
+        }
+        descriptionField={
+          descriptionReadOnly ? undefined : (
+            <PrDescriptionField
+              form={form}
+              disabled={actions.isPending}
+              className="lg:col-span-2"
+            />
+          )
+        }
         hasHistory={hasHistory}
         onShowHistory={() => actions.setShowHistory(true)}
         actions={
@@ -225,49 +251,6 @@ export function PurchaseRequestForm({
         }}
         className="space-y-4 px-4"
       >
-        {isDraft && (
-          <PrGeneralFields
-            form={form}
-            readOnly={isView}
-            disabled={actions.isPending}
-            role={role}
-            fromTemplate={!!template}
-            isAdd={isAdd}
-          />
-        )}
-
-        {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
-        {(!descriptionReadOnly || watchedDescription?.trim()) && (
-          <Field className={descriptionReadOnly ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor="pr-description"
-              className={
-                descriptionReadOnly
-                  ? "text-muted-foreground font-normal"
-                  : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {descriptionReadOnly ? (
-              <FieldPlainText className="text-xs">
-                <span className="whitespace-pre-line">
-                  {watchedDescription}
-                </span>
-              </FieldPlainText>
-            ) : (
-              <Textarea
-                id="pr-description"
-                placeholder={t("descPlaceholder")}
-                rows={2}
-                maxLength={256}
-                disabled={actions.isPending}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        )}
-
         <PrItemFields
           form={form}
           isDisabled={isDisabled}

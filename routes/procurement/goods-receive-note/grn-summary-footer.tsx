@@ -85,8 +85,8 @@ export function GrnSummaryFooter({
               : formatCurrency(0),
           valueClassName:
             summary.totalDiscount > 0
-              ? "text-destructive font-semibold"
-              : "font-semibold",
+              ? "text-destructive"
+              : undefined,
         },
         {
           key: "net",

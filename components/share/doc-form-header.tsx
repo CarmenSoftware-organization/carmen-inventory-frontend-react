@@ -2,7 +2,8 @@ import { type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { EyeBrow } from "@/components/ui/eye-brow";
+import { Input } from "@/components/ui/input";
+import { Field, FieldLabel } from "@/components/ui/field";
 
 interface DocFormHeaderProps {
   readonly title: string;
@@ -72,7 +73,10 @@ export function DocFormHeader({
             <h1
               className={cn(
                 // min-w-0 ให้ truncate ทำงานใน flex — ไม่งั้น title ยาวจะดันเบียด badge
-                "min-w-0 truncate text-xl font-semibold tracking-tight sm:text-2xl",
+                // 18/20px ไม่ใช่ 20/24px: เลขที่เอกสารเป็น "ค่า" ไม่ใช่ชื่อหน้า
+                // (navbar breadcrumb บอกชื่อหน้าอยู่แล้ว) และ header ที่เหลือ
+                // อยู่ที่ 11-14px ทั้งแถบ — 24px ทำให้หัวหนักบนผิดสัดส่วน
+                "min-w-0 truncate text-lg font-semibold tracking-tight sm:text-xl",
                 titleMuted && "text-muted-foreground italic",
               )}
               title={title}
@@ -124,9 +128,12 @@ export function DocFormHeader({
 }
 
 /**
- * ribbon cell แบบ grid — label เล็ก uppercase + value; ไม่มี px (spacing มาจาก
- * grid gap ของ container) → align คอลัมน์กับ form body ที่ใช้ grid track เดียวกัน
- * (PO/PR/GRN/CN/SR)
+ * ribbon cell ของแถบข้อมูลหัวเอกสาร — label + ค่าที่อ่านอย่างเดียว
+ *
+ * ค่าเป็น `Input` ที่ disabled ไว้ (ไม่ใช่ข้อความเปล่า) เพื่อให้แถบนี้หน้าตา
+ * เท่ากับช่องกรอกในฟอร์มข้างล่างเป๊ะ ๆ สลับ view/edit แล้วไม่มีอะไรขยับ
+ * ไม่มี px — spacing มาจาก grid gap ของ container → คอลัมน์ align กับ form body
+ * ที่ใช้ grid track เดียวกัน (PO/PR/GRN/CN/SR)
  */
 export function RibbonField({
   label,
@@ -134,20 +141,22 @@ export function RibbonField({
   className,
 }: {
   readonly label: string;
+  /** ข้อความปกติจะเข้า Input · ส่ง node มาได้ในเคสที่ต้องตกแต่ง (เช่น เตือนสีแดง) */
   readonly value: ReactNode;
   /** เช่น "lg:col-span-2" สำหรับ cell ที่ค่ายาว (department/vendor) */
   readonly className?: string;
 }) {
+  const isPlain = typeof value === "string" || typeof value === "number";
   return (
-    <div className={cn("min-w-0", className)}>
-      {/* label ใช้ EyeBrow ของกลาง — class ชุดเดียวกันเป๊ะกับที่เคยเขียนไว้ตรงนี้
-          ไม่ต้องมีสำเนาให้เพี้ยนกันทีหลัง */}
-      <EyeBrow>{label}</EyeBrow>
-      {/* 12px/500 ตาม docs/DESIGN.md — 12px คือ body จริงของแอป และ 500 คือชั้น
-          ของ "ค่า" ที่ต้องเด่นกว่า label โดยไม่ตะโกน · ของเดิม 14px/600 คือสเกล
-          หัวข้อ ทำให้แถบนี้ดังกว่าฟิลด์ข้างล่างที่เป็น 12px/500 ทั้งที่เป็นข้อมูล
-          ชนิดเดียวกัน (DESIGN: "600 ในแถวหนาแน่นอ่านเป็นหัวข้อ ทำให้สแกนยาก") */}
-      <div className="mt-1 truncate text-xs font-medium">{value}</div>
-    </div>
+    <Field className={className}>
+      <FieldLabel>{label}</FieldLabel>
+      {isPlain ? (
+        <Input value={String(value)} disabled />
+      ) : (
+        // node ใส่ใน Input ไม่ได้ — เคสนี้ (เช่นข้อความเตือนสีแดงของ SR) เลย
+        // เป็นข้อความธรรมดา สูงเท่า Input เพื่อไม่ให้แถวเบี้ยว
+        <div className="flex h-8 min-w-0 items-center text-xs">{value}</div>
+      )}
+    </Field>
   );
 }
