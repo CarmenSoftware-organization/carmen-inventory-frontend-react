@@ -255,8 +255,22 @@ export function usePoFormHandlers({
     purchaseOrder?.doc_version ??
     0;
 
+  /**
+   * ส่ง/อนุมัติสำเร็จ → กลับหน้ารายการ (กติกาเดียวกับ PR)
+   *
+   * ต้อง `setIsSubmitting(true)` ก่อนยิง mutation ไม่ใช่ตอนสำเร็จ — nav guard
+   * เฝ้าอยู่เมื่อ mode เป็น add/edit และฟอร์ม dirty ซึ่งเป็นสถานะปกติของผู้อนุมัติ
+   * ที่เพิ่งติ๊กแถว (ติ๊กแล้ว setValue ทำให้ dirty) ถ้าไม่ปิด guard ก่อน การ
+   * navigate ตอนสำเร็จจะไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม ทั้งที่บันทึกไปแล้ว
+   */
+  const onSuccessList = (msg: string) => () => {
+    toast.success(msg);
+    navigate("/procurement/purchase-order");
+  };
+
   const runSubmitPo = async () => {
     if (!purchaseOrder) return;
+    setIsSubmitting(true);
     const fresh = await fetchFreshPo();
     const detailRows: { id: string }[] = Array.isArray(
       fresh?.purchase_order_detail,
@@ -275,9 +289,8 @@ export function usePoFormHandlers({
         })),
       },
       {
-        onSuccess: () => {
-          toast.success(t("submitted"));
-        },
+        onSuccess: onSuccessList(t("submitted")),
+        onError: () => setIsSubmitting(false),
       },
     );
   };
@@ -314,6 +327,7 @@ export function usePoFormHandlers({
 
   const handleApprovePo = async () => {
     if (!purchaseOrder) return;
+    setIsSubmitting(true);
     const fresh = await fetchFreshPo();
     approvePo.mutate(
       {
@@ -323,10 +337,8 @@ export function usePoFormHandlers({
         details: buildDetailsFromForm(),
       },
       {
-        onSuccess: () => {
-          toast.success(tt("updateSuccess", { entity: t("entity") }));
-          setMode("view");
-        },
+        onSuccess: onSuccessList(tt("updateSuccess", { entity: t("entity") })),
+        onError: () => setIsSubmitting(false),
       },
     );
   };

@@ -214,12 +214,17 @@ export function CnForm({ creditNote }: CnFormProps) {
 
   const handleSubmitCn = () => {
     if (!creditNote) return;
+    // ปิด guard ก่อนยิง mutation ไม่ใช่ตอนสำเร็จ — ฟอร์มที่แก้ค้างอยู่จะทำให้
+    // navigate ตอนสำเร็จไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม ทั้งที่ส่งไปแล้ว
+    setIsSubmitting(true);
     submitCn.mutate(
       { id: creditNote.id, doc_version: creditNote.doc_version ?? 0 },
       {
         onSuccess: () => {
           toast.success(tt("submitSuccess", { entity: t("entity") }));
+          navigate("/procurement/credit-note");
         },
+        onError: () => setIsSubmitting(false),
       },
     );
   };
