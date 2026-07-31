@@ -25,7 +25,7 @@ import {
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import { useAddLocationRegistry } from "./po-locations-add-context";
-import { PO_COL, PO_COL_DATA_TOTAL } from "./po-item-columns";
+import { poItemCols } from "./po-item-columns";
 import type { PoFormValues } from "./po-form-schema";
 
 interface Props {
@@ -329,7 +329,10 @@ export function LocationsEditor({
   }, [addRegistry, locEditable, index, prepend]);
 
   // คอลัมน์ align กับ product row — % ของ (data + action ถ้ามี)
-  const denom = PO_COL_DATA_TOTAL + (showActionCol ? PO_COL.action : 0);
+  // showActionCol = !disabled && !readOnly ของ main row — ใช้ค่าเดียวกันคุม
+  // ความกว้าง คอลัมน์สองตารางจึงตรงกันทั้งโหมดอ่านและโหมดแก้
+  const { col: PO_COL, dataTotal } = poItemCols(showActionCol);
+  const denom = dataTotal + (showActionCol ? PO_COL.action : 0);
   const pct = (px: number) => `${(px / denom) * 100}%`;
   const colCount = 9 + (showActionCol ? 1 : 0);
 

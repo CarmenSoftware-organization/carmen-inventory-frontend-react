@@ -1,30 +1,12 @@
 import { useWatch, type UseFormReturn, type Control } from "react-hook-form";
 import { memo } from "react";
-import { Clock, Check, X, Eye, type LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { X } from "lucide-react";
+import { ItemStatusDot } from "@/components/share/item-status-dot";
 import { PR_ITEM_STATUS_CONFIG } from "@/constant/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import type { PrFormValues } from "../pr-form-schema";
 import { STATUS_NORMALIZE } from "./helpers";
-
-// ไอคอนในวงกลม solid bg แบบ workflow-step — สีจาก globals.css semantic tokens
-const STATUS_STYLE: Record<string, { icon: LucideIcon; className: string }> = {
-  // bg สว่าง (info/success/warning) → icon สีดำอ่านชัดกว่า *-foreground
-  pending: { icon: Clock, className: "bg-info text-black" },
-  approved: { icon: Check, className: "bg-success text-black" },
-  rejected: {
-    icon: X,
-    className: "bg-destructive text-destructive-foreground",
-  },
-  review: { icon: Eye, className: "bg-warning text-black" },
-};
 
 export const StatusCell = memo(function StatusCell({
   control,
@@ -77,38 +59,23 @@ export const StatusCell = memo(function StatusCell({
       normalizedStatus === PR_ITEM_STAGE_STATUS.REJECTED ||
       normalizedStatus === PR_ITEM_STAGE_STATUS.REVIEW);
 
-  const statusStyle = STATUS_STYLE[normalizedStatus] ?? STATUS_STYLE.pending;
-  const Icon = statusStyle.icon;
-
   return (
-    <TooltipProvider delayDuration={100}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span
-            className={cn(
-              "flex size-4 shrink-0 items-center justify-center rounded-full",
-              statusStyle.className,
-            )}
-            aria-label={config.label}
+    <ItemStatusDot
+      status={normalizedStatus}
+      label={config.label}
+      tooltipExtra={
+        showReset && (
+          <button
+            type="button"
+            aria-label="Reset status"
+            title="Clear"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center rounded focus-visible:outline-none"
+            onClick={handleReset}
           >
-            <Icon className="size-2.5" strokeWidth={2.75} aria-hidden />
-          </span>
-        </TooltipTrigger>
-        <TooltipContent className="flex items-center gap-2">
-          <span>{config.label}</span>
-          {showReset && (
-            <button
-              type="button"
-              aria-label="Reset status"
-              title="Clear"
-              className="text-muted-foreground hover:text-foreground inline-flex items-center rounded focus-visible:outline-none"
-              onClick={handleReset}
-            >
-              <X className="size-3.5" />
-            </button>
-          )}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+            <X className="size-3.5" />
+          </button>
+        )
+      }
+    />
   );
 });

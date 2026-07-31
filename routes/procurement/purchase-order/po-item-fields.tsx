@@ -77,9 +77,16 @@ export function PoItemFields({
   } = useFieldArray({ control: form.control, name: "items" });
 
   const readOnly = role === STAGE_ROLE.APPROVE;
+  const isApprover =
+    role === STAGE_ROLE.APPROVE && poStatus === PO_STATUS.IN_PROGRESS;
   // ต้องอยู่โหมดแก้ไขก่อน ถึงจะเห็น checkbox — ใบที่เปิดอ่านเฉย ๆ ติ๊กไปก็ทำ
   // อะไรต่อไม่ได้ · จากนั้นค่อยดูว่าใบพ้น draft แล้ว (draft ยังไม่มีอะไรให้ตัดสิน)
-  const showApproveCheckbox = isEditMode && !!poStatus && poStatus !== "draft";
+  const isPoInWorkflow = !!poStatus && poStatus !== "draft";
+  // checkbox = การกระทำ ต้องอยู่โหมดแก้ไขถึงจะกดได้จริง
+  const showApproveCheckbox = isEditMode && isPoInWorkflow;
+  // สถานะรายแถว = ข้อมูล ไม่ใช่การกระทำ — โชว์ตลอดตั้งแต่ใบเข้า workflow
+  // โหมดอ่านก็ต้องรู้ว่าแถวไหนผ่าน/ถูกปฏิเสธ แค่กดแก้ไม่ได้
+  const showStatusBadge = isPoInWorkflow;
 
   const table = usePoItemTable({
     form,
@@ -88,6 +95,9 @@ export function PoItemFields({
     locationsDisabled,
     readOnly,
     showApproveCheckbox,
+    showStatusBadge,
+    // ล้างสถานะได้เฉพาะคนที่ตัดสินได้จริง — เกณฑ์เดียวกับปุ่มตัดสินหมู่
+    canResetStatus: isApprover && isEditMode,
     onDelete: setDeleteIndex,
   });
 
@@ -154,8 +164,6 @@ export function PoItemFields({
     [items],
   );
 
-  const isApprover =
-    role === STAGE_ROLE.APPROVE && poStatus === PO_STATUS.IN_PROGRESS;
   const poAction = computePoAction(itemStatuses);
   const canApprove = !!onApprove && isApprover && poAction === "approved";
   const canReject = !!onReject && isApprover && poAction === "rejected";
@@ -232,94 +240,105 @@ export function PoItemFields({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-end gap-1.5">
-        {showBulkActions && canBulkAct && (
+      {/* แถวเดียว: ปุ่มตัดสิน (อนุมัติ/ส่งกลับ/ปฏิเสธ/ปิด) ชิดซ้าย — เป็นการ
+          กระทำกับแถวที่เลือกไว้ มือไปหาปุ่มตรงที่เพิ่งติ๊ก ไม่ต้องกวาดตาไปสุดขวา
+          ส่วน toolbar (กาง/ยุบ, เพิ่มรายการ) เป็นของทั้งตาราง ดันไปขวาด้วย
+          ms-auto — ไม่ใช้ justify-between เพราะตอนไม่มีปุ่มตัดสิน toolbar ต้อง
+          ยังอยู่ขวาเหมือนเดิม */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {showBulkActions && (
           <>
-            <Button
-              type="button"
-              variant="success"
-              size="xs"
-              disabled={isPending}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleBulkApprove();
-              }}
-            >
-              <Check />
-              {tc("approve")}
-            </Button>
-            <Button
-              type="button"
-              variant="warning"
-              size="xs"
-              disabled={isPending}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleBulkReview();
-              }}
-            >
-              <Eye />
-              {tc("review")}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="xs"
-              disabled={isPending}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setBulkAction("reject");
-              }}
-            >
-              <ThumbsDown />
-              {tc("reject")}
-            </Button>
-          </>
-        )}
-        {showBulkActions && canClose && (
-          <Button
-            type="button"
-            variant="warning"
-            size="xs"
-            disabled={isPending}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setBulkAction("close");
-            }}
-          >
-            <Lock />
-            {tc("close")}
-          </Button>
-        )}
-        {itemFields.length > 0 && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="xs"
-            onClick={() =>
-              table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
-            }
-          >
-            {table.getIsAllRowsExpanded() ? (
+            {canBulkAct && (
               <>
-                <ChevronsDownUp /> {tc("collapseAll")}
-              </>
-            ) : (
-              <>
-                <ChevronsUpDown /> {tc("expandAll")}
+                <Button
+                  type="button"
+                  variant="success"
+                  size="xs"
+                  disabled={isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleBulkApprove();
+                  }}
+                >
+                  <Check />
+                  {tc("approve")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="warning"
+                  size="xs"
+                  disabled={isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleBulkReview();
+                  }}
+                >
+                  <Eye />
+                  {tc("review")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="xs"
+                  disabled={isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setBulkAction("reject");
+                  }}
+                >
+                  <ThumbsDown />
+                  {tc("reject")}
+                </Button>
               </>
             )}
-          </Button>
+            {canClose && (
+              <Button
+                type="button"
+                variant="warning"
+                size="xs"
+                disabled={isPending}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setBulkAction("close");
+                }}
+              >
+                <Lock />
+                {tc("close")}
+              </Button>
+            )}
+          </>
         )}
-        {(!role || role === STAGE_ROLE.CREATE) && !disabled && (
-          <Button type="button" size="xs" onClick={handleAddItem}>
-            <Plus /> {t("addItem")}
-          </Button>
-        )}
+        <div className="ms-auto flex flex-wrap items-center gap-1.5">
+          {itemFields.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="xs"
+              onClick={() =>
+                table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+              }
+            >
+              {table.getIsAllRowsExpanded() ? (
+                <>
+                  <ChevronsDownUp /> {tc("collapseAll")}
+                </>
+              ) : (
+                <>
+                  <ChevronsUpDown /> {tc("expandAll")}
+                </>
+              )}
+            </Button>
+          )}
+          {(!role || role === STAGE_ROLE.CREATE) && !disabled && (
+            <Button type="button" size="xs" onClick={handleAddItem}>
+              <Plus /> {t("addItem")}
+            </Button>
+          )}
+        </div>
       </div>
 
       {itemsError && (

@@ -19,7 +19,7 @@ import {
 import { PriceCell, ProductHeaderCell } from "./po-items-grid-cells";
 import { PoItemExpanded, type PoItemField } from "./po-item-expanded";
 import { useAddLocationRegistry } from "./po-locations-add-context";
-import { PO_COL, PO_COL_DATA_TOTAL } from "./po-item-columns";
+import { poItemCols } from "./po-item-columns";
 import type { PoFormValues } from "./po-form-schema";
 
 export type { PoItemField };
@@ -30,21 +30,21 @@ const ProductCol = memo(function ProductCol({
   index,
   disabled,
   readOnly,
-  showApproveCheckbox,
+  showStatusBadge,
+  canResetStatus,
 }: {
   form: UseFormReturn<PoFormValues>;
   index: number;
   disabled: boolean;
   readOnly: boolean;
-  showApproveCheckbox: boolean;
+  showStatusBadge: boolean;
+  canResetStatus: boolean;
 }) {
   "use no memo";
   const isFoc = useWatch({
     control: form.control,
     name: `items.${index}.is_foc`,
   });
-  // edit mode (!disabled && !readOnly) → ซ่อน status badge; else อิง showApproveCheckbox
-  const showStatusBadge = !disabled && !readOnly ? false : showApproveCheckbox;
   return (
     <ProductHeaderCell
       form={form}
@@ -53,6 +53,7 @@ const ProductCol = memo(function ProductCol({
       readOnly={readOnly}
       isFoc={!!isFoc}
       showStatusBadge={showStatusBadge}
+      canResetStatus={canResetStatus}
     />
   );
 });
@@ -111,6 +112,10 @@ interface UsePoItemTableOptions {
   locationsDisabled: boolean;
   readOnly: boolean;
   showApproveCheckbox: boolean;
+  /** โชว์สถานะรายแถวไหม — แยกจาก checkbox เพราะสถานะเป็นข้อมูล ไม่ใช่การกระทำ */
+  showStatusBadge: boolean;
+  /** ล้างสถานะรายแถวกลับเป็นรอได้ไหม (ผู้อนุมัติในโหมดแก้ไข) */
+  canResetStatus: boolean;
   onDelete: (index: number) => void;
 }
 
@@ -124,6 +129,8 @@ export function usePoItemTable({
   locationsDisabled,
   readOnly,
   showApproveCheckbox,
+  showStatusBadge,
+  canResetStatus,
   onDelete,
 }: UsePoItemTableOptions) {
   "use no memo";
@@ -135,8 +142,10 @@ export function usePoItemTable({
     PO_LEADING_COL * 2 /* expand + index */ +
     (showApproveCheckbox ? PO_LEADING_COL : 0);
   const showAction = !disabled && !readOnly; // action column (ลบ item)
-  const totalSize =
-    preProductSize + PO_COL_DATA_TOTAL + (showAction ? PO_COL.action : 0);
+  // ความกว้างขึ้นกับว่าแถว location แก้ได้ไหม — เกณฑ์เดียวกับ showActionCol ที่
+  // ส่งให้ LocationsEditor ทั้งสองตารางจึงได้ track เดียวกันเสมอ
+  const { col: PO_COL, dataTotal } = poItemCols(showAction);
+  const totalSize = preProductSize + dataTotal + (showAction ? PO_COL.action : 0);
   const leftInsetPct = (preProductSize / totalSize) * 100;
 
   const columns = useMemo<ColumnDef<PoItemField>[]>(() => {
@@ -209,7 +218,8 @@ export function usePoItemTable({
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
-            showApproveCheckbox={showApproveCheckbox}
+            showStatusBadge={showStatusBadge}
+            canResetStatus={canResetStatus}
           />
         ),
       },
@@ -370,6 +380,8 @@ export function usePoItemTable({
     locationsDisabled,
     readOnly,
     showApproveCheckbox,
+    showStatusBadge,
+    canResetStatus,
     onDelete,
     tfl,
     leftInsetPct,

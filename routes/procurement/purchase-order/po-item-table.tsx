@@ -6,8 +6,9 @@ import {
   type UseFormReturn,
   type Control,
 } from "react-hook-form";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { ItemStatusDot } from "@/components/share/item-status-dot";
 import { LookupProduct } from "@/components/lookup/lookup-product";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
@@ -223,10 +224,15 @@ export const TaxProfileCell = memo(function TaxProfileCell({
 
 export const StatusCell = memo(function StatusCell({
   control,
+  form,
   index,
+  canReset = false,
 }: {
   control: Control<PoFormValues>;
+  form?: UseFormReturn<PoFormValues>;
   index: number;
+  /** ผู้อนุมัติในโหมดแก้ไขเท่านั้นที่ล้างสถานะกลับเป็นรอได้ */
+  canReset?: boolean;
 }) {
   "use no memo";
   const rawStatus =
@@ -234,8 +240,34 @@ export const StatusCell = memo(function StatusCell({
     "pending";
   const status = normalizePoItemStatus(rawStatus);
   const config = PO_ITEM_STATUS_CONFIG[status] ?? PO_ITEM_STATUS_CONFIG.pending;
+
+  const handleReset = () => {
+    form?.setValue(`items.${index}.stage_status`, "pending");
+    form?.setValue(`items.${index}.current_stage_status`, "pending");
+  };
+
+  // แถวที่ยังรออยู่ไม่มีอะไรให้ล้าง
+  const showReset = canReset && !!form && status !== "pending";
+
+  // จุดสถานะตัวเดียวกับ PR — PO ใช้ชุดสถานะเดียวกันเป๊ะ ไม่มีเหตุให้หน้าตาต่าง
   return (
-    <Badge className={`text-xs ${config.className}`}>{config.label}</Badge>
+    <ItemStatusDot
+      status={status}
+      label={config.label}
+      tooltipExtra={
+        showReset && (
+          <button
+            type="button"
+            aria-label="Reset status"
+            title="Clear"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center rounded focus-visible:outline-none"
+            onClick={handleReset}
+          >
+            <X className="size-3.5" />
+          </button>
+        )
+      }
+    />
   );
 });
 

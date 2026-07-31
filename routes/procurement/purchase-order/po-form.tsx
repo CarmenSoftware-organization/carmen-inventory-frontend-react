@@ -229,6 +229,11 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           plainText={isView || isReadOnly}
         />
 
+        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบ (ผู้ขาย/สกุลเงิน/วันที่/หมายเหตุ)
+            ออกจากตารางรายการ — สองก้อนนี้อ่านคนละจังหวะกัน ก้อนบนอ่านทีเดียวจบ
+            ก้อนล่างกวาดตาทีละแถว */}
+        <hr className="border-border" />
+
         <PoItemFields
           form={form}
           revealErrorSignal={revealErrorSignal}
