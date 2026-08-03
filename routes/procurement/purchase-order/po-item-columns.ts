@@ -24,6 +24,8 @@ const MONEY_COL = 96;
 export function poItemCols(editable: boolean) {
   const col = {
     product: 200,
+    /** หน่วยสั่งซื้อ — เป็น lookup เลือกได้ จึงกว้างกว่าคอลัมน์ตัวเลข */
+    unit: 88,
     order: 96,
     rec: 104, // "Received Qty" เต็มคำ ไม่ใช่ "Rec"
     price: 92,
@@ -38,6 +40,7 @@ export function poItemCols(editable: boolean) {
   /** ผลรวมความกว้างของ data columns (product → amt) — ไม่รวม action */
   const dataTotal =
     col.product +
+    col.unit +
     col.order +
     col.rec +
     col.price +

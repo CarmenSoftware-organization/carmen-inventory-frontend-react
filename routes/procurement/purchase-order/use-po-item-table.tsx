@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
 import {
   OrderSummaryCell,
+  UnitCol,
   RecSummaryCell,
   ComputedPricingCell,
 } from "./po-item-table";
@@ -226,6 +227,20 @@ export function usePoItemTable({
             readOnly={readOnly}
             showStatusBadge={showStatusBadge}
             canResetStatus={canResetStatus}
+          />
+        ),
+      },
+      {
+        id: "unit",
+        header: tfl("unit"),
+        size: PO_COL.unit,
+        cell: ({ row }) => (
+          <UnitCol
+            control={form.control}
+            form={form}
+            index={row.index}
+            disabled={disabled}
+            readOnly={readOnly}
           />
         ),
       },

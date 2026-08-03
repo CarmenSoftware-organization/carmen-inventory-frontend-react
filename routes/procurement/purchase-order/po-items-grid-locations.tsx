@@ -342,13 +342,14 @@ export function LocationsEditor({
   const { col: PO_COL, dataTotal } = poItemCols(showActionCol);
   const denom = dataTotal + (showActionCol ? PO_COL.action : 0);
   const pct = (px: number) => `${(px / denom) * 100}%`;
-  const colCount = 9 + (showActionCol ? 1 : 0);
+  const colCount = 10 + (showActionCol ? 1 : 0);
 
   return (
     <div>
       <table className="w-full table-fixed text-xs">
         <colgroup>
           <col style={{ width: pct(PO_COL.product) }} />
+          <col style={{ width: pct(PO_COL.unit) }} />
           <col style={{ width: pct(PO_COL.order) }} />
           <col style={{ width: pct(PO_COL.rec) }} />
           <col style={{ width: pct(PO_COL.price) }} />
@@ -362,6 +363,9 @@ export function LocationsEditor({
         <thead className="text-muted-foreground text-micro font-semibold">
           <tr className="border-border/60 border-b">
             <th className="px-2 py-1 text-left">{tfl("location")}</th>
+            {/* หน่วยเป็นของรายการสินค้า ไม่ใช่ของ location — ค่าเลือกที่แถวสินค้า
+                แล้ว ตรงนี้เว้นหัวไว้ ไม่ตั้งป้ายให้คนอ่านนึกว่ามีค่าแล้วไม่ขึ้น */}
+            <th className="px-2 py-1" />
             <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>
             <th className="px-1 py-1 text-right">{tfl("receivedQty")}</th>
             <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
@@ -425,6 +429,10 @@ export function LocationsEditor({
                     )}
                   />
                 </td>
+                {/* unit — เว้นไว้ให้คอลัมน์ตรงกับตารางแถวสินค้าด้านบน
+                    (หน่วยเป็นของรายการสินค้า ทุก location ใช้ตัวเดียวกัน) */}
+                <td className="px-2 py-1" />
+
                 {/* order qty */}
                 <td className="px-1 py-1 text-right">
                   {locEditable ? (
