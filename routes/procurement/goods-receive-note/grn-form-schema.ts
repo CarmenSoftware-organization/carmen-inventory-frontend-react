@@ -8,7 +8,7 @@ import type {
 } from "@/types/goods-receive-note";
 
 function createGrnDetailSchema(tv: TranslationFn, tf: TranslationFn) {
-  return z.object({
+  const base = z.object({
     id: z.string().optional(),
     doc_version: z.coerce.number().optional(),
     _group_key: z.string(),
@@ -35,9 +35,10 @@ function createGrnDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     foc_unit_conversion_factor: z.coerce.number(),
     approved_qty: z.coerce.number(),
     approved_unit_id: z.string().nullable(),
+    // > 0 ไม่ใช่ >= 1 — ของชั่งน้ำหนักรับเป็นเศษได้ (หมูเนื้อแดง 0.5 kg)
     received_qty: z.coerce
       .number()
-      .min(1, tv("minNumber", { field: tf("receivedQty"), min: 1 })),
+      .gt(0, tv("positive", { field: tf("receivedQty") })),
     received_unit_id: z
       .string()
       .nullable()
@@ -61,6 +62,21 @@ function createGrnDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     // Notes
     description: z.string().optional(),
     note: z.string().optional(),
+  });
+
+  // backend บังคับ received_price (= unit_price ของฟอร์ม) เมื่อ received_qty > 0
+  // ปล่อยว่างแล้วค่อยไปเจอ 400 ตอนกดบันทึกคือสายไป เตือนที่ช่องตั้งแต่กรอก
+  // (ของแถมใช้ช่อง FOC แยกอยู่แล้ว แถวที่รับของจริงจึงต้องมีราคาเสมอ)
+  return base.superRefine((item, ctx) => {
+    if (item.received_qty <= 0) return;
+    const price = Number(item.unit_price);
+    if (!Number.isFinite(price) || price <= 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: tv("required", { field: tf("unitPrice") }),
+        path: ["unit_price"],
+      });
+    }
   });
 }
 
@@ -327,6 +343,9 @@ export function mapDetailToPayload(
     received_base_qty: item.received_base_qty,
     received_base_unit_id: item.received_base_unit_id,
     received_unit_conversion_factor: item.received_unit_conversion_factor,
+    // ช่อง "ราคา" บนแถว location — ฟอร์มเก็บชื่อ unit_price, backend ชื่อ
+    // received_price และบังคับต้องมีเมื่อ received_qty > 0 (ไม่ส่ง = 400)
+    received_price: item.unit_price ?? 0,
     ...(item.tax_profile_id ? { tax_profile_id: item.tax_profile_id } : {}),
     tax_rate: item.tax_rate,
     tax_amount: item.tax_amount,

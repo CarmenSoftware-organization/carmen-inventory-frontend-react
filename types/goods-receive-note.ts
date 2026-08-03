@@ -190,6 +190,8 @@ export interface GrnDetailPayload {
   received_base_qty: number;
   received_base_unit_id?: string | null;
   received_unit_conversion_factor: number;
+  /** ราคาต่อหน่วยที่รับ — backend บังคับเมื่อ received_qty > 0 */
+  received_price: number;
   tax_profile_id?: string | null;
   tax_rate: number;
   tax_amount: number;

@@ -18,6 +18,7 @@ import {
   InputSuffixField,
   InputSuffixInput,
   InputSuffixPlain,
+  InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
 import {
   DiscountOverrideInput,
@@ -26,6 +27,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
+import { useUnitDecimals } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
 import { COMBO_COL } from "../combo-col-width";
 import type { CnFormValues } from "./cn-form-schema";
@@ -199,6 +201,12 @@ function QtyCell({
       name: `items.${index}._grn_received_qty`,
     }) ?? 0;
   const error = form.formState.errors.items?.[index]?.quantity?.message;
+  const productId =
+    useWatch({ control: form.control, name: `items.${index}.item_id` }) ?? "";
+  const unitId =
+    useWatch({ control: form.control, name: `items.${index}.unit_id` }) ?? "";
+  // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
+  const decimals = useUnitDecimals(productId, unitId);
   if (disabled || locked) {
     return (
       <InputSuffixPlain
@@ -215,10 +223,9 @@ function QtyCell({
   return (
     <>
       <InputSuffixField className="w-full" error={!!error}>
-        <InputSuffixInput
+        <InputSuffixQty
+          decimals={decimals}
           id={`items-${index}-quantity`}
-          type="number"
-          inputMode="decimal"
           min={1}
           placeholder="0"
           {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}

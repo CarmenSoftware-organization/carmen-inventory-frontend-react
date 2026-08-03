@@ -16,7 +16,8 @@ import { useTranslations } from "use-intl";
 import { Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FieldInput, FieldPlainText } from "@/components/ui/field";
+import { FieldPlainText } from "@/components/ui/field";
+import { InputQty } from "@/components/ui/input/input-qty";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
 import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
@@ -388,11 +389,7 @@ export function useSrItemTable({
           const qtyError =
             form.formState.errors.items?.[row.index]?.requested_qty?.message;
           return (
-            <FieldInput
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="any"
+            <InputQty
               placeholder={tfl("qty")}
               className="text-right"
               disabled={disabled}
@@ -423,11 +420,7 @@ export function useSrItemTable({
                   );
                 }
                 return (
-                  <FieldInput
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="any"
+                  <InputQty
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"
@@ -466,11 +459,7 @@ export function useSrItemTable({
                   );
                 }
                 return (
-                  <FieldInput
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="any"
+                  <InputQty
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"

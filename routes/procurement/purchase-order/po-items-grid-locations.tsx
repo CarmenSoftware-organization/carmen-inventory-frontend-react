@@ -12,10 +12,11 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   InputSuffixAddon,
   InputSuffixField,
-  InputSuffixInput,
   InputSuffixPlain,
+  InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
+import { useUnitDecimals } from "@/hooks/use-product-units";
 import { fieldFocusRef } from "@/lib/field-focus";
 import {
   DiscountOverrideInput,
@@ -289,6 +290,13 @@ export function LocationsEditor({
       control: form.control,
       name: `items.${index}.order_unit_name`,
     }) ?? "";
+  const unitId =
+    useWatch({
+      control: form.control,
+      name: `items.${index}.order_unit_id`,
+    }) ?? "";
+  // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
+  const decimals = useUnitDecimals(productId, unitId);
 
   const { fields, prepend, remove } = useFieldArray({
     control: form.control,
@@ -426,6 +434,7 @@ export function LocationsEditor({
                       locIndex={locIndex}
                       error={reqQtyError}
                       unitName={unitName}
+                      decimals={decimals}
                     />
                   ) : (
                     <InputSuffixPlain
@@ -536,23 +545,22 @@ function LocationQtyInput({
   locIndex,
   error,
   unitName,
+  decimals,
 }: {
   readonly form: UseFormReturn<PoFormValues>;
   readonly itemIndex: number;
   readonly locIndex: number;
   readonly error?: string;
   readonly unitName: string;
+  readonly decimals: number;
 }) {
   "use no memo";
   const name = `items.${itemIndex}.locations.${locIndex}.order_qty` as const;
   const value = useWatch({ control: form.control, name }) ?? 0;
   return (
     <InputSuffixField className="w-full" error={!!error}>
-      <InputSuffixInput
-        type="number"
-        inputMode="decimal"
-        min={0}
-        step="1"
+      <InputSuffixQty
+        decimals={decimals}
         placeholder="0"
         defaultValue={value}
         {...form.register(name)}

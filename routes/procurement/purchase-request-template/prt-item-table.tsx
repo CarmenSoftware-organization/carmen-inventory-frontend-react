@@ -17,10 +17,11 @@ import { Button } from "@/components/ui/button";
 import {
   InputSuffixAddon,
   InputSuffixField,
-  InputSuffixInput,
   InputSuffixPlain,
+  InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
 import { LookupLocation } from "@/components/lookup/lookup-location";
+import { useUnitDecimals } from "@/hooks/use-product-units";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
@@ -176,6 +177,12 @@ const QtyUnitCell = ({
   const unitName =
     useWatch({ control, name: `items.${index}.requested_unit_name` }) ?? "";
   const qtyError = form.formState.errors.items?.[index]?.requested_qty?.message;
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const unitId =
+    useWatch({ control, name: `items.${index}.requested_unit_id` }) ?? "";
+  // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
+  const decimals = useUnitDecimals(productId, unitId);
 
   if (readOnly) {
     return (
@@ -194,9 +201,8 @@ const QtyUnitCell = ({
 
   return (
     <InputSuffixField error={!!qtyError} disabled={disabled}>
-      <InputSuffixInput
-        type="number"
-        inputMode="decimal"
+      <InputSuffixQty
+        decimals={decimals}
         min={1}
         placeholder={tfl("qty")}
         {...form.register(`items.${index}.requested_qty`, {

@@ -2,6 +2,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import {
+  capQtyDecimals,
+  DEFAULT_QTY_DECIMALS,
+  QTY_STEP,
+} from "@/components/ui/input/qty-decimals";
 
 /**
  * State ที่ InputSuffixField แชร์ให้ลูก (InputSuffixInput) ผ่าน context
@@ -123,6 +128,47 @@ function InputSuffixInput({
 }
 
 /**
+ * เวอร์ชัน "จำนวน" ของ InputSuffixInput — ใช้กับช่อง qty ทุกตัวที่มีหน่วยต่อท้าย
+ * (requested / approved / received / foc / issued ฯลฯ)
+ *
+ * ต่างจาก InputSuffixInput เปล่า ๆ ตรงที่ตั้ง type/inputMode/step ให้ครบและกัน
+ * ทศนิยมเกินเพดานให้เอง — เขียนเองทีละที่แล้วลืม `step` เมื่อไหร่ เบราว์เซอร์จะตี
+ * ค่าอย่าง 2.5 เป็นค่าไม่ถูกต้องทันที (ดู `qty-decimals`)
+ *
+ * @param decimals - เพดานทศนิยม (default `DEFAULT_QTY_DECIMALS`; ส่ง `useUnitDecimals(...)` เข้ามาเพื่อใช้ค่าจริงของหน่วย)
+ * @returns JSX element input จำนวน
+ * @example
+ * ```tsx
+ * <InputSuffixField error={!!err}>
+ *   <InputSuffixQty {...register("received_qty", { valueAsNumber: true })} />
+ *   <InputSuffixAddon><LookupProductUnit … /></InputSuffixAddon>
+ * </InputSuffixField>
+ * ```
+ */
+function InputSuffixQty({
+  decimals = DEFAULT_QTY_DECIMALS,
+  onChange,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof InputSuffixInput>,
+  "type" | "step" | "inputMode"
+> & { decimals?: number }) {
+  return (
+    <InputSuffixInput
+      type="number"
+      inputMode="decimal"
+      step={QTY_STEP}
+      min={0}
+      {...props}
+      onChange={(e) => {
+        capQtyDecimals(e.currentTarget, decimals);
+        onChange?.(e);
+      }}
+    />
+  );
+}
+
+/**
  * Slot ทางขวาของ InputSuffixField สำหรับ suffix (unit lookup / currency select /
  * ข้อความ เช่น "kg", "THB") — มี divider เส้นตั้งคั่นด้านซ้ายในตัว, shrink-0
  *
@@ -194,13 +240,15 @@ function InputSuffixPlain({
   return (
     <span
       data-slot="input-suffix-plain"
-      className={cn(
-        "shrink-0 whitespace-nowrap text-right text-xs",
-        className,
-      )}
+      className={cn("shrink-0 text-right text-xs whitespace-nowrap", className)}
       {...props}
     >
-      <span className={cn("text-foreground font-medium tabular-nums", valueClassName)}>
+      <span
+        className={cn(
+          "text-foreground font-medium tabular-nums",
+          valueClassName,
+        )}
+      >
         {value}
       </span>
       {suffix ? (
@@ -220,6 +268,7 @@ function InputSuffixPlain({
 export {
   InputSuffixField,
   InputSuffixInput,
+  InputSuffixQty,
   InputSuffixAddon,
   InputSuffixPlain,
 };

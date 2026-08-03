@@ -10,12 +10,12 @@ import { useTranslations } from "use-intl";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { Input } from "@/components/ui/input";
+import { InputAmount } from "@/components/ui/input/input-amount";
 import {
   InputSuffixAddon,
   InputSuffixField,
-  InputSuffixInput,
   InputSuffixPlain,
+  InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
@@ -24,7 +24,7 @@ import {
   OverrideToggle,
   TaxOverrideInput,
 } from "@/components/procurement/discount-tax-override";
-import { useProductUnits } from "@/hooks/use-product-units";
+import { useProductUnits, useUnitDecimals } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import type { GrnFormValues } from "./grn-form-schema";
@@ -198,7 +198,6 @@ function QtyUnitCell({
   disabled,
   plainText,
   error,
-  min = 0,
   inputRef,
 }: {
   form: UseFormReturn<GrnFormValues>;
@@ -208,11 +207,17 @@ function QtyUnitCell({
   disabled: boolean;
   plainText?: boolean;
   error?: string;
-  min?: number;
   /** ให้ caller โฟกัสช่องนี้ได้ — ต่อ ref ของ RHF ไม่ทับกัน */
   inputRef?: React.RefObject<HTMLInputElement | null>;
 }) {
   "use no memo";
+  const [productId, unitId] = useWatch({
+    control: form.control,
+    name: [`items.${index}.product_id`, `items.${index}.${unitField}`] as const,
+  });
+  // ทศนิยมที่กรอกได้ = ของหน่วยที่เลือกอยู่ ไม่ใช่ค่าคงที่ (kg กรอกเศษได้ EA ไม่ได้)
+  const decimals = useUnitDecimals(productId ?? undefined, unitId ?? undefined);
+
   if (plainText) {
     return (
       <QtyUnitPlain
@@ -225,10 +230,8 @@ function QtyUnitCell({
   }
   return (
     <InputSuffixField className="w-full" disabled={disabled} error={!!error}>
-      <InputSuffixInput
-        type="number"
-        inputMode="decimal"
-        min={min}
+      <InputSuffixQty
+        decimals={decimals}
         placeholder="0"
         disabled={disabled}
         {...(() => {
@@ -313,30 +316,43 @@ const PricePlain = memo(function PricePlain({
   );
 });
 
-/** ช่อง unit price บน location row — view → plain text */
+/**
+ * ช่อง unit price บน location row — view → plain text
+ *
+ * ใช้ `InputAmount` (text input ที่ sanitize เอง) ไม่ใช่ `<input type="number">`:
+ * ระหว่างพิมพ์ "17." เบราว์เซอร์อ่าน valueAsNumber เป็น NaN → ยอดต่อบรรทัดแกว่ง
+ * และทศนิยมหายกลางคัน · ตัวนี้คุมทศนิยมตามสกุลเงินของ BU และคง trailing zero
+ */
 function PriceCell({
   form,
   index,
   disabled,
   plainText,
+  error,
 }: {
   form: UseFormReturn<GrnFormValues>;
   index: number;
   disabled: boolean;
   plainText?: boolean;
+  error?: string;
 }) {
   "use no memo";
   if (plainText) return <PricePlain control={form.control} index={index} />;
   return (
-    <Input
-      type="number"
-      inputMode="decimal"
-      min={0}
-      step="0.01"
-      placeholder="0.00"
-      className="h-8 w-full text-right text-xs"
-      disabled={disabled}
-      {...form.register(`items.${index}.unit_price`, { valueAsNumber: true })}
+    <Controller
+      control={form.control}
+      name={`items.${index}.unit_price`}
+      render={({ field }) => (
+        <InputAmount
+          // ไอคอน error อยู่ซ้าย (ตัวเลขชิดขวา) — เว้นที่ให้ด้วย pl-7 ไม่งั้นทับเลข
+          className={`h-8 w-full text-right text-xs ${error ? "pl-7" : ""}`}
+          disabled={disabled}
+          error={error}
+          errorIconAlign="left"
+          value={Number(field.value ?? 0)}
+          onValueChange={field.onChange}
+        />
+      )}
     />
   );
 }
@@ -570,6 +586,7 @@ export const GrnLocationRow = memo(function GrnLocationRow({
   });
   const itemError = errors.items?.[index];
   const receivedQtyError = itemError?.received_qty?.message;
+  const unitPriceError = itemError?.unit_price?.message;
 
   const editable = !disabled && !plainText; // discount/tax combo แก้ได้
 
@@ -649,7 +666,6 @@ export const GrnLocationRow = memo(function GrnLocationRow({
           disabled={disabled}
           plainText={plainText}
           error={receivedQtyError}
-          min={1}
           inputRef={receivedQtyRef}
         />
         {!disabled && !plainText && (
@@ -676,6 +692,7 @@ export const GrnLocationRow = memo(function GrnLocationRow({
           index={index}
           disabled={disabled}
           plainText={plainText}
+          error={unitPriceError}
         />
       </td>
 
