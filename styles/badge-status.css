@@ -325,11 +325,6 @@
   --color-status-cuisine-middle-east: var(--status-cuisine-middle-east);
   --color-status-cuisine-oceania: var(--status-cuisine-oceania);
 
-  /* Soft tints — พื้น workflow-track */
-  --color-status-approved-soft: var(--status-approved-soft);
-  --color-status-in-progress-soft: var(--status-in-progress-soft);
-  --color-status-voided-soft: var(--status-voided-soft);
-
   /* Foreground (text) colors */
   --color-status-draft-fg: var(--status-draft-fg);
   --color-status-pending-fg: var(--status-pending-fg);

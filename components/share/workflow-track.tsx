@@ -38,10 +38,11 @@ function resolveState(
  * DESIGN.md ห้ามปน semantic token กับ document status และแอปมี token voided อยู่แล้ว
  */
 const STATE_STYLE: Record<StageState, string> = {
-  done: "bg-status-approved-soft text-muted-foreground",
-  current: "bg-status-in-progress-soft text-foreground font-medium",
+  done: "bg-[var(--status-approved-soft)] text-muted-foreground",
+  current: "bg-[var(--status-in-progress-soft)] text-foreground font-medium",
   pending: "bg-muted text-muted-foreground/70",
-  voided: "bg-status-voided-soft text-foreground font-medium line-through",
+  voided:
+    "bg-[var(--status-voided-soft)] text-foreground font-medium line-through",
 };
 
 /** ไอคอนนำหน้าชื่อขั้น — รูปต่างกันต่อสถานะ ไม่ได้ต่างแค่สี */
@@ -50,20 +51,23 @@ function StateIcon({ state }: { readonly state: StageState }) {
     case "done":
       return (
         <Check
-          className="text-status-approved size-3 shrink-0"
+          className="text-[var(--status-approved)] size-3 shrink-0"
           aria-hidden="true"
         />
       );
     case "current":
       return (
         <Circle
-          className="text-status-in-progress size-3 shrink-0 fill-current"
+          className="text-[var(--status-in-progress)] size-3 shrink-0 fill-current"
           aria-hidden="true"
         />
       );
     case "voided":
       return (
-        <X className="text-status-voided size-3 shrink-0" aria-hidden="true" />
+        <X
+          className="text-[var(--status-voided)] size-3 shrink-0"
+          aria-hidden="true"
+        />
       );
     case "pending":
       return (
