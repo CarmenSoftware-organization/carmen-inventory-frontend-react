@@ -216,7 +216,10 @@ export function getDefaultValues(
       credit_term_id: null,
       credit_term_name: "",
       credit_term_days: null,
-      payment_due_date: null,
+      // ไม่มีเทอมเครดิต = จ่ายวันนี้ ตั้งเป็นวันนี้ไปเลยดีกว่าปล่อยว่างให้ไปติด
+      // required ตอนกดบันทึก · เลือกเทอมเครดิตเมื่อไหร่ `syncDueDate` ในหัวฟอร์ม
+      // จะคำนวณทับให้เอง (วันที่ใบแจ้งหนี้ + จำนวนวัน) และแก้เองทับได้ตลอด
+      payment_due_date: new Date().toISOString(),
       is_active: true,
       vendor_id: null,
       vendor_name: "",

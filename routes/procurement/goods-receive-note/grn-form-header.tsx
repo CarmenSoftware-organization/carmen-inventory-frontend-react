@@ -56,12 +56,23 @@ export function GrnFormHeader({
    * คิดตอนผู้ใช้เปลี่ยนค่าเท่านั้น ไม่ทำใน useEffect — setValue ตอน mount จะทำให้
    * ฟอร์มกลายเป็น dirty เองแล้วเด้ง discard dialog ตอนกดออก และจะไปทับวันครบ
    * กำหนดที่บันทึกไว้แล้วของใบเก่าด้วย · ช่องยังแก้เองได้ตามปกติ
+   *
+   * ไม่มีเทอมเครดิต = ใบใหม่ยังถือค่า default "วันนี้" อยู่ ถ้าใบแจ้งหนี้ลงวันที่
+   * หลังจากนั้น วันครบกำหนดจะไปอยู่ก่อนวันที่ใบแจ้งหนี้ซึ่งไม่มีอยู่จริง (ปฏิทิน
+   * ของช่องนั้นก็ล็อก `fromDate` ไว้แล้ว) จึงดันตามให้เท่าวันที่ใบแจ้งหนี้
    */
   const syncDueDate = (invoiceDate?: string | null, days?: number | null) => {
-    if (!invoiceDate || days == null) return;
-    form.setValue("payment_due_date", addDays(invoiceDate, days), {
-      shouldDirty: true,
-    });
+    if (!invoiceDate) return;
+    if (days != null) {
+      form.setValue("payment_due_date", addDays(invoiceDate, days), {
+        shouldDirty: true,
+      });
+      return;
+    }
+    const due = form.getValues("payment_due_date");
+    if (due && new Date(due) < new Date(invoiceDate)) {
+      form.setValue("payment_due_date", invoiceDate, { shouldDirty: true });
+    }
   };
 
   return (
