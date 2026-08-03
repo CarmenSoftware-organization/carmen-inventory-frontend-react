@@ -12,6 +12,7 @@ import {
   TimelineTitle,
 } from "@/components/ui/timeline";
 import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
+import { unknownStatusEntry } from "@/constant/status-config";
 import type { WorkflowHistoryEntry } from "@/types/store-requisition";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
@@ -55,9 +56,12 @@ export function SrWorkflowHistory({
     <div className="space-y-3">
       <Timeline defaultValue={reversedHistory.length} orientation="vertical">
         {reversedHistory.map((entry, i) => {
+          // action ที่ไม่มีในแผนที่ต้องไม่ไปยืมป้ายของ submitted — ของเดิม fallback
+          // เป็น .submitted ทำให้ action แปลก ๆ โชว์ว่า "SUBMITTED" ทั้งที่ไม่ใช่
+          // (ผิดข้อมูล ไม่ใช่แค่หน้าตาเพี้ยน)
           const config =
             SR_WORKFLOW_ACTION_CONFIG[entry.action] ??
-            SR_WORKFLOW_ACTION_CONFIG.submitted;
+            unknownStatusEntry(entry.action);
           const isEven = i % 2 === 0;
 
           return (

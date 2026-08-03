@@ -129,6 +129,28 @@ export function createStatusConfig<S extends string>(
   return config as StatusConfig<S>;
 }
 
+/**
+ * ชิปสำหรับสถานะที่ยังไม่มีในแผนที่ของโมดูล
+ *
+ * ไม่มีในแผนที่แล้วปล่อย `className: ""` = Badge กลับไปใช้ variant default ซึ่งเป็น
+ * พื้นทึบสี primary — ขัด DESIGN.md ("avoid neon") และโผล่เป็นก้อนสีเรืองนั่งข้าง
+ * ชิปที่ถูกต้อง (เจอจริงกับ status `save` ในไทม์ไลน์ประวัติรายบรรทัด) ตัวนี้คง
+ * ดีไซน์ dot-chip ไว้ด้วยจุดสีกลาง แล้วแปลงค่าดิบจาก API เป็นป้ายที่คนอ่านได้
+ *
+ * @param status - ค่า status ดิบจาก API (เช่น `send_back`)
+ * @returns entry ที่ใช้กับ `Badge` ได้เลย
+ * @example
+ * ```ts
+ * const config = STATUS_MAP[entry.status] ?? unknownStatusEntry(entry.status);
+ * ```
+ */
+export function unknownStatusEntry(status: string): StatusConfigEntry {
+  return {
+    className: `${STATUS_DOT_CHIP} before:bg-[var(--status-draft)]`,
+    label: status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+  };
+}
+
 /** Filter option shape for list page status dropdowns */
 export interface StatusFilterOption {
   label: string;

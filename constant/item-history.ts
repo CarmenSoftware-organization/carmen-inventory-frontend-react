@@ -11,6 +11,14 @@ import type { StatusConfigEntry } from "./status-config";
  * Tailwind detect ได้ตอน build.
  */
 export const ITEM_HISTORY_STATUS_CONFIG: Record<string, StatusConfigEntry> = {
+  save: {
+    className: `${STATUS_DOT_CHIP} before:bg-[var(--status-save)]`,
+    label: "Save",
+  },
+  saved: {
+    className: `${STATUS_DOT_CHIP} before:bg-[var(--status-save)]`,
+    label: "Saved",
+  },
   submit: {
     className: `${STATUS_DOT_CHIP} before:bg-[var(--status-submitted)]`,
     label: "Submit",

@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import { UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PR_WORKFLOW_ACTION_CONFIG } from "@/constant/purchase-request";
+import { unknownStatusEntry } from "@/constant/status-config";
 import type { WorkflowHistoryEntry } from "@/types/purchase-request";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
@@ -59,7 +60,12 @@ export function PrWorkflowHistory({
     <div className="space-y-3">
       <Timeline defaultValue={reversedHistory.length} orientation="vertical">
         {reversedHistory.map((entry, i) => {
-          const config = PR_WORKFLOW_ACTION_CONFIG[entry.action] ?? PR_WORKFLOW_ACTION_CONFIG.submitted;
+          // action ที่ไม่มีในแผนที่ต้องไม่ไปยืมป้ายของ submitted — ของเดิม fallback
+          // เป็น .submitted ทำให้ action แปลก ๆ โชว์ว่า "SUBMITTED" ทั้งที่ไม่ใช่
+          // (ผิดข้อมูล ไม่ใช่แค่หน้าตาเพี้ยน)
+          const config =
+            PR_WORKFLOW_ACTION_CONFIG[entry.action] ??
+            unknownStatusEntry(entry.action);
           const stepNumber = i + 1;
           const isEven = i % 2 === 0;
 

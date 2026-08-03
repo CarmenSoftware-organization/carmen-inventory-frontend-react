@@ -19,7 +19,10 @@ import {
   TimelineSeparator,
   TimelineTitle,
 } from "@/components/ui/timeline";
-import type { StatusConfigEntry } from "@/constant/status-config";
+import {
+  unknownStatusEntry,
+  type StatusConfigEntry,
+} from "@/constant/status-config";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
@@ -104,10 +107,11 @@ export function ItemHistorySheet({
               orientation="vertical"
             >
               {reversedHistory.map((entry, i) => {
-                const config = statusConfig[entry.status] ?? {
-                  className: "",
-                  label: entry.status,
-                };
+                // ไม่มีในแผนที่ก็ยังต้องเป็นชิป dot-chip เหมือนตัวอื่น — ปล่อย
+                // className ว่างจะกลายเป็นพื้นทึบสี primary นั่งเรืองข้างชิปปกติ
+                const config =
+                  statusConfig[entry.status] ??
+                  unknownStatusEntry(entry.status);
                 const isEven = i % 2 === 0;
 
                 return (
