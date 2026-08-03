@@ -261,6 +261,7 @@ export function usePrItemTable({
                 form={form}
                 index={row.index}
                 role={role}
+                isDisabled={isDisabled}
               />
             }
           />

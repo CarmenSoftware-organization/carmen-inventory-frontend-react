@@ -173,8 +173,12 @@ export function PrItemFields({
   });
 
   const selectedRows = table.getSelectedRowModel().rows;
+  // ต้องอยู่โหมดแก้ไขก่อน — ติ๊กแถวได้เฉพาะโหมดแก้ไขก็จริง แต่ selection ค้างข้าม
+  // โหมดได้ (ติ๊กแล้วกดยกเลิก) ปุ่มตัดสินจะยังโผล่ให้กดในโหมดอ่าน · เกณฑ์เดียวกับ
+  // ปุ่มล้างสถานะรายแถวและกับ SR
   const canBulkAction =
-    role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE;
+    !isDisabled &&
+    (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE);
 
   const handleAutoAllocate = async () => {
     setIsAllocating(true);

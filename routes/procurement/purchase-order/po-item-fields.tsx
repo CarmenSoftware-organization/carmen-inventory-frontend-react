@@ -178,7 +178,10 @@ export function PoItemFields({
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedIndices = selectedRows.map((r) => r.index);
 
-  const canBulkAct = isApprover && selectedRows.length > 0;
+  // isEditMode ด้วย — คอมเมนต์ที่ canResetStatus บอกว่า "เกณฑ์เดียวกับปุ่มตัดสินหมู่"
+  // แต่ของเดิมสองที่ไม่ตรงกัน (ตรงนั้นเช็ค isEditMode ตรงนี้ไม่เช็ค) selection ค้าง
+  // ข้ามโหมดได้ ปุ่มตัดสินจึงโผล่ให้กดในโหมดอ่าน
+  const canBulkAct = isApprover && isEditMode && selectedRows.length > 0;
   const showBulkActions = selectedRows.length > 0 && (canBulkAct || canClose);
 
   const handleBulkApprove = () => {

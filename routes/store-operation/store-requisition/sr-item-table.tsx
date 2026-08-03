@@ -199,12 +199,15 @@ const StatusCell = memo(function StatusCell({
   index,
   translate,
   role,
+  disabled,
 }: {
   control: Control<SrFormValues>;
   form?: UseFormReturn<SrFormValues>;
   index: number;
   translate: (value?: string) => string | undefined;
   role?: string;
+  /** ฟอร์มอยู่โหมดอ่าน — ปุ่มล้างสถานะต้องหายไป ไม่ใช่แค่จางลง */
+  disabled?: boolean;
 }) {
   "use no memo";
   const stageStatus =
@@ -217,9 +220,12 @@ const StatusCell = memo(function StatusCell({
   const config =
     SR_ITEM_STATUS_CONFIG[effective] ?? SR_ITEM_STATUS_CONFIG.pending;
 
-  // approver/issuer แก้สถานะได้; แต่ล็อกถ้า server ส่งมาแล้วเป็น approve/reject
+  // approver/issuer แก้สถานะได้ เฉพาะตอนอยู่โหมดแก้ไข; และล็อกถ้า server ส่งมา
+  // แล้วเป็น approve/reject — เกณฑ์เดียวกับ PR/PO
   const canEdit =
-    !!form && (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
+    !!form &&
+    !disabled &&
+    (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
   const isLockedFromServer =
     initialStatus === SR_ITEM_STAGE.APPROVE ||
     initialStatus === SR_ITEM_STAGE.REJECT;
@@ -502,6 +508,7 @@ export function useSrItemTable({
             index={row.index}
             translate={translateStageStatus}
             role={role}
+            disabled={disabled}
           />
         ),
         size: 100,
