@@ -29,43 +29,54 @@ function resolveState(
 /**
  * พื้น tint + สีข้อความของแต่ละสถานะ
  *
- * `pending` ใช้ bg-muted ไม่ใช่ tint ของ --status-draft เพราะเทา 10% ผสมกับ --card
- * ในโหมดมืดจางจนมองไม่เห็นรูปลูกศร และในเชิงความหมาย "ยังไม่ถึง" คือยังไม่มี
- * สถานะ ไม่ใช่สถานะสีเทา — bg-muted เป็น token ที่ badge variant `-light` ใช้เป็น
- * กล่องกลางอยู่แล้ว
+ * `pending` ใช้ --status-pending-soft ซึ่งเป็นเทาไร้ hue (ผสม --foreground 2% เข้า
+ * --muted) ไม่ใช่ tint ของ --status-draft — ในเชิงความหมาย "ยังไม่ถึง" คือยังไม่มี
+ * สถานะ ไม่ใช่สถานะสีเทา · เดิมใช้ bg-muted เปล่า ๆ แต่ในโหมดมืดมันต่างจากพื้นหน้า
+ * แค่ 1.13:1 รูปลูกศรจึงแทบไม่ปรากฏ (ช่อง pending มักเป็นช่องสุดท้าย ไม่มีเพื่อนบ้าน
+ * ช่วยตัดขอบ) — token ใหม่ดัน 1.15 / 1.18 โดยข้อความยังผ่าน AA
  *
  * `voided` ใช้ --status-voided (ชมพูเข้ม) ไม่ใช่ text-destructive แบบโค้ดเดิม —
  * DESIGN.md ห้ามปน semantic token กับ document status และแอปมี token voided อยู่แล้ว
+ *
+ * `line-through` ของ voided ไม่ได้อยู่ที่นี่ แต่ไปอยู่ที่ <span> ของชื่อขั้น —
+ * text-decoration propagate ลง in-flow descendant ทุกตัว ถ้าใส่ที่กล่องนอกเส้นจะ
+ * ถูกลากทับไอคอน ✕ ด้วย
  */
 const STATE_STYLE: Record<StageState, string> = {
   done: "bg-[var(--status-approved-soft)] text-muted-foreground",
   current: "bg-[var(--status-in-progress-soft)] text-foreground font-medium",
-  pending: "bg-muted text-muted-foreground/70",
-  voided:
-    "bg-[var(--status-voided-soft)] text-foreground font-medium line-through",
+  pending: "bg-[var(--status-pending-soft)] text-muted-foreground",
+  voided: "bg-[var(--status-voided-soft)] text-foreground font-medium",
 };
 
-/** ไอคอนนำหน้าชื่อขั้น — รูปต่างกันต่อสถานะ ไม่ได้ต่างแค่สี */
+/**
+ * ไอคอนนำหน้าชื่อขั้น — รูปต่างกันต่อสถานะ ไม่ได้ต่างแค่สี
+ *
+ * ใช้ `-ink` ไม่ใช่ token สีสถานะตรง ๆ: token ตัวเปล่าเป็นสี "พื้น" ที่จูนไว้ให้มี
+ * -fg วางทับ เอามาเป็นไอคอนบน tint ของตัวเองแล้ว contrast ตก (in-progress เหลือ
+ * 1.47:1 ในโหมดสว่าง · voided 2.75:1 ในโหมดมืด) `-ink` เป็นเฉดเดียวกันคนละ L
+ * ดูที่มาใน styles/badge-status.css
+ */
 function StateIcon({ state }: { readonly state: StageState }) {
   switch (state) {
     case "done":
       return (
         <Check
-          className="text-[var(--status-approved)] size-3 shrink-0"
+          className="text-[var(--status-approved-ink)] size-3 shrink-0"
           aria-hidden="true"
         />
       );
     case "current":
       return (
         <Circle
-          className="text-[var(--status-in-progress)] size-3 shrink-0 fill-current"
+          className="text-[var(--status-in-progress-ink)] size-3 shrink-0 fill-current"
           aria-hidden="true"
         />
       );
     case "voided":
       return (
         <X
-          className="text-[var(--status-voided)] size-3 shrink-0"
+          className="text-[var(--status-voided-ink)] size-3 shrink-0"
           aria-hidden="true"
         />
       );
@@ -76,6 +87,13 @@ function StateIcon({ state }: { readonly state: StageState }) {
           aria-hidden="true"
         />
       );
+    // เพิ่ม StageState ตัวใหม่แล้วลืมเติม case ที่นี่ → TS error ตรงบรรทัดนี้
+    // (STATE_STYLE เป็น Record<StageState, …> จับให้อยู่แล้ว แต่ switch ไม่จับเอง
+    //  มันจะเงียบแล้วคืน undefined)
+    default: {
+      const _exhaustive: never = state;
+      return _exhaustive;
+    }
   }
 }
 
@@ -92,10 +110,11 @@ function StateIcon({ state }: { readonly state: StageState }) {
  * ปัจจุบันสี่ชั้นพร้อมกัน (ป้าย CURRENT + จุด + halo ที่เต้น + ชื่อขั้น) ซึ่งที่นี่
  * ไม่ทำซ้ำ ข้อจำกัดที่ตั้งไว้กันไม่ให้ไหลกลับไปทางนั้น:
  *
- * - **หนึ่งเฉดต่อหนึ่งช่อง** ปรากฏสองระดับความเข้ม — พื้น tint 14–18% กับไอคอน
- *   เต็มความเข้ม เป็นสีเดียวกันคนละน้ำหนัก ไม่ใช่สองสัญญาณแข่งกัน
- * - **ข้อความเป็นสีกลางเสมอ** ไม่รับสีสถานะ — contrast จึงผ่าน 4.5:1 ทั้งสองธีม
- *   โดยไม่ต้องทำ ink token เพิ่ม
+ * - **หนึ่งเฉดต่อหนึ่งช่อง** ปรากฏสองระดับความเข้ม — พื้น tint 7–18% กับไอคอนที่เป็น
+ *   เฉดเดียวกันแต่เข้มกว่า (`--status-*-ink`) ไม่ใช่สองสัญญาณแข่งกัน
+ * - **ข้อความเป็นสีกลางเสมอ** ไม่รับสีสถานะ — วัดแล้วผ่าน 4.5:1 ทั้งสองธีมทุกสถานะ
+ *   (โหมดมืดฉิวเฉียด 4.5–4.6 เพราะ --muted-foreground บน --card เริ่มต้นที่ 4.89
+ *   อยู่แล้ว จึงเป็นตัวกำหนดเพดานของ % ที่พื้น tint ผสมได้ ดู badge-status.css)
  * - **ไอคอนต่างรูปต่อสถานะ** คนตาบอดสีเขียว-เหลืองยังแยก ✓ / ● / ○ / ✕ ออก
  *   (WCAG 1.4.1 — ห้ามใช้สีเป็นตัวบอกอย่างเดียว)
  * - **ไม่มี animation** ความเคลื่อนไหวควรบอกว่ามีอะไรเปลี่ยน ไม่ใช่ประดับสถานะที่นิ่ง
@@ -136,7 +155,15 @@ export function WorkflowTrack({
             )}
           >
             <StateIcon state={state} />
-            <span className="max-w-20 truncate sm:max-w-32" title={stage}>
+            <span
+              className={cn(
+                "max-w-20 truncate sm:max-w-32",
+                // ขีดทับอยู่ที่ชื่อขั้นเท่านั้น ไม่ใช่ที่กล่องนอก — text-decoration
+                // propagate ลง descendant เส้นจะถูกลากทับไอคอน ✕ ไปด้วย
+                state === "voided" && "line-through",
+              )}
+              title={stage}
+            >
               {stage}
             </span>
           </div>

@@ -24,7 +24,7 @@
 
 | ไฟล์ | ความรับผิดชอบ | Task |
 |---|---|---|
-| `styles/badge-status.css` | นิยามสีสถานะทั้งหมดของแอป — เพิ่ม 3 soft tint + ลงทะเบียนเป็น Tailwind color 3 บรรทัด | 1 |
+| `styles/badge-status.css` | นิยามสีสถานะทั้งหมดของแอป — เพิ่ม soft tint + ink token (custom property ล้วน ๆ **ไม่** ลงทะเบียนเป็น Tailwind color เพราะไฟล์นี้สร้าง utility ไม่ได้ ดู "สิ่งที่แผนนี้คิดผิด") | 1 |
 | `styles/globals.css` | design token + base layer — เพิ่ม `@layer components` สอง class สำหรับรูปลูกศร | 1 |
 | `components/share/workflow-track.tsx` | แสดงลำดับขั้น workflow ของเอกสาร — เขียน render ใหม่ทั้งไฟล์ | 2 |
 
@@ -35,50 +35,62 @@
 ### Task 1: ฐาน CSS — soft tint token กับ class รูปลูกศร
 
 **Files:**
-- Modify: `styles/badge-status.css:153` (ท้ายบล็อก `:root` ก่อนวงเล็บปิดที่บรรทัด 154) และ `styles/badge-status.css:315` (ท้ายกลุ่ม background color ในบล็อก `@theme inline`)
+- Modify: `styles/badge-status.css` (ท้ายบล็อก `:root` ก่อนวงเล็บปิด และท้ายบล็อก `.dark` สำหรับ token ที่ต้องมีคู่โหมดมืด)
 - Modify: `styles/globals.css:355` (แทรก `@layer components` ก่อน `@layer base {`)
 
 **Interfaces:**
-- Consumes: `--status-approved`, `--status-in-progress`, `--status-voided` (มีอยู่แล้วใน `badge-status.css` ทั้งบล็อก `:root` และ `.dark`) · `--card` (มีอยู่แล้วใน `globals.css` ทั้งสองธีม)
+- Consumes: `--status-approved`, `--status-in-progress`, `--status-voided` (มีอยู่แล้วใน `badge-status.css` ทั้งบล็อก `:root` และ `.dark`) · `--card`, `--muted`, `--foreground` (มีอยู่แล้วใน `globals.css` ทั้งสองธีม)
 - Produces:
-  - Tailwind utility `bg-status-approved-soft`, `bg-status-in-progress-soft`, `bg-status-voided-soft` (Task 2 ใช้)
-  - Tailwind utility `text-status-approved`, `text-status-in-progress`, `text-status-voided` (มีอยู่แล้ว ไม่ต้องเพิ่ม — Task 2 ใช้)
-  - CSS class `.wf-chevron` และ `.wf-chevron-head` (Task 2 ใช้)
+  - CSS custom property `--status-approved-soft`, `--status-in-progress-soft`, `--status-voided-soft`, `--status-pending-soft` (Task 2 ใช้ผ่าน `bg-[var(--status-…-soft)]`)
+  - CSS custom property `--status-approved-ink`, `--status-in-progress-ink`, `--status-voided-ink` (Task 2 ใช้ผ่าน `text-[var(--status-…-ink)]`)
+  - CSS class `.wf-chevron` และ `.wf-chevron.wf-chevron-head` (Task 2 ใช้)
 
-- [ ] **Step 1: เพิ่ม soft tint token ท้ายบล็อก `:root` ของ `styles/badge-status.css`**
+> **ไม่มี Tailwind utility ใหม่** — ดูหัวข้อ "สิ่งที่แผนนี้คิดผิด" ท้ายไฟล์ ทุกที่ที่ใช้ต้องเขียนเป็น
+> arbitrary value `bg-[var(--token)]` / `text-[var(--token)]` ไม่ใช่ `bg-status-*` / `text-status-*`
 
-แทรกต่อจากบรรทัด `--status-cuisine-oceania-fg: oklch(0.98 0 0);` (บรรทัด 153) ก่อนวงเล็บปิด `}` ของ `:root`:
+- [ ] **Step 1: เพิ่ม soft tint + ink token ใน `styles/badge-status.css`**
+
+ท้ายบล็อก `:root` (ต่อจาก `--status-cuisine-oceania-fg`) ก่อนวงเล็บปิด `}` — ตัดคอมเมนต์เหลือใจความ
+(ของจริงในไฟล์ยาวกว่านี้ อธิบายที่มาของทุกตัวเลข):
 
 ```css
-
-  /* ── Soft tints: พื้นลูกศรของ workflow-track ──
-     ผสมสีสถานะกับ --card ซึ่งพลิกเองตามธีม จึงประกาศครั้งเดียวพอ ไม่ต้องมีคู่ใน .dark:
-     next-themes ตั้งค่า attribute="class" → :root กับ .dark อยู่บน <html> ตัวเดียวกัน
-     และ var() ใน custom property ถูกแทนค่าตอน computed-value time บน element นั้น
-     จึงได้ค่าที่ชนะ cascade เสมอ ไม่ขึ้นกับลำดับการประกาศในไฟล์
-     เปอร์เซ็นต์ต่างกันเพราะ in-progress (L 0.85) จางกว่าอีกสองสีมาก ต้องผสมเข้มขึ้น
-     จึงจะเห็นเป็นพื้นเหลืองเท่ากัน
-     ผสมใน oklab ไม่ใช่ oklch — oklch interpolate "มุม hue" และ --card คือ oklch(1 0 0)
-     ที่ระบุ hue = 0 ไม่ใช่ none ผลคือ 14% ของเขียว (h=155) กลายเป็น h≈21 (ชมพู)
-     oklab เป็น perceptual space เดียวกันแต่เป็นแกน a/b จึงไม่มีมุม hue ให้ลาก */
+  /* พื้น tint — ผสมสีสถานะกับ --card ซึ่งพลิกเองตามธีม (var() resolve ที่
+     computed-value time บน <html> ตัวเดียวกัน) จึงไม่ต้องมีคู่ใน .dark เพื่อสลับสี
+     ผสมใน oklab ไม่ใช่ oklch — oklch interpolate "มุม hue" และ --card คือ
+     oklch(1 0 0) ที่ระบุ hue = 0 ไม่ใช่ none ผลคือ 14% ของเขียว (h=155)
+     กลายเป็น h≈21 (ชมพู) */
   --status-approved-soft: color-mix(in oklab, var(--status-approved) 14%, var(--card));
   --status-in-progress-soft: color-mix(in oklab, var(--status-in-progress) 18%, var(--card));
   --status-voided-soft: color-mix(in oklab, var(--status-voided) 14%, var(--card));
+
+  /* pending ไม่ใช่สถานะสี จึงไม่มี hue — ผสม --foreground เข้า --muted แค่ 2%
+     ให้ช่องมีรูปทรงแยกจากพื้นหน้า เพดานอยู่ที่ 2–2.5% เพราะโหมดมืด
+     --muted-foreground บน --muted เริ่มต้นที่ 4.76:1 เหลือถึง AA แค่ 0.26 */
+  --status-pending-soft: color-mix(in oklab, var(--foreground) 2%, var(--muted));
+
+  /* ink = หมึกที่วางบนพื้น -soft · fill ตัวเปล่าเป็นสี "พื้น" ที่จูนไว้ให้มี -fg ทับ
+     เอามาเป็นไอคอนบน tint ของตัวเองแล้ววัดได้ done 3.19 · in-progress 1.47 ·
+     voided 3.94 (สว่าง) / voided 2.75 (มืด) — ต่ำกว่า 3:1 ของ WCAG 1.4.11
+     ink คง hue/chroma เดิม เปลี่ยนแค่ L เหมือน --warning-ink ใน globals.css */
+  --status-approved-ink: oklch(0.46 0.19 155);
+  --status-in-progress-ink: oklch(0.52 0.17 90);
+  --status-voided-ink: oklch(0.50 0.18 348.79);
 ```
 
-- [ ] **Step 2: ลงทะเบียน token ทั้งสามเป็น Tailwind color**
-
-ในบล็อก `@theme inline` ของไฟล์เดียวกัน แทรกต่อจากบรรทัด `--color-status-cuisine-oceania: var(--status-cuisine-oceania);` (บรรทัด 315) ก่อนบรรทัดว่างที่คั่นกลุ่ม `/* Foreground (text) colors */`:
+ท้ายบล็อก `.dark` — ink เป็นค่าคงที่ ไม่มีตัวแปรให้พลิกตามธีมเหมือน `-soft` จึงต้องมีคู่
+ส่วน `--status-approved-soft` ต้องลด % ลงเพราะช่อง `done` เป็นช่องเดียวที่ใช้
+`--muted-foreground` เป็นสีข้อความ และในโหมดมืดมันเริ่มต้นที่ 4.89:1 เท่านั้น
+tint 14% กินจนเหลือ 4.25 ตกเส้น AA:
 
 ```css
+  --status-approved-soft: color-mix(in oklab, var(--status-approved) 7%, var(--card));
 
-  /* Soft tints — พื้น workflow-track */
-  --color-status-approved-soft: var(--status-approved-soft);
-  --color-status-in-progress-soft: var(--status-in-progress-soft);
-  --color-status-voided-soft: var(--status-voided-soft);
+  --status-approved-ink: oklch(0.67 0.17 155);
+  --status-in-progress-ink: oklch(0.76 0.15 90);
+  --status-voided-ink: oklch(0.70 0.16 348.79);
 ```
 
-- [ ] **Step 3: เพิ่ม `@layer components` ใน `styles/globals.css`**
+- [ ] **Step 2: เพิ่ม `@layer components` ใน `styles/globals.css`**
 
 แทรกก่อนบรรทัด `@layer base {` (บรรทัด 355) — เว้นบรรทัดว่างคั่นทั้งบนและล่าง:
 
@@ -102,10 +114,10 @@
   }
 
   /* ช่องแรก — ซ้ายตัดตรง ไม่มีปลายของใครมาเสียบ
-     ต้องใส่คู่กับ .wf-chevron เสมอ (--wf-notch มาจาก class นั้น) และต้องประกาศ
-     หลัง .wf-chevron ในไฟล์ — specificity เท่ากัน (0,1,0) ลำดับใน source
-     จึงเป็นตัวตัดสินว่า clip-path ไหนชนะ */
-  .wf-chevron-head {
+     ต้องใส่คู่กับ .wf-chevron เสมอ เพราะ --wf-notch ถูกประกาศไว้ที่ class นั้น
+     selector เขียนเป็น .wf-chevron.wf-chevron-head (specificity 0,2,0) จึงชนะ
+     .wf-chevron (0,1,0) ด้วยตัวมันเอง ไม่ต้องพึ่งลำดับใน source */
+  .wf-chevron.wf-chevron-head {
     clip-path: polygon(
       0 0,
       calc(100% - var(--wf-notch)) 0,
@@ -117,7 +129,7 @@
 }
 ```
 
-- [ ] **Step 4: build เพื่อยืนยันว่า CSS ผ่านและ token ออกไปถึงบันเดิลจริง**
+- [ ] **Step 3: build เพื่อยืนยันว่า CSS ผ่านและ token ออกไปถึงบันเดิลจริง**
 
 ```bash
 bun run build
@@ -134,9 +146,11 @@ grep -c "wf-chevron" dist/assets/*.css
 
 Expected: ทั้งสองคำสั่งคืนค่ามากกว่า 0
 
-> หมายเหตุ: ตอนนี้จะยัง **ไม่** เจอ utility `bg-status-approved-soft` ใน CSS เพราะ Tailwind สร้าง utility ตามที่พบใน source เท่านั้น และยังไม่มีไฟล์ไหนใช้ — จะไปเจอหลัง Task 2 ตรงนี้เช็คแค่ว่า custom property กับ hand-written class ถูก emit ออกมาแล้ว
+> หมายเหตุ: ตอนนี้จะยังไม่เจอ **utility** ที่อ้าง token พวกนี้ (`bg-\[var\(--status-approved-soft\)\]`)
+> เพราะ Tailwind สร้าง utility ตามที่พบใน source เท่านั้น และยังไม่มีไฟล์ไหนใช้ — จะไปเจอหลัง
+> Task 2 ตรงนี้เช็คแค่ว่า custom property กับ hand-written class ถูก emit ออกมาแล้ว
 
-- [ ] **Step 5: lint**
+- [ ] **Step 4: lint**
 
 ```bash
 bun run lint
@@ -144,16 +158,16 @@ bun run lint
 
 Expected: ผ่าน ไม่มี error
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add styles/badge-status.css styles/globals.css
 git commit -m "$(cat <<'EOF'
-style(workflow-track): เพิ่ม soft tint token กับ class รูปลูกศร
+style(workflow-track): เพิ่ม soft tint / ink token กับ class รูปลูกศร
 
-- soft tint 3 ตัวใน badge-status.css คำนวณจาก color-mix กับ --card
-  ประกาศครั้งเดียวพอ ธีมมืดพลิกตามเอง
-- .wf-chevron / .wf-chevron-head ใน @layer components ของ globals.css
+- soft tint คำนวณจาก color-mix กับ --card/--muted ธีมมืดพลิกตามเอง
+- ink 3 ตัวเป็นค่าคงที่ จึงมีคู่ .dark พร้อม approved-soft ที่ต้องลด % ในธีมมืด
+- .wf-chevron / .wf-chevron.wf-chevron-head ใน @layer components ของ globals.css
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
@@ -168,7 +182,7 @@ EOF
 - Modify: `components/share/workflow-track.tsx` (ทั้งไฟล์ — 82 บรรทัดเดิมถูกแทนที่)
 
 **Interfaces:**
-- Consumes (จาก Task 1): class `.wf-chevron`, `.wf-chevron-head` · utility `bg-status-approved-soft`, `bg-status-in-progress-soft`, `bg-status-voided-soft`
+- Consumes (จาก Task 1): class `.wf-chevron`, `.wf-chevron-head` · custom property `--status-{approved,in-progress,voided,pending}-soft` และ `--status-{approved,in-progress,voided}-ink` เขียนเป็น arbitrary value `bg-[var(…)]` / `text-[var(…)]`
 - Produces: `export function WorkflowTrack(props: WorkflowTrackProps)` — signature เดิมทุกประการ ไม่มี export ใหม่
 
 - [ ] **Step 1: แทนที่เนื้อหาทั้งไฟล์ `components/share/workflow-track.tsx`**
@@ -205,41 +219,51 @@ function resolveState(
 /**
  * พื้น tint + สีข้อความของแต่ละสถานะ
  *
- * `pending` ใช้ bg-muted ไม่ใช่ tint ของ --status-draft เพราะเทา 10% ผสมกับ --card
- * ในโหมดมืดจางจนมองไม่เห็นรูปลูกศร และในเชิงความหมาย "ยังไม่ถึง" คือยังไม่มี
- * สถานะ ไม่ใช่สถานะสีเทา — bg-muted เป็น token ที่ badge variant `-light` ใช้เป็น
- * กล่องกลางอยู่แล้ว
+ * `pending` ใช้ --status-pending-soft ซึ่งเป็นเทาไร้ hue ไม่ใช่ tint ของ --status-draft
+ * — ในเชิงความหมาย "ยังไม่ถึง" คือยังไม่มีสถานะ ไม่ใช่สถานะสีเทา · bg-muted เปล่า ๆ
+ * ต่างจากพื้นหน้าแค่ 1.13:1 ในโหมดมืด รูปลูกศรจึงแทบไม่ปรากฏ
  *
  * `voided` ใช้ --status-voided (ชมพูเข้ม) ไม่ใช่ text-destructive แบบโค้ดเดิม —
  * DESIGN.md ห้ามปน semantic token กับ document status และแอปมี token voided อยู่แล้ว
+ *
+ * `line-through` ของ voided ไม่ได้อยู่ที่นี่ แต่ไปอยู่ที่ <span> ของชื่อขั้น —
+ * text-decoration propagate ลง in-flow descendant ถ้าใส่ที่กล่องนอกเส้นจะถูกลากทับไอคอน ✕
  */
 const STATE_STYLE: Record<StageState, string> = {
-  done: "bg-status-approved-soft text-muted-foreground",
-  current: "bg-status-in-progress-soft text-foreground font-medium",
-  pending: "bg-muted text-muted-foreground/70",
-  voided: "bg-status-voided-soft text-foreground font-medium line-through",
+  done: "bg-[var(--status-approved-soft)] text-muted-foreground",
+  current: "bg-[var(--status-in-progress-soft)] text-foreground font-medium",
+  pending: "bg-[var(--status-pending-soft)] text-muted-foreground",
+  voided: "bg-[var(--status-voided-soft)] text-foreground font-medium",
 };
 
-/** ไอคอนนำหน้าชื่อขั้น — รูปต่างกันต่อสถานะ ไม่ได้ต่างแค่สี */
+/**
+ * ไอคอนนำหน้าชื่อขั้น — รูปต่างกันต่อสถานะ ไม่ได้ต่างแค่สี
+ *
+ * ใช้ `-ink` ไม่ใช่ token สีสถานะตรง ๆ (ตัวเปล่าเป็นสี "พื้น" เอามาเป็นไอคอนบน tint
+ * ของตัวเองแล้ว contrast ตกถึง 1.47:1) ดูที่มาใน styles/badge-status.css
+ */
 function StateIcon({ state }: { readonly state: StageState }) {
   switch (state) {
     case "done":
       return (
         <Check
-          className="text-status-approved size-3 shrink-0"
+          className="text-[var(--status-approved-ink)] size-3 shrink-0"
           aria-hidden="true"
         />
       );
     case "current":
       return (
         <Circle
-          className="text-status-in-progress size-3 shrink-0 fill-current"
+          className="text-[var(--status-in-progress-ink)] size-3 shrink-0 fill-current"
           aria-hidden="true"
         />
       );
     case "voided":
       return (
-        <X className="text-status-voided size-3 shrink-0" aria-hidden="true" />
+        <X
+          className="text-[var(--status-voided-ink)] size-3 shrink-0"
+          aria-hidden="true"
+        />
       );
     case "pending":
       return (
@@ -248,6 +272,11 @@ function StateIcon({ state }: { readonly state: StageState }) {
           aria-hidden="true"
         />
       );
+    // เพิ่ม StageState ตัวใหม่แล้วลืมเติม case ที่นี่ → TS error ตรงบรรทัดนี้
+    default: {
+      const _exhaustive: never = state;
+      return _exhaustive;
+    }
   }
 }
 
@@ -264,10 +293,9 @@ function StateIcon({ state }: { readonly state: StageState }) {
  * ปัจจุบันสี่ชั้นพร้อมกัน (ป้าย CURRENT + จุด + halo ที่เต้น + ชื่อขั้น) ซึ่งที่นี่
  * ไม่ทำซ้ำ ข้อจำกัดที่ตั้งไว้กันไม่ให้ไหลกลับไปทางนั้น:
  *
- * - **หนึ่งเฉดต่อหนึ่งช่อง** ปรากฏสองระดับความเข้ม — พื้น tint 14–18% กับไอคอน
- *   เต็มความเข้ม เป็นสีเดียวกันคนละน้ำหนัก ไม่ใช่สองสัญญาณแข่งกัน
- * - **ข้อความเป็นสีกลางเสมอ** ไม่รับสีสถานะ — contrast จึงผ่าน 4.5:1 ทั้งสองธีม
- *   โดยไม่ต้องทำ ink token เพิ่ม
+ * - **หนึ่งเฉดต่อหนึ่งช่อง** ปรากฏสองระดับความเข้ม — พื้น tint 7–18% กับไอคอนที่เป็น
+ *   เฉดเดียวกันแต่เข้มกว่า (`--status-*-ink`) ไม่ใช่สองสัญญาณแข่งกัน
+ * - **ข้อความเป็นสีกลางเสมอ** ไม่รับสีสถานะ — วัดแล้วผ่าน 4.5:1 ทั้งสองธีมทุกสถานะ
  * - **ไอคอนต่างรูปต่อสถานะ** คนตาบอดสีเขียว-เหลืองยังแยก ✓ / ● / ○ / ✕ ออก
  *   (WCAG 1.4.1 — ห้ามใช้สีเป็นตัวบอกอย่างเดียว)
  * - **ไม่มี animation** ความเคลื่อนไหวควรบอกว่ามีอะไรเปลี่ยน ไม่ใช่ประดับสถานะที่นิ่ง
@@ -308,7 +336,14 @@ export function WorkflowTrack({
             )}
           >
             <StateIcon state={state} />
-            <span className="max-w-20 truncate sm:max-w-32" title={stage}>
+            <span
+              className={cn(
+                "max-w-20 truncate sm:max-w-32",
+                // ขีดทับอยู่ที่ชื่อขั้นเท่านั้น ไม่ใช่ที่กล่องนอก
+                state === "voided" && "line-through",
+              )}
+              title={stage}
+            >
               {stage}
             </span>
           </div>
@@ -351,10 +386,12 @@ Expected: ผ่านทั้งหมด · `components/ui/type-ladder.test.t
 
 ```bash
 bun run build
-grep -c "bg-status-approved-soft\|status-approved-soft" dist/assets/*.css
+# Tailwind escape ทั้ง [ ] ( ) ในชื่อ class ที่ emit ออกมา
+grep -c 'bg-\\\[var(--status-approved-soft)\\\]' dist/assets/*.css
+grep -c 'text-\\\[var(--status-in-progress-ink)\\\]' dist/assets/*.css
 ```
 
-Expected: มากกว่า 0 · ถ้าเป็น 0 แปลว่า Tailwind ไม่ได้สแกนเจอ class — ให้ตรวจว่าเขียน class เต็มคำเป็น literal ในไฟล์ (ไม่ประกอบสตริงแบบ `` `bg-status-${x}-soft` `` ซึ่ง Tailwind มองไม่เห็น)
+Expected: มากกว่า 0 ทั้งคู่ · ถ้าเป็น 0 แปลว่า Tailwind ไม่ได้สแกนเจอ class — ให้ตรวจว่าเขียน class เต็มคำเป็น literal ในไฟล์ (ไม่ประกอบสตริงแบบ `` `bg-[var(--status-${x}-soft)]` `` ซึ่ง Tailwind มองไม่เห็น)
 
 - [ ] **Step 6: Commit**
 
@@ -446,5 +483,39 @@ EOF
 
 ## สิ่งที่ plan นี้จงใจไม่แก้
 
-- **แถบ workflow ล้นบนจอ 375px** — track กว้างได้ถึงราว 400px นั่งอยู่ขวาของ flex row ที่ไม่ wrap ใน `doc-form-header.tsx` เป็นปัญหาที่มีมาก่อนงานนี้ Task 2 บรรเทาด้วย `max-w-20 sm:max-w-32` แต่การแก้ให้ขาดต้องรื้อ layout ของ header ซึ่งอยู่นอกขอบเขต
+- **layout ของ `doc-form-header.tsx`** — call site ทั้งสาม (`pr-header.tsx:167`, `po-header.tsx:248`,
+  `sr-header.tsx:290`) ส่ง track เข้าทาง prop **`subtitle`** ซึ่ง render ที่ `doc-form-header.tsx:91`
+  เป็นบล็อกใต้ชื่อเอกสาร ไม่ใช่คอลัมน์ขวาของ flex row · prop `workflowStep` + path
+  `absolute top-4 right-0` ที่ `doc-form-header.tsx:112` ไม่มี call site ไหนใช้เลย
+  (ยืนยันด้วย `grep -rn "workflowStep=" routes components` → ไม่พบ)
+  แถบไม่ล้นบนจอ 375px: ทุกช่องมี `min-w-0` และ span มี `truncate` ความกว้างพื้นล่างจึงเป็น
+  `pl-4 + pr-4 + ไอคอน 12 + gap 4 = 48px` ต่อช่อง (ช่องแรก `pl-2` = 40px) → 3 ช่อง ≈ 140px
+  · `max-w-20 sm:max-w-32` มีไว้ให้ชื่อขั้นอ่านออกในสัดส่วนที่สมดุลกับหัวเอกสาร ไม่ใช่เพื่อกันล้น
 - **`/api/time` ยัง stub เป็นเวลาเครื่อง client** — ไม่เกี่ยวกับงานนี้
+
+---
+
+## สิ่งที่แผนนี้คิดผิด
+
+บันทึกไว้เพื่อไม่ให้แผนถัดไปพลาดซ้ำ — ทั้งสองข้อทำให้เวอร์ชันแรกของงานนี้ออกมาไม่มีสี
+และต้องตามแก้ทีหลัง
+
+**1. `@theme inline` ในไฟล์ CSS ที่ไม่มี `@import "tailwindcss"` ไม่สร้าง utility**
+
+แผนเดิมมี Step ที่สั่งเติม `--color-status-*-soft` ลงบล็อก `@theme inline` ของ
+`styles/badge-status.css` แล้วให้ Task 2 ใช้ `bg-status-approved-soft` — Tailwind ไม่เคย
+สร้าง utility นั้นให้ ผลคือ chevron ทุกช่องไม่มีพื้นสีเลย
+บล็อก `TAILWIND THEME REGISTRATION` ที่ `badge-status.css:294+` (~70 บรรทัด) เป็นโค้ดตาย
+มาแต่ไหนแต่ไรด้วยเหตุผลเดียวกัน — codebase ใช้ `bg-[var(--status-…)]` อยู่ 81 ที่
+ส่วน `bg-status-*` / `text-status-*` ใช้ 0 ที่ ซึ่งเป็นหลักฐานที่ควรเชื่อมากกว่าการมีบล็อกนั้นอยู่
+**บทเรียน:** จะเพิ่มสีใหม่ ให้ประกาศเป็น custom property แล้วเรียกด้วย arbitrary value
+`bg-[var(--token)]` เท่านั้น · ถ้าจะยืนยันว่า utility ถูกสร้าง ให้ grep `dist/assets/*.css`
+หลัง build ไม่ใช่ดูจากการมีบรรทัดใน `@theme inline`
+
+**2. `color-mix(in oklch)` ลากมุม hue เมื่ออีกสีระบุ hue = 0**
+
+`color-mix(in oklch, var(--status-approved) 14%, var(--card))` ให้พื้นสีชมพู ไม่ใช่เขียวจาง
+เพราะ oklch interpolate "มุม hue" และ `--card` คือ `oklch(1 0 0)` ที่ระบุ hue = 0 (ไม่ใช่
+`none`) — 14% ของ h=155 ผสมกับ 86% ของ h=0 จึงได้ h≈21 ซึ่งเป็นชมพู
+**บทเรียน:** ผสม tint ให้ใช้ `in oklab` — perceptual space เดียวกันแต่เป็นแกน a/b
+ไม่มีมุม hue ให้ลาก · หรือประกาศสีกลางเป็น `oklch(1 0 none)` ถ้าจำเป็นต้องใช้ oklch

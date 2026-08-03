@@ -35,7 +35,8 @@ comment ในไฟล์เดิมและ `docs/DESIGN.md` ระบุช
 ใส่ขั้นปัจจุบันสี่ชั้นพร้อมกัน (ป้าย + จุด + halo ที่เต้น + ชื่อขั้น) ซึ่งงานนี้ไม่ทำซ้ำ
 
 ข้อจำกัดที่ตั้งไว้เพื่อไม่ให้กลับไปเป็นแบบเดิม: **หนึ่งเฉดต่อหนึ่งช่อง** ปรากฏสองระดับ
-ความเข้ม (พื้น 14–18% กับไอคอนเต็มความเข้ม) และ **ข้อความเป็นสีกลางเสมอ** ไม่รับสีสถานะ
+ความเข้ม (พื้น tint 7–18% กับไอคอนที่เป็นเฉดเดียวกันแต่เข้มกว่า — `--status-*-ink`)
+และ **ข้อความเป็นสีกลางเสมอ** ไม่รับสีสถานะ
 
 ### ทำไม clip-path ไม่ใช่ pseudo-element หรือ SVG
 
@@ -97,10 +98,10 @@ clip-path อยู่ใน `@layer components` ของ `styles/globals.css` 
   }
 
   /* ช่องแรก — ซ้ายตัดตรง ไม่มีอะไรมาเสียบ
-     ต้องใส่คู่กับ .wf-chevron เสมอ (เอา --wf-notch มาจากตัวนั้น) และต้องประกาศ
-     หลัง .wf-chevron ในไฟล์ — specificity เท่ากัน (0,1,0) ลำดับใน source
-     เป็นตัวตัดสินว่า clip-path ไหนชนะ */
-  .wf-chevron-head {
+     ต้องใส่คู่กับ .wf-chevron เสมอ เพราะ --wf-notch ถูกประกาศไว้ที่ class นั้น
+     selector เขียนเป็น .wf-chevron.wf-chevron-head (specificity 0,2,0) จึงชนะ
+     .wf-chevron (0,1,0) ด้วยตัวมันเอง ไม่ต้องพึ่งลำดับใน source */
+  .wf-chevron.wf-chevron-head {
     clip-path: polygon(
       0 0,
       calc(100% - var(--wf-notch)) 0,
@@ -138,13 +139,22 @@ clip-path อยู่ใน `@layer components` ของ `styles/globals.css` 
       <div
         key={`${i}-${stage}`}
         className={cn(
-          "wf-chevron flex h-6 min-w-0 items-center gap-1 pr-4 text-micro",
+          "wf-chevron text-micro flex h-6 min-w-0 items-center gap-1 pr-4",
+          // ช่องแรกไม่มีรอยบากซ้าย จึงต้องการ padding น้อยกว่าช่องอื่น
           i === 0 ? "wf-chevron-head pl-2" : "pl-4",
           STATE_STYLE[state],
         )}
       >
-        {STATE_ICON[state]}
-        <span className="max-w-20 truncate sm:max-w-32" title={stage}>
+        <StateIcon state={state} />
+        <span
+          className={cn(
+            "max-w-20 truncate sm:max-w-32",
+            // ขีดทับอยู่ที่ชื่อขั้นเท่านั้น ไม่ใช่ที่กล่องนอก — text-decoration
+            // propagate ลง descendant เส้นจะถูกลากทับไอคอน ✕ ไปด้วย
+            state === "voided" && "line-through",
+          )}
+          title={stage}
+        >
           {stage}
         </span>
       </div>
@@ -157,47 +167,73 @@ clip-path อยู่ใน `@layer components` ของ `styles/globals.css` 
 
 ### Token ที่เพิ่ม
 
-เติมท้ายบล็อก `:root` ของ `styles/badge-status.css` — คำนวณจากสีที่มีอยู่ ไม่นิยามเฉดใหม่
+เติมใน `styles/badge-status.css` — คำนวณจากสีที่มีอยู่ ไม่นิยามเฉดใหม่ (ink เปลี่ยนแค่ L
+ของสีเดิม) · ประกาศเป็น custom property ล้วน ๆ ไม่ลงทะเบียนเป็น Tailwind color เพราะ
+ไฟล์นี้ไม่มี `@import "tailwindcss"` บล็อก `@theme inline` ในนั้นจึงไม่สร้าง utility ให้
 
 ```css
-/* ── Soft tints: พื้นลูกศร workflow-track ──
-   ผสมกับ --card ซึ่งพลิกเองตามธีม จึงประกาศครั้งเดียวพอ ไม่ต้องมีคู่ใน .dark
+/* :root — พื้น tint ผสมกับ --card ซึ่งพลิกเองตามธีม
    (next-themes ใช้ attribute="class" → :root กับ .dark อยู่บน <html> ตัวเดียวกัน
    var() ใน custom property resolve ที่ computed-value time บน element นั้น
    จึงได้ค่าที่ชนะ cascade เสมอ ไม่ขึ้นกับลำดับการประกาศ) */
 --status-approved-soft:    color-mix(in oklab, var(--status-approved)    14%, var(--card));
 --status-in-progress-soft: color-mix(in oklab, var(--status-in-progress) 18%, var(--card));
 --status-voided-soft:      color-mix(in oklab, var(--status-voided)      14%, var(--card));
+--status-pending-soft:     color-mix(in oklab, var(--foreground)          2%, var(--muted));
+
+/* ink — หมึกที่วางบนพื้น -soft · คง hue/chroma ของ fill เปลี่ยนแค่ L */
+--status-approved-ink:    oklch(0.46 0.19 155);
+--status-in-progress-ink: oklch(0.52 0.17 90);
+--status-voided-ink:      oklch(0.50 0.18 348.79);
+
+/* .dark — ink เป็นค่าคงที่ ไม่มีตัวแปรให้พลิกตามธีมเหมือน -soft จึงต้องมีคู่
+   approved-soft ต้องลด % ลงด้วย เพราะ done เป็นช่องเดียวที่ใช้ --muted-foreground
+   เป็นสีข้อความ และในโหมดมืดมันเริ่มต้นที่ 4.89:1 เท่านั้น tint 14% กินจนเหลือ 4.25 */
+--status-approved-soft:   color-mix(in oklab, var(--status-approved) 7%, var(--card));
+--status-approved-ink:    oklch(0.67 0.17 155);
+--status-in-progress-ink: oklch(0.76 0.15 90);
+--status-voided-ink:      oklch(0.70 0.16 348.79);
 ```
 
 ผสมใน oklab ไม่ใช่ oklch — oklch interpolate มุม hue และ --card ระบุ hue=0 ไม่ใช่ none ทำให้สีเขียวถูกลาก จึงใช้ oklab แบบแกน a/b แทน
+
+**ทำไมต้องมี `-ink` แยกจาก fill** — token ตัวเปล่าเป็นสี "พื้น" ที่จูนไว้ให้มี `-fg` วางทับ
+เอามาเป็นไอคอนบน tint ของตัวเองแล้ววัดได้ done 3.19 · in-progress **1.47** (เหลือง L 0.85
+บนพื้นเหลืองอ่อน) · voided 3.94 ในโหมดสว่าง และ voided **2.75** ในโหมดมืด — ต่ำกว่า 3:1
+ที่ WCAG 1.4.11 กำหนดสำหรับ non-text UI component `-ink` เป็นเฉดเดียวกันคนละ L
+วัดใหม่ได้ 5.0–5.7 ทุกช่อง ทั้งสองธีม (pattern เดียวกับ `--warning-ink` ใน `globals.css`)
 
 ### ตารางต่อ state
 
 | state | พื้น | ไอคอน (lucide, `size-3`, `aria-hidden`) | ข้อความ |
 |---|---|---|---|
-| `done` | `--status-approved-soft` | `Check` สี `--status-approved` | `text-muted-foreground` |
-| `current` | `--status-in-progress-soft` | `Circle` + `fill-current` สี `--status-in-progress` | `text-foreground font-medium` |
-| `pending` | `bg-muted` | `Circle` (กลวง) สี `text-muted-foreground` | `text-muted-foreground/70` |
-| `voided` | `--status-voided-soft` | `X` สี `--status-voided` | `text-foreground font-medium line-through` |
+| `done` | `--status-approved-soft` | `Check` สี `--status-approved-ink` | `text-muted-foreground` |
+| `current` | `--status-in-progress-soft` | `Circle` + `fill-current` สี `--status-in-progress-ink` | `text-foreground font-medium` |
+| `pending` | `--status-pending-soft` | `Circle` (กลวง) สี `text-muted-foreground` | `text-muted-foreground` |
+| `voided` | `--status-voided-soft` | `X` สี `--status-voided-ink` | `text-foreground font-medium` + `line-through` ที่ `<span>` ชื่อขั้น |
+
+`line-through` อยู่ที่ `<span>` ของชื่อขั้น ไม่ใช่ที่กล่องนอก — `text-decoration` propagate
+ลง in-flow descendant ทุกตัว ถ้าใส่ที่กล่องเส้นจะถูกลากทับไอคอน ✕ ไปด้วย
 
 `font-medium` (500) บนขั้นปัจจุบันตรงกับ tier "ค่า" ของ `DESIGN.md` — เด่นกว่าของข้าง ๆ
 โดยไม่ตะโกน
 
 ### สามข้อที่ต่างจากการอ่านกฎแบบเคร่งที่สุด
 
-1. **`pending` ใช้ `bg-muted` ไม่ใช่ tint ของ `--status-draft`** — เทา 10% ผสมกับ `--card`
-   ในโหมดมืดจางจนมองไม่เห็นรูปลูกศร และในเชิงความหมาย "ยังไม่ถึง" คือยังไม่มีสถานะ
-   ไม่ใช่สถานะสีเทา · `bg-muted` เป็น token ที่ badge variant `-light` ใช้เป็นกล่องกลางอยู่แล้ว
+1. **`pending` ใช้ `--status-pending-soft` (เทาไร้ hue) ไม่ใช่ tint ของ `--status-draft`** —
+   ในเชิงความหมาย "ยังไม่ถึง" คือยังไม่มีสถานะ ไม่ใช่สถานะสีเทา จึงผสมจาก `--foreground`
+   ไม่ใช่จากสีสถานะตัวใด · ฐานเป็น `--muted` ซึ่งเป็นพื้นเดิมของช่องนี้ ผสมเพิ่มแค่ 2%
+   ให้มีรูปทรงแยกจากพื้นหน้า (`bg-muted` เปล่า ๆ ได้ 1.09 / 1.13 เทียบพื้นจริง — ต่ำเกินไป
+   โดยเฉพาะช่อง pending ที่มักเป็นช่องสุดท้าย ไม่มีเพื่อนบ้านช่วยตัดขอบ)
 
 2. **`voided` ใช้ `--status-voided` (ชมพูเข้ม) แทน `text-destructive` ของโค้ดเดิม** —
    `DESIGN.md` ห้ามปน semantic token กับ document status แอปมี token voided อยู่แล้ว
    ของเดิมหยิบ `destructive` มาใช้เป็นการข้ามชั้นที่แก้ไปพร้อมกัน
 
-3. **ไอคอนใช้สีสถานะเต็มความเข้ม ข้อความเป็นสีกลาง** — tint 14% ที่ 11px ในแถบแน่น ๆ
-   แยกเขียวจางกับเทาจางแทบไม่ออก ไอคอนเข้มทำให้อ่านได้จริง และเป็นเฉดเดียวกัน
-   สองระดับความเข้ม ไม่ใช่สองสัญญาณแข่งกัน · ข้อความกลางทำให้ contrast ผ่าน 4.5:1
-   ทั้งสองธีมโดยไม่ต้องทำ ink token เพิ่ม
+3. **ไอคอนใช้ `-ink` (เฉดเดียวกับพื้น แต่เข้มกว่า) ข้อความเป็นสีกลาง** — tint ที่ 11px
+   ในแถบแน่น ๆ แยกเขียวจางกับเทาจางแทบไม่ออก ไอคอนเข้มทำให้อ่านได้จริง และเป็นเฉด
+   เดียวกันสองระดับความเข้ม ไม่ใช่สองสัญญาณแข่งกัน · ใช้ fill ตรง ๆ ไม่ได้เพราะ
+   contrast ตกถึง 1.47:1 จึงต้องมี ink token (ดูหัวข้อสีข้างบน)
 
 ## Edge case
 
@@ -213,13 +249,18 @@ clip-path อยู่ใน `@layer components` ของ `styles/globals.css` 
 
 ## Responsive
 
-track กว้างได้ถึงราว 400px (3 × `max-w-32`) นั่งอยู่ขวาของ flex row ที่ไม่ wrap ใน
-`doc-form-header.tsx` **บนจอ 375px มันล้นอยู่แล้วก่อนงานนี้** — เป็นปัญหาที่มีมาก่อน
-ไม่ใช่ที่งานนี้สร้าง
+call site ทั้งสาม (`pr-header.tsx:167`, `po-header.tsx:248`, `sr-header.tsx:290`) ส่ง track
+เข้าทาง prop **`subtitle`** ของ `DocFormHeader` ซึ่ง render ที่ `doc-form-header.tsx:91`
+เป็นบล็อกเต็มความกว้างใต้ชื่อเอกสาร — ไม่ใช่คอลัมน์ขวาของ flex row ที่ไม่ wrap
+(prop `workflowStep` + path `absolute top-4 right-0` ที่ `doc-form-header.tsx:112`
+มีอยู่จริงแต่ไม่มี call site ไหนใช้ ยืนยันด้วย `grep -rn "workflowStep=" routes components`)
 
-บรรเทาในไฟล์เดียวโดยไม่แตะ header: `max-w-20 sm:max-w-32` ต่อช่อง ตัดความกว้างสูงสุด
-เหลือราว 250px บนมือถือ และแถบยัง `min-w-0` ให้ยุบได้ การแก้ให้ขาดจริงต้องรื้อ layout
-ของ `doc-form-header.tsx` ซึ่งอยู่นอกขอบเขตงานนี้
+**แถบล้นไม่ได้** — ทุกช่องมี `min-w-0` และ span มี `truncate` ความกว้างพื้นล่างจึงคงที่ที่
+`pl-4 + pr-4 + ไอคอน 12 + gap 4 = 48px` ต่อช่อง (ช่องแรกใช้ `pl-2` จึงเป็น 40px)
+→ 3 ช่อง ≈ 140px รวมช่องไฟ ใส่จอ 375px ได้สบาย ส่วนที่ยืดได้คือชื่อขั้น ซึ่งหดเองเมื่อที่ไม่พอ
+
+`max-w-20 sm:max-w-32` ต่อช่องจึงไม่ได้มีไว้กันล้น แต่มีไว้ให้ชื่อขั้นอ่านออกในสัดส่วนที่
+สมดุลกับหัวเอกสาร — ไม่ให้ขั้นชื่อยาวช่องเดียวกินความกว้างจนอีกสองช่องเหลือแต่ `…`
 
 ## Accessibility
 
@@ -227,7 +268,20 @@ track กว้างได้ถึงราว 400px (3 × `max-w-32`) นั�
   อย่างเดียว" — คนตาบอดสีเขียว-เหลืองยังแยกรูปได้
 - ไอคอนใส่ `aria-hidden` · screen reader อ่านชื่อขั้นเรียงซ้ายไปขวาเหมือนพฤติกรรมเดิม
   ไม่เพิ่ม aria string ใหม่จึงไม่ต้องแตะ `messages/{en,th}.json`
-- ข้อความเป็นสีกลางบนพื้น tint จาง contrast ผ่าน 4.5:1 ทั้งสองธีม
+- **ข้อความ** เป็นสีกลางบนพื้น tint จาง วัดแล้วผ่าน 4.5:1 (WCAG AA — 11px นับเป็น
+  normal text ไม่เข้าข้อยกเว้น large text 3:1) ทั้ง 4 สถานะ × 2 ธีม
+  สว่าง 5.87–17.97 · มืด 4.51–11.85
+  ค่าฝั่งมืดที่ฉิวเฉียดเป็นเพดานของ palette เอง ไม่ใช่ของ component: `--muted-foreground`
+  บน `--card` ในธีมมืดเริ่มต้นที่ 4.89:1 อยู่แล้ว tint ทุก % ที่ผสมเพิ่มจึงกินระยะนั้นไป
+  — เป็นตัวกำหนดว่า `--status-approved-soft` ในธีมมืดผสมได้ไม่เกิน 8% และ
+  `--status-pending-soft` ไม่เกิน 2.5%
+- **ไอคอน** เป็น non-text UI component ตาม WCAG 1.4.11 (เกณฑ์ 3:1) ใช้ `-ink`
+  วัดได้ 4.51–5.87 ทุกช่อง ทั้งสองธีม
+- **รูปลูกศร** ไม่ใช่ตัวบอกสถานะเพียงลำพัง (ไอคอนกับชื่อขั้นบอกอยู่แล้ว) จึงไม่ผูกกับ
+  เกณฑ์ WCAG ข้อไหน แต่ตั้งเป้าไว้ที่ ≥1.15 เทียบพื้นจริง (`--background` — ดู
+  `routes/root-layout.tsx` → `.space-main-gradient`) ผ่านทุกช่องยกเว้น `current`
+  ในธีมสว่าง (1.02) ซึ่งพื้นเป็นเหลืองอ่อนที่ luminance ใกล้พื้นหน้าแต่ต่างกันที่ hue —
+  WCAG วัดเฉพาะ luminance จึงประเมินความเห็นชัดของ tint สีต่ำกว่าความจริง
 - ไม่มี animation ตามหลักเดิมของไฟล์ — ความเคลื่อนไหวควรบอกว่ามีอะไรเปลี่ยน
   ไม่ใช่ประดับสถานะที่นิ่ง
 
@@ -251,4 +305,4 @@ track กว้างได้ถึงราว 400px (3 × `max-w-32`) นั�
 |---|---|
 | `components/share/workflow-track.tsx` | เขียน render ใหม่ทั้งหมด props เดิม |
 | `styles/globals.css` | เพิ่ม `@layer components` สอง class |
-| `styles/badge-status.css` | เพิ่ม 3 custom property ท้ายบล็อก `:root` |
+| `styles/badge-status.css` | เพิ่ม 7 custom property ท้ายบล็อก `:root` (soft 4 + ink 3) และ 4 ตัวท้ายบล็อก `.dark` (ink 3 + approved-soft ที่ต้องลด %) |

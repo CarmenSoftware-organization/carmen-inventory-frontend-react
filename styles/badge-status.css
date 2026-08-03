@@ -153,10 +153,12 @@
   --status-cuisine-oceania-fg: oklch(0.98 0 0);
 
   /* ── Soft tints: พื้นลูกศรของ workflow-track ──
-     ผสมสีสถานะกับ --card ซึ่งพลิกเองตามธีม จึงประกาศครั้งเดียวพอ ไม่ต้องมีคู่ใน .dark:
+     ผสมสีสถานะกับ --card ซึ่งพลิกเองตามธีม จึงไม่ต้องมีคู่ใน .dark เพื่อให้ได้สีตามธีม:
      next-themes ตั้งค่า attribute="class" → :root กับ .dark อยู่บน <html> ตัวเดียวกัน
      และ var() ใน custom property ถูกแทนค่าตอน computed-value time บน element นั้น
      จึงได้ค่าที่ชนะ cascade เสมอ ไม่ขึ้นกับลำดับการประกาศในไฟล์
+     (--status-approved-soft ยังถูกประกาศซ้ำในบล็อก .dark ด้านล่าง แต่ด้วยเหตุผลเรื่อง
+     contrast ของข้อความ ไม่ใช่เพราะ color-mix ไม่พลิกตามธีม — อ่านที่นั่น)
      เปอร์เซ็นต์ต่างกันเพราะ in-progress (L 0.85) จางกว่าอีกสองสีมาก ต้องผสมเข้มขึ้น
      จึงจะเห็นเป็นพื้นเหลืองเท่ากัน
      ผสมใน oklab ไม่ใช่ oklch — oklch interpolate "มุม hue" และ --card คือ oklch(1 0 0)
@@ -165,6 +167,33 @@
   --status-approved-soft: color-mix(in oklab, var(--status-approved) 14%, var(--card));
   --status-in-progress-soft: color-mix(in oklab, var(--status-in-progress) 18%, var(--card));
   --status-voided-soft: color-mix(in oklab, var(--status-voided) 14%, var(--card));
+
+  /* pending = "ยังไม่ถึง" ไม่ใช่สถานะสี จึงไม่มี hue — ผสม --foreground เข้า --muted
+     เพียงเล็กน้อยให้ช่องมีรูปทรงแยกจากพื้นหน้า ไม่ใช่ให้เป็นสีเทาที่แปลว่าอะไร
+     ฐานเป็น --muted ไม่ใช่ --card เพราะช่องนี้เดิมคือ bg-muted อยู่แล้ว และ --muted
+     พลิกตามธีมเองเหมือน --card จึงยังประกาศครั้งเดียวพอ
+     2% ไม่ใช่เลขสวยแต่เป็นเพดานที่วัดได้: โหมดมืด --muted-foreground บน --muted
+     เริ่มต้นที่ 4.76:1 เหลือระยะถึงเส้น AA 4.5 แค่ 0.26 และทุก 1% ที่ผสมเพิ่มกินไป
+     ราว 0.09 — เกิน 2.5% ข้อความในช่องนี้ตกเกณฑ์
+     พื้นจริงที่แถบวางอยู่คือ --background ไม่ใช่ --card (routes/root-layout.tsx →
+     .space-main-gradient) วัดเทียบ --background: รูปทรง สว่าง 1.15 มืด 1.18
+     (bg-muted เปล่า ๆ ได้ 1.09 / 1.13) ข้อความ สว่าง 5.87 มืด 4.57 */
+  --status-pending-soft: color-mix(in oklab, var(--foreground) 2%, var(--muted));
+
+  /* ── Ink: สีไอคอนที่วางบนพื้น -soft ──
+     -soft ข้างบนคือพื้น ส่วน ink คือหมึกที่วางบนพื้นนั้น ใช้ค่า fill ตรง ๆ ไม่ได้ —
+     fill ถูกจูนมาเป็นพื้นทึบที่มี -fg วางทับ พอเอามาเป็นไอคอนบน tint ของตัวเอง
+     วัดได้ done 3.19 · in-progress 1.47 (เหลือง L 0.85 บนพื้นเหลืองอ่อน แทบมองไม่เห็น) ·
+     voided 3.94 ในโหมดสว่าง และ voided 2.75 ในโหมดมืด — ต่ำกว่า 3:1 ที่ WCAG 1.4.11
+     กำหนดไว้สำหรับ non-text UI component ในช่องที่แย่ที่สุด
+     ink คง hue กับ chroma ของ fill ไว้ เปลี่ยนแค่ L — pattern เดียวกับ --warning-ink
+     ใน globals.css จึงยังเป็นเฉดเขียว/เหลือง/ชมพูเดิม แค่เข้มพอให้อ่านออก
+     (วัดใหม่ได้ 5.0–5.7 ทุกช่อง ทั้งสองธีม)
+     ต่างจาก -soft ตรงที่ต้องประกาศคู่ .dark ด้วย: -soft เป็น color-mix ที่อ้าง
+     var(--card)/var(--muted) ซึ่งพลิกตามธีมให้เอง ส่วน ink เป็นค่าคงที่ ไม่มีตัวแปรให้พลิก */
+  --status-approved-ink: oklch(0.46 0.19 155);
+  --status-in-progress-ink: oklch(0.52 0.17 90);
+  --status-voided-ink: oklch(0.50 0.18 348.79);
 }
 
 /* ═══════════════════════════════════
@@ -285,6 +314,20 @@
 
   --status-cuisine-oceania: oklch(0.52 0.16 188.43);
   --status-cuisine-oceania-fg: oklch(0.95 0 0);
+
+  /* ── Soft tint ที่ต้องมีคู่โหมดมืด ──
+     ใน 4 ตัว มีแค่ approved ที่ต้องประกาศซ้ำ เพราะช่อง done เป็นช่องเดียวที่ใช้
+     --muted-foreground เป็นสีข้อความ (current/voided ใช้ --foreground ซึ่งเหลือ
+     ระยะเป็นสิบเท่า ส่วน pending ผสมแค่ 2% อยู่แล้ว) และในโหมดมืด --muted-foreground
+     บน --card เริ่มต้นที่ 4.89:1 เท่านั้น — tint 14% กินจนเหลือ 4.25 ตกเส้น AA 4.5
+     7% ได้ 4.58 และรูปทรงเทียบ --background ยังได้ 1.18 (14% ได้ 1.27) */
+  --status-approved-soft: color-mix(in oklab, var(--status-approved) 7%, var(--card));
+
+  /* ── Ink ── ดูเหตุผลเต็มในบล็อก :root · โหมดมืดสว่างขึ้นแทนที่จะเข้มลง
+     เพราะพื้น -soft ในธีมนี้เป็นสีเข้ม */
+  --status-approved-ink: oklch(0.67 0.17 155);
+  --status-in-progress-ink: oklch(0.76 0.15 90);
+  --status-voided-ink: oklch(0.70 0.16 348.79);
 }
 
 /* ═══════════════════════════════════
