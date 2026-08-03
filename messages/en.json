@@ -4326,5 +4326,12 @@
         "description": "Error-state demo — the fetcher rejects every time"
       }
     }
+  },
+  "history": {
+    "elapsedSeconds": "took {count}s",
+    "elapsedMinutes": "took {count} min",
+    "elapsedHours": "took {count} hr",
+    "elapsedDays": "took {count} days",
+    "documentCreated": "Document created"
   }
 }

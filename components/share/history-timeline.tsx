@@ -23,6 +23,8 @@ interface HistoryTimelineContextValue {
   readonly dateFormat: string;
   /** true ถ้า `dateFormat` มี token เวลาอยู่แล้ว (`HH`/`hh`) */
   readonly hasTime: boolean;
+  /** true = วันที่อยู่ในหัวข้อคั่นแล้ว รางซ้ายจึงเหลือแต่เวลา */
+  readonly groupByDay: boolean;
 }
 
 const HistoryTimelineContext = createContext<
@@ -50,6 +52,8 @@ function useHistoryTimelineContext() {
 
 interface HistoryTimelineProps {
   readonly children: ReactNode;
+  /** true เมื่อผู้เรียกแทรก `HistoryTimelineDay` คั่นเอง — รางซ้ายจะเหลือแต่เวลา */
+  readonly groupByDay?: boolean;
 }
 
 /**
@@ -68,7 +72,10 @@ interface HistoryTimelineProps {
  *   <HistoryTimelineItem at={entry.at} marker="current" title={entry.user.name} />
  * </HistoryTimeline>
  */
-export function HistoryTimeline({ children }: HistoryTimelineProps) {
+export function HistoryTimeline({
+  children,
+  groupByDay = false,
+}: HistoryTimelineProps) {
   // เรียก useProfile() ที่นี่เพียงครั้งเดียวต่อ sheet — ไม่ใช่ในทุกแถวของ
   // HistoryTimelineItem เพราะ hooks/use-profile.ts เปิด
   // `new BroadcastChannel(BU_SWITCH_CHANNEL)` ใน useEffect ของตัวเอง ถ้าประวัติมี
@@ -83,8 +90,8 @@ export function HistoryTimeline({ children }: HistoryTimelineProps) {
   const hasTime = dateFormat.includes("HH") || dateFormat.includes("hh");
 
   const contextValue = useMemo<HistoryTimelineContextValue>(
-    () => ({ dateFormat, hasTime }),
-    [dateFormat, hasTime],
+    () => ({ dateFormat, hasTime, groupByDay }),
+    [dateFormat, hasTime, groupByDay],
   );
 
   return (
@@ -96,17 +103,46 @@ export function HistoryTimeline({ children }: HistoryTimelineProps) {
   );
 }
 
+interface HistoryTimelineDayProps {
+  readonly children: ReactNode;
+}
+
+/**
+ * หัวข้อคั่นวัน — พิมพ์วันที่ครั้งเดียวต่อวัน แทนที่จะซ้ำทุกแถว
+ *
+ * workflow ที่จบภายในวันเดียวเคยพิมพ์วันที่เดิมซ้ำ 6 ครั้งในราง ซึ่งกินพื้นที่
+ * ให้กับสิ่งที่ไม่เปลี่ยน หัวข้อคั่นทำให้รางเหลือแต่เวลา และวันที่ยังอ่านได้
+ * ครบเมื่อ workflow ข้ามวัน
+ *
+ * @param props.children - ข้อความวันที่ที่ format แล้ว
+ * @returns React element ของแถวคั่นวัน (กินเต็มความกว้างทั้งสองคอลัมน์)
+ */
+export function HistoryTimelineDay({ children }: HistoryTimelineDayProps) {
+  return (
+    <li className="col-span-2 flex items-center gap-2 pt-2 pb-3 first:pt-0">
+      <span className="text-micro text-muted-foreground font-medium">
+        {children}
+      </span>
+      <span aria-hidden="true" className="bg-border h-px flex-1" />
+    </li>
+  );
+}
+
 export interface HistoryTimelineItemProps {
   /** ISO datetime — ใช้ทั้งข้อความในรางซ้ายและ attribute `dateTime` */
   readonly at: string;
   /** ชนิดของจุด marker (ค่าเริ่มต้น `default`) */
   readonly marker?: HistoryTimelineMarker;
-  /** Badge สถานะที่โมดูลสร้างเอง แสดงหน้าชื่อ */
+  /** `alert` = ก้าวที่ผิดจากทางปกติ (ตีกลับ/ปฏิเสธ) — ย้อมจุดเป็นสีเตือน */
+  readonly tone?: "default" | "alert";
+  /** Badge สถานะ — ตั้งใจให้ส่งมาเฉพาะก้าวที่ผิดปกติ ก้าวปกติปล่อยว่าง */
   readonly badge?: ReactNode;
-  /** ชื่อผู้ใช้ — ว่างได้ (บาง entry ของ PO ส่งมาแค่ id ไม่มีชื่อ) */
+  /** หัวข้อของก้าว (ในระดับเอกสารคือการเปลี่ยน stage) */
   readonly title?: ReactNode;
-  /** บรรทัดคำอธิบายใต้ชื่อ */
+  /** บรรทัดรองใต้หัวข้อ (ในระดับเอกสารคือชื่อผู้กระทำ) */
   readonly children?: ReactNode;
+  /** ระยะเวลาที่ค้างอยู่ก่อนถึงก้าวนี้ แสดงในช่องว่างของราง */
+  readonly elapsed?: ReactNode;
 }
 
 /**
@@ -118,22 +154,28 @@ export interface HistoryTimelineItemProps {
  *
  * @param props.at - ISO datetime ของก้าวนี้ (ว่างได้ รางจะว่างแทนที่จะพัง)
  * @param props.marker - ชนิดจุด marker
- * @param props.badge - Badge สถานะ
- * @param props.title - ชื่อผู้ใช้
- * @param props.children - คำอธิบายใต้ชื่อ
+ * @param props.tone - `alert` สำหรับก้าวที่ผิดจากทางปกติ
+ * @param props.badge - Badge สถานะ (ส่งเฉพาะก้าวผิดปกติ)
+ * @param props.title - หัวข้อของก้าว
+ * @param props.children - บรรทัดรองใต้หัวข้อ
+ * @param props.elapsed - ระยะเวลาที่ค้างก่อนถึงก้าวนี้
  * @returns React element ของหนึ่งก้าว
  */
 export function HistoryTimelineItem({
   at,
   marker = "default",
+  tone = "default",
   badge,
   title,
   children,
+  elapsed,
 }: HistoryTimelineItemProps) {
-  const { dateFormat, hasTime } = useHistoryTimelineContext();
+  const { dateFormat, hasTime, groupByDay } = useHistoryTimelineContext();
 
-  const dateLine = formatDate(at, dateFormat);
-  const timeLine = hasTime ? "" : formatDate(at, "HH:mm");
+  // เมื่อจัดกลุ่มตามวัน วันที่ย้ายไปอยู่หัวข้อคั่นแล้ว รางเหลือแต่เวลา — ใช้
+  // "HH:mm" ตรง ๆ ไม่ต้องแยกส่วนเวลาออกจาก dateFormat ซึ่งทำไม่ได้เสมอไป
+  const dateLine = groupByDay ? formatDate(at, "HH:mm") : formatDate(at, dateFormat);
+  const timeLine = groupByDay || hasTime ? "" : formatDate(at, "HH:mm");
   // dateLine ว่างแปลว่า `at` parse เป็นวันที่ไม่ได้ (ดู formatDate) — attribute
   // `dateTime` ต้องไม่ใส่ค่าที่ไม่ valid ไปด้วย ปล่อยเป็น undefined แทน
   const dateTimeAttr = dateLine ? at : undefined;
@@ -152,14 +194,23 @@ export function HistoryTimelineItem({
           aria-hidden="true"
           className={cn(
             "ring-background absolute top-1.5 left-0 size-2 -translate-x-1/2 rounded-full ring-4",
-            MARKER_CLASS[marker],
+            tone === "alert" ? "bg-destructive" : MARKER_CLASS[marker],
           )}
         />
-        {/* badge อยู่บรรทัดของตัวเอง ชื่อผู้ใช้ลงมาอยู่ใต้ — ในราง 273px ที่
-            เหลือหลังหักคอลัมน์วันที่ ชื่อไทยเต็มยศกับ badge ยืนแถวเดียวกันไม่พอ */}
-        {badge && <div>{badge}</div>}
-        {title && <p className="mt-1 text-sm font-medium">{title}</p>}
+        {/* หัวข้อกับ badge อยู่แถวเดียวกันได้ เพราะ badge ถูกสงวนไว้ให้ก้าวที่
+            ผิดปกติเท่านั้น — แถวส่วนใหญ่จึงมีแค่หัวข้อ ไม่แย่งที่กัน */}
+        {(title || badge) && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {title && <p className="text-sm font-medium">{title}</p>}
+            {badge}
+          </div>
+        )}
         {children && <p className="text-muted-foreground text-xs">{children}</p>}
+        {elapsed && (
+          <p className="text-muted-foreground/70 mt-2 text-micro-legal">
+            {elapsed}
+          </p>
+        )}
       </div>
     </li>
   );

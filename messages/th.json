@@ -4315,5 +4315,12 @@
         "description": "ตัวอย่าง error state — fetcher reject ทุกครั้ง"
       }
     }
+  },
+  "history": {
+    "elapsedSeconds": "ใช้เวลา {count} วินาที",
+    "elapsedMinutes": "ใช้เวลา {count} นาที",
+    "elapsedHours": "ใช้เวลา {count} ชั่วโมง",
+    "elapsedDays": "ใช้เวลา {count} วัน",
+    "documentCreated": "สร้างเอกสาร"
   }
 }
