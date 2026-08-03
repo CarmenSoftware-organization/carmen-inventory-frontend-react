@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { useTranslations } from "use-intl";
 import {
+  formatElapsed,
   HistoryTimeline,
   HistoryTimelineDay,
   HistoryTimelineItem,
@@ -45,40 +46,6 @@ function stagesOf(entry: WorkflowHistoryTimelineEntry): string[] {
   return [entry.current_stage, entry.next_stage].filter(
     (stage): stage is string => !!stage && stage !== NO_STAGE,
   );
-}
-
-/**
- * ช่วงเวลาระหว่างสองก้าว เป็นข้อความสั้นตาม locale
- *
- * คืน `null` เมื่อห่างกันไม่ถึง 5 วินาที เพราะนั่นคือก้าวที่ระบบทำต่อกันเองใน
- * ทรานแซกชันเดียว (เช่น approve ด่านสุดท้ายแล้ว complete ทันที) — บอกว่า
- * "ผ่านไป 0 วินาที" ไม่ได้ให้ข้อมูลอะไร มีแต่เพิ่มบรรทัด
- *
- * @param fromIso - เวลาของก้าวก่อนหน้า (เก่ากว่า)
- * @param toIso - เวลาของก้าวนี้
- * @param t - ตัวแปลจาก namespace `history`
- * @returns ข้อความช่วงเวลา หรือ null เมื่อสั้นเกินกว่าจะมีความหมาย
- */
-function formatElapsed(
-  fromIso: string,
-  toIso: string,
-  t: (key: string, values?: Record<string, number>) => string,
-): string | null {
-  const from = new Date(fromIso).getTime();
-  const to = new Date(toIso).getTime();
-  if (Number.isNaN(from) || Number.isNaN(to)) return null;
-
-  const seconds = Math.round((to - from) / 1000);
-  if (seconds < 5) return null;
-  if (seconds < 60) return t("elapsedSeconds", { count: seconds });
-
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return t("elapsedMinutes", { count: minutes });
-
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return t("elapsedHours", { count: hours });
-
-  return t("elapsedDays", { count: Math.round(hours / 24) });
 }
 
 interface WorkflowHistoryTimelineProps {

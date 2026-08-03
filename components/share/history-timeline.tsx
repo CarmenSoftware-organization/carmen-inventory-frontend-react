@@ -1,4 +1,10 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { ChevronRight } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
@@ -15,6 +21,43 @@ const MARKER_CLASS = {
   /** จุดกำเนิดเอกสาร เช่น แถวผู้ร้องขอ — วงกลมกลวง */
   origin: "bg-background border-2 border-border",
 } as const;
+
+/**
+ * ช่วงเวลาระหว่างสองก้าว เป็นข้อความสั้นตาม locale
+ *
+ * คืน `null` เมื่อห่างกันไม่ถึง 5 วินาที เพราะนั่นคือก้าวที่ระบบทำต่อกันเองใน
+ * ทรานแซกชันเดียว (เช่น approve ด่านสุดท้ายแล้ว complete ทันที) — บอกว่า
+ * "ผ่านไป 0 วินาที" ไม่ได้ให้ข้อมูลอะไร มีแต่เพิ่มบรรทัด
+ *
+ * อยู่ที่นี่เพราะไทม์ไลน์ทุกตัวที่แสดงช่องว่างของรางต้องใช้ข้อความชุดเดียวกัน
+ * (workflow history ระดับเอกสาร และ activity log ของใบขอซื้อ)
+ *
+ * @param fromIso - เวลาของก้าวก่อนหน้า (เก่ากว่า)
+ * @param toIso - เวลาของก้าวนี้
+ * @param t - ตัวแปลจาก namespace `history`
+ * @returns ข้อความช่วงเวลา หรือ null เมื่อสั้นเกินกว่าจะมีความหมาย
+ */
+export function formatElapsed(
+  fromIso: string,
+  toIso: string,
+  t: (key: string, values?: Record<string, number>) => string,
+): string | null {
+  const from = new Date(fromIso).getTime();
+  const to = new Date(toIso).getTime();
+  if (Number.isNaN(from) || Number.isNaN(to)) return null;
+
+  const seconds = Math.round((to - from) / 1000);
+  if (seconds < 5) return null;
+  if (seconds < 60) return t("elapsedSeconds", { count: seconds });
+
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return t("elapsedMinutes", { count: minutes });
+
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return t("elapsedHours", { count: hours });
+
+  return t("elapsedDays", { count: Math.round(hours / 24) });
+}
 
 export type HistoryTimelineMarker = keyof typeof MARKER_CLASS;
 
@@ -143,6 +186,21 @@ export interface HistoryTimelineItemProps {
   readonly children?: ReactNode;
   /** ระยะเวลาที่ค้างอยู่ก่อนถึงก้าวนี้ แสดงในช่องว่างของราง */
   readonly elapsed?: ReactNode;
+  /**
+   * เนื้อหาที่กางออก — ส่งมาเมื่อไหร่ แถวจะกลายเป็น accordion
+   *
+   * เนื้อหาถูกวางในคอลัมน์เดียวกับหัวข้อ เส้นราง (`border-l` ของคอลัมน์นั้น)
+   * จึงยืดคลุมเองโดยไม่ต้องวัดความสูง
+   */
+  readonly expandable?: ReactNode;
+  /**
+   * สถานะกาง — controlled ล้วน ผู้เรียกต้องถือ state เอง
+   *
+   * ตั้งใจไม่มีโหมด uncontrolled เพราะผู้ใช้จริงทุกรายต้องการ "เปิดได้ทีละแถว"
+   * ซึ่งทำไม่ได้ถ้าแต่ละแถวถือ state ของตัวเอง
+   */
+  readonly open?: boolean;
+  readonly onOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -159,6 +217,9 @@ export interface HistoryTimelineItemProps {
  * @param props.title - หัวข้อของก้าว
  * @param props.children - บรรทัดรองใต้หัวข้อ
  * @param props.elapsed - ระยะเวลาที่ค้างก่อนถึงก้าวนี้
+ * @param props.expandable - เนื้อหาที่กางออก (ส่งมาแล้วแถวจะกลายเป็น accordion)
+ * @param props.open - สถานะกาง (controlled)
+ * @param props.onOpenChange - callback เมื่อกด trigger
  * @returns React element ของหนึ่งก้าว
  */
 export function HistoryTimelineItem({
@@ -169,6 +230,9 @@ export function HistoryTimelineItem({
   title,
   children,
   elapsed,
+  expandable,
+  open,
+  onOpenChange,
 }: HistoryTimelineItemProps) {
   const { dateFormat, hasTime, groupByDay } = useHistoryTimelineContext();
 
@@ -179,6 +243,25 @@ export function HistoryTimelineItem({
   // dateLine ว่างแปลว่า `at` parse เป็นวันที่ไม่ได้ (ดู formatDate) — attribute
   // `dateTime` ต้องไม่ใส่ค่าที่ไม่ valid ไปด้วย ปล่อยเป็น undefined แทน
   const dateTimeAttr = dateLine ? at : undefined;
+
+  // หัวข้อ + บรรทัดรอง ใช้ร่วมกันทั้งแถวที่กางได้และกางไม่ได้ — แถวที่กางได้เอา
+  // ทั้งก้อนไปใส่ใน trigger เพื่อให้คลิกที่หัวข้อก็เปิด ไม่ใช่ต้องเล็งลูกศรเล็ก ๆ
+  const headline = (
+    <>
+      {/* หัวข้อกับ badge อยู่แถวเดียวกันได้ เพราะ badge ถูกสงวนไว้ให้ก้าวที่
+          ผิดปกติเท่านั้น — แถวส่วนใหญ่จึงมีแค่หัวข้อ ไม่แย่งที่กัน */}
+      {(title || badge) && (
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          {title && <p className="text-sm font-medium">{title}</p>}
+          {badge}
+        </div>
+      )}
+      {/* div ไม่ใช่ p — แถวที่กางได้เอาก้อนนี้ไปไว้ในปุ่ม ซึ่งซ้อนใน <p> ไม่ได้ */}
+      {children && (
+        <div className="text-muted-foreground text-xs">{children}</div>
+      )}
+    </>
+  );
 
   return (
     <li className="group/hist col-span-2 grid grid-cols-subgrid">
@@ -197,15 +280,25 @@ export function HistoryTimelineItem({
             tone === "alert" ? "bg-destructive" : MARKER_CLASS[marker],
           )}
         />
-        {/* หัวข้อกับ badge อยู่แถวเดียวกันได้ เพราะ badge ถูกสงวนไว้ให้ก้าวที่
-            ผิดปกติเท่านั้น — แถวส่วนใหญ่จึงมีแค่หัวข้อ ไม่แย่งที่กัน */}
-        {(title || badge) && (
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            {title && <p className="text-sm font-medium">{title}</p>}
-            {badge}
-          </div>
+        {expandable ? (
+          <Collapsible open={open} onOpenChange={onOpenChange}>
+            <CollapsibleTrigger className="hover:bg-muted/50 focus-visible:ring-ring flex w-full cursor-pointer items-start gap-2 rounded-md py-0.5 pr-1 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none">
+              <div className="min-w-0 flex-1">{headline}</div>
+              <ChevronRight
+                aria-hidden="true"
+                className={cn(
+                  "text-muted-foreground mt-1 size-3.5 shrink-0 transition-transform",
+                  open && "rotate-90",
+                )}
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent>{expandable}</CollapsibleContent>
+          </Collapsible>
+        ) : (
+          headline
         )}
-        {children && <p className="text-muted-foreground text-xs">{children}</p>}
+        {/* elapsed อยู่นอก Collapsible เสมอ — ความหมายของมันคือช่องว่างที่ติดกับ
+            แถวที่เก่ากว่าซึ่งอยู่ข้างล่าง ต้องเห็นได้ทั้งตอนกางและตอนหุบ */}
         {elapsed && (
           <p className="text-muted-foreground/70 mt-2 text-micro-legal">
             {elapsed}
