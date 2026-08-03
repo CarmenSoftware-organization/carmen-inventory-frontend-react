@@ -147,10 +147,10 @@ export function CnItem({ form, disabled }: Props) {
         {/* columnsResizable → คอลัมน์กว้างตาม size (px) จริง; DataGridContainer เป็น
             native scroll (overflow-auto) — scroll แนวนอนแบบ PR (ไม่ห่อ Radix ScrollArea
             เลี่ยง nested scroll ที่สะดุด)
-            · pb-2 = ที่ว่างให้ scrollbar แนวนอนยืน · CN เป็นตารางแบน ไม่มีแถวกาง
+            · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน (เท่ากันทุกโมดูล) · CN เป็นตารางแบน ไม่มีแถวกาง
             แถวสุดท้ายจึงชนขอบล่างพอดี แล้ว scrollbar (แบบลอยทับบน macOS) ไปบัง
             ตัวเลขแถวนั้น */}
-        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] pb-2">
+        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] pb-3">
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>

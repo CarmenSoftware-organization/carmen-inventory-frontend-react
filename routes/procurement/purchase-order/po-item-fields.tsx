@@ -380,8 +380,10 @@ export function PoItemFields({
           }
         >
           {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ
-              Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด) */}
-          <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+              Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด)
+              · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน — บน macOS แถบนี้ลอยทับ
+              เนื้อหาโดยไม่กินที่ ไม่เว้นไว้มันจะไปบังตัวเลขแถวสุดท้าย */}
+          <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] pb-3">
             <DataGridTable />
           </DataGridContainer>
         </DataGrid>
