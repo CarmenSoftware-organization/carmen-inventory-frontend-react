@@ -14,6 +14,7 @@ import {
   indexColumn,
   statusColumn,
   actionColumn,
+  type ActionColumnActivity,
 } from "./columns";
 
 interface UseConfigTableOptions<T> {
@@ -31,6 +32,14 @@ interface UseConfigTableOptions<T> {
    * เช่น ซ่อนคอลัมน์ audit เป็น default: `{ columnVisibility: { created_at: false, updated_at: false } }`
    */
   initialState?: InitialTableState;
+  /**
+   * เปิดเมนู Activity ในแถว — ไม่ส่ง = ไม่มีเมนู
+   *
+   * เปิดเฉพาะ list ที่ backend บันทึกกิจกรรมให้จริง (ดู `activity-registry.ts`
+   * ฝั่ง micro-business) — เปิดให้ตารางที่ไม่มีในทะเบียนจะได้เมนูที่กดแล้วว่าง
+   * เช่น certification / eco / equipment / recipe / period
+   */
+  activity?: ActionColumnActivity<T>;
 }
 
 /**
@@ -68,6 +77,7 @@ export function useConfigTable<T>({
   hideStatus,
   permissionPrefix,
   initialState,
+  activity,
 }: UseConfigTableOptions<T>) {
   // "use no memo" opts out of React Compiler's automatic memoization.
   // TanStack Table creates new column/row objects each render; memoizing them
@@ -89,7 +99,13 @@ export function useConfigTable<T>({
     ...columns,
     ...(hideStatus ? [] : [statusColumn<T>()]),
     ...(onDelete
-      ? [actionColumn<T>(onDelete, { deleteDenied, deletePermission })]
+      ? [
+          actionColumn<T>(onDelete, {
+            deleteDenied,
+            deletePermission,
+            activity,
+          }),
+        ]
       : []),
   ];
 

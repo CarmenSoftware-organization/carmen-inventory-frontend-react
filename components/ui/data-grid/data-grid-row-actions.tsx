@@ -1,5 +1,5 @@
 
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { History, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
+import { openActivity } from "@/components/share/activity-sheet-host";
 import type { Permission } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 
@@ -23,22 +24,34 @@ interface DataGridRowActionsProps {
   /** Permission codes สำหรับใช้ใน dispatch event เมื่อ denied */
   readonly editPermission?: Permission;
   readonly deletePermission?: Permission;
+  /**
+   * เปิดเมนู Activity ของแถวนี้ — ไม่ส่ง = ไม่มีเมนู
+   *
+   * เปิดเฉพาะตารางที่ backend บันทึกกิจกรรมให้จริง (ดู activity-registry.ts ฝั่ง
+   * micro-business) เปิดให้ตารางที่ไม่มีในทะเบียนจะได้เมนูที่กดแล้วว่างเปล่า
+   */
+  readonly activity?: { id: string; label?: string };
 }
 
 /**
  * Dropdown menu ของ row actions
  *
- * Render ปุ่มไอคอน MoreHorizontal เปิด dropdown ที่มีเมนู Edit และ Delete
- * (Delete ใช้ destructive variant) เมนูจะแสดงเฉพาะเมื่อมี callback ที่ส่ง
- * เข้ามา และมี separator ระหว่าง Edit-Delete เมื่อมีทั้งคู่
+ * Render ปุ่มไอคอน MoreHorizontal เปิด dropdown ที่มีเมนู Edit, Activity และ
+ * Delete (Delete ใช้ destructive variant) เมนูจะแสดงเฉพาะเมื่อมี callback หรือ
+ * ข้อมูลที่ส่งเข้ามา และมี separator คั่นระหว่างกลุ่มที่มีจริงเท่านั้น
  *
  * @param props - props ของ component
  * @param props.onEdit - callback เมื่อกด Edit (optional)
  * @param props.onDelete - callback เมื่อกด Delete (optional)
+ * @param props.activity - id/label ของแถวสำหรับเปิด activity sheet (optional)
  * @returns JSX element ของ action dropdown
  * @example
  * ```tsx
- * <DataGridRowActions onEdit={() => edit(item)} onDelete={() => del(item)} />
+ * <DataGridRowActions
+ *   onEdit={() => edit(item)}
+ *   onDelete={() => del(item)}
+ *   activity={{ id: item.id, label: item.code }}
+ * />
  * ```
  */
 export function DataGridRowActions({
@@ -48,8 +61,10 @@ export function DataGridRowActions({
   deleteDenied,
   editPermission,
   deletePermission,
+  activity,
 }: DataGridRowActionsProps) {
   const tc = useTranslations("common");
+  const tActivity = useTranslations("activity");
 
   const handleEdit = editDenied
     ? () => dispatchPermissionDenied(editPermission)
@@ -77,7 +92,19 @@ export function DataGridRowActions({
               {tc("edit")}
             </DropdownMenuItem>
           )}
-          {onEdit && onDelete && <DropdownMenuSeparator />}
+          {onEdit && (activity || onDelete) && <DropdownMenuSeparator />}
+          {activity && (
+            <DropdownMenuItem
+              className="cursor-pointer"
+              // onSelect ไม่ใช่ onClick — Radix ต้องปิดเมนูและคืน focus ให้เสร็จ
+              // ก่อน Sheet จะ mount ไม่งั้นสองตัวแย่ง focus กัน
+              onSelect={() => openActivity(activity.id, activity.label)}
+            >
+              <History className="size-3" />
+              {tActivity("title")}
+            </DropdownMenuItem>
+          )}
+          {activity && onDelete && <DropdownMenuSeparator />}
           {onDelete && (
             <DropdownMenuItem
               onClick={handleDelete}

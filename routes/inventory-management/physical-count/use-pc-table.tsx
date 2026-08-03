@@ -61,5 +61,6 @@ export function usePhysicalCountTable({
     params,
     tableConfig,
     onDelete,
+    activity: { id: (r) => r.id, label: (r) => r.department_name },
   });
 }
