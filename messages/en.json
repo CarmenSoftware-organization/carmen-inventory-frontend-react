@@ -3052,6 +3052,7 @@
     "purchaseOrder": {
       "entity": "Purchase Order",
       "tabWorkflowHistory": "Workflow History",
+      "noWorkflowHistory": "No workflow history",
       "title": "Purchase Order",
       "desc": "Manage purchase orders.",
       "add": "Add Purchase Order",
