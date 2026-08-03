@@ -238,7 +238,6 @@ export function PurchaseRequestForm({
             onCancel={actions.handleCancel}
             onDelete={() => actions.setShowDelete(true)}
             onComment={() => actions.setShowComment(true)}
-            onActivity={() => actions.setShowActivity(true)}
           />
         }
       />
@@ -281,8 +280,6 @@ export function PurchaseRequestForm({
         setShowComment={actions.setShowComment}
         showHistory={actions.showHistory}
         setShowHistory={actions.setShowHistory}
-        showActivity={actions.showActivity}
-        setShowActivity={actions.setShowActivity}
         workflowHistory={purchaseRequest?.workflow_history}
         requestorName={purchaseRequest?.requestor_name}
         createdAt={purchaseRequest?.audit?.created?.at}

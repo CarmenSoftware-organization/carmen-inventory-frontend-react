@@ -32,10 +32,14 @@ import {
 /**
  * action → key หัวข้อใน namespace `history` (action นอกรายการนี้ตกไปที่ humanize)
  *
- * ครอบทั้ง action ของ CRUD และของ workflow (`ActionPr` ใน `types/stage-role.ts`)
- * เพราะ backend เขียนทั้งสองชุดลง activity log เดียวกัน — เอกสารจริงส่วนใหญ่มี
- * แถว workflow มากกว่าแถว CRUD ถ้าไม่ครอบไว้ หัวข้อจะค้างเป็นภาษาอังกฤษจาก
- * humanize แม้ผู้ใช้สลับเป็นไทย
+ * ครอบทั้ง action ของ CRUD และของ workflow เพราะ backend เขียนทั้งสองชุดลง
+ * activity log เดียวกัน — เอกสารจริงส่วนใหญ่มีแถว workflow มากกว่าแถว CRUD
+ * ถ้าไม่ครอบไว้ หัวข้อจะค้างเป็นภาษาอังกฤษจาก humanize แม้ผู้ใช้สลับเป็นไทย
+ *
+ * รายการนี้ตรงกับค่าที่ registry ของ micro-business บันทึกจริง
+ * (`common/activity/activity-registry.ts`) ซึ่งเป็นสับเซตของ enum
+ * `enum_activity_action` ฝั่ง DB — ค่าอย่าง `view` / `login` / `export` มีในเอนัม
+ * แต่ไม่มี handler ไหนเขียนให้เอกสารหรือข้อมูลหลัก จึงไม่ต้องมีหัวข้อ
  */
 const ACTION_TITLE_KEY: Record<string, string> = {
   create: "actionCreated",
@@ -44,23 +48,26 @@ const ACTION_TITLE_KEY: Record<string, string> = {
   save: "actionSaved",
   submit: "actionSubmitted",
   approve: "actionApproved",
-  purchase: "actionPurchased",
   review: "actionReviewed",
   reject: "actionRejected",
-  send_back: "actionSentBack",
+  cancel: "actionCancelled",
+  void: "actionVoided",
+  print: "actionPrinted",
+  comment: "actionCommented",
 };
 
 /**
  * action ที่ทำลายข้อมูลหรือออกนอกทางปกติของ workflow — ย้อมจุด marker เป็นสีเตือน
  * เจตนาเดียวกับ `ALERT_ACTIONS` ของ workflow history (กวาดตาไทม์ไลน์แล้วเจอทันที
- * ว่าใบนี้เคยถูกตีกลับ ถูกปฏิเสธ หรือถูกลบอะไรไป) แต่คำศัพท์ไม่ตรงกัน — activity
- * log เก็บ action เป็นรูปฐาน (`delete` / `reject` / `send_back`) ส่วน
- * `workflow_history` เก็บเป็นรูปอดีต (`rejected` / `sent_back`) จึงก๊อปมาแปลงรูป
- * ไม่ได้ตรง ๆ ส่วน `voided` / `cancelled` ของ workflow history ไม่มีคู่ในเซตนี้
- * โดยตั้งใจ — การ void ใบขอซื้อทำผ่าน PATCH ธรรมดา ซึ่ง activity log บันทึกเป็น
- * action `update` เหมือนการแก้ไขทั่วไป ไม่มี action เฉพาะให้ครอบ
+ * ว่ารายการนี้เคยถูกปฏิเสธ ยกเลิก หรือถูกลบอะไรไป) แต่คำศัพท์ไม่ตรงกัน — activity
+ * log เก็บ action เป็นรูปฐาน (`delete` / `reject` / `cancel`) ส่วน
+ * `workflow_history` เก็บเป็นรูปอดีต (`rejected` / `cancelled`) จึงก๊อปมาแปลงรูป
+ * ไม่ได้ตรง ๆ
+ *
+ * `send_back` ไม่อยู่ในเซตนี้เพราะไม่มีใน enum ของคอลัมน์ `action` จึงไม่มีทาง
+ * ถูกบันทึก — การตีกลับถูกเก็บใน `workflow_history` ซึ่งมีหน้าเฉพาะของมันอยู่แล้ว
  */
-const ALERT_ACTIONS = new Set(["delete", "reject", "send_back"]);
+const ALERT_ACTIONS = new Set(["delete", "reject", "cancel", "void"]);
 
 /**
  * ฟิลด์ที่ไม่เอามาแสดง
@@ -204,11 +211,11 @@ function ChildChangeBlock({
   label: string;
   rowsById: Map<string, Record<string, unknown>>;
 }) {
-  const t = useTranslations("procurement.purchaseRequest");
+  const t = useTranslations("activity");
   const counts = [
-    { label: t("activityAdded"), n: child.added.length },
-    { label: t("activityRemoved"), n: child.removed.length },
-    { label: t("activityUpdated"), n: child.updated.length },
+    { label: t("added"), n: child.added.length },
+    { label: t("removed"), n: child.removed.length },
+    { label: t("updated"), n: child.updated.length },
   ].filter((c) => c.n > 0);
 
   // แถวที่เหลือแต่ฟิลด์ที่ซ่อนอยู่แล้ว = ไม่มีอะไรให้ดู
@@ -260,7 +267,7 @@ function ChildChangeBlock({
 
 /** เนื้อหาที่กางออกของ log หนึ่งรายการ — โหลด diff ตอนกางเท่านั้น */
 function ActivityChanges({ logId }: { logId: string }) {
-  const t = useTranslations("procurement.purchaseRequest");
+  const t = useTranslations("activity");
   const { data, isLoading, isError } = useActivityLogDetail(logId);
 
   if (isLoading)
@@ -273,7 +280,7 @@ function ActivityChanges({ logId }: { logId: string }) {
   if (isError || !data)
     return (
       <p className="text-destructive py-2 text-micro">
-        {t("activityLoadError")}
+        {t("loadError")}
       </p>
     );
 
@@ -282,7 +289,7 @@ function ActivityChanges({ logId }: { logId: string }) {
   if (!fields.length && !data.changes.children.length)
     return (
       <p className="text-muted-foreground py-2 text-micro">
-        {t("activityNoChanges")}
+        {t("noChanges")}
       </p>
     );
 
@@ -307,42 +314,50 @@ function ActivityChanges({ logId }: { logId: string }) {
   );
 }
 
-interface PrActivitySheetProps {
-  readonly prId: string | undefined;
-  readonly prNo?: string;
+interface ActivitySheetProps {
+  readonly entityId: string | undefined;
+  /** เลขที่เอกสารหรือชื่อรายการ — ขึ้นในคำอธิบายหัว sheet */
+  readonly label?: string;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
 }
 
 /**
- * Sheet แสดงประวัติกิจกรรมของใบขอซื้อใบเดียวเป็นไทม์ไลน์ เรียงล่าสุดขึ้นก่อน
- * แตะที่แถวเพื่อกางดูว่าฟิลด์ไหนและรายการสินค้าใดเปลี่ยนไป (โหลด diff ตอนกาง
- * เท่านั้นเพราะ snapshot ของเอกสารมีขนาดใหญ่) เปิดได้ทีละแถว
+ * Sheet แสดงประวัติกิจกรรมของรายการเดียวเป็นไทม์ไลน์ เรียงล่าสุดขึ้นก่อน
+ * แตะที่แถวเพื่อกางดูว่าฟิลด์ไหนและแถวลูกใดเปลี่ยนไป (โหลด diff ตอนกางเท่านั้น
+ * เพราะ snapshot ของเอกสารมีขนาดใหญ่) เปิดได้ทีละแถว
  *
- * ใช้ไทม์ไลน์ชุดเดียวกับ workflow history เพราะผู้ใช้เปิดทั้งสอง sheet จากแถบ
- * เดียวกันในหน้าเดียวกัน — คนละภาษาภาพในหน้าเดียวอ่านสะดุด
+ * ใช้ได้กับทุก entity ที่ backend บันทึกกิจกรรมให้ — ทั้งเอกสารธุรกรรมและข้อมูลหลัก
+ * โดยไม่ต้องบอกว่าเป็นตารางไหน เพราะ `useActivityLogByRecord` ยิงด้วย entity id
+ * ล้วน (UUID ไม่ซ้ำข้ามตาราง) และชื่อตารางลูกที่ใช้ตั้งหัวข้อ diff อ่านจาก
+ * `entity_type` ที่มากับ response รายตัวอยู่แล้ว
+ *
+ * ใช้ไทม์ไลน์ชุดเดียวกับ workflow history เพราะในหน้าเอกสารผู้ใช้เปิดทั้งสอง sheet
+ * จากแถบเดียวกัน — คนละภาษาภาพในหน้าเดียวอ่านสะดุด
+ *
+ * ปกติไม่เรียกตรง ๆ — เรียกผ่าน `openActivity()` ของ `activity-sheet-host` แทน
  * @param props - คุณสมบัติของ sheet
- * @param props.prId - รหัสใบขอซื้อที่จะดูประวัติ
- * @param props.prNo - เลขที่เอกสาร ใช้แสดงในคำอธิบายหัว sheet
+ * @param props.entityId - รหัสของรายการที่จะดูประวัติ
+ * @param props.label - เลขที่เอกสารหรือชื่อรายการ ใช้แสดงในคำอธิบายหัว sheet
  * @param props.open - สถานะเปิด/ปิดของ sheet
  * @param props.onOpenChange - callback เมื่อสถานะเปิด/ปิดเปลี่ยน
  * @returns React element ของ activity sheet
  * @example
- * <PrActivitySheet
- *   prId={purchaseRequest?.id}
- *   prNo={purchaseRequest?.pr_no}
- *   open={showActivity}
- *   onOpenChange={setShowActivity}
+ * <ActivitySheet
+ *   entityId={purchaseOrder?.id}
+ *   label={purchaseOrder?.po_no}
+ *   open={open}
+ *   onOpenChange={setOpen}
  * />
  */
-export function PrActivitySheet({
-  prId,
-  prNo,
+export function ActivitySheet({
+  entityId,
+  label,
   open,
   onOpenChange,
-}: PrActivitySheetProps) {
-  const t = useTranslations("procurement.purchaseRequest");
-  // key หัวข้อกับข้อความช่วงเวลาเป็นคำของไทม์ไลน์ ไม่ใช่ศัพท์ของใบขอซื้อ
+}: ActivitySheetProps) {
+  const t = useTranslations("activity");
+  // key หัวข้อกับข้อความช่วงเวลาเป็นคำของไทม์ไลน์ ไม่ใช่ศัพท์ของ activity
   // จึงอยู่คนละ namespace กับ `t`
   const tHistory = useTranslations("history");
   const { dateFormat } = useProfile();
@@ -350,7 +365,7 @@ export function PrActivitySheet({
 
   // fetch ต่อเมื่อ sheet เปิด — ผู้ใช้ส่วนใหญ่ไม่เคยกดปุ่มนี้
   const { data, isLoading, isError } = useActivityLogByRecord(
-    open ? prId : undefined,
+    open ? entityId : undefined,
     { perpage: 50 },
   );
 
@@ -388,9 +403,9 @@ export function PrActivitySheet({
         className="w-full overflow-hidden sm:max-w-xl lg:max-w-2xl"
       >
         <SheetHeader className="space-y-1">
-          <SheetTitle className="text-sm">{t("activity")}</SheetTitle>
+          <SheetTitle className="text-sm">{t("title")}</SheetTitle>
           <SheetDescription className="text-xs">
-            {prNo ? `${prNo} · ${t("activityDesc")}` : t("activityDesc")}
+            {label ? `${label} · ${t("description")}` : t("description")}
           </SheetDescription>
         </SheetHeader>
 
@@ -404,11 +419,11 @@ export function PrActivitySheet({
           )}
 
           {isError && (
-            <p className="text-destructive text-xs">{t("activityLoadError")}</p>
+            <p className="text-destructive text-xs">{t("loadError")}</p>
           )}
 
           {!isLoading && !isError && steps.length === 0 && (
-            <p className="text-muted-foreground text-xs">{t("activityEmpty")}</p>
+            <p className="text-muted-foreground text-xs">{t("empty")}</p>
           )}
 
           {steps.length > 0 && (
@@ -434,7 +449,7 @@ export function PrActivitySheet({
                     // Radix ไม่ mount เนื้อหาของ CollapsibleContent ตอนหุบ
                     // ActivityChanges จึงยังไม่ยิง request จนกว่าจะกาง — snapshot
                     // ของเอกสารก้อนใหญ่ ยิงทุกแถวตอนเปิด sheet ไม่ไหว
-                    // (pr-activity-sheet.test.tsx ล็อกพฤติกรรมนี้ไว้)
+                    // (activity-sheet.test.tsx ล็อกพฤติกรรมนี้ไว้)
                     expandable={<ActivityChanges logId={step.id} />}
                   >
                     {step.actor}
