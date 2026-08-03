@@ -352,6 +352,39 @@
   --shadow-2xl: var(--shadow-2xl);
 }
 
+@layer components {
+  /* ── workflow-track: ลูกศรลำดับขั้นเอกสาร ──
+     บากซ้ายรับปลายของช่องก่อนหน้า แหลมขวาชี้ทิศทางที่เอกสารกำลังเดินไป
+     ใช้ clip-path ไม่ใช่สามเหลี่ยม pseudo-element เพราะกล่องต้องยืดตามความยาว
+     ชื่อขั้นเอง และรับสีจาก CSS custom property ได้ตรง ๆ (dark mode จึงมาฟรี)
+     ข้อแลก: clip ตัดเส้นขอบไปด้วย ใส่ border ไม่ได้ — ออกแบบเป็นพื้น tint จึงไม่กระทบ */
+  .wf-chevron {
+    --wf-notch: 0.5rem;
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--wf-notch)) 0,
+      100% 50%,
+      calc(100% - var(--wf-notch)) 100%,
+      0 100%,
+      var(--wf-notch) 50%
+    );
+  }
+
+  /* ช่องแรก — ซ้ายตัดตรง ไม่มีปลายของใครมาเสียบ
+     ต้องใส่คู่กับ .wf-chevron เสมอ (--wf-notch มาจาก class นั้น) และต้องประกาศ
+     หลัง .wf-chevron ในไฟล์ — specificity เท่ากัน (0,1,0) ลำดับใน source
+     จึงเป็นตัวตัดสินว่า clip-path ไหนชนะ */
+  .wf-chevron-head {
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--wf-notch)) 0,
+      100% 50%,
+      calc(100% - var(--wf-notch)) 100%,
+      0 100%
+    );
+  }
+}
+
 @layer base {
   /* ── Font scale — ผู้ใช้ปรับได้จากเมนูโปรไฟล์ (lib/font-scale.ts) ──
      หน่วยเป็น % ไม่ใช่ px เพื่อไม่ทับค่า default font size ที่ผู้ใช้ตั้งไว้ใน
