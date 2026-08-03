@@ -116,9 +116,7 @@ export function ItemHistorySheet({
                       <>
                         {entry.name}
                         {entry.message && (
-                          <span className="text-muted-foreground block">
-                            {entry.message}
-                          </span>
+                          <span className="block">{entry.message}</span>
                         )}
                       </>
                     )}

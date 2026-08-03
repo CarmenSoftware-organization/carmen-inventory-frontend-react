@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,35 @@ const MARKER_CLASS = {
 } as const;
 
 export type HistoryTimelineMarker = keyof typeof MARKER_CLASS;
+
+interface HistoryTimelineContextValue {
+  /** `date_format` ของ BU ปัจจุบัน (จาก `useProfile()`) */
+  readonly dateFormat: string;
+  /** true ถ้า `dateFormat` มี token เวลาอยู่แล้ว (`HH`/`hh`) */
+  readonly hasTime: boolean;
+}
+
+const HistoryTimelineContext = createContext<
+  HistoryTimelineContextValue | undefined
+>(undefined);
+
+/**
+ * Hook อ่าน dateFormat/hasTime จาก HistoryTimelineContext
+ *
+ * Throw error ถ้าถูกเรียกนอก `<HistoryTimeline>` แทนที่จะเงียบแล้วเรนเดอร์
+ * รางวันที่ว่างเปล่า — เหมือน `useTimeline` ใน `components/ui/timeline.tsx`
+ *
+ * @returns ค่า context `{ dateFormat, hasTime }`
+ */
+function useHistoryTimelineContext() {
+  const context = useContext(HistoryTimelineContext);
+  if (!context) {
+    throw new Error(
+      "HistoryTimelineItem must be used within a HistoryTimeline",
+    );
+  }
+  return context;
+}
 
 interface HistoryTimelineProps {
   readonly children: ReactNode;
@@ -39,10 +68,34 @@ interface HistoryTimelineProps {
  * </HistoryTimeline>
  */
 export function HistoryTimeline({ children }: HistoryTimelineProps) {
-  return <ol className="grid grid-cols-[auto_1fr] gap-x-3">{children}</ol>;
+  // เรียก useProfile() ที่นี่เพียงครั้งเดียวต่อ sheet — ไม่ใช่ในทุกแถวของ
+  // HistoryTimelineItem เพราะ hooks/use-profile.ts เปิด
+  // `new BroadcastChannel(BU_SWITCH_CHANNEL)` ใน useEffect ของตัวเอง ถ้าประวัติมี
+  // 20 แถวแล้วแต่ละแถวเรียก useProfile() เอง จะกลายเป็น 20 BroadcastChannel +
+  // 20 query observer พร้อมกัน และการสลับ BU จากแท็บอื่น 1 ครั้งจะยิง
+  // `removeQueries`/`invalidateQueries` ซ้ำทั้งแคช 20 รอบโดยไม่จำเป็น
+  const { dateFormat } = useProfile();
+
+  // `date_format` ของ BU ใส่ token เวลามาเองได้ (เช่น "DD/MM/YYYY HH:mm") — ต่อ
+  // "HH:mm" ทับลงไปอีกจะได้เวลาซ้ำสองที่ในรางเดียว คำนวณ hasTime ครั้งเดียวที่นี่
+  // แล้วส่งลงไปทุกแถวผ่าน context แทนที่จะคำนวณซ้ำทุกแถว (ค่าเดียวกันทั้งไทม์ไลน์)
+  const hasTime = dateFormat.includes("HH") || dateFormat.includes("hh");
+
+  const contextValue = useMemo<HistoryTimelineContextValue>(
+    () => ({ dateFormat, hasTime }),
+    [dateFormat, hasTime],
+  );
+
+  return (
+    <HistoryTimelineContext.Provider value={contextValue}>
+      <ol role="list" className="grid grid-cols-[auto_1fr] gap-x-3">
+        {children}
+      </ol>
+    </HistoryTimelineContext.Provider>
+  );
 }
 
-interface HistoryTimelineItemProps {
+export interface HistoryTimelineItemProps {
   /** ISO datetime — ใช้ทั้งข้อความในรางซ้ายและ attribute `dateTime` */
   readonly at: string;
   /** ชนิดของจุด marker (ค่าเริ่มต้น `default`) */
@@ -76,24 +129,24 @@ export function HistoryTimelineItem({
   title,
   children,
 }: HistoryTimelineItemProps) {
-  const { dateFormat } = useProfile();
+  const { dateFormat, hasTime } = useHistoryTimelineContext();
 
-  // `date_format` ของ BU ใส่ token เวลามาเองได้ (เช่น "DD/MM/YYYY HH:mm") —
-  // ต่อ "HH:mm" ทับลงไปอีกจะได้เวลาซ้ำสองที่ในรางเดียว
-  const hasTime = dateFormat.includes("HH") || dateFormat.includes("hh");
   const dateLine = formatDate(at, dateFormat);
   const timeLine = hasTime ? "" : formatDate(at, "HH:mm");
+  // dateLine ว่างแปลว่า `at` parse เป็นวันที่ไม่ได้ (ดู formatDate) — attribute
+  // `dateTime` ต้องไม่ใส่ค่าที่ไม่ valid ไปด้วย ปล่อยเป็น undefined แทน
+  const dateTimeAttr = dateLine ? at : undefined;
 
   return (
     <li className="group/hist col-span-2 grid grid-cols-subgrid">
       <time
-        dateTime={at || undefined}
+        dateTime={dateTimeAttr}
         className="text-micro text-muted-foreground pt-0.5 text-right leading-tight tabular-nums whitespace-nowrap"
       >
         <span className="block">{dateLine}</span>
         {timeLine && <span className="block">{timeLine}</span>}
       </time>
-      <div className="relative border-l pb-5 pl-4 group-last/hist:border-transparent group-last/hist:pb-0">
+      <div className="relative min-w-0 border-l pb-5 pl-4 group-last/hist:border-transparent group-last/hist:pb-0">
         <span
           aria-hidden="true"
           className={cn(
