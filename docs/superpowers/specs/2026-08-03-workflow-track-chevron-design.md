@@ -165,10 +165,12 @@ clip-path อยู่ใน `@layer components` ของ `styles/globals.css` 
    (next-themes ใช้ attribute="class" → :root กับ .dark อยู่บน <html> ตัวเดียวกัน
    var() ใน custom property resolve ที่ computed-value time บน element นั้น
    จึงได้ค่าที่ชนะ cascade เสมอ ไม่ขึ้นกับลำดับการประกาศ) */
---status-approved-soft:    color-mix(in oklch, var(--status-approved)    14%, var(--card));
---status-in-progress-soft: color-mix(in oklch, var(--status-in-progress) 18%, var(--card));
---status-voided-soft:      color-mix(in oklch, var(--status-voided)      14%, var(--card));
+--status-approved-soft:    color-mix(in oklab, var(--status-approved)    14%, var(--card));
+--status-in-progress-soft: color-mix(in oklab, var(--status-in-progress) 18%, var(--card));
+--status-voided-soft:      color-mix(in oklab, var(--status-voided)      14%, var(--card));
 ```
+
+ผสมใน oklab ไม่ใช่ oklch — oklch interpolate มุม hue และ --card ระบุ hue=0 ไม่ใช่ none ทำให้สีเขียวถูกลาก จึงใช้ oklab แบบแกน a/b แทน
 
 ### ตารางต่อ state
 

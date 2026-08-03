@@ -57,10 +57,13 @@
      และ var() ใน custom property ถูกแทนค่าตอน computed-value time บน element นั้น
      จึงได้ค่าที่ชนะ cascade เสมอ ไม่ขึ้นกับลำดับการประกาศในไฟล์
      เปอร์เซ็นต์ต่างกันเพราะ in-progress (L 0.85) จางกว่าอีกสองสีมาก ต้องผสมเข้มขึ้น
-     จึงจะเห็นเป็นพื้นเหลืองเท่ากัน */
-  --status-approved-soft: color-mix(in oklch, var(--status-approved) 14%, var(--card));
-  --status-in-progress-soft: color-mix(in oklch, var(--status-in-progress) 18%, var(--card));
-  --status-voided-soft: color-mix(in oklch, var(--status-voided) 14%, var(--card));
+     จึงจะเห็นเป็นพื้นเหลืองเท่ากัน
+     ผสมใน oklab ไม่ใช่ oklch — oklch interpolate "มุม hue" และ --card คือ oklch(1 0 0)
+     ที่ระบุ hue = 0 ไม่ใช่ none ผลคือ 14% ของเขียว (h=155) กลายเป็น h≈21 (ชมพู)
+     oklab เป็น perceptual space เดียวกันแต่เป็นแกน a/b จึงไม่มีมุม hue ให้ลาก */
+  --status-approved-soft: color-mix(in oklab, var(--status-approved) 14%, var(--card));
+  --status-in-progress-soft: color-mix(in oklab, var(--status-in-progress) 18%, var(--card));
+  --status-voided-soft: color-mix(in oklab, var(--status-voided) 14%, var(--card));
 ```
 
 - [ ] **Step 2: ลงทะเบียน token ทั้งสามเป็น Tailwind color**
