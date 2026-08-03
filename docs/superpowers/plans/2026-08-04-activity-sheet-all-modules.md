@@ -8,6 +8,11 @@
 
 **Tech Stack:** React 19 · TypeScript · React Router 7 · TanStack Table · Radix UI · use-intl · Tailwind 4
 
+> **แก้ระหว่างทำ (2026-08-04):** Task 4 เขียนไว้ว่ามี 7 หน้าที่ใช้ `FormToolbar` ร่วมกัน
+> — ตรวจของจริงแล้วมีแค่ **4** (department · location · physical-count · PR template)
+> ส่วน credit-note · goods-receive-note · product ใช้ `DocFormHeader` ของตัวเอง
+> จึงย้ายไปทำใน Task 5 ทำให้ Task 5 กลายเป็น **15 หน้า** ยอดรวม 19 หน้าใหม่เท่าเดิม
+
 ## Global Constraints
 
 - สเปกต้นทาง: `docs/superpowers/specs/2026-08-04-activity-sheet-all-modules-design.md`
