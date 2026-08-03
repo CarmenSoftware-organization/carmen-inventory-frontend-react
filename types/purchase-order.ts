@@ -69,6 +69,18 @@ export interface PurchaseOrderDetail extends ItemMoneyFields {
   discount_amount: number;
   pr_detail: PrDetailRef[];
   locations: PoDetailLocation[];
+  history?: PoItemHistoryEntry[];
+}
+
+/** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบสั่งซื้อ */
+export interface PoItemHistoryEntry {
+  at: string;
+  seq: number;
+  name: string;
+  /** บาง entry หลังบ้านส่งมาแค่ id ไม่มีชื่อ */
+  user: { id: string; name?: string };
+  status: string;
+  message?: string | null;
 }
 
 export interface PrDetailRef {

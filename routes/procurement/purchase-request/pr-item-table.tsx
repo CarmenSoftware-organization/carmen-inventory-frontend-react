@@ -20,7 +20,8 @@ import type { PrFormValues } from "./pr-form-schema";
 import { PrItemExpand } from "./pr-item-expand";
 import { PrPricelistCompare } from "./pr-pricelist-compare";
 import { ItemHistorySheet } from "@/components/share/item-history-sheet";
-import { PR_ITEM_HISTORY_STATUS_CONFIG } from "@/constant/purchase-request";
+import {} from "@/constant/purchase-request";
+import { ITEM_HISTORY_STATUS_CONFIG } from "@/constant/item-history";
 import { isRowLocked } from "./pr-item-cells/helpers";
 import {
   SelectCell,
@@ -432,7 +433,7 @@ export function usePrItemTable({
             <ItemHistorySheet
               history={row.original.history ?? []}
               productName={row.original.product_name}
-              statusConfig={PR_ITEM_HISTORY_STATUS_CONFIG}
+              statusConfig={ITEM_HISTORY_STATUS_CONFIG}
               label={t("tabWorkflowHistory")}
             />
           )}

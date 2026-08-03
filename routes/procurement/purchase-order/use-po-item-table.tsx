@@ -21,6 +21,9 @@ import { PriceCell, ProductHeaderCell } from "./po-items-grid-cells";
 import { PoItemExpanded, type PoItemField } from "./po-item-expanded";
 import { useAddLocationRegistry } from "./po-locations-add-context";
 import { poItemCols } from "./po-item-columns";
+import { ItemHistorySheet } from "@/components/share/item-history-sheet";
+import { ITEM_HISTORY_STATUS_CONFIG } from "@/constant/item-history";
+import type { PoItemHistoryEntry } from "@/types/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
 
 export type { PoItemField };
@@ -68,11 +71,18 @@ const PoItemActionCell = memo(function PoItemActionCell({
   index,
   expanded,
   canAddLocation,
+  canDelete,
+  history,
+  productName,
   onDelete,
 }: {
   index: number;
   expanded: boolean;
   canAddLocation: boolean;
+  /** โหมดอ่านยังเห็นคอลัมน์นี้ได้ถ้ามีประวัติ — แต่ห้ามมีปุ่มลบ */
+  canDelete: boolean;
+  history?: PoItemHistoryEntry[];
+  productName?: string;
   onDelete: (index: number) => void;
 }) {
   "use no memo";
@@ -80,6 +90,14 @@ const PoItemActionCell = memo(function PoItemActionCell({
   const registry = useAddLocationRegistry();
   return (
     <div className="flex items-center justify-center">
+      {(history?.length ?? 0) > 0 && (
+        <ItemHistorySheet
+          history={history ?? []}
+          productName={productName}
+          statusConfig={ITEM_HISTORY_STATUS_CONFIG}
+          label={t("tabWorkflowHistory")}
+        />
+      )}
       {expanded && canAddLocation && (
         <Button
           type="button"
@@ -92,16 +110,18 @@ const PoItemActionCell = memo(function PoItemActionCell({
           <MapPinPlus className="size-3.5" aria-hidden="true" />
         </Button>
       )}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-        aria-label="Remove"
-        onClick={() => onDelete(index)}
-      >
-        <Trash2 className="size-3.5" aria-hidden="true" />
-      </Button>
+      {canDelete && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          aria-label="Remove"
+          onClick={() => onDelete(index)}
+        >
+          <Trash2 className="size-3.5" aria-hidden="true" />
+        </Button>
+      )}
     </div>
   );
 });
@@ -143,6 +163,12 @@ export function usePoItemTable({
     PO_LEADING_COL * 2 /* expand + index */ +
     (showApproveCheckbox ? PO_LEADING_COL : 0);
   const showAction = !disabled && !readOnly; // action column (ลบ item)
+  // โหมดอ่านก็ยังต้องมีคอลัมน์ action ถ้ามีประวัติรายบรรทัดให้กด (เงื่อนไขเดียวกับ PR)
+  // — ประวัติมีก็ต่อเมื่อใบผ่าน workflow มาแล้ว ซึ่งตอนนั้นฟอร์มมักอยู่โหมดอ่าน
+  const hasAnyHistory = itemFields.some(
+    (item) => (item.history?.length ?? 0) > 0,
+  );
+  const showActionCol = showAction || hasAnyHistory;
   // ความกว้างขึ้นกับว่าแถว location แก้ได้ไหม — เกณฑ์เดียวกับ showActionCol ที่
   // ส่งให้ LocationsEditor ทั้งสองตารางจึงได้ track เดียวกันเสมอ
   //
@@ -152,7 +178,8 @@ export function usePoItemTable({
   const { col: PO_COL, dataTotal } = poItemCols(
     showAction && itemFields.length > 0,
   );
-  const totalSize = preProductSize + dataTotal + (showAction ? PO_COL.action : 0);
+  const totalSize =
+    preProductSize + dataTotal + (showActionCol ? PO_COL.action : 0);
   const leftInsetPct = (preProductSize / totalSize) * 100;
 
   const columns = useMemo<ColumnDef<PoItemField>[]>(() => {
@@ -188,6 +215,7 @@ export function usePoItemTable({
             disabled={disabled}
             locationsDisabled={locationsDisabled}
             readOnly={readOnly}
+            showActionCol={showActionCol}
             leftInsetPct={leftInsetPct}
           />
         ),
@@ -354,6 +382,9 @@ export function usePoItemTable({
           index={row.index}
           expanded={row.getIsExpanded()}
           canAddLocation={!locationsDisabled}
+          canDelete={showAction}
+          history={row.original.history}
+          productName={row.original.product_name}
           onDelete={onDelete}
         />
       ),
@@ -382,7 +413,7 @@ export function usePoItemTable({
       expandColumn,
       indexColumn,
       ...dataColumns,
-      ...(showAction ? [actionColumn] : []),
+      ...(showActionCol ? [actionColumn] : []),
     ];
 
     return baseCols.map((col) => ({

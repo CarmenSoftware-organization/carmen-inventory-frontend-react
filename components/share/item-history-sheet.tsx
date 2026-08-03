@@ -24,12 +24,13 @@ import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 
-/** ประวัติ workflow ระดับรายการ 1 ก้าว — โครงเดียวกันทั้ง PR และ SR */
+/** ประวัติ workflow ระดับรายการ 1 ก้าว — โครงเดียวกันทั้ง PR / PO / SR */
 export interface ItemHistoryEntry {
   at: string;
   seq: number;
   name: string;
-  user: { id: string; name: string };
+  /** name ไม่บังคับ — บาง entry หลังบ้านส่งมาแค่ id (เช่นประวัติของ PO) */
+  user: { id: string; name?: string };
   status: string;
   message?: string | null;
 }
@@ -37,7 +38,7 @@ export interface ItemHistoryEntry {
 interface ItemHistorySheetProps {
   readonly history: ItemHistoryEntry[];
   readonly productName?: string;
-  /** map สถานะ → สี/ป้ายของโมดูลนั้น (เช่น `PR_ITEM_HISTORY_STATUS_CONFIG`) */
+  /** map สถานะ → สี/ป้ายของโมดูลนั้น (เช่น `ITEM_HISTORY_STATUS_CONFIG`) */
   readonly statusConfig: Record<string, StatusConfigEntry>;
   /** ป้ายปุ่ม + หัว sheet (เช่น `t("tabWorkflowHistory")`) */
   readonly label: string;
@@ -48,7 +49,7 @@ interface ItemHistorySheetProps {
  * timeline ประวัติ workflow ระดับรายการ (per-item) แบบซิกแซกสลับซ้าย/ขวา
  * เรียงล่าสุดขึ้นบนสุด — โครงเดียวกับ workflow history ระดับเอกสาร
  *
- * ใช้ร่วมกันทุกโมดูลที่มีประวัติรายบรรทัด (PR/SR) — สิ่งที่ต่างกันคือชุดสถานะ
+ * ใช้ร่วมกันทุกโมดูลที่มีประวัติรายบรรทัด (PR/PO/SR) — สิ่งที่ต่างกันคือชุดสถานะ
  * กับป้ายเท่านั้น จึงรับมาเป็น prop ไม่ผูกกับโมดูลใดโมดูลหนึ่ง
  *
  * @param props.history - ประวัติของรายการนั้น (เรียงเก่า→ใหม่ ตามที่ backend ส่งมา)
@@ -60,7 +61,7 @@ interface ItemHistorySheetProps {
  * <ItemHistorySheet
  *   history={item.history}
  *   productName={item.product_name}
- *   statusConfig={PR_ITEM_HISTORY_STATUS_CONFIG}
+ *   statusConfig={ITEM_HISTORY_STATUS_CONFIG}
  *   label={t("tabWorkflowHistory")}
  * />
  */
@@ -141,7 +142,9 @@ export function ItemHistorySheet({
                           isEven && "flex-row-reverse",
                         )}
                       >
-                        <TimelineTitle>{entry.user.name}</TimelineTitle>
+                        {entry.user.name && (
+                          <TimelineTitle>{entry.user.name}</TimelineTitle>
+                        )}
                         <Badge className={config.className} size="xs">
                           {config.label}
                         </Badge>
