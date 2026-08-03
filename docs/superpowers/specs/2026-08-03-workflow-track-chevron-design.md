@@ -214,7 +214,7 @@ clip-path อยู่ใน `@layer components` ของ `styles/globals.css` 
 | state | พื้น | ไอคอน (lucide, `size-3`, `aria-hidden`) | ข้อความ |
 |---|---|---|---|
 | `done` | `--status-approved-soft` | `Check` สี `--status-approved-ink` | `text-[var(--status-track-done-fg)]` |
-| `current` | `--status-in-progress-soft` | `Circle` + `fill-current` สี `--status-in-progress-ink` | `text-foreground font-medium` |
+| `current` | `--status-in-progress-soft` | `Circle` ไส้ `--status-in-progress` (เหลืองอ่อน) + ขอบ `--status-in-progress-ink` | `text-foreground font-medium` |
 | `pending` | `--status-pending-soft` | `Circle` (กลวง) สี `text-muted-foreground` | `text-muted-foreground` |
 | `voided` | `--status-voided-soft` | `X` สี `--status-voided-ink` | `text-foreground font-medium` + `line-through` ที่ `<span>` ชื่อขั้น |
 

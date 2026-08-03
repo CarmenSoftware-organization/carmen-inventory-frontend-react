@@ -63,6 +63,11 @@ const STATE_STYLE: Record<StageState, string> = {
  * -fg วางทับ เอามาเป็นไอคอนบน tint ของตัวเองแล้ว contrast ตก (in-progress เหลือ
  * 1.47:1 ในโหมดสว่าง · voided 2.75:1 ในโหมดมืด) `-ink` เป็นเฉดเดียวกันคนละ L
  * ดูที่มาใน styles/badge-status.css
+ *
+ * ยกเว้นจุดของ `current` ที่แยก fill กับ stroke: **ไส้** เป็นเหลืองอ่อน
+ * (`--status-in-progress` ตัวเปล่า) เพราะขั้นที่กำลังทำอยู่ควรอ่านเป็น "เหลือง"
+ * ไม่ใช่น้ำตาลโอลีฟแบบที่ `-ink` ให้ในโหมดสว่าง · **ขอบ** ยังเป็น `-ink` จึงยังมี
+ * เส้นเข้มคุม contrast ไว้ ไม่จมพื้น tint เหลืองของตัวเอง — ได้ทั้งสีที่ถูกและยังเห็น
  */
 function StateIcon({ state }: { readonly state: StageState }) {
   switch (state) {
@@ -76,7 +81,7 @@ function StateIcon({ state }: { readonly state: StageState }) {
     case "current":
       return (
         <Circle
-          className="text-[var(--status-in-progress-ink)] size-3 shrink-0 fill-current"
+          className="text-[var(--status-in-progress-ink)] size-3 shrink-0 fill-[var(--status-in-progress)]"
           aria-hidden="true"
         />
       );
