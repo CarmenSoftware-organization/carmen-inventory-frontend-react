@@ -164,8 +164,6 @@ export interface GoodsReceiveNote {
   doc_version?: number;
   // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
   audit?: Audit;
-  deleted_at: string | null;
-  deleted_by_id: string | null;
   // Detail items (nested: detail → items[])
   good_received_note_detail: GoodsReceiveNoteDetail[];
   // Extra cost

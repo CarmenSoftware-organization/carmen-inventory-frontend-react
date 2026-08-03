@@ -11,7 +11,6 @@ export interface Role {
   business_unit_id: string;
   name: string;
   description: string | null;
-  created_at: string;
   permissions: RolePermission[];
 }
 

@@ -21,10 +21,6 @@ const rows: AppConfig[] = [
     id: "1",
     key: "interface_pos",
     value: { enabled: true },
-    created_at: null,
-    created_by_id: null,
-    updated_at: null,
-    updated_by_id: null,
   },
 ];
 
