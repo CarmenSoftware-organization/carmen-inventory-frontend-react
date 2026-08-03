@@ -284,10 +284,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           </Suspense>
           {hasHistory && (
             <Sheet open={showHistory} onOpenChange={dialogs.setShowHistory}>
-              <SheetContent
-                side="right"
-                className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
-              >
+              {/* ไม่ override ความกว้าง — ใช้ค่า default ของ SheetContent
+                  (w-3/4 sm:max-w-sm) ให้เท่ากับ comment sheet */}
+              <SheetContent side="right" className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
                   <SheetDescription className="sr-only">
