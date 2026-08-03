@@ -197,8 +197,6 @@ export interface PurchaseRequest {
   info: Record<string, unknown>;
   dimension: string;
   doc_version: number;
-  created_at: string;
-  updated_at: string;
   audit?: Audit;
 }
 
@@ -221,8 +219,10 @@ export const purchaseRequestSchema = z.looseObject({
   workflow_previous_stage: z.string().nullable(),
   last_action: lastActionSchema.nullable(),
   department_name: z.string(),
-  created_at: z.string(),
-  purchase_request_detail: z.array(purchaseRequestDetailSummarySchema),
+  // ไม่มี created_at / purchase_request_detail: gateway ตัด audit ดิบออก
+  // (`.omit(AUDIT_RAW_FIELDS)`) และ list ไม่ส่งรายการสินค้ามาด้วย — ประกาศไว้
+  // ก็ทำได้แค่ยิง console.warn "API schema mismatch" ทุกครั้งที่โหลดรายการ
+  purchase_request_detail: z.array(purchaseRequestDetailSummarySchema).optional(),
 });
 
 export enum PR_ITEM_PRICELIST_COMPARE_TYPE {

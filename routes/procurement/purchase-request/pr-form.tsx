@@ -285,7 +285,7 @@ export function PurchaseRequestForm({
         setShowActivity={actions.setShowActivity}
         workflowHistory={purchaseRequest?.workflow_history}
         requestorName={purchaseRequest?.requestor_name}
-        createdAt={purchaseRequest?.created_at}
+        createdAt={purchaseRequest?.audit?.created?.at}
         showNoDepartment={showNoDepartment}
         discardDialogProps={actions.discardDialogProps}
         navDiscardDialogProps={actions.navDiscardDialogProps}

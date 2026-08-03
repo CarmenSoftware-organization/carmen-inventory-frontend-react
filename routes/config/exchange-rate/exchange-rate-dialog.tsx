@@ -138,12 +138,12 @@ function EditForm({
             </span>
           </>
         )}
-        {item?.updated_at && (
+        {item?.audit?.updated?.at && (
           <>
             <span className="bg-border h-3 w-px" />
             <span className="inline-flex items-center gap-1">
               <History className="size-3" />
-              {formatDate(item.updated_at, dateFormat)}
+              {formatDate(item.audit.updated.at, dateFormat)}
             </span>
           </>
         )}

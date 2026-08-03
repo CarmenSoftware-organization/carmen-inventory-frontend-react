@@ -9,8 +9,6 @@ export interface ExchangeRateItem {
   at_date: string;
   // flat fields ยังใช้อยู่ใน exchange-rate-dialog (อ่าน updated_at); list endpoint
   // จะไม่ส่งมา (serializer omit) แต่ enrich เป็น audit object แทน
-  created_at: string;
-  updated_at: string;
   audit?: Audit;
 }
 

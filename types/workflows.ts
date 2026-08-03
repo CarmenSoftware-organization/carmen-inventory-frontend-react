@@ -183,12 +183,6 @@ export interface Workflow {
   note: null;
   info: object;
   dimension: object;
-  created_at: string;
-  created_by_id: string | null;
-  updated_at: string;
-  updated_by_id: string | null;
-  deleted_at: string | null;
-  deleted_by_id: string | null;
   audit?: AuditInfo;
 }
 
