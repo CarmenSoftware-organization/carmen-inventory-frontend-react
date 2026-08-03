@@ -4321,6 +4321,16 @@
     "elapsedMinutes": "ใช้เวลา {count} นาที",
     "elapsedHours": "ใช้เวลา {count} ชั่วโมง",
     "elapsedDays": "ใช้เวลา {count} วัน",
-    "documentCreated": "สร้างเอกสาร"
+    "documentCreated": "สร้างเอกสาร",
+    "actionCreated": "สร้าง",
+    "actionUpdated": "แก้ไข",
+    "actionDeleted": "ลบ",
+    "actionSaved": "บันทึก",
+    "actionSubmitted": "ส่งอนุมัติ",
+    "actionApproved": "อนุมัติ",
+    "actionPurchased": "จัดซื้อ",
+    "actionReviewed": "ตรวจสอบ",
+    "actionRejected": "ไม่อนุมัติ",
+    "actionSentBack": "ตีกลับ"
   }
 }

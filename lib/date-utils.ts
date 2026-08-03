@@ -91,6 +91,47 @@ export function formatDate(iso: string, dateFormat: string): string {
 }
 
 /**
+ * ช่วงเวลาระหว่างสองก้าว เป็นข้อความสั้นตาม locale
+ *
+ * คืน `null` เมื่อห่างกันไม่ถึง 5 วินาที เพราะนั่นคือก้าวที่ระบบทำต่อกันเองใน
+ * ทรานแซกชันเดียว (เช่น approve ด่านสุดท้ายแล้ว complete ทันที) — บอกว่า
+ * "ผ่านไป 0 วินาที" ไม่ได้ให้ข้อมูลอะไร มีแต่เพิ่มบรรทัด
+ *
+ * อยู่ที่นี่เพราะเป็น pure function ไม่มี React dependency เข้าชุดกับ `formatDate`
+ * ในไฟล์นี้อยู่แล้ว — เดิมอยู่ใน `components/share/history-timeline.tsx` แต่การ
+ * `export` function ที่ไม่ใช่ component จากไฟล์ component ทำให้ ESLint
+ * `react-refresh/only-export-components` ฟ้อง จึงย้ายมาไว้ที่นี่ ผู้ใช้ทุกไทม์ไลน์
+ * (workflow history ระดับเอกสาร และ activity log ของใบขอซื้อ) ยัง import ตัวเดียว
+ * ร่วมกันเหมือนเดิม เพียงย้ายที่ import
+ *
+ * @param fromIso - เวลาของก้าวก่อนหน้า (เก่ากว่า)
+ * @param toIso - เวลาของก้าวนี้
+ * @param t - ตัวแปลจาก namespace `history`
+ * @returns ข้อความช่วงเวลา หรือ null เมื่อสั้นเกินกว่าจะมีความหมาย
+ */
+export function formatElapsed(
+  fromIso: string,
+  toIso: string,
+  t: (key: string, values?: Record<string, number>) => string,
+): string | null {
+  const from = new Date(fromIso).getTime();
+  const to = new Date(toIso).getTime();
+  if (Number.isNaN(from) || Number.isNaN(to)) return null;
+
+  const seconds = Math.round((to - from) / 1000);
+  if (seconds < 5) return null;
+  if (seconds < 60) return t("elapsedSeconds", { count: seconds });
+
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return t("elapsedMinutes", { count: minutes });
+
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return t("elapsedHours", { count: hours });
+
+  return t("elapsedDays", { count: Math.round(hours / 24) });
+}
+
+/**
  * คำนวณจำนวนวันระหว่างสอง ISO date string
  *
  * คืน 0 หากค่าใดค่าหนึ่งเป็น empty string หรือ parse ไม่ได้

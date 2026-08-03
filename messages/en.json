@@ -4332,6 +4332,16 @@
     "elapsedMinutes": "took {count} min",
     "elapsedHours": "took {count} hr",
     "elapsedDays": "took {count} days",
-    "documentCreated": "Document created"
+    "documentCreated": "Document created",
+    "actionCreated": "Created",
+    "actionUpdated": "Updated",
+    "actionDeleted": "Deleted",
+    "actionSaved": "Saved",
+    "actionSubmitted": "Submitted",
+    "actionApproved": "Approved",
+    "actionPurchased": "Purchased",
+    "actionReviewed": "Reviewed",
+    "actionRejected": "Rejected",
+    "actionSentBack": "Sent back"
   }
 }
