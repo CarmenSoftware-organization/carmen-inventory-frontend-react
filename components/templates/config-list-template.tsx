@@ -40,7 +40,6 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { buildPermissionKey } from "@/constant/permissions";
 import type { CardRenderProps, ConfigListTemplateProps } from "./types";
-import type { ViewScope } from "@/types/list-view";
 
 interface GridContentArgs<TEntity extends { id: string }> {
   readonly isLoading: boolean;
@@ -308,30 +307,6 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   if (error)
     return <ErrorState message={error.message} onRetry={() => refetch()} />;
 
-  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
-   *  (mirror ของ ViewSelector's handleSaveViewDialogSave — instance นี้แยกต่างหาก
-   *  เพราะ ListFilterSheet's "save current view" ต้องเปิด dialog ของตัวเอง ไม่ใช่
-   *  ตัวที่ ViewSelector ถือ local state ไว้ภายในของมันเอง) */
-  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
-    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
-    const existing = list.find((v) => v.name === name);
-    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
-    if (existing) {
-      await lf.view.update(existing.id, scope, snapshot);
-      // อัปเดต view อื่นที่ไม่ใช่ view ปัจจุบัน — ต้อง apply ต่อให้ URL ชี้ตาม
-      if (existing.id !== lf.view.current?.id) {
-        lf.view.apply({
-          ...existing,
-          filters: snapshot.filters,
-          sort: snapshot.sort,
-        });
-      }
-    } else {
-      const saved = await lf.view.saveAs(name, scope, snapshot);
-      lf.view.apply(saved);
-    }
-  };
-
   return (
     <div
       ref={pullRefresh.containerRef}
@@ -497,10 +472,8 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
         open={saveDialogOpen}
         onOpenChange={setSaveDialogOpen}
         canManageBu={lf.view.canManageBu}
-        existingNames={(s) =>
-          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
-        }
-        onSave={handleSaveViewDialogSave}
+        existingNames={lf.view.existingNames}
+        onSave={lf.view.saveOrUpdate}
       />
     </div>
   );

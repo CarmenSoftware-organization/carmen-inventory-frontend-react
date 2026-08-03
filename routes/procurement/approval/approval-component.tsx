@@ -27,7 +27,6 @@ import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
-import type { ViewScope } from "@/types/list-view";
 
 // หน้านี้ไม่มี filter field จริงให้ลง sheet — ตัวกรอง doc_type ขับเคลื่อนด้วยการ์ด
 // สรุปด้านบน ผ่าน useDataGridState's setFilter ที่เขียน URL param "filter" ตรง ๆ
@@ -106,27 +105,6 @@ export default function ApprovalComponent() {
     pageKey: LIST_PAGE_KEYS.APPROVAL,
     fields: APPROVAL_FILTER_FIELDS,
   });
-
-  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
-   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
-  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
-    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
-    const existing = list.find((v) => v.name === name);
-    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
-    if (existing) {
-      await lf.view.update(existing.id, scope, snapshot);
-      if (existing.id !== lf.view.current?.id) {
-        lf.view.apply({
-          ...existing,
-          filters: snapshot.filters,
-          sort: snapshot.sort,
-        });
-      }
-    } else {
-      const saved = await lf.view.saveAs(name, scope, snapshot);
-      lf.view.apply(saved);
-    }
-  };
 
   const { data, isLoading, error, refetch } = useApprovalPending(params);
   const { data: summary, isLoading: summaryLoading } =
@@ -233,10 +211,8 @@ export default function ApprovalComponent() {
         open={saveViewDialogOpen}
         onOpenChange={setSaveViewDialogOpen}
         canManageBu={lf.view.canManageBu}
-        existingNames={(s) =>
-          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
-        }
-        onSave={handleSaveViewDialogSave}
+        existingNames={lf.view.existingNames}
+        onSave={lf.view.saveOrUpdate}
       />
     </DisplayTemplate>
   );
