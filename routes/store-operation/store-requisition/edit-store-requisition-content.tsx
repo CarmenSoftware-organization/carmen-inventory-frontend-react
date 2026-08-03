@@ -21,7 +21,7 @@ export function EditStoreRequisitionContent({ id }: { id: string }) {
 
   return (
     <StoreRequisitionForm
-      key={storeRequisition.updated_at ?? storeRequisition.id}
+      key={storeRequisition.audit?.updated?.at ?? storeRequisition.id}
       storeRequisition={storeRequisition}
     />
   );

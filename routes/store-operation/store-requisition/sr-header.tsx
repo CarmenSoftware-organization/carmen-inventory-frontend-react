@@ -209,7 +209,7 @@ export function SrHeader({
             statusConfig={SR_WORKFLOW_ACTION_CONFIG}
             emptyLabel={t("noWorkflowHistory")}
             requestorName={requesterName}
-            createdAt={storeRequisition?.created_at}
+            createdAt={storeRequisition?.audit?.created?.at}
           />
         </div>
       </SheetContent>

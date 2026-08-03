@@ -129,8 +129,6 @@ export interface CreditNote {
   total_amount?: number;
   base_total_amount?: number;
   is_active?: boolean;
-  created_at?: string;
-  updated_at?: string;
   /** audit จาก API — created.name ใช้แสดง "Created By" ใน header ribbon */
   audit?: AuditInfo;
   credit_note_detail: CreditNoteItem[];

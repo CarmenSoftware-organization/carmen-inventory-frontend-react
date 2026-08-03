@@ -206,8 +206,6 @@ export interface PurchaseOrder {
   total_amount: number;
   // flat fields ยังใช้อยู่ในหน้า edit (po-form → PoWorkflowHistory);
   // list endpoint จะไม่ส่งมา (serializer omit) แต่ enrich เป็น audit object แทน
-  created_at: string;
-  updated_at: string;
   audit?: Audit;
   purchase_order_detail: PurchaseOrderDetail[];
 }

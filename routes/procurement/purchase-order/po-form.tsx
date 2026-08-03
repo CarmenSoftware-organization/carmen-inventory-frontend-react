@@ -300,7 +300,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
                       statusConfig={PR_WORKFLOW_ACTION_CONFIG}
                       emptyLabel={t("noWorkflowHistory")}
                       requestorName={purchaseOrder.buyer_name}
-                      createdAt={purchaseOrder.created_at}
+                      createdAt={purchaseOrder.audit?.created?.at}
                     />
                   </Suspense>
                 </div>
