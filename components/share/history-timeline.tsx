@@ -33,7 +33,8 @@ const HistoryTimelineContext = createContext<
  * Hook อ่าน dateFormat/hasTime จาก HistoryTimelineContext
  *
  * Throw error ถ้าถูกเรียกนอก `<HistoryTimeline>` แทนที่จะเงียบแล้วเรนเดอร์
- * รางวันที่ว่างเปล่า — เหมือน `useTimeline` ใน `components/ui/timeline.tsx`
+ * รางวันที่ว่างเปล่า — บอกที่ผิดตั้งแต่ตอนพัฒนา ดีกว่าปล่อยให้ UI ดูเหมือน
+ * ข้อมูลหาย
  *
  * @returns ค่า context `{ dateFormat, hasTime }`
  */
