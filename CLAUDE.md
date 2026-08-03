@@ -105,3 +105,12 @@ or any secret-bearing app-config save (incl. the pre-existing `report_email`) 40
   the fix is dropping `.int()` from the 3 copies of `ValidateSchema` in
   carmen-turborepo-backend-v2 (`backend-gateway`, `micro-business`, `micro-file`).
   Frontend deliberately does NOT round to compensate — that would corrupt the data.
+- Backend bug (not frontend): `GET /api/purchase-requests` (PR list) carries a bare
+  `@EnrichAuditUsers()`, which only enriches path `''` — but the rows sit at
+  `data[].data[]` (multi-BU envelope), so the interceptor never reaches them. Rows come
+  back with a raw `created_at` still attached and **no `audit` object at all**, so the
+  Created/Updated columns on the PR list render blank (`pr-component.tsx` Excel export,
+  `pr-card.tsx` grid card). Verified by hitting the gateway directly 2026-08-04. Fix is
+  `paths` on the decorator so it reaches the nested rows — same class as the SR list fix.
+  Frontend deliberately keeps reading `audit` rather than falling back to the raw field:
+  the raw one disappears the moment the decorator is fixed.
