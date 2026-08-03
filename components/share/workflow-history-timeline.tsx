@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import { useTranslations } from "use-intl";
 import {
-  formatElapsed,
   HistoryTimeline,
   HistoryTimelineDay,
   HistoryTimelineItem,
@@ -12,7 +11,7 @@ import {
   type StatusConfigEntry,
 } from "@/constant/status-config";
 import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
+import { formatDate, formatElapsed } from "@/lib/date-utils";
 
 /** ประวัติ workflow ระดับเอกสาร 1 ก้าว — โครงเดียวกันทั้ง PR / PO / SR */
 export interface WorkflowHistoryTimelineEntry {

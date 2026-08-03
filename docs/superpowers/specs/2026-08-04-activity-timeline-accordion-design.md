@@ -21,9 +21,9 @@
 | ไฟล์ | สิ่งที่ทำ |
 |---|---|
 | `components/share/history-timeline.tsx` | เพิ่มความสามารถ "แถวกางได้" เป็น prop optional |
-| `components/share/workflow-history-timeline.tsx` | ย้าย `formatElapsed` ออกไปไว้ที่ primitive แล้ว import กลับมา |
+| `components/share/workflow-history-timeline.tsx` | ย้าย `formatElapsed` ออกไปไว้ที่ primitive แล้ว import กลับมา (ภายหลังย้ายต่อไปที่ `lib/date-utils.ts` — ดู "ส่วนที่เปลี่ยนหลังตรวจของจริง") |
 | `routes/procurement/purchase-request/pr-activity-sheet.tsx` | เปลี่ยนการเรนเดอร์รายการเป็นไทม์ไลน์ |
-| `messages/{en,th}.json` | เพิ่ม 3 key ใน namespace `history` |
+| `messages/{en,th}.json` | เพิ่ม 10 key ใน namespace `history` |
 
 **นอกขอบเขต**
 
@@ -114,6 +114,13 @@ readonly onOpenChange?: (open: boolean) => void;
 ตรงกันทั้งสองไทม์ไลน์ ตรรกะไม่เปลี่ยน (คืน `null` เมื่อห่างไม่ถึง 5 วินาที) และ
 `workflow-history-timeline.tsx` เปลี่ยนแค่บรรทัด import
 
+**อัปเดตหลังรอบตรวจ whole-branch:** การ `export` function ที่ไม่ใช่ component จากไฟล์
+component (`history-timeline.tsx`) ทำให้ ESLint `react-refresh/only-export-components`
+ฟ้อง — เป็น warning ที่ branch นี้เป็นคนสร้างขึ้นเอง จึงย้าย `formatElapsed` ต่อไปอีกที่ไปอยู่
+`lib/date-utils.ts` ซึ่งอยู่ข้าง `formatDate` ที่ทั้งสามไฟล์ import อยู่แล้ว ตรรกะและ signature
+ไม่เปลี่ยน เปลี่ยนแค่บรรทัด import ของ `workflow-history-timeline.tsx` และ
+`pr-activity-sheet.tsx`
+
 ### `routes/procurement/purchase-request/pr-activity-sheet.tsx`
 
 ส่วนที่ **ไม่แตะ**: `humanize` · `relationLabel` · `formatValue` · `rowLabelOf` · `indexRows` ·
@@ -134,10 +141,10 @@ readonly onOpenChange?: (open: boolean) => void;
 
 | ค่า | กติกา |
 |---|---|
-| `title` | `create` → `tHistory("actionCreated")` · `update` → `tHistory("actionUpdated")` · `delete` → `tHistory("actionDeleted")` · อื่น ๆ → `humanize(action)` |
+| `title` | `create` → `tHistory("actionCreated")` · `update` → `tHistory("actionUpdated")` · `delete` → `tHistory("actionDeleted")` · `save` → `tHistory("actionSaved")` · `submit` → `tHistory("actionSubmitted")` · `approve` → `tHistory("actionApproved")` · `purchase` → `tHistory("actionPurchased")` · `review` → `tHistory("actionReviewed")` · `reject` → `tHistory("actionRejected")` · `send_back` → `tHistory("actionSentBack")` · อื่น ๆ → `humanize(action)` (ครบ union `ActionPr` ใน `types/stage-role.ts` บวก 3 action ของ CRUD) |
 | `children` | `actorNameOf(log)` |
 | `marker` | `create` → `origin` · แถวแรกของรายการ (ล่าสุด) → `current` · ที่เหลือ → `default` |
-| `tone` | `delete` → `alert` · ที่เหลือ → `default` |
+| `tone` | `delete` / `reject` / `send_back` → `alert` · ที่เหลือ → `default` |
 | `elapsed` | `formatElapsed(เวลาของ log ที่เก่ากว่าถัดไป, เวลาของ log นี้, tHistory)` · แถวล่างสุดได้ `null` |
 | `expandable` | `<ActivityChanges logId={log.id} />` เรนเดอร์เฉพาะตอนกาง (เงื่อนไข `isOpen &&` เดิม) |
 | `open` / `onOpenChange` | ผูกกับ `expandedId` state เดิม — เปิดได้ทีละรายการ |
@@ -157,6 +164,34 @@ readonly onOpenChange?: (open: boolean) => void;
 | `actionCreated` | `Created` | `สร้าง` |
 | `actionUpdated` | `Updated` | `แก้ไข` |
 | `actionDeleted` | `Deleted` | `ลบ` |
+| `actionSaved` | `Saved` | `บันทึก` |
+| `actionSubmitted` | `Submitted` | `ส่งอนุมัติ` |
+| `actionApproved` | `Approved` | `อนุมัติ` |
+| `actionPurchased` | `Purchased` | `จัดซื้อ` |
+| `actionReviewed` | `Reviewed` | `ตรวจสอบ` |
+| `actionRejected` | `Rejected` | `ไม่อนุมัติ` |
+| `actionSentBack` | `Sent back` | `ตีกลับ` |
+
+## ส่วนที่เปลี่ยนหลังตรวจของจริง
+
+Spec ฉบับแรกสมมติว่า activity log ของใบขอซื้อมีแค่ 3 action (`create` / `update` / `delete`)
+เพราะนั่นคือสิ่งที่ endpoint ชื่อบอกไว้ ("activity log" ฟังดูเหมือน audit trail ของ CRUD ล้วน ๆ)
+
+พอตรวจกับใบจริงหลัง Task 3 ถึงพบว่า backend เขียน action ของ **workflow**
+(`save` / `submit` / `approve` / `purchase` / `review` / `reject` / `send_back` — ทั้ง union
+`ActionPr` ใน `types/stage-role.ts`) ลง activity log เดียวกับ action ของ CRUD จริง ๆ ไม่ได้แยก
+log กันคนละชุด ผลคือใบขอซื้อทั่วไปที่ผ่าน workflow มาแล้วมีแถว workflow มากกว่าแถว CRUD
+เสียอีก และแผนที่เดิมที่ครอบแค่ 3 action ทำให้แถวส่วนใหญ่ตกไปที่ `humanize(action)` ซึ่งเป็น
+ภาษาอังกฤษเสมอ — ผู้ใช้สลับเป็นไทยแล้วหัวข้อครึ่งค่อนไทม์ไลน์ก็ยังอ่านเป็นอังกฤษอยู่ดี
+
+อีกจุดที่ตกหล่นคือ tone: spec เดิมให้ `alert` แค่ `delete` ตัวเดียว ทั้งที่ `reject` และ
+`send_back` เป็นก้าวที่ออกนอกทางปกติไม่ต่างจาก delete และ workflow history (ไทม์ไลน์พี่น้องกัน)
+ก็ให้ tone เตือนกับสองก้าวนี้อยู่แล้ว (`rejected` / `sent_back` ใน `ALERT_ACTIONS` ของ
+`workflow-history-timeline.tsx`) — การไม่ให้ tone ตรงกันจะทำให้ใบที่เคยถูกตีกลับดูเรียบเฉย
+เหมือนก้าวปกติเมื่อดูจาก activity sheet ทั้งที่ workflow history sheet ข้าง ๆ กันกลับติดจุดแดง
+
+เพิ่มเป็น Task 4 ในแผน แก้แค่ `ACTION_TITLE_KEY` / `ALERT_ACTIONS` / i18n key ไม่กระทบ
+สถาปัตยกรรมหรือขอบเขตของ Task 1-3 ที่เหลือ
 
 ## หน้าตาผลลัพธ์
 

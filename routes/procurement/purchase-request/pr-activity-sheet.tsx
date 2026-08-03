@@ -2,7 +2,6 @@ import { Fragment, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
-  formatElapsed,
   HistoryTimeline,
   HistoryTimelineDay,
   HistoryTimelineItem,
@@ -22,7 +21,7 @@ import {
   useActivityLogDetail,
 } from "@/hooks/use-activity-log";
 import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
+import { formatDate, formatElapsed } from "@/lib/date-utils";
 import {
   getLogCreatedAt,
   type ActivityChildChange,
@@ -53,8 +52,13 @@ const ACTION_TITLE_KEY: Record<string, string> = {
 
 /**
  * action ที่ทำลายข้อมูลหรือออกนอกทางปกติของ workflow — ย้อมจุด marker เป็นสีเตือน
- * ให้ตรงกับ `ALERT_ACTIONS` ของ workflow history เพื่อให้กวาดตาไทม์ไลน์แล้วเจอทันที
- * ว่าใบนี้เคยถูกตีกลับ ถูกปฏิเสธ หรือถูกลบอะไรไป
+ * เจตนาเดียวกับ `ALERT_ACTIONS` ของ workflow history (กวาดตาไทม์ไลน์แล้วเจอทันที
+ * ว่าใบนี้เคยถูกตีกลับ ถูกปฏิเสธ หรือถูกลบอะไรไป) แต่คำศัพท์ไม่ตรงกัน — activity
+ * log เก็บ action เป็นรูปฐาน (`delete` / `reject` / `send_back`) ส่วน
+ * `workflow_history` เก็บเป็นรูปอดีต (`rejected` / `sent_back`) จึงก๊อปมาแปลงรูป
+ * ไม่ได้ตรง ๆ ส่วน `voided` / `cancelled` ของ workflow history ไม่มีคู่ในเซตนี้
+ * โดยตั้งใจ — การ void ใบขอซื้อทำผ่าน PATCH ธรรมดา ซึ่ง activity log บันทึกเป็น
+ * action `update` เหมือนการแก้ไขทั่วไป ไม่มี action เฉพาะให้ครอบ
  */
 const ALERT_ACTIONS = new Set(["delete", "reject", "send_back"]);
 
