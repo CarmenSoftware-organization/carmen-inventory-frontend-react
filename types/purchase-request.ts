@@ -215,9 +215,12 @@ export const purchaseRequestSchema = z.looseObject({
   workflow_previous_stage: z.string().nullable(),
   last_action: lastActionSchema.nullable(),
   department_name: z.string(),
-  // ไม่มี created_at: interceptor `@EnrichAuditUsers` ลบ audit ดิบทิ้ง
-  // (`delete target[at]` ใน audit-shape.ts) แล้วยัด `audit` มาแทน — ประกาศไว้
-  // ก็ทำได้แค่ยิง console.warn "API schema mismatch" ทุกครั้งที่โหลดรายการ
+  // ไม่ประกาศ created_at ทั้งที่ endpoint นี้ส่งมาจริง (ยืนยันด้วยการยิง API
+  // 2026-08-04) เพราะเป็นผลจากบั๊ก backend: list ใช้ `@EnrichAuditUsers()` เปล่า
+  // ซึ่ง enrich แค่ path `''` แต่แถวจริงอยู่ที่ `data[].data[]` interceptor จึง
+  // ไปไม่ถึง — แถวเลยมี created_at ดิบค้างและ **ไม่มี `audit`** (ดู CLAUDE.md
+  // "Known open items") พอ backend ใส่ paths ให้ถูก created_at จะหายไปเป็น audit
+  // การประกาศไว้ตอนนี้จึงเท่ากับผูกโค้ดกับสภาพชั่วคราวที่กำลังจะถูกแก้
   purchase_request_detail: z.array(purchaseRequestDetailSummarySchema).optional(),
 });
 
