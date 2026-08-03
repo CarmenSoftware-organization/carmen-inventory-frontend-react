@@ -1,6 +1,7 @@
 
 import {
   ChevronRight,
+  History,
   Pencil,
   Plus,
   Trash2,
@@ -10,6 +11,7 @@ import {
   Box,
 } from "lucide-react";
 import { useTranslations } from "use-intl";
+import { openActivity } from "@/components/share/activity-sheet-host";
 import { cn } from "@/lib/utils";
 import { NODE_TYPE, type CategoryNode } from "@/types/category";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +57,7 @@ export function TreeNode({
   const t = useTranslations("productManagement.category");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
+  const tActivity = useTranslations("activity");
 
   const isExpanded = expanded[node.id] ?? false;
   const hasChildren = !!node.children?.length;
@@ -174,6 +177,17 @@ export function TreeNode({
             aria-label={tc("edit")}
           >
             <Pencil className="h-3 w-3" />
+          </button>
+          {/* ทั้งสามระดับของ tree (category · sub-category · item-group) เป็น entity
+              คนละตัวที่ backend บันทึกกิจกรรมให้ทั้งหมด — node.id จึงใช้ได้ตรง ๆ */}
+          <button
+            type="button"
+            className="p-1 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+            onClick={() => openActivity(node.id, node.name)}
+            title={tActivity("title")}
+            aria-label={tActivity("title")}
+          >
+            <History className="h-3 w-3" />
           </button>
           <button
             type="button"

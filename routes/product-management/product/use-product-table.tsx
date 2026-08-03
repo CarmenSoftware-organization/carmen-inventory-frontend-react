@@ -192,7 +192,9 @@ export function useProductTable({
     selectColumn<Product>(),
     indexColumn<Product>(params),
     ...dataColumns,
-    actionColumn<Product>(onDelete),
+    actionColumn<Product>(onDelete, {
+      activity: { id: (r) => r.id, label: (r) => r.code },
+    }),
   ];
 
   return useReactTable({

@@ -136,7 +136,9 @@ export function usePriceListTable({
     selectColumn<PriceList>(),
     indexColumn<PriceList>(params),
     ...dataColumns,
-    actionColumn<PriceList>(onDelete),
+    actionColumn<PriceList>(onDelete, {
+      activity: { id: (r) => r.id, label: (r) => r.no },
+    }),
   ];
 
   return useReactTable({
