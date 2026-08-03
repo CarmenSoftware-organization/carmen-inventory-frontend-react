@@ -291,6 +291,7 @@ export function LocationForm({ location }: LocationFormProps) {
           deleteIsPending={deleteLocation.isPending}
           statusBadge={codeBadge}
           permissionPrefix="configuration.location"
+          activity={location && { id: location.id, label: location.name }}
         />
       </Reveal>
 
