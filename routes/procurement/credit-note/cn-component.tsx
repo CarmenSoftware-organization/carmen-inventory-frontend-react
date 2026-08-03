@@ -301,9 +301,7 @@ export default function CnComponent() {
               )}
             >
               <div className="flex-1 overflow-auto">
-                <div className="min-w-300">
-                  <DataGridTable />
-                </div>
+                <DataGridTable />
               </div>
               <DataGridPagination />
             </DataGridContainer>

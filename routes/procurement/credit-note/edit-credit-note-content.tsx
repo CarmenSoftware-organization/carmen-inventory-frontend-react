@@ -2,7 +2,7 @@
 import { useCreditNoteById } from "@/hooks/use-credit-note";
 import { CnForm } from "./cn-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { DocFormSkeleton } from "@/components/loader/doc-form-skeleton";
 
 /**
  * หน้าดู/แก้ไขใบลดหนี้ตาม id ที่ระบุใน URL
@@ -19,7 +19,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
 export function EditCreditNoteContent({ id }: { id: string }) {
   const { data: creditNote, isLoading, error, refetch } = useCreditNoteById(id);
 
-  if (isLoading) return <FormSkeleton />;
+  if (isLoading) return <DocFormSkeleton />;
   if (error)
     return <ErrorState message={error.message} onRetry={() => refetch()} />;
   if (!creditNote) return <ErrorState message="Credit note not found" />;
