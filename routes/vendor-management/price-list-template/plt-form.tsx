@@ -8,7 +8,7 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
@@ -47,6 +47,7 @@ import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { usePltFormActions } from "./use-plt-form-actions";
 import { FORM_ID } from "./plt-form-helpers";
 import { useProductLabels, useStepperLabels } from "./plt-form-labels";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface PriceListTemplateFormProps {
   readonly priceListTemplate?: PriceListTemplate;
@@ -56,6 +57,7 @@ export function PriceListTemplateForm({
   priceListTemplate,
 }: PriceListTemplateFormProps) {
   const t = useTranslations("vendorManagement.priceListTemplate");
+  const tActivity = useTranslations("activity");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const tform = useTranslations("form");
@@ -221,46 +223,62 @@ export function PriceListTemplateForm({
             </StatusDotBadge>
           }
           actions={
-            isView ? (
-              <Button size="sm" onClick={() => setMode("edit")}>
-                <Pencil />
-                {tc("edit")}
-              </Button>
-            ) : (
-              <>
+            <>
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {priceListTemplate && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={actions.handleCancel}
-                  disabled={actions.isPending}
+                  onClick={() =>
+                    openActivity(priceListTemplate.id, priceListTemplate.name)
+                  }
                 >
-                  <X />
-                  {tc("cancel")}
+                  <History />
+                  {tActivity("title")}
                 </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  form={FORM_ID}
-                  disabled={actions.isPending}
-                >
-                  <Save />
-                  {submitLabel}
+              )}
+              {isView ? (
+                <Button size="sm" onClick={() => setMode("edit")}>
+                  <Pencil />
+                  {tc("edit")}
                 </Button>
-                {isEdit && priceListTemplate && (
+              ) : (
+                <>
                   <Button
                     type="button"
-                    variant="destructive"
+                    variant="outline"
                     size="sm"
-                    onClick={() => actions.setShowDelete(true)}
-                    disabled={actions.isDeletePending || actions.isPending}
+                    onClick={actions.handleCancel}
+                    disabled={actions.isPending}
                   >
-                    <Trash2 />
-                    {tc("delete")}
+                    <X />
+                    {tc("cancel")}
                   </Button>
-                )}
-              </>
-            )
+                  <Button
+                    type="submit"
+                    size="sm"
+                    form={FORM_ID}
+                    disabled={actions.isPending}
+                  >
+                    <Save />
+                    {submitLabel}
+                  </Button>
+                  {isEdit && priceListTemplate && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => actions.setShowDelete(true)}
+                      disabled={actions.isDeletePending || actions.isPending}
+                    >
+                      <Trash2 />
+                      {tc("delete")}
+                    </Button>
+                  )}
+                </>
+              )}
+            </>
           }
         />
       </div>

@@ -1,6 +1,7 @@
 import { useTranslations } from "use-intl";
 import {
   CalendarDays,
+  History,
   Pencil,
   Save,
   Trash2,
@@ -24,6 +25,7 @@ import type { FormMode } from "@/types/form";
 import type { CreditNoteDetail } from "@/types/credit-note";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
 import { DocFormHeader } from "@/components/share/doc-form-header";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface CnHeaderProps {
   readonly creditNote?: CreditNoteDetail;
@@ -62,6 +64,7 @@ export function CnHeader({
   onShowComment,
 }: CnHeaderProps) {
   const t = useTranslations("procurement.creditNote");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useCreditNoteComments(creditNote?.id);
@@ -177,6 +180,17 @@ export function CnHeader({
       {/* Always (มี record) — comment + print */}
       {creditNote && (
         <CommentButton count={comments?.length} onClick={onShowComment} />
+      )}
+      {creditNote && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => openActivity(creditNote.id, creditNote.cn_no)}
+        >
+          <History />
+          {tActivity("title")}
+        </Button>
       )}
       {isView && creditNote?.id && (
         <PrintDocumentButton

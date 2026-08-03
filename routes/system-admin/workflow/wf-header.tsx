@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Pencil, Trash2 } from "lucide-react";
+import { History, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useDeleteWorkflow } from "@/hooks/use-workflow";
 import type { Workflow } from "@/types/workflows";
 import { getWorkflowTypeLabels } from "@/constant/workflow";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface WfHeaderProps {
   readonly workflow: Workflow;
@@ -33,6 +34,7 @@ export function WfHeader({
   const deleteWorkflow = useDeleteWorkflow();
   const [showDelete, setShowDelete] = useState(false);
   const t = useTranslations("systemAdmin.workflow");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tf = useTranslations("form");
   const ts = useTranslations("status");
@@ -62,8 +64,23 @@ export function WfHeader({
       <span className="line-clamp-2">{workflow.description}</span>
     ) : undefined;
 
+  // ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทั้งสองโหมด
+  const activityButton = (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={() => openActivity(workflow.id, workflow.name)}
+      className="text-xs"
+    >
+      <History className="size-3" />
+      {tActivity("title")}
+    </Button>
+  );
+
   const actions = isEditing ? (
     <>
+      {activityButton}
       <Button
         type="button"
         variant="ghost"
@@ -86,6 +103,7 @@ export function WfHeader({
     </>
   ) : (
     <>
+      {activityButton}
       <Button size="sm" onClick={onEdit} className="text-xs">
         <Pencil className="size-3" />
         {tc("edit")}

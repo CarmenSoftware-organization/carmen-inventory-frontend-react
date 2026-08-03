@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { FileText, Pencil, Save, Trash2, X } from "lucide-react";
+import { FileText, History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentButton } from "@/components/comment-button";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
@@ -18,6 +18,7 @@ import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface GrnHeaderProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
@@ -65,6 +66,7 @@ export function GrnHeader({
   onSave,
 }: GrnHeaderProps) {
   const t = useTranslations("procurement.goodsReceiveNote");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useGoodsReceiveNoteComments(goodsReceiveNote?.id);
@@ -188,6 +190,19 @@ export function GrnHeader({
       {/* Always (มี record) — comment + print */}
       {goodsReceiveNote && (
         <CommentButton count={comments?.length} onClick={onShowComment} />
+      )}
+      {goodsReceiveNote && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(goodsReceiveNote.id, goodsReceiveNote.grn_no)
+          }
+        >
+          <History />
+          {tActivity("title")}
+        </Button>
       )}
       {isView && goodsReceiveNote?.id && (
         <PrintDocumentButton

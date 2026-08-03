@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -45,6 +45,7 @@ import {
   type RfpFormValues,
 } from "./rfp-form-schema";
 import RfpVendorTable from "./rfp-vendor-table";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "rfp-form";
 
@@ -60,6 +61,7 @@ export function RequestPriceListForm({
   const navigate = useNavigate();
   const { dateFormat } = useProfile();
   const t = useTranslations("vendorManagement.requestPriceList");
+  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -281,59 +283,75 @@ export function RequestPriceListForm({
           backLabel={tc("goBack")}
           onBack={handleBack}
           actions={
-            isView ? (
-              <>
-                <Button size="sm" onClick={() => setMode("edit")}>
-                  <Pencil />
-                  {tc("edit")}
-                </Button>
-                {requestPriceList?.id && (
-                  <PrintDocumentButton
-                    documentType="RFP"
-                    documentId={requestPriceList.id}
-                    filters={
-                      requestPriceList.name
-                        ? { DocumentNo: requestPriceList.name }
-                        : undefined
-                    }
-                  />
-                )}
-              </>
-            ) : (
-              <>
+            <>
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {requestPriceList && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={handleCancel}
-                  disabled={isPending}
+                  onClick={() =>
+                    openActivity(requestPriceList.id, requestPriceList.name)
+                  }
                 >
-                  <X />
-                  {tc("cancel")}
+                  <History />
+                  {tActivity("title")}
                 </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  form={FORM_ID}
-                  disabled={isPending}
-                >
-                  <Save />
-                  {submitLabel}
-                </Button>
-                {isEdit && requestPriceList && (
+              )}
+              {isView ? (
+                <>
+                  <Button size="sm" onClick={() => setMode("edit")}>
+                    <Pencil />
+                    {tc("edit")}
+                  </Button>
+                  {requestPriceList?.id && (
+                    <PrintDocumentButton
+                      documentType="RFP"
+                      documentId={requestPriceList.id}
+                      filters={
+                        requestPriceList.name
+                          ? { DocumentNo: requestPriceList.name }
+                          : undefined
+                      }
+                    />
+                  )}
+                </>
+              ) : (
+                <>
                   <Button
                     type="button"
-                    variant="destructive"
+                    variant="outline"
                     size="sm"
-                    onClick={() => setShowDelete(true)}
-                    disabled={deleteRfp.isPending || isPending}
+                    onClick={handleCancel}
+                    disabled={isPending}
                   >
-                    <Trash2 />
-                    {tc("delete")}
+                    <X />
+                    {tc("cancel")}
                   </Button>
-                )}
-              </>
-            )
+                  <Button
+                    type="submit"
+                    size="sm"
+                    form={FORM_ID}
+                    disabled={isPending}
+                  >
+                    <Save />
+                    {submitLabel}
+                  </Button>
+                  {isEdit && requestPriceList && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setShowDelete(true)}
+                      disabled={deleteRfp.isPending || isPending}
+                    >
+                      <Trash2 />
+                      {tc("delete")}
+                    </Button>
+                  )}
+                </>
+              )}
+            </>
           }
         />
       </div>
