@@ -107,23 +107,74 @@ function tsxFiles(dir: string): string[] {
   });
 }
 
+/**
+ * `text-warning` etc. are the semantic FILL colours — that is the bug this whole
+ * split exists to fix. `-foreground` (label on a fill) and `-ink` are fine.
+ */
+const SEMANTIC_FILL_AS_TEXT =
+  /\btext-(warning|success|info|positive|negative)(?![\w-])/;
+
+/**
+ * The same bug in the OTHER palette. `styles/badge-status.css` holds the
+ * document-status colours, which are spelled as arbitrary values
+ * (`text-[var(--status-…)]`) because the `@theme inline` block in that file
+ * registers nothing — it has no `@import "tailwindcss"`, so `text-status-*`
+ * utilities do not exist. The rule above only knows the semantic NAMES, so
+ * `text-[var(--status-in-progress)]` — a fill on its own tint, measured at
+ * 1.47:1 — walked straight past it.
+ *
+ * Two spellings are legitimate and must not fire:
+ *   `-fg`  the label that sits on the solid fill (constant/report-history.ts,
+ *          the activity-log badge maps, …)
+ *   `-ink` the text-tuned shade of the same hue (components/share/workflow-track.tsx)
+ */
+const STATUS_FILL_AS_TEXT =
+  /\btext-\[var\(--status-[a-z0-9-]*?(?<!-ink)(?<!-fg)\)\]/;
+
 describe("the fill/text split holds", () => {
   it("no component uses a fill status token as a text colour", () => {
-    // `text-warning` etc. are the FILL colours — that is the bug this whole
-    // split exists to fix. `-foreground` (label on a fill) and `-ink` are fine.
-    const re = /\btext-(warning|success|info|positive|negative)(?![\w-])/;
     const offenders = ["components", "routes"]
       .flatMap(tsxFiles)
-      .filter((f) => re.test(readFileSync(join(ROOT, f), "utf-8")));
+      .filter((f) => {
+        const src = readFileSync(join(ROOT, f), "utf-8");
+        return SEMANTIC_FILL_AS_TEXT.test(src) || STATUS_FILL_AS_TEXT.test(src);
+      });
     expect(offenders).toEqual([]);
   });
 
   it("still recognises the pattern it guards", () => {
-    const re = /\btext-(warning|success|info|positive|negative)(?![\w-])/;
-    expect(re.test(`className="text-warning"`)).toBe(true);
-    expect(re.test(`className="text-success/80"`)).toBe(true);
+    expect(SEMANTIC_FILL_AS_TEXT.test(`className="text-warning"`)).toBe(true);
+    expect(SEMANTIC_FILL_AS_TEXT.test(`className="text-success/80"`)).toBe(true);
     // must NOT fire on the two legitimate spellings
-    expect(re.test(`className="text-warning-ink"`)).toBe(false);
-    expect(re.test(`className="text-warning-foreground"`)).toBe(false);
+    expect(SEMANTIC_FILL_AS_TEXT.test(`className="text-warning-ink"`)).toBe(
+      false,
+    );
+    expect(
+      SEMANTIC_FILL_AS_TEXT.test(`className="text-warning-foreground"`),
+    ).toBe(false);
+
+    // document-status palette — the bug this half was added for
+    expect(
+      STATUS_FILL_AS_TEXT.test(`className="text-[var(--status-in-progress)]"`),
+    ).toBe(true);
+    expect(
+      STATUS_FILL_AS_TEXT.test(`className="text-[var(--status-approved)]"`),
+    ).toBe(true);
+    expect(
+      STATUS_FILL_AS_TEXT.test(`className="hover:text-[var(--status-voided)]"`),
+    ).toBe(true);
+    // …and the two spellings that are correct
+    expect(
+      STATUS_FILL_AS_TEXT.test(`className="text-[var(--status-voided-ink)]"`),
+    ).toBe(false);
+    expect(
+      STATUS_FILL_AS_TEXT.test(
+        `className="text-[var(--status-in-progress-fg)]"`,
+      ),
+    ).toBe(false);
+    // backgrounds are what the fill tokens are FOR — never an offence
+    expect(
+      STATUS_FILL_AS_TEXT.test(`className="bg-[var(--status-approved)]"`),
+    ).toBe(false);
   });
 });
