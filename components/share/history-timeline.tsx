@@ -101,12 +101,10 @@ export function HistoryTimelineItem({
             MARKER_CLASS[marker],
           )}
         />
-        {(badge || title) && (
-          <div className="flex flex-wrap items-center gap-2">
-            {badge}
-            {title && <span className="text-sm font-medium">{title}</span>}
-          </div>
-        )}
+        {/* badge อยู่บรรทัดของตัวเอง ชื่อผู้ใช้ลงมาอยู่ใต้ — ในราง 273px ที่
+            เหลือหลังหักคอลัมน์วันที่ ชื่อไทยเต็มยศกับ badge ยืนแถวเดียวกันไม่พอ */}
+        {badge && <div>{badge}</div>}
+        {title && <p className="mt-1 text-sm font-medium">{title}</p>}
         {children && <p className="text-muted-foreground text-xs">{children}</p>}
       </div>
     </li>
