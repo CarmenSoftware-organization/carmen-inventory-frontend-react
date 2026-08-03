@@ -4324,6 +4324,13 @@
     "documentCreated": "สร้างเอกสาร",
     "actionCreated": "สร้าง",
     "actionUpdated": "แก้ไข",
-    "actionDeleted": "ลบ"
+    "actionDeleted": "ลบ",
+    "actionSaved": "บันทึก",
+    "actionSubmitted": "ส่งอนุมัติ",
+    "actionApproved": "อนุมัติ",
+    "actionPurchased": "จัดซื้อ",
+    "actionReviewed": "ตรวจสอบ",
+    "actionRejected": "ไม่อนุมัติ",
+    "actionSentBack": "ตีกลับ"
   }
 }

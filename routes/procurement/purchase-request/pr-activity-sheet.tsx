@@ -30,18 +30,33 @@ import {
   type ActivityLog,
 } from "@/types/activity-log";
 
-/** action → key หัวข้อใน namespace `history` (action นอกรายการนี้ตกไปที่ humanize) */
+/**
+ * action → key หัวข้อใน namespace `history` (action นอกรายการนี้ตกไปที่ humanize)
+ *
+ * ครอบทั้ง action ของ CRUD และของ workflow (`ActionPr` ใน `types/stage-role.ts`)
+ * เพราะ backend เขียนทั้งสองชุดลง activity log เดียวกัน — เอกสารจริงส่วนใหญ่มี
+ * แถว workflow มากกว่าแถว CRUD ถ้าไม่ครอบไว้ หัวข้อจะค้างเป็นภาษาอังกฤษจาก
+ * humanize แม้ผู้ใช้สลับเป็นไทย
+ */
 const ACTION_TITLE_KEY: Record<string, string> = {
   create: "actionCreated",
   update: "actionUpdated",
   delete: "actionDeleted",
+  save: "actionSaved",
+  submit: "actionSubmitted",
+  approve: "actionApproved",
+  purchase: "actionPurchased",
+  review: "actionReviewed",
+  reject: "actionRejected",
+  send_back: "actionSentBack",
 };
 
 /**
- * action ที่ทำลายข้อมูล — ย้อมจุด marker เป็นสีเตือนแบบเดียวกับก้าวที่ผิดปกติของ
- * workflow history เพื่อให้กวาดตาแล้วเจอทันทีว่าใครลบอะไรไป
+ * action ที่ทำลายข้อมูลหรือออกนอกทางปกติของ workflow — ย้อมจุด marker เป็นสีเตือน
+ * ให้ตรงกับ `ALERT_ACTIONS` ของ workflow history เพื่อให้กวาดตาไทม์ไลน์แล้วเจอทันที
+ * ว่าใบนี้เคยถูกตีกลับ ถูกปฏิเสธ หรือถูกลบอะไรไป
  */
-const ALERT_ACTIONS = new Set(["delete"]);
+const ALERT_ACTIONS = new Set(["delete", "reject", "send_back"]);
 
 /**
  * ฟิลด์ที่ไม่เอามาแสดง

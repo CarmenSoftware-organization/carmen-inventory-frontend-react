@@ -4335,6 +4335,13 @@
     "documentCreated": "Document created",
     "actionCreated": "Created",
     "actionUpdated": "Updated",
-    "actionDeleted": "Deleted"
+    "actionDeleted": "Deleted",
+    "actionSaved": "Saved",
+    "actionSubmitted": "Submitted",
+    "actionApproved": "Approved",
+    "actionPurchased": "Purchased",
+    "actionReviewed": "Reviewed",
+    "actionRejected": "Rejected",
+    "actionSentBack": "Sent back"
   }
 }
