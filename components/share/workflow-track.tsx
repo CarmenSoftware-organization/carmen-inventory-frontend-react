@@ -33,7 +33,14 @@ function resolveState(
  * --muted) ไม่ใช่ tint ของ --status-draft — ในเชิงความหมาย "ยังไม่ถึง" คือยังไม่มี
  * สถานะ ไม่ใช่สถานะสีเทา · เดิมใช้ bg-muted เปล่า ๆ แต่ในโหมดมืดมันต่างจากพื้นหน้า
  * แค่ 1.13:1 รูปลูกศรจึงแทบไม่ปรากฏ (ช่อง pending มักเป็นช่องสุดท้าย ไม่มีเพื่อนบ้าน
- * ช่วยตัดขอบ) — token ใหม่ดัน 1.15 / 1.18 โดยข้อความยังผ่าน AA
+ * ช่วยตัดขอบ) — token ใหม่ดัน 1.14 / 1.18 โดยข้อความยังผ่าน AA
+ *
+ * `done` ใช้ --status-track-done-fg ไม่ใช่ text-muted-foreground เพราะในโหมดมืด
+ * --muted-foreground (oklch 0.64) บนพื้น done ได้แค่ 4.27 ตกเส้น AA · token นี้
+ * เท่า --muted-foreground ทุกไบต์ในโหมดสว่าง และสว่างขึ้นเป็น 0.78 เฉพาะโหมดมืด
+ * (ได้ 7.16) แต่ยังต่ำกว่า --foreground ที่ช่อง current ใช้ ลำดับความเด่นจึงคงเดิม
+ * — ทางเลือกอีกทางคือลดความเข้มของพื้นให้ข้อความผ่าน ซึ่งเคยทำแล้วและผิด: พื้นเป็น
+ * ตัวแบกความหมาย (เขียว = ผ่านแล้ว) ลดแล้วเขียวหายไปจากโหมดมืด ดู badge-status.css
  *
  * `voided` ใช้ --status-voided (ชมพูเข้ม) ไม่ใช่ text-destructive แบบโค้ดเดิม —
  * DESIGN.md ห้ามปน semantic token กับ document status และแอปมี token voided อยู่แล้ว
@@ -43,7 +50,7 @@ function resolveState(
  * ถูกลากทับไอคอน ✕ ด้วย
  */
 const STATE_STYLE: Record<StageState, string> = {
-  done: "bg-[var(--status-approved-soft)] text-muted-foreground",
+  done: "bg-[var(--status-approved-soft)] text-[var(--status-track-done-fg)]",
   current: "bg-[var(--status-in-progress-soft)] text-foreground font-medium",
   pending: "bg-[var(--status-pending-soft)] text-muted-foreground",
   voided: "bg-[var(--status-voided-soft)] text-foreground font-medium",
@@ -110,11 +117,11 @@ function StateIcon({ state }: { readonly state: StageState }) {
  * ปัจจุบันสี่ชั้นพร้อมกัน (ป้าย CURRENT + จุด + halo ที่เต้น + ชื่อขั้น) ซึ่งที่นี่
  * ไม่ทำซ้ำ ข้อจำกัดที่ตั้งไว้กันไม่ให้ไหลกลับไปทางนั้น:
  *
- * - **หนึ่งเฉดต่อหนึ่งช่อง** ปรากฏสองระดับความเข้ม — พื้น tint 7–18% กับไอคอนที่เป็น
+ * - **หนึ่งเฉดต่อหนึ่งช่อง** ปรากฏสองระดับความเข้ม — พื้น tint 14–18% กับไอคอนที่เป็น
  *   เฉดเดียวกันแต่เข้มกว่า (`--status-*-ink`) ไม่ใช่สองสัญญาณแข่งกัน
  * - **ข้อความเป็นสีกลางเสมอ** ไม่รับสีสถานะ — วัดแล้วผ่าน 4.5:1 ทั้งสองธีมทุกสถานะ
- *   (โหมดมืดฉิวเฉียด 4.5–4.6 เพราะ --muted-foreground บน --card เริ่มต้นที่ 4.89
- *   อยู่แล้ว จึงเป็นตัวกำหนดเพดานของ % ที่พื้น tint ผสมได้ ดู badge-status.css)
+ *   (ต่ำสุด 4.56 ที่ช่อง pending โหมดมืด ซึ่งเป็นเพดานของ palette เอง:
+ *   --muted-foreground บน --muted ในธีมมืดเริ่มต้นที่ 4.76 อยู่แล้ว ดู badge-status.css)
  * - **ไอคอนต่างรูปต่อสถานะ** คนตาบอดสีเขียว-เหลืองยังแยก ✓ / ● / ○ / ✕ ออก
  *   (WCAG 1.4.1 — ห้ามใช้สีเป็นตัวบอกอย่างเดียว)
  * - **ไม่มี animation** ความเคลื่อนไหวควรบอกว่ามีอะไรเปลี่ยน ไม่ใช่ประดับสถานะที่นิ่ง

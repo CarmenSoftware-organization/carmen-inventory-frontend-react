@@ -68,6 +68,10 @@
      --muted-foreground บน --muted เริ่มต้นที่ 4.76:1 เหลือถึง AA แค่ 0.26 */
   --status-pending-soft: color-mix(in oklab, var(--foreground) 2%, var(--muted));
 
+  /* สีข้อความช่อง done — ช่องเดียวที่ไม่ได้ใช้ --foreground
+     :root เท่า --muted-foreground เดิม (บนพื้น done ได้ 6.03 อยู่แล้ว) */
+  --status-track-done-fg: oklch(0.46 0 0);
+
   /* ink = หมึกที่วางบนพื้น -soft · fill ตัวเปล่าเป็นสี "พื้น" ที่จูนไว้ให้มี -fg ทับ
      เอามาเป็นไอคอนบน tint ของตัวเองแล้ววัดได้ done 3.19 · in-progress 1.47 ·
      voided 3.94 (สว่าง) / voided 2.75 (มืด) — ต่ำกว่า 3:1 ของ WCAG 1.4.11
@@ -77,13 +81,14 @@
   --status-voided-ink: oklch(0.50 0.18 348.79);
 ```
 
-ท้ายบล็อก `.dark` — ink เป็นค่าคงที่ ไม่มีตัวแปรให้พลิกตามธีมเหมือน `-soft` จึงต้องมีคู่
-ส่วน `--status-approved-soft` ต้องลด % ลงเพราะช่อง `done` เป็นช่องเดียวที่ใช้
-`--muted-foreground` เป็นสีข้อความ และในโหมดมืดมันเริ่มต้นที่ 4.89:1 เท่านั้น
-tint 14% กินจนเหลือ 4.25 ตกเส้น AA:
+ท้ายบล็อก `.dark` — ink กับ `track-done-fg` เป็นค่าคงที่ ไม่มีตัวแปรให้พลิกตามธีมเหมือน
+`-soft` จึงต้องมีคู่ ส่วน `-soft` ทั้ง 4 ตัวประกาศครั้งเดียวใน `:root` พอ
+`track-done-fg` โหมดมืดต้องสว่างกว่า `--muted-foreground` (0.64) เพราะ 0.64 บนพื้น
+`done` ได้แค่ 4.27 ตกเส้น AA · 0.78 ได้ 7.16 และยังต่ำกว่า `--foreground` (0.93)
+จึงไม่แย่งความเด่นกับช่อง `current`:
 
 ```css
-  --status-approved-soft: color-mix(in oklab, var(--status-approved) 7%, var(--card));
+  --status-track-done-fg: oklch(0.78 0 0);
 
   --status-approved-ink: oklch(0.67 0.17 155);
   --status-in-progress-ink: oklch(0.76 0.15 90);
@@ -166,7 +171,7 @@ git commit -m "$(cat <<'EOF'
 style(workflow-track): เพิ่ม soft tint / ink token กับ class รูปลูกศร
 
 - soft tint คำนวณจาก color-mix กับ --card/--muted ธีมมืดพลิกตามเอง
-- ink 3 ตัวเป็นค่าคงที่ จึงมีคู่ .dark พร้อม approved-soft ที่ต้องลด % ในธีมมืด
+- ink 3 ตัวกับ track-done-fg เป็นค่าคงที่ จึงมีคู่ .dark ส่วน soft tint ไม่ต้องมี
 - .wf-chevron / .wf-chevron.wf-chevron-head ใน @layer components ของ globals.css
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
@@ -230,7 +235,7 @@ function resolveState(
  * text-decoration propagate ลง in-flow descendant ถ้าใส่ที่กล่องนอกเส้นจะถูกลากทับไอคอน ✕
  */
 const STATE_STYLE: Record<StageState, string> = {
-  done: "bg-[var(--status-approved-soft)] text-muted-foreground",
+  done: "bg-[var(--status-approved-soft)] text-[var(--status-track-done-fg)]",
   current: "bg-[var(--status-in-progress-soft)] text-foreground font-medium",
   pending: "bg-[var(--status-pending-soft)] text-muted-foreground",
   voided: "bg-[var(--status-voided-soft)] text-foreground font-medium",
@@ -519,3 +524,13 @@ EOF
 `none`) — 14% ของ h=155 ผสมกับ 86% ของ h=0 จึงได้ h≈21 ซึ่งเป็นชมพู
 **บทเรียน:** ผสม tint ให้ใช้ `in oklab` — perceptual space เดียวกันแต่เป็นแกน a/b
 ไม่มีมุม hue ให้ลาก · หรือประกาศสีกลางเป็น `oklch(1 0 none)` ถ้าจำเป็นต้องใช้ oklch
+
+**3. แก้ contrast ที่ไม่พอด้วยการลดความเข้มของพื้น = แก้ปลายเหตุ**
+
+ข้อความช่อง `done` ตก AA ในธีมมืด (4.27) แผนแก้รอบแรกเลือกลดพื้น `--status-approved-soft`
+จาก 14% เหลือ 7% ข้อความผ่านก็จริง แต่พื้นเขียวจางจนไปชนพื้นเทาของ `pending` (1.001:1)
+เขียวหายไปจากธีมมืด แล้วต้องไล่แก้ต่ออีกชั้นด้วยการทำ `pending` เป็นดำสนิท ซึ่งอ่านเป็น
+"หลุม/ปิด" — ย้อนออกทั้งหมด สุดท้ายแก้ที่สีข้อความ (`--status-track-done-fg`) จบในที่เดียว
+**บทเรียน:** คู่ที่วัด contrast คือ "พื้น + ข้อความ" ขยับข้างไหนก็ผ่านได้ ให้ดูว่าข้างไหน
+แบกความหมายอยู่ (พื้นเขียว = ผ่านแล้ว) แล้วขยับอีกข้าง — สีข้อความเป็นสีกลาง ไม่ได้แปลอะไร
+จึงเป็นข้างที่ควรขยับเสมอ · รายละเอียดเต็มอยู่ในสเปกหัวข้อ "บทเรียน"
