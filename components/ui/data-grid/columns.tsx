@@ -8,8 +8,10 @@ import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AuditCell } from "@/components/share/audit-cell";
 import type { Permission } from "@/constant/permissions";
 import type { ParamsDto } from "@/types/params";
+import type { AuditEntry } from "@/types/audit";
 
 export const columnSkeletons = {
   checkbox: <Skeleton className="mx-auto h-2.5 w-2.5 rounded" />,
@@ -161,6 +163,55 @@ export function actionColumn<T>(
       skeleton: null,
     },
   };
+}
+
+/** แถวที่มีข้อมูล audit — `Audit` (types/audit) กับ `AuditInfo` (types/workflows)
+ *  โครงเหมือนกัน จึงรับด้วย shape ตรงนี้ทีเดียวไม่ต้องผูกกับ type ใด type หนึ่ง */
+interface RowWithAudit {
+  audit?: { created?: AuditEntry; updated?: AuditEntry };
+}
+
+/** `useTranslations("field")` ของหน้าที่เรียก — ใช้แค่คีย์ created/updated */
+type FieldTranslator = (key: "created" | "updated") => string;
+
+/**
+ * สร้าง ColumnDef คู่ created/updated ของตาราง list (วันเวลา + ชื่อผู้ทำ)
+ *
+ * `id` ตั้งเป็นชื่อคอลัมน์ฝั่ง backend (`created_at`/`updated_at`) เพื่อให้กด sort
+ * แล้วส่ง `sort=created_at:asc|desc` ได้ตรง cell ใช้ `AuditCell` ตัวเดียวกับการ์ด
+ *
+ * @typeParam T - ประเภทข้อมูลแถว (ต้องมี `audit`)
+ * @param tfl - translator ของ namespace `field`
+ * @param dateTimeFormat - รูปแบบวันเวลาของ BU (จาก `useProfile()`)
+ * @param options.size - ความกว้างคอลัมน์ (default 160)
+ * @returns ColumnDef สองตัว เรียง created แล้วตามด้วย updated
+ * @example
+ * ```ts
+ * const columns = [...customColumns, ...auditColumns<Currency>(tfl, dateTimeFormat)];
+ * ```
+ */
+export function auditColumns<T extends RowWithAudit>(
+  tfl: FieldTranslator,
+  dateTimeFormat: string,
+  options?: { size?: number },
+): ColumnDef<T>[] {
+  const size = options?.size ?? 160;
+
+  return (["created", "updated"] as const).map((which) => ({
+    id: `${which}_at`,
+    accessorFn: (row: T) => row.audit?.[which]?.at ?? "",
+    header: ({ column }) => (
+      <DataGridColumnHeader column={column} title={tfl(which)} />
+    ),
+    cell: ({ row }) => (
+      <AuditCell
+        entry={row.original.audit?.[which]}
+        dateTimeFormat={dateTimeFormat}
+      />
+    ),
+    size,
+    meta: { headerTitle: tfl(which), skeleton: columnSkeletons.text },
+  }));
 }
 
 /**

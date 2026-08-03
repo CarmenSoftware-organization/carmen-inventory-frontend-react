@@ -3,8 +3,10 @@ import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { columnSkeletons } from "@/components/ui/data-grid/columns";
-import { AuditCell } from "@/components/share/audit-cell";
+import {
+  auditColumns,
+  columnSkeletons,
+} from "@/components/ui/data-grid/columns";
 import { useProfile } from "@/hooks/use-profile";
 import type { CnReason } from "@/types/cn-reason";
 import type { ParamsDto } from "@/types/params";
@@ -57,36 +59,7 @@ export function useCreditNoteReasonTable({
       ),
       meta: { headerTitle: tfl("description"), skeleton: columnSkeletons.text },
     },
-    {
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created") },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated") },
-    },
+    ...auditColumns<CnReason>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<CnReason>({

@@ -10,10 +10,10 @@ import {
 } from "@/constant/inventory-adjustment";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import {
+  auditColumns,
   columnSkeletons,
   statusColumn,
 } from "@/components/ui/data-grid/columns";
-import { AuditCell } from "@/components/share/audit-cell";
 import { ADJUSTMENT_TYPE, type AdjustmentType } from "@/types/adjustment-type";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -96,36 +96,7 @@ export function useAdjustmentTypeTable({
       },
     },
     statusColumn<AdjustmentType>(),
-    {
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created") },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated") },
-    },
+    ...auditColumns<AdjustmentType>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<AdjustmentType>({

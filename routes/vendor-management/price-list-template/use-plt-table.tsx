@@ -6,16 +6,16 @@ import { CellAction } from "@/components/ui/cell-action";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { PL_STATUS_TONE } from "@/constant/price-list";
 import {
-  selectColumn,
-  indexColumn,
   actionColumn,
+  auditColumns,
   columnSkeletons,
+  indexColumn,
+  selectColumn,
 } from "@/components/ui/data-grid/columns";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
-import { AuditCell } from "@/components/share/audit-cell";
 
 interface UsePriceListTemplateTableOptions {
   templates: PriceListTemplate[];
@@ -121,36 +121,7 @@ export function usePriceListTemplateTable({
         skeleton: columnSkeletons.badge,
       },
     },
-    {
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
-    },
+    ...auditColumns<PriceListTemplate>(tfl, dateTimeFormat),
   ];
 
   const allColumns: ColumnDef<PriceListTemplate>[] = [
