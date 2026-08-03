@@ -11,42 +11,70 @@ import {
   TimelineSeparator,
   TimelineTitle,
 } from "@/components/ui/timeline";
-import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
-import { unknownStatusEntry } from "@/constant/status-config";
-import type { WorkflowHistoryEntry } from "@/types/store-requisition";
+import {
+  unknownStatusEntry,
+  type StatusConfigEntry,
+} from "@/constant/status-config";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 
-interface SrWorkflowHistoryProps {
-  readonly history: WorkflowHistoryEntry[];
+/** ประวัติ workflow ระดับเอกสาร 1 ก้าว — โครงเดียวกันทั้ง PR / PO / SR */
+export interface WorkflowHistoryTimelineEntry {
+  user: { id: string; name: string };
+  action: string;
+  /** ชื่อฟิลด์เวลาไม่ตรงกันระหว่างโมดูล — PR/PO ส่ง `datetime`, SR ส่ง `at` */
+  at?: string;
+  datetime?: string;
+  current_stage?: string;
+  next_stage?: string;
+}
+
+interface WorkflowHistoryTimelineProps {
+  readonly history: WorkflowHistoryTimelineEntry[];
+  /** map action → สี/ป้ายของโมดูลนั้น (เช่น `PR_WORKFLOW_ACTION_CONFIG`) */
+  readonly statusConfig: Record<string, StatusConfigEntry>;
+  /** ข้อความเมื่อยังไม่มีประวัติ (เช่น `t("noWorkflowHistory")`) */
+  readonly emptyLabel: string;
   readonly requestorName?: string;
   readonly createdAt?: string;
 }
 
 /**
- * Timeline แสดงประวัติ workflow ระดับเอกสารของใบเบิกสินค้าในรูปแบบซิกแซกสลับ
- * ซ้าย/ขวา เรียงล่าสุดขึ้นบนสุด พร้อม badge action และการเปลี่ยน stage —
- * โครงเดียวกับ PrWorkflowHistory ของใบขอซื้อ ด้านล่างแสดงผู้ร้องขอ + วันที่สร้าง
+ * Timeline ประวัติ workflow ระดับเอกสาร — ซิกแซกสลับซ้าย/ขวา เรียงล่าสุดขึ้นบนสุด
+ * พร้อม badge action และการเปลี่ยน stage · ท้ายสุดเป็นผู้ร้องขอ + วันที่สร้าง
  *
- * @param props - ประวัติ workflow (history), ชื่อผู้ร้องขอ (requestorName) และวันที่สร้าง (createdAt)
- * @returns คอมโพเนนต์ไทม์ไลน์ หรือข้อความว่างหากไม่มีประวัติ
+ * ใช้ร่วมกันทุกโมดูลที่มี workflow ระดับเอกสาร (PR/PO/SR) — สิ่งที่ต่างกันคือชุด
+ * action กับข้อความ empty เท่านั้น จึงรับมาเป็น prop ไม่ผูกกับโมดูลใดโมดูลหนึ่ง
+ * (คู่กับ `ItemHistorySheet` ที่เป็นประวัติระดับรายบรรทัด)
+ *
+ * @param props.history - ประวัติ (เรียงเก่า→ใหม่ ตามที่ backend ส่งมา)
+ * @param props.statusConfig - map action → สี/ป้ายของโมดูล
+ * @param props.emptyLabel - ข้อความเมื่อไม่มีประวัติ
+ * @param props.requestorName - ชื่อผู้ร้องขอ/ผู้ซื้อ แสดงใต้ไทม์ไลน์
+ * @param props.createdAt - วันที่สร้างเอกสาร แสดงใต้ชื่อผู้ร้องขอ
+ * @returns React element ของไทม์ไลน์ หรือข้อความว่างเมื่อไม่มีประวัติ
  * @example
- * <SrWorkflowHistory history={storeRequisition.workflow_history} />
+ * <WorkflowHistoryTimeline
+ *   history={purchaseRequest.workflow_history}
+ *   statusConfig={PR_WORKFLOW_ACTION_CONFIG}
+ *   emptyLabel={t("noWorkflowHistory")}
+ *   requestorName={purchaseRequest.requestor_name}
+ *   createdAt={purchaseRequest.created_at}
+ * />
  */
-export function SrWorkflowHistory({
+export function WorkflowHistoryTimeline({
   history,
+  statusConfig,
+  emptyLabel,
   requestorName,
   createdAt,
-}: SrWorkflowHistoryProps) {
-  const t = useTranslations("storeOperation.storeRequisition");
+}: WorkflowHistoryTimelineProps) {
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();
 
   if (!history || history.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">{t("noWorkflowHistory")}</p>
-    );
+    return <p className="text-muted-foreground text-sm">{emptyLabel}</p>;
   }
 
   // Reverse เพื่อให้ล่าสุดขึ้นบนสุด
@@ -56,12 +84,11 @@ export function SrWorkflowHistory({
     <div className="space-y-3">
       <Timeline defaultValue={reversedHistory.length} orientation="vertical">
         {reversedHistory.map((entry, i) => {
-          // action ที่ไม่มีในแผนที่ต้องไม่ไปยืมป้ายของ submitted — ของเดิม fallback
-          // เป็น .submitted ทำให้ action แปลก ๆ โชว์ว่า "SUBMITTED" ทั้งที่ไม่ใช่
+          // action ที่ไม่มีในแผนที่ต้องไม่ไปยืมป้ายของ action อื่น — เดิม fallback
+          // เป็น `.submitted` ทำให้ action แปลก ๆ โชว์ว่า "SUBMITTED" ทั้งที่ไม่ใช่
           // (ผิดข้อมูล ไม่ใช่แค่หน้าตาเพี้ยน)
           const config =
-            SR_WORKFLOW_ACTION_CONFIG[entry.action] ??
-            unknownStatusEntry(entry.action);
+            statusConfig[entry.action] ?? unknownStatusEntry(entry.action);
           const isEven = i % 2 === 0;
 
           return (
@@ -88,7 +115,10 @@ export function SrWorkflowHistory({
                 <TimelineSeparator />
                 <TimelineIndicator />
                 <TimelineDate>
-                  {formatDate(entry.at, `${dateFormat} HH:mm`)}
+                  {formatDate(
+                    entry.at ?? entry.datetime ?? "",
+                    `${dateFormat} HH:mm`,
+                  )}
                 </TimelineDate>
                 <div
                   className={cn(

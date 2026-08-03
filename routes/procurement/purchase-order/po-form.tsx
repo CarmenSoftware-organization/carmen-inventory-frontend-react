@@ -35,15 +35,16 @@ import { usePoPreviousStages } from "@/hooks/use-purchase-order";
 import { usePoDialogState } from "./use-po-dialog-state";
 import { usePoProfileSync } from "./use-po-profile-sync";
 import { usePoFormHandlers } from "./use-po-form-handlers";
+// action ของ workflow ใช้คำชุดเดียวกับ PR (workflow engine ตัวเดียวกัน)
+import { PR_WORKFLOW_ACTION_CONFIG } from "@/constant/purchase-request";
 
 const PoCommentSheet = lazy(() =>
   import("./po-comment-sheet").then((mod) => ({ default: mod.PoCommentSheet })),
 );
 
-// reuse PR's timeline — WorkflowHistoryEntry shape เหมือนกัน
-const PoWorkflowHistory = lazy(() =>
-  import("../purchase-request/workflow/pr-workflow-history").then((mod) => ({
-    default: mod.PrWorkflowHistory,
+const WorkflowHistoryTimeline = lazy(() =>
+  import("@/components/share/workflow-history-timeline").then((mod) => ({
+    default: mod.WorkflowHistoryTimeline,
   })),
 );
 
@@ -295,8 +296,10 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
                 </SheetHeader>
                 <div className="px-4 pb-4">
                   <Suspense fallback={null}>
-                    <PoWorkflowHistory
+                    <WorkflowHistoryTimeline
                       history={purchaseOrder.workflow_history ?? []}
+                      statusConfig={PR_WORKFLOW_ACTION_CONFIG}
+                      emptyLabel={t("noWorkflowHistory")}
                       requestorName={purchaseOrder.buyer_name}
                       createdAt={purchaseOrder.created_at}
                     />

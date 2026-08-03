@@ -157,7 +157,14 @@ export interface PurchaseRequestTemplate {
 export interface WorkflowHistoryEntry {
   user: { id: string; name: string };
   action: string;
-  datetime: string;
+  /**
+   * ของจริงที่ API ส่งมาคือ `at` — `datetime` ประกาศไว้แต่ไม่เคยมีค่า ทำให้
+   * ไทม์ไลน์ระดับเอกสารของ PR/PO ไม่โชว์วันเวลาเลยจนกว่าจะย้ายมาอ่าน `at`
+   * (SR ประกาศเป็น `at` มาแต่แรกจึงโชว์ปกติ) — ประกาศทั้งคู่ไว้ก่อนจนกว่า
+   * หลังบ้านจะเลือกชื่อเดียว
+   */
+  at?: string;
+  datetime?: string;
   next_stage: string;
   current_stage?: string;
 }

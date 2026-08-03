@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { PR_WORKFLOW_ACTION_CONFIG } from "@/constant/purchase-request";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
@@ -34,9 +35,9 @@ const PrActivitySheet = lazy(() =>
   })),
 );
 
-const PrWorkflowHistory = lazy(() =>
-  import("./workflow/pr-workflow-history").then((mod) => ({
-    default: mod.PrWorkflowHistory,
+const WorkflowHistoryTimeline = lazy(() =>
+  import("@/components/share/workflow-history-timeline").then((mod) => ({
+    default: mod.WorkflowHistoryTimeline,
   })),
 );
 
@@ -169,8 +170,10 @@ export function PrFormDialogs({
             </SheetHeader>
             <div className="px-4 pb-4">
               <Suspense fallback={null}>
-                <PrWorkflowHistory
+                <WorkflowHistoryTimeline
                   history={workflowHistory}
+                  statusConfig={PR_WORKFLOW_ACTION_CONFIG}
+                  emptyLabel={t("noWorkflowHistory")}
                   requestorName={requestorName}
                   createdAt={createdAt}
                 />

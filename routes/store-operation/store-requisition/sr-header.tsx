@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/sheet";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { WorkflowTrack } from "@/components/share/workflow-track";
-import { SrWorkflowHistory } from "./sr-workflow-history";
+import { WorkflowHistoryTimeline } from "@/components/share/workflow-history-timeline";
+import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
@@ -204,8 +205,10 @@ export function SrHeader({
           </SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-4">
-          <SrWorkflowHistory
+          <WorkflowHistoryTimeline
             history={workflowHistory}
+            statusConfig={SR_WORKFLOW_ACTION_CONFIG}
+            emptyLabel={t("noWorkflowHistory")}
             requestorName={requesterName}
             createdAt={storeRequisition?.created_at}
           />
