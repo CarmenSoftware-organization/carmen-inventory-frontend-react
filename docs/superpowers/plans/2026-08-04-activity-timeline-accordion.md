@@ -614,6 +614,149 @@ EOF
 
 ---
 
+## Task 4: ครอบ action ของ workflow ให้ครบ
+
+**ที่มา:** Task 3 ตรวจใบจริงแล้วพบว่า backend เขียน action ของ **workflow** (`save` / `approve` / …)
+ลง activity log เดียวกับ action ของ CRUD — spec สมมติไว้แค่ `create` / `update` / `delete`
+ผลคือ 4 จาก 6 แถวตกไปที่ `humanize()` จึงค้างเป็นภาษาอังกฤษแม้ผู้ใช้สลับเป็นไทย และ
+`reject` / `send_back` ไม่ได้จุดสีแดง ทั้งที่ workflow history ให้ tone เตือนกับสองตัวนี้
+ชุด action เต็มอยู่ที่ `ActionPr` ใน `types/stage-role.ts`
+
+**Files:**
+- Modify: `messages/en.json`, `messages/th.json` (namespace `history`)
+- Modify: `routes/procurement/purchase-request/pr-activity-sheet.tsx:33-44`
+- Test (ห้ามแก้ ต้องเขียว): `routes/procurement/purchase-request/pr-activity-sheet.test.tsx`
+
+**Interfaces:**
+- Consumes: `ACTION_TITLE_KEY` และ `ALERT_ACTIONS` ที่ Task 2 สร้างไว้ · key เดิม 3 ตัว
+  (`actionCreated` / `actionUpdated` / `actionDeleted`) ที่ Task 2 ใส่ใน namespace `history`
+- Produces: ไม่มี export ใหม่ — เปลี่ยนเฉพาะค่าคงที่ในไฟล์และ i18n
+
+- [ ] **Step 1: เพิ่ม 7 key ใน `messages/en.json`**
+
+ใน object `history` เติมต่อจาก `"actionDeleted"`:
+
+```json
+    "actionSaved": "Saved",
+    "actionSubmitted": "Submitted",
+    "actionApproved": "Approved",
+    "actionPurchased": "Purchased",
+    "actionReviewed": "Reviewed",
+    "actionRejected": "Rejected",
+    "actionSentBack": "Sent back"
+```
+
+- [ ] **Step 2: เพิ่ม 7 key ใน `messages/th.json`**
+
+ใน object `history` เติมต่อจาก `"actionDeleted"`:
+
+```json
+    "actionSaved": "บันทึก",
+    "actionSubmitted": "ส่งอนุมัติ",
+    "actionApproved": "อนุมัติ",
+    "actionPurchased": "จัดซื้อ",
+    "actionReviewed": "ตรวจสอบ",
+    "actionRejected": "ไม่อนุมัติ",
+    "actionSentBack": "ตีกลับ"
+```
+
+คำไทยเลือกให้เป็น**คำกริยาสั้นทั้งชุด**เพื่อให้อ่านไล่ลงมาในไทม์ไลน์เดียวกันแล้วสอดคล้องกัน
+และยืมคำที่ระบบใช้อยู่แล้วตรงที่ความหมายตรงกัน (`status.approved` = "อนุมัติ",
+`status.rejected` = "ไม่อนุมัติ") เพื่อไม่ให้แอปเรียกเหตุการณ์เดียวกันด้วยคนละคำ
+
+- [ ] **Step 3: ขยาย `ACTION_TITLE_KEY`**
+
+แทนที่ block `ACTION_TITLE_KEY` ทั้งก้อน (`pr-activity-sheet.tsx:33-38` พร้อมคอมเมนต์บรรทัดเดียวด้านบน) ด้วย:
+
+```tsx
+/**
+ * action → key หัวข้อใน namespace `history` (action นอกรายการนี้ตกไปที่ humanize)
+ *
+ * ครอบทั้ง action ของ CRUD และของ workflow (`ActionPr` ใน `types/stage-role.ts`)
+ * เพราะ backend เขียนทั้งสองชุดลง activity log เดียวกัน — เอกสารจริงส่วนใหญ่มี
+ * แถว workflow มากกว่าแถว CRUD ถ้าไม่ครอบไว้ หัวข้อจะค้างเป็นภาษาอังกฤษจาก
+ * humanize แม้ผู้ใช้สลับเป็นไทย
+ */
+const ACTION_TITLE_KEY: Record<string, string> = {
+  create: "actionCreated",
+  update: "actionUpdated",
+  delete: "actionDeleted",
+  save: "actionSaved",
+  submit: "actionSubmitted",
+  approve: "actionApproved",
+  purchase: "actionPurchased",
+  review: "actionReviewed",
+  reject: "actionRejected",
+  send_back: "actionSentBack",
+};
+```
+
+- [ ] **Step 4: ขยาย `ALERT_ACTIONS`**
+
+แทนที่ block `ALERT_ACTIONS` ทั้งก้อน (`pr-activity-sheet.tsx:40-44` พร้อม JSDoc ด้านบน) ด้วย:
+
+```tsx
+/**
+ * action ที่ทำลายข้อมูลหรือออกนอกทางปกติของ workflow — ย้อมจุด marker เป็นสีเตือน
+ * ให้ตรงกับ `ALERT_ACTIONS` ของ workflow history เพื่อให้กวาดตาไทม์ไลน์แล้วเจอทันที
+ * ว่าใบนี้เคยถูกตีกลับ ถูกปฏิเสธ หรือถูกลบอะไรไป
+ */
+const ALERT_ACTIONS = new Set(["delete", "reject", "send_back"]);
+```
+
+ไม่ต้องแก้จุดที่เรียกใช้ — `ACTION_TITLE_KEY[action]` และ `ALERT_ACTIONS.has(action)`
+ทำงานกับ key ที่เพิ่มเข้ามาได้เลย และ `action` ถูก `toLowerCase()` ไว้แล้ว
+
+- [ ] **Step 5: ตรวจว่า key ครบคู่กันทั้งสองภาษา**
+
+```bash
+python3 -c "
+import json
+en=json.load(open('messages/en.json'))['history']
+th=json.load(open('messages/th.json'))['history']
+missing=set(en)^set(th)
+print('key ไม่ตรงกัน:', missing or 'ไม่มี')
+print('action keys:', sorted(k for k in en if k.startswith('action')))
+"
+```
+
+Expected: `key ไม่ตรงกัน: ไม่มี` และรายการ action key ครบ 10 ตัว
+
+- [ ] **Step 6: ตรวจ type และ lint**
+
+```bash
+bunx tsc --noEmit && bun run lint
+```
+
+Expected: ผ่านทั้งคู่
+
+- [ ] **Step 7: รัน suite ทั้งหมด**
+
+```bash
+bun test:run
+```
+
+Expected: เขียวทั้งหมด (801 tests) — test เดิมของ activity sheet mock `useTranslations` ให้คืน key
+จึงไม่ผูกกับข้อความจริง
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add messages/en.json messages/th.json routes/procurement/purchase-request/pr-activity-sheet.tsx
+git commit -m "$(cat <<'EOF'
+fix(pr): แปลหัวข้อ activity ของ action ฝั่ง workflow ให้ครบ
+
+backend เขียน action ของ workflow (save/approve/...) ลง activity log เดียวกับ
+CRUD ซึ่งเดิมไม่มีในแผนที่ หัวข้อจึงค้างเป็นอังกฤษแม้สลับเป็นไทย
+และ reject/send_back ได้จุดสีเตือนเหมือนที่ workflow history ทำ
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
 ## Self-review
 
 | ข้อกำหนดใน spec | Task ที่รองรับ |
