@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PrActivitySheet } from "./pr-activity-sheet";
+import { ActivitySheet } from "./activity-sheet";
 
 // t(key) → key
 vi.mock("use-intl", () => ({
@@ -63,16 +63,16 @@ beforeEach(() => {
 
 function renderSheet(open = true) {
   render(
-    <PrActivitySheet
-      prId="pr-1"
-      prNo="PR-2026-001"
+    <ActivitySheet
+      entityId="pr-1"
+      label="PR-2026-001"
       open={open}
       onOpenChange={vi.fn()}
     />,
   );
 }
 
-describe("PrActivitySheet", () => {
+describe("ActivitySheet", () => {
   it("does not fetch while the sheet is closed", () => {
     renderSheet(false);
     expect(useActivityLogByRecord).toHaveBeenCalledWith(undefined, {
@@ -115,7 +115,7 @@ describe("PrActivitySheet", () => {
       isError: false,
     });
     renderSheet();
-    expect(screen.getByText("activityEmpty")).toBeInTheDocument();
+    expect(screen.getByText("empty")).toBeInTheDocument();
   });
 
   it("loads the diff only for the expanded entry and hides noisy fields", async () => {

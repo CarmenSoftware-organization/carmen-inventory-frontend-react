@@ -79,5 +79,6 @@ export function usePrtTable({
     hideStatus: true,
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
     initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    activity: { id: (r) => r.id, label: (r) => r.name },
   });
 }

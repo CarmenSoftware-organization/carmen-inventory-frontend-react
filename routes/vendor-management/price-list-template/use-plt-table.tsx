@@ -128,7 +128,9 @@ export function usePriceListTemplateTable({
     selectColumn<PriceListTemplate>(),
     indexColumn<PriceListTemplate>(params),
     ...dataColumns,
-    actionColumn<PriceListTemplate>(onDelete),
+    actionColumn<PriceListTemplate>(onDelete, {
+      activity: { id: (r) => r.id, label: (r) => r.name },
+    }),
   ];
 
   return useReactTable({

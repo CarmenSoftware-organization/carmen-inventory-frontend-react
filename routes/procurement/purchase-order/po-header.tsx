@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Lock, Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Lock, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -14,6 +14,7 @@ import type { FormMode } from "@/types/form";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface PoHeaderProps {
   readonly purchaseOrder?: PurchaseOrder;
@@ -59,6 +60,7 @@ export function PoHeader({
   onShowHistory,
 }: PoHeaderProps) {
   const t = useTranslations("procurement.purchaseOrder");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();
@@ -168,6 +170,15 @@ export function PoHeader({
             </>
           )}
           <CommentButton count={comments?.length} onClick={onShowComment} />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => openActivity(purchaseOrder.id, purchaseOrder.po_no)}
+          >
+            <History aria-hidden="true" />
+            {tActivity("title")}
+          </Button>
         </>
       )}
       {isAdd && (

@@ -11,7 +11,7 @@ import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { PL_STATUS_TONE } from "@/constant/price-list";
@@ -41,6 +41,7 @@ import {
 } from "./pl-form-schema";
 import { PLGeneralCard } from "./pl-general-card";
 import { PLProductsSection } from "./pl-products-section";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "pl-form";
 
@@ -51,6 +52,7 @@ interface PriceListFormProps {
 export function PriceListForm({ priceList }: PriceListFormProps) {
   const navigate = useNavigate();
   const t = useTranslations("vendorManagement.priceList");
+  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -233,46 +235,60 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           </>
         }
         actions={
-          isView ? (
-            <Button size="sm" onClick={() => setMode("edit")}>
-              <Pencil />
-              {tc("edit")}
-            </Button>
-          ) : (
-            <>
+          <>
+            {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+            {priceList && (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={handleCancel}
-                disabled={isPending}
+                onClick={() => openActivity(priceList.id, priceList.no)}
               >
-                <X />
-                {tc("cancel")}
+                <History />
+                {tActivity("title")}
               </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form={FORM_ID}
-                disabled={isPending}
-              >
-                <Save />
-                {submitLabel}
+            )}
+            {isView ? (
+              <Button size="sm" onClick={() => setMode("edit")}>
+                <Pencil />
+                {tc("edit")}
               </Button>
-              {isEdit && priceList && (
+            ) : (
+              <>
                 <Button
                   type="button"
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setShowDelete(true)}
-                  disabled={deletePriceList.isPending || isPending}
+                  onClick={handleCancel}
+                  disabled={isPending}
                 >
-                  <Trash2 />
-                  {tc("delete")}
+                  <X />
+                  {tc("cancel")}
                 </Button>
-              )}
-            </>
-          )
+                <Button
+                  type="submit"
+                  size="sm"
+                  form={FORM_ID}
+                  disabled={isPending}
+                >
+                  <Save />
+                  {submitLabel}
+                </Button>
+                {isEdit && priceList && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowDelete(true)}
+                    disabled={deletePriceList.isPending || isPending}
+                  >
+                    <Trash2 />
+                    {tc("delete")}
+                  </Button>
+                )}
+              </>
+            )}
+          </>
         }
         />
       </div>

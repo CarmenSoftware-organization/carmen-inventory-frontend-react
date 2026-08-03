@@ -135,6 +135,7 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
         onEdit={handleEdit}
         onCancel={handleCancel}
         onDelete={cuisine ? () => setShowDelete(true) : undefined}
+        activityId={cuisine?.id}
       />
 
       <form

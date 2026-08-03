@@ -163,6 +163,7 @@ export function PrtForm({ template }: PrtFormProps) {
         onCancel={handleCancel}
         onDelete={template ? () => setShowDelete(true) : undefined}
         deleteIsPending={deletePrt.isPending}
+        activity={template && { id: template.id, label: template.name }}
       />
 
       <div className="mt-6">

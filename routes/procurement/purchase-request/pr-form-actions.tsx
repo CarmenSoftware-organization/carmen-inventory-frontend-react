@@ -3,6 +3,7 @@ import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
+import { openActivity } from "@/components/share/activity-sheet-host";
 import { usePurchaseRequestComments } from "@/hooks/use-purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_STATUS } from "@/types/purchase-request";
@@ -21,7 +22,6 @@ interface PrFormActionsProps {
   readonly onCancel: () => void;
   readonly onDelete: () => void;
   readonly onComment: () => void;
-  readonly onActivity: () => void;
 }
 
 /**
@@ -41,7 +41,6 @@ interface PrFormActionsProps {
  * @param props.onCancel - callback ยกเลิกการแก้ไข
  * @param props.onDelete - callback ลบ PR
  * @param props.onComment - callback เปิด comment sheet
- * @param props.onActivity - callback เปิด activity sheet
  * @returns React element ของแถบปุ่ม action สำหรับฟอร์ม PR
  * @example
  * <PrFormActions
@@ -55,7 +54,6 @@ interface PrFormActionsProps {
  *   onCancel={handleCancel}
  *   onDelete={handleDelete}
  *   onComment={() => setCommentOpen(true)}
- *   onActivity={() => setActivityOpen(true)}
  * />
  */
 export function PrFormActions({
@@ -71,9 +69,8 @@ export function PrFormActions({
   onCancel,
   onDelete,
   onComment,
-  onActivity,
 }: PrFormActionsProps) {
-  const t = useTranslations("procurement.purchaseRequest");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const { data: comments } = usePurchaseRequestComments(
     hasRecord ? prId : undefined,
@@ -139,10 +136,15 @@ export function PrFormActions({
         <CommentButton count={comments?.length} onClick={onComment} />
       )}
 
-      {hasRecord && (
-        <Button type="button" size="sm" variant="outline" onClick={onActivity}>
+      {hasRecord && prId && (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => openActivity(prId, prNo)}
+        >
           <History />
-          {t("activity")}
+          {tActivity("title")}
         </Button>
       )}
 

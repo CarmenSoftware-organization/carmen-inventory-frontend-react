@@ -3030,15 +3030,7 @@
         "healthy": "Healthy",
         "low": "Low Stock",
         "critical": "Critical"
-      },
-      "activity": "Activity",
-      "activityDesc": "Everything done to this request, newest first",
-      "activityEmpty": "No activity recorded yet",
-      "activityNoChanges": "Nothing changed",
-      "activityLoadError": "Could not load activity",
-      "activityAdded": "added",
-      "activityRemoved": "removed",
-      "activityUpdated": "updated"
+      }
     },
     "purchaseRequestTemplate": {
       "entity": "Purchase Request Template",
@@ -4339,9 +4331,21 @@
     "actionSaved": "Saved",
     "actionSubmitted": "Submitted",
     "actionApproved": "Approved",
-    "actionPurchased": "Purchased",
     "actionReviewed": "Reviewed",
     "actionRejected": "Rejected",
-    "actionSentBack": "Sent back"
+    "actionCancelled": "Cancelled",
+    "actionVoided": "Voided",
+    "actionPrinted": "Printed",
+    "actionCommented": "Commented"
+  },
+  "activity": {
+    "title": "Activity",
+    "description": "Everything done to this record, newest first",
+    "empty": "No activity recorded yet",
+    "noChanges": "Nothing changed",
+    "loadError": "Could not load activity",
+    "added": "added",
+    "removed": "removed",
+    "updated": "updated"
   }
 }

@@ -193,5 +193,6 @@ export function useInventoryAdjustmentTable({
     initialState: {
       columnVisibility: { created_at: false, updated_at: false },
     },
+    activity: { id: (r) => r.id, label: (r) => r.si_no ?? r.so_no },
   });
 }

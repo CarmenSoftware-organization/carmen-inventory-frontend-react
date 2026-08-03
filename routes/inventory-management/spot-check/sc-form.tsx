@@ -8,6 +8,7 @@ import {
   Boxes,
   ChevronLeft,
   ClipboardCheck,
+  History,
   MapPin,
   Pencil,
   Save,
@@ -48,6 +49,7 @@ import {
   mapFormToPayload,
   type SpotCheckFormValues,
 } from "./sc-form-schema";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "sc-form";
 
@@ -69,6 +71,7 @@ export function ScForm({
   availableProducts = [],
 }: ScFormProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
+  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -214,6 +217,20 @@ export function ScForm({
                 <StatusPill statusConfig={methodConfig} large />
               </div>
               <div className="flex items-center gap-2">
+                {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+                {spotCheck && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      openActivity(spotCheck.id, spotCheck.spot_check_no)
+                    }
+                  >
+                    <History />
+                    {tActivity("title")}
+                  </Button>
+                )}
                 {isView ? (
                   <>
                     <Button size="sm" onClick={() => setMode("edit")}>

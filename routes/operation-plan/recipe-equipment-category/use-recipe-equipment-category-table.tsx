@@ -55,5 +55,6 @@ export function useRecipeEquipmentCategoryTable({
     params,
     tableConfig,
     onDelete,
+    activity: { id: (r) => r.id, label: (r) => r.name },
   });
 }

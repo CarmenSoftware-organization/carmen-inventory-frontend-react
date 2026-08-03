@@ -141,20 +141,48 @@ export function statusColumn<T>(): ColumnDef<T> {
  * actionColumn<Currency>((item) => setDeleteTarget(item));
  * ```
  */
+/**
+ * วิธีดึง id และป้ายชื่อของแถวไปเปิด activity sheet
+ *
+ * เป็น callback ไม่ใช่ชื่อฟิลด์ตายตัว เพราะแต่ละตารางเก็บป้ายชื่อคนละที่ —
+ * เอกสารใช้เลขที่ (`po_no`) ข้อมูลหลักใช้ `code` หรือ `name`
+ */
+export interface ActionColumnActivity<T> {
+  /** entity id ของแถว — คืน undefined เพื่อซ่อนเมนูเฉพาะแถวนั้น */
+  id: (row: T) => string | undefined;
+  /** ป้ายชื่อที่ขึ้นในหัว sheet เช่นเลขที่เอกสารหรือรหัส */
+  label?: (row: T) => string | undefined;
+}
+
 export function actionColumn<T>(
   onDelete: (item: T) => void,
-  options?: { deleteDenied?: boolean; deletePermission?: Permission },
+  options?: {
+    deleteDenied?: boolean;
+    deletePermission?: Permission;
+    activity?: ActionColumnActivity<T>;
+  },
 ): ColumnDef<T> {
   return {
     id: "action",
     header: () => "",
-    cell: ({ row }) => (
-      <DataGridRowActions
-        onDelete={() => onDelete(row.original)}
-        deleteDenied={options?.deleteDenied}
-        deletePermission={options?.deletePermission}
-      />
-    ),
+    cell: ({ row }) => {
+      const activityId = options?.activity?.id(row.original);
+      return (
+        <DataGridRowActions
+          onDelete={() => onDelete(row.original)}
+          deleteDenied={options?.deleteDenied}
+          deletePermission={options?.deletePermission}
+          activity={
+            activityId
+              ? {
+                  id: activityId,
+                  label: options?.activity?.label?.(row.original),
+                }
+              : undefined
+          }
+        />
+      );
+    },
     enableSorting: false,
     size: 60,
     meta: {

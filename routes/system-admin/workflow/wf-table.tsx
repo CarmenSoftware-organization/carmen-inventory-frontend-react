@@ -191,5 +191,6 @@ export function useWfTable({
     params,
     tableConfig,
     hideStatus: true,
+    activity: { id: (r) => r.id, label: (r) => r.name },
   });
 }

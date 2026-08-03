@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -30,6 +30,7 @@ import type {
   StoreRequisition,
   StoreRequisitionType,
 } from "@/types/store-requisition";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface SrHeaderProps {
   readonly storeRequisition?: StoreRequisition;
@@ -77,6 +78,7 @@ export function SrHeader({
   onComment,
 }: SrHeaderProps) {
   const t = useTranslations("storeOperation.storeRequisition");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
@@ -177,6 +179,19 @@ export function SrHeader({
       )}
       {storeRequisition && onComment && (
         <CommentButton count={comments?.length} onClick={onComment} />
+      )}
+      {storeRequisition && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(storeRequisition.id, storeRequisition.sr_no)
+          }
+        >
+          <History aria-hidden="true" />
+          {tActivity("title")}
+        </Button>
       )}
       {isView && storeRequisition?.id && (
         <PrintDocumentButton

@@ -133,6 +133,9 @@ export function PcForm({ physicalCount }: PcFormProps) {
         onEdit={() => setMode("edit")}
         onDelete={physicalCount ? () => setShowDelete(true) : undefined}
         deleteIsPending={deletePc.isPending}
+        // ไม่ส่ง label เพราะ edit-physical-count-content cast `PhysicalCountData`
+        // เป็น `PhysicalCount` — ฟิลด์ชื่อที่ type ประกาศไว้ไม่มีอยู่จริงตอนรัน
+        activity={physicalCount && { id: physicalCount.id }}
       >
         {mode === "view" && physicalCount?.id && (
           <PrintDocumentButton

@@ -192,7 +192,9 @@ export function useStoreRequisitionTable({
     selectColumn<StoreRequisition>(),
     indexColumn<StoreRequisition>(params),
     ...dataColumns,
-    actionColumn<StoreRequisition>(onDelete),
+    actionColumn<StoreRequisition>(onDelete, {
+      activity: { id: (r) => r.id, label: (r) => r.sr_no },
+    }),
   ];
 
   return useReactTable({
