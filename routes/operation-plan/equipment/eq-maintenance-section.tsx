@@ -3,7 +3,7 @@ import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldDatePicker } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "./eq-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { EquipmentFormValues } from "./eq-form-schema";
 
 interface EqMaintenanceSectionProps {
@@ -21,8 +21,9 @@ export function EqMaintenanceSection({
   const errors = form.formState.errors;
 
   return (
-    <Card
-      label={t("maintenance")}
+    <SettingSection
+      plain
+      title={t("maintenance")}
       description={t("maintenanceDesc")}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -77,6 +78,6 @@ export function EqMaintenanceSection({
           {...form.register("maintenance_schedule")}
         />
       </Field>
-    </Card>
+    </SettingSection>
   );
 }

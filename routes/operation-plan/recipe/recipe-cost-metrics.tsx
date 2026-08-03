@@ -2,7 +2,7 @@
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { FieldInput } from "@/components/ui/field";
-import { Card } from "./recipe-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeFormValues } from "./recipe-form-schema";
 import type { RecipeComputed } from "./use-recipe-cost-calc";
 
@@ -26,7 +26,11 @@ export function RecipeCostMetrics({
   });
 
   return (
-    <Card label={t("otherMetrics")} description={t("otherMetricsDesc")}>
+    <SettingSection
+      plain
+      title={t("otherMetrics")}
+      description={t("otherMetricsDesc")}
+    >
       <div className="space-y-2 text-xs">
         <InfoRow
           label={t("laborCostRatio")}
@@ -78,7 +82,7 @@ export function RecipeCostMetrics({
           </span>
         </div>
       </div>
-    </Card>
+    </SettingSection>
   );
 }
 

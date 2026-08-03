@@ -2,7 +2,7 @@
 import type { UseFormReturn, FieldPath } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldInput } from "@/components/ui/field";
-import { Card } from "./eq-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { EquipmentFormValues } from "./eq-form-schema";
 
 interface EqQuantitySectionProps {
@@ -19,8 +19,9 @@ export function EqQuantitySection({
   const tfl = useTranslations("field");
 
   return (
-    <Card
-      label={t("qtySettings")}
+    <SettingSection
+      plain
+      title={t("qtySettings")}
       description={t("qtySettingsDesc")}
     >
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -53,7 +54,7 @@ export function EqQuantitySection({
           isDisabled={isDisabled}
         />
       </div>
-    </Card>
+    </SettingSection>
   );
 }
 

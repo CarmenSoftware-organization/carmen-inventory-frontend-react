@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LookupCuisine } from "@/components/lookup/lookup-cuisine";
 import { LookupRecipeCategory } from "@/components/lookup/lookup-recipe-category";
 import { LookupUnit } from "@/components/lookup/lookup-unit";
-import { Card } from "./recipe-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeFormValues } from "./recipe-form-schema";
 
 interface RecipeGeneralFieldsProps {
@@ -33,7 +33,11 @@ export function RecipeGeneralFields({
   const errors = form.formState.errors;
 
   return (
-    <Card label={t("recipeDetails")} description={t("recipeDetailsDesc")}>
+    <SettingSection
+      plain
+      title={t("recipeDetails")}
+      description={t("recipeDetailsDesc")}
+    >
       <FieldGroup className="gap-3">
         {/* Code + Classification */}
         <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
@@ -160,7 +164,7 @@ export function RecipeGeneralFields({
           </Field>
         </div>
       </FieldGroup>
-    </Card>
+    </SettingSection>
   );
 }
 

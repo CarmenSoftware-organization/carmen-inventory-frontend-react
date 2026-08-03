@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
  * @param count - ตัวเลขต่อท้าย title (เช่นจำนวนแถวใน dynamic section)
  * @param action - คอนโทรลใต้คำอธิบาย (เช่นปุ่ม Add)
  * @param wide - body กินเต็มความกว้าง (เช่นตารางกว้าง) → title/desc วางด้านบน
+ * @param plain - body เป็นบล็อกเปล่า ไม่ใช่ grid 2 คอลัมน์ (caller จัด layout เอง)
  * @param children - field ต่างๆ
  */
 export function SettingSection({
@@ -25,6 +26,7 @@ export function SettingSection({
   count,
   action,
   wide,
+  plain,
   children,
 }: {
   readonly title: string;
@@ -36,6 +38,11 @@ export function SettingSection({
   readonly action?: React.ReactNode;
   /** body needs full width (e.g. a wide table) — title/desc stack on top */
   readonly wide?: boolean;
+  /**
+   * body ไม่ต้องเป็น grid 2 คอลัมน์ — ปล่อยเป็นบล็อกเปล่าให้ caller จัด layout เอง
+   * (ฟอร์ม operation-plan ห่อ grid ของตัวเองมาแล้ว grid ซ้อน grid จะเพี้ยน)
+   */
+  readonly plain?: boolean;
   readonly children: React.ReactNode;
 }) {
   const heading = (
@@ -76,7 +83,8 @@ export function SettingSection({
   return (
     <section
       className={cn(
-        "grid gap-x-10 gap-y-4 md:grid-cols-3",
+        "grid gap-x-10 md:grid-cols-3",
+        plain ? "gap-y-3" : "gap-y-4",
         !first && "border-border/70 mt-8 border-t pt-8",
       )}
     >
@@ -84,7 +92,14 @@ export function SettingSection({
         {heading}
         {action && <div className="mt-3">{action}</div>}
       </div>
-      <div className="grid gap-4 md:col-span-2 sm:grid-cols-2">{children}</div>
+      <div
+        className={cn(
+          "md:col-span-2",
+          plain ? "min-w-0" : "grid gap-4 sm:grid-cols-2",
+        )}
+      >
+        {children}
+      </div>
     </section>
   );
 }

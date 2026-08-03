@@ -3,7 +3,7 @@ import { useTranslations } from "use-intl";
 import { Plus, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
-import { Card } from "./recipe-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import { cn } from "@/lib/utils";
 
 export interface RecipeIngredient {
@@ -51,8 +51,9 @@ export function RecipeIngredientsFields({
     onChange(ingredients.filter((i) => i.id !== id));
 
   return (
-    <Card
-      label={t("ingredients")}
+    <SettingSection
+      plain
+      title={t("ingredients")}
       description={t("ingredientsDesc")}
       action={
         !isDisabled && ingredients.length > 0 ? (
@@ -153,7 +154,7 @@ export function RecipeIngredientsFields({
           </table>
         </div>
       )}
-    </Card>
+    </SettingSection>
   );
 }
 

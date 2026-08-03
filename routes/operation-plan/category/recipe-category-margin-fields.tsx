@@ -2,7 +2,7 @@
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldDescription, FieldInput } from "@/components/ui/field";
-import { Card } from "./recipe-category-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeCategoryFormValues } from "./recipe-category-form-schema";
 
 interface RecipeCategoryMarginFieldsProps {
@@ -19,8 +19,9 @@ export function RecipeCategoryMarginFields({
   const errors = form.formState.errors;
 
   return (
-    <Card
-      label={t("defaultProfitMargins")}
+    <SettingSection
+      plain
+      title={t("defaultProfitMargins")}
       description={t("defaultProfitMarginsDesc")}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -72,6 +73,6 @@ export function RecipeCategoryMarginFields({
           <FieldDescription>{t("targetProfitMarginDesc")}</FieldDescription>
         </Field>
       </div>
-    </Card>
+    </SettingSection>
   );
 }

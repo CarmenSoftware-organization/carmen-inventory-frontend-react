@@ -4,7 +4,7 @@ import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "./cuisine-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { CuisineFormValues } from "./cuisine-form-schema";
 
 interface CuisineAdditionalFieldsProps {
@@ -21,8 +21,9 @@ export function CuisineAdditionalFields({
   const tfl = useTranslations("field");
 
   return (
-    <Card
-      label={t("additional")}
+    <SettingSection
+      plain
+      title={t("additional")}
       description={t("additionalDesc")}
     >
       <FieldGroup className="gap-3">
@@ -51,6 +52,6 @@ export function CuisineAdditionalFields({
           )}
         />
       </FieldGroup>
-    </Card>
+    </SettingSection>
   );
 }
