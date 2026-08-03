@@ -19,7 +19,8 @@ import { cn } from "@/lib/utils";
 import type { PrFormValues } from "./pr-form-schema";
 import { PrItemExpand } from "./pr-item-expand";
 import { PrPricelistCompare } from "./pr-pricelist-compare";
-import { PrItemHistorySheet } from "./workflow/pr-item-history";
+import { ItemHistorySheet } from "@/components/share/item-history-sheet";
+import { PR_ITEM_HISTORY_STATUS_CONFIG } from "@/constant/purchase-request";
 import { isRowLocked } from "./pr-item-cells/helpers";
 import {
   SelectCell,
@@ -106,6 +107,7 @@ export function usePrItemTable({
   onDelete,
 }: UsePrItemTableOptions) {
   "use no memo";
+  const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
@@ -427,9 +429,11 @@ export function usePrItemTable({
       cell: ({ row }) => (
         <div className="flex items-center justify-center gap-2">
           {(row.original.history?.length ?? 0) > 0 && (
-            <PrItemHistorySheet
+            <ItemHistorySheet
               history={row.original.history ?? []}
               productName={row.original.product_name}
+              statusConfig={PR_ITEM_HISTORY_STATUS_CONFIG}
+              label={t("tabWorkflowHistory")}
             />
           )}
           {!isDisabled && (
@@ -518,6 +522,7 @@ export function usePrItemTable({
     pendingCount,
     today,
     isLockedAfterCreate,
+    t,
     tfl,
     tc,
   ]);

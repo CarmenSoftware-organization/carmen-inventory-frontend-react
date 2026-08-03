@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useTranslations } from "use-intl";
 import { GitBranch } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,31 +19,57 @@ import {
   TimelineSeparator,
   TimelineTitle,
 } from "@/components/ui/timeline";
-import { PR_ITEM_HISTORY_STATUS_CONFIG } from "@/constant/purchase-request";
-import type { PrItemHistoryEntry } from "@/types/purchase-request";
+import type { StatusConfigEntry } from "@/constant/status-config";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 
-interface PrItemHistorySheetProps {
-  readonly history: PrItemHistoryEntry[];
+/** ประวัติ workflow ระดับรายการ 1 ก้าว — โครงเดียวกันทั้ง PR และ SR */
+export interface ItemHistoryEntry {
+  at: string;
+  seq: number;
+  name: string;
+  user: { id: string; name: string };
+  status: string;
+  message?: string | null;
+}
+
+interface ItemHistorySheetProps {
+  readonly history: ItemHistoryEntry[];
   readonly productName?: string;
+  /** map สถานะ → สี/ป้ายของโมดูลนั้น (เช่น `PR_ITEM_HISTORY_STATUS_CONFIG`) */
+  readonly statusConfig: Record<string, StatusConfigEntry>;
+  /** ป้ายปุ่ม + หัว sheet (เช่น `t("tabWorkflowHistory")`) */
+  readonly label: string;
 }
 
 /**
- * ปุ่มไอคอน git-branch ในคอลัมน์ action ของตารางรายการใบขอซื้อ กดแล้วเปิด sheet
- * แสดง timeline ประวัติ workflow ระดับรายการ (per-item) ในรูปแบบซิกแซกสลับซ้าย/ขวา
- * เรียงล่าสุดขึ้นบนสุด — โครงเดียวกับ PrWorkflowHistory ระดับเอกสาร
- * @param props - ประวัติของรายการ (history) และชื่อสินค้า (productName) สำหรับหัว sheet
- * @returns React element ของปุ่ม + sheet timeline ประวัติรายการ
+ * ปุ่มไอคอน git-branch ในคอลัมน์ action ของตารางรายการ กดแล้วเปิด sheet แสดง
+ * timeline ประวัติ workflow ระดับรายการ (per-item) แบบซิกแซกสลับซ้าย/ขวา
+ * เรียงล่าสุดขึ้นบนสุด — โครงเดียวกับ workflow history ระดับเอกสาร
+ *
+ * ใช้ร่วมกันทุกโมดูลที่มีประวัติรายบรรทัด (PR/SR) — สิ่งที่ต่างกันคือชุดสถานะ
+ * กับป้ายเท่านั้น จึงรับมาเป็น prop ไม่ผูกกับโมดูลใดโมดูลหนึ่ง
+ *
+ * @param props.history - ประวัติของรายการนั้น (เรียงเก่า→ใหม่ ตามที่ backend ส่งมา)
+ * @param props.productName - ชื่อสินค้า โชว์เป็นคำอธิบายใต้หัว sheet
+ * @param props.statusConfig - map สถานะ → สี/ป้ายของโมดูล
+ * @param props.label - ป้ายปุ่มและหัว sheet
+ * @returns React element ของปุ่ม + sheet timeline
  * @example
- * <PrItemHistorySheet history={item.history} productName={item.product_name} />
+ * <ItemHistorySheet
+ *   history={item.history}
+ *   productName={item.product_name}
+ *   statusConfig={PR_ITEM_HISTORY_STATUS_CONFIG}
+ *   label={t("tabWorkflowHistory")}
+ * />
  */
-export function PrItemHistorySheet({
+export function ItemHistorySheet({
   history,
   productName,
-}: PrItemHistorySheetProps) {
-  const t = useTranslations("procurement.purchaseRequest");
+  statusConfig,
+  label,
+}: ItemHistorySheetProps) {
   const { dateFormat } = useProfile();
   const [open, setOpen] = useState(false);
 
@@ -57,8 +82,8 @@ export function PrItemHistorySheet({
         type="button"
         variant="ghost"
         size="icon-xs"
-        aria-label={t("tabWorkflowHistory")}
-        title={t("tabWorkflowHistory")}
+        aria-label={label}
+        title={label}
         onClick={() => setOpen(true)}
       >
         <GitBranch className="size-3.5" />
@@ -69,7 +94,7 @@ export function PrItemHistorySheet({
           className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
         >
           <SheetHeader>
-            <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
+            <SheetTitle>{label}</SheetTitle>
             <SheetDescription>{productName ?? ""}</SheetDescription>
           </SheetHeader>
           <div className="px-4 pb-4">
@@ -78,7 +103,7 @@ export function PrItemHistorySheet({
               orientation="vertical"
             >
               {reversedHistory.map((entry, i) => {
-                const config = PR_ITEM_HISTORY_STATUS_CONFIG[entry.status] ?? {
+                const config = statusConfig[entry.status] ?? {
                   className: "",
                   label: entry.status,
                 };

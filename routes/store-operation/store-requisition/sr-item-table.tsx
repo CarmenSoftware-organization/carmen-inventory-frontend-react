@@ -30,7 +30,7 @@ import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
 import { srItemAmount } from "./sr-form-helpers";
 import { Badge } from "@/components/ui/badge";
 import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
-import { SrItemHistorySheet } from "./sr-item-history";
+import { ItemHistorySheet } from "@/components/share/item-history-sheet";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
 const ProductCell = memo(function ProductCell({
@@ -295,6 +295,7 @@ export function useSrItemTable({
   role,
 }: UseSrItemTableOptions) {
   "use no memo";
+  const t = useTranslations("storeOperation.storeRequisition");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
@@ -526,9 +527,11 @@ export function useSrItemTable({
       cell: ({ row }) => (
         <div className="flex items-center justify-end">
           {(row.original.history?.length ?? 0) > 0 && (
-            <SrItemHistorySheet
+            <ItemHistorySheet
               history={row.original.history ?? []}
               productName={row.original.product_name}
+              statusConfig={SR_ITEM_STATUS_CONFIG}
+              label={t("tabWorkflowHistory")}
             />
           )}
           {canDelete && (
@@ -615,6 +618,7 @@ export function useSrItemTable({
     fromLocationId,
     toLocationId,
     role,
+    t,
     tfl,
     tc,
     translateStageStatus,
