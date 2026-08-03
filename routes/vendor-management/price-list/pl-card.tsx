@@ -1,6 +1,10 @@
 import { useTranslations } from "use-intl";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import { PL_STATUS_TONE } from "@/constant/price-list";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -29,7 +33,7 @@ export default function PriceListCard({
 }: PriceListCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const { dateFormat, dateTimeFormat } = useProfile();
+  const { dateFormat } = useProfile();
 
   /** effectivePeriod มาเป็น string "from - to" — จัดรูปแบบวันที่ตาม BU ทั้งสองฝั่ง */
   const formatPeriod = (period: string): string => {
@@ -66,23 +70,7 @@ export default function PriceListCard({
           </span>
         </ListCardRow>
       )}
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

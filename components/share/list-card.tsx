@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useProfile } from "@/hooks/use-profile";
+import { formatDate } from "@/lib/date-utils";
+import type { AuditEntry } from "@/types/audit";
 
 /**
  * Skeleton ที่ mirror โครง `ListCard` — ใช้ตอนโหลดให้ความสูงใกล้ของจริง
@@ -87,6 +90,51 @@ export function ListCardRow({
       <span className="text-muted-foreground shrink-0">{label}</span>
       <div className="min-w-0 text-end font-medium break-words">{children}</div>
     </div>
+  );
+}
+
+/**
+ * สามแถวท้ายการ์ด: วันที่สร้าง · ผู้สร้าง · วันที่แก้ล่าสุด
+ *
+ * ทุกโมดูลปิดท้ายการ์ดด้วยชุดนี้เหมือนกันหมด จึงเป็น component เดียวไม่ใช่ children
+ * (ต่างจากแถวข้อมูลอื่นที่รูปแบบค่าเป็นของใครของมัน) — อ่าน `dateTimeFormat` ของ BU
+ * กับ label เอง ผู้เรียกส่งมาแค่ `audit`
+ *
+ * @param audit - `item.audit` ของแถวนั้น (ไม่มีข้อมูล = ไม่ render อะไรเลย)
+ * @example
+ * <ListCard title={item.name} onOpen={…}>
+ *   <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>
+ *   <ListCardAuditRows audit={item.audit} />
+ * </ListCard>
+ */
+export function ListCardAuditRows({
+  audit,
+}: {
+  readonly audit?: { created?: AuditEntry; updated?: AuditEntry };
+}) {
+  const tfl = useTranslations("field");
+  const { dateTimeFormat } = useProfile();
+
+  return (
+    <>
+      {audit?.created?.at && (
+        <ListCardRow label={tfl("created")}>
+          <span className="tabular-nums">
+            {formatDate(audit.created.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+      {audit?.created?.name && (
+        <ListCardRow label={tfl("by")}>{audit.created.name}</ListCardRow>
+      )}
+      {audit?.updated?.at && (
+        <ListCardRow label={tfl("updated")}>
+          <span className="tabular-nums">
+            {formatDate(audit.updated.at, dateTimeFormat)}
+          </span>
+        </ListCardRow>
+      )}
+    </>
   );
 }
 

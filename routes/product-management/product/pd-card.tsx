@@ -1,8 +1,10 @@
 import { useTranslations } from "use-intl";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
-import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import type { Product } from "@/types/product";
 
 interface ProductCardProps {
@@ -28,7 +30,6 @@ export default function ProductCard({
 }: ProductCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const { dateTimeFormat } = useProfile();
 
   const isActive = item.product_status_type === "active";
   const unitName = item.inventory_unit_name ?? item.inventory_unit?.name;
@@ -64,23 +65,7 @@ export default function ProductCard({
           {item.product_item_group.name}
         </ListCardRow>
       )}
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }
