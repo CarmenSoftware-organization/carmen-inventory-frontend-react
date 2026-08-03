@@ -118,7 +118,7 @@ interface WorkflowHistoryTimelineProps {
  *   statusConfig={PR_WORKFLOW_ACTION_CONFIG}
  *   emptyLabel={t("noWorkflowHistory")}
  *   requestorName={purchaseRequest.requestor_name}
- *   createdAt={purchaseRequest.created_at}
+ *   createdAt={purchaseRequest.audit?.created?.at}
  * />
  */
 export function WorkflowHistoryTimeline({
