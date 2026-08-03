@@ -82,8 +82,6 @@ export interface PurchaseRequestDetail
   dimension: unknown[];
   history?: PrItemHistoryEntry[];
   doc_version: number;
-  created_at: string;
-  updated_at: string;
 }
 
 /** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบขอซื้อ */
@@ -135,8 +133,6 @@ export interface PurchaseRequestTemplateDetail
   info: Record<string, unknown>;
   dimension: unknown[];
   doc_version: number;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface PurchaseRequestTemplate {
@@ -219,8 +215,8 @@ export const purchaseRequestSchema = z.looseObject({
   workflow_previous_stage: z.string().nullable(),
   last_action: lastActionSchema.nullable(),
   department_name: z.string(),
-  // ไม่มี created_at / purchase_request_detail: gateway ตัด audit ดิบออก
-  // (`.omit(AUDIT_RAW_FIELDS)`) และ list ไม่ส่งรายการสินค้ามาด้วย — ประกาศไว้
+  // ไม่มี created_at: interceptor `@EnrichAuditUsers` ลบ audit ดิบทิ้ง
+  // (`delete target[at]` ใน audit-shape.ts) แล้วยัด `audit` มาแทน — ประกาศไว้
   // ก็ทำได้แค่ยิง console.warn "API schema mismatch" ทุกครั้งที่โหลดรายการ
   purchase_request_detail: z.array(purchaseRequestDetailSummarySchema).optional(),
 });

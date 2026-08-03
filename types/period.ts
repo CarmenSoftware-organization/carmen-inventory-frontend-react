@@ -9,8 +9,6 @@ export interface Period {
   start_at: string;
   end_at: string;
   status: PeriodStatus;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface CreatePeriodDto {

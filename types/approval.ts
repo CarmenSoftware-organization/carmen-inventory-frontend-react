@@ -16,7 +16,6 @@ export interface ApprovalItem {
   doc_date: string;
   description: string;
   status: string;
-  created_at: string;
   // Workflow
   workflow_name: string;
   workflow_current_stage: string;
@@ -49,7 +48,6 @@ export interface RawApprovalPR {
   pr_date: string;
   pr_status: string;
   description: string;
-  created_at: string;
   workflow_name: string;
   workflow_current_stage: string;
   workflow_next_stage: string | null;
@@ -67,7 +65,6 @@ export interface RawApprovalPO {
   po_status?: string;
   status?: string;
   description: string;
-  created_at: string;
   workflow_name: string;
   workflow_current_stage: string;
   workflow_next_stage: string | null;
@@ -85,7 +82,6 @@ export interface RawApprovalSR {
   sr_status?: string;
   status?: string;
   description: string;
-  created_at: string;
   workflow_name: string;
   workflow_current_stage: string;
   workflow_next_stage: string | null;
