@@ -3047,6 +3047,7 @@
     "purchaseOrder": {
       "entity": "ใบสั่งซื้อ",
       "tabWorkflowHistory": "ประวัติเวิร์กโฟลว์",
+      "noWorkflowHistory": "ไม่มีประวัติเวิร์กโฟลว์",
       "title": "ใบสั่งซื้อ",
       "desc": "จัดการใบสั่งซื้อ",
       "add": "เพิ่มใบสั่งซื้อ",

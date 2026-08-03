@@ -262,8 +262,12 @@ export function HistoryTimelineItem({
         )}
         {/* elapsed อยู่นอก Collapsible เสมอ — ความหมายของมันคือช่องว่างที่ติดกับ
             แถวที่เก่ากว่าซึ่งอยู่ข้างล่าง ต้องเห็นได้ทั้งตอนกางและตอนหุบ */}
+        {/* ไม่ลดความทึบของสี — `text-muted-foreground/70` วัดได้ 2.97:1 บนพื้นมืด
+            และ 3.25:1 บนพื้นสว่าง ซึ่งต่ำกว่าเกณฑ์ AA (4.5:1) ที่ docs/DESIGN.md
+            กำหนดไว้ ยิ่งข้อความนี้เป็น text-micro-legal (10px) ยิ่งต้องผ่านเกณฑ์
+            ลำดับสายตายังคงอยู่เพราะมันเล็กกว่าบรรทัดอื่นและอยู่ท้ายสุดของแถว */}
         {elapsed && (
-          <p className="text-muted-foreground/70 mt-2 text-micro-legal">
+          <p className="text-muted-foreground mt-2 text-micro-legal">
             {elapsed}
           </p>
         )}
