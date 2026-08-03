@@ -4321,6 +4321,9 @@
     "elapsedMinutes": "ใช้เวลา {count} นาที",
     "elapsedHours": "ใช้เวลา {count} ชั่วโมง",
     "elapsedDays": "ใช้เวลา {count} วัน",
-    "documentCreated": "สร้างเอกสาร"
+    "documentCreated": "สร้างเอกสาร",
+    "actionCreated": "สร้าง",
+    "actionUpdated": "แก้ไข",
+    "actionDeleted": "ลบ"
   }
 }

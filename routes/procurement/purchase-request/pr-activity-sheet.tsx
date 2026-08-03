@@ -1,12 +1,13 @@
-import { useState } from "react";
-import { ChevronRight, Loader2 } from "lucide-react";
+import { Fragment, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+  formatElapsed,
+  HistoryTimeline,
+  HistoryTimelineDay,
+  HistoryTimelineItem,
+  type HistoryTimelineMarker,
+} from "@/components/share/history-timeline";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -22,7 +23,6 @@ import {
 } from "@/hooks/use-activity-log";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { cn } from "@/lib/utils";
 import {
   getLogCreatedAt,
   type ActivityChildChange,
@@ -30,14 +30,18 @@ import {
   type ActivityLog,
 } from "@/types/activity-log";
 
-/** สีของ badge action — ใช้ชุด --status-* เดียวกับ activity monitor ของ system admin */
-const ACTION_CLASS: Record<string, string> = {
-  create:
-    "bg-[var(--status-approved)] text-[var(--status-approved-fg)] border-transparent",
-  update:
-    "bg-[var(--status-pending)] text-[var(--status-pending-fg)] border-transparent",
-  delete: "bg-destructive text-destructive-foreground border-transparent",
+/** action → key หัวข้อใน namespace `history` (action นอกรายการนี้ตกไปที่ humanize) */
+const ACTION_TITLE_KEY: Record<string, string> = {
+  create: "actionCreated",
+  update: "actionUpdated",
+  delete: "actionDeleted",
 };
+
+/**
+ * action ที่ทำลายข้อมูล — ย้อมจุด marker เป็นสีเตือนแบบเดียวกับก้าวที่ผิดปกติของ
+ * workflow history เพื่อให้กวาดตาแล้วเจอทันทีว่าใครลบอะไรไป
+ */
+const ALERT_ACTIONS = new Set(["delete"]);
 
 /**
  * ฟิลด์ที่ไม่เอามาแสดง
@@ -292,9 +296,12 @@ interface PrActivitySheetProps {
 }
 
 /**
- * Sheet แสดงประวัติกิจกรรมของใบขอซื้อใบเดียว เรียงล่าสุดขึ้นก่อน แตะที่รายการ
- * เพื่อกางดูว่าฟิลด์ไหนและรายการสินค้าใดเปลี่ยนไป (โหลด diff ตอนกางเท่านั้น
- * เพราะ snapshot ของเอกสารมีขนาดใหญ่) เปิดได้ทีละรายการ
+ * Sheet แสดงประวัติกิจกรรมของใบขอซื้อใบเดียวเป็นไทม์ไลน์ เรียงล่าสุดขึ้นก่อน
+ * แตะที่แถวเพื่อกางดูว่าฟิลด์ไหนและรายการสินค้าใดเปลี่ยนไป (โหลด diff ตอนกาง
+ * เท่านั้นเพราะ snapshot ของเอกสารมีขนาดใหญ่) เปิดได้ทีละแถว
+ *
+ * ใช้ไทม์ไลน์ชุดเดียวกับ workflow history เพราะผู้ใช้เปิดทั้งสอง sheet จากแถบ
+ * เดียวกันในหน้าเดียวกัน — คนละภาษาภาพในหน้าเดียวอ่านสะดุด
  * @param props - คุณสมบัติของ sheet
  * @param props.prId - รหัสใบขอซื้อที่จะดูประวัติ
  * @param props.prNo - เลขที่เอกสาร ใช้แสดงในคำอธิบายหัว sheet
@@ -316,6 +323,9 @@ export function PrActivitySheet({
   onOpenChange,
 }: PrActivitySheetProps) {
   const t = useTranslations("procurement.purchaseRequest");
+  // key หัวข้อกับข้อความช่วงเวลาเป็นคำของไทม์ไลน์ ไม่ใช่ศัพท์ของใบขอซื้อ
+  // จึงอยู่คนละ namespace กับ `t`
+  const tHistory = useTranslations("history");
   const { dateFormat } = useProfile();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -328,9 +338,29 @@ export function PrActivitySheet({
   // backend เรียงเก่า→ใหม่ แต่คนอ่านอยากเห็นสิ่งที่เพิ่งทำก่อน
   const logs = [...(data?.data ?? [])].reverse();
 
-  const datetimeFormat = dateFormat.includes("HH")
-    ? dateFormat
-    : `${dateFormat} HH:mm`;
+  const steps = logs.map((log, i) => {
+    const action = log.action?.toLowerCase() ?? "";
+    const at = getLogCreatedAt(log);
+    // แถวที่อยู่ "ใต้" แถวนี้คือกิจกรรมที่เก่ากว่า — ช่องว่างระหว่างสองแถวคือ
+    // เวลาที่เอกสารถูกปล่อยไว้ก่อนจะถูกแตะอีกครั้ง
+    const older = logs[i + 1];
+    const titleKey = ACTION_TITLE_KEY[action];
+    // create คือจุดกำเนิดเอกสารเสมอ จึงชนะ current แม้จะเป็นแถวล่าสุด
+    const marker: HistoryTimelineMarker =
+      action === "create" ? "origin" : i === 0 ? "current" : "default";
+
+    return {
+      id: log.id,
+      at,
+      day: formatDate(at, dateFormat),
+      // action ที่ไม่รู้จักต้องไม่ไปยืมหัวข้อของ action อื่น
+      title: titleKey ? tHistory(titleKey) : humanize(log.action ?? ""),
+      actor: actorNameOf(log),
+      marker,
+      tone: ALERT_ACTIONS.has(action) ? ("alert" as const) : ("default" as const),
+      elapsed: older ? formatElapsed(getLogCreatedAt(older), at, tHistory) : null,
+    };
+  });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -358,56 +388,42 @@ export function PrActivitySheet({
             <p className="text-destructive text-xs">{t("activityLoadError")}</p>
           )}
 
-          {!isLoading && !isError && logs.length === 0 && (
+          {!isLoading && !isError && steps.length === 0 && (
             <p className="text-muted-foreground text-xs">{t("activityEmpty")}</p>
           )}
 
-          <div className="divide-border divide-y">
-            {logs.map((log) => {
-              const isOpen = expandedId === log.id;
-              return (
-                <Collapsible
-                  key={log.id}
-                  open={isOpen}
-                  onOpenChange={(next) => setExpandedId(next ? log.id : null)}
-                >
-                  <CollapsibleTrigger className="hover:bg-muted/50 focus-visible:ring-ring flex w-full cursor-pointer items-start gap-2 rounded-md px-1 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none">
-                    <ChevronRight
-                      className={cn(
-                        "text-muted-foreground mt-0.5 size-3.5 shrink-0 transition-transform",
-                        isOpen && "rotate-90",
-                      )}
-                      aria-hidden="true"
-                    />
-                    {/* ไม่แสดง log.description — backend สร้างเป็น
-                        "update on tb_purchase_request (uuid)" ซึ่งเผยชื่อตาราง
-                        ภายในและไม่ได้บอกอะไรเกินจาก action badge */}
-                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-                      <Badge
-                        size="sm"
-                        className={cn(
-                          "text-micro-legal",
-                          ACTION_CLASS[log.action?.toLowerCase()] ??
-                            "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {log.action}
-                      </Badge>
-                      <span className="text-xs font-medium">
-                        {actorNameOf(log)}
-                      </span>
-                      <span className="text-muted-foreground text-micro">
-                        {formatDate(getLogCreatedAt(log), datetimeFormat)}
-                      </span>
-                    </div>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent className="pr-1 pl-6">
-                    {isOpen && <ActivityChanges logId={log.id} />}
-                  </CollapsibleContent>
-                </Collapsible>
-              );
-            })}
-          </div>
+          {steps.length > 0 && (
+            <HistoryTimeline groupByDay>
+              {steps.map((step, i) => (
+                <Fragment key={step.id}>
+                  {step.day && step.day !== steps[i - 1]?.day && (
+                    <HistoryTimelineDay>{step.day}</HistoryTimelineDay>
+                  )}
+                  {/* ไม่แสดง log.description — backend สร้างเป็น
+                      "update on tb_purchase_request (uuid)" ซึ่งเผยชื่อตาราง
+                      ภายในและไม่ได้บอกอะไรเกินจากหัวข้อ */}
+                  <HistoryTimelineItem
+                    at={step.at}
+                    marker={step.marker}
+                    tone={step.tone}
+                    title={step.title}
+                    elapsed={step.elapsed}
+                    open={expandedId === step.id}
+                    onOpenChange={(next) =>
+                      setExpandedId(next ? step.id : null)
+                    }
+                    // Radix ไม่ mount เนื้อหาของ CollapsibleContent ตอนหุบ
+                    // ActivityChanges จึงยังไม่ยิง request จนกว่าจะกาง — snapshot
+                    // ของเอกสารก้อนใหญ่ ยิงทุกแถวตอนเปิด sheet ไม่ไหว
+                    // (pr-activity-sheet.test.tsx ล็อกพฤติกรรมนี้ไว้)
+                    expandable={<ActivityChanges logId={step.id} />}
+                  >
+                    {step.actor}
+                  </HistoryTimelineItem>
+                </Fragment>
+              ))}
+            </HistoryTimeline>
+          )}
         </ScrollArea>
       </SheetContent>
     </Sheet>
