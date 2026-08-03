@@ -141,7 +141,7 @@ export function addDays(iso: string, days: number): string {
  * @example
  * ```ts
  * // ใช้ใน controlled date input
- * <input type="date" value={isoToDateInput(record.created_at)} />
+ * <input type="date" value={isoToDateInput(purchaseRequest.pr_date)} />
  * ```
  */
 export function isoToDateInput(iso: string): string {
