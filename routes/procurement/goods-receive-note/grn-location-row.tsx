@@ -642,6 +642,10 @@ export const GrnLocationRow = memo(function GrnLocationRow({
         )}
       </td>
 
+      {/* Unit — ค่าโชว์อยู่ที่แถวสินค้าแล้ว (หน่วยเดียวกันทุก location) ตรงนี้เว้นไว้
+          ให้คอลัมน์ตรงกับตารางแถวสินค้าด้านบนเท่านั้น */}
+      <td className="px-2 py-1" />
+
       {/* Order (PO เท่านั้น — disabled) */}
       {isPo && (
         <td className="px-1 py-1 text-right">

@@ -25,6 +25,8 @@ const QTY_COL_READ_ONLY = 100;
 export function grnItemCols(isPo: boolean, editable: boolean) {
   const col = {
     product: 200,
+    /** หน่วยนับของสินค้า (มาจาก master ไม่ใช่หน่วยที่รับ) — โชว์อย่างเดียว */
+    unit: 76,
     order: editable ? QTY_COL : QTY_COL_READ_ONLY, // isPo เท่านั้น
     received: editable ? QTY_COL : QTY_COL_READ_ONLY,
     foc: editable ? QTY_COL : QTY_COL_READ_ONLY,
@@ -40,6 +42,7 @@ export function grnItemCols(isPo: boolean, editable: boolean) {
   /** ผลรวมความกว้างของ data columns (product → amt) — ไม่รวม action */
   const dataTotal =
     col.product +
+    col.unit +
     (isPo ? col.order : 0) +
     col.received +
     col.foc +
