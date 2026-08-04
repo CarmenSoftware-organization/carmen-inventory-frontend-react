@@ -9,7 +9,7 @@ import type { CnFormValues } from "./cn-form-schema";
 
 interface CnFooterActionProps {
   readonly control: Control<CnFormValues>;
-  /** ส่งใบได้เฉพาะใบร่างที่เปิดอ่านอยู่ (ไม่ใช่กลางคันตอนแก้) */
+  /** ส่งใบได้ทุกโหมดของใบร่าง — ที่แก้ค้างจะถูกเซฟก่อนส่งให้เอง */
   readonly canSubmit: boolean;
   readonly isPending: boolean;
   readonly onSubmitCn: () => void;
