@@ -53,7 +53,9 @@ export default function CnComponent() {
   const useInfiniteScroll = !!isMobile;
   const deleteCn = useDeleteCreditNote();
   const { exportCreditNote, isExporting } = useExportCreditNote();
-  const { params, search, setSearch, tableConfig } = useDataGridState();
+  const { params, search, setSearch, tableConfig } = useDataGridState({
+    defaultSort: "cn_date:desc",
+  });
 
   // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
   // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
