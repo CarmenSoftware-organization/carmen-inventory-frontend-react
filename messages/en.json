@@ -474,7 +474,7 @@
     "minNumber": "{field} must be at least {min}",
     "minZero": "{field} must be 0 or more",
     "positive": "{field} must be greater than 0",
-    "maxReturnQty": "Return at most {received}",
+    "maxReturnQty": "Cannot return more than received",
     "minLength": "{field} must be at least {min} characters",
     "maxLength": "{field} must be at most {max} characters",
     "invalidEmail": "Invalid email format",

@@ -474,7 +474,7 @@
     "minNumber": "{field}ต้องมีค่าอย่างน้อย {min}",
     "minZero": "{field}ต้องมีค่า 0 ขึ้นไป",
     "positive": "{field}ต้องมีค่ามากกว่า 0",
-    "maxReturnQty": "คืนได้ไม่เกิน {received}",
+    "maxReturnQty": "คืนได้ไม่เกินจำนวนที่รับ",
     "minLength": "{field}ต้องมีอย่างน้อย {min} ตัวอักษร",
     "maxLength": "{field}ต้องมีไม่เกิน {max} ตัวอักษร",
     "invalidEmail": "รูปแบบอีเมลไม่ถูกต้อง",

@@ -67,10 +67,11 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
         item._grn_received_qty > 0 &&
         item.quantity > item._grn_received_qty
       ) {
+        // ข้อความไม่บอกตัวเลขเพดานซ้ำ — คอลัมน์ Received อยู่ติดกันในแถวเดียวกัน
         ctx.addIssue({
           code: "custom",
           path: ["quantity"],
-          message: tv("maxReturnQty", { received: item._grn_received_qty }),
+          message: tv("maxReturnQty"),
         });
       }
     });
