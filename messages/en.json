@@ -3259,6 +3259,7 @@
       "selectFromGrnDesc": "Pick received lines from the referenced GRN to credit.",
       "searchProduct": "Search product by code or name…",
       "alreadyAdded": "Added",
+      "nothingReceived": "Nothing received",
       "noGrnItems": "No lines in this GRN",
       "noGrnItemsDesc": "The referenced GRN has no received lines to credit.",
       "selectVendorFirst": "Select a vendor first — items come from that vendor's GRN.",

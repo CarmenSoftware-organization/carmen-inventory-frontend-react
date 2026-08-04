@@ -22,9 +22,10 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
       _group_key: z.string(),
       // ยอดของบรรทัด GRN ต้นทาง — แถวหลักในตารางแสดงชุดนี้ให้เทียบกับยอดที่คิด
       // จากจำนวนคืน ทุกตัวเป็น display อย่างเดียว ไม่ส่งเข้า payload
-      // (_grn_received_qty ยังเป็นเพดานของจำนวนคืนด้วย · 0 = ยังไม่รู้ค่า เช่น
-      // ใบเก่าที่โหลด GRN ไม่เสร็จ → ไม่บังคับเพดาน จะได้ไม่บล็อกมั่ว)
-      _grn_received_qty: z.coerce.number(),
+      // (_grn_received_qty ยังเป็นเพดานของจำนวนคืนด้วย · null = ยังไม่รู้ค่า เช่น
+      // ใบเก่าที่โหลด GRN ไม่เสร็จ → ไม่บังคับเพดาน จะได้ไม่บล็อกมั่ว
+      // ส่วน 0 คือรับมา 0 จริง = คืนไม่ได้เลย ห้ามเอาไปปนกับ "ไม่รู้")
+      _grn_received_qty: z.coerce.number().nullable(),
       _grn_price: z.coerce.number(),
       _grn_sub_total: z.coerce.number(),
       _grn_discount_amount: z.coerce.number(),
@@ -71,7 +72,7 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
       // คืนเกินที่รับมาไม่ได้ — บล็อกตั้งแต่ในฟอร์ม ไม่ปล่อยไปตายที่ backend
       // (backend เช็คสะสมข้ามใบอีกชั้น เพดานจริงอาจต่ำกว่านี้ถ้าเคยคืนไปแล้ว)
       if (
-        item._grn_received_qty > 0 &&
+        item._grn_received_qty != null &&
         item.quantity > item._grn_received_qty
       ) {
         // ข้อความไม่บอกตัวเลขเพดานซ้ำ — คอลัมน์ Received อยู่ติดกันในแถวเดียวกัน
@@ -237,7 +238,8 @@ export function getDefaultValues(cn?: CreditNoteDetail): CnFormValues {
           doc_version: d.doc_version,
           _group_key: d.product?.id ?? d.id,
           // ยอดฝั่ง GRN ไม่ได้มากับ API ของ CN — cn-item เติมให้จาก GRN ต้นทาง
-          _grn_received_qty: 0,
+          // (null = ยังไม่รู้ ไม่ใช่ 0 ไม่งั้นเพดานจะบล็อกทุกแถวก่อน GRN มาถึง)
+          _grn_received_qty: null,
           _grn_price: 0,
           _grn_sub_total: 0,
           _grn_discount_amount: 0,

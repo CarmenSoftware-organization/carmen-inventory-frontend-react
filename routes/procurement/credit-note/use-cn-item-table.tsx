@@ -238,14 +238,17 @@ function ReceivedCell({
   index: number;
 }) {
   "use no memo";
-  const received =
-    useWatch({ control, name: `items.${index}._grn_received_qty` }) ?? 0;
+  const received = useWatch({
+    control,
+    name: `items.${index}._grn_received_qty`,
+  });
   const unitName =
     useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
   return (
     <InputSuffixPlain
       className="w-full"
-      value={String(received)}
+      // null = ยังไม่ได้ค่าจาก GRN — ขีดไว้ ไม่โชว์ 0 ให้เข้าใจผิดว่ารับมา 0
+      value={received == null ? "—" : String(received)}
       suffix={unitName}
     />
   );
@@ -270,11 +273,10 @@ function QtyCell({
   });
   const unitName =
     useWatch({ control: form.control, name: `items.${index}.unit_name` }) ?? "";
-  const grnReceivedQty =
-    useWatch({
-      control: form.control,
-      name: `items.${index}._grn_received_qty`,
-    }) ?? 0;
+  const grnReceivedQty = useWatch({
+    control: form.control,
+    name: `items.${index}._grn_received_qty`,
+  });
   const error = form.formState.errors.items?.[index]?.quantity?.message;
   const productId =
     useWatch({ control: form.control, name: `items.${index}.item_id` }) ?? "";
@@ -299,7 +301,7 @@ function QtyCell({
         decimals={decimals}
         id={`items-${index}-quantity`}
         min={0}
-        max={grnReceivedQty > 0 ? grnReceivedQty : undefined}
+        max={grnReceivedQty ?? undefined}
         placeholder="0"
         {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
       />

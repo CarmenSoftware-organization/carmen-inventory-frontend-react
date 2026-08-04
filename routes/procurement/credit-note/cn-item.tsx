@@ -149,7 +149,7 @@ export function CnItem({ form, disabled }: Props) {
       });
     }
     form.getValues("items").forEach((item, index) => {
-      if ((item._grn_received_qty ?? 0) > 0) return;
+      if (item._grn_received_qty != null) return;
       const grnLine = grnByLine.get(
         `${item.item_id ?? ""}:${item.location_id ?? ""}`,
       );

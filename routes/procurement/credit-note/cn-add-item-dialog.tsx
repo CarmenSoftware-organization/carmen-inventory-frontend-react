@@ -204,6 +204,9 @@ export function CnAddItemDialog({
             <div className="divide-y">
               {lines.map((line) => {
                 const isExisting = existingKeys.has(line.dedupeKey);
+                // รับมา 0 = ไม่มีอะไรให้คืน เลือกไปก็ save ไม่ผ่านเพดาน
+                const isEmpty = line.quantity <= 0;
+                const isLocked = isExisting || isEmpty;
                 const isPicked = picked.has(line.key);
                 const id = `cn-add-${line.key}`;
                 return (
@@ -211,20 +214,20 @@ export function CnAddItemDialog({
                     key={line.key}
                     className={cn(
                       "flex items-center gap-2 px-4 py-2 text-xs",
-                      isExisting && "opacity-60",
+                      isLocked && "opacity-60",
                     )}
                   >
                     <Checkbox
                       id={id}
                       checked={isExisting ? true : isPicked}
-                      disabled={isExisting}
+                      disabled={isLocked}
                       onCheckedChange={() => togglePick(line.key)}
                     />
                     <label
                       htmlFor={id}
                       className={cn(
                         "flex min-w-0 flex-1 flex-col",
-                        !isExisting && "cursor-pointer",
+                        !isLocked && "cursor-pointer",
                       )}
                     >
                       <span className="flex items-center gap-2">
@@ -234,6 +237,11 @@ export function CnAddItemDialog({
                         {isExisting && (
                           <Badge variant="secondary" size="xs">
                             {t("alreadyAdded")}
+                          </Badge>
+                        )}
+                        {!isExisting && isEmpty && (
+                          <Badge variant="secondary" size="xs">
+                            {t("nothingReceived")}
                           </Badge>
                         )}
                       </span>
