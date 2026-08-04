@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "./module-colors.css";
 
+/* เอกสาร/สกิลไม่ใช่ซอร์สรันไทม์ — Tailwind auto-detect กวาด .md ด้วย แล้วเก็บข้อความ
+   อย่าง `bg-[var(…)]` ในแผนงานไปเป็น candidate จริง (CSS warning + คลาสขยะในบันเดิล) */
+@source not "../docs";
+@source not "../.claude";
+
 @custom-variant dark (&:is(.dark *));
 
 
