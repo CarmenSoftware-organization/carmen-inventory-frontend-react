@@ -22,9 +22,9 @@ import {
 } from "@/components/ui/input/input-suffix";
 import {
   DiscountOverrideInput,
+  OverrideToggle,
   TaxOverrideInput,
 } from "@/components/procurement/discount-tax-override";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useUnitDecimals } from "@/hooks/use-product-units";
@@ -398,41 +398,38 @@ function DiscountCell({
     );
   }
   return (
-    // บรรทัดเดียว: combo (rate/amount) + checkbox override ชิดขวา (label "Override"
-    // อยู่ที่ header row เพื่อไม่ให้แถวสูง)
-    <div className="flex items-center gap-1.5">
-      <div className="min-w-0 flex-1">
-        <DiscountOverrideInput
-          rate={rate}
-          amount={amount}
-          isAdjustment={isAdj}
-          onRateChange={(r) =>
-            form.setValue(`${base}.discount_rate`, r, {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-          onAmountChange={(a) =>
-            form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
-          }
-        />
-      </div>
-      <Checkbox
-        checked={isAdj}
-        onCheckedChange={(v) => {
-          const on = !!v;
-          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-          if (on) {
-            form.setValue(`${base}.discount_amount`, amount, {
+    // toggle (checkbox + คำว่า Override) อยู่บรรทัดบนขวา · combo กินความกว้าง
+    // เต็มคอลัมน์ข้างล่าง — วางแบบเดียวกับ PO
+    <div className="flex flex-col gap-0.5">
+      <div className="flex justify-end">
+        <OverrideToggle
+          checked={isAdj}
+          onCheckedChange={(on) => {
+            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+            if (on) {
+              form.setValue(`${base}.discount_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_discount_adjustment`, on, {
               shouldDirty: true,
             });
-          }
-          form.setValue(`${base}.is_discount_adjustment`, on, {
+          }}
+        />
+      </div>
+      <DiscountOverrideInput
+        rate={rate}
+        amount={amount}
+        isAdjustment={isAdj}
+        onRateChange={(r) =>
+          form.setValue(`${base}.discount_rate`, r, {
             shouldDirty: true,
-          });
-        }}
-        className="size-3.5 shrink-0"
-        aria-label="Override discount"
+            shouldValidate: true,
+          })
+        }
+        onAmountChange={(a) =>
+          form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
+        }
       />
     </div>
   );
@@ -470,38 +467,41 @@ function TaxCell({
     );
   }
   return (
-    // บรรทัดเดียว: combo (tax profile/amount) + checkbox override ชิดขวา
-    // (label "Override" อยู่ที่ header row)
-    <div className="flex items-center gap-1.5">
-      <div className="min-w-0 flex-1">
-        <TaxOverrideInput
-          taxProfileId={taxProfileId}
-          amount={amount}
-          isAdjustment={isAdj}
-          onTaxChange={(value, r, name) => {
-            form.setValue(`${base}.tax_profile_id`, value || null, {
+    // บรรทัดบน: rate% ซ้าย + toggle ขวา · บรรทัดล่าง: combo เต็มความกว้าง (แบบ PO)
+    <div className="flex flex-col gap-0.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-muted-foreground text-micro font-semibold tabular-nums">
+          {rate > 0 ? `${rate}%` : ""}
+        </span>
+        <OverrideToggle
+          checked={isAdj}
+          onCheckedChange={(on) => {
+            if (on) {
+              form.setValue(`${base}.tax_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_tax_adjustment`, on, {
               shouldDirty: true,
-              shouldValidate: true,
             });
-            form.setValue(`${base}.tax_rate`, r);
-            form.setValue(`${base}.tax_profile_name`, name);
           }}
-          onAmountChange={(a) =>
-            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
-          }
         />
       </div>
-      <Checkbox
-        checked={isAdj}
-        onCheckedChange={(v) => {
-          const on = !!v;
-          if (on) {
-            form.setValue(`${base}.tax_amount`, amount, { shouldDirty: true });
-          }
-          form.setValue(`${base}.is_tax_adjustment`, on, { shouldDirty: true });
+      <TaxOverrideInput
+        taxProfileId={taxProfileId}
+        amount={amount}
+        isAdjustment={isAdj}
+        onTaxChange={(value, r, name) => {
+          form.setValue(`${base}.tax_profile_id`, value || null, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          form.setValue(`${base}.tax_rate`, r);
+          form.setValue(`${base}.tax_profile_name`, name);
         }}
-        className="size-3.5 shrink-0"
-        aria-label="Override tax"
+        onAmountChange={(a) =>
+          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+        }
       />
     </div>
   );
@@ -637,18 +637,8 @@ export function useCnItemTable({
       },
       {
         id: "discount",
-        // edit: label "Override" ที่ header (justify-between) — checkbox ต่อแถวอยู่ใต้พอดี
-        header:
-          disabled || isAmountDiscount
-            ? tfl("discount")
-            : () => (
-                <div className="flex w-full items-center justify-between gap-2">
-                  <span>{tfl("discount")}</span>
-                  <span className="text-muted-foreground text-micro font-normal">
-                    {tfl("override")}
-                  </span>
-                </div>
-              ),
+        // ป้าย "Override" ติดไปกับ toggle ในแถวแล้ว (แบบ PO) header จึงมีแค่ชื่อคอลัมน์
+        header: tfl("discount"),
         // โหมดอ่านไม่มี combo (override + rate + ยอด) เหลือแค่ยอดเดียว —
         // ย่อเท่า PO/GRN ด้วยค่าจาก combo-col-width ตัวเดียวกัน
         size: narrowCombo ? COMBO_COL.readOnly : COMBO_COL.discount,
@@ -671,16 +661,7 @@ export function useCnItemTable({
       },
       {
         id: "tax",
-        header: disabled
-          ? tfl("tax")
-          : () => (
-              <div className="flex w-full items-center justify-between gap-2">
-                <span>{tfl("tax")}</span>
-                <span className="text-muted-foreground text-micro font-normal">
-                  {tfl("override")}
-                </span>
-              </div>
-            ),
+        header: tfl("tax"),
         size: narrowCombo ? COMBO_COL.readOnly : COMBO_COL.tax,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -740,7 +721,7 @@ export function useCnItemTable({
         cellClassName: cn("py-1 align-middle", col.meta?.cellClassName),
       },
     }));
-  }, [form, disabled, isAmountDiscount, type, t, tfl, onDelete]);
+  }, [form, disabled, narrowCombo, isAmountDiscount, type, t, tfl, onDelete]);
 
   const table = useReactTable({
     data: itemFields,
