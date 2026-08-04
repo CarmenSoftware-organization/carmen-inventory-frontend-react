@@ -405,13 +405,20 @@
       "emailRequired": "กรุณากรอกอีเมล",
       "emailInvalid": "รูปแบบอีเมลไม่ถูกต้อง",
       "passwordRequired": "กรุณากรอกรหัสผ่าน",
-      "passwordMinChars": "รหัสผ่านต้องมีอย่างน้อย {min} ตัวอักษร"
+      "passwordMinChars": "รหัสผ่านต้องมีอย่างน้อย {min} ตัวอักษร",
+      "firstNameRequired": "กรุณากรอกชื่อ",
+      "lastNameRequired": "กรุณากรอกนามสกุล",
+      "usernameRequired": "กรุณากรอกชื่อผู้ใช้",
+      "usernameMinChars": "ชื่อผู้ใช้ต้องมีอย่างน้อย {min} ตัวอักษร",
+      "confirmPasswordRequired": "กรุณากรอกรหัสผ่านอีกครั้ง",
+      "passwordMismatch": "รหัสผ่านทั้งสองช่องไม่ตรงกัน"
     },
     "errors": {
       "invalidCredentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
       "loginFailed": "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
       "tooManyAttempts": "พยายามเข้าสู่ระบบบ่อยเกินไป ลองอีกครั้งใน {seconds} วินาที",
-      "tooManyAttemptsFallback": "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง"
+      "tooManyAttemptsFallback": "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง",
+      "registerConflict": "อีเมลหรือชื่อผู้ใช้นี้ถูกใช้ไปแล้ว"
     },
     "eyebrow": "เข้าสู่ระบบ",
     "subtitle": "เข้าสู่พื้นที่ทำงานระบบสินค้าคงคลังของโรงแรมคุณ",
@@ -435,7 +442,22 @@
       "multiPropertyDesc": "พื้นที่ทำงานเดียว ใช้ได้ทุกสาขา",
       "hospitalityTitle": "เน้นโรงแรม",
       "hospitalityDesc": "รองรับสูตรอาหาร ใบเบิก และระดับสต็อก"
-    }
+    },
+    "createTitle": "สมัครใช้งาน",
+    "createSubtitle": "สร้างบัญชีเพื่อเข้าใช้ระบบสินค้าคงคลังของโรงแรม",
+    "firstNameLabel": "ชื่อ",
+    "lastNameLabel": "นามสกุล",
+    "usernameLabel": "ชื่อผู้ใช้",
+    "telephoneLabel": "เบอร์โทร (ไม่บังคับ)",
+    "confirmPasswordLabel": "ยืนยันรหัสผ่าน",
+    "createAccount": "สมัครใช้งาน",
+    "creatingAccount": "กำลังสมัคร...",
+    "noAccount": "ยังไม่มีบัญชี?",
+    "haveAccount": "มีบัญชีอยู่แล้ว?",
+    "goToSignIn": "ไปหน้าเข้าสู่ระบบ",
+    "registerDoneTitle": "สมัครเรียบร้อย",
+    "registerDoneSubtitle": "บัญชี Carmen ของคุณพร้อมใช้งานแล้ว",
+    "registerDoneHint": "เข้าสู่ระบบด้วยอีเมลและรหัสผ่านที่ตั้งไว้ ถ้ายังไม่เห็นสาขาของตัวเอง แจ้งหัวหน้างานให้เพิ่มสิทธิ์ให้"
   },
   "toast": {
     "createSuccess": "สร้าง{entity}สำเร็จ",

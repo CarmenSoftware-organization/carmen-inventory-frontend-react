@@ -17,6 +17,7 @@ export const router = createBrowserRouter([
     ErrorBoundary: RootErrorBoundary,
     children: [
       { path: "/login", lazy: () => import("./login/login.route") },
+      { path: "/register", lazy: () => import("./register/register.route") },
       // Public price-list route — vendor ภายนอกเปิดจากลิงก์ในอีเมล (ไม่ต้อง auth)
       { path: "/pl/:url_token", lazy: () => import("./external/pl/price-list-external.route") },
       {

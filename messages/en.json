@@ -405,13 +405,20 @@
       "emailRequired": "Email is required",
       "emailInvalid": "Please enter a valid email address",
       "passwordRequired": "Password is required",
-      "passwordMinChars": "Password must be at least {min} characters"
+      "passwordMinChars": "Password must be at least {min} characters",
+      "firstNameRequired": "First name is required",
+      "lastNameRequired": "Last name is required",
+      "usernameRequired": "Username is required",
+      "usernameMinChars": "Username must be at least {min} characters",
+      "confirmPasswordRequired": "Please confirm your password",
+      "passwordMismatch": "Passwords do not match"
     },
     "errors": {
       "invalidCredentials": "Email or password is incorrect",
       "loginFailed": "Login failed. Please try again",
       "tooManyAttempts": "Too many login attempts. Try again in {seconds}s.",
-      "tooManyAttemptsFallback": "Too many login attempts. Please try again later."
+      "tooManyAttemptsFallback": "Too many login attempts. Please try again later.",
+      "registerConflict": "This email or username is already in use"
     },
     "eyebrow": "Sign in",
     "subtitle": "Sign in to your hotel inventory workspace.",
@@ -435,7 +442,22 @@
       "multiPropertyDesc": "One workspace, every property.",
       "hospitalityTitle": "Hospitality-first",
       "hospitalityDesc": "Recipes, requisitions, par levels."
-    }
+    },
+    "createTitle": "Create your account",
+    "createSubtitle": "Set up access to your hotel inventory workspace.",
+    "firstNameLabel": "First name",
+    "lastNameLabel": "Last name",
+    "usernameLabel": "Username",
+    "telephoneLabel": "Phone (optional)",
+    "confirmPasswordLabel": "Confirm password",
+    "createAccount": "Create account",
+    "creatingAccount": "Creating account...",
+    "noAccount": "New here?",
+    "haveAccount": "Already have an account?",
+    "goToSignIn": "Go to sign in",
+    "registerDoneTitle": "Account created",
+    "registerDoneSubtitle": "Your Carmen account is ready.",
+    "registerDoneHint": "Sign in with your email and password. If your property has not been assigned yet, ask your manager to add you."
   },
   "toast": {
     "createSuccess": "{entity} created successfully",
