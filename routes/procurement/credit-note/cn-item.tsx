@@ -85,7 +85,8 @@ export function CnItem({ form, disabled }: Props) {
         location_code: line.location_code,
         unit_id: line.unit_id,
         unit_name: line.unit_name,
-        quantity: line.quantity,
+        // ไม่ pre-fill จำนวนคืน (CN_ITEM = 0) — line.quantity คือจำนวนที่รับ
+        // ซึ่งไปอยู่คอลัมน์ Received ให้เทียบแทน
         unit_price: line.unit_price,
         discount_rate: line.discount_rate,
         tax_profile_id: line.tax_profile_id,

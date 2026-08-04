@@ -15,48 +15,65 @@ import type { CreditNoteDetail, CnItemPayload } from "@/types/credit-note";
  * item.parse({ item_id: "p1", quantity: 1, unit_id: "u1", ... });
  */
 function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
-  return z.object({
-    id: z.string().optional(),
-    doc_version: z.coerce.number().optional(),
-    _group_key: z.string(),
-    // จำนวนที่รับเข้าตาม GRN บรรทัดอ้างอิง — ใช้เตือนคืนเกินตอนกรอกเท่านั้น
-    // (0 = ไม่มีข้อมูลอ้างอิง เช่น ใบเก่าที่โหลดกลับมา) ไม่ส่งเข้า payload
-    _grn_received_qty: z.coerce.number(),
-    location_id: z
-      .string()
-      .nullable()
-      .refine((v) => !!v, tv("required", { field: tf("location") })),
-    location_name: z.string(),
-    // display เท่านั้น — ไม่ส่งเข้า payload
-    location_code: z.string(),
-    item_id: z
-      .string()
-      .nullable()
-      .refine((v) => !!v, tv("required", { field: tf("product") })),
-    item_name: z.string(),
-    // display เท่านั้น — ไม่ส่งเข้า payload (เหมือน item_name)
-    item_local_name: z.string(),
-    quantity: z.coerce
-      .number()
-      .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
-    requested_qty: z.coerce.number().min(0),
-    approved_qty: z.coerce.number().min(0),
-    unit_id: z.string().min(1, tv("required", { field: tf("unit") })),
-    unit_name: z.string(),
-    currency_code: z.string(),
-    unit_price: z.coerce.number().min(0),
-    net_amount: z.coerce.number().min(0),
-    discount_rate: z.coerce.number().min(0),
-    discount_amount: z.coerce.number().min(0),
-    is_discount_adjustment: z.boolean(),
-    tax_profile_id: z.string().nullable(),
-    tax_profile_name: z.string(),
-    tax_rate: z.coerce.number().min(0),
-    tax_amount: z.coerce.number().min(0),
-    total_amount: z.coerce.number().min(0),
-    is_tax_adjustment: z.boolean(),
-    description: z.string(),
-  });
+  return z
+    .object({
+      id: z.string().optional(),
+      doc_version: z.coerce.number().optional(),
+      _group_key: z.string(),
+      // จำนวนที่รับเข้าตาม GRN บรรทัดอ้างอิง = เพดานของจำนวนคืน
+      // (0 = ไม่มีข้อมูลอ้างอิง เช่น ใบเก่าที่ยังโหลด GRN ไม่เสร็จ → ไม่บังคับเพดาน
+      // จะได้ไม่บล็อกมั่ว) ไม่ส่งเข้า payload
+      _grn_received_qty: z.coerce.number(),
+      location_id: z
+        .string()
+        .nullable()
+        .refine((v) => !!v, tv("required", { field: tf("location") })),
+      location_name: z.string(),
+      // display เท่านั้น — ไม่ส่งเข้า payload
+      location_code: z.string(),
+      item_id: z
+        .string()
+        .nullable()
+        .refine((v) => !!v, tv("required", { field: tf("product") })),
+      item_name: z.string(),
+      // display เท่านั้น — ไม่ส่งเข้า payload (เหมือน item_name)
+      item_local_name: z.string(),
+      // คืนเป็นเศษได้ (0.5 kg) — บังคับแค่ต้องมากกว่า 0 เพดานเช็คใน superRefine
+      quantity: z.coerce
+        .number()
+        .gt(0, tv("positive", { field: tf("returnQty") })),
+      requested_qty: z.coerce.number().min(0),
+      approved_qty: z.coerce.number().min(0),
+      unit_id: z.string().min(1, tv("required", { field: tf("unit") })),
+      unit_name: z.string(),
+      currency_code: z.string(),
+      unit_price: z.coerce.number().min(0),
+      net_amount: z.coerce.number().min(0),
+      discount_rate: z.coerce.number().min(0),
+      discount_amount: z.coerce.number().min(0),
+      is_discount_adjustment: z.boolean(),
+      tax_profile_id: z.string().nullable(),
+      tax_profile_name: z.string(),
+      tax_rate: z.coerce.number().min(0),
+      tax_amount: z.coerce.number().min(0),
+      total_amount: z.coerce.number().min(0),
+      is_tax_adjustment: z.boolean(),
+      description: z.string(),
+    })
+    .superRefine((item, ctx) => {
+      // คืนเกินที่รับมาไม่ได้ — บล็อกตั้งแต่ในฟอร์ม ไม่ปล่อยไปตายที่ backend
+      // (backend เช็คสะสมข้ามใบอีกชั้น เพดานจริงอาจต่ำกว่านี้ถ้าเคยคืนไปแล้ว)
+      if (
+        item._grn_received_qty > 0 &&
+        item.quantity > item._grn_received_qty
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["quantity"],
+          message: tv("maxReturnQty", { received: item._grn_received_qty }),
+        });
+      }
+    });
 }
 
 /**
@@ -78,9 +95,7 @@ export function createCnSchema(tv: TranslationFn, tf: TranslationFn) {
       error: tv("creditNoteTypeRequired"),
     }),
     grn_id: z.string().min(1, tv("required", { field: tf("grn") })),
-    grn_date: z
-      .string()
-      .min(1, tv("required", { field: tf("grnDate") })),
+    grn_date: z.string().min(1, tv("required", { field: tf("grnDate") })),
     vendor_id: z.string().min(1, tv("required", { field: tf("vendor") })),
     cn_no: z.string(),
     cn_date: z.string().min(1, tv("required", { field: tf("docDate") })),
@@ -123,7 +138,9 @@ export const CN_ITEM = {
   item_id: null,
   item_name: "",
   item_local_name: "",
-  quantity: 1,
+  // จำนวนคืนเริ่มที่ 0 เสมอ — คนกรอกต้องตัดสินใจเองว่าคืนเท่าไหร่
+  // (เติมจำนวนที่รับให้ล่วงหน้า = ชวนให้กด save ทั้งที่ยังไม่ได้ดู)
+  quantity: 0,
   requested_qty: 0,
   approved_qty: 0,
   unit_id: "",

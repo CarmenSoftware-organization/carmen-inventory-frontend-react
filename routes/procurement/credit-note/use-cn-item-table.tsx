@@ -122,7 +122,9 @@ export const CnItemComputedSync = memo(function CnItemComputedSync({
       }
     } else if (!isDiscAdj) {
       // discount_amount: เขียนเฉพาะโหมด auto (override → คงค่า user)
-      if (form.getValues(`items.${index}.discount_amount`) !== discount_amount) {
+      if (
+        form.getValues(`items.${index}.discount_amount`) !== discount_amount
+      ) {
         form.setValue(`items.${index}.discount_amount`, discount_amount);
       }
     }
@@ -139,7 +141,16 @@ export const CnItemComputedSync = memo(function CnItemComputedSync({
       form.setValue(`items.${index}.total_amount`, total_amount);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
-  }, [index, type, discount_amount, net_amount, tax_amount, total_amount, isDiscAdj, isTaxAdj]);
+  }, [
+    index,
+    type,
+    discount_amount,
+    net_amount,
+    tax_amount,
+    total_amount,
+    isDiscAdj,
+    isTaxAdj,
+  ]);
 
   return null;
 });
@@ -153,7 +164,8 @@ function ProductCell({
   index: number;
 }) {
   "use no memo";
-  const itemName = useWatch({ control, name: `items.${index}.item_name` }) ?? "";
+  const itemName =
+    useWatch({ control, name: `items.${index}.item_name` }) ?? "";
   const productLocalName =
     useWatch({ control, name: `items.${index}.item_local_name` }) ?? "";
   return <NameWithSubtext primary={itemName} secondary={productLocalName} />;
@@ -189,7 +201,8 @@ function ReceivedCell({
   "use no memo";
   const received =
     useWatch({ control, name: `items.${index}._grn_received_qty` }) ?? 0;
-  const unitName = useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
+  const unitName =
+    useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
   return (
     <InputSuffixPlain
       className="w-full"
@@ -212,7 +225,6 @@ function QtyCell({
   locked: boolean;
 }) {
   "use no memo";
-  const t = useTranslations("procurement.creditNote");
   const quantity = useWatch({
     control: form.control,
     name: `items.${index}.quantity`,
@@ -240,34 +252,24 @@ function QtyCell({
       />
     );
   }
-  // เตือน (ไม่ block) เมื่อคืนเกินจำนวนที่รับตาม GRN บรรทัดอ้างอิง — backend
-  // เช็คสะสมข้ามใบอีกชั้นตอน submit (เพดานจริงอาจต่ำกว่านี้ถ้าเคยคืนไปแล้ว)
-  const overReturn =
-    grnReceivedQty > 0 && (Number(quantity) || 0) > grnReceivedQty;
+  // คืนเกินจำนวนที่รับ = error จาก schema (บล็อกตอน save) — กรอบแดง + ไอคอนเตือน
+  // ในช่อง hover อ่านข้อความได้ แบบเดียวกับช่องราคาของ GRN/PR
   return (
-    <>
-      <InputSuffixField className="w-full" error={!!error}>
-        <InputSuffixQty
-          decimals={decimals}
-          id={`items-${index}-quantity`}
-          min={1}
-          placeholder="0"
-          {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
-        />
-        {unitName && (
-          <InputSuffixAddon>
-            <span className="text-muted-foreground px-2 text-xs">
-              {unitName}
-            </span>
-          </InputSuffixAddon>
-        )}
-      </InputSuffixField>
-      {overReturn && (
-        <p className="mt-0.5 text-right text-micro text-warning-ink">
-          {t("overReturnWarning", { received: grnReceivedQty })}
-        </p>
+    <InputSuffixField className="w-full" errorMessage={error}>
+      <InputSuffixQty
+        decimals={decimals}
+        id={`items-${index}-quantity`}
+        min={0}
+        max={grnReceivedQty > 0 ? grnReceivedQty : undefined}
+        placeholder="0"
+        {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
+      />
+      {unitName && (
+        <InputSuffixAddon>
+          <span className="text-muted-foreground px-2 text-xs">{unitName}</span>
+        </InputSuffixAddon>
       )}
-    </>
+    </InputSuffixField>
   );
 }
 
