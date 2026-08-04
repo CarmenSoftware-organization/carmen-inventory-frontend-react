@@ -493,8 +493,12 @@ function SubtotalCell({
         </span>
       );
     }
+    // ยอดลดหนี้ต้อง > 0 (schema) — กรอบแดง + ไอคอนเตือนในช่อง เหมือนช่องจำนวนคืน
     return (
-      <InputSuffixField className="w-full">
+      <InputSuffixField
+        className="w-full"
+        errorMessage={form.formState.errors.items?.[index]?.net_amount?.message}
+      >
         <InputSuffixInput
           id={`items-${index}-cn-amount`}
           type="number"

@@ -758,6 +758,7 @@
     "receivedQty": "Received Qty",
     "received": "Received",
     "returnQty": "Return",
+    "cnAmount": "CN Amount",
     "receivedAt": "Received At",
     "remaining": "Remaining",
     "receivedUnit": "Received Unit",

@@ -35,6 +35,7 @@ import {
   createCnSchema,
   type CnFormValues,
   getDefaultValues,
+  keepGrnRefs,
   mapItemToPayload,
 } from "./cn-form-schema";
 
@@ -102,7 +103,9 @@ export function CnForm({ creditNote }: CnFormProps) {
   ].join("|");
   useEffect(() => {
     if (mode === "view" && creditNote) {
-      form.reset(getDefaultValues(creditNote));
+      form.reset(
+        keepGrnRefs(getDefaultValues(creditNote), form.getValues("items")),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode read intentionally without retriggering
   }, [cnSyncKey, creditNote?.id]);

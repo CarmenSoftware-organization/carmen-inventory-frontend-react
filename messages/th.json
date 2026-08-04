@@ -758,6 +758,7 @@
     "receivedQty": "จำนวนรับ",
     "received": "รับ",
     "returnQty": "คืน",
+    "cnAmount": "ยอดลดหนี้",
     "receivedAt": "วันที่รับ",
     "remaining": "คงเหลือ",
     "receivedUnit": "หน่วยรับ",

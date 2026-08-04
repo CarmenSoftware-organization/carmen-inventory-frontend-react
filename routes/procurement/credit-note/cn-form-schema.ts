@@ -7,6 +7,9 @@ import type { CreditNoteDetail, CnItemPayload } from "@/types/credit-note";
  * กำหนด validation ของ location, product, qty, unit, price, tax, discount
  * ใช้ร่วมกับ createCnSchema ในฐานะ items array
  *
+ * เงื่อนไขที่ขึ้นกับประเภทใบ (จำนวนคืน vs ยอดลดหนี้) อยู่ที่ superRefine ของ
+ * createCnSchema แทน — ระดับ item มองไม่เห็น credit_note_type ของแม่
+ *
  * @param tv - ฟังก์ชันแปลข้อความ validation (next-intl)
  * @param tf - ฟังก์ชันแปลชื่อฟิลด์ (next-intl)
  * @returns Zod object schema ของ CN item
@@ -46,10 +49,8 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
       item_name: z.string(),
       // display เท่านั้น — ไม่ส่งเข้า payload (เหมือน item_name)
       item_local_name: z.string(),
-      // คืนเป็นเศษได้ (0.5 kg) — บังคับแค่ต้องมากกว่า 0 เพดานเช็คใน superRefine
-      quantity: z.coerce
-        .number()
-        .gt(0, tv("positive", { field: tf("returnQty") })),
+      // คืนเป็นเศษได้ (0.5 kg) · ต้อง > 0 เฉพาะใบประเภทจำนวนคืน (เช็คที่ระดับฟอร์ม)
+      quantity: z.coerce.number().min(0),
       requested_qty: z.coerce.number().min(0),
       approved_qty: z.coerce.number().min(0),
       unit_id: z.string().min(1, tv("required", { field: tf("unit") })),
@@ -67,21 +68,6 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
       total_amount: z.coerce.number().min(0),
       is_tax_adjustment: z.boolean(),
       description: z.string(),
-    })
-    .superRefine((item, ctx) => {
-      // คืนเกินที่รับมาไม่ได้ — บล็อกตั้งแต่ในฟอร์ม ไม่ปล่อยไปตายที่ backend
-      // (backend เช็คสะสมข้ามใบอีกชั้น เพดานจริงอาจต่ำกว่านี้ถ้าเคยคืนไปแล้ว)
-      if (
-        item._grn_received_qty != null &&
-        item.quantity > item._grn_received_qty
-      ) {
-        // ข้อความไม่บอกตัวเลขเพดานซ้ำ — คอลัมน์ Received อยู่ติดกันในแถวเดียวกัน
-        ctx.addIssue({
-          code: "custom",
-          path: ["quantity"],
-          message: tv("maxReturnQty"),
-        });
-      }
     });
 }
 
@@ -98,40 +84,82 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
  * const form = useForm<CnFormValues>({ resolver: zodResolver(schema) as Resolver<CnFormValues> });
  */
 export function createCnSchema(tv: TranslationFn, tf: TranslationFn) {
-  return z.object({
-    doc_version: z.coerce.number().optional(),
-    credit_note_type: z.enum(["quantity_return", "amount_discount"], {
-      error: tv("creditNoteTypeRequired"),
-    }),
-    grn_id: z.string().min(1, tv("required", { field: tf("grn") })),
-    grn_date: z.string().min(1, tv("required", { field: tf("grnDate") })),
-    vendor_id: z.string().min(1, tv("required", { field: tf("vendor") })),
-    cn_no: z.string(),
-    cn_date: z.string().min(1, tv("required", { field: tf("docDate") })),
-    reason: z.string().min(1, tv("required", { field: tf("reason") })),
-    reference_number: z.string(),
-    description: z.string(),
-    currency_code: z.string().min(1, tv("required", { field: tf("currency") })),
-    exchange_rate: z.coerce
-      .number()
-      .gt(0, tv("minNumber", { field: tf("exchangeRate"), min: 0 })),
-    // invoice_no / invoice_date เป็นข้อมูลอ้างอิงจาก GRN (readOnly แก้เองไม่ได้) —
-    // GRN บางใบไม่มีค่า จึงไม่บังคับ กัน submit โดนบล็อกเงียบ ๆ โดยไม่มี error โชว์
-    invoice_no: z.string(),
-    invoice_date: z.string(),
-    tax_invoice_no: z
-      .string()
-      .min(1, tv("required", { field: tf("taxInvoiceNo") })),
-    tax_invoice_date: z
-      .string()
-      .min(1, tv("required", { field: tf("taxInvoiceDate") })),
-    tax_amount: z.coerce.number().min(0),
-    discount_amount: z.coerce.number().min(0),
-    notes: z.string(),
-    items: z
-      .array(createCnItemSchema(tv, tf))
-      .min(1, tv("required", { field: tf("items") })),
-  });
+  return z
+    .object({
+      doc_version: z.coerce.number().optional(),
+      credit_note_type: z.enum(["quantity_return", "amount_discount"], {
+        error: tv("creditNoteTypeRequired"),
+      }),
+      grn_id: z.string().min(1, tv("required", { field: tf("grn") })),
+      grn_date: z.string().min(1, tv("required", { field: tf("grnDate") })),
+      vendor_id: z.string().min(1, tv("required", { field: tf("vendor") })),
+      cn_no: z.string(),
+      cn_date: z.string().min(1, tv("required", { field: tf("docDate") })),
+      reason: z.string().min(1, tv("required", { field: tf("reason") })),
+      reference_number: z.string(),
+      description: z.string(),
+      currency_code: z
+        .string()
+        .min(1, tv("required", { field: tf("currency") })),
+      exchange_rate: z.coerce
+        .number()
+        .gt(0, tv("minNumber", { field: tf("exchangeRate"), min: 0 })),
+      // invoice_no / invoice_date เป็นข้อมูลอ้างอิงจาก GRN (readOnly แก้เองไม่ได้) —
+      // GRN บางใบไม่มีค่า จึงไม่บังคับ กัน submit โดนบล็อกเงียบ ๆ โดยไม่มี error โชว์
+      invoice_no: z.string(),
+      invoice_date: z.string(),
+      tax_invoice_no: z
+        .string()
+        .min(1, tv("required", { field: tf("taxInvoiceNo") })),
+      tax_invoice_date: z
+        .string()
+        .min(1, tv("required", { field: tf("taxInvoiceDate") })),
+      tax_amount: z.coerce.number().min(0),
+      discount_amount: z.coerce.number().min(0),
+      notes: z.string(),
+      items: z
+        .array(createCnItemSchema(tv, tf))
+        .min(1, tv("required", { field: tf("items") })),
+    })
+    .superRefine((values, ctx) => {
+      // ยอดของแต่ละแถวมาจากคนละช่องตามประเภทใบ — บังคับช่องที่ผู้ใช้เห็นจริงเท่านั้น
+      // ไม่งั้นจะตกที่ฟิลด์ที่หน้าจอนั้นไม่ได้เรนเดอร์ = error ที่แก้ไม่ได้
+      const isAmountDiscount = values.credit_note_type === "amount_discount";
+      values.items.forEach((item, index) => {
+        if (isAmountDiscount) {
+          // ยอดลดหนี้ 0 = ใบไม่มีความหมาย (จำนวนคืนเป็น ref ไม่ใช่ตัวตั้ง)
+          if (!(item.net_amount > 0)) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["items", index, "net_amount"],
+              message: tv("positive", { field: tf("cnAmount") }),
+            });
+          }
+          return;
+        }
+        if (!(item.quantity > 0)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["items", index, "quantity"],
+            message: tv("positive", { field: tf("returnQty") }),
+          });
+          return;
+        }
+        // คืนเกินที่รับมาไม่ได้ — บล็อกตั้งแต่ในฟอร์ม ไม่ปล่อยไปตายที่ backend
+        // (backend เช็คสะสมข้ามใบอีกชั้น เพดานจริงอาจต่ำกว่านี้ถ้าเคยคืนไปแล้ว)
+        // ข้อความไม่บอกตัวเลขเพดานซ้ำ — คอลัมน์ Received อยู่ติดกันในแถวเดียวกัน
+        if (
+          item._grn_received_qty != null &&
+          item.quantity > item._grn_received_qty
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["items", index, "quantity"],
+            message: tv("maxReturnQty"),
+          });
+        }
+      });
+    });
 }
 
 export type CnFormValues = z.infer<ReturnType<typeof createCnSchema>>;
@@ -277,6 +305,43 @@ export function getDefaultValues(cn?: CreditNoteDetail): CnFormValues {
     ...EMPTY_FORM,
     cn_date: new Date().toISOString(),
     currency_code: "",
+  };
+}
+
+/**
+ * ยกค่าอ้างอิงฝั่ง GRN (`_grn_*`) ของแถวเดิมมาใส่ค่า default ชุดใหม่
+ *
+ * ค่าพวกนี้ไม่ได้มากับ API ของ CN — `cn-item` ไปดึงจาก GRN ต้นทางมาเติมเองครั้งเดียว
+ * ตอน GRN โหลดเสร็จ ถ้า reset ทับตรง ๆ จะกลับเป็น null แล้วไม่มีใครเติมซ้ำ
+ * (effect ฝั่ง cn-item ไม่ขยับ) = เพดานจำนวนคืนหลุดทั้งใบจนกว่าจะ reload
+ *
+ * @param next - ค่า default ชุดใหม่ที่ได้จาก getDefaultValues
+ * @param current - ค่าปัจจุบันในฟอร์ม (`form.getValues("items")`)
+ * @returns next ที่แถวเดิม (match ด้วย id) ได้ `_grn_*` ที่รู้แล้วกลับคืน
+ * @example
+ * form.reset(keepGrnRefs(getDefaultValues(cn), form.getValues("items")));
+ */
+export function keepGrnRefs(
+  next: CnFormValues,
+  current: CnFormValues["items"],
+): CnFormValues {
+  const known = new Map(current.filter((i) => i.id).map((i) => [i.id, i]));
+  return {
+    ...next,
+    items: next.items.map((item) => {
+      const prev = item.id ? known.get(item.id) : undefined;
+      if (!prev || prev._grn_received_qty == null) return item;
+      return {
+        ...item,
+        _grn_received_qty: prev._grn_received_qty,
+        _grn_price: prev._grn_price,
+        _grn_sub_total: prev._grn_sub_total,
+        _grn_discount_amount: prev._grn_discount_amount,
+        _grn_net_amount: prev._grn_net_amount,
+        _grn_tax_amount: prev._grn_tax_amount,
+        _grn_total_amount: prev._grn_total_amount,
+      };
+    }),
   };
 }
 
