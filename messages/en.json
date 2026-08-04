@@ -405,13 +405,7 @@
       "emailRequired": "Email is required",
       "emailInvalid": "Please enter a valid email address",
       "passwordRequired": "Password is required",
-      "passwordMinChars": "Password must be at least {min} characters",
-      "firstNameRequired": "First name is required",
-      "lastNameRequired": "Last name is required",
-      "usernameRequired": "Username is required",
-      "usernameMinChars": "Username must be at least {min} characters",
-      "confirmPasswordRequired": "Please confirm your password",
-      "passwordMismatch": "Passwords do not match"
+      "passwordMinChars": "Password must be at least {min} characters"
     },
     "errors": {
       "invalidCredentials": "Email or password is incorrect",
@@ -457,7 +451,8 @@
     "goToSignIn": "Go to sign in",
     "registerDoneTitle": "Account created",
     "registerDoneSubtitle": "Your Carmen account is ready.",
-    "registerDoneHint": "Sign in with your email and password. If your property has not been assigned yet, ask your manager to add you."
+    "registerDoneHint": "Sign in with your email and password. If your property has not been assigned yet, ask your manager to add you.",
+    "passwordHint": "At least {min} characters, with an uppercase and lowercase letter, a number, and a special character."
   },
   "toast": {
     "createSuccess": "{entity} created successfully",

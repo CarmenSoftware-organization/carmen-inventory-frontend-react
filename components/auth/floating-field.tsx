@@ -114,6 +114,7 @@ export function FloatingFieldPassword({
   hideLabel,
   autoComplete = "current-password",
   dataId,
+  hint,
   register,
   error,
 }: {
@@ -123,6 +124,8 @@ export function FloatingFieldPassword({
   readonly hideLabel: string;
   readonly autoComplete?: string;
   readonly dataId?: string;
+  /** ข้อกำหนดรหัสผ่าน — โชว์ไว้ก่อน ไม่ต้องรอให้ผิดแล้วค่อยบอก (ซ่อนตอนมี error) */
+  readonly hint?: string;
   readonly register: UseFormRegisterReturn;
   readonly error?: string;
 }) {
@@ -160,6 +163,11 @@ export function FloatingFieldPassword({
         </button>
       </div>
       {error && <FieldErrorText id={`${id}-error`}>{error}</FieldErrorText>}
+      {!error && hint && (
+        <p className="text-muted-foreground mt-1.5 text-micro leading-relaxed">
+          {hint}
+        </p>
+      )}
     </Field>
   );
 }

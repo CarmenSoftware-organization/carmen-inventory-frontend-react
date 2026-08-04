@@ -1,74 +1,37 @@
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { Link, useNavigate } from "react-router";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { register as registerUser } from "@/lib/auth/auth-api";
+import { PASSWORD_MIN_LENGTH } from "@/lib/password-schema";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
 import {
   AuthFormAlert,
   FloatingField,
   FloatingFieldPassword,
 } from "@/components/auth/floating-field";
+import {
+  createRegisterSchema,
+  EMPTY_REGISTER_FORM,
+  type RegisterFormValues,
+} from "@/components/auth/register-form-schema";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
-
-const PASSWORD_MIN = 6;
-const USERNAME_MIN = 3;
-
-type RegisterFormValues = {
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  telephone: string;
-  password: string;
-  confirmPassword: string;
-};
 
 export default function RegisterForm() {
   const navigate = useNavigate();
   const t = useTranslations("auth");
-
-  const registerSchema = z
-    .object({
-      firstName: z.string().trim().min(1, t("validation.firstNameRequired")),
-      lastName: z.string().trim().min(1, t("validation.lastNameRequired")),
-      username: z
-        .string()
-        .trim()
-        .min(1, t("validation.usernameRequired"))
-        .min(USERNAME_MIN, t("validation.usernameMinChars", { min: USERNAME_MIN })),
-      email: z
-        .string()
-        .min(1, t("validation.emailRequired"))
-        .pipe(z.email(t("validation.emailInvalid"))),
-      telephone: z.string().trim(),
-      password: z
-        .string()
-        .min(1, t("validation.passwordRequired"))
-        .min(PASSWORD_MIN, t("validation.passwordMinChars", { min: PASSWORD_MIN })),
-      confirmPassword: z.string().min(1, t("validation.confirmPasswordRequired")),
-    })
-    .refine((v) => v.password === v.confirmPassword, {
-      path: ["confirmPassword"],
-      message: t("validation.passwordMismatch"),
-    });
+  const tv = useTranslations("validation");
+  const tfl = useTranslations("field");
 
   const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema) as Resolver<RegisterFormValues>,
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      username: "",
-      email: "",
-      telephone: "",
-      password: "",
-      confirmPassword: "",
-    },
+    resolver: zodResolver(
+      createRegisterSchema(tv, tfl),
+    ) as Resolver<RegisterFormValues>,
+    defaultValues: EMPTY_REGISTER_FORM,
     mode: "onTouched",
   });
 
@@ -183,18 +146,19 @@ export default function RegisterForm() {
             showLabel={t("showPassword")}
             hideLabel={t("hidePassword")}
             autoComplete="new-password"
+            hint={t("passwordHint", { min: PASSWORD_MIN_LENGTH })}
             register={form.register("password")}
             error={form.formState.errors.password?.message}
           />
 
           <FloatingFieldPassword
-            id="confirmPassword"
+            id="confirm_password"
             label={t("confirmPasswordLabel")}
             showLabel={t("showPassword")}
             hideLabel={t("hidePassword")}
             autoComplete="new-password"
-            register={form.register("confirmPassword")}
-            error={form.formState.errors.confirmPassword?.message}
+            register={form.register("confirm_password")}
+            error={form.formState.errors.confirm_password?.message}
           />
 
           {registerMutation.isError && (

@@ -405,13 +405,7 @@
       "emailRequired": "กรุณากรอกอีเมล",
       "emailInvalid": "รูปแบบอีเมลไม่ถูกต้อง",
       "passwordRequired": "กรุณากรอกรหัสผ่าน",
-      "passwordMinChars": "รหัสผ่านต้องมีอย่างน้อย {min} ตัวอักษร",
-      "firstNameRequired": "กรุณากรอกชื่อ",
-      "lastNameRequired": "กรุณากรอกนามสกุล",
-      "usernameRequired": "กรุณากรอกชื่อผู้ใช้",
-      "usernameMinChars": "ชื่อผู้ใช้ต้องมีอย่างน้อย {min} ตัวอักษร",
-      "confirmPasswordRequired": "กรุณากรอกรหัสผ่านอีกครั้ง",
-      "passwordMismatch": "รหัสผ่านทั้งสองช่องไม่ตรงกัน"
+      "passwordMinChars": "รหัสผ่านต้องมีอย่างน้อย {min} ตัวอักษร"
     },
     "errors": {
       "invalidCredentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
@@ -457,7 +451,8 @@
     "goToSignIn": "ไปหน้าเข้าสู่ระบบ",
     "registerDoneTitle": "สมัครเรียบร้อย",
     "registerDoneSubtitle": "บัญชี Carmen ของคุณพร้อมใช้งานแล้ว",
-    "registerDoneHint": "เข้าสู่ระบบด้วยอีเมลและรหัสผ่านที่ตั้งไว้ ถ้ายังไม่เห็นสาขาของตัวเอง แจ้งหัวหน้างานให้เพิ่มสิทธิ์ให้"
+    "registerDoneHint": "เข้าสู่ระบบด้วยอีเมลและรหัสผ่านที่ตั้งไว้ ถ้ายังไม่เห็นสาขาของตัวเอง แจ้งหัวหน้างานให้เพิ่มสิทธิ์ให้",
+    "passwordHint": "อย่างน้อย {min} ตัวอักษร มีตัวพิมพ์ใหญ่ พิมพ์เล็ก ตัวเลข และอักขระพิเศษ"
   },
   "toast": {
     "createSuccess": "สร้าง{entity}สำเร็จ",
