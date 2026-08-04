@@ -41,6 +41,12 @@ export interface CnGrnLine {
   tax_profile_id: string | null;
   tax_profile_name: string;
   tax_rate: number;
+  /** ยอดของบรรทัด GRN ตามที่รับจริง — ตารางเอาไปโชว์เทียบกับยอดที่จะคืน */
+  grn_sub_total: number;
+  grn_discount_amount: number;
+  grn_net_amount: number;
+  grn_tax_amount: number;
+  grn_total_amount: number;
 }
 
 /** flatten GRN detail → บรรทัดที่เลือกได้ (unit_price = sub_total/received_qty เหมือน GRN form) */
@@ -68,6 +74,11 @@ function toLines(grn: GoodsReceiveNote | undefined): CnGrnLine[] {
         tax_profile_id: item.tax_profile_id ?? null,
         tax_profile_name: item.tax_profile_name ?? "",
         tax_rate: Number(item.tax_rate) || 0,
+        grn_sub_total: Number(item.sub_total_price) || 0,
+        grn_discount_amount: Number(item.discount_amount) || 0,
+        grn_net_amount: Number(item.net_amount) || 0,
+        grn_tax_amount: Number(item.tax_amount) || 0,
+        grn_total_amount: Number(item.total_price) || 0,
       });
     }
   }
@@ -226,7 +237,7 @@ export function CnAddItemDialog({
                           </Badge>
                         )}
                       </span>
-                      <span className="text-muted-foreground truncate text-micro">
+                      <span className="text-muted-foreground text-micro truncate">
                         {line.location_name}
                         {line.location_code ? ` · ${line.location_code}` : ""}
                       </span>

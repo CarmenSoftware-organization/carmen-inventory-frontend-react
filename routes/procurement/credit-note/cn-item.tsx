@@ -11,6 +11,7 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
+import { round2 } from "@/lib/currency-utils";
 import { useGoodsReceiveNoteById } from "@/hooks/use-goods-receive-note";
 import { getDeleteDescription } from "@/lib/form-utils";
 import type { CnFormValues } from "./cn-form-schema";
@@ -86,12 +87,18 @@ export function CnItem({ form, disabled }: Props) {
         unit_id: line.unit_id,
         unit_name: line.unit_name,
         // ไม่ pre-fill จำนวนคืน (CN_ITEM = 0) — line.quantity คือจำนวนที่รับ
-        // ซึ่งไปอยู่คอลัมน์ Received ให้เทียบแทน
+        // ซึ่งไปอยู่แถวหลัก (ยอดตาม GRN) ให้เทียบแทน
         unit_price: line.unit_price,
         discount_rate: line.discount_rate,
         tax_profile_id: line.tax_profile_id,
         tax_profile_name: line.tax_profile_name,
         tax_rate: line.tax_rate,
+        _grn_price: line.unit_price,
+        _grn_sub_total: line.grn_sub_total,
+        _grn_discount_amount: line.grn_discount_amount,
+        _grn_net_amount: line.grn_net_amount,
+        _grn_tax_amount: line.grn_tax_amount,
+        _grn_total_amount: line.grn_total_amount,
       })),
     );
     // prepend → รายการแรกที่เลือกอยู่บนสุด · เด้งไปช่องจำนวนของแถวนั้นเลย เพราะ
@@ -102,31 +109,59 @@ export function CnItem({ form, disabled }: Props) {
     });
   };
 
-  // จำนวนรับของแต่ละบรรทัดไม่ได้อยู่ใน API ของ CN — ใบที่โหลดกลับมาจึงได้ 0 มา
-  // ทั้งกระดาน ต้องเทียบกับ GRN ต้นทางเอง (query เดียวกับ dialog เลือกรายการ →
-  // React Query ใช้ cache ร่วม ไม่ได้ยิงเพิ่มจริง) · setValue ไม่ mark dirty
+  // ยอดฝั่ง GRN ของแต่ละบรรทัดไม่ได้อยู่ใน API ของ CN — ใบที่โหลดกลับมาจึงได้ 0
+  // มาทั้งกระดาน ต้องไปเทียบกับ GRN ต้นทางเอง (query เดียวกับ dialog เลือกรายการ
+  // → React Query ใช้ cache ร่วม ไม่ได้ยิงเพิ่มจริง) · setValue ไม่ mark dirty
   // เพราะเป็นค่าอ้างอิงที่เติมให้ ไม่ใช่การแก้ของผู้ใช้ และไม่เข้า payload อยู่แล้ว
   const { data: grn } = useGoodsReceiveNoteById(grnId);
   useEffect(() => {
     if (!grn) return;
-    const receivedByLine = new Map<string, number>();
+    const grnByLine = new Map<
+      string,
+      {
+        received: number;
+        price: number;
+        subTotal: number;
+        discount: number;
+        net: number;
+        tax: number;
+        total: number;
+      }
+    >();
     for (const detail of grn.good_received_note_detail ?? []) {
       const key = `${detail.product_id}:${detail.location_id ?? ""}`;
-      for (const line of detail.items ?? []) {
-        // บรรทัดแรกที่ match ชนะ — ตรงกับที่ dialog หยิบไปตอนเพิ่มรายการ
-        if (!receivedByLine.has(key)) {
-          receivedByLine.set(key, Number(line.received_qty) || 0);
-        }
-      }
+      // บรรทัดแรกที่ match ชนะ — ตรงกับที่ dialog หยิบไปตอนเพิ่มรายการ
+      if (grnByLine.has(key)) continue;
+      const line = detail.items?.[0];
+      if (!line) continue;
+      const received = Number(line.received_qty) || 0;
+      const subTotal = Number(line.sub_total_price) || 0;
+      grnByLine.set(key, {
+        received,
+        // GRN เก็บแต่ยอดรวมย่อย ไม่มีราคาต่อหน่วยของบรรทัดที่รับ — ถอดกลับด้วย
+        // สูตรเดียวกับ dialog เลือกรายการ ตัวเลขสองที่จะได้ตรงกัน
+        price: received > 0 ? round2(subTotal / received) : 0,
+        subTotal,
+        discount: Number(line.discount_amount) || 0,
+        net: Number(line.net_amount) || 0,
+        tax: Number(line.tax_amount) || 0,
+        total: Number(line.total_price) || 0,
+      });
     }
     form.getValues("items").forEach((item, index) => {
       if ((item._grn_received_qty ?? 0) > 0) return;
-      const received = receivedByLine.get(
+      const grnLine = grnByLine.get(
         `${item.item_id ?? ""}:${item.location_id ?? ""}`,
       );
-      if (received) {
-        form.setValue(`items.${index}._grn_received_qty`, received);
-      }
+      if (!grnLine) return;
+      const base = `items.${index}` as const;
+      form.setValue(`${base}._grn_received_qty`, grnLine.received);
+      form.setValue(`${base}._grn_price`, grnLine.price);
+      form.setValue(`${base}._grn_sub_total`, grnLine.subTotal);
+      form.setValue(`${base}._grn_discount_amount`, grnLine.discount);
+      form.setValue(`${base}._grn_net_amount`, grnLine.net);
+      form.setValue(`${base}._grn_tax_amount`, grnLine.tax);
+      form.setValue(`${base}._grn_total_amount`, grnLine.total);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form stable; เติมเมื่อ GRN มาถึง
   }, [grn, itemFields.length]);

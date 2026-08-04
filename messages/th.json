@@ -3238,7 +3238,8 @@
       "addNItems": "{count, plural, =0 {เพิ่ม} other {เพิ่ม # รายการ}}",
       "cnAmount": "จำนวนลดหนี้",
       "submitTitle": "ส่งใบลดหนี้",
-      "submitConfirm": "จะส่งใบลดหนี้เพื่ออนุมัติ คุณแน่ใจหรือไม่?"
+      "submitConfirm": "จะส่งใบลดหนี้เพื่ออนุมัติ คุณแน่ใจหรือไม่?",
+      "returnLine": "คืน"
     },
     "goodsReceiveNote": {
       "entity": "ใบรับสินค้า",

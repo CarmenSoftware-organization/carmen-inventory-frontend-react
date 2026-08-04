@@ -3243,7 +3243,8 @@
       "addNItems": "{count, plural, =0 {Add} =1 {Add 1 item} other {Add # items}}",
       "cnAmount": "CN Amount",
       "submitTitle": "Submit Credit Note",
-      "submitConfirm": "This will submit the credit note for approval. Are you sure?"
+      "submitConfirm": "This will submit the credit note for approval. Are you sure?",
+      "returnLine": "Return"
     },
     "goodsReceiveNote": {
       "entity": "Goods Receive Note",

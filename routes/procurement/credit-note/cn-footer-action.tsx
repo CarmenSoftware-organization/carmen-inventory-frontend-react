@@ -65,9 +65,7 @@ export function CnFooterAction({
               ? `-${formatCurrency(summary.totalDiscount)}`
               : formatCurrency(0),
           valueClassName:
-            summary.totalDiscount > 0
-              ? "text-destructive"
-              : undefined,
+            summary.totalDiscount > 0 ? "text-destructive" : undefined,
         },
         {
           key: "net",

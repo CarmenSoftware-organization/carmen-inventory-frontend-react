@@ -20,10 +20,17 @@ function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
       id: z.string().optional(),
       doc_version: z.coerce.number().optional(),
       _group_key: z.string(),
-      // จำนวนที่รับเข้าตาม GRN บรรทัดอ้างอิง = เพดานของจำนวนคืน
-      // (0 = ไม่มีข้อมูลอ้างอิง เช่น ใบเก่าที่ยังโหลด GRN ไม่เสร็จ → ไม่บังคับเพดาน
-      // จะได้ไม่บล็อกมั่ว) ไม่ส่งเข้า payload
+      // ยอดของบรรทัด GRN ต้นทาง — แถวหลักในตารางแสดงชุดนี้ให้เทียบกับยอดที่คิด
+      // จากจำนวนคืน ทุกตัวเป็น display อย่างเดียว ไม่ส่งเข้า payload
+      // (_grn_received_qty ยังเป็นเพดานของจำนวนคืนด้วย · 0 = ยังไม่รู้ค่า เช่น
+      // ใบเก่าที่โหลด GRN ไม่เสร็จ → ไม่บังคับเพดาน จะได้ไม่บล็อกมั่ว)
       _grn_received_qty: z.coerce.number(),
+      _grn_price: z.coerce.number(),
+      _grn_sub_total: z.coerce.number(),
+      _grn_discount_amount: z.coerce.number(),
+      _grn_net_amount: z.coerce.number(),
+      _grn_tax_amount: z.coerce.number(),
+      _grn_total_amount: z.coerce.number(),
       location_id: z
         .string()
         .nullable()
@@ -133,6 +140,12 @@ export type CnFormValues = z.infer<ReturnType<typeof createCnSchema>>;
 export const CN_ITEM = {
   _group_key: "",
   _grn_received_qty: 0,
+  _grn_price: 0,
+  _grn_sub_total: 0,
+  _grn_discount_amount: 0,
+  _grn_net_amount: 0,
+  _grn_tax_amount: 0,
+  _grn_total_amount: 0,
   location_id: null,
   location_name: "",
   location_code: "",
@@ -223,7 +236,14 @@ export function getDefaultValues(cn?: CreditNoteDetail): CnFormValues {
           id: d.id,
           doc_version: d.doc_version,
           _group_key: d.product?.id ?? d.id,
+          // ยอดฝั่ง GRN ไม่ได้มากับ API ของ CN — cn-item เติมให้จาก GRN ต้นทาง
           _grn_received_qty: 0,
+          _grn_price: 0,
+          _grn_sub_total: 0,
+          _grn_discount_amount: 0,
+          _grn_net_amount: 0,
+          _grn_tax_amount: 0,
+          _grn_total_amount: 0,
           location_id: d.location?.id ?? null,
           location_name: d.location?.name ?? "",
           location_code: d.location?.code ?? "",

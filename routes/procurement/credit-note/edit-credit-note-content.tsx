@@ -1,4 +1,3 @@
-
 import { useCreditNoteById } from "@/hooks/use-credit-note";
 import { CnForm } from "./cn-form";
 import { ErrorState } from "@/components/ui/error-state";
