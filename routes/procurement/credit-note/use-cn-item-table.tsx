@@ -245,7 +245,7 @@ function ReceivedCell({
   return (
     <InputSuffixPlain
       className="w-full"
-      value={received > 0 ? String(received) : "—"}
+      value={String(received)}
       suffix={unitName}
     />
   );
@@ -286,7 +286,7 @@ function QtyCell({
     return (
       <InputSuffixPlain
         className="w-full"
-        value={quantity != null ? String(quantity) : "—"}
+        value={String(quantity ?? 0)}
         suffix={unitName}
       />
     );
@@ -408,18 +408,10 @@ function CnReturnRow({
           <td className="px-2 py-1 text-right">
             <PriceCell control={form.control} index={index} />
           </td>
+          {/* ช่องกรอกย้ายไปอยู่ช่องแรกของแถวแล้ว ตรงนี้จึงเป็นยอดอ่านอย่างเดียว
+              ทั้งสองโหมด (amount_discount → subtotal = ยอดที่กรอกเอง) */}
           <td className="px-2 py-1 text-right">
-            {/* amount_discount → ยอดที่กรอกไปโผล่ที่ Net ตรง ๆ ไม่มี subtotal */}
-            {isAmountDiscountRow ? (
-              <span className="text-muted-foreground text-xs">—</span>
-            ) : (
-              <SubtotalCell
-                form={form}
-                index={index}
-                type={type}
-                disabled={disabled}
-              />
-            )}
+            <LineSubtotalText form={form} index={index} type={type} />
           </td>
           <td className="px-2 py-1 text-right">
             <DiscountCell
@@ -522,6 +514,25 @@ function SubtotalCell({
   );
 }
 
+/** ยอดรวมย่อยของฝั่งคืน (read-only) — qty × price หรือยอดที่กรอกเองแล้วแต่ประเภทใบ */
+function LineSubtotalText({
+  form,
+  index,
+  type,
+}: {
+  form: UseFormReturn<CnFormValues>;
+  index: number;
+  type: CnCreditNoteType;
+}) {
+  "use no memo";
+  const line = useCnItemLine(form, index, type);
+  return (
+    <span className="text-foreground text-xs font-semibold tabular-nums">
+      {formatCurrency(line.sub_total)}
+    </span>
+  );
+}
+
 /** Net — subtotal − discount (read-only) */
 function NetCell({
   control,
@@ -567,7 +578,13 @@ function DiscountCell({
   const amount = line.discount_amount;
 
   if (type === "amount_discount") {
-    return <span className="text-muted-foreground text-xs">—</span>;
+    // โหมดนี้ไม่มีส่วนลดต่อบรรทัด — ยอดเป็น 0 จริง ๆ ไม่ใช่ "ไม่มีข้อมูล"
+    // ช่องตัวเลขต้องขึ้นตัวเลข คนอ่านจะได้เอาไปบวกลบกับคอลัมน์อื่นได้เลย
+    return (
+      <span className="block text-right text-xs tabular-nums">
+        {formatCurrency(0)}
+      </span>
+    );
   }
   if (disabled) {
     return (
