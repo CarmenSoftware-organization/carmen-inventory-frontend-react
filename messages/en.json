@@ -3236,6 +3236,8 @@
       "alreadyAdded": "Added",
       "noGrnItems": "No lines in this GRN",
       "noGrnItemsDesc": "The referenced GRN has no received lines to credit.",
+      "selectVendorFirst": "Select a vendor first — items come from that vendor's GRN.",
+      "selectGrnFirst": "Select a GRN first — items are picked from its received lines.",
       "nItemsSelected": "{count} selected",
       "addNItems": "{count, plural, =0 {Add} =1 {Add 1 item} other {Add # items}}",
       "cnAmount": "CN Amount",

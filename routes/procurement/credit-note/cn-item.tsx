@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
+import { toast } from "sonner";
 import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +34,7 @@ export function CnItem({ form, disabled }: Props) {
   const tfl = useTranslations("field");
   const grnId =
     useWatch({ control: form.control, name: "grn_id" }) || undefined;
+  const vendorId = useWatch({ control: form.control, name: "vendor_id" });
   const canAddItem = !disabled && !!grnId;
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [addOpen, setAddOpen] = useState(false);
@@ -135,8 +137,22 @@ export function CnItem({ form, disabled }: Props) {
     onDelete: setDeleteIndex,
   });
 
+  // ปุ่มยังกดได้ตลอดแล้วค่อยบอกว่าขาดอะไร — ปุ่มที่จางแล้วกดไม่ติดไม่ได้บอก
+  // ว่าต้องทำอะไรก่อน · เตือนตามลำดับที่ต้องกรอกจริง (ผู้ขาย → ใบรับของ)
+  const handleAddClick = () => {
+    if (!vendorId) {
+      toast.warning(t("selectVendorFirst"));
+      return;
+    }
+    if (!grnId) {
+      toast.warning(t("selectGrnFirst"));
+      return;
+    }
+    setAddOpen(true);
+  };
+
   const addAction = !disabled && (
-    <Button type="button" size="sm" onClick={() => setAddOpen(true)}>
+    <Button type="button" size="sm" onClick={handleAddClick}>
       <Plus aria-hidden="true" /> {t("addItem")}
     </Button>
   );
