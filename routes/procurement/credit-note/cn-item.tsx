@@ -10,6 +10,7 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
+import { useGoodsReceiveNoteById } from "@/hooks/use-goods-receive-note";
 import { getDeleteDescription } from "@/lib/form-utils";
 import type { CnFormValues } from "./cn-form-schema";
 import { fieldFocusRef } from "@/lib/field-focus";
@@ -98,6 +99,35 @@ export function CnItem({ form, disabled }: Props) {
     });
   };
 
+  // จำนวนรับของแต่ละบรรทัดไม่ได้อยู่ใน API ของ CN — ใบที่โหลดกลับมาจึงได้ 0 มา
+  // ทั้งกระดาน ต้องเทียบกับ GRN ต้นทางเอง (query เดียวกับ dialog เลือกรายการ →
+  // React Query ใช้ cache ร่วม ไม่ได้ยิงเพิ่มจริง) · setValue ไม่ mark dirty
+  // เพราะเป็นค่าอ้างอิงที่เติมให้ ไม่ใช่การแก้ของผู้ใช้ และไม่เข้า payload อยู่แล้ว
+  const { data: grn } = useGoodsReceiveNoteById(grnId);
+  useEffect(() => {
+    if (!grn) return;
+    const receivedByLine = new Map<string, number>();
+    for (const detail of grn.good_received_note_detail ?? []) {
+      const key = `${detail.product_id}:${detail.location_id ?? ""}`;
+      for (const line of detail.items ?? []) {
+        // บรรทัดแรกที่ match ชนะ — ตรงกับที่ dialog หยิบไปตอนเพิ่มรายการ
+        if (!receivedByLine.has(key)) {
+          receivedByLine.set(key, Number(line.received_qty) || 0);
+        }
+      }
+    }
+    form.getValues("items").forEach((item, index) => {
+      if ((item._grn_received_qty ?? 0) > 0) return;
+      const received = receivedByLine.get(
+        `${item.item_id ?? ""}:${item.location_id ?? ""}`,
+      );
+      if (received) {
+        form.setValue(`items.${index}._grn_received_qty`, received);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form stable; เติมเมื่อ GRN มาถึง
+  }, [grn, itemFields.length]);
+
   const table = useCnItemTable({
     form,
     itemFields,
@@ -135,6 +165,9 @@ export function CnItem({ form, disabled }: Props) {
       <DataGrid
         table={table}
         recordCount={itemFields.length}
+        // คอลัมน์กว้างตาม size (px) จริง — เกินจอก็ scroll แนวนอน (เหมือน PO/GRN)
+        // เคยลองบีบให้พอดีจอด้วย table-fixed w-full แล้ว combo discount/tax หดจน
+        // กรอก rate กับยอดไม่ได้ · ไม่เกินจอเมื่อไหร่ min-w-full ก็ยืดเต็มให้เอง
         tableLayout={{ columnsResizable: true }}
         emptyMessage={
           <EmptyComponent
@@ -144,12 +177,9 @@ export function CnItem({ form, disabled }: Props) {
           />
         }
       >
-        {/* columnsResizable → คอลัมน์กว้างตาม size (px) จริง; DataGridContainer เป็น
-            native scroll (overflow-auto) — scroll แนวนอนแบบ PR (ไม่ห่อ Radix ScrollArea
-            เลี่ยง nested scroll ที่สะดุด)
-            · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน (เท่ากันทุกโมดูล) · CN เป็นตารางแบน ไม่มีแถวกาง
-            แถวสุดท้ายจึงชนขอบล่างพอดี แล้ว scrollbar (แบบลอยทับบน macOS) ไปบัง
-            ตัวเลขแถวนั้น */}
+        {/* native scroll (overflow-auto) ไม่ห่อ Radix ScrollArea — เลี่ยง nested
+            scroll ที่สะดุด · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน ไม่งั้นแถบลอย
+            (macOS) ไปบังตัวเลขแถวสุดท้าย เพราะ CN เป็นตารางแบน ไม่มีแถวกาง */}
         <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] pb-3">
           <DataGridTable />
         </DataGridContainer>

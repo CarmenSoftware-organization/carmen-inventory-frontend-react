@@ -175,7 +175,31 @@ function LocationCell({
   return <NameWithSubtext primary={locationName} secondary={locationCode} />;
 }
 
-/** Qty (+unit) — quantity_return แก้ได้ · amount_discount ล็อก (ref) */
+/**
+ * Received — จำนวนที่รับเข้าตาม GRN บรรทัดอ้างอิง อ่านอย่างเดียวเสมอ
+ * (เพดานอ้างอิงของจำนวนคืน ไม่ใช่ค่าที่ผู้ใช้กรอก และไม่เข้า payload)
+ */
+function ReceivedCell({
+  control,
+  index,
+}: {
+  control: Control<CnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const received =
+    useWatch({ control, name: `items.${index}._grn_received_qty` }) ?? 0;
+  const unitName = useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
+  return (
+    <InputSuffixPlain
+      className="w-full"
+      value={received > 0 ? String(received) : "—"}
+      suffix={unitName}
+    />
+  );
+}
+
+/** Return qty (+unit) — จำนวนที่คืน = ตัวตั้งของทุกยอดในแถว · amount_discount ล็อก (ref) */
 function QtyCell({
   form,
   index,
@@ -266,9 +290,9 @@ function PriceCell({
 }
 
 /**
- * Subtotal / CN amount —
- * `amount_discount` → กรอก "CN Amount" (เขียน net_amount ตรง)
- * `quantity_return` → subtotal (qty × price) read-only
+ * Subtotal / CN amount — ช่องเดียวกัน สลับความหมายตามประเภทใบ
+ * `quantity_return` → subtotal = จำนวนคืน × ราคา (read-only)
+ * `amount_discount` → กรอก "CN Amount" ตรง (เขียน net_amount)
  */
 function SubtotalCell({
   form,
@@ -282,14 +306,13 @@ function SubtotalCell({
   disabled: boolean;
 }) {
   "use no memo";
-  const isAmountDiscount = type === "amount_discount";
   const net = useWatch({
     control: form.control,
     name: `items.${index}.net_amount`,
   });
   const line = useCnItemLine(form, index, type);
 
-  if (isAmountDiscount) {
+  if (type === "amount_discount") {
     if (disabled) {
       return (
         <span className="text-foreground text-xs font-semibold tabular-nums">
@@ -313,10 +336,26 @@ function SubtotalCell({
       </InputSuffixField>
     );
   }
-  // quantity_return → subtotal = qty × price (read-only)
   return (
     <span className="text-foreground text-xs font-semibold tabular-nums">
       {formatCurrency(line.sub_total)}
+    </span>
+  );
+}
+
+/** Net — subtotal − discount (read-only) */
+function NetCell({
+  control,
+  index,
+}: {
+  control: Control<CnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const net = useWatch({ control, name: `items.${index}.net_amount` });
+  return (
+    <span className="text-foreground text-xs font-semibold tabular-nums">
+      {formatCurrency(Number(net) || 0)}
     </span>
   );
 }
@@ -396,23 +435,6 @@ function DiscountCell({
         aria-label="Override discount"
       />
     </div>
-  );
-}
-
-/** Net — = net_amount (subtotal − discount), read-only */
-function NetCell({
-  control,
-  index,
-}: {
-  control: Control<CnFormValues>;
-  index: number;
-}) {
-  "use no memo";
-  const net = useWatch({ control, name: `items.${index}.net_amount` });
-  return (
-    <span className="text-foreground text-xs font-semibold tabular-nums">
-      {formatCurrency(Number(net) || 0)}
-    </span>
   );
 }
 
@@ -550,7 +572,7 @@ export function useCnItemTable({
       {
         accessorKey: "item_id",
         header: tfl("product"),
-        size: 240,
+        size: 200,
         cell: ({ row }) => (
           <ProductCell control={form.control} index={row.index} />
         ),
@@ -558,15 +580,28 @@ export function useCnItemTable({
       {
         accessorKey: "location_id",
         header: tfl("location"),
-        size: 200,
+        // ชื่อคลังสั้นกว่าชื่อสินค้ามาก และมี code เป็นบรรทัดรองอยู่แล้ว —
+        // กว้างเท่าเดิม (200) คือที่ว่างเปล่าที่คอลัมน์อื่นเอาไปใช้ได้
+        size: 130,
         cell: ({ row }) => (
           <LocationCell control={form.control} index={row.index} />
         ),
       },
+      // จำนวนรับ (อ้างอิง GRN) กับจำนวนคืน (ตัวตั้งของทุกยอด) เป็นคนละค่า —
+      // อยู่ติดกันเพื่อให้เทียบเพดานได้ในสายตาเดียว
+      {
+        id: "received_qty",
+        header: tfl("received"),
+        size: 100,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <ReceivedCell control={form.control} index={row.index} />
+        ),
+      },
       {
         id: "quantity",
-        header: tfl("receivedQty"),
-        size: 160,
+        header: tfl("returnQty"),
+        size: 150,
         meta: rightMeta,
         cell: ({ row }) => (
           <QtyCell
@@ -580,7 +615,7 @@ export function useCnItemTable({
       {
         id: "unit_price",
         header: tfl("price"),
-        size: 110,
+        size: 100,
         meta: rightMeta,
         cell: ({ row }) => (
           <PriceCell control={form.control} index={row.index} />
@@ -589,7 +624,7 @@ export function useCnItemTable({
       {
         id: "net_amount",
         header: isAmountDiscount ? t("cnAmount") : tfl("subtotal"),
-        size: 130,
+        size: 110,
         meta: rightMeta,
         cell: ({ row }) => (
           <SubtotalCell
@@ -616,7 +651,7 @@ export function useCnItemTable({
               ),
         // โหมดอ่านไม่มี combo (override + rate + ยอด) เหลือแค่ยอดเดียว —
         // ย่อเท่า PO/GRN ด้วยค่าจาก combo-col-width ตัวเดียวกัน
-        size: narrowCombo ? COMBO_COL.readOnly : 200,
+        size: narrowCombo ? COMBO_COL.readOnly : COMBO_COL.discount,
         meta: rightMeta,
         cell: ({ row }) => (
           <DiscountCell
@@ -630,7 +665,7 @@ export function useCnItemTable({
       {
         id: "net",
         header: tfl("net"),
-        size: 110,
+        size: 96,
         meta: rightMeta,
         cell: ({ row }) => <NetCell control={form.control} index={row.index} />,
       },
@@ -646,7 +681,7 @@ export function useCnItemTable({
                 </span>
               </div>
             ),
-        size: narrowCombo ? COMBO_COL.readOnly : 250,
+        size: narrowCombo ? COMBO_COL.readOnly : COMBO_COL.tax,
         meta: rightMeta,
         cell: ({ row }) => (
           <TaxCell

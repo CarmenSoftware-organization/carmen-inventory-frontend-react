@@ -731,6 +731,8 @@
     "baseQty": "Base Qty",
     "baseUnit": "Base Unit",
     "receivedQty": "Received Qty",
+    "received": "Received",
+    "returnQty": "Return",
     "receivedAt": "Received At",
     "remaining": "Remaining",
     "receivedUnit": "Received Unit",

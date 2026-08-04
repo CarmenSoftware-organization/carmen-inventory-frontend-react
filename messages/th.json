@@ -731,6 +731,8 @@
     "baseQty": "จำนวนฐาน",
     "baseUnit": "หน่วยฐาน",
     "receivedQty": "จำนวนรับ",
+    "received": "รับ",
+    "returnQty": "คืน",
     "receivedAt": "วันที่รับ",
     "remaining": "คงเหลือ",
     "receivedUnit": "หน่วยรับ",
