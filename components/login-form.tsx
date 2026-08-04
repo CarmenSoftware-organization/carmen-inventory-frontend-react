@@ -182,14 +182,20 @@ export default function LoginForm() {
       <p className="text-muted-foreground/60 mt-3 text-center text-micro-legal leading-relaxed">
         {t.rich("termsLine", {
           terms: (chunks) => (
-            <span className="text-foreground/70 underline-offset-4 hover:underline">
+            <Link
+              to="/terms"
+              className="text-foreground/70 underline-offset-4 hover:underline"
+            >
               {chunks}
-            </span>
+            </Link>
           ),
           privacy: (chunks) => (
-            <span className="text-foreground/70 underline-offset-4 hover:underline">
+            <Link
+              to="/privacy"
+              className="text-foreground/70 underline-offset-4 hover:underline"
+            >
               {chunks}
-            </span>
+            </Link>
           ),
         })}
       </p>

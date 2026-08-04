@@ -458,7 +458,8 @@
     "registerDoneTitle": "Account created",
     "registerDoneSubtitle": "Your Carmen account is ready.",
     "registerDoneHint": "Sign in with your email and password. If your property has not been assigned yet, ask your manager to add you.",
-    "passwordHint": "At least {min} characters, with an uppercase and lowercase letter, a number, and a special character."
+    "passwordHint": "At least {min} characters, with an uppercase and lowercase letter, a number, and a special character.",
+    "registerTermsLine": "By creating an account you agree to our <terms>terms of service</terms> and <privacy>privacy policy</privacy>."
   },
   "toast": {
     "createSuccess": "{entity} created successfully",

@@ -194,6 +194,27 @@ export default function RegisterForm() {
           {t("signIn")}
         </Link>
       </p>
+
+      <p className="text-muted-foreground/60 mt-3 text-center text-micro-legal leading-relaxed">
+        {t.rich("registerTermsLine", {
+          terms: (chunks) => (
+            <Link
+              to="/terms"
+              className="text-foreground/70 underline-offset-4 hover:underline"
+            >
+              {chunks}
+            </Link>
+          ),
+          privacy: (chunks) => (
+            <Link
+              to="/privacy"
+              className="text-foreground/70 underline-offset-4 hover:underline"
+            >
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
     </AuthSplitShell>
   );
 }
