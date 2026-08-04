@@ -197,7 +197,13 @@
     "errorEyebrow": "Connection issue",
     "errorTitle": "Couldn't load your profile",
     "errorDesc": "Check your connection or try again. Your session is preserved.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "noBuEyebrow": "Access pending",
+    "noBuTitle": "Your account is not linked to a property yet",
+    "noBuDesc": "Ask your manager or system admin to add you to a property. Once they have, come back and refresh.",
+    "noBuRetry": "Check again",
+    "signedInAs": "Signed in as {name}",
+    "signOut": "Sign out"
   },
   "notFound": {
     "metaTitle": "Page not found",

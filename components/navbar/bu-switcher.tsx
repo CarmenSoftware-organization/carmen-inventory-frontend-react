@@ -76,6 +76,14 @@ export default function BuSwitcher() {
     return null;
   }
 
+  // โหลดจบแล้วแต่ไม่มี BU สักอัน (คนที่เพิ่งสมัคร ยังไม่มีใคร assign เข้าโรงแรม) —
+  // ซ่อน switcher ไปเลยเหมือนเคส error ของเดิมยัดรวมกับ loading ทำให้ navbar
+  // หมุน skeleton ค้างถาวรทั้งที่ไม่มีอะไรจะโหลดแล้ว ProfileGate เป็นคนอธิบาย
+  // สถานะให้ผู้ใช้อยู่แล้ว
+  if (!isLoading && !isSwitching && !currentDept) {
+    return null;
+  }
+
   if (isLoading || isSwitching || !currentDept) {
     return (
       <div
