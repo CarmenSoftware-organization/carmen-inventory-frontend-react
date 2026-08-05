@@ -10,6 +10,7 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { cn } from "@/lib/utils";
+import { ViewModeToggle } from "@/components/share/view-mode-toggle";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
@@ -127,22 +128,13 @@ export default function StoreRequisitionComponent() {
         render: () => (
           <div className="space-y-1.5 sm:hidden">
             <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                size="sm"
-                variant={viewMode === "my-pending" ? "default" : "outline"}
-                onClick={() => setViewModeRef.current("my-pending")}
-              >
-                {t("myPending")}
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === "all-document" ? "default" : "outline"}
-                onClick={() => setViewModeRef.current("all-document")}
-              >
-                {t("allDocuments")}
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={(next) => setViewModeRef.current(next)}
+              myPendingLabel={t("myPending")}
+              allDocumentsLabel={t("allDocuments")}
+              className="grid grid-cols-2 gap-2"
+            />
           </div>
         ),
       },
@@ -333,22 +325,13 @@ export default function StoreRequisitionComponent() {
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
             {/* กรองเยอะจนไม่พอ ให้ตัวกรองขึ้นบรรทัดใหม่กันเอง อย่าไปดัน toggle ตก */}
-            <div className="hidden sm:flex sm:min-w-0 sm:flex-wrap sm:items-center sm:gap-2">
-              <Button
-                size="sm"
-                variant={viewMode === "my-pending" ? "default" : "outline"}
-                onClick={() => setViewMode("my-pending")}
-              >
-                {t("myPending")}
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === "all-document" ? "default" : "outline"}
-                onClick={() => setViewMode("all-document")}
-              >
-                {t("allDocuments")}
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={setViewMode}
+              myPendingLabel={t("myPending")}
+              allDocumentsLabel={t("allDocuments")}
+              className="hidden sm:flex sm:min-w-0 sm:flex-wrap sm:items-center sm:gap-2"
+            />
             <ViewSelector
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}

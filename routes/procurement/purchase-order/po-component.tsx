@@ -29,6 +29,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
+import { ViewModeToggle } from "@/components/share/view-mode-toggle";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { usePoTable } from "./use-po-table";
@@ -116,22 +117,13 @@ export default function PoComponent() {
         render: () => (
           <div className="space-y-1.5 sm:hidden">
             <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                size="sm"
-                variant={viewMode === "my-pending" ? "default" : "outline"}
-                onClick={() => setViewModeRef.current("my-pending")}
-              >
-                {t("myPending")}
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === "all-document" ? "default" : "outline"}
-                onClick={() => setViewModeRef.current("all-document")}
-              >
-                {t("allDocuments")}
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={(next) => setViewModeRef.current(next)}
+              myPendingLabel={t("myPending")}
+              allDocumentsLabel={t("allDocuments")}
+              className="grid grid-cols-2 gap-2"
+            />
           </div>
         ),
       },
@@ -259,22 +251,13 @@ export default function PoComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden items-center gap-2 sm:flex">
-              <Button
-                size="sm"
-                variant={viewMode === "my-pending" ? "default" : "outline"}
-                onClick={() => setViewMode("my-pending")}
-              >
-                {t("myPending")}
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === "all-document" ? "default" : "outline"}
-                onClick={() => setViewMode("all-document")}
-              >
-                {t("allDocuments")}
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={setViewMode}
+              myPendingLabel={t("myPending")}
+              allDocumentsLabel={t("allDocuments")}
+              className="hidden items-center gap-2 sm:flex"
+            />
             <ViewSelector
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}

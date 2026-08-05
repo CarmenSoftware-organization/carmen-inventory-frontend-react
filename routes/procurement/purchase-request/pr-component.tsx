@@ -18,6 +18,7 @@ import {
   DataGridContainer,
 } from "@/components/ui/data-grid/data-grid";
 import { cn } from "@/lib/utils";
+import { ViewModeToggle } from "@/components/share/view-mode-toggle";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
@@ -150,22 +151,13 @@ export default function PurchaseRequestComponent() {
         render: () => (
           <div className="space-y-1.5 sm:hidden">
             <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                size="sm"
-                variant={viewMode === "my-pending" ? "default" : "outline"}
-                onClick={() => setViewModeRef.current("my-pending")}
-              >
-                {t("myPending")}
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === "all-document" ? "default" : "outline"}
-                onClick={() => setViewModeRef.current("all-document")}
-              >
-                {t("allDocuments")}
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={(next) => setViewModeRef.current(next)}
+              myPendingLabel={t("myPending")}
+              allDocumentsLabel={t("allDocuments")}
+              className="grid grid-cols-2 gap-2"
+            />
           </div>
         ),
       },
@@ -402,22 +394,13 @@ export default function PurchaseRequestComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden items-center gap-2 sm:flex">
-              <Button
-                size="sm"
-                variant={viewMode === "my-pending" ? "default" : "outline"}
-                onClick={() => setViewMode("my-pending")}
-              >
-                {t("myPending")}
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === "all-document" ? "default" : "outline"}
-                onClick={() => setViewMode("all-document")}
-              >
-                {t("allDocuments")}
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={setViewMode}
+              myPendingLabel={t("myPending")}
+              allDocumentsLabel={t("allDocuments")}
+              className="hidden items-center gap-2 sm:flex"
+            />
             {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
                 (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
             <ViewSelector
