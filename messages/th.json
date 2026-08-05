@@ -3924,7 +3924,12 @@
     "productManagementDesc": "แค็ตตาล็อกสินค้าและโครงสร้างหมวดหมู่",
     "storeOperationsDesc": "ใบเบิก เติมสินค้า และรายงานของเสีย",
     "systemAdminDesc": "ลำดับขั้นอนุมัติ ควบคุมการเข้าถึง และความปลอดภัย",
-    "vendorManagementDesc": "โปรไฟล์ผู้ขายและข้อตกลงราคา"
+    "vendorManagementDesc": "โปรไฟล์ผู้ขายและข้อตกลงราคา",
+    "entry": "บันทึกการนับ",
+    "review": "ตรวจทาน",
+    "setting": "ตั้งค่า",
+    "notifications": "การแจ้งเตือน",
+    "fromPriceList": "สร้างจากรายการราคา"
   },
   "commentSheet": {
     "title": "ความคิดเห็น ({count})",

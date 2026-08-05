@@ -3934,7 +3934,12 @@
     "productManagementDesc": "Product catalog and category structure",
     "storeOperationsDesc": "Requisitions, replenishment, and wastage reporting",
     "systemAdminDesc": "Workflows, access control, and system security",
-    "vendorManagementDesc": "Supplier profiles and pricing agreements"
+    "vendorManagementDesc": "Supplier profiles and pricing agreements",
+    "entry": "Count entry",
+    "review": "Review",
+    "setting": "Settings",
+    "notifications": "Notifications",
+    "fromPriceList": "From price list"
   },
   "commentSheet": {
     "title": "Comments ({count})",
