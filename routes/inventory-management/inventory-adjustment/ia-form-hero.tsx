@@ -80,26 +80,8 @@ export function IaFormHero({
 
   const actions = (
     <>
-      {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-      {inventoryAdjustment && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => openActivity(inventoryAdjustment.id, docNo || undefined)}
-        >
-          <History aria-hidden="true" />
-          {tActivity("title")}
-        </Button>
-      )}
-      {canPrint && (
-        <PrintDocumentButton
-          documentType={adjustmentType === "stock-in" ? "SI" : "SO"}
-          documentId={inventoryAdjustment!.id}
-        />
-      )}
       {isView && !isReadOnly ? (
-        <Button size="sm" onClick={onEdit}>
+        <Button size="sm" variant="outline" onClick={onEdit}>
           <Pencil />
           {tc("edit")}
         </Button>
@@ -138,6 +120,26 @@ export function IaFormHero({
           <Trash2 />
           {tc("delete")}
         </Button>
+      )}
+      {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+      {inventoryAdjustment && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(inventoryAdjustment.id, docNo || undefined)
+          }
+        >
+          <History aria-hidden="true" />
+          {tActivity("title")}
+        </Button>
+      )}
+      {canPrint && (
+        <PrintDocumentButton
+          documentType={adjustmentType === "stock-in" ? "SI" : "SO"}
+          documentId={inventoryAdjustment!.id}
+        />
       )}
     </>
   );

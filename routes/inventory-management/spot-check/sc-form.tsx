@@ -210,39 +210,23 @@ export function ScForm({
                 >
                   <ChevronLeft />
                 </Button>
-                <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold tracking-wider uppercase">
+                <span className="bg-primary/10 text-primary text-micro-legal inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-wider uppercase">
                   <ClipboardCheck className="size-2.5" />
                   {t("entity")}
                 </span>
                 <StatusPill statusConfig={methodConfig} large />
               </div>
               <div className="flex items-center gap-2">
-                {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-                {spotCheck && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      openActivity(spotCheck.id, spotCheck.spot_check_no)
-                    }
-                  >
-                    <History />
-                    {tActivity("title")}
-                  </Button>
-                )}
                 {isView ? (
                   <>
-                    <Button size="sm" onClick={() => setMode("edit")}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setMode("edit")}
+                    >
                       <Pencil />
                       {tc("edit")}
                     </Button>
-                    {spotCheck?.id && (
-                      <PrintDocumentButton
-                        documentType="SC"
-                        documentId={spotCheck.id}
-                      />
-                    )}
                   </>
                 ) : (
                   <>
@@ -279,11 +263,31 @@ export function ScForm({
                     )}
                   </>
                 )}
+                {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+                {spotCheck && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      openActivity(spotCheck.id, spotCheck.spot_check_no)
+                    }
+                  >
+                    <History />
+                    {tActivity("title")}
+                  </Button>
+                )}
+                {isView && spotCheck?.id && (
+                  <PrintDocumentButton
+                    documentType="SC"
+                    documentId={spotCheck.id}
+                  />
+                )}
               </div>
             </div>
 
             {/* Title + descriptor */}
-            <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-micro-eyebrow font-semibold tracking-[0.16em] uppercase">
+            <div className="text-muted-foreground text-micro-eyebrow mb-1 flex items-center gap-1.5 font-semibold tracking-[0.16em] uppercase">
               <span className="bg-muted-foreground size-0.5 rounded-sm" />
               {t("entity")}
               <span className="text-muted-foreground/60">·</span>

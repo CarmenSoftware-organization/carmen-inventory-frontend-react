@@ -114,17 +114,6 @@ export function PoHeader({
               {tc("close")}
             </Button>
           )}
-          {isView && (
-            <PrintDocumentButton
-              documentType="PO"
-              documentId={purchaseOrder.id}
-              filters={
-                purchaseOrder.po_no
-                  ? { DocumentNo: purchaseOrder.po_no }
-                  : undefined
-              }
-            />
-          )}
           {isView && canEdit && (
             <Button
               size="sm"
@@ -179,6 +168,17 @@ export function PoHeader({
             <History aria-hidden="true" />
             {tActivity("title")}
           </Button>
+          {isView && (
+            <PrintDocumentButton
+              documentType="PO"
+              documentId={purchaseOrder.id}
+              filters={
+                purchaseOrder.po_no
+                  ? { DocumentNo: purchaseOrder.po_no }
+                  : undefined
+              }
+            />
+          )}
         </>
       )}
       {isAdd && (

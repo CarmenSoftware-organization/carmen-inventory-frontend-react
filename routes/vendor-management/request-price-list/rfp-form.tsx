@@ -284,37 +284,16 @@ export function RequestPriceListForm({
           onBack={handleBack}
           actions={
             <>
-              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-              {requestPriceList && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    openActivity(requestPriceList.id, requestPriceList.name)
-                  }
-                >
-                  <History />
-                  {tActivity("title")}
-                </Button>
-              )}
               {isView ? (
                 <>
-                  <Button size="sm" onClick={() => setMode("edit")}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setMode("edit")}
+                  >
                     <Pencil />
                     {tc("edit")}
                   </Button>
-                  {requestPriceList?.id && (
-                    <PrintDocumentButton
-                      documentType="RFP"
-                      documentId={requestPriceList.id}
-                      filters={
-                        requestPriceList.name
-                          ? { DocumentNo: requestPriceList.name }
-                          : undefined
-                      }
-                    />
-                  )}
                 </>
               ) : (
                 <>
@@ -350,6 +329,31 @@ export function RequestPriceListForm({
                     </Button>
                   )}
                 </>
+              )}
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {requestPriceList && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    openActivity(requestPriceList.id, requestPriceList.name)
+                  }
+                >
+                  <History />
+                  {tActivity("title")}
+                </Button>
+              )}
+              {isView && requestPriceList?.id && (
+                <PrintDocumentButton
+                  documentType="RFP"
+                  documentId={requestPriceList.id}
+                  filters={
+                    requestPriceList.name
+                      ? { DocumentNo: requestPriceList.name }
+                      : undefined
+                  }
+                />
               )}
             </>
           }
