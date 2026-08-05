@@ -572,6 +572,7 @@ function DiscountCell({
   disabled: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const base = `items.${index}` as const;
   const rate =
     useWatch({ control: form.control, name: `${base}.discount_rate` }) ?? 0;
@@ -600,25 +601,9 @@ function DiscountCell({
     );
   }
   return (
-    // toggle (checkbox + คำว่า Override) อยู่บรรทัดบนขวา · combo กินความกว้าง
-    // เต็มคอลัมน์ข้างล่าง — วางแบบเดียวกับ PO
-    <div className="flex flex-col gap-0.5">
-      <div className="flex justify-end">
-        <OverrideToggle
-          checked={isAdj}
-          onCheckedChange={(on) => {
-            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-            if (on) {
-              form.setValue(`${base}.discount_amount`, amount, {
-                shouldDirty: true,
-              });
-            }
-            form.setValue(`${base}.is_discount_adjustment`, on, {
-              shouldDirty: true,
-            });
-          }}
-        />
-      </div>
+    // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
+    // อยู่แล้ว เสียไปทั้งบรรทัดเพื่อ checkbox ตัวเดียวไม่คุ้ม (ท่าเดียวกับ GRN/PO)
+    <div className="flex items-center gap-1.5">
       <DiscountOverrideInput
         rate={rate}
         amount={amount}
@@ -632,6 +617,21 @@ function DiscountCell({
         onAmountChange={(a) =>
           form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
         }
+      />
+      <OverrideToggle
+        checked={isAdj}
+        hint={tfl("overrideHintDiscount")}
+        onCheckedChange={(on) => {
+          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+          if (on) {
+            form.setValue(`${base}.discount_amount`, amount, {
+              shouldDirty: true,
+            });
+          }
+          form.setValue(`${base}.is_discount_adjustment`, on, {
+            shouldDirty: true,
+          });
+        }}
       />
     </div>
   );
@@ -650,6 +650,7 @@ function TaxCell({
   disabled: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const base = `items.${index}` as const;
   const taxProfileId =
     useWatch({ control: form.control, name: `${base}.tax_profile_id` }) ?? null;
@@ -669,14 +670,33 @@ function TaxCell({
     );
   }
   return (
-    // บรรทัดบน: rate% ซ้าย + toggle ขวา · บรรทัดล่าง: combo เต็มความกว้าง (แบบ PO)
     <div className="flex flex-col gap-0.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-muted-foreground text-micro font-semibold tabular-nums">
-          {rate > 0 ? `${rate}%` : ""}
+      {rate > 0 && (
+        <span className="text-muted-foreground text-micro text-right font-semibold tabular-nums">
+          {rate}%
         </span>
+      )}
+      {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
+      <div className="flex items-center gap-1.5">
+        <TaxOverrideInput
+          taxProfileId={taxProfileId}
+          amount={amount}
+          isAdjustment={isAdj}
+          onTaxChange={(value, r, name) => {
+            form.setValue(`${base}.tax_profile_id`, value || null, {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+            form.setValue(`${base}.tax_rate`, r);
+            form.setValue(`${base}.tax_profile_name`, name);
+          }}
+          onAmountChange={(a) =>
+            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+          }
+        />
         <OverrideToggle
           checked={isAdj}
+          hint={tfl("overrideHintTax")}
           onCheckedChange={(on) => {
             if (on) {
               form.setValue(`${base}.tax_amount`, amount, {
@@ -689,22 +709,6 @@ function TaxCell({
           }}
         />
       </div>
-      <TaxOverrideInput
-        taxProfileId={taxProfileId}
-        amount={amount}
-        isAdjustment={isAdj}
-        onTaxChange={(value, r, name) => {
-          form.setValue(`${base}.tax_profile_id`, value || null, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-          form.setValue(`${base}.tax_rate`, r);
-          form.setValue(`${base}.tax_profile_name`, name);
-        }}
-        onAmountChange={(a) =>
-          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
-        }
-      />
     </div>
   );
 }

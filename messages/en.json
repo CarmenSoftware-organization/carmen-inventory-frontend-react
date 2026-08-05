@@ -809,7 +809,10 @@
     "reportTemplate": "Report Template",
     "time": "Time",
     "daysOfWeek": "Days of Week",
-    "daysOfMonth": "Days of Month"
+    "daysOfMonth": "Days of Month",
+    "overrideHint": "Tick to enter the amount yourself instead of letting the system work it out",
+    "overrideHintDiscount": "Tick to enter the discount amount yourself instead of calculating from the rate",
+    "overrideHintTax": "Tick to enter the tax amount yourself instead of calculating from the tax rate"
   },
   "lookup": {
     "select": "Select {entity}",

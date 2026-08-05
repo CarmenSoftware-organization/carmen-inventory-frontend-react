@@ -809,7 +809,10 @@
     "reportTemplate": "เทมเพลตรายงาน",
     "time": "เวลา",
     "daysOfWeek": "วันในสัปดาห์",
-    "daysOfMonth": "วันในเดือน"
+    "daysOfMonth": "วันในเดือน",
+    "overrideHint": "ติ๊กเพื่อกรอกยอดเอง แทนการให้ระบบคิดให้",
+    "overrideHintDiscount": "ติ๊กเพื่อกรอกยอดส่วนลดเอง แทนการคิดจากเปอร์เซ็นต์",
+    "overrideHintTax": "ติ๊กเพื่อกรอกยอดภาษีเอง แทนการคิดจากอัตราภาษี"
   },
   "lookup": {
     "select": "เลือก{entity}",

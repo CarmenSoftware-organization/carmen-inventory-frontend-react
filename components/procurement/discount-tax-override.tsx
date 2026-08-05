@@ -1,5 +1,10 @@
 import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { InputAmount } from "@/components/ui/input/input-amount";
 import {
   InputSuffixField,
@@ -15,26 +20,40 @@ import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
  * amount disabled); `isAdjustment=true` → amount กรอกเอง (rate disabled/ค้างค่า)
  */
 
-/** Label "Override" + checkbox (checkbox อยู่หลังคำ ชิดขอบขวาของช่อง) */
+/**
+ * Checkbox "กรอกยอดเอง" — ไม่มีคำกำกับข้าง ๆ ใช้ tooltip บอกแทน
+ *
+ * เดิมมีคำว่า "แก้ไขเอง" อยู่หน้า checkbox ทุกแถว ซึ่งกินความกว้างของเซลล์ที่แคบ
+ * อยู่แล้ว และซ้ำกันทุกบรรทัดทั้งที่ความหมายเหมือนกันหมด
+ *
+ * @param hint - ข้อความใน tooltip — ให้ call site ส่งคำที่ตรงกับช่องนั้น
+ *   (ยอดส่วนลด / ยอดภาษี) ไม่ส่ง = ใช้ประโยคกลาง
+ */
 export function OverrideToggle({
   checked,
   onCheckedChange,
+  hint,
 }: {
   readonly checked: boolean;
   readonly onCheckedChange: (value: boolean) => void;
+  readonly hint?: string;
 }) {
   const tfl = useTranslations("field");
+  const label = hint ?? tfl("overrideHint");
   return (
-    <label className="flex cursor-pointer items-center gap-1.5">
-      <span className="text-muted-foreground text-xs select-none">
-        {tfl("override")}
-      </span>
-      <Checkbox
-        checked={checked}
-        onCheckedChange={(v) => onCheckedChange(!!v)}
-        className="size-3.5"
-      />
-    </label>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex cursor-pointer items-center">
+          <Checkbox
+            checked={checked}
+            onCheckedChange={(v) => onCheckedChange(!!v)}
+            className="size-3.5"
+            aria-label={label}
+          />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -76,7 +95,7 @@ export function DiscountOverrideInput({
           onRateChange(clamped);
         }}
       />
-      <span className="bg-muted text-muted-foreground border-border flex shrink-0 items-center self-stretch border-l px-2 text-micro-legal">
+      <span className="bg-muted text-muted-foreground border-border text-micro-legal flex shrink-0 items-center self-stretch border-l px-2">
         %
       </span>
       <div className="bg-border h-4 w-px shrink-0" aria-hidden="true" />
