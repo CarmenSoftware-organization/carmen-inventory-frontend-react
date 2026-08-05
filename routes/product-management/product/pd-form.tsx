@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +10,7 @@ import {
   useUpdateProduct,
   useDeleteProduct,
 } from "@/hooks/use-product";
+import { useUploadProductImages } from "@/hooks/use-product-image";
 import {
   type ProductDetail,
   type ProductFormValues,
@@ -215,7 +215,14 @@ export function ProductForm({ product }: ProductFormProps) {
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
   const [showDelete, setShowDelete] = useState(false);
-  const isPending = createProduct.isPending || updateProduct.isPending;
+  // รูปที่เลือกไว้แต่ยังไม่อัปโหลด — ค้างอยู่ในฟอร์มจนกว่าจะกด Save ถ้ากดยกเลิก
+  // ก็หายไปพร้อมกัน ไม่มีรูปค้างบน backend
+  const [pendingImages, setPendingImages] = useState<File[]>([]);
+  const uploadImages = useUploadProductImages();
+  const isPending =
+    createProduct.isPending ||
+    updateProduct.isPending ||
+    uploadImages.isPending;
   const isDisabled = mode === "view" || isPending;
 
   const defaultValues = getDefaultValues(product);
@@ -255,7 +262,14 @@ export function ProductForm({ product }: ProductFormProps) {
     fieldErrors.ingredient_units !== undefined;
   const hasLocationsError = fieldErrors.locations !== undefined;
 
-  const onSubmit = (values: ProductFormValues) => {
+  /** อัปโหลดรูปที่ค้างอยู่ (ถ้ามี) — ต้องมี id ของ product แล้วเท่านั้น */
+  const flushPendingImages = async (id: string) => {
+    if (pendingImages.length === 0) return;
+    await uploadImages.mutateAsync({ product_id: id, images: pendingImages });
+    setPendingImages([]);
+  };
+
+  const onSubmit = async (values: ProductFormValues) => {
     const normalizedValues: ProductFormValues =
       values.order_units.length === 0 && values.inventory_unit_id
         ? {
@@ -276,29 +290,34 @@ export function ProductForm({ product }: ProductFormProps) {
 
     const payload = buildPayload(normalizedValues, product, isAdd);
 
-    if (isEdit && product) {
-      updateProduct.mutate(
-        { id: product.id, doc_version: product.doc_version, ...payload },
-        {
-          onSuccess: () => {
-            toast.success(tt("updateSuccess", { entity: t("entity") }));
-            form.reset(normalizedValues);
-            setMode("view");
-          },
-        },
-      );
-    } else if (isAdd) {
-      createProduct.mutate(payload, {
-        onSuccess: (res) => {
-          toast.success(tt("createSuccess", { entity: t("entity") }));
-          const newId = (res as { data?: { id?: string } })?.data?.id;
-          if (newId) {
-            navigate(`/product-management/product/${newId}`);
-          } else {
-            navigate(returnUrl);
-          }
-        },
-      });
+    try {
+      if (isEdit && product) {
+        // รูปขึ้นก่อน แล้วค่อยบันทึกฟอร์ม — ถ้ารูปพลาดจะได้ไม่บันทึกครึ่ง ๆ กลาง ๆ
+        await flushPendingImages(product.id);
+        await updateProduct.mutateAsync({
+          id: product.id,
+          doc_version: product.doc_version,
+          ...payload,
+        });
+        toast.success(tt("updateSuccess", { entity: t("entity") }));
+        form.reset(normalizedValues);
+        setMode("view");
+        return;
+      }
+      if (isAdd) {
+        // ตอนสร้างยังไม่มี id ให้แนบรูป ต้องสร้างก่อนแล้วค่อยอัปโหลดตามไป
+        const res = await createProduct.mutateAsync(payload);
+        toast.success(tt("createSuccess", { entity: t("entity") }));
+        const newId = (res as { data?: { id?: string } })?.data?.id;
+        if (newId) {
+          await flushPendingImages(newId);
+          navigate(`/product-management/product/${newId}`);
+        } else {
+          navigate(returnUrl);
+        }
+      }
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ค้างอยู่หน้าเดิมให้แก้ต่อ
     }
   };
 
@@ -348,7 +367,12 @@ export function ProductForm({ product }: ProductFormProps) {
   return (
     // px-4 ให้ header+form มี gutter ซ้าย · max-w-4xl คุมทั้งฟอร์มให้เท่า
     // company profile (ทุก tab รวมตาราง units/locations)
-    <div className="mx-auto max-w-4xl space-y-4 px-4">
+    //
+    // w-full ขาดไม่ได้: พ่อเป็น flex column และ mx-auto ทำให้ margin แกนขวางเป็น
+    // auto ซึ่งยกเลิก align-self: stretch ของ flex item — กล่องจะถูกวัดตามเนื้อหา
+    // แทน แท็บที่เนื้อหาน้อย (eco label ที่ยังไม่มีข้อมูล) เลยหดแล้วเลื่อนตำแหน่ง
+    // ทั้งบล็อกรวมหัวเรื่องกับแถบแท็บ
+    <div className="mx-auto w-full max-w-4xl space-y-4 px-4">
       <FormToolbar
         product={product}
         form={form}
@@ -393,7 +417,13 @@ export function ProductForm({ product }: ProductFormProps) {
             )}
           </TabsList>
           <TabsContent value="general">
-            <GeneralTab form={form} isDisabled={isDisabled} product={product} />
+            <GeneralTab
+              form={form}
+              isDisabled={isDisabled}
+              product={product}
+              pendingImages={pendingImages}
+              onPendingImagesChange={setPendingImages}
+            />
           </TabsContent>
           <TabsContent value="units">
             <div className="space-y-6">

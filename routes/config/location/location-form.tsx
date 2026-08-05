@@ -274,7 +274,7 @@ export function LocationForm({ location }: LocationFormProps) {
     <div
       ref={containerRef}
       tabIndex={-1}
-      className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))] outline-none"
+      className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))] outline-none"
     >
       <AnimationStyles />
       {/* ── Toolbar ─────────── */}

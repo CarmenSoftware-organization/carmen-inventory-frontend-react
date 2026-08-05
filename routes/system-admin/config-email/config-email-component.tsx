@@ -117,7 +117,7 @@ export default function ConfigEmailComponent() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="mb-6 flex items-start justify-between gap-3">
           <div className="space-y-2">
             <Skeleton className="h-6 w-48" />
@@ -139,7 +139,7 @@ export default function ConfigEmailComponent() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       {/* ── Header: title + actions (company-profile layout) ── */}
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>

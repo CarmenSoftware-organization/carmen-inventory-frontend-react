@@ -36,7 +36,7 @@ export function Component() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
           <SettingSectionSkeleton
             first
             fields={["half", "half", "half", "half"]}
