@@ -1,4 +1,3 @@
-
 import { useId, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { ImageIcon } from "lucide-react";
@@ -45,7 +44,10 @@ export function EmptyImage({ onAddFiles }: Props) {
         aria-label={t("imgUploadAria")}
         className={cn(
           "text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/5 ring-offset-background focus-visible:ring-ring flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-          isDragging && "border-primary bg-primary/10 text-primary",
+          // ลากไฟล์มาวาง = ขอบเปลี่ยนสีอย่างเดียว — เดิมย้อมทั้งขอบ พื้น และ
+          // ตัวหนังสือด้วย primary พร้อมกัน สีเดียวซ้ำสามที่บนพื้นกลางอ่านเป็น
+          // เรืองแสง (docs/DESIGN.md: หนึ่งสัญญาณต่อหนึ่ง element)
+          isDragging && "border-primary",
         )}
       >
         <ImageIcon className="size-10 opacity-70" aria-hidden="true" />
@@ -53,9 +55,7 @@ export function EmptyImage({ onAddFiles }: Props) {
           <p className="text-sm font-semibold">
             {isDragging ? t("imgDrop") : t("imgAdd")}
           </p>
-          <p className="text-micro opacity-80">
-            {t("imgDragBrowse")}
-          </p>
+          <p className="text-micro opacity-80">{t("imgDragBrowse")}</p>
           <p className="text-micro-legal opacity-60">
             {ALLOWED_EXTENSIONS.join(", ").toUpperCase()} · max{" "}
             {formatBytes(MAX_FILE_SIZE)}

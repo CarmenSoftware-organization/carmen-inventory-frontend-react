@@ -1,12 +1,22 @@
-
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
+import {
+  type ColumnDef,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DataGrid,
+  DataGridContainer,
+} from "@/components/ui/data-grid/data-grid";
+import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SettingSection } from "@/components/ui/setting-section";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import EmptyComponent from "@/components/empty-component";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
 import { useEcoLabel } from "@/hooks/use-eco-label";
@@ -67,121 +77,149 @@ export function ProductEcoLabelSection({
     });
   };
 
+  const columns = useMemo<ColumnDef<ProductEcoLabel>[]>(
+    () => [
+      {
+        id: "index",
+        header: "#",
+        cell: ({ row }) => row.index + 1,
+        enableSorting: false,
+        size: 32,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center text-muted-foreground",
+        },
+      },
+      {
+        id: "certificate_no",
+        header: tfl("certificateNo"),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {row.original.certificate_no}
+          </span>
+        ),
+      },
+      {
+        id: "eco_label",
+        header: tfl("ecoLabel"),
+        cell: ({ row }) => (
+          <span className="font-medium">
+            {masterMap.get(row.original.master_eco_label_id)?.name ??
+              row.original.master_eco_label_id}
+          </span>
+        ),
+      },
+      {
+        id: "issued_date",
+        header: tfl("issuedDate"),
+        cell: ({ row }) =>
+          row.original.issued_date
+            ? formatDate(row.original.issued_date, dateFormat)
+            : "—",
+        meta: { cellClassName: "tabular-nums" },
+      },
+      {
+        id: "expiry_date",
+        header: tfl("expiryDate"),
+        cell: ({ row }) =>
+          row.original.expiry_date
+            ? formatDate(row.original.expiry_date, dateFormat)
+            : "—",
+        meta: { cellClassName: "tabular-nums" },
+      },
+      {
+        id: "status",
+        header: tfl("status"),
+        // StatusDotBadge เหมือนทั้งโมดูล (list, การ์ด, หัวฟอร์ม, แท็บคลัง) — ของเดิม
+        // เป็น Badge เขียวทึบ ซึ่งทั้งดังเกินสำหรับแถวในตารางและใช้ semantic
+        // "success" มาแทนความหมาย "เปิดใช้งานอยู่"
+        cell: ({ row }) => (
+          <StatusDotBadge
+            tone={row.original.is_active ? "success" : "neutral"}
+            size="xs"
+          >
+            {row.original.is_active ? ts("active") : ts("inactive")}
+          </StatusDotBadge>
+        ),
+        enableSorting: false,
+        meta: {
+          headerClassName: "text-center",
+          cellClassName: "text-center",
+        },
+      },
+      ...(readOnly
+        ? []
+        : [
+            {
+              id: "action",
+              header: () => "",
+              cell: ({ row }) => (
+                <div className="flex items-center justify-end gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={tc("edit")}
+                    onClick={() => handleEdit(row.original)}
+                  >
+                    <Pencil />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    aria-label={tc("delete")}
+                    onClick={() => setDeleteItem(row.original)}
+                  >
+                    <Trash2 />
+                  </Button>
+                </div>
+              ),
+              enableSorting: false,
+              size: 72,
+              meta: {
+                headerClassName: "text-right",
+                cellClassName: "text-right",
+              },
+            } as ColumnDef<ProductEcoLabel>,
+          ]),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- masterMap สร้างใหม่ทุก render
+    [readOnly, dateFormat, tfl, tc, ts, masterData],
+  );
+
+  const table = useReactTable({
+    data: items,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
+  });
+
   return (
-    <section className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold">{t("ecoLabelsTitle")}</h2>
-        {!readOnly && (
-          <Button type="button" size="xs" onClick={handleAdd}>
+    <SettingSection
+      first
+      wide
+      title={t("ecoLabelsTitle")}
+      count={items.length}
+      action={
+        !readOnly ? (
+          <Button type="button" size="sm" onClick={handleAdd}>
             <Plus />
             {t("addEcoLabel")}
           </Button>
-        )}
-      </div>
-
-      {isLoading && (
-        <div className="space-y-2">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-        </div>
-      )}
-
-      {!isLoading && items.length === 0 && (
-        <div className="border-border/60 text-muted-foreground rounded-lg border border-dashed py-6 text-center text-xs">
-          {t("noEcoLabels")}
-        </div>
-      )}
-
-      {!isLoading && items.length > 0 && (
-        <div className="border-border/60 overflow-hidden rounded-lg border">
-          <table className="w-full text-xs">
-            <thead className="bg-muted/60 text-foreground border-b">
-              <tr>
-                <th
-                  scope="col"
-                  className="w-10 px-3 py-2 text-center font-semibold"
-                >
-                  #
-                </th>
-                <th scope="col" className="px-3 py-2 text-left font-semibold">
-                  {tfl("certificateNo")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-left font-semibold">
-                  {tfl("ecoLabel")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-left font-semibold">
-                  {tfl("issuedDate")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-left font-semibold">
-                  {tfl("expiryDate")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-center font-semibold">
-                  {tfl("status")}
-                </th>
-                {!readOnly && <th scope="col" className="w-16 px-3 py-2" />}
-              </tr>
-            </thead>
-            <tbody className="divide-border/40 divide-y">
-              {items.map((item, index) => (
-                <tr key={item.id} className="hover:bg-muted/20">
-                  <td className="text-muted-foreground px-3 py-1.5 text-center tabular-nums">
-                    {index + 1}
-                  </td>
-                  <td className="text-muted-foreground px-3 py-1.5">
-                    {item.certificate_no}
-                  </td>
-                  <td className="px-3 py-1.5 font-semibold">
-                    {masterMap.get(item.master_eco_label_id)?.name ??
-                      item.master_eco_label_id}
-                  </td>
-                  <td className="px-3 py-1.5 tabular-nums">
-                    {item.issued_date
-                      ? formatDate(item.issued_date, dateFormat)
-                      : "—"}
-                  </td>
-                  <td className="px-3 py-1.5 tabular-nums">
-                    {item.expiry_date
-                      ? formatDate(item.expiry_date, dateFormat)
-                      : "—"}
-                  </td>
-                  <td className="px-3 py-1.5 text-center">
-                    <Badge
-                      variant={item.is_active ? "success" : "secondary"}
-                      size="xs"
-                    >
-                      {item.is_active ? ts("active") : ts("inactive")}
-                    </Badge>
-                  </td>
-                  {!readOnly && (
-                    <td className="px-3 py-1.5">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="icon-xs"
-                          aria-label={tc("edit")}
-                          onClick={() => handleEdit(item)}
-                        >
-                          <Pencil className="size-3.5" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon-xs"
-                          aria-label={tc("delete")}
-                          onClick={() => setDeleteItem(item)}
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        ) : undefined
+      }
+    >
+      <DataGrid
+        table={table}
+        recordCount={items.length}
+        isLoading={isLoading}
+        emptyMessage={<EmptyComponent title={t("noEcoLabels")} />}
+      >
+        <DataGridContainer>
+          <DataGridTable />
+        </DataGridContainer>
+      </DataGrid>
 
       <ProductEcoLabelDialog
         open={dialogOpen}
@@ -202,6 +240,6 @@ export function ProductEcoLabelSection({
         isPending={deleteEcoLabel.isPending}
         onConfirm={handleConfirmDelete}
       />
-    </section>
+    </SettingSection>
   );
 }

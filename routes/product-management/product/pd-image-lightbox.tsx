@@ -84,7 +84,9 @@ export function ImageLightbox({
         className="max-h-[92vh] max-w-[min(56rem,92vw)] overflow-hidden p-0"
       >
         <DialogTitle className="sr-only">
-          {current ? t("imgViewerName", { label: current.label }) : t("imgViewerTitle")}
+          {current
+            ? t("imgViewerName", { label: current.label })
+            : t("imgViewerTitle")}
         </DialogTitle>
 
         {current && (
@@ -110,8 +112,10 @@ export function ImageLightbox({
             }
             onDrop={onAddFiles ? handleDrop : undefined}
           >
+            {/* ขอบเป็นสัญญาณเดียว — พื้นแค่บังภาพข้างหลังให้อ่านข้อความออก ไม่ใช่
+                ย้อม accent ทับอีกชั้น */}
             {isDragging && onAddFiles && (
-              <div className="border-primary bg-primary/15 text-primary pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed">
+              <div className="border-primary bg-background/80 pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed">
                 <Upload className="size-10" aria-hidden="true" />
                 <p className="text-sm font-semibold">{t("imgDropLightbox")}</p>
               </div>
@@ -175,9 +179,9 @@ export function ImageLightbox({
                   aria-label={t("imgShowAria", { label: img.label })}
                   aria-current={idx === index}
                   className={cn(
-                    "ring-offset-background focus-visible:ring-ring relative flex size-16 shrink-0 cursor-pointer flex-col items-end justify-end overflow-hidden rounded-md border p-1 text-micro-legal transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                    "ring-offset-background focus-visible:ring-ring text-micro-legal relative flex size-16 shrink-0 cursor-pointer flex-col items-end justify-end overflow-hidden rounded-md border p-1 transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                     idx === index
-                      ? "ring-primary ring-2 ring-offset-1"
+                      ? "border-primary bg-primary/5"
                       : "opacity-60 hover:opacity-100",
                   )}
                 >
@@ -198,7 +202,7 @@ export function ImageLightbox({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     aria-label={t("imgUploadAria")}
-                    className="text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/5 ring-offset-background focus-visible:ring-ring flex size-16 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed text-micro-legal transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="text-muted-foreground hover:text-foreground hover:border-primary hover:bg-primary/5 ring-offset-background focus-visible:ring-ring text-micro-legal flex size-16 shrink-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                   >
                     <Upload className="size-4" aria-hidden="true" />
                     <span>{t("imgUpload")}</span>

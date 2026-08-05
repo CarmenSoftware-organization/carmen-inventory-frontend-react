@@ -1,10 +1,7 @@
 import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  StatusDotBadge,
-  type DotTone,
-} from "@/components/ui/status-dot-badge";
+import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import type { FormMode } from "@/types/form";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
@@ -94,15 +91,11 @@ function FormToolbar({
   );
 
   // subtitle: add → neverSaved · view/edit → local_name (custom Thai font)
-  const subtitle = isAdd
-    ? t("neverSaved")
-    : product?.local_name
-      ? (
-          <span>
-            {product.local_name}
-          </span>
-        )
-      : undefined;
+  const subtitle = isAdd ? (
+    t("neverSaved")
+  ) : product?.local_name ? (
+    <span>{product.local_name}</span>
+  ) : undefined;
 
   const actions = (
     <>

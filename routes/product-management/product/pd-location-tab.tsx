@@ -1,6 +1,11 @@
 import { memo, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
-import { Controller, useFieldArray, useFormState, useWatch } from "react-hook-form";
+import {
+  Controller,
+  useFieldArray,
+  useFormState,
+  useWatch,
+} from "react-hook-form";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -17,6 +22,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { SettingSection } from "@/components/ui/setting-section";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import EmptyComponent from "@/components/empty-component";
 import type { ProductFormInstance, ProductFormValues } from "@/types/product";
@@ -82,7 +88,10 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   const assignedIdsKey = watchedLocations
     .map((l) => l.location_id ?? "")
     .join("|");
-  const assignedIds = useMemo(() => assignedIdsKey.split("|"), [assignedIdsKey]);
+  const assignedIds = useMemo(
+    () => assignedIdsKey.split("|"),
+    [assignedIdsKey],
+  );
 
   const allRows = useMemo<LocationRow[]>(
     () =>
@@ -403,14 +412,14 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   });
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">
-          {t("sectionLocations")}{" "}
-          <span className="text-muted-foreground text-xs font-normal">
-            ({fields.length})
-          </span>
-        </h2>
+    // SettingSection ตัวเดียวกับแท็บ General — เดิมเขียนหัวข้อเองเป็น h2 14px
+    // ไม่มี tracking ทำให้สลับแท็บแล้วหัวข้อเปลี่ยนขนาดกันเองในฟอร์มเดียว
+    <SettingSection
+      first
+      wide
+      title={t("sectionLocations")}
+      count={fields.length}
+      action={
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="text-muted-foreground absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2" />
@@ -428,12 +437,12 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
             </Button>
           )}
         </div>
-      </div>
-
+      }
+    >
       <DataGrid
         table={table}
         recordCount={fields.length}
-        tableLayout={{ headerSticky: true}}
+        tableLayout={{ headerSticky: true }}
         emptyMessage={
           <EmptyComponent
             title={t("noLocations")}
@@ -461,7 +470,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
         description={t("removeLocationConfirm")}
         onConfirm={confirmDelete}
       />
-    </div>
+    </SettingSection>
   );
 }
 

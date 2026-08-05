@@ -201,7 +201,9 @@ export function useProductTable({
     data: products,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

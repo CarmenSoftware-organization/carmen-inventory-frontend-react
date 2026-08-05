@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
@@ -245,13 +244,11 @@ export default function ProductComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (product) =>
-      navigate(`/product-management/product/${product.id}`),
+    onEdit: (product) => navigate(`/product-management/product/${product.id}`),
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const handleAddItem = () => {
     navigate("/product-management/product/new");
@@ -262,10 +259,7 @@ export default function ProductComponent() {
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
             onExport={handleExport}
             isExporting={isExporting}
@@ -341,32 +335,39 @@ export default function ProductComponent() {
             onRetry={() => grid.refetch?.()}
           />
         )}
-        {isGridMode && !grid.isLoading && !grid.error && products.length > 0 && (
-          <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((item) => (
-                <ProductCard
-                  key={item.id}
-                  item={item}
-                  onEdit={(p) =>
-                    navigate(`/product-management/product/${p.id}`)
-                  }
-                  onDelete={setDeleteTarget}
-                />
-              ))}
-            </div>
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
+        {isGridMode &&
+          !grid.isLoading &&
+          !grid.error &&
+          products.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {products.map((item) => (
+                  <ProductCard
+                    key={item.id}
+                    item={item}
+                    onEdit={(p) =>
+                      navigate(`/product-management/product/${p.id}`)
+                    }
+                    onDelete={setDeleteTarget}
+                  />
+                ))}
               </div>
-            )}
-          </>
-        )}
-        {isGridMode && !grid.isLoading && !grid.error && products.length === 0 && (
-          <EmptyComponent />
-        )}
+              {grid.hasMore && (
+                <div
+                  ref={grid.sentinelRef}
+                  className="flex justify-center py-4"
+                >
+                  {grid.isLoadingMore && (
+                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        {isGridMode &&
+          !grid.isLoading &&
+          !grid.error &&
+          products.length === 0 && <EmptyComponent />}
         {!isGridMode && (
           <DataGrid
             table={table}

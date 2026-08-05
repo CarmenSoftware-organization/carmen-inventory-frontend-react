@@ -1,14 +1,9 @@
-
 import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 import type { ProductFormInstance } from "@/types/product";
 
-type ArrayName =
-  | "info"
-  | "locations"
-  | "order_units"
-  | "ingredient_units";
+type ArrayName = "info" | "locations" | "order_units" | "ingredient_units";
 
 interface Props {
   readonly form: ProductFormInstance;
@@ -31,7 +26,7 @@ function TabArrayCount({ form, name }: Props) {
     <Badge
       variant="secondary"
       size="xs"
-      className="ml-1.5 h-4 min-w-4 px-1 text-micro-legal"
+      className="text-micro-legal ml-1.5 h-4 min-w-4 px-1"
     >
       {count}
     </Badge>

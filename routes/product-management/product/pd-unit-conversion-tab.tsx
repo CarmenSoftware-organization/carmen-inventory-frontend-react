@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { SettingSection } from "@/components/ui/setting-section";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useUnit } from "@/hooks/use-unit";
 import EmptyComponent from "@/components/empty-component";
@@ -185,9 +186,7 @@ function UnitConversionTab({
             onUnitChange={handleFromUnitChange}
             usedIds={usedSelectableIds}
             unitMap={unitMap}
-            error={
-              errors[name]?.[row.index]?.from_unit_id?.message
-            }
+            error={errors[name]?.[row.index]?.from_unit_id?.message}
           />
         ),
         size: 160,
@@ -221,9 +220,7 @@ function UnitConversionTab({
             onUnitChange={handleToUnitChange}
             usedIds={usedSelectableIds}
             unitMap={unitMap}
-            error={
-              errors[name]?.[row.index]?.to_unit_id?.message
-            }
+            error={errors[name]?.[row.index]?.to_unit_id?.message}
           />
         ),
         size: 160,
@@ -239,8 +236,7 @@ function UnitConversionTab({
               </div>
             );
           }
-          const errorMessage =
-            errors[name]?.[row.index]?.to_unit_qty?.message;
+          const errorMessage = errors[name]?.[row.index]?.to_unit_qty?.message;
           return (
             <div className="flex items-center">
               <FieldInput
@@ -376,15 +372,15 @@ function UnitConversionTab({
   });
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">
-          {label}{" "}
-          <span className="text-muted-foreground text-xs font-normal">
-            ({fields.length})
-          </span>
-        </h2>
-        {!isDisabled && (
+    // SettingSection ตัวเดียวกับแท็บ General — เดิมเขียนหัวข้อเองเป็น h2 14px
+    // ไม่มี tracking ทำให้สลับแท็บแล้วหัวข้อเปลี่ยนขนาดกันเองในฟอร์มเดียว
+    <SettingSection
+      first
+      wide
+      title={label}
+      count={fields.length}
+      action={
+        !isDisabled ? (
           <Button
             type="button"
             size="sm"
@@ -394,9 +390,9 @@ function UnitConversionTab({
             <Plus />
             {t("addUnit", { label })}
           </Button>
-        )}
-      </div>
-
+        ) : undefined
+      }
+    >
       {!isOrder && !isUsedInRecipe && (
         <p className="text-muted-foreground text-sm">{t("enableRecipe")}</p>
       )}
@@ -439,7 +435,7 @@ function UnitConversionTab({
         description={t("removeUnitConfirm", { label })}
         onConfirm={confirmDelete}
       />
-    </div>
+    </SettingSection>
   );
 }
 
