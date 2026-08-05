@@ -485,7 +485,7 @@ export function PrItemFields({
           {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
             — ไม่ห่อด้วย Radix ScrollArea เพื่อเลี่ยง nested scroll ที่ทำให้ scroll
             แนวนอนสะดุด (เห็นชัดในโหมด edit ที่ตารางกว้าง/หนักกว่า) */}
-          <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] pb-3">
+          <DataGridContainer scroll>
             <DataGridTable />
           </DataGridContainer>
         </DataGrid>

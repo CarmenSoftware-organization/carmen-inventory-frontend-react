@@ -16,6 +16,7 @@ import { useTranslations } from "use-intl";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
@@ -325,9 +326,9 @@ export default function ExchangeRateComponent() {
             emptyMessage={<EmptyComponent />}
           >
             <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
-              <div className="flex-1 overflow-auto">
+              <DataGridScrollArea>
                 <DataGridTable />
-              </div>
+              </DataGridScrollArea>
               <DataGridPagination sizes={[5, 10, 25, 50, 100]} />
             </DataGridContainer>
           </DataGrid>

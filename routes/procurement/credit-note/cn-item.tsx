@@ -232,7 +232,7 @@ export function CnItem({ form, disabled }: Props) {
         {/* native scroll (overflow-auto) ไม่ห่อ Radix ScrollArea — เลี่ยง nested
             scroll ที่สะดุด · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน ไม่งั้นแถบลอย
             (macOS) ไปบังตัวเลขแถวสุดท้าย เพราะ CN เป็นตารางแบน ไม่มีแถวกาง */}
-        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] pb-3">
+        <DataGridContainer scroll>
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>

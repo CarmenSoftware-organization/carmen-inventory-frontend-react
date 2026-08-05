@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
@@ -363,9 +364,9 @@ export default function UserActivityComponent() {
                 : "max-h-[calc(100vh-10rem-3rem)]",
             )}
           >
-            <div className="flex-1 overflow-auto">
+            <DataGridScrollArea>
               <DataGridTable />
-            </div>
+            </DataGridScrollArea>
             <DataGridPagination />
           </DataGridContainer>
         </DataGrid>

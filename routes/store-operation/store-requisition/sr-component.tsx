@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { cn } from "@/lib/utils";
 import { ViewModeToggle } from "@/components/share/view-mode-toggle";
@@ -411,10 +412,9 @@ export default function StoreRequisitionComponent() {
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
             >
-              {/* pb-3 กันแถบเลื่อนทับแถวสุดท้าย + แถบบางจาง ตามที่ PO/PR/GRN ใช้ */}
-              <div className="flex-1 [scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] overflow-auto pb-3">
+              <DataGridScrollArea>
                 <DataGridTable />
-              </div>
+              </DataGridScrollArea>
               <DataGridPagination />
             </DataGridContainer>
           </DataGrid>

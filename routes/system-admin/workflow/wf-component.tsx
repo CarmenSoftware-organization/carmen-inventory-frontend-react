@@ -7,6 +7,7 @@ import { useTranslations } from "use-intl";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
@@ -238,9 +239,9 @@ export default function WorkflowComponent() {
             emptyMessage={<EmptyComponent />}
           >
             <DataGridContainer className={cn("flex flex-col", gridMaxHeight)}>
-              <div className="flex-1 overflow-auto">
+              <DataGridScrollArea>
                 <DataGridTable />
-              </div>
+              </DataGridScrollArea>
               <DataGridPagination />
             </DataGridContainer>
           </DataGrid>

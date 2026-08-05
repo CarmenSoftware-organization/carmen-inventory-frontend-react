@@ -363,7 +363,7 @@ export function GrnItemTable({
             Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด)
             · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน — บน macOS แถบนี้ลอยทับเนื้อหา
             โดยไม่กินที่ ไม่เว้นไว้มันจะไปบังตัวเลขแถวสุดท้าย */}
-        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] pb-3">
+        <DataGridContainer scroll>
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>
