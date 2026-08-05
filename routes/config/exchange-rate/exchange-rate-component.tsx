@@ -177,12 +177,7 @@ export default function ExchangeRateComponent() {
   });
 
   if (historyError) {
-    return (
-      <ErrorState
-        message={historyError.message}
-        onRetry={() => refetchHistory()}
-      />
-    );
+    return <ErrorState error={historyError} onRetry={() => refetchHistory()} />;
   }
 
   return (

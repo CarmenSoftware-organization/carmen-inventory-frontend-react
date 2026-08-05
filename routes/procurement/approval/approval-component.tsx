@@ -118,8 +118,7 @@ export default function ApprovalComponent() {
     ? items.length
     : (summary?.[activeType as keyof ApprovalPendingSummary] ?? items.length);
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <DisplayTemplate

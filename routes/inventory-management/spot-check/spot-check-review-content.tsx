@@ -22,7 +22,7 @@ export function ScReviewContent({ id }: Readonly<{ id: string }>) {
   const { data: spotCheck } = useSpotCheckById(id);
 
   if (error) {
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   if (isLoading || !review) {

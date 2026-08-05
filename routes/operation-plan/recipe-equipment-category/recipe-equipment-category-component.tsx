@@ -90,7 +90,7 @@ export default function RecipeEquipmentCategoryComponent() {
   });
 
   if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <DisplayTemplate

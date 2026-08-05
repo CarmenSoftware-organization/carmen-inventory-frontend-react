@@ -307,7 +307,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
   });
 
   if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div

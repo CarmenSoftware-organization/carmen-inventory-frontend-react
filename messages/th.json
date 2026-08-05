@@ -491,7 +491,9 @@
     "offlineDesc": "บางฟีเจอร์อาจใช้งานไม่ได้จนกว่าจะเชื่อมต่ออินเทอร์เน็ต",
     "errorId": "รหัสข้อผิดพลาด",
     "copyErrorId": "คัดลอกรหัสข้อผิดพลาด",
-    "errorIdCopied": "คัดลอกรหัสข้อผิดพลาดแล้ว"
+    "errorIdCopied": "คัดลอกรหัสข้อผิดพลาดแล้ว",
+    "backToList": "กลับไปหน้ารายการ",
+    "goToDashboard": "ไปหน้าแดชบอร์ด"
   },
   "validation": {
     "required": "กรุณากรอก{field}",
@@ -1269,7 +1271,8 @@
         "period_end": "ปิดรอบ",
         "report": "รายงาน",
         "dashboard": "แดชบอร์ด"
-      }
+      },
+      "notFound": "ไม่พบบทบาท"
     },
     "user": {
       "assignRoles": "กำหนดบทบาท",
@@ -1293,7 +1296,8 @@
       "deleteTitle": "ลบผู้ใช้งาน",
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้งาน \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
       "deleteSuccess": "ลบผู้ใช้งานสำเร็จ",
-      "department": "แผนก"
+      "department": "แผนก",
+      "notFound": "ไม่พบผู้ใช้"
     },
     "document": {
       "entity": "เอกสาร",
@@ -1504,7 +1508,8 @@
       "newRule": "กฎใหม่ {n}",
       "generalDesc": "ชื่อ ประเภท และคำอธิบายของลำดับขั้นนี้",
       "status": "สถานะ",
-      "statusDesc": "กำหนดว่าลำดับขั้นนี้เปิดใช้งานเมื่อสร้างหรือไม่"
+      "statusDesc": "กำหนดว่าลำดับขั้นนี้เปิดใช้งานเมื่อสร้างหรือไม่",
+      "notFound": "ไม่พบลำดับขั้นอนุมัติ"
     },
     "runningCode": {
       "entity": "รหัสลำดับ",
@@ -1794,7 +1799,8 @@
         "emailPlaceholder": "email@example.com",
         "phonePlaceholder": "หมายเลขโทรศัพท์",
         "primary": "หลัก"
-      }
+      },
+      "notFound": "ไม่พบผู้ขาย"
     },
     "priceList": {
       "entity": "รายการราคา",
@@ -1844,7 +1850,8 @@
         "removeItem": "ลบสินค้า",
         "removeItemTitle": "ลบสินค้า",
         "removeItemConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?"
-      }
+      },
+      "notFound": "ไม่พบรายการราคา"
     },
     "priceListTemplate": {
       "entity": "แม่แบบรายการราคา",
@@ -1912,7 +1919,8 @@
         "removeItem": "ลบสินค้า",
         "removeItemTitle": "ลบสินค้า",
         "removeItemConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?"
-      }
+      },
+      "notFound": "ไม่พบแม่แบบรายการราคา"
     },
     "requestPriceList": {
       "entity": "ขอใบเสนอราคา",
@@ -1964,7 +1972,8 @@
         "selectVendorFirst": "กรุณาเลือกผู้ขายก่อนบันทึก",
         "copyUrl": "คัดลอก URL ผู้ขาย",
         "openUrl": "เปิด URL ผู้ขาย"
-      }
+      },
+      "notFound": "ไม่พบใบขอรายการราคา"
     }
   },
   "inventoryManagement": {
@@ -2382,7 +2391,8 @@
       "generalInformation": "ข้อมูลทั่วไป",
       "generalInfoDesc": "ชื่อและรายละเอียดของหมวดสูตรนี้",
       "defaultCostSettingsDesc": "ค่าแรงและค่าโสหุ้ยเริ่มต้น ที่สูตรในหมวดนี้จะใช้อัตโนมัติ",
-      "defaultProfitMarginsDesc": "เป้ากำไรเริ่มต้นของหมวดนี้ ใช้ช่วยตั้งราคาสูตร"
+      "defaultProfitMarginsDesc": "เป้ากำไรเริ่มต้นของหมวดนี้ ใช้ช่วยตั้งราคาสูตร",
+      "notFound": "ไม่พบหมวดสูตรอาหาร"
     },
     "cuisine": {
       "regionAsia": "เอเชีย",
@@ -2408,7 +2418,8 @@
       "untitledCuisine": "ประเภทอาหารไม่มีชื่อ",
       "generalInfoDesc": "ชื่อและรหัสของประเภทอาหาร (เช่น ไทย อิตาเลียน)",
       "cuisineDetailsDesc": "รายละเอียดของประเภทอาหารนี้",
-      "additionalDesc": "ข้อมูลเพิ่มเติมอื่น ๆ ของประเภทอาหารนี้"
+      "additionalDesc": "ข้อมูลเพิ่มเติมอื่น ๆ ของประเภทอาหารนี้",
+      "notFound": "ไม่พบประเภทอาหาร"
     },
     "equipment": {
       "entity": "อุปกรณ์",
@@ -2460,7 +2471,8 @@
       "specificationsDesc": "จุดที่ใช้งานและสเปคทางเทคนิค",
       "equipmentImage": "รูปภาพ",
       "equipmentImageDesc": "รูปให้พนักงานเห็นแล้วจำอุปกรณ์ได้",
-      "portableDesc": "อุปกรณ์นี้ย้ายไปใช้ตามจุดต่าง ๆ ได้ไหม"
+      "portableDesc": "อุปกรณ์นี้ย้ายไปใช้ตามจุดต่าง ๆ ได้ไหม",
+      "notFound": "ไม่พบอุปกรณ์"
     },
     "equipmentCategory": {
       "entity": "หมวดหมู่อุปกรณ์",

@@ -307,9 +307,7 @@ export default function StoreRequisitionComponent() {
   });
 
   if (listError)
-    return (
-      <ErrorState message={listError.message} onRetry={() => listRefetch?.()} />
-    );
+    return <ErrorState error={listError} onRetry={() => listRefetch?.()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">

@@ -297,7 +297,7 @@ export default function TransactionComponent() {
   });
 
   if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="relative isolate -mx-3 -my-3">

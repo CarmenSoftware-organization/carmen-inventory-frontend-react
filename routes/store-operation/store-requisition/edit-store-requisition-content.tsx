@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { useStoreRequisitionById } from "@/hooks/use-store-requisition";
 import { StoreRequisitionForm } from "./sr-form";
@@ -15,9 +14,15 @@ export function EditStoreRequisitionContent({ id }: { id: string }) {
   } = useStoreRequisitionById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!storeRequisition) return <ErrorState message={t("notFound")} />;
+  if (error || !storeRequisition)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/store-operation/store-requisition"
+      />
+    );
 
   return (
     <StoreRequisitionForm

@@ -8,7 +8,7 @@ export function ReviewContent({ id }: Readonly<{ id: string }>) {
   const { data, isLoading, error, refetch } = usePhysicalCountReview(id);
 
   if (error) {
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   if (isLoading || !data) {

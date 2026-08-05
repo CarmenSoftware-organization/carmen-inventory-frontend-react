@@ -7,10 +7,8 @@ import { ThemeProvider } from "next-themes";
 import { ApiErrorToaster } from "@/components/api-error-toaster";
 import { PermissionDeniedDialog } from "@/components/permission-denied-dialog";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import {
-  reportApiError,
-  skipsGlobalErrorToast,
-} from "@/lib/api-error-handler";
+import { ApiError } from "@/lib/api-error";
+import { reportApiError, skipsGlobalErrorToast } from "@/lib/api-error-handler";
 
 export const makeQueryClient = () =>
   new QueryClient({
@@ -26,7 +24,14 @@ export const makeQueryClient = () =>
     }),
     defaultOptions: {
       queries: {
-        retry: 1,
+        // 4xx ยิงซ้ำก็ได้คำตอบเดิม (ใบถูกลบไปแล้ว/ไม่มีสิทธิ์) — retry มีแต่ทำให้
+        // คนเปิดหน้าต้องรอนานเป็นเท่าตัวกว่าจะเห็นว่าเกิดอะไรขึ้น
+        retry: (failureCount, error) => {
+          const status =
+            error instanceof ApiError ? (error.statusCode ?? 0) : 0;
+          if (status >= 400 && status < 500) return false;
+          return failureCount < 1;
+        },
         refetchOnWindowFocus: false,
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes

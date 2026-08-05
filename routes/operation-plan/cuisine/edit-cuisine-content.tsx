@@ -1,4 +1,4 @@
-
+import { useTranslations } from "use-intl";
 import { useCuisineById } from "@/hooks/use-cuisine";
 import { CuisineForm } from "./cuisine-form";
 import { ErrorState } from "@/components/ui/error-state";
@@ -13,12 +13,19 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * <EditCuisinePage params={Promise.resolve({ id: "abc-123" })} />
  */
 export function EditCuisineContent({ id }: { id: string }) {
+  const tErr = useTranslations("operationPlan.cuisine");
   const { data: cuisine, isLoading, error, refetch } = useCuisineById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!cuisine) return <ErrorState message="Cuisine not found" />;
+  if (error || !cuisine)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={tErr("notFound")}
+        onRetry={() => refetch()}
+        backTo="/operation-plan/cuisine"
+      />
+    );
 
   return <CuisineForm cuisine={cuisine} />;
 }

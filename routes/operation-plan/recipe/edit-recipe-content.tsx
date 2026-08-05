@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { useRecipeById } from "@/hooks/use-recipe";
 import { RecipeForm } from "./recipe-form";
@@ -18,9 +17,15 @@ export function EditRecipeContent({ id }: { id: string }) {
   const { data: recipe, isLoading, error, refetch } = useRecipeById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!recipe) return <ErrorState message={t("notFound")} />;
+  if (error || !recipe)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/operation-plan/recipe"
+      />
+    );
 
   return <RecipeForm recipe={recipe} />;
 }

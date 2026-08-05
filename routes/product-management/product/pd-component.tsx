@@ -251,7 +251,7 @@ export default function ProductComponent() {
   });
 
   if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const handleAddItem = () => {
     navigate("/product-management/product/new");

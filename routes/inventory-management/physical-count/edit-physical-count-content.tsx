@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { usePhysicalCountById } from "@/hooks/use-physical-count";
 import { PcForm } from "./pc-form";
@@ -17,14 +16,23 @@ import type { PhysicalCount } from "@/types/physical-count";
  */
 export function EditPhysicalCountContent({ id }: Readonly<{ id: string }>) {
   const t = useTranslations("inventoryManagement.physicalCount");
-  const { data: physicalCount, isLoading, error, refetch } =
-    usePhysicalCountById(id);
+  const {
+    data: physicalCount,
+    isLoading,
+    error,
+    refetch,
+  } = usePhysicalCountById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!physicalCount)
-    return <ErrorState message={t("notFound")} />;
+  if (error || !physicalCount)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/inventory-management/physical-count"
+      />
+    );
 
   return <PcForm physicalCount={physicalCount as unknown as PhysicalCount} />;
 }

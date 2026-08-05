@@ -204,8 +204,7 @@ export default function RequestPriceListComponent() {
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">

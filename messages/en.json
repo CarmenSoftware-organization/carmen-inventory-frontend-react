@@ -491,7 +491,9 @@
     "offlineDesc": "Some features may not work until you reconnect.",
     "errorId": "Error ID",
     "copyErrorId": "Copy error ID",
-    "errorIdCopied": "Error ID copied"
+    "errorIdCopied": "Error ID copied",
+    "backToList": "Back to list",
+    "goToDashboard": "Go to dashboard"
   },
   "validation": {
     "required": "{field} is required",
@@ -1269,7 +1271,8 @@
         "period_end": "Period End",
         "report": "Report",
         "dashboard": "Dashboard"
-      }
+      },
+      "notFound": "Role not found"
     },
     "user": {
       "assignRoles": "Assign Roles",
@@ -1293,7 +1296,8 @@
       "deleteTitle": "Delete User",
       "deleteConfirm": "Are you sure you want to delete user \"{name}\"? This action cannot be undone.",
       "deleteSuccess": "User deleted successfully",
-      "department": "Department"
+      "department": "Department",
+      "notFound": "User not found"
     },
     "document": {
       "entity": "Document",
@@ -1504,7 +1508,8 @@
       "newRule": "New Rule {n}",
       "generalDesc": "Name, type and description for this workflow.",
       "status": "Status",
-      "statusDesc": "Set whether this workflow is active on creation."
+      "statusDesc": "Set whether this workflow is active on creation.",
+      "notFound": "Approval flow not found"
     },
     "runningCode": {
       "entity": "Running Code",
@@ -1794,7 +1799,8 @@
         "emailPlaceholder": "email@example.com",
         "phonePlaceholder": "Phone number",
         "primary": "primary"
-      }
+      },
+      "notFound": "Vendor not found"
     },
     "priceList": {
       "entity": "Price List",
@@ -1849,7 +1855,8 @@
         "draft": "Draft price lists are not visible to procurement agents or available for automated ordering.",
         "active": "This price list is active and will be used for purchasing from this vendor.",
         "inactive": "Inactive price lists are archived and will not be used for new orders."
-      }
+      },
+      "notFound": "Price list not found"
     },
     "priceListTemplate": {
       "entity": "Price List Template",
@@ -1917,7 +1924,8 @@
         "removeItem": "Remove product",
         "removeItemTitle": "Remove Product",
         "removeItemConfirm": "Are you sure you want to remove this product?"
-      }
+      },
+      "notFound": "Price list template not found"
     },
     "requestPriceList": {
       "entity": "Request for Pricing",
@@ -1969,7 +1977,8 @@
         "selectVendorFirst": "Please select a vendor before submitting",
         "copyUrl": "Copy vendor URL",
         "openUrl": "Open vendor URL"
-      }
+      },
+      "notFound": "Price list request not found"
     }
   },
   "inventoryManagement": {
@@ -2387,7 +2396,8 @@
       "generalInformation": "General Information",
       "generalInfoDesc": "Name and details of this recipe category.",
       "defaultCostSettingsDesc": "Default labor and overhead costs that recipes in this category start with.",
-      "defaultProfitMarginsDesc": "Default profit target for this category — helps price its recipes."
+      "defaultProfitMarginsDesc": "Default profit target for this category — helps price its recipes.",
+      "notFound": "Recipe category not found"
     },
     "cuisine": {
       "regionAsia": "Asia",
@@ -2413,7 +2423,8 @@
       "untitledCuisine": "Untitled cuisine",
       "generalInfoDesc": "Name and code of this cuisine type (e.g. Thai, Italian).",
       "cuisineDetailsDesc": "Details about this cuisine type.",
-      "additionalDesc": "Any other extra details for this cuisine type."
+      "additionalDesc": "Any other extra details for this cuisine type.",
+      "notFound": "Cuisine not found"
     },
     "equipment": {
       "entity": "Equipment",
@@ -2465,7 +2476,8 @@
       "specificationsDesc": "Where it's used and its technical specs.",
       "equipmentImage": "Photo",
       "equipmentImageDesc": "A photo so staff can recognize it at a glance.",
-      "portableDesc": "Can this equipment be moved between stations?"
+      "portableDesc": "Can this equipment be moved between stations?",
+      "notFound": "Equipment not found"
     },
     "equipmentCategory": {
       "entity": "Equipment Category",
