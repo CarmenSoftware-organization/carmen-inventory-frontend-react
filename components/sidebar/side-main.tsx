@@ -2,7 +2,6 @@ import { Fragment } from "react";
 import { Link } from "react-router";
 import { useLocation } from "react-router";
 import { useTranslations } from "use-intl";
-import { Sparkles } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -73,14 +72,34 @@ export function SideMain() {
             {visibleSubs.map((sub) => {
               const isActive =
                 pathname === sub.path || pathname.startsWith(sub.path + "/");
+              // ไอคอน + ป้าย เหมือนกันทั้งสองสาขา ต่างแค่ตัวห่อ (Link หรือปุ่มที่กด
+              // แล้วบอกว่าไม่มีสิทธิ์) — แยกไว้จะได้ไม่ต้องแก้สองที่ทุกครั้ง
+              const content = (
+                <>
+                  <sub.icon
+                    aria-hidden="true"
+                    className={cn(
+                      "shrink-0",
+                      isActive ? "text-primary" : "text-muted-foreground",
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "text-xs group-data-[collapsible=icon]:hidden",
+                      isActive && "text-primary",
+                    )}
+                  >
+                    {t(sub.name)}
+                  </span>
+                </>
+              );
               return (
                 <Fragment key={sub.path}>
                   {sub.separatorBefore && (
-                    <div className="my-1.5 flex items-center gap-2 px-2 group-data-[collapsible=icon]:hidden">
-                      <span className="bg-border h-px flex-1" />
-                      <Sparkles className="text-muted-foreground/60 size-2.5" />
-                      <span className="bg-border h-px flex-1" />
-                    </div>
+                    <div
+                      role="presentation"
+                      className="bg-border mx-2 my-1.5 h-px group-data-[collapsible=icon]:hidden"
+                    />
                   )}
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -88,9 +107,14 @@ export function SideMain() {
                       tooltip={t(sub.name)}
                       isActive={isActive}
                       className={cn(
-                        "group/sub relative overflow-hidden rounded-lg transition-all",
-                        "data-[active=true]:font-semibold",
-                        // active = blue left-bar signal (icon keeps its module color)
+                        // rounded-md ไม่ใช่ lg — เมนูคือ control ตาม grammar ของ
+                        // docs/DESIGN.md (md = control · lg/xl = container)
+                        "group/sub relative overflow-hidden rounded-md transition-all",
+                        // active = แถบซ้ายนี้ + พื้นกับน้ำหนักจาก
+                        // sidebarMenuButtonVariants + ไอคอนและตัวหนังสือเป็น
+                        // `text-primary` (ดูที่ `content`) รวมเป็นสีน้ำเงินสามที่บน
+                        // ปุ่มเดียว ซึ่งแรงกว่ากติกา single-accent ใน docs/DESIGN.md
+                        // เคยลองตัดเหลือแค่แถบแล้ว แต่ทีมเลือกแบบนี้ — ตั้งใจ ไม่ใช่หลุด
                         "before:bg-primary before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:content-[''] group-data-[collapsible=icon]:before:hidden data-[active=true]:before:opacity-100",
                         "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       )}
@@ -104,44 +128,10 @@ export function SideMain() {
                           title={t(sub.name)}
                           className="opacity-50"
                         >
-                          <sub.icon
-                            aria-hidden="true"
-                            className={cn(
-                              "size-5 shrink-0",
-                              isActive
-                                ? "text-primary"
-                                : "text-muted-foreground",
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "text-xs font-semibold group-data-[collapsible=icon]:hidden",
-                              isActive && "text-primary",
-                            )}
-                          >
-                            {t(sub.name)}
-                          </span>
+                          {content}
                         </button>
                       ) : (
-                        <Link to={sub.path}>
-                          <sub.icon
-                            aria-hidden="true"
-                            className={cn(
-                              "size-5 shrink-0",
-                              isActive
-                                ? "text-primary"
-                                : "text-muted-foreground",
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "text-xs font-semibold group-data-[collapsible=icon]:hidden",
-                              isActive && "text-primary",
-                            )}
-                          >
-                            {t(sub.name)}
-                          </span>
-                        </Link>
+                        <Link to={sub.path}>{content}</Link>
                       )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
