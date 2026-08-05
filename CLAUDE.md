@@ -135,3 +135,7 @@ or any secret-bearing app-config save (incl. the pre-existing `report_email`) 40
   `paths` on the decorator so it reaches the nested rows — same class as the SR list fix.
   Frontend deliberately keeps reading `audit` rather than falling back to the raw field:
   the raw one disappears the moment the decorator is fixed.
+- After the first `build:bump`, the footer's version and `changelog.json`'s newest entry
+  diverge — nothing regenerates `changelog.json`, so the What's New dialog
+  (`components/footer/whats-new-dialog.tsx`) shows an older version heading than the button
+  that opened it. Known, not a bug; the fix is a changelog generator (separate work).
