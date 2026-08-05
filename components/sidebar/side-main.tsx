@@ -10,11 +10,19 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { moduleList } from "@/constant/module-list";
-import { getModuleColor } from "@/constant/module-color-map";
 import { useVisibleModules } from "@/hooks/use-visible-modules";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { AppTile } from "@/components/icons/tiles";
 import { cn } from "@/lib/utils";
+
+/**
+ * สีเดียวของทั้งแอป — จุด ไอคอน และพื้นอ่อนของทุกโมดูลใช้ตัวนี้
+ *
+ * Single-accent design (docs/DESIGN.md): ไม่มีสีประจำโมดูลรายตัวแล้ว เดิมมีตาราง
+ * route→สี กับฟังก์ชันอ่านค่าครอบไว้อีกชั้น ทั้งที่ฟังก์ชันคืนค่านี้ตายตัวโดยไม่
+ * สนใจ path ที่ส่งเข้าไป — ลบทิ้งทั้งชุดแล้ว
+ */
+const ACCENT = "var(--primary)";
 
 export function SideMain() {
   const pathname = useLocation().pathname;
@@ -26,8 +34,6 @@ export function SideMain() {
   if (!activeModule) {
     return null;
   }
-
-  const moduleColor = getModuleColor(activeModule.path);
 
   return (
     <>
@@ -41,14 +47,14 @@ export function SideMain() {
           "group-data-[collapsible=icon]:mx-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
         )}
         style={{
-          backgroundImage: `linear-gradient(135deg, color-mix(in oklch, ${moduleColor} 10%, transparent) 0%, transparent 70%)`,
+          backgroundImage: `linear-gradient(135deg, color-mix(in oklch, ${ACCENT} 10%, transparent) 0%, transparent 70%)`,
         }}
       >
         {/* Left accent bar (hidden in collapsed mode) */}
         <span
           aria-hidden="true"
           className="absolute inset-y-1 left-0 w-0.5 rounded-full group-data-[collapsible=icon]:hidden"
-          style={{ backgroundColor: moduleColor }}
+          style={{ backgroundColor: ACCENT }}
         />
 
         {/* Module icon — illustrated AppTile (module signature) */}
@@ -59,7 +65,7 @@ export function SideMain() {
         {/* Title (hidden when collapsed) */}
         <p
           className="min-w-0 flex-1 truncate text-sm leading-tight font-semibold group-data-[collapsible=icon]:hidden"
-          style={{ color: moduleColor }}
+          style={{ color: ACCENT }}
         >
           {t(activeModule.name)}
         </p>
