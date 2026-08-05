@@ -17,6 +17,8 @@ backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migr
 bun dev              # Dev server = dev:local (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
 bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/config.<env>.json (prod = dev backend until real prod exists)
 bun run build        # tsc + vite build → dist/
+bun run typecheck    # tsc --noEmit เดี่ยว ๆ (gate ของ build:bump)
+bun run build:bump [patch|minor|major]   # ตัด release: bump package.json + commit + annotated tag (local เท่านั้น ไม่ push) — ต้องอยู่บน main, tree สะอาด, ไม่ตามหลัง origin/main; gate typecheck+lint+test:run; ไม่ส่ง level = ถามใน terminal
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
 scripts/setup-gcs-cdn.sh <bucket> <config> [domain]   # One-shot GCP infra (CDN+LB+cert) + first deploy (docs/deploy.md)

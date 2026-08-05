@@ -10,6 +10,8 @@
     "dev:uat": "CONFIG_ENV=uat vite",
     "dev:prod": "CONFIG_ENV=prod vite",
     "build": "tsc --noEmit && vite build",
+    "build:bump": "bun scripts/bump.ts",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
