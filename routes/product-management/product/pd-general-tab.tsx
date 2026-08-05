@@ -50,6 +50,9 @@ interface GeneralTabProps {
     categoryName: string,
     subCategoryName: string,
   ) => void;
+  /** รูปที่เลือกไว้แต่ยังไม่อัปโหลด — ฟอร์มเป็นคนถือ ส่งขึ้นตอนกด Save */
+  readonly pendingImages?: readonly File[];
+  readonly onPendingImagesChange?: (files: File[]) => void;
 }
 
 function GeneralTab({
@@ -57,6 +60,8 @@ function GeneralTab({
   isDisabled,
   product,
   onGroupChange,
+  pendingImages,
+  onPendingImagesChange,
 }: GeneralTabProps) {
   "use no memo";
   // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
@@ -211,10 +216,7 @@ function GeneralTab({
           )}
         </Field>
 
-        <Field
-          data-invalid={!!errors.local_name}
-          className="sm:col-span-2"
-        >
+        <Field data-invalid={!!errors.local_name} className="sm:col-span-2">
           <FieldLabel required>{t("localNameLabel")}</FieldLabel>
           {isDisabled ? (
             <ReadOnlyValue value={v.local_name} />
@@ -232,10 +234,7 @@ function GeneralTab({
           )}
         </Field>
 
-        <Field
-          data-invalid={!!errors.description}
-          className="sm:col-span-2"
-        >
+        <Field data-invalid={!!errors.description} className="sm:col-span-2">
           <FieldLabel>{tfl("description")}</FieldLabel>
           {isDisabled ? (
             <ReadOnlyValue value={v.description} multiline />
@@ -252,9 +251,7 @@ function GeneralTab({
                 placeholder={t("descriptionPlaceholder")}
                 {...form.register("description")}
               />
-              <FieldError>
-                {errors.description?.message}
-              </FieldError>
+              <FieldError>{errors.description?.message}</FieldError>
             </>
           )}
         </Field>
@@ -550,7 +547,12 @@ function GeneralTab({
           description={t("imgSectionDesc")}
         >
           <div className="w-40">
-            <ProductImages productId={product?.id} readOnly={isDisabled} />
+            <ProductImages
+              productId={product?.id}
+              readOnly={isDisabled}
+              pendingFiles={pendingImages}
+              onPendingFilesChange={onPendingImagesChange}
+            />
           </div>
         </SettingSection>
       )}
