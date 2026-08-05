@@ -2888,7 +2888,8 @@
       "footerNote": "Draft · requested by {requester} for {department}",
       "breadcrumbInventory": "Inventory",
       "breadcrumbList": "Store requisitions",
-      "breadcrumbNew": "New"
+      "breadcrumbNew": "New",
+      "selectLocationsFirst": "Choose both the source and destination store before adding items."
     },
     "stockReplenishment": {
       "entity": "Stock Replenishment",

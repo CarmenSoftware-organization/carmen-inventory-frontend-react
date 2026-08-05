@@ -2883,7 +2883,8 @@
       "footerNote": "ร่าง · ขอเบิกโดย {requester} สำหรับ {department}",
       "breadcrumbInventory": "สินค้าคงคลัง",
       "breadcrumbList": "ใบเบิกสินค้า",
-      "breadcrumbNew": "ใหม่"
+      "breadcrumbNew": "ใหม่",
+      "selectLocationsFirst": "เลือกคลังต้นทางและปลายทางก่อน ถึงจะเพิ่มรายการได้"
     },
     "stockReplenishment": {
       "entity": "เติมสินค้า",

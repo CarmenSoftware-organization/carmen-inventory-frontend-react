@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
+import { useLocationPairProducts } from "@/hooks/use-location-pair-products";
 import { useTranslations } from "use-intl";
+import { toast } from "sonner";
 import { BoxIcon, Check, Eye, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +51,47 @@ export function SrItemFields({
     remove: removeItem,
   } = useFieldArray({ control: form.control, name: "items" });
 
+  // โหลดสินค้าของคลังคู่นี้ไว้ล่วงหน้าตั้งแต่เลือกคลังครบ ไม่ต้องรอให้มีแถวก่อน —
+  // ตัวที่ยิงจริงคือ lookup ในแต่ละแถว ซึ่งกว่าจะ mount ก็ตอนกดเพิ่มรายการแล้ว
+  // observer ตัวนี้อยู่ตลอดอายุแท็บรายการ ของที่โหลดมาเลยไม่ถูกทิ้งทั้งที่ gcTime
+  // เป็น 0 · params ต้องตรงกับที่ useLookupPagination ยิงหน้าแรกเป๊ะ ไม่งั้นคนละ key
+  useLocationPairProducts(
+    fromLocationId || undefined,
+    toLocationId || undefined,
+    {
+      search: undefined,
+      perpage: 30,
+      page: 1,
+    },
+  );
+
+  // เปลี่ยนคลังแล้วสินค้าที่เลือกไว้อาจไม่มีในคู่ใหม่ — ล้างของที่เลือกไว้ทุกแถว
+  // เช็คว่า "คู่เดิมครบทั้งสองข้าง" ก่อนล้าง ไม่งั้นตอนเปิดใบเก่าที่ค่าทยอยมาจาก
+  // ว่าง → มีจริง จะไปล้างสินค้าที่เพิ่งโหลดมาทิ้ง
+  const prevPair = useRef<string | null>(null);
+  useEffect(() => {
+    const pair = `${fromLocationId}|${toLocationId}`;
+    const prev = prevPair.current;
+    prevPair.current = pair;
+    if (prev === null || prev === pair) return;
+    const [prevFrom, prevTo] = prev.split("|");
+    if (!prevFrom || !prevTo) return;
+    itemFields.forEach((_, index) => {
+      form.setValue(`items.${index}.product_id`, "");
+      form.setValue(`items.${index}.product_name`, "");
+      form.setValue(`items.${index}.product_local_name`, "");
+      form.setValue(`items.${index}.unit_name`, "");
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ล้างเมื่อคู่คลังเปลี่ยนเท่านั้น
+  }, [fromLocationId, toLocationId]);
+
+  // ต้องมีคลังครบทั้งคู่ก่อน เพราะช่องเลือกสินค้าดึงเฉพาะของที่มีอยู่ทั้งสองคลัง —
+  // เพิ่มแถวเปล่าไปก่อนได้แต่จะกดเลือกอะไรไม่ได้เลย บอกไปตรง ๆ ดีกว่าปล่อยให้งง
   const handleAddItem = () => {
+    if (!fromLocationId || !toLocationId) {
+      toast.warning(t("selectLocationsFirst"));
+      return;
+    }
     prependItem({ ...SR_ITEM });
   };
 
