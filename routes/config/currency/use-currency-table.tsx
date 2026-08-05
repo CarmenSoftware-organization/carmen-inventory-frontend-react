@@ -2,8 +2,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { columnSkeletons, statusColumn } from "@/components/ui/data-grid/columns";
-import { AuditCell } from "@/components/share/audit-cell";
+import {
+  auditColumns,
+  columnSkeletons,
+  statusColumn,
+} from "@/components/ui/data-grid/columns";
 import { useProfile } from "@/hooks/use-profile";
 import { formatExchangeRate } from "@/lib/currency-utils";
 import type { Currency } from "@/types/currency";
@@ -102,36 +105,7 @@ export function useCurrencyTable({
       },
     },
     statusColumn<Currency>(),
-    {
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created") },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated") },
-    },
+    ...auditColumns<Currency>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<Currency>({
@@ -143,5 +117,6 @@ export function useCurrencyTable({
     onDelete,
     hideStatus: true,
     initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    activity: { id: (r) => r.id, label: (r) => r.code },
   });
 }

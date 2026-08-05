@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
@@ -65,8 +66,7 @@ export default function RoleComponent() {
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -150,9 +150,9 @@ export default function RoleComponent() {
             emptyMessage={<EmptyComponent />}
           >
             <DataGridContainer className="flex max-h-[calc(100vh-10rem-3rem)] flex-col">
-              <div className="flex-1 overflow-auto">
+              <DataGridScrollArea>
                 <DataGridTable />
-              </div>
+              </DataGridScrollArea>
               <DataGridPagination />
             </DataGridContainer>
           </DataGrid>

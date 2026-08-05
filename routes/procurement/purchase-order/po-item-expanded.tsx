@@ -11,6 +11,9 @@ interface PoItemExpandedProps {
   readonly disabled: boolean;
   readonly locationsDisabled: boolean;
   readonly readOnly: boolean;
+  /** ตารางแถวสินค้ามีคอลัมน์ action ไหม — ต้องตรงกันสองตาราง ไม่งั้นคอลัมน์เหลื่อม
+   *  (โหมดอ่านก็ยังมีได้ ถ้ามีประวัติรายบรรทัดให้กด) */
+  readonly showActionCol: boolean;
   /** % ของความกว้าง table ที่ต้อง indent ให้ตรงขอบซ้าย column Product */
   readonly leftInsetPct: number;
 }
@@ -27,6 +30,7 @@ export function PoItemExpanded({
   disabled,
   locationsDisabled,
   readOnly,
+  showActionCol,
   leftInsetPct,
 }: PoItemExpandedProps) {
   "use no memo";
@@ -47,7 +51,7 @@ export function PoItemExpanded({
         disabled={locationsDisabled}
         fieldsDisabled={disabled}
         readOnly={readOnly}
-        showActionCol={!disabled && !readOnly}
+        showActionCol={showActionCol}
       />
     </div>
   );

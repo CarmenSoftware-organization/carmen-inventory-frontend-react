@@ -15,7 +15,7 @@ import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
  * amount disabled); `isAdjustment=true` → amount กรอกเอง (rate disabled/ค้างค่า)
  */
 
-/** Checkbox + label "Override" */
+/** Label "Override" + checkbox (checkbox อยู่หลังคำ ชิดขอบขวาของช่อง) */
 export function OverrideToggle({
   checked,
   onCheckedChange,
@@ -26,14 +26,14 @@ export function OverrideToggle({
   const tfl = useTranslations("field");
   return (
     <label className="flex cursor-pointer items-center gap-1.5">
+      <span className="text-muted-foreground text-xs select-none">
+        {tfl("override")}
+      </span>
       <Checkbox
         checked={checked}
         onCheckedChange={(v) => onCheckedChange(!!v)}
         className="size-3.5"
       />
-      <span className="text-muted-foreground text-xs select-none">
-        {tfl("override")}
-      </span>
     </label>
   );
 }

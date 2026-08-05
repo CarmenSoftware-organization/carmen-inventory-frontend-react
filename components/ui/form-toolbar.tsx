@@ -1,6 +1,7 @@
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { openActivity } from "@/components/share/activity-sheet-host";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
@@ -36,6 +37,14 @@ interface FormToolbarProps {
    * full-width) ไม่มี px-4 เหมือน PR/PO จึงต้องให้ header flush ด้วยเพื่อ align
    */
   readonly flush?: boolean;
+  /**
+   * เปิดปุ่ม Activity ในแถบปุ่ม — ไม่ส่ง = ไม่มีปุ่ม (เช่นโหมด add ที่ยังไม่มี id)
+   *
+   * วางไว้ที่ toolbar กลางแทนที่จะให้แต่ละหน้ายัดผ่าน `viewActions` เพื่อให้ทุกหน้า
+   * ที่ใช้ toolbar นี้ได้ปุ่มตำแหน่งเดียวกัน — `viewActions` เป็น slot อิสระ
+   * ใครใส่อะไรก็ได้ ตำแหน่งจะเพี้ยนกันเองระหว่างหน้า
+   */
+  readonly activity?: { id: string; label?: string };
 }
 
 export function FormToolbar({
@@ -56,9 +65,11 @@ export function FormToolbar({
   editTitle,
   permissionPrefix,
   flush = true,
+  activity,
 }: FormToolbarProps) {
   const tc = useTranslations("common");
   const tf = useTranslations("form");
+  const tActivity = useTranslations("activity");
   const { can, isAdmin } = useCan();
   const autoPrefix = usePermissionPrefix();
   const prefix = permissionPrefix ?? autoPrefix;
@@ -93,6 +104,19 @@ export function FormToolbar({
   // button, title align, gutter) อยู่ที่ DocFormHeader ที่เดียวทั้งแอป
   const actions = (
     <>
+      {/* ปุ่มประวัติอยู่ซ้ายสุดของกลุ่มทุกโหมด — เป็นการ "ดู" ไม่ใช่การ "ทำ"
+          จึงไม่ควรไปปนกับปุ่มที่เปลี่ยนข้อมูล (save/delete) ทางขวา */}
+      {activity && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => openActivity(activity.id, activity.label)}
+        >
+          <History />
+          {tActivity("title")}
+        </Button>
+      )}
       {isView && viewActions}
       {isView && onEdit ? (
         <Button

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useForm, useWatch, type Resolver } from "react-hook-form";
+import { useForm, type FieldErrors, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useLocation } from "react-router";
 import { useTranslations } from "use-intl";
@@ -21,13 +21,15 @@ import {
   type CreateCnDto,
 } from "@/types/credit-note";
 import type { FormMode } from "@/types/form";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useProfile } from "@/hooks/use-profile";
+import { useBuCode } from "@/hooks/use-bu-code";
+import { httpClient } from "@/lib/http-client";
+import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CnHeader } from "./cn-header";
 import { CnGeneralFields } from "./cn-general-fields";
 import { CnItem } from "./cn-item";
@@ -36,6 +38,7 @@ import {
   createCnSchema,
   type CnFormValues,
   getDefaultValues,
+  keepGrnRefs,
   mapItemToPayload,
 } from "./cn-form-schema";
 
@@ -49,11 +52,13 @@ interface CnFormProps {
 
 export function CnForm({ creditNote }: CnFormProps) {
   const t = useTranslations("procurement.creditNote");
+  const tc = useTranslations("common");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
   const location = useLocation();
+  const buCode = useBuCode();
   const [mode, setMode] = useState<FormMode>(creditNote ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -64,6 +69,7 @@ export function CnForm({ creditNote }: CnFormProps) {
   const deleteCn = useDeleteCreditNote();
   const submitCn = useSubmitCreditNote();
   const [showDelete, setShowDelete] = useState(false);
+  const [showSubmit, setShowSubmit] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const isPending =
     createCn.isPending || updateCn.isPending || submitCn.isPending;
@@ -77,11 +83,6 @@ export function CnForm({ creditNote }: CnFormProps) {
     defaultValues,
     mode: "onChange",
     reValidateMode: "onChange",
-  });
-
-  const watchedDescription = useWatch({
-    control: form.control,
-    name: "description",
   });
 
   const discard = useDiscardConfirm({
@@ -106,43 +107,43 @@ export function CnForm({ creditNote }: CnFormProps) {
   ].join("|");
   useEffect(() => {
     if (mode === "view" && creditNote) {
-      form.reset(getDefaultValues(creditNote));
+      form.reset(
+        keepGrnRefs(getDefaultValues(creditNote), form.getValues("items")),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form/getDefaultValues stable; mode read intentionally without retriggering
   }, [cnSyncKey, creditNote?.id]);
 
-  const onSubmit = (values: CnFormValues) => {
-    const items = buildItemChanges(
+  const buildPayload = (values: CnFormValues): CreateCnDto => ({
+    ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
+    credit_note_type: values.credit_note_type,
+    grn_id: values.grn_id,
+    grn_date: values.grn_date,
+    vendor_id: values.vendor_id,
+    credit_note_number: values.cn_no,
+    cn_date: values.cn_date,
+    cn_reason_id: values.reason,
+    reference_number: values.reference_number,
+    description: values.description,
+    currency_id: values.currency_code,
+    exchange_rate: values.exchange_rate,
+    // omit ตอนว่าง — backend ไม่รับ "" (invoice_date เป็น ISO-8601 datetime)
+    ...(values.invoice_no ? { invoice_no: values.invoice_no } : {}),
+    ...(values.invoice_date ? { invoice_date: values.invoice_date } : {}),
+    tax_invoice_no: values.tax_invoice_no,
+    tax_invoice_date: values.tax_invoice_date,
+    tax_amount: values.tax_amount,
+    discount_amount: values.discount_amount,
+    note: values.notes,
+    credit_note_detail: buildItemChanges(
       values.items,
       defaultValues.items,
       mapItemToPayload,
-    );
+    ),
+  });
 
-    const payload: CreateCnDto = {
-      ...(values.doc_version != null
-        ? { doc_version: values.doc_version }
-        : {}),
-      credit_note_type: values.credit_note_type,
-      grn_id: values.grn_id,
-      grn_date: values.grn_date,
-      vendor_id: values.vendor_id,
-      credit_note_number: values.cn_no,
-      cn_date: values.cn_date,
-      cn_reason_id: values.reason,
-      reference_number: values.reference_number,
-      description: values.description,
-      currency_id: values.currency_code,
-      exchange_rate: values.exchange_rate,
-      // omit ตอนว่าง — backend ไม่รับ "" (invoice_date เป็น ISO-8601 datetime)
-      ...(values.invoice_no ? { invoice_no: values.invoice_no } : {}),
-      ...(values.invoice_date ? { invoice_date: values.invoice_date } : {}),
-      tax_invoice_no: values.tax_invoice_no,
-      tax_invoice_date: values.tax_invoice_date,
-      tax_amount: values.tax_amount,
-      discount_amount: values.discount_amount,
-      note: values.notes,
-      credit_note_detail: items,
-    };
+  const onSubmit = (values: CnFormValues) => {
+    const payload = buildPayload(values);
 
     if (isEdit && creditNote) {
       updateCn.mutate(
@@ -219,16 +220,95 @@ export function CnForm({ creditNote }: CnFormProps) {
         .join(" ");
   const cnDate = creditNote?.cn_date ?? todayIso;
 
-  const handleSubmitCn = () => {
-    if (!creditNote) return;
+  // กรอกไม่ครบ → พาไปยังช่องแรกที่ขาดแล้วบอกว่าขาดกี่รายการ (ใช้ทั้งปุ่ม Save
+  // และปุ่ม Submit — ปุ่มที่กดแล้วเงียบคือทางตัน)
+  const revealInvalid = (errors: FieldErrors<CnFormValues>) => {
+    scrollToFirstInvalidField();
+    const count = countInvalidItems(errors as Record<string, unknown>);
+    toast.warning(
+      count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
+    );
+  };
+
+  // ปิด dialog ให้ด้วยตอนพัง ไม่งั้นค้างทับ toast แจ้ง error ที่เพิ่งขึ้น
+  const abortSubmit = () => {
+    setShowSubmit(false);
+    setIsSubmitting(false);
+  };
+
+  // GET ใบสดจาก DB ก่อนยิง submit — doc_version ที่ถืออยู่ค้างเก่าทันทีที่ save
+  // ผ่าน (backend bump ให้) ส่งของเก่าไป = ชน 409 optimistic lock (แบบเดียวกับ PR/PO)
+  const fetchFreshDocVersion = async (id: string): Promise<number | null> => {
+    if (!buCode) return null;
+    try {
+      const res = await httpClient.get(
+        `${API_ENDPOINTS.CREDIT_NOTE(buCode)}/${id}`,
+      );
+      if (res.ok)
+        return ((await res.json())?.data?.doc_version ?? null) as number | null;
+    } catch {
+      // network/parse fail — ใช้ค่าที่มีในฟอร์มแทน
+    }
+    return null;
+  };
+
+  const fireSubmit = (id: string, docVersion: number) => {
     submitCn.mutate(
-      { id: creditNote.id, doc_version: creditNote.doc_version ?? 0 },
+      { id, doc_version: docVersion },
       {
         onSuccess: () => {
           toast.success(tt("submitSuccess", { entity: t("entity") }));
+          navigate("/procurement/credit-note");
         },
+        onError: abortSubmit,
       },
     );
+  };
+
+  /**
+   * ส่งใบ = เซฟก่อนแล้วค่อยส่ง (เหมือน PR) — คนกดส่งทั้งที่ยังแก้ค้างอยู่ไม่ได้
+   * แปลว่าอยากทิ้งสิ่งที่แก้ ถ้าส่งใบเวอร์ชันเก่าไปเงียบ ๆ คือกินข้อมูลเขาหาย
+   * ใบที่ยังไม่เคยเซฟ (add) ก็สร้างแล้วส่งต่อในคลิกเดียว
+   */
+  const saveThenSubmit = async (values: CnFormValues) => {
+    // ปิด guard ก่อนยิง mutation ไม่ใช่ตอนสำเร็จ — ฟอร์มที่แก้ค้างอยู่จะทำให้
+    // navigate ตอนสำเร็จไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม ทั้งที่ส่งไปแล้ว
+    setIsSubmitting(true);
+
+    if (!creditNote) {
+      createCn.mutate(buildPayload(values), {
+        onSuccess: async (data) => {
+          const newId = data?.data?.id;
+          if (!newId) return abortSubmit();
+          fireSubmit(newId, (await fetchFreshDocVersion(newId)) ?? 0);
+        },
+        onError: abortSubmit,
+      });
+      return;
+    }
+
+    if (!form.formState.isDirty) {
+      fireSubmit(creditNote.id, creditNote.doc_version ?? 0);
+      return;
+    }
+
+    updateCn.mutate(
+      { id: creditNote.id, ...buildPayload(values) },
+      {
+        onSuccess: async () => {
+          const fresh = await fetchFreshDocVersion(creditNote.id);
+          fireSubmit(creditNote.id, fresh ?? creditNote.doc_version ?? 0);
+        },
+        onError: abortSubmit,
+      },
+    );
+  };
+
+  const handleSubmitCn = () => {
+    form.handleSubmit(saveThenSubmit, (errors) => {
+      abortSubmit();
+      revealInvalid(errors);
+    })();
   };
 
   return (
@@ -247,56 +327,43 @@ export function CnForm({ creditNote }: CnFormProps) {
         onCancel={handleCancel}
         onShowDelete={() => setShowDelete(true)}
         onShowComment={() => setShowComment(true)}
-        onSubmitCn={handleSubmitCn}
       />
 
       <form
         id="cn-form"
-        onSubmit={form.handleSubmit(onSubmit, (errors) => {
-          scrollToFirstInvalidField();
-          const count = countInvalidItems(errors as Record<string, unknown>);
-          toast.warning(
-            count > 0
-              ? tv("incompleteItems", { count })
-              : tv("incompleteDocument"),
-          );
-        })}
+        onSubmit={form.handleSubmit(onSubmit, revealInvalid)}
         className="space-y-3 px-4"
       >
         <CnGeneralFields form={form} disabled={isDisabled || isView} />
 
-        {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
-        {(!isView || watchedDescription?.trim()) && (
-          <Field className={isView ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor="cn-description"
-              className={
-                isView ? "text-muted-foreground font-normal" : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {isView ? (
-              <p className="min-h-8 text-xs whitespace-pre-wrap">
-                {watchedDescription}
-              </p>
-            ) : (
-              <Textarea
-                id="cn-description"
-                placeholder={tfl("optional")}
-                className="text-xs"
-                rows={2}
-                disabled={isDisabled}
-                maxLength={256}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        )}
+        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO/GRN)
+            สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ ก้อนล่างกวาดตาทีละแถว */}
+        <hr className="border-border" />
+
         <CnItem form={form} disabled={isDisabled} />
       </form>
 
-      <CnFooterAction control={form.control} />
+      <CnFooterAction
+        control={form.control}
+        canSubmit={
+          // โผล่ทุกโหมดของใบร่าง (เหมือน PR) — คนกรอกเสร็จแล้วอยากส่งเลย ไม่ต้อง
+          // กด Save → ออกจากโหมดแก้ → ค่อยกด Submit ให้ครบสามจังหวะ
+          isAdd || (!isLocked && creditNote?.doc_status === CN_STATUS.DRAFT)
+        }
+        isPending={isPending}
+        onSubmitCn={() => setShowSubmit(true)}
+      />
+
+      {/* ส่งใบแล้วย้อนไม่ได้ — ถามก่อนหนึ่งครั้ง เหมือน PR/PO/SR */}
+      <ConfirmDialog
+        open={showSubmit}
+        onOpenChange={setShowSubmit}
+        title={t("submitTitle")}
+        description={t("submitConfirm")}
+        confirmText={tc("submit")}
+        isPending={submitCn.isPending}
+        onConfirm={handleSubmitCn}
+      />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 

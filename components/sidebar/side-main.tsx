@@ -2,23 +2,27 @@ import { Fragment } from "react";
 import { Link } from "react-router";
 import { useLocation } from "react-router";
 import { useTranslations } from "use-intl";
-import { Sparkles } from "lucide-react";
 
 import {
   SidebarGroup,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { moduleList } from "@/constant/module-list";
-import { getModuleColor } from "@/constant/module-color-map";
 import { useVisibleModules } from "@/hooks/use-visible-modules";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { AppTile } from "@/components/icons/tiles";
 import { cn } from "@/lib/utils";
+
+/**
+ * สีเดียวของทั้งแอป — จุด ไอคอน และพื้นอ่อนของทุกโมดูลใช้ตัวนี้
+ *
+ * Single-accent design (docs/DESIGN.md): ไม่มีสีประจำโมดูลรายตัวแล้ว เดิมมีตาราง
+ * route→สี กับฟังก์ชันอ่านค่าครอบไว้อีกชั้น ทั้งที่ฟังก์ชันคืนค่านี้ตายตัวโดยไม่
+ * สนใจ path ที่ส่งเข้าไป — ลบทิ้งทั้งชุดแล้ว
+ */
+const ACCENT = "var(--primary)";
 
 export function SideMain() {
   const pathname = useLocation().pathname;
@@ -30,8 +34,6 @@ export function SideMain() {
   if (!activeModule) {
     return null;
   }
-
-  const moduleColor = getModuleColor(activeModule.path);
 
   return (
     <>
@@ -45,14 +47,14 @@ export function SideMain() {
           "group-data-[collapsible=icon]:mx-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
         )}
         style={{
-          backgroundImage: `linear-gradient(135deg, color-mix(in oklch, ${moduleColor} 10%, transparent) 0%, transparent 70%)`,
+          backgroundImage: `linear-gradient(135deg, color-mix(in oklch, ${ACCENT} 10%, transparent) 0%, transparent 70%)`,
         }}
       >
         {/* Left accent bar (hidden in collapsed mode) */}
         <span
           aria-hidden="true"
           className="absolute inset-y-1 left-0 w-0.5 rounded-full group-data-[collapsible=icon]:hidden"
-          style={{ backgroundColor: moduleColor }}
+          style={{ backgroundColor: ACCENT }}
         />
 
         {/* Module icon — illustrated AppTile (module signature) */}
@@ -63,7 +65,7 @@ export function SideMain() {
         {/* Title (hidden when collapsed) */}
         <p
           className="min-w-0 flex-1 truncate text-sm leading-tight font-semibold group-data-[collapsible=icon]:hidden"
-          style={{ color: moduleColor }}
+          style={{ color: ACCENT }}
         >
           {t(activeModule.name)}
         </p>
@@ -76,65 +78,34 @@ export function SideMain() {
             {visibleSubs.map((sub) => {
               const isActive =
                 pathname === sub.path || pathname.startsWith(sub.path + "/");
-              if (sub.subModules?.length) {
-                return (
-                  <Fragment key={sub.path}>
-                    {sub.separatorBefore && (
-                      <div className="my-1.5 flex items-center gap-2 px-2 group-data-[collapsible=icon]:hidden">
-                        <span className="bg-border h-px flex-1" />
-                        <Sparkles className="text-muted-foreground/60 size-2.5" />
-                        <span className="bg-border h-px flex-1" />
-                      </div>
+              // ไอคอน + ป้าย เหมือนกันทั้งสองสาขา ต่างแค่ตัวห่อ (Link หรือปุ่มที่กด
+              // แล้วบอกว่าไม่มีสิทธิ์) — แยกไว้จะได้ไม่ต้องแก้สองที่ทุกครั้ง
+              const content = (
+                <>
+                  <sub.icon
+                    aria-hidden="true"
+                    className={cn(
+                      "shrink-0",
+                      isActive ? "text-primary" : "text-muted-foreground",
                     )}
-                    <SidebarMenuItem>
-                      <SidebarMenuButton
-                        asChild
-                        tooltip={t(sub.name)}
-                        isActive={isActive}
-                        className="rounded-lg data-[active=true]:font-semibold"
-                      >
-                        <Link to={sub.subModules[0].path}>
-                          <sub.icon
-                            aria-hidden="true"
-                            className={cn(
-                              "size-5 shrink-0",
-                              isActive ? "text-primary" : "text-muted-foreground",
-                            )}
-                          />
-                          <span className="text-xs font-semibold group-data-[collapsible=icon]:hidden">
-                            {t(sub.name)}
-                          </span>
-                        </Link>
-                      </SidebarMenuButton>
-                      <SidebarMenuSub>
-                        {sub.subModules.map((child) => {
-                          const childActive =
-                            pathname === child.path ||
-                            pathname.startsWith(child.path + "/");
-                          return (
-                            <SidebarMenuSubItem key={child.path}>
-                              <SidebarMenuSubButton asChild isActive={childActive}>
-                                <Link to={child.path}>
-                                  <child.icon className="size-4" aria-hidden="true" />
-                                  <span>{t(child.name)}</span>
-                                </Link>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          );
-                        })}
-                      </SidebarMenuSub>
-                    </SidebarMenuItem>
-                  </Fragment>
-                );
-              }
+                  />
+                  <span
+                    className={cn(
+                      "text-xs group-data-[collapsible=icon]:hidden",
+                      isActive && "text-primary",
+                    )}
+                  >
+                    {t(sub.name)}
+                  </span>
+                </>
+              );
               return (
                 <Fragment key={sub.path}>
                   {sub.separatorBefore && (
-                    <div className="my-1.5 flex items-center gap-2 px-2 group-data-[collapsible=icon]:hidden">
-                      <span className="bg-border h-px flex-1" />
-                      <Sparkles className="text-muted-foreground/60 size-2.5" />
-                      <span className="bg-border h-px flex-1" />
-                    </div>
+                    <div
+                      role="presentation"
+                      className="bg-border mx-2 my-1.5 h-px group-data-[collapsible=icon]:hidden"
+                    />
                   )}
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -142,9 +113,14 @@ export function SideMain() {
                       tooltip={t(sub.name)}
                       isActive={isActive}
                       className={cn(
-                        "group/sub relative overflow-hidden rounded-lg transition-all",
-                        "data-[active=true]:font-semibold",
-                        // active = blue left-bar signal (icon keeps its module color)
+                        // rounded-md ไม่ใช่ lg — เมนูคือ control ตาม grammar ของ
+                        // docs/DESIGN.md (md = control · lg/xl = container)
+                        "group/sub relative overflow-hidden rounded-md transition-all",
+                        // active = แถบซ้ายนี้ + พื้นกับน้ำหนักจาก
+                        // sidebarMenuButtonVariants + ไอคอนและตัวหนังสือเป็น
+                        // `text-primary` (ดูที่ `content`) รวมเป็นสีน้ำเงินสามที่บน
+                        // ปุ่มเดียว ซึ่งแรงกว่ากติกา single-accent ใน docs/DESIGN.md
+                        // เคยลองตัดเหลือแค่แถบแล้ว แต่ทีมเลือกแบบนี้ — ตั้งใจ ไม่ใช่หลุด
                         "before:bg-primary before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:content-[''] group-data-[collapsible=icon]:before:hidden data-[active=true]:before:opacity-100",
                         "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                       )}
@@ -158,44 +134,10 @@ export function SideMain() {
                           title={t(sub.name)}
                           className="opacity-50"
                         >
-                          <sub.icon
-                            aria-hidden="true"
-                            className={cn(
-                              "size-5 shrink-0",
-                              isActive
-                                ? "text-primary"
-                                : "text-muted-foreground",
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "text-xs font-semibold group-data-[collapsible=icon]:hidden",
-                              isActive && "text-primary",
-                            )}
-                          >
-                            {t(sub.name)}
-                          </span>
+                          {content}
                         </button>
                       ) : (
-                        <Link to={sub.path}>
-                          <sub.icon
-                            aria-hidden="true"
-                            className={cn(
-                              "size-5 shrink-0",
-                              isActive
-                                ? "text-primary"
-                                : "text-muted-foreground",
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "text-xs font-semibold group-data-[collapsible=icon]:hidden",
-                              isActive && "text-primary",
-                            )}
-                          >
-                            {t(sub.name)}
-                          </span>
-                        </Link>
+                        <Link to={sub.path}>{content}</Link>
                       )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>

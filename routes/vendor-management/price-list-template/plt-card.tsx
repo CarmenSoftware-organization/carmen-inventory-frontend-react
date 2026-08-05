@@ -1,9 +1,11 @@
 import { useTranslations } from "use-intl";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import { PL_STATUS_TONE } from "@/constant/price-list";
-import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
 import type { PriceListTemplate } from "@/types/price-list-template";
 
 interface PltCardProps {
@@ -26,7 +28,6 @@ export default function PltCard({ item, onEdit, onDelete }: PltCardProps) {
   const t = useTranslations("vendorManagement.priceListTemplate");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const { dateTimeFormat } = useProfile();
 
   return (
     <ListCard
@@ -55,23 +56,7 @@ export default function PltCard({ item, onEdit, onDelete }: PltCardProps) {
           </span>
         </ListCardRow>
       )}
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

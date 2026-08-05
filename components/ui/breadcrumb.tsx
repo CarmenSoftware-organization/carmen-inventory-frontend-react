@@ -15,7 +15,10 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
     <ol
       data-slot="breadcrumb-list"
       className={cn(
-        "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm break-words sm:gap-3",
+        // 12px ไม่ใช่ 14px ของ shadcn: breadcrumb เป็น context ว่าอยู่ไหน ไม่ใช่
+        // เนื้อหา — 14px คือระดับเดียวกับตัวอักษรบนปุ่ม และห่างจากชื่อเอกสาร
+        // (18px) แค่ขั้นเดียวจนลำดับชั้นอ่อน (ดู typography ใน docs/DESIGN.md)
+        "text-muted-foreground flex flex-wrap items-center gap-1.5 text-xs break-words sm:gap-3",
         className
       )}
       {...props}
@@ -61,7 +64,9 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
       role="link"
       aria-disabled="true"
       aria-current="page"
-      className={cn("text-foreground font-normal", className)}
+      // หนากว่าชั้นอื่นเป็นสัญญาณที่สอง — เดิมต่างจากลิงก์แค่สี ซึ่งอ่อนเกินกว่าจะ
+      // บอกได้ว่าชั้นไหนคือหน้าที่ยืนอยู่
+      className={cn("text-foreground font-medium", className)}
       {...props}
     />
   )
@@ -78,7 +83,7 @@ function BreadcrumbSeparator({
       data-slot="breadcrumb-separator"
       role="presentation"
       aria-hidden="true"
-      className={cn("[&>svg]:size-3.5", className)}
+      className={cn("[&>svg]:size-3", className)}
       {...props}
     >
       {children ?? <ChevronRight />}

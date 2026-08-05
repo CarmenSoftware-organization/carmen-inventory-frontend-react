@@ -8,6 +8,7 @@ import {
   Boxes,
   ChevronLeft,
   ClipboardCheck,
+  History,
   MapPin,
   Pencil,
   Save,
@@ -48,6 +49,7 @@ import {
   mapFormToPayload,
   type SpotCheckFormValues,
 } from "./sc-form-schema";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "sc-form";
 
@@ -69,6 +71,7 @@ export function ScForm({
   availableProducts = [],
 }: ScFormProps) {
   const t = useTranslations("inventoryManagement.spotCheck");
+  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -207,7 +210,7 @@ export function ScForm({
                 >
                   <ChevronLeft />
                 </Button>
-                <span className="bg-primary/10 text-primary inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold tracking-wider uppercase">
+                <span className="bg-primary/10 text-primary text-micro-legal inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-wider uppercase">
                   <ClipboardCheck className="size-2.5" />
                   {t("entity")}
                 </span>
@@ -216,16 +219,14 @@ export function ScForm({
               <div className="flex items-center gap-2">
                 {isView ? (
                   <>
-                    <Button size="sm" onClick={() => setMode("edit")}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setMode("edit")}
+                    >
                       <Pencil />
                       {tc("edit")}
                     </Button>
-                    {spotCheck?.id && (
-                      <PrintDocumentButton
-                        documentType="SC"
-                        documentId={spotCheck.id}
-                      />
-                    )}
                   </>
                 ) : (
                   <>
@@ -248,25 +249,45 @@ export function ScForm({
                       <Save />
                       {submitLabel}
                     </Button>
-                    {isEdit && spotCheck && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setShowDelete(true)}
-                        disabled={deleteSc.isPending || isPending}
-                      >
-                        <Trash2 />
-                        {tc("delete")}
-                      </Button>
-                    )}
                   </>
+                )}
+                {spotCheck && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDelete(true)}
+                    disabled={deleteSc.isPending || isPending}
+                  >
+                    <Trash2 />
+                    {tc("delete")}
+                  </Button>
+                )}
+                {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+                {spotCheck && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      openActivity(spotCheck.id, spotCheck.spot_check_no)
+                    }
+                  >
+                    <History />
+                    {tActivity("title")}
+                  </Button>
+                )}
+                {isView && spotCheck?.id && (
+                  <PrintDocumentButton
+                    documentType="SC"
+                    documentId={spotCheck.id}
+                  />
                 )}
               </div>
             </div>
 
             {/* Title + descriptor */}
-            <div className="text-muted-foreground mb-1 flex items-center gap-1.5 text-micro-eyebrow font-semibold tracking-[0.16em] uppercase">
+            <div className="text-muted-foreground text-micro-eyebrow mb-1 flex items-center gap-1.5 font-semibold tracking-[0.16em] uppercase">
               <span className="bg-muted-foreground size-0.5 rounded-sm" />
               {t("entity")}
               <span className="text-muted-foreground/60">·</span>

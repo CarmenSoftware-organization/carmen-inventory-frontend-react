@@ -163,23 +163,6 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
     }
   };
 
-  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่ */
-  const handleSaveViewDialogSave = async (name: string, saveScope: ViewScope) => {
-    const list = saveScope === "bu" ? buViews : userViews;
-    const existing = list.find((v) => v.name === name);
-    if (existing) {
-      await view.update(existing.id, saveScope, snapshot);
-      // อัปเดต view อื่นที่ไม่ใช่ view ปัจจุบัน — ต้อง apply ต่อให้ URL ชี้ตาม
-      // (ถ้าเป็น view ปัจจุบันอยู่แล้ว ค่าจะ sync เองเมื่อ query cache รีเฟรช)
-      if (existing.id !== current?.id) {
-        view.apply({ ...existing, filters: snapshot.filters, sort: snapshot.sort });
-      }
-    } else {
-      const saved = await view.saveAs(name, saveScope, snapshot);
-      view.apply(saved);
-    }
-  };
-
   const renderRow = (v: SavedView, rowScope: ViewScope, canManage: boolean) => {
     const isCurrent = v.id === current?.id;
     const applyItem = (
@@ -335,8 +318,8 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
         open={saveDialogOpen}
         onOpenChange={setSaveDialogOpen}
         canManageBu={canManageBu}
-        existingNames={(s) => (s === "bu" ? buViews : userViews).map((v) => v.name)}
-        onSave={handleSaveViewDialogSave}
+        existingNames={view.existingNames}
+        onSave={view.saveOrUpdate}
       />
 
       <Dialog

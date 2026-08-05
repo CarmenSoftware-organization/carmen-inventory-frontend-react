@@ -10,7 +10,6 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
-import SearchInput from "@/components/search-input";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { SrFormValues } from "./sr-form-schema";
 import { SR_ITEM, SR_ITEM_STAGE } from "./sr-form-schema";
@@ -51,8 +50,6 @@ export function SrItemFields({
   } = useFieldArray({ control: form.control, name: "items" });
 
   const handleAddItem = () => {
-    // แถวใหม่ยังว่าง ไม่มีทางตรงคำค้น — ค้างตัวกรองไว้ก็เหมือนกดเพิ่มแล้วเงียบ
-    setSearch("");
     prependItem({ ...SR_ITEM });
   };
 
@@ -61,17 +58,12 @@ export function SrItemFields({
   const submitCount = form.formState.submitCount;
   useEffect(() => {
     if (!submitCount) return;
-    // แถวที่กรอกไม่ครบอาจโดนคำค้นซ่อนอยู่ — เตือนไปก็ไม่มีช่องให้ดู ล้างทิ้งก่อน
-    if (form.formState.errors.items) setSearch("");
     if (itemFields.length === 0 && !disabled && !disableAdd) handleAddItem();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
   }, [submitCount]);
 
   const {
     table,
-    search,
-    setSearch,
-    visibleCount,
     selectDialogOpen,
     setSelectDialogOpen,
     allCount,
@@ -120,106 +112,64 @@ export function SrItemFields({
 
   return (
     <div className="space-y-2">
-      {/* ค้นหาซ้าย ปุ่มเพิ่มรายการขวา แถวเดียวกัน — ทั้งคู่เป็นเรื่องของตาราง
-            ข้างล่าง ไม่ใช่ของทั้งฟอร์ม */}
-      <div className="flex items-center justify-end gap-2">
-        {itemFields.length > 0 && (
-          // SearchInput ห่อตัวเองด้วย div flex อยู่แล้ว — mr-auto ต้องอยู่ชั้นนอก
-          <div className="mr-auto">
-            <SearchInput
-              defaultValue={search}
-              onSearch={setSearch}
-              onInputChange={setSearch}
-              containerClassName="w-48 sm:w-64"
-            />
-          </div>
+      {/* แถวเดียว: ปุ่มตัดสินชิดซ้าย (เป็นการกระทำกับแถวที่เพิ่งติ๊ก มือไปหาปุ่ม
+          ตรงนั้น ไม่ต้องกวาดตาไปสุดขวา) · ปุ่มเพิ่มรายการเป็นของทั้งตาราง ดันไป
+          ขวาด้วย ms-auto — ไม่ใช้ justify-between เพราะตอนไม่มีปุ่มตัดสินมันจะ
+          เหลือลูกตัวเดียวแล้วไปกองซ้าย · ลำดับตาม PR: อนุมัติ → ปฏิเสธ → ส่งกลับ */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {selectedRows.length > 0 && canBulkAction && (
+          <>
+            <Button
+              type="button"
+              variant="success"
+              size="xs"
+              onClick={handleBulkApprove}
+            >
+              <Check />
+              {tc("approve")}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="xs"
+              onClick={() => setBulkAction("reject")}
+            >
+              <X />
+              {tc("reject")}
+            </Button>
+            <Button
+              type="button"
+              variant="warning"
+              size="xs"
+              onClick={handleBulkReview}
+            >
+              <Eye />
+              {tc("sendBack")}
+            </Button>
+          </>
         )}
         {!disabled && (
           <Button
             type="button"
             onClick={handleAddItem}
-            disabled={disableAdd}
-            size={'sm'}
+            size="sm"
+            className="ms-auto"
           >
             <Plus /> {t("addItem")}
           </Button>
         )}
       </div>
-      {selectedRows.length > 0 && canBulkAction && (
-        // ปุ่มตัดสินชิดซ้ายเหมือน PR — มือไปหาปุ่มก่อน ไม่ต้องกวาดตาไปสุดขวา
-        // ลำดับตาม PR ด้วย: อนุมัติ → ปฏิเสธ → ส่งกลับ
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Button
-            type="button"
-            variant="success"
-            size="xs"
-            onClick={handleBulkApprove}
-          >
-            <Check />
-            {tc("approve")}
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            size="xs"
-            onClick={() => setBulkAction("reject")}
-          >
-            <X />
-            {tc("reject")}
-          </Button>
-          <Button
-            type="button"
-            variant="warning"
-            size="xs"
-            onClick={handleBulkReview}
-          >
-            <Eye />
-            {tc("sendBack")}
-          </Button>
-        </div>
-      )}
 
       <DataGrid
         table={table}
-        recordCount={visibleCount}
+        recordCount={itemFields.length}
         tableLayout={{ checkbox: !disabled }}
         emptyMessage={
-          // มีรายการอยู่แต่ค้นแล้วไม่เหลือ = หาไม่เจอ ไม่ใช่ใบเปล่า
-          // ชวนกด "เพิ่มรายการ" ตอนนั้นคือชวนผิดเรื่อง
-          itemFields.length > 0 ? (
-            <EmptyComponent
-              icon={BoxIcon}
-              title={tc("noSearchResult")}
-              content={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="xs"
-                  onClick={() => setSearch("")}
-                >
-                  {tc("clearSearch")}
-                </Button>
-              }
-            />
-          ) : (
-            <EmptyComponent
-              icon={BoxIcon}
-              title={t("noItems")}
-              description={t("noItemsDesc")}
-              content={
-                !disabled && (
-                  <Button
-                    type="button"
-                    size="xs"
-                    onClick={handleAddItem}
-                    disabled={disableAdd}
-                  >
-                    <Plus /> {t("addItem")}
-                  </Button>
-                )
-              }
-            />
-          )
+          <EmptyComponent
+            icon={BoxIcon}
+            title={t("noItems")}
+            description={t("noItemsDesc")}
+          />
         }
       >
         <DataGridContainer>

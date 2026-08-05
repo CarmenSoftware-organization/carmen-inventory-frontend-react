@@ -212,16 +212,21 @@ export function useSrFormActions({
     options?: { onDone?: () => void },
   ) => {
     if (!storeRequisition) return;
+    // ปิด guard ก่อนยิง mutation — ผู้อนุมัติ/ผู้จ่ายที่เพิ่งติ๊กแถวคือฟอร์ม dirty
+    // ถ้าไม่ปิดก่อน navigate ตอนสำเร็จจะไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม
+    setIsSubmitting(true);
     const fresh = await fetchFreshSr();
     mutation.mutate(
       { ...payload, doc_version: resolveDocVersion(fresh) },
       {
-      onSuccess: () => {
-        toast.success(tt("updateSuccess", { entity: t("entity") }));
-        options?.onDone?.();
-        navigate(SR_LIST_PATH);
+        onSuccess: () => {
+          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          options?.onDone?.();
+          navigate(SR_LIST_PATH);
+        },
+        onError: () => setIsSubmitting(false),
       },
-    });
+    );
   };
 
   const buildStageDetails = (

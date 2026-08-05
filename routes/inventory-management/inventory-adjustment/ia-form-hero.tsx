@@ -1,6 +1,6 @@
 import { type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DocFormHeader } from "@/components/share/doc-form-header";
@@ -15,6 +15,7 @@ import type {
 } from "@/types/inventory-adjustment";
 import type { FormMode } from "@/types/form";
 import type { AdjFormValues } from "./ia-form-schema";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface IaFormHeroProps {
   readonly adjustmentType: InventoryAdjustmentType;
@@ -48,8 +49,8 @@ export function IaFormHero({
   onDelete,
 }: IaFormHeroProps) {
   const tc = useTranslations("common");
+  const tActivity = useTranslations("activity");
   const isView = mode === "view";
-  const isEdit = mode === "edit";
   const TypeIcon = IA_TYPE_ICON[adjustmentType];
   const docNo = inventoryAdjustment?.si_no ?? inventoryAdjustment?.so_no ?? "";
   const canDelete = !!inventoryAdjustment && !isReadOnly;
@@ -78,14 +79,8 @@ export function IaFormHero({
 
   const actions = (
     <>
-      {canPrint && (
-        <PrintDocumentButton
-          documentType={adjustmentType === "stock-in" ? "SI" : "SO"}
-          documentId={inventoryAdjustment!.id}
-        />
-      )}
       {isView && !isReadOnly ? (
-        <Button size="sm" onClick={onEdit}>
+        <Button size="sm" variant="outline" onClick={onEdit}>
           <Pencil />
           {tc("edit")}
         </Button>
@@ -113,10 +108,10 @@ export function IaFormHero({
           </Button>
         </>
       ) : null}
-      {isEdit && canDelete && (
+      {canDelete && (
         <Button
           type="button"
-          variant="destructive"
+          variant="outline"
           size="sm"
           onClick={onDelete}
           disabled={isPending || deleteIsPending}
@@ -124,6 +119,26 @@ export function IaFormHero({
           <Trash2 />
           {tc("delete")}
         </Button>
+      )}
+      {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+      {inventoryAdjustment && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(inventoryAdjustment.id, docNo || undefined)
+          }
+        >
+          <History aria-hidden="true" />
+          {tActivity("title")}
+        </Button>
+      )}
+      {canPrint && (
+        <PrintDocumentButton
+          documentType={adjustmentType === "stock-in" ? "SI" : "SO"}
+          documentId={inventoryAdjustment!.id}
+        />
       )}
     </>
   );

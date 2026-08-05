@@ -1,32 +1,23 @@
 import { useEffect, useState } from "react";
-import {
-  useForm,
-  type Resolver,
-  type UseFormRegisterReturn,
-} from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
-import { useNavigate, useSearchParams } from "react-router";
-import {
-  ArrowRight,
-  Eye,
-  EyeOff,
-  Hotel,
-  ShieldCheck,
-  Sparkles,
-  Zap,
-} from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router";
+import { ArrowRight } from "lucide-react";
 import { profileQueryKey } from "@/hooks/use-profile";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { login } from "@/lib/auth/auth-api";
 import { resolveNextPath } from "@/lib/auth/resolve-next-path";
+import { AuthSplitShell } from "@/components/auth/auth-split-shell";
+import {
+  AuthFormAlert,
+  FloatingField,
+  FloatingFieldPassword,
+} from "@/components/auth/floating-field";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import brandingUrl from "./icons/carmen-branding.svg";
+import { FieldGroup } from "@/components/ui/field";
 
 const PASSWORD_MIN = 6;
 
@@ -127,408 +118,87 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="bg-background relative isolate min-h-svh overflow-hidden">
-      {/* Inline keyframes — subtle entrance motion only */}
-      <style>{`
-        @keyframes title-reveal {
-          0% { opacity: 0; transform: translateY(0.75rem); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fade-up-soft {
-          0% { opacity: 0; transform: translateY(0.5rem); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+    <AuthSplitShell title={t("welcomeBack")} subtitle={t("subtitle")}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4" noValidate>
+        <FieldGroup className="gap-3">
+          <FloatingField
+            id="email"
+            label={t("emailLabel")}
+            type="email"
+            autoComplete="email"
+            register={form.register("email")}
+            error={form.formState.errors.email?.message}
+          />
 
-      {/* ── 50/50 split ──────────────────────────────────── */}
-      <div className="relative grid h-svh lg:grid-cols-2">
-        {/* ╔══ LEFT — Form (focused glass card) ═══════════════════╗ */}
-        <div className="flex items-center justify-center px-5 py-6 sm:px-8">
-          <div
-            className="w-full max-w-md"
-            style={{ animation: "fade-up-soft 0.6s ease-out 0.1s both" }}
-          >
-            {/* Mobile-only branding */}
-            <div className="mb-5 lg:hidden">
-              <BrandMark size="sm" />
-            </div>
+          <FloatingFieldPassword
+            id="password"
+            label={t("passwordLabel")}
+            showLabel={t("showPassword")}
+            hideLabel={t("hidePassword")}
+            dataId="log-in-password"
+            register={form.register("password")}
+            error={form.formState.errors.password?.message}
+          />
 
-            {/* Card */}
-            <div className="bg-card rounded-2xl border p-5 sm:p-6">
-              <div>
-                <h1
-                  className="mt-2 text-2xl leading-[1.05] font-semibold tracking-tight sm:text-[1.75rem]"
-                  style={{ animation: "title-reveal 0.7s ease-out 0.2s both" }}
-                >
-                  {t("welcomeBack")}
-                </h1>
-                <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-                  {t("subtitle")}
-                </p>
-
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="mt-4"
-                  noValidate
-                >
-                  <FieldGroup className="gap-3">
-                    <FloatingField
-                      id="email"
-                      label={t("emailLabel")}
-                      type="email"
-                      autoComplete="email"
-                      register={form.register("email")}
-                      error={form.formState.errors.email?.message}
-                    />
-
-                    <FloatingFieldPassword
-                      id="password"
-                      label={t("passwordLabel")}
-                      showLabel={t("showPassword")}
-                      hideLabel={t("hidePassword")}
-                      register={form.register("password")}
-                      error={form.formState.errors.password?.message}
-                    />
-
-                    {loginMutation.isError && (
-                      <div
-                        className="border-destructive/40 bg-destructive/5 rounded-xl border px-3 py-2"
-                        style={{
-                          animation: "fade-up-soft 0.3s ease-out both",
-                        }}
-                        role="alert"
-                        aria-live="polite"
-                      >
-                        <p className="text-destructive text-xs font-semibold">
-                          {loginMutation.error instanceof RateLimitError &&
-                          retryAfter !== null
-                            ? t("errors.tooManyAttempts", {
-                                seconds: retryAfter,
-                              })
-                            : loginMutation.error.message}
-                        </p>
-                      </div>
-                    )}
-
-                    <Button
-                      type="submit"
-                      className="group mt-0.5 h-10 w-full"
-                      disabled={loginMutation.isPending || retryAfter !== null}
-                    >
-                      {loginMutation.isPending ? (
-                        <>
-                          <span className="border-primary-foreground/30 border-t-primary-foreground inline-block size-4 animate-spin rounded-full border-2" />
-                          {t("signingIn")}
-                        </>
-                      ) : (
-                        <>
-                          {t("signIn")}
-                          <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                        </>
-                      )}
-                    </Button>
-                  </FieldGroup>
-                </form>
-
-                <p className="text-muted-foreground/60 mt-4 text-center text-micro-legal leading-relaxed">
-                  {t.rich("termsLine", {
-                    terms: (chunks) => (
-                      <span className="text-foreground/70 underline-offset-4 hover:underline">
-                        {chunks}
-                      </span>
-                    ),
-                    privacy: (chunks) => (
-                      <span className="text-foreground/70 underline-offset-4 hover:underline">
-                        {chunks}
-                      </span>
-                    ),
-                  })}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ╔══ RIGHT — Cinematic hero ═══════════════════════════ */}
-        <div className="relative hidden items-center overflow-hidden lg:flex">
-          <div
-            className="relative w-full px-10 py-8 xl:px-14"
-            style={{ animation: "fade-up-soft 0.7s ease-out 0.2s both" }}
-          >
-            {/* Brand */}
-            <div className="flex items-center gap-3">
-              <BrandMark size="lg" />
-            </div>
-
-            {/* Cinematic headline — compact */}
-            <h2
-              className="mt-6 max-w-[24ch] text-[2.25rem] leading-[1.05] font-semibold tracking-[-0.03em] xl:text-[2.75rem]"
-              style={{ animation: "title-reveal 0.9s ease-out 0.35s both" }}
-            >
-              {t("heroHeadlineStart")}{" "}
-              <span className="text-primary">{t("heroHeadlineEmphasis")}</span>
-            </h2>
-
-            <p
-              className="text-muted-foreground/90 mt-3 max-w-md text-[0.8125rem] leading-relaxed"
-              style={{ animation: "fade-up-soft 0.7s ease-out 0.5s both" }}
-            >
-              {t("heroDescription")}
-            </p>
-
-            {/* Bento feature grid — compact */}
-            <div
-              className="mt-5 grid grid-cols-2 gap-2"
-              style={{ animation: "fade-up-soft 0.7s ease-out 0.7s both" }}
-            >
-              <BentoCard
-                icon={Zap}
-                title={t("features.liveStockTitle")}
-                desc={t("features.liveStockDesc")}
-              />
-              <BentoCard
-                icon={ShieldCheck}
-                title={t("features.roleAwareTitle")}
-                desc={t("features.roleAwareDesc")}
-              />
-              <BentoCard
-                icon={Hotel}
-                title={t("features.multiPropertyTitle")}
-                desc={t("features.multiPropertyDesc")}
-              />
-              <BentoCard
-                icon={Sparkles}
-                title={t("features.hospitalityTitle")}
-                desc={t("features.hospitalityDesc")}
-              />
-            </div>
-
-            {/* Tagline footer */}
-            <div
-              className="mt-6 flex items-center gap-2"
-              style={{ animation: "fade-up-soft 0.7s ease-out 0.9s both" }}
-            >
-              <div className="bg-primary size-1 rounded-full" />
-              <p className="text-muted-foreground text-micro font-semibold tracking-wide italic">
-                {t("letsBegin")}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <p className="text-muted-foreground/40 pointer-events-none absolute right-0 bottom-2 left-0 z-10 text-center text-micro-legal">
-        {t("platformFooter")}
-      </p>
-    </div>
-  );
-}
-
-/* ── Brand atoms ─────────────────────────────────────── */
-
-function BrandMark({ size = "sm" }: { readonly size?: "sm" | "lg" }) {
-  return (
-    <img
-      src={brandingUrl}
-      alt="Carmen"
-      className={size === "lg" ? "h-18 w-auto" : "h-7 w-auto"}
-    />
-  );
-}
-
-/* ── Floating-label input ────────────────────────────── */
-
-const FLOATING_INPUT_CLASS = cn(
-  "border-border bg-background hover:border-foreground/40 focus-visible:border-primary",
-  "h-12 rounded-lg border px-3 pt-4 pb-1 text-sm shadow-none transition-colors",
-  "focus-visible:ring-primary/30 focus-visible:ring-2",
-);
-
-function FloatingLabel({
-  htmlFor,
-  children,
-  isFloating,
-  hasError,
-}: {
-  readonly htmlFor: string;
-  readonly children: React.ReactNode;
-  readonly isFloating: boolean;
-  readonly hasError?: boolean;
-}) {
-  return (
-    <FieldLabel
-      htmlFor={htmlFor}
-      className={cn(
-        "pointer-events-none absolute left-3 z-10 transition-all duration-150",
-        isFloating
-          ? "top-1 text-micro-eyebrow font-semibold tracking-widest uppercase"
-          : "top-1/2 -translate-y-1/2 text-xs",
-        getLabelTone(isFloating, hasError),
-      )}
-    >
-      {children}
-    </FieldLabel>
-  );
-}
-
-function getLabelTone(isFloating: boolean, hasError?: boolean) {
-  if (hasError) return "text-destructive";
-  if (isFloating) return "text-primary";
-  return "text-muted-foreground/80";
-}
-
-function useFloatingState(register: UseFormRegisterReturn) {
-  const [focused, setFocused] = useState(false);
-  const [hasValue, setHasValue] = useState(false);
-
-  const handlers = {
-    onFocus: () => setFocused(true),
-    onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
-      setFocused(false);
-      setHasValue(e.target.value.length > 0);
-      void register.onBlur(e);
-    },
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-      setHasValue(e.target.value.length > 0);
-      void register.onChange(e);
-    },
-  };
-
-  return { isFloating: focused || hasValue, handlers };
-}
-
-function FloatingField({
-  id,
-  label,
-  type = "text",
-  autoComplete,
-  register,
-  error,
-}: {
-  readonly id: string;
-  readonly label: string;
-  readonly type?: string;
-  readonly autoComplete?: string;
-  readonly register: UseFormRegisterReturn;
-  readonly error?: string;
-}) {
-  const { isFloating, handlers } = useFloatingState(register);
-
-  return (
-    <Field>
-      <div className="relative">
-        <FloatingLabel htmlFor={id} isFloating={isFloating} hasError={!!error}>
-          {label}
-        </FloatingLabel>
-        <Input
-          id={id}
-          type={type}
-          autoComplete={autoComplete}
-          aria-invalid={!!error}
-          className={cn(FLOATING_INPUT_CLASS, error && "border-destructive")}
-          {...register}
-          {...handlers}
-        />
-      </div>
-      {error && <FieldErrorText id={`${id}-error`}>{error}</FieldErrorText>}
-    </Field>
-  );
-}
-
-function FloatingFieldPassword({
-  id,
-  label,
-  showLabel,
-  hideLabel,
-  register,
-  error,
-}: {
-  readonly id: string;
-  readonly label: string;
-  readonly showLabel: string;
-  readonly hideLabel: string;
-  readonly register: UseFormRegisterReturn;
-  readonly error?: string;
-}) {
-  const { isFloating, handlers } = useFloatingState(register);
-  const [show, setShow] = useState(false);
-
-  return (
-    <Field>
-      <div className="relative">
-        <FloatingLabel htmlFor={id} isFloating={isFloating} hasError={!!error}>
-          {label}
-        </FloatingLabel>
-        <Input
-          id={id}
-          type={show ? "text" : "password"}
-          autoComplete="current-password"
-          data-id="log-in-password"
-          aria-invalid={!!error}
-          className={cn(
-            FLOATING_INPUT_CLASS,
-            "pr-12",
-            error && "border-destructive",
+          {loginMutation.isError && (
+            <AuthFormAlert>
+              {loginMutation.error instanceof RateLimitError &&
+              retryAfter !== null
+                ? t("errors.tooManyAttempts", { seconds: retryAfter })
+                : loginMutation.error.message}
+            </AuthFormAlert>
           )}
-          {...register}
-          {...handlers}
-        />
-        <button
-          type="button"
-          onClick={() => setShow((s) => !s)}
-          aria-label={show ? hideLabel : showLabel}
-          tabIndex={-1}
-          className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 rounded-md p-1 transition-colors"
+
+          <Button
+            type="submit"
+            className="group mt-0.5 h-10 w-full"
+            disabled={loginMutation.isPending || retryAfter !== null}
+          >
+            {loginMutation.isPending ? (
+              <>
+                <span className="border-primary-foreground/30 border-t-primary-foreground inline-block size-4 animate-spin rounded-full border-2" />
+                {t("signingIn")}
+              </>
+            ) : (
+              <>
+                {t("signIn")}
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </>
+            )}
+          </Button>
+        </FieldGroup>
+      </form>
+
+      <p className="text-muted-foreground mt-4 text-center text-xs">
+        {t("noAccount")}{" "}
+        <Link
+          to="/register"
+          className="text-primary font-semibold underline-offset-4 hover:underline"
         >
-          {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-        </button>
-      </div>
-      {error && <FieldErrorText id={`${id}-error`}>{error}</FieldErrorText>}
-    </Field>
-  );
-}
-
-function FieldErrorText({
-  id,
-  children,
-}: {
-  readonly id: string;
-  readonly children: React.ReactNode;
-}) {
-  return (
-    <p
-      id={id}
-      role="alert"
-      className="text-destructive mt-1.5 text-xs font-semibold"
-    >
-      {children}
-    </p>
-  );
-}
-
-/* ── Bento card for feature grid ────────────────────── */
-
-function BentoCard({
-  icon: Icon,
-  title,
-  desc,
-}: {
-  readonly icon: React.ComponentType<{ className?: string }>;
-  readonly title: string;
-  readonly desc: string;
-}) {
-  return (
-    <div className="border-border bg-card hover:border-primary/40 rounded-xl border p-3 transition-colors">
-      <div className="bg-primary/10 text-primary mb-2 flex size-7 items-center justify-center rounded-lg">
-        <Icon className="size-3.5" />
-      </div>
-      <div className="text-foreground text-xs font-semibold tracking-tight">
-        {title}
-      </div>
-      <p className="text-muted-foreground mt-0.5 text-micro leading-snug">
-        {desc}
+          {t("createAccount")}
+        </Link>
       </p>
-    </div>
+
+      <p className="text-muted-foreground/60 mt-3 text-center text-micro-legal leading-relaxed">
+        {t.rich("termsLine", {
+          terms: (chunks) => (
+            <Link
+              to="/terms"
+              className="text-foreground/70 underline-offset-4 hover:underline"
+            >
+              {chunks}
+            </Link>
+          ),
+          privacy: (chunks) => (
+            <Link
+              to="/privacy"
+              className="text-foreground/70 underline-offset-4 hover:underline"
+            >
+              {chunks}
+            </Link>
+          ),
+        })}
+      </p>
+    </AuthSplitShell>
   );
 }

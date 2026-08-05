@@ -82,8 +82,6 @@ export interface StoreRequisition {
   doc_version: number;
   // flat fields ยังใช้อยู่ในหน้า edit (sr-header / edit-store-requisition-content);
   // list endpoint จะไม่ส่งมา (serializer omit) แต่ enrich เป็น audit object แทน
-  created_at: string;
-  updated_at: string;
   audit?: Audit;
 }
 

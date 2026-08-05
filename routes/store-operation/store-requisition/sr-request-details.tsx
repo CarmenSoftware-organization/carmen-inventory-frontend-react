@@ -2,6 +2,7 @@ import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldDatePicker } from "@/components/ui/field";
 import { LookupUserLocation } from "@/components/lookup/lookup-user-location";
+import { Input } from "@/components/ui/input";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { INVENTORY_TYPE } from "@/constant/location";
 import { WORKFLOW_TYPE } from "@/types/workflows";
@@ -58,7 +59,7 @@ export function SrRequestDetails({
   const fieldDisabled = disabled || isReadOnly;
 
   return (
-    <div className="my-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
+    <div className="my-4 grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
       {/* workflow อยู่ที่นี่ที่เดียวทุกโหมด — พ้น draft แล้วล็อกด้วย disabled
           ไม่ใช่ซ่อนแล้วไปโผล่บนแถบหัว (ฟิลด์เดียวกันไม่ควรมีสองที่อยู่) */}
       <Field>
@@ -158,6 +159,21 @@ export function SrRequestDetails({
               error={errors.to_location_id?.message}
             />
           )}
+        />
+      </Field>
+
+      {/* คำอธิบายต่อท้ายคลังปลายทาง อยู่ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยก
+          ใต้ฟอร์ม — ช่องบรรทัดเดียวกว้าง 2 คอลัมน์ ไม่ใช่ Textarea เพราะจำกัด
+          256 ตัวอักษรอยู่แล้ว เป็นข้อความสั้น ไม่ใช่บันทึกยาว */}
+      <Field className="lg:col-span-2">
+        <FieldLabel htmlFor="sr-description">{tfl("description")}</FieldLabel>
+        <Input
+          id="sr-description"
+          placeholder={t("optionalDescription")}
+          maxLength={256}
+          disabled={fieldDisabled}
+          className="text-xs"
+          {...form.register("description")}
         />
       </Field>
     </div>

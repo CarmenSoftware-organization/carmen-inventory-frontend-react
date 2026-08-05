@@ -3,6 +3,7 @@ import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { type Plugin, defineConfig } from "vite";
+import { appVersion } from "./scripts/app-version";
 
 // Dev-only: เสิร์ฟ config ตาม CONFIG_ENV ที่ /config.json (runtime fetch /config.json เสมอ)
 //   CONFIG_ENV=local|dev|uat|prod (default: local) → public/config.<env>.json
@@ -68,6 +69,12 @@ export default defineConfig(() => ({
     react({ babel: { plugins: ["babel-plugin-react-compiler"] } }),
     tailwindcss(),
   ],
+  // เวอร์ชันที่ footer แสดง มาจาก package.json ที่เดียว — ฉีดเข้า bundle ตอน build
+  // แทน literal ใน lib/version.ts ที่ต้องแก้มือ (ของเดิมค้างตั้งแต่ 2026-05-27)
+  // bump ด้วย `bun run build:bump`
+  define: {
+    __APP_VERSION__: JSON.stringify(appVersion()),
+  },
   resolve: {
     alias: { "@": path.resolve(import.meta.dirname, ".") },
   },

@@ -61,5 +61,6 @@ export function useSpotCheckTable({
     params,
     tableConfig,
     onDelete,
+    activity: { id: (r) => r.id, label: (r) => r.spot_check_no },
   });
 }

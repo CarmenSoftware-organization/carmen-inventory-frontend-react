@@ -2,7 +2,7 @@
 import type { UseFormReturn, FieldPath } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldInput } from "@/components/ui/field";
-import { Card } from "./recipe-category-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeCategoryFormValues } from "./recipe-category-form-schema";
 
 interface RecipeCategoryCostFieldsProps {
@@ -18,8 +18,9 @@ export function RecipeCategoryCostFields({
   const t = useTranslations("operationPlan.recipeCategory");
 
   return (
-    <Card
-      label={t("defaultCostSettings")}
+    <SettingSection
+      plain
+      title={t("defaultCostSettings")}
       description={t("defaultCostSettingsDesc")}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -45,7 +46,7 @@ export function RecipeCategoryCostFields({
           isDisabled={isDisabled}
         />
       </div>
-    </Card>
+    </SettingSection>
   );
 }
 

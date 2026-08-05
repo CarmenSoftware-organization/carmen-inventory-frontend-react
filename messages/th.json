@@ -378,7 +378,13 @@
     "errorEyebrow": "ปัญหาการเชื่อมต่อ",
     "errorTitle": "ไม่สามารถโหลดโปรไฟล์ได้",
     "errorDesc": "ตรวจสอบการเชื่อมต่อหรือลองใหม่อีกครั้ง เซสชันของคุณยังคงอยู่",
-    "retry": "ลองอีกครั้ง"
+    "retry": "ลองอีกครั้ง",
+    "noBuEyebrow": "รอสิทธิ์เข้าใช้งาน",
+    "noBuTitle": "บัญชีนี้ยังไม่ได้ผูกกับโรงแรมไหน",
+    "noBuDesc": "แจ้งหัวหน้างานหรือผู้ดูแลระบบให้เพิ่มคุณเข้าโรงแรมก่อน เพิ่มให้แล้วค่อยกลับมากดตรวจอีกครั้ง",
+    "noBuRetry": "ตรวจอีกครั้ง",
+    "signedInAs": "เข้าใช้งานในชื่อ {name}",
+    "signOut": "ออกจากระบบ"
   },
   "notFound": {
     "metaTitle": "ไม่พบหน้านี้",
@@ -592,7 +598,8 @@
       "invalidCredentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
       "loginFailed": "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
       "tooManyAttempts": "พยายามเข้าสู่ระบบบ่อยเกินไป ลองอีกครั้งใน {seconds} วินาที",
-      "tooManyAttemptsFallback": "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง"
+      "tooManyAttemptsFallback": "พยายามเข้าสู่ระบบบ่อยเกินไป กรุณาลองใหม่ภายหลัง",
+      "registerConflict": "อีเมลหรือชื่อผู้ใช้นี้ถูกใช้ไปแล้ว"
     },
     "eyebrow": "เข้าสู่ระบบ",
     "subtitle": "เข้าสู่พื้นที่ทำงานระบบสินค้าคงคลังของโรงแรมคุณ",
@@ -616,7 +623,24 @@
       "multiPropertyDesc": "พื้นที่ทำงานเดียว ใช้ได้ทุกสาขา",
       "hospitalityTitle": "เน้นโรงแรม",
       "hospitalityDesc": "รองรับสูตรอาหาร ใบเบิก และระดับสต็อก"
-    }
+    },
+    "createTitle": "สมัครใช้งาน",
+    "createSubtitle": "สร้างบัญชีเพื่อเข้าใช้ระบบสินค้าคงคลังของโรงแรม",
+    "firstNameLabel": "ชื่อ",
+    "lastNameLabel": "นามสกุล",
+    "usernameLabel": "ชื่อผู้ใช้",
+    "telephoneLabel": "เบอร์โทร (ไม่บังคับ)",
+    "confirmPasswordLabel": "ยืนยันรหัสผ่าน",
+    "createAccount": "สมัครใช้งาน",
+    "creatingAccount": "กำลังสมัคร...",
+    "noAccount": "ยังไม่มีบัญชี?",
+    "haveAccount": "มีบัญชีอยู่แล้ว?",
+    "goToSignIn": "ไปหน้าเข้าสู่ระบบ",
+    "registerDoneTitle": "สมัครเรียบร้อย",
+    "registerDoneSubtitle": "บัญชี Carmen ของคุณพร้อมใช้งานแล้ว",
+    "registerDoneHint": "เข้าสู่ระบบด้วยอีเมลและรหัสผ่านที่ตั้งไว้ ถ้ายังไม่เห็นสาขาของตัวเอง แจ้งหัวหน้างานให้เพิ่มสิทธิ์ให้",
+    "passwordHint": "อย่างน้อย {min} ตัวอักษร มีตัวพิมพ์ใหญ่ พิมพ์เล็ก ตัวเลข และอักขระพิเศษ",
+    "registerTermsLine": "การสมัครใช้งานถือว่าคุณยอมรับ<terms>ข้อตกลงการใช้บริการ</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>"
   },
   "toast": {
     "createSuccess": "สร้าง{entity}สำเร็จ",
@@ -648,13 +672,16 @@
     "offlineDesc": "บางฟีเจอร์อาจใช้งานไม่ได้จนกว่าจะเชื่อมต่ออินเทอร์เน็ต",
     "errorId": "รหัสข้อผิดพลาด",
     "copyErrorId": "คัดลอกรหัสข้อผิดพลาด",
-    "errorIdCopied": "คัดลอกรหัสข้อผิดพลาดแล้ว"
+    "errorIdCopied": "คัดลอกรหัสข้อผิดพลาดแล้ว",
+    "backToList": "กลับไปหน้ารายการ",
+    "goToDashboard": "ไปหน้าแดชบอร์ด"
   },
   "validation": {
     "required": "กรุณากรอก{field}",
     "minNumber": "{field}ต้องมีค่าอย่างน้อย {min}",
     "minZero": "{field}ต้องมีค่า 0 ขึ้นไป",
     "positive": "{field}ต้องมีค่ามากกว่า 0",
+    "maxReturnQty": "คืนได้ไม่เกินจำนวนที่รับ",
     "minLength": "{field}ต้องมีอย่างน้อย {min} ตัวอักษร",
     "maxLength": "{field}ต้องมีไม่เกิน {max} ตัวอักษร",
     "invalidEmail": "รูปแบบอีเมลไม่ถูกต้อง",
@@ -912,6 +939,9 @@
     "baseQty": "จำนวนฐาน",
     "baseUnit": "หน่วยฐาน",
     "receivedQty": "จำนวนรับ",
+    "received": "รับ",
+    "returnQty": "คืน",
+    "cnAmount": "ยอดลดหนี้",
     "receivedAt": "วันที่รับ",
     "remaining": "คงเหลือ",
     "receivedUnit": "หน่วยรับ",
@@ -1422,7 +1452,8 @@
         "period_end": "ปิดรอบ",
         "report": "รายงาน",
         "dashboard": "แดชบอร์ด"
-      }
+      },
+      "notFound": "ไม่พบบทบาท"
     },
     "user": {
       "assignRoles": "กำหนดบทบาท",
@@ -1446,7 +1477,8 @@
       "deleteTitle": "ลบผู้ใช้งาน",
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้งาน \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
       "deleteSuccess": "ลบผู้ใช้งานสำเร็จ",
-      "department": "แผนก"
+      "department": "แผนก",
+      "notFound": "ไม่พบผู้ใช้"
     },
     "document": {
       "entity": "เอกสาร",
@@ -1657,7 +1689,8 @@
       "newRule": "กฎใหม่ {n}",
       "generalDesc": "ชื่อ ประเภท และคำอธิบายของลำดับขั้นนี้",
       "status": "สถานะ",
-      "statusDesc": "กำหนดว่าลำดับขั้นนี้เปิดใช้งานเมื่อสร้างหรือไม่"
+      "statusDesc": "กำหนดว่าลำดับขั้นนี้เปิดใช้งานเมื่อสร้างหรือไม่",
+      "notFound": "ไม่พบลำดับขั้นอนุมัติ"
     },
     "runningCode": {
       "entity": "รหัสลำดับ",
@@ -1947,7 +1980,8 @@
         "emailPlaceholder": "email@example.com",
         "phonePlaceholder": "หมายเลขโทรศัพท์",
         "primary": "หลัก"
-      }
+      },
+      "notFound": "ไม่พบผู้ขาย"
     },
     "priceList": {
       "entity": "รายการราคา",
@@ -1997,7 +2031,8 @@
         "removeItem": "ลบสินค้า",
         "removeItemTitle": "ลบสินค้า",
         "removeItemConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?"
-      }
+      },
+      "notFound": "ไม่พบรายการราคา"
     },
     "priceListTemplate": {
       "entity": "แม่แบบรายการราคา",
@@ -2065,7 +2100,8 @@
         "removeItem": "ลบสินค้า",
         "removeItemTitle": "ลบสินค้า",
         "removeItemConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?"
-      }
+      },
+      "notFound": "ไม่พบแม่แบบรายการราคา"
     },
     "requestPriceList": {
       "entity": "ขอใบเสนอราคา",
@@ -2117,7 +2153,8 @@
         "selectVendorFirst": "กรุณาเลือกผู้ขายก่อนบันทึก",
         "copyUrl": "คัดลอก URL ผู้ขาย",
         "openUrl": "เปิด URL ผู้ขาย"
-      }
+      },
+      "notFound": "ไม่พบใบขอรายการราคา"
     }
   },
   "inventoryManagement": {
@@ -2535,7 +2572,8 @@
       "generalInformation": "ข้อมูลทั่วไป",
       "generalInfoDesc": "ชื่อและรายละเอียดของหมวดสูตรนี้",
       "defaultCostSettingsDesc": "ค่าแรงและค่าโสหุ้ยเริ่มต้น ที่สูตรในหมวดนี้จะใช้อัตโนมัติ",
-      "defaultProfitMarginsDesc": "เป้ากำไรเริ่มต้นของหมวดนี้ ใช้ช่วยตั้งราคาสูตร"
+      "defaultProfitMarginsDesc": "เป้ากำไรเริ่มต้นของหมวดนี้ ใช้ช่วยตั้งราคาสูตร",
+      "notFound": "ไม่พบหมวดสูตรอาหาร"
     },
     "cuisine": {
       "regionAsia": "เอเชีย",
@@ -2561,7 +2599,8 @@
       "untitledCuisine": "ประเภทอาหารไม่มีชื่อ",
       "generalInfoDesc": "ชื่อและรหัสของประเภทอาหาร (เช่น ไทย อิตาเลียน)",
       "cuisineDetailsDesc": "รายละเอียดของประเภทอาหารนี้",
-      "additionalDesc": "ข้อมูลเพิ่มเติมอื่น ๆ ของประเภทอาหารนี้"
+      "additionalDesc": "ข้อมูลเพิ่มเติมอื่น ๆ ของประเภทอาหารนี้",
+      "notFound": "ไม่พบประเภทอาหาร"
     },
     "equipment": {
       "entity": "อุปกรณ์",
@@ -2613,7 +2652,8 @@
       "specificationsDesc": "จุดที่ใช้งานและสเปคทางเทคนิค",
       "equipmentImage": "รูปภาพ",
       "equipmentImageDesc": "รูปให้พนักงานเห็นแล้วจำอุปกรณ์ได้",
-      "portableDesc": "อุปกรณ์นี้ย้ายไปใช้ตามจุดต่าง ๆ ได้ไหม"
+      "portableDesc": "อุปกรณ์นี้ย้ายไปใช้ตามจุดต่าง ๆ ได้ไหม",
+      "notFound": "ไม่พบอุปกรณ์"
     },
     "equipmentCategory": {
       "entity": "หมวดหมู่อุปกรณ์",
@@ -3206,15 +3246,7 @@
         "healthy": "พอใช้",
         "low": "ใกล้หมด",
         "critical": "วิกฤต"
-      },
-      "activity": "กิจกรรม",
-      "activityDesc": "ทุกอย่างที่ทำกับใบขอซื้อนี้ ล่าสุดอยู่บนสุด",
-      "activityEmpty": "ยังไม่มีกิจกรรม",
-      "activityNoChanges": "ไม่มีอะไรเปลี่ยน",
-      "activityLoadError": "โหลดกิจกรรมไม่สำเร็จ",
-      "activityAdded": "เพิ่ม",
-      "activityRemoved": "ลบ",
-      "activityUpdated": "แก้ไข"
+      }
     },
     "purchaseRequestTemplate": {
       "entity": "แม่แบบใบขอซื้อ",
@@ -3236,6 +3268,7 @@
     "purchaseOrder": {
       "entity": "ใบสั่งซื้อ",
       "tabWorkflowHistory": "ประวัติเวิร์กโฟลว์",
+      "noWorkflowHistory": "ไม่มีประวัติเวิร์กโฟลว์",
       "title": "ใบสั่งซื้อ",
       "desc": "จัดการใบสั่งซื้อ",
       "add": "เพิ่มใบสั่งซื้อ",
@@ -3403,6 +3436,7 @@
       "quantityReturn": "คืนสินค้า",
       "amountDiscount": "ลดราคา",
       "grnPlaceholder": "รหัสใบรับสินค้า",
+      "invoiceNoPlaceholder": "มาจาก GRN ที่เลือก",
       "cnNumberPlaceholder": "เช่น CN-2026-001",
       "refNoPlaceholder": "เช่น REF-001",
       "taxAmountLabel": "จำนวนภาษี",
@@ -3414,12 +3448,17 @@
       "selectFromGrnDesc": "เลือกรายการที่รับเข้าจาก GRN อ้างอิงเพื่อทำใบลดหนี้",
       "searchProduct": "ค้นหาสินค้าด้วยรหัสหรือชื่อ…",
       "alreadyAdded": "เพิ่มแล้ว",
+      "nothingReceived": "ไม่ได้รับของ",
       "noGrnItems": "ไม่มีรายการใน GRN นี้",
       "noGrnItemsDesc": "GRN อ้างอิงไม่มีรายการที่รับเข้าให้ทำใบลดหนี้",
+      "selectVendorFirst": "เลือกผู้ขายก่อน รายการที่คืนได้มาจากใบรับของของผู้ขายรายนั้น",
+      "selectGrnFirst": "เลือกใบรับของ (GRN) ก่อน รายการที่คืนได้มาจากของที่รับเข้าตามใบนั้น",
       "nItemsSelected": "เลือก {count} รายการ",
       "addNItems": "{count, plural, =0 {เพิ่ม} other {เพิ่ม # รายการ}}",
       "cnAmount": "จำนวนลดหนี้",
-      "overReturnWarning": "คืนเกินจำนวนรับ (รับ {received})"
+      "submitTitle": "ส่งใบลดหนี้",
+      "submitConfirm": "จะส่งใบลดหนี้เพื่ออนุมัติ คุณแน่ใจหรือไม่?",
+      "returnLine": "คืน"
     },
     "goodsReceiveNote": {
       "entity": "ใบรับสินค้า",
@@ -3429,7 +3468,6 @@
       "overReceiptWarning": "รับเกินจำนวนสั่ง (สั่ง {ordered})",
       "documentInfo": "ข้อมูลเอกสาร",
       "add": "เพิ่ม GRN",
-      "create": "สร้าง GRN",
       "edit": "แก้ไขใบรับสินค้า",
       "status": "สถานะ",
       "deleteTitle": "ลบใบรับสินค้า",
@@ -3449,7 +3487,7 @@
       "noItemsDesc": "เพิ่มรายการในใบรับสินค้านี้",
       "removeItem": "ลบรายการ",
       "deleteProduct": "ลบสินค้า",
-      "tabGeneral": "ทั่วไป",
+      "tabItems": "รายการ",
       "tabDetail": "รายละเอียด",
       "tabPayment": "การชำระเงิน",
       "tabExtraCost": "ค่าใช้จ่ายเพิ่ม",
@@ -3697,9 +3735,7 @@
     "removingLogo": "กำลังลบ…",
     "logoHint": "PNG, JPG, WebP ขนาดไม่เกิน 2MB",
     "logoUploaded": "อัปโหลดโลโก้สำเร็จ",
-    "logoUploadFailed": "อัปโหลดโลโก้ไม่สำเร็จ",
     "logoRemoved": "ลบโลโก้สำเร็จ",
-    "logoRemoveFailed": "ลบโลโก้ไม่สำเร็จ",
     "removeLogoConfirmTitle": "ยืนยันการลบโลโก้?",
     "removeLogoConfirmDesc": "การลบโลโก้ของ {name} ออกอย่างถาวร คุณสามารถอัปโหลดใหม่ได้ตลอด",
     "logoTypeError": "ไฟล์โลโก้ต้องเป็น PNG, JPG หรือ WebP",
@@ -3712,16 +3748,13 @@
     "buUploadingAvatar": "กำลังอัปโหลด…",
     "buRemovingAvatar": "กำลังลบ…",
     "buAvatarUploaded": "อัปโหลดอวาตาร์สำเร็จ",
-    "buAvatarUploadFailed": "อัปโหลดอวาตาร์ไม่สำเร็จ",
     "buAvatarRemoved": "ลบอวาตาร์สำเร็จ",
-    "buAvatarRemoveFailed": "ลบอวาตาร์ไม่สำเร็จ",
     "buAvatarTypeError": "ไฟล์อวาตาร์ต้องเป็น PNG, JPG หรือ WebP",
     "buAvatarSizeError": "ขนาดไฟล์อวาตาร์ต้องไม่เกิน 2MB",
     "removeBuAvatarConfirmTitle": "ยืนยันการลบอวาตาร์?",
     "removeBuAvatarConfirmDesc": "การลบอวาตาร์ของ {name} ออกอย่างถาวร คุณสามารถอัปโหลดใหม่ได้ตลอด",
     "uploadAvatar": "อัปโหลดรูปโปรไฟล์",
     "avatarUploaded": "อัปโหลดรูปโปรไฟล์สำเร็จ",
-    "avatarUploadFailed": "อัปโหลดรูปโปรไฟล์ไม่สำเร็จ",
     "cropAvatarTitle": "ปรับรูปโปรไฟล์",
     "cropAvatarDesc": "ลากเพื่อจัดตำแหน่งและเลื่อนแถบเพื่อซูม กดยืนยันเพื่ออัปโหลด",
     "zoom": "ซูม",
@@ -3739,9 +3772,7 @@
     "removeSignature": "ลบลายเซ็น",
     "removingSignature": "กำลังลบ…",
     "signatureUpdated": "อัปเดตลายเซ็นแล้ว",
-    "signatureUploadFailed": "อัปโหลดลายเซ็นไม่สำเร็จ",
     "signatureRemoved": "ลบลายเซ็นแล้ว",
-    "signatureRemoveFailed": "ลบลายเซ็นไม่สำเร็จ",
     "removeSignatureConfirmTitle": "ลบลายเซ็น?",
     "removeSignatureConfirmDesc": "การกระทำนี้จะลบลายเซ็นที่บันทึกไว้อย่างถาวร",
     "cancel": "ยกเลิก"
@@ -4087,7 +4118,12 @@
     "productManagementDesc": "แค็ตตาล็อกสินค้าและโครงสร้างหมวดหมู่",
     "storeOperationsDesc": "ใบเบิก เติมสินค้า และรายงานของเสีย",
     "systemAdminDesc": "ลำดับขั้นอนุมัติ ควบคุมการเข้าถึง และความปลอดภัย",
-    "vendorManagementDesc": "โปรไฟล์ผู้ขายและข้อตกลงราคา"
+    "vendorManagementDesc": "โปรไฟล์ผู้ขายและข้อตกลงราคา",
+    "entry": "บันทึกการนับ",
+    "review": "ตรวจทาน",
+    "setting": "ตั้งค่า",
+    "notifications": "การแจ้งเตือน",
+    "fromPriceList": "สร้างจากรายการราคา"
   },
   "commentSheet": {
     "title": "ความคิดเห็น ({count})",
@@ -4099,9 +4135,6 @@
     "added": "เพิ่มความคิดเห็นแล้ว",
     "updated": "แก้ไขความคิดเห็นแล้ว",
     "deleted": "ลบความคิดเห็นแล้ว",
-    "addFailed": "ไม่สามารถเพิ่มความคิดเห็นได้",
-    "updateFailed": "ไม่สามารถแก้ไขความคิดเห็นได้",
-    "deleteFailed": "ไม่สามารถลบความคิดเห็นได้",
     "uploadFailed": "ไม่สามารถอัปโหลดไฟล์ได้",
     "fileNotAllowed": "\"{name}\" — อนุญาตเฉพาะรูปภาพและเอกสาร",
     "fileTooLarge": "\"{name}\" มีขนาดเกิน 10 MB",
@@ -4507,5 +4540,34 @@
         "description": "ตัวอย่าง error state — fetcher reject ทุกครั้ง"
       }
     }
+  },
+  "history": {
+    "elapsedSeconds": "ใช้เวลา {count} วินาที",
+    "elapsedMinutes": "ใช้เวลา {count} นาที",
+    "elapsedHours": "ใช้เวลา {count} ชั่วโมง",
+    "elapsedDays": "ใช้เวลา {count} วัน",
+    "documentCreated": "สร้างเอกสาร",
+    "actionCreated": "สร้าง",
+    "actionUpdated": "แก้ไข",
+    "actionDeleted": "ลบ",
+    "actionSaved": "บันทึก",
+    "actionSubmitted": "ส่งอนุมัติ",
+    "actionApproved": "อนุมัติ",
+    "actionReviewed": "ตรวจสอบ",
+    "actionRejected": "ไม่อนุมัติ",
+    "actionCancelled": "ยกเลิกแล้ว",
+    "actionVoided": "ยกเลิกใบแล้ว",
+    "actionPrinted": "พิมพ์",
+    "actionCommented": "แสดงความเห็น"
+  },
+  "activity": {
+    "title": "กิจกรรม",
+    "description": "ทุกอย่างที่เกิดขึ้นกับรายการนี้ ล่าสุดขึ้นก่อน",
+    "empty": "ยังไม่มีกิจกรรมที่บันทึกไว้",
+    "noChanges": "ไม่มีอะไรเปลี่ยน",
+    "loadError": "โหลดกิจกรรมไม่สำเร็จ",
+    "added": "เพิ่ม",
+    "removed": "ลบ",
+    "updated": "แก้ไข"
   }
 }

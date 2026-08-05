@@ -1,6 +1,10 @@
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { SR_STATUS_CONFIG } from "@/constant/store-requisition";
@@ -27,7 +31,7 @@ interface SrCardProps {
 export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const { dateFormat, dateTimeFormat } = useProfile();
+  const { dateFormat } = useProfile();
 
   const config = SR_STATUS_CONFIG[item.doc_status] ?? SR_STATUS_CONFIG.draft;
 
@@ -75,23 +79,7 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
           {item.workflow_current_stage}
         </ListCardRow>
       )}
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

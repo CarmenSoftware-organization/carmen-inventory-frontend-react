@@ -9,7 +9,6 @@ import {
   type ColumnDef,
   type Row,
   getCoreRowModel,
-  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { memo, useCallback, useMemo, useState } from "react";
@@ -17,7 +16,8 @@ import { useTranslations } from "use-intl";
 import { Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FieldInput, FieldPlainText } from "@/components/ui/field";
+import { FieldPlainText } from "@/components/ui/field";
+import { InputQty } from "@/components/ui/input/input-qty";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
 import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
@@ -31,7 +31,7 @@ import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
 import { srItemAmount } from "./sr-form-helpers";
 import { Badge } from "@/components/ui/badge";
 import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
-import { SrItemHistorySheet } from "./sr-item-history";
+import { ItemHistorySheet } from "@/components/share/item-history-sheet";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
 const ProductCell = memo(function ProductCell({
@@ -199,12 +199,15 @@ const StatusCell = memo(function StatusCell({
   index,
   translate,
   role,
+  disabled,
 }: {
   control: Control<SrFormValues>;
   form?: UseFormReturn<SrFormValues>;
   index: number;
   translate: (value?: string) => string | undefined;
   role?: string;
+  /** ฟอร์มอยู่โหมดอ่าน — ปุ่มล้างสถานะต้องหายไป ไม่ใช่แค่จางลง */
+  disabled?: boolean;
 }) {
   "use no memo";
   const stageStatus =
@@ -217,9 +220,12 @@ const StatusCell = memo(function StatusCell({
   const config =
     SR_ITEM_STATUS_CONFIG[effective] ?? SR_ITEM_STATUS_CONFIG.pending;
 
-  // approver/issuer แก้สถานะได้; แต่ล็อกถ้า server ส่งมาแล้วเป็น approve/reject
+  // approver/issuer แก้สถานะได้ เฉพาะตอนอยู่โหมดแก้ไข; และล็อกถ้า server ส่งมา
+  // แล้วเป็น approve/reject — เกณฑ์เดียวกับ PR/PO
   const canEdit =
-    !!form && (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
+    !!form &&
+    !disabled &&
+    (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
   const isLockedFromServer =
     initialStatus === SR_ITEM_STAGE.APPROVE ||
     initialStatus === SR_ITEM_STAGE.REJECT;
@@ -276,31 +282,6 @@ const SR_NARROW_COL = 28;
 
 export type SrItemField = FieldArrayWithId<SrFormValues, "items", "id">;
 
-/**
- * ค้นหาในรายการของใบนี้ — ฝั่ง client ล้วน (items ทั้งใบอยู่ในฟอร์มแล้ว
- * ไม่ต้องยิง API) กวาดชื่อสินค้า/ชื่อท้องถิ่น/หน่วย/คำอธิบาย
- *
- * อ่านค่าจาก `form.getValues` ไม่ใช่ `row.original` เพราะ `fields` ของ
- * useFieldArray เป็น snapshot ตอน mount/reset — เปลี่ยนสินค้าในแถวแล้วค้นด้วย
- * ค่าเดิมจะได้ชื่อเก่า
- */
-function matchesSrSearch(
-  form: UseFormReturn<SrFormValues>,
-  index: number,
-  term: string,
-): boolean {
-  const q = term.trim().toLowerCase();
-  if (!q) return true;
-  const item = form.getValues(`items.${index}`);
-  if (!item) return false;
-  return [
-    item.product_name,
-    item.product_local_name,
-    item.unit_name,
-    item.description,
-  ].some((field) => (field ?? "").toLowerCase().includes(q));
-}
-
 interface UseSrItemTableOptions {
   form: UseFormReturn<SrFormValues>;
   itemFields: SrItemField[];
@@ -321,19 +302,14 @@ export function useSrItemTable({
   role,
 }: UseSrItemTableOptions) {
   "use no memo";
+  const t = useTranslations("storeOperation.storeRequisition");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
-  const [search, setSearch] = useState("");
 
-  // ระหว่างค้นหานับเฉพาะแถวที่เห็นอยู่ ให้ตรงกับ checkbox หัวตารางที่กวาด
-  // เฉพาะแถวที่ผ่านตัวกรอง
-  const matchedItems = itemFields.filter((_item, index) =>
-    matchesSrSearch(form, index, search),
-  );
-  const allCount = matchedItems.length;
-  const pendingCount = matchedItems.filter((item) => {
+  const allCount = itemFields.length;
+  const pendingCount = itemFields.filter((item) => {
     const status = item.current_stage_status ?? "";
     return !status || status === "pending";
   }).length;
@@ -419,11 +395,7 @@ export function useSrItemTable({
           const qtyError =
             form.formState.errors.items?.[row.index]?.requested_qty?.message;
           return (
-            <FieldInput
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="any"
+            <InputQty
               placeholder={tfl("qty")}
               className="text-right"
               disabled={disabled}
@@ -454,11 +426,7 @@ export function useSrItemTable({
                   );
                 }
                 return (
-                  <FieldInput
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="any"
+                  <InputQty
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"
@@ -497,11 +465,7 @@ export function useSrItemTable({
                   );
                 }
                 return (
-                  <FieldInput
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="any"
+                  <InputQty
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"
@@ -544,6 +508,7 @@ export function useSrItemTable({
             index={row.index}
             translate={translateStageStatus}
             role={role}
+            disabled={disabled}
           />
         ),
         size: 100,
@@ -558,9 +523,11 @@ export function useSrItemTable({
       cell: ({ row }) => (
         <div className="flex items-center justify-end">
           {(row.original.history?.length ?? 0) > 0 && (
-            <SrItemHistorySheet
+            <ItemHistorySheet
               history={row.original.history ?? []}
               productName={row.original.product_name}
+              statusConfig={SR_ITEM_STATUS_CONFIG}
+              label={t("tabWorkflowHistory")}
             />
           )}
           {canDelete && (
@@ -647,6 +614,7 @@ export function useSrItemTable({
     fromLocationId,
     toLocationId,
     role,
+    t,
     tfl,
     tc,
     translateStageStatus,
@@ -656,15 +624,7 @@ export function useSrItemTable({
   const table = useReactTable({
     data: itemFields,
     columns: allColumns,
-    state: { globalFilter: search },
-    onGlobalFilterChange: setSearch,
-    // กรองทั้งแถวทีเดียว ไม่สนว่า column ไหนเป็นคนเรียก · กรองที่ table ไม่ใช่
-    // ที่ `data` เพราะ `row.index` ต้องคงเป็น index ใน form array (ทุก cell
-    // ผูก `items.${index}` ไว้)
-    globalFilterFn: (row, _columnId, value: string) =>
-      matchesSrSearch(form, row.index, value),
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getRowId: (row) => row.id,
     enableRowSelection: (row) =>
       !isItemLocked(
@@ -680,7 +640,7 @@ export function useSrItemTable({
 
   const handleSelectPending = () => {
     const selection: Record<string, boolean> = {};
-    for (const field of matchedItems) {
+    for (const field of itemFields) {
       const status = field.current_stage_status ?? "";
       if (!status || status === "pending") {
         selection[field.id] = true;
@@ -692,9 +652,6 @@ export function useSrItemTable({
 
   return {
     table,
-    search,
-    setSearch,
-    visibleCount: table.getFilteredRowModel().rows.length,
     selectDialogOpen,
     setSelectDialogOpen,
     allCount,

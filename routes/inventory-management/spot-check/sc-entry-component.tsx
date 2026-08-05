@@ -125,7 +125,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
   const virtualItems = rowVirtualizer.getVirtualItems();
 
   if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const handleCommitCount = (id: string, value: number | null) => {
     setCounts((prev) => {

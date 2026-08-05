@@ -26,6 +26,8 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
+import { ApiError } from "@/lib/api-error";
+import { useErrorToast } from "@/hooks/use-error-toast";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
@@ -69,6 +71,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
   const buCode = useBuCode();
   const { userId, data: profile } = useProfile();
   const queryClient = useQueryClient();
+  const errorToast = useErrorToast();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -102,15 +105,12 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
         API_ENDPOINTS.PURCHASE_ORDER_GROUP_PR(buCode),
         { pr_ids: prIds },
       );
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.message || "Failed to group PRs");
-      }
+      if (!res.ok) throw await ApiError.from(res, "Failed to group PRs");
       const json = await res.json();
       setGroupedData(json.data.groups);
       setStep(2);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to group PRs");
+      errorToast(err);
     } finally {
       setIsGrouping(false);
     }
@@ -139,10 +139,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
           buyer_name: buyerName,
         },
       );
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.message || "Failed to confirm PRs");
-      }
+      if (!res.ok) throw await ApiError.from(res, "Failed to confirm PRs");
       await res.json();
       toast.success(tt("createSuccess", { entity: t("entity") }));
       await queryClient.invalidateQueries({
@@ -150,7 +147,7 @@ export function PoFromPrDialog({ open, onOpenChange }: PoFromPrDialogProps) {
       });
       onOpenChange(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to confirm PRs");
+      errorToast(err);
     } finally {
       setIsConfirming(false);
     }

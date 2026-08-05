@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/field";
 import { ALLERGEN_OPTIONS } from "@/constant/recipe";
 import { cn } from "@/lib/utils";
-import { Card, CardSubLabel } from "./recipe-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
+import { CardSubLabel } from "./recipe-card-sub-label";
 import type { RecipeFormValues } from "./recipe-form-schema";
 
 interface RecipeComplianceFieldsProps {
@@ -64,7 +65,11 @@ export function RecipeComplianceFields({
   return (
     <>
       {/* Allergens & tags */}
-      <Card label={t("safetyCompliance")} description={t("safetyComplianceDesc")}>
+      <SettingSection
+        plain
+        title={t("safetyCompliance")}
+        description={t("safetyComplianceDesc")}
+      >
         <FieldGroup className="gap-4">
           <div>
             <CardSubLabel className="flex items-center gap-1.5">
@@ -183,7 +188,7 @@ export function RecipeComplianceFields({
             </FieldDescription>
           </div>
         </FieldGroup>
-      </Card>
+      </SettingSection>
     </>
   );
 }

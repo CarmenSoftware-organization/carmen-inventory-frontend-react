@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { usePurchaseRequestById } from "@/hooks/use-purchase-request";
 import { PurchaseRequestForm } from "./pr-form";
@@ -15,9 +14,15 @@ export function EditPurchaseRequestContent({ id }: { id: string }) {
   } = usePurchaseRequestById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!purchaseRequest) return <ErrorState message={t("notFound")} />;
+  if (error || !purchaseRequest)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/procurement/purchase-request"
+      />
+    );
 
   return <PurchaseRequestForm purchaseRequest={purchaseRequest} />;
 }

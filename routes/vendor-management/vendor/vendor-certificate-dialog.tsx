@@ -140,7 +140,6 @@ export function VendorCertificateDialog({
         );
         onOpenChange(false);
       },
-      onError: (err: Error) => toast.error(err.message),
     };
 
     if (isEdit) {

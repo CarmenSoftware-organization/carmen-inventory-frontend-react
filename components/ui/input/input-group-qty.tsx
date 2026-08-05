@@ -1,51 +1,41 @@
 import * as React from "react";
 
 import { InputGroupInput } from "@/components/ui/input-group";
-import { useProfile } from "@/hooks/use-profile";
+import {
+  capQtyDecimals,
+  DEFAULT_QTY_DECIMALS,
+  QTY_STEP,
+} from "@/components/ui/input/qty-decimals";
 
 type Props = Omit<
   React.ComponentProps<typeof InputGroupInput>,
   "type" | "step" | "inputMode"
->;
+> & {
+  /** เพดานทศนิยม (default `DEFAULT_QTY_DECIMALS`; ส่ง `useUnitDecimals(...)` เข้ามาเพื่อใช้ค่าจริงของหน่วย) */
+  readonly decimals?: number;
+};
 
 /**
- * InputGroupQty — เวอร์ชัน InputGroup ของ InputQty (number input สำหรับจำนวน)
+ * InputGroupQty — เวอร์ชัน InputGroup ของ `InputQty`
  *
  * ใช้เมื่อ qty ต้องอยู่ในกล่อง InputGroup เดียวกับ addon (เช่นหน่วยนับ) — render
  * เป็น InputGroupInput (borderless, data-slot=input-group-control) แทน FieldInput
- * ที่มี wrapper div ของตัวเอง. logic decimal เหมือน InputQty ทุกอย่าง:
- * - รับ config `quantity_format` จาก business unit profile
- * - กันพิมพ์ทศนิยมเกิน `resolvedDecimals` ตำแหน่งผ่าน onChange interceptor
+ * ที่มี wrapper div ของตัวเอง · กติกาทศนิยมใช้ร่วมกันที่ `qty-decimals`
  */
-export function InputGroupQty({ placeholder, onChange, ...props }: Props) {
-  const { defaultBu } = useProfile();
-  const resolvedDecimals =
-    defaultBu?.config?.quantity_format?.minimumIntegerDigits ?? 3;
-
-  const computedStep =
-    resolvedDecimals > 0
-      ? `0.${"0".repeat(Math.max(resolvedDecimals - 1, 0))}1`
-      : "1";
-  const computedPlaceholder =
-    placeholder ??
-    (resolvedDecimals > 0 ? `0.${"0".repeat(resolvedDecimals)}` : "0");
-
+export function InputGroupQty({
+  decimals = DEFAULT_QTY_DECIMALS,
+  onChange,
+  ...props
+}: Props) {
   return (
     <InputGroupInput
       type="number"
       inputMode="decimal"
-      step={computedStep}
-      placeholder={computedPlaceholder}
+      step={QTY_STEP}
+      placeholder="0"
       {...props}
       onChange={(e) => {
-        const val = e.currentTarget.value;
-        const dot = val.indexOf(".");
-        if (dot !== -1 && val.length - dot - 1 > resolvedDecimals) {
-          e.currentTarget.value =
-            resolvedDecimals > 0
-              ? val.slice(0, dot + resolvedDecimals + 1)
-              : val.slice(0, dot);
-        }
+        capQtyDecimals(e.currentTarget, decimals);
         onChange?.(e);
       }}
     />

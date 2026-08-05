@@ -92,6 +92,17 @@ export function useGrnFormActions({
     onCancel: navGuard.cancel,
   };
 
+  /**
+   * บันทึกใบ (draft → saved) สำเร็จ → กลับหน้ารายการ เหมือน PR/PO
+   *
+   * เฉพาะขั้น "ปิดจบ" เท่านั้น — บันทึกร่างเฉย ๆ ยังอยู่หน้าเดิม เพราะคนกรอก
+   * มักจะกรอกต่อ ไม่ใช่กรอกเสร็จ
+   */
+  const onSavedToList = () => {
+    toast.success(tt("updateSuccess", { entity: t("entity") }));
+    navigate("/procurement/goods-receive-note");
+  };
+
   const onSubmit = (values: GrnFormValues) => {
     const isManual = values.doc_type === "manual";
 
@@ -215,11 +226,7 @@ export function useGrnFormActions({
       if (Object.keys(patchPayload).length === 0) {
         if (willCallSave) {
           saveGrn.mutate(goodsReceiveNote.id, {
-            onSuccess: () => {
-              toast.success(tt("updateSuccess", { entity: t("entity") }));
-              setIsSubmitting(false);
-              setMode("view");
-            },
+            onSuccess: onSavedToList,
             onError: () => setIsSubmitting(false),
           });
           return;
@@ -249,7 +256,7 @@ export function useGrnFormActions({
             };
             if (willCallSave) {
               saveGrn.mutate(goodsReceiveNote.id, {
-                onSuccess: finalize,
+                onSuccess: onSavedToList,
                 onError: () => setIsSubmitting(false),
               });
             } else {
@@ -277,9 +284,11 @@ export function useGrnFormActions({
               });
             }
           };
+          // สร้างแล้วปิดจบเลย → กลับหน้ารายการ · สร้างเป็นร่าง → เข้าหน้าใบที่
+          // เพิ่งสร้างเพื่อกรอกต่อ
           if (values.doc_status === "saved" && newId) {
             saveGrn.mutate(newId, {
-              onSuccess: finalize,
+              onSuccess: onSavedToList,
               onError: () => setIsSubmitting(false),
             });
           } else {

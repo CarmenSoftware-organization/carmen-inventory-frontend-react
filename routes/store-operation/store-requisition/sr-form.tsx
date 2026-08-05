@@ -4,8 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
 import { useProfile } from "@/hooks/use-profile";
 import {
   SR_TYPE,
@@ -108,15 +106,6 @@ export function StoreRequisitionForm({
     control: form.control,
     name: "department_id",
   });
-  const description = useWatch({ control: form.control, name: "description" });
-
-  // description แก้ได้เฉพาะผู้สร้าง (role CREATE) — ขั้น approve/issue/view lock
-  const srRole = storeRequisition?.role ?? STAGE_ROLE.CREATE;
-  const isDescReadOnly =
-    isView ||
-    srRole === STAGE_ROLE.APPROVE ||
-    srRole === STAGE_ROLE.ISSUE ||
-    srRole === STAGE_ROLE.VIEW_ONLY;
 
   const [fromLocInfo, setFromLocInfo] = useState<LocationInfo>({
     name: storeRequisition?.from_location_name ?? "",
@@ -229,33 +218,9 @@ export function StoreRequisitionForm({
           isAdd={isAdd}
         />
 
-        {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
-        {(!isDescReadOnly || description?.trim()) && (
-          <Field>
-            <FieldLabel
-              htmlFor="sr-description"
-              className={
-                isDescReadOnly ? "text-muted-foreground font-normal" : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {isDescReadOnly ? (
-              <FieldPlainText className="text-xs">
-                <span className="whitespace-pre-line">{description}</span>
-              </FieldPlainText>
-            ) : (
-              <Textarea
-                id="sr-description"
-                placeholder={t("optionalDescription")}
-                className="min-h-13"
-                maxLength={256}
-                disabled={actions.isPending}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        )}
+        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO/GRN)
+            สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ ก้อนล่างกวาดตาทีละแถว */}
+        <hr className="border-border" />
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList variant="line">

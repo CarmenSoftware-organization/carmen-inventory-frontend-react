@@ -2,7 +2,7 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Sparkles } from "lucide-react";
 import { FieldInput } from "@/components/ui/field";
-import { Card } from "./recipe-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeFormValues } from "./recipe-form-schema";
 import type { RecipeComputed } from "./use-recipe-cost-calc";
 
@@ -33,7 +33,7 @@ export function RecipeCostHero({
   const suggested = computed.suggestedPrice;
 
   return (
-    <Card label={t("pricing")} description={t("pricingDesc")}>
+    <SettingSection plain title={t("pricing")} description={t("pricingDesc")}>
       <div className="space-y-4">
         {/* Cost per portion — computed · accent อยู่ที่ตัวเลข */}
         <div>
@@ -79,6 +79,6 @@ export function RecipeCostHero({
           )}
         </div>
       </div>
-    </Card>
+    </SettingSection>
   );
 }

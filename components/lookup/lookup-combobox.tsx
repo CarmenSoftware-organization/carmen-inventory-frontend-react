@@ -173,8 +173,17 @@ export function LookupCombobox<T>({
       ? items
       : items.filter((item) => searchFn(item).toLowerCase().includes(q));
 
+  // item ที่ผู้ใช้เพิ่งกดเลือก — เก็บไว้เผื่อมันหลุดออกจาก `items`
+  //
+  // เลือกเสร็จเราล้างคำค้นทิ้ง (setSearch("")) พอเป็น serverSideSearch ตัว
+  // caller จะยิงโหลดหน้าแรกใหม่แบบไม่มีคำค้น ตัวที่เพิ่งเลือกมักไม่อยู่ใน 30
+  // รายการแรก → หา `selectedItem` ไม่เจอ → ป้ายบนปุ่มกลับไปเป็น placeholder
+  // ทั้งที่ค่าถูกเก็บแล้ว (บั๊กเดิม: ค้น "กรอ" แล้วเลือก ช่องขึ้น "Select Product")
+  const [pickedItem, setPickedItem] = useState<T | null>(null);
+
   const selectedItem = value
-    ? items.find((item) => getId(item) === value)
+    ? (items.find((item) => getId(item) === value) ??
+      (pickedItem && getId(pickedItem) === value ? pickedItem : undefined))
     : undefined;
   let selectedLabel: string | null = null;
   if (value) {
@@ -338,9 +347,11 @@ export function LookupCombobox<T>({
                     )}
                     onClick={() => {
                       const id = getId(item);
+                      const isUnselect = value === id;
+                      setPickedItem(isUnselect ? null : item);
                       onValueChange(
-                        value === id ? "" : id,
-                        value === id ? undefined : item,
+                        isUnselect ? "" : id,
+                        isUnselect ? undefined : item,
                       );
                       // ปิดทั้งสองทาง: uncontrolled ปิดเอง ส่วน controlled ให้
                       // caller เป็นคนปิดผ่าน onOpenChange

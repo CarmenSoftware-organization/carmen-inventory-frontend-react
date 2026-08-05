@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { ErrorState } from "@/components/ui/error-state";
 import { useNotificationTemplateById } from "@/hooks/use-notification-template";
@@ -13,7 +12,7 @@ export function NotiTmplDetailContent({ id }: { readonly id: string }) {
 
   if (isLoading) return <NotificationTemplateFormSkeleton />;
   if (error) {
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
   if (!data) return <ErrorState message={tc("noDataFound")} />;
 

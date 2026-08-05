@@ -289,8 +289,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
     getItemKey: (i) => filtered[i]?.id ?? i,
   });
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const locationName = pcData?.location_name ?? "";
   const locationCode = pcData?.location_code ?? "";

@@ -1,4 +1,4 @@
-
+import { useTranslations } from "use-intl";
 import { usePriceListTemplateById } from "@/hooks/use-price-list-template";
 import { PriceListTemplateForm } from "./plt-form";
 import { ErrorState } from "@/components/ui/error-state";
@@ -22,6 +22,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * ```
  */
 export function EditPriceListTemplateContent({ id }: { id: string }) {
+  const tErr = useTranslations("vendorManagement.priceListTemplate");
   const {
     data: priceListTemplate,
     isLoading,
@@ -30,10 +31,15 @@ export function EditPriceListTemplateContent({ id }: { id: string }) {
   } = usePriceListTemplateById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!priceListTemplate)
-    return <ErrorState message="Price list template not found" />;
+  if (error || !priceListTemplate)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={tErr("notFound")}
+        onRetry={() => refetch()}
+        backTo="/vendor-management/price-list-template"
+      />
+    );
 
   return <PriceListTemplateForm priceListTemplate={priceListTemplate} />;
 }

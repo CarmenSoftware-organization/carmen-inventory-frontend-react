@@ -27,7 +27,7 @@ export function CommentButton({ count, onClick }: CommentButtonProps) {
   const label = count ? `${tc("comment")} (${count})` : tc("comment");
 
   return (
-    <Button type="button" size="sm" variant="info" onClick={onClick}>
+    <Button type="button" size="sm" variant="outline" onClick={onClick}>
       <MessageSquare aria-hidden="true" />
       {label}
     </Button>

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { LookupRecipeCategory } from "@/components/lookup/lookup-recipe-category";
-import { Card } from "./recipe-category-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeCategoryFormValues } from "./recipe-category-form-schema";
 
 interface RecipeCategoryGeneralFieldsProps {
@@ -32,9 +32,10 @@ export function RecipeCategoryGeneralFields({
   const errors = form.formState.errors;
 
   return (
-    <Card
+    <SettingSection
+      plain
       first
-      label={tf("generalInfo")}
+      title={tf("generalInfo")}
       description={t("generalInfoDesc")}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -103,6 +104,6 @@ export function RecipeCategoryGeneralFields({
           {...form.register("description")}
         />
       </Field>
-    </Card>
+    </SettingSection>
   );
 }

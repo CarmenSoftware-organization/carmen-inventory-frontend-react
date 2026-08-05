@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { useGoodsReceiveNoteById } from "@/hooks/use-goods-receive-note";
 import { GrnForm } from "./grn-form";
@@ -19,12 +18,23 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  */
 export function EditGoodsReceiveNoteContent({ id }: { id: string }) {
   const t = useTranslations("procurement.goodsReceiveNote");
-  const { data: goodsReceiveNote, isLoading, error, refetch } = useGoodsReceiveNoteById(id);
+  const {
+    data: goodsReceiveNote,
+    isLoading,
+    error,
+    refetch,
+  } = useGoodsReceiveNoteById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!goodsReceiveNote) return <ErrorState message={t("notFound")} />;
+  if (error || !goodsReceiveNote)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/procurement/goods-receive-note"
+      />
+    );
 
   return <GrnForm goodsReceiveNote={goodsReceiveNote} />;
 }

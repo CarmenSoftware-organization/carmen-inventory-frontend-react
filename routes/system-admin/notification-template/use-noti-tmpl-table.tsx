@@ -104,5 +104,6 @@ export function useNotiTmplTable({
     totalRecords,
     params,
     tableConfig,
+    activity: { id: (r) => r.id, label: (r) => r.name },
   });
 }

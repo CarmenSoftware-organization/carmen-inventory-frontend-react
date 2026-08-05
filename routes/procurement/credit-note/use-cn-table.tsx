@@ -2,7 +2,6 @@ import { useTranslations } from "use-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { AuditCell } from "@/components/share/audit-cell";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import type { CreditNote } from "@/types/credit-note";
 import type { ParamsDto } from "@/types/params";
@@ -10,7 +9,10 @@ import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
-import { columnSkeletons } from "@/components/ui/data-grid/columns";
+import {
+  auditColumns,
+  columnSkeletons,
+} from "@/components/ui/data-grid/columns";
 import { Badge } from "@/components/ui/badge";
 import { CN_STATUS_CONFIG, CN_TYPE_CONFIG } from "@/constant/credit-note";
 
@@ -45,7 +47,7 @@ export function useCnTable({
           {row.original.cn_no}
         </CellAction>
       ),
-      size: 200,
+      size: 100,
       meta: { headerTitle: tfl("cnNo"), skeleton: columnSkeletons.text },
     },
     {
@@ -53,7 +55,7 @@ export function useCnTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      size: 300,
+      size: 200,
       meta: { headerTitle: tfl("vendor"), skeleton: columnSkeletons.text },
     },
     {
@@ -74,7 +76,6 @@ export function useCnTable({
           </Badge>
         );
       },
-      size: 180,
       meta: {
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.text,
@@ -91,7 +92,6 @@ export function useCnTable({
         />
       ),
       cell: ({ row }) => formatDate(row.original.cn_date, dateFormat),
-      size: 160,
       meta: {
         headerTitle: tfl("docDate"),
         skeleton: columnSkeletons.text,
@@ -110,7 +110,6 @@ export function useCnTable({
           </Badge>
         );
       },
-      size: 160,
       meta: {
         headerTitle: tfl("status"),
         skeleton: columnSkeletons.text,
@@ -147,39 +146,8 @@ export function useCnTable({
         skeleton: columnSkeletons.text,
         cellClassName: "text-right",
       },
-      size: 200,
     },
-    {
-      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
-    },
+    ...auditColumns<CreditNote>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<CreditNote>({
@@ -190,6 +158,9 @@ export function useCnTable({
     tableConfig,
     onDelete,
     hideStatus: true,
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
+    activity: { id: (r) => r.id, label: (r) => r.cn_no },
   });
 }

@@ -164,8 +164,6 @@ export interface GoodsReceiveNote {
   doc_version?: number;
   // list/detail response omit raw created/updated fields — gateway enrich เป็น audit object
   audit?: Audit;
-  deleted_at: string | null;
-  deleted_by_id: string | null;
   // Detail items (nested: detail → items[])
   good_received_note_detail: GoodsReceiveNoteDetail[];
   // Extra cost
@@ -190,6 +188,8 @@ export interface GrnDetailPayload {
   received_base_qty: number;
   received_base_unit_id?: string | null;
   received_unit_conversion_factor: number;
+  /** ราคาต่อหน่วยที่รับ — backend บังคับเมื่อ received_qty > 0 */
+  received_price: number;
   tax_profile_id?: string | null;
   tax_rate: number;
   tax_amount: number;

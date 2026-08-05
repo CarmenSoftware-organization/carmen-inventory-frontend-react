@@ -64,7 +64,7 @@ export function CnGeneralFields({ form, disabled }: CnGeneralFieldsProps) {
     // 6 คอลัมน์ยืดเต็มความกว้าง (ไม่ล็อก 10rem) — แถวแรกจบพอดีที่ GRN Date
     // ต่อจากเหตุผล และแถวสองจบพอดีที่ Tax Invoice Date ต่อจากเลขที่ใบกำกับภาษี
     // ของเดิม 5 คอลัมน์ทำให้ทั้งสองช่องนั้นตกไปขึ้นบรรทัดใหม่คนละแถวกับคู่ของมัน
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
+    <div className="grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
       <Field>
         <FieldLabel required>{t("cnType")}</FieldLabel>
         <Controller
@@ -175,7 +175,13 @@ export function CnGeneralFields({ form, disabled }: CnGeneralFieldsProps) {
 
       <Field>
         <FieldLabel>{tfl("invoiceNo")}</FieldLabel>
-        <Input value={invoiceNo} disabled />
+        {/* ช่องนี้กรอกเองไม่ได้ — ค่ามาจาก GRN ที่เลือก · placeholder จึงบอก
+            ที่มา ไม่ใช่ตัวอย่างรูปแบบเลขที่ (แบบ GRN ที่พิมพ์เองได้) */}
+        <Input
+          value={invoiceNo}
+          placeholder={t("invoiceNoPlaceholder")}
+          disabled
+        />
       </Field>
 
       <Field>
@@ -259,6 +265,21 @@ export function CnGeneralFields({ form, disabled }: CnGeneralFieldsProps) {
               error={errors.tax_invoice_date?.message}
             />
           )}
+        />
+      </Field>
+
+      {/* คำอธิบายอยู่ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยกใต้ฟอร์ม — ช่อง
+          บรรทัดเดียวกว้าง 2 คอลัมน์ ไม่ใช่ Textarea เพราะจำกัด 256 ตัวอักษร
+          อยู่แล้ว เป็นข้อความสั้น ไม่ใช่บันทึกยาว */}
+      <Field className="lg:col-span-2">
+        <FieldLabel htmlFor="cn-description">{tfl("description")}</FieldLabel>
+        <Input
+          id="cn-description"
+          placeholder={tfl("optional")}
+          maxLength={256}
+          disabled={disabled}
+          className="text-xs"
+          {...form.register("description")}
         />
       </Field>
     </div>

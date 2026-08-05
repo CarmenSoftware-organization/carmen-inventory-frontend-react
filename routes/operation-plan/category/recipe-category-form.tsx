@@ -152,6 +152,7 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
         onEdit={handleEdit}
         onCancel={handleCancel}
         onDelete={category ? () => setShowDelete(true) : undefined}
+        activityId={category?.id}
       />
 
       <form

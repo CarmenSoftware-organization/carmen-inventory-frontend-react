@@ -6,6 +6,7 @@ import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { Badge } from "@/components/ui/badge";
@@ -85,9 +86,9 @@ export default function ScheduleComponent() {
           emptyMessage={<EmptyComponent />}
         >
           <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
-            <div className="flex-1 overflow-auto">
+            <DataGridScrollArea>
               <DataGridTable />
-            </div>
+            </DataGridScrollArea>
           </DataGridContainer>
         </DataGrid>
       </div>

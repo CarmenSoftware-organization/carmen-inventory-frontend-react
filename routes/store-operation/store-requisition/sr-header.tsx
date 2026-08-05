@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/sheet";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { WorkflowTrack } from "@/components/share/workflow-track";
-import { SrWorkflowHistory } from "./sr-workflow-history";
+import { WorkflowHistoryTimeline } from "@/components/share/workflow-history-timeline";
+import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
@@ -29,6 +30,7 @@ import type {
   StoreRequisition,
   StoreRequisitionType,
 } from "@/types/store-requisition";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface SrHeaderProps {
   readonly storeRequisition?: StoreRequisition;
@@ -76,6 +78,7 @@ export function SrHeader({
   onComment,
 }: SrHeaderProps) {
   const t = useTranslations("storeOperation.storeRequisition");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
@@ -83,7 +86,6 @@ export function SrHeader({
 
   const isView = mode === "view";
   const isAdd = mode === "add";
-  const isEdit = mode === "edit";
   const docStatus = storeRequisition?.doc_status;
   // draft/add ยังไม่เข้า workflow — ซ่อน workflow step (เหมือน PR)
   const isDraft = !docStatus || docStatus === "draft";
@@ -160,10 +162,10 @@ export function SrHeader({
             <Save aria-hidden="true" />
             {isPending ? getModeLabels(mode, t("entity")).pending : tc("save")}
           </Button>
-          {isEdit && storeRequisition && (
+          {storeRequisition && (
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={onDelete}
               disabled={isPending || isDeletePending}
@@ -176,6 +178,19 @@ export function SrHeader({
       )}
       {storeRequisition && onComment && (
         <CommentButton count={comments?.length} onClick={onComment} />
+      )}
+      {storeRequisition && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(storeRequisition.id, storeRequisition.sr_no)
+          }
+        >
+          <History aria-hidden="true" />
+          {tActivity("title")}
+        </Button>
       )}
       {isView && storeRequisition?.id && (
         <PrintDocumentButton
@@ -193,10 +208,9 @@ export function SrHeader({
 
   const workflowHistorySheet = hasHistory ? (
     <Sheet open={showHistory} onOpenChange={setShowHistory}>
-      <SheetContent
-        side="right"
-        className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
-      >
+      {/* ไม่ override ความกว้าง — ใช้ค่า default ของ SheetContent
+          (w-3/4 sm:max-w-sm) ให้เท่ากับ comment sheet */}
+      <SheetContent side="right" className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -204,10 +218,12 @@ export function SrHeader({
           </SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-4">
-          <SrWorkflowHistory
+          <WorkflowHistoryTimeline
             history={workflowHistory}
+            statusConfig={SR_WORKFLOW_ACTION_CONFIG}
+            emptyLabel={t("noWorkflowHistory")}
             requestorName={requesterName}
-            createdAt={storeRequisition?.created_at}
+            createdAt={storeRequisition?.audit?.created?.at}
           />
         </div>
       </SheetContent>
@@ -228,7 +244,7 @@ export function SrHeader({
   // ml-4 หักล้าง -ml-4 ของ DocFormHeader · workflow ไม่อยู่ที่นี่ — อยู่ในบล็อก
   // ฟอร์มด้านล่างที่เดียวทุกโหมด
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
       <Field>
         <FieldLabel>{tfl("srDate")}</FieldLabel>
         <Input value={srDate ? formatDate(srDate, dateFormat) : "—"} disabled />

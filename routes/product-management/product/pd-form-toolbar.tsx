@@ -8,8 +8,9 @@ import {
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import type { FormMode } from "@/types/form";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { useTranslations } from "use-intl";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface FormToolbarProps {
   readonly product?: ProductDetail;
@@ -35,6 +36,7 @@ function FormToolbar({
   onDelete,
 }: FormToolbarProps) {
   const tc = useTranslations("common");
+  const tActivity = useTranslations("activity");
   const tf = useTranslations("form");
   const t = useTranslations("productManagement.product");
   const isView = mode === "view";
@@ -104,6 +106,18 @@ function FormToolbar({
 
   const actions = (
     <>
+      {/* ปุ่มประวัติอยู่ซ้ายสุด — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+      {product && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => openActivity(product.id, product.code)}
+        >
+          <History aria-hidden="true" />
+          {tActivity("title")}
+        </Button>
+      )}
       {isEdit && product && (
         <Button
           type="button"

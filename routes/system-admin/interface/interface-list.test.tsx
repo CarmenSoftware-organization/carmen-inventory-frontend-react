@@ -9,10 +9,6 @@ function config(key: string, value: Record<string, unknown>): AppConfig {
     id: key,
     key,
     value,
-    created_at: null,
-    created_by_id: null,
-    updated_at: null,
-    updated_by_id: null,
   };
 }
 

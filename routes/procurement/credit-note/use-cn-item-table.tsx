@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   useWatch,
   type Control,
@@ -8,25 +8,30 @@ import {
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
+  type ExpandedState,
   getCoreRowModel,
+  getExpandedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   InputSuffixAddon,
   InputSuffixField,
   InputSuffixInput,
   InputSuffixPlain,
+  InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
 import {
   DiscountOverrideInput,
+  OverrideToggle,
   TaxOverrideInput,
 } from "@/components/procurement/discount-tax-override";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
+import { useUnitDecimals } from "@/hooks/use-product-units";
 import { formatCurrency } from "@/lib/currency-utils";
+import { COMBO_COL } from "../combo-col-width";
 import type { CnFormValues } from "./cn-form-schema";
 import {
   computeCnItemAmounts,
@@ -35,6 +40,43 @@ import {
 } from "./cn-item-compute";
 
 export type CnItemField = FieldArrayWithId<CnFormValues, "items", "id">;
+
+/**
+ * ความกว้าง (px) ของคอลัมน์ — ใช้ร่วมกันระหว่างแถวหลัก (ยอดตาม GRN) กับแถวที่
+ * กางออก (ฝั่งคืน) สองแถวจึงตรงคอลัมน์กัน วันไหนปรับก็ปรับที่นี่ที่เดียว
+ *
+ * discount/tax กว้างตาม combo ของฝั่งคืนเสมอ แม้แถวหลักจะเป็นตัวเลขล้วน —
+ * ถ้าย่อตามแถวหลัก แถวกางจะไม่มีที่พอให้ [rate | ยอด | override]
+ */
+const CN_COL = {
+  leading: 36,
+  product: 200,
+  location: 130,
+  qty: 130,
+  price: 100,
+  sub: 110,
+  discount: COMBO_COL.discount,
+  net: 96,
+  tax: COMBO_COL.tax,
+  amount: 120,
+  action: 40,
+} as const;
+
+/** ผลรวมความกว้างของช่วงที่แถวกางครอบ (product → amount, +action ถ้ามี) */
+function cnReturnRowTotal(showActionCol: boolean): number {
+  return (
+    CN_COL.product +
+    CN_COL.location +
+    CN_COL.qty +
+    CN_COL.price +
+    CN_COL.sub +
+    CN_COL.discount +
+    CN_COL.net +
+    CN_COL.tax +
+    CN_COL.amount +
+    (showActionCol ? CN_COL.action : 0)
+  );
+}
 
 /** อ่านค่าที่ต้องใช้คำนวณของ item เดียว → computeCnItemAmounts (honor override) */
 function useCnItemLine(
@@ -119,7 +161,9 @@ export const CnItemComputedSync = memo(function CnItemComputedSync({
       }
     } else if (!isDiscAdj) {
       // discount_amount: เขียนเฉพาะโหมด auto (override → คงค่า user)
-      if (form.getValues(`items.${index}.discount_amount`) !== discount_amount) {
+      if (
+        form.getValues(`items.${index}.discount_amount`) !== discount_amount
+      ) {
         form.setValue(`items.${index}.discount_amount`, discount_amount);
       }
     }
@@ -136,7 +180,16 @@ export const CnItemComputedSync = memo(function CnItemComputedSync({
       form.setValue(`items.${index}.total_amount`, total_amount);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- form is stable (useForm ref)
-  }, [index, type, discount_amount, net_amount, tax_amount, total_amount, isDiscAdj, isTaxAdj]);
+  }, [
+    index,
+    type,
+    discount_amount,
+    net_amount,
+    tax_amount,
+    total_amount,
+    isDiscAdj,
+    isTaxAdj,
+  ]);
 
   return null;
 });
@@ -150,7 +203,8 @@ function ProductCell({
   index: number;
 }) {
   "use no memo";
-  const itemName = useWatch({ control, name: `items.${index}.item_name` }) ?? "";
+  const itemName =
+    useWatch({ control, name: `items.${index}.item_name` }) ?? "";
   const productLocalName =
     useWatch({ control, name: `items.${index}.item_local_name` }) ?? "";
   return <NameWithSubtext primary={itemName} secondary={productLocalName} />;
@@ -172,7 +226,35 @@ function LocationCell({
   return <NameWithSubtext primary={locationName} secondary={locationCode} />;
 }
 
-/** Qty (+unit) — quantity_return แก้ได้ · amount_discount ล็อก (ref) */
+/**
+ * Received — จำนวนที่รับเข้าตาม GRN บรรทัดอ้างอิง อ่านอย่างเดียวเสมอ
+ * (เพดานอ้างอิงของจำนวนคืน ไม่ใช่ค่าที่ผู้ใช้กรอก และไม่เข้า payload)
+ */
+function ReceivedCell({
+  control,
+  index,
+}: {
+  control: Control<CnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const received = useWatch({
+    control,
+    name: `items.${index}._grn_received_qty`,
+  });
+  const unitName =
+    useWatch({ control, name: `items.${index}.unit_name` }) ?? "";
+  return (
+    <InputSuffixPlain
+      className="w-full"
+      // null = ยังไม่ได้ค่าจาก GRN — ขีดไว้ ไม่โชว์ 0 ให้เข้าใจผิดว่ารับมา 0
+      value={received == null ? "—" : String(received)}
+      suffix={unitName}
+    />
+  );
+}
+
+/** Return qty (+unit) — จำนวนที่คืน = ตัวตั้งของทุกยอดในแถว · amount_discount ล็อก (ref) */
 function QtyCell({
   form,
   index,
@@ -185,57 +267,180 @@ function QtyCell({
   locked: boolean;
 }) {
   "use no memo";
-  const t = useTranslations("procurement.creditNote");
   const quantity = useWatch({
     control: form.control,
     name: `items.${index}.quantity`,
   });
   const unitName =
     useWatch({ control: form.control, name: `items.${index}.unit_name` }) ?? "";
-  const grnReceivedQty =
-    useWatch({
-      control: form.control,
-      name: `items.${index}._grn_received_qty`,
-    }) ?? 0;
+  const grnReceivedQty = useWatch({
+    control: form.control,
+    name: `items.${index}._grn_received_qty`,
+  });
   const error = form.formState.errors.items?.[index]?.quantity?.message;
+  const productId =
+    useWatch({ control: form.control, name: `items.${index}.item_id` }) ?? "";
+  const unitId =
+    useWatch({ control: form.control, name: `items.${index}.unit_id` }) ?? "";
+  // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
+  const decimals = useUnitDecimals(productId, unitId);
   if (disabled || locked) {
     return (
       <InputSuffixPlain
         className="w-full"
-        value={quantity != null ? String(quantity) : "—"}
+        value={String(quantity ?? 0)}
         suffix={unitName}
       />
     );
   }
-  // เตือน (ไม่ block) เมื่อคืนเกินจำนวนที่รับตาม GRN บรรทัดอ้างอิง — backend
-  // เช็คสะสมข้ามใบอีกชั้นตอน submit (เพดานจริงอาจต่ำกว่านี้ถ้าเคยคืนไปแล้ว)
-  const overReturn =
-    grnReceivedQty > 0 && (Number(quantity) || 0) > grnReceivedQty;
+  // คืนเกินจำนวนที่รับ = error จาก schema (บล็อกตอน save) — กรอบแดง + ไอคอนเตือน
+  // ในช่อง hover อ่านข้อความได้ แบบเดียวกับช่องราคาของ GRN/PR
   return (
-    <>
-      <InputSuffixField className="w-full" error={!!error}>
-        <InputSuffixInput
-          id={`items-${index}-quantity`}
-          type="number"
-          inputMode="decimal"
-          min={1}
-          placeholder="0"
-          {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
-        />
-        {unitName && (
-          <InputSuffixAddon>
-            <span className="text-muted-foreground px-2 text-xs">
-              {unitName}
-            </span>
-          </InputSuffixAddon>
-        )}
-      </InputSuffixField>
-      {overReturn && (
-        <p className="mt-0.5 text-right text-micro text-warning-ink">
-          {t("overReturnWarning", { received: grnReceivedQty })}
-        </p>
+    <InputSuffixField className="w-full" errorMessage={error}>
+      <InputSuffixQty
+        decimals={decimals}
+        id={`items-${index}-quantity`}
+        min={0}
+        max={grnReceivedQty ?? undefined}
+        placeholder="0"
+        {...form.register(`items.${index}.quantity`, { valueAsNumber: true })}
+      />
+      {unitName && (
+        <InputSuffixAddon>
+          <span className="text-muted-foreground px-2 text-xs">{unitName}</span>
+        </InputSuffixAddon>
       )}
-    </>
+    </InputSuffixField>
+  );
+}
+
+/** ยอดฝั่ง GRN ช่องหนึ่ง — อ่านอย่างเดียว (ไม่เข้า payload) */
+function GrnAmountCell({
+  control,
+  index,
+  field,
+}: {
+  control: Control<CnFormValues>;
+  index: number;
+  field:
+    | "_grn_price"
+    | "_grn_sub_total"
+    | "_grn_discount_amount"
+    | "_grn_net_amount"
+    | "_grn_tax_amount"
+    | "_grn_total_amount";
+}) {
+  "use no memo";
+  const value = useWatch({ control, name: `items.${index}.${field}` });
+  return (
+    <span className="text-muted-foreground text-xs tabular-nums">
+      {formatCurrency(Number(value) || 0)}
+    </span>
+  );
+}
+
+/**
+ * แถวที่กางออก = ฝั่ง "คืน" ช่องกรอกทั้งหมดอยู่ที่นี่
+ * table-fixed + colgroup คิดความกว้างเป็น % ของช่วงที่ครอบ (ทรงเดียวกับ
+ * LocationsEditor ของ PO) — ใช้ px ตรง ๆ ไม่ได้เพราะตารางหลัก scroll แนวนอน
+ */
+function CnReturnRow({
+  form,
+  index,
+  type,
+  disabled,
+  showActionCol,
+}: {
+  form: UseFormReturn<CnFormValues>;
+  index: number;
+  type: CnCreditNoteType;
+  disabled: boolean;
+  showActionCol: boolean;
+}) {
+  "use no memo";
+  const t = useTranslations("procurement.creditNote");
+  const isAmountDiscountRow = type === "amount_discount";
+  const denom = cnReturnRowTotal(showActionCol);
+  const pct = (px: number) => `${(px / denom) * 100}%`;
+
+  return (
+    <table className="w-full table-fixed text-xs">
+      <colgroup>
+        {/* ป้าย "คืน" กินที่ของ product + location รวมกัน */}
+        <col style={{ width: pct(CN_COL.product + CN_COL.location) }} />
+        <col style={{ width: pct(CN_COL.qty) }} />
+        <col style={{ width: pct(CN_COL.price) }} />
+        <col style={{ width: pct(CN_COL.sub) }} />
+        <col style={{ width: pct(CN_COL.discount) }} />
+        <col style={{ width: pct(CN_COL.net) }} />
+        <col style={{ width: pct(CN_COL.tax) }} />
+        <col style={{ width: pct(CN_COL.amount) }} />
+        {showActionCol && <col style={{ width: pct(CN_COL.action) }} />}
+      </colgroup>
+      <tbody>
+        <tr className="align-middle">
+          <td />
+          {/* ช่องกรอกของแถวอยู่ตรงนี้ช่องเดียว สลับตามประเภทใบ — quantity_return
+              กรอกจำนวนคืน, amount_discount กรอกยอดลดหนี้ตรง ๆ (จำนวนคืนไม่มีผล
+              ต่อยอดในโหมดนั้น จึงไม่ต้องมีช่องล็อกไว้ให้รก)
+              ป้ายอยู่บนขวาของช่อง — ทรงเดียวกับ toggle ของ Override */}
+          <td className="px-1 py-1 text-right">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-muted-foreground text-micro text-right font-semibold">
+                {isAmountDiscountRow ? t("cnAmount") : t("returnLine")}
+              </span>
+              {isAmountDiscountRow ? (
+                <SubtotalCell
+                  form={form}
+                  index={index}
+                  type={type}
+                  disabled={disabled}
+                />
+              ) : (
+                <QtyCell
+                  form={form}
+                  index={index}
+                  disabled={disabled}
+                  locked={false}
+                />
+              )}
+            </div>
+          </td>
+          {/* ราคาต่อหน่วยเท่าฝั่งรับเสมอ — คืนของชิ้นเดิมในราคาเดิม */}
+          <td className="px-2 py-1 text-right">
+            <PriceCell control={form.control} index={index} />
+          </td>
+          {/* ช่องกรอกย้ายไปอยู่ช่องแรกของแถวแล้ว ตรงนี้จึงเป็นยอดอ่านอย่างเดียว
+              ทั้งสองโหมด (amount_discount → subtotal = ยอดที่กรอกเอง) */}
+          <td className="px-2 py-1 text-right">
+            <LineSubtotalText form={form} index={index} type={type} />
+          </td>
+          <td className="px-2 py-1 text-right">
+            <DiscountCell
+              form={form}
+              index={index}
+              type={type}
+              disabled={disabled}
+            />
+          </td>
+          <td className="px-2 py-1 text-right">
+            <NetCell control={form.control} index={index} />
+          </td>
+          <td className="px-2 py-1 text-right">
+            <TaxCell
+              form={form}
+              index={index}
+              type={type}
+              disabled={disabled}
+            />
+          </td>
+          <td className="px-2 py-1 text-right">
+            <TotalCell control={form.control} index={index} />
+          </td>
+          {showActionCol && <td className="px-1 py-1" />}
+        </tr>
+      </tbody>
+    </table>
   );
 }
 
@@ -258,9 +463,9 @@ function PriceCell({
 }
 
 /**
- * Subtotal / CN amount —
- * `amount_discount` → กรอก "CN Amount" (เขียน net_amount ตรง)
- * `quantity_return` → subtotal (qty × price) read-only
+ * Subtotal / CN amount — ช่องเดียวกัน สลับความหมายตามประเภทใบ
+ * `quantity_return` → subtotal = จำนวนคืน × ราคา (read-only)
+ * `amount_discount` → กรอก "CN Amount" ตรง (เขียน net_amount)
  */
 function SubtotalCell({
   form,
@@ -274,14 +479,13 @@ function SubtotalCell({
   disabled: boolean;
 }) {
   "use no memo";
-  const isAmountDiscount = type === "amount_discount";
   const net = useWatch({
     control: form.control,
     name: `items.${index}.net_amount`,
   });
   const line = useCnItemLine(form, index, type);
 
-  if (isAmountDiscount) {
+  if (type === "amount_discount") {
     if (disabled) {
       return (
         <span className="text-foreground text-xs font-semibold tabular-nums">
@@ -289,8 +493,12 @@ function SubtotalCell({
         </span>
       );
     }
+    // ยอดลดหนี้ต้อง > 0 (schema) — กรอบแดง + ไอคอนเตือนในช่อง เหมือนช่องจำนวนคืน
     return (
-      <InputSuffixField className="w-full">
+      <InputSuffixField
+        className="w-full"
+        errorMessage={form.formState.errors.items?.[index]?.net_amount?.message}
+      >
         <InputSuffixInput
           id={`items-${index}-cn-amount`}
           type="number"
@@ -305,10 +513,45 @@ function SubtotalCell({
       </InputSuffixField>
     );
   }
-  // quantity_return → subtotal = qty × price (read-only)
   return (
     <span className="text-foreground text-xs font-semibold tabular-nums">
       {formatCurrency(line.sub_total)}
+    </span>
+  );
+}
+
+/** ยอดรวมย่อยของฝั่งคืน (read-only) — qty × price หรือยอดที่กรอกเองแล้วแต่ประเภทใบ */
+function LineSubtotalText({
+  form,
+  index,
+  type,
+}: {
+  form: UseFormReturn<CnFormValues>;
+  index: number;
+  type: CnCreditNoteType;
+}) {
+  "use no memo";
+  const line = useCnItemLine(form, index, type);
+  return (
+    <span className="text-foreground text-xs font-semibold tabular-nums">
+      {formatCurrency(line.sub_total)}
+    </span>
+  );
+}
+
+/** Net — subtotal − discount (read-only) */
+function NetCell({
+  control,
+  index,
+}: {
+  control: Control<CnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const net = useWatch({ control, name: `items.${index}.net_amount` });
+  return (
+    <span className="text-foreground text-xs font-semibold tabular-nums">
+      {formatCurrency(Number(net) || 0)}
     </span>
   );
 }
@@ -341,7 +584,13 @@ function DiscountCell({
   const amount = line.discount_amount;
 
   if (type === "amount_discount") {
-    return <span className="text-muted-foreground text-xs">—</span>;
+    // โหมดนี้ไม่มีส่วนลดต่อบรรทัด — ยอดเป็น 0 จริง ๆ ไม่ใช่ "ไม่มีข้อมูล"
+    // ช่องตัวเลขต้องขึ้นตัวเลข คนอ่านจะได้เอาไปบวกลบกับคอลัมน์อื่นได้เลย
+    return (
+      <span className="block text-right text-xs tabular-nums">
+        {formatCurrency(0)}
+      </span>
+    );
   }
   if (disabled) {
     return (
@@ -351,60 +600,40 @@ function DiscountCell({
     );
   }
   return (
-    // บรรทัดเดียว: combo (rate/amount) + checkbox override ชิดขวา (label "Override"
-    // อยู่ที่ header row เพื่อไม่ให้แถวสูง)
-    <div className="flex items-center gap-1.5">
-      <div className="min-w-0 flex-1">
-        <DiscountOverrideInput
-          rate={rate}
-          amount={amount}
-          isAdjustment={isAdj}
-          onRateChange={(r) =>
-            form.setValue(`${base}.discount_rate`, r, {
-              shouldDirty: true,
-              shouldValidate: true,
-            })
-          }
-          onAmountChange={(a) =>
-            form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
-          }
-        />
-      </div>
-      <Checkbox
-        checked={isAdj}
-        onCheckedChange={(v) => {
-          const on = !!v;
-          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-          if (on) {
-            form.setValue(`${base}.discount_amount`, amount, {
+    // toggle (checkbox + คำว่า Override) อยู่บรรทัดบนขวา · combo กินความกว้าง
+    // เต็มคอลัมน์ข้างล่าง — วางแบบเดียวกับ PO
+    <div className="flex flex-col gap-0.5">
+      <div className="flex justify-end">
+        <OverrideToggle
+          checked={isAdj}
+          onCheckedChange={(on) => {
+            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+            if (on) {
+              form.setValue(`${base}.discount_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_discount_adjustment`, on, {
               shouldDirty: true,
             });
-          }
-          form.setValue(`${base}.is_discount_adjustment`, on, {
+          }}
+        />
+      </div>
+      <DiscountOverrideInput
+        rate={rate}
+        amount={amount}
+        isAdjustment={isAdj}
+        onRateChange={(r) =>
+          form.setValue(`${base}.discount_rate`, r, {
             shouldDirty: true,
-          });
-        }}
-        className="size-3.5 shrink-0"
-        aria-label="Override discount"
+            shouldValidate: true,
+          })
+        }
+        onAmountChange={(a) =>
+          form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
+        }
       />
     </div>
-  );
-}
-
-/** Net — = net_amount (subtotal − discount), read-only */
-function NetCell({
-  control,
-  index,
-}: {
-  control: Control<CnFormValues>;
-  index: number;
-}) {
-  "use no memo";
-  const net = useWatch({ control, name: `items.${index}.net_amount` });
-  return (
-    <span className="text-foreground text-xs font-semibold tabular-nums">
-      {formatCurrency(Number(net) || 0)}
-    </span>
   );
 }
 
@@ -440,38 +669,41 @@ function TaxCell({
     );
   }
   return (
-    // บรรทัดเดียว: combo (tax profile/amount) + checkbox override ชิดขวา
-    // (label "Override" อยู่ที่ header row)
-    <div className="flex items-center gap-1.5">
-      <div className="min-w-0 flex-1">
-        <TaxOverrideInput
-          taxProfileId={taxProfileId}
-          amount={amount}
-          isAdjustment={isAdj}
-          onTaxChange={(value, r, name) => {
-            form.setValue(`${base}.tax_profile_id`, value || null, {
+    // บรรทัดบน: rate% ซ้าย + toggle ขวา · บรรทัดล่าง: combo เต็มความกว้าง (แบบ PO)
+    <div className="flex flex-col gap-0.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-muted-foreground text-micro font-semibold tabular-nums">
+          {rate > 0 ? `${rate}%` : ""}
+        </span>
+        <OverrideToggle
+          checked={isAdj}
+          onCheckedChange={(on) => {
+            if (on) {
+              form.setValue(`${base}.tax_amount`, amount, {
+                shouldDirty: true,
+              });
+            }
+            form.setValue(`${base}.is_tax_adjustment`, on, {
               shouldDirty: true,
-              shouldValidate: true,
             });
-            form.setValue(`${base}.tax_rate`, r);
-            form.setValue(`${base}.tax_profile_name`, name);
           }}
-          onAmountChange={(a) =>
-            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
-          }
         />
       </div>
-      <Checkbox
-        checked={isAdj}
-        onCheckedChange={(v) => {
-          const on = !!v;
-          if (on) {
-            form.setValue(`${base}.tax_amount`, amount, { shouldDirty: true });
-          }
-          form.setValue(`${base}.is_tax_adjustment`, on, { shouldDirty: true });
+      <TaxOverrideInput
+        taxProfileId={taxProfileId}
+        amount={amount}
+        isAdjustment={isAdj}
+        onTaxChange={(value, r, name) => {
+          form.setValue(`${base}.tax_profile_id`, value || null, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          form.setValue(`${base}.tax_rate`, r);
+          form.setValue(`${base}.tax_profile_name`, name);
         }}
-        className="size-3.5 shrink-0"
-        aria-label="Override tax"
+        onAmountChange={(a) =>
+          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+        }
       />
     </div>
   );
@@ -522,24 +754,68 @@ export function useCnItemTable({
       cellClassName: "text-right",
     } as const;
 
+    // กางเพื่อกรอกฝั่งคืน — แถวหลักเป็นยอดตาม GRN (ทรงเดียวกับ PO ที่กางดู location)
+    const expandColumn: ColumnDef<CnItemField> = {
+      id: "expand",
+      header: "",
+      cell: ({ row }) => (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-xs"
+          aria-label={row.getIsExpanded() ? "Collapse" : "Expand"}
+          onClick={() => row.toggleExpanded()}
+        >
+          {row.getIsExpanded() ? (
+            <ChevronDown className="size-3.5" />
+          ) : (
+            <ChevronRight className="size-3.5" />
+          )}
+        </Button>
+      ),
+      enableSorting: false,
+      enableResizing: false,
+      size: CN_COL.leading,
+      meta: {
+        headerClassName: "text-center",
+        cellClassName: "text-center",
+        // เริ่มที่คอลัมน์ Product — ข้าม expand + # ให้ตรงขอบเดียวกับแถวหลัก
+        expandedColStart: 2,
+        expandedContent: (item: CnItemField) => (
+          <CnReturnRow
+            form={form}
+            index={Math.max(
+              itemFields.findIndex((field) => field.id === item.id),
+              0,
+            )}
+            type={type}
+            disabled={disabled}
+            showActionCol={!disabled}
+          />
+        ),
+      },
+    };
+
     const indexColumn: ColumnDef<CnItemField> = {
       id: "index",
       header: "#",
       cell: ({ row }) => row.index + 1,
       enableSorting: false,
       enableResizing: false,
-      size: 36,
+      size: CN_COL.leading,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center text-muted-foreground",
       },
     };
 
+    // แถวหลัก = ยอดของบรรทัดตาม GRN ที่รับมาจริง อ่านอย่างเดียวทั้งแถว
+    // ฝั่งคืน (ช่องกรอกทั้งหมด) อยู่ในแถวที่กางออก ตรงคอลัมน์กันพอดี
     const dataColumns: ColumnDef<CnItemField>[] = [
       {
         accessorKey: "item_id",
         header: tfl("product"),
-        size: 240,
+        size: CN_COL.product,
         cell: ({ row }) => (
           <ProductCell control={form.control} index={row.index} />
         ),
@@ -547,110 +823,96 @@ export function useCnItemTable({
       {
         accessorKey: "location_id",
         header: tfl("location"),
-        size: 200,
+        size: CN_COL.location,
         cell: ({ row }) => (
           <LocationCell control={form.control} index={row.index} />
         ),
       },
       {
-        id: "quantity",
-        header: tfl("receivedQty"),
-        size: 160,
+        id: "received_qty",
+        header: tfl("received"),
+        size: CN_COL.qty,
         meta: rightMeta,
         cell: ({ row }) => (
-          <QtyCell
-            form={form}
-            index={row.index}
-            disabled={disabled}
-            locked={isAmountDiscount}
-          />
+          <ReceivedCell control={form.control} index={row.index} />
         ),
       },
       {
-        id: "unit_price",
+        id: "grn_price",
         header: tfl("price"),
-        size: 110,
+        size: CN_COL.price,
         meta: rightMeta,
         cell: ({ row }) => (
-          <PriceCell control={form.control} index={row.index} />
-        ),
-      },
-      {
-        id: "net_amount",
-        header: isAmountDiscount ? t("cnAmount") : tfl("subtotal"),
-        size: 130,
-        meta: rightMeta,
-        cell: ({ row }) => (
-          <SubtotalCell
-            form={form}
+          <GrnAmountCell
+            control={form.control}
             index={row.index}
-            type={type}
-            disabled={disabled}
+            field="_grn_price"
           />
         ),
       },
       {
-        id: "discount",
-        // edit: label "Override" ที่ header (justify-between) — checkbox ต่อแถวอยู่ใต้พอดี
-        header:
-          disabled || isAmountDiscount
-            ? tfl("discount")
-            : () => (
-                <div className="flex w-full items-center justify-between gap-2">
-                  <span>{tfl("discount")}</span>
-                  <span className="text-muted-foreground text-micro font-normal">
-                    {tfl("override")}
-                  </span>
-                </div>
-              ),
-        size: 200,
+        id: "grn_sub_total",
+        header: tfl("subtotal"),
+        size: CN_COL.sub,
         meta: rightMeta,
         cell: ({ row }) => (
-          <DiscountCell
-            form={form}
+          <GrnAmountCell
+            control={form.control}
             index={row.index}
-            type={type}
-            disabled={disabled}
+            field="_grn_sub_total"
           />
         ),
       },
       {
-        id: "net",
+        id: "grn_discount",
+        header: tfl("discount"),
+        size: CN_COL.discount,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <GrnAmountCell
+            control={form.control}
+            index={row.index}
+            field="_grn_discount_amount"
+          />
+        ),
+      },
+      {
+        id: "grn_net",
         header: tfl("net"),
-        size: 110,
-        meta: rightMeta,
-        cell: ({ row }) => <NetCell control={form.control} index={row.index} />,
-      },
-      {
-        id: "tax",
-        header: disabled
-          ? tfl("tax")
-          : () => (
-              <div className="flex w-full items-center justify-between gap-2">
-                <span>{tfl("tax")}</span>
-                <span className="text-muted-foreground text-micro font-normal">
-                  {tfl("override")}
-                </span>
-              </div>
-            ),
-        size: 250,
+        size: CN_COL.net,
         meta: rightMeta,
         cell: ({ row }) => (
-          <TaxCell
-            form={form}
+          <GrnAmountCell
+            control={form.control}
             index={row.index}
-            type={type}
-            disabled={disabled}
+            field="_grn_net_amount"
           />
         ),
       },
       {
-        id: "total_amount",
-        header: tfl("amount"),
-        size: 120,
+        id: "grn_tax",
+        header: tfl("tax"),
+        size: CN_COL.tax,
         meta: rightMeta,
         cell: ({ row }) => (
-          <TotalCell control={form.control} index={row.index} />
+          <GrnAmountCell
+            control={form.control}
+            index={row.index}
+            field="_grn_tax_amount"
+          />
+        ),
+      },
+      {
+        id: "grn_total",
+        header: tfl("amount"),
+        size: CN_COL.amount,
+        meta: rightMeta,
+        cell: ({ row }) => (
+          <GrnAmountCell
+            control={form.control}
+            index={row.index}
+            field="_grn_total_amount"
+          />
         ),
       },
     ];
@@ -672,7 +934,7 @@ export function useCnItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 40,
+      size: CN_COL.action,
       meta: {
         headerClassName: "text-center",
         cellClassName: "text-center",
@@ -680,6 +942,7 @@ export function useCnItemTable({
     };
 
     const baseCols = [
+      expandColumn,
       indexColumn,
       ...dataColumns,
       ...(disabled ? [] : [actionColumn]),
@@ -692,12 +955,21 @@ export function useCnItemTable({
         cellClassName: cn("py-1 align-middle", col.meta?.cellClassName),
       },
     }));
-  }, [form, disabled, isAmountDiscount, type, t, tfl, onDelete]);
+  }, [form, disabled, isAmountDiscount, type, itemFields, t, tfl, onDelete]);
+
+  // กางทุกแถวไว้ตั้งแต่แรกเสมอ — ฝั่งคืนคือสาระของใบลดหนี้ ไม่ใช่รายละเอียดเสริม
+  // (โหมดแก้ต้องกรอกทุกบรรทัดอยู่แล้ว โหมดอ่านก็ต้องเห็นว่าคืนอะไรไปเท่าไหร่)
+  // พับเองได้ถ้าอยากกวาดตาดูเฉพาะยอดตาม GRN
+  const [expanded, setExpanded] = useState<ExpandedState>(true);
 
   const table = useReactTable({
     data: itemFields,
     columns,
+    state: { expanded },
+    onExpandedChange: setExpanded,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand: () => true,
     getRowId: (row) => row.id,
   });
 

@@ -50,6 +50,14 @@ export interface UseListFiltersResult {
     clear: () => void;
     /** เขียนค่าของ view ปัจจุบันทับ URL อีกรอบ (ใช้ปุ่ม "Discard changes") */
     revert: () => void;
+    /**
+     * บันทึก filter+sort ปัจจุบันเป็น view ชื่อ `name` ใน scope นั้น — ชื่อซ้ำ =
+     * เขียนทับตัวเดิม, ชื่อใหม่ = สร้างใหม่ แล้ว apply ให้ URL ชี้ view นั้นเสมอ
+     * ต่อตรงกับ `onSave` ของ `SaveViewDialog` ได้เลย
+     */
+    saveOrUpdate: (name: string, scope: ViewScope) => Promise<void>;
+    /** ชื่อ view ที่มีอยู่แล้วใน scope นั้น — ให้ `SaveViewDialog` เตือนชื่อซ้ำ */
+    existingNames: (scope: ViewScope) => string[];
   } & UseListViewsResult;
 }
 
@@ -209,6 +217,27 @@ export function useListFilters(
     if (current) apply(current);
   }, [current, apply]);
 
+  const existingNames = (scope: ViewScope) =>
+    (scope === "bu" ? views.buViews : views.userViews).map((v) => v.name);
+
+  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
+   *  (เดิมทุกหน้า list ก๊อปฟังก์ชันนี้ไว้เองคนละก๊อป — ย้ายมารวมที่นี่จุดเดียว) */
+  const saveOrUpdate = async (name: string, scope: ViewScope) => {
+    const list = scope === "bu" ? views.buViews : views.userViews;
+    const existing = list.find((v) => v.name === name);
+    const snapshot = { filters: values, sort: sortRaw || undefined };
+    if (existing) {
+      await views.update(existing.id, scope, snapshot);
+      // อัปเดต view อื่นที่ไม่ใช่ view ปัจจุบัน — ต้อง apply ต่อให้ URL ชี้ตาม
+      // (ถ้าเป็น view ปัจจุบันอยู่แล้ว ค่าจะ sync เองเมื่อ query cache รีเฟรช)
+      if (existing.id !== current?.id) {
+        apply({ ...existing, filters: snapshot.filters, sort: snapshot.sort });
+      }
+    } else {
+      apply(await views.saveAs(name, scope, snapshot));
+    }
+  };
+
   // Step 3: `sv` ชี้ view ที่หาไม่เจอ (ถูกลบ/ลิงก์ที่แชร์มาเก่าแล้ว) — เตือนครั้งเดียว
   // ด้วย ref guard แล้วล้าง `sv` ทิ้งเงียบ ๆ ต้องรอทั้ง `views.isLoading` และ
   // `views.isFetching` เป็น false และไม่มี `views.error` ก่อน — ไม่งั้นระหว่างโหลด/
@@ -241,6 +270,16 @@ export function useListFilters(
     filterParam,
     sortParam: sortRaw,
     activeFilters,
-    view: { current, scope, isDirty, apply, clear, revert, ...views },
+    view: {
+      current,
+      scope,
+      isDirty,
+      apply,
+      clear,
+      revert,
+      saveOrUpdate,
+      existingNames,
+      ...views,
+    },
   };
 }

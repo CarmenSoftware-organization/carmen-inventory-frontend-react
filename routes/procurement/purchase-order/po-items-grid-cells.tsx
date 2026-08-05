@@ -57,6 +57,8 @@ export const PriceCell = memo(function PriceCell({
 interface ProductHeaderCellProps extends CellProps {
   readonly isFoc: boolean;
   readonly showStatusBadge: boolean;
+  /** ผู้อนุมัติในโหมดแก้ไขล้างสถานะรายแถวกลับเป็นรอได้ */
+  readonly canResetStatus?: boolean;
 }
 
 /**
@@ -71,6 +73,7 @@ export function ProductHeaderCell({
   readOnly,
   isFoc,
   showStatusBadge,
+  canResetStatus,
 }: ProductHeaderCellProps) {
   "use no memo";
   return (
@@ -90,7 +93,14 @@ export function ProductHeaderCell({
             FOC
           </Badge>
         )}
-        {showStatusBadge && <StatusCell control={form.control} index={index} />}
+        {showStatusBadge && (
+          <StatusCell
+            control={form.control}
+            form={form}
+            index={index}
+            canReset={canResetStatus}
+          />
+        )}
       </div>
     </div>
   );

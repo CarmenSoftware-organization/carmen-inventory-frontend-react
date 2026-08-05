@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -34,6 +34,7 @@ import { VendorGeneral } from "./vendor-general";
 import { VendorInfo } from "./vendor-info";
 import { VendorAddress } from "./vendor-address";
 import { VendorContact } from "./vendor-contact";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "vendor-form";
 
@@ -45,6 +46,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
   "use no memo";
   const navigate = useNavigate();
   const t = useTranslations("vendorManagement.vendor");
+  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -265,12 +267,25 @@ export function VendorForm({ vendor }: VendorFormProps) {
             </>
           }
           actions={
-            isView ? (
-              <Button size="sm" onClick={() => setMode("edit")}>
-                <Pencil />
-                {tc("edit")}
-              </Button>
-            ) : (
+            <>
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {vendor && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openActivity(vendor.id, vendor.code)}
+                >
+                  <History />
+                  {tActivity("title")}
+                </Button>
+              )}
+              {isView ? (
+                <Button size="sm" onClick={() => setMode("edit")}>
+                  <Pencil />
+                  {tc("edit")}
+                </Button>
+              ) : (
               <>
                 <Button
                   type="button"
@@ -303,8 +318,9 @@ export function VendorForm({ vendor }: VendorFormProps) {
                     {tc("delete")}
                   </Button>
                 )}
-              </>
-            )
+                </>
+              )}
+            </>
           }
         />
       </div>

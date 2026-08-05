@@ -3,7 +3,7 @@ import type { UseFormReturn, FieldPath } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "./eq-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { EquipmentFormValues } from "./eq-form-schema";
 
 interface EqInstructionsSectionProps {
@@ -20,8 +20,9 @@ export function EqInstructionsSection({
   const tfl = useTranslations("field");
 
   return (
-    <Card
-      label={t("instructions")}
+    <SettingSection
+      plain
+      title={t("instructions")}
       description={t("instructionsDesc")}
     >
       <div className="grid grid-cols-1 gap-4">
@@ -50,7 +51,7 @@ export function EqInstructionsSection({
           isDisabled={isDisabled}
         />
       </div>
-    </Card>
+    </SettingSection>
   );
 }
 

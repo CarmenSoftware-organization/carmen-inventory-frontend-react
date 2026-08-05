@@ -132,8 +132,8 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
       await Promise.all(promises);
       toast.success("User updated successfully");
       navigate("/system-admin/user");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to update user");
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ไม่ navigate ออกจากฟอร์ม
     }
   };
 

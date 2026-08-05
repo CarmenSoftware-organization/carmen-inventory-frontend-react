@@ -1,4 +1,4 @@
-
+import { useTranslations } from "use-intl";
 import { useRecipeCategoryById } from "@/hooks/use-recipe-category";
 import { RecipeCategoryForm } from "./recipe-category-form";
 import { ErrorState } from "@/components/ui/error-state";
@@ -13,6 +13,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * <EditRecipeCategoryPage params={Promise.resolve({ id: "abc-123" })} />
  */
 export function EditRecipeCategoryContent({ id }: { id: string }) {
+  const tErr = useTranslations("operationPlan.recipeCategory");
   const {
     data: category,
     isLoading,
@@ -21,9 +22,15 @@ export function EditRecipeCategoryContent({ id }: { id: string }) {
   } = useRecipeCategoryById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!category) return <ErrorState message="Recipe category not found" />;
+  if (error || !category)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={tErr("notFound")}
+        onRetry={() => refetch()}
+        backTo="/operation-plan/category"
+      />
+    );
 
   return <RecipeCategoryForm category={category} />;
 }

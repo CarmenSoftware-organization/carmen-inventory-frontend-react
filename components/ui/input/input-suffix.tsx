@@ -1,7 +1,19 @@
 import * as React from "react";
+import { CircleAlert } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  capQtyDecimals,
+  DEFAULT_QTY_DECIMALS,
+  QTY_STEP,
+} from "@/components/ui/input/qty-decimals";
 
 /**
  * State ที่ InputSuffixField แชร์ให้ลูก (InputSuffixInput) ผ่าน context
@@ -44,48 +56,84 @@ const InputSuffixContext = React.createContext<InputSuffixContextValue>({});
 function InputSuffixField({
   className,
   error,
+  errorMessage,
   disabled,
   children,
   ...props
 }: Omit<React.ComponentProps<"div">, "children"> & {
   error?: boolean;
+  /** ข้อความ error — มีเมื่อไหร่กล่องขึ้นไอคอนเตือน + tooltip ตอน hover */
+  errorMessage?: string;
   disabled?: boolean;
   children?: React.ReactNode;
 }) {
+  const hasError = !!error || !!errorMessage;
   const ctx = React.useMemo<InputSuffixContextValue>(
-    () => ({ error, disabled }),
-    [error, disabled],
+    () => ({ error: hasError, disabled }),
+    [hasError, disabled],
   );
+  // ต้องเป็น <div> ตรงๆ ไม่ใช่ fragment/provider ครอบ — TooltipTrigger asChild
+  // clone props ใส่ element ตัวนี้ (role="group" intentional: Vite eslint config
+  // ไม่มี jsx-a11y plugin)
+  const box = (
+    <div
+      role="group"
+      data-slot="input-suffix-field"
+      // ตัวช่วยเลื่อนหน้าจอไปหาช่องที่กรอกผิด (`scrollToFirstInvalidField`) มองหา
+      // `[aria-invalid="true"], [data-invalid="true"]` — กล่องนี้เป็น <div> จะใส่
+      // aria-invalid ไม่ได้ และ control ข้างในบางตัวก็ไม่ได้รับ error ไปด้วย
+      // (เช่นช่องภาษี ที่ error อยู่ที่ตัวเลือกโปรไฟล์แต่กล่องเป็นคนวาดกรอบแดง)
+      // ไม่มีตัวนี้ = กรอบแดงขึ้นแต่หน้าจอไม่เลื่อนไปหา หาไม่เจอว่าติดตรงไหน
+      data-invalid={hasError ? "true" : undefined}
+      className={cn(
+        "bg-background flex h-8 items-center overflow-hidden rounded-md border transition-[color,box-shadow]",
+        "focus-within:ring-[3px]",
+        // กรอบแดงต้องชนะ focus — คลิกเข้าไปแก้แล้วกรอบหายกลายเป็นน้ำเงิน ทำให้
+        // ช่องที่ยังกรอกไม่ครบดูเหมือนแก้เสร็จแล้วทั้งที่ยังไม่ได้เลือกอะไรเลย
+        // แดงหายก็ต่อเมื่อ error หายจริง (เลือกค่าแล้ว) ไม่ใช่แค่เอาเมาส์ไปคลิก
+        hasError
+          ? "border-destructive focus-within:border-destructive focus-within:ring-destructive/40"
+          : "border-input focus-within:border-ring focus-within:ring-ring/50",
+        // ใช้ค่าเดียวกับ disabled ของ Input (bg-muted/60 + opacity-50)
+        // ไม่งั้นช่องที่มี suffix จะจางคนละระดับกับช่องธรรมดาที่อยู่ข้างกัน
+        disabled && "bg-muted/60 opacity-50",
+        className,
+      )}
+      {...props}
+    >
+      {/* ไอคอนอยู่ในกล่อง ชิดซ้าย (ค่าชิดขวา suffix ชิดขวาสุด) — ที่เดียวที่ว่าง
+            เสมอ · ข้อความอยู่ใน tooltip แบบเดียวกับ InputAmount/FieldInput
+            ไม่ห้อยใต้ช่อง เพราะแถวในตารางจะสูงไม่เท่ากัน */}
+      {!!errorMessage && (
+        <CircleAlert
+          aria-hidden="true"
+          className="text-destructive ml-2 size-4 shrink-0"
+        />
+      )}
+      {children}
+    </div>
+  );
+
   return (
     <InputSuffixContext.Provider value={ctx}>
-      {/* role="group" intentional: ไม่มี jsx-a11y plugin ใน Vite eslint config */}
-      <div
-        role="group"
-        data-slot="input-suffix-field"
-        // ตัวช่วยเลื่อนหน้าจอไปหาช่องที่กรอกผิด (`scrollToFirstInvalidField`) มองหา
-        // `[aria-invalid="true"], [data-invalid="true"]` — กล่องนี้เป็น <div> จะใส่
-        // aria-invalid ไม่ได้ และ control ข้างในบางตัวก็ไม่ได้รับ error ไปด้วย
-        // (เช่นช่องภาษี ที่ error อยู่ที่ตัวเลือกโปรไฟล์แต่กล่องเป็นคนวาดกรอบแดง)
-        // ไม่มีตัวนี้ = กรอบแดงขึ้นแต่หน้าจอไม่เลื่อนไปหา หาไม่เจอว่าติดตรงไหน
-        data-invalid={error ? "true" : undefined}
-        className={cn(
-          "bg-background flex h-8 items-center overflow-hidden rounded-md border transition-[color,box-shadow]",
-          "focus-within:ring-[3px]",
-          // กรอบแดงต้องชนะ focus — คลิกเข้าไปแก้แล้วกรอบหายกลายเป็นน้ำเงิน ทำให้
-          // ช่องที่ยังกรอกไม่ครบดูเหมือนแก้เสร็จแล้วทั้งที่ยังไม่ได้เลือกอะไรเลย
-          // แดงหายก็ต่อเมื่อ error หายจริง (เลือกค่าแล้ว) ไม่ใช่แค่เอาเมาส์ไปคลิก
-          error
-            ? "border-destructive focus-within:border-destructive focus-within:ring-destructive/40"
-            : "border-input focus-within:border-ring focus-within:ring-ring/50",
-          // ใช้ค่าเดียวกับ disabled ของ Input (bg-muted/60 + opacity-50)
-          // ไม่งั้นช่องที่มี suffix จะจางคนละระดับกับช่องธรรมดาที่อยู่ข้างกัน
-          disabled && "bg-muted/60 opacity-50",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </div>
+      {errorMessage ? (
+        // asChild ต้องครอบ <div> ตรงๆ — ถ้าเอา Provider ไว้ข้างใน Radix จะ clone
+        // handler ใส่ Provider ที่ไม่ใช่ DOM element แล้ว tooltip เงียบสนิท
+        <TooltipProvider>
+          <Tooltip delayDuration={100}>
+            <TooltipTrigger asChild>{box}</TooltipTrigger>
+            <TooltipContent
+              side="top"
+              align="end"
+              className="bg-background text-destructive [&>svg]:fill-background [&>svg]:text-border border px-3 py-2 text-xs font-semibold"
+            >
+              {errorMessage}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ) : (
+        box
+      )}
     </InputSuffixContext.Provider>
   );
 }
@@ -118,6 +166,47 @@ function InputSuffixInput({
         className,
       )}
       {...props}
+    />
+  );
+}
+
+/**
+ * เวอร์ชัน "จำนวน" ของ InputSuffixInput — ใช้กับช่อง qty ทุกตัวที่มีหน่วยต่อท้าย
+ * (requested / approved / received / foc / issued ฯลฯ)
+ *
+ * ต่างจาก InputSuffixInput เปล่า ๆ ตรงที่ตั้ง type/inputMode/step ให้ครบและกัน
+ * ทศนิยมเกินเพดานให้เอง — เขียนเองทีละที่แล้วลืม `step` เมื่อไหร่ เบราว์เซอร์จะตี
+ * ค่าอย่าง 2.5 เป็นค่าไม่ถูกต้องทันที (ดู `qty-decimals`)
+ *
+ * @param decimals - เพดานทศนิยม (default `DEFAULT_QTY_DECIMALS`; ส่ง `useUnitDecimals(...)` เข้ามาเพื่อใช้ค่าจริงของหน่วย)
+ * @returns JSX element input จำนวน
+ * @example
+ * ```tsx
+ * <InputSuffixField error={!!err}>
+ *   <InputSuffixQty {...register("received_qty", { valueAsNumber: true })} />
+ *   <InputSuffixAddon><LookupProductUnit … /></InputSuffixAddon>
+ * </InputSuffixField>
+ * ```
+ */
+function InputSuffixQty({
+  decimals = DEFAULT_QTY_DECIMALS,
+  onChange,
+  ...props
+}: Omit<
+  React.ComponentProps<typeof InputSuffixInput>,
+  "type" | "step" | "inputMode"
+> & { decimals?: number }) {
+  return (
+    <InputSuffixInput
+      type="number"
+      inputMode="decimal"
+      step={QTY_STEP}
+      min={0}
+      {...props}
+      onChange={(e) => {
+        capQtyDecimals(e.currentTarget, decimals);
+        onChange?.(e);
+      }}
     />
   );
 }
@@ -194,13 +283,15 @@ function InputSuffixPlain({
   return (
     <span
       data-slot="input-suffix-plain"
-      className={cn(
-        "shrink-0 whitespace-nowrap text-right text-xs",
-        className,
-      )}
+      className={cn("shrink-0 text-right text-xs whitespace-nowrap", className)}
       {...props}
     >
-      <span className={cn("text-foreground font-medium tabular-nums", valueClassName)}>
+      <span
+        className={cn(
+          "text-foreground font-medium tabular-nums",
+          valueClassName,
+        )}
+      >
         {value}
       </span>
       {suffix ? (
@@ -220,6 +311,7 @@ function InputSuffixPlain({
 export {
   InputSuffixField,
   InputSuffixInput,
+  InputSuffixQty,
   InputSuffixAddon,
   InputSuffixPlain,
 };

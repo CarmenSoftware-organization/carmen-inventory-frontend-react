@@ -104,7 +104,7 @@ function PeriodSelectorCard({
             </h2>
             {periodBadge}
           </div>
-          <div className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-micro">
+          <div className="text-muted-foreground text-micro flex flex-wrap items-center gap-1.5">
             <Calendar className="size-2.5 shrink-0" aria-hidden="true" />
             <span>{t("periodEnds", { date: endDate })}</span>
           </div>
@@ -113,7 +113,7 @@ function PeriodSelectorCard({
         <p className="text-muted-foreground text-xs">{emptyText}</p>
       )}
       <div>
-        <label className="text-muted-foreground mb-1 flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
+        <label className="text-muted-foreground text-micro-eyebrow mb-1 flex items-center gap-1 font-semibold tracking-widest uppercase">
           <CalendarRange className="size-2.5" aria-hidden="true" />
           {tfl("physicalCountPeriod")}
         </label>
@@ -238,8 +238,7 @@ export default function PcComponent() {
     );
   };
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const periodTitle = period ? formatPeriodTitle(period.tb_period.period) : "";
 

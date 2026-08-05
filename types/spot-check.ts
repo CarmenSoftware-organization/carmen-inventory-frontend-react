@@ -93,12 +93,6 @@ export interface SpotCheckDetail {
   info: Record<string, unknown>;
   dimension: unknown[];
   doc_version: number;
-  created_at: string;
-  created_by_id: string;
-  updated_at: string;
-  updated_by_id: string | null;
-  deleted_at: string | null;
-  deleted_by_id: string | null;
   tb_product?: {
     id: string;
     name: string;
@@ -126,12 +120,6 @@ export interface SpotCheck {
   items?: number;
   min_value?: number;
   product_id?: string[];
-  created_at: string;
-  created_by_id: string;
-  updated_at: string;
-  updated_by_id: string | null;
-  deleted_at: string | null;
-  deleted_by_id: string | null;
   tb_location?: {
     id: string;
     name: string;

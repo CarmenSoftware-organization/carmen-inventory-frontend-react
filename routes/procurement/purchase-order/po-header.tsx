@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Lock, Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Lock, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -14,6 +14,7 @@ import type { FormMode } from "@/types/form";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface PoHeaderProps {
   readonly purchaseOrder?: PurchaseOrder;
@@ -59,6 +60,7 @@ export function PoHeader({
   onShowHistory,
 }: PoHeaderProps) {
   const t = useTranslations("procurement.purchaseOrder");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { dateFormat } = useProfile();
@@ -104,7 +106,7 @@ export function PoHeader({
           {canClose && purchaseOrder.po_status === PO_STATUS.SENT && (
             <Button
               size="sm"
-              variant="warning"
+              variant="outline"
               disabled={isPending}
               onClick={onShowClose}
             >
@@ -112,19 +114,13 @@ export function PoHeader({
               {tc("close")}
             </Button>
           )}
-          {isView && (
-            <PrintDocumentButton
-              documentType="PO"
-              documentId={purchaseOrder.id}
-              filters={
-                purchaseOrder.po_no
-                  ? { DocumentNo: purchaseOrder.po_no }
-                  : undefined
-              }
-            />
-          )}
           {isView && canEdit && (
-            <Button size="sm" onClick={onEnterEdit} disabled={isPending}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onEnterEdit}
+              disabled={isPending}
+            >
               <Pencil aria-hidden="true" />
               {tc("edit")}
             </Button>
@@ -149,20 +145,40 @@ export function PoHeader({
                 <Save aria-hidden="true" />
                 {tc("save")}
               </Button>
-              {canEdit && !terminalStatus && (
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  disabled={deletePoIsPending || isPending}
-                  onClick={onShowDelete}
-                >
-                  <Trash2 aria-hidden="true" />
-                  {tc("delete")}
-                </Button>
-              )}
             </>
           )}
+          {canEdit && !terminalStatus && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={deletePoIsPending || isPending}
+              onClick={onShowDelete}
+            >
+              <Trash2 aria-hidden="true" />
+              {tc("delete")}
+            </Button>
+          )}
           <CommentButton count={comments?.length} onClick={onShowComment} />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => openActivity(purchaseOrder.id, purchaseOrder.po_no)}
+          >
+            <History aria-hidden="true" />
+            {tActivity("title")}
+          </Button>
+          {isView && (
+            <PrintDocumentButton
+              documentType="PO"
+              documentId={purchaseOrder.id}
+              filters={
+                purchaseOrder.po_no
+                  ? { DocumentNo: purchaseOrder.po_no }
+                  : undefined
+              }
+            />
+          )}
         </>
       )}
       {isAdd && (
@@ -185,13 +201,9 @@ export function PoHeader({
     </>
   );
 
-  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (po-general-fields) → cells
-  // align ตรงกับ fields ด้านล่าง · ml-4 หักล้าง -ml-4 ของ DocFormHeader
-  // workflow ไม่อยู่ที่นี่ — อยู่ในบล็อกฟอร์มด้านล่างที่เดียว ทุกโหมด
-  const ribbonCols = "lg:grid-cols-[repeat(6,minmax(0,10rem))]";
   const ribbon = (
     <div
-      className={`ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${ribbonCols}`}
+      className={`ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6`}
     >
       <Field>
         <FieldLabel>{tfl("buyer")}</FieldLabel>

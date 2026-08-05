@@ -73,5 +73,6 @@ export function useRunningCodeTable({
     tableConfig,
     onDelete,
     hideStatus: true,
+    activity: { id: (r) => r.id, label: (r) => r.type },
   });
 }

@@ -2,7 +2,6 @@ import { Link } from "react-router";
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { getModule } from "@/constant/module-list";
-import { getModuleColor } from "@/constant/module-color-map";
 import { useVisibleModules } from "@/hooks/use-visible-modules";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { cn } from "@/lib/utils";
@@ -12,11 +11,19 @@ interface ModuleLandingProps {
   description: string;
 }
 
+/**
+ * สีเดียวของทั้งแอป — จุด ไอคอน และพื้นอ่อนของทุกโมดูลใช้ตัวนี้
+ *
+ * Single-accent design (docs/DESIGN.md): ไม่มีสีประจำโมดูลรายตัวแล้ว เดิมมีตาราง
+ * route→สี กับฟังก์ชันอ่านค่าครอบไว้อีกชั้น ทั้งที่ฟังก์ชันคืนค่านี้ตายตัวโดยไม่
+ * สนใจ path ที่ส่งเข้าไป — ลบทิ้งทั้งชุดแล้ว
+ */
+const ACCENT = "var(--primary)";
+
 export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
   const t = useTranslations("modules");
   const mod = getModule(modulePath);
   const Icon = mod.icon;
-  const moduleColor = getModuleColor(modulePath);
   const visibleSubs = useVisibleModules(mod.subModules);
 
   return (
@@ -26,10 +33,10 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
         <div
           className="flex size-11 shrink-0 items-center justify-center rounded-2xl"
           style={{
-            backgroundColor: `color-mix(in oklch, ${moduleColor}, transparent 90%)`,
+            backgroundColor: `color-mix(in oklch, ${ACCENT}, transparent 90%)`,
           }}
         >
-          <Icon className="size-5" style={{ color: moduleColor }} />
+          <Icon className="size-5" style={{ color: ACCENT }} />
         </div>
         <div className="min-w-0 flex-1 space-y-0.5">
           <h1 className="text-foreground text-xl leading-tight font-semibold tracking-tight md:text-[1.5rem]">
@@ -41,7 +48,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
           <div className="text-muted-foreground/80 text-micro-legal mt-1 flex items-center gap-1 tracking-wide">
             <span
               className="inline-block size-1 rounded-full"
-              style={{ backgroundColor: moduleColor }}
+              style={{ backgroundColor: ACCENT }}
             />
             <span>{t("subModuleCount", { count: visibleSubs.length })}</span>
           </div>
@@ -51,7 +58,6 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
       {/* Sub-module grid */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {visibleSubs.map((sub) => {
-          const subColor = getModuleColor(sub.path);
           const cardClass = cn(
             "group border-border bg-card hover:border-primary/40 relative flex items-center gap-3 overflow-hidden rounded-xl border py-2 pr-3 pl-4 text-left transition-colors",
             sub.denied && "opacity-50",
@@ -63,19 +69,19 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
               <span
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-y-2 left-0 w-0.5 rounded-r-full opacity-60 transition-all group-hover:inset-y-0 group-hover:w-1 group-hover:opacity-100"
-                style={{ backgroundColor: subColor }}
+                style={{ backgroundColor: ACCENT }}
               />
 
               {/* Icon pill — muted by default, color on hover */}
               <div
                 className="relative flex size-10 shrink-0 items-center justify-center rounded-xl"
                 style={{
-                  backgroundColor: `color-mix(in oklch, ${subColor}, transparent 90%)`,
+                  backgroundColor: `color-mix(in oklch, ${ACCENT}, transparent 90%)`,
                 }}
               >
                 <sub.icon
                   className="size-4 transition-transform"
-                  style={{ color: subColor }}
+                  style={{ color: ACCENT }}
                   aria-hidden="true"
                 />
               </div>

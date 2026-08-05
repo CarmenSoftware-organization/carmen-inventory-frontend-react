@@ -12,10 +12,11 @@ import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   InputSuffixAddon,
   InputSuffixField,
-  InputSuffixInput,
   InputSuffixPlain,
+  InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
 import { LookupProductLocation } from "@/components/lookup/lookup-product-location";
+import { useUnitDecimals } from "@/hooks/use-product-units";
 import { fieldFocusRef } from "@/lib/field-focus";
 import {
   DiscountOverrideInput,
@@ -25,7 +26,7 @@ import {
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import { useAddLocationRegistry } from "./po-locations-add-context";
-import { PO_COL, PO_COL_DATA_TOTAL } from "./po-item-columns";
+import { poItemCols } from "./po-item-columns";
 import type { PoFormValues } from "./po-form-schema";
 
 interface Props {
@@ -289,6 +290,13 @@ export function LocationsEditor({
       control: form.control,
       name: `items.${index}.order_unit_name`,
     }) ?? "";
+  const unitId =
+    useWatch({
+      control: form.control,
+      name: `items.${index}.order_unit_id`,
+    }) ?? "";
+  // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
+  const decimals = useUnitDecimals(productId, unitId);
 
   const { fields, prepend, remove } = useFieldArray({
     control: form.control,
@@ -329,15 +337,19 @@ export function LocationsEditor({
   }, [addRegistry, locEditable, index, prepend]);
 
   // คอลัมน์ align กับ product row — % ของ (data + action ถ้ามี)
-  const denom = PO_COL_DATA_TOTAL + (showActionCol ? PO_COL.action : 0);
+  // showActionCol = !disabled && !readOnly ของ main row — ใช้ค่าเดียวกันคุม
+  // ความกว้าง คอลัมน์สองตารางจึงตรงกันทั้งโหมดอ่านและโหมดแก้
+  const { col: PO_COL, dataTotal } = poItemCols(showActionCol);
+  const denom = dataTotal + (showActionCol ? PO_COL.action : 0);
   const pct = (px: number) => `${(px / denom) * 100}%`;
-  const colCount = 9 + (showActionCol ? 1 : 0);
+  const colCount = 10 + (showActionCol ? 1 : 0);
 
   return (
     <div>
       <table className="w-full table-fixed text-xs">
         <colgroup>
           <col style={{ width: pct(PO_COL.product) }} />
+          <col style={{ width: pct(PO_COL.unit) }} />
           <col style={{ width: pct(PO_COL.order) }} />
           <col style={{ width: pct(PO_COL.rec) }} />
           <col style={{ width: pct(PO_COL.price) }} />
@@ -351,6 +363,9 @@ export function LocationsEditor({
         <thead className="text-muted-foreground text-micro font-semibold">
           <tr className="border-border/60 border-b">
             <th className="px-2 py-1 text-left">{tfl("location")}</th>
+            {/* หน่วยเป็นของรายการสินค้า ไม่ใช่ของ location — ค่าเลือกที่แถวสินค้า
+                แล้ว ตรงนี้เว้นหัวไว้ ไม่ตั้งป้ายให้คนอ่านนึกว่ามีค่าแล้วไม่ขึ้น */}
+            <th className="px-2 py-1" />
             <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>
             <th className="px-1 py-1 text-right">{tfl("receivedQty")}</th>
             <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
@@ -414,6 +429,10 @@ export function LocationsEditor({
                     )}
                   />
                 </td>
+                {/* unit — เว้นไว้ให้คอลัมน์ตรงกับตารางแถวสินค้าด้านบน
+                    (หน่วยเป็นของรายการสินค้า ทุก location ใช้ตัวเดียวกัน) */}
+                <td className="px-2 py-1" />
+
                 {/* order qty */}
                 <td className="px-1 py-1 text-right">
                   {locEditable ? (
@@ -423,6 +442,7 @@ export function LocationsEditor({
                       locIndex={locIndex}
                       error={reqQtyError}
                       unitName={unitName}
+                      decimals={decimals}
                     />
                   ) : (
                     <InputSuffixPlain
@@ -533,23 +553,22 @@ function LocationQtyInput({
   locIndex,
   error,
   unitName,
+  decimals,
 }: {
   readonly form: UseFormReturn<PoFormValues>;
   readonly itemIndex: number;
   readonly locIndex: number;
   readonly error?: string;
   readonly unitName: string;
+  readonly decimals: number;
 }) {
   "use no memo";
   const name = `items.${itemIndex}.locations.${locIndex}.order_qty` as const;
   const value = useWatch({ control: form.control, name }) ?? 0;
   return (
     <InputSuffixField className="w-full" error={!!error}>
-      <InputSuffixInput
-        type="number"
-        inputMode="decimal"
-        min={0}
-        step="1"
+      <InputSuffixQty
+        decimals={decimals}
         placeholder="0"
         defaultValue={value}
         {...form.register(name)}

@@ -19,10 +19,11 @@ import { cn } from "@/lib/utils";
 import { LookupProduct } from "@/components/lookup/lookup-product";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProductUnits } from "@/hooks/use-product-units";
+import { useProductById } from "@/hooks/use-product";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
 import { GrnLocationRow } from "./grn-location-row";
-import { GRN_COL, grnColDataTotal } from "./grn-item-columns";
+import { grnItemCols } from "./grn-item-columns";
 
 /** 1 product group = 1 แถวใน DataGrid (product + N location indices) */
 export interface GrnGroup {
@@ -131,6 +132,30 @@ function ProductGroupCell({
   }
   return <NameWithSubtext primary={productName} secondary={productLocalName} />;
 }
+
+/**
+ * หน่วยนับของสินค้า (inventory unit จาก product master) — โชว์อย่างเดียว
+ *
+ * ไม่ใช่หน่วยที่รับ (`received_unit_id` ซึ่งเลือกได้ต่อ location) แต่เป็นหน่วยที่
+ * สินค้าตัวนี้ถือสต๊อกอยู่ ใช้เทียบตาว่าหน่วยที่กำลังรับเป็นคนละตัวกับหน่วยสต๊อกไหม
+ * · API ของ GRN ไม่ได้ส่งมาด้วย จึงอ่านจาก product master (แคช 5 นาที ต่อ 1 สินค้า)
+ */
+const ProductUnitCell = memo(function ProductUnitCell({
+  control,
+  index,
+}: {
+  control: Control<GrnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const productId = useWatch({ control, name: `items.${index}.product_id` });
+  const { data: product } = useProductById(productId || undefined);
+  return (
+    <span className="text-muted-foreground text-xs">
+      {product?.inventory_unit?.name || "—"}
+    </span>
+  );
+});
 
 /** Total (net + tax) รวมของกลุ่ม (sum total_price ทุก location) — คอลัมน์ Amount */
 const GroupTotalCell = memo(function GroupTotalCell({
@@ -281,14 +306,17 @@ function GrnGroupLocations({
   const showActionCol = !disabled;
 
   // คอลัมน์ align กับ group row — % ของ (data + action ถ้ามี); order นับเฉพาะ isPo
-  const denom = grnColDataTotal(isPo) + (showActionCol ? GRN_COL.action : 0);
+  // ความกว้าง combo (discount/tax) ย่อในโหมดอ่าน ใช้เกณฑ์เดียวกับ showActionCol
+  const { col: GRN_COL, dataTotal } = grnItemCols(isPo, showActionCol);
+  const denom = dataTotal + (showActionCol ? GRN_COL.action : 0);
   const pct = (px: number) => `${(px / denom) * 100}%`;
-  const colCount = 9 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
+  const colCount = 10 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
 
   return (
     <table className="w-full table-fixed text-xs">
       <colgroup>
         <col style={{ width: pct(GRN_COL.product) }} />
+        <col style={{ width: pct(GRN_COL.unit) }} />
         {isPo && <col style={{ width: pct(GRN_COL.order) }} />}
         <col style={{ width: pct(GRN_COL.received) }} />
         <col style={{ width: pct(GRN_COL.foc) }} />
@@ -303,6 +331,9 @@ function GrnGroupLocations({
       <thead className="text-muted-foreground text-micro font-semibold">
         <tr className="border-border/60 border-b">
           <th className="px-2 py-1 text-left">{tfl("location")}</th>
+          {/* หน่วยเป็นของสินค้า ไม่ใช่ของ location — ค่าโชว์ที่แถวสินค้าแล้ว
+              ตรงนี้เว้นหัวไว้ ไม่ตั้งป้ายให้คนอ่านนึกว่ามีค่าแล้วไม่ขึ้น */}
+          <th className="px-2 py-1" />
           {isPo && <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>}
           <th className="px-1 py-1 text-right">
             {tfl("receivedQty")}
@@ -458,6 +489,13 @@ export function useGrnItemTable({
       headerClassName: "text-right",
       cellClassName: "text-right",
     };
+    // ยังไม่มีแถวก็ยังไม่มีช่องกรอกให้กว้าง — ใช้ความกว้างโหมดอ่านไปก่อน
+    // พอมีรายการแรกค่อยขยาย · ตาราง location ด้านล่างใช้แค่ !disabled ได้
+    // เพราะมันจะ render ก็ต่อเมื่อมีรายการอยู่แล้ว สองตารางจึงตรงกันเสมอ
+    const { col: GRN_COL } = grnItemCols(
+      isPo,
+      !disabled && itemFields.length > 0,
+    );
     const dataColumns: ColumnDef<GrnGroup>[] = [
       {
         id: "product",
@@ -470,6 +508,17 @@ export function useGrnItemTable({
             disabled={disabled}
             autoOpen={row.original.key === autoOpenProductKey}
             onPicked={() => onProductPicked(row.original.key)}
+          />
+        ),
+      },
+      {
+        id: "unit",
+        header: tfl("unit"),
+        size: GRN_COL.unit,
+        cell: ({ row }) => (
+          <ProductUnitCell
+            control={form.control}
+            index={row.original.indices[0]}
           />
         ),
       },

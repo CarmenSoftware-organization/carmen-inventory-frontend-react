@@ -17,6 +17,8 @@ backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migr
 bun dev              # Dev server = dev:local (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
 bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/config.<env>.json (prod = dev backend until real prod exists)
 bun run build        # tsc + vite build → dist/
+bun run typecheck    # tsc --noEmit เดี่ยว ๆ (gate ของ build:bump)
+bun run build:bump [patch|minor|major]   # ตัด release: bump package.json + commit + annotated tag (local เท่านั้น ไม่ push) — ต้องอยู่บน main, tree สะอาด, ไม่ตามหลัง origin/main; gate typecheck+lint+test:run; ไม่ส่ง level = ถามใน terminal
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
 scripts/setup-gcs-cdn.sh <bucket> <config> [domain]   # One-shot GCP infra (CDN+LB+cert) + first deploy (docs/deploy.md)
@@ -71,6 +73,25 @@ the full colocated-route convention and Next→react-router rewrite steps. Gate:
 --noEmit && bun test:run` must be clean. (The `scripts/codemods/*` helpers predate the
 compat removal — don't rely on them for the import step.)
 
+## Activity sheet (ประวัติ "ใครแก้อะไร" ของรายการเดียว)
+
+`components/share/activity-sheet.tsx` เป็นของกลาง ใช้ได้กับทุก entity — เปิดด้วย
+`openActivity(id, label?)` จาก `components/share/activity-sheet-host.tsx` ซึ่ง mount
+ครั้งเดียวใน `routes/root-layout.tsx` (กลไก CustomEvent ชุดเดียวกับ
+`dispatchPermissionDenied`) **อย่าถือ state หรือ render sheet เองในหน้าใหม่**
+
+จุดเข้าถึงมีสามทาง: ปุ่มในหัวหน้า (20 หน้า) · เมนู ⋯ ในแถว list ผ่าน option
+`activity: { id, label }` ของ `useConfigTable` / `actionColumn` (31 list) · ปุ่มไอคอนใน
+`tree-node.tsx` ของหมวดสินค้า
+
+เปิดเฉพาะ entity ที่ backend บันทึกให้จริง — ทะเบียนอยู่ที่
+`carmen-turborepo-backend-v2/apps/micro-business/src/common/activity/activity-registry.ts`
+ตอนนี้ **ไม่เปิด** 7 list ที่ไม่มีในทะเบียน (certification · eco · equipment · recipe ·
+period · activity-log · user-activity) เปิดไปจะได้เมนูที่กดแล้วว่างเปล่า
+
+หัวข้อของแต่ละ action อยู่ใน `ACTION_TITLE_KEY` ของ activity-sheet ซึ่งต้องเป็นสับเซตของ
+enum `enum_activity_action` ฝั่ง DB — ค่าที่ไม่มีในเอนัมจะเขียนลงไม่ได้เลย
+
 ## Interfaces config (`/system-admin/interface`)
 
 Per-BU external-system config (Accounting / POS / PMS). Conventions, storage model, and the
@@ -105,3 +126,16 @@ or any secret-bearing app-config save (incl. the pre-existing `report_email`) 40
   the fix is dropping `.int()` from the 3 copies of `ValidateSchema` in
   carmen-turborepo-backend-v2 (`backend-gateway`, `micro-business`, `micro-file`).
   Frontend deliberately does NOT round to compensate — that would corrupt the data.
+- Backend bug (not frontend): `GET /api/purchase-requests` (PR list) carries a bare
+  `@EnrichAuditUsers()`, which only enriches path `''` — but the rows sit at
+  `data[].data[]` (multi-BU envelope), so the interceptor never reaches them. Rows come
+  back with a raw `created_at` still attached and **no `audit` object at all**, so the
+  Created/Updated columns on the PR list render blank (`pr-component.tsx` Excel export,
+  `pr-card.tsx` grid card). Verified by hitting the gateway directly 2026-08-04. Fix is
+  `paths` on the decorator so it reaches the nested rows — same class as the SR list fix.
+  Frontend deliberately keeps reading `audit` rather than falling back to the raw field:
+  the raw one disappears the moment the decorator is fixed.
+- After the first `build:bump`, the footer's version and `changelog.json`'s newest entry
+  diverge — nothing regenerates `changelog.json`, so the What's New dialog
+  (`components/footer/whats-new-dialog.tsx`) shows an older version heading than the button
+  that opened it. Known, not a bug; the fix is a changelog generator (separate work).

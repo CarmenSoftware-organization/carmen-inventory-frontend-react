@@ -1,8 +1,10 @@
 import { useTranslations } from "use-intl";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
-import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import type { Recipe } from "@/types/recipe";
 import type { Cuisine } from "@/types/cuisine";
 import type { RecipeCategory } from "@/types/recipe-category";
@@ -41,7 +43,6 @@ export default function RecipeCard({
 }: RecipeCardProps) {
   const t = useTranslations("operationPlan.recipe");
   const tfl = useTranslations("field");
-  const { dateTimeFormat } = useProfile();
 
   const cuisineName = cuisines.find((c) => c.id === item.cuisine_id)?.name;
   const categoryName = categories.find((c) => c.id === item.category_id)?.name;
@@ -74,23 +75,7 @@ export default function RecipeCard({
           </span>
         </ListCardRow>
       )}
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

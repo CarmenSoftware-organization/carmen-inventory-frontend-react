@@ -65,6 +65,55 @@ export async function login(email: string, password: string): Promise<LoginResul
   return { platform_role };
 }
 
+export interface RegisterPayload {
+  username: string;
+  email: string;
+  password: string;
+  user_info: {
+    first_name: string;
+    middle_name?: string;
+    last_name: string;
+    telephone?: string;
+  };
+}
+
+/**
+ * สมัครสมาชิก — POST /api/auth/register (public, ไม่ต้องมี access token)
+ * backend คืน 201 เปล่าๆ ไม่มี token กลับมา ผู้ใช้ต้องไป login ต่อเอง
+ */
+export async function register(payload: RegisterPayload): Promise<void> {
+  const { BACKEND_URL } = getRuntimeConfig();
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}/api/auth/register`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+  }
+
+  if (res.ok) return;
+
+  const json = await res.json().catch(() => ({}));
+  // gateway คืน message เป็น array เมื่อ zod validation ไม่ผ่าน (string เมื่อเป็น
+  // error อื่น) — รวมเป็นบรรทัดเดียวไม่งั้น UI ได้ข้อความคั่นด้วยจุลภาคติดกันพรืด
+  const message: string = Array.isArray(json?.message)
+    ? json.message.join(" · ")
+    : (json?.message ?? "Register failed");
+  throw new ApiError(
+    res.status === 409 || res.status === 400
+      ? ERROR_CODES.VALIDATION_ERROR
+      : res.status === 429
+        ? ERROR_CODES.RATE_LIMITED
+        : ERROR_CODES.INTERNAL_ERROR,
+    message,
+    res.status,
+  );
+}
+
 // Mutex — concurrent 401s แชร์ refresh request เดียวกัน (พฤติกรรมเดิมจาก http-client)
 let refreshPromise: Promise<boolean> | null = null;
 

@@ -19,6 +19,7 @@ import EmptyComponent from "@/components/empty-component";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import {
@@ -226,9 +227,9 @@ export function OnOrderDialog({ open, onOpenChange, productId }: Props) {
             }
           >
             <DataGridContainer className="flex max-h-[60vh] flex-col rounded-lg border">
-              <div className="flex-1 overflow-auto">
+              <DataGridScrollArea>
                 <DataGridTable />
-              </div>
+              </DataGridScrollArea>
             </DataGridContainer>
           </DataGrid>
         </div>

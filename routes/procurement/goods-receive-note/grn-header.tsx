@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { FileText, Pencil, Save, Trash2, X } from "lucide-react";
+import { FileText, History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentButton } from "@/components/comment-button";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
@@ -18,6 +18,7 @@ import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface GrnHeaderProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
@@ -65,6 +66,7 @@ export function GrnHeader({
   onSave,
 }: GrnHeaderProps) {
   const t = useTranslations("procurement.goodsReceiveNote");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useGoodsReceiveNoteComments(goodsReceiveNote?.id);
@@ -112,6 +114,7 @@ export function GrnHeader({
       {isView && goodsReceiveNote && canEdit && (
         <Button
           size="sm"
+          variant="outline"
           onClick={
             editDenied
               ? () => dispatchPermissionDenied(updatePermission)
@@ -159,14 +162,14 @@ export function GrnHeader({
                 onClick={onSave}
               >
                 <Save aria-hidden="true" />
-                {isEdit ? tc("save") : t("create")}
+                {isEdit ? tc("save") : tc("create")}
               </Button>
             </>
           )}
-          {isEdit && goodsReceiveNote && (
+          {goodsReceiveNote && (
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={
                 deleteDenied
@@ -188,6 +191,19 @@ export function GrnHeader({
       {goodsReceiveNote && (
         <CommentButton count={comments?.length} onClick={onShowComment} />
       )}
+      {goodsReceiveNote && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(goodsReceiveNote.id, goodsReceiveNote.grn_no)
+          }
+        >
+          <History />
+          {tActivity("title")}
+        </Button>
+      )}
       {isView && goodsReceiveNote?.id && (
         <PrintDocumentButton
           documentType="GRN"
@@ -202,11 +218,11 @@ export function GrnHeader({
     </>
   );
 
-  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (grn-form-header, grid-cols-4)
+  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (grn-form-header, grid-cols-6)
   // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
   // gap-x-3 ให้ตรง gap-3 ของ general grid
   const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(6,minmax(0,10rem))]">
+    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
       <Field>
         <FieldLabel>{tfl("receivedBy")}</FieldLabel>
         <Input value={receivedByName || "—"} disabled />

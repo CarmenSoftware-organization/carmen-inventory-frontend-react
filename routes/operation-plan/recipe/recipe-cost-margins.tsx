@@ -3,7 +3,7 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
 import { FieldInput } from "@/components/ui/field";
-import { Card } from "./recipe-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeFormValues } from "./recipe-form-schema";
 import type { RecipeComputed } from "./use-recipe-cost-calc";
 
@@ -34,7 +34,7 @@ export function RecipeCostMargins({
     targetPct > 0 && foodPct > 0 ? foodPct <= targetPct : foodPct === 0;
 
   return (
-    <Card label={t("margins")} description={t("marginsDesc")}>
+    <SettingSection plain title={t("margins")} description={t("marginsDesc")}>
       <div className="grid grid-cols-2 gap-2">
         <MarginTile
           label={t("grossMargin")}
@@ -95,7 +95,7 @@ export function RecipeCostMargins({
           </span>
         </div>
       </div>
-    </Card>
+    </SettingSection>
   );
 }
 

@@ -190,8 +190,7 @@ export default function ScComponent() {
   const error = isLocationsView ? locationsError : historyError;
   const refetch = isLocationsView ? refetchLocations : refetchHistory;
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <InvListShell>
@@ -393,7 +392,7 @@ function ViewToggle({
         size="sm"
         variant={view === "locations" ? "default" : "ghost"}
         onClick={() => setView("locations")}
-        className="h-7 rounded-full px-3 text-micro font-semibold tracking-wide"
+        className="text-micro h-7 rounded-full px-3 font-semibold tracking-wide"
       >
         <MapPin className="size-3" aria-hidden="true" />
         {t("viewLocations")}
@@ -403,7 +402,7 @@ function ViewToggle({
         size="sm"
         variant={view === "history" ? "default" : "ghost"}
         onClick={() => setView("history")}
-        className="h-7 rounded-full px-3 text-micro font-semibold tracking-wide"
+        className="text-micro h-7 rounded-full px-3 font-semibold tracking-wide"
       >
         <History className="size-3" aria-hidden="true" />
         {t("viewHistory")}

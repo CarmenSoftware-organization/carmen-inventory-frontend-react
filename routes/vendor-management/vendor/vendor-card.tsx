@@ -1,9 +1,11 @@
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
-import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import type { Vendor } from "@/types/vendor";
 
 interface VendorCardProps {
@@ -28,7 +30,6 @@ export default function VendorCard({
   onDelete,
 }: VendorCardProps) {
   const tfl = useTranslations("field");
-  const { dateTimeFormat } = useProfile();
 
   const primaryContact = item.tb_vendor_contact?.find((c) => c.is_primary);
 
@@ -64,23 +65,7 @@ export default function VendorCard({
       {primaryContact?.email && (
         <ListCardRow label={tfl("email")}>{primaryContact.email}</ListCardRow>
       )}
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

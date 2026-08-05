@@ -31,5 +31,5 @@ export default function ModuleError({
       ? getUserErrorMessage(error, t)
       : error.message || undefined;
 
-  return <ErrorState message={message} onRetry={reset} />;
+  return <ErrorState message={message} onRetry={reset} error={error} />;
 }

@@ -2,12 +2,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { AuditCell } from "@/components/share/audit-cell";
 import {
-  selectColumn,
-  indexColumn,
   actionColumn,
+  auditColumns,
   columnSkeletons,
+  indexColumn,
+  selectColumn,
 } from "@/components/ui/data-grid/columns";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -137,7 +137,12 @@ export function useStoreRequisitionTable({
       cell: ({ row }) => {
         const status = row.getValue("doc_status") as StoreRequisitionStatus;
         return (
-          <Badge className={SR_STATUS_CONFIG[status]?.className} size="sm">
+          // uppercase ด้วย CSS ไม่ใช่ .toUpperCase() — ค่าที่ export/คัดลอก
+          // ยังเป็นข้อความเดิม และภาษาไทยที่ไม่มีตัวพิมพ์ใหญ่ก็ไม่โดนแตะ
+          <Badge
+            className={`uppercase ${SR_STATUS_CONFIG[status]?.className ?? ""}`}
+            size="sm"
+          >
             {ts(status)}
           </Badge>
         );
@@ -180,44 +185,16 @@ export function useStoreRequisitionTable({
         cellClassName: "text-center",
       },
     },
-    {
-      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
-    },
+    ...auditColumns<StoreRequisition>(tfl, dateTimeFormat),
   ];
 
   const allColumns: ColumnDef<StoreRequisition>[] = [
     selectColumn<StoreRequisition>(),
     indexColumn<StoreRequisition>(params),
     ...dataColumns,
-    actionColumn<StoreRequisition>(onDelete),
+    actionColumn<StoreRequisition>(onDelete, {
+      activity: { id: (r) => r.id, label: (r) => r.sr_no },
+    }),
   ];
 
   return useReactTable({

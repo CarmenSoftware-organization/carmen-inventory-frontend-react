@@ -2,9 +2,12 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { AuditCell } from "@/components/share/audit-cell";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { columnSkeletons, statusColumn } from "@/components/ui/data-grid/columns";
+import {
+  auditColumns,
+  columnSkeletons,
+  statusColumn,
+} from "@/components/ui/data-grid/columns";
 import type { TaxProfile } from "@/types/tax-profile";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
@@ -71,36 +74,7 @@ export function useTaxProfileTable({
       },
     },
     statusColumn<TaxProfile>(),
-    {
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created") },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated") },
-    },
+    ...auditColumns<TaxProfile>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<TaxProfile>({
@@ -112,5 +86,6 @@ export function useTaxProfileTable({
     onDelete,
     hideStatus: true,
     initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    activity: { id: (r) => r.id, label: (r) => r.name },
   });
 }

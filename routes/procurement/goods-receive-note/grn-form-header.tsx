@@ -13,6 +13,7 @@ import {
   InputSuffixField,
   InputSuffixInput,
 } from "@/components/ui/input/input-suffix";
+import { Input } from "@/components/ui/input";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { addDays } from "@/lib/date-utils";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
@@ -55,20 +56,31 @@ export function GrnFormHeader({
    * คิดตอนผู้ใช้เปลี่ยนค่าเท่านั้น ไม่ทำใน useEffect — setValue ตอน mount จะทำให้
    * ฟอร์มกลายเป็น dirty เองแล้วเด้ง discard dialog ตอนกดออก และจะไปทับวันครบ
    * กำหนดที่บันทึกไว้แล้วของใบเก่าด้วย · ช่องยังแก้เองได้ตามปกติ
+   *
+   * ไม่มีเทอมเครดิต = ใบใหม่ยังถือค่า default "วันนี้" อยู่ ถ้าใบแจ้งหนี้ลงวันที่
+   * หลังจากนั้น วันครบกำหนดจะไปอยู่ก่อนวันที่ใบแจ้งหนี้ซึ่งไม่มีอยู่จริง (ปฏิทิน
+   * ของช่องนั้นก็ล็อก `fromDate` ไว้แล้ว) จึงดันตามให้เท่าวันที่ใบแจ้งหนี้
    */
   const syncDueDate = (invoiceDate?: string | null, days?: number | null) => {
-    if (!invoiceDate || days == null) return;
-    form.setValue("payment_due_date", addDays(invoiceDate, days), {
-      shouldDirty: true,
-    });
+    if (!invoiceDate) return;
+    if (days != null) {
+      form.setValue("payment_due_date", addDays(invoiceDate, days), {
+        shouldDirty: true,
+      });
+      return;
+    }
+    const due = form.getValues("payment_due_date");
+    if (due && new Date(due) < new Date(invoiceDate)) {
+      form.setValue("payment_due_date", invoiceDate, { shouldDirty: true });
+    }
   };
 
   return (
     <div className="space-y-2">
-      {/* คอลัมน์ละ 10rem ชิดซ้าย ไม่ยืดเต็มจอ — ค่าอยู่ใกล้กันพอให้กวาดตารวดเดียว
-          และ track ตรงกับแถบข้อมูลบนหัว (grn-header) · โหมดอ่านใช้ช่องชุดเดียวกัน
-          แค่ disabled จึงไม่ต้องสลับ grid ให้เลย์เอาต์ขยับตอนเปลี่ยนโหมด */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(6,minmax(0,10rem))]">
+      {/* 6 คอลัมน์ยืดเต็มความกว้าง track เดียวกับแถบข้อมูลบนหัว (grn-header)
+          โหมดอ่านใช้ช่องชุดเดียวกันแค่ disabled จึงไม่ต้องสลับ grid ให้เลย์เอาต์
+          ขยับตอนเปลี่ยนโหมด */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
         <Field className={`${viewFieldGap ?? ""} lg:col-span-2`}>
           <FieldLabel required>{tfl("vendor")}</FieldLabel>
           <Controller
@@ -244,6 +256,23 @@ export function GrnFormHeader({
                 </SelectContent>
               </FieldSelect>
             )}
+          />
+        </Field>
+
+        {/* คำอธิบายอยู่ต่อจาก Post Type ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยก
+            ใต้ฟอร์ม — เป็นช่องบรรทัดเดียวกว้าง 3 คอลัมน์ ไม่ใช่ Textarea เต็ม
+            ความกว้าง เพราะคำอธิบายใบเป็นข้อความสั้น ไม่ใช่บันทึกยาว */}
+        <Field className="lg:col-span-3">
+          <FieldLabel htmlFor="grn-description">
+            {tfl("description")}
+          </FieldLabel>
+          <Input
+            id="grn-description"
+            placeholder={t("descriptionPlaceholder")}
+            maxLength={256}
+            disabled={disabled}
+            className="text-xs"
+            {...form.register("description")}
           />
         </Field>
       </div>

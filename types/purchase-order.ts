@@ -69,6 +69,18 @@ export interface PurchaseOrderDetail extends ItemMoneyFields {
   discount_amount: number;
   pr_detail: PrDetailRef[];
   locations: PoDetailLocation[];
+  history?: PoItemHistoryEntry[];
+}
+
+/** ประวัติการทำงาน workflow ระดับรายการ (per-item) ของใบสั่งซื้อ */
+export interface PoItemHistoryEntry {
+  at: string;
+  seq: number;
+  name: string;
+  /** บาง entry หลังบ้านส่งมาแค่ id ไม่มีชื่อ */
+  user: { id: string; name?: string };
+  status: string;
+  message?: string | null;
 }
 
 export interface PrDetailRef {
@@ -194,8 +206,6 @@ export interface PurchaseOrder {
   total_amount: number;
   // flat fields ยังใช้อยู่ในหน้า edit (po-form → PoWorkflowHistory);
   // list endpoint จะไม่ส่งมา (serializer omit) แต่ enrich เป็น audit object แทน
-  created_at: string;
-  updated_at: string;
   audit?: Audit;
   purchase_order_detail: PurchaseOrderDetail[];
 }
