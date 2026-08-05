@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   useFieldArray,
@@ -210,7 +209,9 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   const plNo = priceList?.no ?? null;
   const productsHeaderLabels = useProductsHeaderLabels(t);
   const removeItemLabel = t("detail.removeItem");
-  const tsStatus = ts as (key: "draft" | "submitted" | "active" | "inactive") => string;
+  const tsStatus = ts as (
+    key: "draft" | "submitted" | "active" | "inactive",
+  ) => string;
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
@@ -220,76 +221,80 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
           flush
           title={watchedName || t("namePlaceholder")}
           titleMuted={!watchedName}
-        backLabel={tc("goBack")}
-        onBack={handleBack}
-        badges={
-          <>
-            {plNo && (
-              <span className="text-muted-foreground shrink-0 text-sm">
-                · {plNo}
-              </span>
-            )}
-            <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
-              {tsStatus(watchedStatus)}
-            </StatusDotBadge>
-          </>
-        }
-        actions={
-          <>
-            {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-            {priceList && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => openActivity(priceList.id, priceList.no)}
-              >
-                <History />
-                {tActivity("title")}
-              </Button>
-            )}
-            {isView ? (
-              <Button size="sm" onClick={() => setMode("edit")}>
-                <Pencil />
-                {tc("edit")}
-              </Button>
-            ) : (
-              <>
+          backLabel={tc("goBack")}
+          onBack={handleBack}
+          badges={
+            <>
+              {plNo && (
+                <span className="text-muted-foreground shrink-0 text-sm">
+                  · {plNo}
+                </span>
+              )}
+              <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
+                {tsStatus(watchedStatus)}
+              </StatusDotBadge>
+            </>
+          }
+          actions={
+            <>
+              {isView ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setMode("edit")}
+                >
+                  <Pencil />
+                  {tc("edit")}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={isPending}
+                  >
+                    <X />
+                    {tc("cancel")}
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    form={FORM_ID}
+                    disabled={isPending}
+                  >
+                    <Save />
+                    {submitLabel}
+                  </Button>
+                </>
+              )}
+              {priceList && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={handleCancel}
-                  disabled={isPending}
+                  onClick={() => setShowDelete(true)}
+                  disabled={deletePriceList.isPending || isPending}
                 >
-                  <X />
-                  {tc("cancel")}
+                  <Trash2 />
+                  {tc("delete")}
                 </Button>
+              )}
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {priceList && (
                 <Button
-                  type="submit"
+                  type="button"
+                  variant="outline"
                   size="sm"
-                  form={FORM_ID}
-                  disabled={isPending}
+                  onClick={() => openActivity(priceList.id, priceList.no)}
                 >
-                  <Save />
-                  {submitLabel}
+                  <History />
+                  {tActivity("title")}
                 </Button>
-                {isEdit && priceList && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setShowDelete(true)}
-                    disabled={deletePriceList.isPending || isPending}
-                  >
-                    <Trash2 />
-                    {tc("delete")}
-                  </Button>
-                )}
-              </>
-            )}
-          </>
-        }
+              )}
+            </>
+          }
         />
       </div>
 
