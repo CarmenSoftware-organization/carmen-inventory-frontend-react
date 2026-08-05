@@ -305,6 +305,9 @@ export function SelectField({
  * Field number-format — view แสดงสรุป, edit = locales (dropdown) + minimumIntegerDigits
  *
  * @param localeOptions - รายการ locale มาตรฐานสำหรับ dropdown
+ * @param showDigits - แสดงช่อง minimumIntegerDigits หรือไม่ (default true) —
+ *   ฝั่งจำนวนเงินปิดไว้ เพราะ `formatAmount` ไม่ได้อ่านค่านี้แล้ว เหลือช่องไว้ก็
+ *   เป็นช่องที่กรอกไปแล้วไม่มีผลกับอะไรเลย
  */
 export function NumberFormatField({
   editing,
@@ -316,6 +319,7 @@ export function NumberFormatField({
   localeOptions,
   localesPlaceholder,
   digitsPlaceholder,
+  showDigits = true,
 }: {
   readonly editing: boolean;
   readonly form: Form;
@@ -330,6 +334,7 @@ export function NumberFormatField({
   readonly localeOptions: readonly string[];
   readonly localesPlaceholder: string;
   readonly digitsPlaceholder: string;
+  readonly showDigits?: boolean;
 }) {
   if (!editing) {
     return (
@@ -342,21 +347,23 @@ export function NumberFormatField({
   }
   return (
     <EditShell label={label} description={description}>
-      <div className="grid grid-cols-2 gap-2">
+      <div className={showDigits ? "grid grid-cols-2 gap-2" : undefined}>
         <SelectControl
           form={form}
           name={`${name}.locales` as FormName}
           options={localeOptions}
           placeholder={localesPlaceholder}
         />
-        <Input
-          type="number"
-          {...form.register(`${name}.minimumIntegerDigits` as FormName, {
-            valueAsNumber: true,
-          })}
-          placeholder={digitsPlaceholder}
-          className="h-8"
-        />
+        {showDigits && (
+          <Input
+            type="number"
+            {...form.register(`${name}.minimumIntegerDigits` as FormName, {
+              valueAsNumber: true,
+            })}
+            placeholder={digitsPlaceholder}
+            className="h-8"
+          />
+        )}
       </div>
     </EditShell>
   );

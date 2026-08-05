@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { formatCurrency, formatExchangeRate } from "../currency-utils";
+import {
+  formatAmount,
+  formatCurrency,
+  formatExchangeRate,
+} from "../currency-utils";
 
 describe("formatCurrency", () => {
   it("formats with 2 decimal places by default", () => {
@@ -68,5 +72,32 @@ describe("formatExchangeRate", () => {
   it("always uses 5 decimal places", () => {
     const result = formatExchangeRate(1);
     expect(result).toMatch(/1[.,]00000/);
+  });
+});
+
+describe("formatAmount", () => {
+  // BU ตั้ง minimumIntegerDigits ไว้ 4 แล้ว 211.56 เคยแสดงเป็น "0,211.56"
+  it("ไม่เติมศูนย์นำหน้าถึงคอนฟิกจะสั่งจำนวนหลักไว้", () => {
+    const result = formatAmount(211.56, {
+      locales: "en-US",
+      minimumIntegerDigits: 4,
+    });
+
+    expect(result).toBe("211.56");
+  });
+
+  it("ยังคั่นหลักพันและตรึงทศนิยม 2 ตำแหน่งตาม locale", () => {
+    const result = formatAmount(1234.5, {
+      locales: "en-US",
+      minimumIntegerDigits: 4,
+    });
+
+    expect(result).toBe("1,234.50");
+  });
+
+  it("ศูนย์เป็น 0.00 ไม่ใช่ 0,000.00", () => {
+    expect(formatAmount(0, { locales: "en-US", minimumIntegerDigits: 4 })).toBe(
+      "0.00",
+    );
   });
 });

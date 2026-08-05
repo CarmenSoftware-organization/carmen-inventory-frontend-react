@@ -38,29 +38,31 @@ export function formatCurrency(value: number, decimals: number = 2): string {
 }
 
 /**
- * จัดรูปแบบจำนวนเงินตามการตั้งค่า amountFormat ของ profile
+ * จัดรูปแบบจำนวนเงินตาม locale ที่ BU ตั้งไว้ — คั่นหลักพัน ทศนิยม 2 ตำแหน่ง
  *
- * หากค่าน้อยกว่า 10 จะใช้ minimumIntegerDigits = 1 เพื่อไม่ให้แสดงเป็น "00.00"
+ * **ไม่ผูกกับ `amount_format.minimumIntegerDigits`** ถึงจะมีอยู่ในคอนฟิก เพราะนั่น
+ * คือ "จำนวนหลักหน้าจุด" ขั้นต่ำของ Intl ซึ่งเติมศูนย์นำหน้าให้ — BU ที่ตั้งไว้ 4
+ * ทำให้ 211.56 แสดงเป็น "0,211.56" ไม่มีใครเขียนจำนวนเงินแบบนั้น โค้ดเดิมรู้ปัญหา
+ * แล้วแต่แก้เฉพาะค่าที่น้อยกว่า 10 (กัน "00.00") ค่าที่มากกว่านั้นยังโดนเติมอยู่
+ *
+ * กับดักตัวเดียวกับที่ฝั่ง "จำนวน" เคยเจอแล้วตัดขาดไปก่อนแล้ว — ดู
+ * `components/ui/input/qty-decimals.ts`
  *
  * @param value - ค่าตัวเลขที่จะจัดรูปแบบ
- * @param amountFormat - การตั้งค่า locale และ minimumIntegerDigits จาก profile
+ * @param amountFormat - การตั้งค่า locale จาก profile (อ่านเฉพาะ `locales`)
  * @returns string ของจำนวนเงินที่จัดรูปแบบแล้ว
  * @example
  * ```ts
+ * formatAmount(211.56, { locales: "th-TH", minimumIntegerDigits: 4 }); // "211.56"
  * formatAmount(1234.5, { locales: "th-TH", minimumIntegerDigits: 3 }); // "1,234.50"
- * formatAmount(0); // "0.00" (ไม่เป็น "000.00")
  * ```
  */
 export function formatAmount(
   value: number,
-  amountFormat?: { locales: string; minimumIntegerDigits: number } | null,
+  amountFormat?: { locales: string; minimumIntegerDigits?: number } | null,
 ): string {
   if (amountFormat) {
-    // Use minimumIntegerDigits: 1 when value < 10 to avoid "00.00" for zero
-    const minIntDigits =
-      Math.abs(value) < 10 ? 1 : amountFormat.minimumIntegerDigits;
     return value.toLocaleString(amountFormat.locales, {
-      minimumIntegerDigits: minIntDigits,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
