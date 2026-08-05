@@ -13,7 +13,7 @@ import { WhatsNewDialog } from "./whats-new-dialog";
  *
  * Render `<footer role="contentinfo">` สูง h-6 แสดงชื่อผู้ใช้ + buCode
  * ด้านซ้าย และเวลา server ปัจจุบัน (`useServerTime`) + ปุ่มเวอร์ชันแอป
- * ด้านขวา เวอร์ชันอ่านจาก `lib/version.ts` (`APP_VERSION`) คลิกที่ปุ่ม
+ * ด้านขวา เวอร์ชัน (`APP_VERSION`) ฉีดตอน build จาก `package.json` คลิกที่ปุ่ม
  * เพื่อเปิด What's New dialog และ dialog จะเด้งอัตโนมัติครั้งเดียวเมื่อมี
  * version ใหม่ (`useWhatsNew`) ใช้ `formatDate` ตาม `dateTimeFormat` จาก
  * profile ใส่ `suppressHydrationWarning` บน `<time>` รองรับ SSR/CSR mismatch
@@ -37,7 +37,6 @@ export function StatusBar() {
     ? `${profile.user_info.firstname ?? ""} ${profile.user_info.lastname ?? ""}`.trim()
     : "";
   const displayName = fullName || aliasName || "—";
-  const version = APP_VERSION.split("-")[0];
   const formattedTime = now ? formatDate(now.toISOString(), dateTimeFormat) : "";
 
   const handleOpenChange = (next: boolean) => {
@@ -83,7 +82,7 @@ export function StatusBar() {
             className="hover:text-foreground flex items-center gap-1.5 transition-colors"
           >
             <Tag aria-hidden="true" className="h-3 w-3" />
-            <span>v{version}</span>
+            <span>v{APP_VERSION}</span>
           </button>
         </div>
       </footer>
