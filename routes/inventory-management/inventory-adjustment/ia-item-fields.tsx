@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
+import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,6 @@ export function AdjItemFields({
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const tfl = useTranslations("field");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-  const locationId = useWatch({ control: form.control, name: "location_id" });
-  const hasLocation = !!locationId;
 
   const {
     fields: itemFields,
@@ -66,12 +64,7 @@ export function AdjItemFields({
         count={itemFields.length}
         action={
           !disabled ? (
-            <Button
-              type="button"
-              size="xs"
-              onClick={handleAddItem}
-              disabled={!hasLocation}
-            >
+            <Button type="button" size="sm" onClick={handleAddItem}>
               <Plus /> {t("addItem")}
             </Button>
           ) : undefined
@@ -88,22 +81,12 @@ export function AdjItemFields({
             table={table}
             recordCount={itemFields.length}
             emptyMessage={
+              // ปุ่มเพิ่มรายการอยู่ที่หัวข้อของ section อยู่แล้ว ไม่ต้องมีซ้ำ
+              // ในกล่องว่าง — ปุ่มเดียวกันสองที่บนจอเดียว
               <EmptyComponent
                 icon={BoxIcon}
                 title={t("noItems")}
                 description={t("noItemsDesc")}
-                content={
-                  !disabled && (
-                    <Button
-                      type="button"
-                      size="xs"
-                      onClick={handleAddItem}
-                      disabled={!hasLocation}
-                    >
-                      <Plus /> {t("addItem")}
-                    </Button>
-                  )
-                }
               />
             }
           >

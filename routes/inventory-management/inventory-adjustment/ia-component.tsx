@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -114,8 +113,14 @@ export default function InventoryAdjustmentComponent() {
         control: "status",
         labelKey: "common.status",
         options: [
-          { labelKey: "status.in_progress", value: "doc_status|string:in_progress" },
-          { labelKey: "status.completed", value: "doc_status|string:completed" },
+          {
+            labelKey: "status.in_progress",
+            value: "doc_status|string:in_progress",
+          },
+          {
+            labelKey: "status.completed",
+            value: "doc_status|string:completed",
+          },
           { labelKey: "status.draft", value: "doc_status|string:draft" },
           { labelKey: "status.voided", value: "doc_status|string:voided" },
         ],
@@ -253,18 +258,14 @@ export default function InventoryAdjustmentComponent() {
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
@@ -294,28 +295,37 @@ export default function InventoryAdjustmentComponent() {
               const StockOutIcon = IA_TYPE_ICON["stock-out"];
               return (
                 <>
+                  {/* กล่องเป็นกลาง สีอยู่ที่ไอคอนครั้งเดียว — ปุ่มทึบสองสีติดกัน
+                      ในแถบเดียวดังกว่าตัวข้อมูลในตาราง (docs/DESIGN.md: หนึ่ง
+                      สัญญาณต่อหนึ่ง element) ส่วนสีตัวอักษรใช้ `-ink` ที่ผ่าน AA */}
                   <Button
                     size="sm"
-                    variant="success"
+                    variant="outline"
                     onClick={() =>
                       navigate(
                         `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-in`,
                       )
                     }
                   >
-                    <StockInIcon aria-hidden="true" />
+                    <StockInIcon
+                      aria-hidden="true"
+                      className="text-success-ink"
+                    />
                     {t("addStockIn")}
                   </Button>
                   <Button
                     size="sm"
-                    variant="destructive"
+                    variant="outline"
                     onClick={() =>
                       navigate(
                         `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-out`,
                       )
                     }
                   >
-                    <StockOutIcon aria-hidden="true" />
+                    <StockOutIcon
+                      aria-hidden="true"
+                      className="text-destructive"
+                    />
                     {t("addStockOut")}
                   </Button>
                 </>

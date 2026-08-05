@@ -1,7 +1,7 @@
 import type React from "react";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { XCircle } from "lucide-react";
+import { X, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
@@ -74,11 +74,6 @@ export function VoidDialog({
                   {description}
                 </div>
               )}
-              {/* คำเตือนเป็นบรรทัดต่อจากคำอธิบาย ไม่ใช่กล่องแยกที่มีพื้น/ขอบ/
-                  ไอคอนของตัวเอง — กล่องนี้ถามอยู่คำถามเดียว */}
-              <p className="text-muted-foreground mt-1 text-sm">
-                {tc("voidWarning")}
-              </p>
             </div>
           </div>
         </DialogHeader>
@@ -112,6 +107,7 @@ export function VoidDialog({
             onClick={() => handleOpenChange(false)}
             disabled={isPending}
           >
+            <X />
             {tc("cancel")}
           </Button>
           <Button
@@ -121,6 +117,7 @@ export function VoidDialog({
             disabled={isPending || !reason.trim()}
             onClick={() => onConfirm(reason.trim())}
           >
+            <XCircle />
             {isPending ? tc("processing") : tc("void")}
           </Button>
         </DialogFooter>
