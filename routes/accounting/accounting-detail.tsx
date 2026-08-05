@@ -164,6 +164,14 @@ export default function AccountingDetail() {
   const t = useTranslations("accounting.documents");
   const tc = useTranslations("common");
   const config = accountingDocumentFromPath(pathname);
+  const hasWorkflowApproval =
+    config.kind === "journalVoucher" ||
+    config.kind === "apInvoice" ||
+    config.kind === "apPayment" ||
+    config.kind === "arInvoice" ||
+    config.kind === "arReceipt";
+  const hasInlineApproval =
+    config.kind === "recurringVoucher" || config.kind === "allocationVoucher";
   const documents = useMemo(() => documentsFor(config), [config]);
   const document = documents.find((item) => item.id === id) ?? documents[0];
   const isNew = id === "new";
@@ -365,7 +373,7 @@ export default function AccountingDetail() {
       : t("entryDetails");
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="flex w-full min-w-0 flex-col gap-4">
       <header className="bg-card flex flex-wrap items-center justify-between gap-2 rounded-lg border p-2">
         <div className="flex flex-wrap items-center gap-1">
           <Button
@@ -532,7 +540,14 @@ export default function AccountingDetail() {
         }}
       >
         <Card className="gap-3 py-4">
-          <CardContent className="grid gap-4 px-4 sm:grid-cols-2 lg:grid-cols-6">
+          <CardContent
+            className={`grid gap-4 px-4 sm:grid-cols-2 ${
+              config.kind === "journalVoucher" ||
+              config.kind === "financialReports"
+                ? "lg:grid-cols-6"
+                : "lg:grid-cols-8"
+            }`}
+          >
             <Field>
               <FieldLabel>{t("prefix")}</FieldLabel>
               <FieldPlainText>{t(`${config.kind}.single`)}</FieldPlainText>
@@ -593,157 +608,190 @@ export default function AccountingDetail() {
                     />
                   )}
                 </Field>
-                <Field>
-                  <FieldLabel>{t("source")}</FieldLabel>
-                  <FieldPlainText className="tabular-nums">
-                    AP-102934
-                  </FieldPlainText>
-                </Field>
-                <Field>
-                  <FieldLabel>{t("approval")}</FieldLabel>
-                  <FieldPlainText>{t("pendingController")}</FieldPlainText>
-                </Field>
-                <Field>
-                  <FieldLabel>{t("status")}</FieldLabel>
-                  <div className="flex min-h-8 items-center">
-                    <Badge
-                      variant={
-                        documentStatus === "Voided"
-                          ? "destructive"
-                          : documentStatus === "Pending"
-                            ? "secondary"
-                            : "outline"
-                      }
-                    >
-                      {documentStatus}
-                    </Badge>
-                  </div>
-                </Field>
+                {config.kind === "financialReports" && (
+                  <Field>
+                    <FieldLabel>{t("approval")}</FieldLabel>
+                    <FieldPlainText>{t("pendingController")}</FieldPlainText>
+                  </Field>
+                )}
+                {config.kind === "financialReports" && (
+                  <>
+                    <Field>
+                      <FieldLabel>{t("source")}</FieldLabel>
+                      <FieldPlainText className="tabular-nums">
+                        AP-102934
+                      </FieldPlainText>
+                    </Field>
+                    <Field>
+                      <FieldLabel>{t("status")}</FieldLabel>
+                      <div className="flex min-h-8 items-center">
+                        <Badge
+                          variant={
+                            documentStatus === "Voided"
+                              ? "destructive"
+                              : documentStatus === "Pending"
+                                ? "secondary"
+                                : "outline"
+                          }
+                        >
+                          {documentStatus}
+                        </Badge>
+                      </div>
+                    </Field>
+                  </>
+                )}
               </>
             )}
           </CardContent>
-          {config.kind === "journalVoucher" && (
+          {config.kind !== "financialReports" && (
             <CardContent className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t px-4 pt-3">
-              <div className="flex min-h-8 min-w-52 items-center gap-3">
-                {isView ? (
-                  <Badge
-                    variant={values.schedulePost ? "secondary" : "outline"}
+              {config.kind === "journalVoucher" && (
+                <>
+                  <div className="flex min-h-8 min-w-52 items-center gap-3">
+                    {isView ? (
+                      <Badge
+                        variant={values.schedulePost ? "secondary" : "outline"}
+                      >
+                        {values.schedulePost ? tc("yes") : tc("no")}
+                      </Badge>
+                    ) : (
+                      <Switch
+                        id="schedule-post"
+                        aria-label={t("schedulePost")}
+                        checked={values.schedulePost}
+                        onCheckedChange={(schedulePost) =>
+                          setValues((current) => ({
+                            ...current,
+                            schedulePost,
+                          }))
+                        }
+                      />
+                    )}
+                    <FieldLabel htmlFor="schedule-post" className="shrink-0">
+                      {t("schedulePost")}
+                    </FieldLabel>
+                    {values.schedulePost && (
+                      <DatePicker
+                        value={values.scheduleDate}
+                        onValueChange={(scheduleDate) =>
+                          setValues((current) => ({ ...current, scheduleDate }))
+                        }
+                        readOnly={isView}
+                        hideClear
+                        className="ml-auto w-28"
+                      />
+                    )}
+                  </div>
+
+                  <span
+                    className="bg-border hidden h-8 w-px lg:block"
+                    aria-hidden="true"
+                  />
+
+                  <div className="flex min-h-8 min-w-52 items-center gap-3">
+                    {isView ? (
+                      <Badge
+                        variant={values.autoReverse ? "secondary" : "outline"}
+                      >
+                        {values.autoReverse ? tc("yes") : tc("no")}
+                      </Badge>
+                    ) : (
+                      <Switch
+                        id="auto-reverse"
+                        aria-label={t("autoReverse")}
+                        checked={values.autoReverse}
+                        onCheckedChange={(autoReverse) =>
+                          setValues((current) => ({ ...current, autoReverse }))
+                        }
+                      />
+                    )}
+                    <FieldLabel htmlFor="auto-reverse" className="shrink-0">
+                      {t("autoReverse")}
+                    </FieldLabel>
+                    {values.autoReverse && (
+                      <DatePicker
+                        value={values.reverseDate}
+                        onValueChange={(reverseDate) =>
+                          setValues((current) => ({ ...current, reverseDate }))
+                        }
+                        readOnly={isView}
+                        hideClear
+                        className="ml-auto w-28"
+                      />
+                    )}
+                  </div>
+
+                  <span
+                    className="bg-border hidden h-8 w-px lg:block"
+                    aria-hidden="true"
+                  />
+                </>
+              )}
+
+              {hasInlineApproval && (
+                <>
+                  <div className="flex min-h-8 items-center gap-3 text-xs">
+                    <span className="text-muted-foreground">
+                      {t("approval")}
+                    </span>
+                    <span className="font-medium">
+                      {t("pendingController")}
+                    </span>
+                  </div>
+                  <span
+                    className="bg-border hidden h-8 w-px xl:block"
+                    aria-hidden="true"
+                  />
+                </>
+              )}
+
+              {hasWorkflowApproval && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-label={t("approvalWorkflow")}
+                      className="gap-0.5 px-1.5"
+                    >
+                      <span className="bg-success flex size-5 items-center justify-center rounded-full text-[10px] font-semibold text-black">
+                        ✓
+                      </span>
+                      <span className="bg-success/60 h-px w-2" />
+                      <span className="bg-primary text-primary-foreground flex size-5 items-center justify-center rounded-full text-[10px] font-semibold">
+                        2
+                      </span>
+                      <span className="bg-border h-px w-2" />
+                      <span className="bg-muted text-muted-foreground flex size-5 items-center justify-center rounded-full border text-[10px] font-semibold">
+                        3
+                      </span>
+                      <span className="sr-only">{t("approvalController")}</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    align="end"
+                    className="w-80 max-w-[calc(100vw-2rem)] p-3"
                   >
-                    {values.schedulePost ? tc("yes") : tc("no")}
-                  </Badge>
-                ) : (
-                  <Switch
-                    id="schedule-post"
-                    aria-label={t("schedulePost")}
-                    checked={values.schedulePost}
-                    onCheckedChange={(schedulePost) =>
-                      setValues((current) => ({
-                        ...current,
-                        schedulePost,
-                      }))
-                    }
-                  />
-                )}
-                <FieldLabel htmlFor="schedule-post" className="shrink-0">
-                  {t("schedulePost")}
-                </FieldLabel>
-                {values.schedulePost && (
-                  <DatePicker
-                    value={values.scheduleDate}
-                    onValueChange={(scheduleDate) =>
-                      setValues((current) => ({ ...current, scheduleDate }))
-                    }
-                    readOnly={isView}
-                    hideClear
-                    className="ml-auto w-28"
-                  />
-                )}
-              </div>
+                    <p className="mb-2 text-xs font-medium">
+                      {t("approvalWorkflow")}
+                    </p>
+                    <WorkflowTrack
+                      previousStage={t("approvalPrepared")}
+                      currentStage={t("approvalController")}
+                      nextStage={t("approvalApproved")}
+                    />
+                  </TooltipContent>
+                </Tooltip>
+              )}
 
-              <span
-                className="bg-border hidden h-8 w-px lg:block"
-                aria-hidden="true"
-              />
-
-              <div className="flex min-h-8 min-w-52 items-center gap-3">
-                {isView ? (
-                  <Badge variant={values.autoReverse ? "secondary" : "outline"}>
-                    {values.autoReverse ? tc("yes") : tc("no")}
-                  </Badge>
-                ) : (
-                  <Switch
-                    id="auto-reverse"
-                    aria-label={t("autoReverse")}
-                    checked={values.autoReverse}
-                    onCheckedChange={(autoReverse) =>
-                      setValues((current) => ({ ...current, autoReverse }))
-                    }
-                  />
-                )}
-                <FieldLabel htmlFor="auto-reverse" className="shrink-0">
-                  {t("autoReverse")}
-                </FieldLabel>
-                {values.autoReverse && (
-                  <DatePicker
-                    value={values.reverseDate}
-                    onValueChange={(reverseDate) =>
-                      setValues((current) => ({ ...current, reverseDate }))
-                    }
-                    readOnly={isView}
-                    hideClear
-                    className="ml-auto w-28"
-                  />
-                )}
-              </div>
-
-              <span
-                className="bg-border hidden h-8 w-px lg:block"
-                aria-hidden="true"
-              />
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    aria-label={t("approvalWorkflow")}
-                    className="gap-0.5 px-1.5"
-                  >
-                    <span className="bg-success flex size-5 items-center justify-center rounded-full text-[10px] font-semibold text-black">
-                      ✓
-                    </span>
-                    <span className="bg-success/60 h-px w-2" />
-                    <span className="bg-primary text-primary-foreground flex size-5 items-center justify-center rounded-full text-[10px] font-semibold">
-                      2
-                    </span>
-                    <span className="bg-border h-px w-2" />
-                    <span className="bg-muted text-muted-foreground flex size-5 items-center justify-center rounded-full border text-[10px] font-semibold">
-                      3
-                    </span>
-                    <span className="sr-only">{t("approvalController")}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  align="end"
-                  className="w-80 max-w-[calc(100vw-2rem)] p-3"
-                >
-                  <p className="mb-2 text-xs font-medium">
-                    {t("approvalWorkflow")}
-                  </p>
-                  <WorkflowTrack
-                    previousStage={t("approvalPrepared")}
-                    currentStage={t("approvalController")}
-                    nextStage={t("approvalApproved")}
-                  />
-                </TooltipContent>
-              </Tooltip>
-
-              <span
-                className="bg-border hidden h-8 w-px xl:block"
-                aria-hidden="true"
-              />
+              {hasWorkflowApproval && (
+                <span
+                  className="bg-border hidden h-8 w-px xl:block"
+                  aria-hidden="true"
+                />
+              )}
 
               <div className="ml-auto flex min-h-8 items-center gap-3 text-xs">
                 <span className="text-muted-foreground">{t("source")}</span>
@@ -768,7 +816,13 @@ export default function AccountingDetail() {
           )}
         </Card>
 
-        <Card className="h-[calc(100dvh-20rem)] min-h-80 gap-3 py-4">
+        <Card
+          className={`gap-3 py-4 ${
+            config.kind === "financialReports"
+              ? "h-[calc(100dvh-25rem)] min-h-64"
+              : "h-[calc(100dvh-21rem)] min-h-80"
+          }`}
+        >
           <CardHeader className="px-4">
             <CardTitle className="flex items-center gap-2 text-sm font-semibold">
               <ListTree className="text-primary size-4" aria-hidden="true" />
@@ -1039,7 +1093,7 @@ export default function AccountingDetail() {
                                     );
                                   }}
                                 >
-                                  <Trash2 className="size-3" />
+                                  <Trash2 className="size-4" />
                                 </Button>
                               )}
                             </div>
@@ -1506,7 +1560,7 @@ export default function AccountingDetail() {
                     aria-label={tc("delete")}
                     onClick={() => toast.success(t("attachmentRemoved"))}
                   >
-                    <Trash2 className="size-3.5" aria-hidden="true" />
+                    <Trash2 className="size-4" aria-hidden="true" />
                   </Button>
                 </div>
               ))}
