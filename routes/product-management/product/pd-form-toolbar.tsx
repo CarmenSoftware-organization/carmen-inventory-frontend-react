@@ -42,15 +42,14 @@ function FormToolbar({
 
   // Subscribe ONLY to the 3 fields the toolbar displays — `form.watch`
   // would subscribe to every form change (toolbar re-renders on every keystroke).
-  const [watchedName, watchedCode, watchedStatus] = useWatch({
+  const [watchedName, watchedStatus] = useWatch({
     control: form.control,
-    name: ["name", "code", "product_status_type"],
+    name: ["name", "product_status_type"],
   });
 
   const displayName = isAdd
     ? watchedName || t("newProductTitle")
     : (product?.name ?? watchedName);
-  const displayCode = product?.code ?? watchedCode;
   const isDirty = form.formState.isDirty;
   const saveDisabled = isPending || (isEdit && !isDirty);
 
@@ -73,15 +72,13 @@ function FormToolbar({
     return isEdit ? tc("save") : t("createProduct");
   }
 
-  // status + code/hint แสดงข้าง title (badges slot)
+  // status + hint แสดงข้าง title (badges slot) — รหัสสินค้าไม่อยู่ตรงนี้แล้ว
+  // มันมีช่อง Code ของตัวเองอยู่ในแท็บ General
   const badges = (
     <>
       <StatusDotBadge tone={statusTone} size="xs">
         {statusLabel}
       </StatusDotBadge>
-      {!isAdd && displayCode && (
-        <span className="text-muted-foreground text-xs">{displayCode}</span>
-      )}
       {isAdd && (
         <span className="text-muted-foreground text-xs">
           {t("fillRequiredBefore")}
