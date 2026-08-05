@@ -96,7 +96,11 @@ export function useInventoryAdjustmentById(
  */
 export function useCreateInventoryAdjustment() {
   return useApiMutation<
-    CreateInventoryAdjustmentDto & { type: InventoryAdjustmentType }
+    CreateInventoryAdjustmentDto & { type: InventoryAdjustmentType },
+    // ระบุ response type เพื่อให้ caller อ่าน id ของใบที่เพิ่งสร้างได้ —
+    // ia-form ใช้พาไปหน้าใบนั้นต่อ ไม่ใช่เด้งกลับหน้ารายการ และใช้ doc_version
+    // ต่อให้ /commit ในกรณีที่กด commit ตั้งแต่ยังไม่เคยเซฟ draft
+    { data?: { id?: string; doc_version?: number } }
   >({
     mutationFn: ({ type, ...data }, buCode) => {
       const endpoint = getEndpoint(type);
@@ -112,8 +116,11 @@ export function useCreateInventoryAdjustment() {
 }
 
 /**
- * Hook สำหรับแก้ไข Inventory Adjustment ผ่าน PATCH
+ * Hook สำหรับแก้ไข Inventory Adjustment ผ่าน PATCH /{id}/save
  * เลือก endpoint ตาม type และ invalidate รายการ inventory adjustment
+ *
+ * ต่อท้ายด้วย `/save` เหมือน GRN/PO/physical-count/spot-check — ยิง `/{id}`
+ * เปล่า ๆ ไม่ใช่ endpoint ที่หลังบ้านเปิดไว้ให้บันทึกการแก้ไข
  * @returns mutation object จาก useApiMutation
  * @example
  * const update = useUpdateInventoryAdjustment();
@@ -125,11 +132,13 @@ export function useUpdateInventoryAdjustment() {
       id: string;
       type: InventoryAdjustmentType;
       doc_version?: number;
-    }
+    },
+    // อ่าน doc_version ที่เพิ่มขึ้นหลัง save เพื่อส่งต่อให้ /commit
+    { data?: { doc_version?: number } }
   >({
     mutationFn: ({ id, type, ...data }, buCode) => {
       const endpoint = getEndpoint(type);
-      return httpClient.patch(`${endpoint(buCode)}/${id}`, data);
+      return httpClient.patch(`${endpoint(buCode)}/${id}/save`, data);
     },
     invalidateKeys: [QUERY_KEYS.INVENTORY_ADJUSTMENTS],
     errorMessage: "Failed to update inventory adjustment",
@@ -141,8 +150,8 @@ export function useUpdateInventoryAdjustment() {
 }
 
 /**
- * Hook สำหรับยกเลิก (void) Inventory Adjustment พร้อมระบุเหตุผล
- * ส่ง PATCH เปลี่ยน doc_status เป็น voided พร้อม void_reason
+ * Hook สำหรับยกเลิก (void) Inventory Adjustment ผ่าน DELETE /{id}/void
+ * ส่ง void_reason ไปกับ body สถานะมาจาก endpoint ไม่ต้องส่ง doc_status เอง
  * @returns mutation object จาก useApiMutation
  * @example
  * const voidIa = useVoidInventoryAdjustment();
@@ -157,14 +166,45 @@ export function useVoidInventoryAdjustment() {
   }>({
     mutationFn: ({ id, type, void_reason, doc_version }, buCode) => {
       const endpoint = getEndpoint(type);
-      return httpClient.patch(`${endpoint(buCode)}/${id}`, {
-        doc_status: "voided",
-        void_reason,
-        doc_version,
+      // DELETE /{id}/void ไม่ใช่ PATCH /{id} เปล่า ๆ — สถานะมาจาก endpoint
+      // ไม่ต้องยัด doc_status ไปใน body เอง (ท่าเดียวกับ GRN) · `delete` ของ
+      // httpClient รับ body ผ่าน options ไม่ใช่ argument ที่สองเหมือน patch/post
+      return httpClient.delete(`${endpoint(buCode)}/${id}/void`, {
+        body: { void_reason, doc_version },
       });
     },
     invalidateKeys: [QUERY_KEYS.INVENTORY_ADJUSTMENTS],
     errorMessage: "Failed to void inventory adjustment",
+  });
+}
+
+/**
+ * Hook สำหรับปิดเอกสาร (commit) Inventory Adjustment ผ่าน PATCH /{id}/commit
+ *
+ * endpoint นี้เปลี่ยนแค่สถานะ ไม่ได้รับรายการสินค้าไปด้วย — ถ้าฟอร์มยังมีของที่แก้
+ * ค้าง ต้อง save ให้เสร็จก่อนแล้วค่อยเรียกตัวนี้ด้วย doc_version ที่ได้กลับมาใหม่
+ *
+ * @returns mutation object จาก useApiMutation
+ * @example
+ * const commit = useCommitInventoryAdjustment();
+ * commit.mutate({ id, type: "stock-in", doc_version: 1 });
+ */
+export function useCommitInventoryAdjustment() {
+  return useApiMutation<{
+    id: string;
+    type: InventoryAdjustmentType;
+    doc_version?: number;
+  }>({
+    mutationFn: ({ id, type, doc_version }, buCode) => {
+      const endpoint = getEndpoint(type);
+      return httpClient.patch(`${endpoint(buCode)}/${id}/commit`, {
+        doc_version,
+      });
+    },
+    invalidateKeys: [QUERY_KEYS.INVENTORY_ADJUSTMENTS],
+    errorMessage: "Failed to commit inventory adjustment",
+    // business error (เช่น stock ไม่พอ) มาเป็น 500 เหมือน create/update
+    meta: { skipGlobalErrorToast: true },
   });
 }
 
@@ -203,7 +243,10 @@ export function useExportInventoryAdjustment() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();
 
-  const exportInventoryAdjustment = async ({ params, columns }: ExportInventoryAdjustmentArgs) => {
+  const exportInventoryAdjustment = async ({
+    params,
+    columns,
+  }: ExportInventoryAdjustmentArgs) => {
     if (!buCode) throw new Error("Missing buCode");
     return exportToXlsx<InventoryAdjustment>({
       fetch: async () => {

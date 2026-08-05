@@ -24,10 +24,17 @@ export interface InventoryAdjustmentDetail {
   product_sku: string;
   description: string | null;
   qty: number;
-  /** ชื่อหน่วยนับ (inventory unit) — ใช้แสดงคอลัมน์ Unit ในฟอร์ม ไม่ได้ส่งกลับ */
+  /**
+   * หน่วยนับ — endpoint รายละเอียดคืนเป็น object ส่วน endpoint list คืนเป็น
+   * flat string (แบบเดียวกับ product ดู types/product.ts) จึงประกาศไว้ทั้งสองทาง
+   * และตอนอ่านต้อง fallback ให้ครบ ไม่งั้นคอลัมน์ Unit ว่างเปล่า
+   */
+  inventory_unit?: { id: string; name: string };
   inventory_unit_name?: string;
   cost_per_unit: number;
   total_cost: number;
+  /** เวอร์ชันของ "แถว" ไม่ใช่ของใบ — ตอน save หลังบ้านบังคับให้ส่งกลับทุกแถวที่แก้ */
+  doc_version?: number;
   info: unknown;
   dimension: unknown;
 }
@@ -55,6 +62,8 @@ export interface InventoryAdjustment {
 }
 
 export interface AdjustmentDetailItemPayload {
+  /** มีเฉพาะแถวที่มีอยู่แล้ว (update) — แถวที่เพิ่งเพิ่ม (add) ยังไม่มีเวอร์ชัน */
+  doc_version?: number;
   product_id: string;
   qty: number;
   cost_per_unit: number;
