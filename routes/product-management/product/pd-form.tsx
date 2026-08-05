@@ -30,7 +30,7 @@ import FormToolbar from "./pd-form-toolbar";
 import GeneralTab from "./pd-general-tab";
 import LocationsTab from "./pd-location-tab";
 import UnitConversionTab from "./pd-unit-conversion-tab";
-import TabArrayCount from "./pd-tab-count";
+import TabArrayCount, { TabEcoLabelCount } from "./pd-tab-count";
 import { ProductEcoLabelSection } from "./pd-eco-label-section";
 
 const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
@@ -322,7 +322,9 @@ export function ProductForm({ product }: ProductFormProps) {
   };
 
   const discard = useDiscardConfirm({
-    isDirty: form.formState.isDirty,
+    // รูปที่เลือกไว้แต่ยังไม่ได้อัปโหลดก็นับเป็นของที่จะหาย — ไม่งั้นกดออกแล้วรูป
+    // หายเงียบ ๆ โดยไม่ถามสักคำ
+    isDirty: form.formState.isDirty || pendingImages.length > 0,
     isPending,
   });
 
@@ -379,6 +381,7 @@ export function ProductForm({ product }: ProductFormProps) {
         mode={mode}
         isPending={isPending}
         deleteIsPending={deleteProduct.isPending}
+        hasPendingImages={pendingImages.length > 0}
         onBack={handleBack}
         onEdit={() => setMode("edit")}
         onCancel={handleCancel}
@@ -413,6 +416,7 @@ export function ProductForm({ product }: ProductFormProps) {
             {product?.id && (
               <TabsTrigger value="eco-labels" className="text-xs">
                 {t("tabEcoLabels")}
+                <TabEcoLabelCount productId={product.id} />
               </TabsTrigger>
             )}
           </TabsList>

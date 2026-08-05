@@ -15,6 +15,14 @@ interface FormToolbarProps {
   readonly mode: FormMode;
   readonly isPending: boolean;
   readonly deleteIsPending: boolean;
+  /**
+   * มีรูปที่เลือกไว้รออัปโหลดหรือยัง — นับเป็น "แก้แล้ว" ด้วย
+   *
+   * `form.formState.isDirty` เห็นแค่ฟิลด์ในฟอร์ม แต่รูปเก็บอยู่ใน state แยก
+   * (อัปโหลดตอนกด Save) ถ้าไม่บอกตรงนี้ คนที่เข้าโหมดแก้แล้วเลือกแต่รูปอย่างเดียว
+   * จะกด Save ไม่ได้ทั้งที่มีของรอส่ง
+   */
+  readonly hasPendingImages?: boolean;
   readonly onBack: () => void;
   readonly onEdit: () => void;
   readonly onCancel: () => void;
@@ -27,6 +35,7 @@ function FormToolbar({
   mode,
   isPending,
   deleteIsPending,
+  hasPendingImages,
   onBack,
   onEdit,
   onCancel,
@@ -50,7 +59,7 @@ function FormToolbar({
   const displayName = isAdd
     ? watchedName || t("newProductTitle")
     : (product?.name ?? watchedName);
-  const isDirty = form.formState.isDirty;
+  const isDirty = form.formState.isDirty || !!hasPendingImages;
   const saveDisabled = isPending || (isEdit && !isDirty);
 
   // status → global dot badge (draft=info · active=success · inactive=neutral)
@@ -115,7 +124,6 @@ function FormToolbar({
           size="sm"
           onClick={onDelete}
           disabled={isPending || deleteIsPending}
-          className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 aria-hidden="true" />
           {tc("delete")}
