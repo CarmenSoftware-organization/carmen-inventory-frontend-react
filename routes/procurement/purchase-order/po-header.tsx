@@ -145,18 +145,18 @@ export function PoHeader({
                 <Save aria-hidden="true" />
                 {tc("save")}
               </Button>
-              {canEdit && !terminalStatus && (
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  disabled={deletePoIsPending || isPending}
-                  onClick={onShowDelete}
-                >
-                  <Trash2 aria-hidden="true" />
-                  {tc("delete")}
-                </Button>
-              )}
             </>
+          )}
+          {canEdit && !terminalStatus && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={deletePoIsPending || isPending}
+              onClick={onShowDelete}
+            >
+              <Trash2 aria-hidden="true" />
+              {tc("delete")}
+            </Button>
           )}
           <CommentButton count={comments?.length} onClick={onShowComment} />
           <Button

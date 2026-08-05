@@ -51,7 +51,6 @@ export function IaFormHero({
   const tc = useTranslations("common");
   const tActivity = useTranslations("activity");
   const isView = mode === "view";
-  const isEdit = mode === "edit";
   const TypeIcon = IA_TYPE_ICON[adjustmentType];
   const docNo = inventoryAdjustment?.si_no ?? inventoryAdjustment?.so_no ?? "";
   const canDelete = !!inventoryAdjustment && !isReadOnly;
@@ -109,10 +108,10 @@ export function IaFormHero({
           </Button>
         </>
       ) : null}
-      {isEdit && canDelete && (
+      {canDelete && (
         <Button
           type="button"
-          variant="destructive"
+          variant="outline"
           size="sm"
           onClick={onDelete}
           disabled={isPending || deleteIsPending}

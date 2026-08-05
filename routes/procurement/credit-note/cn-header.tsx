@@ -72,7 +72,6 @@ export function CnHeader({
   const { can, isAdmin } = useCan();
   const prefix = usePermissionPrefix();
   const isView = mode === "view";
-  const isEdit = mode === "edit";
   const isAdd = mode === "add";
 
   const savePermission = prefix
@@ -156,10 +155,10 @@ export function CnHeader({
               {isAdd ? tc("create") : tc("save")}
             </Button>
           )}
-          {isEdit && creditNote && !isLocked && (
+          {creditNote && !isLocked && (
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={
                 deleteDenied

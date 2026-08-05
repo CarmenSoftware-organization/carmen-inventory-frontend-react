@@ -166,10 +166,10 @@ export function GrnHeader({
               </Button>
             </>
           )}
-          {isEdit && goodsReceiveNote && (
+          {goodsReceiveNote && (
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={
                 deleteDenied

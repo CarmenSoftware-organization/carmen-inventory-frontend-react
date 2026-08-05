@@ -122,7 +122,7 @@ export function PrFormActions({
       {prStatus === PR_STATUS.DRAFT && (
         <Button
           type="button"
-          variant="destructive"
+          variant="outline"
           size="sm"
           onClick={onDelete}
           disabled={isPending || isDeletePending}

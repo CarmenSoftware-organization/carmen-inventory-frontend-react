@@ -249,19 +249,19 @@ export function ScForm({
                       <Save />
                       {submitLabel}
                     </Button>
-                    {isEdit && spotCheck && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setShowDelete(true)}
-                        disabled={deleteSc.isPending || isPending}
-                      >
-                        <Trash2 />
-                        {tc("delete")}
-                      </Button>
-                    )}
                   </>
+                )}
+                {spotCheck && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowDelete(true)}
+                    disabled={deleteSc.isPending || isPending}
+                  >
+                    <Trash2 />
+                    {tc("delete")}
+                  </Button>
                 )}
                 {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
                 {spotCheck && (

@@ -86,7 +86,6 @@ export function SrHeader({
 
   const isView = mode === "view";
   const isAdd = mode === "add";
-  const isEdit = mode === "edit";
   const docStatus = storeRequisition?.doc_status;
   // draft/add ยังไม่เข้า workflow — ซ่อน workflow step (เหมือน PR)
   const isDraft = !docStatus || docStatus === "draft";
@@ -163,10 +162,10 @@ export function SrHeader({
             <Save aria-hidden="true" />
             {isPending ? getModeLabels(mode, t("entity")).pending : tc("save")}
           </Button>
-          {isEdit && storeRequisition && (
+          {storeRequisition && (
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={onDelete}
               disabled={isPending || isDeletePending}
