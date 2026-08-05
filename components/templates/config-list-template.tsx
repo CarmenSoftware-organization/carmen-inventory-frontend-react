@@ -40,6 +40,7 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { buildPermissionKey } from "@/constant/permissions";
 import type { CardRenderProps, ConfigListTemplateProps } from "./types";
+import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 interface GridContentArgs<TEntity extends { id: string }> {
   readonly isLoading: boolean;
@@ -219,6 +220,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
 
   const t = useTranslations(translationNamespace);
   const tc = useTranslations("common");
+  const exportErrorToast = useExportErrorToast();
   const tt = useTranslations("toast");
 
   const entities = useInfiniteScroll
@@ -271,7 +273,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
       });
       toast.success(tc("exportSuccess", { count: entities.length }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : tc("exportFailed"));
+      exportErrorToast(err);
     } finally {
       setIsExporting(false);
     }

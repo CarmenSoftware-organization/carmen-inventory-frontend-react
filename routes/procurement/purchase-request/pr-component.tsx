@@ -62,6 +62,7 @@ import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const CreatePRDialog = lazy(() =>
@@ -79,6 +80,7 @@ const CreatePRDialog = lazy(() =>
 export default function PurchaseRequestComponent() {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
+  const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
@@ -271,7 +273,7 @@ export default function PurchaseRequestComponent() {
       }
       toast.success(tc("exportSuccess", { count }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : tc("exportFailed"));
+      exportErrorToast(err);
     }
   };
 

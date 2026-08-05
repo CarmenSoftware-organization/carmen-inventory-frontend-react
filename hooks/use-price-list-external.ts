@@ -194,6 +194,9 @@ export function useUpdatePriceListExternal(urlToken: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    // หน้านี้แสดง message จาก backend ให้ vendor เอง (ลิงก์หมดอายุ / validation)
+    // ซึ่ง toast กลางไม่รู้จัก HttpError เลยจะทับด้วยข้อความ generic เป็นใบที่สอง
+    meta: { skipGlobalErrorToast: true },
     mutationFn: async (formData: PricelistExternalDto) => {
       const res = await httpClient.patch(
         API_ENDPOINTS.PRICE_LIST_EXTERNAL(urlToken),
@@ -222,6 +225,7 @@ export function useSubmitPriceListExternal(urlToken: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
+    meta: { skipGlobalErrorToast: true },
     mutationFn: async () => {
       // submit ไม่มี payload — แค่ finalize (การเซฟข้อมูลจัดการโดย save draft ก่อนหน้า)
       const res = await httpClient.post(

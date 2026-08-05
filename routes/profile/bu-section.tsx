@@ -39,7 +39,6 @@ import {
   useUploadBuAvatar,
   useUploadBuLogo,
 } from "@/hooks/use-profile";
-import type { ApiError } from "@/lib/api-error";
 import {
   IMAGE_MAX_BYTES,
   IMAGE_ACCEPT_ATTR,
@@ -57,9 +56,7 @@ type ImageUploadText = {
   readonly uploading: string;
   readonly removing: string;
   readonly uploaded: string;
-  readonly uploadFailed: string;
   readonly removed: string;
-  readonly removeFailed: string;
   readonly typeError: string;
   readonly sizeError: string;
   readonly confirmTitle: string;
@@ -128,8 +125,7 @@ function ImageUploadField({
           setPreview(null);
           if (fileInputRef.current) fileInputRef.current.value = "";
         },
-        onError: (err) => {
-          toast.error(err.message || text.uploadFailed);
+        onError: () => {
           setPreview(null);
           if (fileInputRef.current) fileInputRef.current.value = "";
         },
@@ -153,9 +149,6 @@ function ImageUploadField({
         toast.success(text.removed);
         if (fileInputRef.current) fileInputRef.current.value = "";
         setConfirmOpen(false);
-      },
-      onError: (err: ApiError) => {
-        toast.error(err.message || text.removeFailed);
       },
     });
   };
@@ -347,9 +340,7 @@ export default function BUSection({ bu }: { bu: BusinessUnit }) {
     uploading: t("uploadingLogo"),
     removing: t("removingLogo"),
     uploaded: t("logoUploaded"),
-    uploadFailed: t("logoUploadFailed"),
     removed: t("logoRemoved"),
-    removeFailed: t("logoRemoveFailed"),
     typeError: t("logoTypeError"),
     sizeError: t("logoSizeError"),
     confirmTitle: t("removeLogoConfirmTitle"),
@@ -366,9 +357,7 @@ export default function BUSection({ bu }: { bu: BusinessUnit }) {
     uploading: t("buUploadingAvatar"),
     removing: t("buRemovingAvatar"),
     uploaded: t("buAvatarUploaded"),
-    uploadFailed: t("buAvatarUploadFailed"),
     removed: t("buAvatarRemoved"),
-    removeFailed: t("buAvatarRemoveFailed"),
     typeError: t("buAvatarTypeError"),
     sizeError: t("buAvatarSizeError"),
     confirmTitle: t("removeBuAvatarConfirmTitle"),

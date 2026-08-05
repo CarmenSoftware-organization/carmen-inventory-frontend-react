@@ -131,8 +131,7 @@ export default function UserProfileSetting() {
         setCropSrc(null);
         if (avatarInputRef.current) avatarInputRef.current.value = "";
       },
-      onError: (err) => {
-        toast.error(err.message || t("avatarUploadFailed"));
+      onError: () => {
         setAvatarPreview(null);
         setCropSrc(null);
         if (avatarInputRef.current) avatarInputRef.current.value = "";
@@ -157,10 +156,7 @@ export default function UserProfileSetting() {
         if (avatarInputRef.current) avatarInputRef.current.value = "";
         setRemoveAvatarOpen(false);
       },
-      onError: (err) => {
-        toast.error(err.message || t("avatarRemoveFailed"));
-        // Keep dialog open so user can retry
-      },
+      // ไม่ปิด dialog ตอนพลาด ให้ลองใหม่ได้ (toast ขึ้นจาก MutationCache กลาง)
     });
   };
 
@@ -170,7 +166,6 @@ export default function UserProfileSetting() {
         toast.success(t("signatureUpdated"));
         setSignatureDialogOpen(false);
       },
-      onError: (err) => toast.error(err.message || t("signatureUploadFailed")),
     });
   };
 
@@ -180,7 +175,6 @@ export default function UserProfileSetting() {
         toast.success(t("signatureRemoved"));
         setRemoveSignatureOpen(false);
       },
-      onError: (err) => toast.error(err.message || t("signatureRemoveFailed")),
     });
   };
 

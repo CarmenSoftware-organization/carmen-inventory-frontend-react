@@ -316,8 +316,8 @@ export function usePoFormHandlers({
         setMode("view");
         await runSubmitPo();
         return;
-      } catch (err) {
-        toast.error((err as Error).message);
+      } catch {
+        // toast ขึ้นจาก MutationCache กลางแล้ว — แค่หยุดไม่ยิง action ต่อ
         return;
       }
     }

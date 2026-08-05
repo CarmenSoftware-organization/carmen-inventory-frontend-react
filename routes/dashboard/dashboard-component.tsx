@@ -194,7 +194,6 @@ const SavedWidgetsSection = () => {
         {
           onSuccess: () =>
             toast.success(tt("createSuccess", { entity: t("entity") })),
-          onError: (err) => toast.error(err.message),
         },
       );
       return;
@@ -231,7 +230,6 @@ const SavedWidgetsSection = () => {
           toast.success(tt("createSuccess", { entity: t("entity") }));
           setPendingAdd(null);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -250,7 +248,6 @@ const SavedWidgetsSection = () => {
           });
           setPendingConfig(null);
         },
-        onError: (err) => toast.error(err.message),
       },
     );
   };
@@ -274,8 +271,7 @@ const SavedWidgetsSection = () => {
     updateWidget.mutate(
       { id: w.id, params: newParams },
       {
-        onError: (err) => {
-          toast.error(err.message);
+        onError: () => {
           queryClient.invalidateQueries({
             queryKey: [QUERY_KEYS.MY_DASHBOARD_WIDGETS],
           });

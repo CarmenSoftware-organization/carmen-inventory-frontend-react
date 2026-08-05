@@ -53,6 +53,7 @@ import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 /**
  * Component หลักของหน้ารายการงวดบัญชี (Period) รองรับ desktop/mobile, filter, และการสร้างงวดถัดไป
@@ -70,6 +71,7 @@ export default function PeriodComponent() {
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const t = useTranslations("systemAdmin.period");
   const tc = useTranslations("common");
+  const exportErrorToast = useExportErrorToast();
   const tt = useTranslations("toast");
 
   // PERIOD_STATUS_OPTIONS มา createStatusFilterOptions — label เป็น literal
@@ -144,7 +146,7 @@ export default function PeriodComponent() {
       }
       toast.success(tc("exportSuccess", { count }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : tc("exportFailed"));
+      exportErrorToast(err);
     }
   };
 

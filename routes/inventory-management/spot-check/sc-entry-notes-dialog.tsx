@@ -71,8 +71,7 @@ export function ScEntryNotesDialog({
               toast.success(t("saveNote"));
               onSaved?.({ note, images: previews });
             },
-            onError: (err: Error) => {
-              toast.error(err.message);
+            onError: () => {
               onSaved?.({ note, images: previews });
             },
           },

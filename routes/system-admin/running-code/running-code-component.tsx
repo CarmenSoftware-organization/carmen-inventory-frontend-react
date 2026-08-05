@@ -36,6 +36,7 @@ import { RunningCodeDialog } from "./running-code-dialog";
 import { useRunningCodeTable } from "./use-running-code-table";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
+import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 /**
  * Component หลักของหน้า Running Code รองรับเพิ่ม/แก้ไข/ลบ และ initialize ข้อมูลเริ่มต้น
@@ -66,6 +67,7 @@ export default function RunningCodeComponent() {
   });
   const t = useTranslations("systemAdmin.runningCode");
   const tc = useTranslations("common");
+  const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
 
@@ -89,7 +91,7 @@ export default function RunningCodeComponent() {
       }
       toast.success(tc("exportSuccess", { count }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : tc("exportFailed"));
+      exportErrorToast(err);
     }
   };
 

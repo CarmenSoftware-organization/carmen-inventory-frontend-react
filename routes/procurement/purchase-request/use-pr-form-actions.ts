@@ -169,8 +169,6 @@ export function usePrFormActions({
     onCancel: navGuard.cancel,
   };
 
-  const handleMutationError = (err: Error) => toast.error(err.message);
-
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
     navigate("/procurement/purchase-request");
@@ -235,8 +233,8 @@ export function usePrFormActions({
       });
       syncDocVersions(data);
       return true;
-    } catch (err) {
-      handleMutationError(err as Error);
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว — คืน false ให้ caller หยุดยิง action ต่อ
       return false;
     }
   };

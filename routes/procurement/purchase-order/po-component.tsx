@@ -44,6 +44,7 @@ import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 // next/dynamic → lazy+Suspense (Batch D hand-fix)
 const CreatePODialog = lazy(() =>
@@ -53,6 +54,7 @@ const CreatePODialog = lazy(() =>
 export default function PoComponent() {
   const t = useTranslations("procurement.purchaseOrder");
   const tc = useTranslations("common");
+  const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
@@ -222,7 +224,7 @@ export default function PoComponent() {
       }
       toast.success(tc("exportSuccess", { count }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : tc("exportFailed"));
+      exportErrorToast(err);
     }
   };
 
