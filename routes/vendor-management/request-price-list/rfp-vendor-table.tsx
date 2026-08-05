@@ -199,7 +199,6 @@ export default function RfpVendorTable({
           disabled={isDisabled}
           title={t("vendors.noVendors")}
           description={t("vendors.noVendorsDesc")}
-          addLabel={t("vendors.addVendor")}
         />
       ) : (
         <>
