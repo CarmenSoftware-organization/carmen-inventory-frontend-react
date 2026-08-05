@@ -184,7 +184,7 @@ export default function RfpVendorTable({
         !isDisabled ? (
           <Button
             type="button"
-            size="xs"
+            size="sm"
             onClick={handleAddClick}
             disabled={isAdding}
           >
@@ -196,7 +196,6 @@ export default function RfpVendorTable({
     >
       {displayVendors.length === 0 && !isAdding ? (
         <EmptyProducts
-          onAdd={handleAddClick}
           disabled={isDisabled}
           title={t("vendors.noVendors")}
           description={t("vendors.noVendorsDesc")}
