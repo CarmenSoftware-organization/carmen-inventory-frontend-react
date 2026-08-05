@@ -127,6 +127,8 @@ const ProductCell = memo(function ProductCell({
   disabled,
   errorMessage,
   excludeIds,
+  autoOpen,
+  onPicked,
 }: {
   control: Control<AdjFormValues>;
   form: UseFormReturn<AdjFormValues>;
@@ -134,6 +136,9 @@ const ProductCell = memo(function ProductCell({
   disabled: boolean;
   errorMessage?: string;
   excludeIds?: string[];
+  /** แถวที่เพิ่งกดเพิ่ม — เปิดช่องเลือกสินค้าให้เลย ไม่ต้องกดซ้ำ */
+  autoOpen?: boolean;
+  onPicked?: () => void;
 }) {
   "use no memo";
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
@@ -171,8 +176,10 @@ const ProductCell = memo(function ProductCell({
             <LookupProductInLocation
               locationId={locationId}
               value={field.value ?? ""}
+              defaultOpen={autoOpen}
               onValueChange={(value, product) => {
                 field.onChange(value);
+                onPicked?.();
                 if (product) {
                   form.setValue(`items.${index}.product_name`, product.name);
                   form.setValue(
@@ -227,6 +234,9 @@ interface UseAdjItemTableOptions {
   disabled: boolean;
   onDelete: (index: number) => void;
   adjustmentType: InventoryAdjustmentType;
+  /** true = แถวบนสุดเพิ่งถูกเพิ่ม ให้เปิดช่องเลือกสินค้าเอง */
+  autoOpenFirst?: boolean;
+  onProductPicked?: () => void;
 }
 
 export function useAdjItemTable({
@@ -235,6 +245,8 @@ export function useAdjItemTable({
   disabled,
   onDelete,
   adjustmentType,
+  autoOpenFirst,
+  onProductPicked,
 }: UseAdjItemTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
@@ -284,6 +296,8 @@ export function useAdjItemTable({
               disabled={disabled}
               errorMessage={errorMessage}
               excludeIds={selectedIds}
+              autoOpen={autoOpenFirst && row.index === 0}
+              onPicked={onProductPicked}
             />
           );
         },
@@ -422,7 +436,15 @@ export function useAdjItemTable({
       ...visibleDataColumns,
       ...(disabled ? [] : [actionColumn]),
     ];
-  }, [form, disabled, onDelete, tfl, adjustmentType]);
+  }, [
+    form,
+    disabled,
+    onDelete,
+    tfl,
+    adjustmentType,
+    autoOpenFirst,
+    onProductPicked,
+  ]);
 
   const table = useReactTable({
     data: itemFields,

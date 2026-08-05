@@ -2013,7 +2013,8 @@
       "commitConfirm": "Once committed this adjustment posts to stock and can no longer be edited. Continue?",
       "docInfo": "Document Information",
       "docInfoDesc": "Date, reason, location and a note for this adjustment.",
-      "grandTotal": "Grand Total"
+      "grandTotal": "Grand Total",
+      "selectLocationFirst": "Choose a store before adding items"
     },
     "physicalCount": {
       "entity": "Physical Count",
