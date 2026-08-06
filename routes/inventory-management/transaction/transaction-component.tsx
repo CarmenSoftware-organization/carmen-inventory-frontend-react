@@ -90,6 +90,13 @@ function buildDateRangeClause(
 }
 
 export default function TransactionComponent() {
+  // TanStack table instance เป็น ref คงที่แต่ mutate ข้างในตัวเอง — React Compiler
+  // มองว่า dependency ของบล็อก JSX ที่ห่อ <DataGrid> ไม่เปลี่ยน (table เป็นตัวเดิม,
+  // recordCount กับ isLoading ก็เท่าเดิม) เลย reuse ผลลัพธ์เดิมทั้งก้อน กดเปลี่ยน
+  // หน้าแล้ว URL กับ query เปลี่ยนจริงแต่ตารางค้างอยู่หน้าเดิม (เจอจริง: กดหน้า 3
+  // แล้วกลับหน้า 1 ได้ page=1 บน URL แต่ตารางยังโชว์แถว 21-30) · directive เดียวกับ
+  // ที่ use-config-table / data-grid-table / data-grid-pagination ใช้ด้วยเหตุผลนี้
+  "use no memo";
   const t = useTranslations("inventoryManagement.transaction");
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const { params, search, setSearch, tableConfig } = useDataGridState();

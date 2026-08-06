@@ -6,7 +6,7 @@ import {
   indexColumn,
   columnSkeletons,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
@@ -21,27 +21,28 @@ interface UseTransactionTableOptions {
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
 }
 
+/**
+ * ชนิดเอกสาร → ตัวย่อ + สีของจุด
+ *
+ * ของเดิมเป็น Badge ทึบเจ็ดสีเรียงกันในคอลัมน์เดียว ซึ่งชนกติกา "avoid neon" ของ
+ * docs/DESIGN.md (สีความหมายโผล่ครั้งเดียวต่อชิ้น ไม่ใช่ย้อมทั้งป้าย) และสีทั้ง
+ * เจ็ดก็ไม่ได้แปลว่าอะไรเลย เป็นแค่การแยกให้ดูต่าง
+ *
+ * เปลี่ยนเป็นชิปกลาง + จุดสีเดียว โดยให้สีบอก **ทิศทางของของ** ซึ่งเป็นสิ่งที่
+ * คนอ่านตารางนี้มองหาจริง ๆ: เขียว = ของเข้า · เหลือง = ของออก · เทา = ยังไม่มี
+ * ของขยับ (ใบขอซื้อ/ใบสั่งซื้อเป็นแค่คำสั่ง ยังไม่กระทบสต๊อก)
+ */
 const DOC_TYPE_CONFIG: Record<
   TransactionDocType,
-  {
-    label: string;
-    variant:
-      | "info"
-      | "warning"
-      | "destructive"
-      | "secondary"
-      | "default"
-      | "success"
-      | "invert";
-  }
+  { label: string; tone: DotTone }
 > = {
-  stock_in: { label: "SI", variant: "info" },
-  stock_out: { label: "SO", variant: "warning" },
-  credit_note: { label: "CN", variant: "destructive" },
-  purchase_request: { label: "PR", variant: "secondary" },
-  purchase_order: { label: "PO", variant: "default" },
-  good_received_note: { label: "GRN", variant: "success" },
-  store_requisition: { label: "SR", variant: "invert" },
+  stock_in: { label: "SI", tone: "success" },
+  good_received_note: { label: "GRN", tone: "success" },
+  stock_out: { label: "SO", tone: "warning" },
+  store_requisition: { label: "SR", tone: "warning" },
+  credit_note: { label: "CN", tone: "warning" },
+  purchase_request: { label: "PR", tone: "neutral" },
+  purchase_order: { label: "PO", tone: "neutral" },
 };
 
 export function useTransactionTable({
@@ -51,7 +52,7 @@ export function useTransactionTable({
   tableConfig,
 }: UseTransactionTableOptions) {
   "use no memo";
-  const { dateFormat, amountFormat } = useProfile();
+  const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
   const tfl = useTranslations("field");
   const t = useTranslations("inventoryManagement.transaction");
 
@@ -84,9 +85,9 @@ export function useTransactionTable({
         const docType = row.original.inventory_doc_type;
         const config = DOC_TYPE_CONFIG[docType];
         return (
-          <Badge variant={config?.variant ?? "outline"} size="sm">
+          <StatusDotBadge tone={config?.tone ?? "neutral"} size="sm">
             {config?.label ?? docType}
-          </Badge>
+          </StatusDotBadge>
         );
       },
       meta: {
@@ -113,7 +114,14 @@ export function useTransactionTable({
         const products = [
           ...new Set(row.original.details.map((d) => d.product_name)),
         ];
-        return products.join(", ");
+        const text = products.join(", ");
+        // ใบเดียวมีได้หลายสินค้า ต่อกันแล้วยาวจนดันแถวสูงกว่าเพื่อนหลายเท่า —
+        // ตัดที่ 2 บรรทัดแล้วใส่จุดไข่ปลา · ตัวเต็มดูได้จาก tooltip ของเบราว์เซอร์
+        return (
+          <span className="line-clamp-2 break-words" title={text}>
+            {text}
+          </span>
+        );
       },
       meta: { skeleton: columnSkeletons.text },
       size: 220,
@@ -127,7 +135,12 @@ export function useTransactionTable({
         const locations = [
           ...new Set(row.original.details.map((d) => d.location_name)),
         ];
-        return locations.join(", ");
+        const text = locations.join(", ");
+        return (
+          <span className="line-clamp-2 break-words" title={text}>
+            {text}
+          </span>
+        );
       },
       meta: { skeleton: columnSkeletons.text },
       size: 220,
@@ -188,7 +201,21 @@ export function useTransactionTable({
           (sum, d) => sum + d.total_cost,
           0,
         );
-        return formatAmount(total, amountFormat);
+        // ต่อท้ายด้วยสกุลเงินหลักของกิจการ (ทรงเดียวกับคอลัมน์ยอดรวมของ PR/PO/CN)
+        // — ตัวเลขเปล่า ๆ ไม่บอกว่านับเป็นเงินอะไร ต้นทุนในคลังเก็บเป็นเงินหลัก
+        // เสมอ ไม่ใช่สกุลของใบที่ซื้อมา
+        return (
+          <div className="text-right">
+            <span className="font-medium">
+              {formatAmount(total, amountFormat)}
+            </span>
+            {defaultCurrencyCode && (
+              <span className="text-muted-foreground ms-1 text-xs font-normal">
+                {defaultCurrencyCode}
+              </span>
+            )}
+          </div>
+        );
       },
       meta: {
         skeleton: columnSkeletons.text,
