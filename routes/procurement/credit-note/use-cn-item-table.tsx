@@ -379,32 +379,31 @@ function CnReturnRow({
       </colgroup>
       <tbody>
         <tr className="align-middle">
-          <td />
+          {/* ป้ายบอกว่าแถวนี้คือของที่คืน — อยู่ท้ายช่วง product+location ชิดขวา
+              ติดกับช่องค่าแรก · เดิมวางซ้อนอยู่เหนือค่า ทำให้ค่าในช่องนี้ต่ำกว่า
+              ค่าช่องอื่นทั้งแถว อ่านแล้วไม่เป็นแนวเดียวกัน */}
+          <td className="text-muted-foreground text-micro px-2 py-1 text-right font-semibold">
+            {isAmountDiscountRow ? t("cnAmount") : t("returnLine")}
+          </td>
           {/* ช่องกรอกของแถวอยู่ตรงนี้ช่องเดียว สลับตามประเภทใบ — quantity_return
               กรอกจำนวนคืน, amount_discount กรอกยอดลดหนี้ตรง ๆ (จำนวนคืนไม่มีผล
-              ต่อยอดในโหมดนั้น จึงไม่ต้องมีช่องล็อกไว้ให้รก)
-              ป้ายอยู่บนขวาของช่อง — ทรงเดียวกับ toggle ของ Override */}
+              ต่อยอดในโหมดนั้น จึงไม่ต้องมีช่องล็อกไว้ให้รก) */}
           <td className="px-1 py-1 text-right">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-muted-foreground text-micro text-right font-semibold">
-                {isAmountDiscountRow ? t("cnAmount") : t("returnLine")}
-              </span>
-              {isAmountDiscountRow ? (
-                <SubtotalCell
-                  form={form}
-                  index={index}
-                  type={type}
-                  disabled={disabled}
-                />
-              ) : (
-                <QtyCell
-                  form={form}
-                  index={index}
-                  disabled={disabled}
-                  locked={false}
-                />
-              )}
-            </div>
+            {isAmountDiscountRow ? (
+              <SubtotalCell
+                form={form}
+                index={index}
+                type={type}
+                disabled={disabled}
+              />
+            ) : (
+              <QtyCell
+                form={form}
+                index={index}
+                disabled={disabled}
+                locked={false}
+              />
+            )}
           </td>
           {/* ราคาต่อหน่วยเท่าฝั่งรับเสมอ — คืนของชิ้นเดิมในราคาเดิม */}
           <td className="px-2 py-1 text-right">
@@ -670,45 +669,40 @@ function TaxCell({
     );
   }
   return (
-    <div className="flex flex-col gap-0.5">
-      {rate > 0 && (
-        <span className="text-muted-foreground text-micro text-right font-semibold tabular-nums">
-          {rate}%
-        </span>
-      )}
-      {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
-      <div className="flex items-center gap-1.5">
-        <TaxOverrideInput
-          taxProfileId={taxProfileId}
-          amount={amount}
-          isAdjustment={isAdj}
-          onTaxChange={(value, r, name) => {
-            form.setValue(`${base}.tax_profile_id`, value || null, {
+    // ไม่มีป้าย "{rate}%" ลอยเหนือช่องกรอกแล้ว — มันดันแถวให้สูงขึ้นทั้งแถว
+    // และอัตราก็อ่านได้จากชื่อ tax profile ในช่องอยู่แล้ว
+    // checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด
+    <div className="flex items-center gap-1.5">
+      <TaxOverrideInput
+        taxProfileId={taxProfileId}
+        amount={amount}
+        isAdjustment={isAdj}
+        onTaxChange={(value, r, name) => {
+          form.setValue(`${base}.tax_profile_id`, value || null, {
+            shouldDirty: true,
+            shouldValidate: true,
+          });
+          form.setValue(`${base}.tax_rate`, r);
+          form.setValue(`${base}.tax_profile_name`, name);
+        }}
+        onAmountChange={(a) =>
+          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+        }
+      />
+      <OverrideToggle
+        checked={isAdj}
+        hint={tfl("overrideHintTax")}
+        onCheckedChange={(on) => {
+          if (on) {
+            form.setValue(`${base}.tax_amount`, amount, {
               shouldDirty: true,
-              shouldValidate: true,
             });
-            form.setValue(`${base}.tax_rate`, r);
-            form.setValue(`${base}.tax_profile_name`, name);
-          }}
-          onAmountChange={(a) =>
-            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
           }
-        />
-        <OverrideToggle
-          checked={isAdj}
-          hint={tfl("overrideHintTax")}
-          onCheckedChange={(on) => {
-            if (on) {
-              form.setValue(`${base}.tax_amount`, amount, {
-                shouldDirty: true,
-              });
-            }
-            form.setValue(`${base}.is_tax_adjustment`, on, {
-              shouldDirty: true,
-            });
-          }}
-        />
-      </div>
+          form.setValue(`${base}.is_tax_adjustment`, on, {
+            shouldDirty: true,
+          });
+        }}
+      />
     </div>
   );
 }

@@ -217,10 +217,15 @@ export function CnItem({ form, disabled }: Props) {
       <DataGrid
         table={table}
         recordCount={itemFields.length}
-        // คอลัมน์กว้างตาม size (px) จริง — เกินจอก็ scroll แนวนอน (เหมือน PO/GRN)
-        // เคยลองบีบให้พอดีจอด้วย table-fixed w-full แล้ว combo discount/tax หดจน
-        // กรอก rate กับยอดไม่ได้ · ไม่เกินจอเมื่อไหร่ min-w-full ก็ยืดเต็มให้เอง
-        tableLayout={{ columnsResizable: true }}
+        // โหมดแก้ไข: คอลัมน์กว้างตาม size (px) จริง เกินจอก็เลื่อนแนวนอน (เหมือน
+        // PO/GRN) เคยลองบีบให้พอดีจอด้วย table-fixed w-full แล้ว combo
+        // discount/tax หดจนกรอก rate กับยอดไม่ได้
+        //
+        // โหมดดู: ปิด resizable → กลับไปใช้ width "fixed" ซึ่งแปลง size เป็น % ของ
+        // ความกว้างจริง ตารางเลยพอดีจอไม่ต้องเลื่อน และสัดส่วนคอลัมน์ยังเท่าเดิม
+        // ซึ่งจำเป็น เพราะแถว "คืน" เป็นตารางซ้อนที่คิด % จาก CN_COL ชุดเดียวกัน
+        // (table-auto ทำให้คอลัมน์จัดตามเนื้อหา สัดส่วนไม่ตรง แถวคืนเลยเหลื่อม)
+        tableLayout={disabled ? {} : { columnsResizable: true }}
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}
@@ -230,9 +235,10 @@ export function CnItem({ form, disabled }: Props) {
         }
       >
         {/* native scroll (overflow-auto) ไม่ห่อ Radix ScrollArea — เลี่ยง nested
-            scroll ที่สะดุด · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน ไม่งั้นแถบลอย
-            (macOS) ไปบังตัวเลขแถวสุดท้าย เพราะ CN เป็นตารางแบน ไม่มีแถวกาง */}
-        <DataGridContainer scroll>
+            scroll ที่สะดุด · scroll (pb-3) เฉพาะโหมดแก้ไขที่ตารางกว้างเกินจอจริง
+            ไม่งั้นแถบเลื่อนลอย (macOS) ไปบังตัวเลขแถวสุดท้าย เพราะ CN เป็นตาราง
+            แบน ไม่มีแถวกาง · โหมดดูไม่มีแถบเลื่อน จะเว้นที่ไว้ก็เป็นช่องว่างเปล่า */}
+        <DataGridContainer scroll={!disabled}>
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>
