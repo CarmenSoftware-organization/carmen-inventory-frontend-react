@@ -836,7 +836,7 @@
     "currency": {
       "entity": "Currency",
       "title": "Currency",
-      "desc": "Manage currencies and exchange rates.",
+      "desc": "Currencies you buy in, and the rate used to convert each one back to your base currency.",
       "add": "Add Currency",
       "deleteTitle": "Delete Currency",
       "deleteConfirm": "Are you sure you want to delete currency \"{name}\"? This action cannot be undone.",
@@ -857,7 +857,7 @@
     "deliveryPoint": {
       "entity": "Delivery Point",
       "title": "Delivery Point",
-      "desc": "Manage delivery points for your inventory.",
+      "desc": "Where vendors drop the goods off — loading dock, back door, kitchen entrance.",
       "add": "Add Delivery Point",
       "deleteTitle": "Delete Delivery Point",
       "deleteConfirm": "Are you sure you want to delete delivery point \"{name}\"? This action cannot be undone.",
@@ -866,7 +866,7 @@
     "department": {
       "entity": "Department",
       "title": "Department",
-      "desc": "Manage departments for your organization.",
+      "desc": "The teams that request and spend — kitchen, housekeeping, F&B. Requests and spend are tracked per department.",
       "add": "Add Department",
       "edit": "Edit Department",
       "deleteTitle": "Delete Department",
@@ -884,7 +884,7 @@
     "location": {
       "entity": "Store Location",
       "title": "Store Location",
-      "desc": "Manage store locations for your inventory.",
+      "desc": "Every place that holds stock — main store, kitchen store, minibar. Counts and requisitions run per location.",
       "add": "Add Store Location",
       "edit": "Edit Location",
       "deleteTitle": "Delete Store Location",
@@ -909,7 +909,7 @@
     "taxProfile": {
       "entity": "Tax Profile",
       "title": "Tax Profile",
-      "desc": "Manage tax profiles and rates.",
+      "desc": "The tax rates you pick on documents — VAT and the rest. Tax on each line is worked out from these.",
       "add": "Add Tax Profile",
       "deleteTitle": "Delete Tax Profile",
       "deleteConfirm": "Are you sure you want to delete tax profile \"{name}\"? This action cannot be undone.",
@@ -919,7 +919,7 @@
     "exchangeRate": {
       "entity": "Exchange Rate",
       "title": "Exchange Rate",
-      "desc": "Manage exchange rates (base: {base})",
+      "desc": "What one unit of each foreign currency is worth in {base}.",
       "update": "Update Exchange Rates",
       "updating": "Updating...",
       "editTitle": "Edit Exchange Rate",
@@ -939,7 +939,7 @@
     "extraCost": {
       "entity": "Extra Cost Type",
       "title": "Extra Cost Type",
-      "desc": "Manage extra cost types for your inventory.",
+      "desc": "Charges that ride along with a delivery — freight, insurance, customs — and get shared into item cost.",
       "add": "Add Extra Cost Type",
       "deleteTitle": "Delete Extra Cost Type",
       "deleteConfirm": "Are you sure you want to delete extra cost type \"{name}\"? This action cannot be undone.",
@@ -949,7 +949,7 @@
       "entity": "Eco Certification",
       "title": "Eco Certification",
       "iso": "ISO",
-      "desc": "Manage environmental and sustainability certifications (organic, fair-trade, carbon-neutral, etc.).",
+      "desc": "Green certifications a product can carry — organic, fair-trade, carbon-neutral.",
       "add": "Add Eco Certification",
       "edit": "Edit Eco Certification",
       "deleteTitle": "Delete Eco Certification",
@@ -960,7 +960,7 @@
     "businessType": {
       "entity": "Business Type",
       "title": "Business Type",
-      "desc": "Manage vendor business types for your inventory.",
+      "desc": "How vendors are grouped by what they do — food supplier, laundry, maintenance.",
       "add": "Add Business Type",
       "deleteTitle": "Delete Business Type",
       "deleteConfirm": "Are you sure you want to delete business type \"{name}\"? This action cannot be undone.",
@@ -969,7 +969,7 @@
     "certification": {
       "entity": "Certification",
       "title": "Certification",
-      "desc": "Manage vendor master certifications for your inventory.",
+      "desc": "Certifications you ask vendors to hold — HACCP, GMP, halal — and check before buying.",
       "add": "Add Certification",
       "deleteTitle": "Delete Certification",
       "deleteConfirm": "Are you sure you want to delete certification \"{name}\"? This action cannot be undone.",
@@ -979,7 +979,7 @@
     "adjustmentType": {
       "entity": "Adjustment Type",
       "title": "Adjustment Type",
-      "desc": "Manage adjustment types for your inventory.",
+      "desc": "Reasons stock goes in or out without a purchase or a sale — breakage, staff meal, found stock.",
       "add": "Add Adjustment Type",
       "deleteTitle": "Delete Adjustment Type",
       "deleteConfirm": "Are you sure you want to delete adjustment type \"{name}\"? This action cannot be undone.",
@@ -990,7 +990,7 @@
     "creditTerm": {
       "entity": "Credit Term",
       "title": "Credit Term",
-      "desc": "Manage credit terms for payment conditions.",
+      "desc": "How long you have to pay each vendor — cash, 30 days, 60 days.",
       "add": "Add Credit Term",
       "deleteTitle": "Delete Credit Term",
       "deleteConfirm": "Are you sure you want to delete credit term \"{name}\"? This action cannot be undone.",
@@ -1001,7 +1001,7 @@
     "creditNoteReason": {
       "entity": "Credit Note Reason",
       "title": "Credit Note Reason",
-      "desc": "Manage reasons for credit notes.",
+      "desc": "Why goods go back or money is claimed back — damaged, wrong item, overcharged.",
       "add": "Add Credit Note Reason",
       "deleteTitle": "Delete Credit Note Reason",
       "deleteConfirm": "Are you sure you want to delete credit note reason \"{name}\"? This action cannot be undone.",
@@ -1176,7 +1176,7 @@
       "noPermissionsDesc": "You have no permissions to manage.",
       "entity": "Role",
       "title": "Roles",
-      "desc": "Manage application roles and permissions.",
+      "desc": "Job roles, and what each role is allowed to see and do.",
       "add": "Add Role",
       "edit": "Edit Role",
       "deleteTitle": "Delete Role",
@@ -1294,7 +1294,7 @@
       "title": "User Assign",
       "add": "Add User",
       "edit": "Edit User",
-      "desc": "Manage user assignments for your system.",
+      "desc": "Who can sign in, which property they work at, and the role they hold.",
       "deleteTitle": "Delete User",
       "deleteConfirm": "Are you sure you want to delete user \"{name}\"? This action cannot be undone.",
       "deleteSuccess": "User deleted successfully",
@@ -1304,7 +1304,7 @@
     "document": {
       "entity": "Document",
       "title": "Document Management",
-      "desc": "Upload and manage documents.",
+      "desc": "Files kept alongside the system — upload, replace, or remove them.",
       "upload": "Upload",
       "uploading": "Uploading...",
       "uploadSuccess": "Document uploaded successfully",
@@ -1324,7 +1324,7 @@
     "userActivity": {
       "entity": "User Activity",
       "title": "User Activity",
-      "desc": "Track user login and logout sessions.",
+      "desc": "Who signed in and out, and when.",
       "action": "Action",
       "user": "User",
       "timestamp": "Date / Time",
@@ -1338,7 +1338,7 @@
     "activityLog": {
       "entity": "Activity Log",
       "title": "Activity Monitor",
-      "desc": "View system activity and user actions.",
+      "desc": "The trail of who changed what, across every document.",
       "action": "Action",
       "entityType": "Record Type",
       "entityId": "Record ID",
@@ -1358,7 +1358,7 @@
     "workflow": {
       "entity": "Workflow",
       "title": "Workflow",
-      "desc": "Manage approval workflows.",
+      "desc": "Who approves what, and in which order, before a document can go through.",
       "add": "New Workflow",
       "edit": "Edit Workflow",
       "deleteTitle": "Delete Workflow",
@@ -1516,7 +1516,7 @@
     "runningCode": {
       "entity": "Running Code",
       "title": "Running Code",
-      "desc": "Configure document number sequences and formatting rules.",
+      "desc": "The shape of your document numbers — prefix, running number, and when it starts over.",
       "add": "Add Running Code",
       "deleteTitle": "Delete Running Code",
       "deleteConfirm": "Are you sure you want to delete running code \"{name}\"? This action cannot be undone.",
@@ -1530,7 +1530,7 @@
     "period": {
       "entity": "Period",
       "title": "Period",
-      "desc": "Manage fiscal periods for your business.",
+      "desc": "Accounting periods — open one to post into, close it when the month is done.",
       "add": "Add Period",
       "deleteTitle": "Delete Period",
       "deleteConfirm": "Are you sure you want to delete period FY{year}/M{month}? This action cannot be undone.",
@@ -1547,7 +1547,7 @@
     },
     "configEmail": {
       "title": "Email Configuration",
-      "desc": "SMTP settings for sending notification and report emails",
+      "desc": "The mail account the system sends alerts and reports from.",
       "testEmail": "Test Email",
       "smtpServer": "SMTP Server",
       "smtpServerDesc": "Connection details for the outgoing mail server.",
@@ -1568,7 +1568,7 @@
     "notificationTemplate": {
       "entity": "Notification Template",
       "title": "Notification Template",
-      "desc": "Manage reusable notification templates for workflow events.",
+      "desc": "The wording of the emails and alerts sent when a document moves along.",
       "add": "Add Notification Template",
       "edit": "Edit Notification Template",
       "untitled": "Untitled Template",
@@ -1592,7 +1592,7 @@
     },
     "dashboardDataset": {
       "title": "Dashboard Dataset",
-      "desc": "Data sources available to dashboard widgets",
+      "desc": "The data each dashboard widget is allowed to pull from.",
       "searchPlaceholder": "Search datasets…",
       "loading": "Loading datasets…",
       "loadError": "Failed to load datasets",
@@ -1720,7 +1720,7 @@
       "certificateNoPlaceholder": "e.g. CERT-2026-0001",
       "deleteCertificateTitle": "Delete Certificate",
       "deleteCertificateConfirm": "Delete certificate \"{no}\"? This action cannot be undone.",
-      "desc": "Manage vendors for your business.",
+      "desc": "Everyone you buy from — contacts, payment terms, and the certifications they hold.",
       "add": "Add Vendor",
       "edit": "Edit Vendor",
       "deleteTitle": "Delete Vendor",
@@ -1808,7 +1808,7 @@
       "entity": "Price List",
       "title": "Price List",
       "generalDesc": "Vendor, currency, effective period, description and status.",
-      "desc": "Manage price lists for your business.",
+      "desc": "Prices each vendor has quoted, and how long each price holds.",
       "add": "Add Price List",
       "edit": "Edit Price List",
       "deleteTitle": "Delete Price List",
@@ -1864,7 +1864,7 @@
       "entity": "Price List Template",
       "title": "Price List Template",
       "generalDesc": "Currency, validity period, description and status.",
-      "desc": "Manage price list templates for your business.",
+      "desc": "The item lists you hand vendors when you ask them to quote.",
       "add": "Add Template",
       "edit": "Edit Price List Template",
       "deleteTitle": "Delete Price List Template",
@@ -1933,7 +1933,7 @@
       "entity": "Request for Pricing",
       "title": "Request for Pricing",
       "generalDesc": "Template and the effective request period.",
-      "desc": "Manage request price lists for your business.",
+      "desc": "Quote requests sent out to vendors, and what has come back.",
       "add": "Add Request",
       "edit": "Edit Request for Price List",
       "deleteTitle": "Delete Request for Pricing",
@@ -1994,7 +1994,7 @@
       "title": "Inventory Adjustment",
       "add": "Add Inventory Adjustment",
       "edit": "Edit Inventory Adjustment",
-      "desc": "Manage stock in and stock out adjustments.",
+      "desc": "Stock added or taken out without a purchase or a sale — breakage, found stock, staff use.",
       "addStockIn": "Add Stock In",
       "addStockOut": "Add Stock Out",
       "deleteTitle": "Delete Inventory Adjustment",
@@ -2019,7 +2019,7 @@
     "physicalCount": {
       "entity": "Physical Count",
       "title": "Physical Count",
-      "desc": "Manage inventory counts by location",
+      "desc": "Full counts by location — what is on the shelf against what the system says.",
       "add": "Add Physical Count",
       "edit": "Edit Physical Count",
       "deleteTitle": "Delete Physical Count",
@@ -2156,7 +2156,7 @@
     "spotCheck": {
       "entity": "Spot Check",
       "title": "Spot Check",
-      "desc": "Manage spot checks for inventory.",
+      "desc": "Quick counts on a handful of items, without closing the whole store.",
       "add": "Add Spot Check",
       "edit": "Edit Spot Check",
       "deleteTitle": "Delete Spot Check",
@@ -2276,7 +2276,7 @@
     "periodEnd": {
       "entity": "Period End",
       "title": "Period End",
-      "desc": "Manage period end closings.",
+      "desc": "Closing the month — lock the period so nothing new can be posted back into it.",
       "add": "Add Period End",
       "edit": "Edit Period End",
       "current": "Current Period",
@@ -2330,7 +2330,7 @@
     "transaction": {
       "entity": "Transaction",
       "title": "Transaction",
-      "desc": "View transaction history.",
+      "desc": "Every movement of stock, in and out, with the document behind it.",
       "stockIn": "Stock In",
       "stockOut": "Stock Out",
       "qtyIn": "Qty In",
@@ -2370,7 +2370,7 @@
     "recipeCategory": {
       "entity": "Recipe Category",
       "title": "Recipe Category",
-      "desc": "Manage recipe categories.",
+      "desc": "How recipes are grouped on the menu — starters, mains, desserts.",
       "add": "Add Category",
       "edit": "Edit Recipe Category",
       "deleteTitle": "Delete Recipe Category",
@@ -2411,7 +2411,7 @@
       "regionOceania": "Oceania",
       "entity": "Cuisine Type",
       "title": "Cuisine Type",
-      "desc": "Manage cuisine types for your recipes.",
+      "desc": "The kitchen a recipe comes from — Thai, Italian, Japanese.",
       "add": "Add Cuisine Type",
       "edit": "Edit Cuisine",
       "deleteTitle": "Delete Cuisine Type",
@@ -2432,7 +2432,7 @@
     "equipment": {
       "entity": "Equipment",
       "title": "Equipment",
-      "desc": "Manage equipment for your operations.",
+      "desc": "Kitchen equipment a recipe calls for — oven, mixer, blast chiller.",
       "add": "Add Equipment",
       "edit": "Edit Equipment",
       "deleteTitle": "Delete Equipment",
@@ -2485,7 +2485,7 @@
     "equipmentCategory": {
       "entity": "Equipment Category",
       "title": "Equipment Category",
-      "desc": "Manage equipment categories for your operations.",
+      "desc": "How equipment is grouped — cooking, chilling, preparation.",
       "add": "Add Category",
       "deleteTitle": "Delete Equipment Category",
       "deleteConfirm": "Are you sure you want to delete equipment category \"{name}\"? This action cannot be undone.",
@@ -2497,7 +2497,7 @@
     "recipeEquipmentCategory": {
       "entity": "Recipe Equipment Category",
       "title": "Recipe Equipment Category",
-      "desc": "Manage recipe equipment categories.",
+      "desc": "The equipment groups a recipe can call for while you write it.",
       "add": "Add Category",
       "deleteTitle": "Delete Recipe Equipment Category",
       "deleteConfirm": "Are you sure you want to delete recipe equipment category \"{name}\"? This action cannot be undone.",
@@ -2507,7 +2507,7 @@
       "minShort": "min",
       "entity": "Recipe",
       "title": "Recipe",
-      "desc": "Manage recipes for your operational planning.",
+      "desc": "Standard recipes — ingredients, how much it yields, and the cost per portion.",
       "add": "Add Recipe",
       "edit": "Edit Recipe",
       "deleteTitle": "Delete Recipe",
@@ -2672,7 +2672,7 @@
     "category": {
       "entity": "Category",
       "title": "Category",
-      "desc": "Manage product categories, subcategories, and item groups.",
+      "desc": "How the catalogue is organised — category, sub-category, and item group.",
       "add": "Add Category",
       "expand": "Expand",
       "collapse": "Collapse",
@@ -2693,7 +2693,7 @@
     "product": {
       "entity": "Product",
       "title": "Products",
-      "desc": "Manage products for your inventory.",
+      "desc": "Everything you buy, store, and count — with its units, price, and where it is kept.",
       "add": "Add New",
       "edit": "Edit Product",
       "deleteTitle": "Delete Product",
@@ -2833,7 +2833,7 @@
     "storeRequisition": {
       "entity": "Store Requisition",
       "title": "Store Requisition",
-      "desc": "Manage store requisitions for your business.",
+      "desc": "Requests to move stock from a store to a department — what was asked for, what was issued.",
       "add": "Add Requisition",
       "noCreatableWorkflow": "None of the approval flows let you start a store requisition.",
       "edit": "Edit Store Requisition",
@@ -2898,7 +2898,7 @@
     "stockReplenishment": {
       "entity": "Stock Replenishment",
       "title": "Stock Replenishment",
-      "desc": "Monitor stock levels and replenishment needs across locations.",
+      "desc": "What is running low, and how much to order to bring it back up.",
       "createPr": "Create PR",
       "createSr": "Create SR",
       "nLocations": "{count} locations",
@@ -2912,7 +2912,7 @@
     "wastageReporting": {
       "entity": "Wastage Report",
       "title": "Wastage Reporting",
-      "desc": "Record and track wastage of inventory items.",
+      "desc": "Stock thrown away — what, how much, and why.",
       "add": "Add Report",
       "edit": "Edit Wastage Report",
       "deleteTitle": "Delete Wastage Report",
@@ -2935,7 +2935,7 @@
     "purchaseRequest": {
       "entity": "Purchase Request",
       "title": "Purchase Request",
-      "desc": "Manage purchase requests for your business.",
+      "desc": "Requests to buy, from the person who needs it through to approval.",
       "lastReceiving": "Last received",
       "lastReceivingNone": "No receiving history",
       "documentInfo": "Document Info",
@@ -3079,7 +3079,7 @@
     "purchaseRequestTemplate": {
       "entity": "Purchase Request Template",
       "title": "Purchase Request Template",
-      "desc": "Manage purchase request templates.",
+      "desc": "Ready-made request lists for the things you order again and again.",
       "add": "Add Template",
       "edit": "Edit Purchase Request Template",
       "deleteTitle": "Delete Template",
@@ -3098,7 +3098,7 @@
       "tabWorkflowHistory": "Workflow History",
       "noWorkflowHistory": "No workflow history",
       "title": "Purchase Order",
-      "desc": "Manage purchase orders.",
+      "desc": "Orders placed with vendors — what was ordered, at what price, and how much has arrived.",
       "add": "Add Purchase Order",
       "noCreatableWorkflow": "None of the approval flows let you start a purchase order.",
       "edit": "Edit Purchase Order",
@@ -3233,7 +3233,7 @@
     "creditNote": {
       "entity": "Credit Note",
       "title": "Credit Note",
-      "desc": "Manage credit notes.",
+      "desc": "Goods or money claimed back from a vendor after delivery — returns and price corrections.",
       "documentInfo": "Document Info",
       "groupDetails": "Credit Note",
       "groupGrnRef": "GRN Reference",
@@ -3291,7 +3291,7 @@
     "goodsReceiveNote": {
       "entity": "Goods Receive Note",
       "title": "Goods Receive Note",
-      "desc": "Manage goods receive notes for procurement.",
+      "desc": "What actually arrived from the vendor, checked against the order.",
       "mixedCurrencyError": "Selected POs use different currencies. Please select POs with the same currency.",
       "overReceiptWarning": "Received exceeds ordered ({ordered})",
       "documentInfo": "Document Info",
@@ -3415,7 +3415,7 @@
     "approval": {
       "entity": "Approval",
       "title": "My Approval",
-      "desc": "Review and approve pending procurement requests.",
+      "desc": "Documents waiting on you — approve, send back, or reject.",
       "totalPending": "Total Pending",
       "purchaseRequest": "Purchase Request",
       "purchaseOrder": "Purchase Order",
@@ -3613,7 +3613,7 @@
   "report": {
     "entity": "Report",
     "title": "Report",
-    "desc": "Manage reports.",
+    "desc": "Reports you can run on stock, spend, and vendors.",
     "system": "System",
     "intro": {
       "eyebrow": "The Reports desk · ห้องรายงาน",
@@ -3738,7 +3738,7 @@
   },
   "reportSchedule": {
     "title": "Report Schedules",
-    "desc": "Manage recurring report generation schedules.",
+    "desc": "Reports that run on their own — when they run, and who receives them.",
     "name": "Name",
     "reportTemplate": "Report Template",
     "selectTemplate": "Select template...",
@@ -3784,7 +3784,7 @@
   },
   "reportHistory": {
     "title": "Report History",
-    "desc": "View report generation history and job status.",
+    "desc": "Reports that have already run, and whether each one finished.",
     "jobId": "Job ID",
     "loadingMore": "Loading more…",
     "scrollToLoadMore": "Scroll to load more",
