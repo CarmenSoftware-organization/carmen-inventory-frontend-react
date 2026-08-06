@@ -135,7 +135,7 @@ export function useListViews(pageKey: ListPageKey): UseListViewsResult {
     const fresh = await fetchFreshViews(scope);
     const next = modify(fresh);
     if (next.length > MAX_VIEWS_PER_KEY) {
-      toast.error(t("limitReached", { max: MAX_VIEWS_PER_KEY }));
+      toast.warning(t("limitReached", { max: MAX_VIEWS_PER_KEY }));
       throw new Error("view limit reached");
     }
     const value = { views: next } satisfies ListViewsConfigValue;

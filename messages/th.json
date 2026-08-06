@@ -468,7 +468,8 @@
     "approveSuccess": "อนุมัติ{entity}สำเร็จ",
     "rejectSuccess": "ไม่อนุมัติ{entity}แล้ว",
     "submitSuccess": "ส่ง{entity}สำเร็จ",
-    "validationError": "กรุณาแก้ไขช่องที่ไฮไลต์ก่อน"
+    "validationError": "กรุณาแก้ไขช่องที่ไฮไลต์ก่อน",
+    "buSwitched": "สลับไปที่ {name} แล้ว"
   },
   "errors": {
     "title": "เกิดข้อผิดพลาด",
@@ -492,7 +493,9 @@
     "copyErrorId": "คัดลอกรหัสข้อผิดพลาด",
     "errorIdCopied": "คัดลอกรหัสข้อผิดพลาดแล้ว",
     "backToList": "กลับไปหน้ารายการ",
-    "goToDashboard": "ไปหน้าแดชบอร์ด"
+    "goToDashboard": "ไปหน้าแดชบอร์ด",
+    "noBusinessUnit": "ยังไม่ได้เลือกกิจการ เลือกจากแถบด้านบนก่อน",
+    "buSwitchFailed": "สลับกิจการไม่สำเร็จ กรุณาลองอีกครั้ง"
   },
   "validation": {
     "required": "กรุณากรอก{field}",
@@ -529,7 +532,10 @@
     "mustNotExceed": "{field} ต้องไม่เกิน{target}",
     "formIncomplete": "กรุณากรอกข้อมูลให้ครบก่อนยืนยัน",
     "incompleteItems": "ยังกรอกไม่ครบ {count} รายการ พาไปที่ช่องแรกที่ต้องแก้ให้แล้ว",
-    "incompleteDocument": "ยังกรอกข้อมูลไม่ครบ พาไปที่ช่องที่ต้องแก้ให้แล้ว"
+    "incompleteDocument": "ยังกรอกข้อมูลไม่ครบ พาไปที่ช่องที่ต้องแก้ให้แล้ว",
+    "fileUnsupportedFormat": "อัปโหลดได้เฉพาะไฟล์ {formats}",
+    "fileTooLarge": "ไฟล์ {size} ใหญ่กว่าที่รับได้ {max}",
+    "filesRejected": "ข้ามไป {count} ไฟล์ — {first}"
   },
   "field": {
     "field": "ฟิลด์",

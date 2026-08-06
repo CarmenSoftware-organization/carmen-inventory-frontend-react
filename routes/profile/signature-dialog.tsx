@@ -17,6 +17,7 @@ import {
   IMAGE_MAX_BYTES,
   validateImageFiles,
 } from "@/lib/image-upload";
+import { fileRejectMessage } from "@/lib/image-upload";
 import { SignaturePad, type SignaturePadHandle } from "./signature-pad";
 
 interface SignatureDialogProps {
@@ -50,6 +51,7 @@ export function SignatureDialog({
 }: SignatureDialogProps) {
   const t = useTranslations("profile");
   const tc = useTranslations("common");
+  const tv = useTranslations("validation");
 
   const [tab, setTab] = useState<"draw" | "upload">("draw");
   const padRef = useRef<SignaturePadHandle>(null);
@@ -81,7 +83,7 @@ export function SignatureDialog({
     if (!file) return;
     const { valid, rejected } = validateImageFiles([file], IMAGE_MAX_BYTES);
     if (rejected.length > 0) {
-      setUploadError(rejected[0].reason);
+      setUploadError(fileRejectMessage(rejected[0].reason, tv));
       setUploadFile(null);
       setUploadPreview(null);
       e.target.value = "";

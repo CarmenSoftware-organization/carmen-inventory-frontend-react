@@ -135,7 +135,7 @@ export function RequestPriceListForm({
 
   const handleAddVendor = (vendor: Vendor) => {
     if (selectedVendorIds.has(vendor.id)) {
-      toast.error(t("vendorAlreadyAdded"));
+      toast.warning(t("vendorAlreadyAdded"));
       setIsAdding(false);
       return;
     }
@@ -172,7 +172,7 @@ export function RequestPriceListForm({
 
   const onSubmit = (values: RfpFormValues) => {
     if (isAdding) {
-      toast.error(t("vendors.selectVendorFirst"));
+      toast.warning(t("vendors.selectVendorFirst"));
       return;
     }
     const vendorsAdd = (values.vendors?.add ?? []).map((v, i) => ({

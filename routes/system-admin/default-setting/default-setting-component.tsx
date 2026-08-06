@@ -161,7 +161,9 @@ export default function DefaultSettingComponent() {
           toast.success(t("saved"));
           setEditing(false);
         },
-        onError: (e) => toast.error(e.message || t("saveError")),
+        // ไม่ต้อง onError เอง — mutation ตัวนี้ผ่าน MutationCache กลางซึ่ง toast
+        // ให้อยู่แล้ว เขียนซ้ำที่นี่ = เด้งสองใบ และใบนี้โยน err.message ดิบซึ่ง
+        // เป็นสตริงที่ dev เขียนไว้ ไม่ใช่ข้อความสำหรับผู้ใช้ (ดู lib/api-error.ts)
       },
     );
   });

@@ -289,9 +289,9 @@ export function CommentSheet({
     const validFiles: File[] = [];
     for (const file of Array.from(files)) {
       if (!ALLOWED_TYPES.has(file.type)) {
-        toast.error(t("fileNotAllowed", { name: file.name }));
+        toast.warning(t("fileNotAllowed", { name: file.name }));
       } else if (file.size > MAX_FILE_SIZE) {
-        toast.error(t("fileTooLarge", { name: file.name }));
+        toast.warning(t("fileTooLarge", { name: file.name }));
       } else {
         validFiles.push(file);
       }

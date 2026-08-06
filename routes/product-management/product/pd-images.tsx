@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { fileRejectMessage } from "@/lib/image-upload";
 import {
   useDeleteProductImage,
   useProductImages,
@@ -50,6 +51,7 @@ export function ProductImages({
   onPendingFilesChange,
 }: ProductImagesProps) {
   const t = useTranslations("productManagement.product");
+  const tv = useTranslations("validation");
   const { data, isLoading } = useProductImages(productId);
   const deleteImage = useDeleteProductImage();
 
@@ -88,10 +90,13 @@ export function ProductImages({
     const { valid, rejected } = validateImageFiles(Array.from(files));
 
     if (rejected.length > 0) {
-      toast.error(
+      // ไฟล์ไม่ผ่านกติกา = ผู้ใช้เลือกใหม่ได้เอง ไม่ใช่ระบบพัง → warning
+      // และเดิมประโยคทั้งท่อนเป็นภาษาอังกฤษที่ประกอบมาจาก lib
+      const first = `${rejected[0].name}: ${fileRejectMessage(rejected[0].reason, tv)}`;
+      toast.warning(
         rejected.length === 1
-          ? `${rejected[0].name}: ${rejected[0].reason}`
-          : `${rejected.length} files rejected — ${rejected[0].name}: ${rejected[0].reason}`,
+          ? first
+          : tv("filesRejected", { count: String(rejected.length), first }),
       );
     }
 

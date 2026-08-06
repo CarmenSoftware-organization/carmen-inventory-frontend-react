@@ -1,7 +1,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useErrorToast } from "@/hooks/use-error-toast";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_DYNAMIC, CACHE_NORMAL } from "@/lib/cache-config";
@@ -35,6 +35,7 @@ const getWsUrl = (): string | undefined => {
 export function useNotification(userId: string | undefined) {
   const [isConnected, setIsConnected] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const errorToast = useErrorToast();
 
   useEffect(() => {
     const handleNotificationSent = (event: Event) => {
@@ -129,11 +130,9 @@ export function useNotification(userId: string | undefined) {
       }
     } catch (err) {
       setNotifications(snapshot); // rollback
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Failed to mark notification as read",
-      );
+      // err.message เป็นสตริงที่ dev เขียนไว้ตอน throw (อังกฤษ ไม่แปล) — ให้
+      // errorToast แปลงเป็นประโยคของผู้ใช้ตาม error code เหมือนที่อื่นทั้งแอป
+      errorToast(err);
     }
   };
 
@@ -153,11 +152,7 @@ export function useNotification(userId: string | undefined) {
       }
     } catch (err) {
       setNotifications(snapshot); // rollback
-      toast.error(
-        err instanceof Error
-          ? err.message
-          : "Failed to mark all notifications as read",
-      );
+      errorToast(err);
     }
   };
 

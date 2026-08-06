@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "use-intl";
 import { useLocation as useRouterLocation, useNavigate } from "react-router";
 import { ArrowLeft, Pencil, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,8 @@ interface UserAssignedFormProps {
 
 export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const navigate = useNavigate();
+  const tt = useTranslations("toast");
+  const tfl = useTranslations("field");
   const location = useRouterLocation();
   const [mode, setMode] = useState<FormMode>("view");
   const isView = mode === "view";
@@ -130,7 +133,7 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
         );
       }
       await Promise.all(promises);
-      toast.success("User updated successfully");
+      toast.success(tt("updateSuccess", { entity: tfl("user") }));
       navigate("/system-admin/user");
     } catch {
       // toast ขึ้นจาก MutationCache กลางแล้ว — แค่ไม่ navigate ออกจากฟอร์ม

@@ -103,12 +103,12 @@ function ImageUploadField({
     if (!file) return;
 
     if (!IMAGE_MIME_TYPES.includes(file.type)) {
-      toast.error(text.typeError);
+      toast.warning(text.typeError);
       event.target.value = "";
       return;
     }
     if (file.size > IMAGE_MAX_BYTES) {
-      toast.error(text.sizeError);
+      toast.warning(text.sizeError);
       event.target.value = "";
       return;
     }

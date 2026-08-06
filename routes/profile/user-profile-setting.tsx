@@ -90,12 +90,12 @@ export default function UserProfileSetting() {
 
     // Client-side guards — backend still validates authoritatively
     if (!IMAGE_MIME_TYPES.includes(file.type)) {
-      toast.error(t("logoTypeError"));
+      toast.warning(t("logoTypeError"));
       event.target.value = "";
       return;
     }
     if (file.size > IMAGE_MAX_BYTES) {
-      toast.error(t("logoSizeError"));
+      toast.warning(t("logoSizeError"));
       event.target.value = "";
       return;
     }

@@ -468,7 +468,8 @@
     "approveSuccess": "{entity} approved successfully",
     "rejectSuccess": "{entity} rejected successfully",
     "submitSuccess": "{entity} submitted successfully",
-    "validationError": "Please fix the highlighted fields first"
+    "validationError": "Please fix the highlighted fields first",
+    "buSwitched": "Switched to {name}"
   },
   "errors": {
     "title": "Something went wrong",
@@ -492,7 +493,9 @@
     "copyErrorId": "Copy error ID",
     "errorIdCopied": "Error ID copied",
     "backToList": "Back to list",
-    "goToDashboard": "Go to dashboard"
+    "goToDashboard": "Go to dashboard",
+    "noBusinessUnit": "No business unit selected — pick one from the top bar first.",
+    "buSwitchFailed": "Could not switch business unit. Please try again."
   },
   "validation": {
     "required": "{field} is required",
@@ -529,7 +532,10 @@
     "mustNotExceed": "{field} must not exceed {target}",
     "formIncomplete": "Please complete all required fields before confirming",
     "incompleteItems": "{count, plural, =1 {# item is} other {# items are}} still incomplete — jumped to the first field to fix.",
-    "incompleteDocument": "Some details are missing — jumped to the field to fix."
+    "incompleteDocument": "Some details are missing — jumped to the field to fix.",
+    "fileUnsupportedFormat": "only {formats} files are allowed",
+    "fileTooLarge": "{size} is over the {max} limit",
+    "filesRejected": "{count} files skipped — {first}"
   },
   "field": {
     "field": "Field",

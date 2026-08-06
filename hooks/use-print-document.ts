@@ -12,6 +12,7 @@ import { resolvePrintFormTemplateId } from "@/lib/print-form-config";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useBusinessUnit } from "@/hooks/use-business-unit";
 import { useProfile } from "@/hooks/use-profile";
+import { useErrorToast } from "@/hooks/use-error-toast";
 
 export interface UsePrintDocumentResult {
   print: (
@@ -35,7 +36,8 @@ export function usePrintDocument(): UsePrintDocumentResult {
   const buCode = useBuCode();
   const { defaultBu } = useProfile();
   const { data: businessUnit } = useBusinessUnit(defaultBu?.id);
-  const t = useTranslations("common");
+  const tErr = useTranslations("errors");
+  const errorToast = useErrorToast();
   const [isPrinting, setIsPrinting] = useState(false);
 
   const print = async (
@@ -43,7 +45,9 @@ export function usePrintDocument(): UsePrintDocumentResult {
     options?: PrintDocumentOptions,
   ): Promise<PrintDocumentResult | null> => {
     if (!buCode) {
-      toast.error("Business unit not selected");
+      // ยังเลือกกิจการไม่ได้ = ทำไม่ได้ตอนนี้ ไม่ใช่ระบบพัง · และเดิมเป็น
+      // ภาษาอังกฤษฝังไว้ในโค้ด ทั้งที่คนใช้ส่วนใหญ่อ่านไทย
+      toast.warning(tErr("noBusinessUnit"));
       return null;
     }
     setIsPrinting(true);
@@ -58,8 +62,8 @@ export function usePrintDocument(): UsePrintDocumentResult {
       });
       return result;
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      toast.error(`${t("print")}: ${message}`);
+      // เดิมต่อ err.message ท้ายคำว่า "พิมพ์" ซึ่งเป็นข้อความของ dev ล้วน ๆ
+      errorToast(err);
       return null;
     } finally {
       setIsPrinting(false);

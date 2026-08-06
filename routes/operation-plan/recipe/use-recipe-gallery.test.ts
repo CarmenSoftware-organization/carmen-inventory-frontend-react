@@ -16,7 +16,7 @@ vi.mock("use-intl", () => ({
 }));
 
 vi.mock("sonner", () => ({
-  toast: { error: vi.fn() },
+  toast: { error: vi.fn(), warning: vi.fn() },
 }));
 
 import { toast } from "sonner";
@@ -85,7 +85,7 @@ describe("useRecipeGallery — addFiles", () => {
     act(() => result.current.addFiles([new File(["d"], "x.gif", { type: "image/gif" })]));
 
     expect(result.current.items).toHaveLength(0);
-    expect(toast.error).toHaveBeenCalled();
+    expect(toast.warning).toHaveBeenCalled();
   });
 
   it("rejects files larger than IMAGE_MAX_BYTES", () => {
@@ -97,7 +97,7 @@ describe("useRecipeGallery — addFiles", () => {
     act(() => result.current.addFiles([big]));
 
     expect(result.current.items).toHaveLength(0);
-    expect(toast.error).toHaveBeenCalled();
+    expect(toast.warning).toHaveBeenCalled();
   });
 
   it("caps the gallery at 10 images", () => {
@@ -108,7 +108,7 @@ describe("useRecipeGallery — addFiles", () => {
 
     expect(result.current.items).toHaveLength(10);
     expect(result.current.canAddMore).toBe(false);
-    expect(toast.error).toHaveBeenCalled();
+    expect(toast.warning).toHaveBeenCalled();
   });
 
   it("makes the first image primary when starting empty", () => {
