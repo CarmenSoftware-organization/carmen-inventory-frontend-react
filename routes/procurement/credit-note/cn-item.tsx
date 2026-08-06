@@ -188,7 +188,12 @@ export function CnItem({ form, disabled }: Props) {
   };
 
   const addAction = !disabled && (
-    <Button type="button" size="sm" onClick={handleAddClick}>
+    <Button
+      type="button"
+      size="sm"
+      variant="secondary"
+      onClick={handleAddClick}
+    >
       <Plus aria-hidden="true" /> {t("addItem")}
     </Button>
   );

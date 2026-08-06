@@ -299,7 +299,12 @@ export function GrnItemTable({
   const addAction =
     !disabled &&
     (isManual ? (
-      <Button type="button" size="sm" onClick={handleAddItem}>
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        onClick={handleAddItem}
+      >
         <Plus /> {t("addItem")}
       </Button>
     ) : (
@@ -317,7 +322,6 @@ export function GrnItemTable({
           <Button
             type="button"
             variant="ghost"
-            size="xs"
             onClick={() =>
               table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
             }

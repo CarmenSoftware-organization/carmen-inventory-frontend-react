@@ -74,6 +74,7 @@ export function PrtItemFields({
             size="sm"
             disabled={disabled}
             onClick={handleAddItem}
+            variant="secondary"
           >
             <Plus /> {t("addItem")}
           </Button>

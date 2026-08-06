@@ -384,6 +384,7 @@ function UnitConversionTab({
           <Button
             type="button"
             size="sm"
+            variant="secondary"
             disabled={addDisabled}
             onClick={handleAdd}
           >
@@ -406,15 +407,6 @@ function UnitConversionTab({
           <EmptyComponent
             title={t("noUnits", { label })}
             description={t("addFirstConversionHint")}
-            content={
-              !isDisabled &&
-              !addDisabled && (
-                <Button type="button" size="xs" onClick={handleAdd}>
-                  <Plus aria-hidden="true" />
-                  {t("addFirstConversion")}
-                </Button>
-              )
-            }
           />
         }
       >

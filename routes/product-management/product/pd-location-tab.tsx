@@ -226,7 +226,6 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
                   excludeIds={assignedIds.filter((id) => id !== field.value)}
                   defaultLabel={location_name}
                   className="w-full"
-                  size="xs"
                   popoverWidth="w-[26.25rem]"
                   error={errorMessage}
                 />
@@ -271,7 +270,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
               min={0}
               step="any"
               placeholder=""
-              className="h-6 w-24 text-right text-xs tabular-nums"
+              className="text-right text-xs tabular-nums"
               {...form.register(
                 `locations.${row.original.fieldIndex}.min_qty`,
                 { valueAsNumber: true },
@@ -296,7 +295,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
               min={0}
               step="any"
               placeholder=""
-              className="h-6 w-24 text-right text-xs tabular-nums"
+              className="text-right text-xs tabular-nums"
               {...form.register(
                 `locations.${row.original.fieldIndex}.max_qty`,
                 { valueAsNumber: true },
@@ -321,7 +320,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
               min={0}
               step="any"
               placeholder=""
-              className="h-6 w-24 text-right text-xs tabular-nums"
+              className="text-right text-xs tabular-nums"
               {...form.register(
                 `locations.${row.original.fieldIndex}.re_order_qty`,
                 { valueAsNumber: true },
@@ -346,7 +345,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
               min={0}
               step="any"
               placeholder=""
-              className="h-6 w-24 text-right text-xs tabular-nums"
+              className="text-right text-xs tabular-nums"
               {...form.register(
                 `locations.${row.original.fieldIndex}.par_qty`,
                 { valueAsNumber: true },
