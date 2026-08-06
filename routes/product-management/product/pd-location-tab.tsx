@@ -430,7 +430,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
             />
           </div>
           {!isDisabled && (
-            <Button type="button" size="sm" onClick={handleAdd}>
+            <Button type="button" size="sm" variant="secondary" onClick={handleAdd}>
               <Plus />
               {t("addLocation")}
             </Button>

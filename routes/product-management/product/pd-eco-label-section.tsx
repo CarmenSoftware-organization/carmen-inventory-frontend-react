@@ -203,7 +203,7 @@ export function ProductEcoLabelSection({
       count={items.length}
       action={
         !readOnly ? (
-          <Button type="button" size="sm" onClick={handleAdd}>
+          <Button type="button" size="sm" variant="secondary" onClick={handleAdd}>
             <Plus />
             {t("addEcoLabel")}
           </Button>
