@@ -63,6 +63,17 @@ function useInViewRef() {
   const [node, setNode] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!node) return;
+    /**
+     * threshold ต้องเป็น 0 เท่านั้น — ห้ามใช้สัดส่วน
+     *
+     * threshold 0.1 แปลว่า "ต้องเห็นพื้นที่ของบล็อกอย่างน้อย 10%" ซึ่งบล็อกที่สูง
+     * กว่าจอเกินสิบเท่าไม่มีวันทำได้ (จอ 674px กับตารางสินค้า 27,900px = 2.4%)
+     * observer จึงไม่ยิงเลยและบล็อกค้างที่ opacity 0 ตลอดกาล — DOM มีข้อมูลครบ
+     * แต่มองไม่เห็น เหมือนโหลดไม่ขึ้น (เจอที่ตารางสินค้าของ location form)
+     *
+     * ใช้ 0 = "ขอบบนโผล่เข้าจอเมื่อไรก็นับ" ได้ผลกับทุกความสูง ส่วนจังหวะหน่วง
+     * ให้ค่อย ๆ โผล่ยกไปไว้ที่ rootMargin ล่างแทน
+     */
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -70,7 +81,7 @@ function useInViewRef() {
           observer.unobserve(node);
         }
       },
-      { threshold: 0.1, rootMargin: "-2% 0px" },
+      { threshold: 0, rootMargin: "0px 0px -2% 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();

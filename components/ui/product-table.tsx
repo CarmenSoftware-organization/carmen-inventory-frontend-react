@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import EmptyComponent from "@/components/empty-component";
@@ -191,6 +192,7 @@ export function ProductTable({ products, className }: ProductTableProps) {
       <DataGrid
         table={table}
         recordCount={filteredProducts.length}
+        tableLayout={{ headerSticky: true }}
         emptyMessage={
           <EmptyComponent
             icon={Package}
@@ -199,8 +201,13 @@ export function ProductTable({ products, className }: ProductTableProps) {
           />
         }
       >
-        <DataGridContainer>
-          <DataGridTable />
+        {/* จำกัดความสูงแล้วเลื่อนในกรอบ — คลังหนึ่งแห่งผูกสินค้าได้เป็นพันรายการ
+            ปล่อยยาวคือหน้าสูงสามหมื่นพิกเซล เลื่อนหาหัวข้อถัดไปไม่เจอ และหัว
+            ตารางก็หลุดจอไปตั้งแต่แถวที่ยี่สิบ · หัวตารางปักไว้ให้อ่านคอลัมน์ออก */}
+        <DataGridContainer className="flex max-h-[420px] flex-col">
+          <DataGridScrollArea>
+            <DataGridTable />
+          </DataGridScrollArea>
         </DataGridContainer>
       </DataGrid>
     </div>
