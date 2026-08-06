@@ -847,8 +847,8 @@
     },
     "unit": {
       "entity": "Unit",
-      "title": "Unit",
-      "desc": "Manage unit of measurement for your inventory.",
+      "title": "Unit of Measurement",
+      "desc": "The units you count and order stock in — bottle, case, kilogram. Set how many decimals each one allows.",
       "add": "Add Unit",
       "deleteTitle": "Delete Unit",
       "deleteConfirm": "Are you sure you want to delete unit \"{name}\"? This action cannot be undone.",
