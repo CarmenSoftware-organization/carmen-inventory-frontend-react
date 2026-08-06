@@ -3427,7 +3427,8 @@
       "noVendorDesc": "No vendors with available purchase orders.",
       "poCount": "{count} PO(s)",
       "committed": "Goods receive note committed — stock updated",
-      "commit": "Commit"
+      "commit": "Commit",
+      "deleteProductLine": "Remove this product and all its locations"
     },
     "approval": {
       "entity": "Approval",

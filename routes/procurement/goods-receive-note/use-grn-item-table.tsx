@@ -14,6 +14,11 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { cn } from "@/lib/utils";
 import { LookupProduct } from "@/components/lookup/lookup-product";
@@ -329,24 +334,22 @@ function GrnGroupLocations({
         {showActionCol && <col style={{ width: pct(GRN_COL.action) }} />}
       </colgroup>
       <thead className="text-muted-foreground text-micro font-semibold">
+        {/* ตารางย่อยใช้ colgroup ชุดเดียวกับตารางหลัก คอลัมน์จึงตรงกันอยู่แล้ว
+            หัวคอลัมน์ซ้ำอีกชุดเลยเป็นการอ่านคำเดิมสองรอบห่างกันไม่กี่สิบพิกเซล
+            เหลือไว้แค่ "ที่เก็บ" ซึ่งเป็นคำเดียวที่ตารางหลักไม่มี */}
         <tr className="border-border/60 border-b">
-          <th className="px-2 py-1 text-left">{tfl("location")}</th>
-          {/* หน่วยเป็นของสินค้า ไม่ใช่ของ location — ค่าโชว์ที่แถวสินค้าแล้ว
-              ตรงนี้เว้นหัวไว้ ไม่ตั้งป้ายให้คนอ่านนึกว่ามีค่าแล้วไม่ขึ้น */}
-          <th className="px-2 py-1" />
-          {isPo && <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>}
-          <th className="px-1 py-1 text-right">
-            {tfl("receivedQty")}
-            <span className="text-destructive"> *</span>
-          </th>
-          <th className="px-1 py-1 text-right">{tfl("foc")}</th>
-          <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
-          <th className="px-2 py-1 text-right">{tfl("subtotal")}</th>
-          <th className="px-2 py-1 text-right">{tfl("discount")}</th>
-          <th className="px-2 py-1 text-right">{tfl("net")}</th>
-          <th className="px-2 py-1 text-right">{tfl("tax")}</th>
-          <th className="px-2 py-1 text-right">{tfl("amount")}</th>
-          {showActionCol && <th className="px-1 py-1" />}
+          <th className="px-3 py-1 text-left">{tfl("location")}</th>
+          <th className="px-3 py-1" />
+          {isPo && <th className="px-3 py-1" />}
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          {showActionCol && <th className="px-3 py-1" />}
         </tr>
       </thead>
       <tbody className="divide-border/60 divide-y">
@@ -542,7 +545,7 @@ export function useGrnItemTable({
         : []),
       {
         id: "received",
-        header: tfl("receivedQty"),
+        header: tfl("received"),
         size: GRN_COL.received,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -650,33 +653,44 @@ export function useGrnItemTable({
       id: "action",
       header: () => "",
       cell: ({ row }) => (
+        // ปุ่มไอคอนล้วนสองตัวติดกัน เดาจากรูปอย่างเดียวไม่ออกว่าอันไหนลบอะไร
+        // (ลบสินค้าทั้งบรรทัด vs ลบเฉพาะที่เก็บในแถวย่อย) — บอกด้วย tooltip
         <div className="flex items-center justify-center gap-0.5">
           {row.original.isManual && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              className="text-primary hover:bg-primary/10 hover:text-primary"
-              aria-label={t("addLocation")}
-              title={t("addLocation")}
-              onClick={() => {
-                onAddLocation(row.original);
-                if (!row.getIsExpanded()) row.toggleExpanded();
-              }}
-            >
-              <MapPinPlus className="size-3.5" aria-hidden="true" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-primary hover:bg-primary/10 hover:text-primary"
+                  aria-label={t("addLocation")}
+                  onClick={() => {
+                    onAddLocation(row.original);
+                    if (!row.getIsExpanded()) row.toggleExpanded();
+                  }}
+                >
+                  <MapPinPlus className="size-3.5" aria-hidden="true" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t("addLocation")}</TooltipContent>
+            </Tooltip>
           )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            aria-label="Remove"
-            onClick={() => onDeleteGroup(row.original)}
-          >
-            <Trash2 className="size-3.5" aria-hidden="true" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                aria-label={t("deleteProductLine")}
+                onClick={() => onDeleteGroup(row.original)}
+              >
+                <Trash2 className="size-3.5" aria-hidden="true" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t("deleteProductLine")}</TooltipContent>
+          </Tooltip>
         </div>
       ),
       enableSorting: false,
