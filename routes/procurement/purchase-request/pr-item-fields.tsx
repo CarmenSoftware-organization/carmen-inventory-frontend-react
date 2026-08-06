@@ -445,14 +445,19 @@ export function PrItemFields({
               </Button>
             )}
             {!isDisabled && role === STAGE_ROLE.CREATE && (
-              <Button type="button" size="sm" onClick={() => handleAddItem()}>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => handleAddItem()}
+              >
                 <Plus /> {t("addItem")}
               </Button>
             )}
             {!isDisabled && role === STAGE_ROLE.PURCHASE && (
               <Button
                 type="button"
-                size="xs"
+                size="sm"
                 variant="outline"
                 disabled={isAllocating || itemFields.length === 0}
                 onClick={handleAutoAllocate}
