@@ -28,6 +28,7 @@ import type {
 import { CACHE_STATIC } from "@/lib/cache-config";
 import { cn } from "@/lib/utils";
 import { SettingSection } from "@/components/ui/setting-section";
+import { VendorEmptySection } from "./vendor-empty-section";
 
 interface VendorAddressTabProps {
   form: ReturnType<typeof useForm<VendorFormValues>>;
@@ -63,7 +64,7 @@ export function VendorAddress({
           <Button
             type="button"
             variant="secondary"
-            size="xs"
+            size="sm"
             onClick={handleAdd}
           >
             <Plus />
@@ -74,29 +75,11 @@ export function VendorAddress({
     >
       <div className="sm:col-span-2">
         {addressFields.length === 0 ? (
-          <div className="border-border/60 bg-muted/20 rounded-xl border border-dashed p-6 text-center">
-            <div className="bg-muted text-muted-foreground/70 mx-auto mb-2 flex size-9 items-center justify-center rounded-xl">
-              <MapPin className="size-4" />
-            </div>
-            <div className="text-foreground text-xs font-semibold">
-              {t("address.noAddresses")}
-            </div>
-            <p className="text-muted-foreground mt-0.5 text-micro">
-              {t("address.noAddressesDesc")}
-            </p>
-            {!isView && (
-              <Button
-                type="button"
-                variant="secondary"
-                size="xs"
-                onClick={handleAdd}
-                className="mt-2"
-              >
-                <Plus />
-                {t("address.addAddress")}
-              </Button>
-            )}
-          </div>
+          <VendorEmptySection
+            icon={MapPin}
+            title={t("address.noAddresses")}
+            description={t("address.noAddressesDesc")}
+          />
         ) : (
           <div className="flex flex-col gap-2">
             {addressFields.map((field, index) => (
@@ -291,7 +274,7 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
               <RadioGroupItem value="thai" id={`thai-${index}`} />
               <Label
                 htmlFor={`thai-${index}`}
-                className="cursor-pointer text-micro font-normal"
+                className="text-micro cursor-pointer font-normal"
               >
                 {t("address.thailand")}
               </Label>
@@ -303,7 +286,7 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
               />
               <Label
                 htmlFor={`international-${index}`}
-                className="cursor-pointer text-micro font-normal"
+                className="text-micro cursor-pointer font-normal"
               >
                 {t("address.international")}
               </Label>
@@ -326,7 +309,6 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
       <div className="space-y-2">
         <Input
           placeholder={t("address.addressLine1")}
-          className="h-7 text-xs"
           disabled={isDisabled}
           maxLength={256}
           {...form.register(`vendor_address.${index}.address_line1`)}
@@ -334,7 +316,6 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
 
         <Input
           placeholder={t("address.addressLine2")}
-          className="h-7 text-xs"
           disabled={isDisabled}
           maxLength={256}
           {...form.register(`vendor_address.${index}.address_line2`)}
@@ -360,7 +341,6 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
                   form.setValue(`vendor_address.${index}.postal_code`, "");
                 }}
                 disabled={isDisabled}
-                className="h-7 text-xs"
               />
               <LookupThaiDistrict
                 provinceCode={provinceCode}
@@ -378,7 +358,6 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
                   form.setValue(`vendor_address.${index}.postal_code`, "");
                 }}
                 disabled={isDisabled}
-                className="h-7 text-xs"
               />
               <LookupThaiSubDistrict
                 districtCode={districtCode}
@@ -395,14 +374,12 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
                   );
                 }}
                 disabled={isDisabled}
-                className="h-7 text-xs"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <Input
                 placeholder={t("address.postalCodeAuto")}
-                className="h-7 text-xs"
                 disabled={isDisabled}
                 maxLength={5}
                 {...form.register(`vendor_address.${index}.postal_code`, {
@@ -411,7 +388,6 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
               />
               <Input
                 placeholder={t("address.country")}
-                className="h-7 text-xs"
                 disabled
                 value="Thailand"
                 readOnly
@@ -437,14 +413,12 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
               </div>
               <Input
                 placeholder={t("address.district")}
-                className="h-7 text-xs"
                 disabled={isDisabled}
                 maxLength={100}
                 {...form.register(`vendor_address.${index}.district`)}
               />
               <Input
                 placeholder={t("address.subDistrict")}
-                className="h-7 text-xs"
                 disabled={isDisabled}
                 maxLength={100}
                 {...form.register(`vendor_address.${index}.sub_district`)}
@@ -454,21 +428,18 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               <Input
                 placeholder={t("address.provinceState")}
-                className="h-7 text-xs"
                 disabled={isDisabled}
                 maxLength={100}
                 {...form.register(`vendor_address.${index}.province`)}
               />
               <Input
                 placeholder={t("address.postalCode")}
-                className="h-7 text-xs"
                 disabled={isDisabled}
                 maxLength={20}
                 {...form.register(`vendor_address.${index}.postal_code`)}
               />
               <Input
                 placeholder={t("address.country")}
-                className="h-7 text-xs"
                 disabled={isDisabled}
                 maxLength={100}
                 {...form.register(`vendor_address.${index}.country`)}

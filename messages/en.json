@@ -1807,7 +1807,8 @@
         "phonePlaceholder": "Phone number",
         "primary": "primary"
       },
-      "notFound": "Vendor not found"
+      "notFound": "Vendor not found",
+      "noCertificatesDesc": "No certificates recorded for this vendor yet."
     },
     "priceList": {
       "entity": "Price List",

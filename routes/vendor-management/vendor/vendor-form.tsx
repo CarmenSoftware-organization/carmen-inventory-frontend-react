@@ -343,13 +343,6 @@ export function VendorForm({ vendor }: VendorFormProps) {
         })}
       >
         <VendorGeneral form={form} isDisabled={isDisabled} />
-        <VendorInfo
-          form={form}
-          isDisabled={isDisabled}
-          infoFields={infoFields}
-          prependInfo={prependInfo}
-          removeInfo={removeInfo}
-        />
         <VendorAddress
           form={form}
           isDisabled={isDisabled}
@@ -364,10 +357,22 @@ export function VendorForm({ vendor }: VendorFormProps) {
           prependContact={prependContact}
           removeContact={handleRemoveContact}
         />
+        <VendorInfo
+          form={form}
+          isDisabled={isDisabled}
+          infoFields={infoFields}
+          prependInfo={prependInfo}
+          removeInfo={removeInfo}
+        />
       </form>
 
       {/* Certificates — CRUD อิสระ (นอก form, ยิง API เอง) แสดงเมื่อมี vendor */}
-      {vendor?.id && <VendorCertificateSection vendorId={vendor.id} />}
+      {/* section นี้ยิง API เอง ไม่ผ่านฟอร์ม แต่ต้องเคารพโหมดเดียวกับหมวดอื่น —
+          ไม่ส่ง readOnly มาก่อนหน้านี้ ปุ่มเพิ่ม/แก้/ลบใบรับรองเลยโผล่ตั้งแต่โหมดดู
+          ทั้งที่ข้อมูล/ที่อยู่/ผู้ติดต่อ ต้องกด Edit ก่อนถึงจะเห็น */}
+      {vendor?.id && (
+        <VendorCertificateSection vendorId={vendor.id} readOnly={isDisabled} />
+      )}
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 

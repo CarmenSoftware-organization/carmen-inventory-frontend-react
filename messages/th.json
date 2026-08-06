@@ -1807,7 +1807,8 @@
         "phonePlaceholder": "หมายเลขโทรศัพท์",
         "primary": "หลัก"
       },
-      "notFound": "ไม่พบผู้ขาย"
+      "notFound": "ไม่พบผู้ขาย",
+      "noCertificatesDesc": "ยังไม่ได้บันทึกใบรับรองของผู้ขายรายนี้"
     },
     "priceList": {
       "entity": "รายการราคา",

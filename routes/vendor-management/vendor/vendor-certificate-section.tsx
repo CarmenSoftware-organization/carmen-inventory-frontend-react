@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Award, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import {
 } from "@/hooks/use-vendor-certificate";
 import type { VendorCertificate } from "@/types/vendor-certificate";
 import { VendorCertificateDialog } from "./vendor-certificate-dialog";
+import { VendorEmptySection } from "./vendor-empty-section";
 
 interface VendorCertificateSectionProps {
   readonly vendorId: string;
@@ -78,7 +79,7 @@ export function VendorCertificateSection({
           <Button
             type="button"
             variant="secondary"
-            size="xs"
+            size="sm"
             onClick={handleAdd}
           >
             <Plus />
@@ -96,8 +97,12 @@ export function VendorCertificateSection({
       )}
 
       {!isLoading && items.length === 0 && (
-        <div className="border-border/60 text-muted-foreground mt-2 rounded-lg border border-dashed py-6 text-center text-xs">
-          {t("noCertificates")}
+        <div className="mt-2">
+          <VendorEmptySection
+            icon={Award}
+            title={t("noCertificates")}
+            description={t("noCertificatesDesc")}
+          />
         </div>
       )}
 
