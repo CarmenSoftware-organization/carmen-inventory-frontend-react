@@ -6,27 +6,49 @@
  * discount/tax เป็นคอลัมน์ combo เดียว (rate+amount override) — product row โชว์
  * ยอดรวม, location row โชว์ combo แก้ได้ (ไม่ซ้ำ rate/amount แยกคอลัมน์)
  */
-export const PO_COL = {
-  product: 200,
-  order: 96,
-  rec: 104, // "Received Qty" เต็มคำ ไม่ใช่ "Rec"
-  price: 92,
-  sub: 96,
-  discount: 176, // combo: [override] rate% | amount
-  net: 96,
-  tax: 196, // combo: [override] tax-profile | amount
-  amt: 100,
-  action: 48,
-} as const;
 
-/** ผลรวมความกว้างของ data columns (product → amt) — ไม่รวม action */
-export const PO_COL_DATA_TOTAL =
-  PO_COL.product +
-  PO_COL.order +
-  PO_COL.rec +
-  PO_COL.price +
-  PO_COL.sub +
-  PO_COL.discount +
-  PO_COL.net +
-  PO_COL.tax +
-  PO_COL.amt;
+import { comboColWidth } from "../combo-col-width";
+
+/** คอลัมน์เงินที่เป็นตัวเลขล้วน (sub/net/amt) กว้างเท่านี้พอ */
+const MONEY_COL = 96;
+
+/**
+ * ความกว้างคอลัมน์ตามว่าแถว location แก้ได้หรือไม่
+ *
+ * โหมดอ่านอย่างเดียวไม่มี combo (ปุ่ม override + ช่อง rate + ช่องยอด) เหลือแค่
+ * ตัวเลขยอดเดียว discount/tax จึงไม่ต้องกว้างเท่าโหมดแก้ไข — คืนที่ให้ชื่อสินค้า
+ * กับคอลัมน์อื่นไป
+ *
+ * @param editable - แถว location แก้ได้ไหม (`!disabled && !readOnly`)
+ */
+export function poItemCols(editable: boolean) {
+  const col = {
+    product: 200,
+    /** หน่วยสั่งซื้อ — เป็น lookup เลือกได้ จึงกว้างกว่าคอลัมน์ตัวเลข */
+    unit: 88,
+    order: 80,
+    rec: 80, // หัวคอลัมน์เหลือคำเดียว "Received" แล้ว ไม่ต้องกว้างเท่าเดิม
+    price: 92,
+    sub: MONEY_COL,
+    discount: comboColWidth("discount", editable),
+    net: MONEY_COL,
+    tax: comboColWidth("tax", editable),
+    amt: 100,
+    action: 48,
+  } as const;
+
+  /** ผลรวมความกว้างของ data columns (product → amt) — ไม่รวม action */
+  const dataTotal =
+    col.product +
+    col.unit +
+    col.order +
+    col.rec +
+    col.price +
+    col.sub +
+    col.discount +
+    col.net +
+    col.tax +
+    col.amt;
+
+  return { col, dataTotal };
+}

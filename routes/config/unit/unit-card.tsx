@@ -1,8 +1,10 @@
 import { useTranslations } from "use-intl";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
-import { useProfile } from "@/hooks/use-profile";
-import { formatDate } from "@/lib/date-utils";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import type { Unit } from "@/types/unit";
 
 interface Props {
@@ -17,8 +19,6 @@ interface Props {
  */
 export default function UnitCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
-  const { dateTimeFormat } = useProfile();
-
   return (
     <ListCard
       title={item.name || "..."}
@@ -26,23 +26,13 @@ export default function UnitCard({ item, onEdit, onDelete }: Props) {
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
+      {item.description && (
+        <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>
       )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardRow label={tfl("decimalPlaces")}>
+        {item.decimal_place ?? 0}
+      </ListCardRow>
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

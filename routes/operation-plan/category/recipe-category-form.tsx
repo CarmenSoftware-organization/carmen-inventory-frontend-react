@@ -142,7 +142,7 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const excludeIds = category ? new Set([category.id]) : undefined;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <RecipeCategoryToolbar
         form={form}
         mode={mode}
@@ -152,6 +152,7 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
         onEdit={handleEdit}
         onCancel={handleCancel}
         onDelete={category ? () => setShowDelete(true) : undefined}
+        activityId={category?.id}
       />
 
       <form

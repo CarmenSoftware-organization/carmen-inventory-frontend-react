@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { getDeleteDescription } from "@/lib/form-utils";
 import { SettingSection } from "@/components/ui/setting-section";
+import { VendorEmptySection } from "./vendor-empty-section";
 import {
   EMPTY_VENDOR_CONTACT,
   type VendorFormValues,
@@ -60,7 +61,12 @@ export function VendorContact({
       count={contactFields.length}
       action={
         !isView ? (
-          <Button type="button" size="xs" onClick={handleAdd}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleAdd}
+          >
             <Plus />
             {t("contact.addContact")}
           </Button>
@@ -69,12 +75,10 @@ export function VendorContact({
     >
       <div className="sm:col-span-2">
         {contactFields.length === 0 ? (
-          <EmptyContacts
-            isView={isView}
+          <VendorEmptySection
+            icon={User}
             title={t("contact.noContacts")}
             description={t("contact.noContactsDesc")}
-            addLabel={t("contact.addContact")}
-            onAdd={handleAdd}
           />
         ) : (
           <div className="flex flex-col gap-2">
@@ -315,35 +319,3 @@ function ContactSubField({
   );
 }
 
-function EmptyContacts({
-  isView,
-  title,
-  description,
-  addLabel,
-  onAdd,
-}: {
-  readonly isView: boolean;
-  readonly title: string;
-  readonly description: string;
-  readonly addLabel: string;
-  readonly onAdd: () => void;
-}) {
-  "use no memo";
-  return (
-    <div className="border-border/60 bg-muted/20 rounded-xl border border-dashed p-6 text-center">
-      <div className="bg-muted text-muted-foreground/70 mx-auto mb-2 flex size-9 items-center justify-center rounded-xl">
-        <User className="size-4" />
-      </div>
-      <div className="text-foreground text-xs font-semibold">{title}</div>
-      <p className="text-muted-foreground mt-0.5 text-micro">
-        {description}
-      </p>
-      {!isView && (
-        <Button type="button" size="xs" onClick={onAdd} className="mt-2">
-          <Plus />
-          {addLabel}
-        </Button>
-      )}
-    </div>
-  );
-}

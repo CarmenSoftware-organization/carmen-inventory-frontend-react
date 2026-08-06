@@ -8,6 +8,7 @@ import {
   useCreateInventoryAdjustment,
   useUpdateInventoryAdjustment,
   useDeleteInventoryAdjustment,
+  useCommitInventoryAdjustment,
   useVoidInventoryAdjustment,
 } from "@/hooks/use-inventory-adjustment";
 import { useAdjustmentType } from "@/hooks/use-adjustment-type";
@@ -41,6 +42,7 @@ import { AdjItemFields } from "./ia-item-fields";
 import { DocumentInfo } from "./ia-doc-info";
 import { AdjSummaryFooter } from "./ia-summary";
 import { IaFormHero } from "./ia-form-hero";
+import { Check } from "lucide-react";
 
 interface InventoryAdjustmentFormProps {
   readonly adjustmentType: InventoryAdjustmentType;
@@ -64,10 +66,12 @@ export function InventoryAdjustmentForm({
   const updateAdj = useUpdateInventoryAdjustment();
   const deleteAdj = useDeleteInventoryAdjustment();
   const voidAdj = useVoidInventoryAdjustment();
+  const commitAdj = useCommitInventoryAdjustment();
   const [showDelete, setShowDelete] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
   const [showCommit, setShowCommit] = useState(false);
-  const isPending = createAdj.isPending || updateAdj.isPending;
+  const isPending =
+    createAdj.isPending || updateAdj.isPending || commitAdj.isPending;
   const isDisabled = isView || isPending;
 
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
@@ -140,11 +144,30 @@ export function InventoryAdjustmentForm({
     errorToast(err);
   };
 
-  const handleMutationSuccess =
-    (msgKey: "createSuccess" | "updateSuccess") => () => {
-      toast.success(tt(msgKey, { entity: t("entity") }));
-      navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
-    };
+  // เซฟแล้วอยู่กับใบเดิม ไม่เด้งกลับหน้ารายการ — คนเพิ่งกรอกเสร็จมักอยากเห็นผล
+  // ที่ตัวเอกสารก่อน ถ้าจะกลับก็มีปุ่ม back อยู่แล้ว
+  const handleUpdateSuccess = () => {
+    toast.success(tt("updateSuccess", { entity: t("entity") }));
+    // rebaseline ค่าที่เพิ่งเซฟ ไม่งั้น isDirty ค้างแล้วเตือน "ยังไม่ได้บันทึก"
+    // ตอนออกจากหน้า ทั้งที่บันทึกไปแล้ว
+    form.reset(form.getValues());
+    setMode("view");
+  };
+
+  // ตอนสร้างยังไม่มี URL ของใบ — พาไปหน้าใบที่เพิ่งสร้าง (replace เพื่อไม่ให้กด
+  // back แล้วย้อนกลับมาหน้า /new ที่ส่งไปแล้ว) ไม่มี id ค่อยตกกลับหน้ารายการ
+  const handleCreateSuccess = (data: { data?: { id?: string } }) => {
+    toast.success(tt("createSuccess", { entity: t("entity") }));
+    const newId = data?.data?.id;
+    if (newId) {
+      navigate(
+        `${INVENTORY_ADJUSTMENT_BASE_PATH}/${newId}?type=${adjustmentType}`,
+        { replace: true },
+      );
+      return;
+    }
+    navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+  };
 
   const buildBasePayload = (values: AdjFormValues) => {
     const dateKey = adjustmentType === "stock-in" ? "si_date" : "so_date";
@@ -160,40 +183,37 @@ export function InventoryAdjustmentForm({
   const detailsKey =
     adjustmentType === "stock-in" ? "stock_in_detail" : "stock_out_detail";
 
-  const submitUpdate = (values: AdjFormValues) => {
-    if (!inventoryAdjustment) return;
-    const details = buildItemChanges(
+  const buildUpdatePayload = (values: AdjFormValues) => ({
+    id: inventoryAdjustment!.id,
+    type: adjustmentType,
+    doc_version: inventoryAdjustment!.doc_version,
+    ...buildBasePayload(values),
+    [detailsKey]: buildItemChanges(
       values.items,
       defaultValues.items,
       mapItemToPayload,
-    );
-    updateAdj.mutate(
-      {
-        id: inventoryAdjustment.id,
-        type: adjustmentType,
-        doc_version: inventoryAdjustment.doc_version,
-        ...buildBasePayload(values),
-        [detailsKey]: details,
-      },
-      {
-        onSuccess: handleMutationSuccess("updateSuccess"),
-        onError: handleMutationError,
-      },
-    );
+    ),
+  });
+
+  const buildCreatePayload = (values: AdjFormValues) => ({
+    type: adjustmentType,
+    ...buildBasePayload(values),
+    [detailsKey]: { add: values.items.map(mapItemToPayload) },
+  });
+
+  const submitUpdate = (values: AdjFormValues) => {
+    if (!inventoryAdjustment) return;
+    updateAdj.mutate(buildUpdatePayload(values), {
+      onSuccess: handleUpdateSuccess,
+      onError: handleMutationError,
+    });
   };
 
   const submitCreate = (values: AdjFormValues) => {
-    createAdj.mutate(
-      {
-        type: adjustmentType,
-        ...buildBasePayload(values),
-        [detailsKey]: { add: values.items.map(mapItemToPayload) },
-      },
-      {
-        onSuccess: handleMutationSuccess("createSuccess"),
-        onError: handleMutationError,
-      },
-    );
+    createAdj.mutate(buildCreatePayload(values), {
+      onSuccess: handleCreateSuccess,
+      onError: handleMutationError,
+    });
   };
 
   const onSubmit = (values: AdjFormValues) => {
@@ -210,10 +230,61 @@ export function InventoryAdjustmentForm({
       () => scrollToFirstInvalidField(),
     )();
 
+  /**
+   * ปิดเอกสาร — `/commit` เปลี่ยนแค่สถานะ ไม่ได้รับรายการสินค้าไปด้วย จึงต้องมีใบ
+   * ที่บันทึกแล้วอยู่ก่อนเสมอ (ท่าเดียวกับ PR ที่เซฟของค้างให้ก่อนแล้วค่อยยิง action)
+   *
+   * - ยังไม่เคยเซฟเลย (กด Commit จากใบใหม่) → POST สร้างเป็น draft ก่อน แล้วค่อย PATCH
+   * - เซฟแล้วแต่ยังแก้ค้าง → PATCH /save ก่อน แล้วใช้ doc_version ที่เพิ่งได้กลับมา
+   *   (ตัวเดิม stale ทันทีที่ save สำเร็จ)
+   * - ไม่มีอะไรค้าง → PATCH /commit ตรง ๆ
+   */
   const confirmCommit = () => {
     setShowCommit(false);
-    form.setValue("doc_status", "completed");
-    form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())();
+    form.handleSubmit(
+      async (values) => {
+        try {
+          if (!inventoryAdjustment) {
+            const created = await createAdj.mutateAsync(
+              buildCreatePayload({ ...values, doc_status: "draft" }),
+            );
+            const newId = created?.data?.id;
+            if (!newId) {
+              navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+              return;
+            }
+            await commitAdj.mutateAsync({
+              id: newId,
+              type: adjustmentType,
+              doc_version: created?.data?.doc_version,
+            });
+            toast.success(tt("createSuccess", { entity: t("entity") }));
+            navigate(INVENTORY_ADJUSTMENT_BASE_PATH, { replace: true });
+            return;
+          }
+
+          let docVersion = inventoryAdjustment.doc_version;
+          if (form.formState.isDirty) {
+            const saved = await updateAdj.mutateAsync(
+              buildUpdatePayload(values),
+            );
+            docVersion = saved?.data?.doc_version ?? docVersion;
+          }
+          await commitAdj.mutateAsync({
+            id: inventoryAdjustment.id,
+            type: adjustmentType,
+            doc_version: docVersion,
+          });
+          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          // reset ก่อนออกจากหน้า ไม่งั้น isDirty ค้างแล้วโดน discard ขวางตอน navigate
+          form.reset(form.getValues());
+          navigate(INVENTORY_ADJUSTMENT_BASE_PATH);
+        } catch (err) {
+          handleMutationError(err);
+        }
+      },
+      () => scrollToFirstInvalidField(),
+    )();
   };
 
   const handleCancel = () => {
@@ -258,14 +329,11 @@ export function InventoryAdjustmentForm({
         isReadOnly={isReadOnly}
         isPending={isPending}
         deleteIsPending={deleteAdj.isPending}
-        voidIsPending={voidAdj.isPending}
         formId="inventory-adjustment-form"
         onBack={handleBack}
         onCancel={handleCancel}
         onEdit={() => setMode("edit")}
         onDelete={() => setShowDelete(true)}
-        onVoid={() => setShowVoid(true)}
-        onCommit={openCommitDialog}
       />
 
       <form
@@ -300,7 +368,17 @@ export function InventoryAdjustmentForm({
       </form>
 
       {/* footer อยู่นอก form เป็นพี่น้องกัน (โครงเดียวกับ po-form) */}
-      <AdjSummaryFooter form={form} formatter={formatter} t={t} />
+      <AdjSummaryFooter
+        form={form}
+        formatter={formatter}
+        t={t}
+        canVoid={isEdit && !!inventoryAdjustment && !isReadOnly}
+        canCommit={!isView}
+        isPending={isPending}
+        voidIsPending={voidAdj.isPending}
+        onVoid={() => setShowVoid(true)}
+        onCommit={openCommitDialog}
+      />
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 
@@ -369,6 +447,7 @@ export function InventoryAdjustmentForm({
         title={t("commitTitle")}
         description={t("commitConfirm")}
         confirmText={t("commit")}
+        confirmIcon={<Check />}
         isPending={isPending}
         onConfirm={confirmCommit}
       />

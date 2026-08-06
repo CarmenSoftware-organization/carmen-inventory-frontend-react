@@ -4,8 +4,11 @@ import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column
 import { CellAction } from "@/components/ui/cell-action";
 import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { columnSkeletons, statusColumn } from "@/components/ui/data-grid/columns";
-import { AuditCell } from "@/components/share/audit-cell";
+import {
+  auditColumns,
+  columnSkeletons,
+  statusColumn,
+} from "@/components/ui/data-grid/columns";
 import { useProfile } from "@/hooks/use-profile";
 import type { Vendor } from "@/types/vendor";
 import type { ParamsDto } from "@/types/params";
@@ -87,37 +90,7 @@ export function useVendorTable({
     },
     // status column แทรกเองก่อน created/updated (useConfigTable ส่ง hideStatus)
     statusColumn<Vendor>(),
-    {
-      // id = ชื่อคอลัมน์จริงของ backend เพื่อให้ sort ส่ง field ถูกต้อง
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created"), skeleton: columnSkeletons.text },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated"), skeleton: columnSkeletons.text },
-    },
+    ...auditColumns<Vendor>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<Vendor>({
@@ -130,5 +103,6 @@ export function useVendorTable({
     hideStatus: true,
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
     initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    activity: { id: (r) => r.id, label: (r) => r.code },
   });
 }

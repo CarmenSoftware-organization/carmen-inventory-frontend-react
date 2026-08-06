@@ -44,8 +44,15 @@ export const mapPoDetailToItems = (
         received_base_unit_id: d.base_unit_id,
         approved_qty: d.order_qty,
         approved_unit_id: d.order_unit_id,
-        net_amount: d.net_amount,
-        total_price: d.net_amount,
+        // ยอดทั้งหมดของ GRN คิดจาก unit_price × received_qty (computeLineAmounts
+        // แล้ว GrnItemComputedSync เขียน net/total กลับเข้าฟอร์ม) — ไม่หยิบราคา
+        // จาก PO มาใส่ ทุกยอดในใบเลยเป็นศูนย์ทั้งที่ PO มีราคาอยู่
+        //
+        // net/total ปล่อยศูนย์ ให้ตัว sync เป็นคนคำนวณที่เดียว — seed ค่ามาจาก
+        // PO ก็ถูกเขียนทับอยู่ดี มีแต่จะเห็นตัวเลขเก่าแวบหนึ่งตอนโหลด
+        unit_price: d.price,
+        net_amount: 0,
+        total_price: 0,
       },
     ];
   }
@@ -69,6 +76,11 @@ export const mapPoDetailToItems = (
     approved_qty: loc.requested_qty ?? loc.order_qty,
     approved_unit_id: loc.request_unit_id || d.order_unit_id,
     foc_qty: loc.foc_qty ?? 0,
+    // ราคาต่อหน่วยเป็นของ product ไม่ใช่ของ location — PO ใบหนึ่งมีราคาเดียว
+    // ทุก location ของรายการเดียวกันจึงใช้ราคาเดียวกัน ส่วน net/total ปล่อย
+    // ศูนย์ไว้ได้เพราะ GrnItemComputedSync คำนวณทับตามจำนวนที่รับจริงของแต่ละ
+    // location
+    unit_price: d.price,
     net_amount: 0,
     total_price: 0,
   }));
@@ -87,7 +99,13 @@ const PoAddButton = memo(function PoAddButton({
   const t = useTranslations("procurement.goodsReceiveNote");
   const vendorId = useWatch({ control, name: "vendor_id" }) ?? "";
   return (
-    <Button type="button" size="xs" disabled={!vendorId} onClick={onOpen}>
+    <Button
+      type="button"
+      size="sm"
+      variant="secondary"
+      disabled={!vendorId}
+      onClick={onOpen}
+    >
       <Plus aria-hidden="true" /> {hasItems ? t("addMorePo") : t("addFromPo")}
     </Button>
   );
@@ -287,7 +305,12 @@ export function GrnItemTable({
   const addAction =
     !disabled &&
     (isManual ? (
-      <Button type="button" size="xs" onClick={handleAddItem}>
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        onClick={handleAddItem}
+      >
         <Plus /> {t("addItem")}
       </Button>
     ) : (
@@ -305,7 +328,7 @@ export function GrnItemTable({
           <Button
             type="button"
             variant="ghost"
-            size="xs"
+            size="sm"
             onClick={() =>
               table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
             }
@@ -344,13 +367,14 @@ export function GrnItemTable({
             icon={BoxIcon}
             title={t("noItems")}
             description={t("noItemsDesc")}
-            content={addAction}
           />
         }
       >
         {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ
-            Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด) */}
-        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+            Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด)
+            · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน — บน macOS แถบนี้ลอยทับเนื้อหา
+            โดยไม่กินที่ ไม่เว้นไว้มันจะไปบังตัวเลขแถวสุดท้าย */}
+        <DataGridContainer scroll>
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>

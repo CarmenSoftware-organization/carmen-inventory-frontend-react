@@ -1,4 +1,3 @@
-
 import { useWatch } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -37,8 +36,10 @@ export function ProductInfoSummary({
   const tfl = useTranslations("field");
   const t = useTranslations("productManagement.product");
 
-  const description = useWatch({ control: form.control, name: "description" }) ?? "";
-  const localName = useWatch({ control: form.control, name: "local_name" }) ?? "";
+  const description =
+    useWatch({ control: form.control, name: "description" }) ?? "";
+  const localName =
+    useWatch({ control: form.control, name: "local_name" }) ?? "";
   const barcode = useWatch({ control: form.control, name: "barcode" }) ?? "";
   const sku = useWatch({ control: form.control, name: "sku" }) ?? "";
 
@@ -149,11 +150,14 @@ function ViewItem({
 }) {
   return (
     <div className="space-y-0.5">
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
         {icon}
         <span>{label}</span>
       </div>
-      <p className="truncate text-sm font-semibold text-foreground" title={value || undefined}>
+      <p
+        className="text-foreground truncate text-sm font-semibold"
+        title={value || undefined}
+      >
         {value || "—"}
       </p>
     </div>
@@ -171,12 +175,12 @@ function ReadOnlyField({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <span className="text-muted-foreground flex items-center gap-1.5 text-xs">
         {icon}
         {label}
       </span>
       <div
-        className="flex h-8 items-center rounded-md bg-muted/50 px-3 text-sm text-muted-foreground"
+        className="bg-muted/50 text-muted-foreground flex h-8 items-center rounded-md px-3 text-sm"
         title={value || undefined}
       >
         {value || "—"}

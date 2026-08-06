@@ -2,7 +2,11 @@ import { CheckCircle2, XCircle } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
@@ -44,8 +48,7 @@ export default function PrCard({
 }: PrCardProps) {
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
-  const { dateFormat, dateTimeFormat, amountFormat, defaultCurrencyCode } =
-    useProfile();
+  const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
 
   const config = PR_STATUS_CONFIG[item.pr_status] ?? PR_STATUS_CONFIG.draft;
   const totalAmount = item.base_total_amount;
@@ -137,23 +140,7 @@ export default function PrCard({
           </span>
         </ListCardRow>
       )}
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

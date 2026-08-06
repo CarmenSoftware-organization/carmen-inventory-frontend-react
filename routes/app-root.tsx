@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { I18nProvider } from "@/components/i18n-provider";
 import Providers from "@/components/providers";
 import { TopLoader } from "@/components/top-loader";
@@ -18,13 +18,7 @@ export default function AppRoot() {
         </a>
         <TopLoader />
         <Outlet />
-        <Toaster
-          richColors
-          closeButton
-          position="bottom-left"
-          mobileOffset={{ top: "1rem", left: "1rem", right: "1rem" }}
-          offset={{ top: "1rem", right: "1rem" }}
-        />
+        <Toaster />
       </Providers>
     </I18nProvider>
   );

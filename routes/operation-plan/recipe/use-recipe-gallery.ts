@@ -103,21 +103,21 @@ export function useRecipeGallery(
   const addFiles = (files: FileList | File[]) => {
     const room = MAX_IMAGES - items.length;
     if (room <= 0) {
-      toast.error(t("maxImages", { max: MAX_IMAGES }));
+      toast.warning(t("maxImages", { max: MAX_IMAGES }));
       return;
     }
     const accepted: RecipeGalleryItem[] = [];
     for (const file of Array.from(files)) {
       if (accepted.length >= room) {
-        toast.error(t("maxImages", { max: MAX_IMAGES }));
+        toast.warning(t("maxImages", { max: MAX_IMAGES }));
         break;
       }
       if (!IMAGE_MIME_TYPES.includes(file.type)) {
-        toast.error(t("imageTypeError"));
+        toast.warning(t("imageTypeError"));
         continue;
       }
       if (file.size > IMAGE_MAX_BYTES) {
-        toast.error(t("imageSizeError", { size: formatBytes(IMAGE_MAX_BYTES) }));
+        toast.warning(t("imageSizeError", { size: formatBytes(IMAGE_MAX_BYTES) }));
         continue;
       }
       const url = URL.createObjectURL(file);

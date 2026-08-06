@@ -4,7 +4,7 @@ import { useTranslations } from "use-intl";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldLabel, FieldInput } from "@/components/ui/field";
 import { LookupEquipmentCategory } from "@/components/lookup/lookup-equipment-category";
-import { Card } from "./eq-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import { EqImageField, type EqImageChange } from "./eq-image-field";
 import type { EquipmentFormValues } from "./eq-form-schema";
 
@@ -34,7 +34,12 @@ export function EqGeneralSection({
   return (
     <>
       {/* Identification */}
-      <Card first label={tf("generalInfo")} description={t("generalInfoDesc")}>
+      <SettingSection
+        plain
+        first
+        title={tf("generalInfo")}
+        description={t("generalInfoDesc")}
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="equipment-code" required>
@@ -138,10 +143,14 @@ export function EqGeneralSection({
             {...form.register("description")}
           />
         </Field>
-      </Card>
+      </SettingSection>
 
       {/* Specifications */}
-      <Card label={t("specifications")} description={t("specificationsDesc")}>
+      <SettingSection
+        plain
+        title={t("specifications")}
+        description={t("specificationsDesc")}
+      >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="equipment-station">
@@ -188,10 +197,14 @@ export function EqGeneralSection({
             />
           </Field>
         </div>
-      </Card>
+      </SettingSection>
 
       {/* Photo */}
-      <Card label={t("equipmentImage")} description={t("equipmentImageDesc")}>
+      <SettingSection
+        plain
+        title={t("equipmentImage")}
+        description={t("equipmentImageDesc")}
+      >
         <div className="max-w-xs">
           <EqImageField
             disabled={isDisabled}
@@ -201,7 +214,7 @@ export function EqGeneralSection({
             onChange={onImageChange}
           />
         </div>
-      </Card>
+      </SettingSection>
     </>
   );
 }

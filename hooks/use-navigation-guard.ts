@@ -94,6 +94,14 @@ export function useNavigationGuard(enabled: boolean): UseNavigationGuardReturn {
       // nothing. Only pop when the sentinel is actually on top — in the
       // click/back confirm paths the user has already navigated past it.
       if (window.history.state?.__navGuard) {
+        // Mark the popstate this back() will emit as ours BEFORE firing it.
+        // The event is async: if the guard re-arms in the meantime (submit
+        // flips the flag on, validation fails, it flips straight back off) the
+        // *new* popHandler receives it and would read it as a user Back press,
+        // opening the discard dialog on a form nobody tried to leave. The ref
+        // lives on the hook instance, not the effect, so the new handler sees
+        // the mark. Harmless when the guard is really unmounting.
+        skipNextPopstateRef.current = true;
         window.history.back();
       }
     };

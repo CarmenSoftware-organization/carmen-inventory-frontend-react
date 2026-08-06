@@ -14,7 +14,6 @@ import {
   ChevronsUpDown,
   Eye,
   Loader2,
-  PackagePlus,
   Plus,
   RefreshCcw,
   Scissors,
@@ -174,8 +173,12 @@ export function PrItemFields({
   });
 
   const selectedRows = table.getSelectedRowModel().rows;
+  // ต้องอยู่โหมดแก้ไขก่อน — ติ๊กแถวได้เฉพาะโหมดแก้ไขก็จริง แต่ selection ค้างข้าม
+  // โหมดได้ (ติ๊กแล้วกดยกเลิก) ปุ่มตัดสินจะยังโผล่ให้กดในโหมดอ่าน · เกณฑ์เดียวกับ
+  // ปุ่มล้างสถานะรายแถวและกับ SR
   const canBulkAction =
-    role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE;
+    !isDisabled &&
+    (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE);
 
   const handleAutoAllocate = async () => {
     setIsAllocating(true);
@@ -324,7 +327,8 @@ export function PrItemFields({
       .filter((id): id is string => !!id);
 
     if (detailIds.length === 0) {
-      toast.error(t("noSavedItemsForSplit"));
+      // ยังไม่ได้บันทึกแถวที่เลือก = ทำไม่ได้ตอนนี้ ไม่ใช่ระบบพัง → warning
+      toast.warning(t("noSavedItemsForSplit"));
       return;
     }
 
@@ -358,70 +362,14 @@ export function PrItemFields({
   return (
     <PrStageRoleProvider role={role}>
       <div className="space-y-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-end gap-1.5">
-            {selectedRows.length > 0 && (
-              <PrAskAiMenu
-                items={selectedRows.map((row) => {
-                  const item = form.getValues(`items.${row.index}`);
-                  return {
-                    productName: item.product_name,
-                    productLocalName: item.product_local_name,
-                    locationName: item.location_name,
-                  };
-                })}
-              />
-            )}
-            {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="xs"
-                onClick={() =>
-                  table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
-                }
-              >
-                {table.getIsAllRowsExpanded() ? (
-                  <>
-                    <ChevronsDownUp /> {tc("collapseAll")}
-                  </>
-                ) : (
-                  <>
-                    <ChevronsUpDown /> {tc("expandAll")}
-                  </>
-                )}
-              </Button>
-            )}
-            {!isDisabled && role === STAGE_ROLE.CREATE && (
-              <Button
-                type="button"
-                size="xs"
-                disabled={!canAddItem}
-                title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-                onClick={() => handleAddItem()}
-              >
-                <PackagePlus /> {t("addItem")}
-              </Button>
-            )}
-
-            {!isDisabled && role === STAGE_ROLE.PURCHASE && (
-              <Button
-                type="button"
-                size="xs"
-                disabled={isAllocating || itemFields.length === 0}
-                onClick={handleAutoAllocate}
-              >
-                {isAllocating ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  <RefreshCcw />
-                )}
-                {t("autoAllocate")}
-              </Button>
-            )}
-          </div>
+        {/* แถวเดียว: ปุ่มตัดสิน (อนุมัติ/ส่งกลับ/ปฏิเสธ/แยกใบ) ชิดซ้าย — เป็นการ
+            กระทำกับแถวที่เพิ่งติ๊ก มือไปหาปุ่มตรงนั้น ไม่ต้องกวาดตาไปสุดขวา
+            ส่วนของทั้งตาราง (ถาม AI, กาง/ยุบ, เพิ่มรายการ, จัดราคาอัตโนมัติ)
+            ดันไปขวาด้วย ms-auto — ไม่ใช้ justify-between เพราะตอนไม่มีปุ่มตัดสิน
+            มันจะเหลือลูกตัวเดียวแล้วไปกองซ้าย */}
+        <div className="flex flex-wrap items-center gap-1.5">
           {selectedRows.length > 0 && canBulkAction && (
-            <div className="flex items-center gap-1.5">
+            <>
               <Button
                 type="button"
                 variant="success"
@@ -460,8 +408,69 @@ export function PrItemFields({
                   {t("split")}
                 </Button>
               )}
-            </div>
+            </>
           )}
+
+          <div className="ms-auto flex flex-wrap items-center gap-1.5">
+            {selectedRows.length > 0 && (
+              <PrAskAiMenu
+                items={selectedRows.map((row) => {
+                  const item = form.getValues(`items.${row.index}`);
+                  return {
+                    productName: item.product_name,
+                    productLocalName: item.product_local_name,
+                    locationName: item.location_name,
+                  };
+                })}
+              />
+            )}
+            {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
+                onClick={() =>
+                  table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+                }
+              >
+                {table.getIsAllRowsExpanded() ? (
+                  <>
+                    <ChevronsDownUp /> {tc("collapseAll")}
+                  </>
+                ) : (
+                  <>
+                    <ChevronsUpDown /> {tc("expandAll")}
+                  </>
+                )}
+              </Button>
+            )}
+            {!isDisabled && role === STAGE_ROLE.CREATE && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => handleAddItem()}
+              >
+                <Plus /> {t("addItem")}
+              </Button>
+            )}
+            {!isDisabled && role === STAGE_ROLE.PURCHASE && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={isAllocating || itemFields.length === 0}
+                onClick={handleAutoAllocate}
+              >
+                {isAllocating ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <RefreshCcw />
+                )}
+                {t("autoAllocate")}
+              </Button>
+            )}
+          </div>
         </div>
 
         <DataGrid
@@ -476,27 +485,13 @@ export function PrItemFields({
               icon={BoxIcon}
               title={t("noItems")}
               description={t("noItemsDesc")}
-              content={
-                !isDisabled &&
-                role === STAGE_ROLE.CREATE && (
-                  <Button
-                    type="button"
-                    size="xs"
-                    disabled={!canAddItem}
-                    title={!canAddItem ? t("selectWorkflowFirst") : undefined}
-                    onClick={() => handleAddItem()}
-                  >
-                    <Plus /> {t("addItem")}
-                  </Button>
-                )
-              }
             />
           }
         >
           {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
             — ไม่ห่อด้วย Radix ScrollArea เพื่อเลี่ยง nested scroll ที่ทำให้ scroll
             แนวนอนสะดุด (เห็นชัดในโหมด edit ที่ตารางกว้าง/หนักกว่า) */}
-          <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+          <DataGridContainer scroll>
             <DataGridTable />
           </DataGridContainer>
         </DataGrid>

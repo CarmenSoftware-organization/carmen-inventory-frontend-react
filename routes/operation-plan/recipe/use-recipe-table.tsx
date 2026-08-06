@@ -2,10 +2,9 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { AuditCell } from "@/components/share/audit-cell";
 import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { statusColumn } from "@/components/ui/data-grid/columns";
+import { auditColumns, statusColumn } from "@/components/ui/data-grid/columns";
 import { useProfile } from "@/hooks/use-profile";
 import type { Recipe } from "@/types/recipe";
 import type { Cuisine } from "@/types/cuisine";
@@ -133,37 +132,7 @@ export function useRecipeTable({
     },
     // Status ก่อน created/updated (hideStatus:true กัน useConfigTable inject ซ้ำ)
     statusColumn<Recipe>(),
-    {
-      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created") },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated") },
-    },
+    ...auditColumns<Recipe>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<Recipe>({

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useWatch, type Control } from "react-hook-form";
-import { Check, Eye, SendHorizonal, ThumbsDown } from "lucide-react";
+import { Check, Eye, SendHorizontal, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import { computeItemPricing } from "./po-item-pricing";
@@ -138,8 +138,8 @@ export function PoFooterAction({
                 : formatCurrency(0),
             valueClassName:
               summary.totalDiscount > 0
-                ? "text-destructive font-semibold"
-                : "font-semibold",
+                ? "text-destructive"
+                : undefined,
           },
           {
             key: "net",
@@ -172,12 +172,12 @@ export function PoFooterAction({
                     title: t("submitTitle"),
                     description: t("submitConfirm"),
                     confirmLabel: tc("submit"),
-                    confirmVariant: "info",
+                    confirmVariant: "default",
                     onConfirm: () => onSubmit?.(),
                   })
                 }
               >
-                <SendHorizonal aria-hidden="true" />
+                <SendHorizontal aria-hidden="true" />
                 {tc("submit")}
               </Button>
             )}

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -45,6 +45,7 @@ import {
   type RfpFormValues,
 } from "./rfp-form-schema";
 import RfpVendorTable from "./rfp-vendor-table";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "rfp-form";
 
@@ -60,6 +61,7 @@ export function RequestPriceListForm({
   const navigate = useNavigate();
   const { dateFormat } = useProfile();
   const t = useTranslations("vendorManagement.requestPriceList");
+  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -131,26 +133,32 @@ export function RequestPriceListForm({
     ...addedVendors.map((v) => v.vendor_id),
   ]);
 
-  const handleAddVendor = (vendor: Vendor) => {
-    if (selectedVendorIds.has(vendor.id)) {
-      toast.error(t("vendorAlreadyAdded"));
+  /**
+   * รับผู้ขายทีเดียวหลายรายจาก dialog — กันซ้ำในนี้อีกชั้น (dialog ปิดตัวที่มี
+   * อยู่แล้วไว้ แต่รายการอาจถูกเพิ่มจากหน้าต่างอื่นระหว่างที่ dialog เปิดค้าง)
+   */
+  const handleAddVendors = (vendors: Vendor[]) => {
+    const fresh = vendors.filter((v) => !selectedVendorIds.has(v.id));
+    if (fresh.length === 0) {
       setIsAdding(false);
       return;
     }
-    const contacts = vendor.contacts ?? vendor.tb_vendor_contact ?? [];
-    const primaryContact = contacts.find((c) => c.is_primary);
     const currentAdd = form.getValues("vendors.add") ?? [];
     form.setValue("vendors.add", [
       ...currentAdd,
-      {
-        vendor_id: vendor.id,
-        vendor_name: vendor.name,
-        vendor_code: vendor.code,
-        contact_person: primaryContact?.name ?? "",
-        contact_phone: primaryContact?.phone ?? "",
-        contact_email: primaryContact?.email ?? "",
-        dimension: "",
-      },
+      ...fresh.map((vendor) => {
+        const contacts = vendor.contacts ?? vendor.tb_vendor_contact ?? [];
+        const primaryContact = contacts.find((c) => c.is_primary);
+        return {
+          vendor_id: vendor.id,
+          vendor_name: vendor.name,
+          vendor_code: vendor.code,
+          contact_person: primaryContact?.name ?? "",
+          contact_phone: primaryContact?.phone ?? "",
+          contact_email: primaryContact?.email ?? "",
+          dimension: "",
+        };
+      }),
     ]);
     setIsAdding(false);
   };
@@ -169,10 +177,6 @@ export function RequestPriceListForm({
   };
 
   const onSubmit = (values: RfpFormValues) => {
-    if (isAdding) {
-      toast.error(t("vendors.selectVendorFirst"));
-      return;
-    }
     const vendorsAdd = (values.vendors?.add ?? []).map((v, i) => ({
       vendor_id: v.vendor_id,
       vendor_name: v.vendor_name,
@@ -272,7 +276,7 @@ export function RequestPriceListForm({
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
-    <div className="mx-auto max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-5xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6">
         <DocFormHeader
           flush
@@ -281,59 +285,79 @@ export function RequestPriceListForm({
           backLabel={tc("goBack")}
           onBack={handleBack}
           actions={
-            isView ? (
-              <>
-                <Button size="sm" onClick={() => setMode("edit")}>
-                  <Pencil />
-                  {tc("edit")}
-                </Button>
-                {requestPriceList?.id && (
-                  <PrintDocumentButton
-                    documentType="RFP"
-                    documentId={requestPriceList.id}
-                    filters={
-                      requestPriceList.name
-                        ? { DocumentNo: requestPriceList.name }
-                        : undefined
-                    }
-                  />
-                )}
-              </>
-            ) : (
-              <>
+            <>
+              {isView ? (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setMode("edit")}
+                  >
+                    <Pencil />
+                    {tc("edit")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={isPending}
+                  >
+                    <X />
+                    {tc("cancel")}
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    form={FORM_ID}
+                    disabled={isPending}
+                  >
+                    <Save />
+                    {submitLabel}
+                  </Button>
+                </>
+              )}
+              {requestPriceList && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={handleCancel}
-                  disabled={isPending}
+                  onClick={() => setShowDelete(true)}
+                  disabled={deleteRfp.isPending || isPending}
                 >
-                  <X />
-                  {tc("cancel")}
+                  <Trash2 />
+                  {tc("delete")}
                 </Button>
+              )}
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {requestPriceList && (
                 <Button
-                  type="submit"
+                  type="button"
+                  variant="outline"
                   size="sm"
-                  form={FORM_ID}
-                  disabled={isPending}
+                  onClick={() =>
+                    openActivity(requestPriceList.id, requestPriceList.name)
+                  }
                 >
-                  <Save />
-                  {submitLabel}
+                  <History />
+                  {tActivity("title")}
                 </Button>
-                {isEdit && requestPriceList && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setShowDelete(true)}
-                    disabled={deleteRfp.isPending || isPending}
-                  >
-                    <Trash2 />
-                    {tc("delete")}
-                  </Button>
-                )}
-              </>
-            )
+              )}
+              {isView && requestPriceList?.id && (
+                <PrintDocumentButton
+                  documentType="RFP"
+                  documentId={requestPriceList.id}
+                  filters={
+                    requestPriceList.name
+                      ? { DocumentNo: requestPriceList.name }
+                      : undefined
+                  }
+                />
+              )}
+            </>
           }
         />
       </div>
@@ -479,7 +503,7 @@ export function RequestPriceListForm({
           setIsAdding={setIsAdding}
           displayVendors={displayVendors}
           selectedVendorIds={selectedVendorIds}
-          onAddVendor={handleAddVendor}
+          onAddVendor={handleAddVendors}
           onRemoveVendor={handleRemoveVendor}
         />
       </form>

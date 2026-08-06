@@ -1,4 +1,3 @@
-
 import { Suspense } from "react";
 import { useTranslations } from "use-intl";
 import { useProductById } from "@/hooks/use-product";
@@ -24,9 +23,15 @@ const EditProductInner = ({ id }: { id: string }) => {
   const { data: product, isLoading, error, refetch } = useProductById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!product) return <ErrorState message={t("notFound")} />;
+  if (error || !product)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/product-management/product"
+      />
+    );
 
   return <ProductForm product={product} />;
 };

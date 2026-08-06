@@ -8,6 +8,8 @@ import type {
 function createDetailSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
+    // เวอร์ชันของแถว — พกไว้เฉย ๆ ไม่ได้แสดงบนจอ แต่ต้องส่งกลับตอน save
+    doc_version: z.coerce.number().optional(),
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     product_name: z.string(),
     product_local_name: z.string(),
@@ -79,6 +81,9 @@ export function mapItemToPayload(
   item: AdjFormValues["items"][number],
 ): AdjustmentDetailItemPayload {
   return {
+    // แถวที่มีอยู่แล้วต้องส่ง doc_version กลับ ไม่งั้น /save ตอบ 400
+    // ("stock_in_detail.update.0.doc_version: Required") ส่วนแถวใหม่ยังไม่มี
+    ...(item.doc_version != null ? { doc_version: item.doc_version } : {}),
     // unit_name ไม่อยู่ในนี้ — เป็นคอลัมน์แสดงผลอย่างเดียว
     product_id: item.product_id,
     qty: item.qty,
@@ -114,10 +119,11 @@ export function getDefaultValues(
       location_id: adj.location_id ?? "",
       items: details.map((d) => ({
         id: d.id,
+        doc_version: d.doc_version,
         product_id: d.product_id,
         product_name: d.product_name,
         product_local_name: d.product_local_name,
-        unit_name: d.inventory_unit_name ?? "",
+        unit_name: d.inventory_unit?.name ?? d.inventory_unit_name ?? "",
         qty: d.qty,
         cost_per_unit: d.cost_per_unit,
         total_cost: d.total_cost,

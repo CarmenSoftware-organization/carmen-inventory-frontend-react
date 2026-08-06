@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Check, Eye, PackageCheck, Send, X } from "lucide-react";
+import { Check, Eye, PackageCheck, SendHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { formatCurrency } from "@/lib/currency-utils";
@@ -115,11 +115,10 @@ export function SrFooter({
             <Button
               type="button"
               size="sm"
-              variant="info"
               disabled={isPending}
               onClick={onSubmit}
             >
-              <Send />
+              <SendHorizontal />
               {t("submit")}
             </Button>
           )}

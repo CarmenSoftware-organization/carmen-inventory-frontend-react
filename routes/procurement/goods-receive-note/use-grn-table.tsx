@@ -2,7 +2,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { AuditCell } from "@/components/share/audit-cell";
 import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
@@ -17,6 +16,7 @@ import {
   GRN_DOC_TYPE_KEY,
 } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
+import { auditColumns } from "@/components/ui/data-grid/columns";
 
 interface UseGrnTableOptions {
   goodsReceiveNotes: GoodsReceiveNote[];
@@ -49,7 +49,7 @@ export function useGrnTable({
           {row.original.grn_no}
         </CellAction>
       ),
-      size: 200,
+      size: 180,
       meta: { headerTitle: tfl("grnNo") },
     },
     {
@@ -57,7 +57,7 @@ export function useGrnTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      size: 200,
+      size: 240,
       meta: { headerTitle: tfl("vendor") },
     },
     {
@@ -134,6 +134,22 @@ export function useGrnTable({
       },
     },
     {
+      // คนที่รับของเข้าและคีย์ใบ — ของขาด/ของเสียต้องย้อนไปถามคนที่ยืนรับตอนนั้น
+      // หัวคอลัมน์ใช้คำว่า "ผู้รับ" ตามที่หัวเอกสารเรียก ไม่ใช่ "ผู้สร้าง" กลาง ๆ
+      // ไม่เรียงลำดับเพราะ audit เป็น object ซ้อน backend เรียงให้ไม่ได้
+      id: "created_by",
+      accessorFn: (row) => row.audit?.created?.name ?? "",
+      size: 160,
+      header: tfl("receivedBy"),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.audit?.created?.name || "—"}
+        </span>
+      ),
+      enableSorting: false,
+      meta: { headerTitle: tfl("receivedBy") },
+    },
+    {
       accessorKey: "total_amount",
       header: ({ column }) => (
         <DataGridColumnHeader
@@ -163,37 +179,8 @@ export function useGrnTable({
       },
       size: 200,
     },
-    {
-      // id = ชื่อคอลัมน์ backend เพื่อให้ sort ส่ง sort=created_at:asc|desc
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created") },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated") },
-    },
+
+    ...auditColumns<GoodsReceiveNote>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<GoodsReceiveNote>({
@@ -205,5 +192,6 @@ export function useGrnTable({
     onDelete,
     hideStatus: true,
     initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    activity: { id: (r) => r.id, label: (r) => r.grn_no },
   });
 }

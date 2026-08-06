@@ -27,15 +27,20 @@ export function Component() {
   const brandDef = findBrand(category, brand);
 
   if (!categoryDef || !brandDef || !isEntitled(categoryDef.key, brandDef.key)) {
-    return <ErrorState message={t("notFound")} />;
+    return (
+      <ErrorState message={t("notFound")} backTo="/system-admin/interface" />
+    );
   }
 
   const Form = brandDef.form ?? categoryDef.form;
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
-          <SettingSectionSkeleton first fields={["half", "half", "half", "half"]} />
+        <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+          <SettingSectionSkeleton
+            first
+            fields={["half", "half", "half", "half"]}
+          />
         </div>
       }
     >

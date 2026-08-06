@@ -16,7 +16,8 @@ import { useTranslations } from "use-intl";
 import { Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FieldInput, FieldPlainText } from "@/components/ui/field";
+import { FieldPlainText } from "@/components/ui/field";
+import { InputQty } from "@/components/ui/input/input-qty";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
 import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
@@ -30,7 +31,7 @@ import { SR_ITEM_STAGE, type SrFormValues } from "./sr-form-schema";
 import { srItemAmount } from "./sr-form-helpers";
 import { Badge } from "@/components/ui/badge";
 import { SR_ITEM_STATUS_CONFIG } from "@/constant/store-requisition";
-import { SrItemHistorySheet } from "./sr-item-history";
+import { ItemHistorySheet } from "@/components/share/item-history-sheet";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 
 const ProductCell = memo(function ProductCell({
@@ -61,7 +62,7 @@ const ProductCell = memo(function ProductCell({
   const [onHandOpen, setOnHandOpen] = useState(false);
   const [onOrderOpen, setOnOrderOpen] = useState(false);
 
-  // ยอดคงเหลือ/กำลังสั่ง — hover แล้วยิง API เหมือน PR v2 (กด label ใน tooltip
+  // ยอดคงเหลือ/กำลังสั่ง — hover แล้วยิง API เหมือนหน้า PR (กด label ใน tooltip
   // เปิด dialog รายละเอียดต่อได้) SR ไม่มีคลังรายแถว ยอดจึงอ้างคลังต้นทางของใบ
   const inventory = (
     <>
@@ -198,12 +199,15 @@ const StatusCell = memo(function StatusCell({
   index,
   translate,
   role,
+  disabled,
 }: {
   control: Control<SrFormValues>;
   form?: UseFormReturn<SrFormValues>;
   index: number;
   translate: (value?: string) => string | undefined;
   role?: string;
+  /** ฟอร์มอยู่โหมดอ่าน — ปุ่มล้างสถานะต้องหายไป ไม่ใช่แค่จางลง */
+  disabled?: boolean;
 }) {
   "use no memo";
   const stageStatus =
@@ -216,9 +220,12 @@ const StatusCell = memo(function StatusCell({
   const config =
     SR_ITEM_STATUS_CONFIG[effective] ?? SR_ITEM_STATUS_CONFIG.pending;
 
-  // approver/issuer แก้สถานะได้; แต่ล็อกถ้า server ส่งมาแล้วเป็น approve/reject
+  // approver/issuer แก้สถานะได้ เฉพาะตอนอยู่โหมดแก้ไข; และล็อกถ้า server ส่งมา
+  // แล้วเป็น approve/reject — เกณฑ์เดียวกับ PR/PO
   const canEdit =
-    !!form && (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
+    !!form &&
+    !disabled &&
+    (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.ISSUE);
   const isLockedFromServer =
     initialStatus === SR_ITEM_STAGE.APPROVE ||
     initialStatus === SR_ITEM_STAGE.REJECT;
@@ -295,6 +302,7 @@ export function useSrItemTable({
   role,
 }: UseSrItemTableOptions) {
   "use no memo";
+  const t = useTranslations("storeOperation.storeRequisition");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
@@ -387,11 +395,7 @@ export function useSrItemTable({
           const qtyError =
             form.formState.errors.items?.[row.index]?.requested_qty?.message;
           return (
-            <FieldInput
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="any"
+            <InputQty
               placeholder={tfl("qty")}
               className="text-right"
               disabled={disabled}
@@ -422,11 +426,7 @@ export function useSrItemTable({
                   );
                 }
                 return (
-                  <FieldInput
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="any"
+                  <InputQty
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"
@@ -465,11 +465,7 @@ export function useSrItemTable({
                   );
                 }
                 return (
-                  <FieldInput
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="any"
+                  <InputQty
                     placeholder={tfl("qty")}
                     size="xs"
                     className="text-right"
@@ -512,6 +508,7 @@ export function useSrItemTable({
             index={row.index}
             translate={translateStageStatus}
             role={role}
+            disabled={disabled}
           />
         ),
         size: 100,
@@ -526,9 +523,11 @@ export function useSrItemTable({
       cell: ({ row }) => (
         <div className="flex items-center justify-end">
           {(row.original.history?.length ?? 0) > 0 && (
-            <SrItemHistorySheet
+            <ItemHistorySheet
               history={row.original.history ?? []}
               productName={row.original.product_name}
+              statusConfig={SR_ITEM_STATUS_CONFIG}
+              label={t("tabWorkflowHistory")}
             />
           )}
           {canDelete && (
@@ -615,6 +614,7 @@ export function useSrItemTable({
     fromLocationId,
     toLocationId,
     role,
+    t,
     tfl,
     tc,
     translateStageStatus,

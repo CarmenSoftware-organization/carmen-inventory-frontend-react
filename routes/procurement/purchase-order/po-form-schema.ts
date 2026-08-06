@@ -75,6 +75,20 @@ export function createPoDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     stage_status: z.string().optional(),
     stage_message: z.string().optional(),
     pr_detail: z.array(prDetailSchema),
+    // ประวัติ workflow ระดับรายการ (display-only passthrough, ไม่ส่งกลับ API)
+    // user.name ไม่บังคับ — บาง entry หลังบ้านส่งมาแค่ id
+    history: z
+      .array(
+        z.object({
+          at: z.string(),
+          seq: z.coerce.number(),
+          name: z.string(),
+          user: z.object({ id: z.string(), name: z.string().optional() }),
+          status: z.string(),
+          message: z.string().nullish(),
+        }),
+      )
+      .optional(),
     locations: z.array(createLocationSchema(tv, tf)),
   });
 }
@@ -266,6 +280,7 @@ export function getDefaultValues(
           stage_status: "",
           stage_message: "",
           pr_detail: d.pr_detail ?? [],
+          history: d.history,
           locations:
             d.locations
               ?.filter((loc) => loc.location_id)

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
@@ -16,8 +16,10 @@ import { toast } from "sonner";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { cn } from "@/lib/utils";
+import { ViewModeToggle } from "@/components/share/view-mode-toggle";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
@@ -35,7 +37,7 @@ import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useURL } from "@/hooks/use-url";
+import { setURLParams, useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import { PR_STATUS } from "@/types/purchase-request";
 import SearchInput from "@/components/search-input";
@@ -62,7 +64,7 @@ import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
-import type { ViewScope } from "@/types/list-view";
+import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
 const CreatePRDialog = lazy(() =>
@@ -80,6 +82,7 @@ const CreatePRDialog = lazy(() =>
 export default function PurchaseRequestComponent() {
   const t = useTranslations("procurement.purchaseRequest");
   const tc = useTranslations("common");
+  const exportErrorToast = useExportErrorToast();
   const tfl = useTranslations("field");
   const tt = useTranslations("toast");
   const navigate = useNavigate();
@@ -103,14 +106,29 @@ export default function PurchaseRequestComponent() {
   );
   const [selectAllOpen, setSelectAllOpen] = useState(false);
   // viewMode อยู่ใน URL (?view=) เพื่อให้ปุ่ม back จาก detail กลับมาเจอ tab เดิม
-  const [viewModeParam, setViewMode] = useURL("view", {
+  const [viewModeParam] = useURL("view", {
     defaultValue: "my-pending",
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
-  // setViewMode (จาก useURL) ได้ reference ใหม่ทุก render — เก็บไว้ใน ref กัน
-  // ไม่ให้หลุดเข้า useMemo deps ของ prFilterFields ข้างล่าง (ไม่งั้น memo ไม่เคย hit)
-  const setViewModeRef = useRef(setViewMode);
-  setViewModeRef.current = setViewMode;
+  /**
+   * สลับกลุ่มเอกสาร — ล้างคำค้น ขั้นตอนที่กรองไว้ และกลับหน้า 1 เสมอ
+   *
+   * สองกลุ่มนี้เป็นคนละชุดข้อมูลกัน คำค้นที่เจอ 3 ใบใน "รอฉันดำเนินการ" อาจเจอ
+   * 200 ใบใน "เอกสารทั้งหมด" (หรือกลับกันคือเจอ 0 แล้วดูเหมือนไม่มีอะไรเลย)
+   * ขั้นตอนที่กรองไว้ก็อาจไม่มีอยู่ในอีกกลุ่ม และเลขหน้าที่ค้างอยู่ก็อาจไม่มีจริง
+   * · เขียนทีเดียวทุกพารามิเตอร์ด้วย setURLParams จะได้ replaceState กับ
+   * re-render รอบเดียว
+   */
+  const handleViewModeChange = useCallback(
+    (next: string) =>
+      setURLParams({
+        view: next,
+        search: "",
+        page: "",
+        workflow_current_stage: "",
+      }),
+    [],
+  );
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
@@ -149,22 +167,13 @@ export default function PurchaseRequestComponent() {
         render: () => (
           <div className="space-y-1.5 sm:hidden">
             <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                size="sm"
-                variant={viewMode === "my-pending" ? "default" : "outline"}
-                onClick={() => setViewModeRef.current("my-pending")}
-              >
-                {t("myPending")}
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === "all-document" ? "default" : "outline"}
-                onClick={() => setViewModeRef.current("all-document")}
-              >
-                {t("allDocuments")}
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={handleViewModeChange}
+              myPendingLabel={t("myPending")}
+              allDocumentsLabel={t("allDocuments")}
+              className="grid grid-cols-2 gap-2"
+            />
           </div>
         ),
       },
@@ -207,27 +216,6 @@ export default function PurchaseRequestComponent() {
   });
 
   const queryParams = { ...params, filter: lf.filterParam };
-
-  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
-   *  (mirror ของ ConfigListTemplate's handleSaveViewDialogSave) */
-  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
-    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
-    const existing = list.find((v) => v.name === name);
-    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
-    if (existing) {
-      await lf.view.update(existing.id, scope, snapshot);
-      if (existing.id !== lf.view.current?.id) {
-        lf.view.apply({
-          ...existing,
-          filters: snapshot.filters,
-          sort: snapshot.sort,
-        });
-      }
-    } else {
-      const saved = await lf.view.saveAs(name, scope, snapshot);
-      lf.view.apply(saved);
-    }
-  };
 
   const handleExport = async () => {
     try {
@@ -293,7 +281,7 @@ export default function PurchaseRequestComponent() {
       }
       toast.success(tc("exportSuccess", { count }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : tc("exportFailed"));
+      exportErrorToast(err);
     }
   };
 
@@ -400,7 +388,7 @@ export default function PurchaseRequestComponent() {
   };
 
   if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -422,22 +410,13 @@ export default function PurchaseRequestComponent() {
               <SearchInput defaultValue={search} onSearch={setSearch} />
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
-            <div className="hidden items-center gap-2 sm:flex">
-              <Button
-                size="sm"
-                variant={viewMode === "my-pending" ? "default" : "outline"}
-                onClick={() => setViewMode("my-pending")}
-              >
-                {t("myPending")}
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === "all-document" ? "default" : "outline"}
-                onClick={() => setViewMode("all-document")}
-              >
-                {t("allDocuments")}
-              </Button>
-            </div>
+            <ViewModeToggle
+              value={viewMode}
+              onChange={handleViewModeChange}
+              myPendingLabel={t("myPending")}
+              allDocumentsLabel={t("allDocuments")}
+              className="hidden items-center gap-2 sm:flex"
+            />
             {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
                 (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
             <ViewSelector
@@ -544,9 +523,9 @@ export default function PurchaseRequestComponent() {
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
             >
-              <div className="flex-1 overflow-auto">
+              <DataGridScrollArea>
                 <DataGridTable />
-              </div>
+              </DataGridScrollArea>
               <DataGridPagination />
             </DataGridContainer>
           </DataGrid>
@@ -799,10 +778,8 @@ export default function PurchaseRequestComponent() {
         open={saveViewDialogOpen}
         onOpenChange={setSaveViewDialogOpen}
         canManageBu={lf.view.canManageBu}
-        existingNames={(s) =>
-          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
-        }
-        onSave={handleSaveViewDialogSave}
+        existingNames={lf.view.existingNames}
+        onSave={lf.view.saveOrUpdate}
       />
     </div>
   );

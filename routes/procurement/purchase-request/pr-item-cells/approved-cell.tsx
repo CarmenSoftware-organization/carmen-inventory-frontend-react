@@ -4,9 +4,10 @@ import { useTranslations } from "use-intl";
 import {
   InputSuffixAddon,
   InputSuffixField,
-  InputSuffixInput,
+  InputSuffixQty,
 } from "@/components/ui/input/input-suffix";
 import { useQuantityFormatter } from "@/hooks/use-number-formatter";
+import { useUnitDecimals } from "@/hooks/use-product-units";
 import type { PrFormValues } from "../pr-form-schema";
 import { useIsRowLocked, WatchedProductUnit, QtyUnitPlain } from "./helpers";
 
@@ -30,6 +31,12 @@ export const ApprovedCell = memo(function ApprovedCell({
   const qtyDisabled = isQtyDisabled || isRowLocked;
   const unitDisabled = isUnitDisabled || isRowLocked;
   const formatQty = useQuantityFormatter();
+  const productId =
+    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
+  const unitId =
+    useWatch({ control, name: `items.${index}.approved_unit_id` }) ?? "";
+  // ทศนิยมที่กรอกได้มาจาก decimal_place ของหน่วยที่เลือก (master data)
+  const decimals = useUnitDecimals(productId, unitId);
 
   if (qtyDisabled && unitDisabled) {
     return (
@@ -54,10 +61,8 @@ export const ApprovedCell = memo(function ApprovedCell({
       disabled={qtyDisabled}
       error={!!form.formState.errors.items?.[index]?.approved_qty}
     >
-      <InputSuffixInput
-        type="number"
-        inputMode="decimal"
-        min={0}
+      <InputSuffixQty
+        decimals={decimals}
         placeholder={tfl("qty")}
         defaultValue={qty ?? undefined}
         {...form.register(`items.${index}.approved_qty`)}

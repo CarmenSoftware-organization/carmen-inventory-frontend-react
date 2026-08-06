@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   useFieldArray,
@@ -11,7 +10,7 @@ import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { PL_STATUS_TONE } from "@/constant/price-list";
@@ -41,6 +40,7 @@ import {
 } from "./pl-form-schema";
 import { PLGeneralCard } from "./pl-general-card";
 import { PLProductsSection } from "./pl-products-section";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 const FORM_ID = "pl-form";
 
@@ -51,6 +51,7 @@ interface PriceListFormProps {
 export function PriceListForm({ priceList }: PriceListFormProps) {
   const navigate = useNavigate();
   const t = useTranslations("vendorManagement.priceList");
+  const tActivity = useTranslations("activity");
   const tt = useTranslations("toast");
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -206,63 +207,72 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   };
 
   const plNo = priceList?.no ?? null;
-  const productsHeaderLabels = useProductsHeaderLabels(t);
+  const productsHeaderLabels = useProductsHeaderLabels(t, tc);
   const removeItemLabel = t("detail.removeItem");
-  const tsStatus = ts as (key: "draft" | "submitted" | "active" | "inactive") => string;
+  const tsStatus = ts as (
+    key: "draft" | "submitted" | "active" | "inactive",
+  ) => string;
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6">
         <DocFormHeader
           flush
           title={watchedName || t("namePlaceholder")}
           titleMuted={!watchedName}
-        backLabel={tc("goBack")}
-        onBack={handleBack}
-        badges={
-          <>
-            {plNo && (
-              <span className="text-muted-foreground shrink-0 text-sm">
-                · {plNo}
-              </span>
-            )}
-            <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
-              {tsStatus(watchedStatus)}
-            </StatusDotBadge>
-          </>
-        }
-        actions={
-          isView ? (
-            <Button size="sm" onClick={() => setMode("edit")}>
-              <Pencil />
-              {tc("edit")}
-            </Button>
-          ) : (
+          backLabel={tc("goBack")}
+          onBack={handleBack}
+          badges={
             <>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCancel}
-                disabled={isPending}
-              >
-                <X />
-                {tc("cancel")}
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                form={FORM_ID}
-                disabled={isPending}
-              >
-                <Save />
-                {submitLabel}
-              </Button>
-              {isEdit && priceList && (
+              {plNo && (
+                <span className="text-muted-foreground shrink-0 text-sm">
+                  · {plNo}
+                </span>
+              )}
+              <StatusDotBadge tone={PL_STATUS_TONE[watchedStatus] ?? "neutral"}>
+                {tsStatus(watchedStatus)}
+              </StatusDotBadge>
+            </>
+          }
+          actions={
+            <>
+              {isView ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setMode("edit")}
+                >
+                  <Pencil />
+                  {tc("edit")}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={isPending}
+                  >
+                    <X />
+                    {tc("cancel")}
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    form={FORM_ID}
+                    disabled={isPending}
+                  >
+                    <Save />
+                    {submitLabel}
+                  </Button>
+                </>
+              )}
+              {priceList && (
                 <Button
                   type="button"
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
                   onClick={() => setShowDelete(true)}
                   disabled={deletePriceList.isPending || isPending}
@@ -271,9 +281,20 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
                   {tc("delete")}
                 </Button>
               )}
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {priceList && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openActivity(priceList.id, priceList.no)}
+                >
+                  <History />
+                  {tActivity("title")}
+                </Button>
+              )}
             </>
-          )
-        }
+          }
         />
       </div>
 
@@ -362,12 +383,17 @@ function getSubmitLabel(
   return isAdd ? tc("create") : tc("save");
 }
 
-function useProductsHeaderLabels(t: ReturnType<typeof useTranslations>) {
+function useProductsHeaderLabels(
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>,
+) {
   return {
     title: t("detail.title"),
     noItems: t("detail.noItems"),
     noItemsDesc: t("detail.noItemsDesc"),
-    addLabel: t("detail.addDetail"),
+    // "เพิ่มรายการ" ตัวกลางเหมือนทุกโมดูลที่มีตารางรายการ — เดิมเป็น "เพิ่มสินค้า"
+    // เฉพาะของสองโมดูลนี้ ทั้งที่ปุ่มทำงานเดียวกันเป๊ะ
+    addLabel: tc("addItem"),
     itemSingular: t("itemSingular"),
     itemPlural: t("itemPlural"),
   };

@@ -6,8 +6,7 @@ import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
  * (ทุกรายการปฏิเสธ) > approved (ทุกรายการเป็น approve/reject และมีอย่างน้อย
  * หนึ่งรายการ approve) ใช้เพื่อตัดสินใจว่าควรแสดงปุ่ม workflow ปุ่มใดใน footer
  *
- * อยู่ในไฟล์ของตัวเองเพราะทั้ง footer เดิมและหน้า v2 ต้องใช้ตัวเดียวกัน — เงื่อนไข
- * "ปุ่มไหนโผล่ตอนไหน" ห้ามแตกเป็นสองชุด
+ * อยู่ในไฟล์ของตัวเองเพราะเงื่อนไข "ปุ่มไหนโผล่ตอนไหน" ห้ามแตกเป็นหลายชุด
  * @param statuses - รายการสถานะ `current_stage_status` ของแต่ละ item ใน PR
  * @returns ค่า `"none" | "review" | "rejected" | "approved"` สะท้อนปุ่มที่ควรแสดง
  * @example

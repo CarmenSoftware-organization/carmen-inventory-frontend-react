@@ -1,6 +1,7 @@
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { openActivity } from "@/components/share/activity-sheet-host";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
@@ -22,7 +23,6 @@ interface FormToolbarProps {
   readonly subtitle?: string;
   readonly statusBadge?: React.ReactNode;
   readonly submitSlot?: React.ReactNode;
-  readonly viewActions?: React.ReactNode;
   readonly children?: React.ReactNode;
   readonly editTitle?: string;
   /**
@@ -36,6 +36,13 @@ interface FormToolbarProps {
    * full-width) ไม่มี px-4 เหมือน PR/PO จึงต้องให้ header flush ด้วยเพื่อ align
    */
   readonly flush?: boolean;
+  /**
+   * เปิดปุ่ม Activity ในแถบปุ่ม — ไม่ส่ง = ไม่มีปุ่ม (เช่นโหมด add ที่ยังไม่มี id)
+   *
+   * อยู่ที่ toolbar กลาง ไม่ให้แต่ละหน้ายัดปุ่มนี้เอง ทุกหน้าที่ใช้ toolbar นี้จะได้
+   * ตำแหน่งเดียวกันเสมอ
+   */
+  readonly activity?: { id: string; label?: string };
 }
 
 export function FormToolbar({
@@ -51,19 +58,20 @@ export function FormToolbar({
   subtitle,
   statusBadge,
   submitSlot,
-  viewActions,
   children,
   editTitle,
   permissionPrefix,
   flush = true,
+  activity,
 }: FormToolbarProps) {
   const tc = useTranslations("common");
   const tf = useTranslations("form");
+  const tActivity = useTranslations("activity");
   const { can, isAdmin } = useCan();
   const autoPrefix = usePermissionPrefix();
   const prefix = permissionPrefix ?? autoPrefix;
   const isView = mode === "view";
-  const isEdit = mode === "edit";
+  const isAdd = mode === "add";
 
   const title =
     mode === "add"
@@ -86,17 +94,16 @@ export function FormToolbar({
 
   const saveDenied = !!savePermission && !isAdmin && !can(savePermission);
   const editDenied = !!updatePermission && !isAdmin && !can(updatePermission);
-  const deleteDenied =
-    !!deletePermission && !isAdmin && !can(deletePermission);
+  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
 
   // ประกอบปุ่ม action ตาม mode แล้วส่งเข้า DocFormHeader.actions — layout (back
   // button, title align, gutter) อยู่ที่ DocFormHeader ที่เดียวทั้งแอป
   const actions = (
     <>
-      {isView && viewActions}
       {isView && onEdit ? (
         <Button
           size="sm"
+          variant="outline"
           onClick={
             editDenied
               ? () => dispatchPermissionDenied(updatePermission)
@@ -145,10 +152,10 @@ export function FormToolbar({
             ))}
         </>
       ) : null}
-      {isEdit && onDelete && (
+      {!isAdd && onDelete && (
         <Button
           type="button"
-          variant="destructive"
+          variant="outline"
           size="sm"
           onClick={
             deleteDenied
@@ -161,6 +168,19 @@ export function FormToolbar({
         >
           <Trash2 />
           {tc("delete")}
+        </Button>
+      )}
+      {/* ประวัติเป็นการ "ดู" อยู่ท้ายกลุ่มถัดจากปุ่มที่เปลี่ยนข้อมูล — ลำดับเดียว
+          กับทุกหน้าเอกสารในแอป: Edit · Delete · Activity · Print */}
+      {activity && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => openActivity(activity.id, activity.label)}
+        >
+          <History />
+          {tActivity("title")}
         </Button>
       )}
       {children}

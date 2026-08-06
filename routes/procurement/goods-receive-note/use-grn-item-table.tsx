@@ -14,15 +14,21 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { cn } from "@/lib/utils";
 import { LookupProduct } from "@/components/lookup/lookup-product";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProductUnits } from "@/hooks/use-product-units";
+import { useProductById } from "@/hooks/use-product";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { GrnFormValues } from "./grn-form-schema";
 import { GrnLocationRow } from "./grn-location-row";
-import { GRN_COL, grnColDataTotal } from "./grn-item-columns";
+import { grnItemCols } from "./grn-item-columns";
 
 /** 1 product group = 1 แถวใน DataGrid (product + N location indices) */
 export interface GrnGroup {
@@ -131,6 +137,30 @@ function ProductGroupCell({
   }
   return <NameWithSubtext primary={productName} secondary={productLocalName} />;
 }
+
+/**
+ * หน่วยนับของสินค้า (inventory unit จาก product master) — โชว์อย่างเดียว
+ *
+ * ไม่ใช่หน่วยที่รับ (`received_unit_id` ซึ่งเลือกได้ต่อ location) แต่เป็นหน่วยที่
+ * สินค้าตัวนี้ถือสต๊อกอยู่ ใช้เทียบตาว่าหน่วยที่กำลังรับเป็นคนละตัวกับหน่วยสต๊อกไหม
+ * · API ของ GRN ไม่ได้ส่งมาด้วย จึงอ่านจาก product master (แคช 5 นาที ต่อ 1 สินค้า)
+ */
+const ProductUnitCell = memo(function ProductUnitCell({
+  control,
+  index,
+}: {
+  control: Control<GrnFormValues>;
+  index: number;
+}) {
+  "use no memo";
+  const productId = useWatch({ control, name: `items.${index}.product_id` });
+  const { data: product } = useProductById(productId || undefined);
+  return (
+    <span className="text-muted-foreground text-xs">
+      {product?.inventory_unit?.name || "—"}
+    </span>
+  );
+});
 
 /** Total (net + tax) รวมของกลุ่ม (sum total_price ทุก location) — คอลัมน์ Amount */
 const GroupTotalCell = memo(function GroupTotalCell({
@@ -281,14 +311,17 @@ function GrnGroupLocations({
   const showActionCol = !disabled;
 
   // คอลัมน์ align กับ group row — % ของ (data + action ถ้ามี); order นับเฉพาะ isPo
-  const denom = grnColDataTotal(isPo) + (showActionCol ? GRN_COL.action : 0);
+  // ความกว้าง combo (discount/tax) ย่อในโหมดอ่าน ใช้เกณฑ์เดียวกับ showActionCol
+  const { col: GRN_COL, dataTotal } = grnItemCols(isPo, showActionCol);
+  const denom = dataTotal + (showActionCol ? GRN_COL.action : 0);
   const pct = (px: number) => `${(px / denom) * 100}%`;
-  const colCount = 9 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
+  const colCount = 10 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
 
   return (
-    <table className="w-full table-fixed text-xs">
+    <table className="w-full table-fixed border-separate border-spacing-0 text-xs">
       <colgroup>
         <col style={{ width: pct(GRN_COL.product) }} />
+        <col style={{ width: pct(GRN_COL.unit) }} />
         {isPo && <col style={{ width: pct(GRN_COL.order) }} />}
         <col style={{ width: pct(GRN_COL.received) }} />
         <col style={{ width: pct(GRN_COL.foc) }} />
@@ -300,22 +333,23 @@ function GrnGroupLocations({
         <col style={{ width: pct(GRN_COL.amt) }} />
         {showActionCol && <col style={{ width: pct(GRN_COL.action) }} />}
       </colgroup>
-      <thead className="text-muted-foreground text-micro font-semibold">
-        <tr className="border-border/60 border-b">
-          <th className="px-2 py-1 text-left">{tfl("location")}</th>
-          {isPo && <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>}
-          <th className="px-1 py-1 text-right">
-            {tfl("receivedQty")}
-            <span className="text-destructive"> *</span>
-          </th>
-          <th className="px-1 py-1 text-right">{tfl("foc")}</th>
-          <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
-          <th className="px-2 py-1 text-right">{tfl("subtotal")}</th>
-          <th className="px-2 py-1 text-right">{tfl("discount")}</th>
-          <th className="px-2 py-1 text-right">{tfl("net")}</th>
-          <th className="px-2 py-1 text-right">{tfl("tax")}</th>
-          <th className="px-2 py-1 text-right">{tfl("amount")}</th>
-          {showActionCol && <th className="px-1 py-1" />}
+      <thead className="text-muted-foreground text-xs font-semibold">
+        {/* ตารางย่อยใช้ colgroup ชุดเดียวกับตารางหลัก คอลัมน์จึงตรงกันอยู่แล้ว
+            หัวคอลัมน์ซ้ำอีกชุดเลยเป็นการอ่านคำเดิมสองรอบห่างกันไม่กี่สิบพิกเซล
+            เหลือไว้แค่ "ที่เก็บ" ซึ่งเป็นคำเดียวที่ตารางหลักไม่มี */}
+        <tr className="border-border/60 h-11 border-b">
+          <th className="px-3 py-1 text-left">{tfl("location")}</th>
+          <th className="px-3 py-1" />
+          {isPo && <th className="px-3 py-1" />}
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          <th className="px-3 py-1" />
+          {showActionCol && <th className="px-3 py-1" />}
         </tr>
       </thead>
       <tbody className="divide-border/60 divide-y">
@@ -458,6 +492,13 @@ export function useGrnItemTable({
       headerClassName: "text-right",
       cellClassName: "text-right",
     };
+    // ยังไม่มีแถวก็ยังไม่มีช่องกรอกให้กว้าง — ใช้ความกว้างโหมดอ่านไปก่อน
+    // พอมีรายการแรกค่อยขยาย · ตาราง location ด้านล่างใช้แค่ !disabled ได้
+    // เพราะมันจะ render ก็ต่อเมื่อมีรายการอยู่แล้ว สองตารางจึงตรงกันเสมอ
+    const { col: GRN_COL } = grnItemCols(
+      isPo,
+      !disabled && itemFields.length > 0,
+    );
     const dataColumns: ColumnDef<GrnGroup>[] = [
       {
         id: "product",
@@ -473,11 +514,22 @@ export function useGrnItemTable({
           />
         ),
       },
+      {
+        id: "unit",
+        header: tfl("unit"),
+        size: GRN_COL.unit,
+        cell: ({ row }) => (
+          <ProductUnitCell
+            control={form.control}
+            index={row.original.indices[0]}
+          />
+        ),
+      },
       ...(isPo
         ? [
             {
               id: "order",
-              header: tfl("orderQty"),
+              header: tfl("order"),
               size: GRN_COL.order,
               meta: rightMeta,
               cell: ({ row }) => (
@@ -493,7 +545,7 @@ export function useGrnItemTable({
         : []),
       {
         id: "received",
-        header: tfl("receivedQty"),
+        header: tfl("received"),
         size: GRN_COL.received,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -601,33 +653,44 @@ export function useGrnItemTable({
       id: "action",
       header: () => "",
       cell: ({ row }) => (
+        // ปุ่มไอคอนล้วนสองตัวติดกัน เดาจากรูปอย่างเดียวไม่ออกว่าอันไหนลบอะไร
+        // (ลบสินค้าทั้งบรรทัด vs ลบเฉพาะที่เก็บในแถวย่อย) — บอกด้วย tooltip
         <div className="flex items-center justify-center gap-0.5">
           {row.original.isManual && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              className="text-primary hover:bg-primary/10 hover:text-primary"
-              aria-label={t("addLocation")}
-              title={t("addLocation")}
-              onClick={() => {
-                onAddLocation(row.original);
-                if (!row.getIsExpanded()) row.toggleExpanded();
-              }}
-            >
-              <MapPinPlus className="size-3.5" aria-hidden="true" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-primary hover:bg-primary/10 hover:text-primary"
+                  aria-label={t("addLocation")}
+                  onClick={() => {
+                    onAddLocation(row.original);
+                    if (!row.getIsExpanded()) row.toggleExpanded();
+                  }}
+                >
+                  <MapPinPlus className="size-3.5" aria-hidden="true" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t("addLocation")}</TooltipContent>
+            </Tooltip>
           )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-            aria-label="Remove"
-            onClick={() => onDeleteGroup(row.original)}
-          >
-            <Trash2 className="size-3.5" aria-hidden="true" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                aria-label={t("deleteProductLine")}
+                onClick={() => onDeleteGroup(row.original)}
+              >
+                <Trash2 className="size-3.5" aria-hidden="true" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t("deleteProductLine")}</TooltipContent>
+          </Tooltip>
         </div>
       ),
       enableSorting: false,
@@ -650,7 +713,12 @@ export function useGrnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        cellClassName: cn("py-2 align-middle", col.meta?.cellClassName),
+        // h-11 ตายตัวทั้งแถวหลักและแถวย่อย — ปล่อยให้สูงตามเนื้อหา แถวหลักจะ 39px
+        // เพราะชื่อสินค้ากินสองบรรทัด ส่วนแถวย่อยได้ 41px จากช่องกรอก สองแถบเลย
+        // ไม่เท่ากันทั้งที่เป็นรายการเดียวกัน · 44px ไม่ใช่ 40 เพราะช่องสินค้ากิน
+        // สองบรรทัด (30px) ที่ 40px จะเหลือขอบบน-ล่างแค่ 5px ดูอัดแน่นกว่าแถวย่อย
+        // ที่มีบรรทัดเดียว (เหลือ 12px)
+        cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
       },
     }));
   }, [

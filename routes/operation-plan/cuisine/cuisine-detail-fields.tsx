@@ -3,7 +3,7 @@ import type { UseFormReturn, FieldPath } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "./cuisine-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { CuisineFormValues } from "./cuisine-form-schema";
 
 interface CuisineDetailFieldsProps {
@@ -20,8 +20,9 @@ export function CuisineDetailFields({
   const tfl = useTranslations("field");
 
   return (
-    <Card
-      label={t("cuisineDetails")}
+    <SettingSection
+      plain
+      title={t("cuisineDetails")}
       description={t("cuisineDetailsDesc")}
     >
       <div className="grid grid-cols-1 gap-4">
@@ -58,7 +59,7 @@ export function CuisineDetailFields({
           isDisabled={isDisabled}
         />
       </div>
-    </Card>
+    </SettingSection>
   );
 }
 

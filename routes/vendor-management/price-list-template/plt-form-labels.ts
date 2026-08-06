@@ -71,12 +71,15 @@ export function useStepperLabels(
 export function useProductLabels(
   t: ReturnType<typeof useTranslations>,
   tf: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>,
 ): ProductLabels {
   return {
     sectionTitle: t("productsTitle"),
     noItems: t("detail.noItems"),
     noItemsDesc: t("detail.noItemsDesc"),
-    addLabel: t("detail.addDetail"),
+    // "เพิ่มรายการ" ตัวกลางเหมือนทุกโมดูลที่มีตารางรายการ (PR/PO/GRN/CN/SR/IA)
+    // เดิมเป็น "เพิ่มสินค้า" เฉพาะของโมดูลนี้ ทั้งที่ปุ่มทำงานเดียวกันเป๊ะ
+    addLabel: tc("addItem"),
     removeProduct: t("removeProduct"),
     removeTier: t("removeTier"),
     addTier: t("addTier"),

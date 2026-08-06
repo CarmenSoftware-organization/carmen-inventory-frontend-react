@@ -17,6 +17,10 @@ export const router = createBrowserRouter([
     ErrorBoundary: RootErrorBoundary,
     children: [
       { path: "/login", lazy: () => import("./login/login.route") },
+      { path: "/register", lazy: () => import("./register/register.route") },
+      // เอกสารกฎหมาย — public ทั้งคู่ ต้องอ่านได้ก่อนกดสมัคร
+      { path: "/terms", lazy: () => import("./legal/terms.route") },
+      { path: "/privacy", lazy: () => import("./legal/privacy.route") },
       // Public price-list route — vendor ภายนอกเปิดจากลิงก์ในอีเมล (ไม่ต้อง auth)
       { path: "/pl/:url_token", lazy: () => import("./external/pl/price-list-external.route") },
       {
@@ -41,6 +45,12 @@ export const router = createBrowserRouter([
           {
             path: "notifications",
             lazy: () => import("./notifications/notifications.route"),
+            ErrorBoundary: RouteErrorBoundaryAdapter,
+          },
+          // เครื่องมือของคนทำระบบ ไม่มีในเมนูและไม่มีลิงก์จากที่ไหน เข้าจาก URL
+          {
+            path: "dev/toast",
+            lazy: () => import("./dev/toast/toast.route"),
             ErrorBoundary: RouteErrorBoundaryAdapter,
           },
           {
@@ -88,8 +98,6 @@ export const router = createBrowserRouter([
               { path: "purchase-order/:id", lazy: () => import("./procurement/purchase-order/purchase-order-edit.route") },
               { path: "purchase-request", lazy: () => import("./procurement/purchase-request/purchase-request.route") },
               { path: "purchase-request/new", lazy: () => import("./procurement/purchase-request/purchase-request-new.route") },
-              { path: "purchase-request/v2/new", lazy: () => import("./procurement/purchase-request/v2/purchase-request-v2-new.route") },
-              { path: "purchase-request/v2/:id", lazy: () => import("./procurement/purchase-request/v2/purchase-request-v2.route") },
               { path: "purchase-request/:id", lazy: () => import("./procurement/purchase-request/purchase-request-edit.route") },
               { path: "approval", lazy: () => import("./procurement/approval/approval.route") },
             ],

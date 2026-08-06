@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { usePurchaseOrderById } from "@/hooks/use-purchase-order";
 import PoForm from "./po-form";
@@ -29,9 +28,15 @@ export function EditPurchaseOrderContent({ id }: { id: string }) {
   } = usePurchaseOrderById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!purchaseOrder) return <ErrorState message={t("notFound")} />;
+  if (error || !purchaseOrder)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/procurement/purchase-order"
+      />
+    );
 
   return <PoForm purchaseOrder={purchaseOrder} />;
 }

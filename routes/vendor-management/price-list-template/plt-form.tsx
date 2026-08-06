@@ -8,7 +8,7 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
@@ -47,6 +47,7 @@ import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { usePltFormActions } from "./use-plt-form-actions";
 import { FORM_ID } from "./plt-form-helpers";
 import { useProductLabels, useStepperLabels } from "./plt-form-labels";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface PriceListTemplateFormProps {
   readonly priceListTemplate?: PriceListTemplate;
@@ -56,6 +57,7 @@ export function PriceListTemplateForm({
   priceListTemplate,
 }: PriceListTemplateFormProps) {
   const t = useTranslations("vendorManagement.priceListTemplate");
+  const tActivity = useTranslations("activity");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const tform = useTranslations("form");
@@ -66,7 +68,6 @@ export function PriceListTemplateForm({
     priceListTemplate ? "view" : "add",
   );
   const isView = mode === "view";
-  const isEdit = mode === "edit";
   const isAdd = mode === "add";
 
   const [removeDetailIndex, setRemoveDetailIndex] = useState<number | null>(
@@ -187,14 +188,13 @@ export function PriceListTemplateForm({
   };
 
   const stepperLabels = useStepperLabels(t);
-  const productLabels = useProductLabels(t, tfl);
+  const productLabels = useProductLabels(t, tfl, tc);
 
   // ชื่อ product ที่กำลังจะลบ — ไว้โชว์ใน confirm dialog (master ก่อน, fallback ref)
   const removeProductName = removeProductId
     ? (allProducts.find((p) => p.id === removeProductId)?.name ??
-      priceListTemplate?.products?.find(
-        (p) => p.product_id === removeProductId,
-      )?.product_name ??
+      priceListTemplate?.products?.find((p) => p.product_id === removeProductId)
+        ?.product_name ??
       "")
     : "";
   const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
@@ -207,7 +207,7 @@ export function PriceListTemplateForm({
       : tc("save");
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6">
         <DocFormHeader
           flush
@@ -221,46 +221,66 @@ export function PriceListTemplateForm({
             </StatusDotBadge>
           }
           actions={
-            isView ? (
-              <Button size="sm" onClick={() => setMode("edit")}>
-                <Pencil />
-                {tc("edit")}
-              </Button>
-            ) : (
-              <>
+            <>
+              {isView ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setMode("edit")}
+                >
+                  <Pencil />
+                  {tc("edit")}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={actions.handleCancel}
+                    disabled={actions.isPending}
+                  >
+                    <X />
+                    {tc("cancel")}
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    form={FORM_ID}
+                    disabled={actions.isPending}
+                  >
+                    <Save />
+                    {submitLabel}
+                  </Button>
+                </>
+              )}
+              {priceListTemplate && (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={actions.handleCancel}
-                  disabled={actions.isPending}
+                  onClick={() => actions.setShowDelete(true)}
+                  disabled={actions.isDeletePending || actions.isPending}
                 >
-                  <X />
-                  {tc("cancel")}
+                  <Trash2 />
+                  {tc("delete")}
                 </Button>
+              )}
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {priceListTemplate && (
                 <Button
-                  type="submit"
+                  type="button"
+                  variant="outline"
                   size="sm"
-                  form={FORM_ID}
-                  disabled={actions.isPending}
+                  onClick={() =>
+                    openActivity(priceListTemplate.id, priceListTemplate.name)
+                  }
                 >
-                  <Save />
-                  {submitLabel}
+                  <History />
+                  {tActivity("title")}
                 </Button>
-                {isEdit && priceListTemplate && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => actions.setShowDelete(true)}
-                    disabled={actions.isDeletePending || actions.isPending}
-                  >
-                    <Trash2 />
-                    {tc("delete")}
-                  </Button>
-                )}
-              </>
-            )
+              )}
+            </>
           }
         />
       </div>

@@ -4,19 +4,24 @@ import { PR_STATUS, PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { useTranslations } from "use-intl";
 import {
   type ColumnDef,
+  type SortingState,
   getCoreRowModel,
   getExpandedRowModel,
+  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { cn } from "@/lib/utils";
 import type { PrFormValues } from "./pr-form-schema";
 import { PrItemExpand } from "./pr-item-expand";
 import { PrPricelistCompare } from "./pr-pricelist-compare";
-import { PrItemHistorySheet } from "./workflow/pr-item-history";
+import { ItemHistorySheet } from "@/components/share/item-history-sheet";
+import {} from "@/constant/purchase-request";
+import { ITEM_HISTORY_STATUS_CONFIG } from "@/constant/item-history";
 import { isRowLocked } from "./pr-item-cells/helpers";
 import {
   SelectCell,
@@ -44,7 +49,40 @@ export type ItemField = FieldArrayWithId<PrFormValues, "items", "id">;
  * ต่างกัน (เดิม 80/60/40) UI จึงกว้างไม่เท่ากัน
  */
 const NARROW_COL_SIZE = 35;
-const QTY_SIZE = 150;
+
+/**
+ * ความกว้างคอลัมน์ที่มีช่องกรอก (Requested / Approved / FOC / Delivery Point)
+ *
+ * view mode เหลือแค่ข้อความ ไม่มี input กับ dropdown จึงไม่ต้องกว้างเท่าโหมด
+ * แก้ไข — คืนที่ให้คอลัมน์อื่นไป
+ */
+const INPUT_COL_SIZE = 150;
+const INPUT_COL_SIZE_VIEW = 120;
+
+/** คอลัมน์ action — edit มีปุ่มลบคู่กับปุ่มประวัติ view เหลือปุ่มประวัติปุ่มเดียว */
+const ACTION_COL_SIZE = 60;
+const ACTION_COL_SIZE_VIEW = 40;
+
+type PrItem = PrFormValues["items"][number];
+
+/**
+ * ค่าปัจจุบันของแถว — อ่านจากฟอร์มตรง ๆ ไม่ใช่จาก `row.original`
+ *
+ * `fields` ของ useFieldArray เป็น snapshot ตอน mount/reset ไม่ขยับตาม `setValue`
+ * ที่ cell เขียนลงไป · เปลี่ยนสินค้าในแถวแล้วค้น/เรียงด้วย `row.original`
+ * จะได้ชื่อเก่า
+ */
+function liveItem(
+  form: UseFormReturn<PrFormValues>,
+  index: number,
+): PrItem | undefined {
+  return form.getValues(`items.${index}`);
+}
+
+/** ยอดที่เทียบกันได้ข้ามสกุลเงิน — ยอดในสกุลของแถว × เรต = ยอดสกุลฐาน */
+function baseAmountOf(item: PrItem | undefined): number {
+  return Number(item?.total_price ?? 0) * Number(item?.exchange_rate ?? 1);
+}
 
 interface UsePrItemTableOptions {
   form: UseFormReturn<PrFormValues>;
@@ -70,9 +108,11 @@ export function usePrItemTable({
   onDelete,
 }: UsePrItemTableOptions) {
   "use no memo";
+  const t = useTranslations("procurement.purchaseRequest");
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
   const [selectDialogOpen, setSelectDialogOpen] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   // นับเฉพาะแถวที่ติ๊กได้จริง — แถวที่ถูกตัดสินมาแล้วไม่มี checkbox ให้กด
   // นับรวมไปก็หลอกตาว่าจะเลือกได้มากกว่าที่เลือกได้จริง
@@ -89,6 +129,7 @@ export function usePrItemTable({
     isDisabled || (!!role && role !== STAGE_ROLE.CREATE);
 
   const allColumns = useMemo<ColumnDef<ItemField>[]>(() => {
+    const inputColSize = isDisabled ? INPUT_COL_SIZE_VIEW : INPUT_COL_SIZE;
     const prSelectColumn: ColumnDef<ItemField> = {
       id: "select",
       header: ({ table: t }) => {
@@ -200,7 +241,14 @@ export function usePrItemTable({
     const dataColumns: ColumnDef<ItemField>[] = [
       {
         accessorKey: "location_id",
-        header: tfl("location"),
+        // เรียงตามชื่อคลัง ไม่ใช่ค่าใน accessor (location_id เป็น uuid เรียงแล้วมั่ว)
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("location")} />
+        ),
+        sortingFn: (a, b) =>
+          (liveItem(form, a.index)?.location_name ?? "").localeCompare(
+            liveItem(form, b.index)?.location_name ?? "",
+          ),
         cell: ({ row }) => (
           <LocationCell
             control={form.control}
@@ -213,6 +261,7 @@ export function usePrItemTable({
                 form={form}
                 index={row.index}
                 role={role}
+                isDisabled={isDisabled}
               />
             }
           />
@@ -233,7 +282,13 @@ export function usePrItemTable({
       },
       {
         accessorKey: "product_id",
-        header: tfl("product"),
+        header: ({ column }) => (
+          <DataGridColumnHeader column={column} title={tfl("product")} />
+        ),
+        sortingFn: (a, b) =>
+          (liveItem(form, a.index)?.product_name ?? "").localeCompare(
+            liveItem(form, b.index)?.product_name ?? "",
+          ),
         cell: ({ row }) => (
           <ProductCell
             control={form.control}
@@ -256,7 +311,7 @@ export function usePrItemTable({
             isDisabled={isLockedAfterCreate}
           />
         ),
-        size: QTY_SIZE,
+        size: inputColSize,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
@@ -274,7 +329,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: QTY_SIZE,
+        size: inputColSize,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
@@ -292,7 +347,7 @@ export function usePrItemTable({
             isUnitDisabled={isLockedAfterCreate}
           />
         ),
-        size: QTY_SIZE,
+        size: inputColSize,
         meta: {
           headerClassName: "text-right",
           cellClassName: "text-right",
@@ -300,7 +355,20 @@ export function usePrItemTable({
       },
       {
         id: "amount",
-        header: tfl("amountCur"),
+        // TanStack ยอมให้ sort เฉพาะคอลัมน์ที่มี accessorFn — คอลัมน์นี้เดิมเป็น
+        // display ล้วน ต้องมี accessor ถึงจะกดเรียงได้ (ค่าจริงใช้ sortingFn ข้างล่าง)
+        accessorFn: (item) => item.total_price,
+        header: ({ column }) => (
+          <DataGridColumnHeader
+            column={column}
+            title={tfl("amountCur")}
+            className="justify-end"
+          />
+        ),
+        // เทียบเป็นสกุลฐาน ไม่งั้นใบที่มีหลายสกุลจะเรียงเลขที่คนละหน่วยกัน
+        sortingFn: (a, b) =>
+          baseAmountOf(liveItem(form, a.index)) -
+          baseAmountOf(liveItem(form, b.index)),
         cell: ({ row }) => (
           <AmountCell
             control={form.control}
@@ -334,7 +402,8 @@ export function usePrItemTable({
             isDisabled={isDisabled}
           />
         ),
-        size: 110,
+        // 110 เดิมแคบสุดในตาราง ชื่อจุดส่งของยาวกว่านั้นเกือบทุกอัน
+        size: inputColSize,
       },
       {
         accessorKey: "delivery_date",
@@ -362,9 +431,11 @@ export function usePrItemTable({
       cell: ({ row }) => (
         <div className="flex items-center justify-center gap-2">
           {(row.original.history?.length ?? 0) > 0 && (
-            <PrItemHistorySheet
+            <ItemHistorySheet
               history={row.original.history ?? []}
               productName={row.original.product_name}
+              statusConfig={ITEM_HISTORY_STATUS_CONFIG}
+              label={t("tabWorkflowHistory")}
             />
           )}
           {!isDisabled && (
@@ -378,7 +449,7 @@ export function usePrItemTable({
       ),
       enableSorting: false,
       enableResizing: false,
-      size: 80,
+      size: isDisabled ? ACTION_COL_SIZE_VIEW : ACTION_COL_SIZE,
       meta: {
         headerClassName: "text-right",
         cellClassName: "text-right",
@@ -453,6 +524,7 @@ export function usePrItemTable({
     pendingCount,
     today,
     isLockedAfterCreate,
+    t,
     tfl,
     tc,
   ]);
@@ -460,7 +532,12 @@ export function usePrItemTable({
   const table = useReactTable({
     data: itemFields,
     columns: allColumns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    // เรียงที่ table ไม่ใช่ที่ `data` เพราะ `row.index` ต้องคงเป็น index ใน form
+    // array (ทุก cell ผูก `items.${index}` ไว้)
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     // แถวที่ถูกตัดสินมาแล้วไม่มี checkbox ให้กด แต่ toggleAllPageRowsSelected ไม่รู้
     // เรื่องนั้น — ถ้าไม่บอกไว้ "เลือกทั้งหมด" จะกวาดแถวที่ผู้ใช้มองไม่เห็นและ

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
+import { toast } from "sonner";
 import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SettingSection } from "@/components/ui/setting-section";
@@ -32,8 +33,6 @@ export function AdjItemFields({
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const tfl = useTranslations("field");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-  const locationId = useWatch({ control: form.control, name: "location_id" });
-  const hasLocation = !!locationId;
 
   const {
     fields: itemFields,
@@ -41,8 +40,20 @@ export function AdjItemFields({
     remove: removeItem,
   } = useFieldArray({ control: form.control, name: "items" });
 
+  // แถวที่เพิ่งเพิ่มเปิดช่องเลือกสินค้าให้เลย (ท่าเดียวกับ GRN) — prepend วางแถว
+  // ใหม่ไว้บนสุดเสมอ index 0 จึงเป็นตัวที่ต้องเปิด
+  const locationId = useWatch({ control: form.control, name: "location_id" });
+  const [autoOpenFirst, setAutoOpenFirst] = useState(false);
+
   const handleAddItem = () => {
+    // ช่องเลือกสินค้าดึงเฉพาะของที่มีในคลังที่เลือก — ยังไม่เลือกคลังก็เพิ่มแถวไป
+    // ก็กดเลือกอะไรไม่ได้ บอกไปตรง ๆ ดีกว่าปล่อยให้งง
+    if (!locationId) {
+      toast.warning(t("selectLocationFirst"));
+      return;
+    }
     prependItem({ ...ADJ_ITEM });
+    setAutoOpenFirst(true);
   };
 
   const { table } = useAdjItemTable({
@@ -51,6 +62,8 @@ export function AdjItemFields({
     disabled,
     onDelete: setDeleteIndex,
     adjustmentType,
+    autoOpenFirst,
+    onProductPicked: () => setAutoOpenFirst(false),
   });
 
   const itemsError = form.formState.errors.items;
@@ -66,12 +79,7 @@ export function AdjItemFields({
         count={itemFields.length}
         action={
           !disabled ? (
-            <Button
-              type="button"
-              size="xs"
-              onClick={handleAddItem}
-              disabled={!hasLocation}
-            >
+            <Button type="button" size="sm" onClick={handleAddItem}>
               <Plus /> {t("addItem")}
             </Button>
           ) : undefined
@@ -87,24 +95,13 @@ export function AdjItemFields({
           <DataGrid
             table={table}
             recordCount={itemFields.length}
-            tableClassNames={{ headerRow: "h-10", bodyRow: "h-10" }}
             emptyMessage={
+              // ปุ่มเพิ่มรายการอยู่ที่หัวข้อของ section อยู่แล้ว ไม่ต้องมีซ้ำ
+              // ในกล่องว่าง — ปุ่มเดียวกันสองที่บนจอเดียว
               <EmptyComponent
                 icon={BoxIcon}
                 title={t("noItems")}
                 description={t("noItemsDesc")}
-                content={
-                  !disabled && (
-                    <Button
-                      type="button"
-                      size="xs"
-                      onClick={handleAddItem}
-                      disabled={!hasLocation}
-                    >
-                      <Plus /> {t("addItem")}
-                    </Button>
-                  )
-                }
               />
             }
           >

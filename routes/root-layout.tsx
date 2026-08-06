@@ -1,9 +1,11 @@
 import { Outlet } from "react-router";
+import { AnalyticsBridge } from "@/components/analytics-bridge";
 import { StatusBar } from "@/components/footer/status-bar";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
 import { MissingDepartmentDialog } from "@/components/missing-department-dialog";
 import { Navbar } from "@/components/navbar/navbar";
 import { RouteGuard } from "@/components/route-guard";
+import { ActivitySheetHost } from "@/components/share/activity-sheet-host";
 import { OfflineBanner } from "@/components/share/offline-banner";
 import { ProfileGate } from "@/components/share/profile-gate";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
@@ -13,6 +15,7 @@ import { SidebarInset } from "@/components/ui/sidebar";
 export default function RootLayout() {
   return (
     <SidebarShell>
+      <AnalyticsBridge />
       <AppSidebar />
       <SidebarInset className="space-main-gradient relative h-dvh overflow-hidden">
         <Navbar />
@@ -31,6 +34,7 @@ export default function RootLayout() {
       </SidebarInset>
       <KeyboardShortcutsDialog />
       <MissingDepartmentDialog />
+      <ActivitySheetHost />
     </SidebarShell>
   );
 }

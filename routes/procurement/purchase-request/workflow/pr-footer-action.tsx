@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useWatch, type Control } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { Check, Eye, SendHorizonal, ShoppingCart, X } from "lucide-react";
+import { Check, Eye, SendHorizontal, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { STAGE_ROLE } from "@/types/stage-role";
@@ -162,8 +162,8 @@ export function PrFooterAction({
                 : formatCurrency(0),
             valueClassName:
               summary.totalDiscount > 0
-                ? "text-destructive font-semibold"
-                : "font-semibold",
+                ? "text-destructive"
+                : undefined,
           },
           {
             key: "net",
@@ -190,19 +190,18 @@ export function PrFooterAction({
               <Button
                 type="button"
                 size="sm"
-                variant="info"
                 disabled={isPending}
                 onClick={() =>
                   openConfirm({
                     title: t("submitTitle"),
                     description: t("submitConfirm"),
                     confirmLabel: tc("submit"),
-                    confirmVariant: "info",
+                    confirmVariant: "default",
                     onConfirm: () => onSubmitPr?.(),
                   })
                 }
               >
-                <SendHorizonal />
+                <SendHorizontal />
                 {tc("submit")}
               </Button>
             )}

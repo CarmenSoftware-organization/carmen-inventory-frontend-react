@@ -2,7 +2,6 @@ import { type ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { EyeBrow } from "@/components/ui/eye-brow";
 
 interface DocFormHeaderProps {
   readonly title: string;
@@ -71,8 +70,17 @@ export function DocFormHeader({
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <h1
               className={cn(
+                // ชื่อยาวตัดท้ายบรรทัดเดียว ไม่ห่อลงบรรทัดสอง — ตั้งใจ ไม่ใช่หลุด
+                // (เคยเสนอ line-clamp-2 ให้ชื่อสินค้าที่เอาบาร์โค้ดไว้ท้าย ทีมเลือก
+                // แบบนี้) ข้อความเต็มอยู่ใน title attribute
                 // min-w-0 ให้ truncate ทำงานใน flex — ไม่งั้น title ยาวจะดันเบียด badge
-                "min-w-0 truncate text-xl font-semibold tracking-tight sm:text-2xl",
+                // 18/20px ไม่ใช่ 20/24px: เลขที่เอกสารเป็น "ค่า" ไม่ใช่ชื่อหน้า
+                // (navbar breadcrumb บอกชื่อหน้าอยู่แล้ว) และ header ที่เหลือ
+                // อยู่ที่ 11-14px ทั้งแถบ — 24px ทำให้หัวหนักบนผิดสัดส่วน
+                // max-w คุมไม่ให้ชื่อยาวกินทั้งแถวจนดันปุ่มตกบรรทัด — โหมดแก้ไขมี
+                // ปุ่มถึงสี่ตัว ถ้าปล่อยให้ title ยืดตามเนื้อหา ปุ่มจะถูกดันลงไป
+                // เอง (เลขที่เอกสารของโมดูลอื่นสั้นกว่านี้มาก ไม่โดนกระทบ)
+                "max-w-sm min-w-0 truncate text-lg font-semibold tracking-tight sm:text-xl",
                 titleMuted && "text-muted-foreground italic",
               )}
               title={title}
@@ -82,7 +90,10 @@ export function DocFormHeader({
             {badges}
           </div>
           {actions && (
-            <div className="flex flex-wrap items-center gap-2">{actions}</div>
+            // shrink-0 กันปุ่มถูกบีบจนตกบรรทัด — ให้ title เป็นฝ่ายย่อแทน
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {actions}
+            </div>
           )}
         </div>
         {subtitle && (
@@ -100,9 +111,7 @@ export function DocFormHeader({
             // (ribbon ชิดซ้าย cols fixed → มีที่ว่างขวาให้ step ไม่ทับ cells).
             // min-h เผื่อความสูง workflowStep (absolute ไม่กินที่) กัน content ถัดไป
             // (เช่น item table ตอนไม่มี general fields คั่น) ถูก step ทับ
-            <div
-              className={cn("relative pt-4", workflowStep && "min-h-[6.5rem]")}
-            >
+            <div className={cn("relative pt-4", workflowStep && "min-h-26")}>
               <div className="-ml-4 flex w-full min-w-0 items-center">
                 {ribbon}
               </div>
@@ -119,35 +128,6 @@ export function DocFormHeader({
             </div>
           ))}
       </div>
-    </div>
-  );
-}
-
-/**
- * ribbon cell แบบ grid — label เล็ก uppercase + value; ไม่มี px (spacing มาจาก
- * grid gap ของ container) → align คอลัมน์กับ form body ที่ใช้ grid track เดียวกัน
- * (PO/PR/GRN/CN/SR)
- */
-export function RibbonField({
-  label,
-  value,
-  className,
-}: {
-  readonly label: string;
-  readonly value: ReactNode;
-  /** เช่น "lg:col-span-2" สำหรับ cell ที่ค่ายาว (department/vendor) */
-  readonly className?: string;
-}) {
-  return (
-    <div className={cn("min-w-0", className)}>
-      {/* label ใช้ EyeBrow ของกลาง — class ชุดเดียวกันเป๊ะกับที่เคยเขียนไว้ตรงนี้
-          ไม่ต้องมีสำเนาให้เพี้ยนกันทีหลัง */}
-      <EyeBrow>{label}</EyeBrow>
-      {/* 12px/500 ตาม docs/DESIGN.md — 12px คือ body จริงของแอป และ 500 คือชั้น
-          ของ "ค่า" ที่ต้องเด่นกว่า label โดยไม่ตะโกน · ของเดิม 14px/600 คือสเกล
-          หัวข้อ ทำให้แถบนี้ดังกว่าฟิลด์ข้างล่างที่เป็น 12px/500 ทั้งที่เป็นข้อมูล
-          ชนิดเดียวกัน (DESIGN: "600 ในแถวหนาแน่นอ่านเป็นหัวข้อ ทำให้สแกนยาก") */}
-      <div className="mt-1 truncate text-xs font-medium">{value}</div>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { useWastageReportById } from "@/hooks/use-wastage-report";
 import { WastageReportForm } from "./wr-form";
@@ -18,14 +17,23 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  */
 export function EditWastageReportContent({ id }: { id: string }) {
   const t = useTranslations("storeOperation.wastageReporting");
-  const { data: wastageReport, isLoading, error, refetch } =
-    useWastageReportById(id);
+  const {
+    data: wastageReport,
+    isLoading,
+    error,
+    refetch,
+  } = useWastageReportById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!wastageReport)
-    return <ErrorState message={t("notFound")} />;
+  if (error || !wastageReport)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/store-operation/wastage-reporting"
+      />
+    );
 
   return <WastageReportForm wastageReport={wastageReport} />;
 }

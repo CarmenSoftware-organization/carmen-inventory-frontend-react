@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
+import {
+  Building2,
+  CalendarDays,
+  History,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -13,12 +22,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { PrintDocumentButton } from "@/components/print-document-button";
-import { WorkflowStep } from "@/components/share/workflow-step";
-import { SrWorkflowHistory } from "./sr-workflow-history";
-import {
-  DocFormHeader,
-  RibbonField,
-} from "@/components/share/doc-form-header";
+import { WorkflowTrack } from "@/components/share/workflow-track";
+import { cn } from "@/lib/utils";
+import { WorkflowHistoryTimeline } from "@/components/share/workflow-history-timeline";
+import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
+import { DocFormHeader } from "@/components/share/doc-form-header";
 import { formatDate } from "@/lib/date-utils";
 import {
   SR_STATUS_CONFIG,
@@ -30,6 +38,7 @@ import type {
   StoreRequisition,
   StoreRequisitionType,
 } from "@/types/store-requisition";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface SrHeaderProps {
   readonly storeRequisition?: StoreRequisition;
@@ -77,6 +86,7 @@ export function SrHeader({
   onComment,
 }: SrHeaderProps) {
   const t = useTranslations("storeOperation.storeRequisition");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
@@ -84,7 +94,6 @@ export function SrHeader({
 
   const isView = mode === "view";
   const isAdd = mode === "add";
-  const isEdit = mode === "edit";
   const docStatus = storeRequisition?.doc_status;
   // draft/add ยังไม่เข้า workflow — ซ่อน workflow step (เหมือน PR)
   const isDraft = !docStatus || docStatus === "draft";
@@ -120,6 +129,13 @@ export function SrHeader({
           {t("breadcrumbNew")}
         </Badge>
       )}
+      {/* เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด
+          เพื่อคืนบรรทัด subtitle ให้แถบขั้นตอน */}
+      {storeRequisition?.doc_version != null && (
+        <span className="text-muted-foreground text-xs">
+          {tfl("version")} {storeRequisition.doc_version}
+        </span>
+      )}
     </>
   );
 
@@ -154,10 +170,10 @@ export function SrHeader({
             <Save aria-hidden="true" />
             {isPending ? getModeLabels(mode, t("entity")).pending : tc("save")}
           </Button>
-          {isEdit && storeRequisition && (
+          {storeRequisition && (
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={onDelete}
               disabled={isPending || isDeletePending}
@@ -170,6 +186,19 @@ export function SrHeader({
       )}
       {storeRequisition && onComment && (
         <CommentButton count={comments?.length} onClick={onComment} />
+      )}
+      {storeRequisition && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(storeRequisition.id, storeRequisition.sr_no)
+          }
+        >
+          <History aria-hidden="true" />
+          {tActivity("title")}
+        </Button>
       )}
       {isView && storeRequisition?.id && (
         <PrintDocumentButton
@@ -187,10 +216,9 @@ export function SrHeader({
 
   const workflowHistorySheet = hasHistory ? (
     <Sheet open={showHistory} onOpenChange={setShowHistory}>
-      <SheetContent
-        side="right"
-        className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
-      >
+      {/* ไม่ override ความกว้าง — ใช้ค่า default ของ SheetContent
+          (w-3/4 sm:max-w-sm) ให้เท่ากับ comment sheet */}
+      <SheetContent side="right" className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -198,72 +226,64 @@ export function SrHeader({
           </SheetDescription>
         </SheetHeader>
         <div className="px-4 pb-4">
-          <SrWorkflowHistory
+          <WorkflowHistoryTimeline
             history={workflowHistory}
+            statusConfig={SR_WORKFLOW_ACTION_CONFIG}
+            emptyLabel={t("noWorkflowHistory")}
             requestorName={requesterName}
-            createdAt={storeRequisition?.created_at}
+            createdAt={storeRequisition?.audit?.created?.at}
           />
         </div>
       </SheetContent>
     </Sheet>
   ) : null;
 
-  const departmentValue = (() => {
-    if (isLoading) return "—";
-    if (!departmentName) {
-      return (
-        <span className="text-destructive font-semibold" role="alert">
-          {t("noDepartment")}
-        </span>
-      );
-    }
-    return (
-      <span>
-        {departmentName}
-        {departmentCode && (
-          <span className="text-muted-foreground ml-2 text-xs font-normal">
-            {departmentCode}
-          </span>
-        )}
+  // ไม่มีแผนก = กรอกใบต่อไม่ได้ ต้องเตือน แต่ไม่ต้องเปลี่ยนเป็นข้อความสีแดง
+  // คนละชนิดกับช่องอื่น — ใช้ Input เหมือนกันหมดแล้วให้ aria-invalid วาดกรอบแดง
+  // (กติกาเดียวกับช่องที่ยังกรอกไม่ครบทั้งแอป)
+  const departmentMissing = !isLoading && !departmentName;
+  const departmentValue = isLoading
+    ? "—"
+    : departmentName
+      ? `${departmentName}${departmentCode ? ` (${departmentCode})` : ""}`
+      : t("noDepartment");
+
+  /**
+   * ผู้ขอ · แผนก · วันที่ อยู่ใต้เลขที่ใบเป็นข้อความ ไม่ใช่ช่องกรอกที่จางทั้งแถว
+   * (ทรงเดียวกับ PR/PO/GRN/CN) — สามค่านี้อ่านอย่างเดียว ไม่เข้า payload การทำ
+   * เป็นช่อง disabled กินพื้นที่เท่าช่องที่กรอกได้จริงและชวนให้เข้าใจผิดว่าแก้ได้
+   *
+   * วันที่ไม่เปิดให้เลือกเหมือน PR — วันที่ใบเบิกคือวันที่ระบบบันทึก ไม่ใช่ค่าที่
+   * ผู้เบิกกรอกเอง · แผนกที่ยังไม่ได้ตั้งยังต้องสะดุดตา จึงย้อมสีเตือนไว้เหมือนเดิม
+   */
+  const docMeta = (
+    <span className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+      <span className="flex items-center gap-1">
+        <User className="size-3 shrink-0" aria-hidden="true" />
+        {isLoading ? "—" : requesterName || "—"}
       </span>
-    );
-  })();
-
-  // ribbon เป็น grid คอลัมน์ fixed 10rem → cells ชิดซ้าย compact (เหมือน PO/PR).
-  // ml-4 หักล้าง -ml-4 ของ DocFormHeader. draft = 3 cells; ไม่ draft = 4 (มี workflow)
-  const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
-      {!isDraft && storeRequisition?.workflow_name && (
-        <RibbonField
-          label={tfl("workflow")}
-          value={storeRequisition.workflow_name}
-        />
+      <span
+        className={cn(
+          "flex items-center gap-1",
+          departmentMissing && "text-warning-ink",
+        )}
+      >
+        <Building2 className="size-3 shrink-0" aria-hidden="true" />
+        {departmentValue}
+      </span>
+      {srDate && (
+        <span className="flex items-center gap-1">
+          <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
+          {formatDate(srDate, dateFormat)}
+        </span>
       )}
-      <RibbonField
-        label={tfl("srDate")}
-        value={srDate ? formatDate(srDate, dateFormat) : "—"}
-      />
-      <RibbonField
-        label={tfl("requester")}
-        value={isLoading ? "—" : requesterName || "—"}
-      />
-      <RibbonField
-        label={tfl("department")}
-        value={departmentValue}
-        className="lg:col-span-2"
-      />
-    </div>
+    </span>
   );
-
-  const subtitle =
-    storeRequisition?.doc_version != null
-      ? `${tfl("version")} ${storeRequisition.doc_version}`
-      : undefined;
 
   // workflow stepper ใน header (เหมือน PR) — แสดงเส้นทาง prev → current → next
   const workflowStepEl =
     !isDraft && storeRequisition?.workflow_current_stage ? (
-      <WorkflowStep
+      <WorkflowTrack
         previousStage={storeRequisition.workflow_previous_stage}
         currentStage={storeRequisition.workflow_current_stage}
         nextStage={
@@ -277,7 +297,9 @@ export function SrHeader({
       />
     ) : undefined;
 
-  // แตะที่ workflow step → เปิด history sheet (progressive disclosure, เหมือน PR)
+  // กดที่แถบขั้นตอน = เปิดประวัติ · ไม่มีข้อความบอกว่า "กดเพื่อดู" แล้ว —
+  // ถ้าต้องติดป้ายบอกว่ากดได้ แปลว่า affordance ยังไม่พอ ให้ hover/cursor กับ
+  // tooltip ทำหน้าที่แทน · -ml-1 หักล้าง px-1 ของตัวเอง ให้แถบชิดซ้ายเสมอ title
   const workflowStep =
     workflowStepEl && hasHistory ? (
       <button
@@ -285,13 +307,9 @@ export function SrHeader({
         onClick={() => setShowHistory(true)}
         title={t("tabWorkflowHistory")}
         aria-label={t("tabWorkflowHistory")}
-        className="group hover:bg-muted/60 focus-visible:ring-ring flex flex-col items-end rounded-lg px-1 pb-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        className="hover:bg-muted/60 focus-visible:ring-ring -ml-1 w-fit cursor-pointer rounded-lg px-1 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
       >
         {workflowStepEl}
-        <span className="text-muted-foreground/50 group-hover:text-muted-foreground flex items-center gap-0.5 self-end text-micro-legal tracking-wide transition-colors">
-          <History className="size-2.5" />
-          {t("viewHistoryHint")}
-        </span>
       </button>
     ) : (
       workflowStepEl
@@ -301,14 +319,16 @@ export function SrHeader({
     <>
       <DocFormHeader
         title={storeRequisition?.sr_no ?? t("title")}
-        subtitle={subtitle}
+        subtitle={
+          <span className="flex flex-col gap-1">
+            {docMeta}
+            {workflowStep}
+          </span>
+        }
         backLabel={tc("goBack")}
         onBack={onBack}
         badges={badges}
         actions={actions}
-        ribbon={ribbon}
-        workflowStep={workflowStep}
-        workflowStepBelow
       />
       {workflowHistorySheet}
     </>

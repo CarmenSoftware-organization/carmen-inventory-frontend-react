@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -23,6 +22,7 @@ import { toast } from "sonner";
 import {
   DataGrid,
   DataGridContainer,
+  DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
@@ -57,12 +57,13 @@ import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
-import type { ViewScope } from "@/types/list-view";
+import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 export default function InventoryAdjustmentComponent() {
   const navigate = useNavigate();
   const t = useTranslations("inventoryManagement.inventoryAdjustment");
   const tc = useTranslations("common");
+  const exportErrorToast = useExportErrorToast();
   const tt = useTranslations("toast");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
@@ -112,8 +113,14 @@ export default function InventoryAdjustmentComponent() {
         control: "status",
         labelKey: "common.status",
         options: [
-          { labelKey: "status.in_progress", value: "doc_status|string:in_progress" },
-          { labelKey: "status.completed", value: "doc_status|string:completed" },
+          {
+            labelKey: "status.in_progress",
+            value: "doc_status|string:in_progress",
+          },
+          {
+            labelKey: "status.completed",
+            value: "doc_status|string:completed",
+          },
           { labelKey: "status.draft", value: "doc_status|string:draft" },
           { labelKey: "status.voided", value: "doc_status|string:voided" },
         ],
@@ -155,27 +162,6 @@ export default function InventoryAdjustmentComponent() {
   }, [lf.values.filter]);
 
   const queryParams = { ...params, filter: lf.filterParam };
-
-  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
-   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
-  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
-    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
-    const existing = list.find((v) => v.name === name);
-    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
-    if (existing) {
-      await lf.view.update(existing.id, scope, snapshot);
-      if (existing.id !== lf.view.current?.id) {
-        lf.view.apply({
-          ...existing,
-          filters: snapshot.filters,
-          sort: snapshot.sort,
-        });
-      }
-    } else {
-      const saved = await lf.view.saveAs(name, scope, snapshot);
-      lf.view.apply(saved);
-    }
-  };
 
   const handleExport = async () => {
     try {
@@ -236,7 +222,7 @@ export default function InventoryAdjustmentComponent() {
       }
       toast.success(tc("exportSuccess", { count }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : tc("exportFailed"));
+      exportErrorToast(err);
     }
   };
 
@@ -272,18 +258,14 @@ export default function InventoryAdjustmentComponent() {
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
           <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               size="sm"
@@ -313,28 +295,37 @@ export default function InventoryAdjustmentComponent() {
               const StockOutIcon = IA_TYPE_ICON["stock-out"];
               return (
                 <>
+                  {/* กล่องเป็นกลาง สีอยู่ที่ไอคอนครั้งเดียว — ปุ่มทึบสองสีติดกัน
+                      ในแถบเดียวดังกว่าตัวข้อมูลในตาราง (docs/DESIGN.md: หนึ่ง
+                      สัญญาณต่อหนึ่ง element) ส่วนสีตัวอักษรใช้ `-ink` ที่ผ่าน AA */}
                   <Button
                     size="sm"
-                    variant="success"
+                    variant="outline"
                     onClick={() =>
                       navigate(
                         `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-in`,
                       )
                     }
                   >
-                    <StockInIcon aria-hidden="true" />
+                    <StockInIcon
+                      aria-hidden="true"
+                      className="text-success-ink"
+                    />
                     {t("addStockIn")}
                   </Button>
                   <Button
                     size="sm"
-                    variant="destructive"
+                    variant="outline"
                     onClick={() =>
                       navigate(
                         `${INVENTORY_ADJUSTMENT_BASE_PATH}/new?type=stock-out`,
                       )
                     }
                   >
-                    <StockOutIcon aria-hidden="true" />
+                    <StockOutIcon
+                      aria-hidden="true"
+                      className="text-destructive"
+                    />
                     {t("addStockOut")}
                   </Button>
                 </>
@@ -447,9 +438,9 @@ export default function InventoryAdjustmentComponent() {
                   : "max-h-[calc(100vh-10rem-3rem)]",
               )}
             >
-              <div className="flex-1 overflow-auto">
+              <DataGridScrollArea>
                 <DataGridTable />
-              </div>
+              </DataGridScrollArea>
               <DataGridPagination />
             </DataGridContainer>
           </DataGrid>
@@ -505,10 +496,8 @@ export default function InventoryAdjustmentComponent() {
         open={saveViewDialogOpen}
         onOpenChange={setSaveViewDialogOpen}
         canManageBu={lf.view.canManageBu}
-        existingNames={(s) =>
-          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
-        }
-        onSave={handleSaveViewDialogSave}
+        existingNames={lf.view.existingNames}
+        onSave={lf.view.saveOrUpdate}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import { type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
-import { Ban, Check, Pencil, Save, Trash2, X } from "lucide-react";
+import { History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DocFormHeader } from "@/components/share/doc-form-header";
@@ -15,6 +15,7 @@ import type {
 } from "@/types/inventory-adjustment";
 import type { FormMode } from "@/types/form";
 import type { AdjFormValues } from "./ia-form-schema";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface IaFormHeroProps {
   readonly adjustmentType: InventoryAdjustmentType;
@@ -25,15 +26,11 @@ interface IaFormHeroProps {
   readonly isReadOnly: boolean;
   readonly isPending: boolean;
   readonly deleteIsPending: boolean;
-  readonly voidIsPending: boolean;
   readonly formId: string;
   readonly onBack: () => void;
   readonly onCancel: () => void;
   readonly onEdit: () => void;
   readonly onDelete: () => void;
-  readonly onVoid: () => void;
-  /** กด Commit — ฟอร์มเป็นคนเปิด confirm dialog เอง (ไม่ submit ตรง) */
-  readonly onCommit: () => void;
 }
 
 export function IaFormHero({
@@ -45,24 +42,18 @@ export function IaFormHero({
   isReadOnly,
   isPending,
   deleteIsPending,
-  voidIsPending,
   formId,
   onBack,
   onCancel,
   onEdit,
   onDelete,
-  onVoid,
-  onCommit,
 }: IaFormHeroProps) {
   const tc = useTranslations("common");
-  // ไม่ใช้ common.commit เพราะภาษาไทยของ key นั้นคือ "ยืนยันรับสินค้า" (ของ GRN)
-  const t = useTranslations("inventoryManagement.inventoryAdjustment");
+  const tActivity = useTranslations("activity");
   const isView = mode === "view";
-  const isEdit = mode === "edit";
   const TypeIcon = IA_TYPE_ICON[adjustmentType];
   const docNo = inventoryAdjustment?.si_no ?? inventoryAdjustment?.so_no ?? "";
   const canDelete = !!inventoryAdjustment && !isReadOnly;
-  const canVoid = isEdit && !!inventoryAdjustment && !isReadOnly;
   const canPrint = isView && !!inventoryAdjustment?.id;
 
   /** Save = เซฟเป็นฉบับร่าง — ตั้ง doc_status ก่อน submit ฟอร์ม
@@ -88,26 +79,8 @@ export function IaFormHero({
 
   const actions = (
     <>
-      {canVoid && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onVoid}
-          disabled={isPending || voidIsPending}
-        >
-          <Ban />
-          {tc("void")}
-        </Button>
-      )}
-      {canPrint && (
-        <PrintDocumentButton
-          documentType={adjustmentType === "stock-in" ? "SI" : "SO"}
-          documentId={inventoryAdjustment!.id}
-        />
-      )}
       {isView && !isReadOnly ? (
-        <Button size="sm" onClick={onEdit}>
+        <Button size="sm" variant="outline" onClick={onEdit}>
           <Pencil />
           {tc("edit")}
         </Button>
@@ -125,7 +98,6 @@ export function IaFormHero({
           </Button>
           <Button
             type="submit"
-            variant="outline"
             size="sm"
             form={formId}
             disabled={isPending}
@@ -134,21 +106,12 @@ export function IaFormHero({
             <Save />
             {tc("save")}
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            disabled={isPending}
-            onClick={onCommit}
-          >
-            <Check />
-            {t("commit")}
-          </Button>
         </>
       ) : null}
-      {isEdit && canDelete && (
+      {canDelete && (
         <Button
           type="button"
-          variant="destructive"
+          variant="outline"
           size="sm"
           onClick={onDelete}
           disabled={isPending || deleteIsPending}
@@ -156,6 +119,26 @@ export function IaFormHero({
           <Trash2 />
           {tc("delete")}
         </Button>
+      )}
+      {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+      {inventoryAdjustment && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(inventoryAdjustment.id, docNo || undefined)
+          }
+        >
+          <History aria-hidden="true" />
+          {tActivity("title")}
+        </Button>
+      )}
+      {canPrint && (
+        <PrintDocumentButton
+          documentType={adjustmentType === "stock-in" ? "SI" : "SO"}
+          documentId={inventoryAdjustment!.id}
+        />
       )}
     </>
   );

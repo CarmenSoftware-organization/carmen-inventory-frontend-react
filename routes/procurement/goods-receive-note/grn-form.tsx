@@ -6,8 +6,6 @@ import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
 import type { FormMode } from "@/types/form";
@@ -62,10 +60,9 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   );
   const fromWizard = !!wizardData;
 
-  // Document info ribbon — buyer/requestor + department แสดงอย่างเดียว (ไม่เข้า payload),
-  // grn_date เป็น field จริง. defaultCurrency* ใช้เป็น currency เริ่มต้นของ GRN ใหม่
+  // ผู้รับ + แผนก โชว์ใต้เลขที่ใบอย่างเดียว ไม่เข้า payload · grn_date เป็นช่อง
+  // กรอกจริงในฟอร์มแล้ว · defaultCurrency* ใช้เป็น currency เริ่มต้นของ GRN ใหม่
   const {
-    dateFormat,
     defaultBu,
     data: profileData,
     defaultCurrencyId,
@@ -161,11 +158,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
     form.reset(defaultValues);
   }, [goodsReceiveNote, defaultValues, form]);
 
-  const watchedGrnDate = useWatch({ control: form.control, name: "grn_date" });
-  const watchedDescription = useWatch({
-    control: form.control,
-    name: "description",
-  });
   const receivedByName =
     goodsReceiveNote?.received_by_name ||
     [profileData?.user_info?.firstname, profileData?.user_info?.lastname]
@@ -203,8 +195,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         deleteIsPending={actions.deleteGrn.isPending}
         receivedByName={receivedByName}
         departmentName={departmentName}
-        grnDate={watchedGrnDate}
-        dateFormat={dateFormat}
         onBack={actions.handleBack}
         onEnterEdit={() => setMode("edit")}
         onCancel={actions.handleCancel}
@@ -221,43 +211,18 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
       >
         <GrnFormHeader
           form={form}
-          disabled={isDisabled}
+          disabled={isDisabled || isView}
           fromWizard={fromWizard}
-          plainText={isView}
         />
 
-        {/* view แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
-        {(!isView || watchedDescription?.trim()) && (
-          <Field className={isView ? "gap-1" : undefined}>
-            <FieldLabel
-              htmlFor="grn-description"
-              className={
-                isView ? "text-muted-foreground font-normal" : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {isView ? (
-              <p className="min-h-8 text-xs whitespace-pre-wrap">
-                {watchedDescription}
-              </p>
-            ) : (
-              <Textarea
-                id="grn-description"
-                placeholder={t("descriptionPlaceholder")}
-                maxLength={256}
-                rows={2}
-                disabled={isDisabled}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        )}
+        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO)
+            สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ ก้อนล่างกวาดตาทีละแถว */}
+        <hr className="border-border" />
 
         <Tabs defaultValue="general">
           <TabsList variant="line">
             <TabsTrigger value="general" className="text-xs">
-              {t("tabGeneral")}
+              {t("tabItems")}
             </TabsTrigger>
             <TabsTrigger value="extra-cost" className="text-xs">
               {t("tabExtraCost")}

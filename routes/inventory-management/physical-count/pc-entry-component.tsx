@@ -289,8 +289,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
     getItemKey: (i) => filtered[i]?.id ?? i,
   });
 
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const locationName = pcData?.location_name ?? "";
   const locationCode = pcData?.location_code ?? "";
@@ -426,7 +425,7 @@ export function PcEntryComponent({ physicalCountId }: PcEntryComponentProps) {
                       onClick={handleSubmitReview}
                       disabled={reviewPhysicalCount.isPending}
                     >
-                      <SendHorizontal className="size-3.5" aria-hidden="true" />
+                      <SendHorizontal aria-hidden="true" />
                       {reviewPhysicalCount.isPending
                         ? t("submittingForReview")
                         : t("submitForReview")}

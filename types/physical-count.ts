@@ -55,8 +55,6 @@ export interface PhysicalCountDetail {
   diff_qty: number;
   counted_at: string | null;
   counted_by_id: string | null;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface PhysicalCountData {
@@ -74,10 +72,6 @@ export interface PhysicalCountData {
   completed_by_id?: string | null;
   product_counted: number;
   product_total: number;
-  created_at: string;
-  created_by_id?: string | null;
-  updated_at: string;
-  updated_by_id?: string | null;
   doc_version?: number;
   details: PhysicalCountDetail[];
 }
@@ -89,8 +83,6 @@ export interface PhysicalCount {
   department_name: string;
   is_active: boolean;
   doc_version?: number;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface CreatePhysicalCountDto {

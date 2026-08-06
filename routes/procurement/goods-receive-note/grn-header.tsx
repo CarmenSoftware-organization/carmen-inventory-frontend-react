@@ -1,5 +1,14 @@
 import { useTranslations } from "use-intl";
-import { FileText, Pencil, Save, Trash2, X } from "lucide-react";
+import {
+  Building2,
+  FileText,
+  History,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentButton } from "@/components/comment-button";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
@@ -10,12 +19,12 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/date-utils";
 import type { FormMode } from "@/types/form";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { GRN_FORM_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
-import { DocFormHeader, RibbonField } from "@/components/share/doc-form-header";
+import { DocFormHeader } from "@/components/share/doc-form-header";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface GrnHeaderProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
@@ -28,8 +37,6 @@ interface GrnHeaderProps {
   readonly receivedByName: string;
   /** display only — ไม่เข้า payload */
   readonly departmentName: string;
-  readonly grnDate?: string;
-  readonly dateFormat: string;
   readonly onBack: () => void;
   readonly onEnterEdit: () => void;
   readonly onCancel: () => void;
@@ -52,8 +59,6 @@ export function GrnHeader({
   deleteIsPending,
   receivedByName,
   departmentName,
-  grnDate,
-  dateFormat,
   onBack,
   onEnterEdit,
   onCancel,
@@ -63,6 +68,7 @@ export function GrnHeader({
   onSave,
 }: GrnHeaderProps) {
   const t = useTranslations("procurement.goodsReceiveNote");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useGoodsReceiveNoteComments(goodsReceiveNote?.id);
@@ -101,6 +107,14 @@ export function GrnHeader({
           {getGrnDocTypeLabel(t, goodsReceiveNote.doc_type)}
         </Badge>
       )}
+      {/* เลขที่ใบ · สถานะ · ชนิดใบ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด
+          (ทรงเดียวกับใบลดหนี้) — ไม่ใช่ Badge เพราะรุ่นเป็นตัวเลขอ้างอิง ไม่ใช่
+          สถานะที่ต้องสะดุดตา */}
+      {goodsReceiveNote?.doc_version != null && (
+        <span className="text-muted-foreground text-xs">
+          {tfl("version")} {goodsReceiveNote.doc_version}
+        </span>
+      )}
     </>
   );
 
@@ -110,6 +124,7 @@ export function GrnHeader({
       {isView && goodsReceiveNote && canEdit && (
         <Button
           size="sm"
+          variant="outline"
           onClick={
             editDenied
               ? () => dispatchPermissionDenied(updatePermission)
@@ -157,14 +172,14 @@ export function GrnHeader({
                 onClick={onSave}
               >
                 <Save aria-hidden="true" />
-                {isEdit ? tc("save") : t("create")}
+                {isEdit ? tc("save") : tc("create")}
               </Button>
             </>
           )}
-          {isEdit && goodsReceiveNote && (
+          {goodsReceiveNote && (
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={
                 deleteDenied
@@ -186,6 +201,19 @@ export function GrnHeader({
       {goodsReceiveNote && (
         <CommentButton count={comments?.length} onClick={onShowComment} />
       )}
+      {goodsReceiveNote && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            openActivity(goodsReceiveNote.id, goodsReceiveNote.grn_no)
+          }
+        >
+          <History />
+          {tActivity("title")}
+        </Button>
+      )}
       {isView && goodsReceiveNote?.id && (
         <PrintDocumentButton
           documentType="GRN"
@@ -200,28 +228,29 @@ export function GrnHeader({
     </>
   );
 
-  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (grn-form-header, grid-cols-4)
-  // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
-  // gap-x-3 ให้ตรง gap-3 ของ general grid
-  const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,10rem))]">
-      <RibbonField label={tfl("receivedBy")} value={receivedByName || "—"} />
-      <RibbonField
-        label={tfl("department")}
-        value={departmentName || "—"}
-        className="lg:col-span-2"
-      />
-      <RibbonField
-        label={tfl("grnDate")}
-        value={grnDate ? formatDate(grnDate, dateFormat) : "—"}
-      />
-    </div>
+  /**
+   * ผู้รับ + แผนก อยู่ใต้เลขที่ใบเป็นข้อความ ไม่ใช่ช่องกรอกที่จางทั้งแถว (ทรง
+   * เดียวกับใบลดหนี้) — สองค่านี้อ่านอย่างเดียว ไม่เข้า payload การทำเป็นช่อง
+   * disabled กินพื้นที่เท่าช่องที่กรอกได้จริงและชวนให้เข้าใจผิดว่าแก้ได้
+   *
+   * วันที่ย้ายไปเป็นช่องกรอกในฟอร์มแล้ว (ต่อจากวันที่รับของ) จึงไม่โชว์ซ้ำที่นี่
+   */
+  const subtitle = (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+      {receivedByName && (
+        <span className="flex items-center gap-1">
+          <User className="size-3 shrink-0" aria-hidden="true" />
+          {receivedByName}
+        </span>
+      )}
+      {departmentName && (
+        <span className="flex items-center gap-1">
+          <Building2 className="size-3 shrink-0" aria-hidden="true" />
+          {departmentName}
+        </span>
+      )}
+    </span>
   );
-
-  const subtitle =
-    goodsReceiveNote?.doc_version != null
-      ? `${tfl("version")} ${goodsReceiveNote.doc_version}`
-      : undefined;
 
   return (
     <DocFormHeader
@@ -231,7 +260,6 @@ export function GrnHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      ribbon={ribbon}
     />
   );
 }

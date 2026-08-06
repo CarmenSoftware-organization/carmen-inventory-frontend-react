@@ -326,7 +326,8 @@ function PoStep({
     const firstPo = result[0];
     // กัน PO ต่างสกุลเงินถูกยัดเข้า GRN เดียวด้วย exchange rate ของ PO แรก (silent error)
     if (result.some((po) => po.currency_id !== firstPo.currency_id)) {
-      toast.error(t("mixedCurrencyError"));
+      // เลือกได้แต่ทำต่อไม่ได้ = เตือนให้เลือกใหม่ ไม่ใช่ระบบพัง → warning
+      toast.warning(t("mixedCurrencyError"));
       return;
     }
     onComplete({

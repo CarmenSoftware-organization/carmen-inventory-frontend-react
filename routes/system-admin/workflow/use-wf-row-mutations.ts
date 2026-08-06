@@ -5,6 +5,8 @@ import { useTranslations } from "use-intl";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useCreateWorkflow, useUpdateWorkflow } from "@/hooks/use-workflow";
 import { httpClient } from "@/lib/http-client";
+import { ApiError } from "@/lib/api-error";
+import { useErrorToast } from "@/hooks/use-error-toast";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type { Workflow, WorkflowDto } from "@/types/workflows";
 import {
@@ -31,10 +33,7 @@ const runMutation = <T>(
         toast.success(successMessage);
         resolve();
       },
-      onError: (err: Error) => {
-        toast.error(err.message);
-        reject(err);
-      },
+      onError: (err: Error) => reject(err),
     });
   });
 
@@ -44,13 +43,14 @@ export function useWfRowMutations() {
   const updateWorkflow = useUpdateWorkflow();
   const createWorkflow = useCreateWorkflow();
   const t = useTranslations("systemAdmin.workflow");
+  const errorToast = useErrorToast();
 
   const fetchDetail = async (id: string): Promise<Workflow> => {
     if (!buCode) throw new Error("Missing buCode");
     const res = await httpClient.get(
       `${API_ENDPOINTS.WORKFLOWS(buCode)}/${id}`,
     );
-    if (!res.ok) throw new Error("Failed to fetch workflow");
+    if (!res.ok) throw await ApiError.from(res, "Failed to fetch workflow");
     const json = await res.json();
     return json.data as Workflow;
   };
@@ -61,12 +61,19 @@ export function useWfRowMutations() {
   ) => {
     try {
       setPendingId(workflow.id);
-      const detail = await fetchDetail(workflow.id);
+      let detail: Workflow;
+      try {
+        detail = await fetchDetail(workflow.id);
+      } catch (err) {
+        // ดึงเองด้วย httpClient ไม่ได้ผ่าน MutationCache → toast เองตรงนี้
+        errorToast(err);
+        return;
+      }
       await runner(detail);
     } catch (err) {
       // ข้อมูลคนละ shape — บอกให้ชัด ไม่ใช่โยน message ดิบของ schema ใส่หน้าผู้ใช้
+      // error อื่นมาจาก mutation ซึ่ง toast ขึ้นจาก MutationCache กลางแล้ว
       if (err instanceof WorkflowDataParseError) toast.error(t("incompatibleData"));
-      else if (err instanceof Error) toast.error(err.message);
     } finally {
       setPendingId(null);
     }

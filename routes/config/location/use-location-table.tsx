@@ -3,8 +3,11 @@ import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
-import { columnSkeletons, statusColumn } from "@/components/ui/data-grid/columns";
-import { AuditCell } from "@/components/share/audit-cell";
+import {
+  auditColumns,
+  columnSkeletons,
+  statusColumn,
+} from "@/components/ui/data-grid/columns";
 import { CircleCheck, CircleX } from "lucide-react";
 import type { Location } from "@/types/location";
 import type { ParamsDto } from "@/types/params";
@@ -126,36 +129,7 @@ export function useLocationTable({
       },
     },
     statusColumn<Location>(),
-    {
-      id: "created_at",
-      accessorFn: (row) => row.audit?.created?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("created")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.created}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("created") },
-    },
-    {
-      id: "updated_at",
-      accessorFn: (row) => row.audit?.updated?.at ?? "",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("updated")} />
-      ),
-      cell: ({ row }) => (
-        <AuditCell
-          entry={row.original.audit?.updated}
-          dateTimeFormat={dateTimeFormat}
-        />
-      ),
-      size: 160,
-      meta: { headerTitle: tfl("updated") },
-    },
+    ...auditColumns<Location>(tfl, dateTimeFormat),
   ];
 
   return useConfigTable<Location>({
@@ -167,5 +141,6 @@ export function useLocationTable({
     onDelete,
     hideStatus: true,
     initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    activity: { id: (r) => r.id, label: (r) => r.code },
   });
 }

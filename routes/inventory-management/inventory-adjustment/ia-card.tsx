@@ -1,6 +1,10 @@
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
-import { ListCard, ListCardRow } from "@/components/share/list-card";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
@@ -32,8 +36,7 @@ interface IaCardProps {
  */
 export default function IaCard({ item, onEdit, onDelete }: IaCardProps) {
   const tfl = useTranslations("field");
-  const { dateFormat, amountFormat, defaultCurrencyCode, dateTimeFormat } =
-    useProfile();
+  const { dateFormat, amountFormat, defaultCurrencyCode } = useProfile();
 
   const typeKey = getAdjustmentType(item);
   const isStockIn = typeKey === "stock-in";
@@ -96,23 +99,7 @@ export default function IaCard({ item, onEdit, onDelete }: IaCardProps) {
           )}
         </span>
       </ListCardRow>
-      {item.audit?.created?.at && (
-        <ListCardRow label={tfl("created")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.created.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
-      {item.audit?.created?.name && (
-        <ListCardRow label={tfl("by")}>{item.audit.created.name}</ListCardRow>
-      )}
-      {item.audit?.updated?.at && (
-        <ListCardRow label={tfl("updated")}>
-          <span className="tabular-nums">
-            {formatDate(item.audit.updated.at, dateTimeFormat)}
-          </span>
-        </ListCardRow>
-      )}
+      <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );
 }

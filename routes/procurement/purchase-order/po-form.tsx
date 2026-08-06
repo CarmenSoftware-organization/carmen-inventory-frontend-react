@@ -25,7 +25,6 @@ import { PoHeader } from "./po-header";
 import { PoGeneralFields } from "./po-general-fields";
 import { PoItemFields } from "./po-item-fields";
 import { PoFooterAction } from "./po-footer-action";
-import { PoNotesSummary } from "./po-notes-summary";
 import {
   createPoSchema,
   type PoFormValues,
@@ -36,15 +35,16 @@ import { usePoPreviousStages } from "@/hooks/use-purchase-order";
 import { usePoDialogState } from "./use-po-dialog-state";
 import { usePoProfileSync } from "./use-po-profile-sync";
 import { usePoFormHandlers } from "./use-po-form-handlers";
+// action ของ workflow ใช้คำชุดเดียวกับ PR (workflow engine ตัวเดียวกัน)
+import { PR_WORKFLOW_ACTION_CONFIG } from "@/constant/purchase-request";
 
 const PoCommentSheet = lazy(() =>
   import("./po-comment-sheet").then((mod) => ({ default: mod.PoCommentSheet })),
 );
 
-// reuse PR's timeline — WorkflowHistoryEntry shape เหมือนกัน
-const PoWorkflowHistory = lazy(() =>
-  import("../purchase-request/workflow/pr-workflow-history").then((mod) => ({
-    default: mod.PrWorkflowHistory,
+const WorkflowHistoryTimeline = lazy(() =>
+  import("@/components/share/workflow-history-timeline").then((mod) => ({
+    default: mod.WorkflowHistoryTimeline,
   })),
 );
 
@@ -174,6 +174,11 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
   const isPriceListLocked =
     purchaseOrder?.po_type === PO_TYPE.PL && !isReadOnly && !isViewOnly;
   const fieldsDisabled = isDisabled || isPriceListLocked;
+
+  // พ้น draft แล้ว workflow ล็อกถาวร — PoGeneralFields ใช้ค่านี้สั่ง disabled
+  // ไม่ได้ใช้ซ่อน ฟิลด์จึงอยู่ที่เดิมทุกโหมด
+  const isPoDraft =
+    !purchaseOrder?.po_status || purchaseOrder.po_status === PO_STATUS.DRAFT;
   // PO ที่มาจาก PR (!isManual): เนื้อหามาจาก PR หมดแล้ว ล็อกทุกอย่าง (items,
   // locations, notes) — ยกเว้น currency rate ที่ปลดไว้ใน PoGeneralFields
   // (gate ที่ fieldsDisabled ไม่ใช่ contentLocked) ให้ override เรตได้
@@ -194,7 +199,6 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         deletePoIsPending={deletePo.isPending}
         departmentName={departmentName}
         buyerName={purchaseOrder?.buyer_name || buyerName}
-        orderDate={purchaseOrder?.order_date ?? defaultValues.order_date}
         onBack={handleBack}
         onCancel={handleCancel}
         onEnterEdit={() => setMode("edit")}
@@ -211,22 +215,17 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
       >
         <PoGeneralFields
           form={form}
-          disabled={fieldsDisabled}
+          disabled={fieldsDisabled || isView}
           isManual={isManual}
           readOnly={isReadOnly}
-          plainText={isView || isReadOnly}
-          isDraft={
-            !purchaseOrder?.po_status ||
-            purchaseOrder.po_status === PO_STATUS.DRAFT
-          }
+          isDraft={isPoDraft}
           isAdd={!purchaseOrder}
         />
 
-        <PoNotesSummary
-          form={form}
-          disabled={contentLocked}
-          plainText={isView || isReadOnly}
-        />
+        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบ (ผู้ขาย/สกุลเงิน/วันที่/หมายเหตุ)
+            ออกจากตารางรายการ — สองก้อนนี้อ่านคนละจังหวะกัน ก้อนบนอ่านทีเดียวจบ
+            ก้อนล่างกวาดตาทีละแถว */}
+        <hr className="border-border" />
 
         <PoItemFields
           form={form}
@@ -235,6 +234,7 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           locationsDisabled={locationsDisabled}
           role={role}
           poStatus={purchaseOrder?.po_status}
+          isEditMode={isEditMode}
           isPending={isPending}
           onApprove={purchaseOrder ? handleApprovePo : undefined}
           onReject={
@@ -283,10 +283,9 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
           </Suspense>
           {hasHistory && (
             <Sheet open={showHistory} onOpenChange={dialogs.setShowHistory}>
-              <SheetContent
-                side="right"
-                className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
-              >
+              {/* ไม่ override ความกว้าง — ใช้ค่า default ของ SheetContent
+                  (w-3/4 sm:max-w-sm) ให้เท่ากับ comment sheet */}
+              <SheetContent side="right" className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
                   <SheetDescription className="sr-only">
@@ -295,10 +294,12 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
                 </SheetHeader>
                 <div className="px-4 pb-4">
                   <Suspense fallback={null}>
-                    <PoWorkflowHistory
+                    <WorkflowHistoryTimeline
                       history={purchaseOrder.workflow_history ?? []}
+                      statusConfig={PR_WORKFLOW_ACTION_CONFIG}
+                      emptyLabel={t("noWorkflowHistory")}
                       requestorName={purchaseOrder.buyer_name}
-                      createdAt={purchaseOrder.created_at}
+                      createdAt={purchaseOrder.audit?.created?.at}
                     />
                   </Suspense>
                 </div>

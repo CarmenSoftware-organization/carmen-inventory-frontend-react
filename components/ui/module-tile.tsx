@@ -1,6 +1,6 @@
 
 import { SubTile } from "@/components/icons/tiles";
-import { useModuleTile } from "@/hooks/use-module-color";
+import { useModuleTile } from "@/hooks/use-module-tile";
 
 /**
  * ไอคอน illustrated ของ module ปัจจุบัน (SubTile) — derive จาก route ผ่าน

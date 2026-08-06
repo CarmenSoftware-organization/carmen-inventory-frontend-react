@@ -614,7 +614,11 @@ function DataGridTableBodyRowFooter<TData>({ row }: { row: Row<TData> }) {
     <tr
       data-slot="footer-row"
       className={cn(
-        "[&>td]:border-border/50 [&>td]:border-b",
+        // แถวสุดท้ายไม่ต้องมีเส้นปิดท้าย เหมือนแถวข้อมูลปกติ — กล่องตารางมีขอบ
+        // ของตัวเองอยู่แล้ว เส้นซ้ำเข้าไปอีกชั้นจะกลายเป็นเส้นคู่ห่างกันเท่ากับ
+        // ที่ว่างของแถบเลื่อน ดูเป็นของเสียมากกว่าของตั้งใจ (PR เป็นหน้าเดียวที่
+        // ใช้ footerContent จึงเป็นหน้าเดียวที่มีเส้นนี้ ต่างจาก PO/GRN/CN)
+        "[&:not(:last-child)>td]:border-border/50 [&:not(:last-child)>td]:border-b",
         props.tableClassNames?.bodyRow,
       )}
     >

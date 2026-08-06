@@ -50,6 +50,8 @@ account.
 bun dev              # Dev server (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
 bun run dev:{local,dev,uat,prod}   # Dev server serving public/config.<env>.json (dev aliases dev:local)
 bun run build        # tsc + vite build → dist/
+bun run typecheck    # tsc --noEmit only
+bun run build:bump [patch|minor|major]   # Cut a release: bump package.json + release commit + annotated tag (local only, never pushes); run on main with a clean tree; gates on typecheck+lint+test:run; prompts for level if omitted
 bun run preview      # Serve the production build locally
 bun run lint         # ESLint          bun test            # Vitest watch
 bun test:run         # Run all tests   bun test:run <path> # Single file

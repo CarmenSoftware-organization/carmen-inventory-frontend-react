@@ -33,7 +33,6 @@ import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
-import type { ViewScope } from "@/types/list-view";
 
 const templateToReport = (t: ReportTemplate): Report => {
   return {
@@ -112,27 +111,6 @@ export default function ReportComponent() {
     fields: reportFilterFields,
   });
 
-  /** replace semantics: ชื่อซ้ำใน scope เดียวกัน → update ของเดิม, ไม่ซ้ำ → saveAs ใหม่
-   *  (mirror ของ PR pilot's handleSaveViewDialogSave) */
-  const handleSaveViewDialogSave = async (name: string, scope: ViewScope) => {
-    const list = scope === "bu" ? lf.view.buViews : lf.view.userViews;
-    const existing = list.find((v) => v.name === name);
-    const snapshot = { filters: lf.values, sort: lf.sortParam || undefined };
-    if (existing) {
-      await lf.view.update(existing.id, scope, snapshot);
-      if (existing.id !== lf.view.current?.id) {
-        lf.view.apply({
-          ...existing,
-          filters: snapshot.filters,
-          sort: snapshot.sort,
-        });
-      }
-    } else {
-      const saved = await lf.view.saveAs(name, scope, snapshot);
-      lf.view.apply(saved);
-    }
-  };
-
   const groupFilter = lf.values.groups
     ? lf.values.groups.split(",").filter(Boolean)
     : [];
@@ -178,12 +156,13 @@ export default function ReportComponent() {
           onClick: () => globalThis.window.open(url, "_blank"),
         },
       });
-    } catch (err) {
+    } catch {
       viewerWindow?.close();
-      toast.error(t("runError"), {
-        id: toastId,
-        description: err instanceof Error ? err.message : undefined,
-      });
+      // ไม่ใส่ err.message ลงบรรทัดสอง — เป็นข้อความของ dev (ภาษาอังกฤษ บางที
+      // เป็น stack trace ยาวเป็นสิบบรรทัด) ซึ่งเป็นกับดักเดียวกับที่
+      // hooks/use-error-toast.ts ปิดไปแล้วที่ท่อกลาง หน้านี้ยิง toast เอง
+      // เลยหลุดมาได้ · รายละเอียดจริงดูได้ที่ Report History
+      toast.error(t("runError"), { id: toastId });
     }
   };
 
@@ -305,10 +284,8 @@ export default function ReportComponent() {
         open={saveViewDialogOpen}
         onOpenChange={setSaveViewDialogOpen}
         canManageBu={lf.view.canManageBu}
-        existingNames={(s) =>
-          (s === "bu" ? lf.view.buViews : lf.view.userViews).map((v) => v.name)
-        }
-        onSave={handleSaveViewDialogSave}
+        existingNames={lf.view.existingNames}
+        onSave={lf.view.saveOrUpdate}
       />
     </>
   );

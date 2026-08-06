@@ -3,7 +3,7 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
 import { FieldInput } from "@/components/ui/field";
-import { Card } from "./recipe-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { RecipeFormValues } from "./recipe-form-schema";
 
 interface RecipeCostBreakdownProps {
@@ -39,7 +39,11 @@ export function RecipeCostBreakdown({
   const ovhPct = total > 0 ? (ovh / total) * 100 : 0;
 
   return (
-    <Card label={t("costBreakdown")} description={t("costBreakdownDesc")}>
+    <SettingSection
+      plain
+      title={t("costBreakdown")}
+      description={t("costBreakdownDesc")}
+    >
       <div
         className="bg-muted mb-3 flex h-2 overflow-hidden rounded-full"
         aria-hidden="true"
@@ -121,7 +125,7 @@ export function RecipeCostBreakdown({
         </span>
         <span className="text-base font-bold">฿{total.toFixed(2)}</span>
       </div>
-    </Card>
+    </SettingSection>
   );
 }
 

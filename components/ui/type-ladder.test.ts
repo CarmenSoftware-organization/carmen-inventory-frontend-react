@@ -135,9 +135,10 @@ const ALLOWED_OFF_LADDER: Record<string, number> = {
   // shadcn/react-day-picker upstream default (12.8px) on weekday headers.
   // Changing it diverges from upstream for 0.8px.
   "components/ui/calendar.tsx": 2,
-  // Login display sizes: 13/28/36/44px. The login screen is the one surface that
-  // is intentionally not dense — DESIGN.md's display end is deliberately loose.
-  "components/login-form.tsx": 4,
+  // Auth display sizes: 13/28/36/44px, now in the shell that /login and /register
+  // share. The auth screens are the one surface that is intentionally not dense —
+  // DESIGN.md's display end is deliberately loose.
+  "components/auth/auth-split-shell.tsx": 4,
   "components/module-landing.tsx": 1, // 24px section head
   "components/not-found-component.tsx": 1, // 88px "404" numeral
   "routes/dashboard/dashboard-component.tsx": 2, // 16px + 32px stat display

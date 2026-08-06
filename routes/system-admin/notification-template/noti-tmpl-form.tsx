@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { ChevronLeft, Pencil, Save, Trash2, X } from "lucide-react";
+import { ChevronLeft, History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +40,7 @@ import {
   notificationTemplateSchema,
   type NotificationTemplateFormValues,
 } from "./noti-tmpl-form-schema";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 const LIST_PATH = "/system-admin/notification-template";
 const FORM_ID = "notification-template-form";
@@ -53,6 +54,7 @@ export function NotificationTemplateForm({
   template,
 }: NotificationTemplateFormProps) {
   const t = useTranslations("systemAdmin.notificationTemplate");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tf = useTranslations("form");
   const tfl = useTranslations("field");
@@ -155,7 +157,7 @@ export function NotificationTemplateForm({
   const submitLabel = isPending ? pendingLabel : actionLabel;
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button
@@ -182,6 +184,18 @@ export function NotificationTemplateForm({
           )}
         </div>
         <div className="flex items-center gap-2">
+          {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+          {template && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => openActivity(template.id, template.name)}
+            >
+              <History />
+              {tActivity("title")}
+            </Button>
+          )}
           {isView ? (
             <Button size="sm" onClick={() => setMode("edit")}>
               <Pencil />
@@ -360,7 +374,7 @@ export function NotificationTemplateForm({
 /** Loading skeleton that mirrors the form's real layout (header + 2 sections). */
 export function NotificationTemplateFormSkeleton() {
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Skeleton className="size-8 rounded-md" />

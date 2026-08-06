@@ -34,6 +34,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/activity-logs/${id}/detail`,
   ADJUSTMENT_TYPES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/adjustment-types`,
+  /** UI telemetry batch ingest (click + page view) — ดู lib/analytics.ts */
+  ANALYTICS_EVENTS: "/api/proxy/api/analytics-events",
   APPLICATION_ROLES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/application-roles`,
   APPROVAL_PENDING: "/api/proxy/api/my-approve",
@@ -232,9 +234,9 @@ export const API_ENDPOINTS = {
     locationId: string,
     qty: number | string,
   ) =>
-    `/api/proxy/api/${buCode}/cost/product/${productId}/location/${locationId}/qty/${qty}`,
+    `/api/proxy/api/${buCode}/cost/products/${productId}/location/${locationId}/qty/${qty}`,
   PRODUCT_INVENTORY: (buCode: string, locationId: string, productId: string) =>
-    `/api/proxy/api/${buCode}/user-locations/${locationId}/product/${productId}/inventory`,
+    `/api/proxy/api/${buCode}/inventory-info/${productId}/${locationId}`,
   PRODUCT_INVENTORY_MOVEMENT: (buCode: string, productId: string) =>
     `/api/proxy/api/${buCode}/products/${productId}/inventory-movement`,
   PRODUCT_ITEM_GROUPS: (buCode: string) =>

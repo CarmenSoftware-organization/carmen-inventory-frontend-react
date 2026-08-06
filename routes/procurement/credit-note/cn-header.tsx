@@ -1,6 +1,12 @@
-
 import { useTranslations } from "use-intl";
-import { Pencil, Save, SendHorizonal, Trash2, X } from "lucide-react";
+import {
+  History,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -11,14 +17,11 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/date-utils";
 import type { FormMode } from "@/types/form";
-import { CN_STATUS, type CreditNoteDetail } from "@/types/credit-note";
+import type { CreditNoteDetail } from "@/types/credit-note";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
-import {
-  DocFormHeader,
-  RibbonField,
-} from "@/components/share/doc-form-header";
+import { DocFormHeader } from "@/components/share/doc-form-header";
+import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface CnHeaderProps {
   readonly creditNote?: CreditNoteDetail;
@@ -28,14 +31,11 @@ interface CnHeaderProps {
   readonly isLocked: boolean;
   /** display only — ไม่เข้า payload */
   readonly createdByName: string;
-  readonly cnDate?: string;
-  readonly dateFormat: string;
   readonly onBack: () => void;
   readonly onEnterEdit: () => void;
   readonly onCancel: () => void;
   readonly onShowDelete: () => void;
   readonly onShowComment: () => void;
-  readonly onSubmitCn: () => void;
 }
 
 /**
@@ -49,16 +49,14 @@ export function CnHeader({
   deleteIsPending,
   isLocked,
   createdByName,
-  cnDate,
-  dateFormat,
   onBack,
   onEnterEdit,
   onCancel,
   onShowDelete,
   onShowComment,
-  onSubmitCn,
 }: CnHeaderProps) {
   const t = useTranslations("procurement.creditNote");
+  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useCreditNoteComments(creditNote?.id);
@@ -66,7 +64,6 @@ export function CnHeader({
   const { can, isAdmin } = useCan();
   const prefix = usePermissionPrefix();
   const isView = mode === "view";
-  const isEdit = mode === "edit";
   const isAdd = mode === "add";
 
   const savePermission = prefix
@@ -80,16 +77,9 @@ export function CnHeader({
     : undefined;
   const saveDenied = !!savePermission && !isAdmin && !can(savePermission);
   const editDenied = !!updatePermission && !isAdmin && !can(updatePermission);
-  const deleteDenied =
-    !!deletePermission && !isAdmin && !can(deletePermission);
+  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
 
-  const statusCfg = creditNote
-    ? CN_STATUS_CONFIG[creditNote.doc_status]
-    : null;
-  const typeLabel =
-    creditNote?.credit_note_type === "amount_discount"
-      ? t("amountDiscount")
-      : t("quantityReturn");
+  const statusCfg = creditNote ? CN_STATUS_CONFIG[creditNote.doc_status] : null;
 
   const badges = (
     <>
@@ -98,45 +88,33 @@ export function CnHeader({
           {statusCfg.label ?? creditNote?.doc_status}
         </Badge>
       )}
-      {creditNote && (
-        <Badge variant="info-light" size="sm">
-          {typeLabel}
-        </Badge>
+      {/* เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด */}
+      {creditNote?.doc_version != null && (
+        <span className="text-muted-foreground text-xs">
+          {tfl("version")} {creditNote.doc_version}
+        </span>
       )}
     </>
   );
 
   const actions = (
     <>
-      {/* View — submit (draft) + edit */}
+      {/* View — edit (ส่งใบย้ายไป footer ขวาล่าง = CnFooterAction) */}
       {isView && !isLocked && (
-        <>
-          {creditNote?.doc_status === CN_STATUS.DRAFT && (
-            <Button
-              type="button"
-              size="sm"
-              variant="info"
-              disabled={isPending}
-              onClick={onSubmitCn}
-            >
-              <SendHorizonal aria-hidden="true" />
-              {tc("submit")}
-            </Button>
-          )}
-          <Button
-            size="sm"
-            onClick={
-              editDenied
-                ? () => dispatchPermissionDenied(updatePermission)
-                : onEnterEdit
-            }
-            aria-disabled={editDenied || undefined}
-            className={cn(editDenied && "opacity-50")}
-          >
-            <Pencil aria-hidden="true" />
-            {tc("edit")}
-          </Button>
-        </>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={
+            editDenied
+              ? () => dispatchPermissionDenied(updatePermission)
+              : onEnterEdit
+          }
+          aria-disabled={editDenied || undefined}
+          className={cn(editDenied && "opacity-50")}
+        >
+          <Pencil aria-hidden="true" />
+          {tc("edit")}
+        </Button>
       )}
 
       {/* Edit / add — cancel + save + delete */}
@@ -169,10 +147,10 @@ export function CnHeader({
               {isAdd ? tc("create") : tc("save")}
             </Button>
           )}
-          {isEdit && creditNote && !isLocked && (
+          {creditNote && !isLocked && (
             <Button
               type="button"
-              variant="destructive"
+              variant="outline"
               size="sm"
               onClick={
                 deleteDenied
@@ -194,6 +172,17 @@ export function CnHeader({
       {creditNote && (
         <CommentButton count={comments?.length} onClick={onShowComment} />
       )}
+      {creditNote && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => openActivity(creditNote.id, creditNote.cn_no)}
+        >
+          <History />
+          {tActivity("title")}
+        </Button>
+      )}
       {isView && creditNote?.id && (
         <PrintDocumentButton
           documentType="CN"
@@ -206,23 +195,20 @@ export function CnHeader({
     </>
   );
 
-  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (cn-general-fields, grid-cols-5)
-  // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
-  // gap-x-3 ให้ตรง gap-3 ของ general grid
-  const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-2 lg:grid-cols-[repeat(5,minmax(0,10rem))]">
-      <RibbonField label={tfl("createdBy")} value={createdByName || "—"} />
-      <RibbonField
-        label={tfl("date")}
-        value={cnDate ? formatDate(cnDate, dateFormat) : "—"}
-      />
-    </div>
-  );
-
+  // ไอคอนบอกว่าอันไหนคือคนสร้าง อันไหนคือวันที่สร้าง — บรรทัดนี้ไม่มี label
+  // กำกับ ถ้าปล่อยเป็นข้อความเปล่าสองก้อนคั่นด้วยจุด คนอ่านต้องเดาเอง
+  // (ไอคอนขนาดเท่าตัวอักษร สีเดียวกับข้อความ ไม่ใช่ signal สีแยก)
   const subtitle =
-    creditNote?.doc_version != null
-      ? `${tfl("version")} ${creditNote.doc_version}`
-      : undefined;
+    createdByName ? (
+      <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+        {createdByName && (
+          <span className="flex items-center gap-1">
+            <User className="size-3 shrink-0" aria-hidden="true" />
+            {createdByName}
+          </span>
+        )}
+      </span>
+    ) : undefined;
 
   return (
     <DocFormHeader
@@ -232,7 +218,6 @@ export function CnHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      ribbon={ribbon}
     />
   );
 }

@@ -237,7 +237,10 @@ export function FromPriceListContent() {
       else setStep(3);
       // รอ DOM ของ step ปลายทาง mount ก่อนค่อย scroll + focus invalid field
       requestAnimationFrame(() => scrollToFirstInvalidField());
-      toast.error(tv("formIncomplete"));
+      // warning ไม่ใช่ error — ระบบไม่ได้พัง แค่ยังกรอกไม่ครบ (สีแดงเก็บไว้ให้
+      // เรื่องที่ผู้ใช้แก้เองไม่ได้) และใช้ประโยคเดียวกับฟอร์ม PR/PO/GRN/CN/SR
+      // ซึ่งบอกด้วยว่าพาไปที่ช่องที่ต้องแก้ให้แล้ว ตรงกับที่ wizard ทำจริง
+      toast.warning(tv("incompleteDocument"));
       return;
     }
     // Sync ค่าระดับ item จาก locations ก่อนสร้าง payload — wizard ไม่มี

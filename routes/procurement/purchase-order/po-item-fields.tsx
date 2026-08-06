@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import {
+  BoxIcon,
   Check,
   ChevronsDownUp,
   ChevronsUpDown,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import EmptyComponent from "@/components/empty-component";
 import {
   DataGrid,
   DataGridContainer,
@@ -41,6 +43,8 @@ interface PoItemFieldsProps {
   locationsDisabled?: boolean;
   role?: string;
   poStatus?: string;
+  /** อยู่โหมดแก้ไขไหม — checkbox ตัดสินรายการโผล่เฉพาะตอนแก้ได้ */
+  isEditMode?: boolean;
   onApprove?: () => void;
   onReject?: () => void;
   onClose?: (reason: string) => void;
@@ -54,6 +58,7 @@ export function PoItemFields({
   locationsDisabled = disabled,
   role,
   poStatus,
+  isEditMode = false,
   onApprove,
   onReject,
   onClose,
@@ -74,7 +79,16 @@ export function PoItemFields({
   } = useFieldArray({ control: form.control, name: "items" });
 
   const readOnly = role === STAGE_ROLE.APPROVE;
-  const showApproveCheckbox = !!poStatus && poStatus !== "draft";
+  const isApprover =
+    role === STAGE_ROLE.APPROVE && poStatus === PO_STATUS.IN_PROGRESS;
+  // ต้องอยู่โหมดแก้ไขก่อน ถึงจะเห็น checkbox — ใบที่เปิดอ่านเฉย ๆ ติ๊กไปก็ทำ
+  // อะไรต่อไม่ได้ · จากนั้นค่อยดูว่าใบพ้น draft แล้ว (draft ยังไม่มีอะไรให้ตัดสิน)
+  const isPoInWorkflow = !!poStatus && poStatus !== "draft";
+  // checkbox = การกระทำ ต้องอยู่โหมดแก้ไขถึงจะกดได้จริง
+  const showApproveCheckbox = isEditMode && isPoInWorkflow;
+  // สถานะรายแถว = ข้อมูล ไม่ใช่การกระทำ — โชว์ตลอดตั้งแต่ใบเข้า workflow
+  // โหมดอ่านก็ต้องรู้ว่าแถวไหนผ่าน/ถูกปฏิเสธ แค่กดแก้ไม่ได้
+  const showStatusBadge = isPoInWorkflow;
 
   const table = usePoItemTable({
     form,
@@ -83,6 +97,9 @@ export function PoItemFields({
     locationsDisabled,
     readOnly,
     showApproveCheckbox,
+    showStatusBadge,
+    // ล้างสถานะได้เฉพาะคนที่ตัดสินได้จริง — เกณฑ์เดียวกับปุ่มตัดสินหมู่
+    canResetStatus: isApprover && isEditMode,
     onDelete: setDeleteIndex,
   });
 
@@ -149,8 +166,6 @@ export function PoItemFields({
     [items],
   );
 
-  const isApprover =
-    role === STAGE_ROLE.APPROVE && poStatus === PO_STATUS.IN_PROGRESS;
   const poAction = computePoAction(itemStatuses);
   const canApprove = !!onApprove && isApprover && poAction === "approved";
   const canReject = !!onReject && isApprover && poAction === "rejected";
@@ -163,7 +178,10 @@ export function PoItemFields({
   const selectedRows = table.getSelectedRowModel().rows;
   const selectedIndices = selectedRows.map((r) => r.index);
 
-  const canBulkAct = isApprover && selectedRows.length > 0;
+  // isEditMode ด้วย — คอมเมนต์ที่ canResetStatus บอกว่า "เกณฑ์เดียวกับปุ่มตัดสินหมู่"
+  // แต่ของเดิมสองที่ไม่ตรงกัน (ตรงนั้นเช็ค isEditMode ตรงนี้ไม่เช็ค) selection ค้าง
+  // ข้ามโหมดได้ ปุ่มตัดสินจึงโผล่ให้กดในโหมดอ่าน
+  const canBulkAct = isApprover && isEditMode && selectedRows.length > 0;
   const showBulkActions = selectedRows.length > 0 && (canBulkAct || canClose);
 
   const handleBulkApprove = () => {
@@ -225,96 +243,109 @@ export function PoItemFields({
 
   const itemsError = form.formState.errors.items?.message;
 
+  const addAction = (!role || role === STAGE_ROLE.CREATE) && !disabled && (
+    <Button type="button" size="sm" variant="secondary" onClick={handleAddItem}>
+      <Plus /> {t("addItem")}
+    </Button>
+  );
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-end gap-1.5">
-        {showBulkActions && canBulkAct && (
+      {/* แถวเดียว: ปุ่มตัดสิน (อนุมัติ/ส่งกลับ/ปฏิเสธ/ปิด) ชิดซ้าย — เป็นการ
+          กระทำกับแถวที่เลือกไว้ มือไปหาปุ่มตรงที่เพิ่งติ๊ก ไม่ต้องกวาดตาไปสุดขวา
+          ส่วน toolbar (กาง/ยุบ, เพิ่มรายการ) เป็นของทั้งตาราง ดันไปขวาด้วย
+          ms-auto — ไม่ใช้ justify-between เพราะตอนไม่มีปุ่มตัดสิน toolbar ต้อง
+          ยังอยู่ขวาเหมือนเดิม */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {showBulkActions && (
           <>
-            <Button
-              type="button"
-              variant="success"
-              size="xs"
-              disabled={isPending}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleBulkApprove();
-              }}
-            >
-              <Check />
-              {tc("approve")}
-            </Button>
-            <Button
-              type="button"
-              variant="warning"
-              size="xs"
-              disabled={isPending}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleBulkReview();
-              }}
-            >
-              <Eye />
-              {tc("review")}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="xs"
-              disabled={isPending}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setBulkAction("reject");
-              }}
-            >
-              <ThumbsDown />
-              {tc("reject")}
-            </Button>
-          </>
-        )}
-        {showBulkActions && canClose && (
-          <Button
-            type="button"
-            variant="warning"
-            size="xs"
-            disabled={isPending}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setBulkAction("close");
-            }}
-          >
-            <Lock />
-            {tc("close")}
-          </Button>
-        )}
-        {itemFields.length > 0 && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="xs"
-            onClick={() =>
-              table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
-            }
-          >
-            {table.getIsAllRowsExpanded() ? (
+            {canBulkAct && (
               <>
-                <ChevronsDownUp /> {tc("collapseAll")}
-              </>
-            ) : (
-              <>
-                <ChevronsUpDown /> {tc("expandAll")}
+                <Button
+                  type="button"
+                  variant="success"
+                  size="sm"
+                  disabled={isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleBulkApprove();
+                  }}
+                >
+                  <Check />
+                  {tc("approve")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="warning"
+                  size="sm"
+                  disabled={isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleBulkReview();
+                  }}
+                >
+                  <Eye />
+                  {tc("review")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  disabled={isPending}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setBulkAction("reject");
+                  }}
+                >
+                  <ThumbsDown />
+                  {tc("reject")}
+                </Button>
               </>
             )}
-          </Button>
+            {canClose && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isPending}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setBulkAction("close");
+                }}
+              >
+                <Lock />
+                {tc("close")}
+              </Button>
+            )}
+          </>
         )}
-        {(!role || role === STAGE_ROLE.CREATE) && !disabled && (
-          <Button type="button" size="xs" onClick={handleAddItem}>
-            <Plus /> {t("addItem")}
-          </Button>
-        )}
+        <div className="ms-auto flex flex-wrap items-center gap-1.5">
+          {itemFields.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() =>
+                table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
+              }
+            >
+              {table.getIsAllRowsExpanded() ? (
+                <>
+                  <ChevronsDownUp /> {tc("collapseAll")}
+                </>
+              ) : (
+                <>
+                  <ChevronsUpDown /> {tc("expandAll")}
+                </>
+              )}
+            </Button>
+          )}
+          {addAction}
+        </div>
       </div>
 
       {itemsError && (
@@ -344,14 +375,18 @@ export function PoItemFields({
             columnsResizable: true,
           }}
           emptyMessage={
-            <div className="text-muted-foreground py-10 text-center text-sm">
-              {t("noItems")}
-            </div>
+            <EmptyComponent
+              icon={BoxIcon}
+              title={t("noItems")}
+              description={t("noItemsDesc")}
+            />
           }
         >
           {/* DataGridContainer = native overflow-auto (เลี่ยง nested scroll ของ
-              Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด) */}
-          <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+              Radix ScrollArea ที่ทำ scroll แนวนอนสะดุด)
+              · pb-3 = ที่ว่างให้ scrollbar แนวนอนยืน — บน macOS แถบนี้ลอยทับ
+              เนื้อหาโดยไม่กินที่ ไม่เว้นไว้มันจะไปบังตัวเลขแถวสุดท้าย */}
+          <DataGridContainer scroll>
             <DataGridTable />
           </DataGridContainer>
         </DataGrid>

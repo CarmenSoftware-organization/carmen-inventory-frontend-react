@@ -1,4 +1,4 @@
-
+import { useTranslations } from "use-intl";
 import { useRequestPriceListById } from "@/hooks/use-request-price-list";
 import { RequestPriceListForm } from "./rfp-form";
 import { ErrorState } from "@/components/ui/error-state";
@@ -12,6 +12,7 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * <EditRequestPriceListContent id="rfp-001" />
  */
 export function EditRequestPriceListContent({ id }: { id: string }) {
+  const tErr = useTranslations("vendorManagement.requestPriceList");
   const {
     data: requestPriceList,
     isLoading,
@@ -20,10 +21,15 @@ export function EditRequestPriceListContent({ id }: { id: string }) {
   } = useRequestPriceListById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!requestPriceList)
-    return <ErrorState message="Request price list not found" />;
+  if (error || !requestPriceList)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={tErr("notFound")}
+        onRetry={() => refetch()}
+        backTo="/vendor-management/request-price-list"
+      />
+    );
 
   return <RequestPriceListForm requestPriceList={requestPriceList} />;
 }

@@ -1,12 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Field, FieldLabel, FieldPlainText } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile } from "@/hooks/use-profile";
 import {
   SR_TYPE,
@@ -23,11 +20,12 @@ import {
 } from "./sr-form-schema";
 import { buildSrDefaultValues, srGrandTotal } from "./sr-form-helpers";
 import { useSrFormActions } from "./use-sr-form-actions";
-import { SrItemFields, type SrItemFieldsHandle } from "./sr-item-fields";
+import { SrItemFields } from "./sr-item-fields";
 import { SrHeader } from "./sr-header";
 import { SrRequestDetails } from "./sr-request-details";
 import { SrFooter } from "./sr-footer";
 import { SrFormDialogs } from "./sr-form-dialogs";
+import { SrStockTable } from "./sr-stock-table";
 
 interface StoreRequisitionFormProps {
   readonly storeRequisition?: StoreRequisition;
@@ -83,7 +81,16 @@ export function StoreRequisitionForm({
   });
   const isDisabled = isView || actions.isPending;
 
-  const itemsRef = useRef<SrItemFieldsHandle>(null);
+  const [tab, setTab] = useState("items");
+
+  // Radix ถอด TabsContent ที่ไม่ได้เลือกออกจาก DOM — กด submit ค้างอยู่แท็บ Stock
+  // แล้วรายการกรอกไม่ครบ จะขึ้น toast เตือนแต่ไม่มีช่องให้เห็นว่าผิดตรงไหน
+  const submitCount = form.formState.submitCount;
+  useEffect(() => {
+    if (!submitCount) return;
+    if (form.formState.errors.items) setTab("items");
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ยิงครั้งเดียวต่อการกด submit
+  }, [submitCount]);
 
   const fromLocationId = useWatch({
     control: form.control,
@@ -99,15 +106,6 @@ export function StoreRequisitionForm({
     control: form.control,
     name: "department_id",
   });
-  const description = useWatch({ control: form.control, name: "description" });
-
-  // description แก้ได้เฉพาะผู้สร้าง (role CREATE) — ขั้น approve/issue/view lock
-  const srRole = storeRequisition?.role ?? STAGE_ROLE.CREATE;
-  const isDescReadOnly =
-    isView ||
-    srRole === STAGE_ROLE.APPROVE ||
-    srRole === STAGE_ROLE.ISSUE ||
-    srRole === STAGE_ROLE.VIEW_ONLY;
 
   const [fromLocInfo, setFromLocInfo] = useState<LocationInfo>({
     name: storeRequisition?.from_location_name ?? "",
@@ -171,7 +169,6 @@ export function StoreRequisitionForm({
   }
 
   const itemFieldsProps = {
-    ref: itemsRef,
     form,
     disabled: isDisabled,
     disableAdd: !fromLocationId || !toLocationId,
@@ -211,10 +208,6 @@ export function StoreRequisitionForm({
           form={form}
           readOnly={isView}
           disabled={actions.isPending}
-          dateFormat={dateFormat}
-          workflowName={storeRequisition?.workflow_name}
-          fromLocInfo={fromLocInfo}
-          toLocInfo={toLocInfo}
           onFromLocInfoChange={setFromLocInfo}
           onToLocInfoChange={setToLocInfo}
           role={storeRequisition?.role ?? STAGE_ROLE.CREATE}
@@ -225,52 +218,40 @@ export function StoreRequisitionForm({
           isAdd={isAdd}
         />
 
-        {/* read-only แสดงเฉพาะเมื่อมี value; ตอนแก้ได้แสดง Textarea เสมอ */}
-        {(!isDescReadOnly || description?.trim()) && (
-          <Field>
-            <FieldLabel
-              htmlFor="sr-description"
-              className={
-                isDescReadOnly ? "text-muted-foreground font-normal" : undefined
-              }
-            >
-              {tfl("description")}
-            </FieldLabel>
-            {isDescReadOnly ? (
-              <FieldPlainText className="text-xs">
-                <span className="whitespace-pre-line">{description}</span>
-              </FieldPlainText>
-            ) : (
-              <Textarea
-                id="sr-description"
-                placeholder={t("optionalDescription")}
-                className="min-h-13"
-                maxLength={256}
-                disabled={actions.isPending}
-                {...form.register("description")}
-              />
-            )}
-          </Field>
-        )}
+        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบออกจากตารางรายการ (เหมือน PO/GRN)
+            สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ ก้อนล่างกวาดตาทีละแถว */}
+        <hr className="border-border" />
 
-        <div className="flex items-center justify-end">
-          {!isDisabled && (
-            <Button
-              type="button"
-              size="xs"
-              onClick={() => itemsRef.current?.addItem()}
-              disabled={!fromLocationId || !toLocationId}
-            >
-              <Plus /> {t("addItem")}
-            </Button>
-          )}
-        </div>
-        {form.formState.errors.items?.message && (
-          <p className="text-destructive text-xs" role="alert">
-            {form.formState.errors.items.message}
-          </p>
-        )}
-        <SrItemFields {...itemFieldsProps} />
+        <Tabs value={tab} onValueChange={setTab}>
+          <TabsList variant="line">
+            <TabsTrigger value="items" className="text-xs">
+              {t("tabItems")}
+            </TabsTrigger>
+            <TabsTrigger value="stock" className="text-xs">
+              {t("tabStock")}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="items" className="space-y-4">
+            {form.formState.errors.items?.message && (
+              <p className="text-destructive text-xs" role="alert">
+                {form.formState.errors.items.message}
+              </p>
+            )}
+            <SrItemFields {...itemFieldsProps} />
+          </TabsContent>
+
+          <TabsContent value="stock">
+            <SrStockTable
+              items={items}
+              fromLocationName={fromLocInfo.name}
+              toLocationName={toLocInfo.name}
+              srId={storeRequisition?.id}
+              srNo={storeRequisition?.sr_no}
+              docStatus={storeRequisition?.doc_status}
+            />
+          </TabsContent>
+        </Tabs>
       </form>
 
       <SrFooter

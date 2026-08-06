@@ -60,11 +60,11 @@ export function EqImageField({
 
   const pickFile = (selected: File) => {
     if (!IMAGE_MIME_TYPES.includes(selected.type)) {
-      toast.error(t("imageTypeError"));
+      toast.warning(t("imageTypeError"));
       return;
     }
     if (selected.size > IMAGE_MAX_BYTES) {
-      toast.error(t("imageSizeError", { size: formatBytes(IMAGE_MAX_BYTES) }));
+      toast.warning(t("imageSizeError", { size: formatBytes(IMAGE_MAX_BYTES) }));
       return;
     }
     onChange({ file: selected, removed: false });

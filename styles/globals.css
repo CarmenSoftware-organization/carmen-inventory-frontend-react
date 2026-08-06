@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "./module-colors.css";
 
+/* เอกสาร/สกิลไม่ใช่ซอร์สรันไทม์ — Tailwind auto-detect กวาด .md ด้วย แล้วเก็บข้อความ
+   อย่าง `bg-[var(…)]` ในแผนงานไปเป็น candidate จริง (CSS warning + คลาสขยะในบันเดิล) */
+@source not "../docs";
+@source not "../.claude";
+
 @custom-variant dark (&:is(.dark *));
 
 
@@ -350,6 +355,39 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+}
+
+@layer components {
+  /* ── workflow-track: ลูกศรลำดับขั้นเอกสาร ──
+     บากซ้ายรับปลายของช่องก่อนหน้า แหลมขวาชี้ทิศทางที่เอกสารกำลังเดินไป
+     ใช้ clip-path ไม่ใช่สามเหลี่ยม pseudo-element เพราะกล่องต้องยืดตามความยาว
+     ชื่อขั้นเอง และรับสีจาก CSS custom property ได้ตรง ๆ (dark mode จึงมาฟรี)
+     ข้อแลก: clip ตัดเส้นขอบไปด้วย ใส่ border ไม่ได้ — ออกแบบเป็นพื้น tint จึงไม่กระทบ */
+  .wf-chevron {
+    --wf-notch: 0.5rem;
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--wf-notch)) 0,
+      100% 50%,
+      calc(100% - var(--wf-notch)) 100%,
+      0 100%,
+      var(--wf-notch) 50%
+    );
+  }
+
+  /* ช่องแรก — ซ้ายตัดตรง ไม่มีปลายของใครมาเสียบ
+     ต้องใส่คู่กับ .wf-chevron เสมอ เพราะ --wf-notch ถูกประกาศไว้ที่ class นั้น
+     selector เขียนเป็น .wf-chevron.wf-chevron-head (specificity 0,2,0) จึงชนะ
+     .wf-chevron (0,1,0) ด้วยตัวมันเอง ไม่ต้องพึ่งลำดับใน source */
+  .wf-chevron.wf-chevron-head {
+    clip-path: polygon(
+      0 0,
+      calc(100% - var(--wf-notch)) 0,
+      100% 50%,
+      calc(100% - var(--wf-notch)) 100%,
+      0 100%
+    );
+  }
 }
 
 @layer base {

@@ -289,9 +289,9 @@ export function CommentSheet({
     const validFiles: File[] = [];
     for (const file of Array.from(files)) {
       if (!ALLOWED_TYPES.has(file.type)) {
-        toast.error(t("fileNotAllowed", { name: file.name }));
+        toast.warning(t("fileNotAllowed", { name: file.name }));
       } else if (file.size > MAX_FILE_SIZE) {
-        toast.error(t("fileTooLarge", { name: file.name }));
+        toast.warning(t("fileTooLarge", { name: file.name }));
       } else {
         validFiles.push(file);
       }
@@ -354,8 +354,8 @@ export function CommentSheet({
       setPendingFiles([]);
       setPendingRawFiles([]);
       toast.success(t("added"));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("addFailed"));
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว — ที่นี่แค่ไม่ล้างช่องพิมพ์ทิ้ง
     }
   };
 
@@ -380,8 +380,8 @@ export function CommentSheet({
       });
       cancelEdit();
       toast.success(t("updated"));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("updateFailed"));
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว — คง edit mode ไว้ให้แก้ต่อ
     }
   };
 
@@ -391,8 +391,8 @@ export function CommentSheet({
       await onDelete(deleteTarget.id);
       setDeleteTarget(null);
       toast.success(t("deleted"));
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t("deleteFailed"));
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว — คง dialog ยืนยันไว้ให้ลองใหม่
     }
   };
 

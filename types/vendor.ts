@@ -40,8 +40,6 @@ export interface Vendor {
   contacts?: VendorContact[];
   /** @deprecated use `contacts` */
   tb_vendor_contact?: VendorContact[];
-  created_at: string;
-  updated_at: string;
   /** audit ที่ backend enrich มา (created/updated พร้อมชื่อผู้ทำ) — ใช้แสดงคอลัมน์ list/card */
   audit?: Audit;
   /** Optimistic-concurrency version; required when PATCHing the record. */

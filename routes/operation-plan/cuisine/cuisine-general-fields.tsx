@@ -13,7 +13,7 @@ import {
   CUISINE_REGION_OPTIONS,
   CUISINE_REGION_LABEL_KEY,
 } from "@/constant/cuisine";
-import { Card } from "./cuisine-card-shell";
+import { SettingSection } from "@/components/ui/setting-section";
 import type { CuisineFormValues } from "./cuisine-form-schema";
 
 interface CuisineGeneralFieldsProps {
@@ -32,9 +32,10 @@ export function CuisineGeneralFields({
   const errors = form.formState.errors;
 
   return (
-    <Card
+    <SettingSection
+      plain
       first
-      label={tf("generalInfo")}
+      title={tf("generalInfo")}
       description={t("generalInfoDesc")}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -94,6 +95,6 @@ export function CuisineGeneralFields({
           {...form.register("description")}
         />
       </Field>
-    </Card>
+    </SettingSection>
   );
 }

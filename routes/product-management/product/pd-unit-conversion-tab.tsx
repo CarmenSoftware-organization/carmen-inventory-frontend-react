@@ -3,6 +3,7 @@ import { useTranslations } from "use-intl";
 import {
   Controller,
   useFieldArray,
+  useFormState,
   useWatch,
   type FieldArrayWithId,
 } from "react-hook-form";
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { SettingSection } from "@/components/ui/setting-section";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useUnit } from "@/hooks/use-unit";
 import EmptyComponent from "@/components/empty-component";
@@ -47,6 +49,11 @@ function UnitConversionTab({
   isDisabled,
 }: UnitConversionTabProps) {
   "use no memo";
+  // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
+  // และ props (form/isDisabled) เป็น ref นิ่ง กด save แล้ว validation fail ตัว
+  // parent re-render แต่ตัวนี้ถูก memo กั้นไว้ กรอบแดงเลยไม่ขึ้นจนกว่าจะสลับแท็บ
+  // ไปกลับ (remount แล้วอ่านใหม่) · useFormState subscribe ที่ component นี้เอง
+  const { errors } = useFormState({ control: form.control });
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
   const { fields, prepend, remove } = useFieldArray({
@@ -179,9 +186,7 @@ function UnitConversionTab({
             onUnitChange={handleFromUnitChange}
             usedIds={usedSelectableIds}
             unitMap={unitMap}
-            error={
-              form.formState.errors[name]?.[row.index]?.from_unit_id?.message
-            }
+            error={errors[name]?.[row.index]?.from_unit_id?.message}
           />
         ),
         size: 160,
@@ -215,9 +220,7 @@ function UnitConversionTab({
             onUnitChange={handleToUnitChange}
             usedIds={usedSelectableIds}
             unitMap={unitMap}
-            error={
-              form.formState.errors[name]?.[row.index]?.to_unit_id?.message
-            }
+            error={errors[name]?.[row.index]?.to_unit_id?.message}
           />
         ),
         size: 160,
@@ -233,8 +236,7 @@ function UnitConversionTab({
               </div>
             );
           }
-          const errorMessage =
-            form.formState.errors[name]?.[row.index]?.to_unit_qty?.message;
+          const errorMessage = errors[name]?.[row.index]?.to_unit_qty?.message;
           return (
             <div className="flex items-center">
               <FieldInput
@@ -357,6 +359,9 @@ function UnitConversionTab({
     inventoryUnitName,
     unitMap,
     usedSelectableIds,
+    // cell ปิดทับ errors ไว้ ไม่ใส่ใน deps แล้ว columns ไม่สร้างใหม่ตอน
+    // validation fail — error ที่ส่งเข้า cell ค้างเป็นค่าเก่า
+    errors,
   ]);
 
   const table = useReactTable({
@@ -367,27 +372,28 @@ function UnitConversionTab({
   });
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">
-          {label}{" "}
-          <span className="text-muted-foreground text-xs font-normal">
-            ({fields.length})
-          </span>
-        </h2>
-        {!isDisabled && (
+    // SettingSection ตัวเดียวกับแท็บ General — เดิมเขียนหัวข้อเองเป็น h2 14px
+    // ไม่มี tracking ทำให้สลับแท็บแล้วหัวข้อเปลี่ยนขนาดกันเองในฟอร์มเดียว
+    <SettingSection
+      first
+      wide
+      title={label}
+      count={fields.length}
+      action={
+        !isDisabled ? (
           <Button
             type="button"
             size="sm"
+            variant="secondary"
             disabled={addDisabled}
             onClick={handleAdd}
           >
             <Plus />
             {t("addUnit", { label })}
           </Button>
-        )}
-      </div>
-
+        ) : undefined
+      }
+    >
       {!isOrder && !isUsedInRecipe && (
         <p className="text-muted-foreground text-sm">{t("enableRecipe")}</p>
       )}
@@ -401,15 +407,6 @@ function UnitConversionTab({
           <EmptyComponent
             title={t("noUnits", { label })}
             description={t("addFirstConversionHint")}
-            content={
-              !isDisabled &&
-              !addDisabled && (
-                <Button type="button" size="xs" onClick={handleAdd}>
-                  <Plus aria-hidden="true" />
-                  {t("addFirstConversion")}
-                </Button>
-              )
-            }
           />
         }
       >
@@ -430,7 +427,7 @@ function UnitConversionTab({
         description={t("removeUnitConfirm", { label })}
         onConfirm={confirmDelete}
       />
-    </div>
+    </SettingSection>
   );
 }
 

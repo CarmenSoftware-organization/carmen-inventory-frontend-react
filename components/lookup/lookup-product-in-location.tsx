@@ -22,6 +22,8 @@ interface LookupProductInLocationProps {
   readonly disableTooltip?: boolean;
   readonly error?: string;
   readonly readOnly?: boolean;
+  /** เปิด popover ทันทีตอน mount — ใช้ตอนกดเพิ่มรายการแล้วให้เลือกสินค้าต่อเลย */
+  readonly defaultOpen?: boolean;
 }
 
 /**
@@ -47,6 +49,7 @@ export function LookupProductInLocation({
   value,
   onValueChange,
   disabled,
+  defaultOpen,
   placeholder,
   className,
   size,
@@ -88,6 +91,7 @@ export function LookupProductInLocation({
   return (
     <LookupCombobox
       size={size}
+      defaultOpen={defaultOpen}
       value={value}
       onValueChange={onValueChange}
       items={products}

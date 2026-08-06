@@ -1,19 +1,17 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import {
   Field,
   FieldLabel,
   FieldDatePicker,
-  FieldPlainText,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import { useCurrency } from "@/hooks/use-currency";
 import { useProfile } from "@/hooks/use-profile";
-import { formatExchangeRate } from "@/lib/currency-utils";
-import { formatDate } from "@/lib/date-utils";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { PoFormValues } from "./po-form-schema";
@@ -21,7 +19,6 @@ import {
   InputSuffixAddon,
   InputSuffixField,
   InputSuffixInput,
-  InputSuffixPlain,
 } from "@/components/ui/input/input-suffix";
 
 interface PoGeneralFieldsProps {
@@ -29,36 +26,10 @@ interface PoGeneralFieldsProps {
   readonly disabled: boolean;
   readonly isManual: boolean;
   readonly readOnly?: boolean;
-  /** view/locked → แสดงค่าทุก field เป็น plain text แทน input */
-  readonly plainText?: boolean;
-  /** draft/add เท่านั้นที่แสดง workflow picker — ไม่ draft ย้ายไป ribbon cell */
+  /** ใบยังเป็น draft ไหม — ไม่ draft แล้ว workflow แก้ไม่ได้ (แต่ยังแสดงอยู่) */
   readonly isDraft?: boolean;
   /** กำลังสร้างใบใหม่ — workflow ให้เลือกเฉพาะตัวที่ผู้ใช้เริ่มใบได้ */
   readonly isAdd?: boolean;
-}
-
-/** Field ที่แสดงค่าเป็น plain text (ใช้ใน view/locked mode) */
-function PlainField({
-  label,
-  value,
-  children,
-  className,
-}: {
-  readonly label: string;
-  readonly value?: string;
-  readonly children?: ReactNode;
-  readonly className?: string;
-}) {
-  // gap-1 (4px) ภายในคู่ label↔value ให้ชิดกันเป็นชุดเดียว — แถวต่อแถวเว้น 16px
-  // (gap-y-4) สร้าง proximity grouping แบบ Apple (intra ชิดกว่า inter มากๆ)
-  return (
-    <Field className={`gap-1${className ? ` ${className}` : ""}`}>
-      <FieldLabel className="text-muted-foreground font-normal">
-        {label}
-      </FieldLabel>
-      {children ?? <FieldPlainText className="text-xs">{value}</FieldPlainText>}
-    </Field>
-  );
 }
 
 export function PoGeneralFields({
@@ -66,13 +37,12 @@ export function PoGeneralFields({
   disabled,
   isManual,
   readOnly = false,
-  plainText = false,
   isDraft = true,
   isAdd = false,
 }: PoGeneralFieldsProps) {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const { defaultCurrencyId, dateFormat } = useProfile();
+  const { defaultCurrencyId } = useProfile();
 
   const currencyId = useWatch({ control: form.control, name: "currency_id" });
 
@@ -96,83 +66,39 @@ export function PoGeneralFields({
   }, [currencyId, defaultCurrencyId, currencyData?.data, form]);
 
   // Fields editable only when PO is manual (linked PO locks these)
+  //
+  // โหมดอ่านอย่างเดียวใช้ control ชุดเดิมแล้วสั่ง disabled — ไม่มีสาขา plain text
+  // แยกอีกชุดแล้ว · ของเดิมเขียน field ทั้งชุดสองรอบ (plain text กับ input) ซึ่ง
+  // เพี้ยนกันเองได้ทุกครั้งที่แก้ข้างเดียว และตำแหน่ง/ความสูงช่องขยับตอนสลับโหมด
   const fieldDisabled = disabled || readOnly;
   const manualFieldDisabled = fieldDisabled || !isManual;
-
-  // คอลัมน์กว้างคงที่ 12rem (ไม่ยืดเต็มแถว) → fields ชิดซ้าย compact และ align
-  // ตรงกับ ribbon (po-header ใช้ track เดียวกัน). draft = 5 คอลัมน์ (มี workflow);
-  // ไม่ draft = 4 (workflow ย้ายไป ribbon)
-  // vendor span-2 → draft(workflow/vendor2/creditTerm/delivery/currency)=6,
-  // non-draft(vendor2/creditTerm/delivery/currency)=5 units; cols-6 ทั้งคู่ให้ align
-  // กับ ribbon (po-header)
-  const lgGridCols = "lg:grid-cols-[repeat(6,minmax(0,10rem))]";
-
-  // View/locked/disabled → แสดงทุก field เป็น plain text (workflow ใช้ lookup
-  // readOnly เพราะไม่ได้เก็บ workflow_name; ที่เหลืออ่านจาก *_name/_code ที่เก็บไว้)
-  if (plainText || disabled) {
-    const v = form.getValues();
-    return (
-      <div
-        className={`grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${lgGridCols}`}
-      >
-        {isDraft && (
-          <PlainField label={tfl("workflow")}>
-            <LookupWorkflow
-              value={v.workflow_id}
-              onValueChange={() => {}}
-              workflowType={WORKFLOW_TYPE.PO}
-              readOnly
-              className="text-xs"
-            />
-          </PlainField>
-        )}
-        <PlainField
-          label={tfl("vendor")}
-          value={v.vendor_name}
-          className="lg:col-span-2"
-        />
-        <PlainField label={tfl("creditTerm")} value={v.credit_term_name} />
-        <PlainField
-          label={tfl("deliveryDate")}
-          value={v.delivery_date ? formatDate(v.delivery_date, dateFormat) : ""}
-        />
-        {/* Currency + Exchange rate รวมเป็น field เดียว (เหมือน GRN):
-            exchange rate (ค่า) + currency code (suffix) */}
-        <PlainField label={tfl("currency")}>
-          <InputSuffixPlain
-            className="inline-flex min-h-8 items-center text-left text-xs"
-            value={formatExchangeRate(v.exchange_rate)}
-            suffix={v.currency_code}
-          />
-        </PlainField>
-      </div>
-    );
-  }
+  // workflow ล็อกถาวรหลังพ้น draft — แต่ยังต้องเห็นค่าอยู่ จึงใช้ disabled
+  // ไม่ใช่ซ่อนแล้วไปโผล่บนแถบหัว (ฟิลด์เดียวกันไม่ควรมีสองที่อยู่)
+  const workflowDisabled = manualFieldDisabled || !isDraft;
 
   return (
     <div
-      className={`grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2 ${lgGridCols}`}
+      className={`grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6`}
     >
-      {isDraft && (
-        <Field>
-          <FieldLabel required>{tfl("workflow")}</FieldLabel>
-          <Controller
-            control={form.control}
-            name="workflow_id"
-            render={({ field, fieldState }) => (
-              <LookupWorkflow
-                value={field.value}
-                onValueChange={field.onChange}
-                workflowType={WORKFLOW_TYPE.PO}
-                creatableOnly={isAdd}
-                disabled={manualFieldDisabled}
-                className="w-full text-xs"
-                error={fieldState.error?.message}
-              />
-            )}
-          />
-        </Field>
-      )}
+      <Field>
+        <FieldLabel required>{tfl("workflow")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="workflow_id"
+          render={({ field, fieldState }) => (
+            <LookupWorkflow
+              value={field.value}
+              onValueChange={field.onChange}
+              workflowType={WORKFLOW_TYPE.PO}
+              creatableOnly={isAdd}
+              disabled={workflowDisabled}
+              className="w-full text-xs"
+              error={fieldState.error?.message}
+            />
+          )}
+        />
+      </Field>
+      {/* ชื่อผู้ขายยาวกว่าช่องอื่นเป็นปกติ — กิน 2 คอลัมน์กันโดนตัด */}
       <Field className="lg:col-span-2">
         <FieldLabel required>{tfl("vendor")}</FieldLabel>
         <Controller
@@ -207,6 +133,26 @@ export function PoGeneralFields({
           disabled={fieldDisabled}
         />
       </Field>
+      {/* วันที่ใบสั่งซื้อ — คู่กับวันที่ส่งของ อ่านด้วยกัน (สั่งวันไหน ของถึงวันไหน)
+          เดิมโชว์เป็นข้อความอ่านอย่างเดียวบนหัวใบ ทั้งที่ schema บังคับกรอกและ
+          รับค่าได้อยู่แล้ว · ค่าตั้งต้นเป็นวันนี้ (ดู getDefaultValues) */}
+      <Field>
+        <FieldLabel required>{tfl("orderDate")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="order_date"
+          render={({ field, fieldState }) => (
+            <FieldDatePicker
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={fieldDisabled}
+              placeholder={tc("selectDate")}
+              className="w-full text-xs"
+              error={fieldState.error?.message}
+            />
+          )}
+        />
+      </Field>
       <Field>
         <FieldLabel required>{tfl("deliveryDate")}</FieldLabel>
         <Controller
@@ -225,11 +171,17 @@ export function PoGeneralFields({
         />
       </Field>
       <Field>
-        <FieldLabel required htmlFor="po-exchange-rate">
+        {/* ป้ายชิดขวาให้ตรงกับตัวเลขในช่อง ซึ่งจัดชิดขวาแบบคอลัมน์ตัวเลข
+            (FieldLabel เป็น w-fit — ดันด้วย ml-auto ไม่ใช่ text-right) */}
+        <FieldLabel required htmlFor="po-exchange-rate" className="ml-auto">
           {tfl("currency")}
         </FieldLabel>
+        {/* กล่องเป็นคนแสดงสถานะ disabled — InputSuffixInput ปิดหน้าตา disabled
+            ของตัวเองไว้ (disabled:bg-transparent) ไม่ส่งให้กล่องด้วยก็จะขาว
+            อยู่ช่องเดียวทั้งที่ช่องอื่นเทาหมด */}
         <InputSuffixField
           className="h-8"
+          disabled={fieldDisabled}
           error={!!form.formState.errors.currency_id?.message}
         >
           <InputSuffixInput
@@ -259,6 +211,33 @@ export function PoGeneralFields({
             />
           </InputSuffixAddon>
         </InputSuffixField>
+      </Field>
+
+      {/* คำอธิบาย/หมายเหตุ อยู่ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยกใต้ฟอร์ม —
+          เป็นช่องบรรทัดเดียวกว้าง 2 คอลัมน์ ไม่ใช่ Textarea เพราะทั้งคู่เป็น
+          ข้อความสั้น (จำกัด 256 ตัวอักษรอยู่แล้ว) ไม่ใช่บันทึกยาว */}
+      <Field className="lg:col-span-2">
+        <FieldLabel htmlFor="po-description">{tfl("description")}</FieldLabel>
+        <Input
+          id="po-description"
+          placeholder={tfl("optional")}
+          maxLength={256}
+          disabled={fieldDisabled}
+          className="text-xs"
+          {...form.register("description")}
+        />
+      </Field>
+
+      <Field className="lg:col-span-2">
+        <FieldLabel htmlFor="po-remarks">{tfl("remarks")}</FieldLabel>
+        <Input
+          id="po-remarks"
+          placeholder={tfl("optional")}
+          maxLength={256}
+          disabled={fieldDisabled}
+          className="text-xs"
+          {...form.register("remarks")}
+        />
       </Field>
     </div>
   );

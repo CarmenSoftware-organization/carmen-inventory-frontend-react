@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";
@@ -19,9 +18,15 @@ export function ScByLocationContent({ locationId }: ScByLocationContentProps) {
   } = useLocationById(locationId);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!location) return <ErrorState message={t("notFound")} />;
+  if (error || !location)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/inventory-management/spot-check"
+      />
+    );
 
   return (
     <ScForm

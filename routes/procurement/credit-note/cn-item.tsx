@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
+import { toast } from "sonner";
 import { BoxIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +11,8 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import EmptyComponent from "@/components/empty-component";
+import { round2 } from "@/lib/currency-utils";
+import { useGoodsReceiveNoteById } from "@/hooks/use-goods-receive-note";
 import { getDeleteDescription } from "@/lib/form-utils";
 import type { CnFormValues } from "./cn-form-schema";
 import { fieldFocusRef } from "@/lib/field-focus";
@@ -32,6 +35,7 @@ export function CnItem({ form, disabled }: Props) {
   const tfl = useTranslations("field");
   const grnId =
     useWatch({ control: form.control, name: "grn_id" }) || undefined;
+  const vendorId = useWatch({ control: form.control, name: "vendor_id" });
   const canAddItem = !disabled && !!grnId;
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [addOpen, setAddOpen] = useState(false);
@@ -82,12 +86,19 @@ export function CnItem({ form, disabled }: Props) {
         location_code: line.location_code,
         unit_id: line.unit_id,
         unit_name: line.unit_name,
-        quantity: line.quantity,
+        // ไม่ pre-fill จำนวนคืน (CN_ITEM = 0) — line.quantity คือจำนวนที่รับ
+        // ซึ่งไปอยู่แถวหลัก (ยอดตาม GRN) ให้เทียบแทน
         unit_price: line.unit_price,
         discount_rate: line.discount_rate,
         tax_profile_id: line.tax_profile_id,
         tax_profile_name: line.tax_profile_name,
         tax_rate: line.tax_rate,
+        _grn_price: line.unit_price,
+        _grn_sub_total: line.grn_sub_total,
+        _grn_discount_amount: line.grn_discount_amount,
+        _grn_net_amount: line.grn_net_amount,
+        _grn_tax_amount: line.grn_tax_amount,
+        _grn_total_amount: line.grn_total_amount,
       })),
     );
     // prepend → รายการแรกที่เลือกอยู่บนสุด · เด้งไปช่องจำนวนของแถวนั้นเลย เพราะ
@@ -98,6 +109,63 @@ export function CnItem({ form, disabled }: Props) {
     });
   };
 
+  // ยอดฝั่ง GRN ของแต่ละบรรทัดไม่ได้อยู่ใน API ของ CN — ใบที่โหลดกลับมาจึงได้ null
+  // มาทั้งกระดาน ต้องไปเทียบกับ GRN ต้นทางเอง (query เดียวกับ dialog เลือกรายการ
+  // → React Query ใช้ cache ร่วม ไม่ได้ยิงเพิ่มจริง) · setValue ไม่ mark dirty
+  // เพราะเป็นค่าอ้างอิงที่เติมให้ ไม่ใช่การแก้ของผู้ใช้ และไม่เข้า payload อยู่แล้ว
+  const { data: grn } = useGoodsReceiveNoteById(grnId);
+  useEffect(() => {
+    if (!grn) return;
+    const grnByLine = new Map<
+      string,
+      {
+        received: number;
+        price: number;
+        subTotal: number;
+        discount: number;
+        net: number;
+        tax: number;
+        total: number;
+      }
+    >();
+    for (const detail of grn.good_received_note_detail ?? []) {
+      const key = `${detail.product_id}:${detail.location_id ?? ""}`;
+      // บรรทัดแรกที่ match ชนะ — ตรงกับที่ dialog หยิบไปตอนเพิ่มรายการ
+      if (grnByLine.has(key)) continue;
+      const line = detail.items?.[0];
+      if (!line) continue;
+      const received = Number(line.received_qty) || 0;
+      const subTotal = Number(line.sub_total_price) || 0;
+      grnByLine.set(key, {
+        received,
+        // GRN เก็บแต่ยอดรวมย่อย ไม่มีราคาต่อหน่วยของบรรทัดที่รับ — ถอดกลับด้วย
+        // สูตรเดียวกับ dialog เลือกรายการ ตัวเลขสองที่จะได้ตรงกัน
+        price: received > 0 ? round2(subTotal / received) : 0,
+        subTotal,
+        discount: Number(line.discount_amount) || 0,
+        net: Number(line.net_amount) || 0,
+        tax: Number(line.tax_amount) || 0,
+        total: Number(line.total_price) || 0,
+      });
+    }
+    form.getValues("items").forEach((item, index) => {
+      if (item._grn_received_qty != null) return;
+      const grnLine = grnByLine.get(
+        `${item.item_id ?? ""}:${item.location_id ?? ""}`,
+      );
+      if (!grnLine) return;
+      const base = `items.${index}` as const;
+      form.setValue(`${base}._grn_received_qty`, grnLine.received);
+      form.setValue(`${base}._grn_price`, grnLine.price);
+      form.setValue(`${base}._grn_sub_total`, grnLine.subTotal);
+      form.setValue(`${base}._grn_discount_amount`, grnLine.discount);
+      form.setValue(`${base}._grn_net_amount`, grnLine.net);
+      form.setValue(`${base}._grn_tax_amount`, grnLine.tax);
+      form.setValue(`${base}._grn_total_amount`, grnLine.total);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- form stable; เติมเมื่อ GRN มาถึง
+  }, [grn, itemFields.length]);
+
   const table = useCnItemTable({
     form,
     itemFields,
@@ -105,12 +173,26 @@ export function CnItem({ form, disabled }: Props) {
     onDelete: setDeleteIndex,
   });
 
+  // ปุ่มยังกดได้ตลอดแล้วค่อยบอกว่าขาดอะไร — ปุ่มที่จางแล้วกดไม่ติดไม่ได้บอก
+  // ว่าต้องทำอะไรก่อน · เตือนตามลำดับที่ต้องกรอกจริง (ผู้ขาย → ใบรับของ)
+  const handleAddClick = () => {
+    if (!vendorId) {
+      toast.warning(t("selectVendorFirst"));
+      return;
+    }
+    if (!grnId) {
+      toast.warning(t("selectGrnFirst"));
+      return;
+    }
+    setAddOpen(true);
+  };
+
   const addAction = !disabled && (
     <Button
       type="button"
-      size="xs"
-      onClick={() => setAddOpen(true)}
-      disabled={!canAddItem}
+      size="sm"
+      variant="secondary"
+      onClick={handleAddClick}
     >
       <Plus aria-hidden="true" /> {t("addItem")}
     </Button>
@@ -140,20 +222,28 @@ export function CnItem({ form, disabled }: Props) {
       <DataGrid
         table={table}
         recordCount={itemFields.length}
-        tableLayout={{ columnsResizable: true }}
+        // โหมดแก้ไข: คอลัมน์กว้างตาม size (px) จริง เกินจอก็เลื่อนแนวนอน (เหมือน
+        // PO/GRN) เคยลองบีบให้พอดีจอด้วย table-fixed w-full แล้ว combo
+        // discount/tax หดจนกรอก rate กับยอดไม่ได้
+        //
+        // โหมดดู: ปิด resizable → กลับไปใช้ width "fixed" ซึ่งแปลง size เป็น % ของ
+        // ความกว้างจริง ตารางเลยพอดีจอไม่ต้องเลื่อน และสัดส่วนคอลัมน์ยังเท่าเดิม
+        // ซึ่งจำเป็น เพราะแถว "คืน" เป็นตารางซ้อนที่คิด % จาก CN_COL ชุดเดียวกัน
+        // (table-auto ทำให้คอลัมน์จัดตามเนื้อหา สัดส่วนไม่ตรง แถวคืนเลยเหลื่อม)
+        tableLayout={disabled ? {} : { columnsResizable: true }}
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}
             title={t("noItems")}
             description={t("noItemsDesc")}
-            content={addAction}
           />
         }
       >
-        {/* columnsResizable → คอลัมน์กว้างตาม size (px) จริง; DataGridContainer เป็น
-            native scroll (overflow-auto) — scroll แนวนอนแบบ PR (ไม่ห่อ Radix ScrollArea
-            เลี่ยง nested scroll ที่สะดุด) */}
-        <DataGridContainer className="[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent]">
+        {/* native scroll (overflow-auto) ไม่ห่อ Radix ScrollArea — เลี่ยง nested
+            scroll ที่สะดุด · scroll (pb-3) เฉพาะโหมดแก้ไขที่ตารางกว้างเกินจอจริง
+            ไม่งั้นแถบเลื่อนลอย (macOS) ไปบังตัวเลขแถวสุดท้าย เพราะ CN เป็นตาราง
+            แบน ไม่มีแถวกาง · โหมดดูไม่มีแถบเลื่อน จะเว้นที่ไว้ก็เป็นช่องว่างเปล่า */}
+        <DataGridContainer scroll={!disabled}>
           <DataGridTable />
         </DataGridContainer>
       </DataGrid>

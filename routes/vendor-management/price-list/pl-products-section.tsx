@@ -1,5 +1,5 @@
 
-import { PackagePlus } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { SettingSection } from "@/components/ui/setting-section";
@@ -53,20 +53,19 @@ export function PLProductsSection({
       count={detailFields.length}
       action={
         !isDisabled ? (
-          <Button type="button" size="xs" onClick={onAdd}>
-            <PackagePlus />
+          <Button type="button" size="sm" variant="secondary" onClick={onAdd}>
+            <Plus />
             {headerLabels.addLabel}
           </Button>
         ) : undefined
       }
     >
       {detailFields.length === 0 ? (
+        // ไม่ส่ง onAdd — ปุ่มเพิ่มสินค้าอยู่ที่หัวข้อ section อยู่แล้ว
         <EmptyProducts
-          onAdd={onAdd}
           disabled={isDisabled}
           title={headerLabels.noItems}
           description={headerLabels.noItemsDesc}
-          addLabel={headerLabels.addLabel}
         />
       ) : (
         <PLProductTable

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "use-intl";
 import { ChevronLeft, ChevronRight, ImageIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { fileRejectMessage } from "@/lib/image-upload";
 import {
   useDeleteProductImage,
   useProductImages,
-  useUploadProductImages,
 } from "@/hooks/use-product-image";
 import type { ProductImage } from "@/types/product-image";
 import { type MockImage, validateImageFiles } from "./pd-image-utils";
@@ -22,6 +22,12 @@ interface ProductImagesProps {
   readonly productId?: string;
   /** เพิ่ม/อัปโหลดรูปได้เฉพาะตอน edit mode — true = ดูอย่างเดียว */
   readonly readOnly?: boolean;
+  /**
+   * รูปที่เลือกไว้แต่ยังไม่ได้อัปโหลด — ถืออยู่ที่ฟอร์ม แล้วส่งขึ้น backend ตอนกด
+   * Save พร้อมกับข้อมูลอื่น ไม่ยิงทันทีที่เลือกไฟล์
+   */
+  readonly pendingFiles?: readonly File[];
+  readonly onPendingFilesChange?: (files: File[]) => void;
 }
 
 /** map รูปจาก API → รูปแบบที่ใช้แสดงผล (url + label) */
@@ -32,24 +38,48 @@ function toDisplayImage(
 ): MockImage {
   return {
     id: img.id,
-    label: img.caption || img.alt_text || t("imgFallbackLabel", { n: index + 1 }),
+    label:
+      img.caption || img.alt_text || t("imgFallbackLabel", { n: index + 1 }),
     url: img.url,
   };
 }
 
-export function ProductImages({ productId, readOnly }: ProductImagesProps) {
+export function ProductImages({
+  productId,
+  readOnly,
+  pendingFiles = [],
+  onPendingFilesChange,
+}: ProductImagesProps) {
   const t = useTranslations("productManagement.product");
+  const tv = useTranslations("validation");
   const { data, isLoading } = useProductImages(productId);
-  const uploadImages = useUploadProductImages();
   const deleteImage = useDeleteProductImage();
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [dialogIndex, setDialogIndex] = useState<number | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<MockImage | null>(null);
 
-  const images = (data?.data.images ?? [])
+  const savedImages = (data?.data.images ?? [])
     .toSorted((a, b) => a.sort_order - b.sort_order)
     .map((img, i) => toDisplayImage(img, i, t));
+
+  // preview ของไฟล์ที่ยังไม่ได้อัปโหลด — object URL ต้องคืนทิ้งเองไม่งั้นรั่ว
+  const pendingPreviews = useMemo(
+    () =>
+      pendingFiles.map((file, i) => ({
+        id: `pending-${i}-${file.name}`,
+        label: file.name,
+        url: URL.createObjectURL(file),
+        pending: true as const,
+      })),
+    [pendingFiles],
+  );
+  useEffect(
+    () => () => pendingPreviews.forEach((p) => URL.revokeObjectURL(p.url)),
+    [pendingPreviews],
+  );
+
+  const images = [...savedImages, ...pendingPreviews];
   const total = images.length;
   // clamp index กันหลุดช่วงหลัง refetch (จำนวนรูปเปลี่ยน)
   const safeIndex = total === 0 ? 0 : Math.min(activeIndex, total - 1);
@@ -60,26 +90,35 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
     const { valid, rejected } = validateImageFiles(Array.from(files));
 
     if (rejected.length > 0) {
-      toast.error(
+      // ไฟล์ไม่ผ่านกติกา = ผู้ใช้เลือกใหม่ได้เอง ไม่ใช่ระบบพัง → warning
+      // และเดิมประโยคทั้งท่อนเป็นภาษาอังกฤษที่ประกอบมาจาก lib
+      const first = `${rejected[0].name}: ${fileRejectMessage(rejected[0].reason, tv)}`;
+      toast.warning(
         rejected.length === 1
-          ? `${rejected[0].name}: ${rejected[0].reason}`
-          : `${rejected.length} files rejected — ${rejected[0].name}: ${rejected[0].reason}`,
+          ? first
+          : tv("filesRejected", { count: String(rejected.length), first }),
       );
     }
 
-    if (valid.length === 0 || !productId || uploadImages.isPending) return;
+    if (valid.length === 0) return;
 
-    uploadImages.mutate(
-      { product_id: productId, images: valid },
-      {
-        onSuccess: () =>
-          toast.success(t("imgUploaded", { count: valid.length })),
-      },
-    );
+    // เก็บไว้ในฟอร์มเฉย ๆ — อัปโหลดจริงตอนกด Save (ดู pd-form.tsx) เพื่อไม่ให้มี
+    // รูปค้างบน backend เมื่อผู้ใช้กดยกเลิกการแก้ไข
+    onPendingFilesChange?.([...pendingFiles, ...valid]);
   };
 
   const handleConfirmDelete = () => {
-    if (!deleteTarget || !productId) return;
+    if (!deleteTarget) return;
+    // รูปที่ยังไม่ได้อัปโหลด ลบทิ้งจากรายการที่รออยู่เฉย ๆ ไม่ต้องยิง API
+    const pendingIdx = pendingPreviews.findIndex(
+      (p) => p.id === deleteTarget.id,
+    );
+    if (pendingIdx >= 0) {
+      onPendingFilesChange?.(pendingFiles.filter((_, i) => i !== pendingIdx));
+      setDeleteTarget(null);
+      return;
+    }
+    if (!productId) return;
     deleteImage.mutate(
       { product_id: productId, imageId: deleteTarget.id },
       {
@@ -123,10 +162,10 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
             alt={active.label}
             className="absolute inset-0 size-full object-cover"
           />
-          <span className="bg-background text-foreground absolute bottom-2 left-2 rounded px-2 py-0.5 text-micro font-semibold">
+          <span className="bg-background text-foreground text-micro absolute bottom-2 left-2 rounded px-2 py-0.5 font-semibold">
             {active.label}
           </span>
-          <span className="bg-background text-muted-foreground absolute right-2 bottom-2 rounded px-2 py-0.5 text-micro tabular-nums">
+          <span className="bg-background text-muted-foreground text-micro absolute right-2 bottom-2 rounded px-2 py-0.5 tabular-nums">
             {safeIndex + 1} / {total}
           </span>
         </button>
@@ -183,7 +222,7 @@ export function ProductImages({ productId, readOnly }: ProductImagesProps) {
               className={cn(
                 "ring-offset-background focus-visible:ring-ring relative size-12 shrink-0 cursor-pointer overflow-hidden rounded-md border transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                 idx === safeIndex
-                  ? "ring-primary ring-2 ring-offset-2"
+                  ? "border-primary bg-primary/5"
                   : "opacity-60 hover:opacity-100",
               )}
             >

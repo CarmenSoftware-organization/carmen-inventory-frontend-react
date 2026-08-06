@@ -1,8 +1,8 @@
-
 import { useCreditNoteById } from "@/hooks/use-credit-note";
+import { useTranslations } from "use-intl";
 import { CnForm } from "./cn-form";
 import { ErrorState } from "@/components/ui/error-state";
-import { FormSkeleton } from "@/components/loader/form-skeleton";
+import { DocFormSkeleton } from "@/components/loader/doc-form-skeleton";
 
 /**
  * หน้าดู/แก้ไขใบลดหนี้ตาม id ที่ระบุใน URL
@@ -17,12 +17,19 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * // params จะ resolve เป็น { id: "cn-001" }
  */
 export function EditCreditNoteContent({ id }: { id: string }) {
+  const tErr = useTranslations("procurement.creditNote");
   const { data: creditNote, isLoading, error, refetch } = useCreditNoteById(id);
 
-  if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!creditNote) return <ErrorState message="Credit note not found" />;
+  if (isLoading) return <DocFormSkeleton />;
+  if (error || !creditNote)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={tErr("notFound")}
+        onRetry={() => refetch()}
+        backTo="/procurement/credit-note"
+      />
+    );
 
   return <CnForm creditNote={creditNote} />;
 }

@@ -1,5 +1,5 @@
-
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useProfile } from "@/hooks/use-profile";
 import { UserProfile } from "./user-profile";
 import PathBreadcrumb from "./path-breadcrumb";
 import BuSwitcher from "./bu-switcher";
@@ -7,6 +7,12 @@ import ModuleApp from "./module-app";
 import Notification from "./notification";
 
 export function Navbar() {
+  // โหลดโปรไฟล์ไม่ผ่าน (500/503) — ทุกอย่างบนแถบนี้อ่านค่าจากโปรไฟล์: สลับกิจการ
+  // ต้องมีรายการ BU, ตัวเปิดโมดูลต้องรู้สิทธิ์, แจ้งเตือนต้องมี userId, เบรดครัมบ์
+  // ชี้ไปหน้าที่เข้าไม่ได้อยู่ดี ปล่อยไว้ก็เป็นปุ่มที่กดแล้วว่างเปล่า · ซ่อนหมด
+  // เหลือเมนูโปรไฟล์ที่เดียว เพราะเป็นทางเดียวที่จะออกจากระบบไปล้าง session ได้
+  const { isError } = useProfile();
+
   return (
     <header
       data-slot="navbar"
@@ -15,15 +21,19 @@ export function Navbar() {
       <div className="flex w-full items-center gap-1.5 px-2">
         <SidebarTrigger />
         <div className="min-w-0 flex-1 truncate">
-          <PathBreadcrumb />
+          {!isError && <PathBreadcrumb />}
         </div>
         <div className="ml-auto flex items-center gap-1">
-          <div className="flex items-center gap-1">
-            <BuSwitcher />
-            <ModuleApp />
-          </div>
+          {!isError && (
+            <>
+              <div className="flex items-center gap-1">
+                <BuSwitcher />
+                <ModuleApp />
+              </div>
 
-          <Notification />
+              <Notification />
+            </>
+          )}
           <UserProfile />
         </div>
       </div>

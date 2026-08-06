@@ -1,4 +1,4 @@
-
+import { useTranslations } from "use-intl";
 import { useEquipmentById } from "@/hooks/use-equipment";
 import { EquipmentForm } from "./eq-form";
 import { ErrorState } from "@/components/ui/error-state";
@@ -13,12 +13,19 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
  * <EditEquipmentPage params={Promise.resolve({ id: "abc-123" })} />
  */
 export function EditEquipmentContent({ id }: { id: string }) {
+  const tErr = useTranslations("operationPlan.equipment");
   const { data: equipment, isLoading, error, refetch } = useEquipmentById(id);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!equipment) return <ErrorState message="Equipment not found" />;
+  if (error || !equipment)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={tErr("notFound")}
+        onRetry={() => refetch()}
+        backTo="/operation-plan/equipment"
+      />
+    );
 
   return <EquipmentForm equipment={equipment} />;
 }

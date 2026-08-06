@@ -17,6 +17,8 @@ backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migr
 bun dev              # Dev server = dev:local (VITE_DEV_PROXY_TARGET=<backend> to proxy /api)
 bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/config.<env>.json (prod = dev backend until real prod exists)
 bun run build        # tsc + vite build → dist/
+bun run typecheck    # tsc --noEmit เดี่ยว ๆ (gate ของ build:bump)
+bun run build:bump [patch|minor|major]   # ตัด release: bump package.json + commit + annotated tag (local เท่านั้น ไม่ push) — ต้องอยู่บน main, tree สะอาด, ไม่ตามหลัง origin/main; gate typecheck+lint+test:run; ไม่ส่ง level = ถามใน terminal
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
 scripts/setup-gcs-cdn.sh <bucket> <config> [domain]   # One-shot GCP infra (CDN+LB+cert) + first deploy (docs/deploy.md)
@@ -66,50 +68,36 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
 
 ## Migrating a module from the source app
 
-All sections are already ported **and colocated**. For a new/updated module, follow the
-colocated convention (the `scripts/codemods/*` helpers predate the compat removal and still
-rewrite to `lib/compat/*` — don't rely on them for the import step):
+Use the `migrate-source-module` skill (`.claude/skills/migrate-source-module/`) — it carries
+the full colocated-route convention and Next→react-router rewrite steps. Gate: `bunx tsc
+--noEmit && bun test:run` must be clean. (The `scripts/codemods/*` helpers predate the
+compat removal — don't rely on them for the import step.)
 
-1. Copy the module's components, hooks and types from `../carmen-inventory-frontend` into
-   `routes/<module>/<feature>/` — flat, no `_components/` wrapper.
-2. Rewrite Next APIs to react-router directly (see "Imports" above): `next/link`→`Link`
-   (`to`), `next/navigation`→`useNavigate`/`useLocation`/`useParams`/`useSearchParams`,
-   `next-intl`→`use-intl`. `next/dynamic` → `lazy()` + `<Suspense fallback={null}>` (see
-   `routes/config/currency/currency-component.tsx`). Drop no-op `router.refresh()` calls
-   (data comes from TanStack Query invalidation).
-3. Name each route file `<feature>.route.tsx` exporting `Component`. Dynamic routes use
-   `useParams` + native `:id` (see `routes/config/department/department-edit.route.tsx`).
-4. Register routes in `routes/router.tsx` with `lazy: () => import("./<...>.route")`, under
-   the module's section parent (which carries `RouteErrorBoundaryAdapter`).
-5. `bunx tsc --noEmit && bun test:run` must be clean.
+## Activity sheet (ประวัติ "ใครแก้อะไร" ของรายการเดียว)
+
+`components/share/activity-sheet.tsx` เป็นของกลาง ใช้ได้กับทุก entity — เปิดด้วย
+`openActivity(id, label?)` จาก `components/share/activity-sheet-host.tsx` ซึ่ง mount
+ครั้งเดียวใน `routes/root-layout.tsx` (กลไก CustomEvent ชุดเดียวกับ
+`dispatchPermissionDenied`) **อย่าถือ state หรือ render sheet เองในหน้าใหม่**
+
+จุดเข้าถึงมีสามทาง: ปุ่มในหัวหน้า (20 หน้า) · เมนู ⋯ ในแถว list ผ่าน option
+`activity: { id, label }` ของ `useConfigTable` / `actionColumn` (31 list) · ปุ่มไอคอนใน
+`tree-node.tsx` ของหมวดสินค้า
+
+เปิดเฉพาะ entity ที่ backend บันทึกให้จริง — ทะเบียนอยู่ที่
+`carmen-turborepo-backend-v2/apps/micro-business/src/common/activity/activity-registry.ts`
+ตอนนี้ **ไม่เปิด** 7 list ที่ไม่มีในทะเบียน (certification · eco · equipment · recipe ·
+period · activity-log · user-activity) เปิดไปจะได้เมนูที่กดแล้วว่างเปล่า
+
+หัวข้อของแต่ละ action อยู่ใน `ACTION_TITLE_KEY` ของ activity-sheet ซึ่งต้องเป็นสับเซตของ
+enum `enum_activity_action` ฝั่ง DB — ค่าที่ไม่มีในเอนัมจะเขียนลงไม่ได้เลย
 
 ## Interfaces config (`/system-admin/interface`)
 
-Per-BU config for connections to external systems — **Accounting**, **POS**, **PMS**
-(the customer's "HMS"). Config storage only; no sync/test-connection. Lives in
-`routes/system-admin/interface/`.
-
-- **Registry (`interface-registry.ts`)** holds *list metadata only* — `key` (route param),
-  `configKey` (`interface_<key>`), `icon`, and a `lazy()` form. Each interface owns its own
-  form + zod schema (`<name>-interface-form.tsx`), NOT a shared schema. **Add an interface** =
-  one registry entry + one form file (+ its i18n block, + a backend `secretPathsByKey` path if
-  it has a secret). A future interface can render anything (e.g. a mapping table) without
-  touching the others.
-- **Shared bits:** `use-interface-config.ts` (wraps `useAppConfigByKey`/`useUpsertAppConfig`;
-  maps 404 → `isNew`, not an error), `interface-page-layout.tsx` (presentational shell +
-  nav-guard, takes `isDirty`, holds no form state), `interface-fields.tsx`
-  (`TextField`/`EnumField`/`ToggleField` — label+value, not schema-driven). Forms derive
-  dropdown options from `schema.shape.<field>.options` so options and validation can't drift.
-- **Storage:** one `tb_application_config` row per interface. The backend
-  (`carmen-turborepo-backend-v2`) encrypts+masks the `api_key` secret via a generic
-  `secretPathsByKey` registry; a never-configured interface returns `{ enabled: false }`
-  (not 404). **Prod/UAT must set `SECRET_ENCRYPTION_KEY`** or any secret-bearing save (incl.
-  the pre-existing `report_email`) 400s.
-- **List-envelope gotcha:** the app-config *list* endpoint returns `{ data: { items, count } }`
-  — the array is at `json.data.items`, NOT `json.data` (which is the array only in a mental
-  model, never in reality). The *single-key* GET's `json.data` IS the row. `useAppConfigs`
-  reads `.items`; any new list hook must too. A test mocking a bare `{ data: [...] }` passes
-  while the real page crashes — verify list features in a real browser.
+Per-BU external-system config (Accounting / POS / PMS). Conventions, storage model, and the
+list-envelope gotcha live in `routes/system-admin/interface/CLAUDE.md` (loads when working
+in that folder). One cross-cutting deploy note: **Prod/UAT must set `SECRET_ENCRYPTION_KEY`**
+or any secret-bearing app-config save (incl. the pre-existing `report_email`) 400s.
 
 ## Known open items
 
@@ -138,3 +126,16 @@ Per-BU config for connections to external systems — **Accounting**, **POS**, *
   the fix is dropping `.int()` from the 3 copies of `ValidateSchema` in
   carmen-turborepo-backend-v2 (`backend-gateway`, `micro-business`, `micro-file`).
   Frontend deliberately does NOT round to compensate — that would corrupt the data.
+- Backend bug (not frontend): `GET /api/purchase-requests` (PR list) carries a bare
+  `@EnrichAuditUsers()`, which only enriches path `''` — but the rows sit at
+  `data[].data[]` (multi-BU envelope), so the interceptor never reaches them. Rows come
+  back with a raw `created_at` still attached and **no `audit` object at all**, so the
+  Created/Updated columns on the PR list render blank (`pr-component.tsx` Excel export,
+  `pr-card.tsx` grid card). Verified by hitting the gateway directly 2026-08-04. Fix is
+  `paths` on the decorator so it reaches the nested rows — same class as the SR list fix.
+  Frontend deliberately keeps reading `audit` rather than falling back to the raw field:
+  the raw one disappears the moment the decorator is fixed.
+- After the first `build:bump`, the footer's version and `changelog.json`'s newest entry
+  diverge — nothing regenerates `changelog.json`, so the What's New dialog
+  (`components/footer/whats-new-dialog.tsx`) shows an older version heading than the button
+  that opened it. Known, not a bug; the fix is a changelog generator (separate work).

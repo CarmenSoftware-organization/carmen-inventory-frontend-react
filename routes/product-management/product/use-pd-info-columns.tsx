@@ -1,15 +1,9 @@
 import { useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { X } from "lucide-react";
-import {
-  Controller,
-  type FieldArrayWithId,
-} from "react-hook-form";
+import { Controller, type FieldArrayWithId } from "react-hook-form";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  FieldInput,
-  FieldSelect,
-} from "@/components/ui/field";
+import { FieldInput, FieldSelect } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -18,10 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import type {
-  ProductFormInstance,
-  ProductFormValues,
-} from "@/types/product";
+import type { ProductFormInstance, ProductFormValues } from "@/types/product";
 import { PRODUCT_ATTRIBUTE_LABELS } from "@/types/product";
 
 export type InfoField = FieldArrayWithId<

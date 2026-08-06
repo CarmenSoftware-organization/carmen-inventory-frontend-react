@@ -47,11 +47,6 @@ interface UsePrFormActionsParams {
   mode: FormMode;
   setMode: (mode: FormMode) => void;
   role: string;
-  /**
-   * พาไปหาช่องที่ผิด — หน้าเดิมเลื่อนหา field ตรง ๆ ส่วน v2 ต้องพาแถวมาเรนเดอร์
-   * ก่อน (ตารางเป็น virtualized) ค่า default คือเลื่อนหา field เฉย ๆ
-   */
-  onRevealInvalid?: () => void;
 }
 
 export function usePrFormActions({
@@ -61,7 +56,6 @@ export function usePrFormActions({
   mode,
   setMode,
   role,
-  onRevealInvalid,
 }: UsePrFormActionsParams) {
   const t = useTranslations("procurement.purchaseRequest");
   const tt = useTranslations("toast");
@@ -139,7 +133,6 @@ export function usePrFormActions({
   const [showDelete, setShowDelete] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [showActivity, setShowActivity] = useState(false);
   const [actionDialog, setActionDialog] = useState<ActionDialogState>({
     type: null,
   });
@@ -175,8 +168,6 @@ export function usePrFormActions({
     onConfirm: navGuard.confirm,
     onCancel: navGuard.cancel,
   };
-
-  const handleMutationError = (err: Error) => toast.error(err.message);
 
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
@@ -242,8 +233,8 @@ export function usePrFormActions({
       });
       syncDocVersions(data);
       return true;
-    } catch (err) {
-      handleMutationError(err as Error);
+    } catch {
+      // toast ขึ้นจาก MutationCache กลางแล้ว — คืน false ให้ caller หยุดยิง action ต่อ
       return false;
     }
   };
@@ -452,8 +443,7 @@ export function usePrFormActions({
    * แถวที่ผิดถูกกางให้เองอยู่แล้วผ่าน submitCount ใน pr-item-table
    */
   const revealInvalid = (errors: FieldErrors<PrFormValues>) => {
-    if (onRevealInvalid) onRevealInvalid();
-    else scrollToFirstInvalidField();
+    scrollToFirstInvalidField();
     const count = countInvalidItems(errors as Record<string, unknown>);
     toast.warning(
       count > 0 ? tv("incompleteItems", { count }) : tv("incompleteDocument"),
@@ -651,8 +641,6 @@ export function usePrFormActions({
     setShowComment,
     showHistory,
     setShowHistory,
-    showActivity,
-    setShowActivity,
     discardDialogProps: discard.dialogProps,
     navDiscardDialogProps,
     actionDialog,

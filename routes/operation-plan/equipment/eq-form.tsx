@@ -179,7 +179,7 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <EqToolbar
         form={form}
         mode={mode}

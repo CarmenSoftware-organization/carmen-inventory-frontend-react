@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { PR_WORKFLOW_ACTION_CONFIG } from "@/constant/purchase-request";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
@@ -28,15 +29,9 @@ const PrCommentSheet = lazy(() =>
   import("./pr-comment-sheet").then((mod) => ({ default: mod.PrCommentSheet })),
 );
 
-const PrActivitySheet = lazy(() =>
-  import("./pr-activity-sheet").then((mod) => ({
-    default: mod.PrActivitySheet,
-  })),
-);
-
-const PrWorkflowHistory = lazy(() =>
-  import("./workflow/pr-workflow-history").then((mod) => ({
-    default: mod.PrWorkflowHistory,
+const WorkflowHistoryTimeline = lazy(() =>
+  import("@/components/share/workflow-history-timeline").then((mod) => ({
+    default: mod.WorkflowHistoryTimeline,
   })),
 );
 
@@ -51,8 +46,6 @@ interface PrFormDialogsProps {
   setShowComment: (open: boolean) => void;
   showHistory: boolean;
   setShowHistory: (open: boolean) => void;
-  showActivity: boolean;
-  setShowActivity: (open: boolean) => void;
   workflowHistory?: WorkflowHistoryEntry[];
   requestorName?: string;
   createdAt?: string;
@@ -77,8 +70,6 @@ export function PrFormDialogs({
   setShowComment,
   showHistory,
   setShowHistory,
-  showActivity,
-  setShowActivity,
   workflowHistory,
   requestorName,
   createdAt,
@@ -146,21 +137,11 @@ export function PrFormDialogs({
         />
       </Suspense>
 
-      <Suspense fallback={null}>
-        <PrActivitySheet
-          prId={purchaseRequest?.id}
-          prNo={purchaseRequest?.pr_no}
-          open={showActivity}
-          onOpenChange={setShowActivity}
-        />
-      </Suspense>
-
       {!!workflowHistory?.length && (
         <Sheet open={showHistory} onOpenChange={setShowHistory}>
-          <SheetContent
-            side="right"
-            className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl"
-          >
+          {/* ไม่ override ความกว้าง — ใช้ค่า default ของ SheetContent
+              (w-3/4 sm:max-w-sm) ให้เท่ากับ comment sheet */}
+          <SheetContent side="right" className="overflow-y-auto">
             <SheetHeader>
               <SheetTitle>{t("tabWorkflowHistory")}</SheetTitle>
               <SheetDescription className="sr-only">
@@ -169,8 +150,10 @@ export function PrFormDialogs({
             </SheetHeader>
             <div className="px-4 pb-4">
               <Suspense fallback={null}>
-                <PrWorkflowHistory
+                <WorkflowHistoryTimeline
                   history={workflowHistory}
+                  statusConfig={PR_WORKFLOW_ACTION_CONFIG}
+                  emptyLabel={t("noWorkflowHistory")}
                   requestorName={requestorName}
                   createdAt={createdAt}
                 />

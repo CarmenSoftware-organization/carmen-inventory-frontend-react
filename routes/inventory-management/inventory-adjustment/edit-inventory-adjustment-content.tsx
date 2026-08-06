@@ -1,4 +1,3 @@
-
 import { Suspense } from "react";
 import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
@@ -14,9 +13,7 @@ const EditInventoryAdjustmentInner = ({ id }: { id: string }) => {
   const type = searchParams.get("type") as InventoryAdjustmentType | null;
 
   if (!type || (type !== "stock-in" && type !== "stock-out")) {
-    return (
-      <ErrorState message={t("invalidType")} />
-    );
+    return <ErrorState message={t("invalidType")} />;
   }
 
   return <EditWithType id={id} type={type} />;
@@ -38,9 +35,15 @@ const EditWithType = ({
   } = useInventoryAdjustmentById(id, type);
 
   if (isLoading) return <FormSkeleton />;
-  if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
-  if (!inventoryAdjustment) return <ErrorState message={t("notFound")} />;
+  if (error || !inventoryAdjustment)
+    return (
+      <ErrorState
+        error={error}
+        notFoundMessage={t("notFound")}
+        onRetry={() => refetch()}
+        backTo="/inventory-management/inventory-adjustment"
+      />
+    );
 
   return (
     <InventoryAdjustmentForm

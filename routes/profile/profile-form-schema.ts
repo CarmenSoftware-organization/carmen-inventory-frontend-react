@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
+import { createPasswordSchema } from "@/lib/password-schema";
 import type { UserProfile } from "@/types/profile";
 
 /**
@@ -55,13 +56,7 @@ export function createChangePasswordSchema(tv: TranslationFn, tf: TranslationFn)
   return z
     .object({
       current_password: z.string().min(1, tv("required", { field: tf("currentPassword") })),
-      new_password: z
-        .string()
-        .min(8, tv("passwordMinLength", { min: 8 }))
-        .regex(/[A-Z]/, tv("passwordUppercase"))
-        .regex(/[a-z]/, tv("passwordLowercase"))
-        .regex(/[0-9]/, tv("passwordNumber"))
-        .regex(/[^A-Za-z0-9]/, tv("passwordSpecial")),
+      new_password: createPasswordSchema(tv),
       confirm_password: z.string().min(1, tv("confirmPassword")),
     })
     .refine((data) => data.new_password !== data.current_password, {

@@ -37,7 +37,7 @@ export default function NotificationTemplateComponent() {
   });
 
   if (error) {
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   return (

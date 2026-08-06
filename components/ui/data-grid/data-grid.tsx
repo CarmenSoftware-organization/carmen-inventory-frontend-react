@@ -232,10 +232,12 @@ function DataGrid<TData extends object>({
  * @param props.className - className เพิ่มเติม
  * @param props.border - แสดงเส้นขอบและ shadow (default true)
  * @returns JSX element ของ div container
+ * @param props.scroll - กล่องนี้เป็นตัวที่เลื่อนเอง (ตาราง item ในหน้าฟอร์ม ที่ไม่มี
+ *                       pagination ต่อท้าย) — ใส่สไตล์แถบเลื่อนให้ ดู `SCROLLER`
  * @example
  * ```tsx
  * <DataGridContainer className="flex max-h-[calc(100vh-13rem-3rem)] flex-col">
- *   <div className="flex-1 overflow-auto"><DataGridTable /></div>
+ *   <DataGridScrollArea><DataGridTable /></DataGridScrollArea>
  *   <DataGridPagination />
  * </DataGridContainer>
  * ```
@@ -244,10 +246,12 @@ function DataGridContainer({
   children,
   className,
   border = true,
+  scroll = false,
 }: {
   readonly children: ReactNode;
   readonly className?: string;
   readonly border?: boolean;
+  readonly scroll?: boolean;
 }) {
   return (
     <div
@@ -255,6 +259,7 @@ function DataGridContainer({
       className={cn(
         "w-full overflow-auto",
         border && "border-border/60 bg-card rounded-lg border",
+        scroll && SCROLLER,
         className,
       )}
     >
@@ -263,4 +268,47 @@ function DataGridContainer({
   );
 }
 
-export { useDataGrid, DataGridProvider, DataGrid, DataGridContainer };
+/**
+ * สไตล์ของกล่องที่เลื่อนเองได้ในตาราง
+ *
+ * - แถบบางและจาง — แถบเลื่อนเป็นของประกอบ ไม่ใช่ของที่ต้องมอง
+ * - `pb-3` เว้นที่ใต้แถวสุดท้าย ไม่ให้แถบเลื่อนแนวนอนทับแถวนั้น
+ *
+ * เดิมสตริงนี้ถูกก็อปไว้ 5 ที่และหลุดอีก 33 ที่ ทำให้หน้า list ส่วนใหญ่แถวสุดท้าย
+ * โดนแถบทับ แต่มีอยู่หน้าเดียวที่ไม่โดน โดยไม่มีเหตุผลอะไรรองรับ
+ */
+const SCROLLER =
+  "[scrollbar-width:thin] [scrollbar-color:var(--scrollbar-thumb)_transparent] pb-3";
+
+/**
+ * กล่องเลื่อนของตารางในหน้า list — ตัวที่เลื่อนจริง ส่วน `DataGridContainer`
+ * เป็นกรอบที่ตรึง `DataGridPagination` ไว้ท้ายกล่อง
+ *
+ * แยกเป็นคอมโพเนนต์เพราะ 33 หน้า list เขียน `<div className="flex-1
+ * overflow-auto">` เหมือนกันเป๊ะ และไม่มีหน้าไหนจำได้ว่าต้องใส่สไตล์แถบเลื่อนด้วย
+ *
+ * @param props.children - ปกติคือ `<DataGridTable />`
+ * @param props.className - className เพิ่มเติม
+ * @returns JSX element ของกล่องเลื่อน
+ */
+function DataGridScrollArea({
+  children,
+  className,
+}: {
+  readonly children: ReactNode;
+  readonly className?: string;
+}) {
+  return (
+    <div className={cn("flex-1 overflow-auto", SCROLLER, className)}>
+      {children}
+    </div>
+  );
+}
+
+export {
+  useDataGrid,
+  DataGridProvider,
+  DataGrid,
+  DataGridContainer,
+  DataGridScrollArea,
+};

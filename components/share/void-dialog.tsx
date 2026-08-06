@@ -1,8 +1,9 @@
 import type React from "react";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { MessageSquare, ShieldAlert, XCircle } from "lucide-react";
+import { Ban, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -12,6 +13,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+/** โชว์ตัวนับเมื่อใกล้เต็มเท่านั้น — ยังพิมพ์ไม่ถึงครึ่งก็ไม่ต้องมีเลขคอยกวน */
+const REASON_MAX = 256;
+const COUNTER_FROM = 200;
 
 interface VoidDialogProps {
   readonly open: boolean;
@@ -23,11 +28,11 @@ interface VoidDialogProps {
 }
 
 /**
- * Dialog ยืนยันการ void เอกสาร — premium ERP design
+ * Dialog ยืนยันการยกเลิกเอกสาร — ถามเหตุผลก่อนยกเลิก
  *
- * มี destructive accent strip + gradient overlay + icon-beside-title header
- * พร้อม textarea กรอกเหตุผล (required) และ warning strip ว่าการกระทำจะถูก
- * บันทึกใน audit log ปุ่ม Void disabled จนกว่าจะกรอกเหตุผล
+ * โครงเดียวกับ `DeleteDialog`: ไอคอนข้างหัวข้อ · เนื้อหา · footer มีเส้นคั่น
+ * สีแดงปรากฏสองที่เท่านั้นคือไอคอนหัวกับปุ่มยืนยัน (DESIGN.md ห้ามยิงสีเดียวกัน
+ * ซ้ำหลายจุดในองค์ประกอบเดียว) ปุ่มยืนยันกดไม่ได้จนกว่าจะกรอกเหตุผล
  */
 export function VoidDialog({
   open,
@@ -55,12 +60,10 @@ export function VoidDialog({
         <DialogHeader className="gap-0 px-5 py-4">
           <div className="flex items-start gap-3">
             <div className="bg-muted text-destructive flex size-9 shrink-0 items-center justify-center rounded-lg">
-              <XCircle className="size-4.5" />
+              <Ban className="size-4.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-destructive text-base">
-                {title}
-              </DialogTitle>
+              <DialogTitle className="text-base">{title}</DialogTitle>
               {description && isStringDescription && (
                 <DialogDescription className="mt-1">
                   {description}
@@ -75,37 +78,28 @@ export function VoidDialog({
           </div>
         </DialogHeader>
 
-        <div className="space-y-3 border-t px-5 py-4">
-          <section className="space-y-1.5">
-            <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold tracking-wider uppercase">
-              <MessageSquare className="size-3" />
-              {tfl("voidReason")}
-              <span className="text-destructive">*</span>
-            </div>
-            <Textarea
-              id="void-reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder={tfl("voidReasonPlaceholder")}
-              className="resize-none text-sm"
-              rows={3}
-              maxLength={256}
-              disabled={isPending}
-            />
-            <p className="text-muted-foreground text-right text-micro-legal tabular-nums">
-              {reason.length}/256
+        <Field className="border-t px-5 py-4">
+          <FieldLabel htmlFor="void-reason" required>
+            {tfl("voidReason")}
+          </FieldLabel>
+          <Textarea
+            id="void-reason"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder={tfl("voidReasonPlaceholder")}
+            className="resize-none text-sm"
+            rows={3}
+            maxLength={REASON_MAX}
+            disabled={isPending}
+          />
+          {reason.length >= COUNTER_FROM && (
+            <p className="text-muted-foreground text-micro-legal text-right tabular-nums">
+              {reason.length}/{REASON_MAX}
             </p>
-          </section>
+          )}
+        </Field>
 
-          <div className="bg-destructive/5 border-destructive/20 flex items-start gap-2 rounded-md border p-2 text-xs">
-            <ShieldAlert className="text-destructive mt-0.5 size-3.5 shrink-0" />
-            <span className="text-muted-foreground">
-              การกระทำนี้จะถูกบันทึกใน audit log · ไม่สามารถย้อนกลับได้
-            </span>
-          </div>
-        </div>
-
-        <DialogFooter className="bg-muted/20 border-t px-5 py-3">
+        <DialogFooter className="border-t px-5 py-3">
           <Button
             type="button"
             variant="outline"
@@ -113,6 +107,7 @@ export function VoidDialog({
             onClick={() => handleOpenChange(false)}
             disabled={isPending}
           >
+            <X />
             {tc("cancel")}
           </Button>
           <Button
@@ -122,7 +117,7 @@ export function VoidDialog({
             disabled={isPending || !reason.trim()}
             onClick={() => onConfirm(reason.trim())}
           >
-            <XCircle />
+            <Ban />
             {isPending ? tc("processing") : tc("void")}
           </Button>
         </DialogFooter>

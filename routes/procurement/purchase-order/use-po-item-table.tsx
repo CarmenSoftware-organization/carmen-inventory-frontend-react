@@ -9,17 +9,26 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
 import {
   OrderSummaryCell,
+  UnitCol,
   RecSummaryCell,
   ComputedPricingCell,
 } from "./po-item-table";
 import { PriceCell, ProductHeaderCell } from "./po-items-grid-cells";
 import { PoItemExpanded, type PoItemField } from "./po-item-expanded";
 import { useAddLocationRegistry } from "./po-locations-add-context";
-import { PO_COL, PO_COL_DATA_TOTAL } from "./po-item-columns";
+import { poItemCols } from "./po-item-columns";
+import { ItemHistorySheet } from "@/components/share/item-history-sheet";
+import { ITEM_HISTORY_STATUS_CONFIG } from "@/constant/item-history";
+import type { PoItemHistoryEntry } from "@/types/purchase-order";
 import type { PoFormValues } from "./po-form-schema";
 
 export type { PoItemField };
@@ -30,21 +39,21 @@ const ProductCol = memo(function ProductCol({
   index,
   disabled,
   readOnly,
-  showApproveCheckbox,
+  showStatusBadge,
+  canResetStatus,
 }: {
   form: UseFormReturn<PoFormValues>;
   index: number;
   disabled: boolean;
   readOnly: boolean;
-  showApproveCheckbox: boolean;
+  showStatusBadge: boolean;
+  canResetStatus: boolean;
 }) {
   "use no memo";
   const isFoc = useWatch({
     control: form.control,
     name: `items.${index}.is_foc`,
   });
-  // edit mode (!disabled && !readOnly) → ซ่อน status badge; else อิง showApproveCheckbox
-  const showStatusBadge = !disabled && !readOnly ? false : showApproveCheckbox;
   return (
     <ProductHeaderCell
       form={form}
@@ -53,6 +62,7 @@ const ProductCol = memo(function ProductCol({
       readOnly={readOnly}
       isFoc={!!isFoc}
       showStatusBadge={showStatusBadge}
+      canResetStatus={canResetStatus}
     />
   );
 });
@@ -66,11 +76,18 @@ const PoItemActionCell = memo(function PoItemActionCell({
   index,
   expanded,
   canAddLocation,
+  canDelete,
+  history,
+  productName,
   onDelete,
 }: {
   index: number;
   expanded: boolean;
   canAddLocation: boolean;
+  /** โหมดอ่านยังเห็นคอลัมน์นี้ได้ถ้ามีประวัติ — แต่ห้ามมีปุ่มลบ */
+  canDelete: boolean;
+  history?: PoItemHistoryEntry[];
+  productName?: string;
   onDelete: (index: number) => void;
 }) {
   "use no memo";
@@ -78,28 +95,50 @@ const PoItemActionCell = memo(function PoItemActionCell({
   const registry = useAddLocationRegistry();
   return (
     <div className="flex items-center justify-center">
-      {expanded && canAddLocation && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={t("addLocation")}
-          className="text-primary hover:bg-primary/10 hover:text-primary"
-          onClick={() => registry?.get(index)?.()}
-        >
-          <MapPinPlus className="size-3.5" aria-hidden="true" />
-        </Button>
+      {(history?.length ?? 0) > 0 && (
+        <ItemHistorySheet
+          history={history ?? []}
+          productName={productName}
+          statusConfig={ITEM_HISTORY_STATUS_CONFIG}
+          label={t("tabWorkflowHistory")}
+        />
       )}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-        aria-label="Remove"
-        onClick={() => onDelete(index)}
-      >
-        <Trash2 className="size-3.5" aria-hidden="true" />
-      </Button>
+      {/* ไอคอนล้วน เดาจากรูปไม่ออกว่าลบอะไร โดยเฉพาะถังขยะที่หน้าตาเหมือนกับ
+          ของแถวย่อยเป๊ะแต่ลบคนละขนาด — บอกด้วย tooltip (ท่าเดียวกับ GRN) */}
+      {expanded && canAddLocation && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              aria-label={t("addLocation")}
+              className="text-primary hover:bg-primary/10 hover:text-primary"
+              onClick={() => registry?.get(index)?.()}
+            >
+              <MapPinPlus className="size-3.5" aria-hidden="true" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t("addLocation")}</TooltipContent>
+        </Tooltip>
+      )}
+      {canDelete && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              aria-label={t("deleteProductLine")}
+              onClick={() => onDelete(index)}
+            >
+              <Trash2 className="size-3.5" aria-hidden="true" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t("deleteProductLine")}</TooltipContent>
+        </Tooltip>
+      )}
     </div>
   );
 });
@@ -111,6 +150,10 @@ interface UsePoItemTableOptions {
   locationsDisabled: boolean;
   readOnly: boolean;
   showApproveCheckbox: boolean;
+  /** โชว์สถานะรายแถวไหม — แยกจาก checkbox เพราะสถานะเป็นข้อมูล ไม่ใช่การกระทำ */
+  showStatusBadge: boolean;
+  /** ล้างสถานะรายแถวกลับเป็นรอได้ไหม (ผู้อนุมัติในโหมดแก้ไข) */
+  canResetStatus: boolean;
   onDelete: (index: number) => void;
 }
 
@@ -124,6 +167,8 @@ export function usePoItemTable({
   locationsDisabled,
   readOnly,
   showApproveCheckbox,
+  showStatusBadge,
+  canResetStatus,
   onDelete,
 }: UsePoItemTableOptions) {
   "use no memo";
@@ -135,8 +180,23 @@ export function usePoItemTable({
     PO_LEADING_COL * 2 /* expand + index */ +
     (showApproveCheckbox ? PO_LEADING_COL : 0);
   const showAction = !disabled && !readOnly; // action column (ลบ item)
+  // โหมดอ่านก็ยังต้องมีคอลัมน์ action ถ้ามีประวัติรายบรรทัดให้กด (เงื่อนไขเดียวกับ PR)
+  // — ประวัติมีก็ต่อเมื่อใบผ่าน workflow มาแล้ว ซึ่งตอนนั้นฟอร์มมักอยู่โหมดอ่าน
+  const hasAnyHistory = itemFields.some(
+    (item) => (item.history?.length ?? 0) > 0,
+  );
+  const showActionCol = showAction || hasAnyHistory;
+  // ความกว้างขึ้นกับว่าแถว location แก้ได้ไหม — เกณฑ์เดียวกับ showActionCol ที่
+  // ส่งให้ LocationsEditor ทั้งสองตารางจึงได้ track เดียวกันเสมอ
+  //
+  // ยังไม่มีแถวก็ยังไม่มีช่องกรอกให้กว้าง — ใช้ความกว้างโหมดอ่านไปก่อน พอมี
+  // รายการแรกค่อยขยาย · ตาราง location ใช้แค่ showActionCol ได้เพราะมัน render
+  // ก็ต่อเมื่อมีรายการอยู่แล้ว สองตารางจึงตรงกันเสมอ
+  const { col: PO_COL, dataTotal } = poItemCols(
+    showAction && itemFields.length > 0,
+  );
   const totalSize =
-    preProductSize + PO_COL_DATA_TOTAL + (showAction ? PO_COL.action : 0);
+    preProductSize + dataTotal + (showActionCol ? PO_COL.action : 0);
   const leftInsetPct = (preProductSize / totalSize) * 100;
 
   const columns = useMemo<ColumnDef<PoItemField>[]>(() => {
@@ -172,6 +232,7 @@ export function usePoItemTable({
             disabled={disabled}
             locationsDisabled={locationsDisabled}
             readOnly={readOnly}
+            showActionCol={showActionCol}
             leftInsetPct={leftInsetPct}
           />
         ),
@@ -209,13 +270,28 @@ export function usePoItemTable({
             index={row.index}
             disabled={disabled}
             readOnly={readOnly}
-            showApproveCheckbox={showApproveCheckbox}
+            showStatusBadge={showStatusBadge}
+            canResetStatus={canResetStatus}
+          />
+        ),
+      },
+      {
+        id: "unit",
+        header: tfl("unit"),
+        size: PO_COL.unit,
+        cell: ({ row }) => (
+          <UnitCol
+            control={form.control}
+            form={form}
+            index={row.index}
+            disabled={disabled}
+            readOnly={readOnly}
           />
         ),
       },
       {
         id: "order",
-        header: tfl("orderQty"),
+        header: tfl("order"),
         size: PO_COL.order,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -224,7 +300,7 @@ export function usePoItemTable({
       },
       {
         id: "received",
-        header: tfl("receivedQty"),
+        header: tfl("received"),
         size: PO_COL.rec,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -323,6 +399,9 @@ export function usePoItemTable({
           index={row.index}
           expanded={row.getIsExpanded()}
           canAddLocation={!locationsDisabled}
+          canDelete={showAction}
+          history={row.original.history}
+          productName={row.original.product_name}
           onDelete={onDelete}
         />
       ),
@@ -351,7 +430,7 @@ export function usePoItemTable({
       expandColumn,
       indexColumn,
       ...dataColumns,
-      ...(showAction ? [actionColumn] : []),
+      ...(showActionCol ? [actionColumn] : []),
     ];
 
     return baseCols.map((col) => ({
@@ -360,7 +439,12 @@ export function usePoItemTable({
         ...col.meta,
         // py-1 เท่าแถว location ข้างล่าง — เดิม py-2 ทำให้แถวสินค้าสูงกว่าแถวคลัง
         // ทั้งที่เป็นตารางเดียวกัน อ่านแล้วสะดุดตรงรอยต่อ
-        cellClassName: cn("py-1 align-middle", col.meta?.cellClassName),
+        // h-11 ตายตัวทั้งแถวหลักและแถวย่อย — ปล่อยให้สูงตามเนื้อหา แถวหลักจะ 39px
+        // เพราะชื่อสินค้ากินสองบรรทัด ส่วนแถวย่อยได้ 41px จากช่องกรอก สองแถบเลย
+        // ไม่เท่ากันทั้งที่เป็นรายการเดียวกัน · 44px ไม่ใช่ 40 เพราะช่องสินค้ากิน
+        // สองบรรทัด (30px) ที่ 40px จะเหลือขอบบน-ล่างแค่ 5px ดูอัดแน่นกว่าแถวย่อย
+        // ที่มีบรรทัดเดียว (เหลือ 12px)
+        cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
       },
     }));
   }, [
@@ -370,6 +454,8 @@ export function usePoItemTable({
     locationsDisabled,
     readOnly,
     showApproveCheckbox,
+    showStatusBadge,
+    canResetStatus,
     onDelete,
     tfl,
     leftInsetPct,

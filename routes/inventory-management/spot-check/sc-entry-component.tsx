@@ -125,7 +125,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
   const virtualItems = rowVirtualizer.getVirtualItems();
 
   if (error)
-    return <ErrorState message={error.message} onRetry={() => refetch()} />;
+    return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const handleCommitCount = (id: string, value: number | null) => {
     setCounts((prev) => {
@@ -427,7 +427,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
                       disabled={reviewSc.isPending}
                       className="rounded-full"
                     >
-                      <SendHorizontal className="size-3.5" aria-hidden="true" />
+                      <SendHorizontal aria-hidden="true" />
                       {reviewSc.isPending
                         ? t("submittingForReview")
                         : t("submitForReview")}
