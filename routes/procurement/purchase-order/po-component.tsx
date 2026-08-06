@@ -78,15 +78,22 @@ export default function PoComponent() {
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
   /**
-   * สลับกลุ่มเอกสาร — ล้างคำค้นและกลับหน้า 1 เสมอ
+   * สลับกลุ่มเอกสาร — ล้างคำค้น ขั้นตอนที่กรองไว้ และกลับหน้า 1 เสมอ
    *
    * สองกลุ่มนี้เป็นคนละชุดข้อมูลกัน คำค้นที่เจอ 3 ใบใน "รอฉันดำเนินการ" อาจเจอ
-   * 200 ใบใน "เอกสารทั้งหมด" (หรือกลับกันคือเจอ 0 แล้วดูเหมือนไม่มีอะไรเลย) และ
-   * เลขหน้าที่ค้างอยู่ก็อาจไม่มีอยู่จริงในกลุ่มใหม่ · เขียนทีเดียวสามพารามิเตอร์
-   * ด้วย setURLParams จะได้ replaceState กับ re-render รอบเดียว
+   * 200 ใบใน "เอกสารทั้งหมด" (หรือกลับกันคือเจอ 0 แล้วดูเหมือนไม่มีอะไรเลย)
+   * ขั้นตอนที่กรองไว้ก็อาจไม่มีอยู่ในอีกกลุ่ม และเลขหน้าที่ค้างอยู่ก็อาจไม่มีจริง
+   * · เขียนทีเดียวทุกพารามิเตอร์ด้วย setURLParams จะได้ replaceState กับ
+   * re-render รอบเดียว
    */
   const handleViewModeChange = useCallback(
-    (next: string) => setURLParams({ view: next, search: "", page: "" }),
+    (next: string) =>
+      setURLParams({
+        view: next,
+        search: "",
+        page: "",
+        workflow_current_stage: "",
+      }),
     [],
   );
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
