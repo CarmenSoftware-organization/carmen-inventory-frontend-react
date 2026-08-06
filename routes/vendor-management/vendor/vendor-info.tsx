@@ -48,6 +48,7 @@ export function VendorInfo({
         !isView ? (
           <Button
             type="button"
+            variant="secondary"
             size="xs"
             onClick={() => prependInfo(EMPTY_VENDOR_INFO)}
           >
@@ -186,7 +187,13 @@ function EmptyInfo({
         {description}
       </p>
       {!isView && (
-        <Button type="button" size="xs" onClick={onAdd} className="mt-2">
+        <Button
+          type="button"
+          variant="secondary"
+          size="xs"
+          onClick={onAdd}
+          className="mt-2"
+        >
           <Plus />
           {addLabel}
         </Button>

@@ -60,7 +60,12 @@ export function VendorContact({
       count={contactFields.length}
       action={
         !isView ? (
-          <Button type="button" size="xs" onClick={handleAdd}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="xs"
+            onClick={handleAdd}
+          >
             <Plus />
             {t("contact.addContact")}
           </Button>
@@ -339,7 +344,13 @@ function EmptyContacts({
         {description}
       </p>
       {!isView && (
-        <Button type="button" size="xs" onClick={onAdd} className="mt-2">
+        <Button
+          type="button"
+          variant="secondary"
+          size="xs"
+          onClick={onAdd}
+          className="mt-2"
+        >
           <Plus />
           {addLabel}
         </Button>

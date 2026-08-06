@@ -60,7 +60,12 @@ export function VendorAddress({
       count={addressFields.length}
       action={
         !isView ? (
-          <Button type="button" size="xs" onClick={handleAdd}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="xs"
+            onClick={handleAdd}
+          >
             <Plus />
             {t("address.addAddress")}
           </Button>
@@ -82,6 +87,7 @@ export function VendorAddress({
             {!isView && (
               <Button
                 type="button"
+                variant="secondary"
                 size="xs"
                 onClick={handleAdd}
                 className="mt-2"

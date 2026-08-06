@@ -75,7 +75,12 @@ export function VendorCertificateSection({
       count={items.length}
       action={
         !readOnly ? (
-          <Button type="button" size="xs" onClick={handleAdd}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="xs"
+            onClick={handleAdd}
+          >
             <Plus />
             {t("addCertificate")}
           </Button>
