@@ -25,7 +25,7 @@ import {
   VendorActionsCell,
   VendorNameCell,
 } from "./rfp-vendor-cells";
-import { RfpVendorAddRow } from "./rfp-vendor-add-row";
+import { RfpVendorAddDialog } from "./rfp-vendor-add-dialog";
 
 type VendorAddItem = RfpFormValues["vendors"]["add"][number];
 type DisplayVendor = RequestPriceListVendor | VendorAddItem;
@@ -36,11 +36,12 @@ const EMPTY = (
 
 interface RfpVendorTableProps {
   readonly isDisabled: boolean;
+  /** dialog เลือกผู้ขายเปิดอยู่ไหม */
   readonly isAdding: boolean;
   readonly setIsAdding: (v: boolean) => void;
   readonly displayVendors: DisplayVendor[];
   readonly selectedVendorIds: Set<string>;
-  readonly onAddVendor: (vendor: Vendor) => void;
+  readonly onAddVendor: (vendors: Vendor[]) => void;
   readonly onRemoveVendor: (vendorId: string) => void;
 }
 
@@ -62,10 +63,6 @@ export default function RfpVendorTable({
   const t = useTranslations("vendorManagement.requestPriceList");
   const tfl = useTranslations("field");
   const td = useTranslations("delete");
-
-  const handleAddClick = () => {
-    if (!isAdding) setIsAdding(true);
-  };
 
   const columns = useMemo<ColumnDef<DisplayVendor>[]>(() => {
     return [
@@ -184,9 +181,9 @@ export default function RfpVendorTable({
         !isDisabled ? (
           <Button
             type="button"
+            variant="secondary"
             size="sm"
-            onClick={handleAddClick}
-            disabled={isAdding}
+            onClick={() => setIsAdding(true)}
           >
             <Plus />
             {t("vendors.addVendor")}
@@ -194,7 +191,7 @@ export default function RfpVendorTable({
         ) : undefined
       }
     >
-      {displayVendors.length === 0 && !isAdding ? (
+      {displayVendors.length === 0 ? (
         <EmptyProducts
           disabled={isDisabled}
           title={t("vendors.noVendors")}
@@ -213,15 +210,15 @@ export default function RfpVendorTable({
               </DataGridContainer>
             </DataGrid>
           )}
-          {isAdding && (
-            <RfpVendorAddRow
-              selectedVendorIds={selectedVendorIds}
-              onCancel={() => setIsAdding(false)}
-              onAddVendor={onAddVendor}
-            />
-          )}
         </>
       )}
+
+      <RfpVendorAddDialog
+        open={isAdding}
+        onOpenChange={setIsAdding}
+        selectedVendorIds={selectedVendorIds}
+        onAdd={onAddVendor}
+      />
     </SettingSection>
   );
 }

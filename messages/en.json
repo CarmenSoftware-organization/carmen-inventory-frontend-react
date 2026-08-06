@@ -1943,7 +1943,6 @@
       "deleteTitle": "Delete Request for Pricing",
       "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. RFP - Fresh Produce Feb 2026",
-      "vendorAlreadyAdded": "Vendor already added",
       "internalNote": "internal — not shown to vendors",
       "pressEnterToSave": "Press Enter to save",
       "clickToRename": "Click to rename",
@@ -1979,10 +1978,14 @@
         "removeVendor": "Remove vendor",
         "noVendors": "No Vendors Yet",
         "noVendorsDesc": "Add vendors to this request.",
-        "selectVendorToAdd": "Select vendor to add...",
-        "selectVendorFirst": "Please select a vendor before submitting",
         "copyUrl": "Copy vendor URL",
-        "openUrl": "Open vendor URL"
+        "openUrl": "Open vendor URL",
+        "selectVendorsTitle": "Add vendors",
+        "selectVendorsDesc": "Tick every vendor you want to ask for a quote — you can pick more than one at a time.",
+        "noVendorsFound": "No vendors match your search",
+        "noVendorsFoundDesc": "Try a different name or code.",
+        "nVendorsSelected": "{count, plural, =0 {None selected} =1 {# selected} other {# selected}}",
+        "addNVendors": "Add {count, plural, =1 {# vendor} other {# vendors}}"
       },
       "notFound": "Price list request not found"
     }

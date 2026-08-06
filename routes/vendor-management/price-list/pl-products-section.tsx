@@ -53,7 +53,7 @@ export function PLProductsSection({
       count={detailFields.length}
       action={
         !isDisabled ? (
-          <Button type="button" size="sm" onClick={onAdd}>
+          <Button type="button" size="sm" variant="secondary" onClick={onAdd}>
             <Plus />
             {headerLabels.addLabel}
           </Button>

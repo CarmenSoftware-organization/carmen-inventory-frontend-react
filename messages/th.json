@@ -1938,7 +1938,6 @@
       "deleteTitle": "ลบขอใบเสนอราคา",
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบ \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
       "namePlaceholder": "เช่น RFP - ผักสด ก.พ. 2569",
-      "vendorAlreadyAdded": "เพิ่มผู้ขายนี้แล้ว",
       "internalNote": "ภายในเท่านั้น — ไม่แสดงให้ผู้ขาย",
       "pressEnterToSave": "กด Enter เพื่อบันทึก",
       "clickToRename": "คลิกเพื่อเปลี่ยนชื่อ",
@@ -1974,10 +1973,14 @@
         "removeVendor": "ลบผู้ขาย",
         "noVendors": "ยังไม่มีผู้ขาย",
         "noVendorsDesc": "เพิ่มผู้ขายในคำขอนี้",
-        "selectVendorToAdd": "เลือกผู้ขายเพื่อเพิ่ม...",
-        "selectVendorFirst": "กรุณาเลือกผู้ขายก่อนบันทึก",
         "copyUrl": "คัดลอก URL ผู้ขาย",
-        "openUrl": "เปิด URL ผู้ขาย"
+        "openUrl": "เปิด URL ผู้ขาย",
+        "selectVendorsTitle": "เพิ่มผู้ขาย",
+        "selectVendorsDesc": "ติ๊กผู้ขายที่จะขอราคา เลือกทีเดียวหลายรายได้",
+        "noVendorsFound": "ไม่พบผู้ขายที่ค้น",
+        "noVendorsFoundDesc": "ลองเปลี่ยนชื่อหรือรหัสดู",
+        "nVendorsSelected": "เลือกไว้ {count} ราย",
+        "addNVendors": "เพิ่ม {count} ราย"
       },
       "notFound": "ไม่พบใบขอรายการราคา"
     }

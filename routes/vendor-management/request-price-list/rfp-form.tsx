@@ -133,26 +133,32 @@ export function RequestPriceListForm({
     ...addedVendors.map((v) => v.vendor_id),
   ]);
 
-  const handleAddVendor = (vendor: Vendor) => {
-    if (selectedVendorIds.has(vendor.id)) {
-      toast.warning(t("vendorAlreadyAdded"));
+  /**
+   * รับผู้ขายทีเดียวหลายรายจาก dialog — กันซ้ำในนี้อีกชั้น (dialog ปิดตัวที่มี
+   * อยู่แล้วไว้ แต่รายการอาจถูกเพิ่มจากหน้าต่างอื่นระหว่างที่ dialog เปิดค้าง)
+   */
+  const handleAddVendors = (vendors: Vendor[]) => {
+    const fresh = vendors.filter((v) => !selectedVendorIds.has(v.id));
+    if (fresh.length === 0) {
       setIsAdding(false);
       return;
     }
-    const contacts = vendor.contacts ?? vendor.tb_vendor_contact ?? [];
-    const primaryContact = contacts.find((c) => c.is_primary);
     const currentAdd = form.getValues("vendors.add") ?? [];
     form.setValue("vendors.add", [
       ...currentAdd,
-      {
-        vendor_id: vendor.id,
-        vendor_name: vendor.name,
-        vendor_code: vendor.code,
-        contact_person: primaryContact?.name ?? "",
-        contact_phone: primaryContact?.phone ?? "",
-        contact_email: primaryContact?.email ?? "",
-        dimension: "",
-      },
+      ...fresh.map((vendor) => {
+        const contacts = vendor.contacts ?? vendor.tb_vendor_contact ?? [];
+        const primaryContact = contacts.find((c) => c.is_primary);
+        return {
+          vendor_id: vendor.id,
+          vendor_name: vendor.name,
+          vendor_code: vendor.code,
+          contact_person: primaryContact?.name ?? "",
+          contact_phone: primaryContact?.phone ?? "",
+          contact_email: primaryContact?.email ?? "",
+          dimension: "",
+        };
+      }),
     ]);
     setIsAdding(false);
   };
@@ -171,10 +177,6 @@ export function RequestPriceListForm({
   };
 
   const onSubmit = (values: RfpFormValues) => {
-    if (isAdding) {
-      toast.warning(t("vendors.selectVendorFirst"));
-      return;
-    }
     const vendorsAdd = (values.vendors?.add ?? []).map((v, i) => ({
       vendor_id: v.vendor_id,
       vendor_name: v.vendor_name,
@@ -501,7 +503,7 @@ export function RequestPriceListForm({
           setIsAdding={setIsAdding}
           displayVendors={displayVendors}
           selectedVendorIds={selectedVendorIds}
-          onAddVendor={handleAddVendor}
+          onAddVendor={handleAddVendors}
           onRemoveVendor={handleRemoveVendor}
         />
       </form>
