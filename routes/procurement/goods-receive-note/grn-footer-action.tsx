@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Check, X } from "lucide-react";
+import { Ban, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface GrnFooterActionProps {
@@ -22,6 +22,7 @@ export function GrnFooterAction({
   onVoid,
 }: GrnFooterActionProps) {
   const tc = useTranslations("common");
+  const t = useTranslations("procurement.goodsReceiveNote");
 
   const showActions = hasRecord && isView && !isCommitted && !isVoid;
 
@@ -31,24 +32,27 @@ export function GrnFooterAction({
   // สรุปยอด (เหมือน PR footer) แทนการเป็นแถบแยกด้านล่าง
   return (
     <div className="flex shrink-0 items-center gap-2">
+      {/* น้ำเงินตัวเดียวกับ Submit และกับปุ่ม commit ของใบปรับสต๊อก — เดิมเป็น
+          เขียว (success) ซึ่งทั้งแอปใช้กับ Approve การอ่านเลยปนกัน */}
       <Button
         type="button"
-        variant="success"
         size="sm"
         disabled={isActionPending}
         onClick={() => onCommit?.()}
       >
         <Check aria-hidden="true" />
-        {tc("commit")}
+        {t("commit")}
       </Button>
+      {/* outline ไม่ย้อมแดง — กติกาเดียวกับปุ่มลบ · สีแดงไปอยู่ที่ปุ่มยืนยัน
+          ใน dialog ซึ่งเป็นจุดที่ตัดสินใจจริง */}
       <Button
         type="button"
-        variant="destructive"
+        variant="outline"
         size="sm"
         disabled={isActionPending}
         onClick={() => onVoid?.()}
       >
-        <X aria-hidden="true" />
+        <Ban aria-hidden="true" />
         {tc("void")}
       </Button>
     </div>

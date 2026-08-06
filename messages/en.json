@@ -285,7 +285,6 @@
     "compare": "Compare",
     "comparePrice": "Compare price",
     "converted": "converted",
-    "commit": "Commit",
     "void": "Void",
     "next": "Next",
     "back": "Back",
@@ -3426,7 +3425,8 @@
       "noVendor": "No Vendors",
       "noVendorDesc": "No vendors with available purchase orders.",
       "poCount": "{count} PO(s)",
-      "committed": "Goods receive note committed — stock updated"
+      "committed": "Goods receive note committed — stock updated",
+      "commit": "Commit"
     },
     "approval": {
       "entity": "Approval",

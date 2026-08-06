@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
+import { Ban, Check } from "lucide-react";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
@@ -66,7 +67,8 @@ export function GrnFormDialogs({
         title={t("commitTitle")}
         description={t("commitConfirm", { grnNo })}
         isPending={isCommitPending}
-        confirmText={tc("commit")}
+        confirmText={t("commit")}
+        confirmIcon={<Check />}
         onConfirm={onConfirmCommit}
       />
 
@@ -77,6 +79,7 @@ export function GrnFormDialogs({
         description={t("voidConfirm", { grnNo })}
         isPending={isVoidPending}
         confirmText={tc("void")}
+        confirmIcon={<Ban />}
         variant="destructive"
         onConfirm={onConfirmVoid}
       />

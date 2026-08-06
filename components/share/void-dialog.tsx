@@ -1,7 +1,7 @@
 import type React from "react";
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { X, XCircle } from "lucide-react";
+import { Ban, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,7 +60,7 @@ export function VoidDialog({
         <DialogHeader className="gap-0 px-5 py-4">
           <div className="flex items-start gap-3">
             <div className="bg-muted text-destructive flex size-9 shrink-0 items-center justify-center rounded-lg">
-              <XCircle className="size-4.5" />
+              <Ban className="size-4.5" />
             </div>
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-base">{title}</DialogTitle>
@@ -117,7 +117,7 @@ export function VoidDialog({
             disabled={isPending || !reason.trim()}
             onClick={() => onConfirm(reason.trim())}
           >
-            <XCircle />
+            <Ban />
             {isPending ? tc("processing") : tc("void")}
           </Button>
         </DialogFooter>
