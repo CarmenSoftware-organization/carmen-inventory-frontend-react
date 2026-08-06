@@ -186,7 +186,7 @@ export function FieldErrorText({
     <p
       id={id}
       role="alert"
-      className="text-destructive ps-3 text-xs font-semibold"
+      className="text-destructive ps-3 text-xs"
     >
       {children}
     </p>
