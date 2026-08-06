@@ -817,7 +817,8 @@
     "daysOfMonth": "Days of Month",
     "overrideHint": "Tick to enter the amount yourself instead of letting the system work it out",
     "overrideHintDiscount": "Tick to enter the discount amount yourself instead of calculating from the rate",
-    "overrideHintTax": "Tick to enter the tax amount yourself instead of calculating from the tax rate"
+    "overrideHintTax": "Tick to enter the tax amount yourself instead of calculating from the tax rate",
+    "order": "Order"
   },
   "lookup": {
     "select": "Select {entity}",
@@ -3243,7 +3244,8 @@
       "approved": "Purchase order approved",
       "rejected": "Purchase order rejected",
       "sentBack": "Purchase order sent back",
-      "closed": "Purchase order closed"
+      "closed": "Purchase order closed",
+      "deleteProductLine": "Remove this product and all its locations"
     },
     "creditNote": {
       "entity": "Credit Note",

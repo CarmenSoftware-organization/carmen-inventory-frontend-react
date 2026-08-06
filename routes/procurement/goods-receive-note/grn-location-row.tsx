@@ -601,7 +601,7 @@ export const GrnLocationRow = memo(function GrnLocationRow({
   const editable = !disabled && !plainText; // discount/tax combo แก้ได้
 
   return (
-    <tr className="hover:bg-muted/40 align-middle transition-colors">
+    <tr className="hover:bg-muted/40 h-11 align-middle transition-colors">
       {/* Location (align ใต้ product) */}
       <td className="px-3 py-1">
         {isManual && !disabled ? (

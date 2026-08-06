@@ -318,7 +318,7 @@ function GrnGroupLocations({
   const colCount = 10 + (isPo ? 1 : 0) + (showActionCol ? 1 : 0);
 
   return (
-    <table className="w-full table-fixed text-xs">
+    <table className="w-full table-fixed border-separate border-spacing-0 text-xs">
       <colgroup>
         <col style={{ width: pct(GRN_COL.product) }} />
         <col style={{ width: pct(GRN_COL.unit) }} />
@@ -333,11 +333,11 @@ function GrnGroupLocations({
         <col style={{ width: pct(GRN_COL.amt) }} />
         {showActionCol && <col style={{ width: pct(GRN_COL.action) }} />}
       </colgroup>
-      <thead className="text-muted-foreground text-micro font-semibold">
+      <thead className="text-muted-foreground text-xs font-semibold">
         {/* ตารางย่อยใช้ colgroup ชุดเดียวกับตารางหลัก คอลัมน์จึงตรงกันอยู่แล้ว
             หัวคอลัมน์ซ้ำอีกชุดเลยเป็นการอ่านคำเดิมสองรอบห่างกันไม่กี่สิบพิกเซล
             เหลือไว้แค่ "ที่เก็บ" ซึ่งเป็นคำเดียวที่ตารางหลักไม่มี */}
-        <tr className="border-border/60 border-b">
+        <tr className="border-border/60 h-11 border-b">
           <th className="px-3 py-1 text-left">{tfl("location")}</th>
           <th className="px-3 py-1" />
           {isPo && <th className="px-3 py-1" />}
@@ -529,7 +529,7 @@ export function useGrnItemTable({
         ? [
             {
               id: "order",
-              header: tfl("orderQty"),
+              header: tfl("order"),
               size: GRN_COL.order,
               meta: rightMeta,
               cell: ({ row }) => (
@@ -713,7 +713,12 @@ export function useGrnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        cellClassName: cn("py-2 align-middle", col.meta?.cellClassName),
+        // h-11 ตายตัวทั้งแถวหลักและแถวย่อย — ปล่อยให้สูงตามเนื้อหา แถวหลักจะ 39px
+        // เพราะชื่อสินค้ากินสองบรรทัด ส่วนแถวย่อยได้ 41px จากช่องกรอก สองแถบเลย
+        // ไม่เท่ากันทั้งที่เป็นรายการเดียวกัน · 44px ไม่ใช่ 40 เพราะช่องสินค้ากิน
+        // สองบรรทัด (30px) ที่ 40px จะเหลือขอบบน-ล่างแค่ 5px ดูอัดแน่นกว่าแถวย่อย
+        // ที่มีบรรทัดเดียว (เหลือ 12px)
+        cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
       },
     }));
   }, [
