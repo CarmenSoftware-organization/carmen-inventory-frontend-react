@@ -35,7 +35,6 @@ export function SrFooter({
   onReject,
   onSendBack,
 }: SrFooterProps) {
-  const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
 
@@ -119,7 +118,7 @@ export function SrFooter({
               onClick={onSubmit}
             >
               <SendHorizontal />
-              {t("submit")}
+              {tc("submit")}
             </Button>
           )}
         </div>
