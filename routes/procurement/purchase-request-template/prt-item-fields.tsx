@@ -88,18 +88,6 @@ export function PrtItemFields({
             icon={BoxIcon}
             title={t("noItems")}
             description={t("noItemsDesc")}
-            content={
-              !readOnly && (
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={disabled}
-                  onClick={handleAddItem}
-                >
-                  <Plus /> {t("addItem")}
-                </Button>
-              )
-            }
           />
         }
       >

@@ -207,7 +207,7 @@ export function PriceListForm({ priceList }: PriceListFormProps) {
   };
 
   const plNo = priceList?.no ?? null;
-  const productsHeaderLabels = useProductsHeaderLabels(t);
+  const productsHeaderLabels = useProductsHeaderLabels(t, tc);
   const removeItemLabel = t("detail.removeItem");
   const tsStatus = ts as (
     key: "draft" | "submitted" | "active" | "inactive",
@@ -383,12 +383,17 @@ function getSubmitLabel(
   return isAdd ? tc("create") : tc("save");
 }
 
-function useProductsHeaderLabels(t: ReturnType<typeof useTranslations>) {
+function useProductsHeaderLabels(
+  t: ReturnType<typeof useTranslations>,
+  tc: ReturnType<typeof useTranslations>,
+) {
   return {
     title: t("detail.title"),
     noItems: t("detail.noItems"),
     noItemsDesc: t("detail.noItemsDesc"),
-    addLabel: t("detail.addDetail"),
+    // "เพิ่มรายการ" ตัวกลางเหมือนทุกโมดูลที่มีตารางรายการ — เดิมเป็น "เพิ่มสินค้า"
+    // เฉพาะของสองโมดูลนี้ ทั้งที่ปุ่มทำงานเดียวกันเป๊ะ
+    addLabel: tc("addItem"),
     itemSingular: t("itemSingular"),
     itemPlural: t("itemPlural"),
   };

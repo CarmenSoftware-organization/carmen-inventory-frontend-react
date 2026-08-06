@@ -1851,7 +1851,6 @@
       "detail": {
         "title": "สินค้า",
         "titleCount": "สินค้า ({count})",
-        "addDetail": "เพิ่มสินค้า",
         "noItems": "ยังไม่มีสินค้า",
         "noItemsDesc": "เพิ่มสินค้าในรายการราคานี้",
         "removeItem": "ลบสินค้า",
@@ -1920,7 +1919,6 @@
       "detail": {
         "title": "สินค้า",
         "titleCount": "สินค้า ({count})",
-        "addDetail": "เพิ่มสินค้า",
         "noItems": "ยังไม่มีสินค้า",
         "noItemsDesc": "เพิ่มสินค้าที่ผู้ขายซึ่งได้รับแม่แบบนี้จะถูกขอให้เสนอราคา ระดับ MOQ สามารถต่างกันตามหน่วยได้",
         "removeItem": "ลบสินค้า",
@@ -2187,7 +2185,6 @@
       "heroFooter": "ตรวจสอบรวดเร็ว · ค้นหาความผิดพลาดได้เร็ว",
       "checkProgress": "ความคืบหน้า",
       "noLocationsInStatus": "ไม่มีตำแหน่งในสถานะนี้",
-      "addProduct": "เพิ่มสินค้า",
       "removeProduct": "ลบสินค้า",
       "removeProductTitle": "ลบสินค้า",
       "removeProductConfirm": "ลบสินค้านี้ออกจากการตรวจสอบ?",

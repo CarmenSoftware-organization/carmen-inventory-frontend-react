@@ -254,7 +254,7 @@
     "comingSoon": "Coming soon",
     "goBack": "Go back",
     "close": "Close",
-    "addItem": "Add item",
+    "addItem": "Add Item",
     "removeRow": "Remove row",
     "clearSearch": "Clear search",
     "noOptions": "No options",
@@ -1851,7 +1851,6 @@
       "detail": {
         "title": "Products",
         "titleCount": "Products ({count})",
-        "addDetail": "Add Product",
         "noItems": "No Products Yet",
         "noItemsDesc": "Add products to this price list.",
         "removeItem": "Remove product",
@@ -1925,7 +1924,6 @@
       "detail": {
         "title": "Products",
         "titleCount": "Products ({count})",
-        "addDetail": "Add product",
         "noItems": "No products yet",
         "noItemsDesc": "Add products that any vendor receiving this template will be asked to price. MOQ tiers can vary per unit.",
         "removeItem": "Remove product",
@@ -2192,7 +2190,6 @@
       "heroFooter": "Quick verification · catches discrepancies early",
       "checkProgress": "Check progress",
       "noLocationsInStatus": "No locations in this status",
-      "addProduct": "Add Product",
       "removeProduct": "Remove product",
       "removeProductTitle": "Remove Product",
       "removeProductConfirm": "Remove this product from the spot check?",

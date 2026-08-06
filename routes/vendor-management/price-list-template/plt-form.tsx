@@ -188,7 +188,7 @@ export function PriceListTemplateForm({
   };
 
   const stepperLabels = useStepperLabels(t);
-  const productLabels = useProductLabels(t, tfl);
+  const productLabels = useProductLabels(t, tfl, tc);
 
   // ชื่อ product ที่กำลังจะลบ — ไว้โชว์ใน confirm dialog (master ก่อน, fallback ref)
   const removeProductName = removeProductId
