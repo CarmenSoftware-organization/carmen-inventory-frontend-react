@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router";
 import { ChevronDown, KeyRound, LogOut, User } from "lucide-react";
@@ -84,7 +83,6 @@ function UserAvatar({
 
 export function UserProfile() {
   const t = useTranslations("navbar");
-  const tCommon = useTranslations("common");
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const {
@@ -99,7 +97,60 @@ export function UserProfile() {
   const isSwitchingBu =
     useIsMutating({ mutationKey: [...SWITCH_BU_MUTATION_KEY] }) > 0;
 
-  if (isError) return null;
+  // โหลดโปรไฟล์ไม่ผ่าน (500/503 ฯลฯ) — เดิม return null ทั้งเมนู ผลคือปุ่มออกจาก
+  // ระบบหายไปด้วย คนที่ session ค้างเลยติดอยู่หน้า error ตลอด ล้าง session ไม่ได้
+  // เลยนอกจากไปลบ localStorage เอง · เมนูยังต้องอยู่ แต่ตัดส่วนที่ต้องใช้ข้อมูล
+  // โปรไฟล์ออก เหลือค่าตั้งค่าเครื่องกับปุ่มออกจากระบบ
+  if (isError) {
+    return (
+      <>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="data-[state=open]:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-lg border border-transparent px-1.5 py-1 outline-none">
+            <UserAvatar
+              avatarUrl={undefined}
+              name=""
+              fallbackText="?"
+              size="sm"
+              interactive
+              eager
+            />
+            <ChevronDown
+              className="size-3 shrink-0 opacity-50"
+              aria-hidden="true"
+            />
+            <span className="sr-only">{t("profile")}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="min-w-56 p-2"
+            align="end"
+            sideOffset={6}
+          >
+            <LangSwitch />
+            <ThemeSwitch />
+            <FontScaleSwitch />
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer gap-2 rounded-md px-2 py-2 text-sm"
+              onSelect={(e) => {
+                e.preventDefault();
+                setLogoutOpen(true);
+              }}
+              disabled={logoutMutation.isPending}
+            >
+              <LogOut className="text-destructive size-4" />
+              {logoutMutation.isPending ? t("loggingOut") : t("logOut")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <LogoutConfirmDialog
+          open={logoutOpen}
+          onOpenChange={setLogoutOpen}
+          onConfirm={() => logoutMutation.mutate()}
+          isPending={logoutMutation.isPending}
+        />
+      </>
+    );
+  }
 
   if (isLoading || isSwitchingBu || !profile) {
     return (
@@ -133,7 +184,7 @@ export function UserProfile() {
         <div className="hidden text-xs leading-tight sm:grid">
           <span className="w-content truncate font-semibold">{name}</span>
           <span
-            className={`w-full truncate text-right text-micro-legal ${department ? "text-muted-foreground" : "text-warning-ink"}`}
+            className={`text-micro-legal w-full truncate text-right ${department ? "text-muted-foreground" : "text-warning-ink"}`}
           >
             {department || t("noDepartment")}
           </span>
@@ -161,18 +212,18 @@ export function UserProfile() {
           />
           <div className="grid min-w-0 flex-1 gap-0.5 leading-tight">
             <span className="truncate text-sm font-semibold">{name}</span>
-            <span className="text-muted-foreground truncate text-micro">
+            <span className="text-muted-foreground text-micro truncate">
               {profile.email}
             </span>
             <span
-              className={`truncate text-micro ${department ? "text-muted-foreground" : "text-warning-ink"}`}
+              className={`text-micro truncate ${department ? "text-muted-foreground" : "text-warning-ink"}`}
             >
               {department || t("noDepartment")}
             </span>
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-muted-foreground px-2 pt-1 pb-0.5 text-micro-legal font-semibold tracking-wider uppercase">
+        <DropdownMenuLabel className="text-muted-foreground text-micro-legal px-2 pt-1 pb-0.5 font-semibold tracking-wider uppercase">
           {t("sectionAccount")}
         </DropdownMenuLabel>
         <DropdownMenuItem
@@ -191,7 +242,7 @@ export function UserProfile() {
           <KeyRound className="size-4" />
           {t("changePassword")}
         </DropdownMenuItem>
-        <DropdownMenuLabel className="text-muted-foreground px-2 pt-2 pb-0.5 text-micro-legal font-semibold tracking-wider uppercase">
+        <DropdownMenuLabel className="text-muted-foreground text-micro-legal px-2 pt-2 pb-0.5 font-semibold tracking-wider uppercase">
           {t("sectionPreferences")}
         </DropdownMenuLabel>
         <LangSwitch />
@@ -215,43 +266,70 @@ export function UserProfile() {
         onOpenChange={setPasswordOpen}
       />
 
-      <AlertDialog
+      <LogoutConfirmDialog
         open={logoutOpen}
-        onOpenChange={(o) => !logoutMutation.isPending && setLogoutOpen(o)}
-      >
-        <AlertDialogContent className="sm:max-w-sm">
-          <div className="flex items-start gap-3">
-            <div className="bg-muted text-destructive flex size-9 shrink-0 items-center justify-center rounded-lg">
-              <LogOut className="size-4.5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <AlertDialogTitle className="text-base">
-                {t("confirmLogoutTitle")}
-              </AlertDialogTitle>
-              <AlertDialogDescription className="mt-1">
-                {t("confirmLogoutDesc")}
-              </AlertDialogDescription>
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={logoutMutation.isPending}>
-              {tCommon("cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              size="default"
-              onClick={(e) => {
-                e.preventDefault();
-                logoutMutation.mutate();
-              }}
-              disabled={logoutMutation.isPending}
-            >
-              <LogOut />
-              {logoutMutation.isPending ? t("loggingOut") : t("logOut")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onOpenChange={setLogoutOpen}
+        onConfirm={() => logoutMutation.mutate()}
+        isPending={logoutMutation.isPending}
+      />
     </DropdownMenu>
+  );
+}
+
+/**
+ * ยืนยันออกจากระบบ — แยกออกมาเพราะเมนูมีสองสาขา (ปกติ กับตอนโหลดโปรไฟล์ไม่ผ่าน)
+ * ที่ต้องใช้ dialog ตัวเดียวกัน
+ */
+function LogoutConfirmDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  isPending,
+}: {
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
+  readonly onConfirm: () => void;
+  readonly isPending: boolean;
+}) {
+  const t = useTranslations("navbar");
+  const tCommon = useTranslations("common");
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={(o) => !isPending && onOpenChange(o)}
+    >
+      <AlertDialogContent className="sm:max-w-sm">
+        <div className="flex items-start gap-3">
+          <div className="bg-muted text-destructive flex size-9 shrink-0 items-center justify-center rounded-lg">
+            <LogOut className="size-4.5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <AlertDialogTitle className="text-base">
+              {t("confirmLogoutTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-1">
+              {t("confirmLogoutDesc")}
+            </AlertDialogDescription>
+          </div>
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>
+            {tCommon("cancel")}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            size="default"
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
+            disabled={isPending}
+          >
+            <LogOut />
+            {isPending ? t("loggingOut") : t("logOut")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
