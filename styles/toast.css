@@ -1,0 +1,58 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Toast (sonner) — เปลือกกลาง สีอยู่ที่ไอคอนอย่างเดียว
+
+   ของเดิมเปิด `richColors` ซึ่งย้อมทั้งใบเป็นเขียว/แดง/เหลืองเข้ม ๆ ผิดกติกา
+   "avoid neon" ใน docs/DESIGN.md ตรง ๆ — สีความหมายต้องโผล่ครั้งเดียวต่อชิ้น
+   ไม่ใช่ทั้งพื้น+ขอบ+ตัวหนังสือ ที่นี่จึงคุมพื้นให้เป็น popover เหมือน
+   dropdown/dialog แล้วปล่อยให้ไอคอนเป็นสัญญาณสีตัวเดียว (ดู toaster.tsx)
+
+   ทำไมต้องเป็นไฟล์ CSS ไม่ใช่ className: sonner เขียนกฎด้วย selector
+   `[data-sonner-toast][data-styled='true']` (specificity 0-2-0) utility
+   ของ Tailwind ตัวเดียวสู้ไม่ได้ ต้องพ่วง `!` ทุกคลาสซึ่งอ่านยากกว่า
+   ══════════════════════════════════════════════════════════════════════════ */
+
+[data-sonner-toaster] {
+  /* sonner หยิบสามตัวนี้ไปทำพื้น/ขอบ/ตัวหนังสือของทุกใบ (รวมปุ่มปิด) */
+  --normal-bg: var(--popover);
+  --normal-border: var(--border);
+  --normal-text: var(--popover-foreground);
+  --normal-bg-hover: var(--hover);
+  --normal-border-hover: var(--border-strong);
+  --border-radius: var(--radius-lg);
+  /* ฟอนต์ของ sonner เป็น system stack ของตัวเอง ไทยเลยหล่นไปฟอนต์อื่นทั้งใบ */
+  font-family: inherit;
+}
+
+[data-sonner-toast][data-styled="true"] {
+  /* 16px กว้างเกินสำหรับข้อความบรรทัดเดียวซึ่งเป็น 99% ของ toast ในแอปนี้ */
+  padding: 0.75rem 0.875rem;
+  gap: 0.625rem;
+  font-size: var(--text-fine-print);
+  line-height: var(--text-fine-print--line-height);
+  /* chrome แบน เงาบางพอให้ลอยเหนือหน้าเท่านั้น (DESIGN.md: Elevation) */
+  box-shadow: var(--shadow-md);
+}
+
+[data-sonner-toast][data-styled="true"] [data-title] {
+  font-weight: 500;
+}
+
+/* ค่า default ของ sonner เป็น #3f3f3f ตายตัว ธีมมืดแล้วอ่านไม่ออก */
+[data-sonner-toast][data-styled="true"] [data-description] {
+  color: var(--muted-foreground);
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
+}
+
+/* ปุ่ม action ใน toast — ให้เป็นปุ่มของ Carmen ไม่ใช่กล่องดำ/ขาวของ sonner */
+[data-sonner-toast][data-styled="true"] [data-button] {
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 500;
+}
+
+[data-sonner-toast][data-styled="true"] [data-cancel] {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}

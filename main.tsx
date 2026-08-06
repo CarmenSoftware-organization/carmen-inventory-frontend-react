@@ -1,5 +1,6 @@
 import "./styles/globals.css";
 import "./styles/badge-status.css";
+import "./styles/toast.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router/dom";
