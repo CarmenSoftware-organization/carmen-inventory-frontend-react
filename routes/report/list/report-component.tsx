@@ -156,12 +156,13 @@ export default function ReportComponent() {
           onClick: () => globalThis.window.open(url, "_blank"),
         },
       });
-    } catch (err) {
+    } catch {
       viewerWindow?.close();
-      toast.error(t("runError"), {
-        id: toastId,
-        description: err instanceof Error ? err.message : undefined,
-      });
+      // ไม่ใส่ err.message ลงบรรทัดสอง — เป็นข้อความของ dev (ภาษาอังกฤษ บางที
+      // เป็น stack trace ยาวเป็นสิบบรรทัด) ซึ่งเป็นกับดักเดียวกับที่
+      // hooks/use-error-toast.ts ปิดไปแล้วที่ท่อกลาง หน้านี้ยิง toast เอง
+      // เลยหลุดมาได้ · รายละเอียดจริงดูได้ที่ Report History
+      toast.error(t("runError"), { id: toastId });
     }
   };
 

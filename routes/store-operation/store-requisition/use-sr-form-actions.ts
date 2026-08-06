@@ -206,9 +206,14 @@ export function useSrFormActions({
     }
   };
 
+  /**
+   * @param successMsg ข้อความตอนสำเร็จ — ต้องบอกว่า "ทำอะไรสำเร็จ" ไม่ใช่
+   *   "อัปเดตสำเร็จ" เหมือนกันหมดทุกปุ่ม โดยเฉพาะ Issue ที่ตัดของออกจากคลังจริง
+   */
   const runWorkflow = async (
     mutation: typeof submitSr,
     payload: SrActionPayload,
+    successMsg: string,
     options?: { onDone?: () => void },
   ) => {
     if (!storeRequisition) return;
@@ -220,7 +225,7 @@ export function useSrFormActions({
       { ...payload, doc_version: resolveDocVersion(fresh) },
       {
         onSuccess: () => {
-          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          toast.success(successMsg);
           options?.onDone?.();
           navigate(SR_LIST_PATH);
         },
@@ -289,7 +294,7 @@ export function useSrFormActions({
       });
 
       setShowSubmit(false);
-      toast.success(tt("updateSuccess", { entity: t("entity") }));
+      toast.success(t("submitted"));
       navigate(SR_LIST_PATH);
     } catch {
       // error toast มาจาก mutation เอง — แค่เปิด guard กลับให้กรอกต่อได้
@@ -323,11 +328,11 @@ export function useSrFormActions({
         stage_message: item.stage_message || null,
         approved_qty: Number(item.approved_qty) || 0,
       }));
-    runWorkflow(approveSr, {
-      id: storeRequisition.id,
-      stage_role: STAGE_ROLE.APPROVE,
-      details,
-    });
+    runWorkflow(
+      approveSr,
+      { id: storeRequisition.id, stage_role: STAGE_ROLE.APPROVE, details },
+      t("approved"),
+    );
   };
 
   const handleIssue = () => {
@@ -341,30 +346,38 @@ export function useSrFormActions({
         stage_message: null,
         issued_qty: Number(item.issued_qty) || 0,
       }));
-    runWorkflow(issueSr, {
-      id: storeRequisition.id,
-      stage_role: STAGE_ROLE.ISSUE,
-      details,
-    });
+    runWorkflow(
+      issueSr,
+      { id: storeRequisition.id, stage_role: STAGE_ROLE.ISSUE, details },
+      t("issued"),
+    );
   };
 
   const handleReject = (message?: string) => {
     if (!storeRequisition) return;
-    runWorkflow(rejectSr, {
-      id: storeRequisition.id,
-      stage_role: currentRole,
-      details: buildStageDetails("reject", message),
-    });
+    runWorkflow(
+      rejectSr,
+      {
+        id: storeRequisition.id,
+        stage_role: currentRole,
+        details: buildStageDetails("reject", message),
+      },
+      t("rejected"),
+    );
   };
 
   const handleReview = (message?: string, desStage?: string) => {
     if (!storeRequisition) return;
-    runWorkflow(reviewSr, {
-      id: storeRequisition.id,
-      stage_role: currentRole,
-      details: buildStageDetails("review", message, true),
-      ...(desStage ? { des_stage: desStage } : {}),
-    });
+    runWorkflow(
+      reviewSr,
+      {
+        id: storeRequisition.id,
+        stage_role: currentRole,
+        details: buildStageDetails("review", message, true),
+        ...(desStage ? { des_stage: desStage } : {}),
+      },
+      t("sentBack"),
+    );
   };
 
   const handleCancel = () => {

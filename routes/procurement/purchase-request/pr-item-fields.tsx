@@ -327,7 +327,8 @@ export function PrItemFields({
       .filter((id): id is string => !!id);
 
     if (detailIds.length === 0) {
-      toast.error(t("noSavedItemsForSplit"));
+      // ยังไม่ได้บันทึกแถวที่เลือก = ทำไม่ได้ตอนนี้ ไม่ใช่ระบบพัง → warning
+      toast.warning(t("noSavedItemsForSplit"));
       return;
     }
 

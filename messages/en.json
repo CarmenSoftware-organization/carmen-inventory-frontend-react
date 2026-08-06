@@ -2893,7 +2893,12 @@
       "breadcrumbInventory": "Inventory",
       "breadcrumbList": "Store requisitions",
       "breadcrumbNew": "New",
-      "selectLocationsFirst": "Choose both the source and destination store before adding items."
+      "selectLocationsFirst": "Choose both the source and destination store before adding items.",
+      "submitted": "Store requisition submitted",
+      "approved": "Store requisition approved",
+      "issued": "Items issued — stock moved out",
+      "rejected": "Store requisition rejected",
+      "sentBack": "Store requisition sent back"
     },
     "stockReplenishment": {
       "entity": "Stock Replenishment",
@@ -3019,7 +3024,7 @@
       "allocated": "Allocated {allocated} of {total} items",
       "allocateFailed": "{count} item(s) failed to allocate",
       "noPriceListFound": "No price list found for the items",
-      "noSavedItemsForSplit": "No saved items selected for split",
+      "noSavedItemsForSplit": "Pick items that have already been saved — a split needs saved lines.",
       "overQtyWarningTitle": "Approved Quantity Exceeds Requested",
       "overQtyWarningDesc": "Some items have an approved quantity greater than the requested quantity. Confirming will approve with the entered values. Cancelling will reset those approved quantities back to the requested quantity.",
       "splitSuccess": "Items split to new PR",
@@ -3228,7 +3233,11 @@
       "rejectTitle": "Reject Purchase Order",
       "rejectConfirm": "Are you sure you want to reject this purchase order? Please provide a reason.",
       "reviewTitle": "Send for Review",
-      "reviewConfirm": "Select the stage to send this purchase order back to and provide a reason."
+      "reviewConfirm": "Select the stage to send this purchase order back to and provide a reason.",
+      "approved": "Purchase order approved",
+      "rejected": "Purchase order rejected",
+      "sentBack": "Purchase order sent back",
+      "closed": "Purchase order closed"
     },
     "creditNote": {
       "entity": "Credit Note",
@@ -3410,7 +3419,8 @@
       "wizardPoDesc": "Select one or more purchase orders to receive.",
       "noVendor": "No Vendors",
       "noVendorDesc": "No vendors with available purchase orders.",
-      "poCount": "{count} PO(s)"
+      "poCount": "{count} PO(s)",
+      "committed": "Goods receive note committed — stock updated"
     },
     "approval": {
       "entity": "Approval",
