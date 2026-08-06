@@ -220,6 +220,11 @@ export default function PoComponent() {
             width: 10,
           },
           {
+            header: tfl("buyer"),
+            value: (r) => r.audit?.created?.name ?? "",
+            width: 22,
+          },
+          {
             header: tfl("description"),
             value: (r) => r.description ?? "",
             width: 40,

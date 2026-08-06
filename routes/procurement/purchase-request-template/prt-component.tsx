@@ -129,6 +129,11 @@ export default function PrtComponent() {
             width: 40,
           },
           {
+            header: tfl("createdBy"),
+            value: (r) => r.audit?.created?.name ?? "",
+            width: 22,
+          },
+          {
             header: tfl("status"),
             value: (r) => (r.is_active ? ts("active") : ts("inactive")),
             width: 10,
