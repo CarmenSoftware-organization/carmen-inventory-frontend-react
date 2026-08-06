@@ -60,10 +60,9 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
   );
   const fromWizard = !!wizardData;
 
-  // Document info ribbon — buyer/requestor + department แสดงอย่างเดียว (ไม่เข้า payload),
-  // grn_date เป็น field จริง. defaultCurrency* ใช้เป็น currency เริ่มต้นของ GRN ใหม่
+  // ผู้รับ + แผนก โชว์ใต้เลขที่ใบอย่างเดียว ไม่เข้า payload · grn_date เป็นช่อง
+  // กรอกจริงในฟอร์มแล้ว · defaultCurrency* ใช้เป็น currency เริ่มต้นของ GRN ใหม่
   const {
-    dateFormat,
     defaultBu,
     data: profileData,
     defaultCurrencyId,
@@ -159,7 +158,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
     form.reset(defaultValues);
   }, [goodsReceiveNote, defaultValues, form]);
 
-  const watchedGrnDate = useWatch({ control: form.control, name: "grn_date" });
   const receivedByName =
     goodsReceiveNote?.received_by_name ||
     [profileData?.user_info?.firstname, profileData?.user_info?.lastname]
@@ -197,8 +195,6 @@ export function GrnForm({ goodsReceiveNote }: GrnFormProps) {
         deleteIsPending={actions.deleteGrn.isPending}
         receivedByName={receivedByName}
         departmentName={departmentName}
-        grnDate={watchedGrnDate}
-        dateFormat={dateFormat}
         onBack={actions.handleBack}
         onEnterEdit={() => setMode("edit")}
         onCancel={actions.handleCancel}

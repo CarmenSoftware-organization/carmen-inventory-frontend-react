@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
+import {
+  Building2,
+  CalendarDays,
+  History,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -14,10 +23,9 @@ import {
 } from "@/components/ui/sheet";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { WorkflowTrack } from "@/components/share/workflow-track";
+import { cn } from "@/lib/utils";
 import { WorkflowHistoryTimeline } from "@/components/share/workflow-history-timeline";
 import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { formatDate } from "@/lib/date-utils";
 import {
@@ -240,28 +248,36 @@ export function SrHeader({
       ? `${departmentName}${departmentCode ? ` (${departmentCode})` : ""}`
       : t("noDepartment");
 
-  // ribbon เป็น grid คอลัมน์ fixed 10rem → cells ชิดซ้าย compact (เหมือน PO/PR).
-  // ml-4 หักล้าง -ml-4 ของ DocFormHeader · workflow ไม่อยู่ที่นี่ — อยู่ในบล็อก
-  // ฟอร์มด้านล่างที่เดียวทุกโหมด
-  const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
-      <Field>
-        <FieldLabel>{tfl("srDate")}</FieldLabel>
-        <Input value={srDate ? formatDate(srDate, dateFormat) : "—"} disabled />
-      </Field>
-      <Field>
-        <FieldLabel>{tfl("requester")}</FieldLabel>
-        <Input value={isLoading ? "—" : requesterName || "—"} disabled />
-      </Field>
-      <Field>
-        <FieldLabel>{tfl("department")}</FieldLabel>
-        <Input
-          value={departmentValue}
-          disabled
-          aria-invalid={departmentMissing || undefined}
-        />
-      </Field>
-    </div>
+  /**
+   * ผู้ขอ · แผนก · วันที่ อยู่ใต้เลขที่ใบเป็นข้อความ ไม่ใช่ช่องกรอกที่จางทั้งแถว
+   * (ทรงเดียวกับ PR/PO/GRN/CN) — สามค่านี้อ่านอย่างเดียว ไม่เข้า payload การทำ
+   * เป็นช่อง disabled กินพื้นที่เท่าช่องที่กรอกได้จริงและชวนให้เข้าใจผิดว่าแก้ได้
+   *
+   * วันที่ไม่เปิดให้เลือกเหมือน PR — วันที่ใบเบิกคือวันที่ระบบบันทึก ไม่ใช่ค่าที่
+   * ผู้เบิกกรอกเอง · แผนกที่ยังไม่ได้ตั้งยังต้องสะดุดตา จึงย้อมสีเตือนไว้เหมือนเดิม
+   */
+  const docMeta = (
+    <span className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+      <span className="flex items-center gap-1">
+        <User className="size-3 shrink-0" aria-hidden="true" />
+        {isLoading ? "—" : requesterName || "—"}
+      </span>
+      <span
+        className={cn(
+          "flex items-center gap-1",
+          departmentMissing && "text-warning-ink",
+        )}
+      >
+        <Building2 className="size-3 shrink-0" aria-hidden="true" />
+        {departmentValue}
+      </span>
+      {srDate && (
+        <span className="flex items-center gap-1">
+          <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
+          {formatDate(srDate, dateFormat)}
+        </span>
+      )}
+    </span>
   );
 
   // workflow stepper ใน header (เหมือน PR) — แสดงเส้นทาง prev → current → next
@@ -303,12 +319,16 @@ export function SrHeader({
     <>
       <DocFormHeader
         title={storeRequisition?.sr_no ?? t("title")}
-        subtitle={workflowStep}
+        subtitle={
+          <span className="flex flex-col gap-1">
+            {docMeta}
+            {workflowStep}
+          </span>
+        }
         backLabel={tc("goBack")}
         onBack={onBack}
         badges={badges}
         actions={actions}
-        ribbon={ribbon}
       />
       {workflowHistorySheet}
     </>

@@ -1,6 +1,5 @@
 import { useTranslations } from "use-intl";
 import {
-  CalendarDays,
   History,
   Pencil,
   Save,
@@ -10,8 +9,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-// import { Field, FieldLabel } from "@/components/ui/field";
-// import { Input } from "@/components/ui/input";
 import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { useCreditNoteComments } from "@/hooks/use-credit-note";
@@ -20,7 +17,6 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/date-utils";
 import type { FormMode } from "@/types/form";
 import type { CreditNoteDetail } from "@/types/credit-note";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
@@ -35,8 +31,6 @@ interface CnHeaderProps {
   readonly isLocked: boolean;
   /** display only — ไม่เข้า payload */
   readonly createdByName: string;
-  readonly cnDate?: string;
-  readonly dateFormat: string;
   readonly onBack: () => void;
   readonly onEnterEdit: () => void;
   readonly onCancel: () => void;
@@ -55,8 +49,6 @@ export function CnHeader({
   deleteIsPending,
   isLocked,
   createdByName,
-  cnDate,
-  dateFormat,
   onBack,
   onEnterEdit,
   onCancel,
@@ -207,7 +199,7 @@ export function CnHeader({
   // กำกับ ถ้าปล่อยเป็นข้อความเปล่าสองก้อนคั่นด้วยจุด คนอ่านต้องเดาเอง
   // (ไอคอนขนาดเท่าตัวอักษร สีเดียวกับข้อความ ไม่ใช่ signal สีแยก)
   const subtitle =
-    createdByName || cnDate ? (
+    createdByName ? (
       <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
         {createdByName && (
           <span className="flex items-center gap-1">
@@ -215,28 +207,8 @@ export function CnHeader({
             {createdByName}
           </span>
         )}
-        {cnDate && (
-          <span className="flex items-center gap-1">
-            <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
-            {formatDate(cnDate, dateFormat)}
-          </span>
-        )}
       </span>
     ) : undefined;
-
-  // แถบข้อมูลของเดิมยังอยู่ครบ — ผู้สร้าง/วันที่โผล่ทั้งใต้เลขที่ใบและในแถบนี้
-  // const ribbon = (
-  //   <div className="ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
-  //     <Field>
-  //       <FieldLabel>{tfl("createdBy")}</FieldLabel>
-  //       <Input value={createdByName || "—"} disabled />
-  //     </Field>
-  //     <Field>
-  //       <FieldLabel>{tfl("date")}</FieldLabel>
-  //       <Input value={cnDate ? formatDate(cnDate, dateFormat) : "—"} disabled />
-  //     </Field>
-  //   </div>
-  // );
 
   return (
     <DocFormHeader
@@ -246,7 +218,6 @@ export function CnHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      // ribbon={ribbon}
     />
   );
 }

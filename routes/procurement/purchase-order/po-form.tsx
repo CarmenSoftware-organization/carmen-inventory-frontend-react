@@ -199,7 +199,6 @@ export default function PoForm({ purchaseOrder }: PoFormProps) {
         deletePoIsPending={deletePo.isPending}
         departmentName={departmentName}
         buyerName={purchaseOrder?.buyer_name || buyerName}
-        orderDate={purchaseOrder?.order_date ?? defaultValues.order_date}
         onBack={handleBack}
         onCancel={handleCancel}
         onEnterEdit={() => setMode("edit")}

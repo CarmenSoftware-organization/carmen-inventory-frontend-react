@@ -64,6 +64,9 @@ export function CnGeneralFields({ form, disabled }: CnGeneralFieldsProps) {
     // 6 คอลัมน์ยืดเต็มความกว้าง (ไม่ล็อก 10rem) — แถวแรกจบพอดีที่ GRN Date
     // ต่อจากเหตุผล และแถวสองจบพอดีที่ Tax Invoice Date ต่อจากเลขที่ใบกำกับภาษี
     // ของเดิม 5 คอลัมน์ทำให้ทั้งสองช่องนั้นตกไปขึ้นบรรทัดใหม่คนละแถวกับคู่ของมัน
+    // ผู้ขายกิน 2 ช่องเหมือนเดิม (ชื่อบริษัทยาว) พอแทรกวันที่ใบลดหนี้เข้ามาแถว
+    // แรกจึงเป็น 7 ช่อง GRN Date ตกไปขึ้นแถวสอง — ยอมแลกเพราะชื่อผู้ขายอ่านออก
+    // สำคัญกว่าการจบแถวพอดี
     <div className="grid grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
       <Field>
         <FieldLabel required>{t("cnType")}</FieldLabel>
@@ -105,6 +108,27 @@ export function CnGeneralFields({ form, disabled }: CnGeneralFieldsProps) {
               disabled={disabled}
               error={errors.vendor_id?.message}
               className="text-xs"
+            />
+          )}
+        />
+      </Field>
+
+      {/* วันที่ใบลดหนี้ — อยู่ต่อจากผู้ขายเพราะเป็นข้อมูลของใบนี้เอง ไม่ใช่ค่าที่
+          ลากมาจาก GRN เหมือนช่องที่เหลือในแถวนี้ · แก้ได้ เพราะลงระบบย้อนหลัง
+          ได้จริง (ของมาถึงวันหนึ่ง เปิดใบลดหนี้อีกวันหนึ่ง) ค่าตั้งต้นเป็นวันนี้ */}
+      <Field>
+        <FieldLabel required>{tfl("docDate")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="cn_date"
+          render={({ field }) => (
+            <FieldDatePicker
+              value={field.value}
+              onValueChange={field.onChange}
+              placeholder={tc("selectDate")}
+              className="w-full text-xs"
+              disabled={disabled}
+              error={errors.cn_date?.message}
             />
           )}
         />

@@ -1,5 +1,14 @@
 import { useTranslations } from "use-intl";
-import { FileText, History, Pencil, Save, Trash2, X } from "lucide-react";
+import {
+  Building2,
+  FileText,
+  History,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentButton } from "@/components/comment-button";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
@@ -10,13 +19,10 @@ import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
-import { formatDate } from "@/lib/date-utils";
 import type { FormMode } from "@/types/form";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { GRN_FORM_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { openActivity } from "@/components/share/activity-sheet-host";
 
@@ -31,8 +37,6 @@ interface GrnHeaderProps {
   readonly receivedByName: string;
   /** display only — ไม่เข้า payload */
   readonly departmentName: string;
-  readonly grnDate?: string;
-  readonly dateFormat: string;
   readonly onBack: () => void;
   readonly onEnterEdit: () => void;
   readonly onCancel: () => void;
@@ -55,8 +59,6 @@ export function GrnHeader({
   deleteIsPending,
   receivedByName,
   departmentName,
-  grnDate,
-  dateFormat,
   onBack,
   onEnterEdit,
   onCancel,
@@ -104,6 +106,14 @@ export function GrnHeader({
         <Badge variant="info-light" size="sm">
           {getGrnDocTypeLabel(t, goodsReceiveNote.doc_type)}
         </Badge>
+      )}
+      {/* เลขที่ใบ · สถานะ · ชนิดใบ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด
+          (ทรงเดียวกับใบลดหนี้) — ไม่ใช่ Badge เพราะรุ่นเป็นตัวเลขอ้างอิง ไม่ใช่
+          สถานะที่ต้องสะดุดตา */}
+      {goodsReceiveNote?.doc_version != null && (
+        <span className="text-muted-foreground text-xs">
+          {tfl("version")} {goodsReceiveNote.doc_version}
+        </span>
       )}
     </>
   );
@@ -218,33 +228,29 @@ export function GrnHeader({
     </>
   );
 
-  // ribbon เป็น grid คอลัมน์เดียวกับ general fields (grn-form-header, grid-cols-6)
-  // → cells align ตรงกับ fields ด้านล่าง. ml-4 หักล้าง -ml-4 ของ DocFormHeader,
-  // gap-x-3 ให้ตรง gap-3 ของ general grid
-  const ribbon = (
-    <div className="ml-4 grid w-full grid-cols-1 gap-x-3 gap-y-4 sm:grid-cols-2 lg:grid-cols-6">
-      <Field>
-        <FieldLabel>{tfl("receivedBy")}</FieldLabel>
-        <Input value={receivedByName || "—"} disabled />
-      </Field>
-      <Field>
-        <FieldLabel>{tfl("department")}</FieldLabel>
-        <Input value={departmentName || "—"} disabled />
-      </Field>
-      <Field>
-        <FieldLabel>{tfl("grnDate")}</FieldLabel>
-        <Input
-          value={grnDate ? formatDate(grnDate, dateFormat) : "—"}
-          disabled
-        />
-      </Field>
-    </div>
+  /**
+   * ผู้รับ + แผนก อยู่ใต้เลขที่ใบเป็นข้อความ ไม่ใช่ช่องกรอกที่จางทั้งแถว (ทรง
+   * เดียวกับใบลดหนี้) — สองค่านี้อ่านอย่างเดียว ไม่เข้า payload การทำเป็นช่อง
+   * disabled กินพื้นที่เท่าช่องที่กรอกได้จริงและชวนให้เข้าใจผิดว่าแก้ได้
+   *
+   * วันที่ย้ายไปเป็นช่องกรอกในฟอร์มแล้ว (ต่อจากวันที่รับของ) จึงไม่โชว์ซ้ำที่นี่
+   */
+  const subtitle = (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+      {receivedByName && (
+        <span className="flex items-center gap-1">
+          <User className="size-3 shrink-0" aria-hidden="true" />
+          {receivedByName}
+        </span>
+      )}
+      {departmentName && (
+        <span className="flex items-center gap-1">
+          <Building2 className="size-3 shrink-0" aria-hidden="true" />
+          {departmentName}
+        </span>
+      )}
+    </span>
   );
-
-  const subtitle =
-    goodsReceiveNote?.doc_version != null
-      ? `${tfl("version")} ${goodsReceiveNote.doc_version}`
-      : undefined;
 
   return (
     <DocFormHeader
@@ -254,7 +260,6 @@ export function GrnHeader({
       onBack={onBack}
       badges={badges}
       actions={actions}
-      ribbon={ribbon}
     />
   );
 }

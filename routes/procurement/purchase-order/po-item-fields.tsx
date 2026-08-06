@@ -264,6 +264,7 @@ export function PoItemFields({
                 <Button
                   type="button"
                   variant="success"
+                  size="sm"
                   disabled={isPending}
                   onClick={(e) => {
                     e.preventDefault();
@@ -277,6 +278,7 @@ export function PoItemFields({
                 <Button
                   type="button"
                   variant="warning"
+                  size="sm"
                   disabled={isPending}
                   onClick={(e) => {
                     e.preventDefault();
@@ -290,6 +292,7 @@ export function PoItemFields({
                 <Button
                   type="button"
                   variant="destructive"
+                  size="sm"
                   disabled={isPending}
                   onClick={(e) => {
                     e.preventDefault();
@@ -306,6 +309,7 @@ export function PoItemFields({
               <Button
                 type="button"
                 variant="outline"
+                size="sm"
                 disabled={isPending}
                 onClick={(e) => {
                   e.preventDefault();
@@ -324,6 +328,7 @@ export function PoItemFields({
             <Button
               type="button"
               variant="ghost"
+              size="sm"
               onClick={() =>
                 table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
               }

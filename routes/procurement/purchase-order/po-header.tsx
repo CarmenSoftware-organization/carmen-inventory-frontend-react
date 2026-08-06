@@ -1,18 +1,23 @@
 import { useTranslations } from "use-intl";
-import { History, Lock, Pencil, Save, Trash2, X } from "lucide-react";
+import {
+  Building2,
+  History,
+  Lock,
+  Pencil,
+  Save,
+  Trash2,
+  User,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { WorkflowTrack } from "@/components/share/workflow-track";
-import { useProfile } from "@/hooks/use-profile";
 import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
-import { formatDate } from "@/lib/date-utils";
 import { PO_STATUS, type PurchaseOrder } from "@/types/purchase-order";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { FormMode } from "@/types/form";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { openActivity } from "@/components/share/activity-sheet-host";
 
@@ -26,7 +31,6 @@ interface PoHeaderProps {
   readonly deletePoIsPending: boolean;
   readonly departmentName: string;
   readonly buyerName: string;
-  readonly orderDate?: string;
   readonly onBack: () => void;
   readonly onCancel: () => void;
   readonly onEnterEdit: () => void;
@@ -49,7 +53,6 @@ export function PoHeader({
   deletePoIsPending,
   departmentName,
   buyerName,
-  orderDate,
   onBack,
   onCancel,
   onEnterEdit,
@@ -63,7 +66,6 @@ export function PoHeader({
   const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
-  const { dateFormat } = useProfile();
   const { data: comments } = usePurchaseOrderComments(purchaseOrder?.id);
 
   const isView = mode === "view";
@@ -201,27 +203,30 @@ export function PoHeader({
     </>
   );
 
-  const ribbon = (
-    <div
-      className={`ml-4 grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6`}
-    >
-      <Field>
-        <FieldLabel>{tfl("buyer")}</FieldLabel>
-        <Input value={buyerName || "—"} disabled />
-      </Field>
-      <Field>
-        <FieldLabel>{tfl("department")}</FieldLabel>
-        <Input value={departmentName || "—"} disabled />
-      </Field>
-      <Field>
-        <FieldLabel>{tfl("orderDate")}</FieldLabel>
-        <Input
-          value={orderDate ? formatDate(orderDate, dateFormat) : "—"}
-          disabled
-        />
-      </Field>
-    </div>
-  );
+  /**
+   * ผู้ซื้อ + แผนก อยู่ใต้เลขที่ใบเป็นข้อความ ไม่ใช่ช่องกรอกที่จางทั้งแถว (ทรง
+   * เดียวกับใบลดหนี้และใบรับสินค้า) — สองค่านี้อ่านอย่างเดียว ไม่เข้า payload
+   * การทำเป็นช่อง disabled กินพื้นที่เท่าช่องที่กรอกได้จริงและชวนให้เข้าใจผิด
+   *
+   * วันที่ย้ายไปเป็นช่องกรอกในฟอร์มแล้ว (ก่อนวันที่ส่งของ) จึงไม่โชว์ซ้ำที่นี่
+   */
+  const docMeta =
+    buyerName || departmentName ? (
+      <span className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+        {buyerName && (
+          <span className="flex items-center gap-1">
+            <User className="size-3 shrink-0" aria-hidden="true" />
+            {buyerName}
+          </span>
+        )}
+        {departmentName && (
+          <span className="flex items-center gap-1">
+            <Building2 className="size-3 shrink-0" aria-hidden="true" />
+            {departmentName}
+          </span>
+        )}
+      </span>
+    ) : null;
 
   const workflowStepEl = purchaseOrder?.workflow_current_stage ? (
     <WorkflowTrack
@@ -256,12 +261,18 @@ export function PoHeader({
   return (
     <DocFormHeader
       title={headerTitle}
-      subtitle={workflowStep}
+      subtitle={
+        docMeta || workflowStep ? (
+          <span className="flex flex-col gap-1">
+            {docMeta}
+            {workflowStep}
+          </span>
+        ) : undefined
+      }
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}
       actions={actions}
-      ribbon={ribbon}
     />
   );
 }
