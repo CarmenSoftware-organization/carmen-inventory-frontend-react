@@ -96,7 +96,7 @@ export default function RegisterForm() {
         className="mt-4"
         noValidate
       >
-        <FieldGroup className="gap-3">
+        <FieldGroup className="gap-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <FloatingField
               id="firstName"
