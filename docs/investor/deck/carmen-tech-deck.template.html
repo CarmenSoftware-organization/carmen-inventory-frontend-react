@@ -1,0 +1,874 @@
+<meta charset="utf-8" />
+<title>Carmen &mdash; Technology &amp; Product Overview</title>
+
+<style>
+  /* impeccable-disable design-system-radius design-system-font-size
+     เอกสารนำเสนอสำหรับนักลงทุน ไม่ใช่ UI ของโปรดักต์ &mdash; เผยแพร่เป็นหน้าเว็บเดี่ยว
+     นอกรีโป จึงตั้งใจให้มีพาเลตต์ ระบบตัวอักษร และมุมโค้งของตัวเอง (3px ให้ความรู้สึก
+     เอกสารพิมพ์ ไม่ใช่การ์ดแอป) การบังคับใช้ token ของ DESIGN.md ที่นี่จะทำให้สไลด์
+     หน้าตาเหมือนหน้าจอที่มันกำลังนำเสนอ ซึ่งผิดวัตถุประสงค์ */
+  :root {
+    --paper: #f2f5f7;
+    --card: #ffffff;
+    --ink: #151a21;
+    --muted: #59636f;
+    --rule: #d3dae1;
+    --rule-soft: #e6ebef;
+    --accent: #1b3f72;
+    --accent-soft: #e8eef7;
+    --figure: #9d6317;
+    --shadow: 0 1px 2px rgba(21, 26, 33, 0.06), 0 8px 24px rgba(21, 26, 33, 0.05);
+
+    --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0e1116;
+      --card: #161b22;
+      --ink: #e4e8ee;
+      --muted: #939eab;
+      --rule: #262e38;
+      --rule-soft: #1d242c;
+      --accent: #8fb4ea;
+      --accent-soft: #17222f;
+      --figure: #d9a256;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0e1116;
+    --card: #161b22;
+    --ink: #e4e8ee;
+    --muted: #939eab;
+    --rule: #262e38;
+    --rule-soft: #1d242c;
+    --accent: #8fb4ea;
+    --accent-soft: #17222f;
+    --figure: #d9a256;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck {
+    scroll-snap-type: y proximity;
+  }
+
+  .slide {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: 0;
+    padding: 5vh 4vw 5vh 0;
+    border-bottom: 1px solid var(--rule-soft);
+    /* safe center — สไลด์ที่เนื้อหาสั้นจัดกลางจอ ส่วนสไลด์ภาพที่สูงเกินหนึ่งจอ
+       จะชิดขอบบนแทนที่จะถูกดันล้นออกทั้งบนและล่างจนแถวล่างโดนตัด */
+    align-content: safe center;
+  }
+
+  .rail {
+    border-right: 1px solid var(--rule);
+    padding-top: 0.35rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .rail .num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rail .tick {
+    width: 1px;
+    flex: 1;
+    background: var(--rule-soft);
+  }
+
+  .body {
+    padding-left: clamp(1.25rem, 4vw, 3.5rem);
+    max-width: 78rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 8vw, 6rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(1.9rem, 3.6vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    font-weight: 400;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-family: var(--serif);
+    font-size: clamp(1.15rem, 1.9vw, 1.5rem);
+    line-height: 1.45;
+    color: var(--ink);
+    margin: 0;
+    max-width: 46ch;
+    text-wrap: pretty;
+  }
+
+  .sub {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--muted);
+  }
+
+  p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    max-width: 64ch;
+  }
+
+  /* ห้ามทำ li เป็น grid — เนื้อใน li เป็น <strong> ตามด้วยข้อความเปล่า ซึ่งกลายเป็น
+     grid item แยกอีกตัว แล้วตกลงช่องแคบของแถวถัดไป ข้อความจะถูกบีบเหลือคำละบรรทัด
+     ใช้ขีดแบบ absolute แทน ข้อความจะไหลเป็นย่อหน้าเดียวตามปกติ */
+  li {
+    position: relative;
+    padding-left: 1.85rem;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.82rem;
+    width: 0.75rem;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  li strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* สองคอลัมน์เสมอ ภาพหน้าจอต้องใหญ่พอให้อ่านตัวหนังสือในนั้นออก
+     สไลด์ที่มีสามภาพให้ภาพแรกกินเต็มความกว้างเป็นภาพนำ จะได้ไม่เหลือภาพโดดแถวล่าง */
+  .shots {
+    display: grid;
+    gap: 1.25rem 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shots--hero .shot:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .shot {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  @media (max-width: 60rem) {
+    .shots {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .shot img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+  }
+
+  .shot figcaption {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .scroll-x {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 34rem;
+    font-size: 0.92rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    font-weight: 400;
+    padding: 0 1.25rem 0.6rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: bottom;
+  }
+
+  td {
+    padding: 0.7rem 1.25rem 0.7rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    color: var(--muted);
+    vertical-align: top;
+  }
+
+  td:first-child {
+    color: var(--ink);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .figures {
+    display: grid;
+    gap: 1.5rem 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    max-width: 60rem;
+  }
+
+  .figure .n {
+    font-family: var(--serif);
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    line-height: 1;
+    color: var(--figure);
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+
+  .figure .l {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-top: 0.5rem;
+  }
+
+  pre {
+    margin: 0;
+  }
+
+  .pre {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+
+  .note {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-left: 1px solid var(--rule);
+    padding-left: 0.9rem;
+    max-width: 52ch;
+  }
+
+  .cols {
+    display: grid;
+    gap: 2rem 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    max-width: 68rem;
+  }
+
+  .cols h3 {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.6rem;
+    font-weight: 400;
+  }
+
+  @media (max-width: 44rem) {
+    .slide {
+      grid-template-columns: 3rem minmax(0, 1fr);
+      padding: 4vh 5vw 4vh 0;
+    }
+    .body {
+      padding-left: 1rem;
+    }
+  }
+
+  /* ── พิมพ์เป็น PDF ─────────────────────────────────────────────────────────
+     หนึ่งสไลด์ต่อหนึ่งหน้ากระดาษ แนวนอน เพราะภาพหน้าจอเป็นอัตราส่วน 16:9
+     บล็อกนี้ต้องอยู่ท้ายสุดของ stylesheet เพราะต้องชนะบล็อกธีมมืดด้านบน
+     ไม่งั้นเครื่องที่ตั้งธีมมืดไว้จะพิมพ์ออกมาพื้นดำ */
+  @media print {
+    @page {
+      size: A4 landscape;
+      margin: 12mm 14mm;
+    }
+
+    /* บังคับโทนสว่างเสมอ · สีเทาเข้มกว่าบนจอ เพราะเทาอ่อนบนกระดาษอ่านไม่ออก
+       เขียนเลือกให้ครบทั้งสามสถานะธีม เพื่อให้ชนะทุกกรณี */
+    :root,
+    :root:not([data-theme="light"]),
+    :root[data-theme="dark"] {
+      --paper: #ffffff;
+      --card: #ffffff;
+      --ink: #101418;
+      --muted: #3f474f;
+      --rule: #9aa3ad;
+      --rule-soft: #c5ccd3;
+      --accent: #12365f;
+      --figure: #7a4c10;
+      --shadow: none;
+    }
+
+    body {
+      background: #ffffff;
+      font-size: 10.5pt;
+      line-height: 1.5;
+    }
+
+    .deck {
+      scroll-snap-type: none;
+    }
+
+    .slide {
+      min-height: 0;
+      padding: 0;
+      border-bottom: 0;
+      align-content: start;
+      grid-template-columns: 13mm minmax(0, 1fr);
+      break-after: page;
+      page-break-after: always;
+    }
+
+    .slide:last-child {
+      break-after: auto;
+      page-break-after: auto;
+    }
+
+    .rail {
+      border-right: 0.4pt solid var(--rule);
+      padding-top: 0;
+    }
+
+    .rail .tick {
+      display: none;
+    }
+
+    .body {
+      padding-left: 6mm;
+      max-width: none;
+      gap: 4mm;
+    }
+
+    /* หน่วย vw ใน clamp อ้างความกว้างหน้ากระดาษ ผลลัพธ์คาดเดายาก กำหนดเป็น pt ตรง ๆ */
+    h1 {
+      font-size: 30pt;
+    }
+
+    h2 {
+      font-size: 17pt;
+    }
+
+    .lede {
+      font-size: 11.5pt;
+    }
+
+    .eyebrow {
+      font-size: 8pt;
+    }
+
+    .figure .n {
+      font-size: 20pt;
+    }
+
+    .shots {
+      gap: 4mm 5mm;
+    }
+
+    .shot,
+    tr,
+    li,
+    .note,
+    .figure {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .shot img {
+      border: 0.4pt solid var(--rule);
+      box-shadow: none;
+    }
+
+    /* จำกัดความสูงภาพตอนพิมพ์ ไม่งั้นสไลด์ภาพล้นไปหน้าที่สอง
+       A4 แนวนอน หักขอบแล้วเหลือสูงราว 185mm หัวสไลด์กินไปราว 36mm
+       สี่ภาพสองแถว 56mm ต่อภาพ = 130mm รวมแล้วพอดีหนึ่งหน้า */
+    .shot img {
+      max-height: 56mm;
+      width: auto;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+
+    .shots--hero .shot:first-child img {
+      max-height: 72mm;
+    }
+
+    .shots--pair .shot img {
+      max-height: 82mm;
+    }
+
+    .shot figcaption {
+      font-size: 7.5pt;
+    }
+
+    /* บนจอ ตารางกว้างเลื่อนในกล่องตัวเอง บนกระดาษเลื่อนไม่ได้ ต้องปล่อยให้ไหลตามหน้า */
+    .scroll-x {
+      overflow: visible;
+    }
+
+    table {
+      min-width: 0;
+      font-size: 9pt;
+    }
+
+    .pre {
+      border: 0.4pt solid var(--rule);
+      padding: 4mm;
+    }
+
+    /* ผัง mermaid ถูก render เป็น SVG ตอนแสดงผลจริง ซึ่งสูงกว่าตอนเป็นข้อความดิบ
+       ใส่เพดานไว้กันสไลด์สถาปัตยกรรมล้นไปหน้าที่สอง */
+    .pre svg {
+      max-height: 108mm;
+      max-width: 100%;
+      height: auto;
+    }
+  }
+</style>
+
+<div class="deck">
+
+  <section class="slide">
+    <div class="rail"><span class="num">01</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Technology &amp; Product Overview &middot; August 2026</p>
+      <h1>Carmen</h1>
+      <p class="lede">Supply-chain ERP for hotel and restaurant operations &mdash; from the
+        requisition raised in a kitchen to the posting in the stock ledger.</p>
+      <p class="sub">Prepared for prospective investors &middot; Companion to the technology memo</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">02</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">The operating problem</p>
+      <h2>Cost of goods is a hotel's second-largest line and its least instrumented one.</h2>
+      <ul>
+        <li><strong>Buying runs on spreadsheets, email and chat.</strong> The approval
+          exists, but only in someone's inbox.</li>
+        <li><strong>Every property invents its own process.</strong> Group management
+          cannot compare what it cannot standardise.</li>
+        <li><strong>Stock counts happen on paper</strong> and reconcile late, if at all &mdash;
+          so variance is discovered a month after it was created.</li>
+        <li><strong>The systems that do exist don't meet.</strong> Purchasing, receiving
+          and the accounting ledger are three separate stories about the same money.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">03</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">What Carmen is</p>
+      <h2>One system from requisition to receipt to stock ledger, across every property
+        in a group.</h2>
+      <div class="cols">
+        <div>
+          <h3>Procurement</h3>
+          <p>Purchase requests and templates, purchase orders, goods received notes,
+            credit notes, an approval inbox.</p>
+        </div>
+        <div>
+          <h3>Inventory</h3>
+          <p>Physical counts, spot checks, adjustments, the transaction ledger,
+            period end.</p>
+        </div>
+        <div>
+          <h3>Store operations</h3>
+          <p>Store requisitions, wastage reporting, stock replenishment.</p>
+        </div>
+        <div>
+          <h3>Vendors</h3>
+          <p>Vendor master, price lists and templates, requests for pricing.</p>
+        </div>
+        <div>
+          <h3>Products &amp; recipes</h3>
+          <p>Product master and categories, recipes with ingredient breakdown, cuisines,
+            equipment.</p>
+        </div>
+        <div>
+          <h3>Administration</h3>
+          <p>Users, roles, workflow designer, running codes, notification templates,
+            print forms, external interfaces.</p>
+        </div>
+      </div>
+      <p class="note">Every operational document carries a server-written activity trail:
+        who did what, and when.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">04</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Product &middot; 1 of 4</p>
+      <h2>Procure-to-pay as one thread.</h2>
+      <p class="lede">A request becomes an order becomes a receipt &mdash; and the approval trail
+        travels with the document.</p>
+      <div class="shots">
+        <figure class="shot">
+          <img src="{{IMG_01}}" alt="Purchase request list sorted by value, showing mixed approval statuses" />
+          <figcaption>Requests across a property, by value and stage</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_02}}" alt="Purchase request detail with the approval track and per-line decisions" />
+          <figcaption>The approval track sits on the document itself</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_03}}" alt="Purchase order detail with one line split across two receiving locations" />
+          <figcaption>One order line, split across receiving locations</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_04}}" alt="Goods received note detail with invoice reference and posting type" />
+          <figcaption>What arrived, checked against the order and the invoice</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">05</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Product &middot; 2 of 4</p>
+      <h2>Inventory you can trust.</h2>
+      <p class="lede">Counts, spot checks and adjustments are separate auditable
+        workflows &mdash; not edits to a number.</p>
+      <div class="shots shots--hero">
+        <figure class="shot">
+          <img src="{{IMG_05}}" alt="Physical count entry screen with per-item counts and evidence attachments" />
+          <figcaption>Counting, item by item, with evidence attached</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_06}}" alt="Spot check overview showing manual, high-value and random selection methods" />
+          <figcaption>Spot checks &mdash; manual, high-value or random selection</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_07}}" alt="Inventory transaction ledger with inbound, outbound and net change totals" />
+          <figcaption>Every movement, tied to the document behind it</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">06</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Product &middot; 3 of 4</p>
+      <h2>Configurable, not hard-coded.</h2>
+      <p class="lede">A new property is a configuration exercise, not an engineering
+        project. Onboarding cost does not grow with the customer list.</p>
+      <div class="shots shots--hero">
+        <figure class="shot">
+          <img src="{{IMG_08}}" alt="Workflow designer showing a seven-stage approval chain with service-level targets" />
+          <figcaption>Approval stages, approvers and time targets &mdash; set in the product</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_09}}" alt="Per-business-unit operational defaults and print form selection" />
+          <figcaption>Operational defaults and print forms, per property</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_10}}" alt="Accounting interface configuration with endpoints and posting options" />
+          <figcaption>Accounting, POS and property-system connections</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">07</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Product &middot; 4 of 4</p>
+      <h2>Built for the people who actually use it.</h2>
+      <p class="lede">Staff work in their own language, on their own screens. The same
+        build, the same data &mdash; no separate localised edition to maintain.</p>
+      <div class="shots shots--pair">
+        <figure class="shot">
+          <img src="{{IMG_11}}" alt="The purchase request list rendered in dark theme" />
+          <figcaption>Dark theme &mdash; the same screen</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_12}}" alt="The same purchase request list rendered in Thai" />
+          <figcaption>Thai &mdash; the same screen, the same data</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">08</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Architecture</p>
+      <h2>One entry point, and services that do one thing each.</h2>
+      <div class="pre">
+        <pre class="mermaid">
+flowchart TD
+    Clients["Web &middot; Admin &middot; Mobile"]
+    API["API gateway<br/>token validation &middot; rate limiting &middot; routing"]
+    Business["Business service<br/>procurement &middot; inventory &middot; master data"]
+    Platform["Cluster &middot; File &middot; Notification &middot; Identity"]
+    Heavy["Report &amp; scheduler services"]
+    DB[("PostgreSQL<br/>platform schema + per-tenant schemas")]
+    IdP[("Identity provider")]
+
+    Clients --> API
+    API --> Business
+    API --> Platform
+    API --> Heavy
+    Business --> DB
+    Platform --> DB
+    Heavy --> DB
+    Platform --> IdP
+        </pre>
+      </div>
+      <p class="note">The web client is a static bundle. There is no application server of
+        ours between the browser and the API.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">09</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Multi-tenancy</p>
+      <h2>Isolation is structural, not a filter someone remembered to write.</h2>
+      <p class="lede">A shared platform schema holds identity, roles and subscriptions.
+        Each business unit's operational data lives in its own schema.</p>
+      <ul>
+        <li><strong>Cross-tenant leakage would take a schema-level mistake</strong> &mdash; not a
+          forgotten condition in a query.</li>
+        <li><strong>One property can be backed up, restored or migrated</strong> without
+          touching anyone else.</li>
+        <li><strong>Group reporting reads across a cluster</strong> under the caller's
+          entitlements, without pooling tenants into one table.</li>
+        <li><strong>A single-tenant deployment is the same product</strong>, not a fork.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">10</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Security &amp; identity</p>
+      <h2>The credential that matters is never written down.</h2>
+      <ul>
+        <li><strong>The access token lives in memory only.</strong> Reading browser storage
+          yields nothing usable.</li>
+        <li><strong>The refresh token is the only stored credential</strong>, and revoking
+          it is a server-side operation &mdash; signing out ends the session for real.</li>
+        <li><strong>Identity is delegated to a dedicated provider.</strong> Carmen never
+          stores a password.</li>
+        <li><strong>Permissions are scoped to cluster and business unit.</strong> The role
+          says what; the scope says where.</li>
+        <li><strong>Integration secrets are encrypted at rest</strong> and never returned to
+          the browser. An administrator can replace a secret, not read it back.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">11</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Engineering judgement</p>
+      <h2>Two languages, each where it pays for itself.</h2>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>Where</th><th>What</th><th>Why there</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>TypeScript</td>
+              <td>API, services and the web client</td>
+              <td>One type system from database to screen. A change to a document shape
+                fails at compile time, not in front of a user.</td>
+            </tr>
+            <tr>
+              <td>Go</td>
+              <td>Report rendering and scheduled jobs</td>
+              <td>CPU-bound and bursty. A month-end report run must never slow down a
+                kitchen raising a requisition &mdash; separated by process and by language.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Nothing is in this stack because it is new.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">12</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Scale &amp; cost posture</p>
+      <h2>The tier every user touches has no servers to pay for.</h2>
+      <ul>
+        <li><strong>The web tier does not scale &mdash; it is files.</strong> Static assets on a
+          CDN absorb user growth without additional servers.</li>
+        <li><strong>The API gateway holds no session state</strong>, so it scales
+          horizontally behind a load balancer.</li>
+        <li><strong>Scheduled jobs coordinate through a distributed lock</strong>, so
+          replicas run safely: exactly one instance executes each job.</li>
+        <li><strong>Abusive traffic is rejected at the gateway</strong>, before it reaches
+          a domain service or the database.</li>
+        <li><strong>Per-tenant schemas are a natural sharding boundary</strong> if a large
+          group ever needs dedicated database capacity.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">13</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">How the work is done</p>
+      <h2>Written down before it is built, and gated before it merges.</h2>
+      <div class="figures">
+        <div class="figure"><span class="n">41</span><span class="l">design specs written before implementation</span></div>
+        <div class="figure"><span class="n">875</span><span class="l">backend test files</span></div>
+        <div class="figure"><span class="n">112</span><span class="l">web test files</span></div>
+        <div class="figure"><span class="n">132</span><span class="l">routes in the web application</span></div>
+      </div>
+      <p>TypeScript strict mode throughout &mdash; implicit <strong>any</strong> and unchecked
+        nulls are compile errors, not review comments. Every change passes type check,
+        lint and the test suite before it merges.</p>
+      <p class="note">These are counts of artefacts, verifiable by inspection. We do not
+        quote pass rates.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">14</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Go-to-market constraint, solved</p>
+      <h2>Large hotel groups will not put their operational data on shared infrastructure.</h2>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>Model</th><th>Shape</th><th>What it unlocks</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Multi-tenant SaaS</td><td>Shared infrastructure, per-tenant schemas</td><td>Lowest cost to serve &mdash; independent hotels and small groups</td></tr>
+            <tr><td>Single-tenant server</td><td>The same stack, dedicated infrastructure</td><td>Groups with data-residency or procurement rules</td></tr>
+            <tr><td>Container image</td><td>Self-contained, proxies its own API traffic</td><td>Runs inside existing orchestration, no cross-origin setup</td></tr>
+            <tr><td>Static hosting + CDN</td><td>Web client on object storage</td><td>Fast global delivery, independent of where the API runs</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Same product, different configuration. A vendor that can only offer
+        shared SaaS is excluded from those conversations before the product is evaluated.</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">15</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Appendix</p>
+      <h2>Stack by layer.</h2>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>Layer</th><th>Technology</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Web client</td><td>Vite &middot; React 19 with the React compiler &middot; TypeScript 5 strict &middot; React Router 7 lazy data routes &middot; Tailwind CSS 4 &middot; TanStack Query, Table and Virtual &middot; react-hook-form with Zod &middot; node-graph workflow editor &middot; Vitest with Testing Library</td></tr>
+            <tr><td>Admin console</td><td>React &middot; TypeScript &middot; CodeMirror 6 for report-template editing</td></tr>
+            <tr><td>Mobile</td><td>React Native via Expo &middot; secure credential storage &middot; device biometrics &middot; camera capture</td></tr>
+            <tr><td>API &amp; services</td><td>NestJS on TypeScript &middot; single HTTP entry point with token validation and rate limiting &middot; internal message-passing transport &middot; generated API documentation</td></tr>
+            <tr><td>Report &amp; scheduling</td><td>Go &middot; Gin &middot; GORM &middot; template rendering &middot; distributed job scheduling with a lock store</td></tr>
+            <tr><td>Data</td><td>PostgreSQL &mdash; shared platform schema plus one schema per business unit &middot; Prisma schema management</td></tr>
+            <tr><td>Identity</td><td>Keycloak &middot; role-based access scoped to cluster and business unit</td></tr>
+            <tr><td>Build &amp; delivery</td><td>Bun &middot; Turborepo &middot; containerised services &middot; object storage and CDN</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Detail, reasoning and known constraints: see the accompanying
+        technology memo.</p>
+    </div>
+  </section>
+
+</div>
