@@ -1,8 +1,9 @@
-<title>Carmen — Technology &amp; Product Overview</title>
+<meta charset="utf-8" />
+<title>Carmen &mdash; Technology &amp; Product Overview</title>
 
 <style>
   /* impeccable-disable design-system-radius design-system-font-size
-     เอกสารนำเสนอสำหรับนักลงทุน ไม่ใช่ UI ของโปรดักต์ — เผยแพร่เป็นหน้าเว็บเดี่ยว
+     เอกสารนำเสนอสำหรับนักลงทุน ไม่ใช่ UI ของโปรดักต์ &mdash; เผยแพร่เป็นหน้าเว็บเดี่ยว
      นอกรีโป จึงตั้งใจให้มีพาเลตต์ ระบบตัวอักษร และมุมโค้งของตัวเอง (3px ให้ความรู้สึก
      เอกสารพิมพ์ ไม่ใช่การ์ดแอป) การบังคับใช้ token ของ DESIGN.md ที่นี่จะทำให้สไลด์
      หน้าตาเหมือนหน้าจอที่มันกำลังนำเสนอ ซึ่งผิดวัตถุประสงค์ */
@@ -73,7 +74,9 @@
     gap: 0;
     padding: 5vh 4vw 5vh 0;
     border-bottom: 1px solid var(--rule-soft);
-    align-content: center;
+    /* safe center — สไลด์ที่เนื้อหาสั้นจัดกลางจอ ส่วนสไลด์ภาพที่สูงเกินหนึ่งจอ
+       จะชิดขอบบนแทนที่จะถูกดันล้นออกทั้งบนและล่างจนแถวล่างโดนตัด */
+    align-content: safe center;
   }
 
   .rail {
@@ -175,19 +178,24 @@
     max-width: 64ch;
   }
 
+  /* ห้ามทำ li เป็น grid — เนื้อใน li เป็น <strong> ตามด้วยข้อความเปล่า ซึ่งกลายเป็น
+     grid item แยกอีกตัว แล้วตกลงช่องแคบของแถวถัดไป ข้อความจะถูกบีบเหลือคำละบรรทัด
+     ใช้ขีดแบบ absolute แทน ข้อความจะไหลเป็นย่อหน้าเดียวตามปกติ */
   li {
-    display: grid;
-    grid-template-columns: 1.1rem minmax(0, 1fr);
-    gap: 0.75rem;
+    position: relative;
+    padding-left: 1.85rem;
     color: var(--muted);
+    text-wrap: pretty;
   }
 
   li::before {
     content: "";
-    width: 0.5rem;
+    position: absolute;
+    left: 0;
+    top: 0.82rem;
+    width: 0.75rem;
     height: 1px;
     background: var(--accent);
-    margin-top: 0.85rem;
   }
 
   li strong {
@@ -195,17 +203,30 @@
     font-weight: 600;
   }
 
+  /* สองคอลัมน์เสมอ ภาพหน้าจอต้องใหญ่พอให้อ่านตัวหนังสือในนั้นออก
+     สไลด์ที่มีสามภาพให้ภาพแรกกินเต็มความกว้างเป็นภาพนำ จะได้ไม่เหลือภาพโดดแถวล่าง */
   .shots {
     display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+    gap: 1.25rem 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shots--hero .shot:first-child {
+    grid-column: 1 / -1;
   }
 
   .shot {
+    margin: 0;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     min-width: 0;
+  }
+
+  @media (max-width: 60rem) {
+    .shots {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .shot img {
@@ -224,6 +245,7 @@
     letter-spacing: 0.06em;
     color: var(--muted);
     text-transform: uppercase;
+    text-wrap: balance;
   }
 
   .scroll-x {
@@ -291,6 +313,10 @@
     margin-top: 0.5rem;
   }
 
+  pre {
+    margin: 0;
+  }
+
   .pre {
     background: var(--card);
     border: 1px solid var(--rule);
@@ -342,11 +368,11 @@
   <section class="slide">
     <div class="rail"><span class="num">01</span><span class="tick"></span></div>
     <div class="body">
-      <p class="eyebrow">Technology &amp; Product Overview · August 2026</p>
+      <p class="eyebrow">Technology &amp; Product Overview &middot; August 2026</p>
       <h1>Carmen</h1>
-      <p class="lede">Supply-chain ERP for hotel and restaurant operations — from the
+      <p class="lede">Supply-chain ERP for hotel and restaurant operations &mdash; from the
         requisition raised in a kitchen to the posting in the stock ledger.</p>
-      <p class="sub">Prepared for prospective investors · Companion to the technology memo</p>
+      <p class="sub">Prepared for prospective investors &middot; Companion to the technology memo</p>
     </div>
   </section>
 
@@ -360,7 +386,7 @@
           exists, but only in someone's inbox.</li>
         <li><strong>Every property invents its own process.</strong> Group management
           cannot compare what it cannot standardise.</li>
-        <li><strong>Stock counts happen on paper</strong> and reconcile late, if at all —
+        <li><strong>Stock counts happen on paper</strong> and reconcile late, if at all &mdash;
           so variance is discovered a month after it was created.</li>
         <li><strong>The systems that do exist don't meet.</strong> Purchasing, receiving
           and the accounting ledger are three separate stories about the same money.</li>
@@ -412,9 +438,9 @@
   <section class="slide">
     <div class="rail"><span class="num">04</span><span class="tick"></span></div>
     <div class="body">
-      <p class="eyebrow">Product · 1 of 4</p>
+      <p class="eyebrow">Product &middot; 1 of 4</p>
       <h2>Procure-to-pay as one thread.</h2>
-      <p class="lede">A request becomes an order becomes a receipt — and the approval trail
+      <p class="lede">A request becomes an order becomes a receipt &mdash; and the approval trail
         travels with the document.</p>
       <div class="shots">
         <figure class="shot">
@@ -440,18 +466,18 @@
   <section class="slide">
     <div class="rail"><span class="num">05</span><span class="tick"></span></div>
     <div class="body">
-      <p class="eyebrow">Product · 2 of 4</p>
+      <p class="eyebrow">Product &middot; 2 of 4</p>
       <h2>Inventory you can trust.</h2>
       <p class="lede">Counts, spot checks and adjustments are separate auditable
-        workflows — not edits to a number.</p>
-      <div class="shots">
+        workflows &mdash; not edits to a number.</p>
+      <div class="shots shots--hero">
         <figure class="shot">
           <img src="{{IMG_05}}" alt="Physical count entry screen with per-item counts and evidence attachments" />
           <figcaption>Counting, item by item, with evidence attached</figcaption>
         </figure>
         <figure class="shot">
           <img src="{{IMG_06}}" alt="Spot check overview showing manual, high-value and random selection methods" />
-          <figcaption>Spot checks — manual, high-value or random selection</figcaption>
+          <figcaption>Spot checks &mdash; manual, high-value or random selection</figcaption>
         </figure>
         <figure class="shot">
           <img src="{{IMG_07}}" alt="Inventory transaction ledger with inbound, outbound and net change totals" />
@@ -464,14 +490,14 @@
   <section class="slide">
     <div class="rail"><span class="num">06</span><span class="tick"></span></div>
     <div class="body">
-      <p class="eyebrow">Product · 3 of 4</p>
+      <p class="eyebrow">Product &middot; 3 of 4</p>
       <h2>Configurable, not hard-coded.</h2>
       <p class="lede">A new property is a configuration exercise, not an engineering
         project. Onboarding cost does not grow with the customer list.</p>
-      <div class="shots">
+      <div class="shots shots--hero">
         <figure class="shot">
           <img src="{{IMG_08}}" alt="Workflow designer showing a seven-stage approval chain with service-level targets" />
-          <figcaption>Approval stages, approvers and time targets — set in the product</figcaption>
+          <figcaption>Approval stages, approvers and time targets &mdash; set in the product</figcaption>
         </figure>
         <figure class="shot">
           <img src="{{IMG_09}}" alt="Per-business-unit operational defaults and print form selection" />
@@ -488,18 +514,18 @@
   <section class="slide">
     <div class="rail"><span class="num">07</span><span class="tick"></span></div>
     <div class="body">
-      <p class="eyebrow">Product · 4 of 4</p>
+      <p class="eyebrow">Product &middot; 4 of 4</p>
       <h2>Built for the people who actually use it.</h2>
       <p class="lede">Staff work in their own language, on their own screens. The same
-        build, the same data — no separate localised edition to maintain.</p>
+        build, the same data &mdash; no separate localised edition to maintain.</p>
       <div class="shots">
         <figure class="shot">
           <img src="{{IMG_11}}" alt="The purchase request list rendered in dark theme" />
-          <figcaption>Dark theme — the same screen</figcaption>
+          <figcaption>Dark theme &mdash; the same screen</figcaption>
         </figure>
         <figure class="shot">
           <img src="{{IMG_12}}" alt="The same purchase request list rendered in Thai" />
-          <figcaption>Thai — the same screen, the same data</figcaption>
+          <figcaption>Thai &mdash; the same screen, the same data</figcaption>
         </figure>
       </div>
     </div>
@@ -509,20 +535,19 @@
     <div class="rail"><span class="num">08</span><span class="tick"></span></div>
     <div class="body">
       <p class="eyebrow">Architecture</p>
-      <h2>An edge, a gateway, and services that do one thing each.</h2>
+      <h2>One entry point, and services that do one thing each.</h2>
       <div class="pre">
         <pre class="mermaid">
 flowchart TD
-    Clients["Web · Admin · Mobile"]
-    Edge["Edge gateway<br/>TLS · token validation · rate limiting"]
-    API["API gateway"]
-    Business["Business service<br/>procurement · inventory · master data"]
-    Platform["Cluster · File · Notification · Identity"]
+    Clients["Web &middot; Admin &middot; Mobile"]
+    API["API gateway<br/>token validation &middot; rate limiting &middot; routing"]
+    Business["Business service<br/>procurement &middot; inventory &middot; master data"]
+    Platform["Cluster &middot; File &middot; Notification &middot; Identity"]
     Heavy["Report &amp; scheduler services"]
     DB[("PostgreSQL<br/>platform schema + per-tenant schemas")]
     IdP[("Identity provider")]
 
-    Clients --> Edge --> API
+    Clients --> API
     API --> Business
     API --> Platform
     API --> Heavy
@@ -545,7 +570,7 @@ flowchart TD
       <p class="lede">A shared platform schema holds identity, roles and subscriptions.
         Each business unit's operational data lives in its own schema.</p>
       <ul>
-        <li><strong>Cross-tenant leakage would take a schema-level mistake</strong> — not a
+        <li><strong>Cross-tenant leakage would take a schema-level mistake</strong> &mdash; not a
           forgotten condition in a query.</li>
         <li><strong>One property can be backed up, restored or migrated</strong> without
           touching anyone else.</li>
@@ -565,7 +590,7 @@ flowchart TD
         <li><strong>The access token lives in memory only.</strong> Reading browser storage
           yields nothing usable.</li>
         <li><strong>The refresh token is the only stored credential</strong>, and revoking
-          it is a server-side operation — signing out ends the session for real.</li>
+          it is a server-side operation &mdash; signing out ends the session for real.</li>
         <li><strong>Identity is delegated to a dedicated provider.</strong> Carmen never
           stores a password.</li>
         <li><strong>Permissions are scoped to cluster and business unit.</strong> The role
@@ -597,7 +622,7 @@ flowchart TD
               <td>Go</td>
               <td>Report rendering and scheduled jobs</td>
               <td>CPU-bound and bursty. A month-end report run must never slow down a
-                kitchen raising a requisition — separated by process and by language.</td>
+                kitchen raising a requisition &mdash; separated by process and by language.</td>
             </tr>
           </tbody>
         </table>
@@ -612,14 +637,14 @@ flowchart TD
       <p class="eyebrow">Scale &amp; cost posture</p>
       <h2>The tier every user touches has no servers to pay for.</h2>
       <ul>
-        <li><strong>The web tier does not scale — it is files.</strong> Static assets on a
+        <li><strong>The web tier does not scale &mdash; it is files.</strong> Static assets on a
           CDN absorb user growth without additional servers.</li>
         <li><strong>The API gateway holds no session state</strong>, so it scales
           horizontally behind a load balancer.</li>
         <li><strong>Scheduled jobs coordinate through a distributed lock</strong>, so
           replicas run safely: exactly one instance executes each job.</li>
-        <li><strong>Abusive traffic is rejected at the edge</strong>, before it consumes
-          application capacity.</li>
+        <li><strong>Abusive traffic is rejected at the gateway</strong>, before it reaches
+          a domain service or the database.</li>
         <li><strong>Per-tenant schemas are a natural sharding boundary</strong> if a large
           group ever needs dedicated database capacity.</li>
       </ul>
@@ -637,7 +662,7 @@ flowchart TD
         <div class="figure"><span class="n">112</span><span class="l">web test files</span></div>
         <div class="figure"><span class="n">132</span><span class="l">routes in the web application</span></div>
       </div>
-      <p>TypeScript strict mode throughout — implicit <strong>any</strong> and unchecked
+      <p>TypeScript strict mode throughout &mdash; implicit <strong>any</strong> and unchecked
         nulls are compile errors, not review comments. Every change passes type check,
         lint and the test suite before it merges.</p>
       <p class="note">These are counts of artefacts, verifiable by inspection. We do not
@@ -656,7 +681,7 @@ flowchart TD
             <tr><th>Model</th><th>Shape</th><th>What it unlocks</th></tr>
           </thead>
           <tbody>
-            <tr><td>Multi-tenant SaaS</td><td>Shared infrastructure, per-tenant schemas</td><td>Lowest cost to serve — independent hotels and small groups</td></tr>
+            <tr><td>Multi-tenant SaaS</td><td>Shared infrastructure, per-tenant schemas</td><td>Lowest cost to serve &mdash; independent hotels and small groups</td></tr>
             <tr><td>Single-tenant server</td><td>The same stack, dedicated infrastructure</td><td>Groups with data-residency or procurement rules</td></tr>
             <tr><td>Container image</td><td>Self-contained, proxies its own API traffic</td><td>Runs inside existing orchestration, no cross-origin setup</td></tr>
             <tr><td>Static hosting + CDN</td><td>Web client on object storage</td><td>Fast global delivery, independent of where the API runs</td></tr>
@@ -679,15 +704,14 @@ flowchart TD
             <tr><th>Layer</th><th>Technology</th></tr>
           </thead>
           <tbody>
-            <tr><td>Web client</td><td>Vite · React 19 with the React compiler · TypeScript 5 strict · React Router 7 lazy data routes · Tailwind CSS 4 · TanStack Query, Table and Virtual · react-hook-form with Zod · node-graph workflow editor · Vitest with Testing Library</td></tr>
-            <tr><td>Admin console</td><td>React · TypeScript · CodeMirror 6 for report-template editing</td></tr>
-            <tr><td>Mobile</td><td>React Native via Expo · secure credential storage · device biometrics · camera capture</td></tr>
-            <tr><td>Edge</td><td>Apache APISIX standalone — TLS, JWT validation, rate limiting, CORS, compression, tracing, socket proxying</td></tr>
-            <tr><td>API &amp; services</td><td>NestJS on TypeScript · HTTP entry point onto an internal message-passing transport · generated API documentation</td></tr>
-            <tr><td>Report &amp; scheduling</td><td>Go · Gin · GORM · template rendering · distributed job scheduling with a lock store</td></tr>
-            <tr><td>Data</td><td>PostgreSQL — shared platform schema plus one schema per business unit · Prisma schema management</td></tr>
-            <tr><td>Identity</td><td>Keycloak · role-based access scoped to cluster and business unit</td></tr>
-            <tr><td>Build &amp; delivery</td><td>Bun · Turborepo · containerised services · object storage and CDN</td></tr>
+            <tr><td>Web client</td><td>Vite &middot; React 19 with the React compiler &middot; TypeScript 5 strict &middot; React Router 7 lazy data routes &middot; Tailwind CSS 4 &middot; TanStack Query, Table and Virtual &middot; react-hook-form with Zod &middot; node-graph workflow editor &middot; Vitest with Testing Library</td></tr>
+            <tr><td>Admin console</td><td>React &middot; TypeScript &middot; CodeMirror 6 for report-template editing</td></tr>
+            <tr><td>Mobile</td><td>React Native via Expo &middot; secure credential storage &middot; device biometrics &middot; camera capture</td></tr>
+            <tr><td>API &amp; services</td><td>NestJS on TypeScript &middot; single HTTP entry point with token validation and rate limiting &middot; internal message-passing transport &middot; generated API documentation</td></tr>
+            <tr><td>Report &amp; scheduling</td><td>Go &middot; Gin &middot; GORM &middot; template rendering &middot; distributed job scheduling with a lock store</td></tr>
+            <tr><td>Data</td><td>PostgreSQL &mdash; shared platform schema plus one schema per business unit &middot; Prisma schema management</td></tr>
+            <tr><td>Identity</td><td>Keycloak &middot; role-based access scoped to cluster and business unit</td></tr>
+            <tr><td>Build &amp; delivery</td><td>Bun &middot; Turborepo &middot; containerised services &middot; object storage and CDN</td></tr>
           </tbody>
         </table>
       </div>

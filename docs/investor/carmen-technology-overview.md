@@ -47,8 +47,7 @@ flowchart TD
     Web["Web client<br/>static bundle on CDN"]
     Admin["Admin console"]
     Mobile["Mobile app"]
-    Edge["Edge gateway<br/>TLS · JWT validation · rate limiting · tracing"]
-    API["API gateway<br/>HTTP entry point"]
+    API["API gateway<br/>HTTP entry point · token validation · rate limiting"]
     Business["Business service<br/>procurement · inventory · master data · recipes"]
     Cluster["Cluster service<br/>tenants · business units"]
     File["File service"]
@@ -59,10 +58,9 @@ flowchart TD
     DB[("PostgreSQL<br/>platform schema + per-tenant schemas")]
     IdP[("Identity provider")]
 
-    Web --> Edge
-    Admin --> Edge
-    Mobile --> Edge
-    Edge --> API
+    Web --> API
+    Admin --> API
+    Mobile --> API
     API --> Business
     API --> Cluster
     API --> File
@@ -79,8 +77,7 @@ flowchart TD
 
 | Component | Responsibility |
 | --- | --- |
-| Edge gateway | Terminates TLS, validates tokens, applies rate limits and CORS, emits traces — before any request reaches application code |
-| API gateway | Single HTTP entry point; translates requests onto an internal message-passing transport and serves the API documentation |
+| API gateway | Single HTTP entry point; validates tokens, applies rate limits, translates requests onto an internal message-passing transport, serves the API documentation |
 | Business service | The domain: procurement, inventory movement, master data, recipes, activity logging |
 | Cluster service | Tenant and business-unit registry, licensing and entitlements |
 | File service | Document and image storage |
@@ -114,8 +111,8 @@ What the separation buys:
 
 ## 5. Identity, authorization and security
 
-- **Identity is delegated.** An identity provider issues tokens; Carmen validates them at
-  the edge and again at the API gateway. Carmen never stores a password.
+- **Identity is delegated.** An identity provider issues tokens; the API gateway validates
+  them on every request. Carmen never stores a password.
 - **Permissions are scoped to cluster and business unit.** A role grants what a user may
   do; the scope decides where.
 - **The access token is held in memory only** in the web client. It is never written to
@@ -148,9 +145,10 @@ the browser runs, not pages a server assembles per request. This removes an enti
 from the operational and cost picture and makes the same build artefact deployable to a
 CDN, a customer's own web server, or a container.
 
-**A dedicated edge in front of the API.** TLS, token validation, rate limiting and
-tracing belong at the boundary. Handling them there keeps that policy out of application
-code and lets it change without redeploying services.
+**One entry point, not many.** Every client — web, admin console, mobile — reaches the
+system through a single API gateway that validates the token, applies rate limits and
+routes onward. Cross-cutting policy lives in one place rather than being reimplemented in
+each service.
 
 Two languages, each where it pays for itself. Nothing is in the stack because it is new.
 
@@ -164,8 +162,8 @@ Two languages, each where it pays for itself. Nothing is in the stack because it
   scheduler can run safely: exactly one instance executes each job.
 - **Report generation is isolated** in its own service and can be scaled independently of
   the API tier.
-- **Rate limiting and token validation happen at the edge**, so abusive traffic is
-  rejected before it consumes application capacity.
+- **Rate limiting and token validation happen at the gateway**, so abusive traffic is
+  rejected before it reaches a domain service or the database.
 - **Per-tenant schemas give a natural sharding boundary** if a large group ever needs
   dedicated database capacity.
 
@@ -218,6 +216,11 @@ These are counts of artefacts, verifiable by inspection. We do not quote pass ra
 
 Stated plainly, because the gaps matter more than the highlights:
 
+- **A dedicated edge tier is designed but not yet deployed.** Today the API gateway
+  carries token validation and rate limiting itself. Moving that policy — along with TLS
+  termination, cross-origin rules and distributed tracing — out to a separate edge is
+  planned; it is the right shape, but it is not in production, and nothing in this
+  document depends on it.
 - **Cross-origin configuration for public-cloud hosting is being finalised.** The
   container deployment is unaffected because it proxies API traffic itself; the
   static-hosting path needs the API side completed before general availability on public
@@ -241,7 +244,6 @@ Stated plainly, because the gaps matter more than the highlights:
 | Web client | Vite · React 19 with the React compiler · TypeScript 5 (strict) · React Router 7 with lazy data routes · Tailwind CSS 4 · TanStack Query, Table and Virtual · react-hook-form with Zod validation · node-graph editor for workflow design · Vitest with Testing Library |
 | Admin console | React · TypeScript · CodeMirror 6 for report-template editing |
 | Mobile | React Native via Expo · secure credential storage · device biometrics · camera capture |
-| Edge | Apache APISIX in standalone mode — TLS termination, JWT validation, rate limiting, CORS, compression, distributed tracing, socket proxying |
 | API and services | NestJS on TypeScript · HTTP entry point translating onto an internal message-passing transport · generated API documentation |
 | Report and scheduling | Go · Gin · GORM · template rendering · distributed job scheduling with a lock store |
 | Data | PostgreSQL — shared platform schema plus one schema per business unit · Prisma schema management |
