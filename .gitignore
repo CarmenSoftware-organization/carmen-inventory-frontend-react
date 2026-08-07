@@ -13,4 +13,5 @@ playwright-report/
 graft/
 
 # deck ที่ generate จาก template + ภาพ (สร้างใหม่ได้ด้วย bun scripts/investor/build-deck.mjs)
-docs/investor/deck/carmen-tech-deck.html
+docs/investor/deck/*.html
+!docs/investor/deck/*.template.html

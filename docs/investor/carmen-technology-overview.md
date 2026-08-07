@@ -2,6 +2,9 @@
 
 August 2026 · Prepared for prospective investors
 
+> Thai edition: [`carmen-technology-overview.th.md`](carmen-technology-overview.th.md)
+> Both editions carry the same content — a change to one must be made in the other.
+
 ---
 
 ## 1. Executive summary

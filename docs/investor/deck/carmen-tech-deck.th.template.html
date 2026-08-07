@@ -1,0 +1,704 @@
+<meta charset="utf-8" />
+<title>Carmen &mdash; ภาพรวมเทคโนโลยีและผลิตภัณฑ์</title>
+
+<style>
+  /* impeccable-disable design-system-radius design-system-font-size
+     เอกสารนำเสนอสำหรับนักลงทุน ไม่ใช่ UI ของโปรดักต์ เผยแพร่เป็นหน้าเว็บเดี่ยวนอกรีโป
+     จึงตั้งใจให้มีพาเลตต์ ระบบตัวอักษร และมุมโค้งของตัวเอง
+
+     ฉบับภาษาไทยไม่ได้แค่แปลข้อความ แต่ปรับงานตัวอักษรด้วย เพราะ Georgia ที่ใช้เป็น
+     หน้าประกาศในฉบับอังกฤษไม่มีสระและวรรณยุกต์ไทยเลย ถ้าใช้ต่อจะได้ฟอนต์ fallback
+     ที่คุมไม่ได้ ที่เปลี่ยนคือ
+       - หน้าประกาศเปลี่ยนจาก serif เป็น Thai sans น้ำหนัก 600 ภาษาไทยสร้างลำดับชั้น
+         ด้วยน้ำหนักได้ดีกว่าด้วยหัวเชิง
+       - ป้ายกำกับเลิกใช้ text-transform: uppercase ภาษาไทยไม่มีตัวพิมพ์ใหญ่
+       - letter-spacing ลดจาก 0.2em เหลือเกือบศูนย์ การถ่างช่องไฟทำให้สระลอยห่างพยัญชนะ
+       - line-height เพิ่มขึ้น เพราะสระบนกับวรรณยุกต์ซ้อนกันสองชั้นต้องการที่
+     ตัวเลขกับเลขสไลด์ยังใช้ monospace เหมือนเดิม เพราะเป็นตัวเลขล้วน */
+  :root {
+    --paper: #f2f5f7;
+    --card: #ffffff;
+    --ink: #151a21;
+    --muted: #59636f;
+    --rule: #d3dae1;
+    --rule-soft: #e6ebef;
+    --accent: #1b3f72;
+    --figure: #9d6317;
+    --shadow: 0 1px 2px rgba(21, 26, 33, 0.06), 0 8px 24px rgba(21, 26, 33, 0.05);
+
+    --thai: "Sukhumvit Set", "IBM Plex Sans Thai", "Noto Sans Thai", Thonburi,
+      "Leelawadee UI", Tahoma, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0e1116;
+      --card: #161b22;
+      --ink: #e4e8ee;
+      --muted: #939eab;
+      --rule: #262e38;
+      --rule-soft: #1d242c;
+      --accent: #8fb4ea;
+      --figure: #d9a256;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0e1116;
+    --card: #161b22;
+    --ink: #e4e8ee;
+    --muted: #939eab;
+    --rule: #262e38;
+    --rule-soft: #1d242c;
+    --accent: #8fb4ea;
+    --figure: #d9a256;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--thai);
+    font-size: 16px;
+    line-height: 1.78;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck {
+    scroll-snap-type: y proximity;
+  }
+
+  .slide {
+    scroll-snap-align: start;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    padding: 5vh 4vw 5vh 0;
+    border-bottom: 1px solid var(--rule-soft);
+    align-content: safe center;
+  }
+
+  .rail {
+    border-right: 1px solid var(--rule);
+    padding-top: 0.35rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .rail .num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rail .tick {
+    width: 1px;
+    flex: 1;
+    background: var(--rule-soft);
+  }
+
+  .body {
+    padding-left: clamp(1.25rem, 4vw, 3.5rem);
+    max-width: 78rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* ป้ายกำกับไทย — ไม่ใช้ตัวพิมพ์ใหญ่ ไม่ถ่างช่องไฟ ใช้น้ำหนักกับสีสร้างลำดับชั้นแทน */
+  .eyebrow {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--accent);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-size: clamp(2.6rem, 6.5vw, 4.6rem);
+    line-height: 1.22;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  h2 {
+    font-size: clamp(1.6rem, 3vw, 2.5rem);
+    line-height: 1.38;
+    letter-spacing: -0.005em;
+    font-weight: 600;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    line-height: 1.7;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 0;
+    max-width: 42em;
+    text-wrap: pretty;
+  }
+
+  .sub {
+    font-size: 0.86rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+    max-width: 46em;
+    color: var(--muted);
+  }
+
+  p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    max-width: 48em;
+  }
+
+  /* เหตุผลเดียวกับฉบับอังกฤษ — ห้ามทำ li เป็น grid เพราะข้อความเปล่าหลัง <strong>
+     จะกลายเป็น grid item แยกแล้วตกลงช่องแคบ ข้อความจะถูกบีบเหลือคำละบรรทัด */
+  li {
+    position: relative;
+    padding-left: 1.85rem;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.95rem;
+    width: 0.75rem;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  li strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .shots {
+    display: grid;
+    gap: 1.25rem 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shots--hero .shot:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .shot {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  @media (max-width: 60rem) {
+    .shots {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .shot img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--card);
+    box-shadow: var(--shadow);
+  }
+
+  .shot figcaption {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-wrap: balance;
+    line-height: 1.6;
+  }
+
+  .scroll-x {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 34rem;
+    font-size: 0.94rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-align: left;
+    padding: 0 1.25rem 0.6rem 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: bottom;
+  }
+
+  td {
+    padding: 0.75rem 1.25rem 0.75rem 0;
+    border-bottom: 1px solid var(--rule-soft);
+    color: var(--muted);
+    vertical-align: top;
+  }
+
+  td:first-child {
+    color: var(--ink);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .figures {
+    display: grid;
+    gap: 1.5rem 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    max-width: 60rem;
+  }
+
+  .figure .n {
+    font-family: var(--mono);
+    font-size: clamp(2rem, 3.6vw, 2.9rem);
+    line-height: 1;
+    color: var(--figure);
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+
+  .figure .l {
+    font-size: 0.85rem;
+    color: var(--muted);
+    display: block;
+    margin-top: 0.6rem;
+    line-height: 1.55;
+  }
+
+  pre {
+    margin: 0;
+  }
+
+  .pre {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+
+  .note {
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-left: 1px solid var(--rule);
+    padding-left: 0.9rem;
+    max-width: 40em;
+    line-height: 1.7;
+  }
+
+  .cols {
+    display: grid;
+    gap: 2rem 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    max-width: 68rem;
+  }
+
+  .cols h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 0 0 0.4rem;
+  }
+
+  @media (max-width: 44rem) {
+    .slide {
+      grid-template-columns: 3rem minmax(0, 1fr);
+      padding: 4vh 5vw 4vh 0;
+    }
+    .body {
+      padding-left: 1rem;
+    }
+  }
+</style>
+
+<div class="deck" lang="th">
+
+  <section class="slide">
+    <div class="rail"><span class="num">01</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ภาพรวมเทคโนโลยีและผลิตภัณฑ์ &middot; สิงหาคม 2569</p>
+      <h1>Carmen</h1>
+      <p class="lede">ระบบ ERP จัดการซัพพลายเชนสำหรับโรงแรมและร้านอาหาร ตั้งแต่ใบขอซื้อ
+        ที่ตั้งขึ้นในครัว จนถึงการลงบัญชีสต๊อก</p>
+      <p class="sub">จัดทำสำหรับผู้ลงทุน &middot; เอกสารประกอบของบันทึกทางเทคนิค</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">02</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ปัญหาหน้างาน</p>
+      <h2>ต้นทุนวัตถุดิบเป็นค่าใช้จ่ายก้อนใหญ่อันดับต้นของโรงแรม
+        และเป็นก้อนที่วัดผลได้น้อยที่สุด</h2>
+      <ul>
+        <li><strong>การสั่งซื้อเดินด้วย Excel อีเมล และแชต</strong>
+          การอนุมัติมีอยู่จริง แต่อยู่ในกล่องข้อความของใครสักคนเท่านั้น</li>
+        <li><strong>แต่ละสาขาคิดวิธีทำงานของตัวเอง</strong>
+          ส่วนกลางจึงเปรียบเทียบต้นทุนข้ามสาขาไม่ได้ เพราะไม่มีมาตรฐานเดียวกันตั้งแต่ต้น</li>
+        <li><strong>การนับสต๊อกยังทำบนกระดาษ</strong>
+          และกระทบยอดช้า หรือไม่ได้กระทบเลย ส่วนต่างจึงถูกพบหลังจากมันเกิดขึ้นไปแล้วเป็นเดือน</li>
+        <li><strong>ระบบที่มีอยู่ไม่คุยกัน</strong>
+          ฝ่ายจัดซื้อ ฝ่ายรับของ และบัญชีแยกประเภท เล่าเรื่องเงินก้อนเดียวกันคนละเรื่อง</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">03</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">Carmen คืออะไร</p>
+      <h2>ระบบเดียว ตั้งแต่ใบขอซื้อ ถึงการรับของ ถึงบัญชีสต๊อก ครอบคลุมทุกสาขาในเครือ</h2>
+      <div class="cols">
+        <div>
+          <h3>จัดซื้อจัดจ้าง</h3>
+          <p>ใบขอซื้อและแม่แบบ ใบสั่งซื้อ ใบรับสินค้า ใบลดหนี้ และกล่องงานรออนุมัติ</p>
+        </div>
+        <div>
+          <h3>สินค้าคงคลัง</h3>
+          <p>การนับสต๊อกเต็มรอบ การสุ่มตรวจ การปรับปรุงยอด บัญชีเคลื่อนไหว และการปิดงวด</p>
+        </div>
+        <div>
+          <h3>งานร้านค้า</h3>
+          <p>ใบเบิกของ การรายงานของเสีย และการเติมสต๊อก</p>
+        </div>
+        <div>
+          <h3>ผู้ขาย</h3>
+          <p>ทะเบียนผู้ขาย รายการราคาและแม่แบบ และการขอใบเสนอราคา</p>
+        </div>
+        <div>
+          <h3>สินค้าและสูตรอาหาร</h3>
+          <p>ทะเบียนสินค้าและหมวดหมู่ สูตรอาหารพร้อมรายการวัตถุดิบ ประเภทอาหาร และอุปกรณ์</p>
+        </div>
+        <div>
+          <h3>งานผู้ดูแลระบบ</h3>
+          <p>ผู้ใช้ บทบาท ตัวออกแบบสายอนุมัติ รหัสเอกสาร แม่แบบการแจ้งเตือน แบบฟอร์มพิมพ์
+            และการต่อระบบภายนอก</p>
+        </div>
+      </div>
+      <p class="note">เอกสารทุกใบมีร่องรอยกิจกรรมที่ฝั่งเซิร์ฟเวอร์เป็นคนบันทึก
+        ว่าใครทำอะไรเมื่อไร</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">04</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ผลิตภัณฑ์ &middot; 1 จาก 4</p>
+      <h2>สายจัดซื้อที่ต่อกันเป็นเส้นเดียว</h2>
+      <p class="lede">ใบขอซื้อกลายเป็นใบสั่งซื้อ กลายเป็นใบรับสินค้า
+        และร่องรอยการอนุมัติเดินติดไปกับเอกสารตลอดทาง</p>
+      <div class="shots">
+        <figure class="shot">
+          <img src="{{IMG_01}}" alt="หน้ารายการใบขอซื้อ เรียงตามมูลค่า แสดงสถานะการอนุมัติหลากหลาย" />
+          <figcaption>ใบขอซื้อทั้งสาขา เรียงตามมูลค่าและขั้นตอน</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_02}}" alt="รายละเอียดใบขอซื้อ พร้อมแถบสายอนุมัติและการตัดสินรายบรรทัด" />
+          <figcaption>สายอนุมัติอยู่บนตัวเอกสารเอง</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_03}}" alt="รายละเอียดใบสั่งซื้อ รายการเดียวกระจายไปสองสถานที่รับ" />
+          <figcaption>รายการเดียว กระจายไปหลายสถานที่รับของ</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_04}}" alt="รายละเอียดใบรับสินค้า พร้อมเลขที่ใบกำกับและประเภทการลงบัญชี" />
+          <figcaption>ของที่มาถึงจริง เทียบกับใบสั่งซื้อและใบกำกับ</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">05</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ผลิตภัณฑ์ &middot; 2 จาก 4</p>
+      <h2>ตัวเลขสต๊อกที่เชื่อถือได้</h2>
+      <p class="lede">การนับ การสุ่มตรวจ และการปรับปรุงยอด เป็นคนละกระบวนการที่ตรวจสอบย้อนหลังได้
+        ไม่ใช่การไปแก้ตัวเลขทับ</p>
+      <div class="shots shots--hero">
+        <figure class="shot">
+          <img src="{{IMG_05}}" alt="หน้ากรอกผลนับสต๊อก มีช่องนับรายรายการและการแนบหลักฐาน" />
+          <figcaption>นับทีละรายการ พร้อมแนบหลักฐานประกอบ</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_06}}" alt="หน้าสุ่มตรวจ แสดงวิธีสุ่มแบบเลือกเอง มูลค่าสูง และสุ่มอัตโนมัติ" />
+          <figcaption>สุ่มตรวจได้สามแบบ เลือกเอง มูลค่าสูง หรือสุ่มอัตโนมัติ</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_07}}" alt="บัญชีเคลื่อนไหวสินค้า พร้อมยอดรับเข้า จ่ายออก และเปลี่ยนแปลงสุทธิ" />
+          <figcaption>ทุกการเคลื่อนไหว ผูกกับเอกสารที่เป็นต้นเหตุ</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">06</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ผลิตภัณฑ์ &middot; 3 จาก 4</p>
+      <h2>ตั้งค่าได้ ไม่ใช่ฝังไว้ในโค้ด</h2>
+      <p class="lede">การเปิดสาขาใหม่คืองานตั้งค่า ไม่ใช่งานเขียนโปรแกรม
+        ต้นทุนการรับลูกค้าใหม่จึงไม่โตตามจำนวนลูกค้า</p>
+      <div class="shots shots--hero">
+        <figure class="shot">
+          <img src="{{IMG_08}}" alt="ตัวออกแบบสายอนุมัติ แสดงเจ็ดขั้นพร้อมเวลาที่กำหนดในแต่ละขั้น" />
+          <figcaption>ขั้นอนุมัติ ผู้อนุมัติ และเวลาที่กำหนด ตั้งได้ในตัวโปรแกรม</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_09}}" alt="ค่าตั้งต้นการทำงานและแบบฟอร์มพิมพ์ แยกตามหน่วยธุรกิจ" />
+          <figcaption>ค่าตั้งต้นและแบบฟอร์มพิมพ์ แยกตามสาขา</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_10}}" alt="หน้าตั้งค่าการเชื่อมต่อระบบบัญชี พร้อมปลายทางและตัวเลือกการลงบัญชี" />
+          <figcaption>การต่อระบบบัญชี ระบบขายหน้าร้าน และระบบบริหารโรงแรม</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">07</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ผลิตภัณฑ์ &middot; 4 จาก 4</p>
+      <h2>ออกแบบมาเพื่อคนที่ใช้งานจริง</h2>
+      <p class="lede">พนักงานทำงานในภาษาของตัวเอง บนหน้าจอที่ตัวเองถนัด
+        ใช้ระบบชุดเดียวกัน ข้อมูลชุดเดียวกัน ไม่ต้องดูแลเวอร์ชันแยกตามภาษา</p>
+      <div class="shots">
+        <figure class="shot">
+          <img src="{{IMG_11}}" alt="หน้ารายการใบขอซื้อในโหมดมืด" />
+          <figcaption>โหมดมืด &mdash; หน้าจอเดียวกัน</figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="{{IMG_12}}" alt="หน้ารายการใบขอซื้อหน้าเดียวกัน แสดงเป็นภาษาไทย" />
+          <figcaption>ภาษาไทย &mdash; หน้าจอเดียวกัน ข้อมูลชุดเดียวกัน</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">08</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">สถาปัตยกรรม</p>
+      <h2>ทางเข้าเดียว กับบริการที่ทำหน้าที่ละอย่าง</h2>
+      <div class="pre">
+        <pre class="mermaid">
+flowchart TD
+    Clients["เว็บ &middot; หน้าจอผู้ดูแล &middot; แอปมือถือ"]
+    API["API gateway<br/>ตรวจ token &middot; จำกัดอัตราเรียก &middot; กระจายงาน"]
+    Business["บริการงานธุรกิจ<br/>จัดซื้อ &middot; สินค้าคงคลัง &middot; ข้อมูลหลัก"]
+    Platform["ทะเบียนหน่วยธุรกิจ &middot; ไฟล์ &middot; แจ้งเตือน &middot; ตัวตน"]
+    Heavy["บริการรายงานและงานตามเวลา"]
+    DB[("PostgreSQL<br/>schema กลาง + schema แยกต่อหน่วยธุรกิจ")]
+    IdP[("ผู้ให้บริการตัวตน")]
+
+    Clients --> API
+    API --> Business
+    API --> Platform
+    API --> Heavy
+    Business --> DB
+    Platform --> DB
+    Heavy --> DB
+    Platform --> IdP
+        </pre>
+      </div>
+      <p class="note">ส่วนหน้าเว็บเป็นไฟล์นิ่ง ไม่มีเซิร์ฟเวอร์แอปของเราคั่นระหว่าง
+        เบราว์เซอร์กับ API</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">09</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">การรองรับหลายผู้เช่า</p>
+      <h2>การแยกข้อมูลอยู่ในโครงสร้าง ไม่ใช่เงื่อนไขที่ใครสักคนต้องจำใส่</h2>
+      <p class="lede">schema กลางเก็บตัวตน บทบาท และการสมัครใช้งาน
+        ส่วนข้อมูลปฏิบัติการของแต่ละหน่วยธุรกิจอยู่ใน schema ของตัวเอง</p>
+      <ul>
+        <li><strong>ข้อมูลจะรั่วข้ามผู้เช่าได้ต้องพลาดถึงระดับ schema</strong>
+          ไม่ใช่แค่ลืมใส่เงื่อนไขในคำสั่งค้นหา</li>
+        <li><strong>สาขาเดียวสำรอง กู้คืน หรือย้ายได้</strong> โดยไม่กระทบสาขาอื่นเลย</li>
+        <li><strong>รายงานระดับเครือทำได้</strong> โดยอ่านข้ามหน่วยธุรกิจตามสิทธิ์ของผู้เรียก
+          ไม่ต้องเอาข้อมูลทุกผู้เช่ามากองรวมในตารางเดียว</li>
+        <li><strong>การติดตั้งแบบผู้เช่าเดียวคือผลิตภัณฑ์ตัวเดียวกัน</strong>
+          ไม่ใช่การแยกสายพัฒนา</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">10</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ความปลอดภัยและตัวตน</p>
+      <h2>ข้อมูลรับรองที่สำคัญที่สุด ไม่เคยถูกบันทึกลงดิสก์</h2>
+      <ul>
+        <li><strong>access token อยู่ในหน่วยความจำเท่านั้น</strong>
+          การอ่านที่เก็บข้อมูลของเบราว์เซอร์จึงไม่ได้อะไรที่เอาไปใช้ต่อได้</li>
+        <li><strong>refresh token เป็นข้อมูลรับรองชิ้นเดียวที่ถูกเก็บ</strong>
+          และการเพิกถอนทำที่ฝั่งเซิร์ฟเวอร์ การออกจากระบบจึงจบเซสชันจริง ไม่ใช่แค่ลบฝั่งเครื่อง</li>
+        <li><strong>การยืนยันตัวตนมอบให้ผู้ให้บริการเฉพาะทาง</strong>
+          Carmen ไม่เคยเก็บรหัสผ่านเอง</li>
+        <li><strong>สิทธิ์ผูกกับกลุ่มธุรกิจและหน่วยธุรกิจ</strong>
+          บทบาทบอกว่าทำอะไรได้ ขอบเขตบอกว่าทำได้ที่ไหน</li>
+        <li><strong>ความลับของการเชื่อมต่อถูกเข้ารหัสตอนพัก</strong>
+          และไม่เคยถูกส่งกลับมาที่เบราว์เซอร์ ผู้ดูแลเปลี่ยนค่าใหม่ได้ แต่อ่านค่าเดิมไม่ได้</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">11</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">การตัดสินใจเชิงวิศวกรรม</p>
+      <h2>สองภาษาโปรแกรม แต่ละภาษาอยู่ตรงที่มันคุ้ม</h2>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>ภาษา</th><th>ใช้ตรงไหน</th><th>ทำไมต้องตรงนั้น</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>TypeScript</td>
+              <td>API บริการต่าง ๆ และส่วนหน้าเว็บ</td>
+              <td>ระบบชนิดข้อมูลชุดเดียวตั้งแต่ฐานข้อมูลถึงหน้าจอ
+                การเปลี่ยนโครงสร้างเอกสารจะพังตอนคอมไพล์ ไม่ใช่พังต่อหน้าผู้ใช้</td>
+            </tr>
+            <tr>
+              <td>Go</td>
+              <td>การสร้างรายงานและงานตามเวลา</td>
+              <td>งานกินซีพียูและมาเป็นช่วง ๆ การรันรายงานปิดงวดต้องไม่ทำให้ครัวที่กำลัง
+                ตั้งใบเบิกช้าลง จึงแยกทั้งด้วยกระบวนการและด้วยภาษาที่เลือกมาเพื่อรับโหลด</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">ไม่มีอะไรอยู่ในกองนี้เพราะมันใหม่</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">12</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">การขยายตัวและโครงสร้างต้นทุน</p>
+      <h2>ชั้นที่ผู้ใช้ทุกคนแตะ ไม่มีเซิร์ฟเวอร์ให้ต้องจ่าย</h2>
+      <ul>
+        <li><strong>ส่วนหน้าเว็บไม่ต้องขยาย เพราะมันคือไฟล์</strong>
+          ไฟล์นิ่งบน CDN รับผู้ใช้ที่เพิ่มขึ้นได้โดยไม่ต้องเพิ่มเครื่อง</li>
+        <li><strong>API gateway ไม่ถือสถานะ</strong> จึงขยายแนวนอนหลังตัวกระจายโหลดได้</li>
+        <li><strong>งานตามเวลาประสานกันผ่านการล็อกแบบกระจาย</strong>
+          จึงรันหลายชุดพร้อมกันได้อย่างปลอดภัย งานหนึ่งงานมีเพียงชุดเดียวที่ทำ</li>
+        <li><strong>ทราฟฟิกที่ผิดปกติถูกปฏิเสธที่ gateway</strong>
+          ก่อนจะไปถึงบริการงานธุรกิจหรือฐานข้อมูล</li>
+        <li><strong>schema แยกต่อหน่วยธุรกิจเป็นเส้นแบ่งที่พร้อมอยู่แล้ว</strong>
+          ถ้าเครือใหญ่รายไหนต้องการฐานข้อมูลของตัวเอง</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">13</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">วิธีทำงานของทีม</p>
+      <h2>เขียนก่อนสร้าง และผ่านด่านก่อนรวมเข้าสายหลัก</h2>
+      <div class="figures">
+        <div class="figure"><span class="n">41</span><span class="l">เอกสารออกแบบที่เขียนก่อนลงมือ</span></div>
+        <div class="figure"><span class="n">875</span><span class="l">ไฟล์ทดสอบฝั่งหลังบ้าน</span></div>
+        <div class="figure"><span class="n">112</span><span class="l">ไฟล์ทดสอบฝั่งเว็บ</span></div>
+        <div class="figure"><span class="n">132</span><span class="l">เส้นทางหน้าจอในแอปเว็บ</span></div>
+      </div>
+      <p>ใช้ TypeScript โหมดเข้มงวดตลอดสาย ชนิดข้อมูลที่ไม่ระบุและค่าที่อาจเป็นว่าง
+        เป็นข้อผิดพลาดตอนคอมไพล์ ไม่ใช่ข้อคิดเห็นตอนรีวิว
+        ทุกการเปลี่ยนแปลงต้องผ่านการตรวจชนิดข้อมูล ตรวจสไตล์ และชุดทดสอบ ก่อนรวมเข้าสายหลัก</p>
+      <p class="note">ตัวเลขเหล่านี้เป็นจำนวนสิ่งที่นับได้และตรวจสอบได้ด้วยการเปิดดู
+        เราไม่อ้างอัตราการผ่านการทดสอบ</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">14</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ข้อจำกัดของตลาด ที่แก้ไปแล้ว</p>
+      <h2>เครือโรงแรมใหญ่ไม่ยอมเอาข้อมูลปฏิบัติการไปวางบนโครงสร้างที่ใช้ร่วมกับคนอื่น</h2>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>รูปแบบ</th><th>ลักษณะ</th><th>เปิดประตูอะไรให้</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>SaaS หลายผู้เช่า</td><td>โครงสร้างใช้ร่วมกัน แยก schema ต่อผู้เช่า</td><td>ต้นทุนให้บริการต่ำที่สุด เหมาะกับโรงแรมเดี่ยวและเครือขนาดเล็ก</td></tr>
+            <tr><td>เซิร์ฟเวอร์ผู้เช่าเดียว</td><td>ระบบชุดเดิม บนโครงสร้างเฉพาะของลูกค้า</td><td>เครือที่มีข้อกำหนดเรื่องที่อยู่ของข้อมูลหรือระเบียบจัดซื้อ</td></tr>
+            <tr><td>Docker image</td><td>ทำงานได้ในตัว มี proxy ให้ API เอง</td><td>รันในระบบจัดการคอนเทนเนอร์ที่ลูกค้ามีอยู่ ไม่ต้องตั้งค่าข้ามโดเมน</td></tr>
+            <tr><td>ไฟล์นิ่งบน CDN</td><td>ส่วนหน้าเว็บวางบนที่เก็บไฟล์</td><td>ส่งหน้าจอได้เร็วทั่วโลก ไม่ขึ้นกับว่า API อยู่ที่ไหน</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">ผลิตภัณฑ์ตัวเดียวกัน ต่างกันแค่การตั้งค่า
+        ผู้ขายที่เสนอได้แค่ SaaS ใช้ร่วมกัน จะถูกตัดออกตั้งแต่ก่อนได้เข้าไปให้ประเมินโปรแกรม</p>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="rail"><span class="num">15</span><span class="tick"></span></div>
+    <div class="body">
+      <p class="eyebrow">ภาคผนวก</p>
+      <h2>เทคโนโลยีแยกตามชั้น</h2>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr><th>ชั้น</th><th>เทคโนโลยี</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ส่วนหน้าเว็บ</td><td>Vite &middot; React 19 พร้อม React compiler &middot; TypeScript 5 โหมดเข้มงวด &middot; React Router 7 แบบโหลดตามต้องการ &middot; Tailwind CSS 4 &middot; TanStack Query, Table และ Virtual &middot; react-hook-form กับ Zod &middot; ตัวแก้ผังแบบโหนดสำหรับออกแบบสายอนุมัติ &middot; Vitest กับ Testing Library</td></tr>
+            <tr><td>หน้าจอผู้ดูแล</td><td>React &middot; TypeScript &middot; CodeMirror 6 สำหรับแก้แม่แบบรายงาน</td></tr>
+            <tr><td>แอปมือถือ</td><td>React Native ผ่าน Expo &middot; ที่เก็บข้อมูลรับรองแบบปลอดภัย &middot; การยืนยันตัวตนด้วยชีวมิติ &middot; การถ่ายภาพ</td></tr>
+            <tr><td>API และบริการ</td><td>NestJS บน TypeScript &middot; ทางเข้า HTTP เดียวที่ตรวจ token และจำกัดอัตราเรียก &middot; การสื่อสารภายในแบบส่งข้อความ &middot; เอกสาร API ที่สร้างอัตโนมัติ</td></tr>
+            <tr><td>รายงานและงานตามเวลา</td><td>Go &middot; Gin &middot; GORM &middot; การสร้างเอกสารจากแม่แบบ &middot; การจัดคิวงานแบบกระจายพร้อมที่เก็บล็อก</td></tr>
+            <tr><td>ข้อมูล</td><td>PostgreSQL &mdash; schema กลางร่วมกัน บวก schema แยกต่อหน่วยธุรกิจ &middot; จัดการ schema ด้วย Prisma</td></tr>
+            <tr><td>ตัวตน</td><td>Keycloak &middot; สิทธิ์ตามบทบาท ผูกกับกลุ่มธุรกิจและหน่วยธุรกิจ</td></tr>
+            <tr><td>การสร้างและส่งมอบ</td><td>Bun &middot; Turborepo &middot; บริการแบบคอนเทนเนอร์ &middot; ที่เก็บไฟล์และ CDN</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">รายละเอียด เหตุผลเบื้องหลัง และข้อจำกัดที่รู้อยู่
+        อยู่ในบันทึกทางเทคนิคที่แนบมาด้วยกัน</p>
+    </div>
+  </section>
+
+</div>
