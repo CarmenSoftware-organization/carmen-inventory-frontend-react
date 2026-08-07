@@ -346,6 +346,160 @@
       padding-left: 1rem;
     }
   }
+
+  /* ── พิมพ์เป็น PDF ─────────────────────────────────────────────────────────
+     หนึ่งสไลด์ต่อหนึ่งหน้ากระดาษ แนวนอน เพราะภาพหน้าจอเป็นอัตราส่วน 16:9
+     บล็อกนี้ต้องอยู่ท้ายสุดของ stylesheet เพราะต้องชนะบล็อกธีมมืดด้านบน
+     ไม่งั้นเครื่องที่ตั้งธีมมืดไว้จะพิมพ์ออกมาพื้นดำ
+
+     ฉบับไทยใช้ตัวอักษรใหญ่กว่าฉบับอังกฤษเล็กน้อยในทุกระดับ เพราะสระบนกับ
+     วรรณยุกต์ที่ซ้อนกันจะตันเมื่อย่อลงบนกระดาษ */
+  @media print {
+    @page {
+      size: A4 landscape;
+      margin: 12mm 14mm;
+    }
+
+    :root,
+    :root:not([data-theme="light"]),
+    :root[data-theme="dark"] {
+      --paper: #ffffff;
+      --card: #ffffff;
+      --ink: #101418;
+      --muted: #3f474f;
+      --rule: #9aa3ad;
+      --rule-soft: #c5ccd3;
+      --accent: #12365f;
+      --figure: #7a4c10;
+      --shadow: none;
+    }
+
+    body {
+      background: #ffffff;
+      font-size: 11pt;
+      line-height: 1.62;
+    }
+
+    .deck {
+      scroll-snap-type: none;
+    }
+
+    .slide {
+      min-height: 0;
+      padding: 0;
+      border-bottom: 0;
+      align-content: start;
+      grid-template-columns: 13mm minmax(0, 1fr);
+      break-after: page;
+      page-break-after: always;
+    }
+
+    .slide:last-child {
+      break-after: auto;
+      page-break-after: auto;
+    }
+
+    .rail {
+      border-right: 0.4pt solid var(--rule);
+      padding-top: 0;
+    }
+
+    .rail .tick {
+      display: none;
+    }
+
+    .body {
+      padding-left: 6mm;
+      max-width: none;
+      gap: 4mm;
+    }
+
+    h1 {
+      font-size: 26pt;
+      line-height: 1.25;
+    }
+
+    h2 {
+      font-size: 16pt;
+      line-height: 1.4;
+    }
+
+    .lede {
+      font-size: 11.5pt;
+      line-height: 1.62;
+    }
+
+    .eyebrow {
+      font-size: 9pt;
+    }
+
+    .figure .n {
+      font-size: 20pt;
+    }
+
+    .shots {
+      gap: 4mm 5mm;
+    }
+
+    .shot,
+    tr,
+    li,
+    .note,
+    .figure {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .shot img {
+      border: 0.4pt solid var(--rule);
+      box-shadow: none;
+    }
+
+    /* จำกัดความสูงภาพตอนพิมพ์ ไม่งั้นสไลด์ภาพล้นไปหน้าที่สอง
+       A4 แนวนอน หักขอบแล้วเหลือสูงราว 185mm หัวสไลด์กินไปราว 36mm
+       สี่ภาพสองแถว 56mm ต่อภาพ = 130mm รวมแล้วพอดีหนึ่งหน้า */
+    .shot img {
+      max-height: 56mm;
+      width: auto;
+      max-width: 100%;
+      margin-inline: auto;
+    }
+
+    .shots--hero .shot:first-child img {
+      max-height: 68mm;
+    }
+
+    .shots--pair .shot img {
+      max-height: 82mm;
+    }
+
+    .shot figcaption {
+      font-size: 8pt;
+      line-height: 1.5;
+    }
+
+    .scroll-x {
+      overflow: visible;
+    }
+
+    table {
+      min-width: 0;
+      font-size: 9.5pt;
+    }
+
+    .pre {
+      border: 0.4pt solid var(--rule);
+      padding: 4mm;
+    }
+
+    /* ผัง mermaid ถูก render เป็น SVG ตอนแสดงผลจริง ซึ่งสูงกว่าตอนเป็นข้อความดิบ
+       ใส่เพดานไว้กันสไลด์สถาปัตยกรรมล้นไปหน้าที่สอง */
+    .pre svg {
+      max-height: 108mm;
+      max-width: 100%;
+      height: auto;
+    }
+  }
 </style>
 
 <div class="deck" lang="th">
@@ -500,7 +654,7 @@
       <h2>ออกแบบมาเพื่อคนที่ใช้งานจริง</h2>
       <p class="lede">พนักงานทำงานในภาษาของตัวเอง บนหน้าจอที่ตัวเองถนัด
         ใช้ระบบชุดเดียวกัน ข้อมูลชุดเดียวกัน ไม่ต้องดูแลเวอร์ชันแยกตามภาษา</p>
-      <div class="shots">
+      <div class="shots shots--pair">
         <figure class="shot">
           <img src="{{IMG_11}}" alt="หน้ารายการใบขอซื้อในโหมดมืด" />
           <figcaption>โหมดมืด &mdash; หน้าจอเดียวกัน</figcaption>
