@@ -153,6 +153,14 @@
       .querySelectorAll('td, dd, h1, h2, h3, [role="cell"]')
       .forEach((el) => add(el.textContent));
     document.querySelectorAll("input, textarea").forEach((el) => add(el.value));
+
+    // เปลือกแอปต้องกวาดด้วย — navbar เก็บชื่อผู้ใช้กับชื่อหน่วยธุรกิจ และ footer
+    // เก็บชื่อผู้ใช้กับรหัส tenant ซึ่งเป็นข้อมูลระบุตัวตนที่ไม่ได้อยู่ในตาราง
+    // เดินเฉพาะ leaf element เพื่อไม่ให้ได้ข้อความของทั้งบล็อกมาก้อนเดียว
+    document.querySelectorAll("header *, footer *, nav *").forEach((el) => {
+      if (el.children.length === 0) add(el.textContent);
+    });
+
     return [...seen].sort();
   }
 
@@ -164,6 +172,9 @@
     (input.people || []).forEach((s) => entries.push([s, pick(PEOPLE, s)]));
     (input.phones || []).forEach((s) => entries.push([s, fakePhone(s)]));
     (input.addresses || []).forEach((s) => entries.push([s, pick(ADDRESSES, s)]));
+    // exact: [[ของจริง, ของปลอม], ...] สำหรับกรณีที่ต้องคุมผลลัพธ์เอง เช่นรหัสหน่วย
+    // ธุรกิจที่ต้องคงรูปแบบ "XX01 - ชื่อ (AVG)" ไว้ ไม่ใช่แทนด้วยชื่อจากรายการเฉย ๆ
+    (input.exact || []).forEach((pair) => entries.push([pair[0], pair[1]]));
     // ยาวก่อนสั้น เพื่อไม่ให้สตริงสั้นไปกินชิ้นส่วนของสตริงยาวที่ยังไม่ถูกแทนที่
     entries.sort((a, b) => b[0].length - a[0].length);
     window.__carmenMap = entries;
