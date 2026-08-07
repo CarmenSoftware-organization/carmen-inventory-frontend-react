@@ -8,3 +8,9 @@ test-results/
 playwright-report/
 .vercel
 .env*.local
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+graft/
+
+# deck ที่ generate จาก template + ภาพ (สร้างใหม่ได้ด้วย bun scripts/investor/build-deck.mjs)
+docs/investor/deck/carmen-tech-deck.html
