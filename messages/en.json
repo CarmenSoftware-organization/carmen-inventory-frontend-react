@@ -482,6 +482,28 @@
       "creating": "Creating account...",
       "createFailed": "Could not create the account. Please try again.",
       "accountReady": "Your account is ready. Sign in to continue."
+    },
+    "invitation": {
+      "title": "You have been invited",
+      "loading": "Loading the invitation...",
+      "deadTitle": "This invitation link no longer works",
+      "deadDescription": "It has expired, was withdrawn, or has already been used.",
+      "reviewDescription": "Review what you are being invited to, then accept or decline.",
+      "chooseDescription": "Create an account to join, or sign in if you already have one.",
+      "signupDescription": "Set your name and password to join.",
+      "cluster": "Chain",
+      "role": "Role",
+      "sentTo": "Sent to",
+      "businessUnits": "Properties",
+      "accept": "Accept",
+      "accepting": "Accepting...",
+      "decline": "Decline",
+      "createAccount": "Create a new account",
+      "createAndJoin": "Create account and join",
+      "haveAccount": "I already have an account",
+      "alreadyHasAccount": "This address already has an account. Sign in and accept the invitation instead.",
+      "wrongAccount": "This invitation was sent to a different account. Sign out and try again.",
+      "actionFailed": "Something went wrong. Please try again."
     }
   },
   "toast": {

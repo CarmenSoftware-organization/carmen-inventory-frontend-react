@@ -25,6 +25,11 @@ export const router = createBrowserRouter([
       // เอกสารกฎหมาย — public ทั้งคู่ ต้องอ่านได้ก่อนกดสมัคร
       { path: "/terms", lazy: () => import("./legal/terms.route") },
       { path: "/privacy", lazy: () => import("./legal/privacy.route") },
+      // หน้ารับคำเชิญ — public เพราะผู้ถูกเชิญอาจยังไม่มีบัญชี และสมัครจบได้ในลิงก์นี้เลย
+      {
+        path: "/invitations/:token",
+        lazy: () => import("./invitation/invitation.route"),
+      },
       // Public price-list route — vendor ภายนอกเปิดจากลิงก์ในอีเมล (ไม่ต้อง auth)
       { path: "/pl/:url_token", lazy: () => import("./external/pl/price-list-external.route") },
       {
