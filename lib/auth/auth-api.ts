@@ -65,21 +65,104 @@ export async function login(email: string, password: string): Promise<LoginResul
   return { platform_role };
 }
 
+export interface UserInfo {
+  first_name: string;
+  middle_name?: string;
+  last_name: string;
+  telephone?: string;
+}
+
 export interface RegisterPayload {
-  username: string;
-  email: string;
+  /** token จากลิงก์ในอีเมล — อีเมลของบัญชีมาจาก token ไม่ใช่จาก payload */
+  token: string;
   password: string;
-  user_info: {
-    first_name: string;
-    middle_name?: string;
-    last_name: string;
-    telephone?: string;
-  };
+  user_info: UserInfo;
 }
 
 /**
- * สมัครสมาชิก — POST /api/auth/register (public, ไม่ต้องมี access token)
- * backend คืน 201 เปล่าๆ ไม่มี token กลับมา ผู้ใช้ต้องไป login ต่อเอง
+ * แปลง error response ของ auth endpoint สาธารณะเป็น ApiError
+ * gateway คืน message เป็น array เมื่อ zod ไม่ผ่าน (string เมื่อเป็น error อื่น) — รวมเป็นบรรทัดเดียว
+ * ไม่งั้น UI ได้ข้อความคั่นด้วยจุลภาคติดกันพรืด
+ * @param res - response ที่ไม่ ok
+ * @param fallback - ข้อความเมื่อ backend ไม่ส่ง message มา
+ * @param parsed - body ที่ parse ไว้แล้ว (ส่งมาเมื่อผู้เรียกอ่าน body ไปก่อนแล้ว body อ่านซ้ำไม่ได้)
+ */
+async function toAuthApiError(res: Response, fallback: string, parsed?: unknown): Promise<ApiError> {
+  const json = (parsed ?? (await res.json().catch(() => ({})))) as {
+    message?: string | string[];
+    retry_after?: number;
+  };
+  const message: string = Array.isArray(json?.message)
+    ? json.message.join(" · ")
+    : (json?.message ?? fallback);
+  const retryAfter: number | undefined =
+    typeof json?.retry_after === "number" ? json.retry_after : undefined;
+  // 410 (ลิงก์ใช้ไม่ได้) กับ 409 (มีบัญชีแล้ว) ใช้ code เดียวกัน หน้าจอแยกสองกรณีนี้ด้วย
+  // `error.status` ไม่ใช่ด้วย code
+  const code =
+    res.status === 400 || res.status === 409 || res.status === 410
+      ? ERROR_CODES.VALIDATION_ERROR
+      : res.status === 429
+        ? ERROR_CODES.RATE_LIMITED
+        : ERROR_CODES.INTERNAL_ERROR;
+  return new ApiError(
+    code,
+    message,
+    res.status,
+    false,
+    retryAfter !== undefined ? { retryAfter } : undefined,
+  );
+}
+
+/**
+ * ขอลิงก์ยืนยันอีเมลเพื่อสมัคร — POST /api/auth/signup-request (public)
+ * backend ตอบ 200 เสมอ ไม่ว่าอีเมลนั้นจะมีบัญชีอยู่แล้วหรือไม่ เพื่อไม่ให้ใครใช้ endpoint นี้
+ * ค้นว่าใครสมัครไว้แล้ว จึงห้ามตีความ 200 ว่า "อีเมลนี้ว่าง" และห้ามแสดงข้อความที่บอกเป็นนัยแบบนั้น
+ */
+export async function signupRequest(email: string): Promise<void> {
+  const { BACKEND_URL } = getRuntimeConfig();
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}/api/auth/signup-request`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ email }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+  }
+  if (res.ok) return;
+  throw await toAuthApiError(res, "Could not send the verification link");
+}
+
+/**
+ * ตรวจลิงก์ก่อนแสดงฟอร์มสมัคร — POST /api/auth/signup-token/verify (public)
+ * 410 แปลว่าลิงก์ไม่มีจริง หมดอายุ หรือถูกใช้ไปแล้ว โดยแยกสามกรณีนี้ไม่ได้ตั้งใจ
+ */
+export async function verifySignupToken(token: string): Promise<{ email: string }> {
+  const { BACKEND_URL } = getRuntimeConfig();
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}/api/auth/signup-token/verify`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ token }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+  }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw await toAuthApiError(res, "This link is no longer valid", json);
+  const email: string | undefined = json?.data?.email;
+  if (!email) throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Invalid response from backend", 502);
+  return { email };
+}
+
+/**
+ * สร้างบัญชีจาก token ที่ยืนยันอีเมลแล้ว — POST /api/auth/register (public)
+ * backend คืน 201 เปล่า ๆ ไม่มี token กลับมา ผู้ใช้ต้องไป login ต่อเอง
  */
 export async function register(payload: RegisterPayload): Promise<void> {
   const { BACKEND_URL } = getRuntimeConfig();
@@ -94,24 +177,8 @@ export async function register(payload: RegisterPayload): Promise<void> {
   } catch {
     throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
   }
-
   if (res.ok) return;
-
-  const json = await res.json().catch(() => ({}));
-  // gateway คืน message เป็น array เมื่อ zod validation ไม่ผ่าน (string เมื่อเป็น
-  // error อื่น) — รวมเป็นบรรทัดเดียวไม่งั้น UI ได้ข้อความคั่นด้วยจุลภาคติดกันพรืด
-  const message: string = Array.isArray(json?.message)
-    ? json.message.join(" · ")
-    : (json?.message ?? "Register failed");
-  throw new ApiError(
-    res.status === 409 || res.status === 400
-      ? ERROR_CODES.VALIDATION_ERROR
-      : res.status === 429
-        ? ERROR_CODES.RATE_LIMITED
-        : ERROR_CODES.INTERNAL_ERROR,
-    message,
-    res.status,
-  );
+  throw await toAuthApiError(res, "Register failed");
 }
 
 // Mutex — concurrent 401s แชร์ refresh request เดียวกัน (พฤติกรรมเดิมจาก http-client)
