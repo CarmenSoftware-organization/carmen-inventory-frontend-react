@@ -3,8 +3,10 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { Link } from "react-router";
 import { MailCheck } from "lucide-react";
+import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { signupRequest } from "@/lib/auth/auth-api";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
+import { AuthFormAlert } from "@/components/auth/floating-field";
 import { Button } from "@/components/ui/button";
 
 /** วินาทีที่ต้องรอก่อนกดส่งลิงก์ซ้ำได้ — ตรงกับที่ backend จำกัดไว้ต่ออีเมล+IP */
@@ -33,6 +35,17 @@ export default function CheckInbox({ email }: { readonly email: string }) {
     onSuccess: () => setSecondsLeft(RESEND_COOLDOWN_SECONDS),
   });
 
+  // การขอซ้ำล้มเหลวต้องมีข้อความ — 429 เกิดได้จริงเพราะ backend จำกัดที่ 5 ครั้งต่ออีเมล+IP
+  // ในหน้าต่างสิบนาที ขณะที่ปุ่มนี้ปลดล็อกทุกหกสิบวินาที ถ้าเงียบ ผู้ใช้จะกดแล้วไม่เกิดอะไรขึ้นเลย
+  const resendError =
+    resend.error instanceof ApiError
+      ? resend.error.code === ERROR_CODES.RATE_LIMITED
+        ? t("signup.tooManyAttempts")
+        : resend.error.message
+      : resend.error
+        ? t("signup.sendFailed")
+        : null;
+
   return (
     <AuthSplitShell
       title={t("signup.checkInboxTitle")}
@@ -46,6 +59,8 @@ export default function CheckInbox({ email }: { readonly email: string }) {
         <p className="text-muted-foreground text-xs leading-relaxed">
           {t("signup.linkExpiryNote")}
         </p>
+        {resendError && <AuthFormAlert>{resendError}</AuthFormAlert>}
+
         <Button
           variant="outline"
           className="mt-1 h-10 w-full"
