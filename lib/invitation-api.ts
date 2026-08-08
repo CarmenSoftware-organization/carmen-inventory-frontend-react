@@ -35,7 +35,7 @@ export interface InvitationPreview {
  */
 export async function getInvitation(token: string): Promise<InvitationPreview> {
   const res = await httpClient.get(
-    `/api/proxy/invitations/${encodeURIComponent(token)}`,
+    `/api/proxy/api/invitations/${encodeURIComponent(token)}`,
   );
   if (!res.ok) throw await ApiError.from(res, "This invitation link is no longer valid");
   const json = await res.json();
@@ -56,7 +56,7 @@ export async function acceptInvitationWithSignup(
   payload: { password: string; user_info: UserInfo },
 ): Promise<void> {
   const res = await httpClient.post(
-    `/api/proxy/invitations/${encodeURIComponent(token)}/accept-with-signup`,
+    `/api/proxy/api/invitations/${encodeURIComponent(token)}/accept-with-signup`,
     payload,
   );
   if (!res.ok) throw await ApiError.from(res, "Could not create the account");
@@ -70,7 +70,7 @@ export async function acceptInvitationWithSignup(
  */
 export async function acceptInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
-    `/api/proxy/invitations/${encodeURIComponent(token)}/accept`,
+    `/api/proxy/api/invitations/${encodeURIComponent(token)}/accept`,
   );
   if (!res.ok) throw await ApiError.from(res, "Could not accept the invitation");
 }
@@ -83,7 +83,7 @@ export async function acceptInvitation(token: string): Promise<void> {
  */
 export async function declineInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
-    `/api/proxy/invitations/${encodeURIComponent(token)}/decline`,
+    `/api/proxy/api/invitations/${encodeURIComponent(token)}/decline`,
   );
   if (!res.ok) throw await ApiError.from(res, "Could not decline the invitation");
 }
