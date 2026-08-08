@@ -36,7 +36,14 @@ function entry(name) {
     const f = path.join(d, name);
     if (fs.existsSync(f)) return f;
   }
-  return path.join(dir, 'dist', 'claude', name); // last-ditch; import will no-op if absent
+  // No last-ditch fallback into the project tree. Hooks run without a permission prompt, so a
+  // file appearing at dist/claude/ — the Vite build output here — must never become code we import.
+  // ไม่ถอยไปหา dist/ ของโปรเจกต์ เพราะ hook รันโดยไม่ผ่านการขออนุญาต ไฟล์ที่ build ออกมา
+  // จึงต้องไม่กลายเป็นโค้ดที่ไฟล์นี้ import
+  return null;
 }
 
-import(pathToFileURL(entry("hooks.js")).href).then((m) => m.main(process.argv[2])).catch(() => { /* graft unavailable — no-op */ });
+const target = entry("hooks.js");
+if (target) {
+  import(pathToFileURL(target).href).then((m) => m.main(process.argv[2])).catch(() => { /* graft unavailable — no-op */ });
+}
