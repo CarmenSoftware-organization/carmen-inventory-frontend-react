@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { ApiError } from "@/lib/api-error";
@@ -9,7 +9,6 @@ import {
   acceptInvitationWithSignup,
   declineInvitation,
   getInvitation,
-  type InvitationPreview,
 } from "@/lib/invitation-api";
 import { AuthFormAlert } from "@/components/auth/floating-field";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
@@ -18,13 +17,13 @@ import SignupProfileForm from "../register/signup-profile-form";
 import type { SignupProfileValues } from "../register/signup-schema";
 import InvitationSummary from "./invitation-summary";
 
-type LinkState =
-  | { kind: "loading" }
-  | { kind: "gone" }
-  | { kind: "ready"; invitation: InvitationPreview };
-
 /**
  * หน้า `/invitations/:token` — public เพราะคนที่เปิดลิงก์อาจยังไม่มีบัญชี
+ *
+ * แยก "ลิงก์ตาย" ออกจาก "โหลดไม่สำเร็จ" ด้วย 410 เท่านั้น — เดิมหน้านี้กลืน error ทุกชนิดเป็น
+ * "ลิงก์หมดอายุ" ซึ่งบอกผู้ใช้ผิดเมื่อเน็ตหลุดหรือ backend ล่ม และเคยปิดบังบั๊ก path ที่ทำให้ทุก
+ * request ได้ 404 ไว้จนไม่มีใครรู้ว่าหน้านี้ไม่เคยทำงาน การแยกไม่ได้เปิดเผยอะไรเพิ่มให้ผู้ถือลิงก์
+ * เพราะ backend คืน 410 ใบเดียวครอบทั้ง "ไม่มีจริง / หมดอายุ / ถูกใช้แล้ว" อยู่แล้ว
  *
  * หน้าจอถาม backend ว่าอีเมลของคำเชิญมีบัญชีอยู่แล้วหรือไม่ (`has_account`) เพื่อเสนอทางเข้าทางเดียว
  * ที่ใช้ได้จริง ข้อเท็จจริงนี้ถูกเปิดเผยอยู่แล้วในรูป 409 ตอนกดสร้างบัญชี การถามก่อนจึงไม่ได้จ่ายความลับ
@@ -42,23 +41,21 @@ export function Component() {
   const token = pathToken ?? searchParams.get("token") ?? "";
   const navigate = useNavigate();
   const t = useTranslations("auth");
-  const [state, setState] = useState<LinkState>({ kind: "loading" });
   const [mode, setMode] = useState<"choose" | "signup">("choose");
   const isAuthed = tokenStore.get() !== null;
 
-  useEffect(() => {
-    let cancelled = false;
-    getInvitation(token)
-      .then((invitation) => {
-        if (!cancelled) setState({ kind: "ready", invitation });
-      })
-      .catch(() => {
-        if (!cancelled) setState({ kind: "gone" });
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [token]);
+  const {
+    data: invitation,
+    error: loadError,
+    isPending,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: ["invitation", token],
+    queryFn: () => getInvitation(token),
+    // ไม่ตั้ง retry เอง — `makeQueryClient` มีนโยบายกลางอยู่แล้ว (4xx ไม่ลองซ้ำ อย่างอื่นลองหนึ่งครั้ง)
+    // ซึ่งเป็นสิ่งที่หน้านี้ต้องการพอดี การเขียนทับจะทำให้มีนโยบายสองชุดที่ต้องแก้ให้ตรงกันตลอดไป
+  });
 
   const signup = useMutation({
     mutationFn: (values: SignupProfileValues) =>
@@ -86,7 +83,7 @@ export function Component() {
     onSuccess: () => navigate("/login", { replace: true }),
   });
 
-  if (state.kind === "loading") {
+  if (isPending) {
     return (
       <AuthSplitShell
         title={t("invitation.title")}
@@ -103,15 +100,42 @@ export function Component() {
     );
   }
 
-  if (state.kind === "gone") {
+  // เช็คว่า "ไม่มีข้อมูลจะแสดง" ไม่ใช่ "มี error" — ถ้าโหลดสำเร็จไปแล้วแล้ว refetch เบื้องหลังล้ม
+  // (สลับแท็บกลับมา เน็ตสะดุด) ข้อมูลเดิมยังถูกต้องและยังใช้ได้ การทิ้งมันไปขึ้นหน้า error แทน
+  // คือการลงโทษผู้ใช้ด้วยความล้มเหลวที่เขาไม่ได้เห็นและไม่ได้เดือดร้อน
+  if (!invitation) {
+    // 410 คือคำตอบเดียวที่ backend ใช้บอกว่าลิงก์ใช้ไม่ได้ (ไม่มีจริง หมดอายุ หรือถูกใช้แล้ว)
+    // อย่างอื่นทั้งหมดแปลว่าเรายังไม่รู้ว่าลิงก์เป็นยังไง จึงต้องเสนอให้ลองใหม่ ไม่ใช่ประกาศว่ามันตาย
+    if (loadError instanceof ApiError && loadError.statusCode === 410) {
+      return (
+        <AuthSplitShell
+          title={t("invitation.deadTitle")}
+          subtitle={t("invitation.deadDescription")}
+        >
+          <Button asChild className="mt-5 h-10 w-full">
+            <Link to="/login">{t("signIn")}</Link>
+          </Button>
+        </AuthSplitShell>
+      );
+    }
+
     return (
       <AuthSplitShell
-        title={t("invitation.deadTitle")}
-        subtitle={t("invitation.deadDescription")}
+        title={t("invitation.loadFailedTitle")}
+        subtitle={t("invitation.loadFailedDescription")}
       >
-        <Button asChild className="mt-5 h-10 w-full">
-          <Link to="/login">{t("signIn")}</Link>
-        </Button>
+        <div className="mt-5 flex flex-col gap-2">
+          <Button
+            className="h-10 w-full"
+            disabled={isFetching}
+            onClick={() => void refetch()}
+          >
+            {isFetching ? t("invitation.loading") : t("invitation.retry")}
+          </Button>
+          <Button variant="outline" className="h-10 w-full" asChild>
+            <Link to="/login">{t("signIn")}</Link>
+          </Button>
+        </div>
       </AuthSplitShell>
     );
   }
@@ -133,7 +157,7 @@ export function Component() {
         title={t("invitation.title")}
         subtitle={t("invitation.reviewDescription")}
       >
-        <InvitationSummary invitation={state.invitation} />
+        <InvitationSummary invitation={invitation} />
         {errorMessage && (
           <div className="mt-4">
             <AuthFormAlert>{errorMessage}</AuthFormAlert>
@@ -177,7 +201,7 @@ export function Component() {
         title={t("invitation.title")}
         subtitle={t("invitation.signupDescription")}
       >
-        <InvitationSummary invitation={state.invitation} />
+        <InvitationSummary invitation={invitation} />
         <SignupProfileForm
           onSubmit={(values) => signup.mutate(values)}
           isPending={signup.isPending}
@@ -195,7 +219,7 @@ export function Component() {
   // true = มีบัญชีแล้ว · false = ยังไม่มี · null/undefined = backend ตอบไม่ได้ (auth ไม่ตอบ หรือยัง
   // ไม่ได้ deploy) กรณีที่สามต้องคงสองทางเลือกไว้เหมือนเดิม เพราะเดาผิดทางไหนก็พาผู้ใช้ไปชนกำแพง —
   // เดาว่าไม่มีบัญชีจะจบที่ 409 หลังกรอกฟอร์ม เดาว่ามีจะขังคนไว้ที่หน้าเข้าสู่ระบบที่เขาผ่านไม่ได้
-  const hasAccount = state.invitation.has_account;
+  const hasAccount = invitation.has_account;
 
   return (
     <AuthSplitShell
@@ -208,7 +232,7 @@ export function Component() {
             : t("invitation.chooseDescription")
       }
     >
-      <InvitationSummary invitation={state.invitation} />
+      <InvitationSummary invitation={invitation} />
       <div className="mt-4 flex flex-col gap-2">
         {hasAccount !== true && (
           <Button className="h-10 w-full" onClick={() => setMode("signup")}>
