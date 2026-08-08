@@ -493,6 +493,7 @@
       "retry": "Try again",
       "reviewDescription": "Review what you are being invited to, then accept or decline.",
       "chooseDescription": "Create an account to join, or sign in if you already have one.",
+      "conflictDescription": "This invitation needs an administrator before you can continue",
       "signInDescription": "Sign in to accept this invitation.",
       "createDescription": "Create an account to join.",
       "signupDescription": "Set your name and password to join.",
@@ -508,7 +509,8 @@
       "haveAccount": "I already have an account",
       "alreadyHasAccount": "This address already has an account. Sign in and accept the invitation instead.",
       "wrongAccount": "This invitation was sent to a different account. Sign out and try again.",
-      "actionFailed": "Something went wrong. Please try again."
+      "actionFailed": "Something went wrong. Please try again.",
+      "addressConflict": "This address is already used as the username of another account, so it cannot be signed up here. The person who invited you has been notified and can fix it."
     }
   },
   "toast": {
