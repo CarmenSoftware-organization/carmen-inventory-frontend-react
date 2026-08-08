@@ -31,7 +31,7 @@ export interface InvitationPreview {
  *
  * @param token - token ดิบจากลิงก์ในอีเมล
  * @returns ข้อมูลคำเชิญเท่าที่หน้าจอต้องใช้
- * @throws {ApiError} status 410 เมื่อลิงก์ไม่มีจริง หมดอายุ หรือถูกใช้ไปแล้ว
+ * @throws {ApiError} statusCode 410 เมื่อลิงก์ไม่มีจริง หมดอายุ หรือถูกใช้ไปแล้ว
  */
 export async function getInvitation(token: string): Promise<InvitationPreview> {
   const res = await httpClient.get(
@@ -49,7 +49,7 @@ export async function getInvitation(token: string): Promise<InvitationPreview> {
  *
  * @param token - token ดิบจากลิงก์ในอีเมล
  * @param payload - รหัสผ่านและข้อมูลโปรไฟล์ที่กรอกในฟอร์ม
- * @throws {ApiError} status 409 เมื่ออีเมลนั้นมีบัญชีอยู่แล้ว · 410 เมื่อลิงก์ใช้ไม่ได้
+ * @throws {ApiError} statusCode 409 เมื่ออีเมลนั้นมีบัญชีอยู่แล้ว · 410 เมื่อลิงก์ใช้ไม่ได้
  */
 export async function acceptInvitationWithSignup(
   token: string,
@@ -66,7 +66,7 @@ export async function acceptInvitationWithSignup(
  * ยินยอมรับคำเชิญด้วยบัญชีที่ล็อกอินอยู่
  *
  * @param token - token ดิบจากลิงก์ในอีเมล
- * @throws {ApiError} status 403 เมื่ออีเมลของผู้ล็อกอินไม่ตรงกับคำเชิญ · 410 เมื่อลิงก์ใช้ไม่ได้
+ * @throws {ApiError} statusCode 403 เมื่ออีเมลของผู้ล็อกอินไม่ตรงกับคำเชิญ · 410 เมื่อลิงก์ใช้ไม่ได้
  */
 export async function acceptInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
@@ -79,7 +79,7 @@ export async function acceptInvitation(token: string): Promise<void> {
  * ปฏิเสธคำเชิญ
  *
  * @param token - token ดิบจากลิงก์ในอีเมล
- * @throws {ApiError} status 403 เมื่ออีเมลของผู้ล็อกอินไม่ตรงกับคำเชิญ · 410 เมื่อลิงก์ใช้ไม่ได้
+ * @throws {ApiError} statusCode 403 เมื่ออีเมลของผู้ล็อกอินไม่ตรงกับคำเชิญ · 410 เมื่อลิงก์ใช้ไม่ได้
  */
 export async function declineInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
