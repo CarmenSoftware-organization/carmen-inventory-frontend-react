@@ -31,6 +31,8 @@ export interface InvitationPreview {
    * โค้ดพิเศษรองรับ และเป็น `null` ได้เมื่อ backend ตอบไม่ทัน — ทั้งสองกรณีต้องแสดงสองทางเลือกเหมือนเดิม
    */
   has_account?: boolean | null;
+  /** สถานะของอีเมลจาก backend — ละเอียดกว่า has_account และใช้แทนมันได้ทุกกรณี */
+  account_state?: 'free' | 'reclaimable' | 'owned' | 'conflict' | null;
 }
 
 /**

@@ -216,45 +216,59 @@ export function Component() {
     );
   }
 
-  // true = มีบัญชีแล้ว · false = ยังไม่มี · null/undefined = backend ตอบไม่ได้ (auth ไม่ตอบ หรือยัง
-  // ไม่ได้ deploy) กรณีที่สามต้องคงสองทางเลือกไว้เหมือนเดิม เพราะเดาผิดทางไหนก็พาผู้ใช้ไปชนกำแพง —
-  // เดาว่าไม่มีบัญชีจะจบที่ 409 หลังกรอกฟอร์ม เดาว่ามีจะขังคนไว้ที่หน้าเข้าสู่ระบบที่เขาผ่านไม่ได้
-  const hasAccount = invitation.has_account;
+  // อ่าน account_state ก่อน แล้วถอยไป has_account เมื่อ backend ยังไม่ได้ deploy ฟิลด์ใหม่
+  // `owned` เท่านั้นที่แปลว่าต้องเข้าสู่ระบบ — `reclaimable` สมัครทับได้แล้วตั้งแต่มีการยึดอีเมลคืน
+  // ส่วน null ยังคงสองทางเลือกไว้เหมือนเดิม เพราะเดาผิดทางไหนก็พาผู้ใช้ไปชนกำแพง — เดาว่าไม่มีบัญชี
+  // จะจบที่ 409 หลังกรอกฟอร์ม เดาว่ามีจะขังคนไว้ที่หน้าเข้าสู่ระบบที่เขาผ่านไม่ได้
+  const accountState = invitation.account_state ?? null;
+  const isConflict = accountState === "conflict";
+  const hasAccount =
+    accountState === null ? invitation.has_account : accountState === "owned";
 
   return (
     <AuthSplitShell
       title={t("invitation.title")}
       subtitle={
-        hasAccount === true
-          ? t("invitation.signInDescription")
-          : hasAccount === false
-            ? t("invitation.createDescription")
-            : t("invitation.chooseDescription")
+        isConflict
+          ? t("invitation.conflictDescription")
+          : hasAccount === true
+            ? t("invitation.signInDescription")
+            : hasAccount === false
+              ? t("invitation.createDescription")
+              : t("invitation.chooseDescription")
       }
     >
       <InvitationSummary invitation={invitation} />
-      <div className="mt-4 flex flex-col gap-2">
-        {hasAccount !== true && (
-          <Button className="h-10 w-full" onClick={() => setMode("signup")}>
-            {t("invitation.createAccount")}
-          </Button>
-        )}
-        {hasAccount !== false && (
-          <Button
-            variant={hasAccount === true ? "default" : "outline"}
-            className="h-10 w-full"
-            asChild
-          >
-            <Link
-              to={`/login?next=${encodeURIComponent(`/invitations/${token}`)}`}
+      {isConflict ? (
+        // ไม่มีปุ่มใด ๆ โดยเจตนา ทุกทางที่กดได้จากตรงนี้พาไปตัน — เข้าสู่ระบบก็ไม่ได้เพราะบัญชีที่ชน
+        // เป็นของคนอื่น สมัครก็ได้ 409 การให้ปุ่มที่กดแล้วล้มเหลวแย่กว่าการบอกตรง ๆ ว่าต้องรอผู้ดูแล
+        <p className="mt-4 text-sm text-muted-foreground">
+          {t("invitation.addressConflict")}
+        </p>
+      ) : (
+        <div className="mt-4 flex flex-col gap-2">
+          {hasAccount !== true && (
+            <Button className="h-10 w-full" onClick={() => setMode("signup")}>
+              {t("invitation.createAccount")}
+            </Button>
+          )}
+          {hasAccount !== false && (
+            <Button
+              variant={hasAccount === true ? "default" : "outline"}
+              className="h-10 w-full"
+              asChild
             >
-              {hasAccount === true
-                ? t("signIn")
-                : t("invitation.haveAccount")}
-            </Link>
-          </Button>
-        )}
-      </div>
+              <Link
+                to={`/login?next=${encodeURIComponent(`/invitations/${token}`)}`}
+              >
+                {hasAccount === true
+                  ? t("signIn")
+                  : t("invitation.haveAccount")}
+              </Link>
+            </Button>
+          )}
+        </div>
+      )}
     </AuthSplitShell>
   );
 }
