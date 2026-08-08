@@ -26,6 +26,12 @@ export const router = createBrowserRouter([
       { path: "/terms", lazy: () => import("./legal/terms.route") },
       { path: "/privacy", lazy: () => import("./legal/privacy.route") },
       // หน้ารับคำเชิญ — public เพราะผู้ถูกเชิญอาจยังไม่มีบัญชี และสมัครจบได้ในลิงก์นี้เลย
+      // สอง path ชี้คอมโพเนนต์เดียวกัน: backend ต่อ token เป็น `?token=` ท้าย Base URL ที่ผู้ดูแล
+      // ตั้งไว้ ส่วนรูปแบบ path เป็นสิ่งที่คนตั้งค่ามักเดาว่าใช่ รับทั้งคู่จึงไม่มีลิงก์ไหนตายเพราะรูปแบบ
+      {
+        path: "/invitations",
+        lazy: () => import("./invitation/invitation.route"),
+      },
       {
         path: "/invitations/:token",
         lazy: () => import("./invitation/invitation.route"),

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 import { ApiError } from "@/lib/api-error";
 import { tokenStore } from "@/lib/auth/token-store";
 import {
@@ -30,9 +30,16 @@ type LinkState =
  * โดยตั้งใจ — คำถามนั้นตอบให้ผู้ถือลิงก์ฟังเมื่อไร ลิงก์ที่หลุดก็กลายเป็นเครื่องมือค้นว่าใครมีบัญชีทันที
  * ผู้ใช้เลือกทางเองว่าจะสร้างบัญชีหรือเข้าสู่ระบบ แล้ว backend เป็นผู้ตัดสินความจริง: กดสร้างบัญชีทั้งที่
  * มีอยู่แล้วได้ 409 พร้อมคำแนะนำให้ไปเข้าสู่ระบบ
+ *
+ * รับ token ได้ทั้งสองรูปแบบโดยตั้งใจ — `/invitations/<token>` และ `/invitations?token=<token>`
+ * เพราะ backend ประกอบลิงก์ด้วย `searchParams.set('token', …)` ต่อท้าย Base URL ที่ผู้ดูแลตั้งไว้
+ * จึงได้รูปแบบ query ส่วนรูปแบบ path เป็นสิ่งที่คนอ่านลิงก์แล้วเดาว่าน่าจะเป็น การรับทั้งคู่ทำให้ค่า
+ * Base URL ที่ตั้งผิดรูปแบบไม่กลายเป็นลิงก์เสียที่ผู้ถูกเชิญแก้เองไม่ได้
  */
 export function Component() {
-  const { token = "" } = useParams();
+  const { token: pathToken } = useParams();
+  const [searchParams] = useSearchParams();
+  const token = pathToken ?? searchParams.get("token") ?? "";
   const navigate = useNavigate();
   const t = useTranslations("auth");
   const [state, setState] = useState<LinkState>({ kind: "loading" });
