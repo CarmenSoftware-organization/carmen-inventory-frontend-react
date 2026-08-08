@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { profileQueryKey } from "@/hooks/use-profile";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
@@ -36,7 +36,13 @@ class RateLimitError extends Error {
 export default function LoginForm() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const queryClient = useQueryClient();
+  // ตั้งโดย /register/verify หลังสร้างบัญชีสำเร็จ — เป็น router state ไม่ใช่ query string
+  // จึงหายไปเองเมื่อรีเฟรช ซึ่งถูกแล้ว เพราะข้อความนี้ควรเห็นครั้งเดียว
+  const justRegistered =
+    (location.state as { justRegistered?: boolean } | null)?.justRegistered ===
+    true;
   const t = useTranslations("auth");
   const [retryAfter, setRetryAfter] = useState<number | null>(null);
 
@@ -121,6 +127,19 @@ export default function LoginForm() {
     <AuthSplitShell title={t("welcomeBack")} subtitle={t("subtitle")}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4" noValidate>
         <FieldGroup className="gap-3">
+          {justRegistered && !loginMutation.isError && (
+            <div
+              className="border-positive-ink/40 bg-positive-ink/5 rounded-xl border px-3 py-2"
+              style={{ animation: "fade-up-soft 0.3s ease-out both" }}
+              role="status"
+              aria-live="polite"
+            >
+              <p className="text-positive-ink text-xs font-semibold">
+                {t("signup.accountReady")}
+              </p>
+            </div>
+          )}
+
           <FloatingField
             id="email"
             label={t("emailLabel")}

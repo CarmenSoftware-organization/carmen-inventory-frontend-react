@@ -18,6 +18,10 @@ export const router = createBrowserRouter([
     children: [
       { path: "/login", lazy: () => import("./login/login.route") },
       { path: "/register", lazy: () => import("./register/register.route") },
+      {
+        path: "/register/verify",
+        lazy: () => import("./register/register-verify.route"),
+      },
       // เอกสารกฎหมาย — public ทั้งคู่ ต้องอ่านได้ก่อนกดสมัคร
       { path: "/terms", lazy: () => import("./legal/terms.route") },
       { path: "/privacy", lazy: () => import("./legal/privacy.route") },
