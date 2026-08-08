@@ -185,10 +185,16 @@ export function Component() {
   }
 
   if (mode === "signup") {
+    // 409 มีสองความหมาย และคำแนะนำต่างกันคนละทาง — "มีบัญชีแล้ว" ให้ไปเข้าสู่ระบบ ส่วน
+    // INVITATION_ADDRESS_CONFLICT เข้าสู่ระบบไม่ได้เลยเพราะบัญชีที่ชนไม่ใช่ของเขา การเหมาว่า
+    // 409 ทุกใบแปลว่า "มีบัญชีแล้ว" จึงส่งคนกลุ่มหลังไปชนกำแพงซึ่งเป็นทางตันที่สาขานี้ตั้งใจกำจัด
+    // และเข้าถึงได้จริงเมื่อ account_state เป็น null (auth ตอบไม่ทัน) แล้วผู้ใช้กดสร้างบัญชี
+    // backend เขียนข้อความของแต่ละ code ไว้ใน error catalog อยู่แล้ว และ `ApiError.from` เก็บไว้ที่
+    // `serverMessage` จึงใช้ของ backend ก่อน แล้วค่อยถอยมาที่ข้อความแปลของเราเมื่ออ่าน body ไม่ได้
     const errorMessage =
       signup.error instanceof ApiError
         ? signup.error.statusCode === 409
-          ? t("invitation.alreadyHasAccount")
+          ? (signup.error.serverMessage ?? t("invitation.alreadyHasAccount"))
           : signup.error.statusCode === 410
             ? t("invitation.deadDescription")
             : signup.error.message
