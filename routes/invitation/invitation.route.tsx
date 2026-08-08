@@ -26,10 +26,10 @@ type LinkState =
 /**
  * หน้า `/invitations/:token` — public เพราะคนที่เปิดลิงก์อาจยังไม่มีบัญชี
  *
- * หน้าจอไม่เคยถาม backend ว่าอีเมลของคำเชิญมีบัญชีอยู่แล้วหรือไม่ และ backend ก็ไม่มีฟิลด์นั้นให้ถาม
- * โดยตั้งใจ — คำถามนั้นตอบให้ผู้ถือลิงก์ฟังเมื่อไร ลิงก์ที่หลุดก็กลายเป็นเครื่องมือค้นว่าใครมีบัญชีทันที
- * ผู้ใช้เลือกทางเองว่าจะสร้างบัญชีหรือเข้าสู่ระบบ แล้ว backend เป็นผู้ตัดสินความจริง: กดสร้างบัญชีทั้งที่
- * มีอยู่แล้วได้ 409 พร้อมคำแนะนำให้ไปเข้าสู่ระบบ
+ * หน้าจอถาม backend ว่าอีเมลของคำเชิญมีบัญชีอยู่แล้วหรือไม่ (`has_account`) เพื่อเสนอทางเข้าทางเดียว
+ * ที่ใช้ได้จริง ข้อเท็จจริงนี้ถูกเปิดเผยอยู่แล้วในรูป 409 ตอนกดสร้างบัญชี การถามก่อนจึงไม่ได้จ่ายความลับ
+ * เพิ่ม แต่ตัดการกรอกฟอร์มทิ้งออกไป เมื่อ backend ตอบไม่ได้ (`null`) หน้าจอกลับไปเสนอทั้งสองทาง และ
+ * backend ยังเป็นผู้ตัดสินความจริงเสมอ — กดสร้างบัญชีทั้งที่มีอยู่แล้วยังได้ 409 พร้อมคำแนะนำให้ไปเข้าสู่ระบบ
  *
  * รับ token ได้ทั้งสองรูปแบบโดยตั้งใจ — `/invitations/<token>` และ `/invitations?token=<token>`
  * เพราะ backend ประกอบลิงก์ด้วย `searchParams.set('token', …)` ต่อท้าย Base URL ที่ผู้ดูแลตั้งไว้
@@ -192,23 +192,44 @@ export function Component() {
     );
   }
 
+  // true = มีบัญชีแล้ว · false = ยังไม่มี · null/undefined = backend ตอบไม่ได้ (auth ไม่ตอบ หรือยัง
+  // ไม่ได้ deploy) กรณีที่สามต้องคงสองทางเลือกไว้เหมือนเดิม เพราะเดาผิดทางไหนก็พาผู้ใช้ไปชนกำแพง —
+  // เดาว่าไม่มีบัญชีจะจบที่ 409 หลังกรอกฟอร์ม เดาว่ามีจะขังคนไว้ที่หน้าเข้าสู่ระบบที่เขาผ่านไม่ได้
+  const hasAccount = state.invitation.has_account;
+
   return (
     <AuthSplitShell
       title={t("invitation.title")}
-      subtitle={t("invitation.chooseDescription")}
+      subtitle={
+        hasAccount === true
+          ? t("invitation.signInDescription")
+          : hasAccount === false
+            ? t("invitation.createDescription")
+            : t("invitation.chooseDescription")
+      }
     >
       <InvitationSummary invitation={state.invitation} />
       <div className="mt-4 flex flex-col gap-2">
-        <Button className="h-10 w-full" onClick={() => setMode("signup")}>
-          {t("invitation.createAccount")}
-        </Button>
-        <Button variant="outline" className="h-10 w-full" asChild>
-          <Link
-            to={`/login?next=${encodeURIComponent(`/invitations/${token}`)}`}
+        {hasAccount !== true && (
+          <Button className="h-10 w-full" onClick={() => setMode("signup")}>
+            {t("invitation.createAccount")}
+          </Button>
+        )}
+        {hasAccount !== false && (
+          <Button
+            variant={hasAccount === true ? "default" : "outline"}
+            className="h-10 w-full"
+            asChild
           >
-            {t("invitation.haveAccount")}
-          </Link>
-        </Button>
+            <Link
+              to={`/login?next=${encodeURIComponent(`/invitations/${token}`)}`}
+            >
+              {hasAccount === true
+                ? t("signIn")
+                : t("invitation.haveAccount")}
+            </Link>
+          </Button>
+        )}
       </div>
     </AuthSplitShell>
   );

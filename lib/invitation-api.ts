@@ -24,6 +24,13 @@ export interface InvitationPreview {
   expires_at: string;
   /** อีเมลแบบปิดบัง เช่น j•••@example.com — backend ไม่คืนอีเมลเต็มโดยตั้งใจ */
   email_masked: string;
+  /**
+   * อีเมลของคำเชิญมีบัญชีอยู่แล้วหรือยัง — `true` เสนอเข้าสู่ระบบอย่างเดียว `false` เสนอสมัครอย่างเดียว
+   *
+   * ประกาศเป็น optional เพื่อให้ backend รุ่นก่อนหน้านี้ตกลงมาที่สถานะ "ไม่รู้" เองตามชนิดข้อมูล ไม่ต้องมี
+   * โค้ดพิเศษรองรับ และเป็น `null` ได้เมื่อ backend ตอบไม่ทัน — ทั้งสองกรณีต้องแสดงสองทางเลือกเหมือนเดิม
+   */
+  has_account?: boolean | null;
 }
 
 /**
@@ -35,7 +42,7 @@ export interface InvitationPreview {
  */
 export async function getInvitation(token: string): Promise<InvitationPreview> {
   const res = await httpClient.get(
-    `/api/proxy/invitations/${encodeURIComponent(token)}`,
+    `/api/proxy/api/invitations/${encodeURIComponent(token)}`,
   );
   if (!res.ok) throw await ApiError.from(res, "This invitation link is no longer valid");
   const json = await res.json();
@@ -56,7 +63,7 @@ export async function acceptInvitationWithSignup(
   payload: { password: string; user_info: UserInfo },
 ): Promise<void> {
   const res = await httpClient.post(
-    `/api/proxy/invitations/${encodeURIComponent(token)}/accept-with-signup`,
+    `/api/proxy/api/invitations/${encodeURIComponent(token)}/accept-with-signup`,
     payload,
   );
   if (!res.ok) throw await ApiError.from(res, "Could not create the account");
@@ -70,7 +77,7 @@ export async function acceptInvitationWithSignup(
  */
 export async function acceptInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
-    `/api/proxy/invitations/${encodeURIComponent(token)}/accept`,
+    `/api/proxy/api/invitations/${encodeURIComponent(token)}/accept`,
   );
   if (!res.ok) throw await ApiError.from(res, "Could not accept the invitation");
 }
@@ -83,7 +90,7 @@ export async function acceptInvitation(token: string): Promise<void> {
  */
 export async function declineInvitation(token: string): Promise<void> {
   const res = await httpClient.post(
-    `/api/proxy/invitations/${encodeURIComponent(token)}/decline`,
+    `/api/proxy/api/invitations/${encodeURIComponent(token)}/decline`,
   );
   if (!res.ok) throw await ApiError.from(res, "Could not decline the invitation");
 }

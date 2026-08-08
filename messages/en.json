@@ -490,6 +490,8 @@
       "deadDescription": "It has expired, was withdrawn, or has already been used.",
       "reviewDescription": "Review what you are being invited to, then accept or decline.",
       "chooseDescription": "Create an account to join, or sign in if you already have one.",
+      "signInDescription": "Sign in to accept this invitation.",
+      "createDescription": "Create an account to join.",
       "signupDescription": "Set your name and password to join.",
       "cluster": "Chain",
       "role": "Role",
