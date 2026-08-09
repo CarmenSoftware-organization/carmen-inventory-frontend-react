@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { Link } from "react-router";
 import { MailCheck } from "lucide-react";
-import { ApiError, ERROR_CODES } from "@/lib/api-error";
+import { ApiError, ERROR_CODES, isTransportError } from "@/lib/api-error";
 import { signupRequest } from "@/lib/auth/auth-api";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
 import { AuthFormAlert } from "@/components/auth/floating-field";
@@ -33,6 +33,16 @@ export default function CheckInbox({ email }: { readonly email: string }) {
   const resend = useMutation({
     mutationFn: () => signupRequest(email),
     onSuccess: () => setSecondsLeft(RESEND_COOLDOWN_SECONDS),
+    // backend บอกมาว่าต้องรออีกกี่วินาที ให้ปุ่มรอตามนั้นจริง ๆ — คูลดาวน์หกสิบวินาทีของหน้านี้
+    // สั้นกว่าหน้าต่างจำกัดสิทธิ์สิบนาทีมาก ปล่อยไว้ผู้ใช้จะกดแล้วเจอ 429 ซ้ำไปเรื่อย ๆ ทั้งที่
+    // ระบบตอบมาแล้วว่าต้องรอถึงเมื่อไร
+    onError: (error) => {
+      const seconds =
+        error instanceof ApiError && error.code === ERROR_CODES.RATE_LIMITED
+          ? (error.details as { retryAfter?: number } | undefined)?.retryAfter
+          : undefined;
+      if (seconds !== undefined && seconds > 0) setSecondsLeft(seconds);
+    },
   });
 
   // การขอซ้ำล้มเหลวต้องมีข้อความ — 429 เกิดได้จริงเพราะ backend จำกัดที่ 5 ครั้งต่ออีเมล+IP
@@ -40,8 +50,12 @@ export default function CheckInbox({ email }: { readonly email: string }) {
   const resendError =
     resend.error instanceof ApiError
       ? resend.error.code === ERROR_CODES.RATE_LIMITED
-        ? t("signup.tooManyAttempts")
-        : resend.error.message
+        ? secondsLeft > 0
+          ? t("signup.tooManyAttemptsIn", { seconds: secondsLeft })
+          : t("signup.tooManyAttempts")
+        : isTransportError(resend.error)
+          ? t("errors.networkUnavailable")
+          : resend.error.message
       : resend.error
         ? t("signup.sendFailed")
         : null;

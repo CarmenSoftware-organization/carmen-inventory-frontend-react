@@ -91,12 +91,22 @@ async function toAuthApiError(res: Response, fallback: string, parsed?: unknown)
   const json = (parsed ?? (await res.json().catch(() => ({})))) as {
     message?: string | string[];
     retry_after?: number;
+    code?: string;
   };
   const message: string = Array.isArray(json?.message)
     ? json.message.join(" · ")
     : (json?.message ?? fallback);
   const retryAfter: number | undefined =
     typeof json?.retry_after === "number" ? json.retry_after : undefined;
+  // code ของ error catalog — สถานะ HTTP เดียวกันมีได้หลายความหมายและคำแนะนำคนละทาง เช่น 409 จาก
+  // `register` เป็นได้ทั้ง AUTH_EMAIL_ALREADY_EXISTS (เข้าสู่ระบบได้) และ AUTH_USERNAME_ALREADY_EXISTS
+  // (เข้าสู่ระบบไม่ได้ บัญชีที่ชนเป็นของคนอื่น) การทิ้งฟิลด์นี้ทำให้หน้าจอแยกสองกรณีไม่ได้เลยและต้อง
+  // เดาว่าเป็นกรณีที่พบบ่อยกว่า ซึ่งคือคำแนะนำที่ผิดสำหรับอีกกรณีหนึ่งเสมอ
+  const serverCode: string | undefined = typeof json?.code === "string" ? json.code : undefined;
+  const details =
+    retryAfter !== undefined || serverCode !== undefined
+      ? { ...(retryAfter !== undefined ? { retryAfter } : {}), ...(serverCode ? { serverCode } : {}) }
+      : undefined;
   // 410 (ลิงก์ใช้ไม่ได้) กับ 409 (มีบัญชีแล้ว) ใช้ code เดียวกัน หน้าจอแยกสองกรณีนี้ด้วย
   // `error.status` ไม่ใช่ด้วย code
   const code =
@@ -110,7 +120,10 @@ async function toAuthApiError(res: Response, fallback: string, parsed?: unknown)
     message,
     res.status,
     false,
-    retryAfter !== undefined ? { retryAfter } : undefined,
+    details,
+    // เก็บเป็น serverMessage เฉพาะเมื่อ backend ส่งมาจริง — `fallback` เป็นข้อความของ dev
+    // (ภาษาอังกฤษ ไม่แปล) ที่ห้ามหลุดไปโชว์ user ในฐานะคำอธิบายจาก backend
+    json?.message !== undefined ? message : undefined,
   );
 }
 

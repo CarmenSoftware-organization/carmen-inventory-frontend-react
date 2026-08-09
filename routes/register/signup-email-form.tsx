@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
-import { ApiError, ERROR_CODES } from "@/lib/api-error";
+import { ApiError, ERROR_CODES, isTransportError } from "@/lib/api-error";
 import { signupRequest } from "@/lib/auth/auth-api";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
 import { AuthFormAlert, FloatingField } from "@/components/auth/floating-field";
@@ -41,6 +42,10 @@ export default function SignupEmailForm({
     mode: "onTouched",
   });
 
+  // วินาทีที่เหลือก่อนกดขอลิงก์ได้อีกครั้ง — ตั้งจาก `retry_after` ที่ backend ส่งมากับ 429 เท่านั้น
+  // ปล่อยให้กดซ้ำได้ทันทีคือการเชิญให้เจอ 429 ใบเดิมซ้ำ ๆ ทั้งที่ระบบบอกเวลามาแล้ว
+  const [retryAfter, setRetryAfter] = useState<number | null>(null);
+
   const mutation = useMutation({
     mutationFn: async (values: SignupEmailValues) => {
       const email = values.email.trim();
@@ -48,13 +53,41 @@ export default function SignupEmailForm({
       return email;
     },
     onSuccess: (email) => onSent(email),
+    onError: (error) => {
+      const seconds =
+        error instanceof ApiError && error.code === ERROR_CODES.RATE_LIMITED
+          ? (error.details as { retryAfter?: number } | undefined)?.retryAfter
+          : undefined;
+      if (seconds !== undefined && seconds > 0) setRetryAfter(seconds);
+    },
   });
+
+  const { reset: resetMutation } = mutation;
+
+  // นับถอยหลังแล้วล้าง error ทิ้งเมื่อครบ — ถ้าไม่ reset ข้อความ "รออีก 0 วินาที" จะค้างอยู่บนจอ
+  // ทั้งที่ปุ่มกลับมากดได้แล้ว
+  useEffect(() => {
+    if (retryAfter === null || retryAfter <= 0) return;
+    const id = setTimeout(() => {
+      if (retryAfter <= 1) {
+        setRetryAfter(null);
+        resetMutation();
+      } else {
+        setRetryAfter(retryAfter - 1);
+      }
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [retryAfter, resetMutation]);
 
   const errorMessage =
     mutation.error instanceof ApiError
       ? mutation.error.code === ERROR_CODES.RATE_LIMITED
-        ? t("signup.tooManyAttempts")
-        : mutation.error.message
+        ? retryAfter !== null
+          ? t("signup.tooManyAttemptsIn", { seconds: retryAfter })
+          : t("signup.tooManyAttempts")
+        : isTransportError(mutation.error)
+          ? t("errors.networkUnavailable")
+          : mutation.error.message
       : mutation.error
         ? t("signup.sendFailed")
         : null;
@@ -84,13 +117,15 @@ export default function SignupEmailForm({
           <Button
             type="submit"
             className="group mt-0.5 h-10 w-full"
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || retryAfter !== null}
           >
             {mutation.isPending ? (
               <>
                 <span className="border-primary-foreground/30 border-t-primary-foreground inline-block size-4 animate-spin rounded-full border-2" />
                 {t("signup.sending")}
               </>
+            ) : retryAfter !== null ? (
+              t("signup.resendIn", { seconds: retryAfter })
             ) : (
               <>
                 {t("signup.sendLink")}
