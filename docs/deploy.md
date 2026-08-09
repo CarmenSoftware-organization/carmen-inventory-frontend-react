@@ -4,6 +4,11 @@ Two supported targets: **AWS S3 + CloudFront** and **Google Cloud Storage (+ Clo
 Both share the same model: one immutable build artifact; the per-environment
 `config.json` lives on the bucket (never in the bundle); `index.html` is no-cache.
 
+`bun run build:{local,dev,uat,prod}` เลือกได้ว่า `dist/config.json` จะมาจากไฟล์ไหน แต่
+**ไม่กระทบการ deploy ทั้งสองทาง** — `deploy-s3.sh` / `deploy-gcs.sh` ตัด `dist/config.json`
+ออกจาก sync และ Docker image ลบทิ้งแล้ว render ใหม่จาก env ตอนรัน สคริปต์ชุดนี้มีไว้สำหรับ
+`bun run preview` และ Vercel ซึ่งเสิร์ฟไฟล์ในบันเดิลตรง ๆ
+
 ---
 
 ## AWS — S3 + CloudFront
