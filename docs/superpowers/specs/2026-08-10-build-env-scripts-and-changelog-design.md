@@ -108,10 +108,15 @@ Port จาก `carmen-turborepo-backend-v2/apps/backend-gateway/scripts/generat
 | `renderMarkdown(changelog)` | สร้างข้อความ `CHANGELOG.md` จาก object |
 | `rebuildFromTags()` | bootstrap — สร้าง `changelog.json` ใหม่จาก git tag (ข้อ 4) |
 
-**รันตรง ๆ**
+**รันตรง ๆ** — ผ่านไฟล์ CLI แยก `scripts/changelog-cli.ts`
 
-- `bun scripts/changelog.ts` — re-render `CHANGELOG.md` จาก `changelog.json` ปัจจุบัน
-- `bun scripts/changelog.ts --rebuild` — เรียก `rebuildFromTags()`
+- `bun scripts/changelog-cli.ts` — re-render `CHANGELOG.md` จาก `changelog.json` ปัจจุบัน
+- `bun scripts/changelog-cli.ts --rebuild` — เรียก `rebuildFromTags()`
+
+แยกไฟล์เพราะตัวตรวจ "ถูกเรียกตรง ๆ หรือถูก import" ของ bun คือ `import.meta.main`
+ซึ่ง `@types/node` ไม่รู้จักและ repo ไม่ได้ติดตั้ง `@types/bun` → `bun run typecheck`
+จะแดง การแยกยังทำให้ `scripts/changelog.ts` เป็น library ที่ไม่มี side effect เลย
+`bump.ts` จึง import ได้อย่างปลอดภัย โดยไม่ต้องเพิ่ม dependency ใหม่
 
 ไม่เพิ่ม entry ใน `package.json` สำหรับสองคำสั่งนี้ — ตัวแรกใช้เมื่อแก้ json ด้วยมือ
 ตัวหลังรันครั้งเดียวตลอดอายุรีโป เขียนไว้ใน `CLAUDE.md` พอ
@@ -231,10 +236,10 @@ git tag -a vX.Y.Z -m vX.Y.Z
 
 **changelog + bump**
 
-5. `bun scripts/changelog.ts --rebuild` → เทียบจำนวนรายการของ entry `1.2.0`
+5. `bun scripts/changelog-cli.ts --rebuild` → เทียบจำนวนรายการของ entry `1.2.0`
    กับ `git log v1.1.0..v1.2.0` ด้วยมือ · ตรวจว่ามี commit จากสาขาที่ merge แบบ
    `merge:` (ไม่มีเลข PR) ติดมาด้วยจริง — นี่คือจุดที่การลอกตรง ๆ จะพลาด
-6. `bun scripts/changelog.ts` → `CHANGELOG.md` render ได้ ไม่พัง
+6. `bun scripts/changelog-cli.ts` → `CHANGELOG.md` render ได้ ไม่พัง
 7. `bun run typecheck && bun run lint && bun test:run` เขียวทั้งหมด
 8. What's New dialog ในเบราว์เซอร์ — หัวข้อเวอร์ชันต้องตรงกับปุ่ม footer ที่กดเปิด
 9. **`build:bump` ทดสอบยาก** — `assertBranchAndTree()` บังคับอยู่บน `main` และมัน
