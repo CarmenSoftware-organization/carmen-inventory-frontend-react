@@ -19,7 +19,8 @@ bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/confi
 bun run build        # tsc + vite build → dist/ (config.json = config.prod.json)
 bun run build:{local,dev,uat,prod}   # เหมือน build แต่เลือก public/config.<env>.json → dist/config.json — มีผลกับ `bun run preview` / Vercel เท่านั้น (S3/GCS/Docker ใช้ config.json ของ environment เอง)
 bun run typecheck    # tsc --noEmit เดี่ยว ๆ (gate ของ build:bump)
-bun run build:bump [patch|minor|major]   # ตัด release: bump package.json + commit + annotated tag (local เท่านั้น ไม่ push) — ต้องอยู่บน main, tree สะอาด, ไม่ตามหลัง origin/main; gate typecheck+lint+test:run; ไม่ส่ง level = ถามใน terminal
+bun run build:bump [patch|minor|major]   # ตัด release: bump package.json + generate changelog.json/CHANGELOG.md + commit + annotated tag (local เท่านั้น ไม่ push) — ต้องอยู่บน main, tree สะอาด, ไม่ตามหลัง origin/main; gate typecheck+lint+test:run; ไม่ส่ง level = ถามใน terminal
+bun scripts/changelog-cli.ts [--rebuild]  # render CHANGELOG.md ใหม่จาก changelog.json (--rebuild = สร้าง changelog.json ใหม่จาก git tag ทับของเดิม)
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
 scripts/setup-gcs-cdn.sh <bucket> <config> [domain]   # One-shot GCP infra (CDN+LB+cert) + first deploy (docs/deploy.md)
@@ -154,7 +155,3 @@ isLoading เท่าเดิม) แล้ว **reuse ผลลัพธ์�
   `paths` on the decorator so it reaches the nested rows — same class as the SR list fix.
   Frontend deliberately keeps reading `audit` rather than falling back to the raw field:
   the raw one disappears the moment the decorator is fixed.
-- After the first `build:bump`, the footer's version and `changelog.json`'s newest entry
-  diverge — nothing regenerates `changelog.json`, so the What's New dialog
-  (`components/footer/whats-new-dialog.tsx`) shows an older version heading than the button
-  that opened it. Known, not a bug; the fix is a changelog generator (separate work).
