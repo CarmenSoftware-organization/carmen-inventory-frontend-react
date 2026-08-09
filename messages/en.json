@@ -416,7 +416,8 @@
       "loginFailed": "Login failed. Please try again",
       "tooManyAttempts": "Too many login attempts. Try again in {seconds}s.",
       "tooManyAttemptsFallback": "Too many login attempts. Please try again later.",
-      "registerConflict": "This email or username is already in use"
+      "registerConflict": "This email or username is already in use",
+      "networkUnavailable": "Could not reach the server. Check your connection and try again."
     },
     "eyebrow": "Sign in",
     "subtitle": "Sign in to your hotel inventory workspace.",
@@ -465,6 +466,7 @@
       "sending": "Sending...",
       "sendFailed": "Could not send the link. Please try again.",
       "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
+      "tooManyAttemptsIn": "Too many attempts. Try again in {seconds}s.",
       "checkInboxTitle": "Check your inbox",
       "checkInboxDescription": "If that address can be signed up, a link is on its way to {email}.",
       "linkExpiryNote": "The link expires in 24 hours.",
@@ -478,6 +480,7 @@
       "linkDeadDuringForm": "This link expired while you were filling in the form. Request a new one — your details are still here.",
       "requestNewLink": "Request a new link",
       "alreadyRegistered": "This address already has an account. Please sign in instead.",
+      "addressConflict": "This address is already used as the username of another account, so it cannot be signed up here. Please contact your administrator to resolve it.",
       "createAccount": "Create account",
       "creating": "Creating account...",
       "createFailed": "Could not create the account. Please try again.",

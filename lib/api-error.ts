@@ -132,6 +132,24 @@ export class ApiError extends Error {
 }
 
 /**
+ * error นี้เกิดจากการ "ส่งไม่ถึง" ไม่ใช่คำตอบจาก backend หรือไม่
+ *
+ * message ของสองกรณีนี้เป็นภาษาอังกฤษที่ dev เขียนไว้ตอน throw (เช่น "Auth server unavailable")
+ * ไม่ได้ผ่านระบบแปล การเอา `error.message` ไปโชว์ตรง ๆ จึงทำให้ผู้ใช้ภาษาไทยเห็นอังกฤษดิบ
+ * หน้าจอต้องเช็คด้วยตัวนี้แล้วใช้ข้อความที่แปลไว้แทน
+ *
+ * @param error - error ที่ catch มา รูปแบบใดก็ได้
+ * @returns true เมื่อเป็น network error หรือ timeout
+ */
+export function isTransportError(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    (error.code === ERROR_CODES.NETWORK_ERROR ||
+      error.code === ERROR_CODES.TIMEOUT)
+  );
+}
+
+/**
  * อ่าน `message` จาก error body — clone() ก่อนเพื่อไม่ consume body ของ caller
  * คืน undefined หาก parse ไม่ได้หรือไม่มี field `message` ที่เป็น string
  */

@@ -7,7 +7,7 @@ import { useTranslations } from "use-intl";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { profileQueryKey } from "@/hooks/use-profile";
-import { ApiError, ERROR_CODES } from "@/lib/api-error";
+import { ApiError, ERROR_CODES, isTransportError } from "@/lib/api-error";
 import { login } from "@/lib/auth/auth-api";
 import { resolveNextPath } from "@/lib/auth/resolve-next-path";
 import { AuthSplitShell } from "@/components/auth/auth-split-shell";
@@ -85,6 +85,10 @@ export default function LoginForm() {
             throw new RateLimitError(seconds);
           }
           throw new Error(t("errors.tooManyAttemptsFallback"));
+        }
+        // ส่งไม่ถึงเซิร์ฟเวอร์ — message ของ error พวกนี้เป็นอังกฤษที่ dev เขียนไว้ ไม่ได้แปล
+        if (isTransportError(err)) {
+          throw new Error(t("errors.networkUnavailable"));
         }
         throw err;
       }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTranslations } from "use-intl";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
-import { ApiError } from "@/lib/api-error";
+import { ApiError, isTransportError } from "@/lib/api-error";
 import { tokenStore } from "@/lib/auth/token-store";
 import {
   acceptInvitation,
@@ -155,7 +155,9 @@ export function Component() {
       ? wrongAccount
         ? t("invitation.wrongAccount")
         : failed instanceof ApiError
-          ? failed.message
+          ? isTransportError(failed)
+            ? t("errors.networkUnavailable")
+            : failed.message
           : t("invitation.actionFailed")
       : null;
 
@@ -204,7 +206,9 @@ export function Component() {
           ? (signup.error.serverMessage ?? t("invitation.alreadyHasAccount"))
           : signup.error.statusCode === 410
             ? t("invitation.deadDescription")
-            : signup.error.message
+            : isTransportError(signup.error)
+              ? t("errors.networkUnavailable")
+              : signup.error.message
         : signup.error
           ? t("signup.createFailed")
           : null;
