@@ -256,13 +256,16 @@ async function main(): Promise<void> {
   gate("test:run", "▸ tests ............ ✓");
 
   // hash ตรงนี้คือ HEAD **ก่อน** release commit เพราะ changelog ต้องถูกเขียนก่อน
-  // จึงจะ commit ได้ — ฟิลด์ `commit` ของ entry ใช้ค่าเดียวกันนี้
+  // จึงจะ commit ได้ — ส่งเข้า recordRelease() ตรง ๆ เป็นฟิลด์ `commit` ของ entry
+  // (ไม่ผ่านการ parse จาก fullVersion อีกต่อไป กัน format ของ fullVersion เปลี่ยนแล้ว
+  // commit เพี้ยนไปเงียบ ๆ)
+  const shortHash = git("rev-parse", "--short", "HEAD");
   const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const fullVersion = `${target}-build.${stamp}.${git("rev-parse", "--short", "HEAD")}`;
+  const fullVersion = `${target}-build.${stamp}.${shortHash}`;
 
   try {
     writePackageVersion(target);
-    recordRelease({ target, fullVersion });
+    recordRelease({ target, fullVersion, commit: shortHash });
   } catch (err) {
     console.error(`✗ เขียน package.json / changelog ไม่สำเร็จ: ${String(err)}`);
     console.error(RESTORE_HINT);

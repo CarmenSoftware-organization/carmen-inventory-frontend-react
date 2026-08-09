@@ -202,11 +202,13 @@ function isCommit(rev: string): boolean {
  * เพราะ commit ของมันชี้ที่ release commit พอดี — ความต่างนี้ตั้งใจ ไม่ต้องทำให้เท่ากัน)
  *
  * @param params.target semver ที่กำลังปล่อย เช่น "1.2.1"
- * @param params.fullVersion เช่น "1.2.1-build.20260810.abc1234" — ส่วนท้ายสุดคือ
- *   short hash ของ HEAD ก่อน release commit และถูกใช้เป็นฟิลด์ `commit` ของ entry
+ * @param params.fullVersion เช่น "1.2.1-build.20260810.abc1234" — ใช้เป็นฟิลด์ `build`
+ *   ของ entry ตรง ๆ ไม่ถูก parse ต่อ
+ * @param params.commit short hash ของ HEAD ก่อน release commit — ผู้เรียกส่งมาตรง ๆ
+ *   แล้วใช้เป็นฟิลด์ `commit` ของ entry (ไม่ derive จาก fullVersion อีกต่อไป)
  * @throws ถ้า changelog.json ไม่มี entry หรือ baseline ชี้ commit ที่ไม่มีในรีโป
  */
-export function recordRelease(params: { target: string; fullVersion: string }): void {
+export function recordRelease(params: { target: string; fullVersion: string; commit: string }): void {
   const changelog = readChangelog();
   const baseline = changelog.versions[0]?.commit;
   if (!baseline) throw new Error("changelog.json ไม่มี entry ให้ใช้เป็น baseline");
@@ -222,7 +224,7 @@ export function recordRelease(params: { target: string; fullVersion: string }): 
     version: params.target,
     build: params.fullVersion,
     date: new Date().toISOString().slice(0, 10),
-    commit: params.fullVersion.split(".").pop() as string,
+    commit: params.commit,
     changes: buildChanges(`${baseline}..HEAD`),
   };
   changelog.versions.unshift(entry);
