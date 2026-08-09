@@ -4,6 +4,18 @@
 แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
 `bun scripts/changelog-cli.ts` เพื่อ render ใหม่
 
+## [2.0.0] - 2026-08-09
+
+### Added
+- **bump:** build:bump เขียน changelog เองและ commit ไฟล์ที่ระบุชัด (#102) — Thammanoon Semapru `8a14f25`
+- **changelog:** generator สร้าง changelog จาก git history (#102) — Thammanoon Semapru `6198d4d`
+- **build:** สคริปต์ build ต่อ environment (#102) — Thammanoon Semapru `cd1dd80`
+
+### Fixed
+- **footer:** เลื่อนโหลด changelog chunk ไปตอนเปิด What's New จริง + กู้ test ที่กลายเป็นโมฆะ (#102) — Thammanoon Semapru `f01d04d`
+- **footer:** เลิกลาก changelog.json เข้า shared chunk ที่ทุกหน้าโหลด (#102) — Thammanoon Semapru `2a4549f`
+- **changelog:** commit field ส่งตรงแทน parse string + fail fast เมื่อ config.<env>.json หาย (#102) — Thammanoon Semapru `b1f35b0`
+
 ## [1.2.0] - 2026-08-09
 
 ### Added

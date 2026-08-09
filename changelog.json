@@ -1,7 +1,62 @@
 {
-  "current": "1.2.0",
-  "generated_at": "2026-08-09T17:59:23.606Z",
+  "current": "2.0.0",
+  "generated_at": "2026-08-09T19:57:52.868Z",
   "versions": [
+    {
+      "version": "2.0.0",
+      "build": "2.0.0-build.20260809.8b1a9b5",
+      "date": "2026-08-09",
+      "commit": "8b1a9b5",
+      "changes": {
+        "added": [
+          {
+            "scope": "bump",
+            "summary": "build:bump เขียน changelog เองและ commit ไฟล์ที่ระบุชัด",
+            "hash": "8a14f25",
+            "author": "Thammanoon Semapru",
+            "pr": 102
+          },
+          {
+            "scope": "changelog",
+            "summary": "generator สร้าง changelog จาก git history",
+            "hash": "6198d4d",
+            "author": "Thammanoon Semapru",
+            "pr": 102
+          },
+          {
+            "scope": "build",
+            "summary": "สคริปต์ build ต่อ environment",
+            "hash": "cd1dd80",
+            "author": "Thammanoon Semapru",
+            "pr": 102
+          }
+        ],
+        "fixed": [
+          {
+            "scope": "footer",
+            "summary": "เลื่อนโหลด changelog chunk ไปตอนเปิด What's New จริง + กู้ test ที่กลายเป็นโมฆะ",
+            "hash": "f01d04d",
+            "author": "Thammanoon Semapru",
+            "pr": 102
+          },
+          {
+            "scope": "footer",
+            "summary": "เลิกลาก changelog.json เข้า shared chunk ที่ทุกหน้าโหลด",
+            "hash": "2a4549f",
+            "author": "Thammanoon Semapru",
+            "pr": 102
+          },
+          {
+            "scope": "changelog",
+            "summary": "commit field ส่งตรงแทน parse string + fail fast เมื่อ config.<env>.json หาย",
+            "hash": "b1f35b0",
+            "author": "Thammanoon Semapru",
+            "pr": 102
+          }
+        ],
+        "changed": []
+      }
+    },
     {
       "version": "1.2.0",
       "build": "1.2.0-build.20260809.0f6ec40",
