@@ -1,12 +1,17 @@
 
 import { Clock, Tag, User } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { useServerTime } from "@/hooks/use-server-time";
 import { useWhatsNew } from "@/hooks/use-whats-new";
 import { formatDate } from "@/lib/date-utils";
 import { APP_VERSION } from "@/lib/version";
-import { WhatsNewDialog } from "./whats-new-dialog";
+
+// Lazy: changelog.json (ยาวขึ้นเรื่อย ๆ ~57 รายการ/release) ต้องไม่ค้างอยู่ใน
+// shared chunk ที่ทุกหน้าโหลด — ดึงเฉพาะตอนผู้ใช้เปิด dialog จริง
+const WhatsNewDialog = lazy(() =>
+  import("./whats-new-dialog").then((m) => ({ default: m.WhatsNewDialog })),
+);
 
 /**
  * Footer status bar
@@ -17,6 +22,10 @@ import { WhatsNewDialog } from "./whats-new-dialog";
  * เพื่อเปิด What's New dialog และ dialog จะเด้งอัตโนมัติครั้งเดียวเมื่อมี
  * version ใหม่ (`useWhatsNew`) ใช้ `formatDate` ตาม `dateTimeFormat` จาก
  * profile ใส่ `suppressHydrationWarning` บน `<time>` รองรับ SSR/CSR mismatch
+ *
+ * `WhatsNewDialog` ถูก `lazy()` — `changelog.json` (ที่มันดึงมาแสดง) จึงอยู่ใน
+ * chunk แยกที่โหลดเฉพาะตอนเปิด dialog จริง (คลิกปุ่มหรือ auto-open) ไม่ค้างใน
+ * shared chunk ที่ทุกหน้าโหลดเหมือนก่อนหน้านี้
  *
  * @returns JSX element ของ status bar
  * @example
@@ -86,7 +95,9 @@ export function StatusBar() {
           </button>
         </div>
       </footer>
-      <WhatsNewDialog open={whatsNewOpen} onOpenChange={handleOpenChange} />
+      <Suspense fallback={null}>
+        <WhatsNewDialog open={whatsNewOpen} onOpenChange={handleOpenChange} />
+      </Suspense>
     </>
   );
 }
