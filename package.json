@@ -10,6 +10,10 @@
     "dev:uat": "CONFIG_ENV=uat vite",
     "dev:prod": "CONFIG_ENV=prod vite",
     "build": "tsc --noEmit && vite build",
+    "build:local": "BUILD_CONFIG_FILE=config.local.json bun run build",
+    "build:dev": "BUILD_CONFIG_FILE=config.dev.json bun run build",
+    "build:uat": "BUILD_CONFIG_FILE=config.uat.json bun run build",
+    "build:prod": "BUILD_CONFIG_FILE=config.prod.json bun run build",
     "build:bump": "bun scripts/bump.ts",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
@@ -81,5 +85,7 @@
     "vite": "^7.3.3",
     "vitest": "^4.1.6"
   },
-  "trustedDependencies": ["unrs-resolver"]
+  "trustedDependencies": [
+    "unrs-resolver"
+  ]
 }
