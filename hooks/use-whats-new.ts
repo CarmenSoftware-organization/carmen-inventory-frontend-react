@@ -36,7 +36,8 @@ function writeLastSeen(version: string): void {
  * (ไม่ใช่ static) เพราะ `changelog.json` โตขึ้นเรื่อย ๆ ทุก release (~57
  * รายการ/รอบ) static import ตรงนี้จะลาก payload นั้นเข้า shared chunk ที่ทุก
  * หน้าโหลด (เช่นเดียวกับที่ `WhatsNewDialog` เป็น `lazy()` แล้วในตัว
- * `status-bar.tsx` ด้วยเหตุผลเดียวกัน)
+ * `status-bar.tsx` ด้วยเหตุผลเดียวกัน) ถ้าดึง chunk ไม่สำเร็จให้เงียบไว้ —
+ * ไม่เด้ง dialog และไม่ปล่อย rejection ลอย
  *
  * @returns `{ shouldAutoOpen, markSeen }` — flag สั่งเปิด dialog อัตโนมัติ
  *   และฟังก์ชันบันทึกว่าผู้ใช้เห็น version ปัจจุบันแล้ว
@@ -58,12 +59,18 @@ export function useWhatsNew() {
     if (lastSeen === APP_VERSION) return;
 
     let cancelled = false;
-    import("@/lib/changelog").then(({ LATEST }) => {
-      if (cancelled) return;
-      const c = LATEST?.changes;
-      const hasChanges = !!c && c.added.length + c.fixed.length + c.changed.length > 0;
-      if (hasChanges) startTransition(() => setShouldAutoOpen(true));
-    });
+    import("@/lib/changelog")
+      .then(({ LATEST }) => {
+        if (cancelled) return;
+        const c = LATEST?.changes;
+        const hasChanges = !!c && c.added.length + c.fixed.length + c.changed.length > 0;
+        if (hasChanges) startTransition(() => setShouldAutoOpen(true));
+      })
+      .catch(() => {
+        // ดึง chunk ไม่สำเร็จ (เน็ตหลุด / deploy ใหม่ทับ hash เดิม) — What's New
+        // เป็นของไม่จำเป็น ปล่อยผ่านเงียบ ๆ ไม่เด้ง dialog และห้าม throw
+        // เพราะ promise ที่ reject ลอย ๆ จะกลายเป็น unhandled rejection
+      });
     return () => {
       cancelled = true;
     };

@@ -29,8 +29,12 @@ afterEach(() => {
 });
 
 describe("useWhatsNew", () => {
-  it("does not auto-open on first-ever load and sets the baseline", () => {
+  it("does not auto-open on first-ever load and sets the baseline", async () => {
     const { result } = renderHook(() => useWhatsNew());
+    // hook ตัดสินใจแบบ async (dynamic import) — ต้องปล่อยให้ microtask
+    // ทั้งหมดวิ่งจบก่อน ไม่งั้น assert false ตรงนี้จะจริงเสมอไม่ว่า hook
+    // จะทำอะไร (เคย regress มาแล้วตอน hook เปลี่ยนเป็น async)
+    await act(async () => {});
     expect(result.current.shouldAutoOpen).toBe(false);
     expect(localStorage.getItem(KEY)).toBe(APP_VERSION);
   });
@@ -42,9 +46,11 @@ describe("useWhatsNew", () => {
     await waitFor(() => expect(result.current.shouldAutoOpen).toBe(true));
   });
 
-  it("does not auto-open when stored version matches current", () => {
+  it("does not auto-open when stored version matches current", async () => {
     localStorage.setItem(KEY, APP_VERSION);
     const { result } = renderHook(() => useWhatsNew());
+    // เหตุผลเดียวกับเคสแรก — ต้องรอ decision แบบ async ให้จบก่อน assert
+    await act(async () => {});
     expect(result.current.shouldAutoOpen).toBe(false);
   });
 
