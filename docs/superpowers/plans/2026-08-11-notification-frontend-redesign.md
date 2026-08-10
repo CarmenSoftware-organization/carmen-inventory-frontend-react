@@ -1095,10 +1095,100 @@ mark-read ส่ง source กลับไปเพื่อให้ประ�
 
 **Files:**
 - Modify: `routes/notifications/notification-content.tsx`
+- Modify: `hooks/use-notification.ts` (เฉพาะ 3 จุดใน Step 0)
+- Modify: `components/navbar/notification.tsx` (เฉพาะ skeleton ใน Step 0)
 
 **Interfaces:**
 - Consumes: `useNotificationsList`, `useMarkAllNotificationsRead`, `NotificationTab` (Task 3) · `Tabs`, `TabsList`, `TabsTrigger` จาก `@/components/ui/tabs` · คีย์ i18n `notifications.*` (Task 1)
 - Produces: ไม่มี export ใหม่
+
+- [ ] **Step 0: เก็บสี่ข้อที่รีวิว Task 3 ฝากไว้ (ทำก่อน แล้ว commit แยกหนึ่งก้อน)**
+
+ทั้งสี่ข้ออยู่ในรัศมีของงานนี้ — โดยเฉพาะข้อ 4 ที่จะกลายเป็นปัญหาจริงทันทีที่ปุ่มโหลดเพิ่มมีผล
+
+**0.1 — `hooks/use-notification.ts:28-32` คอมเมนต์ขัดกับโค้ด**
+JSDoc ของ `notificationKeys` อ้างว่าทุกคีย์แตกจาก prefix เดียวกัน แต่ `detail` ใช้
+`QUERY_KEYS.NOTIFICATION_DETAIL` (`"notification-detail"`) ซึ่งไม่ได้อยู่ใต้ `all`
+ผลจริงคือ WS invalidate และ `onSettled` ของ mark-read ไม่แตะแคชรายละเอียดที่ใช้
+`CACHE_NORMAL` (5 นาที) แทนคอมเมนต์ด้วยข้อความที่ตรงกับพฤติกรรมจริง:
+
+```ts
+/**
+ * คีย์ของรายการทุกตัวแตกจาก prefix `all` เดียวกัน WS จึง invalidate ครั้งเดียวสดทั้งหมด
+ * แคชฝั่ง "ยังไม่อ่าน" ทั้งสองตัว (popover กับแท็บ) อยู่ใต้ `unreadAll` เพื่อให้
+ * optimistic update ของ mark-read เขียนถึงพร้อมกันด้วยคำสั่งเดียว
+ *
+ * ข้อยกเว้น: `detail` อยู่คนละ prefix (`QUERY_KEYS.NOTIFICATION_DETAIL`) จึงไม่ถูก
+ * invalidate ตามรายการ — ตั้งใจ เพราะเนื้อหาของแจ้งเตือนหนึ่งใบไม่เปลี่ยนหลังสร้าง
+ * มีแต่ `is_read` ที่เปลี่ยน ซึ่ง dialog ไม่ได้แสดง
+ */
+```
+
+**0.2 — `hooks/use-notification.ts:186-193` try/catch กว้างเกินเจตนา**
+`invalidateQueries` อยู่ในบล็อก `try` เดียวกับ `JSON.parse` ทำให้ error ของ invalidate
+ถูกกลืนโดย `catch` ที่เขียนว่า "ignore malformed messages" แยกออกจากกัน:
+
+```ts
+      ws.onmessage = (event) => {
+        let message: unknown;
+        try {
+          message = JSON.parse(event.data);
+        } catch {
+          return; // ignore malformed messages
+        }
+        if (
+          message !== null &&
+          typeof message === "object" &&
+          (message as { type?: unknown }).type === "notification"
+        ) {
+          void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+        }
+      };
+```
+
+**0.3 — `hooks/use-notification.ts` WS invalidate ยิงซ้ำทุกหน้าที่โหลดไว้**
+พฤติกรรมมาตรฐานของ TanStack คือ invalidate infinite query แล้ว refetch **ทุกหน้า**
+ที่แคชไว้ — พอปุ่มโหลดเพิ่มใช้งานได้ ผู้ใช้ที่กดไป 10 หน้าจะยิง 10 request ต่อ
+แจ้งเตือนหนึ่งใบ จำกัดขอบเขตด้วย `refetchType: "active"` ทั้งใน WS handler และใน
+`onSettled` ของ mutation ทั้งสองตัว:
+
+```ts
+          void queryClient.invalidateQueries({
+            queryKey: notificationKeys.all,
+            refetchType: "active",
+          });
+```
+
+**0.4 — `components/navbar/notification.tsx` popover โชว์ empty state ระหว่างโหลด**
+เดิมรายการมาจาก WS ล้วนจึงว่างจริงเสมอ ตอนนี้มีช่วงรอ REST จริงแล้ว แต่โค้ดยังตัดสิน
+จาก `notifications.length === 0` อย่างเดียว ทำให้ขึ้น "ยังไม่มีการแจ้งเตือน" ทั้งที่
+กำลังโหลด — รับ `isLoading` มาใช้:
+
+```tsx
+  const { notifications, unreadCount, isLoading } = useUnreadNotifications();
+```
+แล้วในกล่องรายการให้ skeleton มาก่อน empty state (`Skeleton` import อยู่ในไฟล์แล้ว):
+```tsx
+          {isLoading ? (
+            <div className="space-y-2 p-3">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : notifications.length === 0 ? (
+```
+
+ตรวจ `bunx tsc --noEmit` (ยังเหลือ error เดียวจากไฟล์เทสต์ของ Task 5 — ถือว่าปกติ)
+และ `bun run lint` แล้ว commit แยกก้อน:
+
+```bash
+git add hooks/use-notification.ts components/navbar/notification.tsx
+git commit -m "fix(notification): เก็บสี่ข้อจากรีวิว — ขอบเขต invalidate สถานะโหลด และคอมเมนต์ที่ไม่ตรงโค้ด
+
+จำกัด refetch เป็น active query กัน N request ต่อแจ้งเตือนหนึ่งใบเมื่อโหลดหลายหน้า
+popover ขึ้น skeleton แทนข้อความว่างระหว่างรอ REST
+แยก invalidate ออกจาก try ของ JSON.parse และแก้คอมเมนต์ที่อ้าง prefix ไม่ตรงความจริง"
+```
 
 - [ ] **Step 1: เพิ่ม import ที่ต้องใช้**
 
