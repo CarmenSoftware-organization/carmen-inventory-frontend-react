@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  Bell,
-  BellOff,
-  Check,
-  ExternalLink,
-  SquareArrowOutUpRight,
-} from "lucide-react";
+import { Bell, BellOff, Check, SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -36,16 +30,11 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import type { Notification as NotificationType } from "@/types/notification";
 import EmptyComponent from "../empty-component";
-import {
-  cn,
-  safeInternalHref,
-  safeNavigationHref,
-  sanitizeText,
-} from "@/lib/utils";
+import { cn, safeInternalHref, sanitizeText } from "@/lib/utils";
 import {
   formatMessage,
-  getBadgeVariant,
   getNotificationHref,
+  DOC_TYPE_LABEL_KEY,
 } from "@/lib/notification-helpers";
 import { NotificationItemContent } from "./notification-item-content";
 
@@ -65,6 +54,7 @@ const NotificationItem = ({
   dismissLabel,
 }: NotificationItemProps) => {
   const t = useTranslations("navbar");
+  const tRoot = useTranslations();
   const locale = useLocale();
   // Row-overlay link ต้องเป็น internal path เท่านั้น (policy: internal-only)
   // safeInternalHref เป็น sanitizer เฉพาะทาง — รับเฉพาะ root-relative path
@@ -107,6 +97,7 @@ const NotificationItem = ({
         isUnread={isUnread}
         locale={locale}
         unreadLabel={t("unread")}
+        commentLabel={tRoot("notifications.commentLabel")}
       />
       <button
         onClick={() => onMarkAsRead(notification.id)}
@@ -245,11 +236,9 @@ export function NotificationDetailDialog({
   onClose,
 }: NotificationDetailDialogProps) {
   const tc = useTranslations("common");
-  const t = useTranslations("navbar");
+  const tRoot = useTranslations();
   const { data, isLoading, error } = useNotificationDetail(id);
   const open = !!id;
-
-  const externalHref = data ? safeNavigationHref(data.link) : undefined;
 
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
@@ -264,12 +253,16 @@ export function NotificationDetailDialog({
           </DialogTitle>
           {data && (
             <DialogDescription className="flex items-center gap-2 pt-1 text-micro">
-              <Badge variant={getBadgeVariant(data.type)} size="xs">
-                {data.type}
-              </Badge>
-              <span className="text-muted-foreground tabular-nums">
-                {new Date(data.created_at).toLocaleString()}
-              </span>
+              {data.doc_type && (
+                <Badge variant="info-light" size="xs">
+                  {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
+                </Badge>
+              )}
+              {data.created_at && (
+                <span className="text-muted-foreground tabular-nums">
+                  {new Date(data.created_at).toLocaleString()}
+                </span>
+              )}
             </DialogDescription>
           )}
         </DialogHeader>
@@ -295,14 +288,6 @@ export function NotificationDetailDialog({
         </div>
 
         <DialogFooter>
-          {externalHref && (
-            <Button asChild variant="outline" size="sm">
-              <Link to={externalHref} onClick={onClose}>
-                <ExternalLink className="size-3.5" aria-hidden="true" />
-                {t("open")}
-              </Link>
-            </Button>
-          )}
           <Button variant="outline" size="sm" onClick={onClose}>
             {tc("close")}
           </Button>

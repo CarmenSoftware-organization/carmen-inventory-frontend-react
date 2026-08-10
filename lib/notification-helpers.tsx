@@ -1,106 +1,98 @@
 import { Link } from "react-router";
 import type {
   Notification as NotificationType,
-  NotificationEntityType,
+  NotificationDocType,
+  NotificationMetadata,
 } from "@/types/notification";
 import { safeNavigationHref } from "@/lib/utils";
 
-export type NotificationBadgeVariant =
-  | "info-light"
-  | "warning-light"
-  | "success-light"
-  | "destructive-light";
-
 /**
- * Base path ของ detail page ต่อ entity type ของ notification
- * Deep-link สุดท้าย = `${base}/${metadata.id}`
+ * doc_type → base path ของหน้ารายละเอียด
+ * `null` = ไม่มีหน้าให้ลิงก์ไป (ประกาศระบบ/หน่วยธุรกิจ) → ผู้เรียกเปิด detail dialog แทน
  */
-export const ENTITY_ROUTES: Record<NotificationEntityType, string> = {
-  PR: "/procurement/purchase-request",
-  PO: "/procurement/purchase-order",
-  SR: "/store-operation/store-requisition",
+export const DOC_TYPE_ROUTES: Record<NotificationDocType, string | null> = {
+  system: null,
+  business_unit: null,
+  purchase_request: "/procurement/purchase-request",
+  purchase_order: "/procurement/purchase-order",
+  good_received_note: "/procurement/goods-receive-note",
+  credit_note: "/procurement/credit-note",
+  store_requisition: "/store-operation/store-requisition",
 };
 
 /**
- * Type guard ตรวจว่าค่า `type` เป็น entity type ที่ deep-link ได้
- *
- * @param t - notification type string
- * @returns true ถ้าเป็น "PR" / "PO" / "SR"
+ * doc_type → คีย์ i18n แบบเต็ม (ใช้กับ `useTranslations()` ที่ไม่ระบุ namespace)
+ * ชื่อเอกสารยืมจาก namespace `modules` เพื่อให้ตรงกับเมนูเป๊ะ ๆ ไม่แปลซ้ำ
  */
-export function isEntityType(t: string): t is NotificationEntityType {
-  return t === "PR" || t === "PO" || t === "SR";
-}
-
-/**
- * Badge color variant per entity type
- * - PR → info (น้ำเงิน)
- * - PO → warning (เหลือง/ส้ม)
- * - SR → success (เขียว)
- * - อื่นๆ → info (fallback)
- *
- * @param type - notification.type
- * @returns variant name สำหรับ shadcn `<Badge>`
- */
-export function getBadgeVariant(type: string): NotificationBadgeVariant {
-  if (type === "PR") return "info-light";
-  if (type === "PO") return "warning-light";
-  if (type === "SR") return "success-light";
-  return "info-light";
-}
+export const DOC_TYPE_LABEL_KEY: Record<NotificationDocType, string> = {
+  system: "notifications.docType.system",
+  business_unit: "notifications.docType.businessUnit",
+  purchase_request: "modules.purchaseRequest",
+  purchase_order: "modules.purchaseOrder",
+  good_received_note: "modules.goodsReceiveNote",
+  credit_note: "modules.creditNote",
+  store_requisition: "modules.storeRequisition",
+};
 
 export interface NotificationTileRef {
-  /** SubTile glyph key (submodule name in module-list) */
+  /** SubTile glyph key (ชื่อ submodule ใน module-list) */
   readonly name: string;
-  /** Parent module name → drives the tile palette */
+  /** Parent module name → กำหนดจานสีของ tile */
   readonly parent: string;
 }
 
 /**
- * Illustrated app-tile (SubTile) per entity type — the same squircle tiles used
- * in the sidebar / dashboard, so a notification's icon matches its module
- * exactly (palette, glyph, and all).
+ * Illustrated app-tile (SubTile) ต่อ doc_type — squircle ชุดเดียวกับ sidebar/dashboard
+ * doc_type ที่ไม่มีในนี้ (`system`, `business_unit`) ตกไปที่ tile กระดิ่ง
  */
-export const NOTIFICATION_TILE: Record<string, NotificationTileRef> = {
-  PR: { name: "purchaseRequest", parent: "procurement" },
-  PO: { name: "purchaseOrder", parent: "procurement" },
-  SR: { name: "storeRequisition", parent: "storeOperations" },
+export const NOTIFICATION_TILE: Partial<
+  Record<NotificationDocType, NotificationTileRef>
+> = {
+  purchase_request: { name: "purchaseRequest", parent: "procurement" },
+  purchase_order: { name: "purchaseOrder", parent: "procurement" },
+  good_received_note: { name: "goodsReceiveNote", parent: "procurement" },
+  credit_note: { name: "creditNote", parent: "procurement" },
+  store_requisition: { name: "storeRequisition", parent: "storeOperations" },
 };
 
 /**
- * Map entity type → metadata key ที่ backend ใช้เก็บ entity id
- * (backend ใส่ key เป็น `{type}_id` lowercase แทน generic `id`)
+ * คีย์ metadata เก่าต่อ doc_type — ใช้เป็น fallback สำหรับแถวที่เขียนก่อน redesign
+ * write path ปัจจุบันเขียน id เอกสารไว้ที่ `metadata.id` เสมอ
  */
-const METADATA_ID_KEY: Record<NotificationEntityType, "po_id" | "pr_id" | "sr_id"> = {
-  PO: "po_id",
-  PR: "pr_id",
-  SR: "sr_id",
+const LEGACY_ID_KEY: Partial<Record<NotificationDocType, keyof NotificationMetadata>> = {
+  purchase_request: "pr_id",
+  purchase_order: "po_id",
+  store_requisition: "sr_id",
+  good_received_note: "grn_id",
+  credit_note: "cn_id",
 };
 
 /**
- * คืน href ที่ใช้ navigate เมื่อกด notification — ลำดับ priority:
- * 1. Entity deep-link (PR/PO/SR + entity id จาก `metadata.{po_id|pr_id|sr_id}`
- *    หรือ fallback `metadata.id`)
- * 2. `notification.link` (free-form URL จาก backend เช่น type=link)
- * 3. `undefined` → caller fallback ไปเปิด detail dialog แทน
+ * คืน href ที่ใช้ navigate เมื่อกดการแจ้งเตือน
+ * ลำดับ: route ของ doc_type + (`metadata.id` → คีย์เก่าตาม doc_type) มิฉะนั้น undefined
+ * (ผู้เรียก fallback ไปเปิด detail dialog)
  *
- * @param n - notification record
- * @returns href string หรือ undefined
+ * @param n - แถวการแจ้งเตือน
+ * @returns path ภายในแอป หรือ undefined เมื่อไม่มีเอกสารให้เปิด
  */
 export function getNotificationHref(n: NotificationType): string | undefined {
-  if (isEntityType(n.type) && n.metadata) {
-    const idKey = METADATA_ID_KEY[n.type];
-    const entityId = n.metadata[idKey] ?? n.metadata.id;
-    if (entityId) return `${ENTITY_ROUTES[n.type]}/${entityId}`;
-  }
-  return n.link || undefined;
+  if (!n.doc_type) return undefined;
+  const base = DOC_TYPE_ROUTES[n.doc_type];
+  if (!base || !n.metadata) return undefined;
+  const legacyKey = LEGACY_ID_KEY[n.doc_type];
+  const legacyId = legacyKey ? n.metadata[legacyKey] : undefined;
+  const entityId = n.metadata.id ?? legacyId;
+  return typeof entityId === "string" && entityId
+    ? `${base}/${entityId}`
+    : undefined;
 }
 
 /**
- * แปลง markdown-style `[label](url)` ใน message ของ notification เป็น
- * `<Link>` (`safeNavigationHref` กรอง URL อันตรายออก)
+ * แปลง markdown-style `[label](url)` ใน message เป็น `<Link>`
+ * (`safeNavigationHref` กรอง URL อันตรายออก)
  *
- * @param message - notification.message raw text (รับ null/undefined ได้ → คืน [])
- * @returns array ของ ReactNode (string + Link)
+ * @param message - ข้อความดิบ (รับ null/undefined ได้ → คืน [])
+ * @returns array ของ ReactNode
  */
 export function formatMessage(message: string | null | undefined) {
   if (!message) return [];
