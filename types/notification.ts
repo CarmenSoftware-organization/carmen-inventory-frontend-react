@@ -1,19 +1,5 @@
 import type { PaginatedResponse } from "@/types/params";
 
-/**
- * @deprecated ถูกแทนที่ด้วย NotificationDocType และ NotificationEvent
- * สำหรับการอ่านข้อมูลเก่า — จะถูกลบใน Task 6
- */
-export type NotificationCategory =
-  | "system-to-user"
-  | "bu-to-user"
-  | "user-to-user";
-
-/**
- * @deprecated ถูกแทนที่ด้วย NotificationDocType
- * สำหรับการอ่านข้อมูลเก่า — จะถูกลบใน Task 6
- */
-export type NotificationEntityType = "PR" | "PO" | "SR";
 
 /**
  * ชนิดเอกสารที่การแจ้งเตือนอ้างถึง — ตรงกับ `enum_notification_doc_type` ฝั่ง platform schema
@@ -87,15 +73,6 @@ export interface Notification {
   from_user_id?: string | null;
   /** User ที่รับ */
   to_user_id?: string | null;
-
-  /** @deprecated ถูกแทนที่ด้วย `doc_type` + `event` — คอลัมน์ถูก DROP ไปแล้ว ลบใน Task 6 */
-  type: string;
-  /** @deprecated ถูกแทนที่ด้วย `source` — คอลัมน์ถูก DROP ไปแล้ว ลบใน Task 6 */
-  category?: string;
-  /** @deprecated คอลัมน์ถูก DROP ไปแล้ว ลบใน Task 6 */
-  is_sent?: boolean;
-  /** @deprecated backend ไม่เคยส่งฟิลด์นี้มา ลบใน Task 6 */
-  link?: string;
 }
 
 /**

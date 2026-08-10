@@ -388,8 +388,8 @@ describe("useMarkNotificationRead", () => {
 
     queryClient.setQueryData<NotificationListResponse>(UNREAD_QUERY_KEY, {
       data: [
-        { id: "n1", title: "A", type: "info", source: "broadcast" },
-        { id: "n2", title: "B", type: "info", source: "personal" },
+        { id: "n1", title: "A", source: "broadcast" },
+        { id: "n2", title: "B", source: "personal" },
       ],
       paginate: { total: 2, page: 1, perpage: 10, pages: 1 },
     });
@@ -425,7 +425,7 @@ describe("useMarkNotificationRead", () => {
       .mockImplementation(() => {});
 
     const original: NotificationListResponse = {
-      data: [{ id: "n1", title: "A", type: "info", source: "personal" }],
+      data: [{ id: "n1", title: "A", source: "personal" }],
       paginate: { total: 1, page: 1, perpage: 10, pages: 1 },
     };
     queryClient.setQueryData<NotificationListResponse>(
@@ -468,8 +468,8 @@ describe("useMarkAllNotificationsRead", () => {
 
     queryClient.setQueryData<NotificationListResponse>(UNREAD_QUERY_KEY, {
       data: [
-        { id: "n1", title: "A", type: "info", source: "personal" },
-        { id: "n2", title: "B", type: "info", source: "broadcast" },
+        { id: "n1", title: "A", source: "personal" },
+        { id: "n2", title: "B", source: "broadcast" },
       ],
       paginate: { total: 2, page: 1, perpage: 10, pages: 1 },
     });
@@ -502,7 +502,7 @@ describe("useMarkAllNotificationsRead", () => {
       .mockImplementation(() => {});
 
     const original: NotificationListResponse = {
-      data: [{ id: "n1", title: "A", type: "info", source: "personal" }],
+      data: [{ id: "n1", title: "A", source: "personal" }],
       paginate: { total: 1, page: 1, perpage: 10, pages: 1 },
     };
     queryClient.setQueryData<NotificationListResponse>(

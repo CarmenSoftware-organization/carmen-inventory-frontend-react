@@ -80,9 +80,6 @@ function makeNotification(
     id: "n1",
     title: "Test Title",
     message: "Test message",
-    // @deprecated — คอลัมน์ถูกลบจากสายจริงแล้ว แต่ยังเป็น field required บน
-    // Notification interface จนกว่า Task 6 จะถอดออก (ดู types/notification.ts)
-    type: "info",
     source: "personal",
     created_at: "2026-03-01T10:30:00Z",
     ...overrides,
