@@ -119,7 +119,7 @@ export default function Notification() {
   const t = useTranslations("navbar");
   const { userId } = useProfile();
   useNotificationRealtime(userId);
-  const { notifications, unreadCount } = useUnreadNotifications();
+  const { notifications, unreadCount, isLoading } = useUnreadNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -205,7 +205,13 @@ export default function Notification() {
         </div>
 
         <div className="max-h-112 overflow-y-auto">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-2 p-3">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : notifications.length === 0 ? (
             <EmptyComponent
               icon={BellOff}
               title={t("noNotificationsTitle")}

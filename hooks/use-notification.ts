@@ -26,9 +26,13 @@ const PAGE_SIZE = 20;
 const POPOVER_SIZE = 10;
 
 /**
- * Query key ทั้งหมดแตกจาก prefix เดียวกัน เพื่อให้ WS invalidate ครั้งเดียวสดทุกที่
+ * คีย์ของรายการทุกตัวแตกจาก prefix `all` เดียวกัน WS จึง invalidate ครั้งเดียวสดทั้งหมด
  * แคชฝั่ง "ยังไม่อ่าน" ทั้งสองตัว (popover กับแท็บ) อยู่ใต้ `unreadAll` เพื่อให้
  * optimistic update ของ mark-read เขียนถึงพร้อมกันด้วยคำสั่งเดียว
+ *
+ * ข้อยกเว้น: `detail` อยู่คนละ prefix (`QUERY_KEYS.NOTIFICATION_DETAIL`) จึงไม่ถูก
+ * invalidate ตามรายการ — ตั้งใจ เพราะเนื้อหาของแจ้งเตือนหนึ่งใบไม่เปลี่ยนหลังสร้าง
+ * มีแต่ `is_read` ที่เปลี่ยน ซึ่ง dialog ไม่ได้แสดง
  */
 export const notificationKeys = {
   all: [QUERY_KEYS.NOTIFICATIONS] as const,
@@ -182,13 +186,21 @@ export function useNotificationRealtime(userId: string | undefined) {
       };
 
       ws.onmessage = (event) => {
+        let message: unknown;
         try {
-          const message = JSON.parse(event.data);
-          if (message.type === "notification") {
-            queryClient.invalidateQueries({ queryKey: notificationKeys.all });
-          }
+          message = JSON.parse(event.data);
         } catch {
-          // ignore malformed messages
+          return; // ignore malformed messages
+        }
+        if (
+          message !== null &&
+          typeof message === "object" &&
+          (message as { type?: unknown }).type === "notification"
+        ) {
+          void queryClient.invalidateQueries({
+            queryKey: notificationKeys.all,
+            refetchType: "active",
+          });
         }
       };
 
@@ -327,7 +339,10 @@ export function useMarkNotificationRead() {
       errorToast(err);
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: notificationKeys.all,
+        refetchType: "active",
+      });
     },
   });
 }
@@ -375,7 +390,10 @@ export function useMarkAllNotificationsRead() {
       errorToast(err);
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: notificationKeys.all,
+        refetchType: "active",
+      });
     },
   });
 }
