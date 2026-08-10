@@ -25,6 +25,13 @@ const render = (ui: ReactElement) =>
 const markReadSpy = vi.fn();
 const markAllSpy = vi.fn();
 let mockNotifications: NotificationType[] = [];
+// unreadCount มาจาก paginate.total ของ backend — ไม่ใช่ mockNotifications.length
+// (popover ถือแถวได้มากสุดตาม perpage แต่ badge ต้องนับทั้งหมด) ตั้งค่าต่อ test
+// เพื่อพิสูจน์ว่า component อ่าน unreadCount จริง ไม่ได้แอบนับ mockNotifications.length
+let mockUnreadCount = 0;
+// เลขที่ mockNotifications ไม่มีทางนับได้เอง (ไม่มี fixture ไหนมี 47 แถว) — ใช้เป็นค่า
+// unreadCount ในเคสที่ต้องเกินเพดาน "9+" เพื่อพิสูจน์ threshold ยังผูกกับ unreadCount จริง
+const MOCK_UNREAD_TOTAL = 47;
 // detail ที่ useNotificationDetail จะคืน — ตั้งค่าต่อ test (badge doc_type อยู่ใน dialog)
 let mockDetail: NotificationType | undefined;
 
@@ -46,7 +53,7 @@ vi.mock("@/hooks/use-notification", () => ({
   useNotificationRealtime: () => ({ isConnected: true }),
   useUnreadNotifications: () => ({
     notifications: mockNotifications,
-    unreadCount: mockNotifications.length,
+    unreadCount: mockUnreadCount,
     isLoading: false,
     error: null,
   }),
@@ -101,6 +108,7 @@ describe("Notification component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockNotifications = [];
+    mockUnreadCount = 0;
     mockDetail = undefined;
   });
 
@@ -114,20 +122,32 @@ describe("Notification component", () => {
   });
 
   it("does not show badge when there are no notifications", () => {
+    // ตั้ง unreadCount ตรง ๆ (ไม่พึ่ง mockNotifications.length ที่บังเอิญเป็น 0)
+    mockUnreadCount = 0;
     render(<Notification />);
     expect(screen.queryByText("0")).not.toBeInTheDocument();
   });
 
   it("shows notification count badge", () => {
-    mockNotifications = [makeNotification({ id: "n1" })];
+    // แถวใน popover (2) ไม่เท่ากับ unreadCount (5) โดยตั้งใจ — ถ้า component แอบอ่าน
+    // notifications.length แทน unreadCount จริง เทสต์นี้จะเห็น "2" ไม่ใช่ "5"
+    mockNotifications = [
+      makeNotification({ id: "n1" }),
+      makeNotification({ id: "n2" }),
+    ];
+    mockUnreadCount = 5;
     render(<Notification />);
-    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.queryByText("2")).not.toBeInTheDocument();
   });
 
   it('shows "9+" when count exceeds 9', () => {
-    mockNotifications = Array.from({ length: 12 }, (_, i) =>
+    // popover ถือแถวได้มากสุดตาม perpage (นี่คือแค่ 3) แต่ unreadCount มาจาก
+    // paginate.total ซึ่งพุ่งเกิน 9 ได้ทั้งที่แถวในมือมีไม่กี่ใบ
+    mockNotifications = Array.from({ length: 3 }, (_, i) =>
       makeNotification({ id: `n${i}` }),
     );
+    mockUnreadCount = MOCK_UNREAD_TOTAL;
     render(<Notification />);
     expect(screen.getByText("9+")).toBeInTheDocument();
   });
@@ -190,6 +210,8 @@ describe("Notification component", () => {
 
   it("shows Clear all button when there are notifications", async () => {
     mockNotifications = [makeNotification()];
+    // ปุ่ม Clear all คุมด้วย unreadCount ไม่ใช่ notifications.length — ต้องตั้งเอง
+    mockUnreadCount = 1;
 
     render(<Notification />);
     await openPopover();
@@ -201,6 +223,7 @@ describe("Notification component", () => {
 
   it("calls markAllAsRead when Clear all is clicked", async () => {
     mockNotifications = [makeNotification()];
+    mockUnreadCount = 1;
 
     render(<Notification />);
     const user = await openPopover();
