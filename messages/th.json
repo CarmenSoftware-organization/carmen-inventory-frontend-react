@@ -4455,5 +4455,18 @@
     "added": "เพิ่ม",
     "removed": "ลบ",
     "updated": "แก้ไข"
+  },
+  "notifications": {
+    "docType": {
+      "system": "ระบบ",
+      "businessUnit": "หน่วยธุรกิจ"
+    },
+    "commentLabel": "ความคิดเห็น",
+    "tabAll": "ทั้งหมด",
+    "tabUnread": "ยังไม่อ่าน",
+    "loadMore": "โหลดเพิ่ม",
+    "markAllRead": "ทำเครื่องหมายว่าอ่านทั้งหมด",
+    "emptyUnreadTitle": "อ่านครบแล้ว",
+    "emptyUnreadDesc": "ไม่มีการแจ้งเตือนที่ยังไม่ได้อ่าน"
   }
 }

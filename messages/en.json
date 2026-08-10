@@ -4465,5 +4465,18 @@
     "added": "added",
     "removed": "removed",
     "updated": "updated"
+  },
+  "notifications": {
+    "docType": {
+      "system": "System",
+      "businessUnit": "Business Unit"
+    },
+    "commentLabel": "Comment",
+    "tabAll": "All",
+    "tabUnread": "Unread",
+    "loadMore": "Load more",
+    "markAllRead": "Mark all as read",
+    "emptyUnreadTitle": "You're all caught up",
+    "emptyUnreadDesc": "You have no unread notifications."
   }
 }

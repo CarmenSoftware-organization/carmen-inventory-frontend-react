@@ -154,6 +154,7 @@ export const API_ENDPOINTS = {
     "/api/proxy/api/my-pending/store-requisitions/pending",
   NOTIFICATIONS: "/api/proxy/api/notifications",
   NOTIFICATIONS_MARK_ALL_READ: "/api/proxy/api/notifications/mark-all-read",
+  NOTIFICATIONS_UNREAD: "/api/proxy/api/notifications/unread",
   NOTIFICATION_BY_ID: (id: string) =>
     `/api/proxy/api/notifications/${toSafePathSegment(id)}`,
   NOTIFICATION_MARK_READ: (id: string) =>
