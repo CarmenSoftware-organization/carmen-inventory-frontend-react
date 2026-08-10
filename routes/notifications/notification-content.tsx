@@ -9,6 +9,7 @@ import { NotificationDetailDialog } from "@/components/navbar/notification";
 import { NotificationItemContent } from "@/components/navbar/notification-item-content";
 import {
   useMarkAllNotificationsRead,
+  useMarkNotificationRead,
   useNotificationsList,
   type NotificationTab,
 } from "@/hooks/use-notification";
@@ -33,7 +34,11 @@ export default function NotificationsContent() {
     fetchNextPage,
   } = useNotificationsList(tab);
   const markAllRead = useMarkAllNotificationsRead();
+  const markRead = useMarkNotificationRead();
   const [detailId, setDetailId] = useState<string | null>(null);
+
+  const handleMarkAsRead = (notification: Notification) =>
+    markRead.mutate({ id: notification.id, source: notification.source });
 
   // แท็บ "ทั้งหมด" ให้ summary.unread มา ส่วนแท็บ "ยังไม่อ่าน" ไม่มี summary
   // โดยตั้งใจ (จำนวนยังไม่อ่าน = paginate.total ของ endpoint นั้นพอดี)
@@ -113,6 +118,7 @@ export default function NotificationsContent() {
               notification={notification}
               locale={locale}
               onShowDetail={setDetailId}
+              onMarkRead={handleMarkAsRead}
             />
           ))
         )}
@@ -143,12 +149,14 @@ interface NotificationRowProps {
   readonly notification: Notification;
   readonly locale: string;
   readonly onShowDetail: (id: string) => void;
+  readonly onMarkRead: (notification: Notification) => void;
 }
 
 function NotificationRow({
   notification,
   locale,
   onShowDetail,
+  onMarkRead,
 }: NotificationRowProps) {
   const t = useTranslations("navbar");
   const tRoot = useTranslations();
@@ -175,13 +183,20 @@ function NotificationRow({
   return (
     <li>
       {safeLink ? (
-        <Link to={safeLink} className={rowClass}>
+        <Link
+          to={safeLink}
+          className={rowClass}
+          onClick={() => onMarkRead(notification)}
+        >
           {body}
         </Link>
       ) : (
         <button
           type="button"
-          onClick={() => onShowDetail(notification.id)}
+          onClick={() => {
+            onMarkRead(notification);
+            onShowDetail(notification.id);
+          }}
           className={cn(rowClass, "cursor-pointer")}
         >
           {body}

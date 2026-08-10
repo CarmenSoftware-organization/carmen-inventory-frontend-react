@@ -1,6 +1,5 @@
 import type { PaginatedResponse } from "@/types/params";
 
-
 /**
  * ชนิดเอกสารที่การแจ้งเตือนอ้างถึง — ตรงกับ `enum_notification_doc_type` ฝั่ง platform schema
  * (`system`/`business_unit` คือประกาศ ไม่ผูกกับเอกสารใด)
@@ -51,9 +50,9 @@ export interface Notification {
   id: string;
   /** `personal` (ส่งตรง to_user_id) หรือ `broadcast` (system-wide) */
   source?: NotificationSource;
-  /** Document type ใหม่ — แทนที่ type */
+  /** Document type ของการแจ้งเตือน */
   doc_type?: NotificationDocType | null;
-  /** Event type ใหม่ — แทนที่ type */
+  /** Event type ของการแจ้งเตือน */
   event?: NotificationEvent | null;
   /** Title ของการแจ้งเตือน */
   title?: string | null;

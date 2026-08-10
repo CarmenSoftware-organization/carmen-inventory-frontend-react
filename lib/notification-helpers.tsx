@@ -83,7 +83,7 @@ export function getNotificationHref(n: NotificationType): string | undefined {
   const legacyId = legacyKey ? n.metadata[legacyKey] : undefined;
   const entityId = n.metadata.id ?? legacyId;
   return typeof entityId === "string" && entityId
-    ? `${base}/${entityId}`
+    ? `${base}/${encodeURIComponent(entityId)}`
     : undefined;
 }
 
@@ -97,15 +97,16 @@ export function getNotificationHref(n: NotificationType): string | undefined {
 export function formatMessage(message: string | null | undefined) {
   if (!message) return [];
   const parts = message.split(/(\[.*?\]\(.*?\))/g);
-  return parts.map((part) => {
+  return parts.map((part, index) => {
     const match = /^\[(.*?)\]\((.*?)\)$/.exec(part);
     if (match) {
       const safeHref = safeNavigationHref(match[2]);
       if (!safeHref) return match[1];
       return (
         <Link
-          key={safeHref}
+          key={index}
           to={safeHref}
+          rel="noopener noreferrer"
           className="text-primary hover:text-primary/80 font-medium underline underline-offset-2"
           onClick={(e) => e.stopPropagation()}
         >

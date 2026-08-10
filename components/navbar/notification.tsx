@@ -59,11 +59,10 @@ const NotificationItem = ({
   const t = useTranslations("navbar");
   const tRoot = useTranslations();
   const locale = useLocale();
-  // Row-overlay link ต้องเป็น internal path เท่านั้น (policy: internal-only)
-  // safeInternalHref เป็น sanitizer เฉพาะทาง — รับเฉพาะ root-relative path
-  // กัน open-redirect (CWE-601) ไม่มีทางคืน external/absolute URL
-  // External link (เช่น n.link เป็น https://) จะ fall ไปเปิด detail dialog ที่มีปุ่ม
-  // "Open" แยก (กรอง URL ผ่าน safeNavigationHref อีกชั้น)
+  // safeInternalHref เป็นด่านกันเพิ่ม (defence-in-depth) เหนือค่าที่เป็น internal
+  // path อยู่แล้วโดยโครงสร้าง — getNotificationHref คืนได้แค่ route คงที่ + id เท่านั้น
+  // ไม่มีทางเป็น external URL แถวที่ไม่มีเอกสารให้เปิด (คืน undefined) จะ fall ไปเปิด
+  // detail dialog แทน
   const safeLink = safeInternalHref(getNotificationHref(notification));
   const safeTitle = sanitizeText(notification.title);
   const isUnread = notification.is_read === false;
@@ -81,7 +80,7 @@ const NotificationItem = ({
             onMarkAsRead(notification);
             onNavigate();
           }}
-          aria-label={safeTitle}
+          aria-label={safeTitle || t("notifications")}
           className="absolute inset-0 z-10"
         />
       ) : (
@@ -91,7 +90,7 @@ const NotificationItem = ({
             onMarkAsRead(notification);
             onShowDetail(notification.id);
           }}
-          aria-label={safeTitle}
+          aria-label={safeTitle || t("notifications")}
           className="absolute inset-0 z-10 cursor-pointer"
         />
       )}
@@ -178,6 +177,7 @@ export default function Notification() {
                 className="text-muted-foreground h-6 px-2 text-xs"
                 size="sm"
                 onClick={() => markAllRead.mutate()}
+                disabled={markAllRead.isPending}
               >
                 {t("clearAll")}
               </Button>
@@ -252,6 +252,7 @@ export function NotificationDetailDialog({
 }: NotificationDetailDialogProps) {
   const tc = useTranslations("common");
   const tRoot = useTranslations();
+  const locale = useLocale();
   const { data, isLoading, error } = useNotificationDetail(id);
   const open = !!id;
 
@@ -275,7 +276,7 @@ export function NotificationDetailDialog({
               )}
               {data.created_at && (
                 <span className="text-muted-foreground tabular-nums">
-                  {new Date(data.created_at).toLocaleString()}
+                  {new Date(data.created_at).toLocaleString(locale)}
                 </span>
               )}
             </DialogDescription>

@@ -6,7 +6,6 @@ import {
   useQueryClient,
   type QueryClient,
 } from "@tanstack/react-query";
-import { useErrorToast } from "@/hooks/use-error-toast";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_DYNAMIC, CACHE_NORMAL } from "@/lib/cache-config";
@@ -303,7 +302,6 @@ export function useNotificationsList(tab: NotificationTab) {
  */
 export function useMarkNotificationRead() {
   const queryClient = useQueryClient();
-  const errorToast = useErrorToast();
   return useMutation<
     void,
     ApiError,
@@ -327,13 +325,10 @@ export function useMarkNotificationRead() {
       dropFromUnreadCaches(queryClient, new Set([id]));
       return { previous };
     },
-    onError: (err, _vars, context) => {
+    onError: (_err, _vars, context) => {
       context?.previous.forEach(([key, data]) =>
         queryClient.setQueryData(key, data),
       );
-      // err.message เป็นสตริงภาษาอังกฤษที่ dev เขียนไว้ตอน throw — ให้ errorToast
-      // แปลงเป็นประโยคของผู้ใช้ตาม error code เหมือนที่อื่นทั้งแอป
-      errorToast(err);
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
@@ -351,7 +346,6 @@ export function useMarkNotificationRead() {
  */
 export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient();
-  const errorToast = useErrorToast();
   return useMutation<
     void,
     ApiError,
@@ -377,11 +371,10 @@ export function useMarkAllNotificationsRead() {
       dropFromUnreadCaches(queryClient, "all");
       return { previous };
     },
-    onError: (err, _vars, context) => {
+    onError: (_err, _vars, context) => {
       context?.previous.forEach(([key, data]) =>
         queryClient.setQueryData(key, data),
       );
-      errorToast(err);
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
