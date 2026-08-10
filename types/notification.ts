@@ -70,9 +70,9 @@ export interface Notification {
   /** Event type ใหม่ — แทนที่ type */
   event?: NotificationEvent | null;
   /** Title ของการแจ้งเตือน */
-  title: string;
+  title?: string | null;
   /** Message/body ของการแจ้งเตือน */
-  message: string;
+  message?: string | null;
   /** Entity reference + action */
   metadata?: NotificationMetadata | null;
   /** อ่านแล้วหรือยัง */
@@ -81,12 +81,16 @@ export interface Notification {
   pushed_at?: string | null;
   /** Scheduled time (ถ้ากำหนดเวลา) */
   scheduled_at?: string | null;
-  /** เวลาสร้าง — nullable บนสายจริง ทุกจุดที่แสดงเวลาต้องกันค่าว่าง */
+  /**
+   * nullable บนสายจริง แต่คงเป็น required ไว้ก่อนเพื่อให้ tree คอมไพล์ผ่าน —
+   * ผู้ใช้ค่ายังเรียก `new Date(created_at)` ตรง ๆ อยู่ Task 2 กัน null ที่จุดแสดงผล
+   * แล้วจะเปลี่ยนฟิลด์นี้เป็น `created_at?: string | null` ตามสัญญาจริง
+   */
   created_at: string;
   /** User ที่ส่งมา */
-  from_user_id?: string;
+  from_user_id?: string | null;
   /** User ที่รับ */
-  to_user_id?: string;
+  to_user_id?: string | null;
 
   /** @deprecated ถูกแทนที่ด้วย `doc_type` + `event` — คอลัมน์ถูก DROP ไปแล้ว ลบใน Task 6 */
   type: string;
