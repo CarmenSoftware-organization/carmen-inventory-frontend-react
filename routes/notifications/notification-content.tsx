@@ -8,17 +8,18 @@ import { NotificationDetailDialog } from "@/components/navbar/notification";
 import { NotificationItemContent } from "@/components/navbar/notification-item-content";
 import { useNotificationsList } from "@/hooks/use-notification";
 import { getNotificationHref } from "@/lib/notification-helpers";
-import { cn, safeNavigationHref } from "@/lib/utils";
+import { cn, safeInternalHref } from "@/lib/utils";
 import type { Notification } from "@/types/notification";
 import { NotificationLoader } from "@/components/loader/noti-loader";
 
 export default function NotificationsContent() {
   const t = useTranslations("navbar");
   const locale = useLocale();
-  const { data: items = [], isLoading, error } = useNotificationsList();
+  const { items, total, summary, isLoading, error } =
+    useNotificationsList("all");
   const [detailId, setDetailId] = useState<string | null>(null);
 
-  const unreadCount = items.filter((n) => n.is_read === false).length;
+  const unreadCount = summary?.unread ?? 0;
 
   return (
     <div className="flex flex-col gap-3 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -28,9 +29,9 @@ export default function NotificationsContent() {
         <h1 className="text-lg font-semibold tracking-tight">
           {t("notifications")}
         </h1>
-        {items.length > 0 && (
+        {total > 0 && (
           <Badge variant="secondary" size="sm" className="tabular-nums">
-            {items.length.toLocaleString()}
+            {total.toLocaleString()}
           </Badge>
         )}
         {unreadCount > 0 && (
@@ -91,7 +92,8 @@ function NotificationRow({
   onShowDetail,
 }: NotificationRowProps) {
   const t = useTranslations("navbar");
-  const safeLink = safeNavigationHref(getNotificationHref(notification));
+  const tRoot = useTranslations();
+  const safeLink = safeInternalHref(getNotificationHref(notification));
   const isUnread = notification.is_read === false;
 
   const rowClass = cn(
@@ -106,6 +108,7 @@ function NotificationRow({
       isUnread={isUnread}
       locale={locale}
       unreadLabel={t("unread")}
+      commentLabel={tRoot("notifications.commentLabel")}
       clampMessage
     />
   );

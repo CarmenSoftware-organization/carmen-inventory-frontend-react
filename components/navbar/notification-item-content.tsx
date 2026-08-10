@@ -11,15 +11,8 @@ interface NotificationItemContentProps {
   readonly locale: string;
   /** Accessible label for the unread state (e.g. t("unread")) — pairs with the color dot */
   readonly unreadLabel: string;
-  /**
-   * ป้ายกำกับตราคอมเมนต์ (เช่น t("notifications.commentLabel")) — คู่กับไอคอน
-   * optional ชั่วคราว: `routes/notifications/notification-content.tsx` (Task 3)
-   * ยังไม่ส่ง prop นี้มาจนกว่าจะต่อสายใน Task 3 — required ในทางปฏิบัติสำหรับ
-   * ผู้เรียกที่อัปเดตแล้ว (`components/navbar/notification.tsx`)
-   * เมื่อไม่มีค่า ตราคอมเมนต์ทั้งก้อนจะไม่ขึ้นเลย (ไม่ใช่ขึ้นแบบไม่มีป้ายกำกับ)
-   * กัน control ที่ screen reader อ่านไม่ได้
-   */
-  readonly commentLabel?: string;
+  /** ป้ายกำกับตราคอมเมนต์ (เช่น tRoot("notifications.commentLabel")) — คู่กับไอคอน */
+  readonly commentLabel: string;
   /** Clamp message to 2 lines (page list) vs single dense line (navbar dropdown) */
   readonly clampMessage?: boolean;
 }
@@ -72,7 +65,7 @@ export function NotificationItemContent({
             <Bell className="size-4.5" />
           </span>
         )}
-        {isComment && commentLabel && (
+        {isComment && (
           <span className="bg-background ring-border absolute -end-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full ring-1">
             <MessageSquare
               className="text-muted-foreground size-2.5"

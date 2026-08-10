@@ -24,8 +24,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  useNotification,
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
   useNotificationDetail,
+  useNotificationRealtime,
+  useUnreadNotifications,
 } from "@/hooks/use-notification";
 import { useProfile } from "@/hooks/use-profile";
 import type { Notification as NotificationType } from "@/types/notification";
@@ -40,7 +43,7 @@ import { NotificationItemContent } from "./notification-item-content";
 
 interface NotificationItemProps {
   readonly notification: NotificationType;
-  readonly onMarkAsRead: (id: string) => void;
+  readonly onMarkAsRead: (notification: NotificationType) => void;
   readonly onShowDetail: (id: string) => void;
   readonly onNavigate: () => void;
   readonly dismissLabel: string;
@@ -75,7 +78,7 @@ const NotificationItem = ({
         <Link
           to={safeLink}
           onClick={() => {
-            onMarkAsRead(notification.id);
+            onMarkAsRead(notification);
             onNavigate();
           }}
           aria-label={safeTitle}
@@ -85,7 +88,7 @@ const NotificationItem = ({
         <button
           type="button"
           onClick={() => {
-            onMarkAsRead(notification.id);
+            onMarkAsRead(notification);
             onShowDetail(notification.id);
           }}
           aria-label={safeTitle}
@@ -100,7 +103,7 @@ const NotificationItem = ({
         commentLabel={tRoot("notifications.commentLabel")}
       />
       <button
-        onClick={() => onMarkAsRead(notification.id)}
+        onClick={() => onMarkAsRead(notification)}
         className="text-muted-foreground hover:text-foreground relative z-20 self-center opacity-0 transition-opacity group-hover:opacity-100"
         type="button"
         title={dismissLabel}
@@ -115,11 +118,17 @@ const NotificationItem = ({
 export default function Notification() {
   const t = useTranslations("navbar");
   const { userId } = useProfile();
-  const { notifications, markAsRead, markAllAsRead } = useNotification(userId);
+  useNotificationRealtime(userId);
+  const { notifications, unreadCount } = useUnreadNotifications();
+  const markRead = useMarkNotificationRead();
+  const markAllRead = useMarkAllNotificationsRead();
   const [detailId, setDetailId] = useState<string | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  const notificationCount = notifications.length;
+  const notificationCount = unreadCount;
+
+  const handleMarkAsRead = (notification: NotificationType) =>
+    markRead.mutate({ id: notification.id, source: notification.source });
 
   const handleShowDetail = (id: string) => {
     setPopoverOpen(false);
@@ -168,7 +177,7 @@ export default function Notification() {
                 variant="ghost"
                 className="text-muted-foreground h-6 px-2 text-xs"
                 size="sm"
-                onClick={markAllAsRead}
+                onClick={() => markAllRead.mutate()}
               >
                 {t("clearAll")}
               </Button>
@@ -208,7 +217,7 @@ export default function Notification() {
               <NotificationItem
                 key={notification.id}
                 notification={notification}
-                onMarkAsRead={markAsRead}
+                onMarkAsRead={handleMarkAsRead}
                 onShowDetail={handleShowDetail}
                 onNavigate={() => setPopoverOpen(false)}
                 dismissLabel={t("dismiss")}
