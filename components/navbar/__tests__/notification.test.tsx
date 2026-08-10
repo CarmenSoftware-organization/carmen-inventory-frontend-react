@@ -22,10 +22,10 @@ const render = (ui: ReactElement) =>
   );
 
 // Mock hooks
-const mockMarkAsRead = vi.fn();
-const mockMarkAllAsRead = vi.fn();
+const markReadSpy = vi.fn();
+const markAllSpy = vi.fn();
 let mockNotifications: NotificationType[] = [];
-// detail ที่ useNotificationDetail จะคืน — ตั้งค่าต่อ test (badge type อยู่ใน dialog)
+// detail ที่ useNotificationDetail จะคืน — ตั้งค่าต่อ test (badge doc_type อยู่ใน dialog)
 let mockDetail: NotificationType | undefined;
 
 const TRANSLATIONS: Record<string, string> = {
@@ -34,6 +34,7 @@ const TRANSLATIONS: Record<string, string> = {
   noNotificationsTitle: "No Notifications Yet",
   noNotificationsDesc: "You're all caught up",
   dismiss: "Dismiss",
+  "modules.purchaseRequest": "Purchase Request",
 };
 
 vi.mock("use-intl", () => ({
@@ -42,11 +43,17 @@ vi.mock("use-intl", () => ({
 }));
 
 vi.mock("@/hooks/use-notification", () => ({
-  useNotification: () => ({
-    isConnected: true,
+  useNotificationRealtime: () => ({ isConnected: true }),
+  useUnreadNotifications: () => ({
     notifications: mockNotifications,
-    markAsRead: mockMarkAsRead,
-    markAllAsRead: mockMarkAllAsRead,
+    unreadCount: mockNotifications.length,
+    isLoading: false,
+    error: null,
+  }),
+  useMarkNotificationRead: () => ({ mutate: markReadSpy, isPending: false }),
+  useMarkAllNotificationsRead: () => ({
+    mutate: markAllSpy,
+    isPending: false,
   }),
   useNotificationDetail: () => ({
     data: mockDetail,
@@ -66,7 +73,10 @@ function makeNotification(
     id: "n1",
     title: "Test Title",
     message: "Test message",
+    // @deprecated — คอลัมน์ถูกลบจากสายจริงแล้ว แต่ยังเป็น field required บน
+    // Notification interface จนกว่า Task 6 จะถอดออก (ดู types/notification.ts)
     type: "info",
+    source: "personal",
     created_at: "2026-03-01T10:30:00Z",
     ...overrides,
   };
@@ -140,8 +150,8 @@ describe("Notification component", () => {
 
   it("shows notifications list in popover", async () => {
     mockNotifications = [
-      makeNotification({ id: "n1", title: "First Alert", type: "warning" }),
-      makeNotification({ id: "n2", title: "Second Alert", type: "success" }),
+      makeNotification({ id: "n1", title: "First Alert" }),
+      makeNotification({ id: "n2", title: "Second Alert" }),
     ];
 
     render(<Notification />);
@@ -151,26 +161,31 @@ describe("Notification component", () => {
     expect(screen.getByText("Second Alert")).toBeInTheDocument();
   });
 
-  it("shows the notification type as a badge in the detail dialog", async () => {
+  it("shows the notification doc_type as a translated badge in the detail dialog", async () => {
     // The list row no longer renders the raw type as text — the redesign
     // (commit 8378979) moved the type into a leading module icon, and the
-    // text type badge now lives only in the detail dialog. Opening an item
-    // with no navigation target opens that dialog.
-    mockNotifications = [makeNotification({ id: "n1", type: "info" })];
-    mockDetail = makeNotification({ id: "n1", type: "info" });
+    // doc_type badge now lives only in the detail dialog, translated via
+    // DOC_TYPE_LABEL_KEY (never the raw enum value). Opening an item with no
+    // navigation target opens that dialog.
+    mockNotifications = [makeNotification({ id: "n1" })];
+    mockDetail = makeNotification({
+      id: "n1",
+      doc_type: "purchase_request",
+    });
 
     render(<Notification />);
     const user = await openPopover();
 
-    // sanity: the list itself does not surface the raw type string
-    expect(screen.queryByText("info")).not.toBeInTheDocument();
+    // sanity: the list itself does not surface the raw doc_type string
+    expect(screen.queryByText("purchase_request")).not.toBeInTheDocument();
 
     // click the row overlay (no entity / no link → opens the detail dialog)
     const [overlay] = screen.getAllByRole("button", { name: "Test Title" });
     await user.click(overlay);
 
-    // the dialog renders the type badge
-    expect(await screen.findByText("info")).toBeInTheDocument();
+    // the dialog renders the translated label, never the raw enum value
+    expect(await screen.findByText("Purchase Request")).toBeInTheDocument();
+    expect(screen.queryByText("purchase_request")).not.toBeInTheDocument();
   });
 
   it("shows Clear all button when there are notifications", async () => {
@@ -192,11 +207,13 @@ describe("Notification component", () => {
 
     await user.click(screen.getByRole("button", { name: "Clear all" }));
 
-    expect(mockMarkAllAsRead).toHaveBeenCalledOnce();
+    expect(markAllSpy).toHaveBeenCalledOnce();
   });
 
   it("calls markAsRead when dismiss button is clicked", async () => {
-    mockNotifications = [makeNotification({ id: "n1" })];
+    mockNotifications = [
+      makeNotification({ id: "n1", source: "broadcast" }),
+    ];
 
     render(<Notification />);
     const user = await openPopover();
@@ -204,7 +221,11 @@ describe("Notification component", () => {
     const dismissButton = screen.getByTitle("Dismiss");
     await user.click(dismissButton);
 
-    expect(mockMarkAsRead).toHaveBeenCalledWith("n1");
+    // source ต้องติดไปด้วยเพื่อให้ backend เขียนลงตารางที่ถูก (broadcast vs personal)
+    expect(markReadSpy).toHaveBeenCalledWith({
+      id: "n1",
+      source: "broadcast",
+    });
   });
 
   it("renders markdown links in notification message", async () => {
@@ -237,24 +258,36 @@ describe("Notification component", () => {
     expect(screen.getByText("Simple text message")).toBeInTheDocument();
   });
 
-  it("renders deep-link when notification type is PR/PO/SR with metadata.id", async () => {
+  it("renders deep-link when notification doc_type has metadata.id (or the legacy id key as a fallback)", async () => {
     mockNotifications = [
       makeNotification({
         id: "n1",
-        type: "PR",
+        doc_type: "purchase_request",
         metadata: { id: "pr-99" },
+      }),
+      // ชนิดใหม่ที่ redesign เพิ่มเข้ามา — ครอบคลุมนอกเหนือจาก PR เดิม
+      makeNotification({
+        id: "n2",
+        doc_type: "good_received_note",
+        metadata: { id: "grn-5" },
+      }),
+      // แถวเก่าก่อน redesign — ไม่มี metadata.id ต้อง fallback ไปที่คีย์เดิม (pr_id)
+      makeNotification({
+        id: "n3",
+        doc_type: "purchase_request",
+        metadata: { pr_id: "pr-legacy" },
       }),
     ];
 
     render(<Notification />);
     await openPopover();
 
-    const links = screen.getAllByRole("link");
-    const notificationLink = links.find(
-      (link) =>
-        link.getAttribute("href") === "/procurement/purchase-request/pr-99",
-    );
-    expect(notificationLink).toBeDefined();
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
+    expect(hrefs).toContain("/procurement/purchase-request/pr-99");
+    expect(hrefs).toContain("/procurement/goods-receive-note/grn-5");
+    expect(hrefs).toContain("/procurement/purchase-request/pr-legacy");
   });
 
   it("renders a dialog-opening button when notification has no navigation target", async () => {
@@ -263,27 +296,10 @@ describe("Notification component", () => {
     render(<Notification />);
     await openPopover();
 
-    // With no entity deep-link and no free-form `link`, the item wraps a
-    // <button> overlay (not <a>) — the click opens the detail dialog instead
-    // of navigating.
+    // With no entity deep-link, the item wraps a <button> overlay (not <a>) —
+    // the click opens the detail dialog instead of navigating.
     const buttons = screen.getAllByRole("button", { name: "Test Title" });
     expect(buttons.length).toBeGreaterThan(0);
-  });
-
-  it("renders a free-form link when notification has `link` but no entity", async () => {
-    mockNotifications = [makeNotification({ id: "n1", link: "/some/page" })];
-
-    render(<Notification />);
-    await openPopover();
-
-    // getNotificationHref falls back to `notification.link` when there is no
-    // PR/PO/SR entity deep-link, so the item navigates instead of opening the
-    // dialog.
-    const links = screen.getAllByRole("link");
-    const notificationLink = links.find(
-      (link) => link.getAttribute("href") === "/some/page",
-    );
-    expect(notificationLink).toBeDefined();
   });
 
   it("shows Notifications header in popover", async () => {
