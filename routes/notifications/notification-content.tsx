@@ -2,11 +2,16 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Bell, BellOff } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmptyComponent from "@/components/empty-component";
 import { NotificationDetailDialog } from "@/components/navbar/notification";
 import { NotificationItemContent } from "@/components/navbar/notification-item-content";
-import { useNotificationsList } from "@/hooks/use-notification";
+import {
+  useMarkAllNotificationsRead,
+  useNotificationsList,
+  type NotificationTab,
+} from "@/hooks/use-notification";
 import { getNotificationHref } from "@/lib/notification-helpers";
 import { cn, safeInternalHref } from "@/lib/utils";
 import type { Notification } from "@/types/notification";
@@ -14,31 +19,61 @@ import { NotificationLoader } from "@/components/loader/noti-loader";
 
 export default function NotificationsContent() {
   const t = useTranslations("navbar");
+  const tRoot = useTranslations();
   const locale = useLocale();
-  const { items, total, summary, isLoading, error } =
-    useNotificationsList("all");
+  const [tab, setTab] = useState<NotificationTab>("all");
+  const {
+    items,
+    total,
+    summary,
+    isLoading,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useNotificationsList(tab);
+  const markAllRead = useMarkAllNotificationsRead();
   const [detailId, setDetailId] = useState<string | null>(null);
 
-  const unreadCount = summary?.unread ?? 0;
+  // แท็บ "ทั้งหมด" ให้ summary.unread มา ส่วนแท็บ "ยังไม่อ่าน" ไม่มี summary
+  // โดยตั้งใจ (จำนวนยังไม่อ่าน = paginate.total ของ endpoint นั้นพอดี)
+  // summary เป็น optional บนสาย — ไม่มี ≠ ศูนย์ จึงถอยไปใช้ total ของแท็บนั้น
+  const unreadCount = tab === "unread" ? total : (summary?.unread ?? 0);
 
   return (
     <div className="flex flex-col gap-3 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      {/* Flat header */}
-      <header className="border-border/60 flex items-center gap-2 border-b pb-2">
+      <header className="border-border/60 flex flex-wrap items-center gap-2 border-b pb-2">
         <Bell className="text-muted-foreground size-4" aria-hidden="true" />
         <h1 className="text-lg font-semibold tracking-tight">
           {t("notifications")}
         </h1>
-        {total > 0 && (
-          <Badge variant="secondary" size="sm" className="tabular-nums">
-            {total.toLocaleString()}
-          </Badge>
-        )}
+        <Tabs
+          value={tab}
+          onValueChange={(value) => setTab(value as NotificationTab)}
+          className="ms-2"
+        >
+          <TabsList>
+            <TabsTrigger value="all">{tRoot("notifications.tabAll")}</TabsTrigger>
+            <TabsTrigger value="unread">
+              {tRoot("notifications.tabUnread")}
+              {unreadCount > 0 && (
+                <span className="ms-1.5 tabular-nums">
+                  {unreadCount.toLocaleString()}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
         {unreadCount > 0 && (
-          <span className="text-primary ml-auto inline-flex items-center gap-1.5 text-xs font-semibold tabular-nums">
-            <span className="bg-primary size-1.5 rounded-full" />
-            {unreadCount.toLocaleString()}
-          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground ms-auto h-7 text-xs"
+            onClick={() => markAllRead.mutate()}
+            disabled={markAllRead.isPending}
+          >
+            {tRoot("notifications.markAllRead")}
+          </Button>
         )}
       </header>
 
@@ -56,8 +91,16 @@ export default function NotificationsContent() {
           <li className="px-4 py-12">
             <EmptyComponent
               icon={BellOff}
-              title={t("noNotificationsTitle")}
-              description={t("noNotificationsDesc")}
+              title={
+                tab === "unread"
+                  ? tRoot("notifications.emptyUnreadTitle")
+                  : t("noNotificationsTitle")
+              }
+              description={
+                tab === "unread"
+                  ? tRoot("notifications.emptyUnreadDesc")
+                  : t("noNotificationsDesc")
+              }
             />
           </li>
         ) : (
@@ -71,6 +114,19 @@ export default function NotificationsContent() {
           ))
         )}
       </ul>
+
+      {hasNextPage && (
+        <div className="flex justify-center pt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchNextPage}
+            disabled={isFetchingNextPage}
+          >
+            {tRoot("notifications.loadMore")}
+          </Button>
+        </div>
+      )}
 
       <NotificationDetailDialog
         id={detailId}
