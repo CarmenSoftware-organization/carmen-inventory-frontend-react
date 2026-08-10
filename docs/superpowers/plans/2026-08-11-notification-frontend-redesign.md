@@ -533,6 +533,13 @@ git commit -m "feat(notification): map deep-link ไอคอนและป้�
 - Modify: `hooks/use-notification.ts` (เขียนทับทั้งไฟล์)
 - Modify: `components/navbar/notification.tsx` (ส่วนที่ต่อ hook)
 - Modify: `routes/notifications/notification-content.tsx` (ต่อสายขั้นต่ำให้คอมไพล์ผ่านและตัวเลขถูก — แท็บและโหลดเพิ่มอยู่ใน Task 4)
+- Modify: `components/navbar/notification-item-content.tsx` (เฉพาะ prop `commentLabel` — ดู Step 3a)
+
+**คำวินิจฉัยของ controller ที่ Task 3 ต้องปิดให้จบ:** Task 2 ทำ prop `commentLabel` เป็น
+optional ชั่วคราว เพราะ `notification-content.tsx` ซึ่งเป็นไฟล์ของ Task 3 ยังไม่ส่งค่านี้มา
+และ Task 2 แตะไม่ได้ ตอนนี้ตราคอมเมนต์ถูกกดไม่ให้ขึ้นเลยเมื่อไม่มีป้ายกำกับ (กัน control
+ที่ screen reader อ่านไม่ได้) — Task 3 ส่ง prop ครบทั้งสองผู้เรียกแล้วรัดชนิดกลับเป็น
+required ห้ามข้าม Step 3a
 
 **Interfaces:**
 - Consumes: `Notification`, `NotificationListResponse`, `NotificationSource`, `NotificationSummary` (Task 1)
@@ -1047,6 +1054,22 @@ import { cn, safeInternalHref } from "@/lib/utils";
   const safeLink = safeInternalHref(getNotificationHref(notification));
 ```
 
+- [ ] **Step 3a: รัด `commentLabel` กลับเป็น required**
+
+ทำ **หลัง** Step 2 และ Step 3 ส่ง `commentLabel` ครบทั้งสองผู้เรียกแล้วเท่านั้น
+ใน `components/navbar/notification-item-content.tsx` แทนบล็อกของ prop ด้วย:
+
+```tsx
+  /** ป้ายกำกับตราคอมเมนต์ (เช่น tRoot("notifications.commentLabel")) — คู่กับไอคอน */
+  readonly commentLabel: string;
+```
+
+และถอดการ์ดชั่วคราวออก ให้เงื่อนไขการแสดงตรากลับไปเป็น `{isComment && (`
+(ไม่ต้องเช็ค `commentLabel` แล้ว เพราะ compiler บังคับให้มีค่าเสมอ)
+
+ถ้า `bunx tsc --noEmit` ฟ้อง แปลว่ายังมีผู้เรียกที่ไม่ได้ส่ง prop — ส่งให้ครบ
+ห้ามย้อนชนิดกลับเป็น optional
+
 - [ ] **Step 4: ตรวจ**
 
 ```bash
@@ -1058,7 +1081,7 @@ bun run lint
 - [ ] **Step 5: Commit**
 
 ```bash
-git add hooks/use-notification.ts components/navbar/notification.tsx routes/notifications/notification-content.tsx
+git add hooks/use-notification.ts components/navbar/notification.tsx routes/notifications/notification-content.tsx components/navbar/notification-item-content.tsx
 git commit -m "refactor(notification): ย้ายชั้นข้อมูลไป TanStack Query ให้ REST เป็นแหล่งความจริงเดียว
 
 WS เหลือหน้าที่เดียวคือ invalidate เพราะ payload บนสายไม่มี created_at/is_read/source
