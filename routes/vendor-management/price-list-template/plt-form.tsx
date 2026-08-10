@@ -68,7 +68,6 @@ export function PriceListTemplateForm({
     priceListTemplate ? "view" : "add",
   );
   const isView = mode === "view";
-  const isEdit = mode === "edit";
   const isAdd = mode === "add";
 
   const [removeDetailIndex, setRemoveDetailIndex] = useState<number | null>(
@@ -189,14 +188,13 @@ export function PriceListTemplateForm({
   };
 
   const stepperLabels = useStepperLabels(t);
-  const productLabels = useProductLabels(t, tfl);
+  const productLabels = useProductLabels(t, tfl, tc);
 
   // ชื่อ product ที่กำลังจะลบ — ไว้โชว์ใน confirm dialog (master ก่อน, fallback ref)
   const removeProductName = removeProductId
     ? (allProducts.find((p) => p.id === removeProductId)?.name ??
-      priceListTemplate?.products?.find(
-        (p) => p.product_id === removeProductId,
-      )?.product_name ??
+      priceListTemplate?.products?.find((p) => p.product_id === removeProductId)
+        ?.product_name ??
       "")
     : "";
   const tsStatus = ts as (key: "draft" | "active" | "inactive") => string;
@@ -209,7 +207,7 @@ export function PriceListTemplateForm({
       : tc("save");
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6">
         <DocFormHeader
           flush
@@ -224,22 +222,12 @@ export function PriceListTemplateForm({
           }
           actions={
             <>
-              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
-              {priceListTemplate && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    openActivity(priceListTemplate.id, priceListTemplate.name)
-                  }
-                >
-                  <History />
-                  {tActivity("title")}
-                </Button>
-              )}
               {isView ? (
-                <Button size="sm" onClick={() => setMode("edit")}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setMode("edit")}
+                >
                   <Pencil />
                   {tc("edit")}
                 </Button>
@@ -264,19 +252,33 @@ export function PriceListTemplateForm({
                     <Save />
                     {submitLabel}
                   </Button>
-                  {isEdit && priceListTemplate && (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => actions.setShowDelete(true)}
-                      disabled={actions.isDeletePending || actions.isPending}
-                    >
-                      <Trash2 />
-                      {tc("delete")}
-                    </Button>
-                  )}
                 </>
+              )}
+              {priceListTemplate && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => actions.setShowDelete(true)}
+                  disabled={actions.isDeletePending || actions.isPending}
+                >
+                  <Trash2 />
+                  {tc("delete")}
+                </Button>
+              )}
+              {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
+              {priceListTemplate && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    openActivity(priceListTemplate.id, priceListTemplate.name)
+                  }
+                >
+                  <History />
+                  {tActivity("title")}
+                </Button>
               )}
             </>
           }

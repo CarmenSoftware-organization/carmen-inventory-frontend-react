@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
@@ -34,7 +34,7 @@ import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
-import { useURL } from "@/hooks/use-url";
+import { setURLParams, useURL } from "@/hooks/use-url";
 import { FieldLabel } from "@/components/ui/field";
 import { SrFilterStatus } from "./sr-filter-status";
 import { SrFilterFromLocation } from "./sr-filter-from-location";
@@ -83,21 +83,29 @@ export default function StoreRequisitionComponent() {
     }
     navigate("/store-operation/store-requisition/new");
   };
-  const [viewModeParam, setViewMode] = useURL("view", {
+  const [viewModeParam] = useURL("view", {
     defaultValue: "my-pending",
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
-  // setViewMode (จาก useURL) ได้ reference ใหม่ทุก render — เก็บไว้ใน ref กันไม่ให้
-  // หลุดเข้า useMemo deps ของ srFilterFields ข้างล่าง (mirror ของ PR pilot) อัปเดต
-  // ref ใน useEffect (หลัง render เสร็จ) แทนเขียนตรงกลาง render — mirror ของวิธีแก้
-  // ใน transaction-component.tsx (Task 20 review finding 3: เขียนตรงกลาง render
-  // ปลอดภัยในทางปฏิบัติเพราะอ่านผ่าน ref เฉพาะตอน user โต้ตอบ event handler เท่านั้น
-  // แต่เป็น anti-pattern ที่ transaction ไฟล์เดียวกันเจอ eslint react-hooks/refs ฟ้อง
-  // จริง — แก้ให้สอดคล้องกันทั้งสองไฟล์)
-  const setViewModeRef = useRef(setViewMode);
-  useEffect(() => {
-    setViewModeRef.current = setViewMode;
-  });
+  /**
+   * สลับกลุ่มเอกสาร — ล้างคำค้น ขั้นตอนที่กรองไว้ และกลับหน้า 1 เสมอ
+   *
+   * สองกลุ่มนี้เป็นคนละชุดข้อมูลกัน คำค้นที่เจอ 3 ใบใน "รอฉันดำเนินการ" อาจเจอ
+   * 200 ใบใน "เอกสารทั้งหมด" (หรือกลับกันคือเจอ 0 แล้วดูเหมือนไม่มีอะไรเลย)
+   * ขั้นตอนที่กรองไว้ก็อาจไม่มีอยู่ในอีกกลุ่ม และเลขหน้าที่ค้างอยู่ก็อาจไม่มีจริง
+   * · เขียนทีเดียวทุกพารามิเตอร์ด้วย setURLParams จะได้ replaceState กับ
+   * re-render รอบเดียว
+   */
+  const handleViewModeChange = useCallback(
+    (next: string) =>
+      setURLParams({
+        view: next,
+        search: "",
+        page: "",
+        workflow_current_stage: "",
+      }),
+    [],
+  );
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -131,7 +139,7 @@ export default function StoreRequisitionComponent() {
             <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
             <ViewModeToggle
               value={viewMode}
-              onChange={(next) => setViewModeRef.current(next)}
+              onChange={handleViewModeChange}
               myPendingLabel={t("myPending")}
               allDocumentsLabel={t("allDocuments")}
               className="grid grid-cols-2 gap-2"
@@ -328,7 +336,7 @@ export default function StoreRequisitionComponent() {
             {/* กรองเยอะจนไม่พอ ให้ตัวกรองขึ้นบรรทัดใหม่กันเอง อย่าไปดัน toggle ตก */}
             <ViewModeToggle
               value={viewMode}
-              onChange={setViewMode}
+              onChange={handleViewModeChange}
               myPendingLabel={t("myPending")}
               allDocumentsLabel={t("allDocuments")}
               className="hidden sm:flex sm:min-w-0 sm:flex-wrap sm:items-center sm:gap-2"

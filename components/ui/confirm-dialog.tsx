@@ -1,6 +1,6 @@
-
 import type React from "react";
 import { useTranslations } from "use-intl";
+import { X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,8 @@ interface ConfirmDialogProps {
   readonly onConfirm: () => void;
   readonly isPending?: boolean;
   readonly confirmText?: string;
+  /** ไอคอนบนปุ่มยืนยัน — ต่างกันตาม action ที่ถาม (Check ตอน commit ฯลฯ) */
+  readonly confirmIcon?: React.ReactNode;
   readonly variant?: "default" | "destructive";
 }
 
@@ -53,13 +55,17 @@ export function ConfirmDialog({
   onConfirm,
   isPending,
   confirmText,
+  confirmIcon,
   variant = "default",
 }: ConfirmDialogProps) {
   const tc = useTranslations("common");
   const isStringDescription = typeof description === "string";
 
   return (
-    <AlertDialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
+    <AlertDialog
+      open={open}
+      onOpenChange={isPending ? undefined : onOpenChange}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -71,7 +77,10 @@ export function ConfirmDialog({
           <div className="text-muted-foreground text-sm">{description}</div>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>{tc("cancel")}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>
+            <X />
+            {tc("cancel")}
+          </AlertDialogCancel>
           <AlertDialogAction
             variant={variant}
             onClick={(e) => {
@@ -80,6 +89,7 @@ export function ConfirmDialog({
             }}
             disabled={isPending}
           >
+            {confirmIcon}
             {isPending ? tc("processing") : confirmText || tc("confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>

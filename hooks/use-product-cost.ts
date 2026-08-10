@@ -4,13 +4,29 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 
+/** หนึ่งล็อตที่ถูกดึงมาคิดต้นทุน (FIFO) — ยังไม่มีที่ไหนแสดงผล เก็บไว้ให้ครบ shape */
+export interface ProductCostLot {
+  lot_no: string;
+  qty: number;
+  cost_per_unit: number;
+  line_cost: number;
+}
+
 export interface ProductCostByLocationQty {
   product_id?: string;
+  product_code?: string;
+  product_name?: string;
+  inventory_unit_name?: string;
   location_id?: string;
-  qty?: number;
+  location_code?: string;
+  location_name?: string;
+  /** จำนวนที่หลังบ้านคิดต้นทุนให้จริง — อาจไม่เท่ากับที่ขอไปถ้าของไม่พอ */
+  requested_qty?: number;
   average_cost_per_unit: number;
   total_cost: number;
+  lots?: ProductCostLot[];
   currency?: string;
+  /** ชื่อเดิมของ inventory_unit_name — เผื่อ endpoint เก่ายังตอบแบบนี้อยู่ */
   unit_name?: string;
 }
 
@@ -76,9 +92,12 @@ export function useProductCostByLocationQty(
       const json = await res.json();
       return json.data ?? json;
     },
-    enabled:
-      !!buCode && !!productId && !!locationId && qty !== undefined && qty > 0,
-    ...CACHE_DYNAMIC,
+    // qty เป็น 0 ได้ — ยิงตั้งแต่เลือกสินค้าเสร็จเพื่อดึงต้นทุนมาโชว์ ไม่ต้องรอ
+    // ให้กรอกจำนวนก่อน
+    enabled: !!buCode && !!productId && !!locationId && qty !== undefined,
+    // ต้นทุนผูกกับล็อตที่มีอยู่จริง ณ ตอนนั้น — สินค้า/คลัง/จำนวนเปลี่ยนเมื่อไหร่
+    // ต้องได้ตัวเลขใหม่ทันที ไม่ใช่ของที่ค้างอยู่ใน cache
+    staleTime: 0,
   });
 }
 

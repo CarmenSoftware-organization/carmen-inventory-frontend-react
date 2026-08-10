@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useWatch, type Control } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { Check, Eye, SendHorizonal, ShoppingCart, X } from "lucide-react";
+import { Check, Eye, SendHorizontal, ShoppingCart, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { STAGE_ROLE } from "@/types/stage-role";
@@ -201,7 +201,7 @@ export function PrFooterAction({
                   })
                 }
               >
-                <SendHorizonal />
+                <SendHorizontal />
                 {tc("submit")}
               </Button>
             )}

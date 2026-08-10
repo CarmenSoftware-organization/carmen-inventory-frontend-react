@@ -1,4 +1,3 @@
-
 import { Controller, useWatch, type Control } from "react-hook-form";
 import { LookupUnit } from "@/components/lookup/lookup-unit";
 import type { ProductFormValues } from "@/types/product";
@@ -37,7 +36,7 @@ export function FromUnitCell({
 }: UnitCellProps) {
   if (!isOrder) {
     return (
-      <div className="flex items-center px-2 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center px-2 text-xs">
         {inventoryUnitName}
       </div>
     );
@@ -49,7 +48,9 @@ export function FromUnitCell({
         name={`${name}.${index}.from_unit_id`}
         render={({ field }) =>
           disabled ? (
-            <span className="px-2 text-xs">{unitMap.get(field.value) ?? ""}</span>
+            <span className="px-2 text-xs">
+              {unitMap.get(field.value) ?? ""}
+            </span>
           ) : (
             <LookupUnit
               value={field.value}
@@ -85,7 +86,7 @@ export function ToUnitCell({
 }: UnitCellProps) {
   if (isOrder) {
     return (
-      <div className="flex items-center px-2 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center px-2 text-xs">
         {inventoryUnitName}
       </div>
     );
@@ -97,7 +98,9 @@ export function ToUnitCell({
         name={`${name}.${index}.to_unit_id`}
         render={({ field }) =>
           disabled ? (
-            <span className="px-2 text-xs">{unitMap.get(field.value) ?? ""}</span>
+            <span className="px-2 text-xs">
+              {unitMap.get(field.value) ?? ""}
+            </span>
           ) : (
             <LookupUnit
               value={field.value}
@@ -137,13 +140,13 @@ export function ConversionPreview({
   const toQty = useWatch({ control, name: `${name}.${index}.to_unit_qty` });
 
   if (!fromId || !toId) {
-    return <div className="flex items-center text-muted-foreground"></div>;
+    return <div className="text-muted-foreground flex items-center"></div>;
   }
 
   const fromName = unitMap.get(fromId) ?? "?";
   const toName = unitMap.get(toId) ?? "?";
   return (
-    <div className="flex items-center whitespace-nowrap text-muted-foreground">
+    <div className="text-muted-foreground flex items-center whitespace-nowrap">
       {fromQty} {fromName} = {toQty} {toName}
     </div>
   );

@@ -23,7 +23,6 @@ interface FormToolbarProps {
   readonly subtitle?: string;
   readonly statusBadge?: React.ReactNode;
   readonly submitSlot?: React.ReactNode;
-  readonly viewActions?: React.ReactNode;
   readonly children?: React.ReactNode;
   readonly editTitle?: string;
   /**
@@ -40,9 +39,8 @@ interface FormToolbarProps {
   /**
    * เปิดปุ่ม Activity ในแถบปุ่ม — ไม่ส่ง = ไม่มีปุ่ม (เช่นโหมด add ที่ยังไม่มี id)
    *
-   * วางไว้ที่ toolbar กลางแทนที่จะให้แต่ละหน้ายัดผ่าน `viewActions` เพื่อให้ทุกหน้า
-   * ที่ใช้ toolbar นี้ได้ปุ่มตำแหน่งเดียวกัน — `viewActions` เป็น slot อิสระ
-   * ใครใส่อะไรก็ได้ ตำแหน่งจะเพี้ยนกันเองระหว่างหน้า
+   * อยู่ที่ toolbar กลาง ไม่ให้แต่ละหน้ายัดปุ่มนี้เอง ทุกหน้าที่ใช้ toolbar นี้จะได้
+   * ตำแหน่งเดียวกันเสมอ
    */
   readonly activity?: { id: string; label?: string };
 }
@@ -60,7 +58,6 @@ export function FormToolbar({
   subtitle,
   statusBadge,
   submitSlot,
-  viewActions,
   children,
   editTitle,
   permissionPrefix,
@@ -74,7 +71,7 @@ export function FormToolbar({
   const autoPrefix = usePermissionPrefix();
   const prefix = permissionPrefix ?? autoPrefix;
   const isView = mode === "view";
-  const isEdit = mode === "edit";
+  const isAdd = mode === "add";
 
   const title =
     mode === "add"
@@ -97,30 +94,16 @@ export function FormToolbar({
 
   const saveDenied = !!savePermission && !isAdmin && !can(savePermission);
   const editDenied = !!updatePermission && !isAdmin && !can(updatePermission);
-  const deleteDenied =
-    !!deletePermission && !isAdmin && !can(deletePermission);
+  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
 
   // ประกอบปุ่ม action ตาม mode แล้วส่งเข้า DocFormHeader.actions — layout (back
   // button, title align, gutter) อยู่ที่ DocFormHeader ที่เดียวทั้งแอป
   const actions = (
     <>
-      {/* ปุ่มประวัติอยู่ซ้ายสุดของกลุ่มทุกโหมด — เป็นการ "ดู" ไม่ใช่การ "ทำ"
-          จึงไม่ควรไปปนกับปุ่มที่เปลี่ยนข้อมูล (save/delete) ทางขวา */}
-      {activity && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => openActivity(activity.id, activity.label)}
-        >
-          <History />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isView && viewActions}
       {isView && onEdit ? (
         <Button
           size="sm"
+          variant="outline"
           onClick={
             editDenied
               ? () => dispatchPermissionDenied(updatePermission)
@@ -169,10 +152,10 @@ export function FormToolbar({
             ))}
         </>
       ) : null}
-      {isEdit && onDelete && (
+      {!isAdd && onDelete && (
         <Button
           type="button"
-          variant="destructive"
+          variant="outline"
           size="sm"
           onClick={
             deleteDenied
@@ -185,6 +168,19 @@ export function FormToolbar({
         >
           <Trash2 />
           {tc("delete")}
+        </Button>
+      )}
+      {/* ประวัติเป็นการ "ดู" อยู่ท้ายกลุ่มถัดจากปุ่มที่เปลี่ยนข้อมูล — ลำดับเดียว
+          กับทุกหน้าเอกสารในแอป: Edit · Delete · Activity · Print */}
+      {activity && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => openActivity(activity.id, activity.label)}
+        >
+          <History />
+          {tActivity("title")}
         </Button>
       )}
       {children}

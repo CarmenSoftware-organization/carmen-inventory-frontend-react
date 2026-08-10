@@ -361,7 +361,10 @@ export function useGrnFormActions({
       },
       {
         onSuccess: () => {
-          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          // commit ตัดของเข้าสต๊อกจริงและย้อนไม่ได้ — dialog เตือนไว้ก่อนกด แล้ว
+          // ตอนสำเร็จต้องบอกด้วยว่าสต๊อกขยับแล้ว ไม่ใช่ "อัปเดตใบรับสินค้าสำเร็จ"
+          // ซึ่งเป็นข้อความเดียวกับตอนกดเซฟเฉย ๆ คนกดแยกไม่ออกว่าของเข้าหรือยัง
+          toast.success(t("committed"));
           setShowCommit(false);
         },
       },
@@ -372,7 +375,7 @@ export function useGrnFormActions({
     if (!goodsReceiveNote) return;
     voidGrn.mutate(goodsReceiveNote.id, {
       onSuccess: () => {
-        toast.success(tt("updateSuccess", { entity: t("entity") }));
+        toast.success(tt("voidSuccess", { entity: t("entity") }));
         setShowVoid(false);
       },
     });

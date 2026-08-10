@@ -105,11 +105,11 @@ export function EntryNotesDialog({
     const accepted: EvidenceImage[] = [];
     for (const file of Array.from(fileList)) {
       if (!file.type.startsWith("image/")) {
-        toast.error(t("evidenceNotImage", { name: file.name }));
+        toast.warning(t("evidenceNotImage", { name: file.name }));
         continue;
       }
       if (file.size > MAX_BYTES) {
-        toast.error(t("evidenceTooLarge", { name: file.name }));
+        toast.warning(t("evidenceTooLarge", { name: file.name }));
         continue;
       }
       accepted.push({

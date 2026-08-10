@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useWatch, type Control } from "react-hook-form";
-import { Check, Eye, SendHorizonal, ThumbsDown } from "lucide-react";
+import { Check, Eye, SendHorizontal, ThumbsDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, round2 } from "@/lib/currency-utils";
 import { computeItemPricing } from "./po-item-pricing";
@@ -177,7 +177,7 @@ export function PoFooterAction({
                   })
                 }
               >
-                <SendHorizonal aria-hidden="true" />
+                <SendHorizontal aria-hidden="true" />
                 {tc("submit")}
               </Button>
             )}

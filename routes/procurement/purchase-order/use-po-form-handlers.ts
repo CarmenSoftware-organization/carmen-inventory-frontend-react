@@ -312,7 +312,9 @@ export function usePoFormHandlers({
           ...payload,
         });
         syncDocVersions(saved);
-        toast.success(tt("updateSuccess", { entity: t("entity") }));
+        // ไม่ toast ตรงนี้ — เดี๋ยว runSubmitPo บอกว่า "ส่งแล้ว" ซึ่งกินความหมาย
+        // ของ "บันทึกแล้ว" อยู่ในตัว สองใบซ้อนกันใบแรกก็โดนใบหลังทับอยู่ดี
+        // (CN/PR เดินทางเดียวกันแต่ยิงใบเดียวมาตั้งแต่แรก)
         setMode("view");
         await runSubmitPo();
         return;
@@ -337,7 +339,7 @@ export function usePoFormHandlers({
         details: buildDetailsFromForm(),
       },
       {
-        onSuccess: onSuccessList(tt("updateSuccess", { entity: t("entity") })),
+        onSuccess: onSuccessList(t("approved")),
         onError: () => setIsSubmitting(false),
       },
     );
@@ -360,7 +362,7 @@ export function usePoFormHandlers({
       },
       {
         onSuccess: () => {
-          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          toast.success(t("rejected"));
           setShowReject(false);
           setMode("view");
         },
@@ -389,7 +391,7 @@ export function usePoFormHandlers({
       },
       {
         onSuccess: () => {
-          toast.success(tt("updateSuccess", { entity: t("entity") }));
+          toast.success(t("sentBack"));
           setMode("view");
         },
       },
@@ -400,7 +402,7 @@ export function usePoFormHandlers({
     if (!purchaseOrder) return;
     closePo.mutate(purchaseOrder.id, {
       onSuccess: () => {
-        toast.success(tt("updateSuccess", { entity: t("entity") }));
+        toast.success(t("closed"));
         setShowClose(false);
       },
     });

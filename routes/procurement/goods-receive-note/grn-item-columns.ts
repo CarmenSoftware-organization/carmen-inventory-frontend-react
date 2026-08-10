@@ -7,7 +7,7 @@ import { comboColWidth } from "../combo-col-width";
  * จึงไม่ต้องกว้างเท่ากัน
  */
 const QTY_COL = 120;
-const QTY_COL_READ_ONLY = 100;
+const QTY_COL_READ_ONLY = 80;
 
 /**
  * ความกว้าง (px) ของคอลัมน์ item table ของ GRN — ใช้ร่วมกันระหว่าง group row

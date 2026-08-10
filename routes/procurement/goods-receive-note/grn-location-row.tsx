@@ -9,6 +9,11 @@ import {
 import { useTranslations } from "use-intl";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { InputAmount } from "@/components/ui/input/input-amount";
 import {
@@ -387,6 +392,7 @@ function GrnLocationDiscountCell({
   editable: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const base = `items.${index}` as const;
   const rate =
     useWatch({ control: form.control, name: `${base}.discount_rate` }) ?? 0;
@@ -406,24 +412,9 @@ function GrnLocationDiscountCell({
     );
   }
   return (
-    <div className="flex flex-col gap-0.5">
-      {/* override toggle (label คอลัมน์อยู่ที่ header row) */}
-      <div className="flex justify-end">
-        <OverrideToggle
-          checked={isAdj}
-          onCheckedChange={(on) => {
-            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-            if (on) {
-              form.setValue(`${base}.discount_amount`, amount, {
-                shouldDirty: true,
-              });
-            }
-            form.setValue(`${base}.is_discount_adjustment`, on, {
-              shouldDirty: true,
-            });
-          }}
-        />
-      </div>
+    // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
+    // อยู่แล้ว เสียไปทั้งบรรทัดเพื่อ checkbox ตัวเดียวไม่คุ้ม
+    <div className="flex items-center gap-1.5">
       <DiscountOverrideInput
         rate={rate}
         amount={amount}
@@ -437,6 +428,21 @@ function GrnLocationDiscountCell({
         onAmountChange={(a) =>
           form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
         }
+      />
+      <OverrideToggle
+        checked={isAdj}
+        hint={tfl("overrideHintDiscount")}
+        onCheckedChange={(on) => {
+          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+          if (on) {
+            form.setValue(`${base}.discount_amount`, amount, {
+              shouldDirty: true,
+            });
+          }
+          form.setValue(`${base}.is_discount_adjustment`, on, {
+            shouldDirty: true,
+          });
+        }}
       />
     </div>
   );
@@ -453,6 +459,7 @@ function GrnLocationTaxCell({
   editable: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const base = `items.${index}` as const;
   const taxProfileId =
     useWatch({ control: form.control, name: `${base}.tax_profile_id` }) ?? null;
@@ -473,13 +480,31 @@ function GrnLocationTaxCell({
   }
   return (
     <div className="flex flex-col gap-0.5">
-      {/* rate% + override toggle (label คอลัมน์อยู่ที่ header row) */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-muted-foreground text-micro font-semibold tabular-nums">
-          {rate > 0 ? `${rate}%` : ""}
+      {rate > 0 && (
+        <span className="text-muted-foreground text-micro text-right font-semibold tabular-nums">
+          {rate}%
         </span>
+      )}
+      {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
+      <div className="flex items-center gap-1.5">
+        <TaxOverrideInput
+          taxProfileId={taxProfileId}
+          amount={amount}
+          isAdjustment={isAdj}
+          onTaxChange={(value, r) => {
+            form.setValue(`${base}.tax_profile_id`, value || null, {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+            form.setValue(`${base}.tax_rate`, r);
+          }}
+          onAmountChange={(a) =>
+            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+          }
+        />
         <OverrideToggle
           checked={isAdj}
+          hint={tfl("overrideHintTax")}
           onCheckedChange={(on) => {
             if (on) {
               form.setValue(`${base}.tax_amount`, amount, {
@@ -492,21 +517,6 @@ function GrnLocationTaxCell({
           }}
         />
       </div>
-      <TaxOverrideInput
-        taxProfileId={taxProfileId}
-        amount={amount}
-        isAdjustment={isAdj}
-        onTaxChange={(value, r) => {
-          form.setValue(`${base}.tax_profile_id`, value || null, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-          form.setValue(`${base}.tax_rate`, r);
-        }}
-        onAmountChange={(a) =>
-          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
-        }
-      />
     </div>
   );
 }
@@ -591,9 +601,9 @@ export const GrnLocationRow = memo(function GrnLocationRow({
   const editable = !disabled && !plainText; // discount/tax combo แก้ได้
 
   return (
-    <tr className="hover:bg-muted/40 align-middle transition-colors">
+    <tr className="hover:bg-muted/40 h-11 align-middle transition-colors">
       {/* Location (align ใต้ product) */}
-      <td className="py-1 pr-2 pl-2">
+      <td className="px-3 py-1">
         {isManual && !disabled ? (
           <Controller
             control={form.control}
@@ -644,11 +654,11 @@ export const GrnLocationRow = memo(function GrnLocationRow({
 
       {/* Unit — ค่าโชว์อยู่ที่แถวสินค้าแล้ว (หน่วยเดียวกันทุก location) ตรงนี้เว้นไว้
           ให้คอลัมน์ตรงกับตารางแถวสินค้าด้านบนเท่านั้น */}
-      <td className="px-2 py-1" />
+      <td className="px-3 py-1" />
 
       {/* Order (PO เท่านั้น — disabled) */}
       {isPo && (
-        <td className="px-1 py-1 text-right">
+        <td className="px-3 py-1 text-right">
           <QtyUnitCell
             form={form}
             index={index}
@@ -661,7 +671,7 @@ export const GrnLocationRow = memo(function GrnLocationRow({
       )}
 
       {/* Received (required, min 1) */}
-      <td className="px-1 py-1 text-right">
+      <td className="px-3 py-1 text-right">
         <QtyUnitCell
           form={form}
           index={index}
@@ -678,7 +688,7 @@ export const GrnLocationRow = memo(function GrnLocationRow({
       </td>
 
       {/* FOC */}
-      <td className="px-1 py-1 text-right">
+      <td className="px-3 py-1 text-right">
         <QtyUnitCell
           form={form}
           index={index}
@@ -690,7 +700,7 @@ export const GrnLocationRow = memo(function GrnLocationRow({
       </td>
 
       {/* Unit price */}
-      <td className="px-2 py-1 text-right">
+      <td className="px-3 py-1 text-right">
         <PriceCell
           form={form}
           index={index}
@@ -701,12 +711,14 @@ export const GrnLocationRow = memo(function GrnLocationRow({
       </td>
 
       {/* Sub */}
-      <td className="px-2 py-1 text-right">
+      <td className="px-3 py-1 text-right">
         <GrnAmountCell form={form} index={index} field="subtotal" />
       </td>
 
-      {/* Discount combo (rate/amount + override) */}
-      <td className="px-1 py-1">
+      {/* Discount combo (rate/amount + override) — nowrap เพราะโหมดดูเป็น
+          "10% · 320.00" ซึ่งยาวกว่าคอลัมน์เมื่อหักระยะขอบ px-3 ออก ปล่อยไว้
+          จะตัดขึ้นบรรทัดใหม่แล้วแถวสูงกว่าแถวอื่น */}
+      <td className="px-3 py-1 whitespace-nowrap">
         <GrnLocationDiscountCell
           form={form}
           index={index}
@@ -715,32 +727,39 @@ export const GrnLocationRow = memo(function GrnLocationRow({
       </td>
 
       {/* Net */}
-      <td className="px-2 py-1 text-right">
+      <td className="px-3 py-1 text-right">
         <GrnAmountCell form={form} index={index} field="netAmount" />
       </td>
 
-      {/* Tax combo (profile/amount + override) */}
-      <td className="px-1 py-1">
+      {/* Tax combo (profile/amount + override) — nowrap ด้วยเหตุผลเดียวกับส่วนลด */}
+      <td className="px-3 py-1 whitespace-nowrap">
         <GrnLocationTaxCell form={form} index={index} editable={editable} />
       </td>
 
       {/* Amount (total) */}
-      <td className="px-2 py-1 text-right font-semibold">
+      <td className="px-3 py-1 text-right font-semibold">
         <GrnAmountCell form={form} index={index} field="totalPrice" />
       </td>
 
       {showDelete && (
-        <td className="px-1 py-1 text-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-xs"
-            className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
-            aria-label={tfl("deleteLocation")}
-            onClick={() => setShowDeleteConfirm(true)}
-          >
-            <Trash2 className="size-3.5" />
-          </Button>
+        <td className="px-3 py-1 text-center">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                aria-label={tfl("deleteLocation")}
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="size-3.5" />
+              </Button>
+            </TooltipTrigger>
+            {/* ไอคอนถังขยะเหมือนของแถวสินค้าเป๊ะ แต่ลบคนละอย่าง — แถวนี้ลบแค่
+                ที่เก็บหนึ่งที่ ไม่ได้ลบสินค้าทั้งบรรทัด */}
+            <TooltipContent>{tfl("deleteLocation")}</TooltipContent>
+          </Tooltip>
 
           <DeleteDialog
             open={showDeleteConfirm}

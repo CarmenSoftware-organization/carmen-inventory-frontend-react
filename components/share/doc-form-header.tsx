@@ -70,11 +70,17 @@ export function DocFormHeader({
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <h1
               className={cn(
+                // ชื่อยาวตัดท้ายบรรทัดเดียว ไม่ห่อลงบรรทัดสอง — ตั้งใจ ไม่ใช่หลุด
+                // (เคยเสนอ line-clamp-2 ให้ชื่อสินค้าที่เอาบาร์โค้ดไว้ท้าย ทีมเลือก
+                // แบบนี้) ข้อความเต็มอยู่ใน title attribute
                 // min-w-0 ให้ truncate ทำงานใน flex — ไม่งั้น title ยาวจะดันเบียด badge
                 // 18/20px ไม่ใช่ 20/24px: เลขที่เอกสารเป็น "ค่า" ไม่ใช่ชื่อหน้า
                 // (navbar breadcrumb บอกชื่อหน้าอยู่แล้ว) และ header ที่เหลือ
                 // อยู่ที่ 11-14px ทั้งแถบ — 24px ทำให้หัวหนักบนผิดสัดส่วน
-                "min-w-0 truncate text-lg font-semibold tracking-tight sm:text-xl",
+                // max-w คุมไม่ให้ชื่อยาวกินทั้งแถวจนดันปุ่มตกบรรทัด — โหมดแก้ไขมี
+                // ปุ่มถึงสี่ตัว ถ้าปล่อยให้ title ยืดตามเนื้อหา ปุ่มจะถูกดันลงไป
+                // เอง (เลขที่เอกสารของโมดูลอื่นสั้นกว่านี้มาก ไม่โดนกระทบ)
+                "max-w-sm min-w-0 truncate text-lg font-semibold tracking-tight sm:text-xl",
                 titleMuted && "text-muted-foreground italic",
               )}
               title={title}
@@ -84,7 +90,10 @@ export function DocFormHeader({
             {badges}
           </div>
           {actions && (
-            <div className="flex flex-wrap items-center gap-2">{actions}</div>
+            // shrink-0 กันปุ่มถูกบีบจนตกบรรทัด — ให้ title เป็นฝ่ายย่อแทน
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {actions}
+            </div>
           )}
         </div>
         {subtitle && (
@@ -102,9 +111,7 @@ export function DocFormHeader({
             // (ribbon ชิดซ้าย cols fixed → มีที่ว่างขวาให้ step ไม่ทับ cells).
             // min-h เผื่อความสูง workflowStep (absolute ไม่กินที่) กัน content ถัดไป
             // (เช่น item table ตอนไม่มี general fields คั่น) ถูก step ทับ
-            <div
-              className={cn("relative pt-4", workflowStep && "min-h-26")}
-            >
+            <div className={cn("relative pt-4", workflowStep && "min-h-26")}>
               <div className="-ml-4 flex w-full min-w-0 items-center">
                 {ribbon}
               </div>

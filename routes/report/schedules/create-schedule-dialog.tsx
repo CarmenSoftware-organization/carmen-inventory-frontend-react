@@ -23,6 +23,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { useReportTemplates } from "@/hooks/use-report";
 import { useCreateReportSchedule } from "@/hooks/use-report-schedule";
+import { useErrorToast } from "@/hooks/use-error-toast";
 import {
   EMPTY_FORM,
   createScheduleSchema,
@@ -52,6 +53,7 @@ export function CreateScheduleDialog({
   const tfl = useTranslations("field");
   const tv = useTranslations("validation");
   const tt = useTranslations("toast");
+  const errorToast = useErrorToast();
 
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(
@@ -125,8 +127,8 @@ export function CreateScheduleDialog({
       onOpenChange(false);
       onCreated();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : t("createFailed");
-      toast.error(msg);
+      // ไม่โยน err.message ดิบ — เป็นข้อความของ dev ไม่ใช่ของผู้ใช้
+      errorToast(err);
     }
   };
 

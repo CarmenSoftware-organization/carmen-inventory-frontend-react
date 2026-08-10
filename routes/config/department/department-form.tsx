@@ -244,7 +244,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
     ) : undefined;
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <AnimationStyles />
       {/* ── Toolbar ─────────── */}
       <Reveal>

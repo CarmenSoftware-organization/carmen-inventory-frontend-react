@@ -209,16 +209,14 @@ export function CnForm({ creditNote }: CnFormProps) {
     creditNote?.doc_status === CN_STATUS.CANCELLED ||
     creditNote?.doc_status === CN_STATUS.VOIDED;
 
-  // Document info ribbon — created-by + department แสดงอย่างเดียว (ไม่เข้า payload)
-  // add: current user + วันนี้ · edit/view: audit.created.name + cn_date
-  const { data: profileData, dateFormat } = useProfile();
-  const [todayIso] = useState(() => new Date().toISOString());
+  // ชื่อผู้สร้างใต้เลขที่ใบ — แสดงอย่างเดียว ไม่เข้า payload · วันที่ย้ายไปเป็น
+  // ช่องกรอกในฟอร์มแล้ว (cn_date) หัวใบจึงไม่ต้องโชว์ซ้ำ
+  const { data: profileData } = useProfile();
   const createdByName = creditNote
     ? (creditNote.audit?.created?.name ?? "")
     : [profileData?.user_info?.firstname, profileData?.user_info?.lastname]
         .filter(Boolean)
         .join(" ");
-  const cnDate = creditNote?.cn_date ?? todayIso;
 
   // กรอกไม่ครบ → พาไปยังช่องแรกที่ขาดแล้วบอกว่าขาดกี่รายการ (ใช้ทั้งปุ่ม Save
   // และปุ่ม Submit — ปุ่มที่กดแล้วเงียบคือทางตัน)
@@ -320,8 +318,6 @@ export function CnForm({ creditNote }: CnFormProps) {
         deleteIsPending={deleteCn.isPending}
         isLocked={isLocked}
         createdByName={createdByName}
-        cnDate={cnDate}
-        dateFormat={dateFormat}
         onBack={handleBack}
         onEnterEdit={() => setMode("edit")}
         onCancel={handleCancel}

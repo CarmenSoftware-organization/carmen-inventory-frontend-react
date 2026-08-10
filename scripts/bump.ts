@@ -1,9 +1,18 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline";
+import { recordRelease } from "./changelog";
 
 const LEVELS = ["patch", "minor", "major"] as const;
 type Level = (typeof LEVELS)[number];
+
+/**
+ * ไฟล์ที่ประกอบเป็น release commit — `git add` รับเฉพาะลิสต์นี้ ไฟล์แปลกปลอมที่
+ * โผล่มาระหว่าง guard กับ commit จึงติดเข้า release ไปด้วยไม่ได้
+ */
+const RELEASE_FILES = ["package.json", "changelog.json", "CHANGELOG.md"];
+
+const RESTORE_HINT = `  กู้คืนด้วย: git restore --staged --worktree ${RELEASE_FILES.join(" ")}`;
 
 function fail(message: string): never {
   console.error(`✗ ${message}`);
@@ -30,6 +39,50 @@ function tryGit(...args: string[]): string | null {
     return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
   } catch {
     return null;
+  }
+}
+
+/**
+ * `git()` variant ที่คืน false แทนการ exit — ใช้กับขั้นตอนหลังจากเริ่มเขียนไฟล์แล้ว
+ * ซึ่งความล้มเหลวแต่ละจุดมีวิธีกู้คืนคนละแบบ ต้องพิมพ์ให้ตรงจุดก่อนตาย
+ */
+function gitTry(...args: string[]): boolean {
+  return spawnSync("git", args, { stdio: "inherit" }).status === 0;
+}
+
+/**
+ * เขียนเวอร์ชันลง package.json แบบ in-place
+ *
+ * ตรวจรูปแบบก่อนเขียนเป็นด่านสุดท้าย ไม่ใช่ด่านแรก: ถ้ามีบั๊กที่ต้นทางส่งค่าที่ไม่ใช่
+ * string มาถึงตรงนี้ `JSON.stringify` จะ **ทิ้งคีย์ version ทั้งคีย์เงียบ ๆ**
+ * ได้ package.json ที่พังโดยไม่มี error ที่ไหนเลย
+ */
+function writePackageVersion(version: string): void {
+  if (!/^\d+\.\d+\.\d+$/.test(version)) {
+    fail(`เวอร์ชันไม่ถูกรูปแบบ MAJOR.MINOR.PATCH: ${version}`);
+  }
+  const pkg = JSON.parse(readFileSync("package.json", "utf8")) as Record<string, unknown>;
+  pkg.version = version;
+  writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+}
+
+/**
+ * stage เฉพาะ RELEASE_FILES แล้ว commit ก่อน จึงค่อย tag — แยกเป็นสองหน้าต่างเพราะ
+ * วิธีกู้คืนไม่เหมือนกัน: ก่อน commit สำเร็จคือคืนไฟล์ทิ้ง หลัง commit สำเร็จแล้ว
+ * tag พังคือเลือกว่าจะ tag ต่อหรือถอย commit
+ */
+function commitAndTag(target: string): void {
+  const tag = `v${target}`;
+  if (!gitTry("add", ...RELEASE_FILES) || !gitTry("commit", "-m", `chore(release): ${tag}`)) {
+    console.error("✗ commit ไม่สำเร็จ");
+    console.error(RESTORE_HINT);
+    process.exit(1);
+  }
+  if (!gitTry("tag", "-a", tag, "-m", tag) || tryGit("tag", "--list", tag) !== tag) {
+    console.error(`✗ สร้าง tag ${tag} ไม่สำเร็จ — release commit ถูกสร้างไปแล้ว`);
+    console.error(`  ไปต่อ: git tag -a ${tag} -m "${tag}"`);
+    console.error("  ถอย  : git reset --hard HEAD~1");
+    process.exit(1);
   }
 }
 
@@ -151,7 +204,7 @@ function assertUpToDate(): void {
 
 /**
  * Checks only the chosen version — an existing v0.1.1 must not block a minor
- * bump to v0.2.0. Runs before any write because `bun pm version` commits first
+ * bump to v0.2.0. Runs before any write because `commitAndTag()` commits first
  * and tags second: on a tag collision it exits 1 having already committed the
  * bump, leaving a release commit with no tag.
  */
@@ -164,13 +217,13 @@ function assertTagFree(version: string): void {
  * Runs `bun run --silent <script>`, forwarding its output. Exits with its code
  * on failure. `--silent` suppresses bun's own `$ tsc --noEmit` echo line.
  *
- * A gate must never write a git-tracked file. `bun pm version` requires a
- * clean tree and runs after every gate, with no clean-tree check in between —
- * today that's safe only because `tsconfig.json`'s `"incremental": true`
- * writes `tsconfig.tsbuildinfo`, which `.gitignore` excludes. A gate that
- * dirtied a tracked file would make `bun pm version` fail at the very last
- * step with "Git working directory not clean", after the prompt has already
- * been answered.
+ * A gate must never write a git-tracked file. The release commit is built from
+ * an exact list of paths (`RELEASE_FILES`), so a gate that dirtied a tracked
+ * file outside that list would not fail the release — it would silently leave
+ * the file dirty in the tree afterwards; one inside the list would ride along
+ * into the release commit. Today that is safe only because `tsconfig.json`'s
+ * `"incremental": true` writes `tsconfig.tsbuildinfo`, which `.gitignore`
+ * excludes.
  */
 function gate(script: string, done: string): void {
   const result = spawnSync("bun", ["run", "--silent", script], { stdio: "inherit" });
@@ -202,20 +255,27 @@ async function main(): Promise<void> {
   gate("lint", "▸ lint ............. ✓");
   gate("test:run", "▸ tests ............ ✓");
 
-  const bump = spawnSync("bun", ["pm", "version", level, "-m", "chore(release): v%s"], {
-    stdio: "inherit",
-  });
-  if (bump.status !== 0) {
-    fail(
-      `bun pm version ล้มเหลว (exit ${bump.status ?? "?"}) — package.json อาจถูก bump และ stage ไว้แล้ว ตรวจด้วย git status\n  กู้คืนด้วย: git restore --staged --worktree package.json`,
-    );
+  // hash ตรงนี้คือ HEAD **ก่อน** release commit เพราะ changelog ต้องถูกเขียนก่อน
+  // จึงจะ commit ได้ — ส่งเข้า recordRelease() ตรง ๆ เป็นฟิลด์ `commit` ของ entry
+  // (ไม่ผ่านการ parse จาก fullVersion อีกต่อไป กัน format ของ fullVersion เปลี่ยนแล้ว
+  // commit เพี้ยนไปเงียบ ๆ)
+  const shortHash = git("rev-parse", "--short", "HEAD");
+  const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const fullVersion = `${target}-build.${stamp}.${shortHash}`;
+
+  try {
+    writePackageVersion(target);
+    recordRelease({ target, fullVersion, commit: shortHash });
+  } catch (err) {
+    console.error(`✗ เขียน package.json / changelog ไม่สำเร็จ: ${String(err)}`);
+    console.error(RESTORE_HINT);
+    process.exit(1);
   }
 
-  if (git("tag", "--list", `v${target}`) === "") {
-    fail(`bun pm version รันจบแล้วแต่ไม่พบ tag v${target} — ตรวจ git log และ git tag`);
-  }
+  commitAndTag(target);
 
   console.log(`✓ v${target}`);
+  console.log(`  version  ${fullVersion}`);
   console.log(`  commit  chore(release): v${target}`);
   console.log(`  tag     v${target} (annotated)`);
   console.log("");

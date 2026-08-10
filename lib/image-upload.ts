@@ -31,9 +31,31 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+/**
+ * เหตุผลที่ไฟล์ไม่ผ่าน — เก็บเป็นรหัส + ตัวเลข ไม่ใช่ประโยคสำเร็จรูป
+ *
+ * เดิมคืนเป็นข้อความอังกฤษที่ประกอบไว้ในนี้เลย ("Unsupported format (only
+ * JPG, PNG…)") แล้วหน้าจอเอาไปโชว์ตรง ๆ คนใช้ที่อ่านไทยเลยเจออังกฤษ · lib
+ * แปลเองไม่ได้เพราะไม่มี context ของ i18n จึงส่งรหัสออกไปให้หน้าจอแปลด้วย
+ * `fileRejectMessage`
+ */
+export type FileRejectReason =
+  | { code: "format"; formats: string }
+  | { code: "size"; size: string; max: string };
+
 export interface FileValidationResult {
   valid: File[];
-  rejected: { name: string; reason: string }[];
+  rejected: { name: string; reason: FileRejectReason }[];
+}
+
+/** แปลงเหตุผลเป็นประโยคของผู้ใช้ — ส่ง `useTranslations("validation")` เข้ามา */
+export function fileRejectMessage(
+  reason: FileRejectReason,
+  tv: (key: string, values?: Record<string, string>) => string,
+): string {
+  return reason.code === "format"
+    ? tv("fileUnsupportedFormat", { formats: reason.formats })
+    : tv("fileTooLarge", { size: reason.size, max: reason.max });
 }
 
 export function validateImageFiles(
@@ -41,7 +63,7 @@ export function validateImageFiles(
   maxFileSize: number,
 ): FileValidationResult {
   const valid: File[] = [];
-  const rejected: { name: string; reason: string }[] = [];
+  const rejected: { name: string; reason: FileRejectReason }[] = [];
 
   for (const file of files) {
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
@@ -51,14 +73,21 @@ export function validateImageFiles(
     if (!typeOk) {
       rejected.push({
         name: file.name,
-        reason: `Unsupported format (only ${ALLOWED_IMAGE_EXTENSIONS.join(", ").toUpperCase()})`,
+        reason: {
+          code: "format",
+          formats: ALLOWED_IMAGE_EXTENSIONS.join(", ").toUpperCase(),
+        },
       });
       continue;
     }
     if (file.size > maxFileSize) {
       rejected.push({
         name: file.name,
-        reason: `Too large (${formatBytes(file.size)} > ${formatBytes(maxFileSize)})`,
+        reason: {
+          code: "size",
+          size: formatBytes(file.size),
+          max: formatBytes(maxFileSize),
+        },
       });
       continue;
     }

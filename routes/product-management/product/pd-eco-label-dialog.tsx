@@ -1,9 +1,7 @@
-
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Leaf } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -143,7 +141,10 @@ export function ProductEcoLabelDialog({
     };
 
     if (isEdit) {
-      updateEcoLabel.mutate({ id: ecoLabel.id, doc_version: ecoLabel.doc_version, ...payload }, handlers);
+      updateEcoLabel.mutate(
+        { id: ecoLabel.id, doc_version: ecoLabel.doc_version, ...payload },
+        handlers,
+      );
     } else {
       createEcoLabel.mutate({ product_id: productId, ...payload }, handlers);
     }
@@ -162,10 +163,9 @@ export function ProductEcoLabelDialog({
       <DialogContent className="gap-0 p-0 sm:max-w-md">
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <DialogHeader className="gap-0 px-5 py-4">
+            {/* หัวกล่องเหลือแค่ชื่อเรื่อง — ไอคอนในกล่องสีเป็น chrome ตกแต่งที่ยิง
+                accent ซ้ำบนพื้นกลาง (ข้อสรุปเดียวกับ audit ของ GRN/PO dialog) */}
             <div className="flex items-center gap-3">
-              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <Leaf className="size-4.5" />
-              </div>
               <DialogTitle className="text-base">
                 {isEdit
                   ? tf("editTitle", { entity: tfl("ecoLabel") })

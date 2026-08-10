@@ -114,13 +114,15 @@ export default function CompanyProfileComponent() {
           toast.success(t("saved"));
           setEditing(false);
         },
-        onError: (e) => toast.error(e.message || t("saveError")),
+        // ไม่ต้อง onError เอง — mutation ตัวนี้ผ่าน MutationCache กลางซึ่ง toast
+        // ให้อยู่แล้ว เขียนซ้ำที่นี่ = เด้งสองใบ และใบนี้โยน err.message ดิบซึ่ง
+        // เป็นสตริงที่ dev เขียนไว้ ไม่ใช่ข้อความสำหรับผู้ใช้ (ดู lib/api-error.ts)
       },
     );
   });
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))] space-y-4">
+    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">
@@ -600,10 +602,12 @@ export default function CompanyProfileComponent() {
               name="amount_format"
               label={t("fields.amountFormat")}
               description={t("fields.amountFormatDesc")}
-              displayValue={fmtNumber(data.amount_format)}
+              // จำนวนเงินใช้แค่ locale — ดู formatAmount ใน lib/currency-utils.ts
+              displayValue={data.amount_format?.locales ?? null}
               localeOptions={LOCALES}
               localesPlaceholder={t("fields.locales")}
               digitsPlaceholder={t("fields.minimumIntegerDigits")}
+              showDigits={false}
             />
             <NumberFormatField
               editing={editing}

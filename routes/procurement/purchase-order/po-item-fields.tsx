@@ -244,7 +244,7 @@ export function PoItemFields({
   const itemsError = form.formState.errors.items?.message;
 
   const addAction = (!role || role === STAGE_ROLE.CREATE) && !disabled && (
-    <Button type="button" size="sm" onClick={handleAddItem}>
+    <Button type="button" size="sm" variant="secondary" onClick={handleAddItem}>
       <Plus /> {t("addItem")}
     </Button>
   );
@@ -264,7 +264,7 @@ export function PoItemFields({
                 <Button
                   type="button"
                   variant="success"
-                  size="xs"
+                  size="sm"
                   disabled={isPending}
                   onClick={(e) => {
                     e.preventDefault();
@@ -278,7 +278,7 @@ export function PoItemFields({
                 <Button
                   type="button"
                   variant="warning"
-                  size="xs"
+                  size="sm"
                   disabled={isPending}
                   onClick={(e) => {
                     e.preventDefault();
@@ -292,7 +292,7 @@ export function PoItemFields({
                 <Button
                   type="button"
                   variant="destructive"
-                  size="xs"
+                  size="sm"
                   disabled={isPending}
                   onClick={(e) => {
                     e.preventDefault();
@@ -309,7 +309,7 @@ export function PoItemFields({
               <Button
                 type="button"
                 variant="outline"
-                size="xs"
+                size="sm"
                 disabled={isPending}
                 onClick={(e) => {
                   e.preventDefault();
@@ -328,7 +328,7 @@ export function PoItemFields({
             <Button
               type="button"
               variant="ghost"
-              size="xs"
+              size="sm"
               onClick={() =>
                 table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
               }

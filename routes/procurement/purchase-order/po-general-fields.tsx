@@ -133,6 +133,26 @@ export function PoGeneralFields({
           disabled={fieldDisabled}
         />
       </Field>
+      {/* วันที่ใบสั่งซื้อ — คู่กับวันที่ส่งของ อ่านด้วยกัน (สั่งวันไหน ของถึงวันไหน)
+          เดิมโชว์เป็นข้อความอ่านอย่างเดียวบนหัวใบ ทั้งที่ schema บังคับกรอกและ
+          รับค่าได้อยู่แล้ว · ค่าตั้งต้นเป็นวันนี้ (ดู getDefaultValues) */}
+      <Field>
+        <FieldLabel required>{tfl("orderDate")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="order_date"
+          render={({ field, fieldState }) => (
+            <FieldDatePicker
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={fieldDisabled}
+              placeholder={tc("selectDate")}
+              className="w-full text-xs"
+              error={fieldState.error?.message}
+            />
+          )}
+        />
+      </Field>
       <Field>
         <FieldLabel required>{tfl("deliveryDate")}</FieldLabel>
         <Controller

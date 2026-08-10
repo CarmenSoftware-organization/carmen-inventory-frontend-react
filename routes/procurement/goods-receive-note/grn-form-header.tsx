@@ -117,6 +117,27 @@ export function GrnFormHeader({
           />
         </Field>
 
+        {/* วันที่ใบรับสินค้า — ต่อจากวันที่รับของเพราะอ่านคู่กัน (ของมาถึงวันไหน
+            เปิดใบวันไหน ไม่จำเป็นต้องวันเดียวกัน) เดิมโชว์เป็นข้อความอ่านอย่างเดียว
+            อยู่บนหัวใบ แก้ไม่ได้ทั้งที่ schema บังคับกรอกและรับค่าได้อยู่แล้ว */}
+        <Field className={viewFieldGap}>
+          <FieldLabel required>{tfl("grnDate")}</FieldLabel>
+          <Controller
+            control={form.control}
+            name="grn_date"
+            render={({ field }) => (
+              <FieldDatePicker
+                value={field.value ?? ""}
+                onValueChange={field.onChange}
+                disabled={disabled}
+                placeholder={tc("selectDate")}
+                className="w-full text-xs"
+                error={errors.grn_date?.message}
+              />
+            )}
+          />
+        </Field>
+
         <Field className={viewFieldGap}>
           <FieldLabel htmlFor="grn-invoice-no" required>
             {tfl("invoiceNo")}
@@ -260,9 +281,9 @@ export function GrnFormHeader({
         </Field>
 
         {/* คำอธิบายอยู่ต่อจาก Post Type ในตารางเดียวกับช่องอื่น ไม่ใช่ก้อนแยก
-            ใต้ฟอร์ม — เป็นช่องบรรทัดเดียวกว้าง 3 คอลัมน์ ไม่ใช่ Textarea เต็ม
+            ใต้ฟอร์ม — เป็นช่องบรรทัดเดียวกว้าง 2 คอลัมน์ ไม่ใช่ Textarea เต็ม
             ความกว้าง เพราะคำอธิบายใบเป็นข้อความสั้น ไม่ใช่บันทึกยาว */}
-        <Field className="lg:col-span-3">
+        <Field className="lg:col-span-2">
           <FieldLabel htmlFor="grn-description">
             {tfl("description")}
           </FieldLabel>

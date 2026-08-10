@@ -26,8 +26,8 @@ export function poItemCols(editable: boolean) {
     product: 200,
     /** หน่วยสั่งซื้อ — เป็น lookup เลือกได้ จึงกว้างกว่าคอลัมน์ตัวเลข */
     unit: 88,
-    order: 96,
-    rec: 104, // "Received Qty" เต็มคำ ไม่ใช่ "Rec"
+    order: 80,
+    rec: 80, // หัวคอลัมน์เหลือคำเดียว "Received" แล้ว ไม่ต้องกว้างเท่าเดิม
     price: 92,
     sub: MONEY_COL,
     discount: comboColWidth("discount", editable),

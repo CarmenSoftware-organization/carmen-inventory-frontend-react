@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
+import { IntlProvider } from "use-intl";
+import en from "@/messages/en.json";
 
 // --- Mock WebSocket ---
 
@@ -59,6 +62,18 @@ import { httpClient } from "@/lib/http-client";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import { useNotification } from "../use-notification";
 
+// hook แจ้ง error ผ่าน useErrorToast ซึ่งอ่านข้อความจาก i18n — ต้องมี provider
+const wrapper = ({ children }: { children: ReactNode }) =>
+  createElement(IntlProvider, {
+    locale: "en",
+    messages: en,
+    timeZone: "Asia/Bangkok",
+    children,
+  });
+
+const renderNotification = (userId: string | undefined) =>
+  renderHook(() => useNotification(userId), { wrapper });
+
 /**
  * ดึง MockWebSocket instance ล่าสุดที่ถูกสร้างขึ้นในเทสต์
  * ใช้หลัง render hook เพื่อเข้าถึง WebSocket ที่ hook เพิ่งเปิด
@@ -86,7 +101,7 @@ describe("useNotification", () => {
   });
 
   it("does not connect when userId is undefined", () => {
-    renderHook(() => useNotification(undefined));
+    renderNotification(undefined);
 
     expect(MockWebSocket.instances).toHaveLength(0);
   });
@@ -94,7 +109,7 @@ describe("useNotification", () => {
   it("connects to WebSocket and registers user on open", async () => {
     vi.useRealTimers();
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     expect(ws.url).toBe("ws://localhost:3001");
@@ -115,7 +130,7 @@ describe("useNotification", () => {
   it("receives notifications from WebSocket messages", async () => {
     vi.useRealTimers();
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -144,7 +159,7 @@ describe("useNotification", () => {
   it("prepends new notifications (newest first)", async () => {
     vi.useRealTimers();
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -176,7 +191,7 @@ describe("useNotification", () => {
   it("ignores malformed WebSocket messages", async () => {
     vi.useRealTimers();
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -195,7 +210,7 @@ describe("useNotification", () => {
   it("ignores non-notification message types", async () => {
     vi.useRealTimers();
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -215,7 +230,7 @@ describe("useNotification", () => {
     vi.useRealTimers();
     vi.mocked(httpClient.put).mockResolvedValue({ ok: true } as Response);
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -253,7 +268,7 @@ describe("useNotification", () => {
     vi.useRealTimers();
     vi.mocked(httpClient.put).mockResolvedValue({ ok: false } as Response);
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -283,7 +298,7 @@ describe("useNotification", () => {
     vi.useRealTimers();
     vi.mocked(httpClient.put).mockResolvedValue({ ok: true } as Response);
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -315,7 +330,7 @@ describe("useNotification", () => {
     vi.useRealTimers();
     vi.mocked(httpClient.put).mockResolvedValue({ ok: true } as Response);
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -349,7 +364,7 @@ describe("useNotification", () => {
     vi.useRealTimers();
     vi.mocked(httpClient.put).mockResolvedValue({ ok: false } as Response);
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -378,7 +393,7 @@ describe("useNotification", () => {
   it("markAllAsRead does nothing when userId is undefined", async () => {
     vi.useRealTimers();
 
-    const { result } = renderHook(() => useNotification(undefined));
+    const { result } = renderNotification(undefined);
 
     await act(async () => {
       await result.current.markAllAsRead();
@@ -390,7 +405,7 @@ describe("useNotification", () => {
   it("receives notifications from custom notification-sent event", async () => {
     vi.useRealTimers();
 
-    const { result } = renderHook(() => useNotification(undefined));
+    const { result } = renderNotification(undefined);
 
     const notification = {
       id: "n1",
@@ -416,7 +431,7 @@ describe("useNotification", () => {
   it("sets isConnected to false on WebSocket close", async () => {
     vi.useRealTimers();
 
-    const { result } = renderHook(() => useNotification("user-1"));
+    const { result } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -437,7 +452,7 @@ describe("useNotification", () => {
   });
 
   it("attempts to reconnect with exponential backoff on close", () => {
-    renderHook(() => useNotification("user-1"));
+    renderNotification("user-1");
 
     expect(MockWebSocket.instances).toHaveLength(1);
 
@@ -479,7 +494,7 @@ describe("useNotification", () => {
   });
 
   it("caps reconnect delay at 30 seconds", () => {
-    renderHook(() => useNotification("user-1"));
+    renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -522,7 +537,7 @@ describe("useNotification", () => {
   it("cleans up WebSocket on unmount", async () => {
     vi.useRealTimers();
 
-    const { unmount } = renderHook(() => useNotification("user-1"));
+    const { unmount } = renderNotification("user-1");
 
     const ws = getLatestWs();
     act(() => {
@@ -535,7 +550,7 @@ describe("useNotification", () => {
   });
 
   it("resets reconnect counter on successful connection", () => {
-    renderHook(() => useNotification("user-1"));
+    renderNotification("user-1");
 
     const ws1 = getLatestWs();
 

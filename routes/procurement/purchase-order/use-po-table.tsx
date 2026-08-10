@@ -80,6 +80,26 @@ export function usePoTable({
       },
     },
     {
+      // คนที่เปิดใบสั่งซื้อใบนี้ — ใบเดียวกันคนละคนสั่งคนละเงื่อนไข ต้องรู้ว่าจะไป
+      // ถามใครต่อ · หัวคอลัมน์ใช้คำว่า "ผู้จัดซื้อ" ตามที่หัวเอกสารเรียก ไม่ใช่
+      // "ผู้สร้าง" กลาง ๆ · ไม่เรียงลำดับเพราะ audit เป็น object ซ้อน backend
+      // เรียงให้ไม่ได้
+      id: "created_by",
+      accessorFn: (row) => row.audit?.created?.name ?? "",
+      size: 180,
+      header: tfl("buyer"),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.audit?.created?.name || "—"}
+        </span>
+      ),
+      enableSorting: false,
+      meta: {
+        headerTitle: tfl("buyer"),
+        skeleton: columnSkeletons.text,
+      },
+    },
+    {
       accessorKey: "order_date",
       header: ({ column }) => (
         <DataGridColumnHeader

@@ -16,6 +16,7 @@ import { ModuleTileIcon } from "@/components/ui/module-tile";
 import EmptyComponent from "@/components/empty-component";
 import { toast } from "sonner";
 import { useBuCode } from "@/hooks/use-bu-code";
+import { useErrorToast } from "@/hooks/use-error-toast";
 import {
   useDeleteReportSchedule,
   useReportSchedules,
@@ -27,6 +28,7 @@ import { useScheduleTableColumns } from "./use-schedule-table";
 export default function ScheduleComponent() {
   const t = useTranslations("reportSchedule");
   const buCode = useBuCode();
+  const errorToast = useErrorToast();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<ReportSchedule | null>(
@@ -43,8 +45,9 @@ export default function ScheduleComponent() {
       toast.success(t("deleteSuccess"));
       setPendingDelete(null);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : t("deleteConfirm");
-      toast.error(msg);
+      // เดิมโยน err.message ดิบ และ fallback ยังเป็น t("deleteConfirm") ซึ่งเป็น
+      // ประโยคถามยืนยัน ไม่ใช่ข้อความบอกว่าลบไม่สำเร็จ
+      errorToast(err);
     }
   };
 

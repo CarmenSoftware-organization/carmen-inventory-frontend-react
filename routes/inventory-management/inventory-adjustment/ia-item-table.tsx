@@ -20,10 +20,7 @@ import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-l
 import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProfile } from "@/hooks/use-profile";
-import {
-  useProductCostByLocationQty,
-  useProductLastReceiving,
-} from "@/hooks/use-product-cost";
+import { useProductCostByLocationQty } from "@/hooks/use-product-cost";
 import { cn } from "@/lib/utils";
 import type { InventoryAdjustmentType } from "@/types/inventory-adjustment";
 import type { AdjFormValues } from "./ia-form-schema";
@@ -65,7 +62,19 @@ const TotalCostCell = memo(function TotalCostCell({
   );
 });
 
-const StockInCostProbe = memo(function StockInCostProbe({
+/**
+ * ดึงต้นทุนของสินค้าในคลังที่เลือก แล้วเติมลงแถวให้อัตโนมัติ
+ *
+ * ยิงตั้งแต่เลือกสินค้าเสร็จ (qty เป็น 0 ได้) แล้วยิงใหม่ทุกครั้งที่จำนวนเปลี่ยน —
+ * หลังบ้านคิดต้นทุนแบบ FIFO ต่อจำนวนที่ขอ ค่าที่ได้จึงผูกกับ qty เสมอ
+ *
+ * ค่าที่เติมให้แก้ทับได้ทั้งหมด (ไม่ได้ล็อกช่อง) — `requested_qty` ที่คืนมาอาจ
+ * น้อยกว่าที่ขอถ้าของในคลังไม่พอ เขียนกลับลงช่องจำนวนเพื่อให้เห็นของจริง
+ *
+ * ใช้ทั้ง stock-in และ stock-out — เดิม stock-out ไปเรียก last-receiving ซึ่งเป็น
+ * ต้นทุนครั้งล่าสุดที่รับเข้า ไม่ใช่ต้นทุนของล็อตที่จะถูกตัดออกจริง
+ */
+const CostProbe = memo(function CostProbe({
   form,
   index,
 }: {
@@ -83,7 +92,7 @@ const StockInCostProbe = memo(function StockInCostProbe({
     buCode,
     productId || undefined,
     locationId || undefined,
-    typeof qty === "number" && qty > 0 ? qty : undefined,
+    typeof qty === "number" ? qty : 0,
   );
   useEffect(() => {
     if (!data) return;
@@ -93,31 +102,20 @@ const StockInCostProbe = memo(function StockInCostProbe({
     form.setValue(`items.${index}.total_cost`, data.total_cost, {
       shouldDirty: true,
     });
-    if (data.unit_name && !form.getValues(`items.${index}.unit_name`)) {
-      form.setValue(`items.${index}.unit_name`, data.unit_name);
+    // เขียนกลับเฉพาะตอนต่างจริง — ค่าเท่ากันแล้วยัง setValue ซ้ำจะวน render เปล่า
+    // และค่าที่เขียนกลับคือ path param ของรอบถัดไป ต้องให้มันนิ่ง
+    if (
+      typeof data.requested_qty === "number" &&
+      data.requested_qty !== form.getValues(`items.${index}.qty`)
+    ) {
+      form.setValue(`items.${index}.qty`, data.requested_qty, {
+        shouldDirty: true,
+      });
     }
-  }, [data, form, index]);
-  return null;
-});
-
-const StockOutCostProbe = memo(function StockOutCostProbe({
-  form,
-  index,
-}: {
-  form: UseFormReturn<AdjFormValues>;
-  index: number;
-}) {
-  "use no memo";
-  const { buCode } = useProfile();
-  const { control } = form;
-  const productId =
-    useWatch({ control, name: `items.${index}.product_id` }) ?? "";
-  const { data } = useProductLastReceiving(buCode, productId || undefined);
-  useEffect(() => {
-    if (!data) return;
-    form.setValue(`items.${index}.total_cost`, data.total_cost, {
-      shouldDirty: true,
-    });
+    const unitName = data.inventory_unit_name ?? data.unit_name;
+    if (unitName && !form.getValues(`items.${index}.unit_name`)) {
+      form.setValue(`items.${index}.unit_name`, unitName);
+    }
   }, [data, form, index]);
   return null;
 });
@@ -129,7 +127,8 @@ const ProductCell = memo(function ProductCell({
   disabled,
   errorMessage,
   excludeIds,
-  adjustmentType,
+  autoOpen,
+  onPicked,
 }: {
   control: Control<AdjFormValues>;
   form: UseFormReturn<AdjFormValues>;
@@ -137,7 +136,9 @@ const ProductCell = memo(function ProductCell({
   disabled: boolean;
   errorMessage?: string;
   excludeIds?: string[];
-  adjustmentType: InventoryAdjustmentType;
+  /** แถวที่เพิ่งกดเพิ่ม — เปิดช่องเลือกสินค้าให้เลย ไม่ต้องกดซ้ำ */
+  autoOpen?: boolean;
+  onPicked?: () => void;
 }) {
   "use no memo";
   const locationId = useWatch({ control, name: "location_id" }) ?? "";
@@ -145,8 +146,6 @@ const ProductCell = memo(function ProductCell({
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   const productLocalName =
     useWatch({ control, name: `items.${index}.product_local_name` }) ?? "";
-  const CostProbe =
-    adjustmentType === "stock-out" ? StockOutCostProbe : StockInCostProbe;
   if (disabled) {
     // View mode: do NOT mount the cost probe. Its effect writes cost_per_unit /
     // total_cost with shouldDirty:true from the live cost API, which would
@@ -177,8 +176,10 @@ const ProductCell = memo(function ProductCell({
             <LookupProductInLocation
               locationId={locationId}
               value={field.value ?? ""}
+              defaultOpen={autoOpen}
               onValueChange={(value, product) => {
                 field.onChange(value);
+                onPicked?.();
                 if (product) {
                   form.setValue(`items.${index}.product_name`, product.name);
                   form.setValue(
@@ -233,6 +234,9 @@ interface UseAdjItemTableOptions {
   disabled: boolean;
   onDelete: (index: number) => void;
   adjustmentType: InventoryAdjustmentType;
+  /** true = แถวบนสุดเพิ่งถูกเพิ่ม ให้เปิดช่องเลือกสินค้าเอง */
+  autoOpenFirst?: boolean;
+  onProductPicked?: () => void;
 }
 
 export function useAdjItemTable({
@@ -241,6 +245,8 @@ export function useAdjItemTable({
   disabled,
   onDelete,
   adjustmentType,
+  autoOpenFirst,
+  onProductPicked,
 }: UseAdjItemTableOptions) {
   "use no memo";
   const tfl = useTranslations("field");
@@ -290,7 +296,8 @@ export function useAdjItemTable({
               disabled={disabled}
               errorMessage={errorMessage}
               excludeIds={selectedIds}
-              adjustmentType={adjustmentType}
+              autoOpen={autoOpenFirst && row.index === 0}
+              onPicked={onProductPicked}
             />
           );
         },
@@ -429,7 +436,15 @@ export function useAdjItemTable({
       ...visibleDataColumns,
       ...(disabled ? [] : [actionColumn]),
     ];
-  }, [form, disabled, onDelete, tfl, adjustmentType]);
+  }, [
+    form,
+    disabled,
+    onDelete,
+    tfl,
+    adjustmentType,
+    autoOpenFirst,
+    onProductPicked,
+  ]);
 
   const table = useReactTable({
     data: itemFields,

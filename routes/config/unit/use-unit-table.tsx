@@ -58,6 +58,38 @@ export function useUnitTable({
       ),
       meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },
     },
+    {
+      accessorKey: "description",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("description")} />
+      ),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.description || "-"}
+        </span>
+      ),
+      meta: {
+        headerTitle: tfl("description"),
+        skeleton: columnSkeletons.text,
+      },
+    },
+    {
+      accessorKey: "decimal_place",
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("decimalPlaces")}
+          className="justify-end"
+        />
+      ),
+      cell: ({ row }) => row.original.decimal_place ?? 0,
+      size: 110,
+      meta: {
+        headerTitle: tfl("decimalPlaces"),
+        cellClassName: "text-right tabular-nums",
+        skeleton: columnSkeletons.textShort,
+      },
+    },
     statusColumn<Unit>(),
     ...auditColumns<Unit>(tfl, dateTimeFormat),
   ];

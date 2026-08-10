@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "use-intl";
 import { Building2, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 
@@ -64,6 +65,8 @@ function BuAvatar({
 
 export default function BuSwitcher() {
   const queryClient = useQueryClient();
+  const tt = useTranslations("toast");
+  const tErr = useTranslations("errors");
   const navigate = useNavigate();
   const { data: profile, isLoading, isError, defaultBu } = useProfile();
   const switchBuMutation = useSwitchBu();
@@ -143,11 +146,13 @@ export default function BuSwitcher() {
                   await queryClient.refetchQueries({
                     queryKey: [...profileQueryKey],
                   });
-                  toast.success(`Switched to ${bu.name}`);
+                  toast.success(tt("buSwitched", { name: bu.name }));
                   // ข้อมูลของ BU เดิมถูกล้างไปแล้ว หน้าที่ยืนอยู่อาจอ้างถึง id ที่ไม่มีใน BU ใหม่
                   navigate("/dashboard");
                 } catch {
-                  toast.error("Failed to switch business unit");
+                  // เดิมเป็นภาษาอังกฤษฝังในโค้ด ทั้งที่ปุ่มนี้อยู่บนแถบบนสุด
+                  // ที่ทุกคนเห็นทุกวัน
+                  toast.error(tErr("buSwitchFailed"));
                 } finally {
                   setIsSwitching(false);
                 }

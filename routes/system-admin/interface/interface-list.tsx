@@ -65,7 +65,7 @@ export default function InterfaceList() {
   const groups = interfaceGroups(INTERFACE_CATEGORIES, data ?? [], isEntitled);
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="mb-6">
         <h1 className="text-lg font-semibold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground mt-0.5 text-sm">{t("desc")}</p>

@@ -1,6 +1,6 @@
 
 import { useTranslations } from "use-intl";
-import { Send } from "lucide-react";
+import { SendHorizontal } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,7 +42,7 @@ export function SrSubmitDialog({
         <div className="p-5">
           <div className="flex items-start gap-3">
             <div className="bg-info/10 text-info-ink flex size-9 shrink-0 items-center justify-center rounded-lg">
-              <Send className="size-4.5" />
+              <SendHorizontal className="size-4.5" />
             </div>
             <div className="min-w-0 flex-1">
               <AlertDialogTitle className="text-base">
@@ -70,7 +70,7 @@ export function SrSubmitDialog({
             }}
             disabled={isPending}
           >
-            <Send />
+            <SendHorizontal />
             {isPending ? tc("processing") : tc("submit")}
           </AlertDialogAction>
         </AlertDialogFooter>

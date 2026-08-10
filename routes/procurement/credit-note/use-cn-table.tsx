@@ -83,6 +83,25 @@ export function useCnTable({
       },
     },
     {
+      // คนที่เปิดใบลดหนี้ใบนี้ — ใบคืนของมักต้องคุยกลับกับคนเปิดว่าคืนเพราะอะไร
+      // จึงต้องเห็นชื่อตั้งแต่หน้ารายการ · ไม่เรียงลำดับเพราะ audit เป็น object
+      // ซ้อน backend เรียงให้ไม่ได้
+      id: "created_by",
+      accessorFn: (row) => row.audit?.created?.name ?? "",
+      header: tfl("createdBy"),
+      size: 170,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.audit?.created?.name || "—"}
+        </span>
+      ),
+      enableSorting: false,
+      meta: {
+        headerTitle: tfl("createdBy"),
+        skeleton: columnSkeletons.text,
+      },
+    },
+    {
       accessorKey: "cn_date",
       header: ({ column }) => (
         <DataGridColumnHeader

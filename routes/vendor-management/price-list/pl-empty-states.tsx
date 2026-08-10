@@ -10,11 +10,15 @@ export function EmptyProducts({
   description,
   addLabel,
 }: {
-  readonly onAdd: () => void;
+  /**
+   * ไม่ส่ง = ไม่มีปุ่มในกล่องว่าง — ใช้กับ section ที่มีปุ่มเพิ่มอยู่ที่หัวข้ออยู่แล้ว
+   * ปุ่มเดียวกันสองที่บนจอเดียวไม่ได้ช่วยอะไร
+   */
+  readonly onAdd?: () => void;
   readonly disabled: boolean;
   readonly title: string;
   readonly description: string;
-  readonly addLabel: string;
+  readonly addLabel?: string;
 }) {
   return (
     <div className="border-border/60 bg-muted/20 rounded-xl border border-dashed p-6 text-center">
@@ -25,7 +29,7 @@ export function EmptyProducts({
       <p className="text-muted-foreground mt-0.5 text-micro">
         {description}
       </p>
-      {!disabled && (
+      {!disabled && onAdd && (
         <Button type="button" size="xs" onClick={onAdd} className="mt-2">
           <Plus />
           {addLabel}

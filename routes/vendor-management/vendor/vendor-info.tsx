@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { FieldPlainText } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
+import { VendorEmptySection } from "./vendor-empty-section";
 import { EMPTY_VENDOR_INFO, type VendorFormValues } from "./vendor-form-schema";
 
 interface VendorInfoTabProps {
@@ -48,7 +49,8 @@ export function VendorInfo({
         !isView ? (
           <Button
             type="button"
-            size="xs"
+            variant="secondary"
+            size="sm"
             onClick={() => prependInfo(EMPTY_VENDOR_INFO)}
           >
             <Plus />
@@ -59,12 +61,10 @@ export function VendorInfo({
     >
       <div className="sm:col-span-2">
         {infoFields.length === 0 ? (
-          <EmptyInfo
-            isView={isView}
+          <VendorEmptySection
+            icon={Info}
             title={t("info.noInfo")}
             description={t("info.noInfoDesc")}
-            addLabel={t("info.addInfo")}
-            onAdd={() => prependInfo(EMPTY_VENDOR_INFO)}
           />
         ) : (
           <div className="flex flex-col gap-2">
@@ -163,34 +163,3 @@ function InfoRow({
   );
 }
 
-function EmptyInfo({
-  isView,
-  title,
-  description,
-  addLabel,
-  onAdd,
-}: {
-  readonly isView: boolean;
-  readonly title: string;
-  readonly description: string;
-  readonly addLabel: string;
-  readonly onAdd: () => void;
-}) {
-  return (
-    <div className="border-border/60 bg-muted/20 rounded-xl border border-dashed p-6 text-center">
-      <div className="bg-muted text-muted-foreground/70 mx-auto mb-2 flex size-9 items-center justify-center rounded-xl">
-        <Info className="size-4" />
-      </div>
-      <div className="text-foreground text-xs font-semibold">{title}</div>
-      <p className="text-muted-foreground mt-0.5 text-micro">
-        {description}
-      </p>
-      {!isView && (
-        <Button type="button" size="xs" onClick={onAdd} className="mt-2">
-          <Plus />
-          {addLabel}
-        </Button>
-      )}
-    </div>
-  );
-}

@@ -327,7 +327,8 @@ export function PrItemFields({
       .filter((id): id is string => !!id);
 
     if (detailIds.length === 0) {
-      toast.error(t("noSavedItemsForSplit"));
+      // ยังไม่ได้บันทึกแถวที่เลือก = ทำไม่ได้ตอนนี้ ไม่ใช่ระบบพัง → warning
+      toast.warning(t("noSavedItemsForSplit"));
       return;
     }
 
@@ -444,14 +445,19 @@ export function PrItemFields({
               </Button>
             )}
             {!isDisabled && role === STAGE_ROLE.CREATE && (
-              <Button type="button" size="sm" onClick={() => handleAddItem()}>
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => handleAddItem()}
+              >
                 <Plus /> {t("addItem")}
               </Button>
             )}
             {!isDisabled && role === STAGE_ROLE.PURCHASE && (
               <Button
                 type="button"
-                size="xs"
+                size="sm"
                 variant="outline"
                 disabled={isAllocating || itemFields.length === 0}
                 onClick={handleAutoAllocate}

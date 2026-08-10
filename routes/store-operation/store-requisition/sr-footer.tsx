@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { Check, Eye, PackageCheck, Send, X } from "lucide-react";
+import { Check, Eye, PackageCheck, SendHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { formatCurrency } from "@/lib/currency-utils";
@@ -35,7 +35,6 @@ export function SrFooter({
   onReject,
   onSendBack,
 }: SrFooterProps) {
-  const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
 
@@ -118,8 +117,8 @@ export function SrFooter({
               disabled={isPending}
               onClick={onSubmit}
             >
-              <Send />
-              {t("submit")}
+              <SendHorizontal />
+              {tc("submit")}
             </Button>
           )}
         </div>

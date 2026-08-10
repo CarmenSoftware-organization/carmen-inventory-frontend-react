@@ -99,7 +99,7 @@ export function EntryImportDialog({
       const wb = XLSX.read(buffer, { type: "array" });
       const sheet = wb.Sheets[wb.SheetNames[0]];
       if (!sheet) {
-        toast.error(t("importEmptyFile"));
+        toast.warning(t("importEmptyFile"));
         setResult(null);
         return;
       }
@@ -107,7 +107,7 @@ export function EntryImportDialog({
         defval: "",
       });
       if (json.length === 0) {
-        toast.error(t("importEmptyFile"));
+        toast.warning(t("importEmptyFile"));
         setResult(null);
         return;
       }
@@ -163,7 +163,7 @@ export function EntryImportDialog({
         missing: [],
       });
     } catch {
-      toast.error(t("importInvalidFile"));
+      toast.warning(t("importInvalidFile"));
       setResult(null);
     } finally {
       setIsParsing(false);

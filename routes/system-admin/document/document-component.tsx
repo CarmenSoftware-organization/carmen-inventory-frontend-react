@@ -161,7 +161,7 @@ export default function DocumentComponent() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(t("fileSizeLimit"));
+      toast.warning(t("fileSizeLimit"));
       e.target.value = "";
       return;
     }

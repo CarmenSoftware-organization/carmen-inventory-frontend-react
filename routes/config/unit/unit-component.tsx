@@ -42,6 +42,11 @@ export default function UnitComponent() {
           width: 40,
         },
         {
+          header: tfl("decimalPlaces"),
+          value: (r) => r.decimal_place ?? 0,
+          width: 14,
+        },
+        {
           header: tfl("status"),
           value: (r) => (r.is_active ? ts("active") : ts("inactive")),
           width: 10,

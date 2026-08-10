@@ -427,7 +427,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
                       disabled={reviewSc.isPending}
                       className="rounded-full"
                     >
-                      <SendHorizontal className="size-3.5" aria-hidden="true" />
+                      <SendHorizontal aria-hidden="true" />
                       {reviewSc.isPending
                         ? t("submittingForReview")
                         : t("submitForReview")}

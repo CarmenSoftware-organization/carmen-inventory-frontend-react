@@ -1,10 +1,7 @@
 import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  StatusDotBadge,
-  type DotTone,
-} from "@/components/ui/status-dot-badge";
+import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import type { FormMode } from "@/types/form";
 import type { ProductDetail, ProductFormInstance } from "@/types/product";
@@ -18,6 +15,14 @@ interface FormToolbarProps {
   readonly mode: FormMode;
   readonly isPending: boolean;
   readonly deleteIsPending: boolean;
+  /**
+   * มีรูปที่เลือกไว้รออัปโหลดหรือยัง — นับเป็น "แก้แล้ว" ด้วย
+   *
+   * `form.formState.isDirty` เห็นแค่ฟิลด์ในฟอร์ม แต่รูปเก็บอยู่ใน state แยก
+   * (อัปโหลดตอนกด Save) ถ้าไม่บอกตรงนี้ คนที่เข้าโหมดแก้แล้วเลือกแต่รูปอย่างเดียว
+   * จะกด Save ไม่ได้ทั้งที่มีของรอส่ง
+   */
+  readonly hasPendingImages?: boolean;
   readonly onBack: () => void;
   readonly onEdit: () => void;
   readonly onCancel: () => void;
@@ -30,6 +35,7 @@ function FormToolbar({
   mode,
   isPending,
   deleteIsPending,
+  hasPendingImages,
   onBack,
   onEdit,
   onCancel,
@@ -45,16 +51,15 @@ function FormToolbar({
 
   // Subscribe ONLY to the 3 fields the toolbar displays — `form.watch`
   // would subscribe to every form change (toolbar re-renders on every keystroke).
-  const [watchedName, watchedCode, watchedStatus] = useWatch({
+  const [watchedName, watchedStatus] = useWatch({
     control: form.control,
-    name: ["name", "code", "product_status_type"],
+    name: ["name", "product_status_type"],
   });
 
   const displayName = isAdd
     ? watchedName || t("newProductTitle")
     : (product?.name ?? watchedName);
-  const displayCode = product?.code ?? watchedCode;
-  const isDirty = form.formState.isDirty;
+  const isDirty = form.formState.isDirty || !!hasPendingImages;
   const saveDisabled = isPending || (isEdit && !isDirty);
 
   // status → global dot badge (draft=info · active=success · inactive=neutral)
@@ -76,15 +81,13 @@ function FormToolbar({
     return isEdit ? tc("save") : t("createProduct");
   }
 
-  // status + code/hint แสดงข้าง title (badges slot)
+  // status + hint แสดงข้าง title (badges slot) — รหัสสินค้าไม่อยู่ตรงนี้แล้ว
+  // มันมีช่อง Code ของตัวเองอยู่ในแท็บ General
   const badges = (
     <>
       <StatusDotBadge tone={statusTone} size="xs">
         {statusLabel}
       </StatusDotBadge>
-      {!isAdd && displayCode && (
-        <span className="text-muted-foreground text-xs">{displayCode}</span>
-      )}
       {isAdd && (
         <span className="text-muted-foreground text-xs">
           {t("fillRequiredBefore")}
@@ -94,15 +97,11 @@ function FormToolbar({
   );
 
   // subtitle: add → neverSaved · view/edit → local_name (custom Thai font)
-  const subtitle = isAdd
-    ? t("neverSaved")
-    : product?.local_name
-      ? (
-          <span>
-            {product.local_name}
-          </span>
-        )
-      : undefined;
+  const subtitle = isAdd ? (
+    t("neverSaved")
+  ) : product?.local_name ? (
+    <span>{product.local_name}</span>
+  ) : undefined;
 
   const actions = (
     <>
@@ -125,7 +124,6 @@ function FormToolbar({
           size="sm"
           onClick={onDelete}
           disabled={isPending || deleteIsPending}
-          className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 aria-hidden="true" />
           {tc("delete")}

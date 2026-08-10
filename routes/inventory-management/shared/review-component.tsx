@@ -2,7 +2,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   CheckCircle2,
-  Send,
+  SendHorizontal,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
@@ -154,7 +154,7 @@ export function ReviewComponent<T extends VarianceGridItem>({
         <div className="border-border/60 bg-card/80 fixed inset-x-0 bottom-0 z-30 border-t px-4 py-3 backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-end gap-2">
             <Button size="sm" onClick={onSubmit} disabled={isSubmitting}>
-              <Send className="size-3.5" aria-hidden="true" />
+              <SendHorizontal aria-hidden="true" />
               {isSubmitting ? submittingLabel : submitLabel}
             </Button>
           </div>

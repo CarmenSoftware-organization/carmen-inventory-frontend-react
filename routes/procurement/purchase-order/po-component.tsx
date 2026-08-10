@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, lazy, Suspense } from "react";
+import { useCallback, useMemo, useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { Columns3, LayoutGrid, LayoutList, Loader2 } from "lucide-react";
@@ -20,7 +20,7 @@ import {
   useExportPurchaseOrder,
 } from "@/hooks/use-purchase-order";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import { useURL } from "@/hooks/use-url";
+import { setURLParams, useURL } from "@/hooks/use-url";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { PurchaseOrder } from "@/types/purchase-order";
@@ -73,14 +73,29 @@ export default function PoComponent() {
     setCreateOpen(true);
   };
   const [deleteTarget, setDeleteTarget] = useState<PurchaseOrder | null>(null);
-  const [viewModeParam, setViewMode] = useURL("view", {
+  const [viewModeParam] = useURL("view", {
     defaultValue: "my-pending",
   });
   const viewMode = viewModeParam as "my-pending" | "all-document";
-  // setViewMode (จาก useURL) ได้ reference ใหม่ทุก render — เก็บไว้ใน ref กัน
-  // ไม่ให้หลุดเข้า useMemo deps ของ poFilterFields ข้างล่าง (ไม่งั้น memo ไม่เคย hit)
-  const setViewModeRef = useRef(setViewMode);
-  setViewModeRef.current = setViewMode;
+  /**
+   * สลับกลุ่มเอกสาร — ล้างคำค้น ขั้นตอนที่กรองไว้ และกลับหน้า 1 เสมอ
+   *
+   * สองกลุ่มนี้เป็นคนละชุดข้อมูลกัน คำค้นที่เจอ 3 ใบใน "รอฉันดำเนินการ" อาจเจอ
+   * 200 ใบใน "เอกสารทั้งหมด" (หรือกลับกันคือเจอ 0 แล้วดูเหมือนไม่มีอะไรเลย)
+   * ขั้นตอนที่กรองไว้ก็อาจไม่มีอยู่ในอีกกลุ่ม และเลขหน้าที่ค้างอยู่ก็อาจไม่มีจริง
+   * · เขียนทีเดียวทุกพารามิเตอร์ด้วย setURLParams จะได้ replaceState กับ
+   * re-render รอบเดียว
+   */
+  const handleViewModeChange = useCallback(
+    (next: string) =>
+      setURLParams({
+        view: next,
+        search: "",
+        page: "",
+        workflow_current_stage: "",
+      }),
+    [],
+  );
   const [displayMode, setDisplayMode] = useState<"list" | "grid">("list");
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -120,7 +135,7 @@ export default function PoComponent() {
             <FieldLabel className="text-xs">{tc("view")}</FieldLabel>
             <ViewModeToggle
               value={viewMode}
-              onChange={(next) => setViewModeRef.current(next)}
+              onChange={handleViewModeChange}
               myPendingLabel={t("myPending")}
               allDocumentsLabel={t("allDocuments")}
               className="grid grid-cols-2 gap-2"
@@ -205,6 +220,11 @@ export default function PoComponent() {
             width: 10,
           },
           {
+            header: tfl("buyer"),
+            value: (r) => r.audit?.created?.name ?? "",
+            width: 22,
+          },
+          {
             header: tfl("description"),
             value: (r) => r.description ?? "",
             width: 40,
@@ -254,7 +274,7 @@ export default function PoComponent() {
             <span className="bg-border hidden h-4 w-px sm:block" />
             <ViewModeToggle
               value={viewMode}
-              onChange={setViewMode}
+              onChange={handleViewModeChange}
               myPendingLabel={t("myPending")}
               allDocumentsLabel={t("allDocuments")}
               className="hidden items-center gap-2 sm:flex"

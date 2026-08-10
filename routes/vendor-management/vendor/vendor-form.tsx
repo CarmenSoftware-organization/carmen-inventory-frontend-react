@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { useFieldArray, useForm, useWatch, type Resolver } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  useWatch,
+  type Resolver,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -248,7 +253,7 @@ export function VendorForm({ vendor }: VendorFormProps) {
   const submitLabel = getSubmitLabel(isPending, isAdd, tc, tform);
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6">
         <DocFormHeader
           flush
@@ -268,6 +273,50 @@ export function VendorForm({ vendor }: VendorFormProps) {
           }
           actions={
             <>
+              {isView ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setMode("edit")}
+                >
+                  <Pencil />
+                  {tc("edit")}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={isPending}
+                  >
+                    <X />
+                    {tc("cancel")}
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    form={FORM_ID}
+                    disabled={isPending}
+                  >
+                    <Save />
+                    {submitLabel}
+                  </Button>
+                </>
+              )}
+              {vendor && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDelete(true)}
+                  disabled={deleteVendor.isPending || isPending}
+                >
+                  <Trash2 />
+                  {tc("delete")}
+                </Button>
+              )}
               {/* ปุ่มประวัติอยู่นอก ternary — เป็นการดู ไม่ใช่การแก้ จึงเห็นได้ทุกโหมด */}
               {vendor && (
                 <Button
@@ -279,46 +328,6 @@ export function VendorForm({ vendor }: VendorFormProps) {
                   <History />
                   {tActivity("title")}
                 </Button>
-              )}
-              {isView ? (
-                <Button size="sm" onClick={() => setMode("edit")}>
-                  <Pencil />
-                  {tc("edit")}
-                </Button>
-              ) : (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  disabled={isPending}
-                >
-                  <X />
-                  {tc("cancel")}
-                </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  form={FORM_ID}
-                  disabled={isPending}
-                >
-                  <Save />
-                  {submitLabel}
-                </Button>
-                {isEdit && vendor && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setShowDelete(true)}
-                    disabled={deleteVendor.isPending || isPending}
-                  >
-                    <Trash2 />
-                    {tc("delete")}
-                  </Button>
-                )}
-                </>
               )}
             </>
           }
@@ -333,32 +342,37 @@ export function VendorForm({ vendor }: VendorFormProps) {
           scrollToFirstInvalidField();
         })}
       >
-            <VendorGeneral form={form} isDisabled={isDisabled} />
-            <VendorInfo
-              form={form}
-              isDisabled={isDisabled}
-              infoFields={infoFields}
-              prependInfo={prependInfo}
-              removeInfo={removeInfo}
-            />
-            <VendorAddress
-              form={form}
-              isDisabled={isDisabled}
-              addressFields={addressFields}
-              prependAddress={prependAddress}
-              removeAddress={handleRemoveAddress}
-            />
-            <VendorContact
-              form={form}
-              isDisabled={isDisabled}
-              contactFields={contactFields}
-              prependContact={prependContact}
-              removeContact={handleRemoveContact}
-            />
+        <VendorGeneral form={form} isDisabled={isDisabled} />
+        <VendorAddress
+          form={form}
+          isDisabled={isDisabled}
+          addressFields={addressFields}
+          prependAddress={prependAddress}
+          removeAddress={handleRemoveAddress}
+        />
+        <VendorContact
+          form={form}
+          isDisabled={isDisabled}
+          contactFields={contactFields}
+          prependContact={prependContact}
+          removeContact={handleRemoveContact}
+        />
+        <VendorInfo
+          form={form}
+          isDisabled={isDisabled}
+          infoFields={infoFields}
+          prependInfo={prependInfo}
+          removeInfo={removeInfo}
+        />
       </form>
 
       {/* Certificates — CRUD อิสระ (นอก form, ยิง API เอง) แสดงเมื่อมี vendor */}
-      {vendor?.id && <VendorCertificateSection vendorId={vendor.id} />}
+      {/* section นี้ยิง API เอง ไม่ผ่านฟอร์ม แต่ต้องเคารพโหมดเดียวกับหมวดอื่น —
+          ไม่ส่ง readOnly มาก่อนหน้านี้ ปุ่มเพิ่ม/แก้/ลบใบรับรองเลยโผล่ตั้งแต่โหมดดู
+          ทั้งที่ข้อมูล/ที่อยู่/ผู้ติดต่อ ต้องกด Edit ก่อนถึงจะเห็น */}
+      {vendor?.id && (
+        <VendorCertificateSection vendorId={vendor.id} readOnly={isDisabled} />
+      )}
 
       <DiscardDialog {...discard.dialogProps} variant="warning" />
 

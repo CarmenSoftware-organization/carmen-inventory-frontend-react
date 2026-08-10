@@ -378,44 +378,46 @@ function CnReturnRow({
         {showActionCol && <col style={{ width: pct(CN_COL.action) }} />}
       </colgroup>
       <tbody>
-        <tr className="align-middle">
-          <td />
+        {/* h-11 + px-3 py-1 = ระยะเดียวกับเซลล์ของตารางหลักเป๊ะ ๆ เดิมแถวคืนใช้
+            px-2/px-1 และไม่มีความสูงขั้นต่ำ แถบจึงเตี้ยกว่าแถวหลักที่ชื่อสินค้า
+            กินสองบรรทัด อ่านแล้วเหมือนคนละตาราง */}
+        <tr className="h-11 align-middle">
+          {/* ป้ายบอกว่าแถวนี้คือของที่คืน — อยู่ท้ายช่วง product+location ชิดขวา
+              ติดกับช่องค่าแรก · เดิมวางซ้อนอยู่เหนือค่า ทำให้ค่าในช่องนี้ต่ำกว่า
+              ค่าช่องอื่นทั้งแถว อ่านแล้วไม่เป็นแนวเดียวกัน */}
+          <td className="text-muted-foreground text-micro px-3 py-1 text-right font-semibold">
+            {isAmountDiscountRow ? t("cnAmount") : t("returnLine")}
+          </td>
           {/* ช่องกรอกของแถวอยู่ตรงนี้ช่องเดียว สลับตามประเภทใบ — quantity_return
               กรอกจำนวนคืน, amount_discount กรอกยอดลดหนี้ตรง ๆ (จำนวนคืนไม่มีผล
-              ต่อยอดในโหมดนั้น จึงไม่ต้องมีช่องล็อกไว้ให้รก)
-              ป้ายอยู่บนขวาของช่อง — ทรงเดียวกับ toggle ของ Override */}
-          <td className="px-1 py-1 text-right">
-            <div className="flex flex-col gap-0.5">
-              <span className="text-muted-foreground text-micro text-right font-semibold">
-                {isAmountDiscountRow ? t("cnAmount") : t("returnLine")}
-              </span>
-              {isAmountDiscountRow ? (
-                <SubtotalCell
-                  form={form}
-                  index={index}
-                  type={type}
-                  disabled={disabled}
-                />
-              ) : (
-                <QtyCell
-                  form={form}
-                  index={index}
-                  disabled={disabled}
-                  locked={false}
-                />
-              )}
-            </div>
+              ต่อยอดในโหมดนั้น จึงไม่ต้องมีช่องล็อกไว้ให้รก) */}
+          <td className="px-3 py-1 text-right">
+            {isAmountDiscountRow ? (
+              <SubtotalCell
+                form={form}
+                index={index}
+                type={type}
+                disabled={disabled}
+              />
+            ) : (
+              <QtyCell
+                form={form}
+                index={index}
+                disabled={disabled}
+                locked={false}
+              />
+            )}
           </td>
           {/* ราคาต่อหน่วยเท่าฝั่งรับเสมอ — คืนของชิ้นเดิมในราคาเดิม */}
-          <td className="px-2 py-1 text-right">
+          <td className="px-3 py-1 text-right">
             <PriceCell control={form.control} index={index} />
           </td>
           {/* ช่องกรอกย้ายไปอยู่ช่องแรกของแถวแล้ว ตรงนี้จึงเป็นยอดอ่านอย่างเดียว
               ทั้งสองโหมด (amount_discount → subtotal = ยอดที่กรอกเอง) */}
-          <td className="px-2 py-1 text-right">
+          <td className="px-3 py-1 text-right">
             <LineSubtotalText form={form} index={index} type={type} />
           </td>
-          <td className="px-2 py-1 text-right">
+          <td className="px-3 py-1 text-right">
             <DiscountCell
               form={form}
               index={index}
@@ -423,10 +425,10 @@ function CnReturnRow({
               disabled={disabled}
             />
           </td>
-          <td className="px-2 py-1 text-right">
+          <td className="px-3 py-1 text-right">
             <NetCell control={form.control} index={index} />
           </td>
-          <td className="px-2 py-1 text-right">
+          <td className="px-3 py-1 text-right">
             <TaxCell
               form={form}
               index={index}
@@ -434,10 +436,10 @@ function CnReturnRow({
               disabled={disabled}
             />
           </td>
-          <td className="px-2 py-1 text-right">
+          <td className="px-3 py-1 text-right">
             <TotalCell control={form.control} index={index} />
           </td>
-          {showActionCol && <td className="px-1 py-1" />}
+          {showActionCol && <td className="px-3 py-1" />}
         </tr>
       </tbody>
     </table>
@@ -572,6 +574,7 @@ function DiscountCell({
   disabled: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const base = `items.${index}` as const;
   const rate =
     useWatch({ control: form.control, name: `${base}.discount_rate` }) ?? 0;
@@ -600,25 +603,9 @@ function DiscountCell({
     );
   }
   return (
-    // toggle (checkbox + คำว่า Override) อยู่บรรทัดบนขวา · combo กินความกว้าง
-    // เต็มคอลัมน์ข้างล่าง — วางแบบเดียวกับ PO
-    <div className="flex flex-col gap-0.5">
-      <div className="flex justify-end">
-        <OverrideToggle
-          checked={isAdj}
-          onCheckedChange={(on) => {
-            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-            if (on) {
-              form.setValue(`${base}.discount_amount`, amount, {
-                shouldDirty: true,
-              });
-            }
-            form.setValue(`${base}.is_discount_adjustment`, on, {
-              shouldDirty: true,
-            });
-          }}
-        />
-      </div>
+    // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
+    // อยู่แล้ว เสียไปทั้งบรรทัดเพื่อ checkbox ตัวเดียวไม่คุ้ม (ท่าเดียวกับ GRN/PO)
+    <div className="flex items-center gap-1.5">
       <DiscountOverrideInput
         rate={rate}
         amount={amount}
@@ -632,6 +619,21 @@ function DiscountCell({
         onAmountChange={(a) =>
           form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
         }
+      />
+      <OverrideToggle
+        checked={isAdj}
+        hint={tfl("overrideHintDiscount")}
+        onCheckedChange={(on) => {
+          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+          if (on) {
+            form.setValue(`${base}.discount_amount`, amount, {
+              shouldDirty: true,
+            });
+          }
+          form.setValue(`${base}.is_discount_adjustment`, on, {
+            shouldDirty: true,
+          });
+        }}
       />
     </div>
   );
@@ -650,6 +652,7 @@ function TaxCell({
   disabled: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const base = `items.${index}` as const;
   const taxProfileId =
     useWatch({ control: form.control, name: `${base}.tax_profile_id` }) ?? null;
@@ -669,26 +672,10 @@ function TaxCell({
     );
   }
   return (
-    // บรรทัดบน: rate% ซ้าย + toggle ขวา · บรรทัดล่าง: combo เต็มความกว้าง (แบบ PO)
-    <div className="flex flex-col gap-0.5">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-muted-foreground text-micro font-semibold tabular-nums">
-          {rate > 0 ? `${rate}%` : ""}
-        </span>
-        <OverrideToggle
-          checked={isAdj}
-          onCheckedChange={(on) => {
-            if (on) {
-              form.setValue(`${base}.tax_amount`, amount, {
-                shouldDirty: true,
-              });
-            }
-            form.setValue(`${base}.is_tax_adjustment`, on, {
-              shouldDirty: true,
-            });
-          }}
-        />
-      </div>
+    // ไม่มีป้าย "{rate}%" ลอยเหนือช่องกรอกแล้ว — มันดันแถวให้สูงขึ้นทั้งแถว
+    // และอัตราก็อ่านได้จากชื่อ tax profile ในช่องอยู่แล้ว
+    // checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด
+    <div className="flex items-center gap-1.5">
       <TaxOverrideInput
         taxProfileId={taxProfileId}
         amount={amount}
@@ -704,6 +691,20 @@ function TaxCell({
         onAmountChange={(a) =>
           form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
         }
+      />
+      <OverrideToggle
+        checked={isAdj}
+        hint={tfl("overrideHintTax")}
+        onCheckedChange={(on) => {
+          if (on) {
+            form.setValue(`${base}.tax_amount`, amount, {
+              shouldDirty: true,
+            });
+          }
+          form.setValue(`${base}.is_tax_adjustment`, on, {
+            shouldDirty: true,
+          });
+        }}
       />
     </div>
   );
@@ -952,7 +953,12 @@ export function useCnItemTable({
       ...col,
       meta: {
         ...col.meta,
-        cellClassName: cn("py-1 align-middle", col.meta?.cellClassName),
+        // h-11 ตายตัวทั้งแถวหลักและแถวคืน (ดู CnReturnRow) — ปล่อยให้สูงตาม
+        // เนื้อหา แถวหลักจะ 39px เพราะชื่อสินค้ากินสองบรรทัด ส่วนแถวคืนบรรทัด
+        // เดียวได้ 24px สองแถบเลยไม่เท่ากันทั้งที่เป็นรายการเดียวกัน · 44px ไม่ใช่
+        // 40 เพราะช่องสินค้ากินสองบรรทัด (30px) ที่ 40px จะเหลือขอบบน-ล่างแค่ 5px
+        // ดูอัดแน่นกว่าแถวคืนที่มีบรรทัดเดียว (เท่ากับ PO/GRN)
+        cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
       },
     }));
   }, [form, disabled, isAmountDiscount, type, itemFields, t, tfl, onDelete]);

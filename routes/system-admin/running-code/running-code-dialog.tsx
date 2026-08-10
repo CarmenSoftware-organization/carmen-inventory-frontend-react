@@ -69,7 +69,7 @@ export function RunningCodeDialog({
         shouldDirty: true,
       });
     } catch {
-      toast.error(tv("invalidJson", { field: "config" }));
+      toast.warning(tv("invalidJson", { field: "config" }));
     }
   };
 

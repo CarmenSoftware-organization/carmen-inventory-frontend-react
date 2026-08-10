@@ -1,3 +1,4 @@
+import { Building2, CalendarDays, User } from "lucide-react";
 import { type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -100,30 +101,46 @@ export function PrHeader({
   // ช่องจะเลื่อนไปต่อท้ายแถวบนเมื่อจอกว้างพอ) · ml-4 หักล้าง -ml-4 ของ DocFormHeader
   const ribbonRow =
     "grid w-full grid-cols-1 gap-x-2 gap-y-4 sm:grid-cols-2 lg:grid-cols-6";
-  const ribbon = (
-    <div className="ml-4 w-full space-y-4">
+  const ribbon = (workflowCell || descriptionCell) && (
+    <div className="ml-4 w-full">
       <div className={ribbonRow}>
-        <Field>
-          <FieldLabel>{tfl("requester")}</FieldLabel>
-          <Input value={reqName || "—"} disabled />
-        </Field>
-        <Field>
-          <FieldLabel>{tfl("department")}</FieldLabel>
-          <Input value={departmentName || "—"} disabled />
-        </Field>
-        <Field>
-          <FieldLabel>{tfl("date")}</FieldLabel>
-          <Input value={prDateDisplay || "—"} disabled />
-        </Field>
+        {workflowCell}
+        {descriptionCell}
       </div>
-      {(workflowCell || descriptionCell) && (
-        <div className={ribbonRow}>
-          {workflowCell}
-          {descriptionCell}
-        </div>
-      )}
     </div>
   );
+
+  /**
+   * ผู้ขอ · แผนก · วันที่ อยู่ใต้เลขที่ใบเป็นข้อความ ไม่ใช่ช่องกรอกที่จางทั้งแถว
+   * (ทรงเดียวกับ CN/GRN/PO) — สามค่านี้อ่านอย่างเดียว ไม่เข้า payload การทำเป็น
+   * ช่อง disabled กินพื้นที่เท่าช่องที่กรอกได้จริงและชวนให้เข้าใจผิดว่าแก้ได้
+   *
+   * ต่างจากอีกสามใบตรงที่ PR ไม่เปิดให้เลือกวันที่ — วันที่ใบขอซื้อคือวันที่ระบบ
+   * บันทึก ไม่ใช่ค่าที่ผู้ขอกรอกเอง จึงยังเป็นข้อความอ่านอย่างเดียวเหมือนเดิม
+   */
+  const docMeta =
+    reqName || departmentName || prDateDisplay ? (
+      <span className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
+        {reqName && (
+          <span className="flex items-center gap-1">
+            <User className="size-3 shrink-0" aria-hidden="true" />
+            {reqName}
+          </span>
+        )}
+        {departmentName && (
+          <span className="flex items-center gap-1">
+            <Building2 className="size-3 shrink-0" aria-hidden="true" />
+            {departmentName}
+          </span>
+        )}
+        {prDateDisplay && (
+          <span className="flex items-center gap-1">
+            <CalendarDays className="size-3 shrink-0" aria-hidden="true" />
+            {prDateDisplay}
+          </span>
+        )}
+      </span>
+    ) : null;
 
   const workflowStepEl =
     !isDraft && purchaseRequest?.workflow_current_stage ? (
@@ -164,7 +181,14 @@ export function PrHeader({
   return (
     <DocFormHeader
       title={purchaseRequest?.pr_no ?? t("title")}
-      subtitle={workflowStep}
+      subtitle={
+        workflowStep || docMeta ? (
+          <span className="flex flex-col gap-1">
+            {docMeta}
+            {workflowStep}
+          </span>
+        ) : undefined
+      }
       backLabel={tc("goBack")}
       onBack={onBack}
       badges={badges}

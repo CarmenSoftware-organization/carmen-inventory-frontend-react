@@ -67,6 +67,32 @@ describe("TableCard", () => {
     expect(container.textContent).toContain("Dishwashing Liquid");
   });
 
+  it("renders the rejected icon (circle-x) from the allowlist", () => {
+    const data: TableData = {
+      columns: [
+        { key: "action_icon", label: "", type: "icon" },
+        { key: "item_name", label: "Item's Name", type: "text" },
+      ],
+      rows: [{ action_icon: "circle-x", item_name: "MOOZE VODKA 700ml." }],
+    };
+    const { container } = render(
+      <TableCard widget={makeWidget(data)} moduleName="procurement" subTileFor={noop} />,
+    );
+    expect(container.querySelector("svg.lucide-circle-x")).not.toBeNull();
+    expect(container.textContent).toContain("MOOZE VODKA 700ml.");
+  });
+
+  it("renders nothing for an icon name outside the allowlist", () => {
+    const data: TableData = {
+      columns: [{ key: "action_icon", label: "", type: "icon" }],
+      rows: [{ action_icon: "not-a-real-icon" }],
+    };
+    const { container } = render(
+      <TableCard widget={makeWidget(data)} moduleName="procurement" subTileFor={noop} />,
+    );
+    expect(container.querySelector("svg.lucide")).toBeNull();
+  });
+
   it("shows the noData message when there are no columns", () => {
     const { container } = render(
       <TableCard

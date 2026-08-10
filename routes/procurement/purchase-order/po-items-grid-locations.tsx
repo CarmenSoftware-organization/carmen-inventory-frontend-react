@@ -8,6 +8,11 @@ import {
 } from "react-hook-form";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   InputSuffixAddon,
@@ -144,6 +149,7 @@ function LocationDiscountCell({
   readonly editable: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const base = `items.${itemIndex}.locations.${locIndex}` as const;
   const rate =
     useWatch({ control: form.control, name: `${base}.discount_rate` }) ?? 0;
@@ -163,24 +169,9 @@ function LocationDiscountCell({
     );
   }
   return (
-    <div className="flex flex-col gap-0.5">
-      {/* override toggle (label คอลัมน์อยู่ที่ header row) */}
-      <div className="flex justify-end">
-        <OverrideToggle
-          checked={isAdj}
-          onCheckedChange={(on) => {
-            // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
-            if (on) {
-              form.setValue(`${base}.discount_amount`, amount, {
-                shouldDirty: true,
-              });
-            }
-            form.setValue(`${base}.is_discount_adjustment`, on, {
-              shouldDirty: true,
-            });
-          }}
-        />
-      </div>
+    // checkbox อยู่ข้างช่องกรอก ไม่ใช่ลอยเป็นบรรทัดของตัวเองเหนือช่อง — เซลล์แคบ
+    // อยู่แล้ว เสียไปทั้งบรรทัดเพื่อ checkbox ตัวเดียวไม่คุ้ม (ท่าเดียวกับ GRN/CN)
+    <div className="flex items-center gap-1.5">
       <DiscountOverrideInput
         rate={rate}
         amount={amount}
@@ -194,6 +185,21 @@ function LocationDiscountCell({
         onAmountChange={(a) =>
           form.setValue(`${base}.discount_amount`, a, { shouldDirty: true })
         }
+      />
+      <OverrideToggle
+        checked={isAdj}
+        hint={tfl("overrideHintDiscount")}
+        onCheckedChange={(on) => {
+          // เปิด override: seed amount = ค่าที่คำนวณล่าสุด (ต่อเนื่อง)
+          if (on) {
+            form.setValue(`${base}.discount_amount`, amount, {
+              shouldDirty: true,
+            });
+          }
+          form.setValue(`${base}.is_discount_adjustment`, on, {
+            shouldDirty: true,
+          });
+        }}
       />
     </div>
   );
@@ -212,6 +218,7 @@ function LocationTaxCell({
   readonly editable: boolean;
 }) {
   "use no memo";
+  const tfl = useTranslations("field");
   const base = `items.${itemIndex}.locations.${locIndex}` as const;
   const taxProfileId =
     useWatch({ control: form.control, name: `${base}.tax_profile_id` }) ?? null;
@@ -232,13 +239,32 @@ function LocationTaxCell({
   }
   return (
     <div className="flex flex-col gap-0.5">
-      {/* rate% + override toggle (label คอลัมน์อยู่ที่ header row) */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-muted-foreground text-micro font-semibold tabular-nums">
-          {rate > 0 ? `${rate}%` : ""}
+      {rate > 0 && (
+        <span className="text-muted-foreground text-micro text-right font-semibold tabular-nums">
+          {rate}%
         </span>
+      )}
+      {/* checkbox อยู่ข้างช่องกรอก ท่าเดียวกับคอลัมน์ส่วนลด */}
+      <div className="flex items-center gap-1.5">
+        <TaxOverrideInput
+          taxProfileId={taxProfileId}
+          amount={amount}
+          isAdjustment={isAdj}
+          onTaxChange={(value, r, name) => {
+            form.setValue(`${base}.tax_profile_id`, value || null, {
+              shouldDirty: true,
+              shouldValidate: true,
+            });
+            form.setValue(`${base}.tax_rate`, r);
+            form.setValue(`${base}.tax_profile_name`, name);
+          }}
+          onAmountChange={(a) =>
+            form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
+          }
+        />
         <OverrideToggle
           checked={isAdj}
+          hint={tfl("overrideHintTax")}
           onCheckedChange={(on) => {
             if (on) {
               form.setValue(`${base}.tax_amount`, amount, {
@@ -251,22 +277,6 @@ function LocationTaxCell({
           }}
         />
       </div>
-      <TaxOverrideInput
-        taxProfileId={taxProfileId}
-        amount={amount}
-        isAdjustment={isAdj}
-        onTaxChange={(value, r, name) => {
-          form.setValue(`${base}.tax_profile_id`, value || null, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-          form.setValue(`${base}.tax_rate`, r);
-          form.setValue(`${base}.tax_profile_name`, name);
-        }}
-        onAmountChange={(a) =>
-          form.setValue(`${base}.tax_amount`, a, { shouldDirty: true })
-        }
-      />
     </div>
   );
 }
@@ -346,7 +356,7 @@ export function LocationsEditor({
 
   return (
     <div>
-      <table className="w-full table-fixed text-xs">
+      <table className="w-full table-fixed border-separate border-spacing-0 text-xs">
         <colgroup>
           <col style={{ width: pct(PO_COL.product) }} />
           <col style={{ width: pct(PO_COL.unit) }} />
@@ -360,21 +370,22 @@ export function LocationsEditor({
           <col style={{ width: pct(PO_COL.amt) }} />
           {showActionCol && <col style={{ width: pct(PO_COL.action) }} />}
         </colgroup>
-        <thead className="text-muted-foreground text-micro font-semibold">
-          <tr className="border-border/60 border-b">
-            <th className="px-2 py-1 text-left">{tfl("location")}</th>
-            {/* หน่วยเป็นของรายการสินค้า ไม่ใช่ของ location — ค่าเลือกที่แถวสินค้า
-                แล้ว ตรงนี้เว้นหัวไว้ ไม่ตั้งป้ายให้คนอ่านนึกว่ามีค่าแล้วไม่ขึ้น */}
-            <th className="px-2 py-1" />
-            <th className="px-1 py-1 text-right">{tfl("orderQty")}</th>
-            <th className="px-1 py-1 text-right">{tfl("receivedQty")}</th>
-            <th className="px-2 py-1 text-right">{tfl("unitPrice")}</th>
-            <th className="px-2 py-1 text-right">{tfl("subtotal")}</th>
-            <th className="px-2 py-1 text-right">{tfl("discount")}</th>
-            <th className="px-2 py-1 text-right">{tfl("net")}</th>
-            <th className="px-2 py-1 text-right">{tfl("tax")}</th>
-            <th className="px-2 py-1 text-right">{tfl("amount")}</th>
-            {showActionCol && <th className="px-1 py-1" />}
+        <thead className="text-muted-foreground text-xs font-semibold">
+          {/* ตารางย่อยใช้ colgroup ชุดเดียวกับตารางหลัก คอลัมน์จึงตรงกันอยู่แล้ว
+              หัวคอลัมน์ซ้ำอีกชุดเลยเป็นการอ่านคำเดิมสองรอบห่างกันไม่กี่สิบพิกเซล
+              เหลือไว้แค่ "ที่เก็บ" ซึ่งเป็นคำเดียวที่ตารางหลักไม่มี (เหมือน GRN) */}
+          <tr className="border-border/60 h-11 border-b">
+            <th className="px-3 py-1 text-left">{tfl("location")}</th>
+            <th className="px-3 py-1" />
+            <th className="px-3 py-1" />
+            <th className="px-3 py-1" />
+            <th className="px-3 py-1" />
+            <th className="px-3 py-1" />
+            <th className="px-3 py-1" />
+            <th className="px-3 py-1" />
+            <th className="px-3 py-1" />
+            <th className="px-3 py-1" />
+            {showActionCol && <th className="px-3 py-1" />}
           </tr>
         </thead>
         <tbody className="divide-border/60 divide-y">
@@ -396,10 +407,10 @@ export function LocationsEditor({
             return (
               <tr
                 key={loc.id}
-                className="hover:bg-muted/40 align-middle transition-colors"
+                className="hover:bg-muted/40 h-11 align-middle transition-colors"
               >
                 {/* location name (align ใต้ product) */}
-                <td className="py-1 pr-2 pl-2">
+                <td className="px-3 py-1">
                   <Controller
                     control={form.control}
                     name={`items.${index}.locations.${locIndex}.id`}
@@ -431,10 +442,10 @@ export function LocationsEditor({
                 </td>
                 {/* unit — เว้นไว้ให้คอลัมน์ตรงกับตารางแถวสินค้าด้านบน
                     (หน่วยเป็นของรายการสินค้า ทุก location ใช้ตัวเดียวกัน) */}
-                <td className="px-2 py-1" />
+                <td className="px-3 py-1" />
 
                 {/* order qty */}
-                <td className="px-1 py-1 text-right">
+                <td className="px-3 py-1 text-right">
                   {locEditable ? (
                     <LocationQtyInput
                       form={form}
@@ -453,7 +464,7 @@ export function LocationsEditor({
                   )}
                 </td>
                 {/* received (read-only ใน PO) */}
-                <td className="px-1 py-1 text-right">
+                <td className="px-3 py-1 text-right">
                   <InputSuffixPlain
                     className="block w-full text-right"
                     value={watchedLocations?.[locIndex]?.received_qty ?? 0}
@@ -461,11 +472,11 @@ export function LocationsEditor({
                   />
                 </td>
                 {/* unit price (item-level, read-only text) */}
-                <td className="px-2 py-1 text-right">
+                <td className="px-3 py-1 text-right">
                   <LocationPriceText form={form} itemIndex={index} />
                 </td>
                 {/* sub */}
-                <td className="px-2 py-1 text-right">
+                <td className="px-3 py-1 text-right">
                   <LocationAmountCell
                     form={form}
                     itemIndex={index}
@@ -473,8 +484,9 @@ export function LocationsEditor({
                     field="sub_total_price"
                   />
                 </td>
-                {/* discount combo (rate/amount + override) */}
-                <td className="px-1 py-1">
+                {/* discount combo (rate/amount + override) — nowrap เพราะโหมดดู
+                    เป็น "10% · 320.00" ซึ่งยาวกว่าคอลัมน์เมื่อหักระยะขอบออก */}
+                <td className="px-3 py-1 whitespace-nowrap">
                   <LocationDiscountCell
                     form={form}
                     itemIndex={index}
@@ -483,7 +495,7 @@ export function LocationsEditor({
                   />
                 </td>
                 {/* net */}
-                <td className="px-2 py-1 text-right">
+                <td className="px-3 py-1 text-right">
                   <LocationAmountCell
                     form={form}
                     itemIndex={index}
@@ -491,8 +503,8 @@ export function LocationsEditor({
                     field="net_amount"
                   />
                 </td>
-                {/* tax combo (profile/amount + override) */}
-                <td className="px-1 py-1">
+                {/* tax combo (profile/amount + override) — nowrap เหมือนส่วนลด */}
+                <td className="px-3 py-1 whitespace-nowrap">
                   <LocationTaxCell
                     form={form}
                     itemIndex={index}
@@ -501,7 +513,7 @@ export function LocationsEditor({
                   />
                 </td>
                 {/* amt */}
-                <td className="px-2 py-1 text-right font-semibold">
+                <td className="px-3 py-1 text-right font-semibold">
                   <LocationAmountCell
                     form={form}
                     itemIndex={index}
@@ -510,18 +522,24 @@ export function LocationsEditor({
                   />
                 </td>
                 {showActionCol && (
-                  <td className="px-1 py-1 text-center">
+                  <td className="px-3 py-1 text-center">
                     {locEditable && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
-                        aria-label={t("removeLocation")}
-                        onClick={() => setDeleteLocIndex(locIndex)}
-                      >
-                        <Trash2 className="size-3.5" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-xs"
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                            aria-label={t("removeLocation")}
+                            onClick={() => setDeleteLocIndex(locIndex)}
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        {/* ถังขยะเหมือนของแถวสินค้า แต่ลบแค่ที่เก็บเดียว */}
+                        <TooltipContent>{t("removeLocation")}</TooltipContent>
+                      </Tooltip>
                     )}
                   </td>
                 )}

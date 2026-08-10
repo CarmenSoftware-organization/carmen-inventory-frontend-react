@@ -157,7 +157,7 @@ export function NotificationTemplateForm({
   const submitLabel = isPending ? pendingLabel : actionLabel;
 
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button
@@ -374,7 +374,7 @@ export function NotificationTemplateForm({
 /** Loading skeleton that mirrors the form's real layout (header + 2 sections). */
 export function NotificationTemplateFormSkeleton() {
   return (
-    <div className="mx-auto max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="mb-6 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Skeleton className="size-8 rounded-md" />

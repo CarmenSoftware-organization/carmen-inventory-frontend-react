@@ -1,0 +1,738 @@
+# Changelog
+
+ไฟล์นี้ generate จาก git history โดย `bun run build:bump` — อย่าแก้ด้วยมือ
+แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
+`bun scripts/changelog-cli.ts` เพื่อ render ใหม่
+
+## [2.0.0] - 2026-08-09
+
+### Added
+- **bump:** build:bump เขียน changelog เองและ commit ไฟล์ที่ระบุชัด (#102) — Thammanoon Semapru `8a14f25`
+- **changelog:** generator สร้าง changelog จาก git history (#102) — Thammanoon Semapru `6198d4d`
+- **build:** สคริปต์ build ต่อ environment (#102) — Thammanoon Semapru `cd1dd80`
+
+### Fixed
+- **footer:** เลื่อนโหลด changelog chunk ไปตอนเปิด What's New จริง + กู้ test ที่กลายเป็นโมฆะ (#102) — Thammanoon Semapru `f01d04d`
+- **footer:** เลิกลาก changelog.json เข้า shared chunk ที่ทุกหน้าโหลด (#102) — Thammanoon Semapru `2a4549f`
+- **changelog:** commit field ส่งตรงแทน parse string + fail fast เมื่อ config.<env>.json หาย (#102) — Thammanoon Semapru `b1f35b0`
+
+## [1.2.0] - 2026-08-09
+
+### Added
+- **invitation:** หน้ารับคำเชิญเสนอทางเข้าตามสถานะจริงของอีเมล — Thammanoon Semapru `53420c7`
+- **invitation:** เสนอทางเข้าทางเดียวที่ใช้ได้ตาม has_account — Thammanoon Semapru `e2380a3`
+- **invitation:** หน้ารับคำเชิญ สมัครจบในลิงก์เดียวได้ — Thammanoon Semapru `da4b0fe`
+- **register:** แยกการสมัครเป็นสองขั้น — ขอลิงก์ แล้วสร้างบัญชีจากลิงก์ — Thammanoon Semapru `1f65132`
+- **auth:** เพิ่ม signupRequest/verifySignupToken และเปลี่ยน contract ของ register — Thammanoon Semapru `ed3b659`
+- **investor:** พิมพ์สไลด์เป็น PDF ได้ หนึ่งสไลด์ต่อหนึ่งหน้า — Thammanoon Semapru `8823d99`
+- **investor:** เอกสารและสไลด์ฉบับภาษาไทย — Thammanoon Semapru `f9b61a5`
+- **investor:** สไลด์ 15 หน้า พร้อมสคริปต์ฝังภาพ — Thammanoon Semapru `a19c9a7`
+- **investor:** สคริปต์เซ็นเซอร์ชื่อบนหน้าจอก่อนถ่ายภาพให้นักลงทุน — Thammanoon Semapru `0ce85a9`
+- **i18n:** ปุ่มส่งเอกสารบอกให้ครบว่าส่งไปทำอะไร ไม่ใช่ "ส่ง" ลอย ๆ — Thitiphong Srisavat `7a55e4c`
+- **list:** หน้ารายการเห็นชื่อคนที่เปิดใบตั้งแต่ตาราง ไม่ต้องเข้าไปดูทีละใบ — Thitiphong Srisavat `94e8f22`
+- **rfp:** เลือกผู้ขายทีเดียวหลายรายจาก dialog แทนแถวเลือกทีละเจ้า — Thitiphong Srisavat `5254965`
+- **i18n:** ปุ่มเพิ่มแถวในตารางใช้คำเดียวกันทั้งแอป — "เพิ่มรายการ" — Thitiphong Srisavat `c4db424`
+- **i18n:** เลิกใช้คำว่า "ปฏิเสธ" ทั้งแอป — คนหน้างานพูดว่า "ไม่อนุมัติ" — Thitiphong Srisavat `8dfe53f`
+- **toast:** เลิกย้อมทั้งใบ เหลือสีที่ไอคอนจุดเดียว + หน้า /dev/toast ไว้ไล่ดู — Thitiphong Srisavat `23d869c`
+- **i18n:** คำอธิบายหัวหน้า list 53 หน้า เขียนใหม่ให้คนหน้างานอ่านรู้เรื่อง — Thitiphong Srisavat `26cba57`
+- **unit:** ตั้งทศนิยมของหน่วยนับได้เอง เดิมช่องนี้มีแต่ใน backend — Thitiphong Srisavat `7c53de6`
+- **ia:** กดเพิ่มรายการแล้วเปิดช่องเลือกสินค้าให้เลย · ยังไม่เลือกคลังก็เตือนแทน — Thitiphong Srisavat `1f0f1f1`
+- **product:** เลือกรูปแล้วยังไม่อัปโหลด รอกด Save ค่อยส่งขึ้นพร้อมฟอร์ม — Thitiphong Srisavat `aedf417`
+- **ia:** ดึงต้นทุนจริงมาเติมให้ทั้ง stock-in และ stock-out ตั้งแต่เลือกสินค้า — Thitiphong Srisavat `e246aba`
+- **ia:** เซฟแล้วอยู่กับใบเดิม ส่วน commit เซฟให้ก่อนแล้วค่อยปิด — Thitiphong Srisavat `128380f`
+
+### Fixed
+- **invitation:** 409 ที่เป็นอีเมลชนต้องไม่ได้คำแนะนำ "ให้ไปเข้าสู่ระบบ" — Thammanoon Semapru `1cbf0a4`
+- **tooling:** ปิดทางที่ hook รันโค้ดจาก dist/ และตัด permission ที่ไม่ใช่ของรีโปนี้ — Thammanoon Semapru `ba4a349`
+- **invitation:** แยก "ลิงก์ตาย" ออกจาก "โหลดไม่สำเร็จ" ด้วย 410 — Thammanoon Semapru `d6e466e`
+- **invitation:** ยิง path ให้ตรง gateway ทั้งสี่ endpoint — Thammanoon Semapru `ad43670`
+- **register:** แสดงข้อความเมื่อขอลิงก์ซ้ำไม่สำเร็จ — Thammanoon Semapru `ca3a5c1`
+- **invitation:** รับ token ทั้งแบบ path และแบบ query — Thammanoon Semapru `0be689d`
+- **investor:** แก้ข้ออ้างเรื่อง edge gateway ที่ไม่จริง และบั๊กเลย์เอาต์ของสไลด์ — Thammanoon Semapru `dfe4347`
+- **investor:** สคริปต์เซ็นเซอร์มองไม่เห็นเปลือกแอป — Thammanoon Semapru `c2008ae`
+- SR summary add widget of issued count — Khafang `1ecda8b`
+- **location:** ตารางสินค้าโหลดมาครบแต่มองไม่เห็น เพราะบล็อกสูงเกินเกณฑ์ reveal — Thitiphong Srisavat `5a2016d`
+- **transaction:** กดเปลี่ยนหน้าแล้วตารางค้างหน้าเดิม ทั้งที่ URL กับ query เปลี่ยนแล้ว — Thitiphong Srisavat `9b44070`
+- **navbar:** โหลดโปรไฟล์พังแล้วออกจากระบบไม่ได้ เพราะเมนูโปรไฟล์ซ่อนตัวเอง — Thitiphong Srisavat `05a13ed`
+- **po,grn,cn:** จัดตารางรายการให้เป็นจังหวะเดียวกันทั้งสามโมดูล — Thitiphong Srisavat `f95c508`
+- **grn:** หัวตารางย่อยซ้ำกับตารางหลัก · ค่าเยื้องคอลัมน์ · ปุ่มลบสองแบบหน้าตาเหมือนกัน — Thitiphong Srisavat `c410764`
+- **cn:** แถวคืนเตี้ยกว่าแถวหลัก 15px จนดูเหมือนคนละตาราง — Thitiphong Srisavat `05508ff`
+- **list:** สลับกลุ่มแล้วขั้นตอนที่กรองไว้ยังค้าง ทั้งที่กลุ่มใหม่อาจไม่มีขั้นตอนนั้น — Thitiphong Srisavat `bd2ae2d`
+- **list:** สลับกลุ่มเอกสารแล้วคำค้นกับเลขหน้าเดิมยังค้างอยู่ — Thitiphong Srisavat `8384f48`
+- **ui:** ปุ่ม outline กับ secondary แยกไม่ออกในธีมมืด ต่างกันแค่ 1.8% — Thitiphong Srisavat `b35a41c`
+- **ui:** ปุ่มปิดเอกสารสีคนละสี ไอคอนคนละตัว ทั้งที่เป็นการกระทำเดียวกัน — Thitiphong Srisavat `bbab954`
+- **toast:** เก็บหางที่เหลือทั้งโปรเจกต์ — error ซ้ำใบ ข้อความ dev และสีที่ผิด — Thitiphong Srisavat `a4ca8d4`
+- **toast:** ทำอะไรก็ขึ้น "อัปเดตสำเร็จ" เหมือนกันหมด จนแยกไม่ออกว่าของขยับหรือยัง — Thitiphong Srisavat `2bbb162`
+- **auth:** ข้อความเตือนใต้ช่องกรอก ไม่ตรงกับชื่อช่องที่มันเตือน — Thitiphong Srisavat `d1c38bb`
+- **cn:** แถวคืนอ่านไม่เป็นแนวเดียวกัน — ค่าเหลื่อมกับหัวคอลัมน์ทั้งแถว — Thitiphong Srisavat `dca4b3d`
+- **vendor-management:** ปุ่มเพิ่มสินค้าโผล่สองที่บนจอเดียว — Thitiphong Srisavat `79b2d8f`
+- **procurement:** คำว่า "แก้ไขเอง" ซ้ำทุกแถวในเซลล์ที่แคบอยู่แล้ว ย้ายไป tooltip — Thitiphong Srisavat `bb0a168`
+- **product:** เลือกรูปแล้วกด Save ไม่ได้ · แท็บ Eco ไม่มีตัวนับ · ชื่อยาวดันปุ่มตกบรรทัด — Thitiphong Srisavat `a9c7b00`
+- **layout:** ฟอร์มหดตามเนื้อหาเพราะ mx-auto ยกเลิก stretch ของ flex item — Thitiphong Srisavat `a0f12b4`
+- **currency:** 211.56 แสดงเป็น 0,211.56 เพราะไปอ่านจำนวนหลักหน้าจุดจากคอนฟิก — Thitiphong Srisavat `5cd9490`
+- **sr:** สินค้าของคู่คลังโหลดช้าไปหนึ่งจังหวะ แถมเปลี่ยนคลังแล้วของเก่ายังค้าง — Thitiphong Srisavat `8b1ce11`
+- **ui:** ปุ่มทึบสองสีในแถบเดียวดังกว่าข้อมูล และกล่องยืนยันยังไม่มีไอคอนบนปุ่ม — Thitiphong Srisavat `f2842c3`
+- **ia:** ฟอร์มอ่านหน่วยนับผิดคีย์ แล้ว save/void/commit ก็ยิงผิด endpoint — Thitiphong Srisavat `76440d2`
+- **form-toolbar:** ตัวกลางยังเรียง Activity นำหน้า Edit อยู่ อีก 5 หน้าเลยยังไม่ตรง — Thitiphong Srisavat `845171c`
+- **vendor-management:** ปุ่มขวาบนอีกสามหน้ายังเป็นแบบเก่า ตามมาให้ครบ — Thitiphong Srisavat `f362806`
+
+### Changed
+- **docs:** หัวเอกสารทั้ง 5 ใบเป็นทรงเดียวกัน — ข้อมูลผู้เกี่ยวข้องเป็นข้อความ ไม่ใช่ช่องจาง — Thitiphong Srisavat `c3a5774`
+- **vendor:** กล่องว่างของทั้งสี่หมวดในฟอร์มผู้ขายเป็นแบบเดียวกัน — Thitiphong Srisavat `486126f`
+- **product:** แท็บในฟอร์มเดียวกันพูดกันคนละภาษาการออกแบบ — Thitiphong Srisavat `c74bc24`
+
+## [1.1.0] - 2026-08-05
+
+### Added
+- **release:** เพิ่ม bun run build:bump ตัด release commit + annotated tag (#101) — Thammanoon Semapru `06b5e21`
+- **activity:** เพิ่มปุ่ม Activity ใน 15 หน้าที่มี header เฉพาะตัว (#99) — Thammanoon Semapru `21dc179`
+- **activity:** เพิ่มปุ่ม Activity ที่ FormToolbar และ 4 หน้าที่ใช้ร่วมกัน (#99) — Thammanoon Semapru `d0f5af5`
+- **activity:** เปิด activity ให้ list ที่เรียก actionColumn ตรงและ tree หมวดสินค้า (#99) — Thammanoon Semapru `916739c`
+- **activity:** เพิ่มเมนู Activity ในแถวของ DataGrid และเปิดให้ 27 list (#99) — Thammanoon Semapru `cc37c77`
+- **activity:** แยก activity sheet เป็นของกลางและ mount host ที่ shell (#99) — Thammanoon Semapru `4a7bd51`
+- **pr:** activity sheet เป็นไทม์ไลน์แบบเดียวกับ workflow history (#97) — Thammanoon Semapru `25f4ce8`
+- **history-timeline:** รองรับแถวที่กางดูรายละเอียดได้ (#97) — Thammanoon Semapru `898bfb6`
+- **history:** จัดลำดับความสำคัญไทม์ไลน์ workflow ใหม่ (#93) — Thammanoon Semapru `a390ca1`
+- **history:** ไทม์ไลน์ประวัติรายการสินค้าใช้โครงคอลัมน์เดียวร่วมกัน (#90) — Thammanoon Semapru `d13fe80`
+- **history:** ไทม์ไลน์ประวัติเอกสารเป็นคอลัมน์เดียวพร้อมรางเวลา (#90) — Thammanoon Semapru `54c1036`
+- **workflow-track:** เปลี่ยนลำดับขั้นเอกสารเป็นลูกศรพื้นสี (#87) — Thammanoon Semapru `b397ef6`
+- **analytics:** ต่อ AnalyticsBridge เข้า RootLayout เก็บ page view + click จริง — Thammanoon Semapru `6cb3776`
+- **analytics:** โมดูลเก็บ click/page view แบบ batch + endpoint const — Thammanoon Semapru `bf35939`
+- **pr:** activity button opening the document's audit history (#84) — Khafang `39cdf17`
+- **dashboard:** widget param dialog + status-group cards (#84) — Khafang `f72f951`
+- **dashboard:** render table-shaped datasets (#84) — Khafang `1bd4715`
+- **dashboard:** dataset params + table shape in types and hooks (#84) — Khafang `3f5da8b`
+- **sys-admin,op-plan,report:** filter sheet + saved views (#83) — Thammanoon Semapru `01edd84`
+- **product,vendor:** filter sheet + saved views (#83) — Thammanoon Semapru `0ae3b23`
+- **inventory,store-op:** filter sheet + saved views (ia/transaction/sr/wr) (#83) — Thammanoon Semapru `5893c00`
+- **procurement:** filter sheet + saved views (po/grn/cn/prt/approval) (#83) — Thammanoon Semapru `7947c71`
+- **config:** filter sheet + saved views ครบ 13 หน้า config (#83) — Thammanoon Semapru `5facc78`
+- **pr:** ย้ายมา filter registry + saved views (pilot custom page) (#83) — Thammanoon Semapru `00f66b2`
+- **department:** เปิด filter sheet + saved views (pilot template page) (#83) — Thammanoon Semapru `562df46`
+- **list-filter:** ConfigListTemplate รองรับ registry mode (pageKey + filterFields) (#83) — Thammanoon Semapru `3a55379`
+- **list-filter:** ViewSelector (เลือก/บันทึก/แก้/ลบ view + dirty state) (#83) — Thammanoon Semapru `195abbc`
+- **list-filter:** SaveViewDialog (ชื่อ + scope + กันชื่อซ้ำ) (#83) — Thammanoon Semapru `060c548`
+- **list-filter:** ListFilterSheet (desktop ขวา / mobile ล่าง) (#83) — Thammanoon Semapru `c85834c`
+- **list-filter:** FilterFieldControl map registry เป็น control (#83) — Thammanoon Semapru `09a4a6d`
+- **list-filter:** เพิ่มแนมสเปซ listView สำหรับ i18n (en/th) (#83) — Thammanoon Semapru `804a7d6`
+- **list-filter:** useListFilters + useListViews (URL เป็น source of truth) (#83) — Thammanoon Semapru `c7a1199`
+- **list-filter:** hook app-user-config (GET/PUT ต่อ user) (#83) — Thammanoon Semapru `b214a82`
+- **list-filter:** encoder + dirty compare พร้อม unit test (#83) — Thammanoon Semapru `85c9437`
+- **use-url:** setURLParams เขียนหลาย param อะตอมมิก + export URL_CHANGE_EVENT (#83) — Thammanoon Semapru `3bd0291`
+- **list-filter:** types + page keys + endpoint ของ saved views (#83) — Thammanoon Semapru `d315e4a`
+- **ui:** เพิ่ม Font size submenu ในเมนูโปรไฟล์ ถัดจาก Theme — Thammanoon Semapru `81037b3`
+- **ui:** กลไก font scale — root font-size 5 ระดับ + boot script กัน FOUC — Thammanoon Semapru `2d4ea33`
+- **design:** ทำบันได type ของ DESIGN.md ให้มีอยู่จริงเป็น CSS token — Thammanoon Semapru `116d9c2`
+- **config:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ config 14 หน้า — Thammanoon Semapru `4b37fbf`
+- **equipment-category:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการหมวดหมู่อุปกรณ์ (#80) — Thammanoon Semapru `e5c1858`
+- **equipment:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการอุปกรณ์ (#79) — Thammanoon Semapru `016d1da`
+- **cuisine:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ Cuisine Type (#78) — Thammanoon Semapru `adfa157`
+- **recipe-category:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการหมวดหมู่สูตร (#77) — Thammanoon Semapru `9238ace`
+- **recipe:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการสูตรอาหาร (#76) — Thammanoon Semapru `029498b`
+- **inventory-adjustment:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ IA (#75) — Thammanoon Semapru `c2c4ff3`
+- **store-requisition:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ SR (#74) — Thammanoon Semapru `5ca3863`
+- **product:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการสินค้า (#73) — Thammanoon Semapru `fd1596f`
+- **credit-note:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ CN (#72) — Thammanoon Semapru `8971445`
+- **goods-receive-note:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ GRN (#71) — Thammanoon Semapru `e724aa2`
+- **purchase-order:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ PO (#70) — Thammanoon Semapru `4314d1e`
+- **purchase-request-template:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ PR Template (#69) — Thammanoon Semapru `737a5cd`
+- **list:** ซ่อนคอลัมน์ audit (Created/Updated) เป็น default ทุก list page (#68) — Thammanoon Semapru `ab4f27d`
+- **purchase-request:** เพิ่มคอลัมน์ Created/Updated ในหน้ารายการ PR (#67) — Thammanoon Semapru `7b4b5f0`
+- **rfp:** เพิ่มคอลัมน์ Created/Updated ในไฟล์ Excel export (#65) — Thammanoon Semapru `67db725`
+- **rfp:** เพิ่มบรรทัด Updated ในการ์ด RFP (grid view) (#65) — Thammanoon Semapru `05a70e8`
+- **rfp:** เพิ่มคอลัมน์ Created/Updated (sort server-side) ในตาราง RFP (#65) — Thammanoon Semapru `55e46c8`
+- **vendor:** เพิ่มคอลัมน์ Created/Updated (sort server-side) + บรรทัด Updated ในการ์ด — Thammanoon Semapru `459c0e5`
+- **price-list-template:** แสดงบรรทัด Updated ในการ์ด (grid/mobile) (#64) — Thammanoon Semapru `fda188a`
+- **price-list-template:** เพิ่มคอลัมน์ Created/Updated (sort server-side) + แก้ type audit (#64) — Thammanoon Semapru `ddbee36`
+- **shared:** เพิ่ม AuditCell component + audit types ใช้ร่วม (#64) — Thammanoon Semapru `3961591`
+- **price-list:** การ์ดแสดงบรรทัด Updated (relative time) (#63) — Thammanoon Semapru `f18fc12`
+- **price-list:** เพิ่มคอลัมน์ Created/Updated (sort server-side) (#63) — Thammanoon Semapru `b5f27c9`
+- **price-list:** เพิ่ม PlAuditCell (relative time + ชื่อ + tooltip) (#63) — Thammanoon Semapru `1d3a56e`
+- **print:** use the configured form on the generic path, drop the mapping lookup (#62) — Thammanoon Semapru `33a798e`
+- **print-form:** align on the 12 canonical document types (#62) — Thammanoon Semapru `59c2e07`
+- **print-form:** print with the business unit's configured form (#61) — Thammanoon Semapru `448542f`
+- **print-form:** render the Print Forms section with fetched options (#61) — Thammanoon Semapru `a418b02`
+- **print-form:** fetch report form templates grouped by report group (#61) — Thammanoon Semapru `8c651ab`
+- **print-form:** seed print form config items per document type (#61) — Thammanoon Semapru `6f99254`
+- **print-form:** add print-form config key helpers (#61) — Thammanoon Semapru `a0e6b27`
+- **sidebar:** add Interfaces menu under Workflows in System Administration — Thammanoon Semapru `3d62d19`
+- **interface:** per-brand form override; carmen_gl uses the Carmen 4 form — Thammanoon Semapru `3820a1c`
+- **interface:** Carmen GL form with Carmen 4 legacy fields — Thammanoon Semapru `f5d7cc1`
+- **price-list:** support 'submitted' status on the internal edit page — Thammanoon Semapru `9e51f21`
+- **report:** show template_type badge in report catalog (#58) — Thammanoon Semapru `4a7337a`
+- **report:** carry template_type through report catalog types (#58) — Thammanoon Semapru `08d8c1d`
+- **interface:** surface Interfaces on the system-admin landing (#55) — Thammanoon Semapru `e777b01`
+- **interface:** add interface list page (#55) — Thammanoon Semapru `659a00a`
+- **interface:** add interface detail route (#55) — Thammanoon Semapru `8d9721e`
+- **interface:** add interface registry (#55) — Thammanoon Semapru `279f9c5`
+- **interface:** add PMS interface form (#55) — Thammanoon Semapru `7afdd5b`
+- **interface:** add POS interface form (#55) — Thammanoon Semapru `5cea0c8`
+- **interface:** add accounting interface form (#55) — Thammanoon Semapru `e2f8ebc`
+- **interface:** add shared layout and field helpers (#55) — Thammanoon Semapru `5c92a74`
+- **interface:** add useInterfaceConfig hook (#55) — Thammanoon Semapru `fe3b778`
+- **app-config:** add useAppConfigs list hook (#55) — Thammanoon Semapru `1ddafeb`
+- **dev:** CONFIG_ENV-driven dev scripts (dev:local/dev/uat/prod) — Thammanoon Semapru `ebb190a`
+- add GitHub Actions workflow to deploy frontend to GCP Cloud Storage and CDN — Thammanoon Semapru `774661f`
+- **deploy:** --teardown mode (reverse-order delete, bucket kept) — Thammanoon Semapru `9b7ba32`
+- **deploy:** config upload, first deploy, cert wait, summary — Thammanoon Semapru `f0cdc4c`
+- **deploy:** provision bucket, CDN, HTTPS LB, managed cert — Thammanoon Semapru `a92f709`
+- **deploy:** scaffold GCP CDN setup script (args, names, preflight) — Thammanoon Semapru `61ac723`
+- **department:** move account_code column after name and make it sortable — Thammanoon Semapru `a0d73f4`
+- **department:** show account_code in list column and card — Thammanoon Semapru `2d05285`
+- **department:** add account_code input to department form — Thammanoon Semapru `fdeb0de`
+- **department:** add account_code to type, schema, and i18n — Thammanoon Semapru `3c1d828`
+- **category:** sort category tree by code at every level — Thammanoon Semapru `b46ee02`
+- **product:** sortable code/name/local_name/unit/status columns — Thammanoon Semapru `ce4d25c`
+- **product:** order category and sub category before item group — Thammanoon Semapru `2cf4e13`
+- **product:** cascade category -> sub category -> item group — Thammanoon Semapru `aa4d757`
+- **lookup:** add LookupSubCategory with category filter — Thammanoon Semapru `f6e50e1`
+- **product:** lock code field, show auto-generated placeholder — Thammanoon Semapru `f2b5832`
+- **product:** omit code from create payload (server-assigned) — Thammanoon Semapru `90dccaf`
+- **product:** make code field optional (server-assigned) — Thammanoon Semapru `b728438`
+- **running-code:** show note column in table — Thammanoon Semapru `772f122`
+- server-assigned category code (auto-generated) (#48) — Thammanoon Semapru `1e6703d`
+- add default-setting page for PR/SI/PO operational config — Thammanoon Semapru `59c2a67`
+- **bu:** render restructured address fields in business-setting UI — Thammanoon Semapru `535a7b6`
+- **bu:** i18n labels for restructured address fields (en+th) — Thammanoon Semapru `49ccdf4`
+- **bu:** rename+add address fields in inventory types + form schema — Thammanoon Semapru `2366250`
+- **business-setting:** add PO config section (po.group-by-pr-comment) — Thammanoon Semapru `493ecc6`
+- **business-setting:** render SI enum config section with conditional options — Thammanoon Semapru `b696e50`
+- **business-setting:** render enum config as a Select in ConfigField — Thammanoon Semapru `1058420`
+- **business-setting:** carry enum options through group entries — Thammanoon Semapru `bb1bde5`
+- **business-setting:** add SI enum config registry + resolveConfigOptions — Thammanoon Semapru `216bf1a`
+- **business-setting:** render PR config section on the page — Thammanoon Semapru `b274e88`
+- **business-setting:** support config label override + PR i18n — Thammanoon Semapru `da354cb`
+- **business-setting:** group config items by section for rendering — Thammanoon Semapru `bd8ab3b`
+- **business-setting:** merge seeded config into form values — Thammanoon Semapru `2cdf7ac`
+- **business-setting:** add seeded config registry with PR section — Thammanoon Semapru `ee76db0`
+- **module-list:** add separatorBefore to role and running-code entries — Thammanoon Semapru `0292139`
+- **credit-note:** read nested detail objects in edit form mapping — Thammanoon Semapru `6a21704`
+- **credit-note:** type useCreditNoteById as CreditNoteDetail — Thammanoon Semapru `b90d8ad`
+- **credit-note:** add nested CreditNoteDetail type for detail view — Thammanoon Semapru `21c50e7`
+- **grn:** consume last_action as nested {state,at,id,name} object (#37) — Thammanoon Semapru `156eab0`
+- **approval,pr:** consume last_action as nested {state,at,id,name} object (#36) — Thammanoon Semapru `6f5d002`
+- **profile:** signature section on profile setting + details (#35) — Thammanoon Semapru `7162514`
+- **profile:** signature dialog with draw/upload tabs (#35) — Thammanoon Semapru `55ceda8`
+- **profile:** signature drawing pad component (#35) — Thammanoon Semapru `3af3e24`
+- **profile:** signature upload/delete hooks (#35) — Thammanoon Semapru `a732c5d`
+- **profile:** signature endpoint constant, type, and draw library (#35) — Thammanoon Semapru `7067319`
+- **dev:** split dev/prod runtime config via vite middleware (#34) — Thammanoon Semapru `3753261`
+- **tables:** show "..." placeholder when name is empty (#27) — Thammanoon Semapru `9d66520`
+- redirect already-authenticated users away from /login (#18) — Thammanoon Semapru `206525d`
+- migrate report, dashboard, profile and notifications sections (#9) — Thammanoon Semapru `92ecd01`
+- migrate system-admin section (#8) — Thammanoon Semapru `a5e898c`
+- migrate product-management section (#7) — Thammanoon Semapru `2ed16ef`
+- migrate operation-plan section (#6) — Thammanoon Semapru `a392a15`
+- migrate store-operation section (#5) — Thammanoon Semapru `c61e430`
+- migrate vendor-management section and public price-list route (#4) — Thammanoon Semapru `24058af`
+- migrate inventory-management section (#3) — Thammanoon Semapru `5da6a37`
+- migrate approval module and add procurement e2e (#2) — Thammanoon Semapru `49dba2e`
+- migrate purchase-request module (#2) — Thammanoon Semapru `49370ac`
+- migrate purchase-order module (#2) — Thammanoon Semapru `05992ad`
+- migrate goods-receive-note module (#2) — Thammanoon Semapru `53c536c`
+- migrate credit-note module (#2) — Thammanoon Semapru `7a5318b`
+- migrate procurement landing and purchase-request-template (#2) — Thammanoon Semapru `c524faa`
+- migrate department and location page-based config modules (#1) — Thammanoon Semapru `2685c72`
+- migrate remaining dialog-based config modules (#1) — Thammanoon Semapru `9b4be10`
+- migrate config landing, unit and currency modules (#1) — Thammanoon Semapru `3f481d9`
+- add react-router error boundary adapter for module routes (#1) — Thammanoon Semapru `a7a4170`
+- add Next page-to-route codemod for module migrations (#1) — Thammanoon Semapru `a349161`
+- add S3/CloudFront deploy script and documentation (#1) — Thammanoon Semapru `de19ef3`
+- wire login form to client-side auth API (#1) — Thammanoon Semapru `297ddb1`
+- add router, auth guard, root layout and smoke pages (#1) — Thammanoon Semapru `2fc0915`
+- add providers, app root and top loader (#1) — Thammanoon Semapru `474edec`
+- port hooks and components with next-to-vite codemod (#1) — Thammanoon Semapru `afd9889`
+- port types, constants, utils and lib from Next app (#1) — Thammanoon Semapru `9a18e81`
+- add next-to-vite codemod script (#1) — Thammanoon Semapru `6829e77`
+- add use-intl provider with localStorage locale persistence (#1) — Thammanoon Semapru `239b0bc`
+- add next/navigation and next/link compat layer over react-router (#1) — Thammanoon Semapru `6d78f6e`
+- port http-client with direct-backend URL rewrite and bearer injection (#1) — Thammanoon Semapru `5f6286b`
+- add client-side auth API (login/refresh/logout with mutex) (#1) — Thammanoon Semapru `8517fa1`
+- add in-memory access token store and localStorage refresh token adapter (#1) — Thammanoon Semapru `cb97b0b`
+- add runtime config loader (config.json per environment) (#1) — Thammanoon Semapru `e3e2446`
+- scaffold Vite + React 19 + Tailwind 4 SPA foundation (#1) — Thammanoon Semapru `a036c1c`
+- **cn:** list เรียงใบล่าสุดขึ้นก่อน ไม่ใช่ตามใจ backend — Thitiphong Srisavat `2dc92c9`
+- **cn:** กด Submit ได้เลยทั้งที่ยังแก้ค้าง — เซฟให้ก่อนแล้วค่อยส่ง (เหมือน PR) — Thitiphong Srisavat `6452948`
+- **legal:** หน้า /terms กับ /privacy พร้อมเนื้อหาจริง ต่อลิงก์จาก login/register — Thitiphong Srisavat `d802c96`
+- **auth:** เพิ่มหน้า /register ต่อ POST /api/auth/register — Thitiphong Srisavat `b7ccb9c`
+- **cn:** แยกยอดตาม GRN กับยอดที่จะคืนเป็นสองแถว เทียบกันตรงคอลัมน์ — Thitiphong Srisavat `38239c2`
+- **cn:** จำนวนคืนเริ่มที่ 0 และห้ามเกินจำนวนที่รับ — Thitiphong Srisavat `1b9c170`
+- **cn:** กด Add Item ก่อนเลือกผู้ขาย/ใบรับของ ให้ toast บอกว่าขาดอะไร — Thitiphong Srisavat `0e91bb3`
+- **cn:** แยกจำนวนรับกับจำนวนคืนเป็นคนละคอลัมน์ในตารางรายการ — Thitiphong Srisavat `c9f1762`
+- **po:** เพิ่มปุ่มดูประวัติรายบรรทัดในตารางรายการ เหมือน PR — Thitiphong Srisavat `bf2ebb1`
+- **po:** เพิ่มคอลัมน์หน่วยสั่งซื้อในตารางรายการ เลือกได้ — Thitiphong Srisavat `bba5906`
+- **grn:** ใบใหม่ตั้งวันครบกำหนดเป็นวันนี้ไปเลย — Thitiphong Srisavat `2a4f37b`
+- **grn:** เพิ่มคอลัมน์หน่วยของสินค้าในตารางรายการ — Thitiphong Srisavat `410aaf9`
+- **docs:** ส่ง/อนุมัติสำเร็จแล้วกลับหน้ารายการ ทำเหมือน PR ทุกโมดูล — Thitiphong Srisavat `ec352e8`
+- **sr:** ค้นหาในแท็บ Items + toolbar ของแท็บ Stock Movement — Thitiphong Srisavat `d5e2026`
+- **sr:** แท็บ Stock เป็นตารางการเคลื่อนไหวสต๊อกจริง — Thitiphong Srisavat `3c82cb7`
+- **sr:** แยกฟอร์ม SR เป็นแท็บ Items กับ Stock — Thitiphong Srisavat `efdffef`
+- **pr:** ตาราง item ค้นหา+เรียงได้ และขยายคอลัมน์ที่แคบเกิน — Thitiphong Srisavat `5656cd2`
+- **ia:** กด Commit ต้องยืนยันก่อน ปิดเอกสารพลาดไม่ได้ — Thitiphong Srisavat `d8f45fc`
+- **ia:** qty เริ่มที่ 0 ใส่ทศนิยมได้ ห้ามติดลบ + คอลัมน์หน่วยนับ — Thitiphong Srisavat `e4b06e3`
+- **sr:** hover ช่องสินค้าดูยอดคงเหลือ/กำลังสั่งได้ เหมือน PR v2 — Thitiphong Srisavat `a11c7c7`
+- **sr:** เพิ่มคอลัมน์ amount รายแถว + ยอดรวมท้ายฟอร์ม (ตั้ง 0 รอราคา) — Thitiphong Srisavat `05f5b7c`
+- **sr:** กด Submit ได้ตั้งแต่ใบยังไม่เคย save + qty ใส่ทศนิยมได้ — Thitiphong Srisavat `b27d9cf`
+- **item:** เลือกค่าจาก lookup เสร็จแล้วเด้งไปช่องถัดไปของแถวเดียวกัน — Thitiphong Srisavat `57270bc`
+- **grn,cn,sr:** กด Save แล้วไม่มีรายการ ให้พาไปยังสิ่งที่ต้องทำต่อ — Thitiphong Srisavat `9575c74`
+- **po:** ไม่มีรายการแล้วกด Save ให้เติมแถวเปล่าให้ เหมือน PR — Thitiphong Srisavat `cf8a905`
+- **pr:** ต่อ API ลบใบขอซื้อหลายใบ — Thitiphong Srisavat `328f806`
+- **pr:** stage purchase แก้แถวที่ approve มาได้ ทั้งหน้าเดิมและ v2 — Thitiphong Srisavat `d71db67`
+- **po,sr:** กันหน้าสร้างใบสั่งซื้อ/ใบเบิกของแบบเดียวกับ PR — Thitiphong Srisavat `2a06713`
+- **pr:** กันไม่ให้เดินเข้าหน้าสร้างใบขอซื้อทั้งที่ไม่มี workflow ให้เริ่ม — Thitiphong Srisavat `ba64e61`
+- **pr:** tab my-pending ติ๊กใบฉบับร่างกับใบที่รออนุมัติปนกันไม่ได้ — Thitiphong Srisavat `803f2a0`
+- **pr:** ซ่อนช่องติ๊กในหน้า list ตอนอยู่ tab all-document — Thitiphong Srisavat `e8f33ed`
+- **pr:** v2 — ข้อมูลครบเท่าหน้าเดิม เลื่อนไปหาช่องที่กรอกผิด และเก็บรายละเอียด UI — Thitiphong Srisavat `9c14d2e`
+- **pr:** หน้าใบขอซื้อ v2 — ตารางเดียวจบ ไม่มีอะไรซ่อน — Thitiphong Srisavat `2a978a5`
+- **navbar:** สลับ BU สำเร็จแล้วเด้งไป dashboard — Thitiphong Srisavat `dafc867`
+- **operation-plan:** redesign category/cuisine/equipment form ตาม pattern company profile — Thitiphong Srisavat `39ed6f5`
+- **recipe:** redesign form ตาม pattern company profile + neutral ตาม DESIGN.md — Thitiphong Srisavat `c8d1f29`
+- **product:** redesign card view — กันข้อความทะลุกรอบ + ข้อมูลครบ + delete — Thitiphong Srisavat `c8f10a9`
+- **product:** disabled-input view + dot badge + truncate/tooltip ใน list — Thitiphong Srisavat `c0218d8`
+- **product:** redesign general tab ตาม pattern company profile — Thitiphong Srisavat `2ed21ac`
+- **pl-external:** view mode ใช้คอลัมน์ตรงกับ edit — Thitiphong Srisavat `37a1ecc`
+- **price-list:** sort คอลัมน์ No ด้วย field pricelist_no + ตั้งเป็น default sort — Thammanoon Semapru `4f5c736`
+- **pl-external:** header โชว์ช่วง effective + PWT ใช้คำเต็ม — Thitiphong Srisavat `977d7ef`
+- **pl-external:** download/import excel + submit confirm + ปรับตาราง — Thitiphong Srisavat `e7f1b66`
+- **price-list:** เพิ่มคอลัมน์ note ต่อ tier ใน grouped view (เหมือน PLT) — Thitiphong Srisavat `4f861ad`
+- **plt:** view mode group product แบบ price list (rowspan ต่อ product) — Thitiphong Srisavat `50faa86`
+- **plt:** เลือก product จาก tree + การ์ดต่อ product คุม MOQ หลาย unit — Thitiphong Srisavat `4d4633a`
+- add documentation for module migration strategy in .claude/skills — Thammanoon Semapru `fe7532e`
+- **rfp:** make vendor email cell read as a clickable send-email link — Thitiphong Srisavat `4761377`
+- **pl-external:** right-align header labels for numeric columns — Thitiphong Srisavat `7d394bf`
+- **price-list-portal:** return to view mode after a successful save or submit — Thitiphong Srisavat `0ffe98c`
+- **price-list-portal:** confirm before removing a MOQ pricing tier — Thitiphong Srisavat `26216ec`
+- **price-list-portal:** auto-save draft before submit; submit has no payload — Thitiphong Srisavat `f136b00`
+- **price-list-portal:** persist MOQ tiers + fix draft save payload — Thitiphong Srisavat `5f4c8ca`
+- **price-list-portal:** rename Save to "Save Draft" and always allow it — Thitiphong Srisavat `48926d3`
+- **price-list:** add PWT column to the grouped view mode — Thitiphong Srisavat `2126a43`
+- **price-list-portal:** friendly "link expired" page for invalid tokens — Thitiphong Srisavat `e08ab12`
+- **price-list-portal:** Apple-style loading skeleton for the RFQ page — Thitiphong Srisavat `cf71e28`
+- **price-list:** vendor enters gross Price; PWT/Amount derived, columns reordered — Thitiphong Srisavat `af173ba`
+- **price-list:** show PWT / Tax / Amount breakdown on internal + portal tables — Thitiphong Srisavat `ccc4a8a`
+- **price-list-portal:** show vendor (recipient) in the RFQ header — Thitiphong Srisavat `7fec4bd`
+- **price-list-portal:** reframe as a hotel→vendor request-for-pricing document — Thitiphong Srisavat `e766759`
+- **price-list-portal:** tax-profile picker sourced from a dedicated endpoint — Thitiphong Srisavat `6d047b4`
+- **workflow:** show signature in report, per stage (#57) — Thammanoon Semapru `fe4cef8`
+- **doc-header:** span department/vendor cells 2 cols so long names don't truncate — Thitiphong Srisavat `6f4d939`
+- **nav:** back button restores the list's filter/sort/tab state — Thitiphong Srisavat `ed07375`
+- **interface:** Category→Brand model + license-gated visibility (Phase 1 FE) (#56) — Thammanoon Semapru `ae5f4ac`
+- add soft guards for silent data-entry mistakes (GRN/CN/price list) — Thitiphong Srisavat `2cce987`
+- **pr:** show vendor and a direct GRN link in the last-received tooltip — Thitiphong Srisavat `d5c8261`
+- **price-list:** per-item is_preferred flag (schema, type, UI) — Thitiphong Srisavat `220e183`
+- **company-profile:** character-count counter on editable text fields — Thitiphong Srisavat `88a2360`
+- **pr:** show real last-receiving cost in U.Price info tooltip — Thitiphong Srisavat `7d77fc9`
+- **cn:** item rework — GRN browse dialog, type-driven table, per-line discount/tax override — Thitiphong Srisavat `6d4e459`
+- **grn:** mirror PO item table (aligned columns, inline discount/tax override) — Thitiphong Srisavat `8c5b182`
+- **po:** per-location discount/tax with override, GRN-style item table — Thitiphong Srisavat `46bd093`
+- **pr:** hover last-receiving cost by unit next to U.Price — Thitiphong Srisavat `03a898a`
+- **pr:** fixed-decimal amount inputs with format-on-blur — Thitiphong Srisavat `48cea45`
+- **pr:** base-currency summary row + Total field in item grid — Thitiphong Srisavat `fb77ef6`
+- **purchase-request:** unify PR item tax/discount into single-box controls — Thitiphong Srisavat `173f6c5`
+- **purchase-order:** lock all content for PR-sourced PO except currency rate — Thitiphong Srisavat `9077128`
+- **procurement:** allow overriding the currency exchange rate — Thitiphong Srisavat `0e8d5b0`
+- **price-list:** split tax rate into its own Rate column — Thitiphong Srisavat `4ee8fc3`
+- **price-list:** replace tax-profile column with tax-inclusive Amount — Thitiphong Srisavat `8d8b5a4`
+- **price-list:** merge tier columns into one "MOQ Pricing" column — Thitiphong Srisavat `088bd17`
+- **price-list:** group duplicate products in view mode — Thitiphong Srisavat `64191e0`
+- **price-list:** confirm dialog when selecting a duplicate product — Thitiphong Srisavat `e8c8000`
+- **business-setting:** send doc_version in PATCH payload for optimistic lock — Thitiphong Srisavat `b44756d`
+- **vendor-management:** guard navigation away from dirty forms — Thitiphong Srisavat `f995b78`
+- **pr:** inventory icon hint and muted state when no product selected — Thitiphong Srisavat `01bd1f7`
+- **procurement,store-op:** guard forms against discarding unsaved edits — Thitiphong Srisavat `09fce81`
+- **system-admin:** warn before discarding unsaved Business Setting edits — Thitiphong Srisavat `906b9a0`
+- **system-admin:** add Business Setting page (view + edit) — Thitiphong Srisavat `95a8eed`
+- **pr:** save row edits before approve/reject/send-back — Thitiphong Srisavat `24d1df6`
+- **pr:** refine purchase-stage item editing UX — Thitiphong Srisavat `f80c5d8`
+- **grn:** show location code as a badge on the location row — Thitiphong Srisavat `59038a1`
+- **sr:** show product local name in item table — Thitiphong Srisavat `4a9f918`
+- **sr:** workflow UI + interactions parity with PR — Thitiphong Srisavat `12eb1f0`
+- **po:** merge Qty + Unit into one Receiving-style column — Thitiphong Srisavat `3dbcc8b`
+- **cn:** show location code in item table (display-only) — Thitiphong Srisavat `3ed5d8c`
+- **prt:** show product local name + location name/code (display-only) — Thitiphong Srisavat `28aa0b3`
+- **pr:** show location code + status on one row in item table — Thitiphong Srisavat `16ee078`
+- **cn:** show product local name (display-only) in item table — Thitiphong Srisavat `306d01d`
+- **grn:** show product local name (display-only) in item table — Thitiphong Srisavat `f47e18b`
+- **grn:** hide empty description in view mode — Thitiphong Srisavat `93ee501`
+- **po:** hide empty description/remarks in view mode — Thitiphong Srisavat `a17d08f`
+- **prt:** hide empty description section in view mode — Thitiphong Srisavat `8a0e2bb`
+- **pr:** status-gated header/general fields + workflow-history via WorkflowStep — Thitiphong Srisavat `abe5de7`
+- **sr:** PR-style workflow history (doc + per-item), dot badges, shared primitives — Thitiphong Srisavat `b06137b`
+- **prt:** merge qty+unit InputSuffix, Req column, notes/status footer, dot badge — Thitiphong Srisavat `7c31c52`
+- **procurement:** NotesSection + SummaryFooterBar across GRN/CN/PR/PO — Thitiphong Srisavat `e5a047e`
+- **ui:** add NotesSection + SummaryFooterBar reusable components — Thitiphong Srisavat `3717504`
+- **pr:** move description into a dedicated Notes section (like PO) — Thitiphong Srisavat `0cdf72f`
+- **po:** reusable field primitives, merged currency, footer grand summary, GRN-style locations — Thitiphong Srisavat `e4d8f68`
+- **pr:** adopt reusable field primitives in purchase-request — Thitiphong Srisavat `edbec8e`
+- **cn:** migrate credit-note to reusable field primitives + inline item pricing — Thitiphong Srisavat `b9c65f6`
+- **ui:** reusable InputSuffix + FieldPlainText, standardize EyeBrow, migrate GRN — Thitiphong Srisavat `6736b86`
+- **pr:** per-item workflow history sheet + smoother item scroll — Thitiphong Srisavat `ff07ed0`
+- **grn:** product-row amount rollups, price/tax-profile placement, clearer filenames — Thitiphong Srisavat `e15250d`
+- **grn:** product-row rollups + qty/unit on location line + PO-bound expand — Thitiphong Srisavat `290e7a0`
+- **cn:** mirror GRN item redesign as flat product+location cards — Thitiphong Srisavat `e69fd1b`
+- **grn:** inline location/product labels + auto-expand rows on field error — Thitiphong Srisavat `392aa63`
+- **ui:** unify active/inactive status badge across cards and tables — Thitiphong Srisavat `b930d27`
+- **grn:** replace is_consignment/is_cash with post_type select — Thammanoon Semapru `62cc40b`
+- add vercel CLI to project dependencies — Thammanoon Semapru `42ba66c`
+- sync upstream delta (fix PO + doc_version) from source app — Thammanoon Semapru `011cfb3`
+- add Docker deployment (nginx + built-in /api proxy) — Thammanoon Semapru `b768078`
+- add GCS deploy script alongside S3 — Thammanoon Semapru `98563bc`
+
+### Fixed
+- **version:** ให้ footer อ่านเวอร์ชันจาก package.json แทน literal ที่ค้างมา 2 เดือน (#101) — Thammanoon Semapru `451eb56`
+- **a11y:** ให้ข้อความช่วงเวลาในไทม์ไลน์ผ่านเกณฑ์ contrast และเติม i18n key ที่ขาดของ PO (#100) — Thammanoon Semapru `7c5f559`
+- **pr:** แก้ 4 ข้อจากรอบตรวจ whole-branch ของ activity timeline (#97) — Thammanoon Semapru `d33ee76`
+- **pr:** แปลหัวข้อ activity ของ action ฝั่ง workflow ให้ครบ (#97) — Thammanoon Semapru `3f382df`
+- อ่านเวลาจาก audit แทน created_at/updated_at ที่ API ไม่ส่งมา (#92) — Thammanoon Semapru `8e091ed`
+- **history-timeline:** ยก useProfile ขึ้น context กลาง แก้ a11y/edge case จาก code review (#90) — Thammanoon Semapru `f6f0063`
+- **workflow-track:** แก้ AA ของช่อง done ที่สีข้อความ ไม่ใช่ที่ความเข้มของพื้น (#87) — Thammanoon Semapru `5559c50`
+- **workflow-track:** พื้นช่อง done กับ pending ในโหมดมืดแยกกันได้แล้ว (#87) — Thammanoon Semapru `bf37f8f`
+- **workflow-track:** ไอคอน/ข้อความ/รูปลูกศรผ่านเกณฑ์ contrast ทั้งสองธีม (#87) — Thammanoon Semapru `6b318e2`
+- **workflow-track:** พื้นลูกศรออกสีชมพูแทนเขียว/เหลือง (#87) — Thammanoon Semapru `06abc40`
+- **workflow-track:** สีลูกศรไม่ขึ้นเพราะ utility class ไม่ถูกสร้าง (#87) — Thammanoon Semapru `7599fb9`
+- **user:** ลบ index ที่ไม่ได้ใช้ใน users.map ปลด lint error ที่ทำ CI main แดง — Thammanoon Semapru `e46aa47`
+- **analytics:** circuit breaker ปิด analytics เมื่อ auth ปฏิเสธ + เก็บงาน retryable set/track props — Thammanoon Semapru `6a6d579`
+- **analytics:** requeue เฉพาะ error ชั่วคราว กัน analytics เด้ง dialog/redirect — Thammanoon Semapru `8dad575`
+- activity button fetch after click on button, fix IA print button — Khafang `a55c0d0`
+- **pr:** label child tables without the table name (#84) — Khafang `4d0809a`
+- **pr:** make the activity diff readable and free of internals (#84) — Khafang `f01ea4c`
+- **list-views:** แก้ 5 จุดจาก final review — approval saved view, RFP clear all, lost-update window, filter caps, pseudo-field guards (#83) — Thammanoon Semapru `4bcb764`
+- **list-filter:** แก้ 3 ปัญหาจาก code review งาน IA/transaction/SR (#83) — Thammanoon Semapru `e9b03c6`
+- **list-filter:** กัน toast "view not found" ผิดตอน query ยัง fetch/error อยู่ (#83) — Thammanoon Semapru `9f60b87`
+- **pr:** กัน memo churn จาก setViewMode + ซ่อน label ลอยของ view toggle (#83) — Thammanoon Semapru `e3f0ca5`
+- **ui:** FontScaleSwitch อ่านระดับที่ใช้จริงจาก DOM class ไม่ใช่ localStorage — Thammanoon Semapru `402a3e7`
+- **ui:** main.tsx เรียก applyScale ซ้ำตอน boot กัน inline script เป็นจุดเดียวที่พึ่งได้ — Thammanoon Semapru `b0c0874`
+- **ui:** เติม title ให้เซลล์ชื่อสินค้า/location ที่ truncate ในตาราง item ทั้ง 4 module — Thammanoon Semapru `0ae3441`
+- **i18n:** ลบ key fontSize เก่าที่ซ้ำกับ key ใหม่ใน common — Thammanoon Semapru `e8436da`
+- **ui:** ย้าย gap ของ Field ไปตาม orientation — แนวตั้งเหลือ 6px — Thammanoon Semapru `4818dd3`
+- **ui:** เก็บสองจุดที่ค่าใน view mode ยังไม่เข้าพวกกับ field อื่น — Thammanoon Semapru `f7510c4`
+- **ui:** จับ label กับค่าใน view mode ให้อ่านเป็นก้อนเดียว — Thammanoon Semapru `7436bcc`
+- **a11y:** ทำให้แอปเคารพ prefers-reduced-motion โดยไม่แช่แข็ง spinner — Thammanoon Semapru `e439f97`
+- **a11y:** แยก token สีตัวอักษรออกจากสีพื้น — สี status ตกเกณฑ์ AA ใน light mode — Thammanoon Semapru `fe4946c`
+- **design:** ใช้ token --highlight ที่สร้างค้างไว้ + บันทึกกับดักคอนทราสต์ของสี status — Thammanoon Semapru `6f04d39`
+- เลิกใช้ 9px/8px กับข้อความที่อ่านเป็นคำ ในโมดูลที่เหลือ — Thammanoon Semapru `cc0a4e1`
+- **system-admin:** เลิกใช้ 9px กับข้อความที่ไม่ใช่ eyebrow ตัวพิมพ์ใหญ่ — Thammanoon Semapru `3df38d9`
+- **ui:** ให้ cn() รู้จักบันได font-size ที่เป็น custom token — Thammanoon Semapru `398712c`
+- **print-form:** let an admin return a document type to the system default form (#61) — Thammanoon Semapru `6254ae8`
+- **print-form:** distinguish a failed fetch from a deleted template, announce the error (#61) — Thammanoon Semapru `f93c01f`
+- **price-list:** carry doc_version through the edit form for optimistic lock — Thammanoon Semapru `5ac652e`
+- **pricelist-external:** route vendor save-draft/submit to api/pricelist-external — Thammanoon Semapru `a115b90`
+- **app-config:** unwrap list rows from the data.items envelope (#55) — Thammanoon Semapru `445083c`
+- **interface:** inline ErrorState for unknown :key, not full-page NotFound (#55) — Thammanoon Semapru `a27ccb2`
+- **interface:** keep nav guard armed during save, associate field labels, add button type (#55) — Thammanoon Semapru `b79abe6`
+- **interface:** address useInterfaceConfig review findings (#55) — Thammanoon Semapru `50c58ed`
+- widen config*.json guards in deploy paths, fix README quickstart, clarify vite.config.ts comments — Thammanoon Semapru `9c97267`
+- ignore public/config.json too (config*.json, not config.*.json) — Thammanoon Semapru `e55024f`
+- **deploy:** cert-wait poll survives transient gcloud failures — Thammanoon Semapru `6e854f1`
+- **deploy:** exact-match cert domain guard (substring false positive) — Thammanoon Semapru `069d03d`
+- **category:** show inline required error for tax profile on submit — Thammanoon Semapru `cf26a45`
+- **product:** keep Item Group lookup editable when sub-category is missing in edit mode — Thammanoon Semapru `1880d99`
+- period filter will not use all — Khafang `ce9f16f`
+- **procurement:** PO payload contract, workflow-first UX & DESIGN.md UI cleanup — Thitiphong Srisavat `11b5294`
+- **ui:** flatten neon icon-boxes, badges, filter-pills & status chips per DESIGN.md — Thitiphong Srisavat `364088c`
+- **report:** align UI to DESIGN.md tokens & i18n — Thitiphong Srisavat `d233576`
+- **system-admin:** align workflow/role/user UI to DESIGN.md tokens & i18n — Thitiphong Srisavat `bca3555`
+- **operation-plan:** translate hardcoded recipe & cuisine strings — Thitiphong Srisavat `115173f`
+- **product-mgmt:** align UI to DESIGN.md tokens & i18n — Thitiphong Srisavat `d99d7b3`
+- **store-op:** translate hardcoded strings in store-requisition & stock-replenishment — Thitiphong Srisavat `4a6964d`
+- **vendor-mgmt:** align UI to DESIGN.md tokens & i18n — Thitiphong Srisavat `19e8536`
+- **inventory:** translate hardcoded table header & badge strings — Thitiphong Srisavat `70afcc3`
+- **procurement:** align UI to DESIGN.md tokens & i18n — Thitiphong Srisavat `7d75826`
+- **config:** align location & department UI to DESIGN.md tokens — Thitiphong Srisavat `e73f8b6`
+- **pr:** statically import PrActionDialog to drop dynamic-import warning — Thitiphong Srisavat `e248f37`
+- **routes:** close ErrorBoundary coverage gaps — Thitiphong Srisavat `21bc390`
+- **price-list-external:** surface backend error message on save/submit failure — Thitiphong Srisavat `a55f3d3`
+- **http-client:** add default 30s request timeout to prevent hung requests — Thitiphong Srisavat `379f82d`
+- **pr:** don't require vendor/price/tax when sending back at purchase stage — Thammanoon Semapru `3270313`
+- **data-grid:** row-select checkbox not reflecting select-all — Thammanoon Semapru `3845adb`
+- **vendor:** send doc_version on update (optimistic concurrency) (#33) — Thammanoon Semapru `9e54732`
+- round-trip doc_version on update across all config modules (#32) — Thammanoon Semapru `ab89572`
+- **delivery-point:** send doc_version in update payload (#31) — Thammanoon Semapru `ca05512`
+- **api:** strip unsubstituted placeholders from server error messages (#30) — Thammanoon Semapru `d95adcb`
+- **location:** display delivery point even when inactive (#29) — Thammanoon Semapru `4ac7b62`
+- **location:** send doc_version in update payload (#28) — Thammanoon Semapru `5ec3b23`
+- **data-grid:** opt out of React Compiler for table-state consumers (#26) — Thammanoon Semapru `4c5e276`
+- **product-category:** round-trip doc_version on category/subcategory/item-group update (#25) — Thammanoon Semapru `76703be`
+- **eco:** wrap create/update payload under metadata + doc_version on PATCH (#24) — Thammanoon Semapru `b0a4c04`
+- **adjustment-type:** send doc_version on PATCH + use lowercase enum values (#23) — Thammanoon Semapru `1f48d8b`
+- **tax-profile:** send doc_version on PATCH (optimistic concurrency) (#22) — Thammanoon Semapru `fe39361`
+- **currency:** send doc_version on PATCH + guard decimal_places on edit (#21) — Thammanoon Semapru `5f3b105`
+- **extra-cost:** send doc_version on update (PATCH requires it) (#20) — Thammanoon Semapru `73c091d`
+- **business-type:** send doc_version on update (PATCH requires it) (#19) — Thammanoon Semapru `9d41e9f`
+- **unit:** send doc_version on update (PUT requires it) — Thammanoon Semapru `1a50c84`
+- **department:** send doc_version on update (PATCH requires it) — Thammanoon Semapru `e057b6e`
+- add Vercel SPA fallback rewrite + cache headers (#17) — Thammanoon Semapru `d7a22f1`
+- correct Cluster C resync keys per live-backend smoke test (#15) — Thammanoon Semapru `fd0f990`
+- re-sync edit forms to refetched server state after save (Cluster C) (#15) — Thammanoon Semapru `b25b075`
+- behavior-altering backlog findings (PO submit/rate, SR scroll, cost probes, MOQ tiers) (#14) — Thammanoon Semapru `48ee4c4`
+- safe deferred backlog findings (shortcuts, tree ids, chunk self-heal, nav-guard) (#13) — Thammanoon Semapru `f9259ae`
+- paginate desktop grid view for credit-note and PRT lists (#12) — Thammanoon Semapru `1e642e3`
+- surface fetch errors in grid/mobile list views (#12) — Thammanoon Semapru `d5ce9d3`
+- exchange-rate content-type guard + report date-field period race (#11) — Thammanoon Semapru `c6447b3`
+- **config:** close button inert in view-mode dialogs (#11) — Thammanoon Semapru `4348fc8`
+- medium route-level findings (RHF dirty tracking, pagination, perf) (#11) — Thammanoon Semapru `88aa5db`
+- components + missing i18n keys (#11) — Thammanoon Semapru `d9023b7`
+- medium-severity infra/lib findings (#11) — Thammanoon Semapru `b66508d`
+- **procurement:** sync PO-from-price-list item totals from locations (#11) — Thammanoon Semapru `d404a8d`
+- approval pagination total + external endpoint 401 handling (#11) — Thammanoon Semapru `4a06ef2`
+- high-severity review findings (auth, pagination, form lifecycle, data files) (#11) — Thammanoon Semapru `58ba76c`
+- remove browser-breaking process.env references from ported hooks (#1) — Thammanoon Semapru `6bae2b9`
+- route file-upload hooks through httpClient for SPA auth and URL rewrite (#1) — Thammanoon Semapru `1c5eb78`
+- map login 429 to RATE_LIMITED with retryAfter and allow self-signed dev proxy (#1) — Thammanoon Semapru `78f4f52`
+- exclude next-themes from codemod remaining-imports report (#1) — Thammanoon Semapru `d8b3111`
+- readonly search params type and useParams coverage in compat layer (#1) — Thammanoon Semapru `9fa9b14`
+- clearer runtime-config errors and test hygiene (#1) — Thammanoon Semapru `fde40ff`
+- clear storage between tests and use glob-style vitest excludes (#1) — Thammanoon Semapru `6495087`
+- lint ignores for session artifacts and keep lockfile in clear script (#1) — Thammanoon Semapru `93eb5ec`
+- drop unused mode param in vite config (#1) — Thammanoon Semapru `8e6705e`
+- **doc-header:** จะลบเอกสารต้องกด Edit ก่อน ทั้งที่ในหน้า list กดลบได้เลย — Thitiphong Srisavat `ed37e6b`
+- **doc-header:** ปุ่มชุดขวาบนของเอกสาร 8 หน้า เรียงไม่เหมือนกันสักหน้า — Thitiphong Srisavat `7efd093`
+- **data-grid:** ตาราง item ของ PR มีเส้นปิดท้าย แต่ PO/GRN/CN ไม่มี — Thitiphong Srisavat `6dbfb68`
+- **sidebar:** เมนูหนา 600 ทุกอันจนไม่มีอันไหนเด่น แล้วโค้ดที่เขียนไว้ก็ไม่ทำงานสองจุด — Thitiphong Srisavat `e42ad72`
+- **navbar:** breadcrumb เข้าไปในใบแล้วไม่ขยับ แถมกดกลับไม่ได้ ตัวก็ดังเกินเหตุ — Thitiphong Srisavat `bb88636`
+- **error:** เปิดใบที่ไม่มีอยู่จริงแล้วเจอทางตัน ข้อความก็ผิด ปุ่มก็กดไปไม่ได้อะไร — Thitiphong Srisavat `00f7665`
+- **error:** toast เด้งสองใบ กับข้อความอังกฤษที่ dev เขียนไว้เอง หลุดถึงพนักงานหน้างาน — Thitiphong Srisavat `54142c3`
+- **cn:** amount_discount สร้างไม่ได้เลยสักใบ เพราะติด validate ช่องที่ไม่มีบนจอ — Thitiphong Srisavat `de8aeda`
+- **cn:** รับมา 0 แล้วยังกรอกคืนได้ เพราะ 0 ถูกนับเป็น "ยังไม่รู้" — Thitiphong Srisavat `5db7edd`
+- **auth:** คนที่ยังไม่ถูก assign เข้า BU ไหน อย่าปล่อยให้นั่งดู spinner หมุนเปล่า — Thitiphong Srisavat `4b08c65`
+- **cn:** ช่องที่เป็นตัวเลขให้ขึ้นตัวเลข ไม่ใช่ขีด — Thitiphong Srisavat `f77e8f8`
+- **cn:** ข้อความคืนเกินไม่ต้องบอกตัวเลขซ้ำกับคอลัมน์ Received — Thitiphong Srisavat `a77c16c`
+- **procurement:** ตัดสินรายรายการต้องอยู่โหมดแก้ไข ไม่ใช่แค่มี role — Thitiphong Srisavat `da29feb`
+- **status-badge:** status ที่ไม่มีในแผนที่ต้องไม่กลายเป็นพิลทึบหรือไปยืมป้ายคนอื่น — Thitiphong Srisavat `0249a8e`
+- **lookup:** เลือกของจากผลค้นหาแล้วป้ายไม่ขึ้น — Thitiphong Srisavat `fee4764`
+- **procurement:** เว้นที่ให้ scrollbar แนวนอนในตารางรายการทั้ง 4 โมดูล — Thitiphong Srisavat `16b7fd7`
+- **grn:** ส่ง received_price + ให้ช่องจำนวนกับราคากรอกทศนิยมได้ทั้งแอป — Thitiphong Srisavat `12652ec`
+- **cn:** เอา scroll แนวนอนในหน้ารายการออก + skeleton ตอนโหลดฟอร์มให้ตรงของจริง — Thitiphong Srisavat `b1b53ae`
+- **nav-guard:** validation ไม่ผ่านแล้ว discard dialog เด้งเอง — Thitiphong Srisavat `adf0f36`
+- **grn:** สร้าง GRN จาก PO แล้วราคาไม่ติดมา ยอดทั้งใบเป็นศูนย์ — Thitiphong Srisavat `1df2b76`
+- **po:** checkbox ตัดสินรายการโผล่เฉพาะโหมดแก้ไข — Thitiphong Srisavat `c270e43`
+- **sr:** แท็บ Stock Movement โชว์เฉพาะใบที่ completed + เอาปุ่มเพิ่มรายการออก — Thitiphong Srisavat `d189b57`
+- **product:** กรอบแดงขึ้นทันทีที่กด save + validate หมวด/หมวดย่อย — Thitiphong Srisavat `eef3f39`
+- **api:** ย้าย product inventory ไป endpoint ใหม่ — Thitiphong Srisavat `7cb1386`
+- **adjustment-type:** คอลัมน์ Type ใช้ chip แบบเดียวกับตาราง IA — Thitiphong Srisavat `f261ef2`
+- **ia:** หน้ารายการ — การ์ดแบ่งแถวแบบ SR + ปุ่มลบ, โชว์รหัสสกุลเงิน, สลับคอลัมน์ — Thitiphong Srisavat `e50ddb8`
+- **ia:** ช่องสินค้าโชว์ชื่อท้องถิ่น + หัวเอกสารเลิกโชว์วันที่/คลังซ้ำ — Thitiphong Srisavat `8b033d8`
+- **ia:** รื้อหน้าตาฟอร์มปรับปรุงสต๊อกให้ตรง pattern โปรเจกต์ — Thitiphong Srisavat `fdcd54f`
+- **sr:** บีบช่อง checkbox/# ให้เท่ากัน + ปุ่มตัดสินรายแถวชิดซ้ายเหมือน PR — Thitiphong Srisavat `b5544c2`
+- **sr:** รื้อการ์ดในหน้า list ใหม่ badge ไม่ทะลุขอบ + เลื่อนสุดแล้วโหลดต่อ — Thitiphong Srisavat `da2f1d7`
+- **sr:** จัด toolbar ใหม่ + ตารางเลื่อนแนวนอนได้ ไม่ต้องบีบคอลัมน์ — Thitiphong Srisavat `c47d62e`
+- **grn:** แก้บันทึกใบรับสินค้าไม่ได้ ตั้งแต่ id ของแถวยัน doc_version — Thitiphong Srisavat `c841721`
+- **lookup:** className ที่ส่งมาต้อง merge ไม่ใช่แทนที่ default ทั้งก้อน — Thitiphong Srisavat `29ca6e5`
+- **sr:** ช่อง product ขึ้นกรอบแดงได้จริง และคุมความสูงด้วย size — Thitiphong Srisavat `967ac59`
+- **po,grn,cn,sr:** กด Save ไม่ผ่านแล้วต้องบอกว่าขาดอะไร เหมือน PR — Thitiphong Srisavat `aaecfb1`
+- **pr:** ปุ่ม Save/Submit กดได้เสมอ แล้วบอกว่าขาดอะไร — Thitiphong Srisavat `595e589`
+- **grn:** เลือกสินค้าเสร็จแล้วพิมพ์จำนวนต่อได้เลย ไม่หายเงียบ — Thitiphong Srisavat `0fa4ce6`
+- **ui:** toast error ขึ้นประโยคเดียวที่คนหน้างานอ่านรู้เรื่อง — Thitiphong Srisavat `d9c4081`
+- **pr:** แถบสรุปคิด subtotal คนละจำนวนกับแถว และไม่แปลงเป็นสกุลหลัก — Thitiphong Srisavat `8688c50`
+- **po:** ยอดรวมท้ายฟอร์มคิดผิด — ไม่มีส่วนลดกับภาษีเลย — Thitiphong Srisavat `ccc2010`
+- **pr:** แถบ on hand/on order สูงบรรทัดเดียวทุกใบ — Thitiphong Srisavat `1fff152`
+- **pr:** "เลือกทั้งหมด" ต้องไม่กวาดแถวที่ติ๊กไม่ได้เข้ามาด้วย — Thitiphong Srisavat `12146bb`
+- **pr:** v2 ก็ต้องกันหน้าสร้างใบตอนไม่มี workflow ให้เริ่ม — Thitiphong Srisavat `ac5cf24`
+- **nav:** กด back ตอนฟอร์ม dirty แล้ว discard dialog เด้งสองรอบ — Thitiphong Srisavat `7fc2e5a`
+- **ui:** กรอบแดงตอนกรอกผิดต้องชนะ focus และกล่อง suffix ต้องบอกว่าตัวเองผิด — Thitiphong Srisavat `7b50e8b`
+- **pr:** เลิกส่ง total_amount / foc_unit_conversion_rate ที่ไม่มี column จริง — Thitiphong Srisavat `cc3764e`
+- **pr:** purchase approve ส่ง payload ผิด contract จน save 400 ทั้งเส้น — Thitiphong Srisavat `489e9f1`
+- **form:** ปิด navigation guard ระหว่าง create ทุกฟอร์มที่เหลือ — Thitiphong Srisavat `e8cafef`
+- **pr:** เลิกก็อป description ของ template มาใส่ PR — Thitiphong Srisavat `a3e510c`
+- **workflow:** อ่าน recipients รูปแบบเก่าได้ + เลิกกลืน parse error เงียบๆ — Thitiphong Srisavat `8b09169`
+- **dashboard:** widget ที่ dataset ไม่มีใน BU นี้ ซ่อนทิ้ง ไม่ใช่ skeleton ค้าง — Thitiphong Srisavat `ec0c90c`
+- **data-grid:** คลิก sort ซ้ำสลับ asc↔desc ไม่ได้เมื่อ default sort เป็น asc — Thammanoon Semapru `4890c5f`
+- **pl-external:** จัด expanded tier editor ชิดขวาทั้งก้อน — Thitiphong Srisavat `63662c4`
+- **interface:** ไม่โชว์ interface ที่ platform ไม่ได้เลือกไว้ — Thammanoon Semapru `af65fe4`
+- **product:** กัน freeze ตอนกด Edit ในแท็บ Location Assignment — Thammanoon Semapru `c4e4d1a`
+- **grn:** กรอก Discount/เลือก Tax แล้ว focus ไม่เด้งไป product อีก — Thitiphong Srisavat `481247d`
+- **po,pr,cn,sr:** สร้างเสร็จกด back กลับ list ไม่เด้ง /new (แบบเดียวกับ GRN) — Thitiphong Srisavat `76e62f9`
+- **grn:** สร้าง GRN เสร็จแล้วกด back กลับ list ไม่เด้งกลับ /new — Thitiphong Srisavat `bd1204f`
+- **grn:** new GRN ให้ currency default ขึ้นเอง เลิกว่างเปล่า — Thitiphong Srisavat `75ebf34`
+- **grn:** กรอกเลขใน item ใหม่แล้ว focus ไม่เด้งอีก — Thitiphong Srisavat `7b78f1f`
+- **workflow:** de-neon the default-config hint per DESIGN.md — Thitiphong Srisavat `f17b102`
+- **workflow:** drop duplicate object keys that broke the build — Thitiphong Srisavat `45a11e1`
+- **forms:** detect item updates by value, not dirtyFields index — Thitiphong Srisavat `e0a3115`
+- **rfp:** truncate long vendor emails cleanly — Thitiphong Srisavat `2484e36`
+- **price-list-template:** re-sync form to server after save (no stale ids) — Thitiphong Srisavat `bd35942`
+- **price-list-template:** send products on edit and stop them duplicating — Thitiphong Srisavat `573d119`
+- **price-list-portal:** keep input focus while editing MOQ tiers — Thitiphong Srisavat `5553aa9`
+- **price-list-portal:** keep input focus while typing in edit grid — Thitiphong Srisavat `dad1d5e`
+- **price-list:** redirect to detail after create instead of getting stuck on /new — Thitiphong Srisavat `3ae3b24`
+- **price-list:** enforce MOQ reverse-tier guard and fix detail date off-by-one — Thitiphong Srisavat `4d276a7`
+- **goods-receive-note:** send doc_version when committing — Thitiphong Srisavat `ffe0ec2`
+- **header:** keep the workflow step on the ribbon line without overlap — Thitiphong Srisavat `de47157`
+- **credit-note:** send doc_version when submitting to workflow — Thitiphong Srisavat `086031a`
+- **a11y:** move the primary and destructive tokens to clear WCAG AA — Thitiphong Srisavat `ef73897`
+- **ui:** drop the per-role colour maps from workflow, delete dead StatTile — Thitiphong Srisavat `5904364`
+- **ui:** delete the 5-hue TONE_COLOR map from the admin landing — Thitiphong Srisavat `af22dd1`
+- **ui:** one accent per element in vendor cards and the admin landing — Thitiphong Srisavat `e43a590`
+- **ui:** weight 600 on the 9px micro tier, and guard it — Thitiphong Srisavat `f862430`
+- **ui:** strip the permission-denied dialog back to one red signal — Thitiphong Srisavat `cbc5bd4`
+- **errors:** tell the user what actually went wrong — Thitiphong Srisavat `c6c1d7b`
+- **a11y:** give solid semantic surfaces a label that contrasts — Thitiphong Srisavat `023077d`
+- **po:** reset dirty baseline after auto-populate; align create payload — Thitiphong Srisavat `90af77a`
+- **po:** allow editing delivery date on PR-sourced PO — Thitiphong Srisavat `3d152d6`
+- **purchase-order:** new PO now lands on the created record after save — Thitiphong Srisavat `84a216c`
+- **price-list:** Rate column shows the computed tax amount, not the % — Thitiphong Srisavat `5beecc4`
+- **price-list:** enable unit lookup without product + fix stale row on prepend — Thitiphong Srisavat `7a78632`
+- **forms:** auto-populated defaults no longer trigger discard on unedited add — Thitiphong Srisavat `cde1296`
+- **price-list:** full-width currency/date fields + flat products empty state — Thitiphong Srisavat `e49fc76`
+- **user:** locations transfer — arrows off-screen + picks reverting — Thitiphong Srisavat `1d24784`
+- **ui:** add subtle border to filled button variants — Thitiphong Srisavat `24ac8c4`
+- **ui:** make unchecked checkbox border visible in dark mode — Thitiphong Srisavat `7a15785`
+- **pr:** lock non-draft form, fix delivery-date format, polish item UI — Thitiphong Srisavat `7bfda64`
+- **pr:** send reject items as reject and omit null FK on approve — Thitiphong Srisavat `036d537`
+- **procurement:** PO order_qty error feedback + guard server error message — Thitiphong Srisavat `56d0626`
+- **procurement:** align item-row expanded content with the primary column — Thitiphong Srisavat `0c66940`
+- **grn:** include doc_version and per-item good_received_note_id in update PATCH — Thitiphong Srisavat `3a98391`
+- **price-list:** wire doc_version into price-list update call — Thitiphong Srisavat `ef2e145`
+- **price-list:** wire doc_version into template/request-price-list update calls — Thitiphong Srisavat `40a5a06`
+- **product:** wire doc_version into product update PATCH call — Thitiphong Srisavat `5f40a7c`
+- **master-data:** wire doc_version into prt/eco-label/vendor-cert/workflow PATCH/PUT — Thitiphong Srisavat `561f7ad`
+- **inventory-adjustment:** wire doc_version into update/void PATCH calls — Thitiphong Srisavat `e7e555c`
+- **physical-count:** wire doc_version into update/save/review PATCH/PUT calls — Thitiphong Srisavat `d8c75ec`
+- **spot-check:** wire doc_version into save/review/setup PATCH calls — Thitiphong Srisavat `65ed45e`
+- **store-requisition:** fresh doc_version on save & workflow events — Thitiphong Srisavat `8926cd3`
+- **procurement:** fresh doc_version on workflow events (avoid 409) + UI tweaks — Thitiphong Srisavat `754b15f`
+- **purchase-request:** DESIGN.md UI audit & Apple-flat cleanup — Thitiphong Srisavat `d204a31`
+- period dropdown dialog show only 1 data withour x - y — Khafang `476868b`
+- monthly inventory report add new dialog filter period that will show closed to oldest open — Khafang `a030a8c`
+- add period filter for report — Khafang `b5a1fe1`
+- **build:** emit dist/config.json from config.prod.json — Thammanoon Semapru `1e9cb0b`
+- remove duplicate JSON keys in locale messages — Thammanoon Semapru `c9517dd`
+- serialize authenticated e2e workers to avoid same-account login contention — Thammanoon Semapru `ae37e4f`
+
+### Changed
+- **list-filter:** ลบ bespoke filter code ที่ถูกแทนด้วย registry framework (#83) — Thammanoon Semapru `5d9baeb`
+- กวาด literal ขนาดตัวอักษรที่เหลือ 489 จุดไปใช้ token — Thammanoon Semapru `ee8dace`
+- **system-admin:** ย้าย literal ขนาดตัวอักษร 129 จุดไปใช้ token + กัน guard ตาบอด — Thammanoon Semapru `9739b9f`
+- **vendor:** ย้ายคอลัมน์ Status มาก่อน Created/Updated — Thammanoon Semapru `0679109`
+- **price-list:** ใช้ shared AuditCell แทน pl-audit-cell (#64) — Thammanoon Semapru `17c612b`
+- **price-list:** แสดงวันเวลาจริงแทน relative time ใน Created/Updated (#63) — Thammanoon Semapru `8be9e60`
+- **interface:** derive dropdown options from schema; strengthen error test (#55) — Thammanoon Semapru `d3a3dc0`
+- remove latitude and longitude fields from company profile form — Thammanoon Semapru `2cff0ae`
+- rename business-setting page to company-profile (folder, route, i18n namespace, label) — Thammanoon Semapru `33f134b`
+- **build:** split shared vendors out of the router chunk — Thitiphong Srisavat `f0fb5ff`
+- move "use no memo" directives to function level — Thitiphong Srisavat `26523eb`
+- **compat:** remove the compat layer entirely — Thitiphong Srisavat `989671e`
+- **compat:** migrate navigation hooks off the compat shim — Thitiphong Srisavat `753ce4f`
+- **compat:** migrate Link usages off the compat shim — Thitiphong Srisavat `15eeaf6`
+- **routes:** colocate remaining standalone routes (notifications/login/not-found) — Thitiphong Srisavat `70901f9`
+- **system-admin:** colocate CRUD sub-features (role/noti-tmpl/workflow/user) — Thitiphong Srisavat `c8cc092`
+- **system-admin:** colocate index + page-only subs, rename _shared — Thitiphong Srisavat `a1c801f`
+- **product-management:** colocate all routes — Thitiphong Srisavat `85cf7cb`
+- **operation-plan:** colocate all routes — Thitiphong Srisavat `d91200c`
+- **store-operation:** colocate all routes — Thitiphong Srisavat `1964e10`
+- **vendor-management:** colocate all routes — Thitiphong Srisavat `565fbc4`
+- **inventory-management/period-end:** colocate routes — Thitiphong Srisavat `8d555dc`
+- **inventory-management/spot-check:** colocate nested routes — Thitiphong Srisavat `7409ad1`
+- **inventory-management/physical-count:** colocate nested routes — Thitiphong Srisavat `8de338e`
+- **inventory-management/inventory-adjustment:** colocate CRUD routes — Thitiphong Srisavat `75fc3b3`
+- **inventory-management:** colocate index + transaction, rename _shared — Thitiphong Srisavat `db1ceaa`
+- **procurement:** colocate index route — Thitiphong Srisavat `ab208d0`
+- **procurement/purchase-request:** colocate routes — Thitiphong Srisavat `c81be8a`
+- **procurement/purchase-order:** colocate routes incl. from-price-list — Thitiphong Srisavat `4510e14`
+- **procurement/goods-receive-note:** colocate CRUD routes — Thitiphong Srisavat `f9d0a57`
+- **procurement/credit-note:** colocate CRUD routes — Thitiphong Srisavat `7cfcf34`
+- **procurement/purchase-request-template:** colocate CRUD routes — Thitiphong Srisavat `78df839`
+- **procurement/approval:** colocate feature folder — Thitiphong Srisavat `dc993fa`
+- **config/location:** colocate CRUD routes, drop [id]/new folders — Thitiphong Srisavat `9a38b1a`
+- **config/department:** colocate CRUD routes, drop [id]/new folders — Thitiphong Srisavat `ab56324`
+- **config:** colocate index + 12 simple sub-features — Thitiphong Srisavat `8a1601d`
+- **external/pl:** flatten to colocated feature folder — Thitiphong Srisavat `63f9823`
+- **dashboard:** convert to idiomatic structure, drop dead demo code — Thitiphong Srisavat `03891e3`
+- **report:** convert to idiomatic React Router structure — Thitiphong Srisavat `feee0bb`
+- **profile:** convert to idiomatic React Router structure — Thitiphong Srisavat `6d8c93a`
+- reuse DocumentListHeader/DocumentListActions across 13 list pages — Thitiphong Srisavat `90e8847`
+- **procurement:** share list header via DocumentListHeader — Thitiphong Srisavat `80c0421`
+- **pr:** extract document actions toolbar into PrDocumentActions — Thitiphong Srisavat `40465e6`
+- **procurement:** extract active-filter logic into per-list hooks (grn/cn/po) — Thitiphong Srisavat `d7ce8b9`
+- delete app/ — routes/ is the single home for migrated leaves (#10) — Thammanoon Semapru `ff1ddd6`
+- repoint app/(root) imports to routes/ copies (#10) — Thammanoon Semapru `943b023`
+- **data-grid:** แถบเลื่อนแนวนอนทับแถวสุดท้ายอยู่ 33 หน้า มีหน้าเดียวที่ไม่โดน — Thitiphong Srisavat `61652b4`
+- **list:** ปุ่มสลับมุมมองก็อปไว้ 6 ที่ แล้วดริฟท์กันไปแล้วจริง ๆ — Thitiphong Srisavat `e595c8d`
+- **auth:** ยก validation ของ register ไปใช้มาตรฐานกลางของแอป — Thitiphong Srisavat `e7059cb`
+- **procurement:** ย้าย override toggle ไปอยู่บนขวาของช่อง คำนำหน้า checkbox — Thitiphong Srisavat `a5e4cb7`
+- **workflow-history:** ยุบไทม์ไลน์ระดับเอกสารของ PR/PO/SR เป็นตัวเดียว — Thitiphong Srisavat `0fea767`
+- **item-history:** รวม sheet ประวัติรายบรรทัดของ PR กับ SR เป็นตัวเดียว — Thitiphong Srisavat `4a333c0`
+- **operation-plan:** เลิกใช้ card-shell 4 ก๊อป ไปใช้ SettingSection กลาง — Thitiphong Srisavat `ce72883`
+- **list-card:** รวมสามแถว audit ท้ายการ์ด 31 โมดูลเป็น ListCardAuditRows — Thitiphong Srisavat `0044b2d`
+- **data-grid:** รวมคอลัมน์ created/updated 31 ตารางเป็น auditColumns ตัวเดียว — Thitiphong Srisavat `7e1b917`
+- **list-view:** ย้าย handleSaveViewDialogSave 30 ก๊อปมารวมที่ useListFilters — Thitiphong Srisavat `7b840e7`
+- **ui:** ลดสีปุ่มทั้ง procurement/SR + ย้ายปุ่มส่งใบ CN ลง footer — Thitiphong Srisavat `2482294`
+- **docs:** เอาช่องค้นหาในตารางรายการออก + รวมปุ่มเป็นแถวเดียว — Thitiphong Srisavat `b00dad2`
+- **docs:** จัดฟอร์มเอกสารทั้ง 5 โมดูลให้เป็นแบบเดียวกัน — Thitiphong Srisavat `e474bd0`
+- **po:** ตารางรายการ PO ให้เหมือน PR + สถานะรายแถวโชว์ตลอด — Thitiphong Srisavat `05c8aac`
+- **docs:** ยกแบบหัวเอกสารของ PR ไปใช้กับ PO/GRN/CN/SR — Thitiphong Srisavat `934a49f`
+- **pr:** จัดหัวเอกสาร PR ใหม่ + แถบยอดรวมขนาดเดียวกันทั้งแถว — Thitiphong Srisavat `2a416e3`
+- **ia:** จัดฟอร์ม IA ใหม่ + รื้อ void dialog ให้ตาม DESIGN.md — Thitiphong Srisavat `198d83c`
+- **pr:** ลบหน้า PR v2 ทิ้ง — เจ้านายไม่เอา — Thitiphong Srisavat `624f137`
+- **list-card:** config 14 การ์ด + system-admin 4 การ์ดใช้ ListCard — Thitiphong Srisavat `445a3cd`
+- **operation-plan:** recipe/category/cuisine/equipment ใช้ ListCard + ล้างสีที่ไม่ใช่สถานะ — Thitiphong Srisavat `7cbbc81`
+- **list-card:** product/vendor/price-list/PLT/RFP ใช้ ListCard + แก้ชื่อยาวดัน badge — Thitiphong Srisavat `4c54f65`
+- **procurement:** PRT/PO/GRN/CN ใช้ ListCard ตัวเดียวกัน + เพิ่มปุ่มลบในการ์ด — Thitiphong Srisavat `23fb370`
+- **list-card:** รวมเปลือกการ์ดในหน้ารายการเป็นตัวเดียว PR/SR/IA ใช้ร่วมกัน — Thitiphong Srisavat `1a95b6d`
+- **ui:** control ทุกตัวสูงเท่ากันและตัวอักษรเท่ากัน แก้ที่ root — Thitiphong Srisavat `fb8e438`
+- **lookup:** ทุกตัวรับ prop size เหมือนกัน เลิกเขียน h-* ทับที่ call site — Thitiphong Srisavat `ba4e44a`
+- **ui:** หัวคอลัมน์ใช้ชื่อเต็ม เลิกย่อ — Thitiphong Srisavat `4e95586`
+- **pr:** หน้า list ยิงแค่ endpoint ของ tab ที่เปิดอยู่ — Thitiphong Srisavat `c9bfe61`
+- **pr:** แยกช่องส่วนลด/ภาษีออกมาใช้ร่วมกันสองหน้า — Thitiphong Srisavat `dcbd0a4`
+- **pr:** แยก auto-allocate กับ purchase action ออกมาใช้ร่วมกันได้ — Thitiphong Srisavat `3bfc5a1`
+- **recipe:** Prep/Cook Time, Base Yield ใช้ number input ธรรมดา เลิก stepper +/− — Thitiphong Srisavat `e56e04c`
+- **operation-plan:** textarea เต็มแถวเรียงตั้ง เลิกวางใน grid หลายคอลัมน์ — Thitiphong Srisavat `76bc112`
+- **operation-plan:** form toolbar ใช้ DocFormHeader + จัด layout equipment ใหม่ — Thitiphong Srisavat `db4fd48`
+- **product:** form header status ใช้ global dot badge + ปรับ card — Thitiphong Srisavat `59f8356`
+- **pl-external:** แยก tax profile กับ tax amount เป็นคนละคอลัมน์ — Thitiphong Srisavat `27407ed`
+- **grn:** ยก currency default ไปไว้ใน getDefaultValues แบบ PO — Thitiphong Srisavat `5c30692`
+- **workflow:** section the new-workflow form like company profile — Thitiphong Srisavat `ea6257f`
+- **vendor-management:** unify form headers, status badges, field heights — Thitiphong Srisavat `5ba6e30`
+- **goods-receive-note:** move commit/void into the summary footer — Thitiphong Srisavat `a784af5`
+- **header:** align all document ribbons with the general-fields grid — Thitiphong Srisavat `b05ad7d`
+- **header:** consolidate all doc-form headers onto DocFormHeader — Thitiphong Srisavat `46bb0bf`
+- **forms:** adopt the price-list SettingSection layout in config + PRT — Thitiphong Srisavat `3f1e216`
+- **comment:** shared CommentButton with comment count — Thitiphong Srisavat `a32ff2d`
+- **pr:** drop summary cards from on-order dialog — Thitiphong Srisavat `4b1367b`
+- **pr:** amount-cell plain-text when currency locked; widen tax col — Thitiphong Srisavat `51efc0f`
+- **pr:** rework item-expand grid — Vendor to Product width, amounts fill to action — Thitiphong Srisavat `36ae900`
+- **pr:** move pricelist compare to row gutter + item-expand polish — Thitiphong Srisavat `adabab8`
+- **pr:** place inventory row inline with the base-currency summary — Thitiphong Srisavat `515e110`
+- **pr:** status as workflow-style icon badge + exchange-rate gating — Thitiphong Srisavat `eae52e7`
+- **pr:** merge expand toggle into select column + tune field widths — Thitiphong Srisavat `fb68eed`
+- **pr:** rework item-expand field row layout — Thitiphong Srisavat `ea5abff`
+- **pr:** simplify price-compare dialog + gate selection to edit+purchase — Thitiphong Srisavat `6ca1e06`
+- **pr:** compact PR item expand layout with grand-total-style bars — Thitiphong Srisavat `369e51a`
+- **procurement:** drop redundant Price row from grand-total summary — Thitiphong Srisavat `bbfd034`
+- **price-list:** render grouped view as true rowspan — Thitiphong Srisavat `635104e`
+- **price-list:** split product table into table/columns/cells — Thitiphong Srisavat `42e0080`
+- **rfp:** vendor DataGrid + name/template grid row — Thitiphong Srisavat `444335f`
+- **price-list-template:** grid layout, quieter validity, Trash2 — Thitiphong Srisavat `0585ef3`
+- **price-list:** unified DataGrid + currency/date fixes — Thitiphong Srisavat `906dbf7`
+- **vendor:** view-mode plain text via shared FieldPlainText — Thitiphong Srisavat `fd6ab10`
+- **ui:** promote SettingSection to a shared component — Thitiphong Srisavat `89fa5c6`
+- **request-price-list:** adopt business-setting 2-column settings layout — Thitiphong Srisavat `61541d0`
+- **price-list-template:** adopt business-setting 2-column settings layout — Thitiphong Srisavat `fd5c111`
+- **price-list:** adopt business-setting 2-column settings layout — Thitiphong Srisavat `d5d1626`
+- **vendor:** adopt business-setting 2-column settings layout — Thitiphong Srisavat `19e043a`
+- **noti-tmpl:** shared SettingSection + content-height form skeleton — Thitiphong Srisavat `8711401`
+- **config-email:** i18n, pattern switch, reusable content-height skeleton — Thitiphong Srisavat `18940a0`
+- **config-email:** business-setting settings layout + fix switch — Thitiphong Srisavat `4c64a11`
+- **user:** compact role rows + full-width locations transfer — Thitiphong Srisavat `ab74cee`
+- **user:** adopt business-setting 2-column settings layout — Thitiphong Srisavat `309d5dd`
+- **user:** Apple-lens UI audit — neutral avatar, drop redundant chrome — Thitiphong Srisavat `8b4c9cc`
+- **role:** Apple-lens UI audit — neutral chrome, drop vanity metrics — Thitiphong Srisavat `70284e4`
+- **workflow:** dot-badge type, flat-icon flow, reorder status/action — Thitiphong Srisavat `d606744`
+- **pr:** qty cells as InputGroup with unit dropdown addon — Thitiphong Srisavat `dea4883`
+- **lookup:** show location type as dot badge — Thitiphong Srisavat `fab5edd`
+- **pr:** unify approve/reject dialogs and icons across PR list — Thitiphong Srisavat `e49540e`
+- **pr:** trim PR document status to the 5 real backend values — Thitiphong Srisavat `278fc91`
+- **location:** unify location-type badge into shared dot-style component — Thitiphong Srisavat `9fff9b7`
+- **pr:** polish item table and header UI — Thitiphong Srisavat `75af00c`
+- **ui:** drop empty-primary "—" fallback in NameWithSubtext — Thitiphong Srisavat `5b8a4c8`
+- **procurement:** use shared NameWithSubtext for product cells — Thitiphong Srisavat `9f6f15b`
+- **cn:** drop item-row expand, rename product-cards → cn-item — Thitiphong Srisavat `ae27d5e`
+- **pr:** redesign item-expand — grouped eyebrow layout, invoice 2-col — Thitiphong Srisavat `a376e89`
+- **grn:** item list to grouped DataGrid (PO-style) — Thitiphong Srisavat `acc94eb`
+- **sr:** align Store Requisition UI with procurement (PR/PO/CN) — Thitiphong Srisavat `3a57031`
+- **procurement:** PO/CN item grids to DataGrid + extract expanded content — Thitiphong Srisavat `8830989`
+- **inventory:** physical-count/spot-check UI audit + dotted-badge pattern + doc_version — Thitiphong Srisavat `6c7316d`
+- **inventory:** DESIGN.md audit pass + shared page-header migration — Thitiphong Srisavat `40244b2`
+- **card:** make Card a DESIGN.md-compliant pattern + IA spacing/badge audit — Thitiphong Srisavat `d9dc458`
+- **config:** extract ConfigEntityDialog template for entity dialogs — Thitiphong Srisavat `71b1f6e`
+- **config:** reuse shared DocumentListHeader/DocumentListActions in ConfigListTemplate — Thitiphong Srisavat `a8a407b`
+- move Playwright e2e to the dedicated carmen-inventory-frontend-e2e suite — Thammanoon Semapru `8da8866`

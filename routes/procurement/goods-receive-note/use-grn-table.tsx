@@ -49,7 +49,7 @@ export function useGrnTable({
           {row.original.grn_no}
         </CellAction>
       ),
-      size: 200,
+      size: 180,
       meta: { headerTitle: tfl("grnNo") },
     },
     {
@@ -57,7 +57,7 @@ export function useGrnTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      size: 200,
+      size: 240,
       meta: { headerTitle: tfl("vendor") },
     },
     {
@@ -134,6 +134,22 @@ export function useGrnTable({
       },
     },
     {
+      // คนที่รับของเข้าและคีย์ใบ — ของขาด/ของเสียต้องย้อนไปถามคนที่ยืนรับตอนนั้น
+      // หัวคอลัมน์ใช้คำว่า "ผู้รับ" ตามที่หัวเอกสารเรียก ไม่ใช่ "ผู้สร้าง" กลาง ๆ
+      // ไม่เรียงลำดับเพราะ audit เป็น object ซ้อน backend เรียงให้ไม่ได้
+      id: "created_by",
+      accessorFn: (row) => row.audit?.created?.name ?? "",
+      size: 160,
+      header: tfl("receivedBy"),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.audit?.created?.name || "—"}
+        </span>
+      ),
+      enableSorting: false,
+      meta: { headerTitle: tfl("receivedBy") },
+    },
+    {
       accessorKey: "total_amount",
       header: ({ column }) => (
         <DataGridColumnHeader
@@ -163,6 +179,7 @@ export function useGrnTable({
       },
       size: 200,
     },
+
     ...auditColumns<GoodsReceiveNote>(tfl, dateTimeFormat),
   ];
 

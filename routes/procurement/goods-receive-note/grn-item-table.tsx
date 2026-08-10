@@ -99,7 +99,13 @@ const PoAddButton = memo(function PoAddButton({
   const t = useTranslations("procurement.goodsReceiveNote");
   const vendorId = useWatch({ control, name: "vendor_id" }) ?? "";
   return (
-    <Button type="button" size="xs" disabled={!vendorId} onClick={onOpen}>
+    <Button
+      type="button"
+      size="sm"
+      variant="secondary"
+      disabled={!vendorId}
+      onClick={onOpen}
+    >
       <Plus aria-hidden="true" /> {hasItems ? t("addMorePo") : t("addFromPo")}
     </Button>
   );
@@ -299,7 +305,12 @@ export function GrnItemTable({
   const addAction =
     !disabled &&
     (isManual ? (
-      <Button type="button" size="sm" onClick={handleAddItem}>
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        onClick={handleAddItem}
+      >
         <Plus /> {t("addItem")}
       </Button>
     ) : (
@@ -317,7 +328,7 @@ export function GrnItemTable({
           <Button
             type="button"
             variant="ghost"
-            size="xs"
+            size="sm"
             onClick={() =>
               table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
             }

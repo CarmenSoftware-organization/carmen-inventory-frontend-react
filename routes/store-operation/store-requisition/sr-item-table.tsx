@@ -318,7 +318,9 @@ export function useSrItemTable({
     (value?: string) => {
       const v = value?.trim();
       if (!v || v === "pending") return ts("pending");
-      if (v === "submit") return tc("submit");
+      // ช่องนี้เป็น "สถานะของแถว" ไม่ใช่ปุ่ม — ใช้คำบอกสถานะ ("ส่งแล้ว") ไม่ใช่
+      // คำสั่งบนปุ่ม ซึ่งตอนนี้ยาวขึ้นเป็น "ส่งเพื่ออนุมัติ" และอ่านเป็นคำสั่ง
+      if (v === "submit") return ts("submitted");
       if (v === "approve") return tc("approve");
       if (v === "reject") return tc("reject");
       if (v === "review") return tc("review");

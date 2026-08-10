@@ -13,8 +13,14 @@ const buttonVariants = cva(
           "border border-black/10 bg-primary text-primary-foreground hover:bg-primary/90 dark:border-white/10",
         destructive:
           "border border-black/10 bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 dark:border-white/10",
+        // ธีมมืดใช้กฎเดียวกับธีมสว่าง ไม่มี override — ของเดิมย้อมพื้นด้วย
+        // `input/30` ซึ่งทับลงบนการ์ดแล้วได้ L 0.252 ห่างจาก secondary (0.27)
+        // แค่ 0.018 ตาแยกไม่ออก · แถมยังเป็นสูตรเดียวกับ trigger ของ Select เป๊ะ
+        // ปุ่มเลยดูเหมือนช่องกรอก · ปล่อยให้ token พลิกตามธีมเองแบบนี้ outline
+        // จะเป็น "กรอบเปล่าระดับเดียวกับพื้นหน้า" ทั้งสองธีม ส่วน secondary เป็น
+        // ชิปที่มีพื้นจริง ต่างกัน 0.07 ซึ่งเห็นชัด
         outline:
-          "border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
           "border border-black/10 bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:border-white/10",
         // --success is a light teal in BOTH themes → dark label, same as warning

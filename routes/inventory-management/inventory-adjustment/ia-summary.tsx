@@ -82,19 +82,20 @@ export function AdjSummaryFooter({
               size="sm"
               onClick={onVoid}
               disabled={isPending || voidIsPending}
-              className="text-destructive"
             >
               <Ban />
               {tc("void")}
             </Button>
           )}
+          {/* น้ำเงินตัวเดียวกับ Submit — commit คือการปิดเอกสารของเจ้าของใบ
+              ไม่ใช่การอนุมัติ · เขียว (success) ทั้งแอปสงวนไว้ให้ Approve
+              เดิมเป็น info ซึ่งไม่ใช่สีของการกระทำ และไม่มีปุ่มไหนใช้อีกเลย */}
           {canCommit && (
             <Button
               type="button"
               size="sm"
               disabled={isPending}
               onClick={onCommit}
-              variant={'info'}
             >
               <Check />
               {t("commit")}

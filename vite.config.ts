@@ -51,10 +51,15 @@ function emitBuildConfig(): Plugin {
     name: "emit-build-config",
     apply: "build", // build เท่านั้น — dev ใช้ serveEnvConfig
     generateBundle() {
-      const source = fs.readFileSync(
-        path.resolve(import.meta.dirname, "public", file),
-        "utf8",
-      );
+      const target = path.resolve(import.meta.dirname, "public", file);
+      // fail fast ตอน build — ไม่งั้น rollup โยน ENOENT ดิบ ๆ ไม่บอกวิธีแก้
+      // (public/config.<env>.json ถูก gitignore ไว้ — clone ใหม่ไม่มีไฟล์นี้จนกว่าจะสร้างเอง)
+      if (!fs.existsSync(target)) {
+        throw new Error(
+          `${target} not found — copy public/config.sample.json to public/${file} and fill in the values`,
+        );
+      }
+      const source = fs.readFileSync(target, "utf8");
       this.emitFile({ type: "asset", fileName: "config.json", source });
     },
   };

@@ -1,5 +1,6 @@
 
 import {
+  CircleX,
   Minus,
   TrendingDown,
   TrendingUp,
@@ -573,6 +574,7 @@ type TableRow = Record<string, unknown>;
 /** Allowlist of icon names a table dataset may emit via an "icon" column. */
 const TABLE_ICONS: Record<string, LucideIcon> = {
   "undo-2": Undo2,
+  "circle-x": CircleX,
 };
 
 function isNumericColumn(type?: TableColumn["type"]): boolean {

@@ -9,6 +9,11 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, ChevronRight, MapPinPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { selectColumn } from "@/components/ui/data-grid/columns";
 import {
@@ -98,29 +103,41 @@ const PoItemActionCell = memo(function PoItemActionCell({
           label={t("tabWorkflowHistory")}
         />
       )}
+      {/* ไอคอนล้วน เดาจากรูปไม่ออกว่าลบอะไร โดยเฉพาะถังขยะที่หน้าตาเหมือนกับ
+          ของแถวย่อยเป๊ะแต่ลบคนละขนาด — บอกด้วย tooltip (ท่าเดียวกับ GRN) */}
       {expanded && canAddLocation && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          aria-label={t("addLocation")}
-          className="text-primary hover:bg-primary/10 hover:text-primary"
-          onClick={() => registry?.get(index)?.()}
-        >
-          <MapPinPlus className="size-3.5" aria-hidden="true" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              aria-label={t("addLocation")}
+              className="text-primary hover:bg-primary/10 hover:text-primary"
+              onClick={() => registry?.get(index)?.()}
+            >
+              <MapPinPlus className="size-3.5" aria-hidden="true" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t("addLocation")}</TooltipContent>
+        </Tooltip>
       )}
       {canDelete && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          aria-label="Remove"
-          onClick={() => onDelete(index)}
-        >
-          <Trash2 className="size-3.5" aria-hidden="true" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              aria-label={t("deleteProductLine")}
+              onClick={() => onDelete(index)}
+            >
+              <Trash2 className="size-3.5" aria-hidden="true" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t("deleteProductLine")}</TooltipContent>
+        </Tooltip>
       )}
     </div>
   );
@@ -274,7 +291,7 @@ export function usePoItemTable({
       },
       {
         id: "order",
-        header: tfl("orderQty"),
+        header: tfl("order"),
         size: PO_COL.order,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -283,7 +300,7 @@ export function usePoItemTable({
       },
       {
         id: "received",
-        header: tfl("receivedQty"),
+        header: tfl("received"),
         size: PO_COL.rec,
         meta: rightMeta,
         cell: ({ row }) => (
@@ -422,7 +439,12 @@ export function usePoItemTable({
         ...col.meta,
         // py-1 เท่าแถว location ข้างล่าง — เดิม py-2 ทำให้แถวสินค้าสูงกว่าแถวคลัง
         // ทั้งที่เป็นตารางเดียวกัน อ่านแล้วสะดุดตรงรอยต่อ
-        cellClassName: cn("py-1 align-middle", col.meta?.cellClassName),
+        // h-11 ตายตัวทั้งแถวหลักและแถวย่อย — ปล่อยให้สูงตามเนื้อหา แถวหลักจะ 39px
+        // เพราะชื่อสินค้ากินสองบรรทัด ส่วนแถวย่อยได้ 41px จากช่องกรอก สองแถบเลย
+        // ไม่เท่ากันทั้งที่เป็นรายการเดียวกัน · 44px ไม่ใช่ 40 เพราะช่องสินค้ากิน
+        // สองบรรทัด (30px) ที่ 40px จะเหลือขอบบน-ล่างแค่ 5px ดูอัดแน่นกว่าแถวย่อย
+        // ที่มีบรรทัดเดียว (เหลือ 12px)
+        cellClassName: cn("h-11 py-1 align-middle", col.meta?.cellClassName),
       },
     }));
   }, [

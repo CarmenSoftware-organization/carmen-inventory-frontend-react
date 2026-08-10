@@ -64,6 +64,24 @@ export function usePrtTable({
         skeleton: columnSkeletons.text,
       },
     },
+    {
+      // ใครเป็นคนสร้างแม่แบบ — แม่แบบถูกใช้ซ้ำข้ามแผนก คนที่เปิดมาเจอต้องรู้ว่า
+      // ของใครก่อนจะเอาไปสั่งของจริง · ไม่เรียงลำดับเพราะ backend เรียงตามชื่อ
+      // ผู้สร้างไม่ได้ (audit เป็น object ซ้อน ไม่ใช่คอลัมน์ในตาราง)
+      id: "created_by",
+      accessorFn: (row) => row.audit?.created?.name ?? "",
+      header: tfl("createdBy"),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.audit?.created?.name || "—"}
+        </span>
+      ),
+      enableSorting: false,
+      meta: {
+        headerTitle: tfl("createdBy"),
+        skeleton: columnSkeletons.text,
+      },
+    },
     // status column แทรกเองก่อน created/updated (useConfigTable ส่ง hideStatus)
     statusColumn<PurchaseRequestTemplate>(),
     ...auditColumns<PurchaseRequestTemplate>(tfl, dateTimeFormat),
@@ -78,7 +96,9 @@ export function usePrtTable({
     onDelete,
     hideStatus: true,
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     activity: { id: (r) => r.id, label: (r) => r.name },
   });
 }

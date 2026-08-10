@@ -6,6 +6,7 @@ import { StatusSwitch } from "@/components/ui/status-switch";
 import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog";
+import { QTY_MAX_DECIMALS } from "@/components/ui/input/qty-decimals";
 import { useCreateUnit, useUpdateUnit } from "@/hooks/use-unit";
 import type { Unit } from "@/types/unit";
 import type { TranslationFn } from "@/lib/i18n-schema";
@@ -14,12 +15,24 @@ const createUnitSchema = (tv: TranslationFn, tf: TranslationFn) => {
   return z.object({
     name: z.string().min(1, tv("required", { field: tf("name") })),
     description: z.string(),
+    // ช่องว่างในช่องตัวเลขให้เป็น 0 ไม่ใช่ NaN (valueAsNumber ของ RHF คืน NaN)
+    decimal_place: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(QTY_MAX_DECIMALS)
+      .catch(0),
     is_active: z.boolean(),
   });
 };
 
 type UnitFormValues = z.infer<ReturnType<typeof createUnitSchema>>;
-type UnitPayload = { name: string; description: string; is_active: boolean };
+type UnitPayload = {
+  name: string;
+  description: string;
+  decimal_place: number;
+  is_active: boolean;
+};
 
 interface UnitDialogProps {
   readonly open: boolean;
@@ -65,31 +78,56 @@ export function UnitDialog({
       }}
       toFormValues={(e) =>
         e
-          ? { name: e.name, description: e.description, is_active: e.is_active }
-          : { name: "", description: "", is_active: true }
+          ? {
+              name: e.name,
+              description: e.description,
+              decimal_place: e.decimal_place ?? 0,
+              is_active: e.is_active,
+            }
+          : { name: "", description: "", decimal_place: 0, is_active: true }
       }
       toPayload={(v) => ({
         name: v.name,
         description: v.description ?? "",
+        decimal_place: v.decimal_place,
         is_active: v.is_active,
       })}
     >
       {({ form, disabled }) => (
         <>
-          <Field>
-            <FieldLabel htmlFor="unit-name" required>
-              {tfl("name")}
-            </FieldLabel>
-            <FieldInput
-              id="unit-name"
-              placeholder={t("namePlaceholder")}
-              className="h-8"
-              disabled={disabled}
-              error={form.formState.errors.name?.message}
-              maxLength={100}
-              {...form.register("name")}
-            />
-          </Field>
+          <div className="grid grid-cols-2 gap-x-2">
+            <Field>
+              <FieldLabel htmlFor="unit-name" required>
+                {tfl("name")}
+              </FieldLabel>
+              <FieldInput
+                id="unit-name"
+                placeholder={t("namePlaceholder")}
+                disabled={disabled}
+                error={form.formState.errors.name?.message}
+                maxLength={100}
+                {...form.register("name")}
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="unit-decimal-place" required>
+                {tfl("decimalPlaces")}
+              </FieldLabel>
+              <FieldInput
+                id="unit-decimal-place"
+                type="number"
+                inputMode="numeric"
+                min={0}
+                max={QTY_MAX_DECIMALS}
+                step={1}
+                className="text-right tabular-nums"
+                disabled={disabled}
+                error={form.formState.errors.decimal_place?.message}
+                {...form.register("decimal_place", { valueAsNumber: true })}
+              />
+            </Field>
+          </div>
 
           <Field>
             <FieldLabel htmlFor="unit-description">
@@ -98,7 +136,6 @@ export function UnitDialog({
             <Textarea
               id="unit-description"
               placeholder={tfl("optional")}
-              className="h-8"
               disabled={disabled}
               maxLength={256}
               {...form.register("description")}

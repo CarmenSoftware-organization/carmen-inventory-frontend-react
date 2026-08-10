@@ -1,6 +1,6 @@
 import { useTranslations } from "use-intl";
 import { useWatch, type Control } from "react-hook-form";
-import { SendHorizonal } from "lucide-react";
+import { SendHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/currency-utils";
 import { useCurrency } from "@/hooks/use-currency";
@@ -96,7 +96,7 @@ export function CnFooterAction({
             disabled={isPending}
             onClick={onSubmitCn}
           >
-            <SendHorizonal aria-hidden="true" />
+            <SendHorizontal aria-hidden="true" />
             {tc("submit")}
           </Button>
         </div>
