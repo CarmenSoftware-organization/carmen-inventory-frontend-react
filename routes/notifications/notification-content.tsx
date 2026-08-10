@@ -37,8 +37,11 @@ export default function NotificationsContent() {
 
   // แท็บ "ทั้งหมด" ให้ summary.unread มา ส่วนแท็บ "ยังไม่อ่าน" ไม่มี summary
   // โดยตั้งใจ (จำนวนยังไม่อ่าน = paginate.total ของ endpoint นั้นพอดี)
-  // summary เป็น optional บนสาย — ไม่มี ≠ ศูนย์ จึงถอยไปใช้ total ของแท็บนั้น
-  const unreadCount = tab === "unread" ? total : (summary?.unread ?? 0);
+  // summary หายไป = "นับไม่ได้" ไม่ใช่ศูนย์ — undefined จึงต่างจาก 0 อย่างมีความหมาย
+  const unreadCount: number | undefined =
+    tab === "unread" ? total : summary?.unread;
+  // แสดงปุ่ม/ป้ายเมื่อ "รู้ว่ามี" หรือ "ไม่รู้" (undefined) — ซ่อนเฉพาะเมื่อรู้แน่ว่าเป็นศูนย์
+  const hasUnread = unreadCount !== 0;
 
   return (
     <div className="flex flex-col gap-3 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -56,7 +59,7 @@ export default function NotificationsContent() {
             <TabsTrigger value="all">{tRoot("notifications.tabAll")}</TabsTrigger>
             <TabsTrigger value="unread">
               {tRoot("notifications.tabUnread")}
-              {unreadCount > 0 && (
+              {unreadCount !== undefined && unreadCount > 0 && (
                 <span className="ms-1.5 tabular-nums">
                   {unreadCount.toLocaleString()}
                 </span>
@@ -64,7 +67,7 @@ export default function NotificationsContent() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        {unreadCount > 0 && (
+        {hasUnread && (
           <Button
             variant="ghost"
             size="sm"

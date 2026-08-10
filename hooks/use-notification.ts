@@ -197,10 +197,7 @@ export function useNotificationRealtime(userId: string | undefined) {
           typeof message === "object" &&
           (message as { type?: unknown }).type === "notification"
         ) {
-          void queryClient.invalidateQueries({
-            queryKey: notificationKeys.all,
-            refetchType: "active",
-          });
+          void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
         }
       };
 
@@ -339,10 +336,7 @@ export function useMarkNotificationRead() {
       errorToast(err);
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({
-        queryKey: notificationKeys.all,
-        refetchType: "active",
-      });
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
   });
 }
@@ -390,10 +384,7 @@ export function useMarkAllNotificationsRead() {
       errorToast(err);
     },
     onSettled: () => {
-      void queryClient.invalidateQueries({
-        queryKey: notificationKeys.all,
-        refetchType: "active",
-      });
+      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
     },
   });
 }
