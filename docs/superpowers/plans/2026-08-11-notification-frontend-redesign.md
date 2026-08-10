@@ -231,6 +231,12 @@ git commit -m "feat(notification): ชนิดข้อมูลตามสั
 - Modify: `lib/notification-helpers.tsx` (เขียนทับทั้งไฟล์)
 - Modify: `components/navbar/notification-item-content.tsx`
 - Modify: `components/navbar/notification.tsx` (เฉพาะ detail dialog: badge + ตัดปุ่ม Open + ส่ง prop `commentLabel`)
+- Modify: `types/notification.ts` (เฉพาะ `created_at` — ดู Step 2a)
+
+**คำวินิจฉัยของ controller ที่ Task 2 ต้องปิดให้จบ:** Task 1 ต้องคง `created_at: string` เป็น
+required ไว้ก่อน เพราะ `new Date(notification.created_at)` ที่ `notification-item-content.tsx`
+และ `notification.tsx` จะ typecheck ไม่ผ่าน และสองไฟล์นั้นเป็นของ Task 2 — Task 2 คือที่ที่
+กัน null ที่จุดแสดงผลแล้วเปลี่ยนชนิดให้ตรงสัญญาจริง ห้ามข้าม Step 2a
 
 **Interfaces:**
 - Consumes: `NotificationDocType`, `Notification`, `NotificationMetadata` จาก Task 1
@@ -430,6 +436,20 @@ import { Bell, MessageSquare } from "lucide-react";
             </span>
           )}
 ```
+
+- [ ] **Step 2a: เปลี่ยน `created_at` ใน `types/notification.ts` ให้ตรงสัญญาจริง**
+
+ทำ **หลัง** Step 2 และ Step 3 กัน null ที่จุดแสดงผลครบแล้วเท่านั้น (สองจุดคือ
+`notification-item-content.tsx` กับ badge เวลาใน detail dialog ของ `notification.tsx`)
+แทนบล็อกของ `created_at` ทั้งก้อนด้วย:
+
+```ts
+  /** nullable บนสายจริง — ทุกจุดที่แสดงเวลาต้องกันค่าว่าง */
+  created_at?: string | null;
+```
+
+ถ้า `bunx tsc --noEmit` ฟ้องจุดไหนหลังเปลี่ยน แปลว่ายังมีที่อ่าน `created_at` ตรง ๆ หลงเหลือ
+ให้กัน null ที่จุดนั้นด้วย ห้ามย้อนชนิดกลับเป็น required
 
 - [ ] **Step 3: อัปเดต detail dialog ใน `components/navbar/notification.tsx`**
 
