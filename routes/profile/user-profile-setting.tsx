@@ -208,7 +208,7 @@ export default function UserProfileSetting() {
     .join("");
 
   return (
-    <div className="w-full space-y-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className="w-full space-y-4 pb-[max(1rem,env(safe-area-inset-bottom))] relative z-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center gap-2 py-1 sm:static sm:py-0">
         <Button
@@ -224,21 +224,22 @@ export default function UserProfileSetting() {
       </div>
 
       {/* Account Info — read-only hero */}
-      <div className="relative overflow-hidden rounded-xl border bg-primary/5">
-        <div className="relative flex flex-col gap-3 px-2 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
+      <div className="relative overflow-hidden rounded-2xl border bg-primary/5 shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
+        <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4 sm:gap-5">
+            <div className="relative group/avatar">
               <button
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
                 disabled={isUploadingAvatar}
                 aria-label={t("uploadAvatar")}
                 aria-busy={isUploadingAvatar}
-                className="group ring-primary/20 ring-offset-background hover:ring-primary/40 focus-visible:ring-primary relative block size-12 cursor-pointer rounded-full ring-2 ring-offset-2 transition focus-visible:outline-none disabled:cursor-wait disabled:opacity-70"
+                className="group ring-primary/30 ring-offset-background hover:ring-primary/60 focus-visible:ring-primary relative block size-16 cursor-pointer rounded-full ring-4 ring-offset-2 transition-all focus-visible:outline-none disabled:cursor-wait disabled:opacity-70 shadow-xl sm:size-20"
               >
                 <Avatar
                   key={avatarPreview ?? profile.avatar_url ?? "fallback"}
-                  className="size-12"
+                  className="size-16 sm:size-20"
                 >
                   {(avatarPreview ?? profile.avatar_url) && (
                     <AvatarImage
@@ -281,18 +282,18 @@ export default function UserProfileSetting() {
                 onChange={handleAvatarChange}
               />
             </div>
-            <div className="min-w-0 flex-1 space-y-1">
+            <div className="min-w-0 flex-1 space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-semibold">
+                <span className="text-lg font-bold tracking-tight">
                   {t("accountInfo")}
                 </span>
-                <Badge variant="primary-light" size="xs" className="text-xs">
+                <Badge variant="primary-light" size="sm" className="text-xs shadow-sm shadow-primary/10 border-primary/20">
                   {profile.platform_role}
                 </Badge>
               </div>
-              <div className="text-muted-foreground flex items-center gap-1 text-xs">
-                <Mail className="size-3 shrink-0" aria-hidden="true" />
-                <span className="truncate">{profile.email || "-"}</span>
+              <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+                <Mail className="size-3.5 shrink-0 text-primary/60" aria-hidden="true" />
+                <span className="truncate font-medium">{profile.email || "-"}</span>
               </div>
             </div>
           </div>
@@ -300,17 +301,17 @@ export default function UserProfileSetting() {
             variant="outline"
             size="sm"
             onClick={() => setPasswordOpen(true)}
-            className="h-11 w-full sm:h-9 sm:w-auto"
+            className="h-11 w-full sm:h-9 sm:w-auto shadow-sm group"
           >
-            <KeyRound className="size-3.5" aria-hidden="true" />
+            <KeyRound className="size-3.5 transition-transform group-hover:rotate-12" aria-hidden="true" />
             {t("changePassword")}
           </Button>
         </div>
       </div>
 
       {/* Personal Info Form */}
-      <section className="bg-card rounded-xl border">
-        <header className="border-b px-2 py-2">
+      <section className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <header className="border-b px-4 py-3">
           <h2 className="text-sm font-semibold">{t("personalInfo")}</h2>
         </header>
         <form
@@ -318,10 +319,10 @@ export default function UserProfileSetting() {
           onSubmit={form.handleSubmit(onSubmit, () =>
             scrollToFirstInvalidField(),
           )}
-          className="space-y-3 px-2 py-3"
+          className="space-y-4 px-4 py-4"
         >
-          <FieldGroup className="gap-3">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <FieldGroup className="gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field data-invalid={!!form.formState.errors.firstname}>
                 <FieldLabel htmlFor="firstname" required>
                   {t("firstName")}
@@ -329,7 +330,7 @@ export default function UserProfileSetting() {
                 <Input
                   id="firstname"
                   placeholder={t("enterFirstName")}
-                  className="h-8"
+                  className="h-9 transition-colors"
                   maxLength={100}
                   disabled={updateProfile.isPending}
                   {...form.register("firstname")}
@@ -344,7 +345,7 @@ export default function UserProfileSetting() {
                 <Input
                   id="middlename"
                   placeholder={t("enterMiddleName")}
-                  className="h-8"
+                  className="h-9 transition-colors"
                   maxLength={100}
                   disabled={updateProfile.isPending}
                   {...form.register("middlename")}
@@ -361,7 +362,7 @@ export default function UserProfileSetting() {
                 <Input
                   id="lastname"
                   placeholder={t("enterLastName")}
-                  className="h-8"
+                  className="h-9 transition-colors"
                   maxLength={100}
                   disabled={updateProfile.isPending}
                   {...form.register("lastname")}
@@ -372,7 +373,7 @@ export default function UserProfileSetting() {
               </Field>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field
                 data-invalid={!!form.formState.errors.telephone}
                 className="w-full"
@@ -381,7 +382,7 @@ export default function UserProfileSetting() {
                 <Input
                   id="telephone"
                   placeholder={t("enterTelephone")}
-                  className="h-8"
+                  className="h-9 transition-colors"
                   maxLength={20}
                   disabled={updateProfile.isPending}
                   {...form.register("telephone")}
@@ -399,7 +400,7 @@ export default function UserProfileSetting() {
                 <Input
                   id="alias_name"
                   placeholder={t("aliasPlaceholder")}
-                  className="h-8"
+                  className="h-9 transition-colors uppercase"
                   maxLength={2}
                   disabled={updateProfile.isPending}
                   {...form.register("alias_name")}
@@ -424,8 +425,8 @@ export default function UserProfileSetting() {
       </section>
 
       {/* Signature */}
-      <section className="bg-card rounded-xl border">
-        <header className="flex items-center justify-between border-b px-2 py-2">
+      <section className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <header className="flex items-center justify-between border-b px-4 py-3">
           <h2 className="text-sm font-semibold">{t("signature")}</h2>
           <div className="flex gap-2">
             {profile.signature_url && !isUploadingSignature && (
@@ -453,18 +454,19 @@ export default function UserProfileSetting() {
               size="sm"
               disabled={isUploadingSignature}
               onClick={() => setSignatureDialogOpen(true)}
+              className="shadow-sm"
             >
               {profile.signature_url ? t("editSignature") : t("addSignature")}
             </Button>
           </div>
         </header>
-        <div className="flex min-h-24 items-center justify-center p-3">
+        <div className="flex min-h-32 items-center justify-center p-4">
           {profile.signature_url ? (
             <img
               key={profile.signature_url}
               src={profile.signature_url}
               alt={t("signature")}
-              className="max-h-32 max-w-full object-contain"
+              className="max-h-36 max-w-full object-contain drop-shadow-md transition-transform hover:scale-105"
             />
           ) : (
             <p className="text-muted-foreground text-xs">
