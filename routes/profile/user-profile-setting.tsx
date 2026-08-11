@@ -10,6 +10,7 @@ import {
   Loader2,
   Mail,
   Trash2,
+  IdCard,
 } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -221,6 +222,17 @@ export default function UserProfileSetting() {
           <ArrowLeft />
         </Button>
         <h1 className="text-lg font-semibold">{t("title")}</h1>
+        <div className="ml-auto">
+          <Button
+            type="submit"
+            form="profile-form"
+            size="sm"
+            disabled={updateProfile.isPending}
+            className="h-9 shadow-sm"
+          >
+            {updateProfile.isPending ? t("saving") : tc("save")}
+          </Button>
+        </div>
       </div>
 
       {/* Account Info — read-only hero */}
@@ -338,6 +350,7 @@ export default function UserProfileSetting() {
                   className="h-9 transition-colors"
                   maxLength={100}
                   disabled={updateProfile.isPending}
+                  aria-invalid={!!form.formState.errors.firstname}
                   {...form.register("firstname")}
                 />
                 <FieldError>
@@ -353,6 +366,7 @@ export default function UserProfileSetting() {
                   className="h-9 transition-colors"
                   maxLength={100}
                   disabled={updateProfile.isPending}
+                  aria-invalid={!!form.formState.errors.middlename}
                   {...form.register("middlename")}
                 />
                 <FieldError>
@@ -370,6 +384,7 @@ export default function UserProfileSetting() {
                   className="h-9 transition-colors"
                   maxLength={100}
                   disabled={updateProfile.isPending}
+                  aria-invalid={!!form.formState.errors.lastname}
                   {...form.register("lastname")}
                 />
                 <FieldError>
@@ -390,6 +405,7 @@ export default function UserProfileSetting() {
                   className="h-9 transition-colors"
                   maxLength={20}
                   disabled={updateProfile.isPending}
+                  aria-invalid={!!form.formState.errors.telephone}
                   {...form.register("telephone")}
                 />
                 <FieldError>
@@ -408,6 +424,7 @@ export default function UserProfileSetting() {
                   className="h-9 transition-colors uppercase"
                   maxLength={2}
                   disabled={updateProfile.isPending}
+                  aria-invalid={!!form.formState.errors.alias_name}
                   {...form.register("alias_name")}
                 />
                 <FieldError>
@@ -416,16 +433,6 @@ export default function UserProfileSetting() {
               </Field>
             </div>
               </FieldGroup>
-            </div>
-            <div className="flex items-center justify-end border-t bg-muted/20 px-5 py-4 sm:px-6">
-              <Button
-                type="submit"
-                size="sm"
-                disabled={updateProfile.isPending}
-                className="h-10 w-full sm:h-9 sm:w-auto shadow-sm"
-              >
-                {updateProfile.isPending ? t("saving") : tc("save")}
-              </Button>
             </div>
           </form>
         </section>
@@ -479,9 +486,14 @@ export default function UserProfileSetting() {
               className="max-h-36 max-w-full object-contain drop-shadow-md transition-transform hover:scale-105"
             />
           ) : (
-            <p className="text-muted-foreground text-xs">
-              {t("signatureUploadHint")}
-            </p>
+            <div className="flex flex-col items-center justify-center text-center gap-3 py-6">
+              <div className="bg-muted/30 flex size-12 items-center justify-center rounded-full border border-border/30 shadow-sm">
+                <IdCard className="text-muted-foreground size-5" />
+              </div>
+              <p className="text-muted-foreground text-sm font-medium">
+                {t("signatureUploadHint")}
+              </p>
+            </div>
           )}
         </div>
       </section>
