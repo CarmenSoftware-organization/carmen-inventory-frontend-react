@@ -111,11 +111,13 @@ export function NotificationItemContent({
             >
               {sanitizeText(notification.title)}
             </p>
-            {Boolean(notification.metadata?.bu_code) && (
+            {notification.source === "broadcast" ? (
+              <></>
+            ) : notification.metadata?.bu_code ? (
               <span className="bg-primary/10 text-primary shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
-                {notification.metadata?.bu_code as string}
+                {notification.metadata.bu_code as string}
               </span>
-            )}
+            ) : null}
           </div>
           {time && (
             <span
