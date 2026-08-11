@@ -121,7 +121,7 @@ export function NotificationItemContent({
           <div className="flex min-w-0 flex-1 items-center gap-2 truncate">
             <p
               className={cn(
-                "group-hover:text-primary truncate text-[14px] leading-tight transition-colors duration-300",
+                "group-hover:text-primary truncate text-sm leading-tight transition-colors duration-300",
                 isUnread
                   ? "text-foreground font-semibold"
                   : "text-foreground/80 font-medium",
@@ -148,7 +148,7 @@ export function NotificationItemContent({
         {/* Message */}
         <p
           className={cn(
-            "text-muted-foreground/80 group-hover:text-muted-foreground mt-1 text-[13px] leading-relaxed transition-colors duration-300",
+            "text-muted-foreground/80 group-hover:text-muted-foreground mt-1 text-xs leading-relaxed transition-colors duration-300",
             // page list → 2 lines; navbar dropdown → single line + ellipsis
             clampMessage ? "line-clamp-2" : "truncate",
           )}

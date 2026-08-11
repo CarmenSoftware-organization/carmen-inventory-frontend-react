@@ -6,9 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -16,7 +13,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -69,10 +65,10 @@ const NotificationItem = ({
   return (
     <div
       className={cn(
-        "group relative flex items-start gap-3 rounded-xl p-3 pr-10 transition-all duration-300 ease-out border border-border/30",
+        "group flex items-start gap-3 rounded-lg p-3 pr-10 transition-colors border backdrop-blur-sm",
         isUnread
-          ? "bg-primary/[0.03] hover:bg-primary/[0.06] shadow-[inset_3px_0_0_0_hsl(var(--primary)),0_1px_3px_0_rgba(0,0,0,0.05)] hover:shadow-[inset_3px_0_0_0_hsl(var(--primary)),0_4px_6px_-1px_rgba(0,0,0,0.1)] hover:-translate-y-0.5"
-          : "bg-background shadow-sm hover:shadow-md hover:bg-muted/30 hover:-translate-y-0.5",
+          ? "bg-muted/50 border-border/50 hover:bg-muted/70"
+          : "bg-background/40 border-transparent hover:bg-muted/30",
       )}
     >
       {safeLink ? (
@@ -160,11 +156,11 @@ export default function Notification() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="mx-4 max-h-136 w-108 overflow-hidden p-0 shadow-lg"
+        className="mx-4 w-108 max-h-136 p-0 bg-background/70 backdrop-blur-xl border-border/40 shadow-lg supports-[backdrop-filter]:bg-background/50"
         align="end"
         sideOffset={6}
       >
-        <div className="flex items-center justify-between border-b px-3 py-2">
+        <div className="flex items-center justify-between border-b border-border/40 px-4 py-3 bg-background/20">
           <div className="flex items-center gap-2">
             <Bell className="text-muted-foreground size-4 shrink-0" />
             <span className="text-sm font-semibold tracking-tight">
@@ -267,83 +263,67 @@ export function NotificationDetailDialog({
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent 
+        className="sm:max-w-[425px] p-6 gap-6 rounded-xl border border-border/60 bg-background shadow-md sm:rounded-2xl"
         showCloseButton={false}
-        className="sm:max-w-[500px] overflow-hidden p-0 border border-border/30 shadow-2xl bg-background/95 backdrop-blur-2xl rounded-2xl"
       >
-        {/* Glassmorphic decorative glowing orbs */}
-        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/20 blur-[64px] pointer-events-none" aria-hidden="true" />
-        <div className="absolute -left-12 top-12 h-40 w-40 rounded-full bg-blue-500/10 blur-[48px] pointer-events-none" aria-hidden="true" />
-
-        <div className="relative z-10 px-6 pt-8 pb-6">
-          <DialogHeader className="flex flex-row items-start gap-5 space-y-0 text-left">
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-primary/10 to-primary/5 shadow-inner ring-1 ring-primary/20">
-              <Bell className="h-7 w-7 text-primary/90" strokeWidth={1.5} />
-              <div className="absolute inset-0 rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] pointer-events-none" />
-            </div>
-            
-            <div className="flex-1 space-y-2 pt-0">
-              <DialogTitle className="text-[26px] font-bold tracking-tight text-foreground leading-tight">
-                {isLoading ? (
-                  <Skeleton className="h-8 w-4/5 rounded-lg" />
-                ) : (
-                  sanitizeText(data?.title)
+        <div className="flex flex-col gap-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/60 bg-muted/30">
+                <Bell className="h-4 w-4 text-foreground/80" strokeWidth={2} />
+              </div>
+              <div className="flex flex-col">
+                <DialogTitle className="text-[15px] font-semibold text-foreground tracking-tight">
+                  {isLoading ? <Skeleton className="h-4 w-32" /> : data?.title}
+                </DialogTitle>
+                {data && (
+                  <div className="flex items-center gap-2 mt-0.5 text-[13px] text-muted-foreground">
+                    <time dateTime={data.created_at ?? undefined}>{data.created_at ? new Date(data.created_at).toLocaleDateString(locale, { dateStyle: "medium" }) : ""}</time>
+                    {data.doc_type && (
+                      <>
+                        <span className="w-1 h-1 rounded-full bg-border" />
+                        <span className="font-medium text-foreground/70">
+                          {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 )}
-              </DialogTitle>
-              {data && (
-                <DialogDescription className="flex flex-wrap items-center gap-3 pt-1">
-                  {data.doc_type && (
-                    <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                      {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
-                    </Badge>
-                  )}
-                  {data.created_at && (
-                    <span className="text-muted-foreground text-sm font-medium flex items-center gap-2">
-                      <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
-                      {new Date(data.created_at).toLocaleString(locale, {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </span>
-                  )}
-                </DialogDescription>
-              )}
+              </div>
             </div>
-          </DialogHeader>
+          </div>
 
-          <div className="mt-8 rounded-2xl bg-muted/30 p-5 ring-1 ring-inset ring-border/50 shadow-sm backdrop-blur-sm">
+          <div className="rounded-lg border border-border/40 bg-muted/20 p-4">
             {isLoading && (
-              <div className="space-y-3">
-                <Skeleton className="h-4 w-full rounded-md" />
-                <Skeleton className="h-4 w-11/12 rounded-md" />
-                <Skeleton className="h-4 w-4/5 rounded-md" />
-                <Skeleton className="h-4 w-2/3 rounded-md" />
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-4/5" />
               </div>
             )}
+            
             {error && (
-              <div className="flex items-start gap-3 text-destructive rounded-xl bg-destructive/10 p-4">
-                <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
-                <p className="font-medium text-[14.5px] leading-relaxed">
-                  {error instanceof Error ? error.message : String(error)}
-                </p>
+              <div className="flex items-center gap-2 text-[13px] font-medium text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                {error instanceof Error ? error.message : String(error)}
               </div>
             )}
+
             {data && (
-              <p className="text-[15px] leading-relaxed text-foreground/85 whitespace-pre-wrap">
+              <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap">
                 {formatMessage(data.message)}
               </p>
             )}
           </div>
         </div>
 
-        <DialogFooter className="relative z-10 bg-muted/20 border-t border-border/30 px-6 py-4 sm:justify-end">
+        <div className="flex justify-end pt-2">
           <Button 
-            variant="default" 
-            onClick={onClose} 
-            className="w-full sm:w-auto rounded-xl px-8 h-11 text-[15px] font-medium shadow-[0_2px_12px_-4px_hsl(var(--primary))] hover:shadow-[0_6px_16px_-6px_hsl(var(--primary))] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+            onClick={onClose}
+            className="h-9 px-4 text-[13px] font-medium rounded-md shadow-sm transition-colors"
           >
             {tc("close")}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

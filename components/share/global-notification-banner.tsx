@@ -36,7 +36,8 @@ export function GlobalNotificationBanner() {
       <div
         role="alert"
         aria-live="polite"
-        className="flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-primary/20 bg-background/80 p-3 shadow-2xl backdrop-blur-xl ring-1 ring-primary/10 transition-all hover:bg-background/90 hover:shadow-primary/5 sm:p-4"
+        className="flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-primary/20 bg-background/80 p-3 shadow-2xl backdrop-blur-xl ring-1 ring-primary/10 transition-all hover:bg-background/90 hover:shadow-primary/5 sm:p-4 cursor-pointer"
+        onClick={() => setIsVisible(false)}
       >
         <div className="flex items-center gap-3">
           <div className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">

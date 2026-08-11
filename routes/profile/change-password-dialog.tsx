@@ -88,7 +88,7 @@ export default function ChangePasswordDialog({
       open={open}
       onOpenChange={changePassword.isPending ? undefined : onOpenChange}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="text-sm">{t("changePassword")}</DialogTitle>
           <DialogDescription className="text-xs">
