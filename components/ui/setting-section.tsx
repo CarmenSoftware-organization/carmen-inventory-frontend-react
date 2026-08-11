@@ -75,7 +75,9 @@ export function SettingSection({
           <div className="min-w-0">{heading}</div>
           {action}
         </div>
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0 rounded-xl border bg-card shadow-sm p-5 sm:p-6 overflow-hidden">
+          {children}
+        </div>
       </section>
     );
   }
@@ -83,22 +85,28 @@ export function SettingSection({
   return (
     <section
       className={cn(
-        "grid gap-x-10 md:grid-cols-3",
-        plain ? "gap-y-3" : "gap-y-4",
+        "grid gap-x-10 md:grid-cols-3 items-start",
+        plain ? "gap-y-3" : "gap-y-6",
         !first && "border-border/70 mt-8 border-t pt-8",
       )}
     >
-      <div className="md:col-span-1">
+      <div className="md:col-span-1 pt-2">
         {heading}
         {action && <div className="mt-3">{action}</div>}
       </div>
       <div
         className={cn(
-          "md:col-span-2",
-          plain ? "min-w-0" : "grid gap-4 sm:grid-cols-2",
+          "md:col-span-2 rounded-xl border bg-card shadow-sm overflow-hidden",
         )}
       >
-        {children}
+        <div
+          className={cn(
+            "p-5 sm:p-6",
+            plain ? "min-w-0" : "grid gap-6 sm:grid-cols-2",
+          )}
+        >
+          {children}
+        </div>
       </div>
     </section>
   );
@@ -120,25 +128,27 @@ export function SettingSectionSkeleton({
   return (
     <div
       className={cn(
-        "grid gap-x-10 gap-y-4 md:grid-cols-3",
+        "grid gap-x-10 gap-y-6 md:grid-cols-3 items-start",
         !first && "border-border/70 mt-8 border-t pt-8",
       )}
     >
-      <div className="space-y-2 md:col-span-1">
+      <div className="space-y-2 md:col-span-1 pt-2">
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-3 w-44" />
       </div>
-      <div className="grid gap-4 md:col-span-2 sm:grid-cols-2">
-        {fields.map((w, j) => (
-          <Skeleton
-            key={j}
-            className={cn(
-              "w-full",
-              w === "tall" ? "h-24" : "h-14",
-              (w === "full" || w === "tall") && "sm:col-span-2",
-            )}
-          />
-        ))}
+      <div className="md:col-span-2 rounded-xl border bg-card shadow-sm overflow-hidden">
+        <div className="grid gap-6 p-5 sm:p-6 sm:grid-cols-2">
+          {fields.map((w, j) => (
+            <Skeleton
+              key={j}
+              className={cn(
+                "w-full",
+                w === "tall" ? "h-24" : "h-14",
+                (w === "full" || w === "tall") && "sm:col-span-2",
+              )}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -51,7 +51,6 @@ import {
   MessageSquareText,
   Activity,
   UserRoundSearch,
-  Mail,
   BellRing,
   Database,
   Award,
@@ -494,16 +493,10 @@ export const moduleList: ModuleDto[] = [
         permission: PERMISSIONS.system_configuration.view,
       },
       {
-        name: "configEmail",
-        path: "/system-admin/config-email",
-        icon: Mail,
-        separatorBefore: true,
-        permission: PERMISSIONS.system_configuration.view,
-      },
-      {
         name: "notificationTemplate",
         path: "/system-admin/notification-template",
         icon: BellRing,
+        separatorBefore: true,
         permission: PERMISSIONS.system_configuration.view,
       },
       {

@@ -7,7 +7,6 @@ import {
   Database,
   Folder,
   Gauge,
-  Mail,
   Shield,
   Terminal,
   Users,
@@ -26,7 +25,6 @@ export type VisualKey =
   | "docs"
   | "userActivity"
   | "monitor"
-  | "email"
   | "interface"
   | "notify"
   | "code"
@@ -111,12 +109,6 @@ export const CHAPTERS: readonly ChapterDef[] = [
     num: "04",
     key: "config",
     modules: [
-      {
-        key: "email",
-        visualKey: "email",
-        href: "/system-admin/config-email",
-        icon: Mail,
-      },
       {
         key: "interface",
         visualKey: "interface",

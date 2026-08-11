@@ -225,7 +225,6 @@ export const router = createBrowserRouter([
               { path: "workflow/new", lazy: () => import("./system-admin/workflow/workflow-new.route") },
               { path: "workflow/:id", lazy: () => import("./system-admin/workflow/workflow-edit.route") },
               { path: "running-code", lazy: () => import("./system-admin/running-code/running-code.route") },
-              { path: "config-email", lazy: () => import("./system-admin/config-email/config-email.route") },
               { path: "dashboard-dataset", lazy: () => import("./system-admin/dashboard-dataset/dashboard-dataset.route") },
               { path: "company-profile", lazy: () => import("./system-admin/company-profile/company-profile.route") },
               { path: "default-setting", lazy: () => import("./system-admin/default-setting/default-setting.route") },

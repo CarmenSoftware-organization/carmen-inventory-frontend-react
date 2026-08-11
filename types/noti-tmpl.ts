@@ -1,4 +1,4 @@
-export type NotificationTemplateType = "app" | "line" | "sms" | "email";
+export type NotificationTemplateType = "app";
 
 export interface NotificationTemplate {
   id: string;

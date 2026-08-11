@@ -29,8 +29,6 @@ export function ModuleVisual({ visualKey }: { readonly visualKey: VisualKey }) {
       return <UserActivityViz />;
     case "monitor":
       return <MonitorViz />;
-    case "email":
-      return <EmailViz />;
     case "interface":
       return <InterfaceViz />;
     case "notify":
@@ -443,40 +441,6 @@ function MonitorViz() {
   );
 }
 
-function EmailViz() {
-  return (
-    <div className={VIZ_WRAP}>
-      <div className="bg-card border-border rounded-sm border p-2">
-        <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-foreground text-micro-eyebrow font-semibold">
-            mail.aureliabay.com
-          </span>
-          <span className="text-positive-ink inline-flex items-center gap-1 text-micro-floor font-semibold">
-            <span className="bg-positive inline-block size-1.5 rounded-full" />{" "}
-            Connected
-          </span>
-        </div>
-        <div className="text-muted-foreground grid grid-cols-2 gap-1 text-micro-floor">
-          <div className="bg-muted rounded-[1px] px-1.5 py-1">
-            SMTP · 587 TLS
-          </div>
-          <div className="bg-muted rounded-[1px] px-1.5 py-1">DKIM · ok</div>
-          <div className="bg-muted rounded-[1px] px-1.5 py-1">SPF · ok</div>
-          <div
-            className="rounded-[1px] px-1.5 py-1 font-bold"
-            style={{
-              background:
-                "color-mix(in oklch, var(--primary), var(--card) 80%)",
-              color: ACCENT,
-            }}
-          >
-            4 templates
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /** ภาพจำลอง: สามระบบภายนอกต่อเข้าหากล่องกลาง */
 function InterfaceViz() {

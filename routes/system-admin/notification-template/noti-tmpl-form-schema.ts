@@ -11,14 +11,11 @@ export const NOTIFICATION_CHANNEL_OPTIONS: ReadonlyArray<{
   label: string;
 }> = [
   { value: "app", label: "App" },
-  { value: "email", label: "Email" },
-  { value: "line", label: "LINE" },
-  { value: "sms", label: "SMS" },
 ];
 
 export const notificationTemplateSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  type: z.enum(["app", "line", "sms", "email"]),
+  type: z.enum(["app"]),
   subject: z.string(),
   body: z.string().min(1, "Body is required"),
   description: z.string(),

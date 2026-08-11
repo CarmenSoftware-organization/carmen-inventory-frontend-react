@@ -9,7 +9,7 @@ import type { WorkflowCreateModel } from "./wf-form-schema";
 
 type WfAction = "submit" | "approve" | "reject" | "sendback";
 type WfRecipient = "requestor" | "current_approve" | "next_step";
-type WfChannel = "app" | "email";
+type WfChannel = "app";
 
 interface WfStageNotificationsProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
@@ -228,14 +228,6 @@ function RecipientRow({
             channel="app"
             isDisabled={isDisabled}
           />
-          <ChannelRow
-            form={form}
-            index={index}
-            action={action}
-            recipient={recipient}
-            channel="email"
-            isDisabled={isDisabled}
-          />
         </div>
       )}
     </div>
@@ -260,7 +252,7 @@ function ChannelRow({
   isDisabled,
 }: ChannelRowProps) {
   const t = useTranslations("systemAdmin.workflow");
-  const channelLabel = channel === "app" ? t("channelApp") : t("channelEmail");
+  const channelLabel = t("channelApp");
   const channelActive = useWatch({
     control: form.control,
     name: `data.stages.${index}.available_actions.${action}.recipients.${recipient}.notification_channel.${channel}.is_active`,

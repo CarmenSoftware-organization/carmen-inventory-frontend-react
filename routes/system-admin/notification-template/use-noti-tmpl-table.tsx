@@ -3,9 +3,6 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import {
   Bell,
-  Mail,
-  MessageCircle,
-  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -30,18 +27,25 @@ const CHANNEL: Record<
   NotificationTemplateType,
   { label: string; Icon: LucideIcon }
 > = {
-  email: { label: "Email", Icon: Mail },
   app: { label: "App", Icon: Bell },
-  line: { label: "LINE", Icon: MessageCircle },
-  sms: { label: "SMS", Icon: Smartphone },
 };
 
 const ChannelBadge = ({
   type,
 }: {
-  readonly type: NotificationTemplateType;
+  readonly type: NotificationTemplateType | string;
 }) => {
-  const { label, Icon } = CHANNEL[type];
+  const channel = CHANNEL[type as NotificationTemplateType];
+  
+  if (!channel) {
+    return (
+      <Badge variant="secondary" size="sm" className="gap-1 font-semibold">
+        <span className="capitalize">{String(type)}</span>
+      </Badge>
+    );
+  }
+
+  const { label, Icon } = channel;
   return (
     <Badge variant="secondary" size="sm" className="gap-1 font-semibold">
       <Icon aria-hidden />
