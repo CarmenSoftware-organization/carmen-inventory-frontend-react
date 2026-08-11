@@ -1,6 +1,7 @@
-import { Bell, MessageSquare } from "lucide-react";
+import { Bell, MessageSquare, AlertTriangle, AlertCircle, Wrench, Info } from "lucide-react";
 import { SubTile } from "@/components/icons/tiles";
 import { formatMessage, NOTIFICATION_TILE } from "@/lib/notification-helpers";
+import { formatRelativeTime } from "@/lib/relative-time";
 import { cn, sanitizeText } from "@/lib/utils";
 import type { Notification } from "@/types/notification";
 
@@ -32,9 +33,13 @@ export function NotificationItemContent({
   clampMessage = false,
 }: NotificationItemContentProps) {
   const time = notification.created_at
+    ? formatRelativeTime(notification.created_at, locale)
+    : null;
+  const fullTime = notification.created_at
     ? new Date(notification.created_at).toLocaleString(locale, {
         day: "2-digit",
         month: "short",
+        year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
       })
@@ -44,14 +49,30 @@ export function NotificationItemContent({
     : undefined;
   const isComment = notification.event === "comment";
 
+  let FallbackIcon = Bell;
+  const fallbackBg = "bg-primary text-primary-foreground";
+
+  if (!tile && notification.source === "broadcast") {
+    const sev = String(notification.metadata?.severity || "INFO").toUpperCase();
+    if (sev === "WARNING") {
+      FallbackIcon = AlertTriangle;
+    } else if (sev === "CRITICAL") {
+      FallbackIcon = AlertCircle;
+    } else if (sev === "MAINTENANCE") {
+      FallbackIcon = Wrench;
+    } else if (sev === "INFO") {
+      FallbackIcon = Info;
+    }
+  }
+
   return (
     <>
-      {/* Unread rail — blue dot to the left of the icon (iOS style) */}
+      {/* Unread rail — blue dot to the left of the icon (iOS style) with glow */}
       <span
-        className="flex w-1.5 shrink-0 items-center justify-center"
+        className="flex w-2 shrink-0 items-center justify-center"
         aria-hidden="true"
       >
-        {isUnread && <span className="bg-primary size-1.5 rounded-full" />}
+        {isUnread && <span className="bg-primary size-2 rounded-full shadow-[0_0_8px_hsl(var(--primary))] ring-4 ring-primary/10" />}
       </span>
 
       {/* Leading app tile — squircle ชุดเดียวกับ sidebar/dashboard
@@ -61,8 +82,8 @@ export function NotificationItemContent({
         {tile ? (
           <SubTile name={tile.name} parentName={tile.parent} size={36} />
         ) : (
-          <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-xl">
-            <Bell className="size-4.5" />
+          <span className={cn("flex size-9 items-center justify-center rounded-xl", fallbackBg)}>
+            <FallbackIcon className="size-4.5" />
           </span>
         )}
         {isComment && (
@@ -76,21 +97,31 @@ export function NotificationItemContent({
         )}
       </span>
 
-      {/* Content + inset bottom border (divider stops short of the icon) */}
-      <div className="min-w-0 flex-1 border-b py-2">
+      {/* Content + inset bottom border (removed for card layout) */}
+      <div className="min-w-0 flex-1 py-1">
         {/* Top line: type + title (left) · time (right) */}
         <div className="flex items-center gap-2">
           {isUnread && <span className="sr-only">{unreadLabel}</span>}
-          <p
-            className={cn(
-              "min-w-0 flex-1 truncate text-sm leading-snug group-hover:underline",
-              isUnread ? "text-foreground font-semibold" : "font-semibold",
+          <div className="min-w-0 flex-1 flex items-center gap-2 truncate">
+            <p
+              className={cn(
+                "truncate text-[15px] leading-snug group-hover:text-primary transition-colors duration-300",
+                isUnread ? "text-foreground font-semibold" : "font-medium text-foreground/90",
+              )}
+            >
+              {sanitizeText(notification.title)}
+            </p>
+            {Boolean(notification.metadata?.bu_code) && (
+              <span className="bg-primary/10 text-primary shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                {notification.metadata?.bu_code as string}
+              </span>
             )}
-          >
-            {sanitizeText(notification.title)}
-          </p>
+          </div>
           {time && (
-            <span className="text-muted-foreground shrink-0 text-micro whitespace-nowrap tabular-nums">
+            <span
+              title={fullTime || undefined}
+              className="text-muted-foreground shrink-0 text-micro whitespace-nowrap tabular-nums cursor-default"
+            >
               {time}
             </span>
           )}
@@ -99,7 +130,7 @@ export function NotificationItemContent({
         {/* Message */}
         <p
           className={cn(
-            "text-muted-foreground mt-1 text-xs leading-snug",
+            "text-muted-foreground mt-1 text-[13px] leading-relaxed transition-colors duration-300 group-hover:text-foreground/80",
             // page list → 2 lines; navbar dropdown → single line + ellipsis
             clampMessage ? "line-clamp-2" : "truncate",
           )}
