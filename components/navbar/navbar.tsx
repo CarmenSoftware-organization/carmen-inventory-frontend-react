@@ -1,4 +1,7 @@
+import { MoreVertical } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useProfile } from "@/hooks/use-profile";
 import { UserProfile } from "./user-profile";
 import PathBreadcrumb from "./path-breadcrumb";
@@ -26,9 +29,35 @@ export function Navbar() {
         <div className="ml-auto flex items-center gap-1">
           {!isError && (
             <>
-              <div className="flex items-center gap-1">
+              <div className="hidden sm:flex items-center gap-1">
                 <BuSwitcher />
                 <ModuleApp />
+              </div>
+
+              <div className="flex sm:hidden items-center">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="top" className="p-4 pt-12 rounded-b-2xl">
+                    <SheetHeader>
+                      <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                    </SheetHeader>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between px-2">
+                        <span className="text-sm font-medium text-muted-foreground">Business Unit</span>
+                        <BuSwitcher />
+                      </div>
+                      <div className="flex items-center justify-between px-2">
+                        <span className="text-sm font-medium text-muted-foreground">Applications</span>
+                        <ModuleApp />
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
 
               <Notification />

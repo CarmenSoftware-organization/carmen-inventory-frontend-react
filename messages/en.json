@@ -4467,6 +4467,8 @@
     "updated": "updated"
   },
   "notifications": {
+    "broadcasts": "Broadcasts",
+    "personal": "Personal",
     "docType": {
       "system": "System",
       "businessUnit": "Business Unit"

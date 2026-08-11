@@ -83,39 +83,43 @@ export default function NotificationsContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 pb-[max(2rem,env(safe-area-inset-bottom))] md:py-8">
-      <header className="flex flex-wrap items-center gap-3 pb-2">
-        <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-2xl shadow-sm">
-          <Bell className="size-5" aria-hidden="true" />
+      <header className="flex flex-wrap items-center justify-between gap-y-4 gap-x-4 pb-2">
+        <div className="flex flex-wrap items-center gap-y-3 gap-x-6 flex-1 min-w-[200px]">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-2xl shadow-sm shrink-0">
+              <Bell className="size-5" aria-hidden="true" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {t("notifications")}
+            </h1>
+          </div>
+          <Tabs
+            value={tab}
+            onValueChange={(value) => {
+              // Check if document.startViewTransition is supported for smooth tab switching
+              if (document.startViewTransition) {
+                document.startViewTransition(() => setTab(value as NotificationTab));
+              } else {
+                setTab(value as NotificationTab);
+              }
+            }}
+          >
+            <TabsList className="bg-muted/50 rounded-xl p-1">
+              <TabsTrigger value="all" className="rounded-lg data-[state=active]:shadow-sm">{tRoot("notifications.tabAll")}</TabsTrigger>
+              <TabsTrigger value="unread" className="rounded-lg data-[state=active]:shadow-sm">
+                {tRoot("notifications.tabUnread")}
+                {unreadCount !== undefined && unreadCount > 0 && (
+                  <span className="bg-primary/15 text-primary ms-2 rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums">
+                    {unreadCount.toLocaleString()}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t("notifications")}
-        </h1>
-        <Tabs
-          value={tab}
-          onValueChange={(value) => {
-            // Check if document.startViewTransition is supported for smooth tab switching
-            if (document.startViewTransition) {
-              document.startViewTransition(() => setTab(value as NotificationTab));
-            } else {
-              setTab(value as NotificationTab);
-            }
-          }}
-          className="ms-4"
-        >
-          <TabsList className="bg-muted/50 rounded-xl p-1">
-            <TabsTrigger value="all" className="rounded-lg data-[state=active]:shadow-sm">{tRoot("notifications.tabAll")}</TabsTrigger>
-            <TabsTrigger value="unread" className="rounded-lg data-[state=active]:shadow-sm">
-              {tRoot("notifications.tabUnread")}
-              {unreadCount !== undefined && unreadCount > 0 && (
-                <span className="bg-primary/15 text-primary ms-2 rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums">
-                  {unreadCount.toLocaleString()}
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+
         {hasUnread && (
-          <div className="ms-auto flex gap-2">
+          <div className="flex gap-2">
             <Button
               variant={isSelectionMode ? "default" : "outline"}
               size="sm"
@@ -185,9 +189,10 @@ export default function NotificationsContent() {
                 <ul className="flex flex-col gap-3">
                   {items
                     .filter((notification) => notification.source === "broadcast")
-                    .map((notification) => (
+                    .map((notification, index) => (
                       <NotificationRow
                         key={notification.id}
+                        index={index}
                         notification={notification}
                         locale={locale}
                         onShowDetail={setDetailId}
@@ -218,9 +223,10 @@ export default function NotificationsContent() {
                     {buName}
                   </h2>
                   <ul className="flex flex-col gap-3">
-                    {buItems.map((notification) => (
+                    {buItems.map((notification, index) => (
                       <NotificationRow
                         key={notification.id}
+                        index={index}
                         notification={notification}
                         locale={locale}
                         onShowDetail={setDetailId}
@@ -274,6 +280,7 @@ interface NotificationRowProps {
   readonly isSelectionMode?: boolean;
   readonly isSelected?: boolean;
   readonly onToggleSelect?: (id: string) => void;
+  readonly index?: number;
 }
 
 function NotificationRow({
@@ -284,6 +291,7 @@ function NotificationRow({
   isSelectionMode,
   isSelected,
   onToggleSelect,
+  index = 0,
 }: NotificationRowProps) {
   const t = useTranslations("navbar");
   const tRoot = useTranslations();
@@ -325,7 +333,10 @@ function NotificationRow({
   );
 
   return (
-    <li>
+    <li 
+      className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both"
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
       {isSelectionMode && isUnread ? (
         <button
           type="button"

@@ -4457,6 +4457,8 @@
     "updated": "แก้ไข"
   },
   "notifications": {
+    "broadcasts": "ประกาศ",
+    "personal": "ส่วนตัว",
     "docType": {
       "system": "ระบบ",
       "businessUnit": "หน่วยธุรกิจ"
