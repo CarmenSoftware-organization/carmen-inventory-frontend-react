@@ -15,8 +15,6 @@ import type { TranslationFn } from "@/lib/i18n-schema";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -190,54 +188,69 @@ export function ConfigEntityDialog<
 
   return (
     <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
-      <DialogContent className={cn("gap-0 p-0 sm:max-w-md", contentClassName)}>
-        <form
-          onSubmit={
-            stopPropagationOnSubmit
-              ? (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  form.handleSubmit(onSubmit)(e);
-                }
-              : form.handleSubmit(onSubmit)
-          }
-        >
-          <DialogHeader className="gap-0 px-5 py-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-muted text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-                <Icon className="size-4.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <DialogTitle className="text-base">
-                  {isEdit
-                    ? tf("editTitle", { entity: t("entity") })
-                    : tf("addTitle", { entity: t("entity") })}
-                </DialogTitle>
+      <DialogContent 
+        className={cn(
+          "sm:max-w-[425px] p-0 border-0 overflow-hidden bg-transparent shadow-2xl", 
+          contentClassName
+        )}
+        showCloseButton={false}
+      >
+        <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-3xl border border-white/80 dark:border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
+          <form
+            onSubmit={
+              stopPropagationOnSubmit
+                ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    form.handleSubmit(onSubmit)(e);
+                  }
+                : form.handleSubmit(onSubmit)
+            }
+            className="flex flex-col relative"
+          >
+            <div className="px-6 py-6 border-b border-white/60 dark:border-white/10 bg-white/60 dark:bg-black/40">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/90 dark:bg-white/10 text-primary shadow-sm border border-white/80 dark:border-white/20 backdrop-blur-md">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div className="flex flex-col">
+                  <DialogTitle className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                    {isEdit
+                      ? tf("editTitle", { entity: t("entity") })
+                      : tf("addTitle", { entity: t("entity") })}
+                  </DialogTitle>
+                </div>
               </div>
             </div>
-          </DialogHeader>
-          <div className="space-y-3 border-t px-5 py-4">
-            <FieldGroup className="gap-3">
-              {children({ form, disabled: isPending || !!readOnly })}
-            </FieldGroup>
-          </div>
-          <DialogFooter className="bg-muted/20 border-t px-5 py-3">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              disabled={isPending}
-            >
-              {readOnly ? tc("close") : tc("cancel")}
-            </Button>
-            {!readOnly && (
-              <Button type="submit" size="sm" disabled={isPending}>
-                {submitLabel}
+
+            <div className="px-6 py-6 bg-white/50 dark:bg-black/40">
+              <FieldGroup className="gap-5">
+                {children({ form, disabled: isPending || !!readOnly })}
+              </FieldGroup>
+            </div>
+
+            <div className="px-6 py-4 flex justify-end gap-3 border-t border-white/60 dark:border-white/10 bg-white/70 dark:bg-black/50">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isPending}
+                className="rounded-xl bg-white/90 hover:bg-white dark:bg-white/10 dark:hover:bg-white/20 border border-white/80 dark:border-white/20 font-bold backdrop-blur-md shadow-sm transition-all"
+              >
+                {readOnly ? tc("close") : tc("cancel")}
               </Button>
-            )}
-          </DialogFooter>
-        </form>
+              {!readOnly && (
+                <Button 
+                  type="submit" 
+                  disabled={isPending}
+                  className="rounded-xl bg-primary/90 hover:bg-primary text-primary-foreground font-bold shadow-lg backdrop-blur-md transition-all"
+                >
+                  {submitLabel}
+                </Button>
+              )}
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

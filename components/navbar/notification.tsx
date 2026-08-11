@@ -263,29 +263,27 @@ export function NotificationDetailDialog({
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent 
-        className="sm:max-w-[425px] p-6 gap-6 rounded-xl border border-border/60 bg-background shadow-md sm:rounded-2xl"
+        className="sm:max-w-[425px] p-0 border-0 overflow-hidden bg-transparent shadow-2xl"
         showCloseButton={false}
       >
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/60 bg-muted/30">
-                <Bell className="h-4 w-4 text-foreground/80" strokeWidth={2} />
+        <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-3xl border border-white/80 dark:border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
+          {/* Header */}
+          <div className="px-6 py-6 border-b border-white/60 dark:border-white/10 bg-white/60 dark:bg-black/40">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/90 dark:bg-white/10 text-primary shadow-sm border border-white/80 dark:border-white/20 backdrop-blur-md">
+                <Bell className="h-6 w-6" />
               </div>
-              <div className="flex flex-col">
-                <DialogTitle className="text-[15px] font-semibold text-foreground tracking-tight">
-                  {isLoading ? <Skeleton className="h-4 w-32" /> : data?.title}
+              <div className="flex flex-col text-left">
+                <DialogTitle className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                  {isLoading ? <Skeleton className="h-5 w-3/4 bg-black/10 dark:bg-white/10" /> : data?.title}
                 </DialogTitle>
                 {data && (
-                  <div className="flex items-center gap-2 mt-0.5 text-[13px] text-muted-foreground">
-                    <time dateTime={data.created_at ?? undefined}>{data.created_at ? new Date(data.created_at).toLocaleDateString(locale, { dateStyle: "medium" }) : ""}</time>
+                  <div className="text-[13px] font-semibold text-slate-600 dark:text-slate-300 flex items-center mt-1">
+                    <span>{data.created_at ? new Date(data.created_at).toLocaleDateString(locale, { dateStyle: "medium" }) : ""}</span>
                     {data.doc_type && (
-                      <>
-                        <span className="w-1 h-1 rounded-full bg-border" />
-                        <span className="font-medium text-foreground/70">
-                          {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
-                        </span>
-                      </>
+                      <span className="ml-2 before:content-['•'] before:mr-2 uppercase tracking-wider text-primary">
+                        {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
+                      </span>
                     )}
                   </div>
                 )}
@@ -293,36 +291,39 @@ export function NotificationDetailDialog({
             </div>
           </div>
 
-          <div className="rounded-lg border border-border/40 bg-muted/20 p-4">
+          {/* Body */}
+          <div className="px-6 py-6 bg-white/50 dark:bg-black/40">
             {isLoading && (
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-4/5" />
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full bg-black/10 dark:bg-white/10" />
+                <Skeleton className="h-4 w-5/6 bg-black/10 dark:bg-white/10" />
               </div>
             )}
             
             {error && (
-              <div className="flex items-center gap-2 text-[13px] font-medium text-destructive">
-                <AlertCircle className="h-4 w-4" />
+              <div className="flex items-center gap-3 text-[14px] font-semibold text-destructive bg-white/80 dark:bg-black/60 p-4 rounded-xl border border-white/60 dark:border-white/10 backdrop-blur-sm shadow-sm">
+                <AlertCircle className="h-5 w-5" />
                 {error instanceof Error ? error.message : String(error)}
               </div>
             )}
 
             {data && (
-              <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap">
+              <p className="text-[15px] font-medium text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
                 {formatMessage(data.message)}
               </p>
             )}
           </div>
-        </div>
 
-        <div className="flex justify-end pt-2">
-          <Button 
-            onClick={onClose}
-            className="h-9 px-4 text-[13px] font-medium rounded-md shadow-sm transition-colors"
-          >
-            {tc("close")}
-          </Button>
+          {/* Footer */}
+          <div className="px-6 py-4 flex justify-end border-t border-white/60 dark:border-white/10 bg-white/70 dark:bg-black/50">
+            <Button 
+              variant="outline" 
+              onClick={onClose} 
+              className="rounded-xl bg-white/90 hover:bg-white dark:bg-white/10 dark:hover:bg-white/20 border border-white/80 dark:border-white/20 font-bold backdrop-blur-md shadow-sm transition-all"
+            >
+              {tc("close")}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
