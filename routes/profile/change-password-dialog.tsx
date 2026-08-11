@@ -11,8 +11,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
@@ -88,94 +86,103 @@ export default function ChangePasswordDialog({
       open={open}
       onOpenChange={changePassword.isPending ? undefined : onOpenChange}
     >
-      <DialogContent className="sm:max-w-md" showCloseButton={false}>
-        <DialogHeader>
-          <DialogTitle className="text-sm">{t("changePassword")}</DialogTitle>
-          <DialogDescription className="text-xs">
-            {t("changePasswordDesc")}
-          </DialogDescription>
-        </DialogHeader>
-        <form
-          id="change-password-form"
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-3"
-        >
-          <FieldGroup className="gap-3">
-            <Field data-invalid={!!form.formState.errors.current_password}>
-              <FieldLabel htmlFor="current_password" required>
-                {t("currentPassword")}
-              </FieldLabel>
-              <InputCustom
-                id="current_password"
-                type="password"
-                placeholder={t("enterCurrentPassword")}
-                data-id="log-in-password"
-                autoComplete="current-password"
-                className="h-8"
-                disabled={changePassword.isPending}
-                {...form.register("current_password")}
-              />
-              <FieldError>
-                {form.formState.errors.current_password?.message}
-              </FieldError>
-            </Field>
+      <DialogContent 
+        className="sm:max-w-[425px] p-6 gap-6 rounded-xl border border-border/60 bg-background shadow-md sm:rounded-2xl" 
+        showCloseButton={false}
+      >
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col">
+            <DialogTitle className="text-[15px] font-semibold text-foreground tracking-tight">
+              {t("changePassword")}
+            </DialogTitle>
+            <DialogDescription className="text-[13px] text-muted-foreground mt-0.5">
+              {t("changePasswordDesc")}
+            </DialogDescription>
+          </div>
+          
+          <form
+            id="change-password-form"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-3"
+          >
+            <FieldGroup className="gap-4">
+              <Field data-invalid={!!form.formState.errors.current_password}>
+                <FieldLabel htmlFor="current_password" required className="text-[13px] font-medium text-foreground/80 mb-1.5">
+                  {t("currentPassword")}
+                </FieldLabel>
+                <InputCustom
+                  id="current_password"
+                  type="password"
+                  placeholder={t("enterCurrentPassword")}
+                  data-id="log-in-password"
+                  autoComplete="current-password"
+                  className="h-9 rounded-md border-border/60 bg-muted/10 text-[13px] transition-colors focus-visible:ring-1 focus-visible:ring-ring"
+                  disabled={changePassword.isPending}
+                  {...form.register("current_password")}
+                />
+                <FieldError className="text-[12px] mt-1">
+                  {form.formState.errors.current_password?.message}
+                </FieldError>
+              </Field>
 
-            <Field data-invalid={!!form.formState.errors.new_password}>
-              <FieldLabel htmlFor="new_password" required>
-                {t("newPassword")}
-              </FieldLabel>
-              <InputCustom
-                id="new_password"
-                type="password"
-                placeholder={t("enterNewPassword")}
-                data-id="log-in-password"
-                autoComplete="new-password"
-                className="h-8"
-                {...form.register("new_password")}
-              />
-              <FieldError>
-                {form.formState.errors.new_password?.message}
-              </FieldError>
-            </Field>
+              <Field data-invalid={!!form.formState.errors.new_password}>
+                <FieldLabel htmlFor="new_password" required className="text-[13px] font-medium text-foreground/80 mb-1.5">
+                  {t("newPassword")}
+                </FieldLabel>
+                <InputCustom
+                  id="new_password"
+                  type="password"
+                  placeholder={t("enterNewPassword")}
+                  data-id="log-in-password"
+                  autoComplete="new-password"
+                  className="h-9 rounded-md border-border/60 bg-muted/10 text-[13px] transition-colors focus-visible:ring-1 focus-visible:ring-ring"
+                  {...form.register("new_password")}
+                />
+                <FieldError className="text-[12px] mt-1">
+                  {form.formState.errors.new_password?.message}
+                </FieldError>
+              </Field>
 
-            <Field data-invalid={!!form.formState.errors.confirm_password}>
-              <FieldLabel htmlFor="confirm_password" required>
-                {t("confirmPassword")}
-              </FieldLabel>
-              <InputCustom
-                id="confirm_password"
-                type="password"
-                placeholder={t("reenterPassword")}
-                data-id="log-in-password"
-                autoComplete="new-password"
-                className="h-8"
-                disabled={changePassword.isPending}
-                {...form.register("confirm_password")}
-              />
-              <FieldError>
-                {form.formState.errors.confirm_password?.message}
-              </FieldError>
-            </Field>
-          </FieldGroup>
-        </form>
-        <DialogFooter>
+              <Field data-invalid={!!form.formState.errors.confirm_password}>
+                <FieldLabel htmlFor="confirm_password" required className="text-[13px] font-medium text-foreground/80 mb-1.5">
+                  {t("confirmPassword")}
+                </FieldLabel>
+                <InputCustom
+                  id="confirm_password"
+                  type="password"
+                  placeholder={t("reenterPassword")}
+                  data-id="log-in-password"
+                  autoComplete="new-password"
+                  className="h-9 rounded-md border-border/60 bg-muted/10 text-[13px] transition-colors focus-visible:ring-1 focus-visible:ring-ring"
+                  disabled={changePassword.isPending}
+                  {...form.register("confirm_password")}
+                />
+                <FieldError className="text-[12px] mt-1">
+                  {form.formState.errors.confirm_password?.message}
+                </FieldError>
+              </Field>
+            </FieldGroup>
+          </form>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-2">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => onOpenChange(false)}
             disabled={changePassword.isPending}
+            className="h-9 px-4 text-[13px] font-medium rounded-md shadow-sm transition-colors border-border/60 hover:bg-muted/50"
           >
             {tc("cancel")}
           </Button>
           <Button
             type="submit"
             form="change-password-form"
-            size="sm"
             disabled={changePassword.isPending}
+            className="h-9 px-4 text-[13px] font-medium rounded-md shadow-sm transition-colors"
           >
             {changePassword.isPending ? t("changing") : t("changePassword")}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
