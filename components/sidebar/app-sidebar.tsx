@@ -8,7 +8,8 @@ import {
 import { SideMain } from "./side-main";
 import { Link } from "react-router";
 import { CarmenLogo } from "../icons/carmen-logo";
-import brandingUrl from "../icons/carmen-branding.svg";
+import brandingLightUrl from "../icons/carmen-branding-light.svg";
+import brandingDarkUrl from "../icons/carmen-branding-dark.svg";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -18,11 +19,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           to="/"
           className="flex cursor-pointer items-center gap-2 group-data-[collapsible=icon]:justify-center"
         >
-          <img
-            src={brandingUrl}
-            alt="Carmen"
-            className="h-11 w-auto group-data-[collapsible=icon]:hidden"
-          />
+          <>
+            <img
+              src={brandingLightUrl}
+              alt="Carmen"
+              className="h-11 w-auto group-data-[collapsible=icon]:hidden dark:hidden"
+            />
+            <img
+              src={brandingDarkUrl}
+              alt="Carmen"
+              className="hidden h-11 w-auto group-data-[collapsible=icon]:hidden dark:block"
+            />
+          </>
           <span className="hidden group-data-[collapsible=icon]:block">
             <CarmenLogo size={32} />
           </span>

@@ -1,7 +1,8 @@
 import { Link } from "react-router";
 import { useLocale } from "use-intl";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import brandingUrl from "@/components/icons/carmen-branding.svg";
+import brandingLightUrl from "@/components/icons/carmen-branding-light.svg";
+import brandingDarkUrl from "@/components/icons/carmen-branding-dark.svg";
 import { EyeBrow } from "@/components/ui/eye-brow";
 import { useLocaleSwitch } from "@/hooks/use-locale-switch";
 import { SUPPORTED_LOCALES, type SupportedLocale } from "@/i18n/config";
@@ -91,7 +92,8 @@ function LegalHeader() {
     <header className="border-border/60 border-b">
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-4">
         <Link to="/login" className="shrink-0">
-          <img src={brandingUrl} alt="Carmen" className="h-7 w-auto" />
+          <img src={brandingLightUrl} alt="Carmen" className="h-7 w-auto dark:hidden" />
+          <img src={brandingDarkUrl} alt="Carmen" className="hidden h-7 w-auto dark:block" />
         </Link>
         <div className="ml-auto flex items-center gap-3">
           <LocaleToggle />

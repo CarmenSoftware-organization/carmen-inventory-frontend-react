@@ -1,6 +1,7 @@
 import { useTranslations } from "use-intl";
 import { Hotel, ShieldCheck, Sparkles, Zap } from "lucide-react";
-import brandingUrl from "@/components/icons/carmen-branding.svg";
+import brandingLightUrl from "@/components/icons/carmen-branding-light.svg";
+import brandingDarkUrl from "@/components/icons/carmen-branding-dark.svg";
 
 /**
  * โครงหน้า auth แบบแบ่งครึ่ง — ซ้ายเป็นการ์ดฟอร์ม ขวาเป็น hero (ซ่อนบนจอเล็ก)
@@ -141,11 +142,18 @@ export function AuthSplitShell({
 
 function BrandMark({ size = "sm" }: { readonly size?: "sm" | "lg" }) {
   return (
-    <img
-      src={brandingUrl}
-      alt="Carmen"
-      className={size === "lg" ? "h-18 w-auto" : "h-7 w-auto"}
-    />
+    <>
+      <img
+        src={brandingLightUrl}
+        alt="Carmen"
+        className={`${size === "lg" ? "h-18 w-auto" : "h-7 w-auto"} dark:hidden`}
+      />
+      <img
+        src={brandingDarkUrl}
+        alt="Carmen"
+        className={`${size === "lg" ? "h-18 w-auto" : "h-7 w-auto"} hidden dark:block`}
+      />
+    </>
   );
 }
 
