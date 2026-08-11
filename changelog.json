@@ -1,7 +1,98 @@
 {
-  "current": "2.0.0",
-  "generated_at": "2026-08-09T19:57:52.868Z",
+  "current": "2.0.1",
+  "generated_at": "2026-08-11T02:25:52.118Z",
   "versions": [
+    {
+      "version": "2.0.1",
+      "build": "2.0.1-build.20260811.bbcf915",
+      "date": "2026-08-11",
+      "commit": "bbcf915",
+      "changes": {
+        "added": [
+          {
+            "scope": "notification",
+            "summary": "แท็บทั้งหมด/ยังไม่อ่าน และปุ่มโหลดเพิ่มบนหน้ารายการ",
+            "hash": "7b43c83",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "notification",
+            "summary": "map deep-link ไอคอนและป้ายตาม doc_type ครบ 7 ชนิด",
+            "hash": "f8844e0",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "notification",
+            "summary": "ชนิดข้อมูลตามสัญญาใหม่ doc_type/event/source พร้อม endpoint unread และคำแปล",
+            "hash": "ac44c55",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          }
+        ],
+        "fixed": [
+          {
+            "scope": "notification",
+            "summary": "แก้ toast ซ้ำในสอง mutation + หน้า /notifications ไม่ mark read เอง",
+            "hash": "ed635ea",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "notification",
+            "summary": "ถอด refetchType ที่ไม่มีผลจริง และเลิกอ่าน summary ที่หายไปว่าศูนย์",
+            "hash": "1a86b6b",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "notification",
+            "summary": "เก็บสี่ข้อจากรีวิว — ขอบเขต invalidate สถานะโหลด และคอมเมนต์ที่ไม่ตรงโค้ด",
+            "hash": "6e3c8e3",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "notification",
+            "summary": "ไม่ขึ้นตราคอมเมนต์เมื่อยังไม่มีป้ายกำกับ กัน control ที่ screen reader อ่านไม่ได้",
+            "hash": "9966a0e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "notification",
+            "summary": "ปรับฟิลด์ที่รับ null ได้ให้ตรงสัญญาและแก้คอมเมนต์ created_at ที่ขัดกับชนิด",
+            "hash": "cf5bce3",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "investor",
+            "summary": "แปลงผัง mermaid เป็น SVG ตอน build ผังจึงขึ้นตอนเปิดไฟล์ในเครื่อง",
+            "hash": "cc37aa7",
+            "author": "Thammanoon Semapru",
+            "pr": 103
+          },
+          {
+            "scope": "register",
+            "summary": "แยก 409 สองความหมาย + ใช้ retry_after จริง + ข้อความ network error ที่แปลแล้ว",
+            "hash": "1fb466e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          }
+        ],
+        "changed": [
+          {
+            "scope": "notification",
+            "summary": "ย้ายชั้นข้อมูลไป TanStack Query ให้ REST เป็นแหล่งความจริงเดียว",
+            "hash": "acfcc4b",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          }
+        ]
+      }
+    },
     {
       "version": "2.0.0",
       "build": "2.0.0-build.20260809.8b1a9b5",

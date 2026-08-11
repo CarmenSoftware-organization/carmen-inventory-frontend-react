@@ -4,6 +4,25 @@
 แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
 `bun scripts/changelog-cli.ts` เพื่อ render ใหม่
 
+## [2.0.1] - 2026-08-11
+
+### Added
+- **notification:** แท็บทั้งหมด/ยังไม่อ่าน และปุ่มโหลดเพิ่มบนหน้ารายการ — Thammanoon Semapru `7b43c83`
+- **notification:** map deep-link ไอคอนและป้ายตาม doc_type ครบ 7 ชนิด — Thammanoon Semapru `f8844e0`
+- **notification:** ชนิดข้อมูลตามสัญญาใหม่ doc_type/event/source พร้อม endpoint unread และคำแปล — Thammanoon Semapru `ac44c55`
+
+### Fixed
+- **notification:** แก้ toast ซ้ำในสอง mutation + หน้า /notifications ไม่ mark read เอง — Thammanoon Semapru `ed635ea`
+- **notification:** ถอด refetchType ที่ไม่มีผลจริง และเลิกอ่าน summary ที่หายไปว่าศูนย์ — Thammanoon Semapru `1a86b6b`
+- **notification:** เก็บสี่ข้อจากรีวิว — ขอบเขต invalidate สถานะโหลด และคอมเมนต์ที่ไม่ตรงโค้ด — Thammanoon Semapru `6e3c8e3`
+- **notification:** ไม่ขึ้นตราคอมเมนต์เมื่อยังไม่มีป้ายกำกับ กัน control ที่ screen reader อ่านไม่ได้ — Thammanoon Semapru `9966a0e`
+- **notification:** ปรับฟิลด์ที่รับ null ได้ให้ตรงสัญญาและแก้คอมเมนต์ created_at ที่ขัดกับชนิด — Thammanoon Semapru `cf5bce3`
+- **investor:** แปลงผัง mermaid เป็น SVG ตอน build ผังจึงขึ้นตอนเปิดไฟล์ในเครื่อง (#103) — Thammanoon Semapru `cc37aa7`
+- **register:** แยก 409 สองความหมาย + ใช้ retry_after จริง + ข้อความ network error ที่แปลแล้ว — Thammanoon Semapru `1fb466e`
+
+### Changed
+- **notification:** ย้ายชั้นข้อมูลไป TanStack Query ให้ REST เป็นแหล่งความจริงเดียว — Thammanoon Semapru `acfcc4b`
+
 ## [2.0.0] - 2026-08-09
 
 ### Added
