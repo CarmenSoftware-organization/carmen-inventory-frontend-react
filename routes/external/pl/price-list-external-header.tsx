@@ -53,7 +53,7 @@ export default function PriceListExternalHeader({
         </StatusDotBadge>
       </div>
 
-      <dl className="flex flex-wrap gap-x-10 gap-y-4">
+      <dl className="grid grid-cols-2 md:grid-cols-4 gap-6 p-5 bg-slate-50/80 rounded-lg border border-slate-100">
         <Meta label="Vendor" value={data.vendor?.name || "—"} />
         <Meta label="Currency" value={data.currency_code} />
         <Meta
@@ -67,7 +67,7 @@ export default function PriceListExternalHeader({
       </dl>
 
       {(data.description || data.note) && (
-        <dl className="space-y-4 border-t border-border pt-4">
+        <dl className="grid gap-4 border-t border-slate-100 pt-6 mt-6">
           {data.description && (
             <Meta label="Instructions" value={data.description} />
           )}

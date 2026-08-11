@@ -10,7 +10,7 @@ export function Component() {
   const { url_token } = useParams<{ url_token: string }>();
   if (!url_token) return null; // route จับคู่ :url_token เสมอ — กัน type ระดับ runtime
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-slate-50/50 py-8">
       <PriceListExternalComponent urlToken={url_token} />
     </div>
   );

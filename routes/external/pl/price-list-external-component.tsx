@@ -203,69 +203,77 @@ export default function PriceListExternalComponent({
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
-      <PriceListExternalHeader data={data} />
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-muted-foreground">
-          {isViewMode
-            ? "Items requested for pricing."
-            : "Enter your price and tax for each item, then submit."}
-        </p>
-        <div className="flex items-center gap-2 shrink-0">
-          {/* ดาวน์โหลดค่าปัจจุบันไปกรอก/ดูใน excel — ใช้ได้ทุกสถานะ */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownloadExcel}
-            className="gap-1.5"
-          >
-            <Download className="h-4 w-4" />
-            Excel
-          </Button>
-          {/* submit แล้ว vendor แก้ไม่ได้อีก → ซ่อน upload + สลับ edit mode */}
-          {data.status !== "submitted" && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setImportOpen(true)}
-                disabled={updateMutation.isPending}
-                className="gap-1.5"
-              >
-                <Upload className="h-4 w-4" />
-                Import
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsViewMode(!isViewMode)}
-                className="gap-1.5"
-              >
-                {isViewMode ? (
+    <div className="max-w-6xl mx-auto px-4 md:px-8">
+      <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+        <div className="p-6 md:p-8 space-y-8">
+          <PriceListExternalHeader data={data} />
+          
+          <div className="border-t border-slate-100 pt-6 space-y-6">
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">
+                {isViewMode
+                  ? "Items requested for pricing."
+                  : "Enter your price and tax for each item, then submit."}
+              </p>
+              <div className="flex items-center gap-2 shrink-0">
+                {/* ดาวน์โหลดค่าปัจจุบันไปกรอก/ดูใน excel — ใช้ได้ทุกสถานะ */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadExcel}
+                  className="gap-1.5"
+                >
+                  <Download className="h-4 w-4" />
+                  Excel
+                </Button>
+                {/* submit แล้ว vendor แก้ไม่ได้อีก → ซ่อน upload + สลับ edit mode */}
+                {data.status !== "submitted" && (
                   <>
-                    <Pencil className="h-4 w-4" />
-                    Edit Mode
-                  </>
-                ) : (
-                  <>
-                    <Eye className="h-4 w-4" />
-                    View Mode
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setImportOpen(true)}
+                      disabled={updateMutation.isPending}
+                      className="gap-1.5"
+                    >
+                      <Upload className="h-4 w-4" />
+                      Import
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsViewMode(!isViewMode)}
+                      className="gap-1.5"
+                    >
+                      {isViewMode ? (
+                        <>
+                          <Pencil className="h-4 w-4" />
+                          Edit Mode
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-4 w-4" />
+                          View Mode
+                        </>
+                      )}
+                    </Button>
                   </>
                 )}
-              </Button>
-            </>
-          )}
+              </div>
+            </div>
+            <PriceListExternalProductTable
+              form={form}
+              isViewMode={isViewMode}
+              onSave={handleSave}
+              onSubmit={() => setConfirmSubmitOpen(true)}
+              isSaving={updateMutation.isPending}
+              isSubmitting={submitMutation.isPending}
+              taxProfiles={taxProfiles ?? []}
+            />
+          </div>
         </div>
       </div>
-      <PriceListExternalProductTable
-        form={form}
-        isViewMode={isViewMode}
-        onSave={handleSave}
-        onSubmit={() => setConfirmSubmitOpen(true)}
-        isSaving={updateMutation.isPending}
-        isSubmitting={submitMutation.isPending}
-        taxProfiles={taxProfiles ?? []}
-      />
+
       <PriceListExternalImportDialog
         open={importOpen}
         onOpenChange={setImportOpen}
