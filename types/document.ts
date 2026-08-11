@@ -5,4 +5,5 @@ export interface DocumentFile {
   size: number;
   contentType: string;
   lastModified: string;
+  presignedUrl?: string;
 }
