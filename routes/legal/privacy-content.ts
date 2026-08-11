@@ -20,7 +20,7 @@ const en: LegalDocument = {
   eyebrow: "Legal",
   title: "Privacy Policy",
   effective: `Effective ${EFFECTIVE}`,
-  intro: `This policy explains what Carmen Inventory does with personal data, written to Thailand's PDPA and the GDPR. It covers the platform operated by ${LEGAL_ENTITY.company} and the accounts issued through the hotels that subscribe to it.`,
+  intro: `This policy explains what CARMEN BLUE does with personal data, written to Thailand's PDPA and the GDPR. It covers the platform operated by ${LEGAL_ENTITY.company} and the accounts issued through the hotels that subscribe to it.`,
   tocLabel: "On this page",
   crossLink: "Read the Terms of Service",
   sections: [
@@ -120,7 +120,7 @@ const en: LegalDocument = {
       id: "children",
       heading: "10. Children",
       paragraphs: [
-        "Carmen Inventory is a workplace tool. It is not directed at children, and we do not knowingly create accounts for anyone under the minimum working age in their country.",
+        "CARMEN BLUE is a workplace tool. It is not directed at children, and we do not knowingly create accounts for anyone under the minimum working age in their country.",
       ],
     },
     {
@@ -144,7 +144,7 @@ const th: LegalDocument = {
   eyebrow: "ข้อกำหนด",
   title: "นโยบายความเป็นส่วนตัว",
   effective: `มีผลตั้งแต่ ${EFFECTIVE}`,
-  intro: `นโยบายนี้อธิบายว่า Carmen Inventory ทำอะไรกับข้อมูลส่วนบุคคลบ้าง เขียนตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล (PDPA) และ GDPR ครอบคลุมระบบที่ให้บริการโดย ${LEGAL_ENTITY.company} และบัญชีที่ออกผ่านโรงแรมที่ใช้บริการ`,
+  intro: `นโยบายนี้อธิบายว่า CARMEN BLUE ทำอะไรกับข้อมูลส่วนบุคคลบ้าง เขียนตาม พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล (PDPA) และ GDPR ครอบคลุมระบบที่ให้บริการโดย ${LEGAL_ENTITY.company} และบัญชีที่ออกผ่านโรงแรมที่ใช้บริการ`,
   tocLabel: "หัวข้อในหน้านี้",
   crossLink: "อ่านข้อตกลงการใช้บริการ",
   sections: [
@@ -244,7 +244,7 @@ const th: LegalDocument = {
       id: "children",
       heading: "10. เด็กและเยาวชน",
       paragraphs: [
-        "Carmen Inventory เป็นเครื่องมือสำหรับการทำงาน ไม่ได้มุ่งให้เด็กใช้ และเราไม่สร้างบัญชีให้ผู้ที่อายุต่ำกว่าเกณฑ์การจ้างงานขั้นต่ำของประเทศนั้นโดยรู้เห็น",
+        "CARMEN BLUE เป็นเครื่องมือสำหรับการทำงาน ไม่ได้มุ่งให้เด็กใช้ และเราไม่สร้างบัญชีให้ผู้ที่อายุต่ำกว่าเกณฑ์การจ้างงานขั้นต่ำของประเทศนั้นโดยรู้เห็น",
       ],
     },
     {

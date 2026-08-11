@@ -1,4 +1,4 @@
-# Carmen Inventory Frontend — Next.js → Vite + React Router SPA (Static / S3+CDN)
+# CARMEN BLUE Frontend — Next.js → Vite + React Router SPA (Static / S3+CDN)
 
 **Date:** 2026-06-11
 **Status:** ✅ Implemented — all phases (0-9) merged to `main` 2026-06-12; migration complete (125 routes)

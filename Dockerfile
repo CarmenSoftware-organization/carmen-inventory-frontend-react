@@ -1,4 +1,4 @@
-# Carmen Inventory SPA — static bundle served by nginx
+# CARMEN BLUE SPA — static bundle served by nginx
 # Runtime env (ตั้งตอน docker run / compose — ไม่ฝังใน bundle):
 #   BACKEND_URL  (required)  origin ของ backend ที่ nginx จะ proxy /api/* ไปหา
 #   X_APP_ID     (required)  ค่า x-app-id ของ frontend app

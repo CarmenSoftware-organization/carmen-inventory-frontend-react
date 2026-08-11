@@ -1,6 +1,6 @@
 # carmen-inventory-frontend-react
 
-Carmen Inventory — ERP for hospitality supply chain. **Vite + React Router 7 SPA**, fully
+CARMEN BLUE — ERP for hospitality supply chain. **Vite + React Router 7 SPA**, fully
 migrated from the Next.js app at [carmen-inventory-frontend](../carmen-inventory-frontend)
 and built for static hosting on **S3 + CloudFront** (no server runtime; the browser talks
 to the backend directly).

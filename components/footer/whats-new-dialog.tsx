@@ -90,7 +90,7 @@ export function WhatsNewDialog({ open, onOpenChange }: WhatsNewDialogProps) {
             What&apos;s New
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Recent updates to Carmen Inventory.
+            Recent updates to CARMEN BLUE.
           </DialogDescription>
         </DialogHeader>
         <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-1">

@@ -4,7 +4,7 @@ name: Carmen-inventory-ERP
 description: A dense hospitality supply-chain ERP. Neutral graphite surfaces carry a single Carmen-blue accent; chrome is flat and borderless-by-default so that rows of data, not the container, are what the eye lands on. Type is governed from the small end up — 97% of the app's text sits at or below 12px — and colour is split three ways: semantic status, per-module identity, and a 34-value document-status palette. Every rule here is measured against the code, not aspirational.
 
 colors:
-  # Carmen Inventory ERP — neutral graphite surfaces + Carmen blue accent.
+  # CARMEN BLUE — neutral graphite surfaces + Carmen blue accent.
   # Source of truth: styles/globals.css (OKLCH). Hex below are sRGB equivalents.
   #
   # THREE COLOUR LAYERS, three stylesheets. Know which one you are in:
@@ -283,18 +283,18 @@ That gives the interface one job above all others: **let someone scan hundreds o
 - **Density is the point.** The type ladder is governed from 8px up, not from the display sizes down, because that is where the app actually lives.
 - **Chrome recedes.** Cards are flat — a hairline border and a surface step, no shadows. Elevation is reserved for things that genuinely float (dialogs, popovers, dropdowns).
 - **One accent.** Carmen Blue is the only "you can act on this" colour. Status hues are information, not decoration, and appear once per element.
-- **Colour is stratified.** Semantic (`warning`/`success`/…), module identity (per ERP area), and document status (34 values) are three separate systems that must not be mixed. A document being *Rejected* is not the same kind of fact as a field being *invalid*.
+- **Colour is stratified.** Semantic (`warning`/`success`/…), module identity (per ERP area), and document status (34 values) are three separate systems that must not be mixed. A document being _Rejected_ is not the same kind of fact as a field being _invalid_.
 - **Bilingual by default.** Thai and English share every surface, and Thai sets the floor for line-height and font stack.
 
 ## Colors
 
 ### The three layers
 
-| Layer | File | What it means |
-|---|---|---|
-| Semantic | `styles/globals.css` | State of a *control or message* — invalid, warning, success, info |
-| Module identity | `styles/module-colors.css` | Which *area of the ERP* you are in — dashboard, procurement, inventory… |
-| Document status | `styles/badge-status.css` | Where a *document* is in its lifecycle — draft, submitted, approved… |
+| Layer           | File                       | What it means                                                           |
+| --------------- | -------------------------- | ----------------------------------------------------------------------- |
+| Semantic        | `styles/globals.css`       | State of a _control or message_ — invalid, warning, success, info       |
+| Module identity | `styles/module-colors.css` | Which _area of the ERP_ you are in — dashboard, procurement, inventory… |
+| Document status | `styles/badge-status.css`  | Where a _document_ is in its lifecycle — draft, submitted, approved…    |
 
 Mixing them is the most common colour mistake here. A green `success` toast and a green `approved` badge mean different things and are allowed to be different greens.
 
@@ -305,7 +305,7 @@ Mixing them is the most common colour mistake here. A green `success` toast and 
 
 ### Surfaces
 
-Neutral graphite in both themes, achromatic (chroma 0) so the accent is the only hue in the chrome. Light runs `background` #f8f8f8 → `card` #ffffff, i.e. cards are *lighter* than the page; dark runs `background` #161616 → `card` #1f1f1f, the same direction. `accent` is the extreme in each mode (darkest light surface, lightest dark surface) which is why the status inks are solved against it.
+Neutral graphite in both themes, achromatic (chroma 0) so the accent is the only hue in the chrome. Light runs `background` #f8f8f8 → `card` #ffffff, i.e. cards are _lighter_ than the page; dark runs `background` #161616 → `card` #1f1f1f, the same direction. `accent` is the extreme in each mode (darkest light surface, lightest dark surface) which is why the status inks are solved against it.
 
 ### Document status
 
@@ -321,7 +321,7 @@ Borders do the work shadows would. `{colors.border}` at 1px is the default separ
 
 `--font-sans` is a system stack with Thai families appended:
 
-```
+```text
 -apple-system, BlinkMacSystemFont, system-ui, "Inter", "Segoe UI", Roboto,
 "Sarabun", "Noto Sans Thai", "IBM Plex Sans Thai", "Leelawadee UI", "Thonburi", sans-serif
 ```
@@ -332,35 +332,36 @@ Font fallback is per-glyph, so Latin resolves from the first group and only Thai
 
 The ramp is the `typography` block above. In practice:
 
-| Tier | Utility | Where |
-|---|---|---|
-| 8px | `text-micro-floor` | tightest grid cells, DataGrid badges |
-| 9px | `text-micro-eyebrow` | uppercase eyebrows on chips and cards |
-| 10px | `text-micro-legal` | timestamps, captions, inline meta |
-| 11px | `text-micro` | count chips, tabular numbers |
-| 12px | `text-xs` | **the real body size** — labels, cells, most of the app |
-| 14px | `text-sm` | dialog body, buttons, section text |
-| 18–24px | `text-lg`/`xl`/`2xl` | headings |
-| 30px+ | `text-3xl`+ | module landings, one-off numerals |
+| Tier    | Utility              | Where                                                   |
+| ------- | -------------------- | ------------------------------------------------------- |
+| 8px     | `text-micro-floor`   | tightest grid cells, DataGrid badges                    |
+| 9px     | `text-micro-eyebrow` | uppercase eyebrows on chips and cards                   |
+| 10px    | `text-micro-legal`   | timestamps, captions, inline meta                       |
+| 11px    | `text-micro`         | count chips, tabular numbers                            |
+| 12px    | `text-xs`            | **the real body size** — labels, cells, most of the app |
+| 14px    | `text-sm`            | dialog body, buttons, section text                      |
+| 18–24px | `text-lg`/`xl`/`2xl` | headings                                                |
+| 30px+   | `text-3xl`+          | module landings, one-off numerals                       |
 
 ### Principles
 
 - **Use the utility, not a literal.** Every tier is a real Tailwind utility. A new `text-[…]` arbitrary value is a design-system bug, not a shortcut. This is enforced: `components/ui/type-ladder.test.ts` fails if a size that already has a token reappears anywhere, and every remaining off-ladder literal is listed there by file with the reason it was left. Adding a new one means editing that list — which is the point.
-- **A size token sets size, not weight or case.** `micro-eyebrow` and `micro-floor` describe uppercase 600 type, but the *utilities* deliberately do not enforce it — a `text-*` utility that silently restyled weight would have restyled 32 of 102 existing sub-10px call sites on migration, and Tailwind's own `text-*` utilities never do it. Keep `font-semibold` / `uppercase` / `tracking-*` explicit at the call site.
-- **A new step must be registered with `cn()`, not just defined in CSS.** `cn()` is `twMerge(clsx(…))`, and tailwind-merge only knows Tailwind's built-in scale plus arbitrary values — not `@theme` font-size keys. An unregistered step is not treated as conflicting with `text-sm`/`text-xs`, so `cn("… text-sm", "text-micro-legal")` keeps **both** and CSS source order picks the winner. That is how the navbar avatar initials silently jumped 10px → 14px during the ladder migration; it never broke while the call site said `text-[0.625rem]`, because arbitrary values *are* recognised. Add every new step to the `font-size` class group in `lib/utils.ts` (`lib/__tests__/cn-font-size.test.ts` fails if you forget).
+- **A size token sets size, not weight or case.** `micro-eyebrow` and `micro-floor` describe uppercase 600 type, but the _utilities_ deliberately do not enforce it — a `text-*` utility that silently restyled weight would have restyled 32 of 102 existing sub-10px call sites on migration, and Tailwind's own `text-*` utilities never do it. Keep `font-semibold` / `uppercase` / `tracking-*` explicit at the call site.
+- **A new step must be registered with `cn()`, not just defined in CSS.** `cn()` is `twMerge(clsx(…))`, and tailwind-merge only knows Tailwind's built-in scale plus arbitrary values — not `@theme` font-size keys. An unregistered step is not treated as conflicting with `text-sm`/`text-xs`, so `cn("… text-sm", "text-micro-legal")` keeps **both** and CSS source order picks the winner. That is how the navbar avatar initials silently jumped 10px → 14px during the ladder migration; it never broke while the call site said `text-[0.625rem]`, because arbitrary values _are_ recognised. Add every new step to the `font-size` class group in `lib/utils.ts` (`lib/__tests__/cn-font-size.test.ts` fails if you forget).
 - **Sub-10px is for uppercase eyebrows and digits only** — never for running text. The 600 weight and wide tracking of caps are what keep 9px legible, and sentence copy has neither; digits get away with it because they are uniform-height with no ascenders, descenders or diacritics. It matters most in Thai, which stacks two levels of marks above the baseline (สระบน + วรรณยุกต์). **Enforced:** `type-ladder.test.ts` freezes every sub-10px site that is not `uppercase`, so a new one fails the suite until somebody either marks it `uppercase` or records why it is exempt. The proxy is deliberately crude — digits and illustration mock-ups are legitimately neither — because its job is to force a human look, not to classify.
 - **Thai sets the line-height floor.** Thai stacks two levels of diacritics above the baseline, which clip at `line-height: 1`. The tiers that carry Thai sentence text (`micro`, `micro-legal`, `fine-print`) ship at 1.35–1.4; only the uppercase tiers go tighter, and only because Thai has no uppercase.
-- **Weight 500 is the data-value tier.** The full ladder is **300 / 400 / 500 / 600 / 700**. 500 has exactly one job: *this is the value, as distinct from its label or its qualifier.* It is load-bearing — `FieldPlainText` bakes it in and is used ~140×, plus 38 inline sites, all doing the same thing:
+- **Weight 500 is the data-value tier.** The full ladder is **300 / 400 / 500 / 600 / 700**. 500 has exactly one job: _this is the value, as distinct from its label or its qualifier._ It is load-bearing — `FieldPlainText` bakes it in and is used ~140×, plus 38 inline sites, all doing the same thing:
 
-  | pattern | example |
-  |---|---|
-  | amount + currency code | amount at 500, the `THB` suffix at 400 |
-  | name + code beneath | product / vendor / location name at 500, its code at 400 |
-  | label → value pair | label `text-muted-foreground`, value 500 |
-  | table header `<th>` | `px-3 py-2 font-medium` |
-  | selected state | `checked ? "font-medium" : "text-foreground/90"` |
+  | pattern                | example                                                  |
+  | ---------------------- | -------------------------------------------------------- |
+  | amount + currency code | amount at 500, the `THB` suffix at 400                   |
+  | name + code beneath    | product / vendor / location name at 500, its code at 400 |
+  | label → value pair     | label `text-muted-foreground`, value 500                 |
+  | table header `<th>`    | `px-3 py-2 font-medium`                                  |
+  | selected state         | `checked ? "font-medium" : "text-foreground/90"`         |
 
   Do not use 500 for headings or running text — those are 600 and 400. Reach for it when a value must out-rank something adjacent without shouting; 600 in a dense row reads as a heading and flattens the scan.
+
 - **600 is the mid-weight, not 700.** Headings sit at 600. 700 is rare and deliberate. `font-bold` on the 9px tier has been swept repeatedly and is guarded by `type-ladder.test.ts`.
 - **Display type is deliberately loose.** Above 18px there is no governed ladder beyond Tailwind's steps, because the app barely goes there. Do not invent one.
 
@@ -380,12 +381,12 @@ Content is fluid to the viewport rather than locked to a max width — an ERP ta
 
 ## Elevation & Depth
 
-| Level | Treatment | Use |
-|---|---|---|
-| Flat | 1px border, surface step | Cards, panels, the DataGrid, sidebar — the default |
-| Raised | `--shadow-sm`/`--shadow` | Dropdowns, popovers, comboboxes |
-| Floating | `--shadow-lg`/`--shadow-xl` | Dialogs, sheets, the command palette |
-| Overlay | `--overlay` scrim | Behind modals |
+| Level    | Treatment                   | Use                                                |
+| -------- | --------------------------- | -------------------------------------------------- |
+| Flat     | 1px border, surface step    | Cards, panels, the DataGrid, sidebar — the default |
+| Raised   | `--shadow-sm`/`--shadow`    | Dropdowns, popovers, comboboxes                    |
+| Floating | `--shadow-lg`/`--shadow-xl` | Dialogs, sheets, the command palette               |
+| Overlay  | `--overlay` scrim           | Behind modals                                      |
 
 **Flat chrome is the rule.** A card is a border and a surface step, never a shadow — shadows on every panel turn a dense page into visual noise, and the row you are hunting for stops being the most interesting thing on screen. Shadow means "this is temporarily on top of the page", and nothing else. The shadow scale exists (`--shadow-2xs` → `--shadow-2xl`) but the low end is essentially unused by design.
 
@@ -397,7 +398,7 @@ See the `rounded` block. The grammar in one line: **`md` for controls, `lg`/`xl`
 
 Specs live in the `components` block above, read from the source. Notes that do not fit there:
 
-**Button** — one primary per view. Everything else is `outline`, `secondary` or `ghost`. The coloured variants (`success`/`info`/`warning`/`destructive`) are for actions whose *outcome* is that colour, not for decorating a toolbar.
+**Button** — one primary per view. Everything else is `outline`, `secondary` or `ghost`. The coloured variants (`success`/`info`/`warning`/`destructive`) are for actions whose _outcome_ is that colour, not for decorating a toolbar.
 
 **Badge** — prefer the `-light` variants inside tables and dense rows: a neutral `bg-muted` box with the hue carried once, by the label. Solid fills are for the few chips that must survive being scanned past. Document-status badges take their colour from `badge-status.css`, not from the semantic variants.
 

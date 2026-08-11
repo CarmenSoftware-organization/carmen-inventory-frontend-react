@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Carmen inventory ERP frontend — **Vite + React Router SPA port** of the Next.js app at
+CARMEN BLUE frontend — **Vite + React Router SPA port** of the Next.js app at
 `../carmen-inventory-frontend/`. Static bundle on S3/CloudFront; the browser calls the
 backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migration-design.md`.
 

@@ -211,7 +211,7 @@
     "title": "We can't find that page",
     "description": "The page you're looking for doesn't exist or may have been moved. Check the URL or head back to your dashboard.",
     "backToDashboard": "Back to Dashboard",
-    "footer": "© {year} Carmen Inventory · ERP for Hospitality"
+    "footer": "© {year} CARMEN BLUE · ERP for Hospitality"
   },
   "common": {
     "yes": "Yes",
@@ -431,7 +431,7 @@
     "heroHeadlineEmphasis": "that runs the back of house.",
     "heroDescription": "Track stock from receiving dock to F&B outlet · streamline vendor pricing · audit every movement. Built for hotel ops teams who measure in covers, not cells.",
     "letsBegin": "Let's begin.",
-    "platformFooter": "Carmen Inventory · Hotel ERP Platform",
+    "platformFooter": "CARMEN BLUE · Hotel ERP Platform",
     "features": {
       "liveStockTitle": "Live stock",
       "liveStockDesc": "Real-time across kitchens, bars, and stores.",

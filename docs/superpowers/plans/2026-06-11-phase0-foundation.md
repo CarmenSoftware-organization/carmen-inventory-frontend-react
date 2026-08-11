@@ -4,7 +4,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the complete foundation of the Carmen inventory SPA — Vite + React Router 7 scaffold, client-side auth, ported http-client, use-intl i18n, compat layer, bulk-ported shared code, login → dashboard-shell smoke path, and S3/CloudFront deploy artifacts.
+**Goal:** Build the complete foundation of the CARMEN BLUE SPA — Vite + React Router 7 scaffold, client-side auth, ported http-client, use-intl i18n, compat layer, bulk-ported shared code, login → dashboard-shell smoke path, and S3/CloudFront deploy artifacts.
 
 **Architecture:** Static SPA (no server). The browser rewrites legacy `/api/proxy/<rest>` paths to `${BACKEND_URL}/<rest>` and attaches `Authorization: Bearer` + `x-app-id` itself. Access token lives in memory (`tokenStore`), refresh token in localStorage behind an adapter. Next-only APIs are absorbed by a small compat layer (`lib/compat/navigation`, `lib/compat/link`) and `use-intl`, so the ~1,200 source files port with codemods instead of rewrites.
 
@@ -218,7 +218,7 @@ export default tseslint.config(
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Carmen Inventory</title>
+    <title>CARMEN BLUE</title>
     <meta name="description" content="ERP for Hospitality Hotel" />
   </head>
   <body class="antialiased">
@@ -2139,7 +2139,7 @@ Expected: 1 PASS. (`bunx playwright install chromium` first if browsers are miss
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Carmen inventory ERP frontend — **Vite + React Router SPA port** of the Next.js app at
+CARMEN BLUE ERP frontend — **Vite + React Router SPA port** of the Next.js app at
 `../carmen-inventory-frontend/`. Static bundle on S3/CloudFront; the browser calls the
 backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migration-design.md`.
 

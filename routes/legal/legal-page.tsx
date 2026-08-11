@@ -102,7 +102,7 @@ function LegalHeader() {
             className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
           >
             <ArrowLeft className="size-3.5" />
-            <span className="hidden sm:inline">Carmen Inventory</span>
+            <span className="hidden sm:inline">CARMEN BLUE</span>
           </Link>
         </div>
       </div>
