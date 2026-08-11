@@ -33,8 +33,8 @@ export function WfStages({
   const safeIndex = selectedIndex >= fields.length ? 0 : selectedIndex;
 
   return (
-    <div className="flex flex-col gap-3 pt-3 sm:flex-row">
-      <div className="w-full shrink-0 sm:w-48">
+    <div className="flex flex-col gap-6 pt-4 lg:flex-row">
+      <div className="w-full shrink-0 lg:w-72 xl:w-80">
         <WfStageList
           form={form}
           fieldArray={fieldArray}
@@ -44,16 +44,15 @@ export function WfStages({
         />
       </div>
 
-      <div className="flex-1 rounded border p-3">
+      <div className="flex-1 rounded-xl border bg-card p-4 shadow-sm md:p-6">
         {fields.length === 0 ? (
-          <p className="text-muted-foreground py-6 text-center text-xs">
+          <p className="text-muted-foreground py-10 text-center text-sm">
             {t("noStages")}
           </p>
         ) : (
           <WfStageDetail
             key={fields[safeIndex]?.id}
             form={form}
-            fieldArray={fieldArray}
             index={safeIndex}
             users={users}
             isDisabled={isDisabled}

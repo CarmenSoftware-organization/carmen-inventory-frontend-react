@@ -75,7 +75,7 @@ export default function WorkflowNewForm() {
                 size="sm"
                 onClick={() => navigate("/system-admin/workflow")}
                 disabled={isPending}
-                className="text-xs"
+                className="text-sm"
               >
                 {tc("cancel")}
               </Button>
@@ -84,7 +84,7 @@ export default function WorkflowNewForm() {
                 size="sm"
                 form="new-workflow-form"
                 disabled={isPending}
-                className="text-xs"
+                className="text-sm"
               >
                 {isPending ? tf("creating") : t("createWorkflow")}
               </Button>
@@ -125,7 +125,7 @@ export default function WorkflowNewForm() {
                   onValueChange={field.onChange}
                   disabled={isPending}
                 >
-                  <SelectTrigger id="wf-type" size="sm" className="text-xs">
+                  <SelectTrigger id="wf-type" className="h-9">
                     <SelectValue placeholder={t("selectType")} />
                   </SelectTrigger>
                   <SelectContent>
@@ -133,7 +133,7 @@ export default function WorkflowNewForm() {
                       <SelectItem
                         key={opt.value}
                         value={opt.value}
-                        className="text-xs"
+                        className="text-sm"
                       >
                         {opt.label}
                       </SelectItem>
@@ -154,7 +154,7 @@ export default function WorkflowNewForm() {
             <Textarea
               id="wf-description"
               placeholder={t("optionalDescription")}
-              className="min-h-15 text-xs"
+              className="min-h-15 text-sm"
               disabled={isPending}
               maxLength={256}
               {...form.register("description")}
@@ -183,7 +183,7 @@ export default function WorkflowNewForm() {
             <div className="bg-muted/40 rounded-md border px-2.5 py-2">
               <div className="flex items-start gap-2">
                 <Info className="text-info-ink mt-0.5 size-3.5 shrink-0" />
-                <div className="space-y-0.5 text-xs">
+                <div className="space-y-0.5 text-sm">
                   <p className="text-foreground font-semibold">
                     {t("defaultConfig")}
                   </p>

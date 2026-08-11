@@ -194,25 +194,25 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
   };
 
   return (
-    <div className="space-y-2 pt-3">
-      <div className="flex items-center gap-2">
+    <div className="space-y-4 pt-4">
+      <div className="flex items-center gap-4">
         <div className="relative max-w-sm flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-2 size-3 -translate-y-1/2" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
           <Input
             placeholder={t("searchProducts")}
-            className="h-8 pl-7 text-xs placeholder:text-xs"
+            className="h-9 pl-9 text-sm placeholder:text-sm"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <span className="text-muted-foreground text-micro-legal">
+        <span className="text-muted-foreground text-sm font-medium">
           {t("nSelected", { count: selectedProducts?.length ?? 0 })}
         </span>
       </div>
 
-      <div className="max-h-105 overflow-y-auto rounded border p-1.5">
+      <div className="max-h-105 overflow-y-auto rounded-xl border bg-card p-3 shadow-sm">
         {filteredTree.length === 0 ? (
-          <p className="text-muted-foreground py-6 text-center text-xs">
+          <p className="text-muted-foreground py-10 text-center text-sm">
             {search ? t("noProductsMatch") : t("noProductsAvailable")}
           </p>
         ) : (
@@ -281,7 +281,7 @@ const TreeNodeRow = ({
           onCheckedChange={() => node.product && onToggleProduct(node.product)}
           disabled={isDisabled}
         />
-        <span className="text-xs">{node.name}</span>
+        <span className="text-sm">{node.name}</span>
       </div>
     );
   }
@@ -301,7 +301,7 @@ const TreeNodeRow = ({
         >
           <ChevronRight
             className={cn(
-              "text-muted-foreground size-3 transition-transform",
+              "text-muted-foreground size-4 transition-transform",
               isExpanded && "rotate-90",
             )}
           />
@@ -316,8 +316,8 @@ const TreeNodeRow = ({
           className="flex flex-1 cursor-pointer items-center gap-1.5 text-left"
           onClick={() => onToggleExpand(node.id)}
         >
-          <span className="text-xs font-semibold">{node.name}</span>
-          <span className="text-muted-foreground text-micro">
+          <span className="text-sm font-semibold">{node.name}</span>
+          <span className="text-muted-foreground text-sm">
             ({leafIdsMap.get(node.id)?.length ?? 0})
           </span>
         </button>

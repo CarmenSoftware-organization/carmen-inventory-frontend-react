@@ -51,7 +51,7 @@ export default function WfInsights({
 
   if (!stages || stages.length === 0) {
     return (
-      <p className="text-muted-foreground py-6 text-center text-xs">
+      <p className="text-muted-foreground py-6 text-center text-sm">
         {t("noStages")}
       </p>
     );
@@ -60,19 +60,19 @@ export default function WfInsights({
   const insights = computeWorkflowInsights(stages);
 
   return (
-    <div className="space-y-4 pt-3">
+    <div className="space-y-6 pt-4">
       <QuickStats
         insights={insights}
         productCount={productCount}
         routingCount={routingCount}
       />
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <SlaBreakdown insights={insights} />
         <RoleDistribution insights={insights} />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ActionCoverage insights={insights} />
         <RecipientCoverage insights={insights} />
       </div>
@@ -92,12 +92,12 @@ function SectionCard({
   readonly empty?: boolean;
 }) {
   return (
-    <section className="bg-card rounded border p-3">
-      <h3 className="text-foreground mb-2 flex items-center gap-1.5 text-xs font-semibold">
-        <Icon className="text-muted-foreground size-3.5" aria-hidden="true" />
+    <section className="bg-card rounded-xl border p-5 shadow-sm">
+      <h3 className="text-foreground mb-4 flex items-center gap-2 text-sm font-semibold">
+        <Icon className="text-muted-foreground size-4" aria-hidden="true" />
         {title}
       </h3>
-      {empty ? <p className="text-muted-foreground text-xs">—</p> : children}
+      {empty ? <p className="text-muted-foreground text-sm">—</p> : children}
     </section>
   );
 }
@@ -112,12 +112,12 @@ function StatTile({
   readonly icon: typeof Clock;
 }) {
   return (
-    <div className="bg-card rounded border px-3 py-2">
-      <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
-        <Icon className="size-3" aria-hidden="true" />
+    <div className="bg-card rounded-xl border p-4 shadow-sm">
+      <div className="text-muted-foreground flex items-center gap-2 text-sm font-medium">
+        <Icon className="size-4" aria-hidden="true" />
         {label}
       </div>
-      <p className="mt-0.5 text-base font-semibold tabular-nums">{value}</p>
+      <p className="mt-1.5 text-lg font-semibold tabular-nums">{value}</p>
     </div>
   );
 }
@@ -136,7 +136,7 @@ function QuickStats({
   const cycle = formatCycleTime(totalCycleMinutes) || "—";
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
       <StatTile label={t("statCycleTime")} value={cycle} icon={Clock} />
       <StatTile
         label={t("statApprovers")}
@@ -174,7 +174,7 @@ function SlaBreakdown({ insights }: { readonly insights: WorkflowInsights }) {
 
   return (
     <SectionCard title={t("insightsSlaTitle")} icon={Clock}>
-      <ul className="space-y-1.5">
+      <ul className="space-y-3">
         {middleRows.map((row) => {
           const pct = maxStageMinutes
             ? Math.max(4, Math.round((row.minutes / maxStageMinutes) * 100))
@@ -182,7 +182,7 @@ function SlaBreakdown({ insights }: { readonly insights: WorkflowInsights }) {
           const cycle = formatCycleTime(row.minutes) || "0";
           return (
             <li key={`sla-${row.index}-${row.name}`} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-micro">
+              <div className="flex items-center justify-between gap-2 text-sm font-medium">
                 <span className="truncate" title={row.name}>
                   {row.name}
                 </span>
@@ -190,7 +190,7 @@ function SlaBreakdown({ insights }: { readonly insights: WorkflowInsights }) {
                   {cycle}
                 </span>
               </div>
-              <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+              <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                 <div
                   className="bg-primary h-full rounded-full"
                   style={{ width: `${pct}%` }}
@@ -223,18 +223,18 @@ function RoleDistribution({
       icon={Users}
       empty={total === 0}
     >
-      <ul className="space-y-1.5">
+      <ul className="space-y-3">
         {roleDistribution.map((row) => {
           const pct = total ? Math.round((row.count / total) * 100) : 0;
           return (
             <li key={row.role} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-micro">
+              <div className="flex items-center justify-between gap-2 text-sm font-medium">
                 <span className="capitalize">{t(ROLE_LABEL[row.role])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.count} ({pct}%)
                 </span>
               </div>
-              <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+              <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                 <div
                   className="bg-primary h-full rounded-full"
                   style={{ width: `${pct}%` }}
@@ -258,20 +258,20 @@ function ActionCoverage({ insights }: { readonly insights: WorkflowInsights }) {
 
   return (
     <SectionCard title={t("insightsActionTitle")} icon={Activity} empty={empty}>
-      <ul className="space-y-1.5">
+      <ul className="space-y-3">
         {actionCoverage.map((row) => {
           const pct = row.totalStages
             ? Math.round((row.activeCount / row.totalStages) * 100)
             : 0;
           return (
             <li key={row.action} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-micro">
+              <div className="flex items-center justify-between gap-2 text-sm font-medium">
                 <span>{t(ACTION_LABEL[row.action])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.activeCount}/{row.totalStages}
                 </span>
               </div>
-              <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+              <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                 <div
                   className={"bg-primary h-full rounded-full"}
                   style={{ width: `${pct}%` }}
@@ -303,20 +303,20 @@ function RecipientCoverage({
       icon={EyeOff}
       empty={empty}
     >
-      <ul className="space-y-1.5">
+      <ul className="space-y-3">
         {recipientCoverage.map((row) => {
           const pct = row.totalActiveActions
             ? Math.round((row.count / row.totalActiveActions) * 100)
             : 0;
           return (
             <li key={row.recipient} className="space-y-0.5">
-              <div className="flex items-center justify-between gap-2 text-micro">
+              <div className="flex items-center justify-between gap-2 text-sm font-medium">
                 <span>{t(RECIPIENT_LABEL[row.recipient])}</span>
                 <span className="text-muted-foreground shrink-0 tabular-nums">
                   {row.count}/{row.totalActiveActions}
                 </span>
               </div>
-              <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+              <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                 <div
                   className="bg-primary h-full rounded-full"
                   style={{ width: `${pct}%` }}

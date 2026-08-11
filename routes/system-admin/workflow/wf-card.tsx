@@ -59,10 +59,10 @@ export default function WfCard({
         inactive && "bg-muted/30 border-dashed opacity-70 hover:opacity-100",
       )}
     >
-      <CardHeader className="px-2 py-2">
+      <CardHeader className="p-4">
         <div className="flex items-start gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -88,7 +88,7 @@ export default function WfCard({
                 {item.name || "..."}
               </span>
             </CardTitle>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground text-sm">
               {item.workflow_type}
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function WfCard({
         </CardAction>
       </CardHeader>
       <Separator />
-      <CardContent className="space-y-1.5 px-2 py-2 text-xs">
+      <CardContent className="space-y-1.5 p-4 text-sm">
         <div className="flex items-center justify-between gap-3">
           <WfFlowStrip workflow={item} />
           <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ export default function WfCard({
           </div>
         </div>
         {updatedRelative && (
-          <div className="text-muted-foreground flex items-center gap-1 text-micro">
+          <div className="text-muted-foreground flex items-center gap-1 text-xs">
             <Clock className="size-2.5" aria-hidden="true" />
             <span>{updatedRelative}</span>
             {updated?.name && (

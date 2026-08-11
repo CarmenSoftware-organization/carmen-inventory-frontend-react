@@ -62,7 +62,7 @@ export default function WfFlowStrip({ workflow, className }: WfFlowStripProps) {
       {overflow > 0 && (
         <span className="flex items-center gap-0.5">
           <span className="bg-border h-px w-1.5" aria-hidden="true" />
-          <span className="text-micro-legal font-semibold tabular-nums">
+          <span className="text-xs font-semibold tabular-nums">
             +{overflow}
           </span>
         </span>

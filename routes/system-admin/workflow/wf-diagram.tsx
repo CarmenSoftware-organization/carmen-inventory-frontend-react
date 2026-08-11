@@ -83,7 +83,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
       return <Play className="text-muted-foreground size-3 fill-current" />;
     }
     return (
-      <span className="text-micro font-semibold tabular-nums">
+      <span className="text-xs font-semibold tabular-nums">
         {data.index}
       </span>
     );
@@ -92,7 +92,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
   return (
     <div
       className={cn(
-        "group bg-card relative flex w-44 flex-col gap-1 rounded-lg border-2 px-3 py-2 transition-colors",
+        "group bg-card relative flex w-44 flex-col gap-2 rounded-xl border-2 p-4 transition-colors",
         containerClass,
         isSelected &&
           "ring-primary ring-offset-background ring-2 ring-offset-2",
@@ -144,7 +144,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
       </div>
 
       {!isLast && (
-        <div className="text-muted-foreground flex items-center gap-2 text-micro-legal">
+        <div className="text-muted-foreground flex items-center gap-2 text-xs">
           <span className="capitalize">{stage.role}</span>
           {userCount > 0 && !isHod && (
             <span className="inline-flex items-center gap-0.5 tabular-nums">
@@ -316,7 +316,7 @@ export default function WfDiagram({
   return (
     <div className={cn("space-y-1.5", className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-micro">
+        <div className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
           <span className="inline-flex items-center gap-1 tabular-nums">
             <span className="text-foreground font-semibold">
               {stages.length}

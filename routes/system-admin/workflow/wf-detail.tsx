@@ -85,6 +85,16 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
   });
 
   const hasStages = !!watchedStages && watchedStages.length > 0;
+  
+  let hasStageErrors = !!form.formState.errors.data?.stages;
+  let validationResult = null;
+  if (hasStages) {
+    validationResult = validateWorkflow(watchedStages!);
+    if (validationResult.errorCount > 0) hasStageErrors = true;
+  }
+  
+  const hasGeneralErrors = !!form.formState.errors.name || !!form.formState.errors.workflow_type;
+  const hasRoutingErrors = !!form.formState.errors.data?.routing_rules;
 
   const onSubmit = (values: WorkflowCreateModel) => {
     updateWorkflow.mutate(
@@ -117,20 +127,15 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
         formId="wf-detail-form"
       />
 
-      {watchedStages &&
-        watchedStages.length > 0 &&
-        (() => {
-          const result = validateWorkflow(watchedStages);
-          return (
-            <WfValidationPanel
-              issues={result.issues}
-              errorCount={result.errorCount}
-              warningCount={result.warningCount}
-              isReady={result.isReady}
-              onSelectStage={handleSelectStage}
-            />
-          );
-        })()}
+      {hasStages && validationResult && (
+        <WfValidationPanel
+          issues={validationResult.issues}
+          errorCount={validationResult.errorCount}
+          warningCount={validationResult.warningCount}
+          isReady={validationResult.isReady}
+          onSelectStage={handleSelectStage}
+        />
+      )}
 
       <div
         className={cn(
@@ -164,92 +169,100 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
           onSubmit={form.handleSubmit(onSubmit, () =>
             scrollToFirstInvalidField(),
           )}
+          className="flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden min-h-[600px]"
         >
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList variant="line">
-              <TabsTrigger value="general" className="text-xs">
-                {t("general")}
-              </TabsTrigger>
-              <TabsTrigger value="stages" className="text-xs">
-                {t("stages")}
-                {watchedStages && watchedStages.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="ml-1.5 tabular-nums"
-                  >
-                    {watchedStages.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="routing" className="text-xs">
-                {t("routing")}
-                {routingFieldArray.fields.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="ml-1.5 tabular-nums"
-                  >
-                    {routingFieldArray.fields.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="products" className="text-xs">
-                {t("products")}
-                {watchedProducts && watchedProducts.length > 0 && (
-                  <Badge
-                    variant="secondary"
-                    size="xs"
-                    className="ml-1.5 tabular-nums"
-                  >
-                    {watchedProducts.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="text-xs">
-                {t("insights")}
-              </TabsTrigger>
-            </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
+            <div className="border-b bg-muted/20 px-4 md:px-6 pt-2">
+              <TabsList variant="line" className="h-auto gap-4 bg-transparent p-0">
+                <TabsTrigger value="general" className="relative text-sm py-2.5 data-[state=active]:bg-transparent">
+                  {t("general")}
+                  {hasGeneralErrors && <div className="absolute top-2 right-2 size-2 rounded-full bg-destructive" />}
+                </TabsTrigger>
+                <TabsTrigger value="stages" className="relative text-sm py-2.5 data-[state=active]:bg-transparent">
+                  {t("stages")}
+                  {watchedStages && watchedStages.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      size="xs"
+                      className="ml-2 tabular-nums"
+                    >
+                      {watchedStages.length}
+                    </Badge>
+                  )}
+                  {hasStageErrors && <div className="absolute top-2 right-0 size-2 rounded-full bg-destructive" />}
+                </TabsTrigger>
+                <TabsTrigger value="routing" className="relative text-sm py-2.5 data-[state=active]:bg-transparent">
+                  {t("routing")}
+                  {routingFieldArray.fields.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      size="xs"
+                      className="ml-2 tabular-nums"
+                    >
+                      {routingFieldArray.fields.length}
+                    </Badge>
+                  )}
+                  {hasRoutingErrors && <div className="absolute top-2 right-0 size-2 rounded-full bg-destructive" />}
+                </TabsTrigger>
+                <TabsTrigger value="products" className="text-sm py-2.5 data-[state=active]:bg-transparent">
+                  {t("products")}
+                  {watchedProducts && watchedProducts.length > 0 && (
+                    <Badge
+                      variant="secondary"
+                      size="xs"
+                      className="ml-2 tabular-nums"
+                    >
+                      {watchedProducts.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="insights" className="text-sm py-2.5 data-[state=active]:bg-transparent">
+                  {t("insights")}
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <TabsContent value="general">
-              <WfGeneral form={form} isDisabled={isDisabled} />
-            </TabsContent>
+            <div className="flex-1 p-4 md:p-6">
+              <TabsContent value="general" className="mt-0 outline-none">
+                <WfGeneral form={form} isDisabled={isDisabled} />
+              </TabsContent>
 
-            <TabsContent value="stages">
-              <WfStages
-                form={form}
-                fieldArray={stagesFieldArray}
-                users={users}
-                isDisabled={isDisabled}
-                selectedIndex={selectedStageIndex}
-                onSelectIndex={setSelectedStageIndex}
-              />
-            </TabsContent>
+              <TabsContent value="stages" className="mt-0 outline-none">
+                <WfStages
+                  form={form}
+                  fieldArray={stagesFieldArray}
+                  users={users}
+                  isDisabled={isDisabled}
+                  selectedIndex={selectedStageIndex}
+                  onSelectIndex={setSelectedStageIndex}
+                />
+              </TabsContent>
 
-            <TabsContent value="routing">
-              <WfRouting
-                form={form}
-                fieldArray={routingFieldArray}
-                stages={stagesFieldArray.fields}
-                isDisabled={isDisabled}
-              />
-            </TabsContent>
+              <TabsContent value="routing" className="mt-0 outline-none">
+                <WfRouting
+                  form={form}
+                  fieldArray={routingFieldArray}
+                  stages={stagesFieldArray.fields}
+                  isDisabled={isDisabled}
+                />
+              </TabsContent>
 
-            <TabsContent value="products">
-              <WfProducts
-                form={form}
-                allProducts={products}
-                isDisabled={isDisabled}
-              />
-            </TabsContent>
+              <TabsContent value="products" className="mt-0 outline-none">
+                <WfProducts
+                  form={form}
+                  allProducts={products}
+                  isDisabled={isDisabled}
+                />
+              </TabsContent>
 
-            <TabsContent value="insights">
-              <WfInsights
-                stages={watchedStages ?? []}
-                productCount={watchedProducts?.length ?? 0}
-                routingCount={routingFieldArray.fields.length}
-              />
-            </TabsContent>
+              <TabsContent value="insights" className="mt-0 outline-none">
+                <WfInsights
+                  stages={watchedStages ?? []}
+                  productCount={watchedProducts?.length ?? 0}
+                  routingCount={routingFieldArray.fields.length}
+                />
+              </TabsContent>
+            </div>
           </Tabs>
         </form>
       </div>

@@ -18,8 +18,10 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { useTranslations } from "use-intl";
-import { GripVertical, Plus } from "lucide-react";
+import { GripVertical, Plus, Search, Waypoints } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 import {
   useWatch,
   type UseFormReturn,
@@ -76,7 +78,10 @@ export function WfStageList({
 }: WfStageListProps) {
   const { fields, move, insert } = fieldArray;
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
+  const [stageToDelete, setStageToDelete] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const t = useTranslations("systemAdmin.workflow");
+  const tc = useTranslations("common");
 
   const watchedStages = useWatch({
     control: form.control,
@@ -118,24 +123,56 @@ export function WfStageList({
     onSelect(fields.length - 1);
   };
 
+  const confirmDelete = () => {
+    if (stageToDelete === null) return;
+    const { remove } = fieldArray;
+    remove(stageToDelete);
+    if (selectedIndex === stageToDelete) {
+      onSelect(Math.max(0, stageToDelete - 1));
+    } else if (selectedIndex > stageToDelete) {
+      onSelect(selectedIndex - 1);
+    }
+    setStageToDelete(null);
+  };
+
   const activeDragIndex = activeDragId ? stageIds.indexOf(activeDragId) : -1;
 
+  const filteredFields = fields
+    .map((f, i) => ({ ...f, originalIndex: i }))
+    .filter((f) => {
+      if (!searchQuery) return true;
+      const stageName = watchedStages?.[f.originalIndex]?.name ?? f.name;
+      return stageName.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
+  const filteredIds = filteredFields.map((f) => f.id);
+
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold">{t("stages")}</span>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between px-2">
+        <span className="text-sm font-semibold text-foreground/80">{t("stages")}</span>
         {!isDisabled && (
           <Button
             type="button"
             variant="outline"
-            size="xs"
+            size="sm"
             onClick={handleAddStage}
-            className="h-6 px-1.5 text-xs"
+            className="h-9 px-4 text-sm font-medium shadow-sm transition-all hover:bg-muted/50"
           >
-            <Plus className="size-2.5" />
+            <Plus className="mr-1.5 size-3.5" />
             {t("addStage")}
           </Button>
         )}
+      </div>
+
+      <div className="px-1 relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input
+          placeholder={tc("search") || "Search..."}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 h-9"
+        />
       </div>
 
       <DndContext
@@ -146,43 +183,62 @@ export function WfStageList({
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={stageIds}
+          items={filteredIds}
           strategy={verticalListSortingStrategy}
         >
-          <div className="space-y-0.5">
-            {fields.map((field, index) => {
-              const stage = watchedStages?.[index];
-              const isFirst = index === 0;
-              const isLast = index === fields.length - 1;
-              const isHod = stage?.is_hod ?? false;
-              const userCount = stage?.assigned_users?.length ?? 0;
-              const hasWarning =
-                !isFirst && !isLast && !isHod && userCount === 0;
-              return (
-                <SortableStageItem
-                  key={field.id}
-                  id={field.id}
-                  index={index}
-                  name={stage?.name ?? field.name}
-                  isSelected={selectedIndex === index}
-                  isFirst={isFirst}
-                  isLast={isLast}
-                  userCount={userCount}
-                  isHod={isHod}
-                  hasWarning={hasWarning}
-                  dragDisabled={isDisabled}
-                  onClick={() => onSelect(index)}
-                />
-              );
-            })}
+          <div className="space-y-1">
+            {filteredFields.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center animate-in fade-in zoom-in-95 duration-200">
+                <Waypoints className="size-10 text-muted-foreground/30 mb-3" />
+                <p className="text-sm font-medium text-foreground">{tc("noData") || "No stages found"}</p>
+                {!isDisabled && !searchQuery && (
+                  <Button variant="outline" size="sm" onClick={handleAddStage} className="mt-4">
+                    <Plus className="mr-1.5 size-3.5" />
+                    {t("addStage")}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              filteredFields.map((field) => {
+                const index = field.originalIndex;
+                const stage = watchedStages?.[index];
+                const isFirst = index === 0;
+                const isLast = index === fields.length - 1;
+                const isHod = stage?.is_hod ?? false;
+                const userCount = stage?.assigned_users?.length ?? 0;
+                const hasWarning = !isFirst && !isLast && !isHod && userCount === 0;
+                return (
+                  <div key={field.id} className="animate-in fade-in slide-in-from-left-2 duration-300">
+                    <SortableStageItem
+                      id={field.id}
+                      index={index}
+                      name={stage?.name ?? field.name}
+                      isSelected={selectedIndex === index}
+                      isFirst={isFirst}
+                      isLast={isLast}
+                      userCount={userCount}
+                      isHod={isHod}
+                      hasWarning={hasWarning}
+                      dragDisabled={isDisabled || searchQuery.length > 0}
+                      onClick={() => onSelect(index)}
+                      onDelete={
+                        !isDisabled && !isFirst && !isLast
+                          ? () => setStageToDelete(index)
+                          : undefined
+                      }
+                    />
+                  </div>
+                );
+              })
+            )}
           </div>
         </SortableContext>
 
         <DragOverlay>
           {activeDragIndex >= 0 ? (
-            <div className="bg-background flex items-center gap-1.5 rounded border px-1.5 py-1 text-xs shadow-md">
-              <GripVertical className="text-muted-foreground size-3" />
-              <span>
+            <div className="bg-background flex items-center gap-3 rounded-lg border px-3 py-2 text-sm shadow-xl ring-1 ring-border opacity-90 scale-[1.02]">
+              <GripVertical className="text-muted-foreground/50 size-4" />
+              <span className="font-medium">
                 {watchedStages?.[activeDragIndex]?.name ??
                   fields[activeDragIndex]?.name}
               </span>
@@ -190,6 +246,16 @@ export function WfStageList({
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      <DeleteDialog
+        open={stageToDelete !== null}
+        onOpenChange={(open) => !open && setStageToDelete(null)}
+        title={t("deleteTitle")}
+        description={stageToDelete !== null ? t("deleteConfirm", { 
+          name: watchedStages?.[stageToDelete]?.name ?? fields[stageToDelete]?.name ?? "" 
+        }) : ""}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }
