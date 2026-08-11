@@ -89,11 +89,13 @@ export function NotificationItemContent({
           event=comment ติดตราเล็กมุมล่างขวาแทนการเพิ่มบรรทัดข้อความ */}
       <span className="relative flex shrink-0 items-center">
         {tile ? (
-          <SubTile name={tile.name} parentName={tile.parent} size={36} />
+          <div className="rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-110">
+            <SubTile name={tile.name} parentName={tile.parent} size={36} />
+          </div>
         ) : (
           <span
             className={cn(
-              "flex size-9 items-center justify-center rounded-xl",
+              "flex size-9 items-center justify-center rounded-xl shadow-sm transition-transform duration-300 group-hover:scale-110",
               fallbackBg,
             )}
           >
@@ -112,17 +114,17 @@ export function NotificationItemContent({
       </span>
 
       {/* Content + inset bottom border (removed for card layout) */}
-      <div className="min-w-0 flex-1 py-1">
+      <div className="min-w-0 flex-1">
         {/* Top line: type + title (left) · time (right) */}
         <div className="flex items-center gap-2">
           {isUnread && <span className="sr-only">{unreadLabel}</span>}
           <div className="flex min-w-0 flex-1 items-center gap-2 truncate">
             <p
               className={cn(
-                "group-hover:text-primary truncate text-[15px] leading-snug transition-colors duration-300",
+                "group-hover:text-primary truncate text-[14px] leading-tight transition-colors duration-300",
                 isUnread
                   ? "text-foreground font-semibold"
-                  : "text-foreground/90 font-medium",
+                  : "text-foreground/80 font-medium",
               )}
             >
               {sanitizeText(notification.title)}
@@ -146,7 +148,7 @@ export function NotificationItemContent({
         {/* Message */}
         <p
           className={cn(
-            "text-muted-foreground group-hover:text-foreground/80 mt-1 text-[13px] leading-relaxed transition-colors duration-300",
+            "text-muted-foreground/80 group-hover:text-muted-foreground mt-1 text-[13px] leading-relaxed transition-colors duration-300",
             // page list → 2 lines; navbar dropdown → single line + ellipsis
             clampMessage ? "line-clamp-2" : "truncate",
           )}

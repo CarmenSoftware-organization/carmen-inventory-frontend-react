@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, BellOff, Check, SquareArrowOutUpRight } from "lucide-react";
+import { Bell, BellOff, Check, SquareArrowOutUpRight, AlertCircle } from "lucide-react";
 import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -69,8 +69,10 @@ const NotificationItem = ({
   return (
     <div
       className={cn(
-        "group hover:bg-muted relative flex gap-3 pr-3 transition-colors",
-        isUnread && "bg-primary/[0.07]",
+        "group relative flex items-start gap-3 rounded-xl p-3 pr-10 transition-all duration-300 ease-out border border-border/30",
+        isUnread
+          ? "bg-primary/[0.03] hover:bg-primary/[0.06] shadow-[inset_3px_0_0_0_hsl(var(--primary)),0_1px_3px_0_rgba(0,0,0,0.05)] hover:shadow-[inset_3px_0_0_0_hsl(var(--primary)),0_4px_6px_-1px_rgba(0,0,0,0.1)] hover:-translate-y-0.5"
+          : "bg-background shadow-sm hover:shadow-md hover:bg-muted/30 hover:-translate-y-0.5",
       )}
     >
       {safeLink ? (
@@ -102,8 +104,12 @@ const NotificationItem = ({
         commentLabel={tRoot("notifications.commentLabel")}
       />
       <button
-        onClick={() => onMarkAsRead(notification)}
-        className="text-muted-foreground hover:text-foreground relative z-20 self-center opacity-0 transition-opacity group-hover:opacity-100"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onMarkAsRead(notification);
+        }}
+        className="text-muted-foreground/60 hover:text-foreground hover:bg-background/80 absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full p-1.5 opacity-0 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:opacity-100"
         type="button"
         title={dismissLabel}
         aria-label={dismissLabel}
@@ -219,16 +225,18 @@ export default function Notification() {
               classNames="py-10"
             />
           ) : (
-            notifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-                onMarkAsRead={handleMarkAsRead}
-                onShowDetail={handleShowDetail}
-                onNavigate={() => setPopoverOpen(false)}
-                dismissLabel={t("dismiss")}
-              />
-            ))
+            <div className="flex flex-col gap-1 p-2">
+              {notifications.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                  onMarkAsRead={handleMarkAsRead}
+                  onShowDetail={handleShowDetail}
+                  onNavigate={() => setPopoverOpen(false)}
+                  dismissLabel={t("dismiss")}
+                />
+              ))}
+            </div>
           )}
         </div>
       </PopoverContent>
@@ -258,53 +266,81 @@ export function NotificationDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-base">
-            {isLoading ? (
-              <Skeleton className="h-5 w-48" />
-            ) : (
-              sanitizeText(data?.title)
-            )}
-          </DialogTitle>
-          {data && (
-            <DialogDescription className="flex items-center gap-2 pt-1 text-micro">
-              {data.doc_type && (
-                <Badge variant="info-light" size="xs">
-                  {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
-                </Badge>
-              )}
-              {data.created_at && (
-                <span className="text-muted-foreground tabular-nums">
-                  {new Date(data.created_at).toLocaleString(locale)}
-                </span>
-              )}
-            </DialogDescription>
-          )}
-        </DialogHeader>
+      <DialogContent 
+        showCloseButton={false}
+        className="sm:max-w-[500px] overflow-hidden p-0 border border-border/30 shadow-2xl bg-background/95 backdrop-blur-2xl rounded-2xl"
+      >
+        {/* Glassmorphic decorative glowing orbs */}
+        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/20 blur-[64px] pointer-events-none" aria-hidden="true" />
+        <div className="absolute -left-12 top-12 h-40 w-40 rounded-full bg-blue-500/10 blur-[48px] pointer-events-none" aria-hidden="true" />
 
-        <div className="space-y-2 text-sm">
-          {isLoading && (
-            <>
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-4/5" />
-              <Skeleton className="h-4 w-3/5" />
-            </>
-          )}
-          {error && (
-            <p className="text-destructive">
-              {error instanceof Error ? error.message : String(error)}
-            </p>
-          )}
-          {data && (
-            <p className="leading-relaxed whitespace-pre-wrap">
-              {formatMessage(data.message)}
-            </p>
-          )}
+        <div className="relative z-10 px-6 pt-8 pb-6">
+          <DialogHeader className="flex flex-row items-start gap-5 space-y-0 text-left">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-primary/10 to-primary/5 shadow-inner ring-1 ring-primary/20">
+              <Bell className="h-7 w-7 text-primary/90" strokeWidth={1.5} />
+              <div className="absolute inset-0 rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] pointer-events-none" />
+            </div>
+            
+            <div className="flex-1 space-y-2 pt-0">
+              <DialogTitle className="text-[26px] font-bold tracking-tight text-foreground leading-tight">
+                {isLoading ? (
+                  <Skeleton className="h-8 w-4/5 rounded-lg" />
+                ) : (
+                  sanitizeText(data?.title)
+                )}
+              </DialogTitle>
+              {data && (
+                <DialogDescription className="flex flex-wrap items-center gap-3 pt-1">
+                  {data.doc_type && (
+                    <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 border-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                      {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
+                    </Badge>
+                  )}
+                  {data.created_at && (
+                    <span className="text-muted-foreground text-sm font-medium flex items-center gap-2">
+                      <span className="h-1 w-1 rounded-full bg-muted-foreground/40" />
+                      {new Date(data.created_at).toLocaleString(locale, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </span>
+                  )}
+                </DialogDescription>
+              )}
+            </div>
+          </DialogHeader>
+
+          <div className="mt-8 rounded-2xl bg-muted/30 p-5 ring-1 ring-inset ring-border/50 shadow-sm backdrop-blur-sm">
+            {isLoading && (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full rounded-md" />
+                <Skeleton className="h-4 w-11/12 rounded-md" />
+                <Skeleton className="h-4 w-4/5 rounded-md" />
+                <Skeleton className="h-4 w-2/3 rounded-md" />
+              </div>
+            )}
+            {error && (
+              <div className="flex items-start gap-3 text-destructive rounded-xl bg-destructive/10 p-4">
+                <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
+                <p className="font-medium text-[14.5px] leading-relaxed">
+                  {error instanceof Error ? error.message : String(error)}
+                </p>
+              </div>
+            )}
+            {data && (
+              <p className="text-[15px] leading-relaxed text-foreground/85 whitespace-pre-wrap">
+                {formatMessage(data.message)}
+              </p>
+            )}
+          </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" size="sm" onClick={onClose}>
+        <DialogFooter className="relative z-10 bg-muted/20 border-t border-border/30 px-6 py-4 sm:justify-end">
+          <Button 
+            variant="default" 
+            onClick={onClose} 
+            className="w-full sm:w-auto rounded-xl px-8 h-11 text-[15px] font-medium shadow-[0_2px_12px_-4px_hsl(var(--primary))] hover:shadow-[0_6px_16px_-6px_hsl(var(--primary))] transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+          >
             {tc("close")}
           </Button>
         </DialogFooter>
