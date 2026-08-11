@@ -208,7 +208,7 @@ export default function UserProfileSetting() {
     .join("");
 
   return (
-    <div className="w-full space-y-4 pb-[max(1rem,env(safe-area-inset-bottom))] relative z-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="w-full max-w-5xl mx-auto space-y-10 pb-[max(2rem,env(safe-area-inset-bottom))] animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="sticky top-0 z-20 flex items-center gap-2 py-1 sm:static sm:py-0">
         <Button
@@ -224,9 +224,12 @@ export default function UserProfileSetting() {
       </div>
 
       {/* Account Info — read-only hero */}
-      <div className="relative overflow-hidden rounded-2xl border bg-primary/5 shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
-        <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 lg:gap-8 items-start">
+        <div className="pt-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{t("accountInfo")}</h2>
+        </div>
+        <div className="relative overflow-hidden rounded-xl border bg-card shadow-sm">
+          <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4 sm:gap-5">
             <div className="relative group/avatar">
               <button
@@ -301,27 +304,29 @@ export default function UserProfileSetting() {
             variant="outline"
             size="sm"
             onClick={() => setPasswordOpen(true)}
-            className="h-11 w-full sm:h-9 sm:w-auto shadow-sm group"
+            className="h-10 w-full sm:h-9 sm:w-auto shadow-sm group"
           >
             <KeyRound className="size-3.5 transition-transform group-hover:rotate-12" aria-hidden="true" />
             {t("changePassword")}
           </Button>
         </div>
       </div>
+    </div>
 
       {/* Personal Info Form */}
-      <section className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-        <header className="border-b px-4 py-3">
-          <h2 className="text-sm font-semibold">{t("personalInfo")}</h2>
-        </header>
-        <form
-          id="profile-form"
-          onSubmit={form.handleSubmit(onSubmit, () =>
-            scrollToFirstInvalidField(),
-          )}
-          className="space-y-4 px-4 py-4"
-        >
-          <FieldGroup className="gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 lg:gap-8 border-t pt-8 items-start">
+        <div className="pt-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{t("personalInfo")}</h2>
+        </div>
+        <section className="rounded-xl border bg-card shadow-sm overflow-hidden">
+          <form
+            id="profile-form"
+            onSubmit={form.handleSubmit(onSubmit, () =>
+              scrollToFirstInvalidField(),
+            )}
+          >
+            <div className="space-y-6 p-5 sm:p-6">
+              <FieldGroup className="gap-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Field data-invalid={!!form.formState.errors.firstname}>
                 <FieldLabel htmlFor="firstname" required>
@@ -410,25 +415,30 @@ export default function UserProfileSetting() {
                 </FieldError>
               </Field>
             </div>
-          </FieldGroup>
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              size="sm"
-              disabled={updateProfile.isPending}
-              className="h-11 w-full sm:h-9 sm:w-auto"
-            >
-              {updateProfile.isPending ? t("saving") : tc("save")}
-            </Button>
-          </div>
-        </form>
-      </section>
+              </FieldGroup>
+            </div>
+            <div className="flex items-center justify-end border-t bg-muted/20 px-5 py-4 sm:px-6">
+              <Button
+                type="submit"
+                size="sm"
+                disabled={updateProfile.isPending}
+                className="h-10 w-full sm:h-9 sm:w-auto shadow-sm"
+              >
+                {updateProfile.isPending ? t("saving") : tc("save")}
+              </Button>
+            </div>
+          </form>
+        </section>
+      </div>
 
       {/* Signature */}
-      <section className="rounded-2xl border bg-card shadow-sm overflow-hidden">
-        <header className="flex items-center justify-between border-b px-4 py-3">
-          <h2 className="text-sm font-semibold">{t("signature")}</h2>
-          <div className="flex gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 lg:gap-8 border-t pt-8 items-start">
+        <div className="pt-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{t("signature")}</h2>
+        </div>
+        <section className="rounded-xl border bg-card shadow-sm overflow-hidden">
+          <div className="flex items-center justify-end border-b bg-muted/10 px-4 py-3">
+            <div className="flex gap-2">
             {profile.signature_url && !isUploadingSignature && (
               <Button
                 type="button"
@@ -459,8 +469,8 @@ export default function UserProfileSetting() {
               {profile.signature_url ? t("editSignature") : t("addSignature")}
             </Button>
           </div>
-        </header>
-        <div className="flex min-h-32 items-center justify-center p-4">
+        </div>
+        <div className="flex min-h-32 items-center justify-center p-6">
           {profile.signature_url ? (
             <img
               key={profile.signature_url}
@@ -475,6 +485,7 @@ export default function UserProfileSetting() {
           )}
         </div>
       </section>
+      </div>
 
       <ChangePasswordDialog
         open={passwordOpen}
