@@ -1,4 +1,4 @@
-import { Bell } from "lucide-react";
+import { Bell, MessageSquare } from "lucide-react";
 import { SubTile } from "@/components/icons/tiles";
 import { formatMessage, NOTIFICATION_TILE } from "@/lib/notification-helpers";
 import { cn, sanitizeText } from "@/lib/utils";
@@ -11,6 +11,8 @@ interface NotificationItemContentProps {
   readonly locale: string;
   /** Accessible label for the unread state (e.g. t("unread")) — pairs with the color dot */
   readonly unreadLabel: string;
+  /** ป้ายกำกับตราคอมเมนต์ (เช่น tRoot("notifications.commentLabel")) — คู่กับไอคอน */
+  readonly commentLabel: string;
   /** Clamp message to 2 lines (page list) vs single dense line (navbar dropdown) */
   readonly clampMessage?: boolean;
 }
@@ -26,15 +28,21 @@ export function NotificationItemContent({
   isUnread,
   locale,
   unreadLabel,
+  commentLabel,
   clampMessage = false,
 }: NotificationItemContentProps) {
-  const time = new Date(notification.created_at).toLocaleString(locale, {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const tile = NOTIFICATION_TILE[notification.type];
+  const time = notification.created_at
+    ? new Date(notification.created_at).toLocaleString(locale, {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+  const tile = notification.doc_type
+    ? NOTIFICATION_TILE[notification.doc_type]
+    : undefined;
+  const isComment = notification.event === "comment";
 
   return (
     <>
@@ -46,15 +54,24 @@ export function NotificationItemContent({
         {isUnread && <span className="bg-primary size-1.5 rounded-full" />}
       </span>
 
-      {/* Leading app tile — same illustrated squircle as the sidebar/dashboard,
-          so a notification's icon matches its module exactly. Non-entity types
-          fall back to a flat primary Bell tile. */}
-      <span className="flex shrink-0 items-center">
+      {/* Leading app tile — squircle ชุดเดียวกับ sidebar/dashboard
+          doc_type ที่ไม่ใช่เอกสาร (system/business_unit) ตกมาที่กระดิ่ง
+          event=comment ติดตราเล็กมุมล่างขวาแทนการเพิ่มบรรทัดข้อความ */}
+      <span className="relative flex shrink-0 items-center">
         {tile ? (
           <SubTile name={tile.name} parentName={tile.parent} size={36} />
         ) : (
           <span className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-xl">
             <Bell className="size-4.5" />
+          </span>
+        )}
+        {isComment && (
+          <span className="bg-background ring-border absolute -end-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full ring-1">
+            <MessageSquare
+              className="text-muted-foreground size-2.5"
+              aria-hidden="true"
+            />
+            <span className="sr-only">{commentLabel}</span>
           </span>
         )}
       </span>
@@ -72,9 +89,11 @@ export function NotificationItemContent({
           >
             {sanitizeText(notification.title)}
           </p>
-          <span className="text-muted-foreground shrink-0 text-micro whitespace-nowrap tabular-nums">
-            {time}
-          </span>
+          {time && (
+            <span className="text-muted-foreground shrink-0 text-micro whitespace-nowrap tabular-nums">
+              {time}
+            </span>
+          )}
         </div>
 
         {/* Message */}

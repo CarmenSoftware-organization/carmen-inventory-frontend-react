@@ -2,42 +2,86 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Bell, BellOff } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmptyComponent from "@/components/empty-component";
 import { NotificationDetailDialog } from "@/components/navbar/notification";
 import { NotificationItemContent } from "@/components/navbar/notification-item-content";
-import { useNotificationsList } from "@/hooks/use-notification";
+import {
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotificationsList,
+  type NotificationTab,
+} from "@/hooks/use-notification";
 import { getNotificationHref } from "@/lib/notification-helpers";
-import { cn, safeNavigationHref } from "@/lib/utils";
+import { cn, safeInternalHref } from "@/lib/utils";
 import type { Notification } from "@/types/notification";
 import { NotificationLoader } from "@/components/loader/noti-loader";
 
 export default function NotificationsContent() {
   const t = useTranslations("navbar");
+  const tRoot = useTranslations();
   const locale = useLocale();
-  const { data: items = [], isLoading, error } = useNotificationsList();
+  const [tab, setTab] = useState<NotificationTab>("all");
+  const {
+    items,
+    total,
+    summary,
+    isLoading,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useNotificationsList(tab);
+  const markAllRead = useMarkAllNotificationsRead();
+  const markRead = useMarkNotificationRead();
   const [detailId, setDetailId] = useState<string | null>(null);
 
-  const unreadCount = items.filter((n) => n.is_read === false).length;
+  const handleMarkAsRead = (notification: Notification) =>
+    markRead.mutate({ id: notification.id, source: notification.source });
+
+  // แท็บ "ทั้งหมด" ให้ summary.unread มา ส่วนแท็บ "ยังไม่อ่าน" ไม่มี summary
+  // โดยตั้งใจ (จำนวนยังไม่อ่าน = paginate.total ของ endpoint นั้นพอดี)
+  // summary หายไป = "นับไม่ได้" ไม่ใช่ศูนย์ — undefined จึงต่างจาก 0 อย่างมีความหมาย
+  const unreadCount: number | undefined =
+    tab === "unread" ? total : summary?.unread;
+  // แสดงปุ่ม/ป้ายเมื่อ "รู้ว่ามี" หรือ "ไม่รู้" (undefined) — ซ่อนเฉพาะเมื่อรู้แน่ว่าเป็นศูนย์
+  const hasUnread = unreadCount !== 0;
 
   return (
     <div className="flex flex-col gap-3 p-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      {/* Flat header */}
-      <header className="border-border/60 flex items-center gap-2 border-b pb-2">
+      <header className="border-border/60 flex flex-wrap items-center gap-2 border-b pb-2">
         <Bell className="text-muted-foreground size-4" aria-hidden="true" />
         <h1 className="text-lg font-semibold tracking-tight">
           {t("notifications")}
         </h1>
-        {items.length > 0 && (
-          <Badge variant="secondary" size="sm" className="tabular-nums">
-            {items.length.toLocaleString()}
-          </Badge>
-        )}
-        {unreadCount > 0 && (
-          <span className="text-primary ml-auto inline-flex items-center gap-1.5 text-xs font-semibold tabular-nums">
-            <span className="bg-primary size-1.5 rounded-full" />
-            {unreadCount.toLocaleString()}
-          </span>
+        <Tabs
+          value={tab}
+          onValueChange={(value) => setTab(value as NotificationTab)}
+          className="ms-2"
+        >
+          <TabsList>
+            <TabsTrigger value="all">{tRoot("notifications.tabAll")}</TabsTrigger>
+            <TabsTrigger value="unread">
+              {tRoot("notifications.tabUnread")}
+              {unreadCount !== undefined && unreadCount > 0 && (
+                <span className="ms-1.5 tabular-nums">
+                  {unreadCount.toLocaleString()}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        {hasUnread && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground ms-auto h-7 text-xs"
+            onClick={() => markAllRead.mutate()}
+            disabled={markAllRead.isPending}
+          >
+            {tRoot("notifications.markAllRead")}
+          </Button>
         )}
       </header>
 
@@ -55,8 +99,16 @@ export default function NotificationsContent() {
           <li className="px-4 py-12">
             <EmptyComponent
               icon={BellOff}
-              title={t("noNotificationsTitle")}
-              description={t("noNotificationsDesc")}
+              title={
+                tab === "unread"
+                  ? tRoot("notifications.emptyUnreadTitle")
+                  : t("noNotificationsTitle")
+              }
+              description={
+                tab === "unread"
+                  ? tRoot("notifications.emptyUnreadDesc")
+                  : t("noNotificationsDesc")
+              }
             />
           </li>
         ) : (
@@ -66,10 +118,24 @@ export default function NotificationsContent() {
               notification={notification}
               locale={locale}
               onShowDetail={setDetailId}
+              onMarkRead={handleMarkAsRead}
             />
           ))
         )}
       </ul>
+
+      {hasNextPage && (
+        <div className="flex justify-center pt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchNextPage}
+            disabled={isFetchingNextPage}
+          >
+            {tRoot("notifications.loadMore")}
+          </Button>
+        </div>
+      )}
 
       <NotificationDetailDialog
         id={detailId}
@@ -83,15 +149,18 @@ interface NotificationRowProps {
   readonly notification: Notification;
   readonly locale: string;
   readonly onShowDetail: (id: string) => void;
+  readonly onMarkRead: (notification: Notification) => void;
 }
 
 function NotificationRow({
   notification,
   locale,
   onShowDetail,
+  onMarkRead,
 }: NotificationRowProps) {
   const t = useTranslations("navbar");
-  const safeLink = safeNavigationHref(getNotificationHref(notification));
+  const tRoot = useTranslations();
+  const safeLink = safeInternalHref(getNotificationHref(notification));
   const isUnread = notification.is_read === false;
 
   const rowClass = cn(
@@ -106,6 +175,7 @@ function NotificationRow({
       isUnread={isUnread}
       locale={locale}
       unreadLabel={t("unread")}
+      commentLabel={tRoot("notifications.commentLabel")}
       clampMessage
     />
   );
@@ -113,13 +183,20 @@ function NotificationRow({
   return (
     <li>
       {safeLink ? (
-        <Link to={safeLink} className={rowClass}>
+        <Link
+          to={safeLink}
+          className={rowClass}
+          onClick={() => onMarkRead(notification)}
+        >
           {body}
         </Link>
       ) : (
         <button
           type="button"
-          onClick={() => onShowDetail(notification.id)}
+          onClick={() => {
+            onMarkRead(notification);
+            onShowDetail(notification.id);
+          }}
           className={cn(rowClass, "cursor-pointer")}
         >
           {body}

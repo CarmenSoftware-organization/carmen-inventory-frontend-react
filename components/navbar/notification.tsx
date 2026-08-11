@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  Bell,
-  BellOff,
-  Check,
-  ExternalLink,
-  SquareArrowOutUpRight,
-} from "lucide-react";
+import { Bell, BellOff, Check, SquareArrowOutUpRight } from "lucide-react";
 import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
@@ -30,28 +24,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  useNotification,
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
   useNotificationDetail,
+  useNotificationRealtime,
+  useUnreadNotifications,
 } from "@/hooks/use-notification";
 import { useProfile } from "@/hooks/use-profile";
 import type { Notification as NotificationType } from "@/types/notification";
 import EmptyComponent from "../empty-component";
-import {
-  cn,
-  safeInternalHref,
-  safeNavigationHref,
-  sanitizeText,
-} from "@/lib/utils";
+import { cn, safeInternalHref, sanitizeText } from "@/lib/utils";
 import {
   formatMessage,
-  getBadgeVariant,
   getNotificationHref,
+  DOC_TYPE_LABEL_KEY,
 } from "@/lib/notification-helpers";
 import { NotificationItemContent } from "./notification-item-content";
 
 interface NotificationItemProps {
   readonly notification: NotificationType;
-  readonly onMarkAsRead: (id: string) => void;
+  readonly onMarkAsRead: (notification: NotificationType) => void;
   readonly onShowDetail: (id: string) => void;
   readonly onNavigate: () => void;
   readonly dismissLabel: string;
@@ -65,12 +57,12 @@ const NotificationItem = ({
   dismissLabel,
 }: NotificationItemProps) => {
   const t = useTranslations("navbar");
+  const tRoot = useTranslations();
   const locale = useLocale();
-  // Row-overlay link ต้องเป็น internal path เท่านั้น (policy: internal-only)
-  // safeInternalHref เป็น sanitizer เฉพาะทาง — รับเฉพาะ root-relative path
-  // กัน open-redirect (CWE-601) ไม่มีทางคืน external/absolute URL
-  // External link (เช่น n.link เป็น https://) จะ fall ไปเปิด detail dialog ที่มีปุ่ม
-  // "Open" แยก (กรอง URL ผ่าน safeNavigationHref อีกชั้น)
+  // safeInternalHref เป็นด่านกันเพิ่ม (defence-in-depth) เหนือค่าที่เป็น internal
+  // path อยู่แล้วโดยโครงสร้าง — getNotificationHref คืนได้แค่ route คงที่ + id เท่านั้น
+  // ไม่มีทางเป็น external URL แถวที่ไม่มีเอกสารให้เปิด (คืน undefined) จะ fall ไปเปิด
+  // detail dialog แทน
   const safeLink = safeInternalHref(getNotificationHref(notification));
   const safeTitle = sanitizeText(notification.title);
   const isUnread = notification.is_read === false;
@@ -85,20 +77,20 @@ const NotificationItem = ({
         <Link
           to={safeLink}
           onClick={() => {
-            onMarkAsRead(notification.id);
+            onMarkAsRead(notification);
             onNavigate();
           }}
-          aria-label={safeTitle}
+          aria-label={safeTitle || t("notifications")}
           className="absolute inset-0 z-10"
         />
       ) : (
         <button
           type="button"
           onClick={() => {
-            onMarkAsRead(notification.id);
+            onMarkAsRead(notification);
             onShowDetail(notification.id);
           }}
-          aria-label={safeTitle}
+          aria-label={safeTitle || t("notifications")}
           className="absolute inset-0 z-10 cursor-pointer"
         />
       )}
@@ -107,9 +99,10 @@ const NotificationItem = ({
         isUnread={isUnread}
         locale={locale}
         unreadLabel={t("unread")}
+        commentLabel={tRoot("notifications.commentLabel")}
       />
       <button
-        onClick={() => onMarkAsRead(notification.id)}
+        onClick={() => onMarkAsRead(notification)}
         className="text-muted-foreground hover:text-foreground relative z-20 self-center opacity-0 transition-opacity group-hover:opacity-100"
         type="button"
         title={dismissLabel}
@@ -124,11 +117,17 @@ const NotificationItem = ({
 export default function Notification() {
   const t = useTranslations("navbar");
   const { userId } = useProfile();
-  const { notifications, markAsRead, markAllAsRead } = useNotification(userId);
+  useNotificationRealtime(userId);
+  const { notifications, unreadCount, isLoading } = useUnreadNotifications();
+  const markRead = useMarkNotificationRead();
+  const markAllRead = useMarkAllNotificationsRead();
   const [detailId, setDetailId] = useState<string | null>(null);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
-  const notificationCount = notifications.length;
+  const notificationCount = unreadCount;
+
+  const handleMarkAsRead = (notification: NotificationType) =>
+    markRead.mutate({ id: notification.id, source: notification.source });
 
   const handleShowDetail = (id: string) => {
     setPopoverOpen(false);
@@ -177,7 +176,8 @@ export default function Notification() {
                 variant="ghost"
                 className="text-muted-foreground h-6 px-2 text-xs"
                 size="sm"
-                onClick={markAllAsRead}
+                onClick={() => markAllRead.mutate()}
+                disabled={markAllRead.isPending}
               >
                 {t("clearAll")}
               </Button>
@@ -205,7 +205,13 @@ export default function Notification() {
         </div>
 
         <div className="max-h-112 overflow-y-auto">
-          {notifications.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-2 p-3">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : notifications.length === 0 ? (
             <EmptyComponent
               icon={BellOff}
               title={t("noNotificationsTitle")}
@@ -217,7 +223,7 @@ export default function Notification() {
               <NotificationItem
                 key={notification.id}
                 notification={notification}
-                onMarkAsRead={markAsRead}
+                onMarkAsRead={handleMarkAsRead}
                 onShowDetail={handleShowDetail}
                 onNavigate={() => setPopoverOpen(false)}
                 dismissLabel={t("dismiss")}
@@ -245,11 +251,10 @@ export function NotificationDetailDialog({
   onClose,
 }: NotificationDetailDialogProps) {
   const tc = useTranslations("common");
-  const t = useTranslations("navbar");
+  const tRoot = useTranslations();
+  const locale = useLocale();
   const { data, isLoading, error } = useNotificationDetail(id);
   const open = !!id;
-
-  const externalHref = data ? safeNavigationHref(data.link) : undefined;
 
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
@@ -264,12 +269,16 @@ export function NotificationDetailDialog({
           </DialogTitle>
           {data && (
             <DialogDescription className="flex items-center gap-2 pt-1 text-micro">
-              <Badge variant={getBadgeVariant(data.type)} size="xs">
-                {data.type}
-              </Badge>
-              <span className="text-muted-foreground tabular-nums">
-                {new Date(data.created_at).toLocaleString()}
-              </span>
+              {data.doc_type && (
+                <Badge variant="info-light" size="xs">
+                  {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
+                </Badge>
+              )}
+              {data.created_at && (
+                <span className="text-muted-foreground tabular-nums">
+                  {new Date(data.created_at).toLocaleString(locale)}
+                </span>
+              )}
             </DialogDescription>
           )}
         </DialogHeader>
@@ -295,14 +304,6 @@ export function NotificationDetailDialog({
         </div>
 
         <DialogFooter>
-          {externalHref && (
-            <Button asChild variant="outline" size="sm">
-              <Link to={externalHref} onClick={onClose}>
-                <ExternalLink className="size-3.5" aria-hidden="true" />
-                {t("open")}
-              </Link>
-            </Button>
-          )}
           <Button variant="outline" size="sm" onClick={onClose}>
             {tc("close")}
           </Button>
