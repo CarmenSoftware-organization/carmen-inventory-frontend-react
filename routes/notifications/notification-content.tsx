@@ -326,14 +326,14 @@ function NotificationRow({
 
   return (
     <li>
-      {isSelectionMode ? (
+      {isSelectionMode && isUnread ? (
         <button
           type="button"
           onClick={() => onToggleSelect?.(notification.id)}
           className={cn(rowClass, "cursor-pointer outline-none")}
         >
-          <Checkbox checked={isSelected} className="pointer-events-none" />
-          <div className="flex-1 min-w-0 flex items-center">{body}</div>
+          <Checkbox checked={isSelected} className="pointer-events-none shrink-0" />
+          <div className="flex-1 min-w-0 flex items-center gap-4">{body}</div>
         </button>
       ) : safeLink ? (
         <Link
