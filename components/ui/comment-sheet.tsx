@@ -147,15 +147,36 @@ const formatCommentTime = (
 
 /**
  * รวม URL สำหรับแสดง attachment — ถ้า server คืน `fileUrl` ใช้ตามนั้น
- * fileUrl เป็น relative path เช่น `/api/{bu}/documents/{token}/download`
- * ต้อง prepend `/api/proxy` เพื่อให้ผ่าน proxy frontend (กรณีไม่ได้ prefix อยู่แล้ว)
- * ถ้าไม่มี fileUrl ให้ derive จาก `fileToken` รูปแบบ `{buCode}/{uuid}`
+ *
+ * Priority:
+ * 1. data URI ชนิดรูปภาพ (`data:image/…` — SVG placeholder หรือ base64) — ใช้ตรงได้เลย
+ * 2. absolute URL (presigned MinIO / https) — ใช้ตรงได้เลย ไม่ต้อง proxy
+ * 3. relative `/api/...` path — prepend `/api/proxy` (เส้นทางเดิมจาก source app)
+ * 4. fallback: derive จาก `fileToken` รูปแบบ `{buCode}/{uuid}`
+ *
+ * ข้อ 1–2 คือเส้นทางที่ใช้งานได้จริงในบริบทนี้ เพราะ URL ที่ได้ถูกส่งให้เบราว์เซอร์
+ * โหลดเอง (`<img src>` / `<a href>`) ซึ่ง **ไม่ผ่าน** `lib/http-client.ts` — ตัว rewrite
+ * `/api/proxy/<rest>` → `${BACKEND_URL}/<rest>` ทำงานเฉพาะชั้น fetch เท่านั้น ข้อ 3–4
+ * จึงเป็นของตกทอดที่เก็บไว้กันรีเกรสชัน ไม่ใช่เส้นทางหลัก
+ *
+ * รับ data URI เฉพาะ `data:image/` — ชนิดอื่น (เช่น `data:text/html`) ตกไปให้
+ * `sanitizeUrl` ปฏิเสธตามเดิม เพราะปลายทางของไฟล์ที่ไม่ใช่รูปคือ `<a href target="_blank">`
  */
 const resolveAttachmentUrl = (
   fileUrl: string,
   fileToken: string,
 ): string | null => {
   if (fileUrl) {
+    // data URI ของรูปภาพ — pass through โดยตรง (sanitizeUrl บล็อก data: ทุกชนิด)
+    if (fileUrl.startsWith("data:image/")) {
+      return fileUrl;
+    }
+    // Absolute URL (presigned MinIO URL / external https) — ใช้โดยตรงโดยไม่ proxy
+    if (fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) {
+      const safe = sanitizeUrl(fileUrl);
+      if (safe) return safe;
+    }
+    // Relative gateway URL — prepend /api/proxy
     const proxied =
       fileUrl.startsWith("/api/") && !fileUrl.startsWith("/api/proxy/")
         ? `/api/proxy${fileUrl}`
