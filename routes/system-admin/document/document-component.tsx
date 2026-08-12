@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   useDocument,
+  useDocumentSummary,
   useUploadDocument,
   useDeleteDocument,
 } from "@/hooks/use-document";
@@ -21,6 +22,8 @@ import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import DocumentCard from "./document-card";
+import DocumentSummaryBar from "./document-summary-bar";
+import DocumentSummarySheet from "./document-summary-sheet";
 import type { DocumentFile } from "@/types/document";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -79,6 +82,9 @@ export default function DocumentComponent() {
   const uploadDocument = useUploadDocument();
   const isMobile = useIsMobile();
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
+  const [summarySheetOpen, setSummarySheetOpen] = useState(false);
+  const { data: summary, isLoading: isSummaryLoading } = useDocumentSummary();
+  const hasSummary = !!summary && summary.total_count > 0;
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const useInfiniteScroll = !!isMobile;
   const { data, isLoading, error, refetch } = useDocument(params, {
@@ -213,6 +219,12 @@ export default function DocumentComponent() {
           </div>
         </div>
 
+        <DocumentSummaryBar
+          summary={summary}
+          isLoading={isSummaryLoading}
+          onViewAll={() => setSummarySheetOpen(true)}
+        />
+
         <div className="flex w-full items-center gap-2">
           <div className="flex-1">
             <SearchInput defaultValue={search} onSearch={setSearch} />
@@ -277,9 +289,15 @@ export default function DocumentComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                lf.activeFilters.length > 0
-                  ? "max-h-[calc(100vh-13rem-3rem)]"
-                  : "max-h-[calc(100vh-10rem-3rem)]",
+                // แถบสรุปสูงประมาณ 4rem รวมช่องไฟ — สี่เคสตามว่ามีแถบและมี active filter หรือไม่
+                // ไม่เผื่อค่านี้ ตารางจะล้นจอเมื่อแถบขึ้น
+                hasSummary
+                  ? lf.activeFilters.length > 0
+                    ? "max-h-[calc(100vh-17rem-3rem)]"
+                    : "max-h-[calc(100vh-14rem-3rem)]"
+                  : lf.activeFilters.length > 0
+                    ? "max-h-[calc(100vh-13rem-3rem)]"
+                    : "max-h-[calc(100vh-10rem-3rem)]",
               )}
             >
               <DataGridScrollArea>
@@ -311,6 +329,14 @@ export default function DocumentComponent() {
           });
         }}
       />
+
+      {hasSummary && (
+        <DocumentSummarySheet
+          open={summarySheetOpen}
+          onOpenChange={setSummarySheetOpen}
+          summary={summary}
+        />
+      )}
 
       <SaveViewDialog
         open={saveViewDialogOpen}
