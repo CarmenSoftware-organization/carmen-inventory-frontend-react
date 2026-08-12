@@ -34,6 +34,7 @@ export const APP_TILE_PALETTE: Record<string, Palette> = {
   inventoryManagement: PRIMARY_TILE,
   operationPlan:       PRIMARY_TILE,
   report:              PRIMARY_TILE,
+  accounting:          PRIMARY_TILE,
   config:              PRIMARY_TILE,
   systemAdmin:         PRIMARY_TILE,
 };

@@ -117,6 +117,18 @@ export const AppTiles: Record<string, TileRenderer> = {
     </>
   ),
 
+  // Accounting — ledger with debit and credit columns
+  accounting: ({ palette }) => (
+    <>
+      <TileBase palette={palette} />
+      <rect x="8" y="9" width="24" height="23" rx="2" fill="currentColor" />
+      <rect x="11" y="12" width="18" height="4" rx="1" style={{ fill: palette.accent }} />
+      <path d="M 20 19 V 29 M 12 22 H 28 M 12 26 H 28" style={{ stroke: palette.base }} strokeWidth="1.4" opacity="0.75" />
+      <circle cx="15.5" cy="20" r="1.2" style={{ fill: palette.shadow }} />
+      <circle cx="24.5" cy="20" r="1.2" style={{ fill: palette.shadow }} />
+    </>
+  ),
+
   // Configuration — gear
   config: ({ palette }) => (
     <>
