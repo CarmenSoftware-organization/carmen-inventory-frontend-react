@@ -1,5 +1,5 @@
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -85,6 +85,16 @@ export default function DocumentComponent() {
   const [summarySheetOpen, setSummarySheetOpen] = useState(false);
   const { data: summary, isLoading: isSummaryLoading } = useDocumentSummary();
   const hasSummary = !!summary && summary.total_count > 0;
+  // ช่องแถบสรุปถือว่า "มีของ" ตั้งแต่ตอนโหลด (มี skeleton แสดงอยู่) ไม่ใช่แค่ตอนมีข้อมูลจริง
+  // ใช้ค่านี้กับ max-h ของตารางเท่านั้น ส่วน Sheet ยังต้องใช้ hasSummary เพราะต้องการข้อมูลจริง
+  const summarySlotVisible = hasSummary || isSummaryLoading;
+
+  // สลับ BU แล้ว summary หายไปกลางอากาศ (query key เปลี่ยน) ทำให้ Sheet unmount โดยไม่เคยเรียก
+  // onOpenChange(false) — ถ้าไม่รีเซ็ตตรงนี้ summarySheetOpen จะค้างเป็น true แล้วพอสลับไป BU
+  // ที่มีไฟล์ Sheet จะเด้งเปิดเองโดยไม่มีใครกด
+  useEffect(() => {
+    if (!hasSummary) setSummarySheetOpen(false);
+  }, [hasSummary]);
   const { params, search, setSearch, tableConfig } = useDataGridState();
   const useInfiniteScroll = !!isMobile;
   const { data, isLoading, error, refetch } = useDocument(params, {
@@ -289,9 +299,11 @@ export default function DocumentComponent() {
             <DataGridContainer
               className={cn(
                 "flex flex-col",
-                // แถบสรุปสูงประมาณ 4rem รวมช่องไฟ — สี่เคสตามว่ามีแถบและมี active filter หรือไม่
-                // ไม่เผื่อค่านี้ ตารางจะล้นจอเมื่อแถบขึ้น
-                hasSummary
+                // แถบสรุปสูงประมาณ 4rem รวมช่องไฟ (ทั้ง skeleton ตอนโหลดและแถบจริง) — สี่เคส
+                // ตามว่าช่องแถบสรุปมีของ (summarySlotVisible: กำลังโหลดหรือมีข้อมูลแล้ว) และมี
+                // active filter หรือไม่ ใช้ summarySlotVisible ไม่ใช่ hasSummary เพราะถ้ารอข้อมูล
+                // จริงก่อนค่อยเผื่อพื้นที่ ตารางจะกระตุกตอน skeleton สลับเป็นแถบจริง
+                summarySlotVisible
                   ? lf.activeFilters.length > 0
                     ? "max-h-[calc(100vh-17rem-3rem)]"
                     : "max-h-[calc(100vh-14rem-3rem)]"

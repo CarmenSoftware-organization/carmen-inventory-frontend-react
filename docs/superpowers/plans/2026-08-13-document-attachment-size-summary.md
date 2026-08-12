@@ -1083,6 +1083,9 @@ git commit -m "feat(document): แสดงแถบสรุปขนาดไ�
 
 ## หลังทำครบทุก task
 
-- [ ] เปิด PR ทั้งสองรีโป (PR เขียนภาษาอังกฤษตาม CLAUDE.md) และ**เขียนใน PR ของ backend ว่า
-  deploy ต้องเติม `documents.summary` ใน app allowlist ทุก environment** ไม่งั้น 401
+- [ ] เปิด PR ทั้งสองรีโป (PR เขียนภาษาอังกฤษตาม CLAUDE.md) และ**เขียนคำเตือนเดียวกันใน PR ทั้ง
+  backend และ frontend ว่า deploy ต้องเติม `documents.summary` ใน app allowlist ทุก environment**
+  ไม่งั้น 401 — เดิมเขียนไว้แค่ PR ของ backend ฝั่งเดียว แต่ตัว deploy ที่ทำให้ปัญหาเกิดจริงคือตอน
+  frontend ขึ้น (ดู spec §6, §8) คนกด merge/deploy frontend อาจไม่ใช่คนอ่าน PR ของ backend จึงต้องมี
+  คำเตือนอยู่ใน PR frontend ด้วย ไม่ใช่แค่ backend
 - [ ] merge backend ก่อน frontend เสมอ — สลับลำดับได้แค่แถบสรุปไม่ขึ้น หน้าไม่พัง

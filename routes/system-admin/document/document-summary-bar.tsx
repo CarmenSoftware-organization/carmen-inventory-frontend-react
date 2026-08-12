@@ -36,7 +36,7 @@ export default function DocumentSummaryBar({
   const t = useTranslations("systemAdmin.document.summary");
   const tm = useTranslations("modules");
 
-  if (isLoading) return <Skeleton className="h-14 w-full rounded-md" />;
+  if (isLoading) return <Skeleton className="h-9 w-full rounded-md" />;
   if (!summary || summary.total_count === 0) return null;
 
   const directUpload = t("directUpload");

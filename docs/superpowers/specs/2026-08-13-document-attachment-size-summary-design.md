@@ -219,7 +219,10 @@ map `reference_type` → key ใต้ `modules.*`
 
 - บรรทัดแรก: ขนาดรวมเด่นที่สุด ตามด้วยจำนวนไฟล์
 - บรรทัดสอง: 3 โมดูลแรกจาก `by_reference_type` (เรียงจาก backend แล้ว) + ปุ่มเปิด Sheet
-- จอแคบ: บรรทัดสองตัดเหลือ 2 โมดูล ปุ่ม "ดูทั้งหมด" ลงบรรทัดใหม่
+- จอแคบ: ยังแสดง 3 โมดูลเท่าเดิม (**ไม่ตัดเหลือ 2** ตามที่ระบุไว้เดิม) ใช้ CSS `truncate`
+  ตัดข้อความที่ยาวเกินพื้นที่ด้วย ellipsis แทนการคำนวณ breakpoint แยก ปุ่ม "ดูทั้งหมด" อยู่บรรทัด
+  เดียวกันเสมอ ไม่ลงบรรทัดใหม่ — implement แบบนี้แทน เพราะไม่ต้องดูแล breakpoint เพิ่ม และผลลัพธ์
+  ที่ได้เข้าใจง่ายพอกัน (ดู `routes/system-admin/document/document-summary-bar.tsx`)
 
 ### 5.7 `routes/system-admin/document/document-summary-sheet.tsx` (ไฟล์ใหม่)
 
@@ -247,13 +250,17 @@ Sheet เลื่อนจากขวา (`components/ui/sheet.tsx`) แจก
 | สถานะ | พฤติกรรม |
 |---|---|
 | กำลังโหลด | skeleton สูงเท่าแถบจริง เพื่อไม่ให้เลย์เอาต์กระตุกตอนข้อมูลมาถึง |
-| error ทุกชนิด (รวม 401 จาก allowlist ที่ยังไม่เติม) | **ซ่อนแถบทั้งอัน** ตารางทำงานปกติ ไม่ขึ้น error state ไม่มี toast |
+| error ทั่วไป (500, network failure) | **ซ่อนแถบทั้งอัน** ตารางทำงานปกติ ไม่ขึ้น error state ไม่มี toast |
+| **401 จาก allowlist ที่ยังไม่เติม** | **ไม่ได้ซ่อนแถบเงียบ ๆ — ผู้ใช้ถูกเด้งออกไปหน้า `/login` ทุกครั้งที่เปิดหน้านี้** ยืนยันด้วยการไล่โค้ดจริงแล้ว: `handleClientErrors` (`lib/http-client.ts:232`) เช็ค `isPermission = message?.toLowerCase().includes("permission")` แต่ข้อความจาก `AppIdGuard` ("...is not found or not allowed to access this api") ไม่มีคำว่า "permission" จึงหลุด branch permission ไปเข้า flow ปกติแทน: เรียก `refreshTokens()` ซึ่ง **สำเร็จ** (session ไม่ได้มีปัญหาจริง) → retry คำขอเดิม → ได้ 401 ซ้ำ → รอบนี้เป็น `isRetry` แล้ว จึง `tokenStore.clear()` → `RequireAuth` เด้งไป `/login` ทันที `retry: false` ของ query ไม่ช่วยอะไรเพราะการ logout เกิดใน `httpClient` ซึ่งอยู่คนละชั้นกับ TanStack Query **ข้อยกเว้น (ยังไม่ยืนยัน):** ถ้า application row ของ environment นั้นตั้ง `allow_all: true` ไว้ `AppAllowlistStore` จะ short-circuit ผ่านและไม่เกิด 401 นี้เลย — แต่ไม่มีใครตรวจว่า dev/UAT/prod ตั้งค่านี้จริงหรือไม่ (ต้อง query ฐานข้อมูลที่ใช้ร่วมกัน) ดังนั้นเป็นสถานะที่ **ไม่ทราบ** ไม่ใช่ข้อเท็จจริงไปทางใดทางหนึ่ง |
 | BU ไม่มีไฟล์เลย (`total_count === 0`) | ไม่แสดงแถบ |
 | `by_reference_type` มีรายการเดียว | แสดงตามปกติ (100%) |
 | ยังไม่ได้เลือก BU | ไม่ยิง query (`enabled: !!buCode`) |
 
-การซ่อนแบบเงียบเป็นการตัดสินใจโดยตั้งใจ: แถบสรุปเป็นข้อมูลเสริม ไม่ใช่ภารกิจหลักของหน้า
-ถ้า backend ยังไม่ deploy หรือ allowlist ยังไม่เติม หน้าต้องยังใช้งานได้เหมือนเดิมทุกประการ
+การซ่อนแบบเงียบเป็นการตัดสินใจโดยตั้งใจ **สำหรับ error ทั่วไปเท่านั้น** (500, network failure):
+แถบสรุปเป็นข้อมูลเสริม ไม่ใช่ภารกิจหลักของหน้า การรับประกันนี้ **ไม่ครอบคลุม 401 จาก allowlist ที่
+ยังไม่เติม** — กรณีนั้นผู้ใช้ถูกดีดออกจาก session จริง ไม่ใช่แค่แถบสรุปหายไปเฉย ๆ (ดูแถวด้านบนและ
+ลำดับ deploy ข้อ 8) การแก้ `http-client.ts` ให้แยกแยะ 401 ประเภทนี้ออกจาก 401 ที่ควร clear session
+จริง ๆ เป็นงานแยกที่กระทบทุก endpoint ที่มี guard แบบเดียวกัน จึงตั้งใจไม่ทำในรอบนี้
 
 ## 7. การตรวจสอบ
 
@@ -267,12 +274,21 @@ Sheet เลื่อนจากขวา (`components/ui/sheet.tsx`) แจก
 ## 8. ลำดับ deploy
 
 1. deploy `micro-file` และ `backend-gateway`
-2. **เติม `documents.summary` ใน app allowlist ของทุก environment** — `AppIdGuard`
-   (`app-id.guard.ts:70`) เช็ค `api_name` กับ allowlist ที่โหลดจากฐานข้อมูล ค่าที่ไม่มีในนั้นจะถูก
+2. **เติม `documents.summary` ใน app allowlist ของทุก environment แล้วตรวจยืนยันก่อนเริ่ม deploy
+   frontend — ขั้นนี้เป็น hard gate ห้ามข้าม** `AppIdGuard` (`app-id.guard.ts:70`, ข้อความ error จริง
+   อยู่ที่ `app-id.guard.ts:81`) เช็ค `api_name` กับ allowlist ที่โหลดจากฐานข้อมูล ค่าที่ไม่มีในนั้นจะถูก
    ปฏิเสธด้วย 401 ทันที ขั้นตอนนี้ทำมือ เป็นขั้นเดียวกับที่เคยทำตอน interface-brands
-3. deploy frontend
+   **ข้อยกเว้น (ยังไม่ยืนยัน):** ถ้า application row ของ environment นั้นตั้ง `allow_all: true` ไว้แล้ว
+   `AppAllowlistStore` (`app-allowlist.store.ts`) จะ short-circuit ผ่านเลยโดยไม่เช็ค allowlist —
+   ถ้าเป็นแบบนั้นจริง ขั้นนี้ไม่จำเป็นและปัญหาข้อ 3 ด้านล่างจะไม่เกิด แต่ **ไม่มีใครตรวจมาก่อนว่า
+   dev/UAT/prod ตั้งค่านี้ไว้หรือไม่** (การตรวจต้อง query ฐานข้อมูลที่ใช้ร่วมกัน) จึงต้องตรวจให้แน่ใจ
+   เป็นรายสภาพแวดล้อมก่อน ถ้ายังไม่ตรวจให้ถือว่าต้องเติม allowlist เสมอ
+3. deploy frontend — **เริ่มได้ก็ต่อเมื่อข้อ 2 ยืนยันแล้วเท่านั้น**
 
-พลาดลำดับหรือลืมข้อ 2 ผลที่ได้คือแถบสรุปไม่ขึ้นเท่านั้น หน้า Document ยังใช้งานได้ครบ
+พลาดลำดับหรือลืมข้อ 2 (ในสภาพแวดล้อมที่ไม่ได้ตั้ง `allow_all: true`) ผลที่ได้**ไม่ใช่แค่แถบสรุปไม่ขึ้น**
+— ผู้ดูแลระบบที่เปิดหน้า `/system-admin/document` จะถูกเด้งออกไปหน้า `/login` ทุกครั้ง เพราะ 401 จาก
+`AppIdGuard` ไม่มีคำว่า "permission" ในข้อความ ทำให้ `handleClientErrors` (`lib/http-client.ts:232`)
+เข้าใจผิดว่าเป็นปัญหา session แล้วสั่ง `tokenStore.clear()` (รายละเอียดเต็มอยู่ใน §6)
 
 ## 9. ไฟล์ที่แตะ
 
