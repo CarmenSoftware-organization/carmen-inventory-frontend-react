@@ -5,7 +5,7 @@ import { httpClient } from "@/lib/http-client";
 import { buildUrl } from "@/utils/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
-import type { DocumentFile } from "@/types/document";
+import type { DocumentFile, DocumentSummary } from "@/types/document";
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 
@@ -92,5 +92,38 @@ export function useDeleteDocument() {
     },
     invalidateKeys: [QUERY_KEYS.DOCUMENTS],
     errorMessage: "Failed to delete document",
+  });
+}
+
+/**
+ * Hook ดึงยอดสรุปขนาดไฟล์แนบของทั้ง BU
+ *
+ * ยอดนี้เป็นของทั้ง BU เสมอ ไม่ผูกกับ search/filter/หน้าของตาราง จึงไม่รับ params
+ * query key ขึ้นต้นด้วย QUERY_KEYS.DOCUMENTS เหมือน useDocument โดยตั้งใจ —
+ * TanStack Query จับคู่ key แบบ prefix การ invalidate หลัง upload/delete ที่มีอยู่แล้ว
+ * จึงล้างยอดสรุปให้ด้วยโดยไม่ต้องแก้อะไรเพิ่ม
+ *
+ * `retry: false` เพราะเคสพังที่คาดไว้คือ 401 จาก app allowlist ที่ยังไม่เติมตอน deploy
+ * ซึ่ง retry แล้วก็ไม่หาย มีแต่จะยิงซ้ำเปล่า ๆ
+ *
+ * @returns UseQueryResult ของ DocumentSummary
+ * @example
+ * const { data: summary, isLoading } = useDocumentSummary();
+ */
+export function useDocumentSummary() {
+  const buCode = useBuCode();
+
+  return useQuery<DocumentSummary>({
+    queryKey: [QUERY_KEYS.DOCUMENTS, buCode, "summary"],
+    queryFn: async () => {
+      if (!buCode) throw new Error("Missing buCode");
+      const res = await httpClient.get(API_ENDPOINTS.DOCUMENTS_SUMMARY(buCode));
+      if (!res.ok) throw new Error("Failed to fetch document summary");
+      const json = await res.json();
+      return json.data as DocumentSummary;
+    },
+    ...CACHE_DYNAMIC,
+    enabled: !!buCode,
+    retry: false,
   });
 }
