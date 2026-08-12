@@ -74,21 +74,21 @@ function StateIcon({ state }: { readonly state: StageState }) {
     case "done":
       return (
         <Check
-          className="text-[var(--status-approved-ink)] size-3 shrink-0"
+          className="size-3 shrink-0 text-[var(--status-approved-ink)]"
           aria-hidden="true"
         />
       );
     case "current":
       return (
         <Circle
-          className="text-[var(--status-in-progress-ink)] size-3 shrink-0 fill-[var(--status-in-progress)]"
+          className="size-3 shrink-0 fill-[var(--status-in-progress)] text-[var(--status-in-progress-ink)]"
           aria-hidden="true"
         />
       );
     case "voided":
       return (
         <X
-          className="text-[var(--status-voided-ink)] size-3 shrink-0"
+          className="size-3 shrink-0 text-[var(--status-voided-ink)]"
           aria-hidden="true"
         />
       );
