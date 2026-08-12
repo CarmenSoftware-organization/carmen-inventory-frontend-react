@@ -23,6 +23,7 @@ import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
+import { formatFileSize } from "@/lib/format-file-size";
 
 interface UseDocumentTableOptions {
   documents: DocumentFile[];
@@ -31,19 +32,6 @@ interface UseDocumentTableOptions {
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
   onDelete: (doc: DocumentFile) => void;
 }
-
-/**
- * แปลงจำนวน bytes เป็นข้อความขนาดไฟล์ (B, KB, MB)
- * @param bytes - ขนาดไฟล์เป็น bytes
- * @returns ข้อความแสดงขนาดไฟล์ในหน่วยที่เหมาะสม
- * @example
- * formatFileSize(1048576); // "1.0 MB"
- */
-const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
 
 /**
  * คืนค่าข้อมูลประเภทไฟล์ (icon, label key, className) ตาม content type

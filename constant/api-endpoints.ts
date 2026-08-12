@@ -88,6 +88,8 @@ export const API_ENDPOINTS = {
   DEPARTMENT_USER_BY_USER: (buCode: string, userId: string) =>
     `/api/proxy/api/config/${buCode}/department-users/user/${userId}`,
   DOCUMENTS: (buCode: string) => `/api/proxy/api/${buCode}/documents`,
+  DOCUMENTS_SUMMARY: (buCode: string) =>
+    `/api/proxy/api/${buCode}/documents/summary`,
   EQUIPMENT_CATEGORIES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/recipe-equipment-categories`,
   EXCHANGE_RATES: (buCode: string) =>
