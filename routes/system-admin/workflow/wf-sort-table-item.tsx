@@ -106,7 +106,7 @@ export default function SortableStageItem({
           <CheckCircle2 className={cn("size-3.5 shrink-0", isSelected ? "text-primary" : "text-muted-foreground")} />
         ) : (
           <span className={cn(
-            "flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold transition-colors",
+            "flex size-5 shrink-0 items-center justify-center rounded-full text-micro-legal font-semibold transition-colors",
             isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground group-hover:shadow-sm group-hover:ring-1 group-hover:ring-border"
           )}>
             {index + 1}
@@ -147,7 +147,7 @@ export default function SortableStageItem({
             ) : (
               userCount > 0 && (
                 <span className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums transition-colors",
+                  "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-micro-legal font-medium tabular-nums transition-colors",
                   isSelected ? "bg-primary/20 text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground group-hover:shadow-sm"
                 )}>
                   <Users className="size-3" aria-hidden="true" />

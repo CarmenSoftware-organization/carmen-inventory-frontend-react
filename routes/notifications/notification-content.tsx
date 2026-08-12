@@ -109,7 +109,7 @@ export default function NotificationsContent() {
               <TabsTrigger value="unread" className="rounded-lg data-[state=active]:shadow-sm">
                 {tRoot("notifications.tabUnread")}
                 {unreadCount !== undefined && unreadCount > 0 && (
-                  <span className="bg-primary/15 text-primary ms-2 rounded-full px-2 py-0.5 text-[10px] font-bold tabular-nums">
+                  <span className="bg-primary/15 text-primary ms-2 rounded-full px-2 py-0.5 text-micro-legal font-bold tabular-nums">
                     {unreadCount.toLocaleString()}
                   </span>
                 )}

@@ -130,7 +130,7 @@ export function NotificationItemContent({
               {sanitizeText(notification.title)}
             </p>
             {notification.metadata?.bu_code ? (
-              <span className="bg-primary/10 text-primary shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wide uppercase">
+              <span className="bg-primary/10 text-primary shrink-0 rounded-md px-1.5 py-0.5 text-micro-legal font-bold tracking-wide uppercase">
                 {notification.metadata.bu_code as string}
               </span>
             ) : null}

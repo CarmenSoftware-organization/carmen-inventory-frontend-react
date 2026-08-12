@@ -27,7 +27,7 @@ function ChangeList({ items, colorClass }: { readonly items: readonly ChangeItem
           <div className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${colorClass.replace('text-', 'bg-')}`} />
           <div>
             {item.scope && (
-              <span className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground mr-2 mb-0.5 uppercase tracking-wider">
+              <span className="inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-micro-legal font-bold text-muted-foreground mr-2 mb-0.5 uppercase tracking-wider">
                 {item.scope}
               </span>
             )}
@@ -107,7 +107,7 @@ export function WhatsNewDialog({ open, onOpenChange }: WhatsNewDialogProps) {
                 <DialogTitle className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
                   What&apos;s New
                 </DialogTitle>
-                <div className="text-[13px] font-semibold text-slate-600 dark:text-slate-300 mt-1">
+                <div className="text-sm font-semibold text-slate-600 dark:text-slate-300 mt-1">
                   Recent updates to CARMEN BLUE.
                 </div>
               </div>

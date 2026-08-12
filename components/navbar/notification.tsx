@@ -278,7 +278,7 @@ export function NotificationDetailDialog({
                   {isLoading ? <Skeleton className="h-5 w-3/4 bg-black/10 dark:bg-white/10" /> : data?.title}
                 </DialogTitle>
                 {data && (
-                  <div className="text-[13px] font-semibold text-slate-600 dark:text-slate-300 flex items-center mt-1">
+                  <div className="text-sm font-semibold text-slate-600 dark:text-slate-300 flex items-center mt-1">
                     <span>{data.created_at ? new Date(data.created_at).toLocaleDateString(locale, { dateStyle: "medium" }) : ""}</span>
                     {data.doc_type && (
                       <span className="ml-2 before:content-['•'] before:mr-2 uppercase tracking-wider text-primary">
@@ -301,14 +301,14 @@ export function NotificationDetailDialog({
             )}
             
             {error && (
-              <div className="flex items-center gap-3 text-[14px] font-semibold text-destructive bg-white/80 dark:bg-black/60 p-4 rounded-xl border border-white/60 dark:border-white/10 backdrop-blur-sm shadow-sm">
+              <div className="flex items-center gap-3 text-sm font-semibold text-destructive bg-white/80 dark:bg-black/60 p-4 rounded-xl border border-white/60 dark:border-white/10 backdrop-blur-sm shadow-sm">
                 <AlertCircle className="h-5 w-5" />
                 {error instanceof Error ? error.message : String(error)}
               </div>
             )}
 
             {data && (
-              <p className="text-[15px] font-medium text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
                 {formatMessage(data.message)}
               </p>
             )}

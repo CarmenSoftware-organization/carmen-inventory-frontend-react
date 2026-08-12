@@ -107,6 +107,14 @@ describe("the 9px micro tier stays at weight 600", () => {
  *
  * Nothing stops the 614th. This is the ratchet: a size with a token can never
  * come back, and any other arbitrary size must be justified here by name.
+ *
+ * Every tokenised size is listed in BOTH spellings it can be written in. Missing
+ * one is a hole, not a tidier table: `text-[14px]` sailed past this guard into
+ * the notification dialog because only `0.875rem` was registered, and landed in
+ * ALLOWED_OFF_LADDER — the list for sizes that have *no* token — as if it were a
+ * deliberate exception. A size that is off the ladder and a size that is on it
+ * but spelled by hand need different answers, and this map is what tells them
+ * apart.
  */
 const TOKENISED: Record<string, string> = {
   "0.5rem": "text-micro-floor",
@@ -117,7 +125,9 @@ const TOKENISED: Record<string, string> = {
   "0.6875rem": "text-micro",
   "0.7rem": "text-micro",
   "0.75rem": "text-xs",
+  "12px": "text-xs",
   "0.875rem": "text-sm",
+  "14px": "text-sm",
 };
 
 /**
@@ -221,7 +231,8 @@ const ALLOWED_SUB_10PX: Record<string, number> = {
   // Miniature mock interfaces: a fake terminal with macOS traffic-light dots, a
   // fake SQL editor, fake table rows. Scaling this type up breaks the illustration
   // — the point is that it reads as a tiny screenshot.
-  "routes/system-admin/landing-visuals.tsx": 20,
+  // Was 20 until ca4d678 deleted the email-config module's illustration (−3).
+  "routes/system-admin/landing-visuals.tsx": 17,
 
   // ── Digits ──
   // Uniform height, no ascenders/descenders, no diacritics; legible at 9px in a way
@@ -239,8 +250,10 @@ const ALLOWED_SUB_10PX: Record<string, number> = {
   "routes/report/report-landing.tsx": 1, // "07:30" schedule time
   "routes/vendor-management/price-list/pl-name-field.tsx": 1, // character counter
 
-  // ── Caps by nature ──
-  "routes/system-admin/workflow/wf-stage-users.tsx": 1, // avatar initials
+  // The "caps by nature" section is gone on purpose: its only entry was the
+  // wf-stage-users avatar initials, which cc009d2 moved to `text-sm` on a size-8
+  // avatar. Deleting the line rather than zeroing it is what this list is for —
+  // a stale entry and a real exemption should not look the same.
 };
 
 describe("sub-10px type stays off running text", () => {
