@@ -43,6 +43,11 @@ export default function LoginForm() {
   const justRegistered =
     (location.state as { justRegistered?: boolean } | null)?.justRegistered ===
     true;
+  // ตั้งโดย /reset-password หลังตั้งรหัสผ่านใหม่สำเร็จ — backend ไม่คืน token ให้ล็อกอินอัตโนมัติ
+  // ผู้ใช้จึงมาถึงที่นี่พร้อมรหัสใหม่ในมือ และต้องรู้ว่าการตั้งรหัสสำเร็จแล้วจริง
+  const passwordReset =
+    (location.state as { passwordReset?: boolean } | null)?.passwordReset ===
+    true;
   const t = useTranslations("auth");
   const [retryAfter, setRetryAfter] = useState<number | null>(null);
 
@@ -115,6 +120,14 @@ export default function LoginForm() {
     return () => clearTimeout(id);
   }, [retryAfter, resetMutation]);
 
+  // แถบยืนยันเหนือฟอร์ม — มาจากเส้นทางที่พาผู้ใช้มาที่นี่ ไม่ใช่จากสถานะของฟอร์มเอง
+  // ทั้งสองกรณีเกิดพร้อมกันไม่ได้ (คนละ navigate) จึงเลือกอันเดียวพอ
+  const notice = justRegistered
+    ? t("signup.accountReady")
+    : passwordReset
+      ? t("resetPassword.successBanner")
+      : null;
+
   const onSubmit = (values: LoginFormValues) => {
     loginMutation.reset();
     loginMutation.mutate(values, {
@@ -131,7 +144,7 @@ export default function LoginForm() {
     <AuthSplitShell title={t("welcomeBack")} subtitle={t("subtitle")}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4" noValidate>
         <FieldGroup className="gap-3">
-          {justRegistered && !loginMutation.isError && (
+          {notice && !loginMutation.isError && (
             <div
               className="border-positive-ink/40 bg-positive-ink/5 rounded-xl border px-3 py-2"
               style={{ animation: "fade-up-soft 0.3s ease-out both" }}
@@ -139,7 +152,7 @@ export default function LoginForm() {
               aria-live="polite"
             >
               <p className="text-positive-ink text-xs font-semibold">
-                {t("signup.accountReady")}
+                {notice}
               </p>
             </div>
           )}
@@ -162,6 +175,17 @@ export default function LoginForm() {
             register={form.register("password")}
             error={form.formState.errors.password?.message}
           />
+
+          {/* อยู่ติดช่องรหัสผ่านโดยตั้งใจ — คนที่กดหาลิงก์นี้คือคนที่เพิ่งพิมพ์รหัสผิด สายตายังอยู่
+              ตรงช่องนั้น ไม่ได้อยู่ท้ายหน้า */}
+          <div className="-mt-1.5 flex justify-end">
+            <Link
+              to="/forgot-password"
+              className="text-muted-foreground hover:text-primary py-1 text-xs underline-offset-4 transition-colors hover:underline"
+            >
+              {t("forgotPasswordLink")}
+            </Link>
+          </div>
 
           {loginMutation.isError && (
             <AuthFormAlert>

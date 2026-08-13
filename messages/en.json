@@ -637,6 +637,7 @@
     "creatingAccount": "Creating account...",
     "noAccount": "New here?",
     "haveAccount": "Already have an account?",
+    "forgotPasswordLink": "Forgot password?",
     "goToSignIn": "Go to sign in",
     "registerDoneTitle": "Account created",
     "registerDoneSubtitle": "Your Carmen account is ready.",
@@ -669,6 +670,34 @@
       "creating": "Creating account...",
       "createFailed": "Could not create the account. Please try again.",
       "accountReady": "Your account is ready. Sign in to continue."
+    },
+    "forgotPassword": {
+      "title": "Forgot your password?",
+      "emailStepDescription": "Enter your email and we will send you a link to set a new password.",
+      "sendLink": "Send reset link",
+      "sending": "Sending...",
+      "sendFailed": "Could not send the link. Please try again.",
+      "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
+      "tooManyAttemptsIn": "Too many attempts. Try again in {seconds}s.",
+      "checkInboxTitle": "Check your inbox",
+      "checkInboxDescription": "If that address has an account, a link to set a new password is on its way to {email}.",
+      "linkExpiryNote": "The link expires in 24 hours.",
+      "resend": "Send again",
+      "resendIn": "Send again in {seconds}s",
+      "rememberedPassword": "Remembered your password?"
+    },
+    "resetPassword": {
+      "title": "Set a new password",
+      "description": "Choose a new password for your account.",
+      "newPasswordLabel": "New password",
+      "submit": "Save new password",
+      "saving": "Saving...",
+      "failed": "Could not set the new password. Please try again.",
+      "linkDeadTitle": "This link no longer works",
+      "linkDeadDescription": "It has expired, has already been used, or the address is incomplete. Request a new one to continue.",
+      "linkDeadDuringForm": "This link no longer works — it has expired or has already been used. Request a new one to continue.",
+      "requestNewLink": "Request a new link",
+      "successBanner": "Your password has been changed. Sign in with your new password."
     },
     "invitation": {
       "title": "You have been invited",

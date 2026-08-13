@@ -22,6 +22,17 @@ export const router = createBrowserRouter([
         path: "/register/verify",
         lazy: () => import("./register/register-verify.route"),
       },
+      // กู้คืนรหัสผ่าน — public เพราะคนที่ใช้เส้นทางนี้เข้าระบบไม่ได้อยู่แล้ว
+      // ปลายทางของลิงก์ในอีเมลมาจาก platform config คีย์ `password_reset.base_url` ต้องตั้งให้
+      // ชี้มาที่ `/reset-password` ของแอปนี้ ไม่งั้นลิงก์จะพาไปที่อื่นทั้งที่โค้ดทั้งสองฝั่งถูกต้อง
+      {
+        path: "/forgot-password",
+        lazy: () => import("./forgot-password/forgot-password.route"),
+      },
+      {
+        path: "/reset-password",
+        lazy: () => import("./reset-password/reset-password.route"),
+      },
       // เอกสารกฎหมาย — public ทั้งคู่ ต้องอ่านได้ก่อนกดสมัคร
       { path: "/terms", lazy: () => import("./legal/terms.route") },
       { path: "/privacy", lazy: () => import("./legal/privacy.route") },

@@ -194,6 +194,65 @@ export async function register(payload: RegisterPayload): Promise<void> {
   throw await toAuthApiError(res, "Register failed");
 }
 
+/**
+ * ขอลิงก์ตั้งรหัสผ่านใหม่ — POST /api/auth/forgot-password (public)
+ *
+ * **กลืน 404 ให้เท่ากับสำเร็จตั้งแต่ชั้นนี้** — backend ตอบ 404 "User not found" เมื่ออีเมลนั้น
+ * ไม่มีบัญชี ซึ่งเปลี่ยนฟอร์มนี้ให้กลายเป็นเครื่องมือค้นว่าอีเมลไหนมีบัญชีในระบบ การกลืนไว้ที่นี่
+ * แทนที่จะให้หน้าจอตัดสินใจเอง แปลว่าหน้าจอไหนก็เผลอแสดงให้ต่างกันไม่ได้ เทียบกับเส้นทางสมัคร
+ * ที่ backend ตอบ 200 เสมออยู่แล้ว ตรงนี้เป็นการชดเชยฝั่ง client ให้ได้พฤติกรรมเดียวกัน
+ *
+ * หมายเหตุ: endpoint นี้ไม่มี rate limit ฝั่ง backend (ต่างจาก `signup-request`) คูลดาวน์ปุ่ม
+ * "ส่งอีกครั้ง" บนหน้าจอจึงเป็นแค่ UX ไม่ใช่การป้องกันการยิงซ้ำ
+ */
+export async function forgotPassword(email: string): Promise<void> {
+  const { BACKEND_URL } = getRuntimeConfig();
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}/api/auth/forgot-password`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ email }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+  }
+  if (res.ok || res.status === 404) return;
+  throw await toAuthApiError(res, "Could not send the reset link");
+}
+
+/**
+ * ตั้งรหัสผ่านใหม่ด้วย token จากลิงก์ในอีเมล — POST /api/auth/reset-password-with-token (public)
+ *
+ * `token` คือรหัสสั้นใน query ของลิงก์ ไม่ใช่ JWT — ตัว JWT ถูกเก็บคู่กันไว้ฝั่ง backend และถูก
+ * ตรวจอีกชั้นที่นั่น ค่านี้จึงส่งต่อไปตรง ๆ ได้โดยไม่ต้องแกะอะไร
+ *
+ * 400 ครอบสามกรณีรวมกัน: token ไม่มีจริง หมดอายุ หรือถูกใช้ไปแล้ว — backend ตอบเหมือนกันหมด
+ * โดยตั้งใจ และหน้าจอต้องไม่พยายามเดาว่าเป็นกรณีไหน
+ *
+ * backend ไม่คืน access token กลับมา ผู้ใช้จึงต้องไปเข้าสู่ระบบเองหลังตั้งรหัสสำเร็จ
+ */
+export async function resetPasswordWithToken(
+  token: string,
+  newPassword: string,
+): Promise<void> {
+  const { BACKEND_URL } = getRuntimeConfig();
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}/api/auth/reset-password-with-token`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ token, new_password: newPassword }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+  }
+  if (res.ok) return;
+  throw await toAuthApiError(res, "Could not reset the password");
+}
+
 // Mutex — concurrent 401s แชร์ refresh request เดียวกัน (พฤติกรรมเดิมจาก http-client)
 let refreshPromise: Promise<boolean> | null = null;
 
