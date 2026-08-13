@@ -101,23 +101,10 @@ list-envelope gotcha live in `routes/system-admin/interface/CLAUDE.md` (loads wh
 in that folder). One cross-cutting deploy note: **Prod/UAT must set `SECRET_ENCRYPTION_KEY`**
 or any secret-bearing app-config save (incl. the pre-existing `report_email`) 400s.
 
-## React Compiler กับตาราง (`DataGrid`) — กับดักที่เจอซ้ำได้
+## React Compiler กับตาราง (`DataGrid`)
 
-TanStack table instance เป็น **reference คงที่แต่ mutate ข้างในตัวเอง** React
-Compiler จึงมองว่าบล็อก JSX ที่ห่อ `<DataGrid table={table} recordCount={n}
-isLoading={x}>` มี dependency คงที่ (ตัว table เดิม · จำนวนแถวรวมเท่าเดิม ·
-isLoading เท่าเดิม) แล้ว **reuse ผลลัพธ์เดิมทั้งก้อน** — กดเปลี่ยนหน้าแล้ว URL
-กับ query เปลี่ยนจริง แต่ตารางค้างอยู่หน้าเดิม ไม่มี request ใหม่ สั่ง re-render
-ยังไงก็ไม่ขยับ (เจอจริงที่หน้า transaction: กดหน้า 3 แล้วกลับหน้า 1 ได้
-`page=1` บน URL แต่ตารางยังโชว์แถว 21–30)
-
-**แก้:** ใส่ `"use no memo";` บรรทัดแรกของคอมโพเนนต์**หน้านั้น** — directive นี้
-เป็นระดับฟังก์ชัน ใส่ที่ layout แม่ไม่ตกทอดถึงลูก และใส่ใน `useXxxTable` ก็ไม่พอ
-เพราะสิ่งที่ถูกแช่คือ JSX ของหน้า ไม่ใช่ตัว hook · ตัว `data-grid-table.tsx`,
-`data-grid-pagination.tsx` และ `use-config-table.ts` ใส่ไว้แล้วด้วยเหตุผลเดียวกัน
-
-หน้า list ส่วนใหญ่ยัง**ไม่ได้**ใส่และยังทำงานปกติ (ขึ้นกับรูปร่างของ JSX ล้วน ๆ)
-จึงไม่ได้ไล่ใส่ยกชุด — เจอตารางค้างตอนเปลี่ยนหน้าเมื่อไร ใส่หน้านั้นทีละหน้า
+กับดักตารางค้างตอนเปลี่ยนหน้า + วิธีแก้ด้วย `"use no memo";` อยู่ใน `routes/CLAUDE.md`
+(โหลดเองเมื่อทำงานใต้ `routes/`)
 
 ## Known open items
 
@@ -127,15 +114,7 @@ isLoading เท่าเดิม) แล้ว **reuse ผลลัพธ์�
   CRUD works; the live-rates panel degrades gracefully until then.
 - Backend CORS required before production on S3/GCS static hosting (dev uses the Vite
   proxy; the **Docker image needs no CORS** — its nginx proxies `/api/*` itself).
-- Live-backend smoke: **fully verified** against the local gateway
-  (`carmen-turborepo-backend-v2` on :4000) — login → dashboard shell (sidebar/navbar/
-  profile/BU), reload session-restore, 401 error path, 429 RATE_LIMITED countdown,
-  access token never persisted. Zero console errors. (UAT still needs VPN.)
 - Local dev against the local backend: `VITE_DEV_PROXY_TARGET=http://localhost:4000 bun dev`.
-- `app/` is gone (2026-06-12 consolidation): the five Phase-0 pre-copied leaves
-  (workflow/wastage/stock-replenishment schemas + the two profile leaves) now live only
-  under `routes/`; `components/navbar/user-profile.tsx` and the hooks import the
-  `routes/` copies directly.
 - Backend bug (not frontend): `GET /api/me/dashboard-widgets?bu_code=T02` returns 500
   from the gateway itself (verified identical direct vs proxied). Dashboard degrades
   gracefully; report to the carmen-turborepo-backend-v2 team.
