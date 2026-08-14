@@ -42,7 +42,7 @@ import EmptyComponent from "@/components/empty-component";
 import { ProductImages } from "./pd-images";
 import { usePdInfoColumns } from "./use-pd-info-columns";
 
-interface GeneralTabProps {
+interface PdTabGeneralProps {
   readonly form: ProductFormInstance;
   readonly isDisabled: boolean;
   readonly product?: ProductDetail;
@@ -55,14 +55,14 @@ interface GeneralTabProps {
   readonly onPendingImagesChange?: (files: File[]) => void;
 }
 
-function GeneralTab({
+function PdTabGeneral({
   form,
   isDisabled,
   product,
   onGroupChange,
   pendingImages,
   onPendingImagesChange,
-}: GeneralTabProps) {
+}: PdTabGeneralProps) {
   "use no memo";
   // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
   // และ props (form/isDisabled) เป็น ref นิ่ง กด save แล้ว validation fail ตัว
@@ -652,7 +652,7 @@ function GeneralTab({
   );
 }
 
-export default memo(GeneralTab);
+export default memo(PdTabGeneral);
 
 function ToggleRow({
   title,

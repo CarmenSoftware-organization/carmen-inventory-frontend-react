@@ -27,7 +27,7 @@ import {
 import type { ProductEcoLabel } from "@/types/product-eco-label";
 import { ProductEcoLabelDialog } from "./pd-eco-label-dialog";
 
-interface ProductEcoLabelSectionProps {
+interface PdTabEcoProps {
   readonly productId: string;
   readonly readOnly?: boolean;
 }
@@ -36,10 +36,10 @@ interface ProductEcoLabelSectionProps {
  * Section จัดการ eco label ของ product — CRUD อิสระ (ยิง API ทันที ไม่ผ่าน product form)
  * แสดงเฉพาะตอนมี product แล้ว (มี productId)
  */
-export function ProductEcoLabelSection({
+export function PdTabEco({
   productId,
   readOnly,
-}: ProductEcoLabelSectionProps) {
+}: PdTabEcoProps) {
   const t = useTranslations("productManagement.product");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");

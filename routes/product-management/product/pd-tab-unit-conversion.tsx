@@ -35,19 +35,19 @@ type UnitField = FieldArrayWithId<
   "_fieldKey"
 >;
 
-interface UnitConversionTabProps {
+interface PdTabUnitConversionProps {
   form: ProductFormInstance;
   name: "order_units" | "ingredient_units";
   label: string;
   isDisabled: boolean;
 }
 
-function UnitConversionTab({
+function PdTabUnitConversion({
   form,
   name,
   label,
   isDisabled,
-}: UnitConversionTabProps) {
+}: PdTabUnitConversionProps) {
   "use no memo";
   // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
   // และ props (form/isDisabled) เป็น ref นิ่ง กด save แล้ว validation fail ตัว
@@ -431,4 +431,4 @@ function UnitConversionTab({
   );
 }
 
-export default memo(UnitConversionTab);
+export default memo(PdTabUnitConversion);

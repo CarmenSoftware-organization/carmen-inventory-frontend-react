@@ -52,12 +52,12 @@ const TYPE_TONE: Record<string, DotTone> = {
   consignment: "neutral",
 };
 
-interface LocationsTabProps {
+interface PdTabLocationsProps {
   readonly form: ProductFormInstance;
   readonly isDisabled: boolean;
 }
 
-function LocationsTab({ form, isDisabled }: LocationsTabProps) {
+function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
   "use no memo";
   // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
   // และ props (form/isDisabled) เป็น ref นิ่ง กด save แล้ว validation fail ตัว
@@ -85,7 +85,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   // it) keep their reference when only qty fields change. Rebuilding `columns`
   // every render remounts the lookup cells, which in the browser triggers a
   // ResizeObserver render loop that freezes the tab. Mirrors the pattern in
-  // pd-unit-conversion-tab.
+  // pd-tab-unit-conversion.
   const assignedIdsKey = watchedLocations
     .map((l) => l.location_id ?? "")
     .join("|");
@@ -443,4 +443,4 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   );
 }
 
-export default memo(LocationsTab);
+export default memo(PdTabLocations);
