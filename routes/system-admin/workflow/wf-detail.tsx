@@ -77,7 +77,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
   const watchedProducts = useWatch({
     control: form.control,
     name: "data.products",
-  }) as { id: string }[] | undefined;
+  }) as string[] | undefined;
 
   const routingFieldArray = useFieldArray({
     control: form.control,
@@ -243,6 +243,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                   form={form}
                   fieldArray={routingFieldArray}
                   stages={stagesFieldArray.fields}
+                  allProducts={products}
                   isDisabled={isDisabled}
                 />
               </TabsContent>

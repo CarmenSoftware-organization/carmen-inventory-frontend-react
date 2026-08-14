@@ -172,35 +172,17 @@ export const wfFormSchema = z.object({
     ),
     notifications: z.array(z.object({})),
     notification_templates: z.array(z.object({})),
+    // เก็บแค่ id ตามสัญญาฝั่ง backend (micro-business `workflow.types.ts`: `products: string[]`)
+    // เดิมหน้านี้เก็บอ็อบเจ็กต์สินค้าเต็มใบ ซึ่งใหญ่กว่า id ล้วนราว 14 เท่า — BU ที่มีสินค้า 2,594
+    // รายการกลายเป็น body ~1.4 MB ตอนกด Save และ gateway ปฏิเสธทิ้งด้วย "request entity too
+    // large" นอกจากขนาดแล้วสำเนา name/code/category ที่ฝังอยู่ยังเก่าค้างเมื่อสินค้าถูกแก้ทีหลัง
+    // ชื่อกับหมวดที่จะแสดงผลให้ resolve จากรายการสินค้าสด (`allProducts`) เอา
+    //
+    // ยอมอ่านรูปแบบเก่า (อ็อบเจ็กต์) แล้วยุบเหลือ id เพราะ `getWorkflowFormDefaults` ตั้งใจ throw
+    // เมื่อ parse ไม่ผ่าน — ถ้ารับแค่ string ล้วน workflow ที่เคยเซฟด้วยโค้ดรุ่นก่อนจะเปิดหน้าแก้ไข
+    // ไม่ได้เลย เอกสารเก่าจะถูกเขียนกลับเป็น id ล้วนเองตอน save ครั้งถัดไป
     products: z.array(
-      z.object({
-        id: z.string(),
-        code: z.string(),
-        name: z.string(),
-        local_name: z.string().optional(),
-        description: z.nullable(z.string()).optional(),
-        product_status_type: z.string().optional(),
-        inventory_unit: z.object({ id: z.string(), name: z.string() }),
-        isAssigned: z.boolean().optional(),
-        product_item_group: z
-          .object({
-            id: z.string(),
-            name: z.string(),
-          })
-          .optional(),
-        product_sub_category: z
-          .object({
-            id: z.string(),
-            name: z.string(),
-          })
-          .optional(),
-        product_category: z
-          .object({
-            id: z.string(),
-            name: z.string(),
-          })
-          .optional(),
-      }),
+      z.union([z.string(), z.object({ id: z.string() }).transform((p) => p.id)]),
     ),
   }),
   description: z.string().optional(),

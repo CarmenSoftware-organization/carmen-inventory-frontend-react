@@ -3,24 +3,31 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
+import type { Product } from "@/types/workflows";
 import type { WorkflowCreateModel } from "./wf-form-schema";
 
 interface CategoryCheckboxListProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
+  readonly allProducts: Product[];
   readonly ruleIndex: number;
   readonly isDisabled: boolean;
 }
 
 export function CategoryCheckboxList({
   form,
+  allProducts,
   ruleIndex,
   isDisabled,
 }: CategoryCheckboxListProps) {
   const t = useTranslations("systemAdmin.workflow");
-  const products = useWatch({ control: form.control, name: "data.products" });
+  // `data.products` เก็บแค่ id หมวดจึง resolve จากรายการสินค้าสดที่โหลดมา ไม่ใช่จากสำเนาที่ฝังในเอกสาร
+  // ผลพลอยได้คือหมวดที่โชว์เป็นของปัจจุบันเสมอ ต่อให้สินค้าถูกย้ายหมวดหลังจาก workflow ถูกบันทึกไปแล้ว
+  const selectedIds = useWatch({ control: form.control, name: "data.products" });
+  const selected = new Set(selectedIds ?? []);
 
   const catMap = new Map<string, string>();
-  for (const p of products ?? []) {
+  for (const p of allProducts) {
+    if (!selected.has(p.id)) continue;
     if (p.product_category?.id && p.product_category?.name) {
       catMap.set(p.product_category.id, p.product_category.name);
     }
