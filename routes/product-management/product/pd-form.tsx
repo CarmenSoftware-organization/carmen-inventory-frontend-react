@@ -450,7 +450,10 @@ export function ProductForm({ product }: ProductFormProps) {
           </TabsContent>
           {product?.id && (
             <TabsContent value="eco-labels">
-              <ProductEcoLabelSection productId={product.id} />
+              <ProductEcoLabelSection
+                productId={product.id}
+                readOnly={isDisabled}
+              />
             </TabsContent>
           )}
         </Tabs>
