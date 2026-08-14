@@ -103,6 +103,7 @@ interface WfProductsProps {
 export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
   const [search, setSearch] = useState("");
   const t = useTranslations("systemAdmin.workflow");
+  const tfl = useTranslations("field");
   const uncategorizedLabel = t("uncategorized");
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {
@@ -193,6 +194,51 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
     return "indeterminate";
   };
 
+  // select all ทำงานกับที่มองเห็น — ค้นอยู่ก็เลือก/เอาออกเฉพาะที่กรองเจอ
+  // (เกณฑ์เดียวกับ checkbox ของ node กลุ่ม ที่กวาดเฉพาะ leaf ใต้กิ่งตัวเอง)
+  const visibleProductIds = (() => {
+    const ids: string[] = [];
+    const walk = (nodes: TreeNode[]) => {
+      for (const n of nodes) {
+        if (n.type === "product") ids.push(n.id);
+        else walk(n.children);
+      }
+    };
+    walk(filteredTree);
+    return ids;
+  })();
+
+  const selectedVisibleCount = visibleProductIds.filter((id) =>
+    selectedIds.has(id),
+  ).length;
+  const allVisibleSelected =
+    visibleProductIds.length > 0 &&
+    selectedVisibleCount === visibleProductIds.length;
+  const selectAllState: boolean | "indeterminate" = allVisibleSelected
+    ? true
+    : selectedVisibleCount > 0
+      ? "indeterminate"
+      : false;
+
+  const toggleSelectAll = () => {
+    if (isDisabled) return;
+    const current = form.getValues("data.products") ?? [];
+    if (allVisibleSelected) {
+      const removeSet = new Set(visibleProductIds);
+      form.setValue(
+        "data.products",
+        current.filter((p) => !removeSet.has(p.id)),
+      );
+    } else {
+      const allProductsMap = new Map(allProducts.map((p) => [p.id, p]));
+      const toAdd = visibleProductIds
+        .filter((id) => !selectedIds.has(id))
+        .map((id) => allProductsMap.get(id))
+        .filter(Boolean) as Product[];
+      form.setValue("data.products", [...current, ...toAdd]);
+    }
+  };
+
   return (
     <div className="space-y-4 pt-4">
       <div className="flex items-center gap-4">
@@ -205,6 +251,14 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        <label className="flex cursor-pointer items-center gap-1.5">
+          <Checkbox
+            checked={selectAllState}
+            onCheckedChange={toggleSelectAll}
+            disabled={isDisabled || visibleProductIds.length === 0}
+          />
+          <span className="text-sm select-none">{tfl("selectAll")}</span>
+        </label>
         <span className="text-muted-foreground text-sm font-medium">
           {t("nSelected", { count: selectedProducts?.length ?? 0 })}
         </span>
