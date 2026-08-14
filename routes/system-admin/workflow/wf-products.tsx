@@ -139,7 +139,7 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
     control: form.control,
     name: "data.products",
   });
-  const selectedIds = new Set((selectedProducts ?? []).map((p) => p.id));
+  const selectedIds = new Set(selectedProducts ?? []);
 
   const toggleExpand = (id: string) => {
     setExpandedIds((prev) => {
@@ -156,10 +156,10 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
     if (selectedIds.has(product.id)) {
       form.setValue(
         "data.products",
-        current.filter((p) => p.id !== product.id),
+        current.filter((id) => id !== product.id),
       );
     } else {
-      form.setValue("data.products", [...current, product]);
+      form.setValue("data.products", [...current, product.id]);
     }
   };
 
@@ -173,14 +173,10 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
       const removeSet = new Set(leafIds);
       form.setValue(
         "data.products",
-        current.filter((p) => !removeSet.has(p.id)),
+        current.filter((id) => !removeSet.has(id)),
       );
     } else {
-      const allProductsMap = new Map(allProducts.map((p) => [p.id, p]));
-      const toAdd = leafIds
-        .filter((id) => !selectedIds.has(id))
-        .map((id) => allProductsMap.get(id))
-        .filter(Boolean) as Product[];
+      const toAdd = leafIds.filter((id) => !selectedIds.has(id));
       form.setValue("data.products", [...current, ...toAdd]);
     }
   };

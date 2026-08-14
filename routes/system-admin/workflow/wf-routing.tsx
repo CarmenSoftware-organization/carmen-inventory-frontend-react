@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { useDepartment } from "@/hooks/use-department";
+import type { Product } from "@/types/workflows";
 import type { WorkflowCreateModel } from "./wf-form-schema";
 import { cn } from "@/lib/utils";
 import {
@@ -40,6 +41,7 @@ interface WfRoutingProps {
     "data.routing_rules"
   >;
   readonly stages: { id: string; name: string }[];
+  readonly allProducts: Product[];
   readonly isDisabled: boolean;
 }
 
@@ -47,6 +49,7 @@ export function WfRouting({
   form,
   fieldArray,
   stages,
+  allProducts,
   isDisabled,
 }: WfRoutingProps) {
   const { fields, append, remove } = fieldArray;
@@ -394,6 +397,7 @@ export function WfRouting({
                 {watchedField === "category" && (
                   <CategoryCheckboxList
                     form={form}
+                    allProducts={allProducts}
                     ruleIndex={safeIndex}
                     isDisabled={isDisabled}
                   />
