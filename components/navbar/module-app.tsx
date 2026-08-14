@@ -70,7 +70,7 @@ export default function ModuleApp() {
         </div>
 
         {/* Shortcut hint — static display */}
-        <div className="border-border/60 text-muted-foreground flex items-center justify-center gap-1.5 border-t py-2 text-micro">
+        <div className="border-border/60 text-muted-foreground text-micro flex items-center justify-center gap-1.5 border-t py-2">
           <span>{tn("shortcutOpen")}</span>
           <span className="flex items-center gap-1">
             <HintKey>{modKey}</HintKey>
@@ -85,7 +85,7 @@ export default function ModuleApp() {
 /** kbd chip for the shortcut hint */
 function HintKey({ children }: { readonly children: React.ReactNode }) {
   return (
-    <kbd className="bg-muted inline-flex h-4 min-w-4 items-center justify-center rounded border px-1.5 text-micro-legal font-semibold">
+    <kbd className="bg-muted text-micro-legal inline-flex h-4 min-w-4 items-center justify-center rounded border px-1.5 font-semibold">
       {children}
     </kbd>
   );

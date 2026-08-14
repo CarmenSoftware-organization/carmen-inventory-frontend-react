@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Loader2, Search } from "lucide-react";
@@ -129,7 +128,7 @@ function DatasetCard({ dataset }: { readonly dataset: DashboardDataset }) {
       <p className="text-muted-foreground mt-1 text-xs leading-snug">
         {dataset.description}
       </p>
-      <div className="text-muted-foreground mt-2 flex items-center gap-2 text-micro">
+      <div className="text-muted-foreground text-micro mt-2 flex items-center gap-2">
         <span>{dataset.id}</span>
         <span aria-hidden>·</span>
         <span>{dataset.unit}</span>

@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Plus } from "lucide-react";
@@ -93,13 +92,11 @@ export default function WrComponent() {
     totalRecords,
     params,
     tableConfig,
-    onEdit: (item) =>
-      navigate(`/store-operation/wastage-reporting/${item.id}`),
+    onEdit: (item) => navigate(`/store-operation/wastage-reporting/${item.id}`),
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <DisplayTemplate
@@ -128,9 +125,7 @@ export default function WrComponent() {
       actions={
         <Button
           size="sm"
-          onClick={() =>
-            navigate("/store-operation/wastage-reporting/new")
-          }
+          onClick={() => navigate("/store-operation/wastage-reporting/new")}
         >
           <Plus aria-hidden="true" />
           {t("add")}
@@ -145,7 +140,7 @@ export default function WrComponent() {
       >
         <DataGridContainer>
           <DataGridTable />
-        <DataGridPagination />
+          <DataGridPagination />
         </DataGridContainer>
       </DataGrid>
 

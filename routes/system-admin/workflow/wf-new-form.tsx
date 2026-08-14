@@ -1,4 +1,3 @@
-
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
@@ -100,9 +99,15 @@ export default function WorkflowNewForm() {
         )}
       >
         {/* General */}
-        <SettingSection first title={t("general")} description={t("generalDesc")}>
+        <SettingSection
+          first
+          title={t("general")}
+          description={t("generalDesc")}
+        >
           <Field data-invalid={!!form.formState.errors.name}>
-            <FieldLabel htmlFor="wf-name" required>{t("workflowName")}</FieldLabel>
+            <FieldLabel htmlFor="wf-name" required>
+              {t("workflowName")}
+            </FieldLabel>
             <Input
               id="wf-name"
               placeholder={t("workflowNamePlaceholder")}
@@ -115,7 +120,9 @@ export default function WorkflowNewForm() {
           </Field>
 
           <Field data-invalid={!!form.formState.errors.workflow_type}>
-            <FieldLabel htmlFor="wf-type" required>{t("workflowType")}</FieldLabel>
+            <FieldLabel htmlFor="wf-type" required>
+              {t("workflowType")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="workflow_type"
@@ -164,7 +171,7 @@ export default function WorkflowNewForm() {
 
         {/* Status */}
         <SettingSection title={t("status")} description={t("statusDesc")}>
-          <div className="sm:col-span-2 space-y-3">
+          <div className="space-y-3 sm:col-span-2">
             <Controller
               control={form.control}
               name="is_active"

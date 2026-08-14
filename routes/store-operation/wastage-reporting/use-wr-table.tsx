@@ -115,8 +115,7 @@ export function useWastageReportTable({
           className="justify-end"
         />
       ),
-      cell: ({ row }) =>
-        formatCurrency(row.getValue<number>("loss_value")),
+      cell: ({ row }) => formatCurrency(row.getValue<number>("loss_value")),
       enableSorting: false,
       size: 120,
       meta: {
@@ -135,7 +134,11 @@ export function useWastageReportTable({
     {
       accessorKey: "status",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("status")} className="justify-center" />
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
       ),
       enableSorting: false,
       cell: ({ row }) => {

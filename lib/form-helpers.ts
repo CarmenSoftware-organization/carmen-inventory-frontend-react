@@ -224,10 +224,7 @@ export interface ItemChanges<P> {
  * // { add: [...], update: [...], remove: [...] }
  * ```
  */
-export function buildItemChanges<
-  T extends { id?: string | null },
-  P,
->(
+export function buildItemChanges<T extends { id?: string | null }, P>(
   currentItems: T[],
   defaultItems: T[],
   mapFn: (item: T, index: number) => P,
@@ -257,7 +254,9 @@ export function buildItemChanges<
 
   const result: ItemChanges<P> = {};
   if (newItems.length > 0) {
-    result.add = newItems.map((item) => mapFn(item, currentItems.indexOf(item)));
+    result.add = newItems.map((item) =>
+      mapFn(item, currentItems.indexOf(item)),
+    );
   }
   if (updatedItems.length > 0) {
     result.update = updatedItems.map((item) => ({

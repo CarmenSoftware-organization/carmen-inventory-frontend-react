@@ -12,11 +12,7 @@ import { type LucideIcon } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import type { TranslationFn } from "@/lib/i18n-schema";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
@@ -144,7 +140,9 @@ export function ConfigEntityDialog<
 
   const form = useForm<TFormValues>({
     // schema input type เป็น generic — cast ให้ผ่าน overload ของ zodResolver
-    resolver: zodResolver(buildSchema(tv, tfl) as never) as Resolver<TFormValues>,
+    resolver: zodResolver(
+      buildSchema(tv, tfl) as never,
+    ) as Resolver<TFormValues>,
     defaultValues: toFormValues(null) as DefaultValues<TFormValues>,
   });
 
@@ -188,14 +186,14 @@ export function ConfigEntityDialog<
 
   return (
     <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
-      <DialogContent 
+      <DialogContent
         className={cn(
-          "sm:max-w-[425px] p-0 border-0 overflow-hidden bg-transparent shadow-2xl", 
-          contentClassName
+          "overflow-hidden border-0 bg-transparent p-0 shadow-2xl sm:max-w-[425px]",
+          contentClassName,
         )}
         showCloseButton={false}
       >
-        <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-3xl border border-white/80 dark:border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
+        <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] backdrop-blur-3xl dark:border-white/20 dark:bg-zinc-900/80 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
           <form
             onSubmit={
               stopPropagationOnSubmit
@@ -206,15 +204,15 @@ export function ConfigEntityDialog<
                   }
                 : form.handleSubmit(onSubmit)
             }
-            className="flex flex-col relative"
+            className="relative flex flex-col"
           >
-            <div className="px-6 py-6 border-b border-white/60 dark:border-white/10 bg-white/60 dark:bg-black/40">
+            <div className="border-b border-white/60 bg-white/60 px-6 py-6 dark:border-white/10 dark:bg-black/40">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/90 dark:bg-white/10 text-primary shadow-sm border border-white/80 dark:border-white/20 backdrop-blur-md">
+                <div className="text-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/90 shadow-sm backdrop-blur-md dark:border-white/20 dark:bg-white/10">
                   <Icon className="h-6 w-6" />
                 </div>
                 <div className="flex flex-col">
-                  <DialogTitle className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
+                  <DialogTitle className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
                     {isEdit
                       ? tf("editTitle", { entity: t("entity") })
                       : tf("addTitle", { entity: t("entity") })}
@@ -223,27 +221,27 @@ export function ConfigEntityDialog<
               </div>
             </div>
 
-            <div className="px-6 py-6 bg-white/50 dark:bg-black/40">
+            <div className="bg-white/50 px-6 py-6 dark:bg-black/40">
               <FieldGroup className="gap-5">
                 {children({ form, disabled: isPending || !!readOnly })}
               </FieldGroup>
             </div>
 
-            <div className="px-6 py-4 flex justify-end gap-3 border-t border-white/60 dark:border-white/10 bg-white/70 dark:bg-black/50">
+            <div className="flex justify-end gap-3 border-t border-white/60 bg-white/70 px-6 py-4 dark:border-white/10 dark:bg-black/50">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
-                className="rounded-xl bg-white/90 hover:bg-white dark:bg-white/10 dark:hover:bg-white/20 border border-white/80 dark:border-white/20 font-bold backdrop-blur-md shadow-sm transition-all"
+                className="rounded-xl border border-white/80 bg-white/90 font-bold shadow-sm backdrop-blur-md transition-all hover:bg-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
               >
                 {readOnly ? tc("close") : tc("cancel")}
               </Button>
               {!readOnly && (
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={isPending}
-                  className="rounded-xl bg-primary/90 hover:bg-primary text-primary-foreground font-bold shadow-lg backdrop-blur-md transition-all"
+                  className="bg-primary/90 hover:bg-primary text-primary-foreground rounded-xl font-bold shadow-lg backdrop-blur-md transition-all"
                 >
                   {submitLabel}
                 </Button>

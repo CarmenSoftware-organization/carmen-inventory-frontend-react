@@ -12,11 +12,11 @@
  * // "page=1&search=Credit%20Note"
  * ```
  */
-export function buildQueryString<T extends object>(
-  params?: T,
-): string {
+export function buildQueryString<T extends object>(params?: T): string {
   return Object.entries(params ?? {})
-    .filter(([, value]) => value !== undefined && value !== null && value !== "")
+    .filter(
+      ([, value]) => value !== undefined && value !== null && value !== "",
+    )
     .map(
       ([key, value]) =>
         `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,

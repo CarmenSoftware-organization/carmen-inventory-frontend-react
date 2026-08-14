@@ -13,7 +13,7 @@ export function NameWithSubtext({ primary, secondary }: NameWithSubtextProps) {
       </p>
       {secondary && (
         <p
-          className="text-muted-foreground truncate text-micro-legal"
+          className="text-muted-foreground text-micro-legal truncate"
           title={secondary}
         >
           {secondary}

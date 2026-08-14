@@ -3,7 +3,10 @@ import { Crown } from "lucide-react";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { round2 } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
-import { buildProductGroups, type GroupableDetail } from "./pl-product-grouping";
+import {
+  buildProductGroups,
+  type GroupableDetail,
+} from "./pl-product-grouping";
 
 interface PLProductGroupedViewProps {
   readonly detailRefs: readonly GroupableDetail[];
@@ -70,7 +73,9 @@ export function PLProductGroupedView({
                         <NameWithSubtext
                           primary={tier.product_name ?? ""}
                           secondary={
-                            tier.product_local_name ?? tier.product_code ?? undefined
+                            tier.product_local_name ??
+                            tier.product_code ??
+                            undefined
                           }
                         />
                       </Td>

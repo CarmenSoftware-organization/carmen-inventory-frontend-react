@@ -87,7 +87,9 @@ export function useDeleteDocument() {
   return useApiMutation<string>({
     mutationFn: (fileToken) => {
       // fileToken อาจมี buCode prefix เช่น "T02/uuid" — ตัดออกเพราะ endpoint มี buCode อยู่แล้ว
-      const id = fileToken.includes("/") ? fileToken.split("/").pop()! : fileToken;
+      const id = fileToken.includes("/")
+        ? fileToken.split("/").pop()!
+        : fileToken;
       return httpClient.delete(`${API_ENDPOINTS.DOCUMENTS(buCode!)}/${id}`);
     },
     invalidateKeys: [QUERY_KEYS.DOCUMENTS],

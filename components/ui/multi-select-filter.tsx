@@ -1,4 +1,3 @@
-
 import type React from "react";
 import { ChevronsUpDown, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -93,7 +92,11 @@ export function MultiSelectFilter({
             {selected.length > 0 ? (
               <>
                 {placeholder}
-                <Badge variant="secondary" size="xs" className="ml-1 tabular-nums">
+                <Badge
+                  variant="secondary"
+                  size="xs"
+                  className="ml-1 tabular-nums"
+                >
                   {selected.length}
                 </Badge>
               </>
@@ -103,29 +106,29 @@ export function MultiSelectFilter({
           </span>
           <span className="flex items-center gap-0.5">
             {selected.length > 0 && (
-              <span
-                onClick={clear}
-                aria-hidden="true"
-              >
-                <X className="size-3 text-muted-foreground hover:text-foreground" />
+              <span onClick={clear} aria-hidden="true">
+                <X className="text-muted-foreground hover:text-foreground size-3" />
               </span>
             )}
-            <ChevronsUpDown className="size-3 text-muted-foreground" />
+            <ChevronsUpDown className="text-muted-foreground size-3" />
           </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={cn("p-0", searchable ? "w-56" : "w-48")} align="start">
+      <PopoverContent
+        className={cn("p-0", searchable ? "w-56" : "w-48")}
+        align="start"
+      >
         <Command>
           {searchable && (
-            <CommandInput placeholder={searchPlaceholder} className="h-8 text-xs" />
+            <CommandInput
+              placeholder={searchPlaceholder}
+              className="h-8 text-xs"
+            />
           )}
           <CommandList>
             <CommandEmpty>{tc("noOptions")}</CommandEmpty>
             <CommandGroup>
-              <CommandItem
-                onSelect={() => onChange("")}
-                className="text-xs"
-              >
+              <CommandItem onSelect={() => onChange("")} className="text-xs">
                 <Checkbox checked={selected.length === 0} tabIndex={-1} />
                 {tc("all")}
               </CommandItem>
@@ -137,7 +140,9 @@ export function MultiSelectFilter({
                 if (!grouped.has(key)) grouped.set(key, []);
                 grouped.get(key)!.push(opt);
               }
-              const hasGroups = Array.from(grouped.keys()).some((k) => k !== "");
+              const hasGroups = Array.from(grouped.keys()).some(
+                (k) => k !== "",
+              );
               if (!hasGroups) {
                 return (
                   <CommandGroup>

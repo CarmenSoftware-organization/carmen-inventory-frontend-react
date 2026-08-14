@@ -7,8 +7,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 // ── stub network so lookups / profile queries don't hit a backend ───────────
 vi.mock("@/lib/http-client", () => ({
   httpClient: {
-    get: () =>
-      Promise.resolve({ ok: false, json: () => Promise.resolve({}) }),
+    get: () => Promise.resolve({ ok: false, json: () => Promise.resolve({}) }),
   },
 }));
 

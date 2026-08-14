@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";

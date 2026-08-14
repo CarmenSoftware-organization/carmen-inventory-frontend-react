@@ -102,9 +102,7 @@ export function useUserActivityTable({
           <div className="leading-tight">
             <p className="text-xs font-semibold">{fullName || "—"}</p>
             {username && fullName !== username && (
-              <p className="text-muted-foreground text-micro">
-                {username}
-              </p>
+              <p className="text-muted-foreground text-micro">{username}</p>
             )}
           </div>
         );
@@ -149,7 +147,7 @@ export function useUserActivityTable({
       cell: ({ row }) => {
         const ua: string | null = row.original.user_agent;
         return (
-          <span className="text-muted-foreground block max-w-48 truncate text-micro">
+          <span className="text-muted-foreground text-micro block max-w-48 truncate">
             {ua || "—"}
           </span>
         );

@@ -76,9 +76,7 @@ function ResetStep() {
         subtitle={t("resetPassword.linkDeadDescription")}
       >
         <Button asChild className="mt-5 h-10 w-full">
-          <Link to="/forgot-password">
-            {t("resetPassword.requestNewLink")}
-          </Link>
+          <Link to="/forgot-password">{t("resetPassword.requestNewLink")}</Link>
         </Button>
       </AuthSplitShell>
     );

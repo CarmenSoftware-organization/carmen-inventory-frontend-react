@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx"
-import { extendTailwindMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { extendTailwindMerge } from "tailwind-merge";
 
 /**
  * tailwind-merge รู้จักแค่ scale มาตรฐานของ Tailwind กับ arbitrary value —
@@ -27,7 +27,7 @@ const twMerge = extendTailwindMerge({
       ],
     },
   },
-})
+});
 
 /**
  * รวม className แบบ conditional และ merge Tailwind classes ที่ซ้อนทับ
@@ -42,7 +42,7 @@ const twMerge = extendTailwindMerge({
  * ```
  */
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -56,9 +56,9 @@ export function cn(...inputs: ClassValue[]) {
  */
 function hasControlChars(value: string): boolean {
   return [...value].some((ch) => {
-    const code = ch.charCodeAt(0)
-    return code <= 31 || code === 127
-  })
+    const code = ch.charCodeAt(0);
+    return code <= 31 || code === 127;
+  });
 }
 
 /**
@@ -77,17 +77,17 @@ function hasControlChars(value: string): boolean {
  * ```
  */
 export function sanitizeUrl(url: string): string | undefined {
-  const candidate = url.trim()
-  if (!candidate || hasControlChars(candidate)) return undefined
+  const candidate = url.trim();
+  if (!candidate || hasControlChars(candidate)) return undefined;
   try {
-    const parsed = new URL(candidate)
+    const parsed = new URL(candidate);
     if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-      return parsed.toString()
+      return parsed.toString();
     }
   } catch {
     // invalid URL — fall through to undefined
   }
-  return undefined
+  return undefined;
 }
 
 /**
@@ -101,22 +101,24 @@ export function sanitizeUrl(url: string): string | undefined {
  * Trims input and rejects control characters first. Rejects javascript:, data:,
  * vbscript:, file:, and protocol-relative URLs.
  */
-export function safeNavigationHref(input: string | null | undefined): string | null {
-  if (!input) return null
-  const candidate = input.trim()
-  if (!candidate || hasControlChars(candidate)) return null
+export function safeNavigationHref(
+  input: string | null | undefined,
+): string | null {
+  if (!input) return null;
+  const candidate = input.trim();
+  if (!candidate || hasControlChars(candidate)) return null;
 
-  const absolute = sanitizeUrl(candidate)
-  if (absolute) return absolute
+  const absolute = sanitizeUrl(candidate);
+  if (absolute) return absolute;
 
   if (
     candidate.startsWith("/") &&
     !candidate.startsWith("//") &&
     !candidate.includes("\\")
   ) {
-    return candidate
+    return candidate;
   }
-  return null
+  return null;
 }
 
 /**
@@ -139,14 +141,16 @@ export function safeNavigationHref(input: string | null | undefined): string | n
  * safeInternalHref("//evil.com");          // null
  * ```
  */
-export function safeInternalHref(input: string | null | undefined): string | null {
-  if (!input) return null
-  const candidate = input.trim()
-  if (!candidate || hasControlChars(candidate)) return null
-  if (!candidate.startsWith("/") || candidate.startsWith("//")) return null
-  if (candidate.includes("\\")) return null
-  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(candidate)) return null
-  return candidate
+export function safeInternalHref(
+  input: string | null | undefined,
+): string | null {
+  if (!input) return null;
+  const candidate = input.trim();
+  if (!candidate || hasControlChars(candidate)) return null;
+  if (!candidate.startsWith("/") || candidate.startsWith("//")) return null;
+  if (candidate.includes("\\")) return null;
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(candidate)) return null;
+  return candidate;
 }
 
 /**
@@ -164,6 +168,6 @@ export function safeInternalHref(input: string | null | undefined): string | nul
  * ```
  */
 export function sanitizeText(input: string | null | undefined): string {
-  if (!input) return ""
-  return input.replaceAll(/[<>]/g, "").trim()
+  if (!input) return "";
+  return input.replaceAll(/[<>]/g, "").trim();
 }

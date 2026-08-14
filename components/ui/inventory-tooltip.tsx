@@ -1,4 +1,3 @@
-
 import { memo } from "react";
 import { useTranslations } from "use-intl";
 import { BoxIcon, Package } from "lucide-react";
@@ -99,106 +98,112 @@ export const InventoryTooltip = memo(function InventoryTooltip({
           )}
           {hasProduct && (
             <>
-              <p className="mb-2 text-micro font-semibold">
+              <p className="text-micro mb-2 font-semibold">
                 {t("inventoryInfo")}
               </p>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-micro">
-            <div>
-              {onOnHandClick ? (
-                <button
-                  type="button"
-                  onClick={onOnHandClick}
-                  className={cn(
-                    "underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none",
-                    needsReorder ? "text-destructive" : "text-info-foreground",
+              <div className="text-micro grid grid-cols-2 gap-x-4 gap-y-1.5">
+                <div>
+                  {onOnHandClick ? (
+                    <button
+                      type="button"
+                      onClick={onOnHandClick}
+                      className={cn(
+                        "underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none",
+                        needsReorder
+                          ? "text-destructive"
+                          : "text-info-foreground",
+                      )}
+                    >
+                      {t("onHand")}
+                    </button>
+                  ) : (
+                    <span
+                      className={
+                        needsReorder
+                          ? "text-destructive"
+                          : "text-info-foreground"
+                      }
+                    >
+                      {t("onHand")}
+                    </span>
                   )}
-                >
-                  {t("onHand")}
-                </button>
-              ) : (
-                <span
-                  className={
-                    needsReorder ? "text-destructive" : "text-info-foreground"
-                  }
-                >
-                  {t("onHand")}
+                  <p
+                    className={`text-xs font-semibold tabular-nums ${needsReorder ? "text-destructive" : ""}`}
+                  >
+                    {on_hand_qty.toLocaleString()}
+                    {unitName && (
+                      <span className="text-muted-foreground font-normal">
+                        {" "}
+                        {unitName}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  {onOnOrderClick ? (
+                    <button
+                      type="button"
+                      onClick={onOnOrderClick}
+                      className="text-info-foreground underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
+                    >
+                      {t("onOrder")}
+                    </button>
+                  ) : (
+                    <span className="text-info-foreground">{t("onOrder")}</span>
+                  )}
+                  <p className="text-xs font-semibold tabular-nums">
+                    {on_order_qty.toLocaleString()}
+                    {unitName && (
+                      <span className="text-muted-foreground font-normal">
+                        {" "}
+                        {unitName}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">
+                    {t("reorderPt")}
+                  </span>
+                  <p className="text-xs font-semibold tabular-nums">
+                    {re_order_qty.toLocaleString()}
+                    {unitName && (
+                      <span className="text-muted-foreground font-normal">
+                        {" "}
+                        {unitName}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">{t("restock")}</span>
+                  <p className="text-xs font-semibold tabular-nums">
+                    {re_stock_qty.toLocaleString()}
+                    {unitName && (
+                      <span className="text-muted-foreground font-normal">
+                        {" "}
+                        {unitName}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <Progress
+                value={pct}
+                className="mt-2 h-1"
+                indicatorClassName={progressColor}
+              />
+              <div className="text-micro-legal mt-1 flex items-center justify-between">
+                {needsReorder && (
+                  <span className="text-destructive font-semibold">
+                    {t("needsReorder")}
+                  </span>
+                )}
+                {!needsReorder && <span />}
+                <span className="text-muted-foreground tabular-nums">
+                  {t("stockLevel", { pct: pct.toFixed(1) })}
                 </span>
-              )}
-              <p
-                className={`text-xs font-semibold tabular-nums ${needsReorder ? "text-destructive" : ""}`}
-              >
-                {on_hand_qty.toLocaleString()}
-                {unitName && (
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {unitName}
-                  </span>
-                )}
-              </p>
-            </div>
-            <div>
-              {onOnOrderClick ? (
-                <button
-                  type="button"
-                  onClick={onOnOrderClick}
-                  className="text-info-foreground underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
-                >
-                  {t("onOrder")}
-                </button>
-              ) : (
-                <span className="text-info-foreground">{t("onOrder")}</span>
-              )}
-              <p className="text-xs font-semibold tabular-nums">
-                {on_order_qty.toLocaleString()}
-                {unitName && (
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {unitName}
-                  </span>
-                )}
-              </p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{t("reorderPt")}</span>
-              <p className="text-xs font-semibold tabular-nums">
-                {re_order_qty.toLocaleString()}
-                {unitName && (
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {unitName}
-                  </span>
-                )}
-              </p>
-            </div>
-            <div>
-              <span className="text-muted-foreground">{t("restock")}</span>
-              <p className="text-xs font-semibold tabular-nums">
-                {re_stock_qty.toLocaleString()}
-                {unitName && (
-                  <span className="text-muted-foreground font-normal">
-                    {" "}
-                    {unitName}
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
-          <Progress
-            value={pct}
-            className="mt-2 h-1"
-            indicatorClassName={progressColor}
-          />
-          <div className="mt-1 flex items-center justify-between text-micro-legal">
-            {needsReorder && (
-              <span className="text-destructive font-semibold">
-                {t("needsReorder")}
-              </span>
-            )}
-            {!needsReorder && <span />}
-            <span className="text-muted-foreground tabular-nums">
-              {t("stockLevel", { pct: pct.toFixed(1) })}
-            </span>
-          </div>
+              </div>
             </>
           )}
         </TooltipContent>

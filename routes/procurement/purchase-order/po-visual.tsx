@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Eye, FileEdit } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -156,7 +155,7 @@ export function OrderSummaryCard({
             {currencyCode}
           </span>
         </div>
-        <p className="text-muted-foreground mt-2 text-micro">
+        <p className="text-muted-foreground text-micro mt-2">
           {t("summaryItemsUnits", { itemCount, qtyCount })}
         </p>
       </div>

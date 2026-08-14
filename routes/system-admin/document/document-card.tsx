@@ -1,11 +1,6 @@
 import { File } from "lucide-react";
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { DocumentFile } from "@/types/document";
 
@@ -35,7 +30,11 @@ interface DocumentCardProps {
  * @example
  * <DocumentCard item={doc} index={0} onClick={handleOpen} />
  */
-export default function DocumentCard({ item, index, onClick }: DocumentCardProps) {
+export default function DocumentCard({
+  item,
+  index,
+  onClick,
+}: DocumentCardProps) {
   return (
     <Card
       role={onClick ? "button" : undefined}
@@ -47,12 +46,12 @@ export default function DocumentCard({ item, index, onClick }: DocumentCardProps
           onClick(item);
         }
       }}
-      className="gap-0 py-0 transition-colors hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring"
+      className="hover:border-primary/30 focus-visible:ring-ring gap-0 py-0 transition-colors focus-visible:ring-2"
     >
       <CardHeader className="px-4 py-3">
         <CardTitle className="flex items-center gap-2 truncate text-sm">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground text-micro-legal inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 font-semibold tabular-nums">
               {index + 1}
             </span>
           )}

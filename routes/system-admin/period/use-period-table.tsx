@@ -40,7 +40,11 @@ export function usePeriodTable({
     {
       accessorKey: "period",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={t("period")} className="justify-center" />
+        <DataGridColumnHeader
+          column={column}
+          title={t("period")}
+          className="justify-center"
+        />
       ),
       cell: ({ row }) => (
         <CellAction onClick={() => onEdit(row.original)}>
@@ -53,7 +57,11 @@ export function usePeriodTable({
     {
       accessorKey: "fiscal_year",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={t("fiscalYear")} className="justify-center" />
+        <DataGridColumnHeader
+          column={column}
+          title={t("fiscalYear")}
+          className="justify-center"
+        />
       ),
       size: 120,
       meta: { cellClassName: "text-center" },
@@ -61,7 +69,11 @@ export function usePeriodTable({
     {
       accessorKey: "fiscal_month",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={t("fiscalMonth")} className="justify-center" />
+        <DataGridColumnHeader
+          column={column}
+          title={t("fiscalMonth")}
+          className="justify-center"
+        />
       ),
       size: 120,
       meta: { cellClassName: "text-center" },
@@ -93,7 +105,8 @@ export function usePeriodTable({
       ),
       cell: ({ row }) => {
         const status = row.getValue("status") as PeriodStatus;
-        const config = PERIOD_STATUS_CONFIG[status] ?? PERIOD_STATUS_CONFIG.open;
+        const config =
+          PERIOD_STATUS_CONFIG[status] ?? PERIOD_STATUS_CONFIG.open;
         return (
           <Badge size="sm" className={`${config.className} text-xs`}>
             {config.label}

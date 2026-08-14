@@ -1,9 +1,5 @@
-
 import { ErrorState } from "@/components/ui/error-state";
-import {
-  useSpotCheckById,
-  useSpotCheckReview,
-} from "@/hooks/use-spot-check";
+import { useSpotCheckById, useSpotCheckReview } from "@/hooks/use-spot-check";
 import { ItemListSkeleton } from "../shared/inv-shared";
 import { ScReviewComponent } from "./sc-review-component";
 
@@ -12,12 +8,7 @@ import { ScReviewComponent } from "./sc-review-component";
  * โหลด review data ผ่าน useSpotCheckReview (GET) + spot check info สำหรับ location header
  */
 export function ScReviewContent({ id }: Readonly<{ id: string }>) {
-  const {
-    data: review,
-    isLoading,
-    error,
-    refetch,
-  } = useSpotCheckReview(id);
+  const { data: review, isLoading, error, refetch } = useSpotCheckReview(id);
   // Reuse cached SpotCheckById เพื่อแสดง location ใน header (likely already cached จาก entry view)
   const { data: spotCheck } = useSpotCheckById(id);
 

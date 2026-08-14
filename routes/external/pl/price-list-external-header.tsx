@@ -13,10 +13,10 @@ interface PriceListHeaderProps {
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-0.5">
-      <dt className="text-micro font-semibold uppercase tracking-wider text-muted-foreground">
+      <dt className="text-micro text-muted-foreground font-semibold tracking-wider uppercase">
         {label}
       </dt>
-      <dd className="text-sm font-medium text-foreground">{value}</dd>
+      <dd className="text-foreground text-sm font-medium">{value}</dd>
     </div>
   );
 }
@@ -36,14 +36,14 @@ export default function PriceListExternalHeader({
     <header className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1.5">
-          <p className="text-micro font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="text-micro text-muted-foreground font-semibold tracking-wider uppercase">
             Request for Pricing · {data.pricelist_no}
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-foreground text-2xl font-semibold tracking-tight">
             {data.hotel?.name ?? "—"}
           </h1>
           {data.hotel?.address && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {data.hotel.address}
             </p>
           )}
@@ -53,7 +53,7 @@ export default function PriceListExternalHeader({
         </StatusDotBadge>
       </div>
 
-      <dl className="grid grid-cols-2 md:grid-cols-4 gap-6 p-5 bg-slate-50/80 rounded-lg border border-slate-100">
+      <dl className="grid grid-cols-2 gap-6 rounded-lg border border-slate-100 bg-slate-50/80 p-5 md:grid-cols-4">
         <Meta label="Vendor" value={data.vendor?.name || "—"} />
         <Meta label="Currency" value={data.currency_code} />
         <Meta
@@ -67,7 +67,7 @@ export default function PriceListExternalHeader({
       </dl>
 
       {(data.description || data.note) && (
-        <dl className="grid gap-4 border-t border-slate-100 pt-6 mt-6">
+        <dl className="mt-6 grid gap-4 border-t border-slate-100 pt-6">
           {data.description && (
             <Meta label="Instructions" value={data.description} />
           )}

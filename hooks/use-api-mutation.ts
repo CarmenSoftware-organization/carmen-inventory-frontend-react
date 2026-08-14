@@ -24,9 +24,7 @@ export function removeFromListById<T extends { id: string }>(
   old: unknown,
   id: string,
 ): unknown {
-  const data = old as
-    | { data?: T[]; paginate?: { total?: number } }
-    | undefined;
+  const data = old as { data?: T[]; paginate?: { total?: number } } | undefined;
   if (!data?.data) return old;
   return {
     ...data,

@@ -43,7 +43,10 @@ function log(
     meta_data: null,
     old_data: null,
     new_data: newData,
-    audit: { created: { at: "2026-07-29T03:00:00.000Z", id: null, name: null }, updated: { at: "" } },
+    audit: {
+      created: { at: "2026-07-29T03:00:00.000Z", id: null, name: null },
+      updated: { at: "" },
+    },
   };
 }
 
@@ -110,7 +113,10 @@ describe("ActivitySheet", () => {
 
   it("shows the empty state when the document has no activity", () => {
     useActivityLogByRecord.mockReturnValue({
-      data: { data: [], paginate: { total: 0, page: 1, perpage: 50, pages: 1 } },
+      data: {
+        data: [],
+        paginate: { total: 0, page: 1, perpage: 50, pages: 1 },
+      },
       isLoading: false,
       isError: false,
     });

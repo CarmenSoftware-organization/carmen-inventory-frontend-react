@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Plus, Loader2 } from "lucide-react";
@@ -137,8 +136,7 @@ export default function WorkflowComponent() {
     pendingId,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -202,9 +200,10 @@ export default function WorkflowComponent() {
             onRetry={() => grid.refetch?.()}
           />
         )}
-        {isMobile && !grid.isLoading && !grid.error && workflows.length === 0 && (
-          <EmptyComponent />
-        )}
+        {isMobile &&
+          !grid.isLoading &&
+          !grid.error &&
+          workflows.length === 0 && <EmptyComponent />}
         {isMobile && !grid.isLoading && !grid.error && workflows.length > 0 && (
           <>
             <div className="grid grid-cols-1 gap-3">

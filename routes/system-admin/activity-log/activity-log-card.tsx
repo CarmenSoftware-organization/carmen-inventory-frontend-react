@@ -75,7 +75,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {typeof index === "number" && (
-            <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-micro-legal font-semibold tabular-nums">
+            <span className="bg-muted text-muted-foreground text-micro-legal inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 font-semibold tabular-nums">
               {index + 1}
             </span>
           )}
@@ -100,7 +100,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
           />
           <span className="truncate text-xs font-semibold">{actorName}</span>
           {log.actor_username && actorName !== log.actor_username && (
-            <span className="text-muted-foreground truncate text-micro">
+            <span className="text-muted-foreground text-micro truncate">
               ({log.actor_username})
             </span>
           )}
@@ -117,7 +117,7 @@ export function ActivityLogCard({ log, index, onClick }: ActivityLogCardProps) {
         </div>
 
         {log.description && (
-          <p className="text-muted-foreground line-clamp-2 pl-[1.125rem] text-micro">
+          <p className="text-muted-foreground text-micro line-clamp-2 pl-[1.125rem]">
             {log.description}
           </p>
         )}

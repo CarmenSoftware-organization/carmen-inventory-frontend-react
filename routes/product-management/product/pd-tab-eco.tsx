@@ -36,10 +36,7 @@ interface PdTabEcoProps {
  * Section จัดการ eco label ของ product — CRUD อิสระ (ยิง API ทันที ไม่ผ่าน product form)
  * แสดงเฉพาะตอนมี product แล้ว (มี productId)
  */
-export function PdTabEco({
-  productId,
-  readOnly,
-}: PdTabEcoProps) {
+export function PdTabEco({ productId, readOnly }: PdTabEcoProps) {
   const t = useTranslations("productManagement.product");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
@@ -93,6 +90,7 @@ export function PdTabEco({
       {
         id: "certificate_no",
         header: tfl("certificateNo"),
+        size: 250,
         cell: ({ row }) => (
           <span className="text-muted-foreground">
             {row.original.certificate_no}
@@ -102,6 +100,7 @@ export function PdTabEco({
       {
         id: "eco_label",
         header: tfl("ecoLabel"),
+        size: 250,
         cell: ({ row }) => (
           <span className="font-medium">
             {masterMap.get(row.original.master_eco_label_id)?.name ??
@@ -112,6 +111,7 @@ export function PdTabEco({
       {
         id: "issued_date",
         header: tfl("issuedDate"),
+        size: 120,
         cell: ({ row }) =>
           row.original.issued_date
             ? formatDate(row.original.issued_date, dateFormat)
@@ -121,6 +121,7 @@ export function PdTabEco({
       {
         id: "expiry_date",
         header: tfl("expiryDate"),
+        size: 120,
         cell: ({ row }) =>
           row.original.expiry_date
             ? formatDate(row.original.expiry_date, dateFormat)
@@ -130,14 +131,9 @@ export function PdTabEco({
       {
         id: "status",
         header: tfl("status"),
-        // StatusDotBadge เหมือนทั้งโมดูล (list, การ์ด, หัวฟอร์ม, แท็บคลัง) — ของเดิม
-        // เป็น Badge เขียวทึบ ซึ่งทั้งดังเกินสำหรับแถวในตารางและใช้ semantic
-        // "success" มาแทนความหมาย "เปิดใช้งานอยู่"
+        size: 100,
         cell: ({ row }) => (
-          <StatusDotBadge
-            tone={row.original.is_active ? "success" : "neutral"}
-            size="xs"
-          >
+          <StatusDotBadge tone={row.original.is_active ? "success" : "neutral"}>
             {row.original.is_active ? ts("active") : ts("inactive")}
           </StatusDotBadge>
         ),
@@ -203,7 +199,12 @@ export function PdTabEco({
       count={items.length}
       action={
         !readOnly ? (
-          <Button type="button" size="sm" variant="secondary" onClick={handleAdd}>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={handleAdd}
+          >
             <Plus />
             {t("addEcoLabel")}
           </Button>

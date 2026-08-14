@@ -7,7 +7,10 @@ import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 vi.mock("@/lib/auth/auth-api", () => ({ refreshTokens: vi.fn() }));
 
 beforeEach(() => {
-  setRuntimeConfigForTests({ BACKEND_URL: "https://api.test", X_APP_ID: "app-1" });
+  setRuntimeConfigForTests({
+    BACKEND_URL: "https://api.test",
+    X_APP_ID: "app-1",
+  });
   tokenStore.clear();
 });
 
@@ -35,7 +38,9 @@ function jsonResponse(status: number, body: unknown = {}) {
 // =========================================================================
 describe("httpClient.get", () => {
   it("sends GET request with correct URL", async () => {
-    const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
     vi.stubGlobal("fetch", fetchMock);
     const res = await httpClient.get("/api/proxy/test");
     expect(fetchMock).toHaveBeenCalledWith(
@@ -89,7 +94,9 @@ describe("httpClient.patch", () => {
 
 describe("httpClient.delete", () => {
   it("sends DELETE request without body", async () => {
-    const fetchMock = vi.fn().mockResolvedValueOnce(new Response(null, { status: 204 }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetchMock);
     await httpClient.delete("/api/proxy/items/1");
     const [, init] = fetchMock.mock.calls[0];
@@ -196,7 +203,10 @@ describe("429 handling", () => {
 // =========================================================================
 describe("error normalization", () => {
   it("converts a network failure into a NETWORK_ERROR ApiError", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValueOnce(new TypeError("fetch failed")));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValueOnce(new TypeError("fetch failed")),
+    );
     try {
       await httpClient.get("/api/proxy/data");
       expect.unreachable("should have thrown");
@@ -280,7 +290,10 @@ describe("default request timeout", () => {
 // =========================================================================
 describe("normal responses", () => {
   it("returns 200 response as-is", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(jsonResponse(200, { data: [1, 2, 3] })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(jsonResponse(200, { data: [1, 2, 3] })),
+    );
     const res = await httpClient.get("/api/proxy/data");
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -306,7 +319,9 @@ describe("normal responses", () => {
 describe("SPA URL rewrite + auth", () => {
   it("rewrites /api/proxy/* to the backend origin with bearer + x-app-id", async () => {
     tokenStore.set("at-1");
-    const fetchMock = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response("{}", { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
     await httpClient.get("/api/proxy/api/config/HQ/units");
@@ -333,7 +348,9 @@ describe("SPA URL rewrite + auth", () => {
     const res = await httpClient.get("/api/proxy/api/user/profile");
 
     expect(res.status).toBe(200);
-    expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe("Bearer fresh");
+    expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe(
+      "Bearer fresh",
+    );
   });
 
   it("clears the token store when refresh fails after 401", async () => {

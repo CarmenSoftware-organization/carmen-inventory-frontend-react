@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,7 +46,9 @@ export function RoleForm({ role }: RoleFormProps) {
   const isPending = createRole.isPending || updateRole.isPending;
   const isDisabled = isView || isPending;
 
-  const originalPermissionIds = new Set(role?.permissions.map((p) => p.permission_id) ?? []);
+  const originalPermissionIds = new Set(
+    role?.permissions.map((p) => p.permission_id) ?? [],
+  );
 
   const defaultValues = getDefaultValues(role);
 

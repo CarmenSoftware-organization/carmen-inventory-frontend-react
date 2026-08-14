@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -109,7 +108,13 @@ export function EquipmentForm({ equipment }: EquipmentFormProps) {
     if (isEdit && equipment) {
       updateEquipment.mutate(
         // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
-        { id: equipment.id, doc_version: equipment.doc_version, ...payload, image: imageFile, remove_image: imageRemoved },
+        {
+          id: equipment.id,
+          doc_version: equipment.doc_version,
+          ...payload,
+          image: imageFile,
+          remove_image: imageRemoved,
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

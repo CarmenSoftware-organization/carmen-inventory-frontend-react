@@ -32,31 +32,31 @@ export function GlobalNotificationBanner() {
   if (isError || unreadCount === 0 || !isVisible) return null;
 
   return (
-    <div className="fixed right-4 top-4 z-[100] w-[calc(100%-2rem)] max-w-sm animate-in slide-in-from-top-10 fade-in duration-500 ease-out sm:right-6 sm:top-6">
+    <div className="animate-in slide-in-from-top-10 fade-in fixed top-4 right-4 z-[100] w-[calc(100%-2rem)] max-w-sm duration-500 ease-out sm:top-6 sm:right-6">
       <div
         role="alert"
         aria-live="polite"
-        className="flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-primary/20 bg-background/80 p-3 shadow-2xl backdrop-blur-xl ring-1 ring-primary/10 transition-all hover:bg-background/90 hover:shadow-primary/5 sm:p-4 cursor-pointer"
+        className="border-primary/20 bg-background/80 ring-primary/10 hover:bg-background/90 hover:shadow-primary/5 flex cursor-pointer items-center justify-between gap-3 overflow-hidden rounded-2xl border p-3 shadow-2xl ring-1 backdrop-blur-xl transition-all sm:p-4"
         onClick={() => setIsVisible(false)}
       >
         <div className="flex items-center gap-3">
-          <div className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+          <div className="bg-primary/15 text-primary relative flex size-10 shrink-0 items-center justify-center rounded-full">
             <Bell className="size-5" aria-hidden="true" />
-            <span className="absolute right-2 top-2 size-2.5 rounded-full bg-destructive shadow-[0_0_0_2px_hsl(var(--background))]" />
-            <span className="absolute right-2 top-2 size-2.5 animate-ping rounded-full bg-destructive" />
+            <span className="bg-destructive absolute top-2 right-2 size-2.5 rounded-full shadow-[0_0_0_2px_hsl(var(--background))]" />
+            <span className="bg-destructive absolute top-2 right-2 size-2.5 animate-ping rounded-full" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground leading-tight tracking-tight">
+            <span className="text-foreground text-sm leading-tight font-bold tracking-tight">
               {t("notifications")}
             </span>
-            <span className="text-muted-foreground text-xs font-medium mt-0.5">
+            <span className="text-muted-foreground mt-0.5 text-xs font-medium">
               {unreadCount} {t("unread", { defaultValue: "Unread" })}
             </span>
           </div>
         </div>
         <Link
           to="/notifications"
-          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-8 shrink-0 items-center justify-center rounded-xl px-4 text-xs font-semibold shadow-sm transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex h-8 shrink-0 items-center justify-center rounded-xl px-4 text-xs font-semibold shadow-sm transition-transform focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none active:scale-95"
         >
           {t("viewAllTooltip", { defaultValue: "View All" })}
         </Link>

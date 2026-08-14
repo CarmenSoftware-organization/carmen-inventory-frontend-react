@@ -28,7 +28,9 @@ export type UseInterfaceConfigResult = {
  * @param configKey - key ใน app_config เช่น `interface_pos_micros`
  * @returns ค่า config, สถานะโหลด/ใหม่/error และฟังก์ชัน save
  */
-export function useInterfaceConfig(configKey: string): UseInterfaceConfigResult {
+export function useInterfaceConfig(
+  configKey: string,
+): UseInterfaceConfigResult {
   const query = useAppConfigByKey(configKey);
   const upsert = useUpsertAppConfig();
 

@@ -1,4 +1,3 @@
-
 import { ScEntryComponent } from "./sc-entry-component";
 
 /**

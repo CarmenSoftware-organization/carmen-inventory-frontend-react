@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,7 +45,9 @@ export function RecipeCategoryForm({ category }: RecipeCategoryFormProps) {
   const isAdd = mode === "add";
 
   const { data: allCategoryData } = useRecipeCategory({ perpage: -1 });
-  const categoryMap = new Map((allCategoryData?.data ?? []).map((c) => [c.id, c]));
+  const categoryMap = new Map(
+    (allCategoryData?.data ?? []).map((c) => [c.id, c]),
+  );
 
   const createCategory = useCreateRecipeCategory();
   const updateCategory = useUpdateRecipeCategory();

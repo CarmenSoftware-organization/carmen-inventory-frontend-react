@@ -35,31 +35,31 @@ export function VarianceGrid<T extends VarianceGridItem>({
             <tr>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-micro-legal font-semibold tracking-widest uppercase"
+                className="text-micro-legal px-3 py-2 text-left font-semibold tracking-widest uppercase"
               >
                 {t("colProduct")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-right text-micro-legal font-semibold tracking-widest uppercase"
+                className="text-micro-legal px-3 py-2 text-right font-semibold tracking-widest uppercase"
               >
                 {t("colSystem")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-right text-micro-legal font-semibold tracking-widest uppercase"
+                className="text-micro-legal px-3 py-2 text-right font-semibold tracking-widest uppercase"
               >
                 {t("colActual")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-right text-micro-legal font-semibold tracking-widest uppercase"
+                className="text-micro-legal px-3 py-2 text-right font-semibold tracking-widest uppercase"
               >
                 {t("colVariance")}
               </th>
               <th
                 scope="col"
-                className="px-3 py-2 text-left text-micro-legal font-semibold tracking-widest uppercase"
+                className="text-micro-legal px-3 py-2 text-left font-semibold tracking-widest uppercase"
               >
                 {t("colUnit")}
               </th>

@@ -58,7 +58,11 @@ function createWrapper() {
     },
   });
   function Wrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
+    return createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      children,
+    );
   }
   return Wrapper;
 }
@@ -107,7 +111,10 @@ describe("useList", () => {
 
   it("passes params to API", async () => {
     vi.mocked(httpClient.get).mockResolvedValue(
-      jsonRes(200, { data: [], paginate: { total: 0, page: 2, perpage: 5, pages: 0 } }),
+      jsonRes(200, {
+        data: [],
+        paginate: { total: 0, page: 2, perpage: 5, pages: 0 },
+      }),
     );
 
     renderHook(() => crud.useList({ search: "test", page: 2, perpage: 5 }), {

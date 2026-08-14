@@ -54,7 +54,7 @@ export function PcEntryHeader({
               </Badge>
             </div>
 
-            <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-micro-legal tracking-wide uppercase">
+            <div className="text-muted-foreground text-micro-legal mt-2 flex flex-wrap items-center gap-2 tracking-wide uppercase">
               <p>{locationCode}</p>
               {startCountingAt && (
                 <span className="flex items-center gap-1">

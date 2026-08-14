@@ -1,4 +1,3 @@
-
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -76,7 +75,7 @@ export function RecipeHeroFields({
               >
                 <SelectTrigger
                   size="xs"
-                  className="h-6 gap-1.5 rounded-full px-2 text-micro font-semibold tracking-wider"
+                  className="text-micro h-6 gap-1.5 rounded-full px-2 font-semibold tracking-wider"
                   aria-label={tfl("difficulty")}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -117,7 +116,7 @@ export function RecipeHeroFields({
                 onClick={() => !isDisabled && field.onChange(!field.value)}
                 disabled={isDisabled}
                 className={cn(
-                  "inline-flex h-6 items-center gap-1.5 rounded-full border px-2 text-micro font-semibold transition-colors",
+                  "text-micro inline-flex h-6 items-center gap-1.5 rounded-full border px-2 font-semibold transition-colors",
                   field.value
                     ? "border-foreground bg-foreground text-background"
                     : "border-border bg-card text-muted-foreground",
@@ -140,7 +139,7 @@ export function RecipeHeroFields({
                 onClick={() => !isDisabled && field.onChange(!field.value)}
                 disabled={isDisabled}
                 className={cn(
-                  "inline-flex h-6 items-center gap-1.5 rounded-full border px-2 text-micro font-semibold transition-colors",
+                  "text-micro inline-flex h-6 items-center gap-1.5 rounded-full border px-2 font-semibold transition-colors",
                   field.value
                     ? "border-foreground bg-foreground text-background"
                     : "border-border bg-card text-muted-foreground",
@@ -241,7 +240,7 @@ function QuickStat({
         accent ? "border-foreground/20 bg-muted/60" : "bg-card",
       )}
     >
-      <div className="text-muted-foreground flex items-center gap-1 text-micro-legal font-bold tracking-wider uppercase">
+      <div className="text-muted-foreground text-micro-legal flex items-center gap-1 font-bold tracking-wider uppercase">
         <Icon className="size-3" aria-hidden="true" />
         {label}
       </div>

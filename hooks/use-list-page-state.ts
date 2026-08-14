@@ -1,4 +1,3 @@
-
 import { useURL } from "./use-url";
 
 interface UseListPageStateOptions {
@@ -35,7 +34,8 @@ export function useListPageState(options: UseListPageStateOptions = {}) {
 
   const handlePageChange = (newPage: number) => setPage(newPage.toString());
 
-  const handleSetPerpage = (newPerpage: number) => setPerpage(newPerpage.toString());
+  const handleSetPerpage = (newPerpage: number) =>
+    setPerpage(newPerpage.toString());
 
   const handleSetSearch = (value: string) => {
     setSearch(value);

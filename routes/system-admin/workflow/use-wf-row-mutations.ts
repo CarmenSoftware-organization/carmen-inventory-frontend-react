@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
@@ -74,7 +73,8 @@ export function useWfRowMutations() {
     } catch (err) {
       // ข้อมูลคนละ shape — บอกให้ชัด ไม่ใช่โยน message ดิบของ schema ใส่หน้าผู้ใช้
       // error อื่นมาจาก mutation ซึ่ง toast ขึ้นจาก MutationCache กลางแล้ว
-      if (err instanceof WorkflowDataParseError) toast.error(t("incompatibleData"));
+      if (err instanceof WorkflowDataParseError)
+        toast.error(t("incompatibleData"));
     } finally {
       setPendingId(null);
     }

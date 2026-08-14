@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Controller,
@@ -125,14 +124,16 @@ export function WfRouting({
       {/* Left: Rule list */}
       <div className="w-full shrink-0 space-y-4 lg:w-72 xl:w-80">
         <div className="flex items-center justify-between px-1">
-          <span className="text-sm font-semibold text-foreground/80">{t("rules")}</span>
+          <span className="text-foreground/80 text-sm font-semibold">
+            {t("rules")}
+          </span>
           {!isDisabled && (
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={handleAddRule}
-              className="h-9 px-4 text-sm font-medium shadow-sm transition-all hover:bg-muted/50"
+              className="hover:bg-muted/50 h-9 px-4 text-sm font-medium shadow-sm transition-all"
             >
               <Plus className="mr-1.5 size-3.5" />
               {tc("add")}
@@ -140,22 +141,29 @@ export function WfRouting({
           )}
         </div>
 
-        <div className="px-1 relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <div className="relative px-1">
+          <Search className="text-muted-foreground absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
           <Input
             placeholder={tc("search") || "Search..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9"
+            className="h-9 pl-9"
           />
         </div>
 
         {filteredFields.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 text-center animate-in fade-in zoom-in-95 duration-200">
-            <Waypoints className="size-10 text-muted-foreground/30 mb-3" />
-            <p className="text-sm font-medium text-foreground">{tc("noData") || "No routing rules found"}</p>
+          <div className="animate-in fade-in zoom-in-95 flex flex-col items-center justify-center py-10 text-center duration-200">
+            <Waypoints className="text-muted-foreground/30 mb-3 size-10" />
+            <p className="text-foreground text-sm font-medium">
+              {tc("noData") || "No routing rules found"}
+            </p>
             {!isDisabled && !searchQuery && (
-              <Button variant="outline" size="sm" onClick={handleAddRule} className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAddRule}
+                className="mt-4"
+              >
                 <Plus className="mr-1.5 size-3.5" />
                 {tc("add")}
               </Button>
@@ -166,47 +174,51 @@ export function WfRouting({
             {filteredFields.map((field) => {
               const idx = field.originalIndex;
               return (
-              <div
-                key={field.id}
-                className={cn(
-                  "group flex items-center justify-between gap-2 rounded-xl border p-1 pl-4 transition-all duration-200 animate-in fade-in slide-in-from-left-2 duration-300",
-                  safeIndex === idx
-                    ? "border-primary/30 bg-primary/5 shadow-sm ring-1 ring-primary/20"
-                    : "border-border hover:border-border/80 hover:bg-muted/40"
-                )}
-              >
-                <button
-                  type="button"
+                <div
+                  key={field.id}
                   className={cn(
-                    "flex-1 truncate text-left text-sm transition-colors",
-                    safeIndex === idx ? "font-semibold text-primary" : "font-medium text-foreground"
+                    "group animate-in fade-in slide-in-from-left-2 flex items-center justify-between gap-2 rounded-xl border p-1 pl-4 transition-all duration-200 duration-300",
+                    safeIndex === idx
+                      ? "border-primary/30 bg-primary/5 ring-primary/20 shadow-sm ring-1"
+                      : "border-border hover:border-border/80 hover:bg-muted/40",
                   )}
-                  onClick={() => setSelectedIndex(idx)}
                 >
-                  {watchedRules?.[idx]?.name || `Rule ${idx + 1}`}
-                </button>
-                {!isDisabled && (
                   <button
                     type="button"
                     className={cn(
-                      "flex shrink-0 cursor-pointer items-center justify-center rounded p-1.5 transition-all duration-200",
-                      safeIndex === idx ? "text-destructive hover:bg-destructive/10" : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      "flex-1 truncate text-left text-sm transition-colors",
+                      safeIndex === idx
+                        ? "text-primary font-semibold"
+                        : "text-foreground font-medium",
                     )}
-                    onClick={() => handleRemoveRule(idx)}
-                    aria-label={tc("delete")}
+                    onClick={() => setSelectedIndex(idx)}
                   >
-                    <Trash2 className="size-4" />
+                    {watchedRules?.[idx]?.name || `Rule ${idx + 1}`}
                   </button>
-                )}
-              </div>
-            );
-          })}
+                  {!isDisabled && (
+                    <button
+                      type="button"
+                      className={cn(
+                        "flex shrink-0 cursor-pointer items-center justify-center rounded p-1.5 transition-all duration-200",
+                        safeIndex === idx
+                          ? "text-destructive hover:bg-destructive/10"
+                          : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                      )}
+                      onClick={() => handleRemoveRule(idx)}
+                      aria-label={tc("delete")}
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Right: Rule detail */}
-      <div className="flex-1 rounded-xl border bg-card p-4 shadow-sm md:p-6">
+      <div className="bg-card flex-1 rounded-xl border p-4 shadow-sm md:p-6">
         {fields.length === 0 ? (
           <p className="text-muted-foreground py-10 text-center text-sm">
             {t("selectOrAddRule")}
@@ -240,10 +252,7 @@ export function WfRouting({
                         </SelectTrigger>
                         <SelectContent>
                           {stageNames.map((name) => (
-                            <SelectItem
-                              key={name}
-                              value={name}
-                            >
+                            <SelectItem key={name} value={name}>
                               {name}
                             </SelectItem>
                           ))}
@@ -270,7 +279,9 @@ export function WfRouting({
 
             {/* Condition section */}
             <div className="space-y-4">
-              <span className="text-sm font-semibold text-foreground/80 border-b pb-3 block">{t("condition")}</span>
+              <span className="text-foreground/80 block border-b pb-3 text-sm font-semibold">
+                {t("condition")}
+              </span>
 
               <FieldGroup className="gap-6 pt-4">
                 <div
@@ -318,10 +329,7 @@ export function WfRouting({
                             </SelectTrigger>
                             <SelectContent>
                               {operatorValues.map((value) => (
-                                <SelectItem
-                                  key={value}
-                                  value={value}
-                                >
+                                <SelectItem key={value} value={value}>
                                   {t(operatorKeys[value])}
                                 </SelectItem>
                               ))}
@@ -407,7 +415,9 @@ export function WfRouting({
 
             {/* Action section */}
             <div className="space-y-4">
-              <span className="text-sm font-semibold text-foreground/80 border-b pb-3 block">{t("actionLabel")}</span>
+              <span className="text-foreground/80 block border-b pb-3 text-sm font-semibold">
+                {t("actionLabel")}
+              </span>
 
               <div className="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
                 <Field>
@@ -469,4 +479,3 @@ export function WfRouting({
     </div>
   );
 }
-

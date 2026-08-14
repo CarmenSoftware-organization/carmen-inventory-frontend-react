@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
@@ -7,10 +6,7 @@ import {
   REPORT_FORMAT_LABELS,
   normalizeJobStatus,
 } from "@/constant/report-history";
-import type {
-  ReportFormatRaw,
-  ReportHistory,
-} from "@/types/report-history";
+import type { ReportFormatRaw, ReportHistory } from "@/types/report-history";
 
 export function useHistoryTable(): ColumnDef<ReportHistory>[] {
   const t = useTranslations("reportHistory");

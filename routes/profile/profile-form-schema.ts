@@ -52,10 +52,15 @@ export function getDefaultValues(profile?: UserProfile): ProfileFormValues {
  * @param tf - ฟังก์ชันแปลชื่อฟิลด์
  * @returns Zod schema ของฟอร์มเปลี่ยนรหัสผ่าน
  */
-export function createChangePasswordSchema(tv: TranslationFn, tf: TranslationFn) {
+export function createChangePasswordSchema(
+  tv: TranslationFn,
+  tf: TranslationFn,
+) {
   return z
     .object({
-      current_password: z.string().min(1, tv("required", { field: tf("currentPassword") })),
+      current_password: z
+        .string()
+        .min(1, tv("required", { field: tf("currentPassword") })),
       new_password: createPasswordSchema(tv),
       confirm_password: z.string().min(1, tv("confirmPassword")),
     })
@@ -69,7 +74,9 @@ export function createChangePasswordSchema(tv: TranslationFn, tf: TranslationFn)
     });
 }
 
-export type ChangePasswordFormValues = z.infer<ReturnType<typeof createChangePasswordSchema>>;
+export type ChangePasswordFormValues = z.infer<
+  ReturnType<typeof createChangePasswordSchema>
+>;
 
 export const EMPTY_PASSWORD_FORM: ChangePasswordFormValues = {
   current_password: "",

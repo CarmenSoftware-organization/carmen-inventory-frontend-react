@@ -1,4 +1,3 @@
-
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -75,8 +74,10 @@ export function WfStageNotifications({
       )}
 
       {isMiddle && (
-        <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
-          <span className="text-sm font-semibold text-foreground/80">{t("slaWarning")}</span>
+        <div className="bg-muted/20 space-y-3 rounded-xl border p-4">
+          <span className="text-foreground/80 text-sm font-semibold">
+            {t("slaWarning")}
+          </span>
           <div className="space-y-3">
             <Field orientation="horizontal">
               <Controller
@@ -144,8 +145,10 @@ function NotificationSection({
   const t = useTranslations("systemAdmin.workflow");
 
   return (
-    <div className="space-y-3 rounded-xl border bg-muted/20 p-4">
-      <span className="text-sm font-semibold text-foreground/80">{t(actionKey)}</span>
+    <div className="bg-muted/20 space-y-3 rounded-xl border p-4">
+      <span className="text-foreground/80 text-sm font-semibold">
+        {t(actionKey)}
+      </span>
       <div className="space-y-4">
         <RecipientRow
           form={form}

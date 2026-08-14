@@ -1,4 +1,3 @@
-
 import {
   CalendarRange,
   CheckCircle2,
@@ -245,7 +244,7 @@ export default function PeReview() {
                         setDocsKey(key);
                       }
                     }}
-                    className="animate-fade-in-up group focus-visible:ring-ring cursor-pointer transition hover:-translate-y-0.5 hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="animate-fade-in-up group focus-visible:ring-ring hover:border-primary/40 cursor-pointer transition hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                     style={{ animationDelay: `${index * 60}ms` }}
                   >
                     <CardContent className="space-y-3">
@@ -398,7 +397,7 @@ function SummaryStat({ label, value, hint, tone }: SummaryStatProps) {
         {value}
       </p>
       <span
-        className={`inline-flex items-center rounded-full px-2 py-0.5 text-micro font-semibold ${toneClass}`}
+        className={`text-micro inline-flex items-center rounded-full px-2 py-0.5 font-semibold ${toneClass}`}
       >
         {hint}
       </span>

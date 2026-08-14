@@ -29,7 +29,11 @@ export function useProductsByLocation(
     queryFn: async () => {
       const url = buildUrl(
         API_ENDPOINTS.PRODUCTS_BY_LOCATION(buCode!, locationId!),
-        { perpage: params?.perpage ?? 30, page: params?.page, search: params?.search },
+        {
+          perpage: params?.perpage ?? 30,
+          page: params?.page,
+          search: params?.search,
+        },
       );
       const res = await httpClient.get(url);
       if (!res.ok) throw new Error("Failed to fetch products");

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChevronRight, Search } from "lucide-react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
@@ -264,7 +263,7 @@ export function WfProducts({ form, allProducts, isDisabled }: WfProductsProps) {
         </span>
       </div>
 
-      <div className="max-h-105 overflow-y-auto rounded-xl border bg-card p-3 shadow-sm">
+      <div className="bg-card max-h-105 overflow-y-auto rounded-xl border p-3 shadow-sm">
         {filteredTree.length === 0 ? (
           <p className="text-muted-foreground py-10 text-center text-sm">
             {search ? t("noProductsMatch") : t("noProductsAvailable")}

@@ -1,7 +1,4 @@
-import {
-  createStatusConfig,
-  createStatusFilterOptions,
-} from "./status-config";
+import { createStatusConfig, createStatusFilterOptions } from "./status-config";
 
 /** Badge variant + label for WR document-level status */
 export const WR_STATUS_CONFIG = createStatusConfig([

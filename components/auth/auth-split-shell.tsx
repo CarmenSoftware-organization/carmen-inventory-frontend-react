@@ -131,7 +131,7 @@ export function AuthSplitShell({
       </div>
 
       {/* Footer */}
-      <p className="text-muted-foreground/40 pointer-events-none absolute right-0 bottom-2 left-0 z-10 text-center text-micro-legal">
+      <p className="text-muted-foreground/40 text-micro-legal pointer-events-none absolute right-0 bottom-2 left-0 z-10 text-center">
         {t("platformFooter")}
       </p>
     </div>
@@ -176,7 +176,7 @@ function BentoCard({
       <div className="text-foreground text-xs font-semibold tracking-tight">
         {title}
       </div>
-      <p className="text-muted-foreground mt-0.5 text-micro leading-snug">
+      <p className="text-muted-foreground text-micro mt-0.5 leading-snug">
         {desc}
       </p>
     </div>

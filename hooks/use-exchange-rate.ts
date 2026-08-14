@@ -27,7 +27,10 @@ interface ExternalRateResponse {
  */
 export function useExchangeRateQuery(
   params?: ParamsDto,
-  options?: Omit<UseQueryOptions<PaginatedResponse<ExchangeRateItem>>, "queryKey" | "queryFn">,
+  options?: Omit<
+    UseQueryOptions<PaginatedResponse<ExchangeRateItem>>,
+    "queryKey" | "queryFn"
+  >,
 ) {
   const buCode = useBuCode();
 
@@ -71,12 +74,13 @@ export function useExchangeRateMutation() {
  * update.mutate({ id: rate.id, exchange_rate: 36.0 });
  */
 export function useExchangeRateUpdate() {
-  return useApiMutation<{ id: string; doc_version?: number; exchange_rate: number }>({
+  return useApiMutation<{
+    id: string;
+    doc_version?: number;
+    exchange_rate: number;
+  }>({
     mutationFn: ({ id, ...data }, buCode) =>
-      httpClient.patch(
-        `${API_ENDPOINTS.EXCHANGE_RATES(buCode)}/${id}`,
-        data,
-      ),
+      httpClient.patch(`${API_ENDPOINTS.EXCHANGE_RATES(buCode)}/${id}`, data),
     invalidateKeys: [QUERY_KEYS.EXCHANGE_RATES, QUERY_KEYS.CURRENCIES],
     errorMessage: "Failed to update exchange rate",
   });

@@ -409,9 +409,8 @@ describe("useMarkNotificationRead", () => {
       { source: "broadcast" },
     );
 
-    const cached = queryClient.getQueryData<NotificationListResponse>(
-      UNREAD_QUERY_KEY,
-    );
+    const cached =
+      queryClient.getQueryData<NotificationListResponse>(UNREAD_QUERY_KEY);
     expect(cached?.data.map((n) => n.id)).toEqual(["n2"]);
     expect(cached?.paginate.total).toBe(1);
   });
@@ -488,9 +487,8 @@ describe("useMarkAllNotificationsRead", () => {
       "/api/proxy/api/notifications/mark-all-read",
     );
 
-    const cached = queryClient.getQueryData<NotificationListResponse>(
-      UNREAD_QUERY_KEY,
-    );
+    const cached =
+      queryClient.getQueryData<NotificationListResponse>(UNREAD_QUERY_KEY);
     expect(cached?.data).toHaveLength(0);
     expect(cached?.paginate.total).toBe(0);
   });

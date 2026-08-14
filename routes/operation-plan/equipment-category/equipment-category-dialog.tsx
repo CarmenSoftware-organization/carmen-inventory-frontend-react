@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -72,9 +71,7 @@ export function EquipmentCategoryDialog({
   useEffect(() => {
     if (open) {
       form.reset(
-        equipmentCategory
-          ? getDefaultValues(equipmentCategory)
-          : EMPTY_FORM,
+        equipmentCategory ? getDefaultValues(equipmentCategory) : EMPTY_FORM,
       );
     }
   }, [open, equipmentCategory, form]);
@@ -85,7 +82,11 @@ export function EquipmentCategoryDialog({
     if (isEdit) {
       updateCategory.mutate(
         // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
-        { id: equipmentCategory.id, doc_version: equipmentCategory.doc_version, ...payload },
+        {
+          id: equipmentCategory.id,
+          doc_version: equipmentCategory.doc_version,
+          ...payload,
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -105,7 +106,7 @@ export function EquipmentCategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
-      <DialogContent className="sm:max-w-sm gap-3 p-4">
+      <DialogContent className="gap-3 p-4 sm:max-w-sm">
         <DialogHeader className="gap-0 pb-1">
           <DialogTitle className="text-sm">
             {isEdit
@@ -128,9 +129,7 @@ export function EquipmentCategoryDialog({
                 maxLength={100}
                 {...form.register("name")}
               />
-              <FieldError>
-                {form.formState.errors.name?.message}
-              </FieldError>
+              <FieldError>{form.formState.errors.name?.message}</FieldError>
             </Field>
 
             <Field>
@@ -172,8 +171,12 @@ export function EquipmentCategoryDialog({
             </Button>
             <Button type="submit" size="sm" disabled={isPending}>
               {isPending
-                ? (isEdit ? tf("saving") : tf("creating"))
-                : (isEdit ? tc("save") : tc("create"))}
+                ? isEdit
+                  ? tf("saving")
+                  : tf("creating")
+                : isEdit
+                  ? tc("save")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </form>

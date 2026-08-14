@@ -450,10 +450,7 @@ export function ProductForm({ product }: ProductFormProps) {
           </TabsContent>
           {product?.id && (
             <TabsContent value="eco-labels">
-              <PdTabEco
-                productId={product.id}
-                readOnly={isDisabled}
-              />
+              <PdTabEco productId={product.id} readOnly={isDisabled} />
             </TabsContent>
           )}
         </Tabs>

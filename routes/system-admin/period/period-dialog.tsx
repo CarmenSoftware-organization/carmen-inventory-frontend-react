@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -108,7 +107,7 @@ export function PeriodDialog({
 
   return (
     <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
-      <DialogContent className="sm:max-w-sm gap-3 p-4">
+      <DialogContent className="gap-3 p-4 sm:max-w-sm">
         <DialogHeader className="gap-0 pb-1">
           <DialogTitle className="text-sm">
             {isEdit
@@ -159,9 +158,7 @@ export function PeriodDialog({
 
             <div className="grid grid-cols-2 gap-2">
               <Field data-invalid={!!form.formState.errors.start_at}>
-                <FieldLabel className="text-xs">
-                  {t("startAt")}
-                </FieldLabel>
+                <FieldLabel className="text-xs">{t("startAt")}</FieldLabel>
                 <Controller
                   control={form.control}
                   name="start_at"
@@ -181,9 +178,7 @@ export function PeriodDialog({
               </Field>
 
               <Field data-invalid={!!form.formState.errors.end_at}>
-                <FieldLabel className="text-xs">
-                  {t("endAt")}
-                </FieldLabel>
+                <FieldLabel className="text-xs">{t("endAt")}</FieldLabel>
                 <Controller
                   control={form.control}
                   name="end_at"
@@ -197,9 +192,7 @@ export function PeriodDialog({
                     />
                   )}
                 />
-                <FieldError>
-                  {form.formState.errors.end_at?.message}
-                </FieldError>
+                <FieldError>{form.formState.errors.end_at?.message}</FieldError>
               </Field>
             </div>
 
@@ -231,9 +224,7 @@ export function PeriodDialog({
                   </Select>
                 )}
               />
-              <FieldError>
-                {form.formState.errors.status?.message}
-              </FieldError>
+              <FieldError>{form.formState.errors.status?.message}</FieldError>
             </Field>
           </FieldGroup>
 

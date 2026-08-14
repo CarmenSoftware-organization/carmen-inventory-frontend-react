@@ -90,7 +90,11 @@ export function buildPrintFormOptions({
   if (!current || base.some((o) => o.value === current)) {
     return [systemDefault, ...base];
   }
-  const label = isLoading ? loadingLabel : isError ? unavailableLabel : unknownLabel;
+  const label = isLoading
+    ? loadingLabel
+    : isError
+      ? unavailableLabel
+      : unknownLabel;
   return [systemDefault, { value: current, label }, ...base];
 }
 
@@ -169,7 +173,7 @@ export default function DefaultSettingComponent() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-4xl p-[max(1rem,env(safe-area-inset-bottom))] space-y-4">
+    <div className="mx-auto w-full max-w-4xl space-y-4 p-[max(1rem,env(safe-area-inset-bottom))]">
       <header className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold tracking-tight">

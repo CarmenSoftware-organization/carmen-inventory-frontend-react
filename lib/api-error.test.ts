@@ -27,13 +27,9 @@ describe("ApiError", () => {
   });
 
   it("stores code, message, statusCode, retryable, details", () => {
-    const err = new ApiError(
-      ERROR_CODES.RATE_LIMITED,
-      "slow down",
-      429,
-      true,
-      { retryAfter: 60 },
-    );
+    const err = new ApiError(ERROR_CODES.RATE_LIMITED, "slow down", 429, true, {
+      retryAfter: 60,
+    });
     expect(err.code).toBe("RATE_LIMITED");
     expect(err.message).toBe("slow down");
     expect(err.statusCode).toBe(429);

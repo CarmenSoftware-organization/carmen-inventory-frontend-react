@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -143,7 +142,14 @@ export function VendorCertificateDialog({
     };
 
     if (isEdit) {
-      updateCert.mutate({ id: certificate.id, doc_version: certificate.doc_version, ...payload }, handlers);
+      updateCert.mutate(
+        {
+          id: certificate.id,
+          doc_version: certificate.doc_version,
+          ...payload,
+        },
+        handlers,
+      );
     } else {
       createCert.mutate({ vendor_id: vendorId, ...payload }, handlers);
     }

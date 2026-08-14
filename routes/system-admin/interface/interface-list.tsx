@@ -71,7 +71,9 @@ export default function InterfaceList() {
         <p className="text-muted-foreground mt-0.5 text-sm">{t("desc")}</p>
       </header>
 
-      {isError && <ErrorState message={t("loadError")} onRetry={() => refetch()} />}
+      {isError && (
+        <ErrorState message={t("loadError")} onRetry={() => refetch()} />
+      )}
 
       {!isError && isLoading && (
         <div className="grid gap-3 sm:grid-cols-2">

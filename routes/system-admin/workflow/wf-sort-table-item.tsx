@@ -67,15 +67,16 @@ export default function SortableStageItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex items-center gap-2 rounded-xl border p-1 text-sm transition-all duration-200 ease-out focus-within:ring-2 focus-within:ring-ring",
+        "group focus-within:ring-ring relative flex items-center gap-2 rounded-xl border p-1 text-sm transition-all duration-200 ease-out focus-within:ring-2",
         isSelected
-          ? "border-primary/30 bg-primary/5 shadow-sm ring-1 ring-primary/20 text-primary-foreground"
+          ? "border-primary/30 bg-primary/5 ring-primary/20 text-primary-foreground shadow-sm ring-1"
           : "border-border hover:bg-muted/50 hover:border-border/80 text-muted-foreground hover:text-foreground",
-        isDragging && "opacity-80 scale-[0.98] shadow-lg z-50 bg-background ring-1 ring-border cursor-grabbing",
+        isDragging &&
+          "bg-background ring-border z-50 scale-[0.98] cursor-grabbing opacity-80 shadow-lg ring-1",
       )}
     >
       {isSelected && (
-        <div className="absolute inset-y-0 left-0 w-1 rounded-l-lg bg-primary" />
+        <div className="bg-primary absolute inset-y-0 left-0 w-1 rounded-l-lg" />
       )}
       {isDragDisabled ? (
         <span className="w-4 shrink-0" />
@@ -84,8 +85,10 @@ export default function SortableStageItem({
           type="button"
           className={cn(
             "cursor-grab touch-none transition-colors",
-            isSelected ? "text-primary/70 hover:text-primary" : "text-muted-foreground/50 hover:text-foreground",
-            isDragging && "cursor-grabbing text-foreground"
+            isSelected
+              ? "text-primary/70 hover:text-primary"
+              : "text-muted-foreground/50 hover:text-foreground",
+            isDragging && "text-foreground cursor-grabbing",
           )}
           aria-label="Drag to reorder"
           {...attributes}
@@ -98,17 +101,26 @@ export default function SortableStageItem({
         type="button"
         className={cn(
           "flex min-w-0 flex-1 cursor-pointer items-center gap-3 bg-transparent text-left transition-colors",
-          isSelected ? "text-foreground font-medium" : "text-foreground"
+          isSelected ? "text-foreground font-medium" : "text-foreground",
         )}
         onClick={onClick}
       >
         {isLast ? (
-          <CheckCircle2 className={cn("size-3.5 shrink-0", isSelected ? "text-primary" : "text-muted-foreground")} />
+          <CheckCircle2
+            className={cn(
+              "size-3.5 shrink-0",
+              isSelected ? "text-primary" : "text-muted-foreground",
+            )}
+          />
         ) : (
-          <span className={cn(
-            "flex size-5 shrink-0 items-center justify-center rounded-full text-micro-legal font-semibold transition-colors",
-            isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground group-hover:shadow-sm group-hover:ring-1 group-hover:ring-border"
-          )}>
+          <span
+            className={cn(
+              "text-micro-legal flex size-5 shrink-0 items-center justify-center rounded-full font-semibold transition-colors",
+              isSelected
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground group-hover:ring-border group-hover:shadow-sm group-hover:ring-1",
+            )}
+          >
             {index + 1}
           </span>
         )}
@@ -122,7 +134,7 @@ export default function SortableStageItem({
                     className="inline-flex animate-pulse"
                     aria-label={t("warningNoUsers")}
                   >
-                    <AlertCircle className="size-4 text-destructive" />
+                    <AlertCircle className="text-destructive size-4" />
                   </span>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="text-sm">
@@ -146,10 +158,14 @@ export default function SortableStageItem({
               </Tooltip>
             ) : (
               userCount > 0 && (
-                <span className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-micro-legal font-medium tabular-nums transition-colors",
-                  isSelected ? "bg-primary/20 text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground group-hover:shadow-sm"
-                )}>
+                <span
+                  className={cn(
+                    "text-micro-legal inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 font-medium tabular-nums transition-colors",
+                    isSelected
+                      ? "bg-primary/20 text-primary-foreground"
+                      : "bg-muted text-muted-foreground group-hover:bg-background group-hover:text-foreground group-hover:shadow-sm",
+                  )}
+                >
                   <Users className="size-3" aria-hidden="true" />
                   {userCount}
                 </span>
@@ -158,7 +174,7 @@ export default function SortableStageItem({
           </span>
         )}
       </button>
-      
+
       {onDelete && !isDragDisabled && (
         <button
           type="button"
@@ -168,7 +184,9 @@ export default function SortableStageItem({
           }}
           className={cn(
             "flex shrink-0 cursor-pointer items-center justify-center rounded p-1.5 transition-all duration-200",
-            isSelected ? "text-destructive hover:bg-destructive/10" : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            isSelected
+              ? "text-destructive hover:bg-destructive/10"
+              : "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
           )}
           aria-label={t("deleteTitle")}
         >

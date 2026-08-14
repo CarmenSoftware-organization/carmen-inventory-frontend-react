@@ -28,14 +28,19 @@ describe("prepareApproveDetails stage_status", () => {
     // เคสของ bug: item ถูก reject (current_stage_status) แต่ stage_status ว่าง
     // ต้องไม่ถูกส่งเป็น approve
     expect(
-      statusOf(makeItem({ stage_status: "", current_stage_status: "rejected" })),
+      statusOf(
+        makeItem({ stage_status: "", current_stage_status: "rejected" }),
+      ),
     ).toBe("reject");
   });
 
   it("keeps an item rejected this session as reject", () => {
     expect(
       statusOf(
-        makeItem({ stage_status: "rejected", current_stage_status: "rejected" }),
+        makeItem({
+          stage_status: "rejected",
+          current_stage_status: "rejected",
+        }),
       ),
     ).toBe("reject");
   });

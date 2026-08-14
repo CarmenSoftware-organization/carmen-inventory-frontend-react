@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Building2, CalendarRange } from "lucide-react";
@@ -10,10 +9,7 @@ import {
 } from "@/components/ui/field";
 import { LookupDepartment } from "@/components/lookup/lookup-department";
 import { LookupPhysicalCountPeriod } from "@/components/lookup/lookup-physical-count-period";
-import {
-  CardLabel,
-  GlassCard,
-} from "@/components/share/glass-card";
+import { CardLabel, GlassCard } from "@/components/share/glass-card";
 import type { PhysicalCountFormValues } from "./pc-form-schema";
 
 interface PcGeneralFieldsProps {
@@ -37,7 +33,7 @@ export function PcGeneralFields({
         </CardLabel>
         <FieldGroup className="gap-3">
           <Field data-invalid={!!form.formState.errors.department_id}>
-            <FieldLabel className="text-muted-foreground inline-flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
+            <FieldLabel className="text-muted-foreground text-micro-eyebrow inline-flex items-center gap-1 font-semibold tracking-widest uppercase">
               <Building2 className="size-2.5" />
               {tfl("department")}
             </FieldLabel>
@@ -58,7 +54,7 @@ export function PcGeneralFields({
           </Field>
 
           <Field>
-            <FieldLabel className="text-muted-foreground inline-flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
+            <FieldLabel className="text-muted-foreground text-micro-eyebrow inline-flex items-center gap-1 font-semibold tracking-widest uppercase">
               <CalendarRange className="size-2.5" />
               {tfl("physicalCountPeriod")}
             </FieldLabel>

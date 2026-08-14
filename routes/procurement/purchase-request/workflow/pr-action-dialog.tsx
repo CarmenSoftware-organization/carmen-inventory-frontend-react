@@ -1,4 +1,3 @@
-
 import { useState, type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -177,7 +176,7 @@ export function PrActionDialog({
           <div className="flex-1 space-y-4 overflow-y-auto border-t px-5 py-4">
             {showStages && (
               <section className="space-y-2">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold tracking-wider uppercase">
+                <div className="text-muted-foreground text-micro-legal flex items-center gap-1.5 font-semibold tracking-wider uppercase">
                   <Workflow className="size-3" />
                   {tfl("stage")}
                   <span className="text-destructive">*</span>
@@ -221,7 +220,7 @@ export function PrActionDialog({
 
             {showMessage && hasItems && (
               <section className="space-y-2">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold tracking-wider uppercase">
+                <div className="text-muted-foreground text-micro-legal flex items-center gap-1.5 font-semibold tracking-wider uppercase">
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                 </div>
@@ -232,7 +231,7 @@ export function PrActionDialog({
                       className="bg-muted/30 space-y-1.5 rounded-lg border p-2"
                     >
                       <div className="flex items-start gap-2">
-                        <div className="bg-background text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md border text-micro-legal font-semibold tabular-nums">
+                        <div className="bg-background text-muted-foreground text-micro-legal flex size-5 shrink-0 items-center justify-center rounded-md border font-semibold tabular-nums">
                           {i + 1}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -261,7 +260,7 @@ export function PrActionDialog({
 
             {showMessage && !hasItems && (
               <section className="space-y-1.5">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold tracking-wider uppercase">
+                <div className="text-muted-foreground text-micro-legal flex items-center gap-1.5 font-semibold tracking-wider uppercase">
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                   <span className="text-muted-foreground font-normal normal-case">

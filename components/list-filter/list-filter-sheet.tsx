@@ -4,7 +4,11 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import { FieldLabel } from "@/components/ui/field";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -50,7 +54,12 @@ interface ListFilterSheetProps {
  * ```
  */
 export function ListFilterSheet({
-  fields, values, setValue, onClearAll, onSaveClick, activeCount,
+  fields,
+  values,
+  setValue,
+  onClearAll,
+  onSaveClick,
+  activeCount,
 }: ListFilterSheetProps) {
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -76,7 +85,7 @@ export function ListFilterSheet({
             <Badge
               variant="secondary"
               size="xs"
-              className="absolute -top-1 -right-1 h-4 min-w-4 px-1 text-micro-legal tabular-nums"
+              className="text-micro-legal absolute -top-1 -right-1 h-4 min-w-4 px-1 tabular-nums"
             >
               {activeCount}
             </Badge>
@@ -85,7 +94,11 @@ export function ListFilterSheet({
       </SheetTrigger>
       <SheetContent
         side={isMobile ? "bottom" : "right"}
-        className={isMobile ? "max-h-[80vh] overflow-y-auto" : "w-80 sm:w-96 overflow-y-auto"}
+        className={
+          isMobile
+            ? "max-h-[80vh] overflow-y-auto"
+            : "w-80 overflow-y-auto sm:w-96"
+        }
       >
         <SheetHeader>
           <SheetTitle>{tc("filter")}</SheetTitle>
@@ -130,9 +143,7 @@ export function ListFilterSheet({
             >
               {tv("saveCurrent")}
             </Button>
-            <Button onClick={() => setOpen(false)}>
-              {tc("done")}
-            </Button>
+            <Button onClick={() => setOpen(false)}>{tc("done")}</Button>
           </div>
         </div>
       </SheetContent>

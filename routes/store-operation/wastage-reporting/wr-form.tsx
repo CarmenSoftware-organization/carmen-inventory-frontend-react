@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -213,7 +212,7 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
   return (
     // px-4 ให้ header+form มี gutter (full-width flush เหมือน pc/product)
     <div className="space-y-4 px-4">
-      <div className="sticky top-0 z-10 bg-background py-2">
+      <div className="bg-background sticky top-0 z-10 py-2">
         <DocFormHeader
           title={isAdd ? labels.title : (wastageReport?.wr_no ?? "")}
           backLabel={tc("goBack")}
@@ -226,7 +225,9 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
 
       <form
         id="wastage-report-form"
-        onSubmit={form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
         className="space-y-4"
       >
         <div className="max-w-3xl space-y-3">
@@ -276,13 +277,11 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
               </div>
 
               <Field data-invalid={!!form.formState.errors.reason}>
-                <FieldLabel htmlFor="wr-reason">
-                  {tfl("reason")}
-                </FieldLabel>
+                <FieldLabel htmlFor="wr-reason">{tfl("reason")}</FieldLabel>
                 <Textarea
                   id="wr-reason"
                   placeholder={t("reasonPlaceholder")}
-                  className="text-xs min-h-13"
+                  className="min-h-13 text-xs"
                   disabled={isDisabled}
                   maxLength={256}
                   {...form.register("reason")}
@@ -340,7 +339,7 @@ const InfoCell = ({
   return (
     <div>
       <span className="text-muted-foreground">{label}</span>
-      <p className="font-semibold truncate">{value || "—"}</p>
+      <p className="truncate font-semibold">{value || "—"}</p>
     </div>
   );
 };

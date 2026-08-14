@@ -2,10 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement, type ReactNode } from "react";
-import {
-  useUploadUserSignature,
-  useDeleteUserSignature,
-} from "../use-profile";
+import { useUploadUserSignature, useDeleteUserSignature } from "../use-profile";
 
 vi.mock("@/lib/http-client", () => ({
   httpClient: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
@@ -21,7 +18,11 @@ function createWrapper() {
     },
   });
   function Wrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
+    return createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      children,
+    );
   }
   return Wrapper;
 }

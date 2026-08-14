@@ -44,7 +44,7 @@ export function LegalPage({
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
             {document.title}
           </h1>
-          <p className="text-muted-foreground mt-2 text-micro-legal">
+          <p className="text-muted-foreground text-micro-legal mt-2">
             {document.effective}
           </p>
           <p className="text-muted-foreground mt-5 text-sm leading-relaxed">
@@ -92,8 +92,16 @@ function LegalHeader() {
     <header className="border-border/60 border-b">
       <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-4">
         <Link to="/login" className="shrink-0">
-          <img src={brandingLightUrl} alt="Carmen" className="h-7 w-auto dark:hidden" />
-          <img src={brandingDarkUrl} alt="Carmen" className="hidden h-7 w-auto dark:block" />
+          <img
+            src={brandingLightUrl}
+            alt="Carmen"
+            className="h-7 w-auto dark:hidden"
+          />
+          <img
+            src={brandingDarkUrl}
+            alt="Carmen"
+            className="hidden h-7 w-auto dark:block"
+          />
         </Link>
         <div className="ml-auto flex items-center gap-3">
           <LocaleToggle />
@@ -125,7 +133,7 @@ function LocaleToggle() {
           onClick={() => switchLocale(loc)}
           aria-pressed={locale === loc}
           className={cn(
-            "rounded-sm px-2 py-1 text-micro font-semibold transition-colors",
+            "text-micro rounded-sm px-2 py-1 font-semibold transition-colors",
             locale === loc
               ? "bg-card text-foreground"
               : "text-muted-foreground hover:text-foreground",
@@ -138,11 +146,7 @@ function LocaleToggle() {
   );
 }
 
-function TableOfContents({
-  document,
-}: {
-  readonly document: LegalDocument;
-}) {
+function TableOfContents({ document }: { readonly document: LegalDocument }) {
   return (
     <nav className="hidden lg:block" aria-label={document.tocLabel}>
       <div className="sticky top-14">

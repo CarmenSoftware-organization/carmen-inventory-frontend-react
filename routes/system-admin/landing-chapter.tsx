@@ -26,7 +26,7 @@ export function LandingChapter({
           <div className="text-foreground/25 text-3xl leading-[0.85] font-semibold tracking-tight md:text-4xl lg:text-5xl">
             {chapter.num}
           </div>
-          <div className="border-border text-muted-foreground mt-2 inline-block border-t-[1.5px] pt-1.5 text-micro-eyebrow font-semibold tracking-[0.14em] uppercase">
+          <div className="border-border text-muted-foreground text-micro-eyebrow mt-2 inline-block border-t-[1.5px] pt-1.5 font-semibold tracking-[0.14em] uppercase">
             {t(`chapters.${chapter.key}.kicker`)}
           </div>
         </div>
@@ -40,7 +40,9 @@ export function LandingChapter({
         </div>
       </div>
 
-      <div className={`mt-8 md:mt-10 grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 ${cols}`}>
+      <div
+        className={`mt-8 grid grid-cols-1 gap-5 sm:gap-6 md:mt-10 md:grid-cols-2 ${cols}`}
+      >
         {chapter.modules.map((m) => (
           <LandingModuleCard key={m.key} mod={m} t={t} />
         ))}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -107,7 +106,9 @@ export default function PriceListExternalComponent({
     } catch (err) {
       // surface ข้อความจริงจาก backend (เช่น validation / ลิงก์หมดอายุ) ให้ vendor
       // ภายนอกเห็น แทนข้อความ generic — invalidate/refetch จัดการ reset เอง
-      toast.error(err instanceof HttpError ? err.message : "Failed to save changes");
+      toast.error(
+        err instanceof HttpError ? err.message : "Failed to save changes",
+      );
     }
   };
 
@@ -203,19 +204,19 @@ export default function PriceListExternalComponent({
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-8">
-      <div className="bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
-        <div className="p-6 md:p-8 space-y-8">
+    <div className="mx-auto max-w-6xl px-4 md:px-8">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="space-y-8 p-6 md:p-8">
           <PriceListExternalHeader data={data} />
-          
-          <div className="border-t border-slate-100 pt-6 space-y-6">
+
+          <div className="space-y-6 border-t border-slate-100 pt-6">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {isViewMode
                   ? "Items requested for pricing."
                   : "Enter your price and tax for each item, then submit."}
               </p>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex shrink-0 items-center gap-2">
                 {/* ดาวน์โหลดค่าปัจจุบันไปกรอก/ดูใน excel — ใช้ได้ทุกสถานะ */}
                 <Button
                   variant="outline"

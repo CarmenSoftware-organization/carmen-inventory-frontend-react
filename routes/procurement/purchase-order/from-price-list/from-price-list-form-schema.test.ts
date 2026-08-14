@@ -71,9 +71,9 @@ describe("createPoSchema (used by from-price-list wizard)", () => {
     const result = schema.safeParse(makeValid({ workflow_id: "" }));
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(
-        result.error.issues.some((i) => i.path[0] === "workflow_id"),
-      ).toBe(true);
+      expect(result.error.issues.some((i) => i.path[0] === "workflow_id")).toBe(
+        true,
+      );
     }
   });
 
@@ -104,9 +104,9 @@ describe("createPoSchema (used by from-price-list wizard)", () => {
     const result = schema.safeParse(makeValid({ currency_id: "" }));
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(
-        result.error.issues.some((i) => i.path[0] === "currency_id"),
-      ).toBe(true);
+      expect(result.error.issues.some((i) => i.path[0] === "currency_id")).toBe(
+        true,
+      );
     }
   });
 });

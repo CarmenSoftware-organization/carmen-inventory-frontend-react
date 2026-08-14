@@ -1,4 +1,3 @@
-
 import { lazy, Suspense } from "react";
 import { useTranslations } from "use-intl";
 import { useEcoLabel, useDeleteEcoLabel } from "@/hooks/use-eco-label";

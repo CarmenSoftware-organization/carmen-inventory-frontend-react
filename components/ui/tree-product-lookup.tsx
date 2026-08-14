@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChevronRight, Search, Folder, Box, Layers } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -186,7 +185,7 @@ export function TreeProductLookup({
       {/* Header — matches DataGrid style */}
       <div className="bg-muted/40 flex h-9 items-center gap-2 border-b px-3">
         <span className="text-xs font-semibold">Product Catalog</span>
-        <span className="bg-muted text-muted-foreground ml-auto inline-flex h-4.5 min-w-5 items-center justify-center rounded px-1 text-micro-legal font-semibold tabular-nums">
+        <span className="bg-muted text-muted-foreground text-micro-legal ml-auto inline-flex h-4.5 min-w-5 items-center justify-center rounded px-1 font-semibold tabular-nums">
           {selectedProductIds.size}/{totalProducts}
         </span>
       </div>
@@ -338,7 +337,7 @@ const TreeNodeRow = ({
           onClick={() => onToggleExpand(node.id)}
         >
           <span className="text-xs font-semibold">{node.name}</span>
-          <span className="bg-muted text-muted-foreground inline-flex h-4 min-w-4 items-center justify-center rounded px-1 text-micro-eyebrow font-semibold tabular-nums">
+          <span className="bg-muted text-muted-foreground text-micro-eyebrow inline-flex h-4 min-w-4 items-center justify-center rounded px-1 font-semibold tabular-nums">
             {leafCount}
           </span>
         </button>

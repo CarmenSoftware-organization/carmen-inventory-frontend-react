@@ -142,14 +142,14 @@ export function useCreateWorkflow() {
  * update.mutate({ id, ...values });
  */
 export function useUpdateWorkflow() {
-  return useApiMutation<
-    WorkflowPayload & { id: string; doc_version?: number }
-  >({
-    mutationFn: ({ id, ...data }, buCode) =>
-      httpClient.put(`${API_ENDPOINTS.WORKFLOWS(buCode)}/${id}`, data),
-    invalidateKeys: [QUERY_KEYS.WORKFLOWS],
-    errorMessage: "Failed to update workflow",
-  });
+  return useApiMutation<WorkflowPayload & { id: string; doc_version?: number }>(
+    {
+      mutationFn: ({ id, ...data }, buCode) =>
+        httpClient.put(`${API_ENDPOINTS.WORKFLOWS(buCode)}/${id}`, data),
+      invalidateKeys: [QUERY_KEYS.WORKFLOWS],
+      errorMessage: "Failed to update workflow",
+    },
+  );
 }
 
 /**

@@ -66,7 +66,7 @@ export const ProductCell = memo(function ProductCell({
           />
         </div>
         <p
-          className="text-muted-foreground truncate text-micro-legal"
+          className="text-muted-foreground text-micro-legal truncate"
           title={productLocalName || undefined}
         >
           {productLocalName || <span className="text-muted-foreground">—</span>}
@@ -131,7 +131,7 @@ export const ProductCell = memo(function ProductCell({
                     </p>
                   </div>
                   {(productLocalName || unitName) && (
-                    <div className="text-foreground/60 mt-2 flex items-center gap-2 border-t pt-2 text-micro">
+                    <div className="text-foreground/60 text-micro mt-2 flex items-center gap-2 border-t pt-2">
                       {productLocalName && <span>{productLocalName}</span>}
                       {productLocalName && unitName && (
                         <span aria-hidden="true">·</span>

@@ -107,7 +107,7 @@ export function StatusHero({
           {doneDisplay}
         </span>
         <span className="text-muted-foreground text-sm">/ {totalDisplay}</span>
-        <span className="bg-primary/10 text-primary ml-auto rounded-full px-1.5 py-0.5 text-micro-legal font-semibold tabular-nums">
+        <span className="bg-primary/10 text-primary text-micro-legal ml-auto rounded-full px-1.5 py-0.5 font-semibold tabular-nums">
           {pct}%
         </span>
       </div>
@@ -125,7 +125,7 @@ export function StatusHero({
         <HeroCell k={labels.done} v={done} />
       </div>
 
-      <div className="text-muted-foreground mt-2 text-micro">
+      <div className="text-muted-foreground text-micro mt-2">
         {labels.heroFooter}
       </div>
     </div>
@@ -140,7 +140,7 @@ function HeroCell({ k, v }: { readonly k: string; readonly v: number }) {
       </div>
       <div
         className={cn(
-          "mt-0.5 text-micro font-semibold tabular-nums",
+          "text-micro mt-0.5 font-semibold tabular-nums",
           v ? "text-foreground" : "text-muted-foreground/60",
         )}
       >
@@ -304,7 +304,7 @@ export function SectionHeader({
         <h2 className="text-foreground text-sm font-semibold tracking-tight">
           {title}
         </h2>
-        <span className="text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5 text-micro-legal font-semibold tabular-nums">
+        <span className="text-muted-foreground bg-muted/60 text-micro-legal rounded-full px-2 py-0.5 font-semibold tabular-nums">
           {count}
         </span>
       </div>
@@ -347,7 +347,7 @@ export function LocationAvatar({
         </div>
       </div>
       {typeof index === "number" && (
-        <div className="bg-foreground text-background absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full text-micro-eyebrow font-semibold">
+        <div className="bg-foreground text-background text-micro-eyebrow absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full font-semibold">
           {String(index + 1).padStart(2, "0")}
         </div>
       )}
@@ -379,7 +379,7 @@ export function LocationHeading({
       </Link>
       <Link
         to={href}
-        className="text-muted-foreground hover:text-foreground shrink-0 text-micro-legal tracking-wide uppercase transition-colors"
+        className="text-muted-foreground hover:text-foreground text-micro-legal shrink-0 tracking-wide uppercase transition-colors"
       >
         {code}
       </Link>
@@ -425,7 +425,7 @@ export function ProductAvatar({
         </div>
       </div>
       {typeof index === "number" && (
-        <div className="bg-foreground text-background absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full text-micro-eyebrow font-semibold">
+        <div className="bg-foreground text-background text-micro-eyebrow absolute -top-1 -left-1 flex size-4 items-center justify-center rounded-full font-semibold">
           {String(index + 1).padStart(2, "0")}
         </div>
       )}

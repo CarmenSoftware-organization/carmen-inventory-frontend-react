@@ -17,7 +17,11 @@ export function useProductsWithMovementAtLocation(
   const buCode = useBuCode();
 
   return useQuery<ProductWithMovementAtLocation[]>({
-    queryKey: [QUERY_KEYS.PRODUCTS_WITH_MOVEMENT_AT_LOCATION, buCode, locationId],
+    queryKey: [
+      QUERY_KEYS.PRODUCTS_WITH_MOVEMENT_AT_LOCATION,
+      buCode,
+      locationId,
+    ],
     queryFn: async () => {
       const res = await httpClient.get(
         API_ENDPOINTS.PRODUCTS_WITH_MOVEMENT_AT_LOCATION(buCode!, locationId!),

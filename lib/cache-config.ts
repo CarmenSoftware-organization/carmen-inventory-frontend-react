@@ -21,4 +21,3 @@ export const CACHE_DYNAMIC = {
   staleTime: 1 * 60 * 1000,
   gcTime: 5 * 60 * 1000,
 } as const;
-

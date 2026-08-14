@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -64,7 +63,10 @@ export function ScheduleFiltersField({
 interface ScheduleFilterRowProps {
   readonly form: UseFormReturn<ScheduleFormValues>;
   readonly field: ReportScheduleDialogField;
-  readonly lookups: Record<string, ReadonlyArray<{ label: string; value: string }>>;
+  readonly lookups: Record<
+    string,
+    ReadonlyArray<{ label: string; value: string }>
+  >;
   readonly disabled: boolean;
 }
 

@@ -75,12 +75,7 @@ export function RoleHero({
             <X className="size-3.5" aria-hidden="true" />
             {tc("cancel")}
           </Button>
-          <Button
-            type="submit"
-            size="sm"
-            form="role-form"
-            disabled={isSaving}
-          >
+          <Button type="submit" size="sm" form="role-form" disabled={isSaving}>
             <Save className="size-3.5" aria-hidden="true" />
             {isSaving ? tf("saving") : tc("save")}
           </Button>

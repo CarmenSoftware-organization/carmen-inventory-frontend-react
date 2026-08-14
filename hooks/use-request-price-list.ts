@@ -103,10 +103,7 @@ export function useExportRequestPriceList() {
     if (!buCode) throw new Error("Missing buCode");
     return exportToXlsx<RequestPriceList>({
       fetch: async () => {
-        const url = buildUrl(
-          API_ENDPOINTS.REQUEST_PRICE_LISTS(buCode),
-          params,
-        );
+        const url = buildUrl(API_ENDPOINTS.REQUEST_PRICE_LISTS(buCode), params);
         const res = await httpClient.get(url);
         if (!res.ok) throw new Error("Failed to fetch request price lists");
         const json = await res.json();

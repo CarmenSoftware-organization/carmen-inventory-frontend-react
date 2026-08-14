@@ -1,4 +1,3 @@
-
 import { startTransition, useEffect, useState } from "react";
 import { APP_VERSION } from "@/lib/version";
 
@@ -63,7 +62,8 @@ export function useWhatsNew() {
       .then(({ LATEST }) => {
         if (cancelled) return;
         const c = LATEST?.changes;
-        const hasChanges = !!c && c.added.length + c.fixed.length + c.changed.length > 0;
+        const hasChanges =
+          !!c && c.added.length + c.fixed.length + c.changed.length > 0;
         if (hasChanges) startTransition(() => setShouldAutoOpen(true));
       })
       .catch(() => {

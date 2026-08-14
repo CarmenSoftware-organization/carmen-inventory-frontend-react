@@ -24,10 +24,7 @@ import { CACHE_STATIC } from "@/lib/cache-config";
  * @example
  * const { data } = useRole({ page: 1, perpage: 20 });
  */
-export function useRole(
-  params?: ParamsDto,
-  options?: { enabled?: boolean },
-) {
+export function useRole(params?: ParamsDto, options?: { enabled?: boolean }) {
   const buCode = useBuCode();
 
   return useQuery<PaginatedResponse<Role>>({
@@ -96,10 +93,7 @@ export function useCreateRole() {
 export function useUpdateRole() {
   return useApiMutation<UpdateRoleDto & { id: string; doc_version?: number }>({
     mutationFn: ({ id, ...data }, buCode) =>
-      httpClient.put(
-        `${API_ENDPOINTS.APPLICATION_ROLES(buCode)}/${id}`,
-        data,
-      ),
+      httpClient.put(`${API_ENDPOINTS.APPLICATION_ROLES(buCode)}/${id}`, data),
     invalidateKeys: [QUERY_KEYS.APPLICATION_ROLES],
     errorMessage: "Failed to update role",
   });
@@ -116,9 +110,7 @@ export function useUpdateRole() {
 export function useDeleteRole() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>
-      httpClient.delete(
-        `${API_ENDPOINTS.APPLICATION_ROLES(buCode)}/${id}`,
-      ),
+      httpClient.delete(`${API_ENDPOINTS.APPLICATION_ROLES(buCode)}/${id}`),
     invalidateKeys: [QUERY_KEYS.APPLICATION_ROLES],
     errorMessage: "Failed to delete role",
   });

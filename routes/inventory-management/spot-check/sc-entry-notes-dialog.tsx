@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -12,7 +11,10 @@ import {
   useSpotCheckDetailComments,
 } from "@/hooks/use-spot-check-comments";
 
-export type { SavedEvidenceImage, SavedNotePayload } from "../shared/entry-notes-dialog";
+export type {
+  SavedEvidenceImage,
+  SavedNotePayload,
+} from "../shared/entry-notes-dialog";
 
 interface ScEntryNotesDialogProps {
   readonly open: boolean;

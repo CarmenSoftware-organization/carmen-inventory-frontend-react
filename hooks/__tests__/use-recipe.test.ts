@@ -26,7 +26,11 @@ function createWrapper() {
     },
   });
   function Wrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
+    return createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      children,
+    );
   }
   return Wrapper;
 }
@@ -38,7 +42,8 @@ function partsOf(fetchMock: ReturnType<typeof vi.fn>) {
   return { url, init, body };
 }
 
-const pngFile = (name: string) => new File(["data"], name, { type: "image/png" });
+const pngFile = (name: string) =>
+  new File(["data"], name, { type: "image/png" });
 
 describe("useCreateRecipe (multipart)", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
@@ -196,9 +201,12 @@ describe("useUpdateRecipe (multipart full-sync)", () => {
 
   it("surfaces the server error message on failure", async () => {
     fetchMock.mockResolvedValue(
-      new Response(JSON.stringify({ message: "file_index 3 is out of range" }), {
-        status: 400,
-      }),
+      new Response(
+        JSON.stringify({ message: "file_index 3 is out of range" }),
+        {
+          status: 400,
+        },
+      ),
     );
     const { result } = renderHook(() => useUpdateRecipe(), {
       wrapper: createWrapper(),

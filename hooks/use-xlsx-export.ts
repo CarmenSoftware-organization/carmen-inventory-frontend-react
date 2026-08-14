@@ -27,7 +27,7 @@ interface ExportArgs<T> {
 export function useXlsxExport() {
   const [isExporting, setIsExporting] = useState(false);
 
-  const exportToXlsx = async <T,>(args: ExportArgs<T>): Promise<number> => {
+  const exportToXlsx = async <T>(args: ExportArgs<T>): Promise<number> => {
     setIsExporting(true);
     try {
       const rows = await args.fetch();

@@ -182,7 +182,11 @@ export default function PurchaseRequestComponent() {
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
-          <PrFilterStatus value={value} onChange={onChange} className="w-full" />
+          <PrFilterStatus
+            value={value}
+            onChange={onChange}
+            className="w-full"
+          />
         ),
       },
       {
@@ -197,7 +201,11 @@ export default function PurchaseRequestComponent() {
         labelKey: "field.workflow",
         workflowType: WORKFLOW_TYPE.PR,
       },
-      { key: "department", control: "department", labelKey: "field.department" },
+      {
+        key: "department",
+        control: "department",
+        labelKey: "field.department",
+      },
       { key: "user_id", control: "requester", labelKey: "common.requester" },
       {
         key: "pr_date",
@@ -387,8 +395,7 @@ export default function PurchaseRequestComponent() {
     setBatchRejectOpen(true);
   };
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">

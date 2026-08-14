@@ -17,7 +17,10 @@ import { cn } from "@/lib/utils";
 const STATUS_STYLE: Record<string, { icon: LucideIcon; className: string }> = {
   pending: { icon: Clock, className: "bg-info text-black" },
   approved: { icon: Check, className: "bg-success text-black" },
-  rejected: { icon: X, className: "bg-destructive text-destructive-foreground" },
+  rejected: {
+    icon: X,
+    className: "bg-destructive text-destructive-foreground",
+  },
   review: { icon: Eye, className: "bg-warning text-black" },
 };
 

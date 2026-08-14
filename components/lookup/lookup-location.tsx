@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
@@ -69,20 +68,25 @@ export function LookupLocation({
 
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const { items: locations, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination<Location>({
-      useListHook: useLocation,
-      search,
-      perpage: 30,
-      enabled: hasOpened || !!value,
-      filter: (l: Location) => {
-        if (!l.is_active) return false;
-        if (excludedSet && excludedSet.has(l.id)) return false;
-        if (locationTypes && !locationTypes.includes(l.location_type))
-          return false;
-        return true;
-      },
-    });
+  const {
+    items: locations,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination<Location>({
+    useListHook: useLocation,
+    search,
+    perpage: 30,
+    enabled: hasOpened || !!value,
+    filter: (l: Location) => {
+      if (!l.is_active) return false;
+      if (excludedSet && excludedSet.has(l.id)) return false;
+      if (locationTypes && !locationTypes.includes(l.location_type))
+        return false;
+      return true;
+    },
+  });
 
   return (
     <LookupCombobox

@@ -1,4 +1,3 @@
-
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -11,9 +10,7 @@ export function GlassCard({
   readonly children: React.ReactNode;
 }) {
   return (
-    <Card className="bg-card gap-0 rounded-xl px-4 py-3.5">
-      {children}
-    </Card>
+    <Card className="bg-card gap-0 rounded-xl px-4 py-3.5">{children}</Card>
   );
 }
 
@@ -24,7 +21,7 @@ export function CardLabel({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="text-muted-foreground mb-2 text-micro-eyebrow font-semibold tracking-[0.14em] uppercase">
+    <div className="text-muted-foreground text-micro-eyebrow mb-2 font-semibold tracking-[0.14em] uppercase">
       {children}
     </div>
   );
@@ -61,7 +58,7 @@ export function PlainText({
         {value || "—"}
       </div>
       {subtitle && !empty && (
-        <div className="text-muted-foreground mt-0.5 text-micro">
+        <div className="text-muted-foreground text-micro mt-0.5">
           {subtitle}
         </div>
       )}
@@ -85,8 +82,8 @@ export function StatusPill({
         statusConfig.className,
         "rounded-full border-transparent font-semibold tracking-widest uppercase",
         large
-          ? "px-2 py-0.5 text-micro-legal"
-          : "px-1.5 py-0.5 text-micro-eyebrow",
+          ? "text-micro-legal px-2 py-0.5"
+          : "text-micro-eyebrow px-1.5 py-0.5",
         inline && "border-0",
       )}
     >
@@ -109,7 +106,7 @@ export function MetaChip({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold",
+        "text-micro inline-flex items-center gap-1.5 rounded-full border px-2 py-1 font-semibold",
         empty
           ? "border-primary/40 bg-primary/5 text-primary/80 border-dashed italic"
           : "border-border bg-muted text-foreground",
@@ -152,7 +149,7 @@ export function DateCard({
     >
       <div
         className={cn(
-          "mb-1 flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase",
+          "text-micro-eyebrow mb-1 flex items-center gap-1 font-semibold tracking-widest uppercase",
           highlight ? "text-primary" : "text-muted-foreground",
         )}
       >
@@ -176,7 +173,7 @@ export function InfoRow({
 }) {
   const isNode = typeof v === "object" && v !== null;
   return (
-    <div className="flex items-center justify-between gap-2 text-micro">
+    <div className="text-micro flex items-center justify-between gap-2">
       <span className="text-muted-foreground shrink-0">{k}</span>
       {isNode ? (
         v

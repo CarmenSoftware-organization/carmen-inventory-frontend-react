@@ -101,7 +101,9 @@ function renderGridContent<TEntity extends { id: string }>({
 interface DeleteFlowArgs<TEntity extends { id: string }> {
   readonly deleteTarget: TEntity | null;
   readonly setDeleteTarget: (entity: TEntity | null) => void;
-  readonly deleteMutation: ReturnType<ConfigListTemplateProps<TEntity>["useDelete"]>;
+  readonly deleteMutation: ReturnType<
+    ConfigListTemplateProps<TEntity>["useDelete"]
+  >;
   readonly renderDeleteDialog?: ConfigListTemplateProps<TEntity>["renderDeleteDialog"];
   readonly entityNameField: keyof TEntity & string;
   readonly t: ReturnType<typeof useTranslations>;
@@ -307,8 +309,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
     disabled: !isMobile,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div

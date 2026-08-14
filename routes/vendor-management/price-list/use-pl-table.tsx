@@ -98,7 +98,10 @@ export function usePriceListTable({
       ),
       enableSorting: false,
       cell: ({ row }) => formatPeriod(row.getValue("effectivePeriod")),
-      meta: { headerTitle: tfl("effectivePeriod"), skeleton: columnSkeletons.text },
+      meta: {
+        headerTitle: tfl("effectivePeriod"),
+        skeleton: columnSkeletons.text,
+      },
       size: 220,
     },
     {
@@ -113,10 +116,7 @@ export function usePriceListTable({
       cell: ({ row }) => {
         const status = row.getValue<string>("status");
         return (
-          <StatusDotBadge
-            size="lg"
-            tone={PL_STATUS_TONE[status] ?? "neutral"}
-          >
+          <StatusDotBadge size="lg" tone={PL_STATUS_TONE[status] ?? "neutral"}>
             {ts(status as "draft" | "submitted" | "active" | "inactive")}
           </StatusDotBadge>
         );
@@ -146,7 +146,9 @@ export function usePriceListTable({
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

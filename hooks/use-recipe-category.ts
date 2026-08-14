@@ -1,7 +1,10 @@
 import { createConfigCrud } from "@/hooks/use-config-crud";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
-import type { RecipeCategory, CreateRecipeCategoryDto } from "@/types/recipe-category";
+import type {
+  RecipeCategory,
+  CreateRecipeCategoryDto,
+} from "@/types/recipe-category";
 
 const crud = createConfigCrud<RecipeCategory, CreateRecipeCategoryDto>({
   queryKey: QUERY_KEYS.RECIPE_CATEGORIES,

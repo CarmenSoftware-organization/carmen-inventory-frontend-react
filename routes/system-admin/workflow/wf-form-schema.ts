@@ -291,10 +291,22 @@ export function buildDefaultStages(): Stage[] {
       role: "create",
       creator_access: "only_creator",
       available_actions: {
-        submit: { is_active: true, recipients: makeRecipients(true, false, true) },
-        approve: { is_active: false, recipients: makeRecipients(false, false, false) },
-        reject: { is_active: false, recipients: makeRecipients(false, false, false) },
-        sendback: { is_active: false, recipients: makeRecipients(false, false, false) },
+        submit: {
+          is_active: true,
+          recipients: makeRecipients(true, false, true),
+        },
+        approve: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        reject: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        sendback: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
       },
       hide_fields: { price_per_unit: false, total_price: false },
       is_show_signature: false,
@@ -307,10 +319,22 @@ export function buildDefaultStages(): Stage[] {
       sla_unit: "hours",
       role: "approve",
       available_actions: {
-        submit: { is_active: false, recipients: makeRecipients(false, false, false) },
-        approve: { is_active: false, recipients: makeRecipients(false, false, false) },
-        reject: { is_active: false, recipients: makeRecipients(false, false, false) },
-        sendback: { is_active: false, recipients: makeRecipients(false, false, false) },
+        submit: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        approve: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        reject: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        sendback: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
       },
       hide_fields: { price_per_unit: false, total_price: false },
       is_show_signature: false,

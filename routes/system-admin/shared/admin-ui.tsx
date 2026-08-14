@@ -64,9 +64,7 @@ export function EmptyState({ icon: Icon, title, desc }: EmptyStateProps) {
       </div>
       <p className="text-foreground text-xs font-semibold">{title}</p>
       {desc && (
-        <p className="text-muted-foreground max-w-[16rem] text-micro">
-          {desc}
-        </p>
+        <p className="text-muted-foreground text-micro max-w-[16rem]">{desc}</p>
       )}
     </div>
   );
@@ -97,7 +95,7 @@ export function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold transition-colors",
+        "text-micro inline-flex items-center gap-1.5 rounded-full border px-2 py-1 font-semibold transition-colors",
         active
           ? "border-primary/40 bg-primary/5 text-foreground"
           : "border-border/60 bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",

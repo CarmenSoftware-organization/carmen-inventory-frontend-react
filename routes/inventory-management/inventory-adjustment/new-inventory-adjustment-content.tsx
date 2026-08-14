@@ -1,4 +1,3 @@
-
 import { Suspense } from "react";
 import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
@@ -24,7 +23,7 @@ export function NewInventoryAdjustmentContent() {
     <Suspense
       fallback={
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          <Loader2 className="text-muted-foreground size-6 animate-spin" />
         </div>
       }
     >

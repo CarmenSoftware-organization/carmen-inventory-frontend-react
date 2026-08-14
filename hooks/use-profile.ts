@@ -157,7 +157,7 @@ export function useUploadUserAvatar() {
       // Field name follows the BU-logo precedent (resource name = `avatar`).
       // Adjust if backend rejects with a different field-name expectation.
       const formData = new FormData();
-      const ext = file.name?.split('.').pop() || 'png';
+      const ext = file.name?.split(".").pop() || "png";
       formData.append("avatar", file, `avatar.${ext}`);
       const res = await httpClient.post(API_ENDPOINTS.PROFILE_AVATAR, formData);
       if (!res.ok) {
@@ -214,7 +214,7 @@ export function useUploadBuLogo() {
       // Backend expects `UploadLogoBodyDto` — field name is `logo` (not `file`),
       // accepts jpeg/png/webp.
       const formData = new FormData();
-      const ext = file.name?.split('.').pop() || 'png';
+      const ext = file.name?.split(".").pop() || "png";
       formData.append("logo", file, `logo.${ext}`);
       const res = await httpClient.post(
         API_ENDPOINTS.BUSINESS_UNIT_LOGO(buId),
@@ -275,7 +275,7 @@ export function useUploadBuAvatar() {
     mutationFn: async ({ buId, file }) => {
       // Backend expects field name `avatar` — mirrors `useUploadUserAvatar`.
       const formData = new FormData();
-      const ext = file.name?.split('.').pop() || 'png';
+      const ext = file.name?.split(".").pop() || "png";
       formData.append("avatar", file, `avatar.${ext}`);
       const res = await httpClient.post(
         API_ENDPOINTS.BUSINESS_UNIT_AVATAR(buId),
@@ -335,7 +335,7 @@ export function useUploadUserSignature() {
   return useMutation<unknown, ApiError, File>({
     mutationFn: async (file) => {
       const formData = new FormData();
-      const ext = file.name?.split('.').pop() || 'png';
+      const ext = file.name?.split(".").pop() || "png";
       formData.append("signature", file, `signature.${ext}`);
       const res = await httpClient.post(
         API_ENDPOINTS.PROFILE_SIGNATURE,

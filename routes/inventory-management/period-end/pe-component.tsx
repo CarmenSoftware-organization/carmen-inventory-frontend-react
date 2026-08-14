@@ -1,4 +1,3 @@
-
 import {
   CalendarClock,
   CalendarDays,
@@ -142,13 +141,15 @@ function RangeField({ icon, label, value }: RangeFieldProps) {
     <div className="border-border/60 bg-card rounded-lg border p-3">
       <p
         className={cn(
-          "text-muted-foreground flex items-center gap-1.5 text-micro font-semibold tracking-wide uppercase",
+          "text-muted-foreground text-micro flex items-center gap-1.5 font-semibold tracking-wide uppercase",
         )}
       >
         {icon}
         {label}
       </p>
-      <p className="text-foreground mt-1 text-sm font-semibold">{value ?? "—"}</p>
+      <p className="text-foreground mt-1 text-sm font-semibold">
+        {value ?? "—"}
+      </p>
     </div>
   );
 }

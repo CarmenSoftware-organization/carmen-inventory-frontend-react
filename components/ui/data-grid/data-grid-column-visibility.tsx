@@ -1,6 +1,5 @@
-
-import { ReactElement } from "react"
-import { Table } from "@tanstack/react-table"
+import { ReactElement } from "react";
+import { Table } from "@tanstack/react-table";
 
 import {
   DropdownMenu,
@@ -9,7 +8,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 /**
  * Dropdown toggle visibility ของ columns
@@ -35,8 +34,8 @@ function DataGridColumnVisibility<TData>({
   table,
   trigger,
 }: {
-  table: Table<TData>
-  trigger: ReactElement<Record<string, unknown>>
+  table: Table<TData>;
+  trigger: ReactElement<Record<string, unknown>>;
 }) {
   "use no memo"; // TanStack table is stable-ref but mutable; opt out of React Compiler
   return (
@@ -51,7 +50,7 @@ function DataGridColumnVisibility<TData>({
             .getAllColumns()
             .filter(
               (column) =>
-                typeof column.accessorFn !== "undefined" && column.getCanHide()
+                typeof column.accessorFn !== "undefined" && column.getCanHide(),
             )
             .map((column) => {
               return (
@@ -64,12 +63,12 @@ function DataGridColumnVisibility<TData>({
                 >
                   {column.columnDef.meta?.headerTitle || column.id}
                 </DropdownMenuCheckboxItem>
-              )
+              );
             })}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
-export { DataGridColumnVisibility }
+export { DataGridColumnVisibility };

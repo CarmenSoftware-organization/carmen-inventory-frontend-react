@@ -33,7 +33,7 @@ function FloatingLabel({
       className={cn(
         "pointer-events-none absolute left-3 z-10 transition-all duration-150",
         isFloating
-          ? "top-1 text-micro-eyebrow font-semibold tracking-widest uppercase"
+          ? "text-micro-eyebrow top-1 font-semibold tracking-widest uppercase"
           : "top-1/2 -translate-y-1/2 text-xs",
         getLabelTone(isFloating, hasError),
       )}
@@ -164,7 +164,7 @@ export function FloatingFieldPassword({
       </div>
       {error && <FieldErrorText id={`${id}-error`}>{error}</FieldErrorText>}
       {!error && hint && (
-        <p className="text-muted-foreground mt-1 ps-3 text-micro leading-relaxed">
+        <p className="text-muted-foreground text-micro mt-1 ps-3 leading-relaxed">
           {hint}
         </p>
       )}
@@ -183,11 +183,7 @@ export function FieldErrorText({
     // ps-3 = ระยะเดียวกับ label ลอยและตัวหนังสือในช่อง (px-3) ข้อความเลยตั้งต้น
     // ตรงกับชื่อช่อง อ่านแล้วรู้ทันทีว่าเตือนช่องไหน · mt-1 ให้ติดขอบล่างของช่อง
     // มากกว่าระยะห่างระหว่างช่อง จะได้ไม่ดูเหมือนคำเตือนของช่องถัดไป
-    <p
-      id={id}
-      role="alert"
-      className="text-destructive ps-3 text-xs"
-    >
+    <p id={id} role="alert" className="text-destructive ps-3 text-xs">
       {children}
     </p>
   );

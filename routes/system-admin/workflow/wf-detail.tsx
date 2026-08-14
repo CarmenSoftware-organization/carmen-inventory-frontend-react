@@ -86,15 +86,16 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
   });
 
   const hasStages = !!watchedStages && watchedStages.length > 0;
-  
+
   let hasStageErrors = !!form.formState.errors.data?.stages;
   let validationResult = null;
   if (hasStages) {
     validationResult = validateWorkflow(watchedStages!);
     if (validationResult.errorCount > 0) hasStageErrors = true;
   }
-  
-  const hasGeneralErrors = !!form.formState.errors.name || !!form.formState.errors.workflow_type;
+
+  const hasGeneralErrors =
+    !!form.formState.errors.name || !!form.formState.errors.workflow_type;
   const hasRoutingErrors = !!form.formState.errors.data?.routing_rules;
 
   const onSubmit = (values: WorkflowCreateModel) => {
@@ -174,16 +175,31 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
           onSubmit={form.handleSubmit(onSubmit, () =>
             scrollToFirstInvalidField(),
           )}
-          className="flex flex-col rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden min-h-[600px]"
+          className="bg-card text-card-foreground flex min-h-[600px] flex-col overflow-hidden rounded-xl border shadow-sm"
         >
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
-            <div className="border-b bg-muted/20 px-4 md:px-6 pt-2">
-              <TabsList variant="line" className="h-auto gap-4 bg-transparent p-0">
-                <TabsTrigger value="general" className="relative text-sm py-2.5 data-[state=active]:bg-transparent">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="flex flex-1 flex-col"
+          >
+            <div className="bg-muted/20 border-b px-4 pt-2 md:px-6">
+              <TabsList
+                variant="line"
+                className="h-auto gap-4 bg-transparent p-0"
+              >
+                <TabsTrigger
+                  value="general"
+                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
                   {t("general")}
-                  {hasGeneralErrors && <div className="absolute top-2 right-2 size-2 rounded-full bg-destructive" />}
+                  {hasGeneralErrors && (
+                    <div className="bg-destructive absolute top-2 right-2 size-2 rounded-full" />
+                  )}
                 </TabsTrigger>
-                <TabsTrigger value="stages" className="relative text-sm py-2.5 data-[state=active]:bg-transparent">
+                <TabsTrigger
+                  value="stages"
+                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
                   {t("stages")}
                   {watchedStages && watchedStages.length > 0 && (
                     <Badge
@@ -194,9 +210,14 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                       {watchedStages.length}
                     </Badge>
                   )}
-                  {hasStageErrors && <div className="absolute top-2 right-0 size-2 rounded-full bg-destructive" />}
+                  {hasStageErrors && (
+                    <div className="bg-destructive absolute top-2 right-0 size-2 rounded-full" />
+                  )}
                 </TabsTrigger>
-                <TabsTrigger value="routing" className="relative text-sm py-2.5 data-[state=active]:bg-transparent">
+                <TabsTrigger
+                  value="routing"
+                  className="relative py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
                   {t("routing")}
                   {routingFieldArray.fields.length > 0 && (
                     <Badge
@@ -207,9 +228,14 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                       {routingFieldArray.fields.length}
                     </Badge>
                   )}
-                  {hasRoutingErrors && <div className="absolute top-2 right-0 size-2 rounded-full bg-destructive" />}
+                  {hasRoutingErrors && (
+                    <div className="bg-destructive absolute top-2 right-0 size-2 rounded-full" />
+                  )}
                 </TabsTrigger>
-                <TabsTrigger value="products" className="text-sm py-2.5 data-[state=active]:bg-transparent">
+                <TabsTrigger
+                  value="products"
+                  className="py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
                   {t("products")}
                   {watchedProducts && watchedProducts.length > 0 && (
                     <Badge
@@ -221,7 +247,10 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                     </Badge>
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="insights" className="text-sm py-2.5 data-[state=active]:bg-transparent">
+                <TabsTrigger
+                  value="insights"
+                  className="py-2.5 text-sm data-[state=active]:bg-transparent"
+                >
                   {t("insights")}
                 </TabsTrigger>
               </TabsList>

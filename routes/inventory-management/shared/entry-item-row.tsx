@@ -198,7 +198,7 @@ export const EntryItemRow = memo(function EntryItemRow({
 
       <button
         type="button"
-        className="text-primary hover:text-primary/80 inline-flex cursor-pointer items-center gap-1 text-micro font-semibold transition-colors"
+        className="text-primary hover:text-primary/80 text-micro inline-flex cursor-pointer items-center gap-1 font-semibold transition-colors"
         onClick={() => setNotesOpen(true)}
       >
         <MessageSquarePlus className="size-2.5" aria-hidden="true" />
@@ -229,11 +229,11 @@ export const EntryItemRow = memo(function EntryItemRow({
                   </div>
                 ))}
                 {savedNote.images.length > 4 && (
-                  <div className="border-border/60 bg-muted/60 text-muted-foreground flex size-10 items-center justify-center rounded-md border text-micro-legal font-semibold tabular-nums">
+                  <div className="border-border/60 bg-muted/60 text-muted-foreground text-micro-legal flex size-10 items-center justify-center rounded-md border font-semibold tabular-nums">
                     +{savedNote.images.length - 4}
                   </div>
                 )}
-                <span className="text-muted-foreground inline-flex items-center gap-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
+                <span className="text-muted-foreground text-micro-eyebrow inline-flex items-center gap-1 font-semibold tracking-widest uppercase">
                   <ImageIcon className="size-2.5" aria-hidden="true" />
                   {t("evidenceCount", { count: savedNote.images.length })}
                 </span>

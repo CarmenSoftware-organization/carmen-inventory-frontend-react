@@ -11,8 +11,13 @@ import type { Period } from "@/types/period";
 export function createPeriodSchema(tv: TranslationFn, tf: TranslationFn) {
   return z
     .object({
-      fiscal_year: z.coerce.number().min(1, tv("required", { field: tf("fiscalYear") })),
-      fiscal_month: z.coerce.number().min(1, tv("minMonth", { min: 1 })).max(12, tv("maxMonth", { max: 12 })),
+      fiscal_year: z.coerce
+        .number()
+        .min(1, tv("required", { field: tf("fiscalYear") })),
+      fiscal_month: z.coerce
+        .number()
+        .min(1, tv("minMonth", { min: 1 }))
+        .max(12, tv("maxMonth", { max: 12 })),
       start_at: z.string().min(1, tv("required", { field: tf("startDate") })),
       end_at: z.string().min(1, tv("required", { field: tf("endDate") })),
       status: z.enum(["open", "closed", "locked"]),

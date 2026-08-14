@@ -45,8 +45,10 @@ export function PltProductCards({
   "use no memo";
 
   // group detail แบนๆ เป็นก้อนตาม product_id (คงลำดับที่เจอครั้งแรก)
-  const groups: { productId: string; tiers: { id: string; index: number }[] }[] =
-    [];
+  const groups: {
+    productId: string;
+    tiers: { id: string; index: number }[];
+  }[] = [];
   const groupIndexById = new Map<string, number>();
   detailFields.forEach((field, index) => {
     const pid = field.product_id;
@@ -96,7 +98,7 @@ export function PltProductCards({
           {/* MOQ tiers */}
           <div className="mt-2 space-y-1.5">
             {/* column labels — แถวเดียว จัดตรงกับ input ข้างล่าง */}
-            <div className="text-muted-foreground flex items-center gap-1.5 px-0.5 text-micro-legal font-medium tracking-wide uppercase">
+            <div className="text-muted-foreground text-micro-legal flex items-center gap-1.5 px-0.5 font-medium tracking-wide uppercase">
               <span className="w-16 shrink-0 text-right">{labels.qty}</span>
               <span className="w-24 shrink-0">{labels.unit}</span>
               <span className="min-w-0 flex-1">{labels.note}</span>

@@ -29,7 +29,8 @@ export function filterActiveSubCategories(
 ): SubCategoryDto[] {
   return items.filter((sc) => {
     if (!sc.is_active) return false;
-    if (filterCategoryId && sc.product_category_id !== filterCategoryId) return false;
+    if (filterCategoryId && sc.product_category_id !== filterCategoryId)
+      return false;
     return true;
   });
 }
@@ -64,7 +65,10 @@ export function LookupSubCategory({
     { enabled: hasOpened || !!value },
   );
 
-  const subCategories = filterActiveSubCategories(data?.data ?? [], filterCategoryId);
+  const subCategories = filterActiveSubCategories(
+    data?.data ?? [],
+    filterCategoryId,
+  );
 
   return (
     <LookupCombobox

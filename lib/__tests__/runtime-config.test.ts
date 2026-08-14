@@ -15,11 +15,16 @@ describe("runtime-config", () => {
   it("loads and normalizes config.json (strips trailing slash)", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(
-          JSON.stringify({ BACKEND_URL: "https://api.example.com/", X_APP_ID: "app-1" }),
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            JSON.stringify({
+              BACKEND_URL: "https://api.example.com/",
+              X_APP_ID: "app-1",
+            }),
+          ),
         ),
-      ),
     );
     const config = await loadRuntimeConfig();
     expect(config.BACKEND_URL).toBe("https://api.example.com");
@@ -29,9 +34,11 @@ describe("runtime-config", () => {
   it("accepts empty BACKEND_URL (dev proxy mode)", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ BACKEND_URL: "", X_APP_ID: "app-1" })),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(JSON.stringify({ BACKEND_URL: "", X_APP_ID: "app-1" })),
+        ),
     );
     const config = await loadRuntimeConfig();
     expect(config.BACKEND_URL).toBe("");
@@ -40,7 +47,9 @@ describe("runtime-config", () => {
   it("throws when config.json is missing keys", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(new Response(JSON.stringify({ BACKEND_URL: "x" }))),
+      vi
+        .fn()
+        .mockResolvedValue(new Response(JSON.stringify({ BACKEND_URL: "x" }))),
     );
     await expect(loadRuntimeConfig()).rejects.toThrow(/X_APP_ID/);
   });

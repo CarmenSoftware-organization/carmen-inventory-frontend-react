@@ -26,7 +26,8 @@ vi.mock("@/changelog.json", () => ({
 
 describe("lib/changelog", () => {
   it("exposes current version, latest entry, and full list", async () => {
-    const { CURRENT_VERSION, LATEST, CHANGELOG } = await import("@/lib/changelog");
+    const { CURRENT_VERSION, LATEST, CHANGELOG } =
+      await import("@/lib/changelog");
     expect(CURRENT_VERSION).toBe("1.2.0");
     expect(LATEST.version).toBe("1.2.0");
     expect(CHANGELOG.versions).toHaveLength(2);

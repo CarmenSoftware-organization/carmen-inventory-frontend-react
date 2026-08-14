@@ -1,4 +1,3 @@
-
 import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { useTranslations } from "use-intl";
@@ -53,18 +52,49 @@ const DARK: PreviewPalette = {
 };
 
 /** Full-tile UI mockup (20-wide) — used by light & dark variants */
-function FullPreviewContent({
-  palette,
-}: {
-  readonly palette: PreviewPalette;
-}) {
+function FullPreviewContent({ palette }: { readonly palette: PreviewPalette }) {
   return (
     <>
-      <rect x="2" y="2" width="16" height="2.5" rx="0.5" fill={palette.header} />
-      <rect x="2" y="6.5" width="10" height="1.2" rx="0.3" fill={palette.line} />
-      <rect x="2" y="9.5" width="14" height="1.2" rx="0.3" fill={palette.line} />
-      <rect x="2" y="12.5" width="8" height="1.2" rx="0.3" fill={palette.line} />
-      <rect x="2" y="15.5" width="6" height="2.5" rx="0.5" fill={palette.accent} />
+      <rect
+        x="2"
+        y="2"
+        width="16"
+        height="2.5"
+        rx="0.5"
+        fill={palette.header}
+      />
+      <rect
+        x="2"
+        y="6.5"
+        width="10"
+        height="1.2"
+        rx="0.3"
+        fill={palette.line}
+      />
+      <rect
+        x="2"
+        y="9.5"
+        width="14"
+        height="1.2"
+        rx="0.3"
+        fill={palette.line}
+      />
+      <rect
+        x="2"
+        y="12.5"
+        width="8"
+        height="1.2"
+        rx="0.3"
+        fill={palette.line}
+      />
+      <rect
+        x="2"
+        y="15.5"
+        width="6"
+        height="2.5"
+        rx="0.5"
+        fill={palette.accent}
+      />
     </>
   );
 }
@@ -83,8 +113,22 @@ function HalfPreviewContent({
       <rect x={x} y="2" width="7" height="2.5" rx="0.5" fill={palette.header} />
       <rect x={x} y="6.5" width="5" height="1.2" rx="0.3" fill={palette.line} />
       <rect x={x} y="9.5" width="6" height="1.2" rx="0.3" fill={palette.line} />
-      <rect x={x} y="12.5" width="4" height="1.2" rx="0.3" fill={palette.line} />
-      <rect x={x} y="15.5" width="4" height="2.5" rx="0.5" fill={palette.accent} />
+      <rect
+        x={x}
+        y="12.5"
+        width="4"
+        height="1.2"
+        rx="0.3"
+        fill={palette.line}
+      />
+      <rect
+        x={x}
+        y="15.5"
+        width="4"
+        height="2.5"
+        rx="0.5"
+        fill={palette.accent}
+      />
     </>
   );
 }

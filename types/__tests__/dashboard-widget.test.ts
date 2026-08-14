@@ -23,7 +23,9 @@ describe("isCategoricalData", () => {
   });
 
   it("รับ ranked ได้ เพราะมี label+value (BarCard ใช้ร่วมกัน)", () => {
-    expect(isCategoricalData([{ rank: 1, label: "V-01", value: 9 }])).toBe(true);
+    expect(isCategoricalData([{ rank: 1, label: "V-01", value: 9 }])).toBe(
+      true,
+    );
   });
 
   it("ปฏิเสธ non-array", () => {
@@ -63,7 +65,9 @@ describe("isTableData", () => {
   });
 
   it("ปฏิเสธ matrix {rows, cols, values} — ไม่มี columns", () => {
-    expect(isTableData({ rows: ["a"], cols: ["b"], values: [[1]] })).toBe(false);
+    expect(isTableData({ rows: ["a"], cols: ["b"], values: [[1]] })).toBe(
+      false,
+    );
   });
 
   it("ปฏิเสธ categorical array และ scalar", () => {
@@ -88,6 +92,7 @@ describe("SUPPORTED_WIDGETS", () => {
       "matrix",
       "table",
     ];
-    for (const s of shapes) expect(getWidgetsForShape(s).length).toBeGreaterThan(0);
+    for (const s of shapes)
+      expect(getWidgetsForShape(s).length).toBeGreaterThan(0);
   });
 });

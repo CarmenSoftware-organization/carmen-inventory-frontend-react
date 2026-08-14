@@ -43,7 +43,9 @@ describe("PR add form — dirty state after auto-populating hidden defaults", ()
 
     // เพิ่มแล้วลบ item (กลับมาว่างเหมือนเดิม) → ควร clean แต่ setValue ทำให้ค้าง dirty
     act(() =>
-      result.current.fa.prepend({ ...PR_ITEM } as never, { shouldFocus: false }),
+      result.current.fa.prepend({ ...PR_ITEM } as never, {
+        shouldFocus: false,
+      }),
     );
     act(() => result.current.fa.remove(0));
 
@@ -63,7 +65,9 @@ describe("PR add form — dirty state after auto-populating hidden defaults", ()
     );
 
     act(() =>
-      result.current.fa.prepend({ ...PR_ITEM } as never, { shouldFocus: false }),
+      result.current.fa.prepend({ ...PR_ITEM } as never, {
+        shouldFocus: false,
+      }),
     );
     act(() => result.current.fa.remove(0));
 
@@ -116,7 +120,9 @@ describe("PR add form — dirty state after auto-populating hidden defaults", ()
     act(() => autoPopulateReset(result, { requestor: true }));
 
     expect(result.current.form.getValues("pr_date")).toBe(AUTO.pr_date);
-    expect(result.current.form.getValues("requestor_id")).toBe(AUTO.requestor_id);
+    expect(result.current.form.getValues("requestor_id")).toBe(
+      AUTO.requestor_id,
+    );
     expect(result.current.form.formState.isDirty).toBe(false);
   });
 });

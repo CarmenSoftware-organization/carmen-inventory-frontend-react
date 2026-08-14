@@ -20,7 +20,9 @@ import path from "node:path";
  */
 export function appVersion(): string {
   const file = path.resolve(import.meta.dirname, "..", "package.json");
-  const pkg = JSON.parse(fs.readFileSync(file, "utf8")) as { version?: unknown };
+  const pkg = JSON.parse(fs.readFileSync(file, "utf8")) as {
+    version?: unknown;
+  };
   if (typeof pkg.version !== "string") {
     throw new Error(`${file} ไม่มีฟิลด์ version`);
   }

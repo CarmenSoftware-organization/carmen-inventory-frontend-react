@@ -22,15 +22,27 @@ const legacyStage = {
     },
     approve: {
       is_active: false,
-      recipients: { requestor: false, current_approve: false, next_step: false },
+      recipients: {
+        requestor: false,
+        current_approve: false,
+        next_step: false,
+      },
     },
     reject: {
       is_active: false,
-      recipients: { requestor: false, current_approve: false, next_step: false },
+      recipients: {
+        requestor: false,
+        current_approve: false,
+        next_step: false,
+      },
     },
     sendback: {
       is_active: false,
-      recipients: { requestor: false, current_approve: false, next_step: false },
+      recipients: {
+        requestor: false,
+        current_approve: false,
+        next_step: false,
+      },
     },
   },
   hide_fields: { price_per_unit: false, total_price: false },

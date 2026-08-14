@@ -98,12 +98,7 @@ export interface MatrixData {
   readonly values: readonly (readonly number[])[];
 }
 
-export type TableColumnType =
-  | "text"
-  | "number"
-  | "currency"
-  | "date"
-  | "icon";
+export type TableColumnType = "text" | "number" | "currency" | "date" | "icon";
 
 /** One column of a table-shaped dataset (header label + the row key it reads). */
 export interface TableColumn {
@@ -205,9 +200,7 @@ export const SUPPORTED_WIDGETS: Record<DatasetShape, readonly WidgetType[]> = {
   table: ["table"],
 };
 
-export function getWidgetsForShape(
-  shape: DatasetShape,
-): readonly WidgetType[] {
+export function getWidgetsForShape(shape: DatasetShape): readonly WidgetType[] {
   return SUPPORTED_WIDGETS[shape] ?? [];
 }
 

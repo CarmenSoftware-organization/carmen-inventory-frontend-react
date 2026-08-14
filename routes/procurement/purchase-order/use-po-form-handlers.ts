@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useLocation, useNavigate } from "react-router";
@@ -108,7 +107,9 @@ export function usePoFormHandlers({
   // guard เฉพาะตอน add/edit และมีการกรอกค้าง (dirty) — view/ยังไม่กรอก = ผ่านได้เลย
   // ครอบคลุมคลิกลิงก์ในแอป + กด browser back (ปุ่ม Back/Cancel ใช้ discard เอง)
   const navGuard = useNavigationGuard(
-    (mode === "add" || mode === "edit") && form.formState.isDirty && !isSubmitting,
+    (mode === "add" || mode === "edit") &&
+      form.formState.isDirty &&
+      !isSubmitting,
   );
   const navDiscardDialogProps = {
     open: navGuard.isOpen,

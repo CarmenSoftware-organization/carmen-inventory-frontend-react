@@ -6,11 +6,7 @@ import { buildUrl } from "@/utils/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_NORMAL } from "@/lib/cache-config";
-import type {
-  Product,
-  ProductDetail,
-  CreateProductDto,
-} from "@/types/product";
+import type { Product, ProductDetail, CreateProductDto } from "@/types/product";
 import type { ParamsDto } from "@/types/params";
 
 const crud = createConfigCrud<ProductDetail, CreateProductDto>({

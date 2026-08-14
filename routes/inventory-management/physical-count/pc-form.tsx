@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,7 +72,11 @@ export function PcForm({ physicalCount }: PcFormProps) {
 
     if (isEdit && physicalCount) {
       updatePc.mutate(
-        { id: physicalCount.id, doc_version: physicalCount.doc_version, ...payload },
+        {
+          id: physicalCount.id,
+          doc_version: physicalCount.doc_version,
+          ...payload,
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

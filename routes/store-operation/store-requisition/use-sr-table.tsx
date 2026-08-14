@@ -87,7 +87,7 @@ export function useStoreRequisitionTable({
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.badge,
         cellClassName: "text-center",
-        headerClassName: "text-center"
+        headerClassName: "text-center",
       },
       size: 100,
     },
@@ -151,7 +151,7 @@ export function useStoreRequisitionTable({
         headerTitle: tfl("status"),
         skeleton: columnSkeletons.badge,
         cellClassName: "text-center",
-        headerClassName: "text-center"
+        headerClassName: "text-center",
       },
       size: 80,
     },
@@ -201,7 +201,9 @@ export function useStoreRequisitionTable({
     data: items,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

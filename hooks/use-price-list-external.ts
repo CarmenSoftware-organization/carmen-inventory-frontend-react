@@ -33,7 +33,11 @@ const buildPayload = (formData: PricelistExternalDto) => {
   const derive = (gross: number | string, rate: number) => {
     const price = Number(gross) || 0;
     const priceNoTax = round2(price / (1 + rate / 100));
-    return { price, price_without_tax: priceNoTax, tax_amt: round2(price - priceNoTax) };
+    return {
+      price,
+      price_without_tax: priceNoTax,
+      tax_amt: round2(price - priceNoTax),
+    };
   };
 
   for (const d of formData.tb_pricelist_detail) {

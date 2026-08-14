@@ -84,7 +84,6 @@ export interface NotificationSummary {
 }
 
 /** ซองของ `GET /api/notifications` และ `GET /api/notifications/unread` */
-export interface NotificationListResponse
-  extends PaginatedResponse<Notification> {
+export interface NotificationListResponse extends PaginatedResponse<Notification> {
   summary?: NotificationSummary;
 }

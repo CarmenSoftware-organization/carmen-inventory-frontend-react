@@ -1,4 +1,3 @@
-
 import { RotateCcw, X } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
@@ -32,7 +31,9 @@ export function ScResetDialog({
       open={open}
       onOpenChange={(o) => !isPending && onOpenChange(o)}
     >
-      <AlertDialogContent className="gap-0 p-0 sm:max-w-md">        <div className="p-5">
+      <AlertDialogContent className="gap-0 p-0 sm:max-w-md">
+        {" "}
+        <div className="p-5">
           <div className="flex items-start gap-3">
             <div className="bg-muted text-warning-ink flex size-9 shrink-0 items-center justify-center rounded-lg">
               <RotateCcw className="size-4.5" />

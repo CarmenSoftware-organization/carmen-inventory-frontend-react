@@ -405,7 +405,12 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
             inputClassName="h-8 text-xs placeholder:text-xs"
           />
           {!isDisabled && (
-            <Button type="button" size="sm" variant="secondary" onClick={handleAdd}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={handleAdd}
+            >
               <Plus />
               {t("addLocation")}
             </Button>

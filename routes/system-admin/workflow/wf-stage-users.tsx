@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -47,16 +46,16 @@ export function WfStageUsers({
           (u.middlename && u.middlename.toLowerCase().includes(q)),
       );
     }
-    
+
     // Sort assigned users to the top, then alphabetically by firstname
     return [...result].sort((a, b) => {
       const aAssigned = assignedUserIds.has(a.user_id) ? 1 : 0;
       const bAssigned = assignedUserIds.has(b.user_id) ? 1 : 0;
-      
+
       if (aAssigned !== bAssigned) {
         return bAssigned - aAssigned;
       }
-      
+
       return a.firstname.localeCompare(b.firstname);
     });
   })();
@@ -122,16 +121,18 @@ export function WfStageUsers({
       {isHod ? (
         <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
           <Lock className="size-4 text-amber-600" />
-          <p className="text-sm font-medium text-amber-700 dark:text-amber-400">{t("hodEnabled")}</p>
+          <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+            {t("hodEnabled")}
+          </p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/70" />
+              <Search className="text-muted-foreground/70 absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
               <Input
                 placeholder={t("searchUsers")}
-                className="h-9 w-full rounded-lg bg-muted/30 pl-9 transition-colors hover:bg-muted/50 focus:bg-background"
+                className="bg-muted/30 hover:bg-muted/50 focus:bg-background h-9 w-full rounded-lg pl-9 transition-colors"
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
               />
@@ -143,7 +144,7 @@ export function WfStageUsers({
                   variant="secondary"
                   size="sm"
                   onClick={() => assignAll(userSearch ? filteredUsers : users)}
-                  className="h-9 px-4 text-sm font-medium shadow-sm transition-all hover:bg-secondary/80"
+                  className="hover:bg-secondary/80 h-9 px-4 text-sm font-medium shadow-sm transition-all"
                 >
                   {userSearch ? t("assignFiltered") : t("assignAll")}
                 </Button>
@@ -154,7 +155,7 @@ export function WfStageUsers({
                   onClick={() =>
                     unassignAll(userSearch ? filteredUsers : users)
                   }
-                  className="h-9 px-4 text-sm font-medium shadow-sm transition-all hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                  className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 h-9 px-4 text-sm font-medium shadow-sm transition-all"
                 >
                   {userSearch ? t("unassignFiltered") : t("unassignAll")}
                 </Button>
@@ -165,8 +166,8 @@ export function WfStageUsers({
           <div className="max-h-64 space-y-2 overflow-y-auto pr-1">
             {filteredUsers.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-8 text-center">
-                <Search className="mb-2 size-6 text-muted-foreground/40" />
-                <p className="text-sm text-muted-foreground">
+                <Search className="text-muted-foreground/40 mb-2 size-6" />
+                <p className="text-muted-foreground text-sm">
                   {t("noUsersFound")}
                 </p>
               </div>
@@ -179,27 +180,33 @@ export function WfStageUsers({
                     className={cn(
                       "group flex items-center justify-between rounded-xl border p-4 transition-all duration-200",
                       isAssigned
-                        ? "border-primary/20 bg-primary/5 shadow-sm ring-1 ring-primary/10"
-                        : "border-transparent hover:border-border hover:bg-muted/40"
+                        ? "border-primary/20 bg-primary/5 ring-primary/10 shadow-sm ring-1"
+                        : "hover:border-border hover:bg-muted/40 border-transparent",
                     )}
                   >
                     <div className="flex items-center gap-4">
-                      <Avatar className={cn(
-                        "size-8 shadow-sm transition-transform duration-200",
-                        isAssigned ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : "group-hover:scale-105"
-                      )}>
-                        <AvatarFallback className="bg-muted text-sm font-medium text-foreground">
+                      <Avatar
+                        className={cn(
+                          "size-8 shadow-sm transition-transform duration-200",
+                          isAssigned
+                            ? "ring-primary ring-offset-background ring-2 ring-offset-1"
+                            : "group-hover:scale-105",
+                        )}
+                      >
+                        <AvatarFallback className="bg-muted text-foreground text-sm font-medium">
                           {user.initials}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <p className={cn(
-                          "text-sm font-semibold leading-tight transition-colors",
-                          isAssigned ? "text-primary" : "text-foreground"
-                        )}>
+                        <p
+                          className={cn(
+                            "text-sm leading-tight font-semibold transition-colors",
+                            isAssigned ? "text-primary" : "text-foreground",
+                          )}
+                        >
                           {user.firstname} {user.lastname}
                         </p>
-                        <p className="text-sm text-muted-foreground/80 leading-tight mt-0.5">
+                        <p className="text-muted-foreground/80 mt-0.5 text-sm leading-tight">
                           {user.email}
                         </p>
                       </div>
@@ -212,9 +219,9 @@ export function WfStageUsers({
                         onClick={() => toggleUser(user)}
                         className={cn(
                           "h-9 px-4 text-sm font-medium shadow-sm transition-all",
-                          isAssigned 
-                            ? "border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground" 
-                            : "hover:bg-primary hover:text-primary-foreground"
+                          isAssigned
+                            ? "border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                            : "hover:bg-primary hover:text-primary-foreground",
                         )}
                       >
                         {isAssigned ? t("unassign") : t("assign")}

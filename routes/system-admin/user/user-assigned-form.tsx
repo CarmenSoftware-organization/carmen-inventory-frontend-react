@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,7 +81,9 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const memberDepartment = userDepartments?.department ?? null;
   const hodDepartments = userDepartments?.hod_departments ?? [];
 
-  const initialRoleIds = user.application_roles.map((r) => r.application_role_id);
+  const initialRoleIds = user.application_roles.map(
+    (r) => r.application_role_id,
+  );
 
   const form = useForm<UserRolesFormValues>({
     resolver: zodResolver(userRolesSchema) as Resolver<UserRolesFormValues>,

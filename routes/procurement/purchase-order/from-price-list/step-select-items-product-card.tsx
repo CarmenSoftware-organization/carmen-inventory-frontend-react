@@ -1,4 +1,3 @@
-
 import { memo } from "react";
 import { useTranslations } from "use-intl";
 import { Plus, Trash2 } from "lucide-react";
@@ -96,7 +95,7 @@ export const ProductCard = memo(function ProductCard({
       </div>
 
       <div className="divide-border/40 divide-y">
-        <div className="text-muted-foreground bg-muted/10 grid grid-cols-[1fr_8rem_2rem] gap-2 px-4 py-1 text-micro-legal font-semibold tracking-wide uppercase">
+        <div className="text-muted-foreground bg-muted/10 text-micro-legal grid grid-cols-[1fr_8rem_2rem] gap-2 px-4 py-1 font-semibold tracking-wide uppercase">
           <span>{tfl("location")}</span>
           <span className="text-right">{tfl("qty")}</span>
           <span />
@@ -155,7 +154,7 @@ export const ProductCard = memo(function ProductCard({
                   )}
                 />
                 {qtyErr && (
-                  <p className="text-destructive mt-0.5 text-micro-legal">
+                  <p className="text-destructive text-micro-legal mt-0.5">
                     {qtyErr}
                   </p>
                 )}

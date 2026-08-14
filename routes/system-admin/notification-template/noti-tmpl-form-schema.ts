@@ -9,9 +9,7 @@ import type {
 export const NOTIFICATION_CHANNEL_OPTIONS: ReadonlyArray<{
   value: NotificationTemplateType;
   label: string;
-}> = [
-  { value: "app", label: "App" },
-];
+}> = [{ value: "app", label: "App" }];
 
 export const notificationTemplateSchema = z.object({
   name: z.string().min(1, "Name is required"),

@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,7 +35,9 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
       <FieldGroup className="gap-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Field data-invalid={!!form.formState.errors.name}>
-            <FieldLabel htmlFor="wf-name" className="text-base">{t("workflowName")}</FieldLabel>
+            <FieldLabel htmlFor="wf-name" className="text-base">
+              {t("workflowName")}
+            </FieldLabel>
             <Input
               id="wf-name"
               placeholder={t("workflowNamePlaceholder")}
@@ -49,7 +50,9 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
           </Field>
 
           <Field data-invalid={!!form.formState.errors.workflow_type}>
-            <FieldLabel htmlFor="wf-type" className="text-base">{t("workflowType")}</FieldLabel>
+            <FieldLabel htmlFor="wf-type" className="text-base">
+              {t("workflowType")}
+            </FieldLabel>
             <Controller
               control={form.control}
               name="workflow_type"
@@ -64,10 +67,7 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
                   </SelectTrigger>
                   <SelectContent>
                     {workflowTypeOptions.map((opt) => (
-                      <SelectItem
-                        key={opt.value}
-                        value={opt.value}
-                      >
+                      <SelectItem key={opt.value} value={opt.value}>
                         {opt.label}
                       </SelectItem>
                     ))}
@@ -82,7 +82,9 @@ export function WfGeneral({ form, isDisabled }: WfGeneralProps) {
         </div>
 
         <Field>
-          <FieldLabel htmlFor="wf-description" className="text-base">{tfl("description")}</FieldLabel>
+          <FieldLabel htmlFor="wf-description" className="text-base">
+            {tfl("description")}
+          </FieldLabel>
           <Textarea
             id="wf-description"
             placeholder={t("optionalDescription")}

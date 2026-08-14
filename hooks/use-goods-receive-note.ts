@@ -141,10 +141,7 @@ export function useGoodsReceiveNoteByVendorForCn(
  * @example
  * const { data } = useGrnProducts(grnId, { search });
  */
-export function useGrnProducts(
-  grnId: string | undefined,
-  params?: ParamsDto,
-) {
+export function useGrnProducts(grnId: string | undefined, params?: ParamsDto) {
   const buCode = useBuCode();
 
   return useQuery<PaginatedResponse<GrnProductItem>>({
@@ -201,10 +198,7 @@ export function useGrnProductLocations(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw await ApiError.from(
-          res,
-          "Failed to fetch GRN product locations",
-        );
+        throw await ApiError.from(res, "Failed to fetch GRN product locations");
       return res.json();
     },
     enabled: !!buCode && !!grnId && !!productId,
@@ -222,10 +216,7 @@ export function useGrnProductLocations(
  * @example
  * const { data } = useGrnLocations(grnId, { search });
  */
-export function useGrnLocations(
-  grnId: string | undefined,
-  params?: ParamsDto,
-) {
+export function useGrnLocations(grnId: string | undefined, params?: ParamsDto) {
   const buCode = useBuCode();
 
   return useQuery<PaginatedResponse<GrnLocationItem>>({
@@ -282,10 +273,7 @@ export function useGrnLocationProducts(
       );
       const res = await httpClient.get(url);
       if (!res.ok)
-        throw await ApiError.from(
-          res,
-          "Failed to fetch GRN location products",
-        );
+        throw await ApiError.from(res, "Failed to fetch GRN location products");
       return res.json();
     },
     enabled: !!buCode && !!grnId && !!locationId,
@@ -348,7 +336,10 @@ export function useCreateGoodsReceiveNote() {
 export function useUpdateGoodsReceiveNote() {
   return useApiMutation<CreateGrnDto & { id: string }>({
     mutationFn: ({ id, ...data }, buCode) =>
-      httpClient.patch(`${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode)}/${id}`, data),
+      httpClient.patch(
+        `${API_ENDPOINTS.GOODS_RECEIVE_NOTE(buCode)}/${id}`,
+        data,
+      ),
     invalidateKeys: [QUERY_KEYS.GOODS_RECEIVE_NOTES],
     errorMessage: "Failed to update goods receive note",
   });
@@ -455,8 +446,7 @@ export function useGoodsReceiveNoteComments(grnId: string | undefined) {
       const res = await httpClient.get(
         API_ENDPOINTS.GOODS_RECEIVE_NOTE_COMMENT(buCode, grnId),
       );
-      if (!res.ok)
-        throw await ApiError.from(res, "Failed to fetch comments");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch comments");
       const json = await res.json();
       return json.data ?? [];
     },

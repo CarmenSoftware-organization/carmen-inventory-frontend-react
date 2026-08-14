@@ -1,7 +1,10 @@
 import { createConfigCrud } from "@/hooks/use-config-crud";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
-import type { AdjustmentType, CreateAdjustmentTypeDto } from "@/types/adjustment-type";
+import type {
+  AdjustmentType,
+  CreateAdjustmentTypeDto,
+} from "@/types/adjustment-type";
 
 const crud = createConfigCrud<AdjustmentType, CreateAdjustmentTypeDto>({
   queryKey: QUERY_KEYS.ADJUSTMENT_TYPES,

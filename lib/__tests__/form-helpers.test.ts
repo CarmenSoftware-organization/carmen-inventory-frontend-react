@@ -103,9 +103,7 @@ describe("objectToKeyValues", () => {
 describe("keyValuesToObject", () => {
   it("returns null when no keys have content", () => {
     expect(keyValuesToObject([])).toBeNull();
-    expect(
-      keyValuesToObject([createKeyValueRow("", "v")]),
-    ).toBeNull();
+    expect(keyValuesToObject([createKeyValueRow("", "v")])).toBeNull();
   });
 
   it("converts numeric string values to numbers", () => {
@@ -200,9 +198,7 @@ describe("buildItemChanges", () => {
     ];
 
     const result = buildItemChanges(items, defaults, mapFn);
-    expect(result.update).toEqual([
-      { id: "1", name: "A-updated", qty: 1 },
-    ]);
+    expect(result.update).toEqual([{ id: "1", name: "A-updated", qty: 1 }]);
     expect(result.add).toBeUndefined();
     expect(result.remove).toBeUndefined();
   });
@@ -218,9 +214,7 @@ describe("buildItemChanges", () => {
     ];
 
     const result = buildItemChanges(items, defaults, mapFn);
-    expect(result.update).toEqual([
-      { id: "1", name: "A-changed", qty: 1 },
-    ]);
+    expect(result.update).toEqual([{ id: "1", name: "A-changed", qty: 1 }]);
   });
 
   it("treats existing item not in defaults as updated (fallback)", () => {
@@ -228,9 +222,7 @@ describe("buildItemChanges", () => {
     const defaults: TestItem[] = [];
 
     const result = buildItemChanges(items, defaults, mapFn);
-    expect(result.update).toEqual([
-      { id: "99", name: "new-existing", qty: 5 },
-    ]);
+    expect(result.update).toEqual([{ id: "99", name: "new-existing", qty: 5 }]);
   });
 
   // Regression: adding a new row that shifts an already-edited existing row must

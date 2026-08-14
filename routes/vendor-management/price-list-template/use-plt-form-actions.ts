@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
@@ -16,10 +15,7 @@ import type {
   PriceListTemplate,
 } from "@/types/price-list-template";
 import type { FormMode } from "@/types/form";
-import {
-  groupDetailsToProducts,
-  type PltFormValues,
-} from "./plt-form-schema";
+import { groupDetailsToProducts, type PltFormValues } from "./plt-form-schema";
 
 interface UsePltFormActionsParams {
   form: UseFormReturn<PltFormValues>;
@@ -105,7 +101,11 @@ export function usePltFormActions({
 
     if (isEdit && priceListTemplate) {
       updateTemplate.mutate(
-        { id: priceListTemplate.id, doc_version: priceListTemplate.doc_version, ...payload },
+        {
+          id: priceListTemplate.id,
+          doc_version: priceListTemplate.doc_version,
+          ...payload,
+        },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));

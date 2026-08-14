@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   DndContext,
@@ -57,10 +56,22 @@ const buildNewStage = (
     sla_unit: "hours",
     role: "approve",
     available_actions: {
-      submit: { is_active: false, recipients: makeRecipients(false, false, false) },
-      approve: { is_active: true, recipients: makeRecipients(true, false, true) },
-      reject: { is_active: true, recipients: makeRecipients(true, false, false) },
-      sendback: { is_active: true, recipients: makeRecipients(true, false, false) },
+      submit: {
+        is_active: false,
+        recipients: makeRecipients(false, false, false),
+      },
+      approve: {
+        is_active: true,
+        recipients: makeRecipients(true, false, true),
+      },
+      reject: {
+        is_active: true,
+        recipients: makeRecipients(true, false, false),
+      },
+      sendback: {
+        is_active: true,
+        recipients: makeRecipients(true, false, false),
+      },
     },
     hide_fields: { price_per_unit: false, total_price: false },
     is_show_signature: false,
@@ -150,14 +161,16 @@ export function WfStageList({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-2">
-        <span className="text-sm font-semibold text-foreground/80">{t("stages")}</span>
+        <span className="text-foreground/80 text-sm font-semibold">
+          {t("stages")}
+        </span>
         {!isDisabled && (
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={handleAddStage}
-            className="h-9 px-4 text-sm font-medium shadow-sm transition-all hover:bg-muted/50"
+            className="hover:bg-muted/50 h-9 px-4 text-sm font-medium shadow-sm transition-all"
           >
             <Plus className="mr-1.5 size-3.5" />
             {t("addStage")}
@@ -165,13 +178,13 @@ export function WfStageList({
         )}
       </div>
 
-      <div className="px-1 relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+      <div className="relative px-1">
+        <Search className="text-muted-foreground absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
         <Input
           placeholder={tc("search") || "Search..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9 h-9"
+          className="h-9 pl-9"
         />
       </div>
 
@@ -188,11 +201,18 @@ export function WfStageList({
         >
           <div className="space-y-1">
             {filteredFields.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center animate-in fade-in zoom-in-95 duration-200">
-                <Waypoints className="size-10 text-muted-foreground/30 mb-3" />
-                <p className="text-sm font-medium text-foreground">{tc("noData") || "No stages found"}</p>
+              <div className="animate-in fade-in zoom-in-95 flex flex-col items-center justify-center py-10 text-center duration-200">
+                <Waypoints className="text-muted-foreground/30 mb-3 size-10" />
+                <p className="text-foreground text-sm font-medium">
+                  {tc("noData") || "No stages found"}
+                </p>
                 {!isDisabled && !searchQuery && (
-                  <Button variant="outline" size="sm" onClick={handleAddStage} className="mt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddStage}
+                    className="mt-4"
+                  >
                     <Plus className="mr-1.5 size-3.5" />
                     {t("addStage")}
                   </Button>
@@ -206,9 +226,13 @@ export function WfStageList({
                 const isLast = index === fields.length - 1;
                 const isHod = stage?.is_hod ?? false;
                 const userCount = stage?.assigned_users?.length ?? 0;
-                const hasWarning = !isFirst && !isLast && !isHod && userCount === 0;
+                const hasWarning =
+                  !isFirst && !isLast && !isHod && userCount === 0;
                 return (
-                  <div key={field.id} className="animate-in fade-in slide-in-from-left-2 duration-300">
+                  <div
+                    key={field.id}
+                    className="animate-in fade-in slide-in-from-left-2 duration-300"
+                  >
                     <SortableStageItem
                       id={field.id}
                       index={index}
@@ -236,7 +260,7 @@ export function WfStageList({
 
         <DragOverlay>
           {activeDragIndex >= 0 ? (
-            <div className="bg-background flex items-center gap-3 rounded-lg border px-3 py-2 text-sm shadow-xl ring-1 ring-border opacity-90 scale-[1.02]">
+            <div className="bg-background ring-border flex scale-[1.02] items-center gap-3 rounded-lg border px-3 py-2 text-sm opacity-90 shadow-xl ring-1">
               <GripVertical className="text-muted-foreground/50 size-4" />
               <span className="font-medium">
                 {watchedStages?.[activeDragIndex]?.name ??
@@ -251,9 +275,16 @@ export function WfStageList({
         open={stageToDelete !== null}
         onOpenChange={(open) => !open && setStageToDelete(null)}
         title={t("deleteTitle")}
-        description={stageToDelete !== null ? t("deleteConfirm", { 
-          name: watchedStages?.[stageToDelete]?.name ?? fields[stageToDelete]?.name ?? "" 
-        }) : ""}
+        description={
+          stageToDelete !== null
+            ? t("deleteConfirm", {
+                name:
+                  watchedStages?.[stageToDelete]?.name ??
+                  fields[stageToDelete]?.name ??
+                  "",
+              })
+            : ""
+        }
         onConfirm={confirmDelete}
       />
     </div>

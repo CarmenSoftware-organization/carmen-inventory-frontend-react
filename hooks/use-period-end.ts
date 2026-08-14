@@ -108,7 +108,14 @@ export function usePeriodEndReview() {
         (Object.keys(raw.details.transaction) as ReviewTransactionKey[]).map(
           (key) => {
             const stat = raw.details.transaction[key];
-            return [key, { ...stat, is_complete: stat.is_complete === true || stat.is_complete === "true" }];
+            return [
+              key,
+              {
+                ...stat,
+                is_complete:
+                  stat.is_complete === true || stat.is_complete === "true",
+              },
+            ];
           },
         ),
       ) as Record<ReviewTransactionKey, ReviewTransactionStat>;

@@ -1,4 +1,3 @@
-
 import {
   ChevronRight,
   History,
@@ -70,10 +69,7 @@ export function TreeNode({
     if (parts.length === 1) return text;
     return parts.map((part, i) =>
       regex.test(part) ? (
-        <mark
-          key={i}
-          className="bg-highlight rounded-sm px-px"
-        >
+        <mark key={i} className="bg-highlight rounded-sm px-px">
           {part}
         </mark>
       ) : (
@@ -97,20 +93,20 @@ export function TreeNode({
       {/* Tree line connector */}
       <div
         className={cn(
-          "group/node flex items-center h-7 hover:bg-accent/50 transition-colors border-b border-transparent hover:border-border/30",
+          "group/node hover:bg-accent/50 hover:border-border/30 flex h-7 items-center border-b border-transparent transition-colors",
         )}
         style={{ paddingLeft: `${level * 20 + 4}px` }}
       >
         {/* Expand toggle */}
         <button
           type="button"
-          className="flex items-center justify-center w-4 h-4 shrink-0"
+          className="flex h-4 w-4 shrink-0 items-center justify-center"
           onClick={() => hasChildren && toggleExpand(node.id)}
         >
           {hasChildren ? (
             <ChevronRight
               className={cn(
-                "h-3 w-3 cursor-pointer text-muted-foreground transition-transform duration-150",
+                "text-muted-foreground h-3 w-3 cursor-pointer transition-transform duration-150",
                 isExpanded && "rotate-90",
               )}
             />
@@ -120,26 +116,29 @@ export function TreeNode({
         </button>
 
         {/* Node icon */}
-        <div className="flex items-center gap-1.5 ml-1 mr-1.5">
+        <div className="mr-1.5 ml-1 flex items-center gap-1.5">
           {getNodeIcon()}
         </div>
 
         {/* Content - clickable for expand */}
         <button
           type="button"
-          className="flex items-center gap-1.5 min-w-0 flex-1 text-left"
+          className="flex min-w-0 flex-1 items-center gap-1.5 text-left"
           onClick={() => toggleExpand(node.id)}
         >
-          <Badge variant={"secondary"} className="text-micro-legal h-5 shrink-0">
+          <Badge
+            variant={"secondary"}
+            className="text-micro-legal h-5 shrink-0"
+          >
             {highlight(node.code)}
           </Badge>
 
-          <span className="text-xs font-semibold truncate">
+          <span className="truncate text-xs font-semibold">
             {highlight(node.name)}
           </span>
 
           {node.description && (
-            <span className="text-xs text-muted-foreground/60 truncate hidden xl:inline">
+            <span className="text-muted-foreground/60 hidden truncate text-xs xl:inline">
               — {highlight(node.description)}
             </span>
           )}
@@ -157,11 +156,11 @@ export function TreeNode({
         )}
 
         {/* Actions - visible on hover */}
-        <div className="hidden items-center group-hover/node:flex ml-auto pr-2">
+        <div className="ml-auto hidden items-center pr-2 group-hover/node:flex">
           {node.type !== NODE_TYPE.ITEM_GROUP && (
             <button
               type="button"
-              className="p-1 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+              className="hover:bg-primary/10 hover:text-primary rounded p-1 transition-colors"
               onClick={() => onAdd(node)}
               title={t("addChild")}
               aria-label={t("addChild")}
@@ -171,7 +170,7 @@ export function TreeNode({
           )}
           <button
             type="button"
-            className="p-1 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+            className="hover:bg-primary/10 hover:text-primary rounded p-1 transition-colors"
             onClick={() => onEdit(node)}
             title={tc("edit")}
             aria-label={tc("edit")}
@@ -182,7 +181,7 @@ export function TreeNode({
               คนละตัวที่ backend บันทึกกิจกรรมให้ทั้งหมด — node.id จึงใช้ได้ตรง ๆ */}
           <button
             type="button"
-            className="p-1 rounded hover:bg-primary/10 hover:text-primary transition-colors"
+            className="hover:bg-primary/10 hover:text-primary rounded p-1 transition-colors"
             onClick={() => openActivity(node.id, node.name)}
             title={tActivity("title")}
             aria-label={tActivity("title")}
@@ -191,7 +190,7 @@ export function TreeNode({
           </button>
           <button
             type="button"
-            className="p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-colors"
+            className="hover:bg-destructive/10 hover:text-destructive rounded p-1 transition-colors"
             onClick={() => onDelete(node)}
             title={tc("delete")}
             aria-label={tc("delete")}
@@ -206,7 +205,7 @@ export function TreeNode({
         <div className="relative">
           {/* Vertical tree line */}
           <div
-            className="absolute top-0 bottom-0 border-l border-border/40"
+            className="border-border/40 absolute top-0 bottom-0 border-l"
             style={{ left: `${level * 20 + 12}px` }}
           />
           {node.children?.map((child) => (

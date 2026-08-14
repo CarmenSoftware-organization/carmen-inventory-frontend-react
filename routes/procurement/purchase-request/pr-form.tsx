@@ -11,10 +11,7 @@ import {
 } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { type FormMode } from "@/types/form";
-import {
-  PrDescriptionField,
-  PrWorkflowField,
-} from "./pr-general-fields";
+import { PrDescriptionField, PrWorkflowField } from "./pr-general-fields";
 import { PrItemFields } from "./pr-item-fields";
 import { PrFormActions } from "./pr-form-actions";
 import { PrFooterAction } from "./workflow/pr-footer-action";

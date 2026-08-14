@@ -20,10 +20,7 @@ import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  STATUS_DOT_CHIP,
-  createStatusConfig,
-} from "@/constant/status-config";
+import { STATUS_DOT_CHIP, createStatusConfig } from "@/constant/status-config";
 import {
   accountingDocumentFromPath,
   documentsFor,
@@ -66,7 +63,9 @@ export default function AccountingList() {
         const matchesSearch = `${item.number} ${item.description} ${item.party}`
           .toLowerCase()
           .includes(search.toLowerCase());
-        return matchesSearch && (!status || item.status.toLowerCase() === status);
+        return (
+          matchesSearch && (!status || item.status.toLowerCase() === status)
+        );
       }),
     [config, search, status],
   );
@@ -104,7 +103,10 @@ export default function AccountingList() {
           <DataGridColumnHeader column={column} title={t("description")} />
         ),
         cell: ({ row }) => (
-          <span className="block max-w-64 truncate" title={row.original.description}>
+          <span
+            className="block max-w-64 truncate"
+            title={row.original.description}
+          >
             {row.original.description}
           </span>
         ),
@@ -296,7 +298,8 @@ export default function AccountingList() {
                       </ListCardRow>
                       <ListCardRow label={t("amount")}>
                         <span className="font-semibold tabular-nums">
-                          ฿{document.amount.toLocaleString(undefined, {
+                          ฿
+                          {document.amount.toLocaleString(undefined, {
                             minimumFractionDigits: 2,
                           })}
                         </span>

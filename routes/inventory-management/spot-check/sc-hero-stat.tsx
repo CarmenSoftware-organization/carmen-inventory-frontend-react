@@ -46,10 +46,14 @@ export function ScHeroStat({
 
       <div className="bg-border mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-md">
         <Cell k={labels.method} v={methodLabel} />
-        <Cell k={labels.location} v={locationName || "—"} empty={!locationName} />
+        <Cell
+          k={labels.location}
+          v={locationName || "—"}
+          empty={!locationName}
+        />
       </div>
 
-      <div className="text-muted-foreground mt-2 text-micro">
+      <div className="text-muted-foreground text-micro mt-2">
         {labels.footer}
       </div>
     </div>
@@ -73,8 +77,8 @@ function Cell({
       <div
         className={
           empty
-            ? "text-muted-foreground/60 mt-0.5 truncate text-micro font-semibold"
-            : "text-foreground mt-0.5 truncate text-micro font-semibold"
+            ? "text-muted-foreground/60 text-micro mt-0.5 truncate font-semibold"
+            : "text-foreground text-micro mt-0.5 truncate font-semibold"
         }
       >
         {v}

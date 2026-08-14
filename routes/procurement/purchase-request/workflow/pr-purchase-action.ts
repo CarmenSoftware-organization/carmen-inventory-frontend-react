@@ -23,7 +23,10 @@ export function computePurchaseAction(
     s === PR_ITEM_STAGE_STATUS.APPROVE || s === PR_ITEM_STAGE_STATUS.APPROVED;
   if (statuses.some((s) => s === PR_ITEM_STAGE_STATUS.REVIEW)) return "review";
   if (statuses.every(isReject)) return "rejected";
-  if (statuses.every((s) => isApprove(s) || isReject(s)) && statuses.some(isApprove))
+  if (
+    statuses.every((s) => isApprove(s) || isReject(s)) &&
+    statuses.some(isApprove)
+  )
     return "approved";
   return "none";
 }

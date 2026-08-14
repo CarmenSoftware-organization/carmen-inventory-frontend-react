@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 /** Placeholder skeleton แบบ animate-pulse สำหรับแสดงตอนโหลด (shadcn) */
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
@@ -8,7 +8,7 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
       className={cn("bg-accent animate-pulse rounded-md", className)}
       {...props}
     />
-  )
+  );
 }
 
-export { Skeleton }
+export { Skeleton };

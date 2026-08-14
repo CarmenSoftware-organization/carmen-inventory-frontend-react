@@ -1,12 +1,5 @@
 import { useTranslations } from "use-intl";
-import {
-  History,
-  Pencil,
-  Save,
-  Trash2,
-  User,
-  X,
-} from "lucide-react";
+import { History, Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -198,17 +191,16 @@ export function CnHeader({
   // ไอคอนบอกว่าอันไหนคือคนสร้าง อันไหนคือวันที่สร้าง — บรรทัดนี้ไม่มี label
   // กำกับ ถ้าปล่อยเป็นข้อความเปล่าสองก้อนคั่นด้วยจุด คนอ่านต้องเดาเอง
   // (ไอคอนขนาดเท่าตัวอักษร สีเดียวกับข้อความ ไม่ใช่ signal สีแยก)
-  const subtitle =
-    createdByName ? (
-      <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
-        {createdByName && (
-          <span className="flex items-center gap-1">
-            <User className="size-3 shrink-0" aria-hidden="true" />
-            {createdByName}
-          </span>
-        )}
-      </span>
-    ) : undefined;
+  const subtitle = createdByName ? (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-0.5">
+      {createdByName && (
+        <span className="flex items-center gap-1">
+          <User className="size-3 shrink-0" aria-hidden="true" />
+          {createdByName}
+        </span>
+      )}
+    </span>
+  ) : undefined;
 
   return (
     <DocFormHeader

@@ -1,10 +1,7 @@
 import { Link } from "react-router";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
-import {
-  Bell,
-  type LucideIcon,
-} from "lucide-react";
+import { Bell, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
@@ -36,7 +33,7 @@ const ChannelBadge = ({
   readonly type: NotificationTemplateType | string;
 }) => {
   const channel = CHANNEL[type as NotificationTemplateType];
-  
+
   if (!channel) {
     return (
       <Badge variant="secondary" size="sm" className="gap-1 font-semibold">

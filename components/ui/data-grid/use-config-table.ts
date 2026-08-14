@@ -90,8 +90,7 @@ export function useConfigTable<T>({
   const deletePermission = prefix
     ? buildPermissionKey(prefix, "delete")
     : undefined;
-  const deleteDenied =
-    !!deletePermission && !isAdmin && !can(deletePermission);
+  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
 
   const allColumns: ColumnDef<T>[] = [
     selectColumn<T>(),

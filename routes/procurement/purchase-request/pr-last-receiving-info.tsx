@@ -76,14 +76,13 @@ export function PrLastReceivingInfo({ control, index, buCode }: Props) {
                   {data?.currency_code ? ` ${data.currency_code}` : ""}
                 </div>
                 {data?.vendor_name && (
-                  <div className="text-muted-foreground">{data.vendor_name}</div>
+                  <div className="text-muted-foreground">
+                    {data.vendor_name}
+                  </div>
                 )}
                 {data?.no &&
                   (grnLink ? (
-                    <Link
-                      to={grnLink}
-                      className="text-primary hover:underline"
-                    >
+                    <Link to={grnLink} className="text-primary hover:underline">
                       {data.no}
                     </Link>
                   ) : (

@@ -12,7 +12,10 @@ import { useURL } from "@/hooks/use-url";
 import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
-import { DateRangePicker, type DateRange } from "@/components/ui/date-range-picker";
+import {
+  DateRangePicker,
+  type DateRange,
+} from "@/components/ui/date-range-picker";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupCategory } from "@/components/lookup/lookup-category";
 import { cn } from "@/lib/utils";
@@ -226,7 +229,9 @@ export default function TransactionComponent() {
         labelKey: "inventoryManagement.transaction.referenceType",
         toClause: (v) => `inventory_doc_type|in:${v}`,
         render: (value, onChange) => {
-          const refTypes = new Set(value ? value.split(",").filter(Boolean) : []);
+          const refTypes = new Set(
+            value ? value.split(",").filter(Boolean) : [],
+          );
           const toggle = (v: string) => {
             const next = new Set(refTypes);
             if (next.has(v)) next.delete(v);
@@ -243,7 +248,7 @@ export default function TransactionComponent() {
                     type="button"
                     onClick={() => toggle(opt.value)}
                     className={cn(
-                      "border-border/40 bg-card hover:bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold tracking-wide transition-all",
+                      "border-border/40 bg-card hover:bg-card text-micro inline-flex items-center gap-1.5 rounded-full border px-2 py-1 font-semibold tracking-wide transition-all",
                       active && "border-primary bg-primary/10 text-primary",
                     )}
                   >
@@ -303,8 +308,7 @@ export default function TransactionComponent() {
     tableConfig,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="relative isolate -mx-3 -my-3">

@@ -52,9 +52,17 @@ const getFileTypeInfo = (contentType: string) => {
       className: "text-green-600",
     };
   if (contentType.includes("pdf"))
-    return { icon: FileText, labelKey: "pdf" as const, className: "text-red-500" };
+    return {
+      icon: FileText,
+      labelKey: "pdf" as const,
+      className: "text-red-500",
+    };
   if (contentType.includes("image"))
-    return { icon: FileImage, labelKey: "image" as const, className: "text-blue-500" };
+    return {
+      icon: FileImage,
+      labelKey: "image" as const,
+      className: "text-blue-500",
+    };
   if (
     contentType.includes("zip") ||
     contentType.includes("rar") ||
@@ -66,7 +74,11 @@ const getFileTypeInfo = (contentType: string) => {
       className: "text-amber-500",
     };
   if (contentType.includes("text/plain"))
-    return { icon: FileText, labelKey: "txt" as const, className: "text-gray-500" };
+    return {
+      icon: FileText,
+      labelKey: "txt" as const,
+      className: "text-gray-500",
+    };
   if (contentType.includes("word") || contentType.includes("document"))
     return {
       icon: FileText,
@@ -78,8 +90,16 @@ const getFileTypeInfo = (contentType: string) => {
     contentType.includes("xml") ||
     contentType.includes("html")
   )
-    return { icon: FileCode, labelKey: "code" as const, className: "text-purple-500" };
-  return { icon: File, labelKey: "file" as const, className: "text-muted-foreground" };
+    return {
+      icon: FileCode,
+      labelKey: "code" as const,
+      className: "text-purple-500",
+    };
+  return {
+    icon: File,
+    labelKey: "file" as const,
+    className: "text-muted-foreground",
+  };
 };
 
 /**
@@ -112,7 +132,7 @@ export function useDocumentTable({
       ),
       cell: ({ row }) => (
         <span
-          className="font-semibold text-xs block truncate max-w-100"
+          className="block max-w-100 truncate text-xs font-semibold"
           title={row.getValue("originalName")}
         >
           {row.getValue("originalName")}
@@ -127,7 +147,11 @@ export function useDocumentTable({
       ),
       cell: ({ row }) => {
         const contentType: string = row.getValue("contentType");
-        const { icon: Icon, labelKey, className } = getFileTypeInfo(contentType);
+        const {
+          icon: Icon,
+          labelKey,
+          className,
+        } = getFileTypeInfo(contentType);
         return (
           <div className="flex items-center gap-1.5">
             <Icon className={`h-3.5 w-3.5 ${className}`} />

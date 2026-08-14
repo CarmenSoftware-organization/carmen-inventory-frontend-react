@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
@@ -67,11 +63,7 @@ export function useSaveSpotCheckDetailComment(detailId: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: [
-          QUERY_KEYS.SPOT_CHECK_DETAIL_COMMENTS,
-          buCode,
-          detailId,
-        ],
+        queryKey: [QUERY_KEYS.SPOT_CHECK_DETAIL_COMMENTS, buCode, detailId],
       });
     },
   });

@@ -1,4 +1,3 @@
-
 import type { UseFormReturn, FieldPath } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel } from "@/components/ui/field";

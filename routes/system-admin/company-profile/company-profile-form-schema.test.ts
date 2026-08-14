@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import type { BusinessUnitDetail, BusinessUnitConfigItem } from "@/types/business-unit";
+import type {
+  BusinessUnitDetail,
+  BusinessUnitConfigItem,
+} from "@/types/business-unit";
 import {
   toFormValues,
   buildPatch,

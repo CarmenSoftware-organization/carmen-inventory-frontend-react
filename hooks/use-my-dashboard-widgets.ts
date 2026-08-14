@@ -62,7 +62,8 @@ export function myDashboardWidgetDataQueryOptions(
       const res = await httpClient.get(
         API_ENDPOINTS.DASHBOARD_LAB_WIDGET_DATA(buCode!, widgetId!),
       );
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch widget data");
+      if (!res.ok)
+        throw await ApiError.from(res, "Failed to fetch widget data");
       const json = await res.json();
       return json.data as DashboardDatasetDetail;
     },

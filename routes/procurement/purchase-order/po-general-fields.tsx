@@ -1,11 +1,7 @@
 import { useEffect } from "react";
 import { useTranslations } from "use-intl";
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
-import {
-  Field,
-  FieldLabel,
-  FieldDatePicker,
-} from "@/components/ui/field";
+import { Field, FieldLabel, FieldDatePicker } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { LookupVendor } from "@/components/lookup/lookup-vendor";
 import { LookupCreditTerm } from "@/components/lookup/lookup-credit-term";

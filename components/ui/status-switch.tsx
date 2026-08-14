@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";

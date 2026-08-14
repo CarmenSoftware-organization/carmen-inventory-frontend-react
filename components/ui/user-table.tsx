@@ -48,7 +48,7 @@ const HighlightText = ({
         i % 2 === 1 ? (
           <mark
             key={`${i}-${part}`}
-            className="rounded-sm bg-warning/30 text-foreground font-bold"
+            className="bg-warning/30 text-foreground rounded-sm font-bold"
           >
             {part}
           </mark>
@@ -140,7 +140,7 @@ export function UserTable({ users, className }: UserTableProps) {
           placeholder={t("search")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-6 pl-8 text-micro-legal"
+          className="text-micro-legal h-6 pl-8"
         />
       </div>
       <DataGrid

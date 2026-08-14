@@ -23,10 +23,7 @@ import { CACHE_STATIC } from "@/lib/cache-config";
  * @example
  * const { data } = usePrt({ page: 1, perpage: 20 });
  */
-export function usePrt(
-  params?: ParamsDto,
-  options?: { enabled?: boolean },
-) {
+export function usePrt(params?: ParamsDto, options?: { enabled?: boolean }) {
   const buCode = useBuCode();
 
   return useQuery<PaginatedResponse<PurchaseRequestTemplate>>({
@@ -63,8 +60,7 @@ export function usePrtById(id: string | undefined) {
       const res = await httpClient.get(
         `${API_ENDPOINTS.PURCHASE_REQUEST_TEMPLATES(buCode!)}/${id}`,
       );
-      if (!res.ok)
-        throw new Error("Failed to fetch purchase request template");
+      if (!res.ok) throw new Error("Failed to fetch purchase request template");
       const json = await res.json();
       return json.data;
     },
@@ -83,10 +79,7 @@ export function usePrtById(id: string | undefined) {
 export function useCreatePrt() {
   return useApiMutation<CreatePrtDto, { data: { id: string } }>({
     mutationFn: (data, buCode) =>
-      httpClient.post(
-        API_ENDPOINTS.PURCHASE_REQUEST_TEMPLATES(buCode),
-        data,
-      ),
+      httpClient.post(API_ENDPOINTS.PURCHASE_REQUEST_TEMPLATES(buCode), data),
     invalidateKeys: [QUERY_KEYS.PURCHASE_REQUEST_TEMPLATES],
     errorMessage: "Failed to create purchase request template",
   });

@@ -38,12 +38,21 @@ export type FilterFieldDef =
       readonly options: { labelKey: string; value: string }[];
       readonly searchable?: boolean;
     })
-  | (FilterFieldBase & { readonly control: "date-range"; readonly fieldKey: string })
+  | (FilterFieldBase & {
+      readonly control: "date-range";
+      readonly fieldKey: string;
+    })
   | (FilterFieldBase & { readonly control: "department" })
   | (FilterFieldBase & { readonly control: "requester" })
   | (FilterFieldBase & { readonly control: "stage"; readonly stages: string[] })
-  | (FilterFieldBase & { readonly control: "workflow"; readonly workflowType: WORKFLOW_TYPE })
+  | (FilterFieldBase & {
+      readonly control: "workflow";
+      readonly workflowType: WORKFLOW_TYPE;
+    })
   | (FilterFieldBase & {
       readonly control: "custom";
-      readonly render: (value: string, onChange: (v: string) => void) => ReactNode;
+      readonly render: (
+        value: string,
+        onChange: (v: string) => void,
+      ) => ReactNode;
     });

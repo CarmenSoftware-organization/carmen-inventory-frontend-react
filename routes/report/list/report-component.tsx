@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -182,10 +181,7 @@ export default function ReportComponent() {
       <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
           {/* Header */}
-          <DocumentListHeader
-            title={t("title")}
-            description={t("desc")}
-          />
+          <DocumentListHeader title={t("title")} description={t("desc")} />
 
           {/* Toolbar */}
           <div className="flex w-full items-center gap-2">
@@ -225,7 +221,10 @@ export default function ReportComponent() {
             </div>
           </div>
 
-          <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+          <ActiveFilterBar
+            filters={lf.activeFilters}
+            onClearAll={lf.clearAll}
+          />
         </div>
 
         {/* Content */}

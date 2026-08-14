@@ -1,12 +1,8 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Package } from "lucide-react";
 import { Field, FieldError } from "@/components/ui/field";
-import {
-  CardLabel,
-  GlassCard,
-} from "@/components/share/glass-card";
+import { CardLabel, GlassCard } from "@/components/share/glass-card";
 import type { ProductLocation } from "@/types/location";
 import type { SpotCheckFormValues } from "./sc-form-schema";
 import { ProductPanel, type DisplayItem } from "./sc-product-panel";
@@ -44,8 +40,7 @@ export function ScProductTransfer({
     seen.add(p.id);
     allItems.push({
       id: p.id,
-      title:
-        [p.code, p.name].filter(Boolean).join(" — ").trim() || p.id,
+      title: [p.code, p.name].filter(Boolean).join(" — ").trim() || p.id,
     });
   }
 
@@ -150,4 +145,3 @@ function buildProductsValue(
     };
   });
 }
-

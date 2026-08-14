@@ -156,7 +156,12 @@ interface CheckBadgeProps {
   readonly cy?: number;
   readonly r?: number;
 }
-export function CheckBadge({ palette, cx = 28, cy = 28, r = 5 }: CheckBadgeProps) {
+export function CheckBadge({
+  palette,
+  cx = 28,
+  cy = 28,
+  r = 5,
+}: CheckBadgeProps) {
   return (
     <>
       <circle cx={cx} cy={cy} r={r} style={{ fill: palette.accent }} />
@@ -243,7 +248,10 @@ export function Pin({ children }: { readonly children?: React.ReactNode }) {
 export function ProductCube({ palette }: { readonly palette: Palette }) {
   return (
     <>
-      <path d="M 20 9 L 31 13.5 V 26 L 20 30.5 L 9 26 V 13.5 Z" fill="currentColor" />
+      <path
+        d="M 20 9 L 31 13.5 V 26 L 20 30.5 L 9 26 V 13.5 Z"
+        fill="currentColor"
+      />
       <path
         d="M 20 9 L 31 13.5 L 20 18 L 9 13.5 Z"
         style={{ fill: palette.accent }}
@@ -264,9 +272,30 @@ export function ProductCube({ palette }: { readonly palette: Palette }) {
 export function BarChart({ palette }: { readonly palette: Palette }) {
   return (
     <>
-      <rect x="14" y="24" width="2.6" height="5" rx="0.4" style={{ fill: palette.accent }} />
-      <rect x="18" y="21" width="2.6" height="8" rx="0.4" style={{ fill: palette.accent }} />
-      <rect x="22" y="17" width="2.6" height="12" rx="0.4" style={{ fill: palette.accent }} />
+      <rect
+        x="14"
+        y="24"
+        width="2.6"
+        height="5"
+        rx="0.4"
+        style={{ fill: palette.accent }}
+      />
+      <rect
+        x="18"
+        y="21"
+        width="2.6"
+        height="8"
+        rx="0.4"
+        style={{ fill: palette.accent }}
+      />
+      <rect
+        x="22"
+        y="17"
+        width="2.6"
+        height="12"
+        rx="0.4"
+        style={{ fill: palette.accent }}
+      />
       <path
         d="M 14.5 22 L 19 19 L 23 15"
         style={{ stroke: palette.base }}
@@ -290,8 +319,22 @@ export function DashboardGrid({
   return (
     <>
       <rect x="9" y="9" width="9" height="14" rx={rx} fill="currentColor" />
-      <rect x="9" y="25" width="9" height="6" rx={rx} style={{ fill: palette.accent }} />
-      <rect x="20" y="9" width="11" height="7" rx={rx} style={{ fill: palette.accent }} />
+      <rect
+        x="9"
+        y="25"
+        width="9"
+        height="6"
+        rx={rx}
+        style={{ fill: palette.accent }}
+      />
+      <rect
+        x="20"
+        y="9"
+        width="11"
+        height="7"
+        rx={rx}
+        style={{ fill: palette.accent }}
+      />
       <rect x="20" y="18" width="11" height="13" rx={rx} fill="currentColor" />
     </>
   );
@@ -353,7 +396,15 @@ interface GlyphProps {
   readonly opacity?: number;
 }
 /** Bold sans-serif symbol glyph ($, €, %, #) — ใช้ใน config / pricing tiles */
-export function Glyph({ children, x, y, size, fill, anchor, opacity }: GlyphProps) {
+export function Glyph({
+  children,
+  x,
+  y,
+  size,
+  fill,
+  anchor,
+  opacity,
+}: GlyphProps) {
   return (
     <text
       x={x}

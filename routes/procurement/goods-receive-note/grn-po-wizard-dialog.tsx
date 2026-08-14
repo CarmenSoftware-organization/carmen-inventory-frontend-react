@@ -442,7 +442,7 @@ function PoStep({
                       checked={detailChecked}
                       onCheckedChange={() => toggleDetail(d.id)}
                     />
-                    <span className="text-muted-foreground shrink-0 text-micro tabular-nums">
+                    <span className="text-muted-foreground text-micro shrink-0 tabular-nums">
                       {d.product_code}
                     </span>
                     <span className="text-foreground min-w-0 flex-1 truncate text-xs">
@@ -451,7 +451,7 @@ function PoStep({
                     <span className="w-14 shrink-0 text-right text-xs tabular-nums">
                       {d.order_qty}
                     </span>
-                    <span className="text-muted-foreground w-10 shrink-0 text-center text-micro">
+                    <span className="text-muted-foreground text-micro w-10 shrink-0 text-center">
                       {d.order_unit_name}
                     </span>
                     <span className="w-20 shrink-0 text-right text-xs tabular-nums">

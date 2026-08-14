@@ -74,7 +74,7 @@ export const LocationCell = memo(function LocationCell({
           {statusSlot}
         </div>
         <span
-          className="text-muted-foreground truncate text-micro-legal"
+          className="text-muted-foreground text-micro-legal truncate"
           title={locationCode || undefined}
         >
           {locationCode}
@@ -126,9 +126,7 @@ export const LocationCell = memo(function LocationCell({
                         );
                       }
                     }}
-                    nextFocusRef={fieldFocusRef(
-                      `items.${index}.requested_qty`,
-                    )}
+                    nextFocusRef={fieldFocusRef(`items.${index}.requested_qty`)}
                     className="h-7 w-full text-xs"
                     popoverWidth="w-[26.25rem]"
                     defaultLabel={locationName}
@@ -148,14 +146,14 @@ export const LocationCell = memo(function LocationCell({
                       </p>
                     </div>
                     {(locationType || deliveryPointName) && (
-                      <div className="mt-2 flex items-center gap-2 border-t pt-2 text-micro">
+                      <div className="text-micro mt-2 flex items-center gap-2 border-t pt-2">
                         {locationType && (
                           <Badge
                             size="xs"
                             variant={
                               LOCATION_TYPE_VARIANT[locationType] ?? "secondary"
                             }
-                            className="h-4 px-1.5 text-micro-legal"
+                            className="text-micro-legal h-4 px-1.5"
                           >
                             {(() => {
                               const k = inventoryTypeLabelKey(locationType);

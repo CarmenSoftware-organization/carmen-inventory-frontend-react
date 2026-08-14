@@ -1,4 +1,3 @@
-
 import type { UseFormReturn, FieldPath } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldInput } from "@/components/ui/field";
@@ -65,9 +64,8 @@ function PercentField({
   readonly isDisabled: boolean;
   readonly description?: string;
 }) {
-  const error = form.formState.errors[
-    name as keyof RecipeCategoryFormValues
-  ]?.message as string | undefined;
+  const error = form.formState.errors[name as keyof RecipeCategoryFormValues]
+    ?.message as string | undefined;
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
@@ -85,12 +83,12 @@ function PercentField({
           errorIconAlign="left"
           {...form.register(name)}
         />
-        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+        <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm">
           %
         </span>
       </div>
       {description && (
-        <span className="text-xs text-muted-foreground">{description}</span>
+        <span className="text-muted-foreground text-xs">{description}</span>
       )}
     </Field>
   );

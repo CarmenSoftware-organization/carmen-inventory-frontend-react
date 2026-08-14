@@ -8,7 +8,11 @@ import { ApiError, ERROR_CODES } from "@/lib/api-error";
 import { buildUrl } from "@/utils/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
-import type { CreditNote, CreditNoteDetail, CreateCnDto } from "@/types/credit-note";
+import type {
+  CreditNote,
+  CreditNoteDetail,
+  CreateCnDto,
+} from "@/types/credit-note";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import type { CommentItem } from "@/components/ui/comment-sheet";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
@@ -117,10 +121,9 @@ export function useUpdateCreditNote() {
 export function useSubmitCreditNote() {
   return useApiMutation<{ id: string; doc_version: number }>({
     mutationFn: ({ id, doc_version }, buCode) =>
-      httpClient.patch(
-        `${API_ENDPOINTS.CREDIT_NOTE(buCode)}/${id}/submit`,
-        { doc_version },
-      ),
+      httpClient.patch(`${API_ENDPOINTS.CREDIT_NOTE(buCode)}/${id}/submit`, {
+        doc_version,
+      }),
     invalidateKeys: [QUERY_KEYS.CREDIT_NOTES],
     errorMessage: "Failed to submit credit note",
   });
@@ -176,8 +179,7 @@ export function useCreditNoteComments(cnId: string | undefined) {
       const res = await httpClient.get(
         API_ENDPOINTS.CREDIT_NOTE_COMMENT(buCode, cnId),
       );
-      if (!res.ok)
-        throw await ApiError.from(res, "Failed to fetch comments");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch comments");
       const json = await res.json();
       return json.data ?? [];
     },

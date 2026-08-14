@@ -183,7 +183,7 @@ export function StockReplLocation({
       accessorKey: "need",
       header: tfl("need"),
       cell: ({ row }) => (
-        <span className="tabular-nums font-semibold">
+        <span className="font-semibold tabular-nums">
           {row.getValue("need")}
         </span>
       ),
@@ -217,7 +217,7 @@ export function StockReplLocation({
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
-      <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-left text-sm font-semibold hover:bg-muted/70 transition-colors">
+      <CollapsibleTrigger className="bg-muted/40 hover:bg-muted/70 flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-sm font-semibold transition-colors">
         <ChevronRight
           className={`size-4 shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
         />
@@ -244,10 +244,7 @@ export function StockReplLocation({
 
       <CollapsibleContent>
         <div className="mt-1">
-          <DataGrid
-            table={table}
-            recordCount={products.length}
-          >
+          <DataGrid table={table} recordCount={products.length}>
             <DataGridContainer>
               <DataGridTable />
             </DataGridContainer>

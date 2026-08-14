@@ -1,4 +1,3 @@
-
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,7 +31,10 @@ export function CategoryCheckboxList({
       catMap.set(cat.id, cat.name);
     }
   }
-  const categories = Array.from(catMap.entries()).map(([id, name]) => ({ id, name }));
+  const categories = Array.from(catMap.entries()).map(([id, name]) => ({
+    id,
+    name,
+  }));
 
   const value =
     useWatch({

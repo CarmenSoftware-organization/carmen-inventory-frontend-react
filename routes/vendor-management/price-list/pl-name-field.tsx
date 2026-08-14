@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import { Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -49,7 +48,7 @@ export function NameField({
     >
       <div
         className={cn(
-          "mb-0.5 flex items-center gap-1 text-micro-eyebrow font-semibold tracking-[0.16em] uppercase transition-colors",
+          "text-micro-eyebrow mb-0.5 flex items-center gap-1 font-semibold tracking-[0.16em] uppercase transition-colors",
           labelTone,
         )}
       >
@@ -96,7 +95,7 @@ export function NameField({
         )}
       </div>
 
-      <div className="mt-1 flex items-center justify-between text-micro-legal">
+      <div className="text-micro-legal mt-1 flex items-center justify-between">
         <span
           className={cn(
             "font-semibold",

@@ -8,9 +8,7 @@ import type { CategoryNode } from "@/types/category";
 import { NODE_TYPE } from "@/types/category";
 import { CategoryForm } from "./category-form";
 
-function renderForm(
-  props: Partial<React.ComponentProps<typeof CategoryForm>>,
-) {
+function renderForm(props: Partial<React.ComponentProps<typeof CategoryForm>>) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });

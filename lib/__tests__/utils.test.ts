@@ -93,7 +93,9 @@ describe("safeNavigationHref", () => {
   });
 
   it("accepts canonicalized http/https URLs", () => {
-    expect(safeNavigationHref("https://carmen.app")).toBe("https://carmen.app/");
+    expect(safeNavigationHref("https://carmen.app")).toBe(
+      "https://carmen.app/",
+    );
   });
 
   it("rejects protocol-relative and backslash-mangled paths", () => {
@@ -112,7 +114,9 @@ describe("safeInternalHref", () => {
     expect(safeInternalHref("/procurement/purchase-request/123")).toBe(
       "/procurement/purchase-request/123",
     );
-    expect(safeInternalHref("  /some/page?tab=1#x  ")).toBe("/some/page?tab=1#x");
+    expect(safeInternalHref("  /some/page?tab=1#x  ")).toBe(
+      "/some/page?tab=1#x",
+    );
   });
 
   it("returns null for empty/nullish input", () => {

@@ -83,9 +83,7 @@ function StageNode({ data }: NodeProps<Node<StageNodeData>>) {
       return <Play className="text-muted-foreground size-3 fill-current" />;
     }
     return (
-      <span className="text-xs font-semibold tabular-nums">
-        {data.index}
-      </span>
+      <span className="text-xs font-semibold tabular-nums">{data.index}</span>
     );
   };
 

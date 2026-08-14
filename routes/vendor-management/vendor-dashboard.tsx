@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { DashboardWidgetGrid } from "@/components/dashboard-widget/dashboard-widget-grid-lazy";
 import { useVendorWidgets } from "@/hooks/use-dashboard-widgets";

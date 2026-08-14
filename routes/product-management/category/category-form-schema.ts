@@ -48,13 +48,9 @@ export function getDefaultValues(
       parentNode?.price_deviation_limit ??
       0,
     qty_deviation_limit:
-      selectedNode?.qty_deviation_limit ??
-      parentNode?.qty_deviation_limit ??
-      0,
+      selectedNode?.qty_deviation_limit ?? parentNode?.qty_deviation_limit ?? 0,
     is_used_in_recipe:
-      selectedNode?.is_used_in_recipe ??
-      parentNode?.is_used_in_recipe ??
-      false,
+      selectedNode?.is_used_in_recipe ?? parentNode?.is_used_in_recipe ?? false,
     is_sold_directly:
       selectedNode?.is_sold_directly ?? parentNode?.is_sold_directly ?? false,
     tax_profile_id:

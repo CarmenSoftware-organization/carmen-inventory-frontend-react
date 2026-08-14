@@ -34,7 +34,9 @@ function tsxFiles(dir: string): string[] {
   return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => {
     const rel = `${dir}/${e.name}`;
     if (e.isDirectory()) return tsxFiles(rel);
-    return e.name.endsWith(".tsx") && !e.name.endsWith(".test.tsx") ? [rel] : [];
+    return e.name.endsWith(".tsx") && !e.name.endsWith(".test.tsx")
+      ? [rel]
+      : [];
   });
 }
 

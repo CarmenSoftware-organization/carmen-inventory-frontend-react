@@ -47,4 +47,3 @@ export const PHYSICAL_COUNT_LABEL_KEY: Record<string, string> = {
   yes: "pcYes",
   no: "pcNo",
 };
-

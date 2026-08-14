@@ -57,4 +57,3 @@ export enum StatusEop {
   NOT_CREATED = "not_created",
   COUNTED = "counted",
 }
-
