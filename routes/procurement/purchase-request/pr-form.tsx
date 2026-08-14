@@ -113,10 +113,10 @@ export function PurchaseRequestForm({
     !purchaseRequest?.pr_status ||
     purchaseRequest.pr_status === PR_STATUS.DRAFT;
 
-  // lock หลัง submit (status ≠ draft) เฉพาะ role ผู้สร้าง (CREATE) — role ใน
-  // workflow (purchase/approve) ยังต้องเลือก/แก้ item ได้ จึงไม่โดน lock ตรงนี้
-  const isDisabled =
-    isView || actions.isPending || (!isDraft && role === STAGE_ROLE.CREATE);
+  // ไม่ lock ตาม status — backend ให้ role เป็น view_only อยู่แล้วถ้าผู้ใช้ไม่ใช่
+  // actor ของ stage ปัจจุบัน ส่วน non-draft ที่ role = create คือใบถูก send back
+  // กลับมาหาคนขอ ซึ่งต้องแก้ได้ (แถวที่ตัดสินแล้วยังล็อกราย row ผ่าน isRowLocked)
+  const isDisabled = isView || actions.isPending;
 
   const hasHistory = !!purchaseRequest?.workflow_history?.length;
 
