@@ -20,6 +20,7 @@ import type { Workflow, User, Product, Stage } from "@/types/workflows";
 import {
   wfFormSchema,
   getWorkflowFormDefaults,
+  toWorkflowPayload,
   type WorkflowCreateModel,
 } from "./wf-form-schema";
 import { WfHeader } from "./wf-header";
@@ -99,7 +100,11 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
   const onSubmit = (values: WorkflowCreateModel) => {
     updateWorkflow.mutate(
       // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
-      { id: workflow.id, doc_version: workflow.doc_version, ...values },
+      {
+        id: workflow.id,
+        doc_version: workflow.doc_version,
+        ...toWorkflowPayload(values),
+      },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -244,6 +249,7 @@ export function WfDetail({ workflow, users, products }: WfDetailProps) {
                   fieldArray={routingFieldArray}
                   stages={stagesFieldArray.fields}
                   isDisabled={isDisabled}
+                  allProducts={products}
                 />
               </TabsContent>
 

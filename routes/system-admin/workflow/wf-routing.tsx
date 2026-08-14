@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { useDepartment } from "@/hooks/use-department";
+import type { Product } from "@/types/workflows";
 import type { WorkflowCreateModel } from "./wf-form-schema";
 import { cn } from "@/lib/utils";
 import {
@@ -41,6 +42,7 @@ interface WfRoutingProps {
   >;
   readonly stages: { id: string; name: string }[];
   readonly isDisabled: boolean;
+  readonly allProducts: Product[];
 }
 
 export function WfRouting({
@@ -48,6 +50,7 @@ export function WfRouting({
   fieldArray,
   stages,
   isDisabled,
+  allProducts,
 }: WfRoutingProps) {
   const { fields, append, remove } = fieldArray;
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -396,6 +399,7 @@ export function WfRouting({
                     form={form}
                     ruleIndex={safeIndex}
                     isDisabled={isDisabled}
+                    allProducts={allProducts}
                   />
                 )}
               </FieldGroup>

@@ -172,41 +172,68 @@ export const wfFormSchema = z.object({
     ),
     notifications: z.array(z.object({})),
     notification_templates: z.array(z.object({})),
+    // payload จริงส่งแค่ id (ดู toWorkflowPayload) — ตอนอ่านจึงต้องรับทั้ง
+    // string id (รูปแบบใหม่) และ object เต็มที่ workflow เก่า snapshot ไว้
+    // แล้ว normalize เป็น { id, ... } ให้ฟอร์มใช้ shape เดียว
     products: z.array(
-      z.object({
-        id: z.string(),
-        code: z.string(),
-        name: z.string(),
-        local_name: z.string().optional(),
-        description: z.nullable(z.string()).optional(),
-        product_status_type: z.string().optional(),
-        inventory_unit: z.object({ id: z.string(), name: z.string() }),
-        isAssigned: z.boolean().optional(),
-        product_item_group: z
-          .object({
+      z
+        .union([
+          z.string(),
+          z.object({
             id: z.string(),
-            name: z.string(),
-          })
-          .optional(),
-        product_sub_category: z
-          .object({
-            id: z.string(),
-            name: z.string(),
-          })
-          .optional(),
-        product_category: z
-          .object({
-            id: z.string(),
-            name: z.string(),
-          })
-          .optional(),
-      }),
+            code: z.string().optional(),
+            name: z.string().optional(),
+            local_name: z.string().optional(),
+            description: z.nullable(z.string()).optional(),
+            product_status_type: z.string().optional(),
+            inventory_unit: z
+              .object({ id: z.string(), name: z.string() })
+              .optional(),
+            isAssigned: z.boolean().optional(),
+            product_item_group: z
+              .object({
+                id: z.string(),
+                name: z.string(),
+              })
+              .optional(),
+            product_sub_category: z
+              .object({
+                id: z.string(),
+                name: z.string(),
+              })
+              .optional(),
+            product_category: z
+              .object({
+                id: z.string(),
+                name: z.string(),
+              })
+              .optional(),
+          }),
+        ])
+        .transform((p) => (typeof p === "string" ? { id: p } : p)),
     ),
   }),
   description: z.string().optional(),
 });
 
 export type WorkflowCreateModel = z.infer<typeof wfFormSchema>;
+
+/**
+ * payload ที่ส่งขึ้น API — products หั่นเหลือ id ล้วน (ตรง contract ฝั่ง backend
+ * ที่ประกาศ `products: string[]`) ไม่ snapshot ชื่อ/หน่วย/category ของสินค้าลง
+ * JSON ของ workflow ให้ค้างเป็นค่าเก่า
+ */
+export type WorkflowPayload = Omit<WorkflowCreateModel, "data"> & {
+  data: Omit<WorkflowCreateModel["data"], "products"> & { products: string[] };
+};
+
+/** แปลงค่าฟอร์มเป็น payload ก่อนส่ง (POST/PUT) — ทุกจุดที่ยิง API ต้องผ่านตัวนี้ */
+export function toWorkflowPayload(model: WorkflowCreateModel): WorkflowPayload {
+  return {
+    ...model,
+    data: { ...model.data, products: model.data.products.map((p) => p.id) },
+  };
+}
 
 export const DEFAULT_WORKFLOW_DATA: WorkflowCreateModel["data"] = {
   document_reference_pattern: "PR-{YYYY}-{MM}-{####}",
@@ -292,7 +319,7 @@ export function buildDefaultStages(): Stage[] {
   ];
 }
 
-export function mapToPayload(values: WorkflowFormValues): WorkflowCreateModel {
+export function mapToPayload(values: WorkflowFormValues): WorkflowPayload {
   return {
     id: crypto.randomUUID(),
     name: values.name,

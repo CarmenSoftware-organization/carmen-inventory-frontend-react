@@ -11,8 +11,9 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type { Workflow, WorkflowDto } from "@/types/workflows";
 import {
   getWorkflowFormDefaults,
+  toWorkflowPayload,
   WorkflowDataParseError,
-  type WorkflowCreateModel,
+  type WorkflowPayload,
 } from "./wf-form-schema";
 
 interface MutateOptions<T> {
@@ -83,8 +84,8 @@ export function useWfRowMutations() {
     handle(workflow, async (detail) => {
       const next = !workflow.is_active;
       const defaults = getWorkflowFormDefaults(detail);
-      const payload: WorkflowCreateModel & { id: string; doc_version?: number } = {
-        ...defaults,
+      const payload: WorkflowPayload & { id: string; doc_version?: number } = {
+        ...toWorkflowPayload(defaults),
         id: workflow.id,
         is_active: next,
         // detail is freshly GET-fetched above — its doc_version is current
@@ -100,8 +101,8 @@ export function useWfRowMutations() {
   const duplicate = (workflow: WorkflowDto) =>
     handle(workflow, async (detail) => {
       const defaults = getWorkflowFormDefaults(detail);
-      const payload: WorkflowCreateModel = {
-        ...defaults,
+      const payload: WorkflowPayload = {
+        ...toWorkflowPayload(defaults),
         id: crypto.randomUUID(),
         name: `${detail.name} ${t("copySuffix")}`,
       };
