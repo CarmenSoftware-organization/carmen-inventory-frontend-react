@@ -87,7 +87,9 @@ describe("PermissionDeniedDialog — reason variants", () => {
     expect(screen.getByText("title")).toBeInTheDocument();
     expect(screen.getByText("description")).toBeInTheDocument();
     // AlertDialog renders into a Radix portal (document.body), not `container`
-    expect(document.querySelector("svg.lucide-shield-off")).not.toBeNull();
+    const icon = document.querySelector("svg.lucide-shield-off");
+    expect(icon).not.toBeNull();
+    expect(icon).toHaveClass("text-destructive");
   });
 
   it('shows the license copy + Lock icon when reason is "license"', () => {
@@ -96,7 +98,9 @@ describe("PermissionDeniedDialog — reason variants", () => {
     expect(screen.getByText("licenseTitle")).toBeInTheDocument();
     expect(screen.getByText("licenseDescription")).toBeInTheDocument();
     expect(screen.queryByText("title")).toBeNull();
-    expect(document.querySelector("svg.lucide-lock")).not.toBeNull();
+    const icon = document.querySelector("svg.lucide-lock");
+    expect(icon).not.toBeNull();
+    expect(icon).toHaveClass("text-destructive");
     expect(document.querySelector("svg.lucide-shield-off")).toBeNull();
   });
 
@@ -106,7 +110,9 @@ describe("PermissionDeniedDialog — reason variants", () => {
     expect(screen.getByText("expiredTitle")).toBeInTheDocument();
     expect(screen.getByText("expiredDescription")).toBeInTheDocument();
     expect(screen.queryByText("title")).toBeNull();
-    expect(document.querySelector("svg.lucide-calendar-x")).not.toBeNull();
+    const icon = document.querySelector("svg.lucide-calendar-x");
+    expect(icon).not.toBeNull();
+    expect(icon).toHaveClass("text-destructive");
     expect(document.querySelector("svg.lucide-shield-off")).toBeNull();
   });
 
