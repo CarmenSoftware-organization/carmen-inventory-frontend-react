@@ -137,3 +137,14 @@ or any secret-bearing app-config save (incl. the pre-existing `report_email`) 40
 - `scripts/changelog.ts`'s conventional-commit regex captures the breaking-change `!`
   marker (e.g. `feat(api)!: …`) but nothing reads it — deliberately not implementing a
   breaking-change badge in What's New for now; such commits render like ordinary features.
+- **License gating ฝั่ง FE ครอบไม่ครบโดยตั้งใจ** — ปุ่มที่เรียก mutation ตรงโดยไม่ผ่าน
+  `useCan().guard()` / `FormToolbar` / `useConfigTable` จะยังกดได้แล้วเด้ง 403 จาก backend
+  ซึ่งยอมรับได้เพราะ `LicenseInterceptor` ที่ gateway คือตัวบังคับจริง การไล่ปิดทุกปุ่ม
+  เป็นงานที่ไม่มีวันจบและตรวจไม่ได้ว่าครบ
+- **สวิตช์ `LICENSE_ENFORCEMENT` ต้องเปิดเองตอน rollout** — เป็น optional key ใน
+  `RuntimeConfig` (`lib/runtime-config.ts`), default `false` (shadow mode: banner/ปุ่ม
+  เขียนไม่ล็อกอะไรเลยแม้ `state` จะเป็น `expired`/`inactive`/`none`) ไฟล์
+  `public/config.{local,dev,uat,prod}.json` ของแต่ละ environment จริงถูก **gitignore**
+  (`public/config*.json` ยกเว้น `public/config.sample.json` ซึ่งมีคีย์นี้เป็นตัวอย่างอยู่แล้ว)
+  จึงต้อง**เติมคีย์ `LICENSE_ENFORCEMENT: true` ด้วยมือ** ในไฟล์ config ของ environment
+  นั้นเมื่อพร้อมเปิดใช้งานจริง — ไม่มีทางเปิดผ่าน env var หรือ build flag
