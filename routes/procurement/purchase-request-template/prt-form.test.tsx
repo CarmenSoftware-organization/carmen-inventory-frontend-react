@@ -1,11 +1,19 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { IntlProvider } from "use-intl";
 import en from "@/messages/en.json";
 import type { PurchaseRequestTemplate } from "@/types/purchase-request";
+import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 import { PrtForm } from "./prt-form";
+
+// FormToolbar → useCan() → useLicense() reads runtime config — without this it
+// throws "Runtime config not loaded" on every render. enforced defaults to
+// false here (shadow mode); this test only cares about layout, not license.
+beforeEach(() => {
+  setRuntimeConfigForTests({ BACKEND_URL: "", X_APP_ID: "app-1" });
+});
 
 const template: PurchaseRequestTemplate = {
   id: "prt-1",

@@ -4304,6 +4304,11 @@
     "expiredTitle": "Subscription Expired",
     "expiredDescription": "Your subscription has expired or been suspended. You can still view data, but editing is disabled. Contact your administrator to renew."
   },
+  "license": {
+    "expiredBanner": "Your subscription expired on {date} — you can still view data, but saving or editing is disabled.",
+    "inactiveBanner": "Your subscription has been suspended — you can still view data, but saving or editing is disabled.",
+    "writeDisabledTitle": "Disabled — your subscription is expired or inactive. Contact your administrator to renew."
+  },
   "profileError": {
     "missingDepartmentTitle": "No Department Assigned",
     "missingDepartmentDesc": "You do not have a department assigned to your default business unit ({buName}). Please contact your administrator.",
