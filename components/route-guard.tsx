@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { EyeBrow } from "@/components/ui/eye-brow";
 import { findRouteLeaf } from "@/constant/module-list";
 import { useCan } from "@/hooks/use-can";
-import { featureKeyOf, useLicense } from "@/hooks/use-license";
+import { licenseFeatureOf, useLicense } from "@/hooks/use-license";
+import type { DeniedReason } from "@/components/permission-denied-dialog";
 
 interface RouteGuardProps {
   readonly children: React.ReactNode;
@@ -37,10 +38,15 @@ export function RouteGuard({ children }: RouteGuardProps) {
 
   const leaf = findRouteLeaf(pathname);
 
-  const locked =
-    !!leaf?.permission && !isLicensed(featureKeyOf(leaf.permission));
+  const feature = leaf ? licenseFeatureOf(leaf) : undefined;
+  const locked = !!feature && !isLicensed(feature);
   if (locked) {
-    return <AccessDeniedBlock description={t("licenseDescription")} />;
+    return (
+      <AccessDeniedBlock
+        reason="license"
+        description={t("licenseDescription")}
+      />
+    );
   }
 
   const denied = !!leaf?.permission && !isAdmin && !can(leaf.permission);
@@ -52,6 +58,11 @@ export function RouteGuard({ children }: RouteGuardProps) {
 interface AccessDeniedBlockProps {
   /** แทนคำอธิบาย default ("หน้านี้เข้าไม่ได้") เมื่อเหตุผลเจาะจงกว่านั้น */
   readonly description?: string;
+  /**
+   * ทำไมถึงเข้าไม่ได้ — ใช้เลือกว่าจะแสดงบรรทัด "ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์"
+   * ต่อท้ายไหม default `"permission"` (พฤติกรรมเดิมเมื่อไม่ส่งมา)
+   */
+  readonly reason?: DeniedReason;
 }
 
 /**
@@ -61,7 +72,10 @@ interface AccessDeniedBlockProps {
  * ใช้ทั้งจาก `RouteGuard` (สิทธิ์ระดับหน้า) และจากหน้าที่ gate ตัวเองด้วยเงื่อนไข
  * ที่ moduleList ไม่รู้ เช่น หน้าสร้าง PR ที่ไม่มี workflow ให้เริ่มเลยสักตัว
  */
-export function AccessDeniedBlock({ description }: AccessDeniedBlockProps) {
+export function AccessDeniedBlock({
+  description,
+  reason = "permission",
+}: AccessDeniedBlockProps) {
   const t = useTranslations("permissionDenied");
   const navigate = useNavigate();
 
@@ -85,9 +99,14 @@ export function AccessDeniedBlock({ description }: AccessDeniedBlockProps) {
         <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
           {description ?? t("pageDescription")}
         </p>
-        <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
-          {t("contactAdmin")}
-        </p>
+        {/* "ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์" ใช้ได้เฉพาะเรื่องสิทธิ์ — เหตุผล license/
+            expired มีทางแก้คนละทาง (ต่อสัญญา/ติดต่อฝ่ายขาย) และคำอธิบายด้านบนบอก
+            ไปแล้ว การแปะบรรทัดนี้ต่อท้ายจึงขัดกันเอง */}
+        {reason === "permission" && (
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+            {t("contactAdmin")}
+          </p>
+        )}
 
         <Button
           type="button"

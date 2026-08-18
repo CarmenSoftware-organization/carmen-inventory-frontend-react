@@ -1,5 +1,5 @@
 import { useCan } from "@/hooks/use-can";
-import { useLicense, featureKeyOf } from "@/hooks/use-license";
+import { useLicense, licenseFeatureOf } from "@/hooks/use-license";
 import { moduleList, type ModuleDto } from "@/constant/module-list";
 import type { Permission } from "@/constant/permissions";
 
@@ -32,11 +32,12 @@ export function annotate(
         locked: subs.every((s) => s.locked),
       };
     }
+    const feature = licenseFeatureOf(mod);
     return {
       ...rest,
       subModules: undefined,
       denied: !!mod.permission && !can(mod.permission),
-      locked: !!mod.permission && !isLicensed(featureKeyOf(mod.permission)),
+      locked: !!feature && !isLicensed(feature),
     };
   });
 }
@@ -64,11 +65,12 @@ export function markAll(
         locked: subs.every((s) => s.locked),
       };
     }
+    const feature = licenseFeatureOf(mod);
     return {
       ...rest,
       subModules: undefined,
       denied: false,
-      locked: !!mod.permission && !isLicensed(featureKeyOf(mod.permission)),
+      locked: !!feature && !isLicensed(feature),
     };
   });
 }

@@ -24,6 +24,7 @@ vi.mock("@/hooks/use-profile", () => ({
 
 const PERMISSION = PERMISSIONS.procurement.purchase_request.view; // "procurement.purchase_request.view"
 const FEATURE = "procurement.purchase_request"; // featureKeyOf(PERMISSION)
+const MODULE = "procurement"; // module ของ FEATURE — backend ส่งมาคู่กันเสมอ
 
 const baseConfig: RuntimeConfig = {
   BACKEND_URL: "",
@@ -34,7 +35,9 @@ function license(overrides: Partial<BusinessUnitLicense> = {}): BusinessUnitLice
   return {
     state: "active",
     end_date: "2027-01-01T00:00:00.000Z",
-    features: [FEATURE],
+    // ต้องมีทั้ง module และ resource — `evaluateLicense` ของ backend ตรวจทั้งคู่
+    // (สัญญาข้อ 4.4) และ `resolveLicense` เลียนแบบพฤติกรรมนั้น
+    features: [MODULE, FEATURE],
     seat: { used: 0, cap: 0, pending_invites: 0 },
     ...overrides,
   };
@@ -132,6 +135,15 @@ describe("RouteGuard — license (checked before permission)", () => {
     renderGuard();
     expect(screen.queryByText("protected content")).toBeNull();
     expect(screen.getByText("licenseDescription")).toBeInTheDocument();
+    // "ติดต่อผู้ดูแลเพื่อขอสิทธิ์" ขัดกับคำอธิบาย license (ให้ติดต่อฝ่ายขาย)
+    expect(screen.queryByText("contactAdmin")).toBeNull();
+  });
+
+  it("บล็อกเพราะสิทธิ์ (ไม่ใช่ license) ยังแสดง contactAdmin ตามเดิม", () => {
+    setup({ permissions: [], systemLevel: "user", enforced: false });
+    renderGuard();
+    expect(screen.getByText("pageDescription")).toBeInTheDocument();
+    expect(screen.getByText("contactAdmin")).toBeInTheDocument();
   });
 
   it("blocks on a missing license even for a BU admin — no admin bypass for license", () => {
