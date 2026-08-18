@@ -137,10 +137,25 @@ or any secret-bearing app-config save (incl. the pre-existing `report_email`) 40
 - `scripts/changelog.ts`'s conventional-commit regex captures the breaking-change `!`
   marker (e.g. `feat(api)!: …`) but nothing reads it — deliberately not implementing a
   breaking-change badge in What's New for now; such commits render like ordinary features.
-- **License gating ฝั่ง FE ครอบไม่ครบโดยตั้งใจ** — ปุ่มที่เรียก mutation ตรงโดยไม่ผ่าน
-  `useCan().guard()` / `FormToolbar` / `useConfigTable` จะยังกดได้แล้วเด้ง 403 จาก backend
+- **License gating ฝั่ง FE ครอบไม่ครบโดยตั้งใจ** — จุดที่ปิดปุ่มเขียนตาม `canWrite` จริง
+  **มีแค่ 3 จุด** คือ `FormToolbar` (Save/Edit/Delete), row actions ของ data-grid
+  (`useConfigTable` → `DataGridRowActions`) และ `ConfigListTemplate` (ปุ่ม Add + `readOnly`
+  ของ dialog แก้ไข) ปุ่มอื่นที่เรียก mutation ตรงจะยังกดได้แล้วเด้ง 403 จาก backend
   ซึ่งยอมรับได้เพราะ `LicenseInterceptor` ที่ gateway คือตัวบังคับจริง การไล่ปิดทุกปุ่ม
   เป็นงานที่ไม่มีวันจบและตรวจไม่ได้ว่าครบ
+- **`useCan().guard()` ยังไม่มีผู้เรียกสักจุดเดียวในแอป** — มันเช็ค `canWrite` ก่อน `can()`
+  แล้วเด้ง dialog ให้ตามเหตุผล (expired/permission) และมีเทสต์ครบ แต่ไม่มีใคร destructure
+  ออกมาใช้ (ทุก call site ของ `useCan()` เอาแค่ `can`/`isAdmin`/`canWrite`) — **อย่าอ่านว่า
+  "การเขียนถูกบล็อกทุกที่ที่มี guard"** ถ้าจะใช้ต้องไปเสียบที่ handler เอง:
+  `const { guard } = useCan(); <Button onClick={guard(PERMISSIONS.x.create, doCreate)}>`
+  เก็บโค้ดไว้เพราะมันถูกและเป็นทางลัดที่พร้อมใช้ ไม่ใช่เพราะมันทำงานอยู่
+- **license feature key ≠ permission key** — `constant/module-list.ts` มีฟิลด์
+  `licenseFeature` ไว้ระบุ feature ของ leaf ตรง ๆ เมื่อ key ที่คำนวณจาก `permission`
+  ไม่ตรง catalog ของ backend (เช่น `report_analytics.view` → `report.list`,
+  `product_management.unit.view` → `configuration.unit`) ค่าที่ใส่ต้องมาจาก
+  `LICENSE_ROUTE_FEATURES` ของ backend เท่านั้น และ
+  `constant/module-list.license-feature.test.ts` จะแดงถ้า key ที่ผลิตได้ไม่มีใน catalog
+  (สำเนา catalog อยู่ที่ `constant/__fixtures__/license-catalog.ts` พร้อมวิธีอัปเดต)
 - **สวิตช์ `LICENSE_ENFORCEMENT` ต้องเปิดเองตอน rollout** — เป็น optional key ใน
   `RuntimeConfig` (`lib/runtime-config.ts`), default `false` (shadow mode: banner/ปุ่ม
   เขียนไม่ล็อกอะไรเลยแม้ `state` จะเป็น `expired`/`inactive`/`none`) ไฟล์
