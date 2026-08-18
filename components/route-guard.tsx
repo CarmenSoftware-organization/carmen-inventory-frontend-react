@@ -6,29 +6,47 @@ import { Button } from "@/components/ui/button";
 import { EyeBrow } from "@/components/ui/eye-brow";
 import { findRouteLeaf } from "@/constant/module-list";
 import { useCan } from "@/hooks/use-can";
+import { featureKeyOf, useLicense } from "@/hooks/use-license";
 
 interface RouteGuardProps {
   readonly children: React.ReactNode;
 }
 
 /**
- * บล็อก direct URL ของหน้าที่ผู้ใช้ไม่มีสิทธิ์
+ * บล็อก direct URL ของหน้าที่ผู้ใช้ไม่มีสิทธิ์ หรือ BU ไม่ได้ซื้อ feature นี้
  *
  * - หา leaf ใน moduleList ที่ตรงกับ pathname (รวม nested เช่น /[id])
- * - ถ้า leaf มี `permission` แต่ผู้ใช้ไม่มี → แสดง AccessDeniedBlock แทน children
- * - Admin หรือ leaf ที่ไม่ระบุ permission → render ปกติ
+ * - เช็ค **license ก่อน permission เสมอ** — ถ้า feature ไม่อยู่ในสัญญาของ BU
+ *   การมีสิทธิ์ RBAC ก็ไม่ช่วยอะไร และต่างจาก permission ตรงที่ **ไม่มี admin
+ *   bypass** เลย (admin ของ BU ที่ไม่ได้ซื้อโมดูลก็ยังเข้าไม่ได้ — ดู
+ *   hooks/use-license.ts และ phase-c-backend-contract.md ข้อ 7.1)
+ * - `useLicense().isLicensed()` จัดการสวิตช์ `LICENSE_ENFORCEMENT` (shadow mode)
+ *   กับ state `"unresolved"` ให้แล้วภายใน — ทั้งสองกรณีไม่ล็อกหน้า ไม่ต้องเช็คซ้ำที่นี่
+ * - สัญญาหมดอายุ/ถูกระงับ (`expired`/`inactive`) **ไม่บล็อกที่นี่** — ยังอ่านได้
+ *   ตามสเปก §3.2 การบล็อกอยู่ที่ปุ่มเขียนกับที่ backend เท่านั้น
+ * - ถ้า license ผ่านแต่ไม่มี permission (และไม่ใช่ admin) → แสดง AccessDeniedBlock
+ * - Admin (เมื่อ license ผ่าน) หรือ leaf ที่ไม่ระบุ permission → render ปกติ
  *
  * วางใน `(root)/layout.tsx` ภายใต้ `ProfileGate` (รอ profile โหลดเสร็จก่อน)
  */
 export function RouteGuard({ children }: RouteGuardProps) {
   const pathname = useLocation().pathname;
   const { can, isAdmin } = useCan();
+  const { isLicensed } = useLicense();
+  const t = useTranslations("permissionDenied");
 
   const leaf = findRouteLeaf(pathname);
-  const denied = !!leaf?.permission && !isAdmin && !can(leaf.permission);
 
-  if (!denied) return <>{children}</>;
-  return <AccessDeniedBlock />;
+  const locked =
+    !!leaf?.permission && !isLicensed(featureKeyOf(leaf.permission));
+  if (locked) {
+    return <AccessDeniedBlock description={t("licenseDescription")} />;
+  }
+
+  const denied = !!leaf?.permission && !isAdmin && !can(leaf.permission);
+  if (denied) return <AccessDeniedBlock />;
+
+  return <>{children}</>;
 }
 
 interface AccessDeniedBlockProps {
