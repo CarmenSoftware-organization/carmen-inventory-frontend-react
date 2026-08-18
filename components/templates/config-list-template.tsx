@@ -280,7 +280,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
     }
   };
 
-  const { can, isAdmin } = useCan();
+  const { can, isAdmin, canWrite } = useCan();
   const autoPrefix = usePermissionPrefix();
   const prefix = permissionPrefix ?? autoPrefix;
   const createPermission = prefix
@@ -291,6 +291,23 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
     ? buildPermissionKey(prefix, "update")
     : undefined;
   const updateDenied = !!updatePermission && !isAdmin && !can(updatePermission);
+  // สัญญาหมดอายุ/ถูกระงับ → เขียนไม่ได้ทั้งหน้า ไม่ว่าจะมีสิทธิ์ RBAC หรือไม่
+  // (license ไม่มี admin bypass) ปุ่มลบของแถวถูกปิดไปแล้วใน useConfigTable —
+  // ถ้าไม่รวมตรงนี้ด้วย ปุ่ม Add กับ dialog แก้ไขจะยังใช้ได้แล้วไปเด้ง 403 ตอน save
+  // ซึ่งขัดกับปุ่มลบบนแถวเดียวกันในจอเดียวกัน
+  const addBlocked = createDenied || !canWrite;
+  const handleAddClick = () => {
+    if (!canWrite) {
+      // license มาก่อน permission เสมอ — แก้คนละวิธี (ต่ออายุ ไม่ใช่ขอสิทธิ์)
+      dispatchPermissionDenied(createPermission, undefined, "expired");
+      return;
+    }
+    if (createDenied) {
+      dispatchPermissionDenied(createPermission);
+      return;
+    }
+    handleAdd();
+  };
 
   const table = useTable({
     data: entities,
@@ -339,12 +356,8 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <DocumentListHeader title={t("title")} description={t("desc")} />
           <DocumentListActions
-            onAdd={
-              createDenied
-                ? () => dispatchPermissionDenied(createPermission)
-                : handleAdd
-            }
-            addDisabled={createDenied}
+            onAdd={handleAddClick}
+            addDisabled={addBlocked}
             addLabel={t("add")}
             onExport={handleExport}
             isExporting={isExporting}
@@ -458,7 +471,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
         open: dialogOpen,
         onOpenChange: setDialogOpen,
         entity: editEntity,
-        readOnly: !!editEntity && updateDenied,
+        readOnly: !!editEntity && (updateDenied || !canWrite),
       })}
 
       {renderDeleteFlow({

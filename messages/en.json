@@ -4298,7 +4298,16 @@
     "pageDescription": "You don't have permission to view this page.",
     "contactAdmin": "Contact your administrator to request access.",
     "close": "Close",
-    "goBack": "Go Back"
+    "goBack": "Go Back",
+    "licenseTitle": "Feature Not Licensed",
+    "licenseDescription": "This feature is not included in your organization's subscription. Contact your administrator or sales representative to enable it.",
+    "expiredTitle": "Subscription Expired",
+    "expiredDescription": "Your subscription has expired or been suspended. You can still view data, but editing is disabled. Contact your administrator to renew."
+  },
+  "license": {
+    "expiredBanner": "Your subscription expired on {date} — you can still view data, but saving or editing is disabled.",
+    "inactiveBanner": "Your subscription has been suspended — you can still view data, but saving or editing is disabled.",
+    "writeDisabledTitle": "Disabled — your subscription is expired or inactive. Contact your administrator to renew."
   },
   "profileError": {
     "missingDepartmentTitle": "No Department Assigned",
