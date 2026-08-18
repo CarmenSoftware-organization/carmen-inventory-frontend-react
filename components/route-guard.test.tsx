@@ -13,7 +13,11 @@ vi.mock("use-intl", () => ({
 }));
 
 const routeLeaf = vi.fn();
-vi.mock("@/constant/module-list", () => ({
+// mock บางส่วน — คุมแค่ `findRouteLeaf` แต่ต้องคง `moduleList` ตัวจริงไว้ เพราะ
+// `RouteGuard` เรียก `useLandingPath()` ซึ่งเดิน `moduleList` ทั้งก้อนหา leaf แรก
+// ที่เข้าได้ (ปลายทางของปุ่มในกล่อง) — mock ทั้งโมดูลจะทำให้ export นั้นหายไป
+vi.mock("@/constant/module-list", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/constant/module-list")>()),
   findRouteLeaf: () => routeLeaf(),
 }));
 

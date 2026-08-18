@@ -4299,6 +4299,7 @@
     "contactAdmin": "Contact your administrator to request access.",
     "close": "Close",
     "goBack": "Go Back",
+    "goToAccessiblePage": "Go to an available page",
     "licenseTitle": "Feature Not Licensed",
     "licenseDescription": "This feature is not included in your organization's subscription. Contact your administrator or sales representative to enable it.",
     "expiredTitle": "Subscription Expired",

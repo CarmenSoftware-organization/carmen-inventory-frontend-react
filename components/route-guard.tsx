@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { ArrowLeft, ShieldOff } from "lucide-react";
+import { ArrowLeft, Home, ShieldOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EyeBrow } from "@/components/ui/eye-brow";
 import { findRouteLeaf } from "@/constant/module-list";
 import { useCan } from "@/hooks/use-can";
+import { useLandingPath } from "@/hooks/use-landing-path";
 import { licenseFeatureOf, useLicense } from "@/hooks/use-license";
 import type { DeniedReason } from "@/components/permission-denied-dialog";
 
@@ -35,6 +36,8 @@ export function RouteGuard({ children }: RouteGuardProps) {
   const { can, isAdmin } = useCan();
   const { isLicensed } = useLicense();
   const t = useTranslations("permissionDenied");
+  // ต้องเรียกก่อน early return ทุกอัน — hook เรียกแบบมีเงื่อนไขไม่ได้
+  const landing = useLandingPath();
 
   const leaf = findRouteLeaf(pathname);
 
@@ -45,12 +48,13 @@ export function RouteGuard({ children }: RouteGuardProps) {
       <AccessDeniedBlock
         reason="license"
         description={t("licenseDescription")}
+        fallbackTo={landing}
       />
     );
   }
 
   const denied = !!leaf?.permission && !isAdmin && !can(leaf.permission);
-  if (denied) return <AccessDeniedBlock />;
+  if (denied) return <AccessDeniedBlock fallbackTo={landing} />;
 
   return <>{children}</>;
 }
@@ -63,6 +67,18 @@ interface AccessDeniedBlockProps {
    * ต่อท้ายไหม default `"permission"` (พฤติกรรมเดิมเมื่อไม่ส่งมา)
    */
   readonly reason?: DeniedReason;
+  /**
+   * ปลายทางของปุ่มทางออก เมื่อ "ย้อนกลับ" ไม่ใช่คำตอบ
+   *
+   * ไม่ส่ง (default) → ปุ่มคือ `navigate(-1)` เหมือนเดิม ถูกต้องสำหรับกล่องที่เด้ง
+   * ขึ้นกลางเส้นทางที่ผู้ใช้เดินมาเอง เช่น `CreateWorkflowGate` ที่บล็อกหน้า *สร้าง*
+   * เพราะไม่มี workflow ให้เริ่ม — คนนั้นมาจากหน้า list จริง ๆ การกลับคือสิ่งที่ต้องการ
+   *
+   * ส่งมา → ปุ่มพาไป path นั้นแทน (`replace`) ใช้กับเคส direct URL/bookmark ที่
+   * **ไม่มี history ให้ถอย** — `navigate(-1)` ตรงนั้นอาจเด้งออกนอกแอปหรือกลับไป
+   * `/login` ทำให้กล่องกลายเป็นทางตัน ดู `useLandingPath()`
+   */
+  readonly fallbackTo?: string;
 }
 
 /**
@@ -75,6 +91,7 @@ interface AccessDeniedBlockProps {
 export function AccessDeniedBlock({
   description,
   reason = "permission",
+  fallbackTo,
 }: AccessDeniedBlockProps) {
   const t = useTranslations("permissionDenied");
   const navigate = useNavigate();
@@ -108,14 +125,19 @@ export function AccessDeniedBlock({
           </p>
         )}
 
+        {/* ปลายทางเดียวที่การันตีว่าเปิดได้ ดีกว่าการถอย history ที่อาจไม่มีอะไรให้ถอย */}
         <Button
           type="button"
           size="sm"
-          onClick={() => navigate(-1)}
+          onClick={() =>
+            fallbackTo
+              ? navigate(fallbackTo, { replace: true })
+              : navigate(-1)
+          }
           className="mt-5"
         >
-          <ArrowLeft />
-          {t("goBack")}
+          {fallbackTo ? <Home /> : <ArrowLeft />}
+          {fallbackTo ? t("goToAccessiblePage") : t("goBack")}
         </Button>
       </div>
     </div>
