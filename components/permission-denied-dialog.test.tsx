@@ -116,6 +116,18 @@ describe("PermissionDeniedDialog — reason variants", () => {
     expect(document.querySelector("svg.lucide-shield-off")).toBeNull();
   });
 
+  it('ซ่อน "ติดต่อผู้ดูแลเพื่อขอสิทธิ์" เมื่อ reason เป็น "license" — คำอธิบายบอกให้ติดต่อฝ่ายขาย', () => {
+    render(<PermissionDeniedDialog />);
+    act(() => dispatchPermissionDenied(undefined, undefined, "license"));
+    expect(screen.queryByText("contactAdmin")).toBeNull();
+  });
+
+  it('ซ่อน "ติดต่อผู้ดูแลเพื่อขอสิทธิ์" เมื่อ reason เป็น "expired" — คำอธิบายบอกให้ต่ออายุ', () => {
+    render(<PermissionDeniedDialog />);
+    act(() => dispatchPermissionDenied(undefined, undefined, "expired"));
+    expect(screen.queryByText("contactAdmin")).toBeNull();
+  });
+
   it("still prefers an explicit message over the reason-specific copy", () => {
     render(<PermissionDeniedDialog />);
     act(() =>

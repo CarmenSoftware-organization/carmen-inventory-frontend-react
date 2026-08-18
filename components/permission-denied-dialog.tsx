@@ -115,9 +115,14 @@ export function PermissionDeniedDialog() {
 
           <AlertDialogDescription>{description}</AlertDialogDescription>
 
-          <p className="text-muted-foreground/80 text-xs leading-relaxed">
-            {t("contactAdmin")}
-          </p>
+          {/* "ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์" เป็นทางแก้ของ reason "permission" เท่านั้น —
+              "license" บอกให้ติดต่อฝ่ายขาย ส่วน "expired" บอกให้ต่ออายุสัญญา อยู่ใน
+              คำอธิบายด้านบนแล้วทั้งคู่ การแปะบรรทัดนี้ทุก reason จึงขัดกันเอง */}
+          {reason === "permission" && (
+            <p className="text-muted-foreground/80 text-xs leading-relaxed">
+              {t("contactAdmin")}
+            </p>
+          )}
         </AlertDialogHeader>
 
         {/* footer ของ size=sm เป็น grid-cols-2 — ปุ่มเดียวต้องบังคับให้อยู่กลาง */}
