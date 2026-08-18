@@ -159,6 +159,9 @@ export function actionColumn<T>(
   options?: {
     deleteDenied?: boolean;
     deletePermission?: Permission;
+    /** สัญญาหมดอายุ/ถูกระงับ (`!canWrite`) — ปิดปุ่ม delete จริงพร้อม title อธิบาย */
+    writeDisabled?: boolean;
+    writeDisabledTitle?: string;
     activity?: ActionColumnActivity<T>;
   },
 ): ColumnDef<T> {
@@ -172,6 +175,8 @@ export function actionColumn<T>(
           onDelete={() => onDelete(row.original)}
           deleteDenied={options?.deleteDenied}
           deletePermission={options?.deletePermission}
+          writeDisabled={options?.writeDisabled}
+          writeDisabledTitle={options?.writeDisabledTitle}
           activity={
             activityId
               ? {

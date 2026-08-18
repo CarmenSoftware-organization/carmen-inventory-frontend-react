@@ -67,11 +67,16 @@ export function FormToolbar({
   const tc = useTranslations("common");
   const tf = useTranslations("form");
   const tActivity = useTranslations("activity");
-  const { can, isAdmin } = useCan();
+  const tl = useTranslations("license");
+  const { can, isAdmin, canWrite } = useCan();
   const autoPrefix = usePermissionPrefix();
   const prefix = permissionPrefix ?? autoPrefix;
   const isView = mode === "view";
   const isAdd = mode === "add";
+  // สัญญาหมดอายุ/ถูกระงับ → ปิดปุ่มเขียนจริง (native disabled + title อธิบาย)
+  // ต่างจาก saveDenied/editDenied/deleteDenied (permission) ที่ยังคลิกได้แล้ว
+  // เด้ง dialog — license มาก่อนเสมอเพราะแก้คนละวิธี (ต่ออายุ ไม่ใช่ขอสิทธิ์)
+  const writeDisabledTitle = !canWrite ? tl("writeDisabledTitle") : undefined;
 
   const title =
     mode === "add"
@@ -105,12 +110,16 @@ export function FormToolbar({
           size="sm"
           variant="outline"
           onClick={
-            editDenied
-              ? () => dispatchPermissionDenied(updatePermission)
-              : onEdit
+            !canWrite
+              ? undefined
+              : editDenied
+                ? () => dispatchPermissionDenied(updatePermission)
+                : onEdit
           }
-          aria-disabled={editDenied || undefined}
-          className={cn(editDenied && "opacity-50")}
+          disabled={!canWrite}
+          title={writeDisabledTitle}
+          aria-disabled={canWrite && editDenied ? true : undefined}
+          className={cn(canWrite && editDenied && "opacity-50")}
         >
           <Pencil />
           {tc("edit")}
@@ -128,7 +137,12 @@ export function FormToolbar({
             {tc("cancel")}
           </Button>
           {submitSlot ??
-            (saveDenied ? (
+            (!canWrite ? (
+              <Button type="button" size="sm" disabled title={writeDisabledTitle}>
+                <Save />
+                {submit}
+              </Button>
+            ) : saveDenied ? (
               <Button
                 type="button"
                 size="sm"
@@ -158,13 +172,16 @@ export function FormToolbar({
           variant="outline"
           size="sm"
           onClick={
-            deleteDenied
-              ? () => dispatchPermissionDenied(deletePermission)
-              : onDelete
+            !canWrite
+              ? undefined
+              : deleteDenied
+                ? () => dispatchPermissionDenied(deletePermission)
+                : onDelete
           }
-          disabled={!deleteDenied && (isPending || deleteIsPending)}
-          aria-disabled={deleteDenied || undefined}
-          className={cn(deleteDenied && "opacity-50")}
+          disabled={!canWrite || (!deleteDenied && (isPending || deleteIsPending))}
+          title={writeDisabledTitle}
+          aria-disabled={canWrite && deleteDenied ? true : undefined}
+          className={cn(canWrite && deleteDenied && "opacity-50")}
         >
           <Trash2 />
           {tc("delete")}

@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useTranslations } from "use-intl";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useCan } from "@/hooks/use-can";
@@ -84,7 +85,8 @@ export function useConfigTable<T>({
   // breaks reference-equality checks the library relies on internally.
   "use no memo";
 
-  const { can, isAdmin } = useCan();
+  const { can, isAdmin, canWrite } = useCan();
+  const tl = useTranslations("license");
   const autoPrefix = usePermissionPrefix();
   const prefix = permissionPrefix ?? autoPrefix;
   const deletePermission = prefix
@@ -92,6 +94,10 @@ export function useConfigTable<T>({
     : undefined;
   const deleteDenied =
     !!deletePermission && !isAdmin && !can(deletePermission);
+  // สัญญาหมดอายุ/ถูกระงับ → ปิดปุ่ม delete ของแถวจริง (ไม่ใช่แค่ dim+dispatch แบบ
+  // deleteDenied) มาก่อน deleteDenied เสมอเพราะแก้คนละวิธี (ต่ออายุ ไม่ใช่ขอสิทธิ์)
+  const writeDisabled = !canWrite;
+  const writeDisabledTitle = writeDisabled ? tl("writeDisabledTitle") : undefined;
 
   const allColumns: ColumnDef<T>[] = [
     selectColumn<T>(),
@@ -103,6 +109,8 @@ export function useConfigTable<T>({
           actionColumn<T>(onDelete, {
             deleteDenied,
             deletePermission,
+            writeDisabled,
+            writeDisabledTitle,
             activity,
           }),
         ]
