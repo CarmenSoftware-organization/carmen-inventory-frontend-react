@@ -131,6 +131,45 @@ export class ApiError extends Error {
   }
 }
 
+/** error code สองตัวที่ `LicenseInterceptor` ฝั่ง backend โยนมาเมื่อ feature ไม่อยู่ในสัญญา/สัญญาหมดอายุ */
+export const LICENSE_ERROR_CODES = {
+  LICENSE_REQUIRED: "LICENSE_REQUIRED",
+  LICENSE_EXPIRED: "LICENSE_EXPIRED",
+} as const;
+
+export type LicenseErrorCode =
+  (typeof LICENSE_ERROR_CODES)[keyof typeof LICENSE_ERROR_CODES];
+
+/**
+ * แยก 403 ของ license ออกจาก 403 ของสิทธิ์ (permission) — คีย์เดียวที่แยกได้เด็ดขาดคือ
+ * `body.error.code` ("LICENSE_REQUIRED" | "LICENSE_EXPIRED") ตามสัญญาจริงจาก
+ * `LicenseInterceptor` (backend) — **ห้ามคีย์กับ `message` หรือ `status`** เพราะ 403
+ * ของ permission ก็เป็น 403 เหมือนกันและ `message` ขึ้นกับภาษา
+ *
+ * permission 403 ของ backend ส่ง `error` เป็น `{message:"Forbidden"}` เสมอ (ไม่มี `code`)
+ * — คืน `undefined` สำหรับกรณีนั้นและกรณี body รูปแปลกทุกแบบ (null, ไม่มี `error`,
+ * `error` เป็น string) เพื่อให้ caller ปล่อยไปเส้นทาง permission เดิม ไม่ throw
+ *
+ * @param body - error body ที่ parse จาก response แล้ว (JSON.parse ผลลัพธ์, ชนิดอะไรก็ได้)
+ * @returns license error code เมื่อแมตช์ ไม่งั้น undefined
+ * @example
+ * ```ts
+ * licenseErrorCodeFrom({ error: { code: "LICENSE_REQUIRED" } }); // "LICENSE_REQUIRED"
+ * licenseErrorCodeFrom({ error: { message: "Forbidden" } });     // undefined
+ * licenseErrorCodeFrom(null);                                    // undefined
+ * ```
+ */
+export function licenseErrorCodeFrom(body: unknown): LicenseErrorCode | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const error = (body as { error?: unknown }).error;
+  if (typeof error !== "object" || error === null) return undefined;
+  const code = (error as { code?: unknown }).code;
+  return code === LICENSE_ERROR_CODES.LICENSE_REQUIRED ||
+    code === LICENSE_ERROR_CODES.LICENSE_EXPIRED
+    ? code
+    : undefined;
+}
+
 /**
  * error นี้เกิดจากการ "ส่งไม่ถึง" ไม่ใช่คำตอบจาก backend หรือไม่
  *

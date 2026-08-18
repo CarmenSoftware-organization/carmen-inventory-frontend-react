@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ApiError, ERROR_CODES } from "./api-error";
+import { ApiError, ERROR_CODES, licenseErrorCodeFrom } from "./api-error";
 
 describe("ERROR_CODES", () => {
   it("contains all expected error codes", () => {
@@ -112,6 +112,54 @@ describe("ApiError.from", () => {
   it("survives a body that is not JSON", async () => {
     const err = await ApiError.from(fakeResponse(503), "fb");
     expect(err.message).toBe("fb");
+  });
+});
+
+// C5: แยก 403 ของ license ออกจาก 403 ของสิทธิ์ — key เดียวที่แยกได้เด็ดขาดคือ
+// body.error.code (phase-c-backend-contract.md ข้อ 5c) ต้องไม่คีย์กับ message/status
+describe("licenseErrorCodeFrom", () => {
+  it("returns LICENSE_REQUIRED when body.error.code matches", () => {
+    expect(
+      licenseErrorCodeFrom({
+        error: { code: "LICENSE_REQUIRED", id: 2110001 },
+        feature: "procurement.purchase_request",
+        bu_codes: ["BU01"],
+      }),
+    ).toBe("LICENSE_REQUIRED");
+  });
+
+  it("returns LICENSE_EXPIRED when body.error.code matches", () => {
+    expect(
+      licenseErrorCodeFrom({ error: { code: "LICENSE_EXPIRED", id: 2110002 } }),
+    ).toBe("LICENSE_EXPIRED");
+  });
+
+  // permission 403 จริง — error เหลือแค่ {message:"Forbidden"} ไม่มี code เลย
+  it("returns undefined for a real permission-403 body", () => {
+    expect(
+      licenseErrorCodeFrom({
+        message: "Permission denied: You do not have the required permissions for BU(s): BU01",
+        error: { message: "Forbidden" },
+      }),
+    ).toBeUndefined();
+  });
+
+  it("returns undefined for an unrelated error.code (e.g. SEAT_LIMIT_REACHED)", () => {
+    expect(
+      licenseErrorCodeFrom({ error: { code: "SEAT_LIMIT_REACHED" } }),
+    ).toBeUndefined();
+  });
+
+  it.each([
+    ["null body", null],
+    ["undefined body", undefined],
+    ["a bare string body", "Forbidden"],
+    ["body with no error key", { message: "Forbidden" }],
+    ["error as a string, not an object", { error: "Forbidden" }],
+    ["error.code as a non-string", { error: { code: 123 } }],
+  ])("does not throw and returns undefined for %s", (_label, body) => {
+    expect(() => licenseErrorCodeFrom(body)).not.toThrow();
+    expect(licenseErrorCodeFrom(body)).toBeUndefined();
   });
 });
 
