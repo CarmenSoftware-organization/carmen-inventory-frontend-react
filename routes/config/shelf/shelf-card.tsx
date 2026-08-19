@@ -1,5 +1,10 @@
+import { useTranslations } from "use-intl";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ListCard, ListCardAuditRows } from "@/components/share/list-card";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
 import type { Shelf } from "@/types/shelf";
 
 interface Props {
@@ -13,6 +18,7 @@ interface Props {
  * ใช้ `ListCard` ตัวเดียวกับการ์ดทุกโมดูล
  */
 export default function ShelfCard({ item, onEdit, onDelete }: Props) {
+  const tfl = useTranslations("field");
   return (
     <ListCard
       title={item.name || "..."}
@@ -20,6 +26,15 @@ export default function ShelfCard({ item, onEdit, onDelete }: Props) {
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
+      {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
+      {item.location_name && (
+        <ListCardRow label={tfl("location")}>{item.location_name}</ListCardRow>
+      )}
+      {item.description && (
+        <ListCardRow label={tfl("description")}>
+          {item.description}
+        </ListCardRow>
+      )}
       <ListCardAuditRows audit={item.audit} />
     </ListCard>
   );

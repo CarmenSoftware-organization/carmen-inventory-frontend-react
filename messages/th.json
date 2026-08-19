@@ -1085,7 +1085,8 @@
     "overrideHint": "ติ๊กเพื่อกรอกยอดเอง แทนการให้ระบบคิดให้",
     "overrideHintDiscount": "ติ๊กเพื่อกรอกยอดส่วนลดเอง แทนการคิดจากเปอร์เซ็นต์",
     "overrideHintTax": "ติ๊กเพื่อกรอกยอดภาษีเอง แทนการคิดจากอัตราภาษี",
-    "order": "สั่ง"
+    "order": "สั่ง",
+    "sequence": "ลำดับ"
   },
   "lookup": {
     "select": "เลือก{entity}",
@@ -1186,7 +1187,9 @@
       "add": "เพิ่มชั้นวาง",
       "deleteTitle": "ลบชั้นวาง",
       "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบชั้นวาง \"{name}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
-      "namePlaceholder": "เช่น A1, ชั้น 3 ห้องแห้ง"
+      "codePlaceholder": "เช่น A-01",
+      "namePlaceholder": "เช่น ชั้นวางของแห้ง A1",
+      "sequencePlaceholder": "อัตโนมัติ"
     },
     "taxProfile": {
       "entity": "โปรไฟล์ภาษี",

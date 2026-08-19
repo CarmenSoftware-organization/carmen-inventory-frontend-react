@@ -42,16 +42,46 @@ export function useShelfTable({
   const { dateTimeFormat } = useProfile();
   const columns: ColumnDef<Shelf>[] = [
     {
+      accessorKey: "code",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("code")} />
+      ),
+      cell: ({ row }) => (
+        <CellAction onClick={() => onEdit(row.original)}>
+          {row.getValue("code") || "..."}
+        </CellAction>
+      ),
+      meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.text },
+      size: 90,
+    },
+    {
       accessorKey: "name",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("name")} />
       ),
-      cell: ({ row }) => (
-        <CellAction onClick={() => onEdit(row.original)}>
-          {row.getValue("name") || "..."}
-        </CellAction>
-      ),
+      cell: ({ row }) => row.getValue("name") || "...",
       meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },
+    },
+    {
+      accessorKey: "location_name",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("location")} />
+      ),
+      cell: ({ row }) => row.original.location_name || "-",
+      meta: { headerTitle: tfl("location"), skeleton: columnSkeletons.text },
+    },
+    {
+      accessorKey: "description",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("description")} />
+      ),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.description || "-"}
+        </span>
+      ),
+      enableSorting: false,
+      meta: { headerTitle: tfl("description"), skeleton: columnSkeletons.text },
     },
     statusColumn<Shelf>(),
     ...auditColumns<Shelf>(tfl, dateTimeFormat),

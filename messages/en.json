@@ -1088,7 +1088,8 @@
     "overrideHint": "Tick to enter the amount yourself instead of letting the system work it out",
     "overrideHintDiscount": "Tick to enter the discount amount yourself instead of calculating from the rate",
     "overrideHintTax": "Tick to enter the tax amount yourself instead of calculating from the tax rate",
-    "order": "Order"
+    "order": "Order",
+    "sequence": "Sequence"
   },
   "lookup": {
     "select": "Select {entity}",
@@ -1189,7 +1190,9 @@
       "add": "Add Shelf",
       "deleteTitle": "Delete Shelf",
       "deleteConfirm": "Are you sure you want to delete shelf \"{name}\"? This action cannot be undone.",
-      "namePlaceholder": "e.g. A1, Dry Store Rack 3"
+      "codePlaceholder": "e.g. A-01",
+      "namePlaceholder": "e.g. Dry Rack A1",
+      "sequencePlaceholder": "Auto"
     },
     "taxProfile": {
       "entity": "Tax Profile",

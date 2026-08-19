@@ -35,9 +35,20 @@ export default function ShelfComponent() {
       permissionPrefix="configuration.shelf"
       pageKey={LIST_PAGE_KEYS.SHELF}
       filterFields={SHELF_FILTER_FIELDS}
-      defaultSort="name:asc"
+      defaultSort="code:asc"
       exportColumns={[
+        { header: tfl("code"), value: (r) => r.code, width: 12 },
         { header: tfl("name"), value: (r) => r.name, width: 28 },
+        {
+          header: tfl("location"),
+          value: (r) => r.location_name ?? "",
+          width: 24,
+        },
+        {
+          header: tfl("description"),
+          value: (r) => r.description ?? "",
+          width: 32,
+        },
         {
           header: tfl("status"),
           value: (r) => (r.is_active ? ts("active") : ts("inactive")),

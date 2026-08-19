@@ -4,13 +4,14 @@ import { useTranslations } from "use-intl";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
 import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog";
+import { LookupLocation } from "@/components/lookup/lookup-location";
 import { useCreateShelf, useUpdateShelf } from "@/hooks/use-shelf";
 import {
   createShelfSchema,
-  EMPTY_FORM,
+  getDefaultValues,
   type ShelfFormValues,
 } from "./shelf-form-schema";
-import type { Shelf } from "@/types/shelf";
+import type { Shelf, CreateShelfDto } from "@/types/shelf";
 
 interface ShelfDialogProps {
   readonly open: boolean;
@@ -19,7 +20,7 @@ interface ShelfDialogProps {
   readonly readOnly?: boolean;
 }
 
-type ShelfPayload = { name: string; is_active: boolean };
+type ShelfPayload = Omit<CreateShelfDto, "doc_version">;
 
 export function ShelfDialog({
   open,
@@ -41,25 +42,93 @@ export function ShelfDialog({
       useCreate={useCreateShelf}
       useUpdate={useUpdateShelf}
       buildSchema={createShelfSchema}
-      toFormValues={(e) =>
-        e ? { name: e.name, is_active: e.is_active } : EMPTY_FORM
-      }
-      toPayload={(v) => ({ name: v.name, is_active: v.is_active })}
+      toFormValues={(e) => getDefaultValues(e ?? undefined)}
+      toPayload={(v) => ({
+        location_id: v.location_id,
+        code: v.code,
+        name: v.name,
+        description: v.description || undefined,
+        sequence_no: v.sequence_no,
+        is_active: v.is_active,
+      })}
     >
       {({ form, disabled }) => (
         <>
           <Field>
-            <FieldLabel htmlFor="shelf-name" required>
-              {tfl("name")}
+            <FieldLabel required>{tfl("location")}</FieldLabel>
+            <Controller
+              control={form.control}
+              name="location_id"
+              render={({ field }) => (
+                <LookupLocation
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  defaultLabel={shelf?.location_name}
+                  disabled={disabled}
+                  error={form.formState.errors.location_id?.message}
+                  modal
+                />
+              )}
+            />
+          </Field>
+
+          <div className="grid grid-cols-[8rem_1fr] gap-3">
+            <Field>
+              <FieldLabel htmlFor="shelf-code" required>
+                {tfl("code")}
+              </FieldLabel>
+              <FieldInput
+                id="shelf-code"
+                placeholder={t("codePlaceholder")}
+                className="h-8"
+                disabled={disabled}
+                error={form.formState.errors.code?.message}
+                maxLength={20}
+                {...form.register("code")}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="shelf-name" required>
+                {tfl("name")}
+              </FieldLabel>
+              <FieldInput
+                id="shelf-name"
+                placeholder={t("namePlaceholder")}
+                className="h-8"
+                disabled={disabled}
+                error={form.formState.errors.name?.message}
+                maxLength={100}
+                {...form.register("name")}
+              />
+            </Field>
+          </div>
+
+          <Field>
+            <FieldLabel htmlFor="shelf-description">
+              {tfl("description")}
             </FieldLabel>
             <FieldInput
-              id="shelf-name"
-              placeholder={t("namePlaceholder")}
+              id="shelf-description"
+              placeholder={tfl("optional")}
               className="h-8"
               disabled={disabled}
-              error={form.formState.errors.name?.message}
-              maxLength={100}
-              {...form.register("name")}
+              maxLength={256}
+              {...form.register("description")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="shelf-sequence">{tfl("sequence")}</FieldLabel>
+            <FieldInput
+              id="shelf-sequence"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              placeholder={t("sequencePlaceholder")}
+              className="h-8 w-28 text-right tabular-nums"
+              disabled={disabled}
+              error={form.formState.errors.sequence_no?.message}
+              {...form.register("sequence_no")}
             />
           </Field>
 
