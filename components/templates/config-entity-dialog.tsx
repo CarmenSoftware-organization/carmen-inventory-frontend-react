@@ -193,7 +193,7 @@ export function ConfigEntityDialog<
         )}
         showCloseButton={false}
       >
-        <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] backdrop-blur-3xl dark:border-white/20 dark:bg-zinc-900/80 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
+        <div className="border-border/60 bg-popover/80 relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-3xl">
           <form
             onSubmit={
               stopPropagationOnSubmit
@@ -206,13 +206,13 @@ export function ConfigEntityDialog<
             }
             className="relative flex flex-col"
           >
-            <div className="border-b border-white/60 bg-white/60 px-6 py-6 dark:border-white/10 dark:bg-black/40">
+            <div className="border-border/40 bg-background/40 border-b px-6 py-6">
               <div className="flex items-center gap-4">
-                <div className="text-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/90 shadow-sm backdrop-blur-md dark:border-white/20 dark:bg-white/10">
+                <div className="text-primary bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
                   <Icon className="h-6 w-6" />
                 </div>
                 <div className="flex flex-col">
-                  <DialogTitle className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+                  <DialogTitle className="text-foreground text-xl font-bold tracking-tight">
                     {isEdit
                       ? tf("editTitle", { entity: t("entity") })
                       : tf("addTitle", { entity: t("entity") })}
@@ -221,19 +221,19 @@ export function ConfigEntityDialog<
               </div>
             </div>
 
-            <div className="bg-white/50 px-6 py-6 dark:bg-black/40">
+            <div className="px-6 py-6">
               <FieldGroup className="gap-5">
                 {children({ form, disabled: isPending || !!readOnly })}
               </FieldGroup>
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-white/60 bg-white/70 px-6 py-4 dark:border-white/10 dark:bg-black/50">
+            <div className="border-border/40 bg-background/40 flex justify-end gap-3 border-t px-6 py-4">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isPending}
-                className="rounded-xl border border-white/80 bg-white/90 font-bold shadow-sm backdrop-blur-md transition-all hover:bg-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+                className="rounded-xl"
               >
                 {readOnly ? tc("close") : tc("cancel")}
               </Button>

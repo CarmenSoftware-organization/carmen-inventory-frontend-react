@@ -8,36 +8,39 @@ interface WhatsNewDialogProps {
   readonly onOpenChange: (open: boolean) => void;
 }
 
+// chip ใช้คู่ tint ตามกติกา token: bg-x/10 + text-x-foreground (destructive
+// เป็นข้อยกเว้น ใช้ text-destructive บน canvas ได้เลย) ส่วนจุด bullet ใช้ตัว
+// token สด ๆ — อย่าเอา class ของ chip ไป replace เป็นสีจุด
 const SECTIONS = [
   {
     key: "added",
     label: "Added",
     Icon: Plus,
-    colorClass: "text-emerald-500",
-    bgClass: "bg-emerald-500/10",
+    chipClass: "bg-success/10 text-success-foreground",
+    dotClass: "bg-success",
   },
   {
     key: "fixed",
     label: "Fixed",
     Icon: Wrench,
-    colorClass: "text-rose-500",
-    bgClass: "bg-rose-500/10",
+    chipClass: "bg-destructive/10 text-destructive",
+    dotClass: "bg-destructive",
   },
   {
     key: "changed",
     label: "Changed",
     Icon: RefreshCw,
-    colorClass: "text-blue-500",
-    bgClass: "bg-blue-500/10",
+    chipClass: "bg-info/10 text-info",
+    dotClass: "bg-info",
   },
 ] as const;
 
 function ChangeList({
   items,
-  colorClass,
+  dotClass,
 }: {
   readonly items: readonly ChangeItem[];
-  colorClass: string;
+  dotClass: string;
 }) {
   return (
     <ul className="mt-3 space-y-2.5">
@@ -47,7 +50,7 @@ function ChangeList({
           className="flex items-start gap-3 text-sm leading-relaxed"
         >
           <div
-            className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${colorClass.replace("text-", "bg-")}`}
+            className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${dotClass}`}
           />
           <div>
             {item.scope && (
@@ -86,15 +89,15 @@ function VersionBlock({ entry }: { readonly entry: VersionEntry }) {
         </p>
       ) : (
         <div className="space-y-7">
-          {sections.map(({ key, label, Icon, colorClass, bgClass }) => (
+          {sections.map(({ key, label, Icon, chipClass, dotClass }) => (
             <div key={key}>
               <div
-                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-bold ${bgClass} ${colorClass}`}
+                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-bold ${chipClass}`}
               >
                 <Icon aria-hidden="true" className="h-4 w-4" />
                 <span className="tracking-wider uppercase">{label}</span>
               </div>
-              <ChangeList items={entry.changes[key]} colorClass={colorClass} />
+              <ChangeList items={entry.changes[key]} dotClass={dotClass} />
             </div>
           ))}
         </div>
@@ -126,18 +129,18 @@ export function WhatsNewDialog({ open, onOpenChange }: WhatsNewDialogProps) {
         className="overflow-hidden border-0 bg-transparent p-0 shadow-2xl sm:max-w-4xl"
         showCloseButton={false}
       >
-        <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] backdrop-blur-3xl dark:border-white/20 dark:bg-zinc-900/80 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
+        <div className="border-border/60 bg-popover/80 relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-3xl">
           {/* Header */}
-          <div className="border-b border-white/60 bg-white/60 px-6 py-6 dark:border-white/10 dark:bg-black/40">
+          <div className="border-border/40 bg-background/40 border-b px-6 py-6">
             <div className="flex items-center gap-4">
-              <div className="text-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/90 shadow-sm backdrop-blur-md dark:border-white/20 dark:bg-white/10">
+              <div className="text-primary bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
                 <Sparkles className="h-6 w-6" />
               </div>
               <div className="flex flex-col text-left">
-                <DialogTitle className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+                <DialogTitle className="text-foreground text-xl font-bold tracking-tight">
                   What&apos;s New
                 </DialogTitle>
-                <div className="mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                <div className="text-muted-foreground mt-1 text-sm font-semibold">
                   Recent updates to CARMEN BLUE.
                 </div>
               </div>
@@ -145,7 +148,7 @@ export function WhatsNewDialog({ open, onOpenChange }: WhatsNewDialogProps) {
           </div>
 
           {/* Body */}
-          <div className="bg-white/50 px-6 py-6 dark:bg-black/40">
+          <div className="px-6 py-6">
             <div className="max-h-[60vh] space-y-4 overflow-y-auto pr-2">
               {CHANGELOG.versions.map((entry) => (
                 <VersionBlock key={entry.build} entry={entry} />
@@ -154,11 +157,11 @@ export function WhatsNewDialog({ open, onOpenChange }: WhatsNewDialogProps) {
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end border-t border-white/60 bg-white/70 px-6 py-4 dark:border-white/10 dark:bg-black/50">
+          <div className="border-border/40 bg-background/40 flex justify-end border-t px-6 py-4">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="rounded-xl border border-white/80 bg-white/90 font-bold shadow-sm backdrop-blur-md transition-all hover:bg-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
+              className="rounded-xl"
             >
               Close
             </Button>

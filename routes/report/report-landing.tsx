@@ -320,7 +320,7 @@ function MenuVisual() {
               className={cn(
                 "size-2.5",
                 r.starred
-                  ? "fill-amber-500 text-amber-500"
+                  ? "fill-warning text-warning"
                   : "text-muted-foreground/40",
               )}
               aria-hidden="true"

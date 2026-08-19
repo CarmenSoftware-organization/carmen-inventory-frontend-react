@@ -119,9 +119,9 @@ export function WfStageUsers({
       )}
 
       {isHod ? (
-        <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-          <Lock className="size-4 text-amber-600" />
-          <p className="text-sm font-medium text-amber-700 dark:text-amber-400">
+        <div className="border-warning/30 bg-warning/10 flex items-center gap-3 rounded-lg border p-4">
+          <Lock className="text-warning-foreground size-4" />
+          <p className="text-warning-foreground text-sm font-medium">
             {t("hodEnabled")}
           </p>
         </div>

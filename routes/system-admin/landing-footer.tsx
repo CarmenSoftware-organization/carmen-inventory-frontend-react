@@ -31,7 +31,7 @@ export function LandingFooter({ t }: { readonly t: TFn }) {
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            className="rounded-md border border-white/30 px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-white/10"
+            className="border-background/30 hover:bg-background/10 rounded-md border px-3 py-1.5 text-xs font-semibold transition-colors"
           >
             {t("footer.handbook")}
           </button>

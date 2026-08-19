@@ -269,7 +269,10 @@ export default function UserProfileSetting() {
                     </AvatarFallback>
                   </Avatar>
                   <span className="bg-foreground/55 pointer-events-none absolute inset-0 flex items-center justify-center rounded-full opacity-0 transition-opacity group-hover:opacity-100">
-                    <Camera className="size-4 text-white" aria-hidden="true" />
+                    <Camera
+                      className="text-background size-4"
+                      aria-hidden="true"
+                    />
                   </span>
                 </button>
                 {(avatarPreview || profile.avatar_url) &&
