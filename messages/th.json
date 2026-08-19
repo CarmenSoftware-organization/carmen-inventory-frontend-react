@@ -33,8 +33,6 @@
       "infoDesc": "ข้อมูลเพิ่มเติมเกี่ยวกับหน่วยธุรกิจ",
       "calculationMethod": "วิธีคำนวณต้นทุน",
       "calculationMethodDesc": "วิธีคิดต้นทุนสินค้าคงคลัง (เช่น average, FIFO)",
-      "maxLicenseUsers": "จำนวนผู้ใช้สูงสุด",
-      "maxLicenseUsersDesc": "จำนวนผู้ใช้ตามลิขสิทธิ์สูงสุดที่อนุญาต",
       "defaultCurrencyId": "สกุลเงินเริ่มต้น",
       "defaultCurrencyIdDesc": "สกุลเงินเริ่มต้นของหน่วยธุรกิจ",
       "docVersion": "เวอร์ชันเอกสาร",

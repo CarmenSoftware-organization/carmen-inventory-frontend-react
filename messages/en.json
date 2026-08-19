@@ -33,8 +33,6 @@
       "infoDesc": "Additional information about the business unit.",
       "calculationMethod": "Costing Method",
       "calculationMethodDesc": "Inventory costing method (e.g. average, FIFO).",
-      "maxLicenseUsers": "Max License Users",
-      "maxLicenseUsersDesc": "Maximum number of licensed users allowed.",
       "defaultCurrencyId": "Default Currency",
       "defaultCurrencyIdDesc": "The default currency for this unit.",
       "docVersion": "Document Version",
