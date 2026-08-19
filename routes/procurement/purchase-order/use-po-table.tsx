@@ -12,6 +12,7 @@ import { formatCurrency } from "@/lib/currency-utils";
 import {
   auditColumns,
   columnSkeletons,
+  sendbackColumn,
 } from "@/components/ui/data-grid/columns";
 import { Badge } from "@/components/ui/badge";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
@@ -34,6 +35,7 @@ export function usePoTable({
   onDelete,
 }: UsePoTableOptions) {
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const { dateFormat, dateTimeFormat } = useProfile();
 
   const columns: ColumnDef<PurchaseOrder>[] = [
@@ -151,6 +153,7 @@ export function usePoTable({
         headerClassName: "text-center",
       },
     },
+    sendbackColumn<PurchaseOrder>(tc("sendBack")),
     {
       accessorKey: "total_amount",
       header: ({ column }) => (

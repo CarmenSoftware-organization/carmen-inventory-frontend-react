@@ -64,6 +64,7 @@ import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
+import { SENDBACK_FILTER_CLAUSE } from "@/constant/last-action";
 import { useExportErrorToast } from "@/hooks/use-export-error-toast";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
@@ -204,6 +205,16 @@ export default function PurchaseRequestComponent() {
         control: "date-range",
         labelKey: "field.prDate",
         fieldKey: "pr_date",
+      },
+      {
+        // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
+        // ค่าที่เก็บคือ clause เต็มอยู่แล้ว จึงไม่ต้องประกาศ toClause
+        key: "sendback",
+        control: "status",
+        labelKey: "common.sendBack",
+        options: [
+          { labelKey: "common.sendBack", value: SENDBACK_FILTER_CLAUSE },
+        ],
       },
     ],
     [stages, viewMode, t, tc],

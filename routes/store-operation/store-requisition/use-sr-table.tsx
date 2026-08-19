@@ -8,6 +8,7 @@ import {
   columnSkeletons,
   indexColumn,
   selectColumn,
+  sendbackColumn,
 } from "@/components/ui/data-grid/columns";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ export function useStoreRequisitionTable({
   "use no memo";
   const { dateFormat, dateTimeFormat } = useProfile();
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
   const ts = useTranslations("status");
 
   const dataColumns: ColumnDef<StoreRequisition>[] = [
@@ -155,6 +157,7 @@ export function useStoreRequisitionTable({
       },
       size: 80,
     },
+    sendbackColumn<StoreRequisition>(tc("sendBack")),
     {
       accessorKey: "workflow_name",
       header: ({ column }) => (

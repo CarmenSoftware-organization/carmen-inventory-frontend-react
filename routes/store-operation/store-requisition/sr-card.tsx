@@ -1,5 +1,6 @@
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
+import { SendBackBadge } from "@/components/share/sendback-badge";
 import {
   ListCard,
   ListCardAuditRows,
@@ -39,9 +40,12 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
     <ListCard
       title={item.sr_no}
       badge={
-        <Badge size="xs" className={config.className}>
-          {ts(item.doc_status)}
-        </Badge>
+        <div className="flex shrink-0 items-center gap-1">
+          <SendBackBadge lastAction={item.last_action} size="xs" />
+          <Badge size="xs" className={config.className}>
+            {ts(item.doc_status)}
+          </Badge>
+        </div>
       }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}

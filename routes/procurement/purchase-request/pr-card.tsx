@@ -1,6 +1,7 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
+import { SendBackBadge } from "@/components/share/sendback-badge";
 import { Button } from "@/components/ui/button";
 import {
   ListCard,
@@ -64,9 +65,12 @@ export default function PrCard({
     <ListCard
       title={item.pr_no}
       badge={
-        <Badge size="xs" className={config.className}>
-          {config.label}
-        </Badge>
+        <div className="flex shrink-0 items-center gap-1">
+          <SendBackBadge lastAction={item.last_action} size="xs" />
+          <Badge size="xs" className={config.className}>
+            {config.label}
+          </Badge>
+        </div>
       }
       onOpen={() => onEdit(item)}
       onDelete={canDelete ? () => onDelete?.(item) : undefined}

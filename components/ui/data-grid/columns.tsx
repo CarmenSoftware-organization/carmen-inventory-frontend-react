@@ -9,6 +9,9 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuditCell } from "@/components/share/audit-cell";
+import { SendBackBadge } from "@/components/share/sendback-badge";
+import { isSentBack } from "@/constant/last-action";
+import type { RowWithLastAction } from "@/constant/last-action";
 import type { Permission } from "@/constant/permissions";
 import type { ParamsDto } from "@/types/params";
 import type { AuditEntry } from "@/types/audit";
@@ -245,6 +248,45 @@ export function auditColumns<T extends RowWithAudit>(
     size,
     meta: { headerTitle: tfl(which), skeleton: columnSkeletons.text },
   }));
+}
+
+/**
+ * สร้าง ColumnDef คอลัมน์ "ส่งกลับ" — มีค่าเฉพาะใบที่ action ล่าสุดคือการตีกลับ
+ *
+ * ช่องจะว่างสำหรับทุก state อื่น (`submitted` / `approved` / `rejected` /
+ * `completed` / ไม่มีค่า) เพราะคอลัมน์นี้ตอบคำถามว่า "ตอนนี้ค้างอยู่ที่การตีกลับ
+ * ไหม" ไม่ใช่ "เคยถูกตีกลับไหม" — ดู `isSentBack` ใน `constant/last-action.ts`
+ * ปิด sorting ไว้เพราะ backend เรียงตาม enum ตามลำดับตัวอักษรซึ่งไม่มีความหมาย
+ *
+ * @typeParam T - ประเภทข้อมูลแถวที่มี `last_action`
+ * @param title - หัวคอลัมน์ที่แปลแล้ว (ปกติคือ `tc("sendBack")`)
+ * @param options.size - ความกว้างคอลัมน์ (default 120)
+ * @returns ColumnDef ของ column "sendback"
+ * @example
+ * ```ts
+ * const columns = [...dataColumns, sendbackColumn<PurchaseRequest>(tc("sendBack"))];
+ * ```
+ */
+export function sendbackColumn<T extends RowWithLastAction>(
+  title: string,
+  options?: { size?: number },
+): ColumnDef<T> {
+  return {
+    id: "sendback",
+    // accessorFn คืนข้อความ ไม่ใช่ boolean — column visibility menu กับการคัดลอก
+    // ค่าจากตารางจะได้อ่านรู้เรื่อง ไม่ใช่ "true"/"false"
+    accessorFn: (row: T) => (isSentBack(row.last_action) ? title : ""),
+    header: title,
+    enableSorting: false,
+    cell: ({ row }) => <SendBackBadge lastAction={row.original.last_action} />,
+    size: options?.size ?? 120,
+    meta: {
+      headerTitle: title,
+      skeleton: columnSkeletons.badge,
+      cellClassName: "text-center",
+      headerClassName: "text-center",
+    },
+  };
 }
 
 /**

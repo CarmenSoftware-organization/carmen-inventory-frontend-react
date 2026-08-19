@@ -1,5 +1,6 @@
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
+import { SendBackBadge } from "@/components/share/sendback-badge";
 import {
   ListCard,
   ListCardAuditRows,
@@ -45,11 +46,14 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
     <ListCard
       title={item.po_no}
       badge={
-        statusConfig ? (
-          <Badge size="xs" className={statusConfig.className}>
-            {statusConfig.label}
-          </Badge>
-        ) : undefined
+        <div className="flex shrink-0 items-center gap-1">
+          <SendBackBadge lastAction={item.last_action} size="xs" />
+          {statusConfig ? (
+            <Badge size="xs" className={statusConfig.className}>
+              {statusConfig.label}
+            </Badge>
+          ) : null}
+        </div>
       }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
