@@ -15,6 +15,7 @@ import {
   columnSkeletons,
   customActionColumn,
   indexColumn,
+  sendbackColumn,
 } from "@/components/ui/data-grid/columns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,6 +90,7 @@ export function usePurchaseRequestTable({
       size: 140,
       meta: { headerTitle: tfl("prNo"), skeleton: columnSkeletons.text },
     },
+    sendbackColumn<PurchaseRequest>(tc("sendBack")),
     {
       accessorKey: "pr_date",
       header: ({ column }) => (
