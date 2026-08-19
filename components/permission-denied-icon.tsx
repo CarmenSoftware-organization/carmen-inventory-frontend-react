@@ -1,4 +1,4 @@
-import { CalendarX, Lock } from "lucide-react";
+import { CalendarX, Lock, Users } from "lucide-react";
 import type { DeniedReason } from "@/components/permission-denied-dialog";
 
 interface DeniedReasonIconProps {
@@ -19,8 +19,13 @@ interface DeniedReasonIconProps {
  * สีแดงยังอยู่ที่ไอคอนจุดเดียวเหมือนเดิมตาม docs/DESIGN.md แค่ย้ายมาไว้คนละไฟล์
  * — `permission-denied-icon.test.tsx` ล็อกไฟล์นี้ด้วยกติกาเดียวกัน เพราะการ
  * แยกไฟล์ทำให้ describe ข้างต้นไม่คุ้มครองไฟล์นี้อีกต่อไป
+ *
+ * เพิ่ม `"seat"` (Task 5.3, SEAT_LIMIT_EXCEEDED) ด้วย `Users` — ยังใช้ class สีแดงเดิม
+ * เส้นเดียวกับสองเหตุผลก่อนหน้า (ไม่เพิ่มจำนวนครั้งที่คำนั้นปรากฏในไฟล์นี้เลย ไม่ว่าจะมีกี่
+ * reason ก็ตาม) ไม่กระทบเทสต์ "chrome stays flat and single-signal" ด้านล่าง
  */
 export function DeniedReasonIcon({ reason }: DeniedReasonIconProps) {
-  const Icon = reason === "license" ? Lock : CalendarX;
+  const Icon =
+    reason === "license" ? Lock : reason === "seat" ? Users : CalendarX;
   return <Icon className="text-destructive" aria-hidden />;
 }

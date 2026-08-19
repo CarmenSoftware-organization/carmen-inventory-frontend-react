@@ -131,10 +131,14 @@ export class ApiError extends Error {
   }
 }
 
-/** error code สองตัวที่ `LicenseInterceptor` ฝั่ง backend โยนมาเมื่อ feature ไม่อยู่ในสัญญา/สัญญาหมดอายุ */
+/**
+ * error code สามตัวที่ `LicenseInterceptor` ฝั่ง backend โยนมาเมื่อ feature ไม่อยู่ในสัญญา/
+ * สัญญาหมดอายุ/cluster เกินโควตาที่นั่ง (`SEAT_LIMIT_EXCEEDED` — Task 5.1/5.2, evaluateSeat)
+ */
 export const LICENSE_ERROR_CODES = {
   LICENSE_REQUIRED: "LICENSE_REQUIRED",
   LICENSE_EXPIRED: "LICENSE_EXPIRED",
+  SEAT_LIMIT_EXCEEDED: "SEAT_LIMIT_EXCEEDED",
 } as const;
 
 export type LicenseErrorCode =
@@ -142,8 +146,8 @@ export type LicenseErrorCode =
 
 /**
  * แยก 403 ของ license ออกจาก 403 ของสิทธิ์ (permission) — คีย์เดียวที่แยกได้เด็ดขาดคือ
- * `body.error.code` ("LICENSE_REQUIRED" | "LICENSE_EXPIRED") ตามสัญญาจริงจาก
- * `LicenseInterceptor` (backend) — **ห้ามคีย์กับ `message` หรือ `status`** เพราะ 403
+ * `body.error.code` ("LICENSE_REQUIRED" | "LICENSE_EXPIRED" | "SEAT_LIMIT_EXCEEDED") ตาม
+ * สัญญาจริงจาก `LicenseInterceptor` (backend) — **ห้ามคีย์กับ `message` หรือ `status`** เพราะ 403
  * ของ permission ก็เป็น 403 เหมือนกันและ `message` ขึ้นกับภาษา
  *
  * permission 403 ของ backend ส่ง `error` เป็น `{message:"Forbidden"}` เสมอ (ไม่มี `code`)
@@ -167,7 +171,8 @@ export function licenseErrorCodeFrom(
   if (typeof error !== "object" || error === null) return undefined;
   const code = (error as { code?: unknown }).code;
   return code === LICENSE_ERROR_CODES.LICENSE_REQUIRED ||
-    code === LICENSE_ERROR_CODES.LICENSE_EXPIRED
+    code === LICENSE_ERROR_CODES.LICENSE_EXPIRED ||
+    code === LICENSE_ERROR_CODES.SEAT_LIMIT_EXCEEDED
     ? code
     : undefined;
 }

@@ -273,12 +273,13 @@ const handleClientErrors = async (
   }
 
   if (response.status === 403) {
-    // 403 มีสามความหมายที่ผู้ใช้แก้คนละวิธี — license (ไม่อยู่ในสัญญา) กับ license
-    // หมดอายุ ต้องเด้ง dialog คนละความหมายจาก 403 ของสิทธิ์ (RBAC) เดิม ไม่งั้น
-    // ลูกค้าที่สัญญาหมดอายุจะเห็นว่า "ไม่มีสิทธิ์" แล้วไปโทษแอดมินของตัวเองผิดที่
-    // แยกด้วย `error.code` เท่านั้น (ดู phase-c-backend-contract.md ข้อ 5) —
-    // `licenseErrorCodeFrom` คืน undefined ให้ทั้ง permission 403 ปกติและ body รูปแปลก
-    // ทุกแบบ (null, ไม่มี error, error เป็น string) จึงไม่ throw และตกไปเส้นทางเดิม
+    // 403 มีสี่ความหมายที่ผู้ใช้แก้คนละวิธี — license (ไม่อยู่ในสัญญา), license หมดอายุ,
+    // และ (Task 5.3) cluster เกินโควตาที่นั่งที่ซื้อไว้ (SEAT_LIMIT_EXCEEDED) ต้องเด้ง dialog
+    // คนละความหมายจาก 403 ของสิทธิ์ (RBAC) เดิม ไม่งั้นลูกค้าที่สัญญาหมดอายุ/เกินโควตาจะเห็นว่า
+    // "ไม่มีสิทธิ์" แล้วไปโทษแอดมินของตัวเองผิดที่ แยกด้วย `error.code` เท่านั้น (ดู
+    // phase-c-backend-contract.md ข้อ 5) — `licenseErrorCodeFrom` คืน undefined ให้ทั้ง
+    // permission 403 ปกติและ body รูปแปลกทุกแบบ (null, ไม่มี error, error เป็น string)
+    // จึงไม่ throw และตกไปเส้นทางเดิม
     const body = await readErrorBody(response);
     const message =
       typeof (body as { message?: unknown } | undefined)?.message === "string"
@@ -290,7 +291,11 @@ const handleClientErrors = async (
       dispatchPermissionDenied(
         undefined,
         undefined,
-        licenseCode === "LICENSE_EXPIRED" ? "expired" : "license",
+        licenseCode === "LICENSE_EXPIRED"
+          ? "expired"
+          : licenseCode === "SEAT_LIMIT_EXCEEDED"
+            ? "seat"
+            : "license",
       );
     } else {
       dispatchAuthError(message);

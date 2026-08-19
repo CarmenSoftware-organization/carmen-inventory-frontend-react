@@ -130,6 +130,16 @@ describe("licenseErrorCodeFrom", () => {
     ).toBe("LICENSE_EXPIRED");
   });
 
+  // Task 5.3: โค้ดที่สาม — เกินโควตาที่นั่งของ cluster (evaluateSeat ฝั่ง backend, Task 5.1/5.2)
+  it("returns SEAT_LIMIT_EXCEEDED when body.error.code matches", () => {
+    expect(
+      licenseErrorCodeFrom({
+        error: { code: "SEAT_LIMIT_EXCEEDED" },
+        bu_codes: ["BU01"],
+      }),
+    ).toBe("SEAT_LIMIT_EXCEEDED");
+  });
+
   // permission 403 จริง — error เหลือแค่ {message:"Forbidden"} ไม่มี code เลย
   it("returns undefined for a real permission-403 body", () => {
     expect(

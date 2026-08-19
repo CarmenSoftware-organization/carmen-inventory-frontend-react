@@ -65,6 +65,43 @@ export interface LicenseInfo {
    */
   isLicensed: (featureKey: string) => boolean;
   seat: BusinessUnitSeat | undefined;
+  /**
+   * ที่นั่งที่ใช้อยู่เกิน cap ของ cluster จริง (`used > cap`) — เลียนแบบ `evaluateSeat` ฝั่ง
+   * backend (`apps/backend-gateway/src/license/license.evaluator.ts`) เป๊ะ ๆ: `used === cap`
+   * ยังไม่ถือว่าเกิน (เต็มพอดี), ตัดสินไม่ได้ (ไม่มี `seat`) → `false`
+   *
+   * ⚠️ เป็น **สัญญาณดิบ** ไม่ผ่านสวิตช์ `enforced` — ต่างจาก `canWrite`/`isLicensed` ที่ bypass
+   * เองเมื่อสวิตช์ปิด ผู้บริโภค (เช่น `SeatQuotaBanner`) ต้องเช็ค `enforced` เองก่อนแสดงผล
+   * แบบเดียวกับที่ `LicenseExpiredBanner` เช็ค `enforced` เองจาก `state`/`endDate` ดิบด้านบน —
+   * ไม่งั้นแถบแดง "บันทึกไม่ได้" จะโผล่ตอน shadow mode ทั้งที่ backend ยังไม่บล็อกอะไรจริง
+   */
+  overQuota: boolean;
+  /**
+   * ที่นั่งที่กำลังจะหมดอายุ **และ** การหมดอายุนั้นจะทำให้คนที่ใช้อยู่จริงเกิน pool ที่เหลือ
+   * (`used > cap - seats`) — ดู `evaluateExpiringSoon`-equivalent ใน `SeatQuotaBanner`
+   *
+   * ⚠️ **เป็น `null` เสมอในตอนนี้** — `ClusterSeat` ที่ gateway ส่งมา (`license.types.ts`)
+   * มีแค่ `{ used, cap, pending_invites }` รวมทั้ง cluster เท่านั้น ไม่มีรายละเอียดว่าที่นั่ง
+   * ส่วนไหนของใบไหน (`tb_business_unit_license` รายใบ) จะหมดอายุเมื่อไหร่ — ข้อมูลระดับใบ
+   * เป็นของ carmen-platform (`businessUnitLicenseService`) เท่านั้น ไม่เดินทางมาถึง profile
+   * ของแอปนี้ผ่าน seat block
+   *
+   * `endDate`/`state` ด้านบนใช้แทนไม่ได้เช่นกัน — เป็นคนละสัญญา (`tb_subscription` ของ
+   * feature/module) กับที่นั่ง (`tb_business_unit_license`) การเอามาปนกันจะรายงานวันหมดอายุ
+   * ผิดสัญญา อาจขึ้นแถบเหลืองอ้างอิงใบที่ไม่เกี่ยวกับที่นั่งเลย
+   *
+   * เก็บ field นี้ไว้ (ไม่ลบ) เพราะ `SeatQuotaBanner` ใช้ shape นี้อยู่แล้ว — พร้อมต่อสายจริง
+   * ทันทีที่ backend เพิ่ม field ที่นั่งใกล้หมดอายุเข้า `ClusterSeat`
+   */
+  expiringSoon: SeatExpiringSoon | null;
+}
+
+/** ที่นั่งกลุ่มหนึ่งที่จะหมดอายุ และวันที่จะหมด — ดู `LicenseInfo.expiringSoon` */
+export interface SeatExpiringSoon {
+  /** จำนวนที่นั่งที่จะหายไปจาก pool ของ cluster เมื่อใบหมดอายุ */
+  seats: number;
+  /** ISO 8601 Z — วันที่ใบหมดอายุ */
+  date: string;
 }
 
 /**
@@ -87,6 +124,7 @@ export function resolveLicense(
   const hasLicenseData = license != null;
   const state = license?.state ?? "active";
   const endDate = license?.end_date ?? null;
+  const seat = license?.seat;
 
   // ปิดพฤติกรรมล็อกทั้งหมดเมื่อสวิตช์ปิด (shadow mode) หรือ backend ยังตัดสินไม่ได้
   const bypass = !enforced || state === "unresolved";
@@ -109,7 +147,12 @@ export function resolveLicense(
         license.features.includes(moduleKey)
       );
     },
-    seat: license?.seat,
+    seat,
+    // ล้อ evaluateSeat ฝั่ง backend เป๊ะ ๆ: used > cap เท่านั้น — ไม่ผ่าน `bypass`/`enforced`
+    // โดยตั้งใจ (ดู doc ของ overQuota ใน LicenseInfo ด้านบน)
+    overQuota: seat != null && seat.used > seat.cap,
+    // ยังไม่มีข้อมูลระดับใบให้คำนวณ (ดู doc ของ expiringSoon ใน LicenseInfo ด้านบน)
+    expiringSoon: null,
   };
 }
 
