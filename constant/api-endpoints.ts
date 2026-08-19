@@ -341,6 +341,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/running-codes`,
   RUNNING_CODES_INIT: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/running-codes/init`,
+  /** backend ยังไม่มี endpoint นี้ — หน้า /config/shelf สร้างรอ contract นี้ไว้ */
+  SHELVES: (buCode: string) => `/api/proxy/api/config/${buCode}/shelves`,
   SPOT_CHECK: (buCode: string) => `/api/proxy/api/${buCode}/spot-checks`,
   // Spot check comment (header level) — id = spot_check_id (GET/POST list) หรือ comment id (PATCH/DELETE)
   SPOT_CHECK_COMMENT: (buCode: string, id: string) =>

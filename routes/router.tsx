@@ -160,6 +160,10 @@ export const router = createBrowserRouter([
                 path: "location/:id",
                 lazy: () => import("./config/location/location-edit.route"),
               },
+              {
+                path: "shelf",
+                lazy: () => import("./config/shelf/shelf.route"),
+              },
             ],
           },
           {

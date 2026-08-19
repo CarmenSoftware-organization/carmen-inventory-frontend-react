@@ -17,6 +17,7 @@ export const LIST_PAGE_KEYS = {
   EXCHANGE_RATE: "exchange_rate",
   EXTRA_COST: "extra_cost",
   LOCATION: "location",
+  SHELF: "shelf",
   TAX_PROFILE: "tax_profile",
   UNIT: "unit",
   // inventory-management

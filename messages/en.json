@@ -1182,6 +1182,15 @@
       "usersDesc": "Users who can access this location.",
       "productsDesc": "Products stocked at this location."
     },
+    "shelf": {
+      "entity": "Shelf",
+      "title": "Shelf",
+      "desc": "Storage shelves inside a location — used to pinpoint where items sit during counts and picking.",
+      "add": "Add Shelf",
+      "deleteTitle": "Delete Shelf",
+      "deleteConfirm": "Are you sure you want to delete shelf \"{name}\"? This action cannot be undone.",
+      "namePlaceholder": "e.g. A1, Dry Store Rack 3"
+    },
     "taxProfile": {
       "entity": "Tax Profile",
       "title": "Tax Profile",
@@ -4174,6 +4183,7 @@
     "certification": "Certification",
     "eco": "Eco Certification",
     "storeLocation": "Store Location",
+    "shelf": "Shelf",
     "taxProfile": "Tax Profile",
     "unit": "Unit",
     "dashboard": "Dashboard",

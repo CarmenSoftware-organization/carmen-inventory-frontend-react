@@ -20,6 +20,7 @@ import {
   MapPin,
   Warehouse,
   Receipt,
+  Rows3,
   Briefcase,
   Scale,
   SlidersHorizontal,
@@ -441,6 +442,17 @@ export const moduleList: ModuleDto[] = [
         path: "/config/location",
         icon: Building,
         permission: PERMISSIONS.configuration.location.view,
+      },
+      {
+        name: "shelf",
+        path: "/config/shelf",
+        // หน้าสร้างรอ backend — catalog ยังไม่มี configuration.shelf จึงผูกกับ
+        // module key ไปก่อน (endpoint /shelves ก็ยังไม่แมตช์ LICENSE_ROUTE_FEATURES
+        // ฝั่ง backend เลยไม่บล็อกอยู่แล้ว) พอ backend ลงโมดูลนี้ค่อยเปลี่ยนเป็น
+        // configuration.shelf แล้วอัปเดต catalog fixture
+        licenseFeature: "configuration",
+        icon: Rows3,
+        permission: PERMISSIONS.configuration.shelf.view,
       },
       {
         name: "department",
