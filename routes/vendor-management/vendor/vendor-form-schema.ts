@@ -53,7 +53,10 @@ function createVendorAddressSchema(tv: TranslationFn, tf: TranslationFn) {
 function createVendorContactSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
-    name: z.string().min(1, tv("required", { field: tf("name") })).max(100),
+    name: z
+      .string()
+      .min(1, tv("required", { field: tf("name") }))
+      .max(100),
     email: z
       .string()
       .max(100)
@@ -74,8 +77,14 @@ function createVendorContactSchema(tv: TranslationFn, tf: TranslationFn) {
  */
 export function createVendorSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
-    code: z.string().min(1, tv("required", { field: tf("code") })).max(10),
-    name: z.string().min(1, tv("required", { field: tf("name") })).max(100),
+    code: z
+      .string()
+      .min(1, tv("required", { field: tf("code") }))
+      .max(10),
+    name: z
+      .string()
+      .min(1, tv("required", { field: tf("name") }))
+      .max(100),
     description: z.string().max(256),
     is_active: z.boolean(),
     business_types: z.array(z.object({ id: z.string(), name: z.string() })),
@@ -222,7 +231,8 @@ export function getDefaultValues(vendor?: VendorDetail): VendorFormValues {
       name: vendor.name,
       description: vendor.description ?? "",
       is_active: vendor.is_active,
-      business_types: vendor.business_type?.map((bt) => ({ id: bt.id, name: bt.name })) ?? [],
+      business_types:
+        vendor.business_type?.map((bt) => ({ id: bt.id, name: bt.name })) ?? [],
       info: vendor.info ?? [],
       vendor_address:
         vendor.vendor_address?.map((a) => ({

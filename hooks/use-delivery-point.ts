@@ -1,7 +1,10 @@
 import { createConfigCrud } from "@/hooks/use-config-crud";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
-import type { DeliveryPoint, CreateDeliveryPointDto } from "@/types/delivery-point";
+import type {
+  DeliveryPoint,
+  CreateDeliveryPointDto,
+} from "@/types/delivery-point";
 
 const crud = createConfigCrud<DeliveryPoint, CreateDeliveryPointDto>({
   queryKey: QUERY_KEYS.DELIVERY_POINTS,

@@ -25,7 +25,6 @@ vi.mock("@/hooks/use-profile", () => ({
   useProfile: () => ({ buCode: "BU001" }),
 }));
 
-
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
@@ -89,7 +88,9 @@ function createWrapper() {
   return Wrapper;
 }
 
-function renderDialog(props: Partial<Parameters<typeof DeliveryPointDialog>[0]> = {}) {
+function renderDialog(
+  props: Partial<Parameters<typeof DeliveryPointDialog>[0]> = {},
+) {
   const defaultProps = {
     open: true,
     onOpenChange: vi.fn(),
@@ -206,10 +207,9 @@ describe("DeliveryPointDialog", () => {
 
     const dialog = getDialog();
     await waitFor(() => {
-      expect(dialog.getByPlaceholderText("e.g. หลังคลังสินค้า")).toHaveAttribute(
-        "aria-invalid",
-        "true",
-      );
+      expect(
+        dialog.getByPlaceholderText("e.g. หลังคลังสินค้า"),
+      ).toHaveAttribute("aria-invalid", "true");
     });
 
     expect(mockCreate).not.toHaveBeenCalled();

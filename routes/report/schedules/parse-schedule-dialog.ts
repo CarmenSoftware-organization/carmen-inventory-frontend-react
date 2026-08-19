@@ -65,8 +65,7 @@ export function parseScheduleDialog(
           name,
           type: "select",
           label: currentLabel || name,
-          options:
-            items.length > 1 || items[0] !== "ALL" ? items : undefined,
+          options: items.length > 1 || items[0] !== "ALL" ? items : undefined,
           source,
         });
       } else {

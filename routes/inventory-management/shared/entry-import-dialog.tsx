@@ -346,7 +346,7 @@ export function EntryImportDialog({
               <div className="text-muted-foreground text-micro-eyebrow font-semibold tracking-widest uppercase">
                 {t("importColumnLegend")}
               </div>
-              <div className="text-foreground/80 mt-1 text-micro-legal leading-relaxed">
+              <div className="text-foreground/80 text-micro-legal mt-1 leading-relaxed">
                 {REQUIRED_COLUMNS.join(", ")}
               </div>
             </div>

@@ -138,7 +138,12 @@ export function FormToolbar({
           </Button>
           {submitSlot ??
             (!canWrite ? (
-              <Button type="button" size="sm" disabled title={writeDisabledTitle}>
+              <Button
+                type="button"
+                size="sm"
+                disabled
+                title={writeDisabledTitle}
+              >
                 <Save />
                 {submit}
               </Button>
@@ -178,7 +183,9 @@ export function FormToolbar({
                 ? () => dispatchPermissionDenied(deletePermission)
                 : onDelete
           }
-          disabled={!canWrite || (!deleteDenied && (isPending || deleteIsPending))}
+          disabled={
+            !canWrite || (!deleteDenied && (isPending || deleteIsPending))
+          }
           title={writeDisabledTitle}
           aria-disabled={canWrite && deleteDenied ? true : undefined}
           className={cn(canWrite && deleteDenied && "opacity-50")}

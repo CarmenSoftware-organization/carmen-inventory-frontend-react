@@ -68,9 +68,10 @@ describe("useDepartmentTable — account_code column", () => {
     // (useDataGridState.onSortingChange emits `${id}:${dir}`). Pin id === the
     // backend column name so a future accessorKey/id rename can't emit an
     // unrecognized field. The backend orders by any real tb_department column.
-    expect(column?.id, "account_code column id must equal the backend field").toBe(
-      "account_code",
-    );
+    expect(
+      column?.id,
+      "account_code column id must equal the backend field",
+    ).toBe("account_code");
     expect(column?.getCanSort(), "account_code should be sortable").toBe(true);
   });
 

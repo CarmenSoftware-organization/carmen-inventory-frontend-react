@@ -1,4 +1,3 @@
-
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
@@ -90,7 +89,7 @@ export function RecipeCostMargins({
             errorIconAlign="left"
             {...form.register("target_food_cost_percentage")}
           />
-          <span className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 text-micro">
+          <span className="text-muted-foreground text-micro pointer-events-none absolute top-1/2 right-2 -translate-y-1/2">
             %
           </span>
         </div>

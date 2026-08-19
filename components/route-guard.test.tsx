@@ -35,7 +35,9 @@ const baseConfig: RuntimeConfig = {
   X_APP_ID: "app-1",
 };
 
-function license(overrides: Partial<BusinessUnitLicense> = {}): BusinessUnitLicense {
+function license(
+  overrides: Partial<BusinessUnitLicense> = {},
+): BusinessUnitLicense {
   return {
     state: "active",
     end_date: "2027-01-01T00:00:00.000Z",
@@ -166,7 +168,10 @@ describe("RouteGuard — license (checked before permission)", () => {
     setup({
       permissions: [PERMISSION],
       systemLevel: "user",
-      buLicense: license({ state: "expired", end_date: "2020-01-01T00:00:00.000Z" }),
+      buLicense: license({
+        state: "expired",
+        end_date: "2020-01-01T00:00:00.000Z",
+      }),
       enforced: true,
     });
     renderGuard();

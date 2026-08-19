@@ -26,17 +26,17 @@ const PRIMARY_TILE: Palette = {
 
 /** Module tile palette — known keys map ไปยังโทน primary เดียวกันทั้งหมด */
 export const APP_TILE_PALETTE: Record<string, Palette> = {
-  dashboard:           PRIMARY_TILE,
-  procurement:         PRIMARY_TILE,
-  productManagement:   PRIMARY_TILE,
-  vendorManagement:    PRIMARY_TILE,
-  storeOperations:     PRIMARY_TILE,
+  dashboard: PRIMARY_TILE,
+  procurement: PRIMARY_TILE,
+  productManagement: PRIMARY_TILE,
+  vendorManagement: PRIMARY_TILE,
+  storeOperations: PRIMARY_TILE,
   inventoryManagement: PRIMARY_TILE,
-  operationPlan:       PRIMARY_TILE,
-  report:              PRIMARY_TILE,
-  accounting:          PRIMARY_TILE,
-  config:              PRIMARY_TILE,
-  systemAdmin:         PRIMARY_TILE,
+  operationPlan: PRIMARY_TILE,
+  report: PRIMARY_TILE,
+  accounting: PRIMARY_TILE,
+  config: PRIMARY_TILE,
+  systemAdmin: PRIMARY_TILE,
 };
 
 export function getPalette(name: string): Palette | null {

@@ -261,9 +261,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
           statusBadge={codeBadge}
           editTitle={department?.name}
           permissionPrefix="configuration.department"
-          activity={
-            department && { id: department.id, label: department.name }
-          }
+          activity={department && { id: department.id, label: department.name }}
         />
       </Reveal>
 

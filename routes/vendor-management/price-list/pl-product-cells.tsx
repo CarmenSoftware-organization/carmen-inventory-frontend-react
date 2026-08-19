@@ -103,8 +103,7 @@ export function UnitCell({
       control: form.control,
       name: `pricelist_detail.${index}.product_id`,
     }) ?? "";
-  if (isView)
-    return <FieldPlainText>{detailRef?.unit_name}</FieldPlainText>;
+  if (isView) return <FieldPlainText>{detailRef?.unit_name}</FieldPlainText>;
   const errors = form.formState.errors.pricelist_detail?.[index];
   return (
     <Controller
@@ -266,9 +265,16 @@ function useRowPriceParts(
   const priceGross = isView
     ? Number(detailRef?.price) || 0
     : Number(priceWatch) || 0;
-  const rate = isView ? Number(detailRef?.tax_rate) || 0 : Number(rateWatch) || 0;
+  const rate = isView
+    ? Number(detailRef?.tax_rate) || 0
+    : Number(rateWatch) || 0;
   const pwt = round2(priceGross / (1 + rate / 100));
-  return { priceGross, pwt, taxAmt: round2(priceGross - pwt), amount: priceGross };
+  return {
+    priceGross,
+    pwt,
+    taxAmt: round2(priceGross - pwt),
+    amount: priceGross,
+  };
 }
 
 /** PWT — ราคาก่อนภาษี (computed จาก price ÷ (1+rate), read-only) */
@@ -304,7 +310,10 @@ export function PreferredCell({
   "use no memo";
   if (isView)
     return detailRef?.is_preferred ? (
-      <Crown className="text-warning-ink mx-auto size-3.5" aria-label="preferred" />
+      <Crown
+        className="text-warning-ink mx-auto size-3.5"
+        aria-label="preferred"
+      />
     ) : (
       <span className="text-muted-foreground/50">—</span>
     );

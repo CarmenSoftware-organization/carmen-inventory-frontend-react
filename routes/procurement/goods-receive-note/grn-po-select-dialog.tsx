@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -140,7 +139,7 @@ export function GrnPoSelectDialog({
                 <PackageCheck className="size-4.5" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="bg-primary/10 text-primary mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold">
+                <div className="bg-primary/10 text-primary text-micro-legal mb-1 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 font-semibold">
                   {t("entity")}
                 </div>
                 <DialogTitle className="text-base">{t("selectPo")}</DialogTitle>
@@ -190,7 +189,9 @@ export function GrnPoSelectDialog({
                   }
                   onCheckedChange={toggleAll}
                 />
-                <span className="text-xs font-semibold">{tfl("selectAll")}</span>
+                <span className="text-xs font-semibold">
+                  {tfl("selectAll")}
+                </span>
                 <span className="text-muted-foreground text-micro">
                   · {poList.length} PO · {allDetailIds.length} items
                 </span>
@@ -238,7 +239,7 @@ export function GrnPoSelectDialog({
                       <span className="text-muted-foreground text-micro">
                         {formatDate(po.order_date, dateFormat)}
                       </span>
-                      <span className="text-muted-foreground flex items-center gap-1 text-micro">
+                      <span className="text-muted-foreground text-micro flex items-center gap-1">
                         <Package className="size-3" aria-hidden="true" />
                         {po.po_detail.length}
                       </span>
@@ -295,7 +296,7 @@ export function GrnPoSelectDialog({
                             <span className="w-14 shrink-0 text-right text-xs tabular-nums">
                               {d.order_qty}
                             </span>
-                            <span className="text-muted-foreground w-10 shrink-0 text-center text-micro">
+                            <span className="text-muted-foreground text-micro w-10 shrink-0 text-center">
                               {d.order_unit_name}
                             </span>
                             <span className="w-20 shrink-0 text-right text-xs tabular-nums">

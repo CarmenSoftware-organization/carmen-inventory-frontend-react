@@ -2,11 +2,8 @@ import { describe, it, expect } from "vitest";
 import { buildProductGroups, type DetailRef } from "./pl-product-grouping";
 
 // buildProductGroups only reads product_id / moq_qty — cast minimal fixtures.
-const ref = (
-  id: string,
-  product_id: string,
-  moq_qty: number,
-): DetailRef => ({ id, product_id, moq_qty }) as unknown as DetailRef;
+const ref = (id: string, product_id: string, moq_qty: number): DetailRef =>
+  ({ id, product_id, moq_qty }) as unknown as DetailRef;
 
 describe("buildProductGroups", () => {
   it("returns [] for empty/undefined input", () => {

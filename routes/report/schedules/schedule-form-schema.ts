@@ -71,5 +71,11 @@ export const EMPTY_FORM: ScheduleFormValues = {
  * @returns ScheduleFormValues
  */
 export function getDefaultValues(): ScheduleFormValues {
-  return { ...EMPTY_FORM, days_of_week: [], days_of_month: [], filters: {}, recipients: [] };
+  return {
+    ...EMPTY_FORM,
+    days_of_week: [],
+    days_of_month: [],
+    filters: {},
+    recipients: [],
+  };
 }

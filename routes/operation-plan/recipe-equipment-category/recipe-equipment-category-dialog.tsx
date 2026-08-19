@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,7 +62,9 @@ export function RecipeEquipmentCategoryDialog({
 
   const schema = createRecipeEquipmentCategorySchema(tv, tfl);
   const form = useForm<RecipeEquipmentCategoryFormValues>({
-    resolver: zodResolver(schema) as Resolver<RecipeEquipmentCategoryFormValues>,
+    resolver: zodResolver(
+      schema,
+    ) as Resolver<RecipeEquipmentCategoryFormValues>,
     defaultValues: EMPTY_FORM,
   });
 
@@ -111,7 +112,7 @@ export function RecipeEquipmentCategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={isPending ? undefined : onOpenChange}>
-      <DialogContent className="sm:max-w-sm gap-3 p-4">
+      <DialogContent className="gap-3 p-4 sm:max-w-sm">
         <DialogHeader className="gap-0 pb-1">
           <DialogTitle className="text-sm">
             {isEdit
@@ -134,9 +135,7 @@ export function RecipeEquipmentCategoryDialog({
                 maxLength={100}
                 {...form.register("name")}
               />
-              <FieldError>
-                {form.formState.errors.name?.message}
-              </FieldError>
+              <FieldError>{form.formState.errors.name?.message}</FieldError>
             </Field>
 
             <Field>
@@ -178,8 +177,12 @@ export function RecipeEquipmentCategoryDialog({
             </Button>
             <Button type="submit" size="sm" disabled={isPending}>
               {isPending
-                ? (isEdit ? tf("saving") : tf("creating"))
-                : (isEdit ? tc("save") : tc("create"))}
+                ? isEdit
+                  ? tf("saving")
+                  : tf("creating")
+                : isEdit
+                  ? tc("save")
+                  : tc("create")}
             </Button>
           </DialogFooter>
         </form>

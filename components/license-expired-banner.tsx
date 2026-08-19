@@ -36,7 +36,7 @@ export function LicenseExpiredBanner() {
   return (
     <div
       role="alert"
-      className="bg-muted border-b px-4 py-2 text-xs flex items-center justify-center gap-2"
+      className="bg-muted flex items-center justify-center gap-2 border-b px-4 py-2 text-xs"
     >
       {/* สีแดงอยู่ที่ไอคอนจุดเดียว พื้นเป็น neutral ตาม docs/DESIGN.md */}
       <CalendarX className="text-destructive size-4 shrink-0" aria-hidden />

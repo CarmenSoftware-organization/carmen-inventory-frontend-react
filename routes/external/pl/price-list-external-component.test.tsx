@@ -149,7 +149,9 @@ describe("PriceListExternalComponent — submit error surfacing", () => {
     // กด Submit ที่ตาราง → เปิด confirm dialog → กดยืนยันใน dialog
     await userEvent.click(screen.getByRole("button", { name: "Submit" }));
     const dialog = await screen.findByRole("alertdialog");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Submit" }));
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Submit" }),
+    );
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith("This link has expired"),

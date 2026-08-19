@@ -61,7 +61,9 @@ export function useThaiDistricts(provinceCode?: number) {
       const res = await fetch("/data/thai-districts.json");
       if (!res.ok) throw new Error("Failed to load districts");
       const all: ThaiDistrict[] = await res.json();
-      return provinceCode ? all.filter((d) => d.provinceCode === provinceCode) : all;
+      return provinceCode
+        ? all.filter((d) => d.provinceCode === provinceCode)
+        : all;
     },
     enabled: !!provinceCode,
     ...CACHE_STATIC,
@@ -83,7 +85,9 @@ export function useThaiSubDistricts(districtCode?: number) {
       const res = await fetch("/data/thai-subdistricts.json");
       if (!res.ok) throw new Error("Failed to load sub-districts");
       const all: ThaiSubDistrict[] = await res.json();
-      return districtCode ? all.filter((d) => d.districtCode === districtCode) : all;
+      return districtCode
+        ? all.filter((d) => d.districtCode === districtCode)
+        : all;
     },
     enabled: !!districtCode,
     ...CACHE_STATIC,

@@ -37,7 +37,11 @@ function createWrapper() {
     },
   });
   function Wrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
+    return createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      children,
+    );
   }
   return Wrapper;
 }
@@ -51,10 +55,9 @@ describe("useApiMutation", () => {
   it("calls mutationFn with variables and buCode", async () => {
     const mutationFn = vi.fn().mockResolvedValue(jsonRes(200, { id: "1" }));
 
-    const { result } = renderHook(
-      () => useApiMutation({ mutationFn }),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useApiMutation({ mutationFn }), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.mutate({ name: "test" });
@@ -68,10 +71,9 @@ describe("useApiMutation", () => {
     vi.mocked(useBuCode).mockReturnValue(undefined as unknown as string);
     const mutationFn = vi.fn();
 
-    const { result } = renderHook(
-      () => useApiMutation({ mutationFn }),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useApiMutation({ mutationFn }), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.mutate("data");
@@ -84,9 +86,9 @@ describe("useApiMutation", () => {
   });
 
   it("throws ApiError with server message on non-ok response", async () => {
-    const mutationFn = vi.fn().mockResolvedValue(
-      jsonRes(400, { message: "Name already exists" }),
-    );
+    const mutationFn = vi
+      .fn()
+      .mockResolvedValue(jsonRes(400, { message: "Name already exists" }));
 
     const { result } = renderHook(
       () => useApiMutation({ mutationFn, errorMessage: "Create failed" }),
@@ -102,12 +104,13 @@ describe("useApiMutation", () => {
   });
 
   it("uses fallback errorMessage when server response has no message", async () => {
-    const mutationFn = vi.fn().mockResolvedValue(
-      new Response("not json", { status: 500 }),
-    );
+    const mutationFn = vi
+      .fn()
+      .mockResolvedValue(new Response("not json", { status: 500 }));
 
     const { result } = renderHook(
-      () => useApiMutation({ mutationFn, errorMessage: "Something went wrong" }),
+      () =>
+        useApiMutation({ mutationFn, errorMessage: "Something went wrong" }),
       { wrapper: createWrapper() },
     );
 
@@ -121,13 +124,16 @@ describe("useApiMutation", () => {
 
   it("throws ApiError when response body has success: false", async () => {
     const mutationFn = vi.fn().mockResolvedValue(
-      jsonRes(200, { success: false, message: "Validation failed", status: 422 }),
+      jsonRes(200, {
+        success: false,
+        message: "Validation failed",
+        status: 422,
+      }),
     );
 
-    const { result } = renderHook(
-      () => useApiMutation({ mutationFn }),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useApiMutation({ mutationFn }), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.mutate("data");
@@ -142,19 +148,27 @@ describe("useApiMutation", () => {
     const mutationFn = vi.fn().mockResolvedValue(jsonRes(200, { ok: true }));
 
     const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
     });
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
     function TestWrapper({ children }: { children: ReactNode }) {
-      return createElement(QueryClientProvider, { client: queryClient }, children);
+      return createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        children,
+      );
     }
 
     const { result } = renderHook(
-      () => useApiMutation({
-        mutationFn,
-        invalidateKeys: ["items", "categories"],
-      }),
+      () =>
+        useApiMutation({
+          mutationFn,
+          invalidateKeys: ["items", "categories"],
+        }),
       { wrapper: TestWrapper },
     );
 
@@ -169,14 +183,13 @@ describe("useApiMutation", () => {
   });
 
   it("returns parsed data on success", async () => {
-    const mutationFn = vi.fn().mockResolvedValue(
-      jsonRes(200, { id: "1", name: "Created" }),
-    );
+    const mutationFn = vi
+      .fn()
+      .mockResolvedValue(jsonRes(200, { id: "1", name: "Created" }));
 
-    const { result } = renderHook(
-      () => useApiMutation({ mutationFn }),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useApiMutation({ mutationFn }), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.mutate({ name: "test" });
@@ -187,14 +200,13 @@ describe("useApiMutation", () => {
   });
 
   it("defaults errorMessage to 'Request failed'", async () => {
-    const mutationFn = vi.fn().mockResolvedValue(
-      new Response("error", { status: 500 }),
-    );
+    const mutationFn = vi
+      .fn()
+      .mockResolvedValue(new Response("error", { status: 500 }));
 
-    const { result } = renderHook(
-      () => useApiMutation({ mutationFn }),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useApiMutation({ mutationFn }), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.mutate("data");
@@ -207,23 +219,27 @@ describe("useApiMutation", () => {
 
 describe("cleanServerMessage", () => {
   it("strips an unsubstituted placeholder with its separator", () => {
-    expect(cleanServerMessage("Validation failed: {errors}", "Request failed")).toBe(
-      "Validation failed",
-    );
+    expect(
+      cleanServerMessage("Validation failed: {errors}", "Request failed"),
+    ).toBe("Validation failed");
     expect(cleanServerMessage("Failed - {detail}", "Request failed")).toBe(
       "Failed",
     );
   });
 
   it("falls back when the message is empty or only a placeholder", () => {
-    expect(cleanServerMessage("{errors}", "Request failed")).toBe("Request failed");
-    expect(cleanServerMessage(undefined, "Request failed")).toBe("Request failed");
+    expect(cleanServerMessage("{errors}", "Request failed")).toBe(
+      "Request failed",
+    );
+    expect(cleanServerMessage(undefined, "Request failed")).toBe(
+      "Request failed",
+    );
     expect(cleanServerMessage("", "Request failed")).toBe("Request failed");
   });
 
   it("leaves a clean message untouched", () => {
-    expect(cleanServerMessage("Location already exists", "Request failed")).toBe(
-      "Location already exists",
-    );
+    expect(
+      cleanServerMessage("Location already exists", "Request failed"),
+    ).toBe("Location already exists");
   });
 });

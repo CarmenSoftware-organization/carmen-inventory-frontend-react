@@ -21,15 +21,27 @@ const legacyStage = {
     },
     approve: {
       is_active: false,
-      recipients: { requestor: false, current_approve: false, next_step: false },
+      recipients: {
+        requestor: false,
+        current_approve: false,
+        next_step: false,
+      },
     },
     reject: {
       is_active: false,
-      recipients: { requestor: false, current_approve: false, next_step: false },
+      recipients: {
+        requestor: false,
+        current_approve: false,
+        next_step: false,
+      },
     },
     sendback: {
       is_active: false,
-      recipients: { requestor: false, current_approve: false, next_step: false },
+      recipients: {
+        requestor: false,
+        current_approve: false,
+        next_step: false,
+      },
     },
   },
   hide_fields: { price_per_unit: false, total_price: false },
@@ -70,6 +82,39 @@ describe("parseWorkflowData", () => {
   it("ของที่แปลงแล้วยังผ่าน schema ซ้ำได้ (ของใหม่ไม่พัง)", () => {
     const once = parseWorkflowData(legacyData);
     expect(parseWorkflowData(once.data).success).toBe(true);
+  });
+});
+
+describe("products", () => {
+  const fullSnapshotProduct = {
+    id: "6a1f0c1e-0000-0000-0000-000000000001",
+    code: "P-0001",
+    name: "Rice",
+    inventory_unit: { id: "u1", name: "KG" },
+    product_category: { id: "c1", name: "Dry Goods" },
+  };
+
+  it("อ่านได้ทั้ง snapshot เต็มแบบเก่าและ id ล้วนแบบใหม่ — ยุบเหลือ string id", () => {
+    const parsed = parseWorkflowData({
+      ...legacyData,
+      products: [fullSnapshotProduct, "6a1f0c1e-0000-0000-0000-000000000002"],
+    });
+    expect(parsed.success).toBe(true);
+    expect(parsed.data!.products).toEqual([
+      "6a1f0c1e-0000-0000-0000-000000000001",
+      "6a1f0c1e-0000-0000-0000-000000000002",
+    ]);
+  });
+
+  it("defaults ที่ได้พร้อมส่งกลับเป็น id ล้วน — workflow เก่าถูกล้าง snapshot ตอน save ถัดไป", () => {
+    const defaults = getWorkflowFormDefaults(
+      workflowWith({ ...legacyData, products: [fullSnapshotProduct] }),
+    );
+    expect(defaults.data.products).toEqual([
+      "6a1f0c1e-0000-0000-0000-000000000001",
+    ]);
+    expect(defaults.data.stages).toHaveLength(1);
+    expect(defaults.name).toBe("General PR");
   });
 });
 

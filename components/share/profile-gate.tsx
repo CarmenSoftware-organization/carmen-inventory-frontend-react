@@ -92,7 +92,7 @@ function NoBusinessUnit({
         </p>
 
         {name && (
-          <p className="text-muted-foreground/70 mt-3 text-micro-legal">
+          <p className="text-muted-foreground/70 text-micro-legal mt-3">
             {t("signedInAs", { name })}
           </p>
         )}

@@ -226,7 +226,7 @@ export default function LoginForm() {
         </Link>
       </p>
 
-      <p className="text-muted-foreground/60 mt-3 text-center text-micro-legal leading-relaxed">
+      <p className="text-muted-foreground/60 text-micro-legal mt-3 text-center leading-relaxed">
         {t.rich("termsLine", {
           terms: (chunks) => (
             <Link

@@ -60,7 +60,9 @@ describe("ModuleApp launcher — locked (BU has not licensed the feature)", () =
   it("renders a button (not a Link) with the Lock icon, dimmed", async () => {
     visibleModules.mockReturnValue([mod({ locked: true })]);
     await renderAndOpen();
-    expect(screen.queryByRole("link", { name: /procurementModule/i })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: /procurementModule/i }),
+    ).toBeNull();
     const button = screen.getByRole("button", { name: /procurementModule/i });
     expect(button.querySelector("svg.lucide-lock")).not.toBeNull();
     expect(button.className).toMatch(/opacity-50/);

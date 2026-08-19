@@ -1,4 +1,3 @@
-
 import type { PaginationState, SortingState } from "@tanstack/react-table";
 import { useListPageState } from "@/hooks/use-list-page-state";
 import type { ParamsDto } from "@/types/params";
@@ -45,12 +44,13 @@ export function useDataGridState(options?: UseDataGridStateOptions) {
     return [{ id, desc: dir === "desc" }];
   })();
 
-  const pagination: PaginationState = { pageIndex: pageNumber - 1, pageSize: perpageNumber };
+  const pagination: PaginationState = {
+    pageIndex: pageNumber - 1,
+    pageSize: perpageNumber,
+  };
 
   const combinedFilter =
-    [filter, stage, userId]
-      .filter(Boolean)
-      .join(";") || undefined;
+    [filter, stage, userId].filter(Boolean).join(";") || undefined;
 
   const params: ParamsDto = {
     page: pageNumber,
@@ -63,8 +63,7 @@ export function useDataGridState(options?: UseDataGridStateOptions) {
   const onPaginationChange = (
     updater: PaginationState | ((old: PaginationState) => PaginationState),
   ) => {
-    const next =
-      typeof updater === "function" ? updater(pagination) : updater;
+    const next = typeof updater === "function" ? updater(pagination) : updater;
     handlePageChange(next.pageIndex + 1);
     handleSetPerpage(next.pageSize);
   };

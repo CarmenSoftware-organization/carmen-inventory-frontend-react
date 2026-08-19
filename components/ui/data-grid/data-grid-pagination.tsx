@@ -1,4 +1,3 @@
-
 import React, { useMemo } from "react";
 import { useTranslations } from "use-intl";
 import { useDataGrid } from "@/components/ui/data-grid/data-grid";
@@ -129,7 +128,7 @@ function DataGridPagination({
     return (
       <div
         className={cn(
-          "flex items-center justify-between border-t border-border/50 bg-muted/10 px-3 py-1.5",
+          "border-border/50 bg-muted/10 flex items-center justify-between border-t px-3 py-1.5",
           className,
         )}
       >
@@ -145,7 +144,7 @@ function DataGridPagination({
       role="navigation"
       aria-label={t("label")}
       className={cn(
-        "flex flex-col items-center gap-2 border-t border-border/50 bg-muted/10 px-3 py-1.5 sm:flex-row sm:justify-between",
+        "border-border/50 bg-muted/10 flex flex-col items-center gap-2 border-t px-3 py-1.5 sm:flex-row sm:justify-between",
         className,
       )}
     >
@@ -198,7 +197,7 @@ function DataGridPagination({
           <Button
             size="icon-sm"
             variant="outline"
-            className="size-6 border-border/40"
+            className="border-border/40 size-6"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
             aria-label={t("firstPage")}
@@ -209,7 +208,7 @@ function DataGridPagination({
           <Button
             size="icon-sm"
             variant="outline"
-            className="size-6 border-border/40"
+            className="border-border/40 size-6"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
             aria-label={t("previousPage")}
@@ -237,7 +236,7 @@ function DataGridPagination({
                   key={page}
                   type="button"
                   className={cn(
-                    "inline-flex h-6 min-w-6 items-center justify-center rounded px-1.5 text-xs font-semibold cursor-pointer transition-all duration-150",
+                    "inline-flex h-6 min-w-6 cursor-pointer items-center justify-center rounded px-1.5 text-xs font-semibold transition-all duration-150",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -255,7 +254,7 @@ function DataGridPagination({
           <Button
             size="icon-sm"
             variant="outline"
-            className="size-6 border-border/40"
+            className="border-border/40 size-6"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
             aria-label={t("nextPage")}
@@ -266,7 +265,7 @@ function DataGridPagination({
           <Button
             size="icon-sm"
             variant="outline"
-            className="size-6 border-border/40"
+            className="border-border/40 size-6"
             onClick={() => table.setPageIndex(pageCount - 1)}
             disabled={!table.getCanNextPage()}
             aria-label={t("lastPage")}

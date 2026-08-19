@@ -61,19 +61,27 @@ beforeEach(() => {
 // =========================================================================
 describe("getList", () => {
   it("fetches list successfully", async () => {
-    const data = { data: [{ id: "1", name: "A" }], paginate: { total: 1, page: 1, perpage: 10, pages: 1 } };
+    const data = {
+      data: [{ id: "1", name: "A" }],
+      paginate: { total: 1, page: 1, perpage: 10, pages: 1 },
+    };
     vi.mocked(httpClient.get).mockResolvedValue(jsonRes(200, data));
 
     const api = createApi();
     const result = await api.getList("BU001");
 
-    expect(httpClient.get).toHaveBeenCalledWith("/api/proxy/api/config/BU001/items");
+    expect(httpClient.get).toHaveBeenCalledWith(
+      "/api/proxy/api/config/BU001/items",
+    );
     expect(result.data).toHaveLength(1);
     expect(result.paginate.total).toBe(1);
   });
 
   it("passes query params via buildUrl", async () => {
-    const data = { data: [], paginate: { total: 0, page: 1, perpage: 10, pages: 0 } };
+    const data = {
+      data: [],
+      paginate: { total: 0, page: 1, perpage: 10, pages: 0 },
+    };
     vi.mocked(httpClient.get).mockResolvedValue(jsonRes(200, data));
 
     const api = createApi();
@@ -124,7 +132,9 @@ describe("getById", () => {
     const api = createApi();
     const result = await api.getById("BU001", "1");
 
-    expect(httpClient.get).toHaveBeenCalledWith("/api/proxy/api/config/BU001/items/1");
+    expect(httpClient.get).toHaveBeenCalledWith(
+      "/api/proxy/api/config/BU001/items/1",
+    );
     expect(result).toEqual({ id: "1", name: "A" });
   });
 
@@ -132,7 +142,9 @@ describe("getById", () => {
     vi.mocked(httpClient.get).mockResolvedValue(jsonRes(404, {}));
 
     const api = createApi();
-    await expect(api.getById("BU001", "999")).rejects.toThrow("Failed to fetch item");
+    await expect(api.getById("BU001", "999")).rejects.toThrow(
+      "Failed to fetch item",
+    );
   });
 });
 

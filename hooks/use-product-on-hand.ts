@@ -37,7 +37,12 @@ export function useProductOnHand(
   const buCode = useBuCode();
 
   return useQuery<ProductOnHandResponse>({
-    queryKey: [QUERY_KEYS.PRODUCT_ON_HAND, buCode, productId, locationId ?? null],
+    queryKey: [
+      QUERY_KEYS.PRODUCT_ON_HAND,
+      buCode,
+      productId,
+      locationId ?? null,
+    ],
     queryFn: async () => {
       const url = buildUrl(
         API_ENDPOINTS.PRODUCT_ON_HAND(buCode!, productId!),

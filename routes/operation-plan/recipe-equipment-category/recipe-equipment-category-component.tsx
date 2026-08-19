@@ -1,4 +1,3 @@
-
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Download, Plus, Printer } from "lucide-react";
 import { toast } from "sonner";
@@ -90,8 +89,7 @@ export default function RecipeEquipmentCategoryComponent() {
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <DisplayTemplate

@@ -21,8 +21,14 @@ export const ADJUSTMENT_TYPE_FILTER_FIELDS: FilterFieldDef[] = [
     control: "multi-select",
     labelKey: "field.type",
     options: [
-      { labelKey: "field.stockIn", value: `type|string:${ADJUSTMENT_TYPE.STOCK_IN}` },
-      { labelKey: "field.stockOut", value: `type|string:${ADJUSTMENT_TYPE.STOCK_OUT}` },
+      {
+        labelKey: "field.stockIn",
+        value: `type|string:${ADJUSTMENT_TYPE.STOCK_IN}`,
+      },
+      {
+        labelKey: "field.stockOut",
+        value: `type|string:${ADJUSTMENT_TYPE.STOCK_OUT}`,
+      },
     ],
   },
 ];

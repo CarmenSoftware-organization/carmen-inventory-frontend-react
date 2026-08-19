@@ -33,9 +33,7 @@ export enum PR_ITEM_STAGE_STATUS {
 }
 
 export interface PurchaseRequestDetail
-  extends TaxFields,
-    DiscountFields,
-    ItemMoneyFields {
+  extends TaxFields, DiscountFields, ItemMoneyFields {
   id: string;
   purchase_request_id: string;
   sequence_no: number;
@@ -96,8 +94,7 @@ export interface PrItemHistoryEntry {
 }
 
 export interface PurchaseRequestTemplateDetail
-  extends TaxFields,
-    DiscountFields {
+  extends TaxFields, DiscountFields {
   id: string;
   purchase_request_template_id: string;
   location_id: string;
@@ -227,7 +224,9 @@ export const purchaseRequestSchema = z.looseObject({
   // ไปไม่ถึง — แถวเลยมี created_at ดิบค้างและ **ไม่มี `audit`** (ดู CLAUDE.md
   // "Known open items") พอ backend ใส่ paths ให้ถูก created_at จะหายไปเป็น audit
   // การประกาศไว้ตอนนี้จึงเท่ากับผูกโค้ดกับสภาพชั่วคราวที่กำลังจะถูกแก้
-  purchase_request_detail: z.array(purchaseRequestDetailSummarySchema).optional(),
+  purchase_request_detail: z
+    .array(purchaseRequestDetailSummarySchema)
+    .optional(),
 });
 
 export enum PR_ITEM_PRICELIST_COMPARE_TYPE {

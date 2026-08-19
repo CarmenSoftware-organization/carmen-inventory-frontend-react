@@ -36,9 +36,7 @@ describe("LocationForm — SettingSection layout", () => {
       [en.config.location.locationUsers, en.config.location.usersDesc],
       [en.config.location.products, en.config.location.productsDesc],
     ]) {
-      expect(
-        screen.getByRole("heading", { name: title }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
       // asserts the i18n key resolved — a missing key would render the path
       expect(screen.getByText(description)).toBeInTheDocument();
     }

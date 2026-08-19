@@ -31,7 +31,9 @@ export function buildPoPayload(
   return {
     stage_role: "create",
     details: {
-      ...(values.doc_version != null ? { doc_version: values.doc_version } : {}),
+      ...(values.doc_version != null
+        ? { doc_version: values.doc_version }
+        : {}),
       ...(options?.po_type ? { po_type: options.po_type } : {}),
       workflow_id: values.workflow_id,
       vendor_id: values.vendor_id,

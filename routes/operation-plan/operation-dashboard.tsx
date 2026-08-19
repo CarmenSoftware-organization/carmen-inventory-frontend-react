@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import {
   BarCard,
@@ -56,8 +55,7 @@ export default function OperationDashboard() {
   const lines = resolved.filter(
     (w) => w.widget_type === "line" || w.widget_type === "area",
   );
-  const hasAny =
-    kpis.length + pies.length + bars.length + lines.length > 0;
+  const hasAny = kpis.length + pies.length + bars.length + lines.length > 0;
 
   return (
     <div className="space-y-4 p-3">

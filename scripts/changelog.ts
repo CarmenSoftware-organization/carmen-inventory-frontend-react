@@ -72,7 +72,13 @@ function collectCommits(range: string): RawCommit[] {
   const commits: RawCommit[] = [];
 
   // 1) merge บนเส้น first-parent — หนึ่งตัวต่อหนึ่งสาขาที่ถูก merge เข้ามา
-  const mergeRaw = git("log", "--first-parent", "--merges", `--pretty=format:%h${UNIT}%s`, range);
+  const mergeRaw = git(
+    "log",
+    "--first-parent",
+    "--merges",
+    `--pretty=format:%h${UNIT}%s`,
+    range,
+  );
   const merges = mergeRaw
     ? mergeRaw.split("\n").map((line) => {
         const [hash, subject] = line.split(UNIT);
@@ -98,7 +104,13 @@ function collectCommits(range: string): RawCommit[] {
 
   // 2) commit ที่ลงเส้น first-parent ตรง ๆ ไม่ผ่าน merge
   const directs = parseLines(
-    git("log", "--first-parent", "--no-merges", `--pretty=format:%h${UNIT}%an${UNIT}%s`, range),
+    git(
+      "log",
+      "--first-parent",
+      "--no-merges",
+      `--pretty=format:%h${UNIT}%an${UNIT}%s`,
+      range,
+    ),
   );
   for (const commit of directs) {
     if (seen.has(commit.hash)) continue;
@@ -108,8 +120,12 @@ function collectCommits(range: string): RawCommit[] {
   return commits;
 }
 
-function toChangeItem(commit: RawCommit): { category: Category; item: ChangeItem } | null {
-  const conventional = /^(\w+)(?:\(([^)]+)\))?(!)?:\s+(.+)$/.exec(commit.subject);
+function toChangeItem(
+  commit: RawCommit,
+): { category: Category; item: ChangeItem } | null {
+  const conventional = /^(\w+)(?:\(([^)]+)\))?(!)?:\s+(.+)$/.exec(
+    commit.subject,
+  );
   if (!conventional) return null;
   const category = categoryFor(conventional[1]);
   if (!category) return null;
@@ -127,7 +143,11 @@ function toChangeItem(commit: RawCommit): { category: Category; item: ChangeItem
 }
 
 function buildChanges(range: string): VersionEntry["changes"] {
-  const changes: VersionEntry["changes"] = { added: [], fixed: [], changed: [] };
+  const changes: VersionEntry["changes"] = {
+    added: [],
+    fixed: [],
+    changed: [],
+  };
   for (const commit of collectCommits(range)) {
     const parsed = toChangeItem(commit);
     if (!parsed) continue;
@@ -161,7 +181,10 @@ export function renderMarkdown(changelog: Changelog): string {
     if (!sections.some(([, items]) => items.length > 0)) {
       // ใช้ "init" ให้ตรงกับที่ whats-new-dialog.tsx:50 เช็ค — ต้นฉบับ backend
       // ใช้คำว่า "baseline" ซึ่งฝั่งนี้ไม่มีใครอ่าน
-      lines.push(entry.note === "init" ? "_Initial release._" : "_No notable changes._", "");
+      lines.push(
+        entry.note === "init" ? "_Initial release._" : "_No notable changes._",
+        "",
+      );
       continue;
     }
     for (const [title, items] of sections) {
@@ -182,7 +205,11 @@ function writeAll(changelog: Changelog): void {
 }
 
 function countChanges(entry: VersionEntry): number {
-  return entry.changes.added.length + entry.changes.fixed.length + entry.changes.changed.length;
+  return (
+    entry.changes.added.length +
+    entry.changes.fixed.length +
+    entry.changes.changed.length
+  );
 }
 
 function isCommit(rev: string): boolean {
@@ -208,10 +235,15 @@ function isCommit(rev: string): boolean {
  *   แล้วใช้เป็นฟิลด์ `commit` ของ entry (ไม่ derive จาก fullVersion อีกต่อไป)
  * @throws ถ้า changelog.json ไม่มี entry หรือ baseline ชี้ commit ที่ไม่มีในรีโป
  */
-export function recordRelease(params: { target: string; fullVersion: string; commit: string }): void {
+export function recordRelease(params: {
+  target: string;
+  fullVersion: string;
+  commit: string;
+}): void {
   const changelog = readChangelog();
   const baseline = changelog.versions[0]?.commit;
-  if (!baseline) throw new Error("changelog.json ไม่มี entry ให้ใช้เป็น baseline");
+  if (!baseline)
+    throw new Error("changelog.json ไม่มี entry ให้ใช้เป็น baseline");
   // เคยเกิดจริง: changelog.json ที่ port ติดมาจาก Next.js app ชี้ commit dbf5ae2b
   // ที่ไม่มีในรีโปนี้ แล้ว `git log dbf5ae2b..HEAD` fatal โดยไม่บอกสาเหตุ
   if (!isCommit(baseline)) {
@@ -231,7 +263,9 @@ export function recordRelease(params: { target: string; fullVersion: string; com
   changelog.current = params.target;
   changelog.generated_at = new Date().toISOString();
   writeAll(changelog);
-  console.log(`▸ changelog ........ +${countChanges(entry)} รายการ (${baseline}..HEAD) ✓`);
+  console.log(
+    `▸ changelog ........ +${countChanges(entry)} รายการ (${baseline}..HEAD) ✓`,
+  );
 }
 
 /**
@@ -269,7 +303,9 @@ export function rebuildFromTags(): void {
     versions: entries,
   });
   for (const entry of entries) {
-    console.log(`  v${entry.version.padEnd(8)} ${String(countChanges(entry)).padStart(3)} รายการ  ${entry.date}`);
+    console.log(
+      `  v${entry.version.padEnd(8)} ${String(countChanges(entry)).padStart(3)} รายการ  ${entry.date}`,
+    );
   }
   console.log(`✓ rebuild ${entries.length} เวอร์ชันจาก git tag`);
 }

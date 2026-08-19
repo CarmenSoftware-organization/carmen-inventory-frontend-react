@@ -286,7 +286,11 @@ export function useSubmitPurchaseOrder() {
     id: string;
     stage_role: string;
     doc_version: number;
-    details: { id: string; stage_status: string; stage_message: string | null }[];
+    details: {
+      id: string;
+      stage_status: string;
+      stage_message: string | null;
+    }[];
   }>({
     mutationFn: ({ id, ...body }, buCode) =>
       httpClient.patch(
@@ -311,7 +315,11 @@ export function useApprovePurchaseOrder() {
     id: string;
     stage_role: string;
     doc_version: number;
-    details: { id: string; stage_status: string; stage_message: string | null }[];
+    details: {
+      id: string;
+      stage_status: string;
+      stage_message: string | null;
+    }[];
   }>({
     mutationFn: ({ id, ...body }, buCode) =>
       httpClient.patch(
@@ -336,7 +344,11 @@ export function useRejectPurchaseOrder() {
     id: string;
     stage_role: string;
     doc_version: number;
-    details: { id: string; stage_status: string; stage_message: string | null }[];
+    details: {
+      id: string;
+      stage_status: string;
+      stage_message: string | null;
+    }[];
   }>({
     mutationFn: ({ id, ...body }, buCode) =>
       httpClient.patch(
@@ -399,7 +411,11 @@ export function useReviewPurchaseOrder() {
     stage_role: string;
     doc_version: number;
     des_stage?: string;
-    details: { id: string; stage_status: string; stage_message: string | null }[];
+    details: {
+      id: string;
+      stage_status: string;
+      stage_message: string | null;
+    }[];
   }>({
     mutationFn: ({ id, ...body }, buCode) =>
       httpClient.patch(
@@ -474,8 +490,7 @@ export function usePurchaseOrderComments(poId: string | undefined) {
       const res = await httpClient.get(
         API_ENDPOINTS.PURCHASE_ORDER_COMMENT(buCode, poId),
       );
-      if (!res.ok)
-        throw await ApiError.from(res, "Failed to fetch comments");
+      if (!res.ok) throw await ApiError.from(res, "Failed to fetch comments");
       const json = await res.json();
       return json.data ?? [];
     },

@@ -33,8 +33,8 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
       }}
       className={cn(
         "group border-border/60 bg-card relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-        "hover:-translate-y-0.5 hover:border-primary/40",
+        "focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none",
+        "hover:border-primary/40 hover:-translate-y-0.5",
       )}
     >
       {/* Left accent bar — widens on hover */}
@@ -66,7 +66,7 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
               aria-hidden
             />
           </div>
-          <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-1.5 text-micro">
+          <div className="text-muted-foreground text-micro mt-1 flex flex-wrap items-center gap-1.5">
             <span className="font-semibold tracking-wide uppercase">
               {item.ReportGroup}
             </span>
@@ -78,7 +78,7 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
                 <Badge
                   variant="outline"
                   size="sm"
-                  className="border-primary/30 text-primary inline-flex items-center gap-0.5 px-1.5 py-0 text-micro-eyebrow font-semibold tracking-wide uppercase"
+                  className="border-primary/30 text-primary text-micro-eyebrow inline-flex items-center gap-0.5 px-1.5 py-0 font-semibold tracking-wide uppercase"
                 >
                   <Sparkles className="size-2" aria-hidden />
                   {t("system")}
@@ -93,7 +93,7 @@ export default function ReportCard({ item, onSelect }: ReportCardProps) {
                 <Badge
                   variant="outline"
                   size="sm"
-                  className="text-muted-foreground inline-flex items-center px-1.5 py-0 text-micro-eyebrow font-semibold tracking-wide uppercase"
+                  className="text-muted-foreground text-micro-eyebrow inline-flex items-center px-1.5 py-0 font-semibold tracking-wide uppercase"
                 >
                   {item._templateType}
                 </Badge>

@@ -80,8 +80,10 @@ export default function GrnTaxDiscountFields({
 
   // ชื่อ tax profile สำหรับ view mode (schema เก็บแค่ id → resolve จาก list)
   const taxProfileId =
-    useWatch({ control: form.control, name: `items.${index}.tax_profile_id` }) ??
-    "";
+    useWatch({
+      control: form.control,
+      name: `items.${index}.tax_profile_id`,
+    }) ?? "";
   const { data: taxProfileData } = useTaxProfile({ perpage: 30 });
   const taxProfileName =
     taxProfileData?.data?.find((t) => t.id === taxProfileId)?.name ?? "";
@@ -162,7 +164,9 @@ export default function GrnTaxDiscountFields({
             {tfl("taxProfile")}
           </FieldLabel>
           {plainText ? (
-            <FieldPlainText className="text-xs">{taxProfileName}</FieldPlainText>
+            <FieldPlainText className="text-xs">
+              {taxProfileName}
+            </FieldPlainText>
           ) : (
             <Controller
               control={form.control}
@@ -216,7 +220,10 @@ export default function GrnTaxDiscountFields({
               suffix={currencyCode}
             />
           ) : (
-            <InputSuffixField className="w-full" disabled={disabled || !isTaxAdj}>
+            <InputSuffixField
+              className="w-full"
+              disabled={disabled || !isTaxAdj}
+            >
               <InputSuffixInput
                 id={`items-${index}-tax-amount`}
                 type="number"

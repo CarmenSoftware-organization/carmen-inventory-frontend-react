@@ -68,10 +68,14 @@ export const ApprovedCell = memo(function ApprovedCell({
         {...form.register(`items.${index}.approved_qty`)}
         onChange={(e) => {
           const n = e.target.valueAsNumber;
-          form.setValue(`items.${index}.approved_qty`, Number.isNaN(n) ? 0 : n, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
+          form.setValue(
+            `items.${index}.approved_qty`,
+            Number.isNaN(n) ? 0 : n,
+            {
+              shouldDirty: true,
+              shouldValidate: true,
+            },
+          );
         }}
       />
       <InputSuffixAddon>

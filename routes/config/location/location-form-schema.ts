@@ -30,14 +30,18 @@ export function createLocationSchema(tv: TranslationFn, tf: TranslationFn) {
     }),
     description: z.string(),
     is_active: z.boolean(),
-    delivery_point_id: z.string().min(1, tv("required", { field: tf("deliveryPoint") })),
+    delivery_point_id: z
+      .string()
+      .min(1, tv("required", { field: tf("deliveryPoint") })),
     delivery_point_name: z.string(),
     users: transferPayloadSchema,
     products: transferPayloadSchema,
   });
 }
 
-export type LocationFormValues = z.infer<ReturnType<typeof createLocationSchema>>;
+export type LocationFormValues = z.infer<
+  ReturnType<typeof createLocationSchema>
+>;
 
 const emptyTransfer = { add: [], remove: [] };
 

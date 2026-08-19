@@ -29,9 +29,7 @@ export interface GrnLocationItem {
 // --- Detail Item (line item inside a detail group) ---
 
 export interface GrnDetailItem
-  extends TaxFields,
-    DiscountFields,
-    ItemMoneyFields {
+  extends TaxFields, DiscountFields, ItemMoneyFields {
   id: string;
   good_received_note_detail_id: string;
   inventory_transaction_id: string | null;

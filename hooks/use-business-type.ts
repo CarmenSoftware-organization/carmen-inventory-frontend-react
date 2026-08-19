@@ -1,7 +1,10 @@
 import { createConfigCrud } from "@/hooks/use-config-crud";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
-import type { BusinessType, CreateBusinessTypeDto } from "@/types/business-type";
+import type {
+  BusinessType,
+  CreateBusinessTypeDto,
+} from "@/types/business-type";
 
 const crud = createConfigCrud<BusinessType, CreateBusinessTypeDto>({
   queryKey: QUERY_KEYS.BUSINESS_TYPES,

@@ -1,4 +1,3 @@
-
 import { useProfile } from "@/hooks/use-profile";
 
 type Formatter = (value: number | null | undefined) => string;
@@ -45,8 +44,7 @@ export function useQuantityFormatter(): Formatter {
  */
 export function useRecipeFormatter(): Formatter {
   const { defaultBu } = useProfile();
-  const decimals =
-    defaultBu?.config?.recipe_format?.minimumIntegerDigits ?? 5;
+  const decimals = defaultBu?.config?.recipe_format?.minimumIntegerDigits ?? 5;
   const locales = defaultBu?.config?.recipe_format?.locales ?? "en-US";
   return createFormatter(decimals, locales);
 }
@@ -64,7 +62,6 @@ export function useAmountFormatter(decimals?: number): Formatter {
   const { defaultBu } = useProfile();
   const resolved =
     decimals ?? defaultBu?.config?.default_currency?.decimal_places ?? 2;
-  const locales =
-    defaultBu?.config?.amount_format?.locales ?? "en-US";
+  const locales = defaultBu?.config?.amount_format?.locales ?? "en-US";
   return createFormatter(resolved, locales);
 }

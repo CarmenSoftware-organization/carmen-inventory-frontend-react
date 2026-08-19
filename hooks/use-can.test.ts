@@ -21,7 +21,9 @@ vi.mock("@/components/permission-denied-dialog", () => ({
 
 const PERMISSION = PERMISSIONS.configuration.department.create;
 
-function license(overrides: Partial<BusinessUnitLicense> = {}): BusinessUnitLicense {
+function license(
+  overrides: Partial<BusinessUnitLicense> = {},
+): BusinessUnitLicense {
   return {
     state: "active",
     end_date: "2027-01-01T00:00:00.000Z",

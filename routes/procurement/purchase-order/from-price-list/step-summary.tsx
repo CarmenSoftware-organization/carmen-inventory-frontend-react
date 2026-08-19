@@ -1,4 +1,3 @@
-
 import type { ReactNode } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
@@ -248,7 +247,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                   className="border-border/40 overflow-hidden rounded-md border"
                 >
                   <div className="bg-muted/20 flex items-center gap-3 border-b px-3 py-2">
-                    <span className="text-muted-foreground w-6 text-center text-micro tabular-nums">
+                    <span className="text-muted-foreground text-micro w-6 text-center tabular-nums">
                       {index + 1}
                     </span>
                     <div className="min-w-0 flex-1">
@@ -280,19 +279,19 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                       <tr className="text-muted-foreground bg-muted/5 border-b">
                         <th
                           scope="col"
-                          className="px-3 py-1 text-left text-micro-legal font-semibold tracking-wide uppercase"
+                          className="text-micro-legal px-3 py-1 text-left font-semibold tracking-wide uppercase"
                         >
                           {tfl("location")}
                         </th>
                         <th
                           scope="col"
-                          className="w-20 px-3 py-1 text-right text-micro-legal font-semibold tracking-wide uppercase"
+                          className="text-micro-legal w-20 px-3 py-1 text-right font-semibold tracking-wide uppercase"
                         >
                           {tfl("qty")}
                         </th>
                         <th
                           scope="col"
-                          className="w-24 px-3 py-1 text-right text-micro-legal font-semibold tracking-wide uppercase"
+                          className="text-micro-legal w-24 px-3 py-1 text-right font-semibold tracking-wide uppercase"
                         >
                           {tfl("total")}
                         </th>
@@ -327,7 +326,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                     </tbody>
                     <tfoot>
                       <tr className="bg-muted/10 border-t">
-                        <td className="text-muted-foreground px-3 py-1.5 text-micro">
+                        <td className="text-muted-foreground text-micro px-3 py-1.5">
                           {t("totalQty")}
                         </td>
                         <td className="px-3 py-1.5 text-right text-xs font-semibold tabular-nums">
@@ -372,7 +371,7 @@ export function StepSummary({ form, onEditStep }: StepSummaryProps) {
                   </dd>
                 </div>
               </dl>
-              <p className="text-muted-foreground mt-2 inline-flex items-center gap-1 text-micro">
+              <p className="text-muted-foreground text-micro mt-2 inline-flex items-center gap-1">
                 <Badge variant="secondary" size="xs">
                   {items.length} {tfl("products").toLowerCase()}
                 </Badge>

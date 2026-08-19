@@ -1,4 +1,3 @@
-
 import { Link } from "react-router";
 import {
   AtSign,
@@ -28,8 +27,8 @@ function InfoItem({
   value?: string | null;
 }>) {
   return (
-    <div className="group flex items-center gap-3 rounded-xl border border-border/30 bg-background/40 p-3 transition-all hover:bg-background/60 hover:shadow-md">
-      <span className="flex size-9 items-center justify-center rounded-lg border border-border/50 bg-background/50 shadow-sm transition-transform group-hover:scale-110 group-hover:bg-primary/5">
+    <div className="group border-border/30 bg-background/40 hover:bg-background/60 flex items-center gap-3 rounded-xl border p-3 transition-all hover:shadow-md">
+      <span className="border-border/50 bg-background/50 group-hover:bg-primary/5 flex size-9 items-center justify-center rounded-lg border shadow-sm transition-transform group-hover:scale-110">
         <Icon className="text-primary size-4" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
@@ -68,17 +67,16 @@ export default function UserProfileDetails() {
     .join("");
 
   return (
-    <div className="w-full space-y-4 relative z-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
-
+    <div className="animate-in fade-in slide-in-from-bottom-4 relative z-0 w-full space-y-4 duration-500">
       {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl border bg-primary/5 shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
+      <div className="bg-primary/5 relative overflow-hidden rounded-2xl border shadow-sm">
+        <div className="from-primary/10 absolute inset-0 bg-gradient-to-br via-transparent to-transparent opacity-50" />
         <div className="relative flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4 sm:gap-5">
             <Avatar
               // Force remount when avatar_url flips
               key={profile.avatar_url ?? "fallback"}
-              className="size-16 ring-4 ring-background/50 ring-offset-0 shadow-xl transition-transform duration-300 hover:scale-105 sm:size-20"
+              className="ring-background/50 size-16 shadow-xl ring-4 ring-offset-0 transition-transform duration-300 hover:scale-105 sm:size-20"
             >
               {profile.avatar_url && (
                 <AvatarImage
@@ -96,18 +94,28 @@ export default function UserProfileDetails() {
                 <h2 className="text-lg font-bold tracking-tight sm:text-xl">
                   {fullName}
                 </h2>
-                <Badge variant="primary-light" size="sm" className="text-xs shadow-sm shadow-primary/10 border-primary/20">
+                <Badge
+                  variant="primary-light"
+                  size="sm"
+                  className="shadow-primary/10 border-primary/20 text-xs shadow-sm"
+                >
                   {profile.platform_role}
                 </Badge>
               </div>
               <div className="text-muted-foreground flex flex-col gap-1.5 text-xs sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <span className="inline-flex items-center gap-1.5 truncate">
-                  <Mail className="size-3.5 shrink-0 text-primary/60" aria-hidden="true" />
+                  <Mail
+                    className="text-primary/60 size-3.5 shrink-0"
+                    aria-hidden="true"
+                  />
                   <span className="truncate font-medium">{profile.email}</span>
                 </span>
                 {user_info.telephone && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Phone className="size-3.5 shrink-0 text-primary/60" aria-hidden="true" />
+                    <Phone
+                      className="text-primary/60 size-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
                     <span className="font-medium">{user_info.telephone}</span>
                   </span>
                 )}
@@ -118,10 +126,13 @@ export default function UserProfileDetails() {
             variant="outline"
             size="sm"
             asChild
-            className="h-11 w-full sm:h-9 sm:w-auto shadow-sm group"
+            className="group h-11 w-full shadow-sm sm:h-9 sm:w-auto"
           >
             <Link to="/profile/setting">
-              <Settings className="size-3.5 transition-transform group-hover:rotate-45" aria-hidden="true" />
+              <Settings
+                className="size-3.5 transition-transform group-hover:rotate-45"
+                aria-hidden="true"
+              />
               {t("editProfile")}
             </Link>
           </Button>
@@ -129,7 +140,7 @@ export default function UserProfileDetails() {
       </div>
 
       {/* Personal Information */}
-      <section className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+      <section className="bg-card overflow-hidden rounded-2xl border shadow-sm">
         <header className="flex items-center gap-2 border-b px-3 py-3">
           <span className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
             <User className="text-primary size-4" aria-hidden="true" />
@@ -162,7 +173,7 @@ export default function UserProfileDetails() {
 
       {/* Signature */}
       {profile.signature_url && (
-        <section className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+        <section className="bg-card overflow-hidden rounded-2xl border shadow-sm">
           <header className="flex items-center gap-2 border-b px-3 py-3">
             <span className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
               <IdCard className="text-primary size-4" aria-hidden="true" />
@@ -181,7 +192,7 @@ export default function UserProfileDetails() {
       )}
 
       {/* Business Units */}
-      <section className="rounded-2xl border bg-card shadow-sm overflow-hidden">
+      <section className="bg-card overflow-hidden rounded-2xl border shadow-sm">
         <header className="flex items-center gap-2 border-b px-3 py-3">
           <span className="bg-primary/10 flex size-8 items-center justify-center rounded-lg">
             <Building2 className="text-primary size-4" aria-hidden="true" />
@@ -192,9 +203,12 @@ export default function UserProfileDetails() {
           {profile.business_unit.length > 0 && (
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
               {profile.business_unit.map((bu) => (
-                <div key={bu.id} className="rounded-xl border bg-muted/10 p-3 shadow-sm transition-shadow hover:shadow-md">
-                  <h4 className="mb-3 text-sm font-bold text-foreground flex items-center gap-2">
-                    <Building2 className="size-4 text-primary" />
+                <div
+                  key={bu.id}
+                  className="bg-muted/10 rounded-xl border p-3 shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <h4 className="text-foreground mb-3 flex items-center gap-2 text-sm font-bold">
+                    <Building2 className="text-primary size-4" />
                     {bu.name}
                   </h4>
                   <BUSection bu={bu} />
@@ -204,7 +218,7 @@ export default function UserProfileDetails() {
           )}
           {profile.business_unit.length === 0 && (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <div className="bg-muted/30 mb-3 flex size-12 items-center justify-center rounded-full border border-border/30">
+              <div className="bg-muted/30 border-border/30 mb-3 flex size-12 items-center justify-center rounded-full border">
                 <Building2 className="text-muted-foreground size-5" />
               </div>
               <p className="text-muted-foreground text-sm font-medium">

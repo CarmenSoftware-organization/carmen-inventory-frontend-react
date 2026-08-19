@@ -64,7 +64,7 @@ export default function PriceListExternalSkeleton() {
       </div>
 
       {/* items table */}
-      <div className="divide-border/60 border-border overflow-hidden rounded-lg border divide-y">
+      <div className="divide-border/60 border-border divide-y overflow-hidden rounded-lg border">
         <RowSkeleton />
         <RowSkeleton />
         <RowSkeleton />

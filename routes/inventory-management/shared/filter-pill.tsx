@@ -29,12 +29,12 @@ export function FilterPill({
       type="button"
       onClick={onClick}
       className={cn(
-        "border-border/40 bg-card inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold tracking-wide transition-all",
+        "border-border/40 bg-card text-micro inline-flex items-center gap-1.5 rounded-full border px-2 py-1 font-semibold tracking-wide transition-all",
         active && ACTIVE_TONE_MAP[tone],
       )}
     >
       <span>{label}</span>
-      <span className="bg-muted/60 text-foreground/70 rounded-full px-1.5 text-micro-eyebrow font-semibold tabular-nums">
+      <span className="bg-muted/60 text-foreground/70 text-micro-eyebrow rounded-full px-1.5 font-semibold tabular-nums">
         {count}
       </span>
     </button>

@@ -75,9 +75,7 @@ export function ReviewStatTile({
       >
         {value}
       </div>
-      <p className="text-muted-foreground text-micro leading-snug">
-        {desc}
-      </p>
+      <p className="text-muted-foreground text-micro leading-snug">{desc}</p>
     </div>
   );
 }

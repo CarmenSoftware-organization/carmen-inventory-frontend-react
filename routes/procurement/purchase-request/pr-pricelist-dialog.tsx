@@ -81,10 +81,10 @@ const buildColumns = (
           {row.original.is_preferred && (
             <Badge
               size="xs"
-              variant={'ghost'}
-              className="gap-1 text-micro-legal"
+              variant={"ghost"}
+              className="text-micro-legal gap-1"
             >
-              <Crown className="size-3 text-warning-ink" />
+              <Crown className="text-warning-ink size-3" />
               {/*{t("preferred")}*/}
             </Badge>
           )}
@@ -304,7 +304,7 @@ export function PrPricelistDialog({
             <DialogDescription className="sr-only">
               {t("priceListComparison")}
             </DialogDescription>
-            <div className="text-muted-foreground mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-micro">
+            <div className="text-muted-foreground text-micro mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="inline-flex items-center gap-1">
                 <Package className="size-3" />
                 {tfl("requested")}:{" "}

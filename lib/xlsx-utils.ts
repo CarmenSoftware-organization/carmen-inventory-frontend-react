@@ -2,7 +2,10 @@ export interface XlsxColumn<T> {
   /** Sheet column header text (already translated) */
   header: string;
   /** Cell value extractor — return primitive that Excel can store */
-  value: (row: T, index: number) => string | number | boolean | null | undefined;
+  value: (
+    row: T,
+    index: number,
+  ) => string | number | boolean | null | undefined;
   /** Column width in characters (xlsx `wch`). Default 16 */
   width?: number;
 }

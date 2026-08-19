@@ -39,17 +39,20 @@ describe("printDocument", () => {
   it.each([
     ["SI", "stock-ins"],
     ["SO", "stock-outs"],
-  ] as const)("routes %s to the %s dedicated endpoint", async (type, segment) => {
-    const result = await printDocument(BU, type, {
-      documentId: DOC_ID,
-      target: null,
-    });
+  ] as const)(
+    "routes %s to the %s dedicated endpoint",
+    async (type, segment) => {
+      const result = await printDocument(BU, type, {
+        documentId: DOC_ID,
+        target: null,
+      });
 
-    expect(httpClient.get).toHaveBeenCalledWith(
-      `/api/proxy/api/${BU}/${segment}/${DOC_ID}/print-viewer`,
-    );
-    expect(result.url).toBe(VIEWER_URL);
-  });
+      expect(httpClient.get).toHaveBeenCalledWith(
+        `/api/proxy/api/${BU}/${segment}/${DOC_ID}/print-viewer`,
+      );
+      expect(result.url).toBe(VIEWER_URL);
+    },
+  );
 
   it("appends the BU-configured template as template_id", async () => {
     const templateId = "3b6f9c14-2a7d-4f58-9c31-6d0e5a8b7c21";

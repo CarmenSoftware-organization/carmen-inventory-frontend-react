@@ -166,12 +166,7 @@ export function SaveViewDialog({
           >
             {tc("cancel")}
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={submit}
-            disabled={isPending}
-          >
+          <Button type="button" size="sm" onClick={submit} disabled={isPending}>
             {confirmingReplace ? tv("replace") : tv("save")}
           </Button>
         </DialogFooter>

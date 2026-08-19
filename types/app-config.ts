@@ -3,4 +3,3 @@ export interface AppConfig {
   key: string;
   value: Record<string, unknown>;
 }
-

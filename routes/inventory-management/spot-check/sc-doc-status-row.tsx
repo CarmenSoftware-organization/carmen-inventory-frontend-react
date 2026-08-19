@@ -54,7 +54,7 @@ export function ScDocStatusRow({
           variant={status.variant}
           size="xs"
           className={cn(
-            "gap-1 px-2 text-micro-eyebrow font-semibold tracking-wider uppercase",
+            "text-micro-eyebrow gap-1 px-2 font-semibold tracking-wider uppercase",
             status.className,
           )}
         >
@@ -71,7 +71,7 @@ export function ScDocStatusRow({
         <Badge
           variant={methodVis.variant}
           size="xs"
-          className="gap-1 px-2 text-micro-eyebrow font-semibold tracking-wider uppercase"
+          className="text-micro-eyebrow gap-1 px-2 font-semibold tracking-wider uppercase"
         >
           <MethodIcon className="size-2.5" aria-hidden="true" />
           {methodLabel}

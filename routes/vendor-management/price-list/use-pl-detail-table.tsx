@@ -1,8 +1,4 @@
-import {
-  Controller,
-  useWatch,
-  type UseFormReturn,
-} from "react-hook-form";
+import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -18,7 +14,10 @@ import { LookupProduct } from "@/components/lookup/lookup-product";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupTaxProfile } from "@/components/lookup/lookup-tax-profile";
 import { round2 } from "@/lib/currency-utils";
-import type { PriceListFormValues, PriceListDetailField } from "./pl-form-schema";
+import type {
+  PriceListFormValues,
+  PriceListDetailField,
+} from "./pl-form-schema";
 
 interface UsePriceListDetailTableOptions {
   form: UseFormReturn<PriceListFormValues>;
@@ -127,7 +126,7 @@ const PriceCell = memo(function PriceCell({
   });
   const price = Number(raw) || 0;
   return (
-    <span className="block text-right tabular-nums text-micro font-semibold text-positive-ink">
+    <span className="text-micro text-positive-ink block text-right font-semibold tabular-nums">
       {price.toFixed(2)}
     </span>
   );
@@ -170,7 +169,7 @@ const TaxCalcCell = memo(function TaxCalcCell({
   }, [price, form, index]);
 
   return (
-    <span className="block text-right tabular-nums text-micro">
+    <span className="text-micro block text-right tabular-nums">
       {taxAmt.toFixed(2)}
     </span>
   );
@@ -206,7 +205,10 @@ export function usePriceListDetailTable({
           <ProductCell
             form={form}
             index={row.index}
-            error={form.formState.errors.pricelist_detail?.[row.index]?.product_id?.message}
+            error={
+              form.formState.errors.pricelist_detail?.[row.index]?.product_id
+                ?.message
+            }
           />
         ),
         size: 280,
@@ -218,7 +220,10 @@ export function usePriceListDetailTable({
           <UnitCell
             form={form}
             index={row.index}
-            error={form.formState.errors.pricelist_detail?.[row.index]?.unit_id?.message}
+            error={
+              form.formState.errors.pricelist_detail?.[row.index]?.unit_id
+                ?.message
+            }
           />
         ),
         size: 110,
@@ -232,8 +237,11 @@ export function usePriceListDetailTable({
             inputMode="decimal"
             min={0}
             placeholder="0"
-            className="h-7 text-right text-micro"
-            error={form.formState.errors.pricelist_detail?.[row.index]?.moq_qty?.message}
+            className="text-micro h-7 text-right"
+            error={
+              form.formState.errors.pricelist_detail?.[row.index]?.moq_qty
+                ?.message
+            }
             {...form.register(`pricelist_detail.${row.index}.moq_qty`, {
               valueAsNumber: true,
             })}
@@ -252,8 +260,11 @@ export function usePriceListDetailTable({
             min={0}
             step="0.01"
             placeholder="0.00"
-            className="h-7 text-right text-micro"
-            error={form.formState.errors.pricelist_detail?.[row.index]?.price_without_tax?.message}
+            className="text-micro h-7 text-right"
+            error={
+              form.formState.errors.pricelist_detail?.[row.index]
+                ?.price_without_tax?.message
+            }
             {...form.register(
               `pricelist_detail.${row.index}.price_without_tax`,
               { valueAsNumber: true },
@@ -270,7 +281,10 @@ export function usePriceListDetailTable({
           <TaxProfileCell
             form={form}
             index={row.index}
-            error={form.formState.errors.pricelist_detail?.[row.index]?.tax_profile_id?.message}
+            error={
+              form.formState.errors.pricelist_detail?.[row.index]
+                ?.tax_profile_id?.message
+            }
           />
         ),
         size: 120,
@@ -280,9 +294,10 @@ export function usePriceListDetailTable({
         header: tfl("taxPercent"),
         cell: ({ row }) => (
           <Input
-            type="number" inputMode="decimal"
+            type="number"
+            inputMode="decimal"
             placeholder="0"
-            className="h-7 text-right text-micro"
+            className="text-micro h-7 text-right"
             disabled
             {...form.register(`pricelist_detail.${row.index}.tax_rate`, {
               valueAsNumber: true,
@@ -315,8 +330,11 @@ export function usePriceListDetailTable({
             inputMode="decimal"
             min={0}
             placeholder="0"
-            className="h-7 text-right text-micro"
-            error={form.formState.errors.pricelist_detail?.[row.index]?.lead_time_days?.message}
+            className="text-micro h-7 text-right"
+            error={
+              form.formState.errors.pricelist_detail?.[row.index]
+                ?.lead_time_days?.message
+            }
             {...form.register(`pricelist_detail.${row.index}.lead_time_days`, {
               valueAsNumber: true,
             })}

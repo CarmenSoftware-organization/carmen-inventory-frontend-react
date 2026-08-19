@@ -182,7 +182,10 @@ export const wfFormSchema = z.object({
     // เมื่อ parse ไม่ผ่าน — ถ้ารับแค่ string ล้วน workflow ที่เคยเซฟด้วยโค้ดรุ่นก่อนจะเปิดหน้าแก้ไข
     // ไม่ได้เลย เอกสารเก่าจะถูกเขียนกลับเป็น id ล้วนเองตอน save ครั้งถัดไป
     products: z.array(
-      z.union([z.string(), z.object({ id: z.string() }).transform((p) => p.id)]),
+      z.union([
+        z.string(),
+        z.object({ id: z.string() }).transform((p) => p.id),
+      ]),
     ),
   }),
   description: z.string().optional(),
@@ -246,10 +249,22 @@ export function buildDefaultStages(): Stage[] {
       role: "create",
       creator_access: "only_creator",
       available_actions: {
-        submit: { is_active: true, recipients: makeRecipients(true, false, true) },
-        approve: { is_active: false, recipients: makeRecipients(false, false, false) },
-        reject: { is_active: false, recipients: makeRecipients(false, false, false) },
-        sendback: { is_active: false, recipients: makeRecipients(false, false, false) },
+        submit: {
+          is_active: true,
+          recipients: makeRecipients(true, false, true),
+        },
+        approve: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        reject: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        sendback: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
       },
       hide_fields: { price_per_unit: false, total_price: false },
       is_show_signature: false,
@@ -262,10 +277,22 @@ export function buildDefaultStages(): Stage[] {
       sla_unit: "hours",
       role: "approve",
       available_actions: {
-        submit: { is_active: false, recipients: makeRecipients(false, false, false) },
-        approve: { is_active: false, recipients: makeRecipients(false, false, false) },
-        reject: { is_active: false, recipients: makeRecipients(false, false, false) },
-        sendback: { is_active: false, recipients: makeRecipients(false, false, false) },
+        submit: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        approve: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        reject: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
+        sendback: {
+          is_active: false,
+          recipients: makeRecipients(false, false, false),
+        },
       },
       hide_fields: { price_per_unit: false, total_price: false },
       is_show_signature: false,

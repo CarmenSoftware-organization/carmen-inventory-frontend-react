@@ -29,14 +29,24 @@ export function createEquipmentSchema(tv: TranslationFn, tf: TranslationFn) {
     note: z.string(),
     is_active: z.boolean(),
     is_portable: z.boolean(),
-    available_qty: z.coerce.number().min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
-    total_qty: z.coerce.number().min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
-    usage_count: z.coerce.number().min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
-    average_usage_time: z.coerce.number().min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
+    available_qty: z.coerce
+      .number()
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
+    total_qty: z.coerce
+      .number()
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
+    usage_count: z.coerce
+      .number()
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
+    average_usage_time: z.coerce
+      .number()
+      .min(0, tv("minNumber", { field: tf("qty"), min: 0 })),
   });
 }
 
-export type EquipmentFormValues = z.infer<ReturnType<typeof createEquipmentSchema>>;
+export type EquipmentFormValues = z.infer<
+  ReturnType<typeof createEquipmentSchema>
+>;
 
 /**
  * แปลงข้อมูลอุปกรณ์เป็นค่าเริ่มต้นของฟอร์ม

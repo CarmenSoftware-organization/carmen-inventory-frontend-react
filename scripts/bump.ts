@@ -36,7 +36,10 @@ function git(...args: string[]): string {
  */
 function tryGit(...args: string[]): string | null {
   try {
-    return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    return execFileSync("git", args, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
   } catch {
     return null;
   }
@@ -61,7 +64,10 @@ function writePackageVersion(version: string): void {
   if (!/^\d+\.\d+\.\d+$/.test(version)) {
     fail(`เวอร์ชันไม่ถูกรูปแบบ MAJOR.MINOR.PATCH: ${version}`);
   }
-  const pkg = JSON.parse(readFileSync("package.json", "utf8")) as Record<string, unknown>;
+  const pkg = JSON.parse(readFileSync("package.json", "utf8")) as Record<
+    string,
+    unknown
+  >;
   pkg.version = version;
   writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
 }
@@ -73,13 +79,21 @@ function writePackageVersion(version: string): void {
  */
 function commitAndTag(target: string): void {
   const tag = `v${target}`;
-  if (!gitTry("add", ...RELEASE_FILES) || !gitTry("commit", "-m", `chore(release): ${tag}`)) {
+  if (
+    !gitTry("add", ...RELEASE_FILES) ||
+    !gitTry("commit", "-m", `chore(release): ${tag}`)
+  ) {
     console.error("✗ commit ไม่สำเร็จ");
     console.error(RESTORE_HINT);
     process.exit(1);
   }
-  if (!gitTry("tag", "-a", tag, "-m", tag) || tryGit("tag", "--list", tag) !== tag) {
-    console.error(`✗ สร้าง tag ${tag} ไม่สำเร็จ — release commit ถูกสร้างไปแล้ว`);
+  if (
+    !gitTry("tag", "-a", tag, "-m", tag) ||
+    tryGit("tag", "--list", tag) !== tag
+  ) {
+    console.error(
+      `✗ สร้าง tag ${tag} ไม่สำเร็จ — release commit ถูกสร้างไปแล้ว`,
+    );
     console.error(`  ไปต่อ: git tag -a ${tag} -m "${tag}"`);
     console.error("  ถอย  : git reset --hard HEAD~1");
     process.exit(1);
@@ -189,7 +203,12 @@ function assertBranchAndTree(): void {
  * runs before the prompt, alongside the other instant guards.
  */
 function assertUpToDate(): void {
-  const upstream = tryGit("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}");
+  const upstream = tryGit(
+    "rev-parse",
+    "--abbrev-ref",
+    "--symbolic-full-name",
+    "@{upstream}",
+  );
   if (upstream === null) {
     console.log("▸ upstream ......... skip (ไม่มี upstream) ✓");
     return;
@@ -226,7 +245,9 @@ function assertTagFree(version: string): void {
  * excludes.
  */
 function gate(script: string, done: string): void {
-  const result = spawnSync("bun", ["run", "--silent", script], { stdio: "inherit" });
+  const result = spawnSync("bun", ["run", "--silent", script], {
+    stdio: "inherit",
+  });
   if (result.status !== 0) {
     console.error(`✗ ${script} ไม่ผ่าน`);
     process.exit(result.status ?? 1);
@@ -279,7 +300,9 @@ async function main(): Promise<void> {
   console.log(`  commit  chore(release): v${target}`);
   console.log(`  tag     v${target} (annotated)`);
   console.log("");
-  console.log(`→ ขั้นต่อไป: git push origin main && git push origin v${target}`);
+  console.log(
+    `→ ขั้นต่อไป: git push origin main && git push origin v${target}`,
+  );
 }
 
 await main();

@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Download, MoreHorizontal, Printer } from "lucide-react";
@@ -130,152 +129,157 @@ export default function UserComponent() {
     onDelete: setDeleteTarget,
   });
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   return (
     <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="sticky top-0 z-20 space-y-3 pb-3 sm:static sm:pb-0">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <ModuleTileIcon />
-            <h1 className="text-lg font-semibold">{t("title")}</h1>
-            {totalRecords > 0 && (
-              <Badge variant="secondary" size="sm" className="tabular-nums text-xs">
-                {totalRecords.toLocaleString()}
-              </Badge>
-            )}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <ModuleTileIcon />
+              <h1 className="text-lg font-semibold">{t("title")}</h1>
+              {totalRecords > 0 && (
+                <Badge
+                  variant="secondary"
+                  size="sm"
+                  className="text-xs tabular-nums"
+                >
+                  {totalRecords.toLocaleString()}
+                </Badge>
+              )}
+            </div>
+            <p className="text-muted-foreground text-sm">{t("desc")}</p>
           </div>
-          <p className="text-muted-foreground text-sm">{t("desc")}</p>
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled
+              title={tc("comingSoon")}
+              className="hidden sm:inline-flex"
+            >
+              <Download aria-hidden="true" />
+              {tc("export")}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled
+              title={tc("comingSoon")}
+              className="hidden sm:inline-flex"
+            >
+              <Printer aria-hidden="true" />
+              {tc("print")}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="ml-auto h-11 w-11 shrink-0 sm:hidden"
+                  aria-label={tc("aria.moreActions")}
+                >
+                  <MoreHorizontal aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem disabled>
+                  <Download aria-hidden="true" />
+                  {tc("export")}
+                </DropdownMenuItem>
+                <DropdownMenuItem disabled>
+                  <Printer aria-hidden="true" />
+                  {tc("print")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          <Button
-            size="sm"
-            variant="outline"
-            disabled
-            title={tc("comingSoon")}
-            className="hidden sm:inline-flex"
-          >
-            <Download aria-hidden="true" />
-            {tc("export")}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled
-            title={tc("comingSoon")}
-            className="hidden sm:inline-flex"
-          >
-            <Printer aria-hidden="true" />
-            {tc("print")}
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size="icon"
-                variant="outline"
-                className="ml-auto h-11 w-11 shrink-0 sm:hidden"
-                aria-label={tc("aria.moreActions")}
-              >
-                <MoreHorizontal aria-hidden="true" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem disabled>
-                <Download aria-hidden="true" />
-                {tc("export")}
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <Printer aria-hidden="true" />
-                {tc("print")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
 
-      <div className="flex w-full items-center gap-2">
-        <div className="flex-1">
-          <SearchInput defaultValue={search} onSearch={setSearch} />
+        <div className="flex w-full items-center gap-2">
+          <div className="flex-1">
+            <SearchInput defaultValue={search} onSearch={setSearch} />
+          </div>
+          <span className="bg-border hidden h-4 w-px sm:block" />
+          <ViewSelector
+            view={lf.view}
+            snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
+          />
+          <ListFilterSheet
+            fields={userFilterFields}
+            values={lf.values}
+            setValue={lf.setValue}
+            onClearAll={lf.clearAll}
+            onSaveClick={() => setSaveViewDialogOpen(true)}
+            activeCount={lf.activeFilters.length}
+          />
         </div>
-        <span className="bg-border hidden h-4 w-px sm:block" />
-        <ViewSelector
-          view={lf.view}
-          snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
-        />
-        <ListFilterSheet
-          fields={userFilterFields}
-          values={lf.values}
-          setValue={lf.setValue}
-          onClearAll={lf.clearAll}
-          onSaveClick={() => setSaveViewDialogOpen(true)}
-          activeCount={lf.activeFilters.length}
-        />
-      </div>
 
-      {/* Active filter badges */}
-      <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
+        {/* Active filter badges */}
+        <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       </div>
 
       <div className="mt-3 space-y-3">
-      {isMobile ? (
-        grid.isLoading ? (
-          <CardSkeletonGrid />
-        ) : grid.error ? (
-          <ErrorState
-            message={grid.error.message}
-            onRetry={() => grid.refetch?.()}
-          />
-        ) : users.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 gap-3">
-              {users.map((u) => (
-                <UserCard
-                  key={u.user_id}
-                  item={u}
-                  onEdit={(user) =>
-                    navigate(`/system-admin/user/${user.user_id}`)
-                  }
-                  onDelete={setDeleteTarget}
-                />
-              ))}
-            </div>
-            {grid.hasMore && (
-              <div ref={grid.sentinelRef} className="flex justify-center py-4">
-                {grid.isLoadingMore && (
-                  <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                )}
+        {isMobile ? (
+          grid.isLoading ? (
+            <CardSkeletonGrid />
+          ) : grid.error ? (
+            <ErrorState
+              message={grid.error.message}
+              onRetry={() => grid.refetch?.()}
+            />
+          ) : users.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 gap-3">
+                {users.map((u) => (
+                  <UserCard
+                    key={u.user_id}
+                    item={u}
+                    onEdit={(user) =>
+                      navigate(`/system-admin/user/${user.user_id}`)
+                    }
+                    onDelete={setDeleteTarget}
+                  />
+                ))}
               </div>
-            )}
-          </>
+              {grid.hasMore && (
+                <div
+                  ref={grid.sentinelRef}
+                  className="flex justify-center py-4"
+                >
+                  {grid.isLoadingMore && (
+                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyComponent />
+          )
         ) : (
-          <EmptyComponent />
-        )
-      ) : (
-        <DataGrid
-          table={table}
-          recordCount={totalRecords}
-          isLoading={isLoading}
-          tableLayout={{ headerSticky: true }}
-          emptyMessage={<EmptyComponent />}
-        >
-          <DataGridContainer
-            className={cn(
-              "flex flex-col",
-              lf.activeFilters.length > 0
-                ? "max-h-[calc(100vh-13rem-3rem)]"
-                : "max-h-[calc(100vh-10rem-3rem)]",
-            )}
+          <DataGrid
+            table={table}
+            recordCount={totalRecords}
+            isLoading={isLoading}
+            tableLayout={{ headerSticky: true }}
+            emptyMessage={<EmptyComponent />}
           >
-            <DataGridScrollArea>
-              <DataGridTable />
-            </DataGridScrollArea>
-            <DataGridPagination />
-          </DataGridContainer>
-        </DataGrid>
-      )}
-
+            <DataGridContainer
+              className={cn(
+                "flex flex-col",
+                lf.activeFilters.length > 0
+                  ? "max-h-[calc(100vh-13rem-3rem)]"
+                  : "max-h-[calc(100vh-10rem-3rem)]",
+              )}
+            >
+              <DataGridScrollArea>
+                <DataGridTable />
+              </DataGridScrollArea>
+              <DataGridPagination />
+            </DataGridContainer>
+          </DataGrid>
+        )}
       </div>
 
       <DeleteDialog

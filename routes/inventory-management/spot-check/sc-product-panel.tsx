@@ -81,7 +81,7 @@ export function ProductPanel({
         <span className="text-foreground text-micro font-semibold tracking-widest uppercase">
           {title}
         </span>
-        <span className="bg-primary/15 text-primary ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-micro-eyebrow font-semibold tracking-wider tabular-nums">
+        <span className="bg-primary/15 text-primary text-micro-eyebrow ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 font-semibold tracking-wider tabular-nums">
           {totalLabel}
         </span>
       </div>

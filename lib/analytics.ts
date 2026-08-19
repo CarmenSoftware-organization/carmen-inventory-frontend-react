@@ -64,7 +64,10 @@ export function setAnalyticsBuCode(buCode: string | undefined): void {
   currentBuCode = buCode;
 }
 
-function enqueue(event_type: AnalyticsEventType, fields: Partial<AnalyticsEvent>): void {
+function enqueue(
+  event_type: AnalyticsEventType,
+  fields: Partial<AnalyticsEvent>,
+): void {
   try {
     // เก็บเฉพาะหลัง login — event ก่อนมี token ทิ้ง (endpoint ต้องการ auth)
     if (disabled || !started || !tokenStore.get()) return;
@@ -79,7 +82,8 @@ function enqueue(event_type: AnalyticsEventType, fields: Partial<AnalyticsEvent>
       props: fields.props,
       client_ts: new Date().toISOString(),
     });
-    if (queue.length > MAX_QUEUE_SIZE) queue = queue.slice(queue.length - MAX_QUEUE_SIZE);
+    if (queue.length > MAX_QUEUE_SIZE)
+      queue = queue.slice(queue.length - MAX_QUEUE_SIZE);
     if (queue.length >= FLUSH_THRESHOLD) void flush();
   } catch {
     // analytics ห้ามทำแอปพัง
@@ -87,7 +91,10 @@ function enqueue(event_type: AnalyticsEventType, fields: Partial<AnalyticsEvent>
 }
 
 export function trackPageView(pathname: string, routePattern: string): void {
-  enqueue("page_view", { page_path: pathname, props: { route_pattern: routePattern } });
+  enqueue("page_view", {
+    page_path: pathname,
+    props: { route_pattern: routePattern },
+  });
 }
 
 /** identity ของ element: data-track → id → aria-label → text (ตัด 100 ตัวอักษร) */
@@ -102,8 +109,12 @@ function deriveElementId(el: HTMLElement): string | undefined {
 }
 
 /** เก็บเฉพาะ data-track-* extras (ไม่กวาด dataset ทั้งก้อน — กัน radix state/ข้อมูลไม่เกี่ยวปนเข้ามา) */
-function collectTrackProps(el: HTMLElement): Record<string, unknown> | undefined {
-  const entries = Object.entries(el.dataset).filter(([key]) => key !== "track" && /^track[A-Z]/.test(key));
+function collectTrackProps(
+  el: HTMLElement,
+): Record<string, unknown> | undefined {
+  const entries = Object.entries(el.dataset).filter(
+    ([key]) => key !== "track" && /^track[A-Z]/.test(key),
+  );
   return entries.length > 0 ? Object.fromEntries(entries) : undefined;
 }
 
@@ -151,7 +162,8 @@ async function flush(useKeepalive = false): Promise<void> {
       queue = batch.concat(queue).slice(0, MAX_QUEUE_SIZE);
     } else if (
       error instanceof ApiError &&
-      (error.code === ERROR_CODES.UNAUTHORIZED || error.code === ERROR_CODES.FORBIDDEN)
+      (error.code === ERROR_CODES.UNAUTHORIZED ||
+        error.code === ERROR_CODES.FORBIDDEN)
     ) {
       // auth ปฏิเสธ: ปิด analytics ทั้ง session — dialog แรกห้ามไม่ได้ แต่ต้องไม่วนซ้ำ
       disabled = true;
@@ -193,8 +205,13 @@ export function stopAnalytics(): void {
  * เช่น ("/procurement/purchase-request/1a2b", {id:"1a2b"}) → "/procurement/purchase-request/:id"
  * เทียบทีละ segment เต็ม ๆ (ไม่ substring-replace) กันชนกรณีค่า param ไปพ้องกับ segment อื่น
  */
-export function toRoutePattern(pathname: string, params: Record<string, string | undefined>): string {
-  const entries = Object.entries(params).filter(([key, value]) => key !== "*" && !!value);
+export function toRoutePattern(
+  pathname: string,
+  params: Record<string, string | undefined>,
+): string {
+  const entries = Object.entries(params).filter(
+    ([key, value]) => key !== "*" && !!value,
+  );
   return pathname
     .split("/")
     .map((segment) => {

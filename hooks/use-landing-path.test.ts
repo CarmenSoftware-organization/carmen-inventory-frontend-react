@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { LucideIcon } from "lucide-react";
-import {
-  firstAccessiblePath,
-  LANDING_FALLBACK_PATH,
-} from "./use-landing-path";
+import { firstAccessiblePath, LANDING_FALLBACK_PATH } from "./use-landing-path";
 import { annotate, type ModuleWithAccess } from "./use-visible-modules";
 import { licenseFeatureOf } from "@/hooks/use-license";
 import { moduleList, findRouteLeaf } from "@/constant/module-list";
@@ -125,7 +122,9 @@ describe("firstAccessiblePath กับ moduleList จริง", () => {
   });
 
   it("BU ไม่ได้ซื้ออะไรเลย → ยังได้ path ที่เปิดได้จริง ไม่ใช่ /dashboard", () => {
-    const path = firstAccessiblePath(annotate(moduleList, canAll, licensedNone));
+    const path = firstAccessiblePath(
+      annotate(moduleList, canAll, licensedNone),
+    );
     expect(path).not.toBe("/dashboard");
     // ต้องเป็น path ที่ RouteGuard ปล่อยผ่านจริง ไม่ใช่แค่ string อะไรก็ได้ —
     // leaf ที่ไม่มี licenseFeature แต่มี permission ก็ยังได้ feature key จาก

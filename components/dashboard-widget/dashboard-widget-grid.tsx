@@ -1,4 +1,3 @@
-
 import {
   CircleX,
   Minus,
@@ -130,11 +129,11 @@ export function DashboardWidgetGrid({
   const widgets = (data?.items ?? [])
     .filter((w) => !hiddenDatasets?.has(w.dataset_id))
     .sort((a, b) => {
-    const groupDiff =
-      WIDGET_TYPE_ORDER[a.widget_type] - WIDGET_TYPE_ORDER[b.widget_type];
-    if (groupDiff !== 0) return groupDiff;
-    return a.order_index - b.order_index;
-  });
+      const groupDiff =
+        WIDGET_TYPE_ORDER[a.widget_type] - WIDGET_TYPE_ORDER[b.widget_type];
+      if (groupDiff !== 0) return groupDiff;
+      return a.order_index - b.order_index;
+    });
 
   return (
     <div className="space-y-4 p-3">
@@ -286,7 +285,6 @@ function WidgetHeader({ widget, moduleName, subTileFor }: WidgetCardProps) {
         </CardTitle>
         {!isDocumentWidget && widget.meta.description && (
           <CardDescription className="text-micro leading-snug">
-
             {widget.meta.description}
           </CardDescription>
         )}
@@ -396,13 +394,13 @@ export function PieCard({ widget, moduleName, subTileFor }: WidgetCardProps) {
                         backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
                       }}
                     />
-                    <span className="min-w-0 flex-1 truncate text-micro leading-tight">
+                    <span className="text-micro min-w-0 flex-1 truncate leading-tight">
                       {item.name}
                     </span>
                     <span className="text-micro font-semibold tabular-nums">
                       {item.value.toLocaleString()}
                     </span>
-                    <span className="text-muted-foreground w-9 text-right text-micro tabular-nums">
+                    <span className="text-muted-foreground text-micro w-9 text-right tabular-nums">
                       {pct}%
                     </span>
                   </li>
@@ -591,7 +589,10 @@ function formatTableCell(value: unknown, type?: TableColumn["type"]): string {
 }
 
 /** Render a cell — an "icon" column maps its string value to a lucide icon. */
-function renderTableCell(value: unknown, type?: TableColumn["type"]): ReactNode {
+function renderTableCell(
+  value: unknown,
+  type?: TableColumn["type"],
+): ReactNode {
   if (type === "icon") {
     const Icon = typeof value === "string" ? TABLE_ICONS[value] : undefined;
     return Icon ? (

@@ -60,7 +60,7 @@ function RolesViz() {
           {perms.map((p) => (
             <span
               key={p}
-              className="text-muted-foreground text-center text-micro-floor font-semibold tracking-wider uppercase"
+              className="text-muted-foreground text-micro-floor text-center font-semibold tracking-wider uppercase"
             >
               {p}
             </span>
@@ -114,7 +114,7 @@ function AssignViz() {
             }`}
           >
             <span
-              className="inline-flex size-4 items-center justify-center rounded-full text-micro-floor font-semibold"
+              className="text-micro-floor inline-flex size-4 items-center justify-center rounded-full font-semibold"
               style={{
                 background:
                   "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -123,11 +123,11 @@ function AssignViz() {
             >
               {u.i}
             </span>
-            <span className="text-foreground flex-1 text-micro-legal font-semibold">
+            <span className="text-foreground text-micro-legal flex-1 font-semibold">
               {u.n}
             </span>
             <span
-              className="rounded-sm px-1.5 py-0.5 text-micro-floor font-semibold tracking-wider uppercase"
+              className="text-micro-floor rounded-sm px-1.5 py-0.5 font-semibold tracking-wider uppercase"
               style={{
                 background:
                   "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -175,7 +175,7 @@ function PeriodViz() {
   return (
     <div className={VIZ_WRAP}>
       <div className="bg-card border-border rounded-sm border p-2">
-        <div className="text-muted-foreground mb-1.5 text-micro-eyebrow font-semibold tracking-wider uppercase">
+        <div className="text-muted-foreground text-micro-eyebrow mb-1.5 font-semibold tracking-wider uppercase">
           FY 2026 · Months
         </div>
         <div className="grid grid-cols-12 gap-0.5">
@@ -197,7 +197,7 @@ function PeriodViz() {
             return (
               <div
                 key={m}
-                className="rounded-[1px] py-1 text-center text-micro-floor font-semibold"
+                className="text-micro-floor rounded-[1px] py-1 text-center font-semibold"
                 style={style}
               >
                 {m}
@@ -205,7 +205,7 @@ function PeriodViz() {
             );
           })}
         </div>
-        <div className="text-muted-foreground mt-1.5 flex gap-2 text-micro-floor">
+        <div className="text-muted-foreground text-micro-floor mt-1.5 flex gap-2">
           <span className="inline-flex items-center gap-1">
             <span
               className="inline-block size-2 rounded-[1px]"
@@ -324,7 +324,7 @@ function DocsViz() {
         {tree.map((row, i) => (
           <div
             key={i}
-            className="text-foreground flex items-center gap-1.5 py-0.5 text-micro-eyebrow"
+            className="text-foreground text-micro-eyebrow flex items-center gap-1.5 py-0.5"
             style={{ paddingLeft: `${0.375 + row.d * 0.75}rem` }}
           >
             <span className="inline-flex size-2.5 items-center justify-center">
@@ -368,7 +368,7 @@ function UserActivityViz() {
             }`}
           >
             <span
-              className="inline-flex size-4 items-center justify-center rounded-full text-micro-floor font-semibold"
+              className="text-micro-floor inline-flex size-4 items-center justify-center rounded-full font-semibold"
               style={{
                 background:
                   "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -377,10 +377,12 @@ function UserActivityViz() {
             >
               {e.i}
             </span>
-            <span className="text-foreground flex-1 text-micro-eyebrow leading-snug">
+            <span className="text-foreground text-micro-eyebrow flex-1 leading-snug">
               <span className="font-bold">{e.i}</span> {e.t}
             </span>
-            <span className="text-muted-foreground text-micro-floor">{e.m}</span>
+            <span className="text-muted-foreground text-micro-floor">
+              {e.m}
+            </span>
           </div>
         ))}
       </div>
@@ -409,10 +411,7 @@ function MonitorViz() {
           <span className="text-muted-foreground text-micro-eyebrow font-semibold tracking-wider uppercase">
             CPU · last 30m
           </span>
-          <span
-            className="text-micro font-bold"
-            style={{ color: ACCENT }}
-          >
+          <span className="text-micro font-bold" style={{ color: ACCENT }}>
             34%
           </span>
         </div>
@@ -440,7 +439,6 @@ function MonitorViz() {
     </div>
   );
 }
-
 
 /** ภาพจำลอง: สามระบบภายนอกต่อเข้าหากล่องกลาง */
 function InterfaceViz() {
@@ -495,11 +493,11 @@ function NotifyViz() {
                 <circle cx="8" cy="11.4" r="1" fill={ACCENT} />
               </svg>
             </span>
-            <span className="text-foreground flex-1 truncate text-micro-legal font-semibold">
+            <span className="text-foreground text-micro-legal flex-1 truncate font-semibold">
               {tpl.n}
             </span>
             <span
-              className="rounded-sm px-1 py-0.5 text-micro-floor font-semibold"
+              className="text-micro-floor rounded-sm px-1 py-0.5 font-semibold"
               style={{
                 background:
                   "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -615,7 +613,7 @@ function QueryViz() {
             184 rows · 1.2s
           </span>
           <span
-            className="rounded-[1px] px-1.5 py-0.5 text-micro-floor font-semibold"
+            className="text-micro-floor rounded-[1px] px-1.5 py-0.5 font-semibold"
             style={{
               background:
                 "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -645,7 +643,7 @@ function DatasetViz() {
             vendor_spend_monthly
           </span>
           <span
-            className="rounded-[1px] px-1.5 py-0.5 text-micro-floor font-semibold"
+            className="text-micro-floor rounded-[1px] px-1.5 py-0.5 font-semibold"
             style={{
               background:
                 "color-mix(in oklch, var(--primary), var(--card) 80%)",
@@ -681,7 +679,9 @@ function DatasetViz() {
               {c.pk ? "PK" : "·"}
             </span>
             <span className="text-foreground text-micro-eyebrow">{c.n}</span>
-            <span className="text-muted-foreground text-micro-floor">{c.t}</span>
+            <span className="text-muted-foreground text-micro-floor">
+              {c.t}
+            </span>
           </div>
         ))}
       </div>

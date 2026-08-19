@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { LandingChapter } from "./landing-chapter";
 import { LandingFooter } from "./landing-footer";

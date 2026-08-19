@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import {
@@ -36,12 +35,7 @@ export interface ActionDialogItem {
   readonly productName: string;
 }
 
-type ActionVariant =
-  | "default"
-  | "destructive"
-  | "success"
-  | "info"
-  | "warning";
+type ActionVariant = "default" | "destructive" | "success" | "info" | "warning";
 
 interface PoActionDialogProps {
   readonly open: boolean;
@@ -154,9 +148,7 @@ export function PoActionDialog({
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent
-        className={`gap-0 p-0 ${
-          hasItems ? "sm:max-w-lg" : "sm:max-w-md"
-        }`}
+        className={`gap-0 p-0 ${hasItems ? "sm:max-w-lg" : "sm:max-w-md"}`}
       >
         <div className="p-5">
           <div className="flex items-start gap-3">
@@ -178,9 +170,7 @@ export function PoActionDialog({
                 <div className="mt-2">
                   <Badge variant="outline" size="xs" className="tabular-nums">
                     {items.length}{" "}
-                    {items.length === 1
-                      ? tc("itemSingular")
-                      : tc("itemPlural")}
+                    {items.length === 1 ? tc("itemSingular") : tc("itemPlural")}
                   </Badge>
                 </div>
               )}
@@ -192,7 +182,7 @@ export function PoActionDialog({
           <div className="space-y-4 border-t px-5 py-4">
             {hasStages && (
               <section className="space-y-2">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold uppercase tracking-wider">
+                <div className="text-muted-foreground text-micro-legal flex items-center gap-1.5 font-semibold tracking-wider uppercase">
                   <Workflow className="size-3" />
                   {tfl("stage")}
                   <span className="text-destructive">*</span>
@@ -236,7 +226,7 @@ export function PoActionDialog({
 
             {showMessage && hasItems && (
               <section className="space-y-2">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold uppercase tracking-wider">
+                <div className="text-muted-foreground text-micro-legal flex items-center gap-1.5 font-semibold tracking-wider uppercase">
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                 </div>
@@ -248,10 +238,10 @@ export function PoActionDialog({
                         className="bg-muted/30 space-y-1.5 rounded-lg border p-2"
                       >
                         <div className="flex items-start gap-2">
-                          <div className="bg-background text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-md border text-micro-legal font-semibold tabular-nums">
+                          <div className="bg-background text-muted-foreground text-micro-legal flex size-5 shrink-0 items-center justify-center rounded-md border font-semibold tabular-nums">
                             {i + 1}
                           </div>
-                          <p className="min-w-0 flex-1 truncate text-xs font-semibold leading-snug">
+                          <p className="min-w-0 flex-1 truncate text-xs leading-snug font-semibold">
                             {item.productName || "—"}
                           </p>
                         </div>
@@ -275,7 +265,7 @@ export function PoActionDialog({
 
             {showMessage && !hasItems && (
               <section className="space-y-1.5">
-                <div className="text-muted-foreground flex items-center gap-1.5 text-micro-legal font-semibold uppercase tracking-wider">
+                <div className="text-muted-foreground text-micro-legal flex items-center gap-1.5 font-semibold tracking-wider uppercase">
                   <MessageSquare className="size-3" />
                   {tfl("reason")}
                   <span className="text-muted-foreground font-normal normal-case">

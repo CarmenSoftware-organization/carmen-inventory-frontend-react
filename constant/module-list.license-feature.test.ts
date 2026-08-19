@@ -42,9 +42,18 @@ const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
   // /accounting/* ทั้งกลุ่ม: ยังเป็นหน้า mock ไม่เรียก API สักตัว และ catalog ของ
   // backend ไม่มี module `accounting` เลย → อยู่นอกขอบเขต license ทั้งหมด
   { path: "/accounting/journal-voucher", why: "accounting ยังไม่มีใน catalog" },
-  { path: "/accounting/template-voucher", why: "accounting ยังไม่มีใน catalog" },
-  { path: "/accounting/recurring-voucher", why: "accounting ยังไม่มีใน catalog" },
-  { path: "/accounting/allocation-voucher", why: "accounting ยังไม่มีใน catalog" },
+  {
+    path: "/accounting/template-voucher",
+    why: "accounting ยังไม่มีใน catalog",
+  },
+  {
+    path: "/accounting/recurring-voucher",
+    why: "accounting ยังไม่มีใน catalog",
+  },
+  {
+    path: "/accounting/allocation-voucher",
+    why: "accounting ยังไม่มีใน catalog",
+  },
   {
     path: "/accounting/accounts-payable/invoice",
     why: "accounting ยังไม่มีใน catalog",
@@ -61,7 +70,10 @@ const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
     path: "/accounting/accounts-receivable/receipt",
     why: "accounting ยังไม่มีใน catalog",
   },
-  { path: "/accounting/financial-reports", why: "accounting ยังไม่มีใน catalog" },
+  {
+    path: "/accounting/financial-reports",
+    why: "accounting ยังไม่มีใน catalog",
+  },
 ];
 
 const unmappedPaths = new Set(UNMAPPED_ON_PURPOSE.map((e) => e.path));
@@ -71,7 +83,8 @@ describe("moduleList → license feature key", () => {
     const unknown = leaves()
       .map((leaf) => ({ path: leaf.path, feature: licenseFeatureOf(leaf) }))
       .filter(
-        (x) => x.feature !== undefined && !LICENSE_FEATURE_KEYS.includes(x.feature),
+        (x) =>
+          x.feature !== undefined && !LICENSE_FEATURE_KEYS.includes(x.feature),
       );
 
     expect(unknown).toEqual([]);
@@ -123,7 +136,9 @@ describe("moduleList → license feature key", () => {
     // เคยได้ "product_management.unit" ซึ่ง license เรียก "configuration.unit"
     expect(featureOf("/config/unit")).toBe("configuration.unit");
     // เคยได้ "configuration.extra_cost" แต่ catalog สะกดว่า extra_cost_type
-    expect(featureOf("/config/extra-cost")).toBe("configuration.extra_cost_type");
+    expect(featureOf("/config/extra-cost")).toBe(
+      "configuration.extra_cost_type",
+    );
   });
 
   it("leaf ที่ไม่มี permission แต่ backend ตรวจ license ให้ ต้องถูก map แล้ว (กันโมดัลเด้งซ้ำจาก 403)", () => {
@@ -132,7 +147,10 @@ describe("moduleList → license feature key", () => {
     for (const [path, feature] of [
       ["/procurement/purchase-request", "procurement.purchase_request"],
       ["/procurement/purchase-order", "procurement.purchase_order"],
-      ["/store-operation/store-requisition", "store_operations.store_requisition"],
+      [
+        "/store-operation/store-requisition",
+        "store_operations.store_requisition",
+      ],
     ] as const) {
       const leaf = byPath(path);
       expect(leaf?.permission).toBeUndefined();

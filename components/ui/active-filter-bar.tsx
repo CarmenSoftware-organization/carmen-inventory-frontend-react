@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -32,17 +31,14 @@ interface ActiveFilterBarProps {
  * />
  * ```
  */
-export function ActiveFilterBar({
-  filters,
-  onClearAll,
-}: ActiveFilterBarProps) {
+export function ActiveFilterBar({ filters, onClearAll }: ActiveFilterBarProps) {
   const tc = useTranslations("common");
 
   if (filters.length === 0) return null;
 
   return (
-    <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto rounded-md bg-muted/30 px-2 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible">
-      <span className="shrink-0 text-muted-foreground text-micro-legal sm:text-micro">
+    <div className="bg-muted/30 flex [scrollbar-width:none] flex-nowrap items-center gap-1.5 overflow-x-auto rounded-md px-2 py-1.5 sm:flex-wrap sm:overflow-visible [&::-webkit-scrollbar]:hidden">
+      <span className="text-muted-foreground text-micro-legal sm:text-micro shrink-0">
         {tc("activeFilter")}:
       </span>
       {filters.map((filter) => (
@@ -50,7 +46,7 @@ export function ActiveFilterBar({
           key={filter.key}
           variant="secondary"
           size="xs"
-          className="shrink-0 gap-1 text-micro-legal sm:text-micro"
+          className="text-micro-legal sm:text-micro shrink-0 gap-1"
         >
           {filter.label}
           <button
@@ -66,7 +62,7 @@ export function ActiveFilterBar({
       <button
         type="button"
         onClick={onClearAll}
-        className="shrink-0 text-muted-foreground hover:text-foreground text-micro-legal underline sm:text-micro"
+        className="text-muted-foreground hover:text-foreground text-micro-legal sm:text-micro shrink-0 underline"
       >
         {tc("clearAll")}
       </button>

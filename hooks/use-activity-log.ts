@@ -126,7 +126,10 @@ export function useExportActivityLog() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();
 
-  const exportActivityLog = async ({ params, columns }: ExportActivityLogArgs) => {
+  const exportActivityLog = async ({
+    params,
+    columns,
+  }: ExportActivityLogArgs) => {
     if (!buCode) throw new Error("Missing buCode");
     return exportToXlsx<ActivityLog>({
       fetch: async () => {

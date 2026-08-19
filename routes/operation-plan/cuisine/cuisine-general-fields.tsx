@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import {
@@ -79,7 +78,6 @@ export function CuisineGeneralFields({
             )}
           />
         </Field>
-
       </div>
 
       <Field className="mt-4">

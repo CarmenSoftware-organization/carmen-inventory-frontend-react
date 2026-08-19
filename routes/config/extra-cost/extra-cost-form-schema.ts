@@ -18,7 +18,9 @@ export function createExtraCostSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-export type ExtraCostFormValues = z.infer<ReturnType<typeof createExtraCostSchema>>;
+export type ExtraCostFormValues = z.infer<
+  ReturnType<typeof createExtraCostSchema>
+>;
 
 export const EMPTY_FORM: ExtraCostFormValues = {
   name: "",

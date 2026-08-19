@@ -17,10 +17,14 @@ export function createWrDetailSchema(tv: TranslationFn, tf: TranslationFn) {
     product_id: z.string().min(1, tv("required", { field: tf("product") })),
     product_name: z.string(),
     product_code: z.string(),
-    qty: z.coerce.number().min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
+    qty: z.coerce
+      .number()
+      .min(1, tv("minNumber", { field: tf("qty"), min: 1 })),
     unit_id: z.string().min(1, tv("required", { field: tf("unit") })),
     unit_name: z.string(),
-    unit_cost: z.coerce.number().min(0, tv("minZero", { field: tf("costPerUnit") })),
+    unit_cost: z.coerce
+      .number()
+      .min(0, tv("minZero", { field: tf("costPerUnit") })),
   });
 }
 

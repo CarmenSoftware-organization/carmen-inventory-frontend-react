@@ -163,7 +163,9 @@ export type LicenseErrorCode =
  * licenseErrorCodeFrom(null);                                    // undefined
  * ```
  */
-export function licenseErrorCodeFrom(body: unknown): LicenseErrorCode | undefined {
+export function licenseErrorCodeFrom(
+  body: unknown,
+): LicenseErrorCode | undefined {
   if (typeof body !== "object" || body === null) return undefined;
   const error = (body as { error?: unknown }).error;
   if (typeof error !== "object" || error === null) return undefined;
@@ -197,7 +199,9 @@ export function isTransportError(error: unknown): boolean {
  * อ่าน `message` จาก error body — clone() ก่อนเพื่อไม่ consume body ของ caller
  * คืน undefined หาก parse ไม่ได้หรือไม่มี field `message` ที่เป็น string
  */
-const readServerMessage = async (res: Response): Promise<string | undefined> => {
+const readServerMessage = async (
+  res: Response,
+): Promise<string | undefined> => {
   try {
     const body = await res.clone().json();
     return typeof body?.message === "string" && body.message.trim()

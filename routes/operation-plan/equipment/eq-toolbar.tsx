@@ -54,7 +54,7 @@ export function EqToolbar({
     <>
       <span
         className={cn(
-          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-legal font-semibold tracking-wider uppercase",
+          "text-micro-legal inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-wider uppercase",
           code
             ? "bg-foreground text-background"
             : "text-muted-foreground border border-dashed",

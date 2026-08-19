@@ -8,9 +8,11 @@ describe("protected routes", () => {
       route.children?.some((child) => child.path === "dashboard"),
     );
 
-    expect(protectedShell?.children?.some((route) => route.path === "accounting"))
-      .toBe(true);
-    expect(appRoot.children?.some((route) => route.path === "accounting"))
-      .toBe(false);
+    expect(
+      protectedShell?.children?.some((route) => route.path === "accounting"),
+    ).toBe(true);
+    expect(appRoot.children?.some((route) => route.path === "accounting")).toBe(
+      false,
+    );
   });
 });

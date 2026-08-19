@@ -9,6 +9,9 @@ import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductInLocationProps {
   readonly locationId: string;
+  /** ส่งมาเมื่อต้องกรองสินค้าตาม workflow ด้วย (products-location-workflow) —
+   * ส่งมาแต่ยังว่าง = รอเลือก workflow ก่อน จะยังไม่ fetch */
+  readonly workflowId?: string;
   readonly value: string;
   readonly onValueChange: (value: string, product?: Product) => void;
   readonly disabled?: boolean;
@@ -46,6 +49,7 @@ interface LookupProductInLocationProps {
  */
 export function LookupProductInLocation({
   locationId,
+  workflowId,
   value,
   onValueChange,
   disabled,
@@ -70,7 +74,7 @@ export function LookupProductInLocation({
     search?: string;
     perpage: number;
     page?: number;
-  }) => useProductsByLocation(locationId || undefined, params);
+  }) => useProductsByLocation(locationId || undefined, params, workflowId);
 
   const {
     items: products,

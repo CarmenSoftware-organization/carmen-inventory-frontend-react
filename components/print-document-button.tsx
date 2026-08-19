@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";

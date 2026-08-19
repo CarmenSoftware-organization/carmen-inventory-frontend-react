@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Bell, BellOff, Check, SquareArrowOutUpRight, AlertCircle } from "lucide-react";
+import {
+  Bell,
+  BellOff,
+  Check,
+  SquareArrowOutUpRight,
+  AlertCircle,
+} from "lucide-react";
 import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   Popover,
   PopoverContent,
@@ -65,10 +67,10 @@ const NotificationItem = ({
   return (
     <div
       className={cn(
-        "group flex items-start gap-3 rounded-lg p-3 pr-10 transition-colors border backdrop-blur-sm",
+        "group flex items-start gap-3 rounded-lg border p-3 pr-10 backdrop-blur-sm transition-colors",
         isUnread
           ? "bg-muted/50 border-border/50 hover:bg-muted/70"
-          : "bg-background/40 border-transparent hover:bg-muted/30",
+          : "bg-background/40 hover:bg-muted/30 border-transparent",
       )}
     >
       {safeLink ? (
@@ -105,7 +107,7 @@ const NotificationItem = ({
           e.stopPropagation();
           onMarkAsRead(notification);
         }}
-        className="text-muted-foreground/60 hover:text-foreground hover:bg-background/80 absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full p-1.5 opacity-0 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:opacity-100"
+        className="text-muted-foreground/60 hover:text-foreground hover:bg-background/80 absolute top-1/2 right-2 z-20 -translate-y-1/2 rounded-full p-1.5 opacity-0 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:opacity-100"
         type="button"
         title={dismissLabel}
         aria-label={dismissLabel}
@@ -148,7 +150,7 @@ export default function Notification() {
           <Bell className="h-3.5 w-3.5 transition-transform group-hover:-rotate-12" />
           {notificationCount > 0 && (
             <>
-              <span className="bg-destructive ring-background absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-micro-eyebrow font-semibold text-white ring-2">
+              <span className="bg-destructive ring-background text-micro-eyebrow absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-semibold text-white ring-2">
                 {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             </>
@@ -156,18 +158,18 @@ export default function Notification() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="mx-4 w-108 max-h-136 p-0 bg-background/70 backdrop-blur-xl border-border/40 shadow-lg supports-[backdrop-filter]:bg-background/50"
+        className="bg-background/70 border-border/40 supports-[backdrop-filter]:bg-background/50 mx-4 max-h-136 w-108 p-0 shadow-lg backdrop-blur-xl"
         align="end"
         sideOffset={6}
       >
-        <div className="flex items-center justify-between border-b border-border/40 px-4 py-3 bg-background/20">
+        <div className="border-border/40 bg-background/20 flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             <Bell className="text-muted-foreground size-4 shrink-0" />
             <span className="text-sm font-semibold tracking-tight">
               {t("notifications")}
             </span>
             {notificationCount > 0 && (
-              <span className="bg-muted text-muted-foreground inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-micro-legal font-semibold tabular-nums">
+              <span className="bg-muted text-muted-foreground text-micro-legal inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 font-semibold tabular-nums">
                 {notificationCount}
               </span>
             )}
@@ -262,26 +264,36 @@ export function NotificationDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
-      <DialogContent 
-        className="sm:max-w-[425px] p-0 border-0 overflow-hidden bg-transparent shadow-2xl"
+      <DialogContent
+        className="overflow-hidden border-0 bg-transparent p-0 shadow-2xl sm:max-w-[425px]"
         showCloseButton={false}
       >
-        <div className="relative overflow-hidden rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-3xl border border-white/80 dark:border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
+        <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] backdrop-blur-3xl dark:border-white/20 dark:bg-zinc-900/80 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
           {/* Header */}
-          <div className="px-6 py-6 border-b border-white/60 dark:border-white/10 bg-white/60 dark:bg-black/40">
+          <div className="border-b border-white/60 bg-white/60 px-6 py-6 dark:border-white/10 dark:bg-black/40">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/90 dark:bg-white/10 text-primary shadow-sm border border-white/80 dark:border-white/20 backdrop-blur-md">
+              <div className="text-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/90 shadow-sm backdrop-blur-md dark:border-white/20 dark:bg-white/10">
                 <Bell className="h-6 w-6" />
               </div>
               <div className="flex flex-col text-left">
-                <DialogTitle className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
-                  {isLoading ? <Skeleton className="h-5 w-3/4 bg-black/10 dark:bg-white/10" /> : data?.title}
+                <DialogTitle className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
+                  {isLoading ? (
+                    <Skeleton className="h-5 w-3/4 bg-black/10 dark:bg-white/10" />
+                  ) : (
+                    data?.title
+                  )}
                 </DialogTitle>
                 {data && (
-                  <div className="text-sm font-semibold text-slate-600 dark:text-slate-300 flex items-center mt-1">
-                    <span>{data.created_at ? new Date(data.created_at).toLocaleDateString(locale, { dateStyle: "medium" }) : ""}</span>
+                  <div className="mt-1 flex items-center text-sm font-semibold text-slate-600 dark:text-slate-300">
+                    <span>
+                      {data.created_at
+                        ? new Date(data.created_at).toLocaleDateString(locale, {
+                            dateStyle: "medium",
+                          })
+                        : ""}
+                    </span>
                     {data.doc_type && (
-                      <span className="ml-2 before:content-['•'] before:mr-2 uppercase tracking-wider text-primary">
+                      <span className="text-primary ml-2 tracking-wider uppercase before:mr-2 before:content-['•']">
                         {tRoot(DOC_TYPE_LABEL_KEY[data.doc_type])}
                       </span>
                     )}
@@ -292,34 +304,34 @@ export function NotificationDetailDialog({
           </div>
 
           {/* Body */}
-          <div className="px-6 py-6 bg-white/50 dark:bg-black/40">
+          <div className="bg-white/50 px-6 py-6 dark:bg-black/40">
             {isLoading && (
               <div className="space-y-3">
                 <Skeleton className="h-4 w-full bg-black/10 dark:bg-white/10" />
                 <Skeleton className="h-4 w-5/6 bg-black/10 dark:bg-white/10" />
               </div>
             )}
-            
+
             {error && (
-              <div className="flex items-center gap-3 text-sm font-semibold text-destructive bg-white/80 dark:bg-black/60 p-4 rounded-xl border border-white/60 dark:border-white/10 backdrop-blur-sm shadow-sm">
+              <div className="text-destructive flex items-center gap-3 rounded-xl border border-white/60 bg-white/80 p-4 text-sm font-semibold shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-black/60">
                 <AlertCircle className="h-5 w-5" />
                 {error instanceof Error ? error.message : String(error)}
               </div>
             )}
 
             {data && (
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-relaxed">
+              <p className="text-sm leading-relaxed font-medium whitespace-pre-wrap text-slate-700 dark:text-slate-200">
                 {formatMessage(data.message)}
               </p>
             )}
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 flex justify-end border-t border-white/60 dark:border-white/10 bg-white/70 dark:bg-black/50">
-            <Button 
-              variant="outline" 
-              onClick={onClose} 
-              className="rounded-xl bg-white/90 hover:bg-white dark:bg-white/10 dark:hover:bg-white/20 border border-white/80 dark:border-white/20 font-bold backdrop-blur-md shadow-sm transition-all"
+          <div className="flex justify-end border-t border-white/60 bg-white/70 px-6 py-4 dark:border-white/10 dark:bg-black/50">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              className="rounded-xl border border-white/80 bg-white/90 font-bold shadow-sm backdrop-blur-md transition-all hover:bg-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
             >
               {tc("close")}
             </Button>

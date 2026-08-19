@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Check } from "lucide-react";
@@ -61,7 +60,8 @@ export function LookupItemGroup({
 
   const itemGroups = (data?.data ?? []).filter((g) => {
     if (!g.is_active) return false;
-    if (filterSubCategoryId && g.product_subcategory_id !== filterSubCategoryId) return false;
+    if (filterSubCategoryId && g.product_subcategory_id !== filterSubCategoryId)
+      return false;
     return true;
   });
 

@@ -141,7 +141,10 @@ const safeFetch = async (url: string, init: RequestInit): Promise<Response> => {
     ...init,
     // signal สดต่อ attempt — retry หลัง refresh ได้ timeout window ใหม่ของตัวเอง
     signal: init.signal ?? AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
-    headers: { ...buildAuthHeaders(), ...(init.headers as Record<string, string>) },
+    headers: {
+      ...buildAuthHeaders(),
+      ...(init.headers as Record<string, string>),
+    },
   };
   try {
     return await fetch(target, finalInit);
@@ -298,11 +301,7 @@ const handleClientErrors = async (
       dispatchAuthError(message);
     }
 
-    throw new ApiError(
-      ERROR_CODES.FORBIDDEN,
-      message || "Access denied",
-      403,
-    );
+    throw new ApiError(ERROR_CODES.FORBIDDEN, message || "Access denied", 403);
   }
 
   if (response.status === 429) {

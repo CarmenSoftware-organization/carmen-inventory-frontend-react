@@ -23,10 +23,7 @@ export function SummaryBar({ items, className }: SummaryBarProps) {
     // ขนาดเลย จึงตกไปกิน body 17px ที่ globals.css ทำให้ตัวประกอบใหญ่กว่ายอดรวม
     // ที่ระบุ text-sm (14px) ไว้ ซึ่งกลับหัวลำดับความสำคัญ
     <div
-      className={cn(
-        "flex items-center gap-4 text-xs tabular-nums",
-        className,
-      )}
+      className={cn("flex items-center gap-4 text-xs tabular-nums", className)}
     >
       {items.map((item, i) => (
         <Fragment key={item.key}>

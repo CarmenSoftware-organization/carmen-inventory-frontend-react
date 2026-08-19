@@ -59,7 +59,6 @@ export interface TransactionSummary {
   };
 }
 
-export interface TransactionListResponse
-  extends PaginatedResponse<Transaction> {
+export interface TransactionListResponse extends PaginatedResponse<Transaction> {
   summary: TransactionSummary;
 }

@@ -98,7 +98,11 @@ export default function CarmenGlInterfaceForm() {
       errorMessage={t("loadError")}
       saveLabel={t("save")}
     >
-      <SettingSection first title={tc("connection")} description={tc("connectionDesc")}>
+      <SettingSection
+        first
+        title={tc("connection")}
+        description={tc("connectionDesc")}
+      >
         <ToggleField
           label={t("enabled")}
           checked={form.watch("enabled")}

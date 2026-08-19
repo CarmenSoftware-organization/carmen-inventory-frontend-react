@@ -80,8 +80,12 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
 
   const onSubmit = (values: RecipeFormValues) => {
     const payload = buildRecipePayload(values);
-    const { files, manifest, count, isDirty: galleryDirty } =
-      gallery.buildPayload();
+    const {
+      files,
+      manifest,
+      count,
+      isDirty: galleryDirty,
+    } = gallery.buildPayload();
 
     if (isEdit && recipe) {
       // Send the full gallery manifest only when it changed (full-sync);
@@ -103,7 +107,10 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
       );
     } else {
       createRecipe.mutate(
-        { ...payload, ...(count > 0 ? { images: files, gallery: manifest } : {}) },
+        {
+          ...payload,
+          ...(count > 0 ? { images: files, gallery: manifest } : {}),
+        },
         {
           onSuccess: () => {
             toast.success(tt("createSuccess", { entity: t("entity") }));
@@ -171,7 +178,9 @@ export function RecipeForm({ recipe }: RecipeFormProps) {
           profile (title/desc ซ้าย · เนื้อหาขวา) stack ต่อกันด้วยเส้นคั่น */}
       <form
         id="recipe-form"
-        onSubmit={form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
       >
         <RecipeHeroFields
           form={form}

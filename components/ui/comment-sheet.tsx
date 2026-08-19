@@ -219,7 +219,7 @@ function AttachmentImage({ src, fileName, size = "md" }: AttachmentImageProps) {
         title={fileName}
       >
         <ImageIcon className="size-4 shrink-0" aria-hidden="true" />
-        <span className="line-clamp-2 w-full text-center text-micro-legal leading-tight break-all">
+        <span className="text-micro-legal line-clamp-2 w-full text-center leading-tight break-all">
           {fileName}
         </span>
       </div>
@@ -469,7 +469,7 @@ export function CommentSheet({
                       {getFullName(c)}
                     </span>
                     <span
-                      className="text-muted-foreground shrink-0 text-micro-legal"
+                      className="text-muted-foreground text-micro-legal shrink-0"
                       title={formatDate(
                         c.audit?.created?.at ?? "",
                         `${dateFormat} HH:mm`,
@@ -586,7 +586,7 @@ export function CommentSheet({
                                   href={safeUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="bg-muted/50 text-muted-foreground hover:bg-muted inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-micro-legal transition-colors"
+                                  className="bg-muted/50 text-muted-foreground hover:bg-muted text-micro-legal inline-flex items-center gap-1 rounded border px-1.5 py-0.5 transition-colors"
                                 >
                                   <Paperclip className="size-2.5 shrink-0" />
                                   <span className="truncate">
@@ -661,7 +661,7 @@ export function CommentSheet({
                 return (
                   <div
                     key={file.fileToken}
-                    className="bg-background text-muted-foreground inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-micro-legal"
+                    className="bg-background text-muted-foreground text-micro-legal inline-flex items-center gap-1 rounded border px-1.5 py-0.5"
                   >
                     <Paperclip className="size-2.5 shrink-0" />
                     <span className="max-w-32 truncate">{file.fileName}</span>
@@ -705,7 +705,7 @@ export function CommentSheet({
                 return (
                   <div
                     key={`${file.name}-${i}`}
-                    className="bg-background text-muted-foreground inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-micro-legal"
+                    className="bg-background text-muted-foreground text-micro-legal inline-flex items-center gap-1 rounded border px-1.5 py-0.5"
                   >
                     <Paperclip className="size-2.5 shrink-0" />
                     <span className="max-w-32 truncate">{file.name}</span>

@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { FolderTree } from "lucide-react";
 import {
@@ -84,9 +83,7 @@ export function CategoryDialog({
             </div>
             <div className="min-w-0 flex-1">
               <DialogTitle className="text-base">{title}</DialogTitle>
-              <DialogDescription className="sr-only">
-                {title}
-              </DialogDescription>
+              <DialogDescription className="sr-only">{title}</DialogDescription>
             </div>
           </div>
         </DialogHeader>

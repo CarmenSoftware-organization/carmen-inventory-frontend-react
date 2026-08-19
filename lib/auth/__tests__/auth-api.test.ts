@@ -10,7 +10,10 @@ const okJson = (body: unknown) =>
 
 describe("auth-api", () => {
   beforeEach(() => {
-    setRuntimeConfigForTests({ BACKEND_URL: "https://api.test", X_APP_ID: "app-1" });
+    setRuntimeConfigForTests({
+      BACKEND_URL: "https://api.test",
+      X_APP_ID: "app-1",
+    });
     tokenStore.clear();
     localStorage.clear();
   });
@@ -46,19 +49,28 @@ describe("auth-api", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ message: "Invalid credentials" }), { status: 401 }),
+        new Response(JSON.stringify({ message: "Invalid credentials" }), {
+          status: 401,
+        }),
       ),
     );
-    await expect(login("a@b.com", "bad")).rejects.toThrow("Invalid credentials");
+    await expect(login("a@b.com", "bad")).rejects.toThrow(
+      "Invalid credentials",
+    );
     expect(tokenStore.get()).toBeNull();
   });
 
   it("login maps 429 to RATE_LIMITED with retryAfter detail", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ message: "Too many attempts", retry_after: 30 }), { status: 429 }),
-      ),
+      vi
+        .fn()
+        .mockResolvedValue(
+          new Response(
+            JSON.stringify({ message: "Too many attempts", retry_after: 30 }),
+            { status: 429 },
+          ),
+        ),
     );
     const error = await login("a@b.com", "x").catch((e) => e);
     expect(error.code).toBe(ERROR_CODES.RATE_LIMITED);
@@ -77,7 +89,13 @@ describe("auth-api", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
-        okJson({ data: { access_token: "at-2", refresh_token: "rt-2", expires_in: 900 } }),
+        okJson({
+          data: {
+            access_token: "at-2",
+            refresh_token: "rt-2",
+            expires_in: 900,
+          },
+        }),
       ),
     );
     expect(await refreshTokens()).toBe(true);
@@ -100,7 +118,10 @@ describe("auth-api", () => {
   it("refreshTokens returns false on network error WITHOUT clearing the session", async () => {
     refreshTokenStorage.set("rt-1");
     tokenStore.set("at-1");
-    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("fetch failed")));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new TypeError("fetch failed")),
+    );
     expect(await refreshTokens()).toBe(false);
     expect(tokenStore.get()).toBe("at-1");
     expect(refreshTokenStorage.get()).toBe("rt-1");
@@ -108,9 +129,11 @@ describe("auth-api", () => {
 
   it("concurrent refreshTokens calls share one network request (mutex)", async () => {
     refreshTokenStorage.set("rt-1");
-    const fetchMock = vi.fn().mockResolvedValue(
-      okJson({ data: { access_token: "at-2", expires_in: 900 } }),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        okJson({ data: { access_token: "at-2", expires_in: 900 } }),
+      );
     vi.stubGlobal("fetch", fetchMock);
     const [a, b] = await Promise.all([refreshTokens(), refreshTokens()]);
     expect(a).toBe(true);

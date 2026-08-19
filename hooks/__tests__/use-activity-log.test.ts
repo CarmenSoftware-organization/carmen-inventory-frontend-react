@@ -44,7 +44,11 @@ function createWrapper() {
     defaultOptions: { queries: { retry: false } },
   });
   function Wrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
+    return createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      children,
+    );
   }
   return Wrapper;
 }
@@ -65,10 +69,9 @@ describe("useActivityLogByRecord", () => {
   it("ยิงตาม entityId ที่ส่งเข้ามา", async () => {
     vi.mocked(httpClient.get).mockResolvedValue(logResponse("create"));
 
-    const { result } = renderHook(
-      () => useActivityLogByRecord(PR_ID, PARAMS),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useActivityLogByRecord(PR_ID, PARAMS), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -84,7 +87,10 @@ describe("useActivityLogByRecord", () => {
     const { result, rerender } = renderHook(
       ({ id }: { id: string | undefined }) =>
         useActivityLogByRecord(id, PARAMS),
-      { wrapper: createWrapper(), initialProps: { id: PR_ID as string | undefined } },
+      {
+        wrapper: createWrapper(),
+        initialProps: { id: PR_ID as string | undefined },
+      },
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -107,7 +113,10 @@ describe("useActivityLogByRecord", () => {
     const { result, rerender } = renderHook(
       ({ id }: { id: string | undefined }) =>
         useActivityLogByRecord(id, PARAMS),
-      { wrapper: createWrapper(), initialProps: { id: PR_ID as string | undefined } },
+      {
+        wrapper: createWrapper(),
+        initialProps: { id: PR_ID as string | undefined },
+      },
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));

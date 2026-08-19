@@ -100,7 +100,11 @@ export default function AccountingInterfaceForm() {
       errorMessage={t("loadError")}
       saveLabel={t("save")}
     >
-      <SettingSection first title={ta("connection")} description={ta("connectionDesc")}>
+      <SettingSection
+        first
+        title={ta("connection")}
+        description={ta("connectionDesc")}
+      >
         <ToggleField
           label={t("enabled")}
           checked={form.watch("enabled")}
@@ -142,7 +146,9 @@ export default function AccountingInterfaceForm() {
           value={form.watch("export_format")}
           options={FORMATS}
           optionLabel={(f) => ta(`formatOption.${f}`)}
-          onChange={(v) => form.setValue("export_format", v, { shouldDirty: true })}
+          onChange={(v) =>
+            form.setValue("export_format", v, { shouldDirty: true })
+          }
         />
         <EnumField
           label={ta("postingFrequency")}

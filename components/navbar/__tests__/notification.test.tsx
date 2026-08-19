@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  render as rtlRender,
-  screen,
-  cleanup,
-} from "@testing-library/react";
+import { render as rtlRender, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type ReactElement } from "react";
 import { MemoryRouter } from "react-router";
@@ -87,9 +83,7 @@ function makeNotification(
 }
 
 function getTrigger() {
-  return document.querySelector(
-    '[data-slot="popover-trigger"]',
-  ) as HTMLElement;
+  return document.querySelector('[data-slot="popover-trigger"]') as HTMLElement;
 }
 
 async function openPopover() {
@@ -231,9 +225,7 @@ describe("Notification component", () => {
   });
 
   it("calls markAsRead when dismiss button is clicked", async () => {
-    mockNotifications = [
-      makeNotification({ id: "n1", source: "broadcast" }),
-    ];
+    mockNotifications = [makeNotification({ id: "n1", source: "broadcast" })];
 
     render(<Notification />);
     const user = await openPopover();

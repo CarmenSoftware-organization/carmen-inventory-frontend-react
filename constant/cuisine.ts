@@ -7,7 +7,8 @@ export const CUISINE_REGION = {
   OCEANIA: "OCEANIA",
 } as const;
 
-export type CuisineRegion = (typeof CUISINE_REGION)[keyof typeof CUISINE_REGION];
+export type CuisineRegion =
+  (typeof CUISINE_REGION)[keyof typeof CUISINE_REGION];
 
 /** i18n key (namespace `operationPlan.cuisine`) ของ label แต่ละภูมิภาค */
 export const CUISINE_REGION_LABEL_KEY: Record<string, string> = {

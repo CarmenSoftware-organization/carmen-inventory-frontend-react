@@ -37,7 +37,11 @@ function createWrapper() {
     },
   });
   function Wrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
+    return createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      children,
+    );
   }
   return Wrapper;
 }
@@ -66,7 +70,11 @@ describe("useDashboardDatasets", () => {
 
   it("unwrap json.data และคง params[] ที่ backend ส่งมา", async () => {
     const items = [
-      { id: "lab.pr-created-series", name: "PR series", params: [{ name: "days" }] },
+      {
+        id: "lab.pr-created-series",
+        name: "PR series",
+        params: [{ name: "days" }],
+      },
       { id: "product.total-active", name: "Active products", params: [] },
     ];
     vi.mocked(httpClient.get).mockResolvedValue(

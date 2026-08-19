@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { CalendarIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -96,7 +95,7 @@ export function DateRangePicker({
         {displayValue && !disabled && (
           <button
             type="button"
-            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100"
+            className="absolute top-1/2 right-2 -translate-y-1/2 opacity-50 hover:opacity-100"
             onClick={() => onValueChange?.({ from: "", to: "" })}
             aria-label="Clear"
           >

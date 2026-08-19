@@ -36,7 +36,7 @@ export const CommentFooterRow = memo(function CommentFooterRow({
     if (!comment) return null;
     return (
       <div className="px-2 pb-4">
-        <p className="text-muted-foreground text-xs italic wrap-break-word whitespace-pre-wrap">
+        <p className="text-muted-foreground text-xs wrap-break-word whitespace-pre-wrap italic">
           {`"${comment}"`}
         </p>
       </div>

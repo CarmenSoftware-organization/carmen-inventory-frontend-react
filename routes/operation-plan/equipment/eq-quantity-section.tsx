@@ -1,4 +1,3 @@
-
 import type { UseFormReturn, FieldPath } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldInput } from "@/components/ui/field";
@@ -71,9 +70,8 @@ function NumberField({
   readonly label: string;
   readonly isDisabled: boolean;
 }) {
-  const error = form.formState.errors[
-    name as keyof EquipmentFormValues
-  ]?.message as string | undefined;
+  const error = form.formState.errors[name as keyof EquipmentFormValues]
+    ?.message as string | undefined;
   return (
     <Field>
       <FieldLabel htmlFor={id} className="w-full justify-end">

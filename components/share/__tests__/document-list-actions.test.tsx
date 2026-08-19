@@ -13,7 +13,9 @@ beforeEach(() => {
   vi.stubGlobal("print", vi.fn());
 });
 
-function renderActions(over: Partial<Parameters<typeof DocumentListActions>[0]> = {}) {
+function renderActions(
+  over: Partial<Parameters<typeof DocumentListActions>[0]> = {},
+) {
   const props = {
     onExport: vi.fn(),
     isExporting: false,

@@ -96,7 +96,10 @@ export function useExportPriceListTemplate() {
   const buCode = useBuCode();
   const { exportToXlsx, isExporting } = useXlsxExport();
 
-  const exportPriceListTemplate = async ({ params, columns }: ExportPriceListTemplateArgs) => {
+  const exportPriceListTemplate = async ({
+    params,
+    columns,
+  }: ExportPriceListTemplateArgs) => {
     if (!buCode) throw new Error("Missing buCode");
     return exportToXlsx<PriceListTemplate>({
       fetch: async () => {

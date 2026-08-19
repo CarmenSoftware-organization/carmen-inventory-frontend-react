@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Field, FieldLabel, FieldDatePicker } from "@/components/ui/field";
@@ -62,7 +61,6 @@ export function EqMaintenanceSection({
             )}
           />
         </Field>
-
       </div>
 
       <Field className="mt-3">

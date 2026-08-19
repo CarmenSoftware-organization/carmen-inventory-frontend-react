@@ -19,7 +19,9 @@ export function createTaxProfileSchema(tv: TranslationFn, tf: TranslationFn) {
   });
 }
 
-export type TaxProfileFormValues = z.infer<ReturnType<typeof createTaxProfileSchema>>;
+export type TaxProfileFormValues = z.infer<
+  ReturnType<typeof createTaxProfileSchema>
+>;
 
 export const EMPTY_FORM: TaxProfileFormValues = {
   name: "",
@@ -35,7 +37,9 @@ export const EMPTY_FORM: TaxProfileFormValues = {
  * // route: /config/tax-profile (dialog)
  * const defaults = getDefaultValues(taxProfile);
  */
-export function getDefaultValues(taxProfile?: TaxProfile): TaxProfileFormValues {
+export function getDefaultValues(
+  taxProfile?: TaxProfile,
+): TaxProfileFormValues {
   if (!taxProfile) return { ...EMPTY_FORM };
   return {
     name: taxProfile.name,

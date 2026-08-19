@@ -1,4 +1,3 @@
-
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Package, RefreshCw, Save, SendHorizontal } from "lucide-react";
@@ -124,8 +123,7 @@ export function ScEntryComponent({ spotCheckId }: ScEntryComponentProps) {
   });
   const virtualItems = rowVirtualizer.getVirtualItems();
 
-  if (error)
-    return <ErrorState error={error} onRetry={() => refetch()} />;
+  if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
   const handleCommitCount = (id: string, value: number | null) => {
     setCounts((prev) => {

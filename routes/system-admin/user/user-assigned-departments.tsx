@@ -1,4 +1,3 @@
-
 import { Building2, Crown } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +40,7 @@ export function DepartmentsSection({
         <div className="space-y-4">
           {/* Member */}
           <div>
-            <p className="text-muted-foreground mb-1.5 text-micro-legal font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground text-micro-legal mb-1.5 font-semibold tracking-widest uppercase">
               Member of
             </p>
             {memberDepartment ? (

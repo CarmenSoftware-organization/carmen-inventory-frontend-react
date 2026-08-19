@@ -38,7 +38,11 @@ function createWrapper() {
     },
   });
   function Wrapper({ children }: { children: ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children);
+    return createElement(
+      QueryClientProvider,
+      { client: queryClient },
+      children,
+    );
   }
   return Wrapper;
 }
@@ -76,7 +80,9 @@ describe("useMyDashboardWidgetData", () => {
 
 describe("widget mutations carry params", () => {
   it("create ส่ง params ไปใน body", async () => {
-    vi.mocked(httpClient.post).mockResolvedValue(okJson({ id: "w-1" }) as never);
+    vi.mocked(httpClient.post).mockResolvedValue(
+      okJson({ id: "w-1" }) as never,
+    );
 
     const { result } = renderHook(() => useCreateMyDashboardWidget(), {
       wrapper: createWrapper(),

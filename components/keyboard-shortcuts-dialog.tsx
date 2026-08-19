@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -25,7 +24,7 @@ const SHORTCUTS: Shortcut[] = [
 
 function Key({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="bg-muted inline-flex h-5 min-w-5 items-center justify-center rounded border px-1.5 text-micro font-semibold">
+    <kbd className="bg-muted text-micro inline-flex h-5 min-w-5 items-center justify-center rounded border px-1.5 font-semibold">
       {children}
     </kbd>
   );

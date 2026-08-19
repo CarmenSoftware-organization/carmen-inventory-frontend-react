@@ -73,7 +73,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
         "group border-border/60 bg-card relative flex flex-col overflow-hidden rounded-2xl border transition-colors",
         "focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none",
         hasUrl &&
-          "cursor-pointer hover:-translate-y-0.5 hover:border-primary/40",
+          "hover:border-primary/40 cursor-pointer hover:-translate-y-0.5",
       )}
     >
       {/* Status accent bar — widens on hover */}
@@ -111,7 +111,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
               />
             )}
           </div>
-          <div className="text-muted-foreground mt-1 flex items-center gap-1.5 text-micro">
+          <div className="text-muted-foreground text-micro mt-1 flex items-center gap-1.5">
             <span className="font-semibold tracking-wide uppercase">
               {item.report_type}
             </span>
@@ -125,7 +125,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
 
       {/* Footer — rows + status pill */}
       <div className="border-border/40 relative mt-auto flex items-center justify-between gap-2 border-t px-4 py-2">
-        <div className="text-muted-foreground inline-flex items-center gap-1.5 text-micro">
+        <div className="text-muted-foreground text-micro inline-flex items-center gap-1.5">
           {item.row_count != null ? (
             <>
               <Rows3 className="size-3" aria-hidden />
@@ -142,7 +142,7 @@ export default function HistoryCard({ item }: HistoryCardProps) {
         {statusConfig && (
           <div
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-micro-legal font-semibold",
+              "text-micro-legal inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold",
               statusConfig.className,
             )}
           >

@@ -283,7 +283,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <SidebarToggleIcon open={open} className="size-5 text-primary" />
+      <SidebarToggleIcon open={open} className="text-primary size-5" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

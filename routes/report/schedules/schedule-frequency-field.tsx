@@ -1,4 +1,3 @@
-
 import { Controller, useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { cn } from "@/lib/utils";
@@ -17,7 +16,15 @@ interface ScheduleFrequencyFieldProps {
   readonly disabled: boolean;
 }
 
-const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+const WEEKDAY_LABELS = [
+  "Sun",
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+] as const;
 const DAYS_OF_MONTH = Array.from({ length: 31 }, (_, i) => i + 1);
 
 /**

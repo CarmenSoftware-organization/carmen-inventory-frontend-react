@@ -71,7 +71,7 @@ const ProductCell = memo(function ProductCell({
             }
           }}
           disabled={disabled}
-          className={`w-full h-6 text-xs${hasError ? " ring-1 ring-destructive rounded-md" : ""}`}
+          className={`h-6 w-full text-xs${hasError ? "ring-destructive rounded-md ring-1" : ""}`}
         />
       )}
     />
@@ -116,7 +116,7 @@ const WatchedProductUnit = memo(function WatchedProductUnit({
           value={field.value ?? ""}
           onValueChange={field.onChange}
           disabled={disabled || !productId}
-          className={`w-full text-xs${hasError ? " ring-1 ring-destructive rounded-md" : ""}`}
+          className={`w-full text-xs${hasError ? "ring-destructive rounded-md ring-1" : ""}`}
         />
       )}
     />
@@ -146,8 +146,7 @@ const LossValueCell = memo(function LossValueCell({
 }) {
   "use no memo";
   const qty = useWatch({ control, name: `items.${index}.qty` }) ?? 0;
-  const unitCost =
-    useWatch({ control, name: `items.${index}.unit_cost` }) ?? 0;
+  const unitCost = useWatch({ control, name: `items.${index}.unit_cost` }) ?? 0;
 
   const lossValue = useMemo(() => round2(qty * unitCost), [qty, unitCost]);
 
@@ -230,10 +229,11 @@ export function useWrItemTable({
           const hasError = !!form.formState.errors.items?.[row.index]?.qty;
           return (
             <Input
-              type="number" inputMode="decimal"
+              type="number"
+              inputMode="decimal"
               min={1}
               placeholder={tfl("qty")}
-              className={`h-6 text-xs md:text-xs text-right${hasError ? " ring-1 ring-destructive" : ""}`}
+              className={`h-6 text-xs md:text-xs text-right${hasError ? "ring-destructive ring-1" : ""}`}
               disabled={disabled}
               {...form.register(`items.${row.index}.qty`, {
                 valueAsNumber: true,
@@ -268,11 +268,12 @@ export function useWrItemTable({
             !!form.formState.errors.items?.[row.index]?.unit_cost;
           return (
             <Input
-              type="number" inputMode="decimal"
+              type="number"
+              inputMode="decimal"
               min={0}
               step="0.01"
               placeholder="0.00"
-              className={`h-6 text-xs md:text-xs text-right${hasError ? " ring-1 ring-destructive" : ""}`}
+              className={`h-6 text-xs md:text-xs text-right${hasError ? "ring-destructive ring-1" : ""}`}
               disabled={disabled}
               {...form.register(`items.${row.index}.unit_cost`, {
                 valueAsNumber: true,
@@ -287,11 +288,7 @@ export function useWrItemTable({
         id: "loss_value",
         header: tfl("lossValue"),
         cell: ({ row }) => (
-          <LossValueCell
-            control={form.control}
-            form={form}
-            index={row.index}
-          />
+          <LossValueCell control={form.control} form={form} index={row.index} />
         ),
         size: 100,
         meta: {

@@ -201,7 +201,12 @@ function setupProfile({
 }: {
   systemLevel?: string;
   permissions?: string[];
-  buLicense?: { state: string; end_date: string | null; features: string[]; seat: { used: number; cap: number; pending_invites: number } };
+  buLicense?: {
+    state: string;
+    end_date: string | null;
+    features: string[];
+    seat: { used: number; cap: number; pending_invites: number };
+  };
 }) {
   profile.mockReturnValue({
     defaultBu: { system_level: systemLevel, permissions },
@@ -219,7 +224,12 @@ describe("useVisibleModules — wiring (isAdmin → markAll, else → annotate)"
     setupProfile({
       systemLevel: "user",
       permissions: [],
-      buLicense: { state: "none", end_date: null, features: [] , seat: { used: 0, cap: 0, pending_invites: 0 } },
+      buLicense: {
+        state: "none",
+        end_date: null,
+        features: [],
+        seat: { used: 0, cap: 0, pending_invites: 0 },
+      },
     });
     const { result } = renderHook(() => useVisibleModules([leaf()]));
     expect(result.current[0].denied).toBe(true);
@@ -235,7 +245,12 @@ describe("useVisibleModules — wiring (isAdmin → markAll, else → annotate)"
     setupProfile({
       systemLevel: "admin",
       permissions: [],
-      buLicense: { state: "none", end_date: null, features: [], seat: { used: 0, cap: 0, pending_invites: 0 } },
+      buLicense: {
+        state: "none",
+        end_date: null,
+        features: [],
+        seat: { used: 0, cap: 0, pending_invites: 0 },
+      },
     });
     const { result } = renderHook(() => useVisibleModules([leaf()]));
     // admin ข้าม permission ได้ → denied false เสมอ
@@ -253,7 +268,12 @@ describe("useVisibleModules — wiring (isAdmin → markAll, else → annotate)"
     setupProfile({
       systemLevel: "user",
       permissions: [PERMISSION],
-      buLicense: { state: "none", end_date: null, features: [], seat: { used: 0, cap: 0, pending_invites: 0 } },
+      buLicense: {
+        state: "none",
+        end_date: null,
+        features: [],
+        seat: { used: 0, cap: 0, pending_invites: 0 },
+      },
     });
     const { result } = renderHook(() => useVisibleModules([leaf()]));
     expect(result.current[0].locked).toBe(false);

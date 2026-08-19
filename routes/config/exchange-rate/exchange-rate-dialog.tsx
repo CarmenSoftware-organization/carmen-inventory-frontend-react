@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useForm, Controller, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -112,7 +111,11 @@ function EditForm({
     if (!item) return;
     updateRate.mutate(
       // doc_version round-trips the loaded record's version — backend requires it for optimistic-concurrency on update
-      { id: item.id, doc_version: item.doc_version, exchange_rate: values.exchange_rate },
+      {
+        id: item.id,
+        doc_version: item.doc_version,
+        exchange_rate: values.exchange_rate,
+      },
       {
         onSuccess: () => {
           toast.success(tt("updateSuccess", { entity: t("entity") }));
@@ -125,7 +128,7 @@ function EditForm({
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
       {/* Metadata strip */}
-      <div className="text-muted-foreground bg-muted/40 flex flex-wrap items-center gap-x-3 gap-y-1 border-t px-5 py-2 text-micro">
+      <div className="text-muted-foreground bg-muted/40 text-micro flex flex-wrap items-center gap-x-3 gap-y-1 border-t px-5 py-2">
         <Badge variant="primary-light" size="xs">
           {item?.currency_code ?? "—"}
         </Badge>

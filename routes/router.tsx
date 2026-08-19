@@ -49,7 +49,10 @@ export const router = createBrowserRouter([
         lazy: () => import("./invitation/invitation.route"),
       },
       // Public price-list route — vendor ภายนอกเปิดจากลิงก์ในอีเมล (ไม่ต้อง auth)
-      { path: "/pl/:url_token", lazy: () => import("./external/pl/price-list-external.route") },
+      {
+        path: "/pl/:url_token",
+        lazy: () => import("./external/pl/price-list-external.route"),
+      },
       {
         Component: ProtectedShell,
         children: [
@@ -86,163 +89,590 @@ export const router = createBrowserRouter([
             children: [
               { index: true, lazy: () => import("./config/config.route") },
               { path: "unit", lazy: () => import("./config/unit/unit.route") },
-              { path: "currency", lazy: () => import("./config/currency/currency.route") },
-              { path: "adjustment-type", lazy: () => import("./config/adjustment-type/adjustment-type.route") },
-              { path: "business-type", lazy: () => import("./config/business-type/business-type.route") },
-              { path: "certification", lazy: () => import("./config/certification/certification.route") },
-              { path: "credit-note-reason", lazy: () => import("./config/credit-note-reason/credit-note-reason.route") },
-              { path: "credit-term", lazy: () => import("./config/credit-term/credit-term.route") },
-              { path: "delivery-point", lazy: () => import("./config/delivery-point/delivery-point.route") },
+              {
+                path: "currency",
+                lazy: () => import("./config/currency/currency.route"),
+              },
+              {
+                path: "adjustment-type",
+                lazy: () =>
+                  import("./config/adjustment-type/adjustment-type.route"),
+              },
+              {
+                path: "business-type",
+                lazy: () =>
+                  import("./config/business-type/business-type.route"),
+              },
+              {
+                path: "certification",
+                lazy: () =>
+                  import("./config/certification/certification.route"),
+              },
+              {
+                path: "credit-note-reason",
+                lazy: () =>
+                  import("./config/credit-note-reason/credit-note-reason.route"),
+              },
+              {
+                path: "credit-term",
+                lazy: () => import("./config/credit-term/credit-term.route"),
+              },
+              {
+                path: "delivery-point",
+                lazy: () =>
+                  import("./config/delivery-point/delivery-point.route"),
+              },
               { path: "eco", lazy: () => import("./config/eco/eco.route") },
-              { path: "exchange-rate", lazy: () => import("./config/exchange-rate/exchange-rate.route") },
-              { path: "extra-cost", lazy: () => import("./config/extra-cost/extra-cost.route") },
-              { path: "tax-profile", lazy: () => import("./config/tax-profile/tax-profile.route") },
-              { path: "department", lazy: () => import("./config/department/department.route") },
-              { path: "department/new", lazy: () => import("./config/department/department-new.route") },
-              { path: "department/:id", lazy: () => import("./config/department/department-edit.route") },
-              { path: "location", lazy: () => import("./config/location/location.route") },
-              { path: "location/new", lazy: () => import("./config/location/location-new.route") },
-              { path: "location/:id", lazy: () => import("./config/location/location-edit.route") },
+              {
+                path: "exchange-rate",
+                lazy: () =>
+                  import("./config/exchange-rate/exchange-rate.route"),
+              },
+              {
+                path: "extra-cost",
+                lazy: () => import("./config/extra-cost/extra-cost.route"),
+              },
+              {
+                path: "tax-profile",
+                lazy: () => import("./config/tax-profile/tax-profile.route"),
+              },
+              {
+                path: "department",
+                lazy: () => import("./config/department/department.route"),
+              },
+              {
+                path: "department/new",
+                lazy: () => import("./config/department/department-new.route"),
+              },
+              {
+                path: "department/:id",
+                lazy: () => import("./config/department/department-edit.route"),
+              },
+              {
+                path: "location",
+                lazy: () => import("./config/location/location.route"),
+              },
+              {
+                path: "location/new",
+                lazy: () => import("./config/location/location-new.route"),
+              },
+              {
+                path: "location/:id",
+                lazy: () => import("./config/location/location-edit.route"),
+              },
             ],
           },
           {
             path: "procurement",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./procurement/procurement.route") },
-              { path: "purchase-request-template", lazy: () => import("./procurement/purchase-request-template/purchase-request-template.route") },
-              { path: "purchase-request-template/new", lazy: () => import("./procurement/purchase-request-template/purchase-request-template-new.route") },
-              { path: "purchase-request-template/:id", lazy: () => import("./procurement/purchase-request-template/purchase-request-template-edit.route") },
-              { path: "credit-note", lazy: () => import("./procurement/credit-note/credit-note.route") },
-              { path: "credit-note/new", lazy: () => import("./procurement/credit-note/credit-note-new.route") },
-              { path: "credit-note/:id", lazy: () => import("./procurement/credit-note/credit-note-edit.route") },
-              { path: "goods-receive-note", lazy: () => import("./procurement/goods-receive-note/goods-receive-note.route") },
-              { path: "goods-receive-note/new", lazy: () => import("./procurement/goods-receive-note/goods-receive-note-new.route") },
-              { path: "goods-receive-note/:id", lazy: () => import("./procurement/goods-receive-note/goods-receive-note-edit.route") },
-              { path: "purchase-order", lazy: () => import("./procurement/purchase-order/purchase-order.route") },
-              { path: "purchase-order/new", lazy: () => import("./procurement/purchase-order/purchase-order-new.route") },
-              { path: "purchase-order/from-price-list", lazy: () => import("./procurement/purchase-order/from-price-list/from-price-list.route") },
-              { path: "purchase-order/:id", lazy: () => import("./procurement/purchase-order/purchase-order-edit.route") },
-              { path: "purchase-request", lazy: () => import("./procurement/purchase-request/purchase-request.route") },
-              { path: "purchase-request/new", lazy: () => import("./procurement/purchase-request/purchase-request-new.route") },
-              { path: "purchase-request/:id", lazy: () => import("./procurement/purchase-request/purchase-request-edit.route") },
-              { path: "approval", lazy: () => import("./procurement/approval/approval.route") },
+              {
+                index: true,
+                lazy: () => import("./procurement/procurement.route"),
+              },
+              {
+                path: "purchase-request-template",
+                lazy: () =>
+                  import("./procurement/purchase-request-template/purchase-request-template.route"),
+              },
+              {
+                path: "purchase-request-template/new",
+                lazy: () =>
+                  import("./procurement/purchase-request-template/purchase-request-template-new.route"),
+              },
+              {
+                path: "purchase-request-template/:id",
+                lazy: () =>
+                  import("./procurement/purchase-request-template/purchase-request-template-edit.route"),
+              },
+              {
+                path: "credit-note",
+                lazy: () =>
+                  import("./procurement/credit-note/credit-note.route"),
+              },
+              {
+                path: "credit-note/new",
+                lazy: () =>
+                  import("./procurement/credit-note/credit-note-new.route"),
+              },
+              {
+                path: "credit-note/:id",
+                lazy: () =>
+                  import("./procurement/credit-note/credit-note-edit.route"),
+              },
+              {
+                path: "goods-receive-note",
+                lazy: () =>
+                  import("./procurement/goods-receive-note/goods-receive-note.route"),
+              },
+              {
+                path: "goods-receive-note/new",
+                lazy: () =>
+                  import("./procurement/goods-receive-note/goods-receive-note-new.route"),
+              },
+              {
+                path: "goods-receive-note/:id",
+                lazy: () =>
+                  import("./procurement/goods-receive-note/goods-receive-note-edit.route"),
+              },
+              {
+                path: "purchase-order",
+                lazy: () =>
+                  import("./procurement/purchase-order/purchase-order.route"),
+              },
+              {
+                path: "purchase-order/new",
+                lazy: () =>
+                  import("./procurement/purchase-order/purchase-order-new.route"),
+              },
+              {
+                path: "purchase-order/from-price-list",
+                lazy: () =>
+                  import("./procurement/purchase-order/from-price-list/from-price-list.route"),
+              },
+              {
+                path: "purchase-order/:id",
+                lazy: () =>
+                  import("./procurement/purchase-order/purchase-order-edit.route"),
+              },
+              {
+                path: "purchase-request",
+                lazy: () =>
+                  import("./procurement/purchase-request/purchase-request.route"),
+              },
+              {
+                path: "purchase-request/new",
+                lazy: () =>
+                  import("./procurement/purchase-request/purchase-request-new.route"),
+              },
+              {
+                path: "purchase-request/:id",
+                lazy: () =>
+                  import("./procurement/purchase-request/purchase-request-edit.route"),
+              },
+              {
+                path: "approval",
+                lazy: () => import("./procurement/approval/approval.route"),
+              },
             ],
           },
           {
             path: "inventory-management",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./inventory-management/inventory-management.route") },
-              { path: "inventory-adjustment", lazy: () => import("./inventory-management/inventory-adjustment/inventory-adjustment.route") },
-              { path: "inventory-adjustment/new", lazy: () => import("./inventory-management/inventory-adjustment/inventory-adjustment-new.route") },
-              { path: "inventory-adjustment/:id", lazy: () => import("./inventory-management/inventory-adjustment/inventory-adjustment-edit.route") },
-              { path: "transaction", lazy: () => import("./inventory-management/transaction/transaction.route") },
-              { path: "physical-count", lazy: () => import("./inventory-management/physical-count/physical-count.route") },
-              { path: "physical-count/new", lazy: () => import("./inventory-management/physical-count/physical-count-new.route") },
-              { path: "physical-count/:id", lazy: () => import("./inventory-management/physical-count/physical-count-edit.route") },
-              { path: "physical-count/:id/entry", lazy: () => import("./inventory-management/physical-count/physical-count-entry.route") },
-              { path: "physical-count/:id/review", lazy: () => import("./inventory-management/physical-count/physical-count-review.route") },
-              { path: "spot-check", lazy: () => import("./inventory-management/spot-check/spot-check.route") },
-              { path: "spot-check/location/:location_id", lazy: () => import("./inventory-management/spot-check/spot-check-by-location.route") },
-              { path: "spot-check/:id", lazy: () => import("./inventory-management/spot-check/spot-check-edit.route") },
-              { path: "spot-check/:id/review", lazy: () => import("./inventory-management/spot-check/spot-check-review.route") },
-              { path: "period-end", lazy: () => import("./inventory-management/period-end/period-end.route") },
-              { path: "period-end/review", lazy: () => import("./inventory-management/period-end/period-end-review.route") },
+              {
+                index: true,
+                lazy: () =>
+                  import("./inventory-management/inventory-management.route"),
+              },
+              {
+                path: "inventory-adjustment",
+                lazy: () =>
+                  import("./inventory-management/inventory-adjustment/inventory-adjustment.route"),
+              },
+              {
+                path: "inventory-adjustment/new",
+                lazy: () =>
+                  import("./inventory-management/inventory-adjustment/inventory-adjustment-new.route"),
+              },
+              {
+                path: "inventory-adjustment/:id",
+                lazy: () =>
+                  import("./inventory-management/inventory-adjustment/inventory-adjustment-edit.route"),
+              },
+              {
+                path: "transaction",
+                lazy: () =>
+                  import("./inventory-management/transaction/transaction.route"),
+              },
+              {
+                path: "physical-count",
+                lazy: () =>
+                  import("./inventory-management/physical-count/physical-count.route"),
+              },
+              {
+                path: "physical-count/new",
+                lazy: () =>
+                  import("./inventory-management/physical-count/physical-count-new.route"),
+              },
+              {
+                path: "physical-count/:id",
+                lazy: () =>
+                  import("./inventory-management/physical-count/physical-count-edit.route"),
+              },
+              {
+                path: "physical-count/:id/entry",
+                lazy: () =>
+                  import("./inventory-management/physical-count/physical-count-entry.route"),
+              },
+              {
+                path: "physical-count/:id/review",
+                lazy: () =>
+                  import("./inventory-management/physical-count/physical-count-review.route"),
+              },
+              {
+                path: "spot-check",
+                lazy: () =>
+                  import("./inventory-management/spot-check/spot-check.route"),
+              },
+              {
+                path: "spot-check/location/:location_id",
+                lazy: () =>
+                  import("./inventory-management/spot-check/spot-check-by-location.route"),
+              },
+              {
+                path: "spot-check/:id",
+                lazy: () =>
+                  import("./inventory-management/spot-check/spot-check-edit.route"),
+              },
+              {
+                path: "spot-check/:id/review",
+                lazy: () =>
+                  import("./inventory-management/spot-check/spot-check-review.route"),
+              },
+              {
+                path: "period-end",
+                lazy: () =>
+                  import("./inventory-management/period-end/period-end.route"),
+              },
+              {
+                path: "period-end/review",
+                lazy: () =>
+                  import("./inventory-management/period-end/period-end-review.route"),
+              },
             ],
           },
           {
             path: "vendor-management",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./vendor-management/vendor-management.route") },
-              { path: "vendor", lazy: () => import("./vendor-management/vendor/vendor.route") },
-              { path: "vendor/new", lazy: () => import("./vendor-management/vendor/vendor-new.route") },
-              { path: "vendor/:id", lazy: () => import("./vendor-management/vendor/vendor-edit.route") },
-              { path: "price-list", lazy: () => import("./vendor-management/price-list/price-list.route") },
-              { path: "price-list/new", lazy: () => import("./vendor-management/price-list/price-list-new.route") },
-              { path: "price-list/:id", lazy: () => import("./vendor-management/price-list/price-list-edit.route") },
-              { path: "price-list-template", lazy: () => import("./vendor-management/price-list-template/price-list-template.route") },
-              { path: "price-list-template/new", lazy: () => import("./vendor-management/price-list-template/price-list-template-new.route") },
-              { path: "price-list-template/:id", lazy: () => import("./vendor-management/price-list-template/price-list-template-edit.route") },
-              { path: "request-price-list", lazy: () => import("./vendor-management/request-price-list/request-price-list.route") },
-              { path: "request-price-list/new", lazy: () => import("./vendor-management/request-price-list/request-price-list-new.route") },
-              { path: "request-price-list/:id", lazy: () => import("./vendor-management/request-price-list/request-price-list-edit.route") },
+              {
+                index: true,
+                lazy: () =>
+                  import("./vendor-management/vendor-management.route"),
+              },
+              {
+                path: "vendor",
+                lazy: () => import("./vendor-management/vendor/vendor.route"),
+              },
+              {
+                path: "vendor/new",
+                lazy: () =>
+                  import("./vendor-management/vendor/vendor-new.route"),
+              },
+              {
+                path: "vendor/:id",
+                lazy: () =>
+                  import("./vendor-management/vendor/vendor-edit.route"),
+              },
+              {
+                path: "price-list",
+                lazy: () =>
+                  import("./vendor-management/price-list/price-list.route"),
+              },
+              {
+                path: "price-list/new",
+                lazy: () =>
+                  import("./vendor-management/price-list/price-list-new.route"),
+              },
+              {
+                path: "price-list/:id",
+                lazy: () =>
+                  import("./vendor-management/price-list/price-list-edit.route"),
+              },
+              {
+                path: "price-list-template",
+                lazy: () =>
+                  import("./vendor-management/price-list-template/price-list-template.route"),
+              },
+              {
+                path: "price-list-template/new",
+                lazy: () =>
+                  import("./vendor-management/price-list-template/price-list-template-new.route"),
+              },
+              {
+                path: "price-list-template/:id",
+                lazy: () =>
+                  import("./vendor-management/price-list-template/price-list-template-edit.route"),
+              },
+              {
+                path: "request-price-list",
+                lazy: () =>
+                  import("./vendor-management/request-price-list/request-price-list.route"),
+              },
+              {
+                path: "request-price-list/new",
+                lazy: () =>
+                  import("./vendor-management/request-price-list/request-price-list-new.route"),
+              },
+              {
+                path: "request-price-list/:id",
+                lazy: () =>
+                  import("./vendor-management/request-price-list/request-price-list-edit.route"),
+              },
             ],
           },
           {
             path: "store-operation",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./store-operation/store-operation.route") },
-              { path: "store-requisition", lazy: () => import("./store-operation/store-requisition/store-requisition.route") },
-              { path: "store-requisition/new", lazy: () => import("./store-operation/store-requisition/store-requisition-new.route") },
-              { path: "store-requisition/:id", lazy: () => import("./store-operation/store-requisition/store-requisition-edit.route") },
-              { path: "wastage-reporting", lazy: () => import("./store-operation/wastage-reporting/wastage-reporting.route") },
-              { path: "wastage-reporting/new", lazy: () => import("./store-operation/wastage-reporting/wastage-reporting-new.route") },
-              { path: "wastage-reporting/:id", lazy: () => import("./store-operation/wastage-reporting/wastage-reporting-edit.route") },
-              { path: "stock-replenishment", lazy: () => import("./store-operation/stock-replenishment/stock-replenishment.route") },
+              {
+                index: true,
+                lazy: () => import("./store-operation/store-operation.route"),
+              },
+              {
+                path: "store-requisition",
+                lazy: () =>
+                  import("./store-operation/store-requisition/store-requisition.route"),
+              },
+              {
+                path: "store-requisition/new",
+                lazy: () =>
+                  import("./store-operation/store-requisition/store-requisition-new.route"),
+              },
+              {
+                path: "store-requisition/:id",
+                lazy: () =>
+                  import("./store-operation/store-requisition/store-requisition-edit.route"),
+              },
+              {
+                path: "wastage-reporting",
+                lazy: () =>
+                  import("./store-operation/wastage-reporting/wastage-reporting.route"),
+              },
+              {
+                path: "wastage-reporting/new",
+                lazy: () =>
+                  import("./store-operation/wastage-reporting/wastage-reporting-new.route"),
+              },
+              {
+                path: "wastage-reporting/:id",
+                lazy: () =>
+                  import("./store-operation/wastage-reporting/wastage-reporting-edit.route"),
+              },
+              {
+                path: "stock-replenishment",
+                lazy: () =>
+                  import("./store-operation/stock-replenishment/stock-replenishment.route"),
+              },
             ],
           },
           {
             path: "operation-plan",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./operation-plan/operation-plan.route") },
-              { path: "category", lazy: () => import("./operation-plan/category/category.route") },
-              { path: "category/new", lazy: () => import("./operation-plan/category/category-new.route") },
-              { path: "category/:id", lazy: () => import("./operation-plan/category/category-edit.route") },
-              { path: "cuisine", lazy: () => import("./operation-plan/cuisine/cuisine.route") },
-              { path: "cuisine/new", lazy: () => import("./operation-plan/cuisine/cuisine-new.route") },
-              { path: "cuisine/:id", lazy: () => import("./operation-plan/cuisine/cuisine-edit.route") },
-              { path: "recipe", lazy: () => import("./operation-plan/recipe/recipe.route") },
-              { path: "recipe/new", lazy: () => import("./operation-plan/recipe/recipe-new.route") },
-              { path: "recipe/:id", lazy: () => import("./operation-plan/recipe/recipe-edit.route") },
-              { path: "equipment", lazy: () => import("./operation-plan/equipment/equipment.route") },
-              { path: "equipment/new", lazy: () => import("./operation-plan/equipment/equipment-new.route") },
-              { path: "equipment/:id", lazy: () => import("./operation-plan/equipment/equipment-edit.route") },
-              { path: "recipe-equipment-category", lazy: () => import("./operation-plan/recipe-equipment-category/recipe-equipment-category.route") },
-              { path: "equipment-category", lazy: () => import("./operation-plan/equipment-category/equipment-category.route") },
+              {
+                index: true,
+                lazy: () => import("./operation-plan/operation-plan.route"),
+              },
+              {
+                path: "category",
+                lazy: () => import("./operation-plan/category/category.route"),
+              },
+              {
+                path: "category/new",
+                lazy: () =>
+                  import("./operation-plan/category/category-new.route"),
+              },
+              {
+                path: "category/:id",
+                lazy: () =>
+                  import("./operation-plan/category/category-edit.route"),
+              },
+              {
+                path: "cuisine",
+                lazy: () => import("./operation-plan/cuisine/cuisine.route"),
+              },
+              {
+                path: "cuisine/new",
+                lazy: () =>
+                  import("./operation-plan/cuisine/cuisine-new.route"),
+              },
+              {
+                path: "cuisine/:id",
+                lazy: () =>
+                  import("./operation-plan/cuisine/cuisine-edit.route"),
+              },
+              {
+                path: "recipe",
+                lazy: () => import("./operation-plan/recipe/recipe.route"),
+              },
+              {
+                path: "recipe/new",
+                lazy: () => import("./operation-plan/recipe/recipe-new.route"),
+              },
+              {
+                path: "recipe/:id",
+                lazy: () => import("./operation-plan/recipe/recipe-edit.route"),
+              },
+              {
+                path: "equipment",
+                lazy: () =>
+                  import("./operation-plan/equipment/equipment.route"),
+              },
+              {
+                path: "equipment/new",
+                lazy: () =>
+                  import("./operation-plan/equipment/equipment-new.route"),
+              },
+              {
+                path: "equipment/:id",
+                lazy: () =>
+                  import("./operation-plan/equipment/equipment-edit.route"),
+              },
+              {
+                path: "recipe-equipment-category",
+                lazy: () =>
+                  import("./operation-plan/recipe-equipment-category/recipe-equipment-category.route"),
+              },
+              {
+                path: "equipment-category",
+                lazy: () =>
+                  import("./operation-plan/equipment-category/equipment-category.route"),
+              },
             ],
           },
           {
             path: "product-management",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./product-management/product-management.route") },
-              { path: "category", lazy: () => import("./product-management/category/category.route") },
-              { path: "product", lazy: () => import("./product-management/product/product.route") },
-              { path: "product/new", lazy: () => import("./product-management/product/product-new.route") },
-              { path: "product/:id", lazy: () => import("./product-management/product/product-edit.route") },
+              {
+                index: true,
+                lazy: () =>
+                  import("./product-management/product-management.route"),
+              },
+              {
+                path: "category",
+                lazy: () =>
+                  import("./product-management/category/category.route"),
+              },
+              {
+                path: "product",
+                lazy: () =>
+                  import("./product-management/product/product.route"),
+              },
+              {
+                path: "product/new",
+                lazy: () =>
+                  import("./product-management/product/product-new.route"),
+              },
+              {
+                path: "product/:id",
+                lazy: () =>
+                  import("./product-management/product/product-edit.route"),
+              },
             ],
           },
           {
             path: "system-admin",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./system-admin/system-admin.route") },
-              { path: "role", lazy: () => import("./system-admin/role/role.route") },
-              { path: "role/new", lazy: () => import("./system-admin/role/role-new.route") },
-              { path: "role/:id", lazy: () => import("./system-admin/role/role-edit.route") },
-              { path: "notification-template", lazy: () => import("./system-admin/notification-template/notification-template.route") },
-              { path: "notification-template/new", lazy: () => import("./system-admin/notification-template/notification-template-new.route") },
-              { path: "notification-template/:id", lazy: () => import("./system-admin/notification-template/notification-template-edit.route") },
-              { path: "period", lazy: () => import("./system-admin/period/period.route") },
-              { path: "user-activity", lazy: () => import("./system-admin/user-activity/user-activity.route") },
-              { path: "user", lazy: () => import("./system-admin/user/user.route") },
-              { path: "user/:id", lazy: () => import("./system-admin/user/user-edit.route") },
-              { path: "document", lazy: () => import("./system-admin/document/document.route") },
-              { path: "activity-log", lazy: () => import("./system-admin/activity-log/activity-log.route") },
-              { path: "workflow", lazy: () => import("./system-admin/workflow/workflow.route") },
-              { path: "workflow/new", lazy: () => import("./system-admin/workflow/workflow-new.route") },
-              { path: "workflow/:id", lazy: () => import("./system-admin/workflow/workflow-edit.route") },
-              { path: "running-code", lazy: () => import("./system-admin/running-code/running-code.route") },
-              { path: "dashboard-dataset", lazy: () => import("./system-admin/dashboard-dataset/dashboard-dataset.route") },
-              { path: "company-profile", lazy: () => import("./system-admin/company-profile/company-profile.route") },
-              { path: "default-setting", lazy: () => import("./system-admin/default-setting/default-setting.route") },
-              { path: "interface", lazy: () => import("./system-admin/interface/interface.route") },
-              { path: "interface/:category/:brand", lazy: () => import("./system-admin/interface/interface-detail.route") },
-              { path: "business-setting", element: <Navigate to="/system-admin/company-profile" replace /> },
+              {
+                index: true,
+                lazy: () => import("./system-admin/system-admin.route"),
+              },
+              {
+                path: "role",
+                lazy: () => import("./system-admin/role/role.route"),
+              },
+              {
+                path: "role/new",
+                lazy: () => import("./system-admin/role/role-new.route"),
+              },
+              {
+                path: "role/:id",
+                lazy: () => import("./system-admin/role/role-edit.route"),
+              },
+              {
+                path: "notification-template",
+                lazy: () =>
+                  import("./system-admin/notification-template/notification-template.route"),
+              },
+              {
+                path: "notification-template/new",
+                lazy: () =>
+                  import("./system-admin/notification-template/notification-template-new.route"),
+              },
+              {
+                path: "notification-template/:id",
+                lazy: () =>
+                  import("./system-admin/notification-template/notification-template-edit.route"),
+              },
+              {
+                path: "period",
+                lazy: () => import("./system-admin/period/period.route"),
+              },
+              {
+                path: "user-activity",
+                lazy: () =>
+                  import("./system-admin/user-activity/user-activity.route"),
+              },
+              {
+                path: "user",
+                lazy: () => import("./system-admin/user/user.route"),
+              },
+              {
+                path: "user/:id",
+                lazy: () => import("./system-admin/user/user-edit.route"),
+              },
+              {
+                path: "document",
+                lazy: () => import("./system-admin/document/document.route"),
+              },
+              {
+                path: "activity-log",
+                lazy: () =>
+                  import("./system-admin/activity-log/activity-log.route"),
+              },
+              {
+                path: "workflow",
+                lazy: () => import("./system-admin/workflow/workflow.route"),
+              },
+              {
+                path: "workflow/new",
+                lazy: () =>
+                  import("./system-admin/workflow/workflow-new.route"),
+              },
+              {
+                path: "workflow/:id",
+                lazy: () =>
+                  import("./system-admin/workflow/workflow-edit.route"),
+              },
+              {
+                path: "running-code",
+                lazy: () =>
+                  import("./system-admin/running-code/running-code.route"),
+              },
+              {
+                path: "dashboard-dataset",
+                lazy: () =>
+                  import("./system-admin/dashboard-dataset/dashboard-dataset.route"),
+              },
+              {
+                path: "company-profile",
+                lazy: () =>
+                  import("./system-admin/company-profile/company-profile.route"),
+              },
+              {
+                path: "default-setting",
+                lazy: () =>
+                  import("./system-admin/default-setting/default-setting.route"),
+              },
+              {
+                path: "interface",
+                lazy: () => import("./system-admin/interface/interface.route"),
+              },
+              {
+                path: "interface/:category/:brand",
+                lazy: () =>
+                  import("./system-admin/interface/interface-detail.route"),
+              },
+              {
+                path: "business-setting",
+                element: (
+                  <Navigate to="/system-admin/company-profile" replace />
+                ),
+              },
             ],
           },
           {
@@ -250,36 +680,115 @@ export const router = createBrowserRouter([
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
               { index: true, lazy: () => import("./report/report.route") },
-              { path: "list", lazy: () => import("./report/list/report-list.route") },
-              { path: "schedules", lazy: () => import("./report/schedules/report-schedules.route") },
-              { path: "history", lazy: () => import("./report/history/report-history.route") },
+              {
+                path: "list",
+                lazy: () => import("./report/list/report-list.route"),
+              },
+              {
+                path: "schedules",
+                lazy: () => import("./report/schedules/report-schedules.route"),
+              },
+              {
+                path: "history",
+                lazy: () => import("./report/history/report-history.route"),
+              },
             ],
           },
           {
             path: "accounting",
             ErrorBoundary: RouteErrorBoundaryAdapter,
             children: [
-              { index: true, lazy: () => import("./accounting/accounting.route") },
-              { path: "journal-voucher", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "journal-voucher/:id", lazy: () => import("./accounting/accounting-detail.route") },
-              { path: "template-voucher", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "template-voucher/:id", lazy: () => import("./accounting/accounting-detail.route") },
-              { path: "recurring-voucher", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "recurring-voucher/:id", lazy: () => import("./accounting/accounting-detail.route") },
-              { path: "allocation-voucher", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "allocation-voucher/:id", lazy: () => import("./accounting/accounting-detail.route") },
-              { path: "accounts-payable", element: <Navigate to="/accounting/accounts-payable/invoice" replace /> },
-              { path: "accounts-payable/invoice", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "accounts-payable/invoice/:id", lazy: () => import("./accounting/accounting-detail.route") },
-              { path: "accounts-payable/payment", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "accounts-payable/payment/:id", lazy: () => import("./accounting/accounting-detail.route") },
-              { path: "accounts-receivable", element: <Navigate to="/accounting/accounts-receivable/invoice" replace /> },
-              { path: "accounts-receivable/invoice", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "accounts-receivable/invoice/:id", lazy: () => import("./accounting/accounting-detail.route") },
-              { path: "accounts-receivable/receipt", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "accounts-receivable/receipt/:id", lazy: () => import("./accounting/accounting-detail.route") },
-              { path: "financial-reports", lazy: () => import("./accounting/accounting-document.route") },
-              { path: "financial-reports/:id", lazy: () => import("./accounting/accounting-detail.route") },
+              {
+                index: true,
+                lazy: () => import("./accounting/accounting.route"),
+              },
+              {
+                path: "journal-voucher",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "journal-voucher/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "template-voucher",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "template-voucher/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "recurring-voucher",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "recurring-voucher/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "allocation-voucher",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "allocation-voucher/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "accounts-payable",
+                element: (
+                  <Navigate to="/accounting/accounts-payable/invoice" replace />
+                ),
+              },
+              {
+                path: "accounts-payable/invoice",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "accounts-payable/invoice/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "accounts-payable/payment",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "accounts-payable/payment/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "accounts-receivable",
+                element: (
+                  <Navigate
+                    to="/accounting/accounts-receivable/invoice"
+                    replace
+                  />
+                ),
+              },
+              {
+                path: "accounts-receivable/invoice",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "accounts-receivable/invoice/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "accounts-receivable/receipt",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "accounts-receivable/receipt/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
+              {
+                path: "financial-reports",
+                lazy: () => import("./accounting/accounting-document.route"),
+              },
+              {
+                path: "financial-reports/:id",
+                lazy: () => import("./accounting/accounting-detail.route"),
+              },
             ],
           },
         ],

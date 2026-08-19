@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { AlertTriangle, ChevronRight, PackagePlus, Search } from "lucide-react";
@@ -222,7 +221,7 @@ export function BrowseDialog({
           </div>
           {activeCurrency && (
             <div
-              className="border-warning/30 bg-warning/5 text-warning-foreground flex items-start gap-2 rounded-md border px-3 py-2 text-micro"
+              className="border-warning/30 bg-warning/5 text-warning-foreground text-micro flex items-start gap-2 rounded-md border px-3 py-2"
               role="status"
               aria-live="polite"
             >
@@ -370,7 +369,7 @@ export function BrowseDialog({
                               <span className="text-foreground/80 w-20 text-right tabular-nums">
                                 {detail.price.toLocaleString()}
                               </span>
-                              <span className="text-muted-foreground w-10 text-micro">
+                              <span className="text-muted-foreground text-micro w-10">
                                 {group.currency.code}
                               </span>
                             </div>

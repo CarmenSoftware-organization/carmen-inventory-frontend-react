@@ -17,7 +17,10 @@ const authHeaders = (): Record<string, string> => ({
   "x-app-id": getRuntimeConfig().X_APP_ID,
 });
 
-export async function login(email: string, password: string): Promise<LoginResult> {
+export async function login(
+  email: string,
+  password: string,
+): Promise<LoginResult> {
   const { BACKEND_URL } = getRuntimeConfig();
   let res: Response;
   try {
@@ -28,7 +31,12 @@ export async function login(email: string, password: string): Promise<LoginResul
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
 
   const json = await res.json().catch(() => ({}));
@@ -57,7 +65,11 @@ export async function login(email: string, password: string): Promise<LoginResul
 
   const { access_token, refresh_token, platform_role } = json?.data ?? {};
   if (!access_token || !refresh_token) {
-    throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Invalid login response from backend", 502);
+    throw new ApiError(
+      ERROR_CODES.INTERNAL_ERROR,
+      "Invalid login response from backend",
+      502,
+    );
   }
 
   tokenStore.set(access_token);
@@ -87,7 +99,11 @@ export interface RegisterPayload {
  * @param fallback - ข้อความเมื่อ backend ไม่ส่ง message มา
  * @param parsed - body ที่ parse ไว้แล้ว (ส่งมาเมื่อผู้เรียกอ่าน body ไปก่อนแล้ว body อ่านซ้ำไม่ได้)
  */
-async function toAuthApiError(res: Response, fallback: string, parsed?: unknown): Promise<ApiError> {
+async function toAuthApiError(
+  res: Response,
+  fallback: string,
+  parsed?: unknown,
+): Promise<ApiError> {
   const json = (parsed ?? (await res.json().catch(() => ({})))) as {
     message?: string | string[];
     retry_after?: number;
@@ -102,10 +118,14 @@ async function toAuthApiError(res: Response, fallback: string, parsed?: unknown)
   // `register` เป็นได้ทั้ง AUTH_EMAIL_ALREADY_EXISTS (เข้าสู่ระบบได้) และ AUTH_USERNAME_ALREADY_EXISTS
   // (เข้าสู่ระบบไม่ได้ บัญชีที่ชนเป็นของคนอื่น) การทิ้งฟิลด์นี้ทำให้หน้าจอแยกสองกรณีไม่ได้เลยและต้อง
   // เดาว่าเป็นกรณีที่พบบ่อยกว่า ซึ่งคือคำแนะนำที่ผิดสำหรับอีกกรณีหนึ่งเสมอ
-  const serverCode: string | undefined = typeof json?.code === "string" ? json.code : undefined;
+  const serverCode: string | undefined =
+    typeof json?.code === "string" ? json.code : undefined;
   const details =
     retryAfter !== undefined || serverCode !== undefined
-      ? { ...(retryAfter !== undefined ? { retryAfter } : {}), ...(serverCode ? { serverCode } : {}) }
+      ? {
+          ...(retryAfter !== undefined ? { retryAfter } : {}),
+          ...(serverCode ? { serverCode } : {}),
+        }
       : undefined;
   // 410 (ลิงก์ใช้ไม่ได้) กับ 409 (มีบัญชีแล้ว) ใช้ code เดียวกัน หน้าจอแยกสองกรณีนี้ด้วย
   // `error.status` ไม่ใช่ด้วย code
@@ -143,7 +163,12 @@ export async function signupRequest(email: string): Promise<void> {
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
   if (res.ok) return;
   throw await toAuthApiError(res, "Could not send the verification link");
@@ -153,7 +178,9 @@ export async function signupRequest(email: string): Promise<void> {
  * ตรวจลิงก์ก่อนแสดงฟอร์มสมัคร — POST /api/auth/signup-token/verify (public)
  * 410 แปลว่าลิงก์ไม่มีจริง หมดอายุ หรือถูกใช้ไปแล้ว โดยแยกสามกรณีนี้ไม่ได้ตั้งใจ
  */
-export async function verifySignupToken(token: string): Promise<{ email: string }> {
+export async function verifySignupToken(
+  token: string,
+): Promise<{ email: string }> {
   const { BACKEND_URL } = getRuntimeConfig();
   let res: Response;
   try {
@@ -164,12 +191,23 @@ export async function verifySignupToken(token: string): Promise<{ email: string 
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
   const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw await toAuthApiError(res, "This link is no longer valid", json);
+  if (!res.ok)
+    throw await toAuthApiError(res, "This link is no longer valid", json);
   const email: string | undefined = json?.data?.email;
-  if (!email) throw new ApiError(ERROR_CODES.INTERNAL_ERROR, "Invalid response from backend", 502);
+  if (!email)
+    throw new ApiError(
+      ERROR_CODES.INTERNAL_ERROR,
+      "Invalid response from backend",
+      502,
+    );
   return { email };
 }
 
@@ -188,7 +226,12 @@ export async function register(payload: RegisterPayload): Promise<void> {
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
   if (res.ok) return;
   throw await toAuthApiError(res, "Register failed");
@@ -216,7 +259,12 @@ export async function forgotPassword(email: string): Promise<void> {
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
   if (res.ok || res.status === 404) return;
   throw await toAuthApiError(res, "Could not send the reset link");
@@ -247,7 +295,12 @@ export async function resetPasswordWithToken(
       signal: AbortSignal.timeout(10_000),
     });
   } catch {
-    throw new ApiError(ERROR_CODES.NETWORK_ERROR, "Auth server unavailable", undefined, true);
+    throw new ApiError(
+      ERROR_CODES.NETWORK_ERROR,
+      "Auth server unavailable",
+      undefined,
+      true,
+    );
   }
   if (res.ok) return;
   throw await toAuthApiError(res, "Could not reset the password");

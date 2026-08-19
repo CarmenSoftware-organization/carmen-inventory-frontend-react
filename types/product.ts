@@ -129,19 +129,33 @@ function createUnitConversionSchema(tv: TranslationFn, tf: TranslationFn) {
 function createLocationSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
-    location_id: z
-      .string()
-      .min(1, tv("required", { field: tf("location") })),
+    location_id: z.string().min(1, tv("required", { field: tf("location") })),
     location_code: z.string().nullable().optional(),
     location_name: z.string().nullable().optional(),
     location_type: z.string().nullable().optional(),
     is_active: z.boolean().nullable().optional(),
     delivery_point_id: z.string().nullable().optional(),
     delivery_point: z.string().nullable().optional(),
-    min_qty: z.preprocess((v) => (v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v)), z.number().nullable().optional()),
-    max_qty: z.preprocess((v) => (v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v)), z.number().nullable().optional()),
-    re_order_qty: z.preprocess((v) => (v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v)), z.number().nullable().optional()),
-    par_qty: z.preprocess((v) => (v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v)), z.number().nullable().optional()),
+    min_qty: z.preprocess(
+      (v) =>
+        v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v),
+      z.number().nullable().optional(),
+    ),
+    max_qty: z.preprocess(
+      (v) =>
+        v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v),
+      z.number().nullable().optional(),
+    ),
+    re_order_qty: z.preprocess(
+      (v) =>
+        v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v),
+      z.number().nullable().optional(),
+    ),
+    par_qty: z.preprocess(
+      (v) =>
+        v == null || v === "" || Number.isNaN(Number(v)) ? null : Number(v),
+      z.number().nullable().optional(),
+    ),
   });
 }
 

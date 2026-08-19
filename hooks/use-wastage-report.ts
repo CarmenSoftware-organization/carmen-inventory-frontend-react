@@ -44,9 +44,7 @@ export function useWastageReport(params?: ParamsDto) {
       if (params?.filter) {
         const statusMatch = params.filter.match(/status\|string:(\w+)/);
         if (statusMatch) {
-          filtered = filtered.filter(
-            (item) => item.status === statusMatch[1],
-          );
+          filtered = filtered.filter((item) => item.status === statusMatch[1]);
         }
       }
 

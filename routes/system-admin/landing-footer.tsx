@@ -24,7 +24,7 @@ export function LandingFooter({ t }: { readonly t: TFn }) {
           <div className="mt-1.5 text-sm leading-snug font-bold tracking-tight md:text-base">
             {t("footer.title")}
           </div>
-          <div className="mt-1.5 text-micro opacity-65 md:text-xs">
+          <div className="text-micro mt-1.5 opacity-65 md:text-xs">
             {t("footer.sub")}
           </div>
         </div>

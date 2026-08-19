@@ -127,9 +127,7 @@ export function useActivityLogTable({
           <div className="leading-tight">
             <p className="text-xs font-semibold">{fullName || "—"}</p>
             {username && fullName !== username && (
-              <p className="text-muted-foreground text-micro">
-                {username}
-              </p>
+              <p className="text-muted-foreground text-micro">{username}</p>
             )}
           </div>
         );
@@ -189,7 +187,7 @@ export function useActivityLogTable({
       cell: ({ row }) => {
         const id: string = row.getValue("entity_id") ?? "";
         return (
-          <span className="text-muted-foreground block max-w-28 truncate text-micro">
+          <span className="text-muted-foreground text-micro block max-w-28 truncate">
             {id ? `${id.slice(0, 8)}…` : "—"}
           </span>
         );

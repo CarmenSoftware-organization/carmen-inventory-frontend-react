@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Plus } from "lucide-react";
@@ -53,18 +52,23 @@ export function LookupUnit({
   const [hasOpened, setHasOpened] = useState(false);
   const excludedSet = excludeIds ? new Set(excludeIds) : undefined;
 
-  const { items: units, isLoading, isLoadingMore, hasMore, loadMore } =
-    useLookupPagination({
-      useListHook: useUnit,
-      search,
-      perpage: 30,
-      enabled: hasOpened || !!value,
-      filter: (u: { id: string; is_active: boolean }) => {
-        if (!u.is_active) return false;
-        if (excludedSet && excludedSet.has(u.id)) return false;
-        return true;
-      },
-    });
+  const {
+    items: units,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+  } = useLookupPagination({
+    useListHook: useUnit,
+    search,
+    perpage: 30,
+    enabled: hasOpened || !!value,
+    filter: (u: { id: string; is_active: boolean }) => {
+      if (!u.is_active) return false;
+      if (excludedSet && excludedSet.has(u.id)) return false;
+      return true;
+    },
+  });
 
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -94,7 +98,7 @@ export function LookupUnit({
         headerSlot={
           <Button
             size="xs"
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1"
+            className="absolute top-1/2 right-2 -translate-y-1/2 p-1"
             onClick={() => setDialogOpen(true)}
             type="button"
             aria-label={tl("addNew", { entity: tfl("unit") })}

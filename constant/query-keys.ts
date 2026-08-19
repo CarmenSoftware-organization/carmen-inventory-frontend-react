@@ -38,14 +38,11 @@ export const QUERY_KEYS = {
   EXTRA_COSTS: "extra-costs",
   GOODS_RECEIVE_NOTES: "goods-receive-notes",
   GOODS_RECEIVE_NOTES_BY_VENDOR: "goods-receive-notes-by-vendor",
-  GOODS_RECEIVE_NOTES_BY_VENDOR_FOR_CN:
-    "goods-receive-notes-by-vendor-for-cn",
+  GOODS_RECEIVE_NOTES_BY_VENDOR_FOR_CN: "goods-receive-notes-by-vendor-for-cn",
   GOODS_RECEIVE_NOTE_PRODUCTS: "goods-receive-note-products",
-  GOODS_RECEIVE_NOTE_PRODUCT_LOCATIONS:
-    "goods-receive-note-product-locations",
+  GOODS_RECEIVE_NOTE_PRODUCT_LOCATIONS: "goods-receive-note-product-locations",
   GOODS_RECEIVE_NOTE_LOCATIONS: "goods-receive-note-locations",
-  GOODS_RECEIVE_NOTE_LOCATION_PRODUCTS:
-    "goods-receive-note-location-products",
+  GOODS_RECEIVE_NOTE_LOCATION_PRODUCTS: "goods-receive-note-location-products",
   GOODS_RECEIVE_NOTE_COMMENTS: "goods-receive-note-comments",
   INVENTORY_ADJUSTMENTS: "inventory-adjustments",
   TRANSACTIONS: "transactions",

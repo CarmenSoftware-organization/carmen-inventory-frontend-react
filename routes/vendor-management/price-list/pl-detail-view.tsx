@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import type { PriceListDetailItem } from "@/types/price-list";
 import EmptyComponent from "@/components/empty-component";
@@ -60,7 +59,7 @@ export function PriceListDetailView({ details }: PriceListDetailViewProps) {
   }
 
   return (
-    <div className="w-full overflow-hidden rounded-lg border border-border">
+    <div className="border-border w-full overflow-hidden rounded-lg border">
       <table className="w-full min-w-full table-fixed border-separate border-spacing-0 text-xs">
         <thead>
           <tr className="bg-muted/60 text-foreground border-b">
@@ -86,7 +85,8 @@ export function PriceListDetailView({ details }: PriceListDetailViewProps) {
               scope="col"
               className="h-9 px-2 text-right align-middle font-semibold"
             >
-              {tfl("taxAmt")}{commonTaxRate == null ? "" : ` (${commonTaxRate}%)`}
+              {tfl("taxAmt")}
+              {commonTaxRate == null ? "" : ` (${commonTaxRate}%)`}
             </th>
             <th
               scope="col"
@@ -105,7 +105,7 @@ export function PriceListDetailView({ details }: PriceListDetailViewProps) {
               >
                 {i === 0 && (
                   <td
-                    className="border-border px-2 w-9 py-1.5 text-center align-middle text-muted-foreground"
+                    className="border-border text-muted-foreground w-9 px-2 py-1.5 text-center align-middle"
                     rowSpan={group.items.length}
                   >
                     {groupIndex + 1}
@@ -125,14 +125,14 @@ export function PriceListDetailView({ details }: PriceListDetailViewProps) {
                   <span className="font-semibold">
                     {(Number(item.price_without_tax) || 0).toFixed(2)}
                   </span>
-                  <span className="ml-1 text-muted-foreground">
+                  <span className="text-muted-foreground ml-1">
                     ({item.lead_time_days}d)
                   </span>
                 </td>
                 <td className="border-border px-2 py-1.5 text-right tabular-nums">
                   {(Number(item.tax_amt) || 0).toFixed(2)}
                 </td>
-                <td className="border-border px-2 py-1.5 text-right tabular-nums font-semibold text-positive-ink">
+                <td className="border-border text-positive-ink px-2 py-1.5 text-right font-semibold tabular-nums">
                   {(Number(item.price) || 0).toFixed(2)}
                 </td>
               </tr>

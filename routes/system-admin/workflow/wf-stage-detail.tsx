@@ -1,8 +1,4 @@
-
-import {
-  useWatch,
-  type UseFormReturn,
-} from "react-hook-form";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +52,6 @@ export function WfStageDetail({
 
   return (
     <div className="space-y-6">
-
       <Tabs defaultValue="general">
         <TabsList variant="line">
           <TabsTrigger value="general" className="text-sm">

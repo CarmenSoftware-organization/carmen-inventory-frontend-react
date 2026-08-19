@@ -167,7 +167,11 @@ function indexRows(
 
 /** ชื่อเต็มของผู้กระทำ ถ้าไม่มีค่อยตกไปที่ username */
 function actorNameOf(log: ActivityLog): string {
-  const fullName = [log.actor_firstname, log.actor_middlename, log.actor_lastname]
+  const fullName = [
+    log.actor_firstname,
+    log.actor_middlename,
+    log.actor_lastname,
+  ]
     .filter(Boolean)
     .join(" ");
   return fullName || log.actor_username || "—";
@@ -176,7 +180,7 @@ function actorNameOf(log: ActivityLog): string {
 /** แถวเดียวของ field ที่เปลี่ยน: ชื่อฟิลด์ + ค่าเดิม → ค่าใหม่ */
 function FieldChangeRow({ change }: { change: ActivityFieldChange }) {
   return (
-    <div className="grid grid-cols-[minmax(0,9rem)_1fr] gap-2 py-0.5 text-micro">
+    <div className="text-micro grid grid-cols-[minmax(0,9rem)_1fr] gap-2 py-0.5">
       <span className="text-muted-foreground truncate" title={change.field}>
         {humanize(change.field)}
       </span>
@@ -194,7 +198,7 @@ function FieldChangeRow({ change }: { change: ActivityFieldChange }) {
 /** แถวที่ถูกเพิ่มหรือลบ — บอกชื่อรายการอย่างเดียว ไม่ต้องกางทุกฟิลด์ */
 function RowMarkLine({ mark, label }: { mark: string; label: string }) {
   return (
-    <p className="py-0.5 text-micro">
+    <p className="text-micro py-0.5">
       <span className="text-muted-foreground mr-1">{mark}</span>
       {label}
     </p>
@@ -272,25 +276,19 @@ function ActivityChanges({ logId }: { logId: string }) {
 
   if (isLoading)
     return (
-      <p className="text-muted-foreground flex items-center gap-2 py-2 text-micro">
+      <p className="text-muted-foreground text-micro flex items-center gap-2 py-2">
         <Loader2 className="size-3 animate-spin" />
       </p>
     );
 
   if (isError || !data)
-    return (
-      <p className="text-destructive py-2 text-micro">
-        {t("loadError")}
-      </p>
-    );
+    return <p className="text-destructive text-micro py-2">{t("loadError")}</p>;
 
   const fields = data.changes.fields.filter((f) => !HIDDEN_FIELDS.has(f.field));
 
   if (!fields.length && !data.changes.children.length)
     return (
-      <p className="text-muted-foreground py-2 text-micro">
-        {t("noChanges")}
-      </p>
+      <p className="text-muted-foreground text-micro py-2">{t("noChanges")}</p>
     );
 
   return (
@@ -391,8 +389,12 @@ export function ActivitySheet({
       title: titleKey ? tHistory(titleKey) : humanize(log.action ?? ""),
       actor: actorNameOf(log),
       marker,
-      tone: ALERT_ACTIONS.has(action) ? ("alert" as const) : ("default" as const),
-      elapsed: older ? formatElapsed(getLogCreatedAt(older), at, tHistory) : null,
+      tone: ALERT_ACTIONS.has(action)
+        ? ("alert" as const)
+        : ("default" as const),
+      elapsed: older
+        ? formatElapsed(getLogCreatedAt(older), at, tHistory)
+        : null,
     };
   });
 

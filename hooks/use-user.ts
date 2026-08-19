@@ -184,9 +184,7 @@ export function useUserDepartments(userId: string | undefined) {
       );
       if (!res.ok) throw new Error("Failed to fetch user departments");
       const json = await res.json();
-      return (
-        json.data ?? { department: null, hod_departments: [] }
-      );
+      return json.data ?? { department: null, hod_departments: [] };
     },
     enabled: !!buCode && !!userId,
   });
@@ -196,25 +194,23 @@ export function useUpdateUserLocations() {
   const buCode = useBuCode();
   const queryClient = useQueryClient();
 
-  return useMutation<
-    void,
-    ApiError,
-    { userId: string; locationIds: string[] }
-  >({
-    mutationFn: async ({ userId, locationIds }) => {
-      if (!buCode) throw new Error("Missing buCode");
-      const res = await httpClient.put(
-        API_ENDPOINTS.CONFIG_LOCATION_USER(buCode, userId),
-        { location_ids: locationIds },
-      );
-      if (!res.ok) {
-        throw await ApiError.from(res, "Failed to update user locations");
-      }
+  return useMutation<void, ApiError, { userId: string; locationIds: string[] }>(
+    {
+      mutationFn: async ({ userId, locationIds }) => {
+        if (!buCode) throw new Error("Missing buCode");
+        const res = await httpClient.put(
+          API_ENDPOINTS.CONFIG_LOCATION_USER(buCode, userId),
+          { location_ids: locationIds },
+        );
+        if (!res.ok) {
+          throw await ApiError.from(res, "Failed to update user locations");
+        }
+      },
+      onSuccess: (_data, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ["user-locations", buCode, variables.userId],
+        });
+      },
     },
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["user-locations", buCode, variables.userId],
-      });
-    },
-  });
+  );
 }

@@ -224,9 +224,7 @@ export function SrStockTable({
   // ของยังไม่ขยับจริงจนกว่าใบจะจ่ายครบ — โชว์ตารางที่เป็นศูนย์ทั้งใบไว้ก่อน
   // มีแต่ทำให้เข้าใจผิดว่าตัดสต๊อกไปแล้ว บอกตรง ๆ ว่าต้องรอดีกว่า
   if (docStatus !== "completed") {
-    return (
-      <EmptyComponent icon={BoxIcon} title={t("stockNeedsCompleted")} />
-    );
+    return <EmptyComponent icon={BoxIcon} title={t("stockNeedsCompleted")} />;
   }
 
   return (

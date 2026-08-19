@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  */
 function ActivityCardSkeletonItem() {
   return (
-    <div className="rounded-lg border bg-card p-3 space-y-2" aria-hidden="true">
+    <div className="bg-card space-y-2 rounded-lg border p-3" aria-hidden="true">
       {/* Header: action badge + timestamp */}
       <div className="flex items-center justify-between gap-2">
         <Skeleton className="h-5 w-14 rounded-full" />
@@ -37,7 +37,7 @@ function ActivityCardSkeletonItem() {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center gap-3 pt-1 border-t">
+      <div className="flex items-center gap-3 border-t pt-1">
         <div className="flex items-center gap-1.5">
           <Skeleton className="size-3 rounded-full" />
           <Skeleton className="h-3 w-24" />
@@ -66,7 +66,9 @@ interface ActivityCardSkeletonGridProps {
  * <ActivityCardSkeletonGrid count={12} />
  * ```
  */
-export function ActivityCardSkeletonGrid({ count = 8 }: ActivityCardSkeletonGridProps) {
+export function ActivityCardSkeletonGrid({
+  count = 8,
+}: ActivityCardSkeletonGridProps) {
   return (
     <div
       className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"

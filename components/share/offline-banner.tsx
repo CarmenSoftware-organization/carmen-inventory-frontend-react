@@ -1,4 +1,3 @@
-
 import { WifiOff } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { useOnlineStatus } from "@/hooks/use-online-status";

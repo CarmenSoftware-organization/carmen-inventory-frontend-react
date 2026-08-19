@@ -1,4 +1,3 @@
-
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { useTranslations } from "use-intl";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,7 +21,10 @@ export function CategoryCheckboxList({
   const t = useTranslations("systemAdmin.workflow");
   // `data.products` เก็บแค่ id หมวดจึง resolve จากรายการสินค้าสดที่โหลดมา ไม่ใช่จากสำเนาที่ฝังในเอกสาร
   // ผลพลอยได้คือหมวดที่โชว์เป็นของปัจจุบันเสมอ ต่อให้สินค้าถูกย้ายหมวดหลังจาก workflow ถูกบันทึกไปแล้ว
-  const selectedIds = useWatch({ control: form.control, name: "data.products" });
+  const selectedIds = useWatch({
+    control: form.control,
+    name: "data.products",
+  });
   const selected = new Set(selectedIds ?? []);
 
   const catMap = new Map<string, string>();
@@ -32,7 +34,10 @@ export function CategoryCheckboxList({
       catMap.set(p.product_category.id, p.product_category.name);
     }
   }
-  const categories = Array.from(catMap.entries()).map(([id, name]) => ({ id, name }));
+  const categories = Array.from(catMap.entries()).map(([id, name]) => ({
+    id,
+    name,
+  }));
 
   const value =
     useWatch({

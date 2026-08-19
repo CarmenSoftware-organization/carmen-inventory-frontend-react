@@ -75,9 +75,7 @@ export function srItemAmount(_item: SrFormValues["items"][number]): number {
  * แยกออกมาเพราะตารางสต๊อกต้องโชว์ราคาต่อหน่วยกับยอดรวมคนละคอลัมน์ วันไหนราคา
  * มาจริงก็แก้ที่นี่ที่เดียวแล้วทั้งสองคอลัมน์ตรงกันเอง
  */
-export function srItemUnitPrice(
-  _item: SrFormValues["items"][number],
-): number {
+export function srItemUnitPrice(_item: SrFormValues["items"][number]): number {
   return 0;
 }
 

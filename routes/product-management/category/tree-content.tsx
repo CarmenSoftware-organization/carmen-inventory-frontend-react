@@ -46,11 +46,11 @@ export default function TreeContent({
 
   if (isLoading) {
     return (
-      <div className="p-1 space-y-px">
+      <div className="space-y-px p-1">
         {["cat", "sub-1", "item-1", "cat-2", "sub-2", "item-2"].map((id, i) => (
           <div
             key={id}
-            className="flex items-center h-7 gap-2"
+            className="flex h-7 items-center gap-2"
             style={{ paddingLeft: `${(i % 3) * 20 + 4}px` }}
           >
             <Skeleton className="h-3 w-3 rounded" />
@@ -66,10 +66,8 @@ export default function TreeContent({
 
   if (filteredData.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-32 text-sm text-muted-foreground">
-        {search
-          ? t("noResults", { search })
-          : t("noCategories")}
+      <div className="text-muted-foreground flex h-32 flex-col items-center justify-center text-sm">
+        {search ? t("noResults", { search }) : t("noCategories")}
       </div>
     );
   }

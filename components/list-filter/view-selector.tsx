@@ -226,7 +226,11 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="max-w-64 justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            className="max-w-64 justify-between"
+          >
             <span className="truncate">
               {tv("view")}: {label}
             </span>
@@ -373,7 +377,9 @@ export function ViewSelector({ view, snapshot }: ViewSelectorProps) {
 
       <DeleteDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => !open && !deletePending && setDeleteTarget(null)}
+        onOpenChange={(open) =>
+          !open && !deletePending && setDeleteTarget(null)
+        }
         title={tv("deleteConfirm", { name: deleteTarget?.name ?? "" })}
         isPending={deletePending}
         onConfirm={() => {

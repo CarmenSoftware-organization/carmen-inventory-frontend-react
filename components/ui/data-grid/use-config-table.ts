@@ -92,12 +92,13 @@ export function useConfigTable<T>({
   const deletePermission = prefix
     ? buildPermissionKey(prefix, "delete")
     : undefined;
-  const deleteDenied =
-    !!deletePermission && !isAdmin && !can(deletePermission);
+  const deleteDenied = !!deletePermission && !isAdmin && !can(deletePermission);
   // สัญญาหมดอายุ/ถูกระงับ → ปิดปุ่ม delete ของแถวจริง (ไม่ใช่แค่ dim+dispatch แบบ
   // deleteDenied) มาก่อน deleteDenied เสมอเพราะแก้คนละวิธี (ต่ออายุ ไม่ใช่ขอสิทธิ์)
   const writeDisabled = !canWrite;
-  const writeDisabledTitle = writeDisabled ? tl("writeDisabledTitle") : undefined;
+  const writeDisabledTitle = writeDisabled
+    ? tl("writeDisabledTitle")
+    : undefined;
 
   const allColumns: ColumnDef<T>[] = [
     selectColumn<T>(),

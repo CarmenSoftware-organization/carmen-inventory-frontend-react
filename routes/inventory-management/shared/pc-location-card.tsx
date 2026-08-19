@@ -89,7 +89,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
                     : t("notCount"),
               }}
             />
-            <div className="text-muted-foreground flex items-center gap-1.5 text-micro">
+            <div className="text-muted-foreground text-micro flex items-center gap-1.5">
               <Warehouse className="size-2.5 shrink-0" aria-hidden="true" />
               <span>{locationTypeLabel}</span>
             </div>
@@ -98,7 +98,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
 
         <div className="shrink-0">
           {actionType === "done" ? (
-            <span className="text-muted-foreground inline-flex items-center gap-1 text-micro font-semibold tracking-wider uppercase">
+            <span className="text-muted-foreground text-micro inline-flex items-center gap-1 font-semibold tracking-wider uppercase">
               <CheckCircle2
                 className="text-success-ink size-3"
                 aria-hidden="true"
@@ -121,7 +121,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
 
       {/* Row 2: Progress */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-micro">
+        <div className="text-micro flex items-center justify-between">
           <span className="text-muted-foreground tracking-wide uppercase">
             {t("progress")}
           </span>
@@ -133,7 +133,7 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
       </div>
 
       {/* Row 3: Footer meta */}
-      <div className="border-border/40 text-muted-foreground flex items-center gap-4 border-t pt-2 text-micro">
+      <div className="border-border/40 text-muted-foreground text-micro flex items-center gap-4 border-t pt-2">
         <span className="flex items-center gap-1">
           <Package className="size-2.5" aria-hidden="true" />
           {t("nItems", { count: total })}

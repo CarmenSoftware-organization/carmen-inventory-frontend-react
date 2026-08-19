@@ -1,4 +1,3 @@
-
 import { Clock, Tag, User } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { useProfile } from "@/hooks/use-profile";
@@ -58,7 +57,9 @@ export function StatusBar() {
     ? `${profile.user_info.firstname ?? ""} ${profile.user_info.lastname ?? ""}`.trim()
     : "";
   const displayName = fullName || aliasName || "—";
-  const formattedTime = now ? formatDate(now.toISOString(), dateTimeFormat) : "";
+  const formattedTime = now
+    ? formatDate(now.toISOString(), dateTimeFormat)
+    : "";
 
   const handleOpenChange = (next: boolean) => {
     setManualOpen(next);
@@ -71,7 +72,7 @@ export function StatusBar() {
       <footer
         role="contentinfo"
         data-slot="status-bar"
-        className="bg-muted/40 text-muted-foreground flex h-6 shrink-0 items-center justify-between border-t px-3 text-micro"
+        className="bg-muted/40 text-muted-foreground text-micro flex h-6 shrink-0 items-center justify-between border-t px-3"
       >
         <div className="flex items-center gap-1.5 truncate">
           <User aria-hidden="true" className="h-3 w-3" />

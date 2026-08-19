@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { useCategory } from "@/hooks/use-category";
@@ -68,7 +67,9 @@ export function LookupCategory({
       size={size}
       renderItem={(c) => (
         <>
-          <Badge size="xs" variant="secondary">{c.code}</Badge>
+          <Badge size="xs" variant="secondary">
+            {c.code}
+          </Badge>
           <span className="flex-1 truncate text-left text-xs">{c.name}</span>
         </>
       )}

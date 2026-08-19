@@ -90,7 +90,10 @@ async function fetchNotificationPage(
   };
 }
 
-type InfiniteShape = { pages: NotificationListResponse[]; pageParams: unknown[] };
+type InfiniteShape = {
+  pages: NotificationListResponse[];
+  pageParams: unknown[];
+};
 
 /** แยกแคชแบบ infinite ออกจากแคชหน้าเดียว — ทั้งสองอยู่ใต้ prefix `unreadAll` */
 function isInfinite(value: unknown): value is InfiniteShape {
@@ -113,8 +116,7 @@ function dropRows(
     data: kept,
     paginate: {
       ...page.paginate,
-      total:
-        ids === "all" ? 0 : Math.max(0, page.paginate.total - removed),
+      total: ids === "all" ? 0 : Math.max(0, page.paginate.total - removed),
     },
   };
 }
@@ -196,7 +198,9 @@ export function useNotificationRealtime(userId: string | undefined) {
           typeof message === "object" &&
           (message as { type?: unknown }).type === "notification"
         ) {
-          void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+          void queryClient.invalidateQueries({
+            queryKey: notificationKeys.all,
+          });
         }
       };
 

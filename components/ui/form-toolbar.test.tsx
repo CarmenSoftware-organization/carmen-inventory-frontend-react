@@ -41,7 +41,9 @@ function setCan({
   useCanReturn.mockReturnValue({ can, isAdmin, canWrite });
 }
 
-function renderToolbar(props: Partial<React.ComponentProps<typeof FormToolbar>>) {
+function renderToolbar(
+  props: Partial<React.ComponentProps<typeof FormToolbar>>,
+) {
   return render(
     <MemoryRouter>
       <FormToolbar
@@ -80,7 +82,9 @@ describe("FormToolbar — canWrite false: real disabled + title, no dialog on cl
     const save = screen.getByRole("button", { name: /save/i });
     expect(save).toBeDisabled();
     expect(save).toHaveAttribute("title", "writeDisabledTitle");
-    await userEvent.click(save, { skipPointerEventsCheck: true } as never).catch(() => {});
+    await userEvent
+      .click(save, { skipPointerEventsCheck: true } as never)
+      .catch(() => {});
     expect(dispatchPermissionDenied).not.toHaveBeenCalled();
   });
 

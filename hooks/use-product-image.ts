@@ -69,7 +69,8 @@ export function useUploadProductImages() {
     UploadProductImagesDto & { product_id: string }
   >({
     mutationFn: async ({ product_id, ...data }) => {
-      if (!buCode) throw new ApiError("MISSING_REQUIRED_FIELD", "Missing buCode");
+      if (!buCode)
+        throw new ApiError("MISSING_REQUIRED_FIELD", "Missing buCode");
       const res = await httpClient.post(
         API_ENDPOINTS.PRODUCT_IMAGES(buCode, product_id),
         buildProductImageFormData(data),

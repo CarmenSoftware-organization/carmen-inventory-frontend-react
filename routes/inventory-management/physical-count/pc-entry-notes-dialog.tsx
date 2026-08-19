@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import {
@@ -13,7 +12,10 @@ import {
   useSavePhysicalCountProductNote,
 } from "@/hooks/use-physical-count";
 
-export type { SavedEvidenceImage, SavedNotePayload } from "../shared/entry-notes-dialog";
+export type {
+  SavedEvidenceImage,
+  SavedNotePayload,
+} from "../shared/entry-notes-dialog";
 
 interface PcEntryNotesDialogProps {
   readonly open: boolean;

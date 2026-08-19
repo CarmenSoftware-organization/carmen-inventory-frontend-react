@@ -11,7 +11,7 @@ export function TopLoader() {
       className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-[3px]"
     >
       <div
-        className="h-full bg-primary transition-[width,opacity] ease-out"
+        className="bg-primary h-full transition-[width,opacity] ease-out"
         style={{
           width: active ? "80%" : "100%",
           opacity: active ? 1 : 0,

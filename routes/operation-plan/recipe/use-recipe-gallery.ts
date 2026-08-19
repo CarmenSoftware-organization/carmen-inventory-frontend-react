@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
@@ -7,10 +6,7 @@ import {
   IMAGE_MIME_TYPES,
   formatBytes,
 } from "@/lib/image-upload";
-import type {
-  RecipeImage,
-  RecipeGalleryManifestItem,
-} from "@/types/recipe";
+import type { RecipeImage, RecipeGalleryManifestItem } from "@/types/recipe";
 
 /** Max images per recipe (backend limit). */
 const MAX_IMAGES = 10;
@@ -49,7 +45,9 @@ export interface RecipeGalleryController {
 }
 
 /** Map server images → gallery items, preserving sort_order (primary flagged, not reordered). */
-function toItems(images: readonly RecipeImage[] | undefined): RecipeGalleryItem[] {
+function toItems(
+  images: readonly RecipeImage[] | undefined,
+): RecipeGalleryItem[] {
   return [...(images ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((img) => ({
@@ -117,7 +115,9 @@ export function useRecipeGallery(
         continue;
       }
       if (file.size > IMAGE_MAX_BYTES) {
-        toast.warning(t("imageSizeError", { size: formatBytes(IMAGE_MAX_BYTES) }));
+        toast.warning(
+          t("imageSizeError", { size: formatBytes(IMAGE_MAX_BYTES) }),
+        );
         continue;
       }
       const url = URL.createObjectURL(file);
@@ -148,7 +148,11 @@ export function useRecipeGallery(
 
   const setPrimary = (key: string) => {
     setItems((prev) =>
-      prev.map((i) => (i.isPrimary === (i.key === key) ? i : { ...i, isPrimary: i.key === key })),
+      prev.map((i) =>
+        i.isPrimary === (i.key === key)
+          ? i
+          : { ...i, isPrimary: i.key === key },
+      ),
     );
     setIsDirty(true);
   };

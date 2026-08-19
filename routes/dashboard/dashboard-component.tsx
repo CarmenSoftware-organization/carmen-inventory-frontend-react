@@ -1,4 +1,3 @@
-
 import { useState, useSyncExternalStore } from "react";
 import {
   closestCenter,
@@ -57,9 +56,7 @@ import { StatusGroupCard } from "./status-group-card";
 import { WidgetConfigDialog } from "./widget-config-dialog";
 import { inferWidgetTypeFromShape, SUPPORTED_SHAPES } from "./widget-shape";
 
-const greetingKeyFor = (
-  hour: number,
-): "morning" | "afternoon" | "evening" => {
+const greetingKeyFor = (hour: number): "morning" | "afternoon" | "evening" => {
   if (hour < 12) return "morning";
   if (hour < 18) return "afternoon";
   return "evening";
@@ -316,11 +313,7 @@ const SavedWidgetsSection = () => {
     reordered.forEach((w) => {
       const orig = normalItems.find((o) => o.id === w.id);
       if (orig && orig.order_index !== w.order_index) {
-        updateWidget.mutate(
-          { id: w.id, order_index: w.order_index },
-          {
-          },
-        );
+        updateWidget.mutate({ id: w.id, order_index: w.order_index }, {});
       }
     });
   };
@@ -471,7 +464,7 @@ function EmptyState() {
             {hints.map((h) => (
               <li
                 key={h.label}
-                className="bg-muted inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-micro font-semibold"
+                className="bg-muted text-micro inline-flex items-center gap-1.5 rounded-full border px-2 py-1 font-semibold"
               >
                 <h.Icon
                   className="size-3"

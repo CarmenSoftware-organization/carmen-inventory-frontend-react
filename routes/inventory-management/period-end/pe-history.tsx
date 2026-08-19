@@ -1,4 +1,3 @@
-
 import { Archive } from "lucide-react";
 import { useTranslations } from "use-intl";
 import EmptyComponent from "@/components/empty-component";

@@ -38,7 +38,7 @@ export function SeatQuotaBanner({ seat, expiringSoon }: SeatQuotaBannerProps) {
     return (
       <div
         role="alert"
-        className="bg-muted border-b px-4 py-2 text-xs flex items-center justify-center gap-2"
+        className="bg-muted flex items-center justify-center gap-2 border-b px-4 py-2 text-xs"
       >
         <Users className="text-destructive size-4 shrink-0" aria-hidden />
         <span className="text-muted-foreground">
@@ -57,9 +57,12 @@ export function SeatQuotaBanner({ seat, expiringSoon }: SeatQuotaBannerProps) {
     return (
       <div
         role="alert"
-        className="bg-muted border-b px-4 py-2 text-xs flex items-center justify-center gap-2"
+        className="bg-muted flex items-center justify-center gap-2 border-b px-4 py-2 text-xs"
       >
-        <TriangleAlert className="text-warning-ink size-4 shrink-0" aria-hidden />
+        <TriangleAlert
+          className="text-warning-ink size-4 shrink-0"
+          aria-hidden
+        />
         <span className="text-muted-foreground">
           {t("seatExpiringSoon", {
             seats: expiringSoon.seats,

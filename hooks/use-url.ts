@@ -1,4 +1,3 @@
-
 import { useCallback, useSyncExternalStore } from "react";
 
 export const URL_CHANGE_EVENT = "useurl:change";
@@ -79,17 +78,14 @@ type URLStateOptions = {
 export const useURL = (paramName: string, options: URLStateOptions = {}) => {
   const { defaultValue = "", onUpdate } = options;
 
-  const subscribe = useCallback(
-    (callback: () => void) => {
-      window.addEventListener("popstate", callback);
-      window.addEventListener(URL_CHANGE_EVENT, callback);
-      return () => {
-        window.removeEventListener("popstate", callback);
-        window.removeEventListener(URL_CHANGE_EVENT, callback);
-      };
-    },
-    [],
-  );
+  const subscribe = useCallback((callback: () => void) => {
+    window.addEventListener("popstate", callback);
+    window.addEventListener(URL_CHANGE_EVENT, callback);
+    return () => {
+      window.removeEventListener("popstate", callback);
+      window.removeEventListener(URL_CHANGE_EVENT, callback);
+    };
+  }, []);
 
   const getSnapshot = useCallback(
     () => getURLParam(paramName, defaultValue),

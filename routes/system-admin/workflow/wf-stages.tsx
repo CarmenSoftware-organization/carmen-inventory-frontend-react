@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import type { UseFormReturn, UseFieldArrayReturn } from "react-hook-form";
@@ -44,7 +43,7 @@ export function WfStages({
         />
       </div>
 
-      <div className="flex-1 rounded-xl border bg-card p-4 shadow-sm md:p-6">
+      <div className="bg-card flex-1 rounded-xl border p-4 shadow-sm md:p-6">
         {fields.length === 0 ? (
           <p className="text-muted-foreground py-10 text-center text-sm">
             {t("noStages")}

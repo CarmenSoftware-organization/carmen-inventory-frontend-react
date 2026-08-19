@@ -1,4 +1,3 @@
-
 import { Controller, type UseFormReturn } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -129,7 +128,10 @@ export function WfStageGeneral({
                     value="only_creator"
                     id={`${prefix}-creator-only`}
                   />
-                  <label htmlFor={`${prefix}-creator-only`} className="text-sm font-medium">
+                  <label
+                    htmlFor={`${prefix}-creator-only`}
+                    className="text-sm font-medium"
+                  >
                     {t("onlyCreator")}
                   </label>
                 </div>
@@ -138,7 +140,10 @@ export function WfStageGeneral({
                     value="all_department"
                     id={`${prefix}-all-dept`}
                   />
-                  <label htmlFor={`${prefix}-all-dept`} className="text-sm font-medium">
+                  <label
+                    htmlFor={`${prefix}-all-dept`}
+                    className="text-sm font-medium"
+                  >
                     {t("allDepartment")}
                   </label>
                 </div>
@@ -219,11 +224,7 @@ export function WfStageGeneral({
                     )}
                   />
                   <FieldLabel>
-                    <Badge
-                      variant="success"
-                      size="sm"
-                      className="font-medium"
-                    >
+                    <Badge variant="success" size="sm" className="font-medium">
                       {t("actionApprove")}
                     </Badge>
                   </FieldLabel>
@@ -263,11 +264,7 @@ export function WfStageGeneral({
                     )}
                   />
                   <FieldLabel>
-                    <Badge
-                      variant="warning"
-                      size="sm"
-                      className="font-medium"
-                    >
+                    <Badge variant="warning" size="sm" className="font-medium">
                       {t("actionSendBack")}
                     </Badge>
                   </FieldLabel>

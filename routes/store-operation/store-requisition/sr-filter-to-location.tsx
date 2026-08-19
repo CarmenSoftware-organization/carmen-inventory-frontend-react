@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import { useState } from "react";
 import { ChevronsUpDown, Search } from "lucide-react";
@@ -64,7 +63,8 @@ export function SrFilterToLocation({
         const q = search.trim().toLowerCase();
         return locations.filter(
           (l) =>
-            l.code.toLowerCase().includes(q) || l.name.toLowerCase().includes(q),
+            l.code.toLowerCase().includes(q) ||
+            l.name.toLowerCase().includes(q),
         );
       })();
 
@@ -160,7 +160,7 @@ export function SrFilterToLocation({
             <label
               key={loc.id}
               className={cn(
-                "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none whitespace-nowrap",
+                "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs whitespace-nowrap select-none",
                 "hover:bg-accent hover:text-accent-foreground",
               )}
             >
@@ -175,7 +175,7 @@ export function SrFilterToLocation({
               <Badge
                 size="xs"
                 variant={TYPE_VARIANT[loc.location_type]}
-                className="h-4 min-w-0 shrink-0 px-1.5 text-micro-legal uppercase"
+                className="text-micro-legal h-4 min-w-0 shrink-0 px-1.5 uppercase"
               >
                 {loc.location_type}
               </Badge>

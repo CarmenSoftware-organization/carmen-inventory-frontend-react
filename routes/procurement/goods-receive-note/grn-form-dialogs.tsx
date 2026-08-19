@@ -8,7 +8,9 @@ import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 // แทน next/dynamic ด้วย React.lazy (code-split comment-sheet chunk เหมือนเดิม)
 // lazy ต้องการ default export — wrap named export ด้วย { default: ... }
 const GrnCommentSheet = lazy(() =>
-  import("./grn-comment-sheet").then((mod) => ({ default: mod.GrnCommentSheet })),
+  import("./grn-comment-sheet").then((mod) => ({
+    default: mod.GrnCommentSheet,
+  })),
 );
 
 interface GrnFormDialogsProps {
@@ -54,7 +56,9 @@ export function GrnFormDialogs({
     <>
       <DeleteDialog
         open={showDelete}
-        onOpenChange={(open) => !open && !isDeletePending && setShowDelete(false)}
+        onOpenChange={(open) =>
+          !open && !isDeletePending && setShowDelete(false)
+        }
         title={t("deleteTitle")}
         description={t("deleteConfirm", { grnNo })}
         isPending={isDeletePending}

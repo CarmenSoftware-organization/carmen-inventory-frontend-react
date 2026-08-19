@@ -8,14 +8,21 @@ import type { PhysicalCount } from "@/types/physical-count";
  * @param tf - ฟังก์ชันแปลชื่อฟิลด์
  * @returns Zod schema ของฟอร์ม physical count
  */
-export function createPhysicalCountSchema(tv: TranslationFn, tf: TranslationFn) {
+export function createPhysicalCountSchema(
+  tv: TranslationFn,
+  tf: TranslationFn,
+) {
   return z.object({
-    department_id: z.string().min(1, tv("required", { field: tf("department") })),
+    department_id: z
+      .string()
+      .min(1, tv("required", { field: tf("department") })),
     physical_count_period_id: z.string().optional(),
   });
 }
 
-export type PhysicalCountFormValues = z.infer<ReturnType<typeof createPhysicalCountSchema>>;
+export type PhysicalCountFormValues = z.infer<
+  ReturnType<typeof createPhysicalCountSchema>
+>;
 
 // --- Defaults ---
 

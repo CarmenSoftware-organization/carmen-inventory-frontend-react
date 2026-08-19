@@ -292,8 +292,7 @@ export function getDefaultValues(
                 received_qty: loc.received_qty ?? 0,
                 // PO เก่าไม่มี Disc%/Tax ต่อ location → fallback ค่า item-level
                 discount_rate: loc.discount_rate ?? d.discount_rate ?? 0,
-                discount_amount:
-                  loc.discount_amount ?? d.discount_amount ?? 0,
+                discount_amount: loc.discount_amount ?? d.discount_amount ?? 0,
                 is_discount_adjustment: loc.is_discount_adjustment ?? false,
                 tax_profile_id: loc.tax_profile_id ?? d.tax_profile_id ?? null,
                 tax_profile_name:

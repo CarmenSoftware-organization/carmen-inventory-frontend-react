@@ -104,10 +104,7 @@ export function usePriceListTemplateTable({
           inactive: ts("inactive"),
         };
         return (
-          <StatusDotBadge
-            size="lg"
-            tone={PL_STATUS_TONE[status] ?? "neutral"}
-          >
+          <StatusDotBadge size="lg" tone={PL_STATUS_TONE[status] ?? "neutral"}>
             {labelMap[status] ?? status}
           </StatusDotBadge>
         );
@@ -138,7 +135,9 @@ export function usePriceListTemplateTable({
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
     // คอลัมน์ audit ซ่อนเป็น default (เปิดได้จากเมนู Toggle Columns)
-    initialState: { columnVisibility: { created_at: false, updated_at: false } },
+    initialState: {
+      columnVisibility: { created_at: false, updated_at: false },
+    },
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

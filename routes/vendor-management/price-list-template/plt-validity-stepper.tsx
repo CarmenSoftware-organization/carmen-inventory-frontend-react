@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -89,7 +88,7 @@ export function PltValidityStepper({
       </div>
 
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        <span className="text-muted-foreground/70 mr-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
+        <span className="text-muted-foreground/70 text-micro-eyebrow mr-1 font-semibold tracking-widest uppercase">
           {labels.presets}
         </span>
         {VALIDITY_PRESETS.map((preset) => {
@@ -101,7 +100,7 @@ export function PltValidityStepper({
               disabled={disabled}
               onClick={() => onChange(preset)}
               className={cn(
-                "rounded-full border px-2 py-1 text-micro font-semibold transition-colors",
+                "text-micro rounded-full border px-2 py-1 font-semibold transition-colors",
                 on
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border/60 bg-background/60 text-foreground/80 hover:border-foreground/40",

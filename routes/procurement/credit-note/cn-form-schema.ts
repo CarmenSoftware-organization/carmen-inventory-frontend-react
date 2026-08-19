@@ -18,57 +18,56 @@ import type { CreditNoteDetail, CnItemPayload } from "@/types/credit-note";
  * item.parse({ item_id: "p1", quantity: 1, unit_id: "u1", ... });
  */
 function createCnItemSchema(tv: TranslationFn, tf: TranslationFn) {
-  return z
-    .object({
-      id: z.string().optional(),
-      doc_version: z.coerce.number().optional(),
-      _group_key: z.string(),
-      // ยอดของบรรทัด GRN ต้นทาง — แถวหลักในตารางแสดงชุดนี้ให้เทียบกับยอดที่คิด
-      // จากจำนวนคืน ทุกตัวเป็น display อย่างเดียว ไม่ส่งเข้า payload
-      // (_grn_received_qty ยังเป็นเพดานของจำนวนคืนด้วย · null = ยังไม่รู้ค่า เช่น
-      // ใบเก่าที่โหลด GRN ไม่เสร็จ → ไม่บังคับเพดาน จะได้ไม่บล็อกมั่ว
-      // ส่วน 0 คือรับมา 0 จริง = คืนไม่ได้เลย ห้ามเอาไปปนกับ "ไม่รู้")
-      _grn_received_qty: z.coerce.number().nullable(),
-      _grn_price: z.coerce.number(),
-      _grn_sub_total: z.coerce.number(),
-      _grn_discount_amount: z.coerce.number(),
-      _grn_net_amount: z.coerce.number(),
-      _grn_tax_amount: z.coerce.number(),
-      _grn_total_amount: z.coerce.number(),
-      location_id: z
-        .string()
-        .nullable()
-        .refine((v) => !!v, tv("required", { field: tf("location") })),
-      location_name: z.string(),
-      // display เท่านั้น — ไม่ส่งเข้า payload
-      location_code: z.string(),
-      item_id: z
-        .string()
-        .nullable()
-        .refine((v) => !!v, tv("required", { field: tf("product") })),
-      item_name: z.string(),
-      // display เท่านั้น — ไม่ส่งเข้า payload (เหมือน item_name)
-      item_local_name: z.string(),
-      // คืนเป็นเศษได้ (0.5 kg) · ต้อง > 0 เฉพาะใบประเภทจำนวนคืน (เช็คที่ระดับฟอร์ม)
-      quantity: z.coerce.number().min(0),
-      requested_qty: z.coerce.number().min(0),
-      approved_qty: z.coerce.number().min(0),
-      unit_id: z.string().min(1, tv("required", { field: tf("unit") })),
-      unit_name: z.string(),
-      currency_code: z.string(),
-      unit_price: z.coerce.number().min(0),
-      net_amount: z.coerce.number().min(0),
-      discount_rate: z.coerce.number().min(0),
-      discount_amount: z.coerce.number().min(0),
-      is_discount_adjustment: z.boolean(),
-      tax_profile_id: z.string().nullable(),
-      tax_profile_name: z.string(),
-      tax_rate: z.coerce.number().min(0),
-      tax_amount: z.coerce.number().min(0),
-      total_amount: z.coerce.number().min(0),
-      is_tax_adjustment: z.boolean(),
-      description: z.string(),
-    });
+  return z.object({
+    id: z.string().optional(),
+    doc_version: z.coerce.number().optional(),
+    _group_key: z.string(),
+    // ยอดของบรรทัด GRN ต้นทาง — แถวหลักในตารางแสดงชุดนี้ให้เทียบกับยอดที่คิด
+    // จากจำนวนคืน ทุกตัวเป็น display อย่างเดียว ไม่ส่งเข้า payload
+    // (_grn_received_qty ยังเป็นเพดานของจำนวนคืนด้วย · null = ยังไม่รู้ค่า เช่น
+    // ใบเก่าที่โหลด GRN ไม่เสร็จ → ไม่บังคับเพดาน จะได้ไม่บล็อกมั่ว
+    // ส่วน 0 คือรับมา 0 จริง = คืนไม่ได้เลย ห้ามเอาไปปนกับ "ไม่รู้")
+    _grn_received_qty: z.coerce.number().nullable(),
+    _grn_price: z.coerce.number(),
+    _grn_sub_total: z.coerce.number(),
+    _grn_discount_amount: z.coerce.number(),
+    _grn_net_amount: z.coerce.number(),
+    _grn_tax_amount: z.coerce.number(),
+    _grn_total_amount: z.coerce.number(),
+    location_id: z
+      .string()
+      .nullable()
+      .refine((v) => !!v, tv("required", { field: tf("location") })),
+    location_name: z.string(),
+    // display เท่านั้น — ไม่ส่งเข้า payload
+    location_code: z.string(),
+    item_id: z
+      .string()
+      .nullable()
+      .refine((v) => !!v, tv("required", { field: tf("product") })),
+    item_name: z.string(),
+    // display เท่านั้น — ไม่ส่งเข้า payload (เหมือน item_name)
+    item_local_name: z.string(),
+    // คืนเป็นเศษได้ (0.5 kg) · ต้อง > 0 เฉพาะใบประเภทจำนวนคืน (เช็คที่ระดับฟอร์ม)
+    quantity: z.coerce.number().min(0),
+    requested_qty: z.coerce.number().min(0),
+    approved_qty: z.coerce.number().min(0),
+    unit_id: z.string().min(1, tv("required", { field: tf("unit") })),
+    unit_name: z.string(),
+    currency_code: z.string(),
+    unit_price: z.coerce.number().min(0),
+    net_amount: z.coerce.number().min(0),
+    discount_rate: z.coerce.number().min(0),
+    discount_amount: z.coerce.number().min(0),
+    is_discount_adjustment: z.boolean(),
+    tax_profile_id: z.string().nullable(),
+    tax_profile_name: z.string(),
+    tax_rate: z.coerce.number().min(0),
+    tax_amount: z.coerce.number().min(0),
+    total_amount: z.coerce.number().min(0),
+    is_tax_adjustment: z.boolean(),
+    description: z.string(),
+  });
 }
 
 /**

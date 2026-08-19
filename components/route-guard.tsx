@@ -130,9 +130,7 @@ export function AccessDeniedBlock({
           type="button"
           size="sm"
           onClick={() =>
-            fallbackTo
-              ? navigate(fallbackTo, { replace: true })
-              : navigate(-1)
+            fallbackTo ? navigate(fallbackTo, { replace: true }) : navigate(-1)
           }
           className="mt-5"
         >

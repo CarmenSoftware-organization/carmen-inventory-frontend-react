@@ -1,4 +1,3 @@
-
 import { lazy, Suspense, useState } from "react";
 import { MapPin } from "lucide-react";
 import { useTranslations } from "use-intl";
@@ -59,9 +58,7 @@ function LocationRow({ loc }: { readonly loc: UserLocationItem }) {
         className="text-muted-foreground size-3.5 shrink-0"
         aria-hidden="true"
       />
-      <span className="text-micro font-semibold">
-        {loc.location_code}
-      </span>
+      <span className="text-micro font-semibold">{loc.location_code}</span>
       <span className="text-muted-foreground/60">·</span>
       <span className="flex-1 truncate">{loc.location_name}</span>
       {!loc.is_active && (
@@ -124,7 +121,8 @@ export function LocationsSection({
   };
 
   const present = LOCATION_TYPE_ORDER.filter((t) => groupedLocations.has(t));
-  const visibleGroups = typeFilter === "all" ? present : present.filter((t) => t === typeFilter);
+  const visibleGroups =
+    typeFilter === "all" ? present : present.filter((t) => t === typeFilter);
 
   const action =
     isView && userLocations.length > 0 ? (

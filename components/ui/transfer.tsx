@@ -1,4 +1,3 @@
-
 import { useDeferredValue, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
@@ -225,7 +224,7 @@ const TransferPanel = ({
         </span>
         <span
           className={cn(
-            "ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 text-micro-eyebrow font-semibold tracking-wider tabular-nums",
+            "text-micro-eyebrow ml-auto inline-flex h-4 min-w-6 items-center justify-center rounded-full px-1.5 font-semibold tracking-wider tabular-nums",
             checkedKeys.size > 0
               ? "bg-primary/15 text-primary"
               : "bg-muted text-muted-foreground",

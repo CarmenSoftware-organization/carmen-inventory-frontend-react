@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import {
@@ -351,7 +350,7 @@ export default function HomeComponent() {
             className="mx-auto mt-16 max-w-2xl"
             style={{ animation: "home-fade-up 0.7s ease-out 0.7s both" }}
           >
-            <p className="text-muted-foreground/60 mb-5 text-micro font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground/60 text-micro mb-5 font-semibold tracking-widest uppercase">
               Trusted by hotel chains managing thousands of inventory items
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
@@ -360,9 +359,7 @@ export default function HomeComponent() {
                   <p className="text-foreground text-xl font-bold tracking-tight tabular-nums">
                     {s.value}
                   </p>
-                  <p className="text-muted-foreground text-micro">
-                    {s.label}
-                  </p>
+                  <p className="text-muted-foreground text-micro">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -374,7 +371,7 @@ export default function HomeComponent() {
       <section className="border-border/50 bg-muted/20 relative border-y py-10 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-6">
           <Reveal>
-            <p className="text-muted-foreground/70 mb-6 text-center text-micro font-semibold tracking-widest uppercase">
+            <p className="text-muted-foreground/70 text-micro mb-6 text-center font-semibold tracking-widest uppercase">
               Connects with your hotel stack
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 sm:gap-x-12">
@@ -458,7 +455,7 @@ export default function HomeComponent() {
                       <h3 className="text-foreground text-sm font-semibold tracking-tight">
                         New Purchase Order
                       </h3>
-                      <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro-eyebrow font-bold tracking-widest uppercase">
+                      <span className="bg-primary/10 text-primary border-primary/15 text-micro-eyebrow inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-bold tracking-widest uppercase">
                         Draft
                       </span>
                     </div>
@@ -469,7 +466,7 @@ export default function HomeComponent() {
                         { label: "Delivery date", value: "2026-04-15" },
                       ].map((field) => (
                         <div key={field.label}>
-                          <p className="text-muted-foreground/80 mb-1 text-micro-eyebrow font-semibold tracking-widest uppercase">
+                          <p className="text-muted-foreground/80 text-micro-eyebrow mb-1 font-semibold tracking-widest uppercase">
                             {field.label}
                           </p>
                           <div className="border-border/40 bg-background/60 flex h-9 items-center rounded-lg border px-3 text-sm">
@@ -560,7 +557,7 @@ export default function HomeComponent() {
                 }}
               />
               <div className="relative">
-                <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro-eyebrow font-bold tracking-widest uppercase">
+                <span className="bg-primary/10 text-primary border-primary/15 text-micro-eyebrow inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-bold tracking-widest uppercase">
                   <Sparkles className="size-2.5" />
                   Customer story
                 </span>
@@ -603,7 +600,7 @@ export default function HomeComponent() {
           <Reveal>
             <div className="grid items-center gap-12 lg:grid-cols-2">
               <div>
-                <span className="bg-primary/15 text-primary border-primary/20 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-micro-eyebrow font-bold tracking-widest uppercase">
+                <span className="bg-primary/15 text-primary border-primary/20 text-micro-eyebrow inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-bold tracking-widest uppercase">
                   <span>Why Carmen</span>
                 </span>
                 <blockquote className="text-invert-foreground mt-4 text-[clamp(1.5rem,3.5vw,2.25rem)] leading-tight font-semibold tracking-[-0.02em]">
@@ -1006,7 +1003,7 @@ function Eyebrow({
   readonly icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <span className="bg-primary/10 text-primary border-primary/15 inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-micro font-semibold tracking-widest uppercase backdrop-blur-sm">
+    <span className="bg-primary/10 text-primary border-primary/15 text-micro inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-semibold tracking-widest uppercase backdrop-blur-sm">
       <Icon className="size-2.5" />
       {children}
     </span>

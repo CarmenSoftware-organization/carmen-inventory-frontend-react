@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -140,7 +139,9 @@ export function CuisineForm({ cuisine }: CuisineFormProps) {
 
       <form
         id="cuisine-form"
-        onSubmit={form.handleSubmit(onSubmit, () => scrollToFirstInvalidField())}
+        onSubmit={form.handleSubmit(onSubmit, () =>
+          scrollToFirstInvalidField(),
+        )}
       >
         <CuisineGeneralFields form={form} isDisabled={isDisabled} />
         <CuisineDetailFields form={form} isDisabled={isDisabled} />

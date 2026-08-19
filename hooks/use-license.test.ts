@@ -62,7 +62,11 @@ describe("resolveLicense — enforcement switch off (shadow mode)", () => {
 
 describe("resolveLicense — enforcement switch on", () => {
   it('state "none" locks every feature', () => {
-    const license = makeLicense({ state: "none", end_date: null, features: [] });
+    const license = makeLicense({
+      state: "none",
+      end_date: null,
+      features: [],
+    });
     const info = resolveLicense(license, true);
     expect(info.isLicensed("procurement")).toBe(false);
     expect(info.isLicensed("procurement.purchase_request")).toBe(false);
@@ -82,18 +86,12 @@ describe("resolveLicense — enforcement switch on", () => {
   });
 
   it("expired/inactive: canWrite is false but isLicensed still follows features[]", () => {
-    const expired = resolveLicense(
-      makeLicense({ state: "expired" }),
-      true,
-    );
+    const expired = resolveLicense(makeLicense({ state: "expired" }), true);
     expect(expired.canWrite).toBe(false);
     expect(expired.isLicensed("procurement.purchase_request")).toBe(true);
     expect(expired.isLicensed("vendor_management")).toBe(false);
 
-    const inactive = resolveLicense(
-      makeLicense({ state: "inactive" }),
-      true,
-    );
+    const inactive = resolveLicense(makeLicense({ state: "inactive" }), true);
     expect(inactive.canWrite).toBe(false);
     expect(inactive.isLicensed("procurement.purchase_request")).toBe(true);
   });
@@ -177,7 +175,6 @@ describe("resolveLicense — expiringSoon (Task 5.3)", () => {
   });
 });
 
-
 describe("licenseFeatureOf", () => {
   const base = { name: "x", path: "/x", icon: (() => null) as never };
 
@@ -221,20 +218,28 @@ describe("resolveLicense — ต้องมีทั้ง module และ res
   });
 
   it("มีแต่ module ไม่มี resource → ไม่ผ่าน", () => {
-    const info = resolveLicense(makeLicense({ features: ["procurement"] }), true);
+    const info = resolveLicense(
+      makeLicense({ features: ["procurement"] }),
+      true,
+    );
     expect(info.isLicensed("procurement.purchase_request")).toBe(false);
   });
 
   it("มีครบทั้งคู่ → ผ่าน", () => {
     const info = resolveLicense(
-      makeLicense({ features: ["procurement", "procurement.purchase_request"] }),
+      makeLicense({
+        features: ["procurement", "procurement.purchase_request"],
+      }),
       true,
     );
     expect(info.isLicensed("procurement.purchase_request")).toBe(true);
   });
 
   it("module key ล้วน ๆ เช็คตัวมันเองครั้งเดียว", () => {
-    const info = resolveLicense(makeLicense({ features: ["procurement"] }), true);
+    const info = resolveLicense(
+      makeLicense({ features: ["procurement"] }),
+      true,
+    );
     expect(info.isLicensed("procurement")).toBe(true);
     expect(info.isLicensed("vendor_management")).toBe(false);
   });

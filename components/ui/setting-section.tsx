@@ -75,7 +75,7 @@ export function SettingSection({
           <div className="min-w-0">{heading}</div>
           {action}
         </div>
-        <div className="min-w-0 rounded-xl border bg-card shadow-sm p-5 sm:p-6 overflow-hidden">
+        <div className="bg-card min-w-0 overflow-hidden rounded-xl border p-5 shadow-sm sm:p-6">
           {children}
         </div>
       </section>
@@ -85,18 +85,18 @@ export function SettingSection({
   return (
     <section
       className={cn(
-        "grid gap-x-10 md:grid-cols-3 items-start",
+        "grid items-start gap-x-10 md:grid-cols-3",
         plain ? "gap-y-3" : "gap-y-6",
         !first && "border-border/70 mt-8 border-t pt-8",
       )}
     >
-      <div className="md:col-span-1 pt-2">
+      <div className="pt-2 md:col-span-1">
         {heading}
         {action && <div className="mt-3">{action}</div>}
       </div>
       <div
         className={cn(
-          "md:col-span-2 rounded-xl border bg-card shadow-sm overflow-hidden",
+          "bg-card overflow-hidden rounded-xl border shadow-sm md:col-span-2",
         )}
       >
         <div
@@ -128,16 +128,16 @@ export function SettingSectionSkeleton({
   return (
     <div
       className={cn(
-        "grid gap-x-10 gap-y-6 md:grid-cols-3 items-start",
+        "grid items-start gap-x-10 gap-y-6 md:grid-cols-3",
         !first && "border-border/70 mt-8 border-t pt-8",
       )}
     >
-      <div className="space-y-2 md:col-span-1 pt-2">
+      <div className="space-y-2 pt-2 md:col-span-1">
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-3 w-44" />
       </div>
-      <div className="md:col-span-2 rounded-xl border bg-card shadow-sm overflow-hidden">
-        <div className="grid gap-6 p-5 sm:p-6 sm:grid-cols-2">
+      <div className="bg-card overflow-hidden rounded-xl border shadow-sm md:col-span-2">
+        <div className="grid gap-6 p-5 sm:grid-cols-2 sm:p-6">
           {fields.map((w, j) => (
             <Skeleton
               key={j}

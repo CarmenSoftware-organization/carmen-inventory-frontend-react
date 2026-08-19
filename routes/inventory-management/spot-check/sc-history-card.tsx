@@ -1,4 +1,3 @@
-
 import { useTranslations } from "use-intl";
 import {
   Boxes,
@@ -41,7 +40,7 @@ export function ScHistoryCard({ spotCheck, onClick }: ScHistoryCardProps) {
       />
 
       {/* Location */}
-      <div className="text-muted-foreground mt-1.5 flex items-center gap-1.5 text-micro">
+      <div className="text-muted-foreground text-micro mt-1.5 flex items-center gap-1.5">
         <MapPin className="size-2.5 shrink-0" aria-hidden="true" />
         <span className="text-foreground/85 font-semibold">
           {spotCheck.location_name}
@@ -52,7 +51,7 @@ export function ScHistoryCard({ spotCheck, onClick }: ScHistoryCardProps) {
       </div>
 
       {/* Footer meta */}
-      <div className="border-border/40 text-muted-foreground mt-2 flex flex-wrap items-center gap-3 border-t pt-2 text-micro">
+      <div className="border-border/40 text-muted-foreground text-micro mt-2 flex flex-wrap items-center gap-3 border-t pt-2">
         <span className="inline-flex items-center gap-1">
           <Calendar className="size-2.5" aria-hidden="true" />
           <span className="font-semibold">{tfl("startDate")}</span>

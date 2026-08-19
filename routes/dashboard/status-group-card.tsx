@@ -47,7 +47,7 @@ function StatusFlowTile({
       </span>
       <div className="min-w-0">
         <div
-          className="truncate text-micro font-semibold tracking-wide uppercase"
+          className="text-micro truncate font-semibold tracking-wide uppercase"
           style={{ color: `var(${cssVar})` }}
         >
           {label}

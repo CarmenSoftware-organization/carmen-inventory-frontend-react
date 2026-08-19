@@ -27,11 +27,11 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import FormToolbar from "./pd-form-toolbar";
-import GeneralTab from "./pd-general-tab";
-import LocationsTab from "./pd-location-tab";
-import UnitConversionTab from "./pd-unit-conversion-tab";
+import PdTabGeneral from "./pd-tab-general";
+import PdTabLocations from "./pd-tab-locations";
+import PdTabUnitConversion from "./pd-tab-unit-conversion";
 import TabArrayCount, { TabEcoLabelCount } from "./pd-tab-count";
-import { ProductEcoLabelSection } from "./pd-eco-label-section";
+import { PdTabEco } from "./pd-tab-eco";
 
 const getDefaultValues = (product?: ProductDetail): ProductFormValues => {
   if (!product) {
@@ -421,7 +421,7 @@ export function ProductForm({ product }: ProductFormProps) {
             )}
           </TabsList>
           <TabsContent value="general">
-            <GeneralTab
+            <PdTabGeneral
               form={form}
               isDisabled={isDisabled}
               product={product}
@@ -431,13 +431,13 @@ export function ProductForm({ product }: ProductFormProps) {
           </TabsContent>
           <TabsContent value="units">
             <div className="space-y-6">
-              <UnitConversionTab
+              <PdTabUnitConversion
                 form={form}
                 name="order_units"
                 label={t("orderUnit")}
                 isDisabled={isDisabled}
               />
-              <UnitConversionTab
+              <PdTabUnitConversion
                 form={form}
                 name="ingredient_units"
                 label={t("ingredientUnit")}
@@ -446,11 +446,11 @@ export function ProductForm({ product }: ProductFormProps) {
             </div>
           </TabsContent>
           <TabsContent value="locations">
-            <LocationsTab form={form} isDisabled={isDisabled} />
+            <PdTabLocations form={form} isDisabled={isDisabled} />
           </TabsContent>
           {product?.id && (
             <TabsContent value="eco-labels">
-              <ProductEcoLabelSection productId={product.id} />
+              <PdTabEco productId={product.id} readOnly={isDisabled} />
             </TabsContent>
           )}
         </Tabs>

@@ -1,6 +1,11 @@
-
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, ImageIcon, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ImageIcon,
+  X,
+} from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { Button } from "@/components/ui/button";
 import {
@@ -114,7 +119,7 @@ export function ImageLightbox({
                 {current.fileName}
               </DialogPrimitive.Title>
               {images.length > 1 && (
-                <span className="bg-muted text-muted-foreground shrink-0 rounded-full px-2 py-0.5 text-micro-legal font-semibold tabular-nums">
+                <span className="bg-muted text-muted-foreground text-micro-legal shrink-0 rounded-full px-2 py-0.5 font-semibold tabular-nums">
                   {currentIndex + 1} / {images.length}
                 </span>
               )}

@@ -57,7 +57,7 @@ export function WrItemFields({ form, disabled }: WrItemFieldsProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold border-b pb-2">
+        <h2 className="border-b pb-2 text-sm font-semibold">
           {tfl("items")}{" "}
           <span className="text-muted-foreground font-normal">
             ({itemFields.length})

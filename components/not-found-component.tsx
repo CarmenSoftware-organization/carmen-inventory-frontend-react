@@ -47,7 +47,7 @@ export function NotFoundComponent() {
         </div>
       </main>
 
-      <footer className="text-muted-foreground border-border border-t px-6 py-3 text-center text-micro">
+      <footer className="text-muted-foreground border-border text-micro border-t px-6 py-3 text-center">
         {t("footer", { year })}
       </footer>
     </div>

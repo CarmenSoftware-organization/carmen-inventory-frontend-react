@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { Input } from "./input";
 import { Label } from "./label";
@@ -433,15 +432,15 @@ const InputCustom = forwardRef<HTMLInputElement, InputProps>(
         <button
           type="button"
           onClick={handleTogglePassword}
-          className="cursor-pointer hover:opacity-70 transition-opacity"
+          className="cursor-pointer transition-opacity hover:opacity-70"
           aria-label={showPassword ? "Hide password" : "Show password"}
           tabIndex={0}
           onKeyDown={handleKeyDown}
         >
           {showPassword ? (
-            <EyeOff className="h-4 w-4 text-muted-foreground" />
+            <EyeOff className="text-muted-foreground h-4 w-4" />
           ) : (
-            <Eye className="h-4 w-4 text-muted-foreground" />
+            <Eye className="text-muted-foreground h-4 w-4" />
           )}
         </button>
       );
@@ -454,9 +453,9 @@ const InputCustom = forwardRef<HTMLInputElement, InputProps>(
 
     const renderInput = useCallback(
       () => (
-        <div className="relative flex items-center w-full">
+        <div className="relative flex w-full items-center">
           {startContent && (
-            <div className="absolute left-3 flex items-center pointer-events-none z-10">
+            <div className="pointer-events-none absolute left-3 z-10 flex items-center">
               {startContent}
             </div>
           )}
@@ -487,7 +486,7 @@ const InputCustom = forwardRef<HTMLInputElement, InputProps>(
             }
             {...props}
           />
-          <div className="absolute right-3 flex items-center z-10">
+          <div className="absolute right-3 z-10 flex items-center">
             {derivedStates.shouldShowPasswordToggle && renderPasswordToggle()}
             {!derivedStates.shouldShowPasswordToggle && endContent}
           </div>
@@ -544,7 +543,7 @@ const InputCustom = forwardRef<HTMLInputElement, InputProps>(
       return (
         <div
           id={`${inputId}-error`}
-          className="text-destructive text-xs mt-1"
+          className="text-destructive mt-1 text-xs"
           role="alert"
           aria-live="polite"
         >

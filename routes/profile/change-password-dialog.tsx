@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -86,20 +85,20 @@ export default function ChangePasswordDialog({
       open={open}
       onOpenChange={changePassword.isPending ? undefined : onOpenChange}
     >
-      <DialogContent 
-        className="sm:max-w-[425px] p-6 gap-6 rounded-xl border border-border/60 bg-background shadow-md sm:rounded-2xl" 
+      <DialogContent
+        className="border-border/60 bg-background gap-6 rounded-xl border p-6 shadow-md sm:max-w-[425px] sm:rounded-2xl"
         showCloseButton={false}
       >
         <div className="flex flex-col gap-5">
           <div className="flex flex-col">
-            <DialogTitle className="font-semibold text-foreground tracking-tight">
+            <DialogTitle className="text-foreground font-semibold tracking-tight">
               {t("changePassword")}
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+            <DialogDescription className="text-muted-foreground mt-0.5 text-xs">
               {t("changePasswordDesc")}
             </DialogDescription>
           </div>
-          
+
           <form
             id="change-password-form"
             onSubmit={form.handleSubmit(onSubmit)}
@@ -107,7 +106,11 @@ export default function ChangePasswordDialog({
           >
             <FieldGroup className="gap-4">
               <Field data-invalid={!!form.formState.errors.current_password}>
-                <FieldLabel htmlFor="current_password" required className="font-medium text-foreground/80 mb-1.5">
+                <FieldLabel
+                  htmlFor="current_password"
+                  required
+                  className="text-foreground/80 mb-1.5 font-medium"
+                >
                   {t("currentPassword")}
                 </FieldLabel>
                 <InputCustom
@@ -116,7 +119,7 @@ export default function ChangePasswordDialog({
                   placeholder={t("enterCurrentPassword")}
                   data-id="log-in-password"
                   autoComplete="current-password"
-                  className="h-9 rounded-md border-border/60 bg-muted/10 transition-colors focus-visible:ring-1 focus-visible:ring-ring"
+                  className="border-border/60 bg-muted/10 focus-visible:ring-ring h-9 rounded-md transition-colors focus-visible:ring-1"
                   disabled={changePassword.isPending}
                   {...form.register("current_password")}
                 />
@@ -126,7 +129,11 @@ export default function ChangePasswordDialog({
               </Field>
 
               <Field data-invalid={!!form.formState.errors.new_password}>
-                <FieldLabel htmlFor="new_password" required className="font-medium text-foreground/80 mb-1.5">
+                <FieldLabel
+                  htmlFor="new_password"
+                  required
+                  className="text-foreground/80 mb-1.5 font-medium"
+                >
                   {t("newPassword")}
                 </FieldLabel>
                 <InputCustom
@@ -135,7 +142,7 @@ export default function ChangePasswordDialog({
                   placeholder={t("enterNewPassword")}
                   data-id="log-in-password"
                   autoComplete="new-password"
-                  className="h-9 rounded-md border-border/60 bg-muted/10 transition-colors focus-visible:ring-1 focus-visible:ring-ring"
+                  className="border-border/60 bg-muted/10 focus-visible:ring-ring h-9 rounded-md transition-colors focus-visible:ring-1"
                   {...form.register("new_password")}
                 />
                 <FieldError className="mt-1">
@@ -144,7 +151,11 @@ export default function ChangePasswordDialog({
               </Field>
 
               <Field data-invalid={!!form.formState.errors.confirm_password}>
-                <FieldLabel htmlFor="confirm_password" required className="font-medium text-foreground/80 mb-1.5">
+                <FieldLabel
+                  htmlFor="confirm_password"
+                  required
+                  className="text-foreground/80 mb-1.5 font-medium"
+                >
                   {t("confirmPassword")}
                 </FieldLabel>
                 <InputCustom
@@ -153,7 +164,7 @@ export default function ChangePasswordDialog({
                   placeholder={t("reenterPassword")}
                   data-id="log-in-password"
                   autoComplete="new-password"
-                  className="h-9 rounded-md border-border/60 bg-muted/10 transition-colors focus-visible:ring-1 focus-visible:ring-ring"
+                  className="border-border/60 bg-muted/10 focus-visible:ring-ring h-9 rounded-md transition-colors focus-visible:ring-1"
                   disabled={changePassword.isPending}
                   {...form.register("confirm_password")}
                 />
@@ -170,7 +181,7 @@ export default function ChangePasswordDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={changePassword.isPending}
-            className="h-9 px-4 font-medium rounded-md shadow-sm transition-colors border-border/60 hover:bg-muted/50"
+            className="border-border/60 hover:bg-muted/50 h-9 rounded-md px-4 font-medium shadow-sm transition-colors"
           >
             {tc("cancel")}
           </Button>
@@ -178,7 +189,7 @@ export default function ChangePasswordDialog({
             type="submit"
             form="change-password-form"
             disabled={changePassword.isPending}
-            className="h-9 px-4 font-medium rounded-md shadow-sm transition-colors"
+            className="h-9 rounded-md px-4 font-medium shadow-sm transition-colors"
           >
             {changePassword.isPending ? t("changing") : t("changePassword")}
           </Button>

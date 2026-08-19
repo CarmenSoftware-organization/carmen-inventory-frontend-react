@@ -27,7 +27,11 @@ function setup(overrides: {
 
 describe("LicenseExpiredBanner — enforced gate (correction #1)", () => {
   it("renders nothing when enforcement is off, even with state expired", () => {
-    setup({ enforced: false, state: "expired", endDate: "2020-01-01T00:00:00.000Z" });
+    setup({
+      enforced: false,
+      state: "expired",
+      endDate: "2020-01-01T00:00:00.000Z",
+    });
     render(<LicenseExpiredBanner />);
     expect(screen.queryByRole("alert")).toBeNull();
   });
@@ -61,7 +65,11 @@ describe("LicenseExpiredBanner — allowlist, not blocklist (correction #2)", ()
 
 describe("LicenseExpiredBanner — expired/inactive with enforcement on", () => {
   it("renders the expired copy with the formatted end date", () => {
-    setup({ enforced: true, state: "expired", endDate: "2026-03-15T00:00:00.000Z" });
+    setup({
+      enforced: true,
+      state: "expired",
+      endDate: "2026-03-15T00:00:00.000Z",
+    });
     render(<LicenseExpiredBanner />);
     const alert = screen.getByRole("alert");
     expect(alert.textContent).toContain("expiredBanner:");
@@ -75,7 +83,11 @@ describe("LicenseExpiredBanner — expired/inactive with enforcement on", () => 
   });
 
   it("the CalendarX icon carries the only red signal — the wrapper stays neutral (docs/DESIGN.md)", () => {
-    setup({ enforced: true, state: "expired", endDate: "2026-03-15T00:00:00.000Z" });
+    setup({
+      enforced: true,
+      state: "expired",
+      endDate: "2026-03-15T00:00:00.000Z",
+    });
     render(<LicenseExpiredBanner />);
     const alert = screen.getByRole("alert");
     expect(alert.className).not.toMatch(/destructive/);

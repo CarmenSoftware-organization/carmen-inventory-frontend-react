@@ -11,9 +11,10 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Plus, X, Search } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import SearchInput from "@/components/search-input";
 import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
 import { inventoryTypeLabelKey } from "@/constant/location";
 import {
@@ -51,12 +52,12 @@ const TYPE_TONE: Record<string, DotTone> = {
   consignment: "neutral",
 };
 
-interface LocationsTabProps {
+interface PdTabLocationsProps {
   readonly form: ProductFormInstance;
   readonly isDisabled: boolean;
 }
 
-function LocationsTab({ form, isDisabled }: LocationsTabProps) {
+function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
   "use no memo";
   // อ่าน error ผ่าน useFormState ไม่ใช่ form.formState — component นี้ห่อ memo()
   // และ props (form/isDisabled) เป็น ref นิ่ง กด save แล้ว validation fail ตัว
@@ -84,7 +85,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   // it) keep their reference when only qty fields change. Rebuilding `columns`
   // every render remounts the lookup cells, which in the browser triggers a
   // ResizeObserver render loop that freezes the tab. Mirrors the pattern in
-  // pd-unit-conversion-tab.
+  // pd-tab-unit-conversion.
   const assignedIdsKey = watchedLocations
     .map((l) => l.location_id ?? "")
     .join("|");
@@ -306,31 +307,6 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
         meta: { headerClassName: "text-right", cellClassName: "text-right" },
       },
       {
-        id: "re_order_qty",
-        header: t("reorderQty"),
-        cell: ({ row }) =>
-          isDisabled ? (
-            <span className="text-xs tabular-nums">
-              {row.original.re_order_qty ?? ""}
-            </span>
-          ) : (
-            <Input
-              type="number"
-              inputMode="decimal"
-              min={0}
-              step="any"
-              placeholder=""
-              className="text-right text-xs tabular-nums"
-              {...form.register(
-                `locations.${row.original.fieldIndex}.re_order_qty`,
-                { valueAsNumber: true },
-              )}
-            />
-          ),
-        size: 120,
-        meta: { headerClassName: "text-right", cellClassName: "text-right" },
-      },
-      {
         id: "par_qty",
         header: t("parQty"),
         cell: ({ row }) =>
@@ -387,7 +363,7 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
           aria-label="Remove"
           onClick={() => setDeleteIdx(row.original.fieldIndex)}
         >
-          <X />
+          <Trash2 />
         </Button>
       ),
       enableSorting: false,
@@ -420,17 +396,21 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
       count={fields.length}
       action={
         <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="text-muted-foreground absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2" />
-            <Input
-              placeholder={t("searchLocations")}
-              className="h-8 w-64 pl-7 text-xs placeholder:text-xs"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+          {/* SearchInput ตัวเดียวกับหน้า list — ยิงตอน Enter/กดแว่น ตาม convention
+              ของแอป (มีปุ่ม X ล้างคำค้นมาให้ด้วย) */}
+          <SearchInput
+            defaultValue={search}
+            onSearch={setSearch}
+            containerClassName="w-64"
+            inputClassName="h-8 text-xs placeholder:text-xs"
+          />
           {!isDisabled && (
-            <Button type="button" size="sm" variant="secondary" onClick={handleAdd}>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={handleAdd}
+            >
               <Plus />
               {t("addLocation")}
             </Button>
@@ -438,22 +418,17 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
         </div>
       }
     >
+      {/* padding แถวเท่า tab units/attributes — default ของ DataGrid คือ py-1
+          ซึ่งแน่นกว่าตารางอื่นในฟอร์มเดียวกัน */}
       <DataGrid
         table={table}
         recordCount={fields.length}
-        tableLayout={{ headerSticky: true }}
+        tableLayout={{ headerSticky: true, rowRounded: true }}
+        tableClassNames={{ bodyRow: "[&>td]:py-3", headerRow: "[&>th]:py-3" }}
         emptyMessage={
           <EmptyComponent
             title={t("noLocations")}
             description={t("addFirstLocationHint")}
-            content={
-              !isDisabled && (
-                <Button type="button" size="xs" onClick={handleAdd}>
-                  <Plus aria-hidden="true" />
-                  {t("addFirstLocation")}
-                </Button>
-              )
-            }
           />
         }
       >
@@ -473,4 +448,4 @@ function LocationsTab({ form, isDisabled }: LocationsTabProps) {
   );
 }
 
-export default memo(LocationsTab);
+export default memo(PdTabLocations);

@@ -32,7 +32,7 @@ export function VendorNameCell({
         {name}
       </span>
       {code && (
-        <span className="text-muted-foreground truncate text-micro-legal tracking-wide uppercase">
+        <span className="text-muted-foreground text-micro-legal truncate tracking-wide uppercase">
           {code}
         </span>
       )}
@@ -97,7 +97,7 @@ export function SubmissionStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-micro-eyebrow font-semibold tracking-widest uppercase",
+        "text-micro-eyebrow inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold tracking-widest uppercase",
         hasSubmitted
           ? "bg-success/15 text-success-foreground"
           : "bg-muted text-muted-foreground",
@@ -133,7 +133,7 @@ export function PricelistCell({
           "noopener,noreferrer",
         )
       }
-      className="truncate text-micro"
+      className="text-micro truncate"
     >
       {pricelist.no}
     </CellAction>

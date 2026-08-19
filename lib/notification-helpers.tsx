@@ -59,7 +59,9 @@ export const NOTIFICATION_TILE: Partial<
  * คีย์ metadata เก่าต่อ doc_type — ใช้เป็น fallback สำหรับแถวที่เขียนก่อน redesign
  * write path ปัจจุบันเขียน id เอกสารไว้ที่ `metadata.id` เสมอ
  */
-const LEGACY_ID_KEY: Partial<Record<NotificationDocType, keyof NotificationMetadata>> = {
+const LEGACY_ID_KEY: Partial<
+  Record<NotificationDocType, keyof NotificationMetadata>
+> = {
   purchase_request: "pr_id",
   purchase_order: "po_id",
   store_requisition: "sr_id",

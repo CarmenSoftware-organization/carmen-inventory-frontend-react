@@ -60,8 +60,8 @@ export default function NotificationsContent() {
 
   const handleBulkMarkAsRead = () => {
     if (selectedIds.size === 0) return;
-    const selectedItems = items.filter(item => selectedIds.has(item.id));
-    selectedItems.forEach(item => {
+    const selectedItems = items.filter((item) => selectedIds.has(item.id));
+    selectedItems.forEach((item) => {
       if (item.is_read === false) {
         markRead.mutate({ id: item.id, source: item.source });
       }
@@ -83,10 +83,10 @@ export default function NotificationsContent() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-4 pb-[max(2rem,env(safe-area-inset-bottom))] md:py-8">
-      <header className="flex flex-wrap items-center justify-between gap-y-4 gap-x-4 pb-2">
-        <div className="flex flex-wrap items-center gap-y-3 gap-x-6 flex-1 min-w-[200px]">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-4 pb-2">
+        <div className="flex min-w-[200px] flex-1 flex-wrap items-center gap-x-6 gap-y-3">
           <div className="flex items-center gap-3">
-            <div className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-2xl shadow-sm shrink-0">
+            <div className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-2xl shadow-sm">
               <Bell className="size-5" aria-hidden="true" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight">
@@ -98,18 +98,28 @@ export default function NotificationsContent() {
             onValueChange={(value) => {
               // Check if document.startViewTransition is supported for smooth tab switching
               if (document.startViewTransition) {
-                document.startViewTransition(() => setTab(value as NotificationTab));
+                document.startViewTransition(() =>
+                  setTab(value as NotificationTab),
+                );
               } else {
                 setTab(value as NotificationTab);
               }
             }}
           >
             <TabsList className="bg-muted/50 rounded-xl p-1">
-              <TabsTrigger value="all" className="rounded-lg data-[state=active]:shadow-sm">{tRoot("notifications.tabAll")}</TabsTrigger>
-              <TabsTrigger value="unread" className="rounded-lg data-[state=active]:shadow-sm">
+              <TabsTrigger
+                value="all"
+                className="rounded-lg data-[state=active]:shadow-sm"
+              >
+                {tRoot("notifications.tabAll")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="unread"
+                className="rounded-lg data-[state=active]:shadow-sm"
+              >
                 {tRoot("notifications.tabUnread")}
                 {unreadCount !== undefined && unreadCount > 0 && (
-                  <span className="bg-primary/15 text-primary ms-2 rounded-full px-2 py-0.5 text-micro-legal font-bold tabular-nums">
+                  <span className="bg-primary/15 text-primary text-micro-legal ms-2 rounded-full px-2 py-0.5 font-bold tabular-nums">
                     {unreadCount.toLocaleString()}
                   </span>
                 )}
@@ -133,7 +143,7 @@ export default function NotificationsContent() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-9 rounded-xl text-xs font-medium transition-all hover:bg-muted"
+                className="hover:bg-muted h-9 rounded-xl text-xs font-medium transition-all"
                 onClick={() => markAllRead.mutate()}
                 disabled={markAllRead.isPending}
               >
@@ -151,13 +161,16 @@ export default function NotificationsContent() {
       )}
 
       {/* Card list layout with view transition support */}
-      <div className="flex flex-col gap-6 pb-2" style={{ viewTransitionName: 'notification-list' }}>
+      <div
+        className="flex flex-col gap-6 pb-2"
+        style={{ viewTransitionName: "notification-list" }}
+      >
         {isLoading ? (
-          <div className="bg-card/40 rounded-3xl p-6 shadow-sm ring-1 ring-border/50 backdrop-blur-md">
+          <div className="bg-card/40 ring-border/50 rounded-3xl p-6 shadow-sm ring-1 backdrop-blur-md">
             <NotificationLoader />
           </div>
         ) : items.length === 0 ? (
-          <div className="bg-card/40 flex items-center justify-center rounded-3xl px-4 py-20 shadow-sm ring-1 ring-border/50 backdrop-blur-md">
+          <div className="bg-card/40 ring-border/50 flex items-center justify-center rounded-3xl px-4 py-20 shadow-sm ring-1 backdrop-blur-md">
             <EmptyComponent
               icon={BellOff}
               title={
@@ -168,8 +181,14 @@ export default function NotificationsContent() {
               description={
                 tab === "unread" ? (
                   <div className="flex flex-col items-center gap-4">
-                    <p className="text-muted-foreground">{tRoot("notifications.emptyUnreadDesc")}</p>
-                    <Button variant="outline" size="sm" onClick={() => setTab("all")}>
+                    <p className="text-muted-foreground">
+                      {tRoot("notifications.emptyUnreadDesc")}
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setTab("all")}
+                    >
                       View All Notifications
                     </Button>
                   </div>
@@ -181,14 +200,18 @@ export default function NotificationsContent() {
           </div>
         ) : (
           <>
-            {items.filter(i => i.source === "broadcast").length > 0 && (
+            {items.filter((i) => i.source === "broadcast").length > 0 && (
               <section>
-                <h2 className="text-muted-foreground mb-3 px-1 text-sm font-semibold uppercase tracking-wider">
-                  {tRoot("notifications.broadcasts", { defaultValue: "Broadcasts" })}
+                <h2 className="text-muted-foreground mb-3 px-1 text-sm font-semibold tracking-wider uppercase">
+                  {tRoot("notifications.broadcasts", {
+                    defaultValue: "Broadcasts",
+                  })}
                 </h2>
                 <ul className="flex flex-col gap-3">
                   {items
-                    .filter((notification) => notification.source === "broadcast")
+                    .filter(
+                      (notification) => notification.source === "broadcast",
+                    )
                     .map((notification, index) => (
                       <NotificationRow
                         key={notification.id}
@@ -207,19 +230,28 @@ export default function NotificationsContent() {
             )}
 
             {(() => {
-              const personalItems = items.filter(i => i.source !== "broadcast");
+              const personalItems = items.filter(
+                (i) => i.source !== "broadcast",
+              );
               if (personalItems.length === 0) return null;
 
-              const groupedByBu = personalItems.reduce((acc, item) => {
-                const bu = item.metadata?.bu ? String(item.metadata.bu) : tRoot("notifications.personal", { defaultValue: "Personal" });
-                if (!acc[bu]) acc[bu] = [];
-                acc[bu].push(item);
-                return acc;
-              }, {} as Record<string, Notification[]>);
+              const groupedByBu = personalItems.reduce(
+                (acc, item) => {
+                  const bu = item.metadata?.bu
+                    ? String(item.metadata.bu)
+                    : tRoot("notifications.personal", {
+                        defaultValue: "Personal",
+                      });
+                  if (!acc[bu]) acc[bu] = [];
+                  acc[bu].push(item);
+                  return acc;
+                },
+                {} as Record<string, Notification[]>,
+              );
 
               return Object.entries(groupedByBu).map(([buName, buItems]) => (
                 <section key={buName}>
-                  <h2 className="text-muted-foreground mb-3 px-1 text-sm font-semibold uppercase tracking-wider">
+                  <h2 className="text-muted-foreground mb-3 px-1 text-sm font-semibold tracking-wider uppercase">
                     {buName}
                   </h2>
                   <ul className="flex flex-col gap-3">
@@ -263,9 +295,17 @@ export default function NotificationsContent() {
       />
 
       {isSelectionMode && selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full border bg-card px-6 py-3 shadow-lg animate-in slide-in-from-bottom-5">
-          <span className="text-sm font-semibold">{selectedIds.size} Selected</span>
-          <Button size="sm" onClick={handleBulkMarkAsRead} className="rounded-full">Mark as Read</Button>
+        <div className="bg-card animate-in slide-in-from-bottom-5 fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full border px-6 py-3 shadow-lg">
+          <span className="text-sm font-semibold">
+            {selectedIds.size} Selected
+          </span>
+          <Button
+            size="sm"
+            onClick={handleBulkMarkAsRead}
+            className="rounded-full"
+          >
+            Mark as Read
+          </Button>
         </div>
       )}
     </div>
@@ -298,17 +338,22 @@ function NotificationRow({
   const safeLink = safeInternalHref(getNotificationHref(notification));
   const isUnread = notification.is_read === false;
 
-  let severityBg = "bg-card/40 ring-border/50 hover:bg-card/80 hover:ring-border/80 hover:border-primary/20";
+  let severityBg =
+    "bg-card/40 ring-border/50 hover:bg-card/80 hover:ring-border/80 hover:border-primary/20";
   if (notification.source === "broadcast") {
     const sev = String(notification.metadata?.severity || "INFO").toUpperCase();
     if (sev === "WARNING") {
-      severityBg = "bg-warning/10 ring-warning/20 hover:bg-warning/15 hover:ring-warning/40 hover:border-warning/30";
+      severityBg =
+        "bg-warning/10 ring-warning/20 hover:bg-warning/15 hover:ring-warning/40 hover:border-warning/30";
     } else if (sev === "CRITICAL") {
-      severityBg = "bg-destructive/10 ring-destructive/20 hover:bg-destructive/15 hover:ring-destructive/40 hover:border-destructive/30";
+      severityBg =
+        "bg-destructive/10 ring-destructive/20 hover:bg-destructive/15 hover:ring-destructive/40 hover:border-destructive/30";
     } else if (sev === "MAINTENANCE") {
-      severityBg = "bg-muted-foreground/10 ring-muted-foreground/20 hover:bg-muted-foreground/15 hover:ring-muted-foreground/40 hover:border-muted-foreground/30";
+      severityBg =
+        "bg-muted-foreground/10 ring-muted-foreground/20 hover:bg-muted-foreground/15 hover:ring-muted-foreground/40 hover:border-muted-foreground/30";
     } else if (sev === "INFO") {
-      severityBg = "bg-info/10 ring-info/20 hover:bg-info/15 hover:ring-info/40 hover:border-info/30";
+      severityBg =
+        "bg-info/10 ring-info/20 hover:bg-info/15 hover:ring-info/40 hover:border-info/30";
     }
   }
 
@@ -318,7 +363,10 @@ function NotificationRow({
     "hover:scale-[1.01] hover:shadow-md",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
     severityBg,
-    isUnread && (notification.source === "broadcast" ? "ring-2" : "bg-primary/[0.04] ring-primary/15 hover:ring-primary/30"),
+    isUnread &&
+      (notification.source === "broadcast"
+        ? "ring-2"
+        : "bg-primary/[0.04] ring-primary/15 hover:ring-primary/30"),
   );
 
   const body = (
@@ -333,8 +381,8 @@ function NotificationRow({
   );
 
   return (
-    <li 
-      className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both"
+    <li
+      className="animate-in fade-in slide-in-from-bottom-2 fill-mode-both duration-500"
       style={{ animationDelay: `${index * 50}ms` }}
     >
       {isSelectionMode && isUnread ? (
@@ -343,8 +391,11 @@ function NotificationRow({
           onClick={() => onToggleSelect?.(notification.id)}
           className={cn(rowClass, "cursor-pointer outline-none")}
         >
-          <Checkbox checked={isSelected} className="pointer-events-none shrink-0" />
-          <div className="flex-1 min-w-0 flex items-center gap-4">{body}</div>
+          <Checkbox
+            checked={isSelected}
+            className="pointer-events-none shrink-0"
+          />
+          <div className="flex min-w-0 flex-1 items-center gap-4">{body}</div>
         </button>
       ) : safeLink ? (
         <Link
