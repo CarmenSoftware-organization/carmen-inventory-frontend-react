@@ -48,13 +48,11 @@ describe("auth-api", () => {
   it("login throws ApiError with backend message on 401", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(JSON.stringify({ message: "Invalid credentials" }), {
-            status: 401,
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ message: "Invalid credentials" }), {
+          status: 401,
+        }),
+      ),
     );
     await expect(login("a@b.com", "bad")).rejects.toThrow(
       "Invalid credentials",
@@ -90,17 +88,15 @@ describe("auth-api", () => {
     refreshTokenStorage.set("rt-1");
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          okJson({
-            data: {
-              access_token: "at-2",
-              refresh_token: "rt-2",
-              expires_in: 900,
-            },
-          }),
-        ),
+      vi.fn().mockResolvedValue(
+        okJson({
+          data: {
+            access_token: "at-2",
+            refresh_token: "rt-2",
+            expires_in: 900,
+          },
+        }),
+      ),
     );
     expect(await refreshTokens()).toBe(true);
     expect(tokenStore.get()).toBe("at-2");

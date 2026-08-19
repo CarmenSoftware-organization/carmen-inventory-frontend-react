@@ -40,16 +40,16 @@ interface WfRoutingProps {
     "data.routing_rules"
   >;
   readonly stages: { id: string; name: string }[];
-  readonly isDisabled: boolean;
   readonly allProducts: Product[];
+  readonly isDisabled: boolean;
 }
 
 export function WfRouting({
   form,
   fieldArray,
   stages,
-  isDisabled,
   allProducts,
+  isDisabled,
 }: WfRoutingProps) {
   const { fields, append, remove } = fieldArray;
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -405,9 +405,9 @@ export function WfRouting({
                 {watchedField === "category" && (
                   <CategoryCheckboxList
                     form={form}
+                    allProducts={allProducts}
                     ruleIndex={safeIndex}
                     isDisabled={isDisabled}
-                    allProducts={allProducts}
                   />
                 )}
               </FieldGroup>

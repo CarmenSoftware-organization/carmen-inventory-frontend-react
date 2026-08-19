@@ -10,6 +10,7 @@ import { Link } from "react-router";
 import {
   columnSkeletons,
   indexColumn,
+  sendbackColumn,
 } from "@/components/ui/data-grid/columns";
 import {
   DataGrid,
@@ -47,6 +48,7 @@ export default function ApprovalQueueList({
   "use no memo";
   const t = useTranslations("procurement.approval");
   const tfl = useTranslations("field");
+  const tc = useTranslations("common");
 
   const DOC_TYPE_CONFIG: Record<
     string,
@@ -93,6 +95,7 @@ export default function ApprovalQueueList({
       },
       meta: { skeleton: columnSkeletons.text },
     },
+    sendbackColumn<ApprovalItem>(tc("sendBack")),
     {
       accessorKey: "doc_type",
       header: tfl("type"),

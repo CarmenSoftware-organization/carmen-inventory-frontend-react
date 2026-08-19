@@ -3,7 +3,6 @@ import {
   WorkflowDataParseError,
   getWorkflowFormDefaults,
   parseWorkflowData,
-  toWorkflowPayload,
 } from "./wf-form-schema";
 import type { Workflow } from "@/types/workflows";
 
@@ -95,31 +94,27 @@ describe("products", () => {
     product_category: { id: "c1", name: "Dry Goods" },
   };
 
-  it("อ่านได้ทั้ง snapshot เต็มแบบเก่าและ id ล้วนแบบใหม่ — normalize เป็น { id, ... }", () => {
+  it("อ่านได้ทั้ง snapshot เต็มแบบเก่าและ id ล้วนแบบใหม่ — ยุบเหลือ string id", () => {
     const parsed = parseWorkflowData({
       ...legacyData,
       products: [fullSnapshotProduct, "6a1f0c1e-0000-0000-0000-000000000002"],
     });
     expect(parsed.success).toBe(true);
-    expect(parsed.data!.products.map((p) => p.id)).toEqual([
+    expect(parsed.data!.products).toEqual([
       "6a1f0c1e-0000-0000-0000-000000000001",
       "6a1f0c1e-0000-0000-0000-000000000002",
     ]);
-    // snapshot เก่ายังเก็บ field เดิมไว้ (ใช้ fallback ตอน join master ไม่เจอ)
-    expect(parsed.data!.products[0].product_category?.name).toBe("Dry Goods");
   });
 
-  it("toWorkflowPayload หั่น products เหลือ id ล้วนก่อนส่ง", () => {
+  it("defaults ที่ได้พร้อมส่งกลับเป็น id ล้วน — workflow เก่าถูกล้าง snapshot ตอน save ถัดไป", () => {
     const defaults = getWorkflowFormDefaults(
       workflowWith({ ...legacyData, products: [fullSnapshotProduct] }),
     );
-    const payload = toWorkflowPayload(defaults);
-    expect(payload.data.products).toEqual([
+    expect(defaults.data.products).toEqual([
       "6a1f0c1e-0000-0000-0000-000000000001",
     ]);
-    // ส่วนอื่นไม่โดนแตะ
-    expect(payload.data.stages).toHaveLength(1);
-    expect(payload.name).toBe("General PR");
+    expect(defaults.data.stages).toHaveLength(1);
+    expect(defaults.name).toBe("General PR");
   });
 });
 

@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { RequireAuth } from "@/components/auth/require-auth";
+import LandingRedirect from "./landing-redirect";
 import AppRoot from "./app-root";
 import RootLayout from "./root-layout";
 import { RouteErrorBoundaryAdapter } from "./module-error-boundary-adapter";
@@ -55,7 +56,7 @@ export const router = createBrowserRouter([
       {
         Component: ProtectedShell,
         children: [
-          { index: true, element: <Navigate to="/dashboard" replace /> },
+          { index: true, element: <LandingRedirect /> },
           {
             path: "dashboard",
             lazy: () => import("./dashboard/dashboard.route"),

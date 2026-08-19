@@ -1,7 +1,8 @@
-import { ApiError, ERROR_CODES } from "@/lib/api-error";
+import { ApiError, ERROR_CODES, licenseErrorCodeFrom } from "@/lib/api-error";
 import { refreshTokens } from "@/lib/auth/auth-api";
 import { tokenStore } from "@/lib/auth/token-store";
 import { getRuntimeConfig } from "@/lib/runtime-config";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -202,6 +203,22 @@ const readErrorMessage = async (
 };
 
 /**
+ * อ่าน body ดิบทั้งก้อนของ error response (ใช้ clone() กันชนกับ caller ที่จะอ่านซ้ำ)
+ *
+ * ใช้เฉพาะจุดที่ต้องมองเข้าไปใน `error.code` (แยก license 403 จาก permission 403) —
+ * `readErrorMessage` ด้านบนพอสำหรับจุดอื่นที่ต้องการแค่ข้อความ
+ *
+ * @returns body ที่ parse แล้ว หรือ undefined เมื่อไม่ใช่ JSON/parse ไม่ได้
+ */
+const readErrorBody = async (response: Response): Promise<unknown> => {
+  try {
+    return await response.clone().json();
+  } catch {
+    return undefined;
+  }
+};
+
+/**
  * จัดการ error responses ฝั่ง client: 401, 403, 429
  *
  * - 401: พยายาม refresh token และลองใหม่ หรือแจ้ง session expired
@@ -256,8 +273,29 @@ const handleClientErrors = async (
   }
 
   if (response.status === 403) {
-    const message = await readErrorMessage(response);
-    dispatchAuthError(message);
+    // 403 มีสามความหมายที่ผู้ใช้แก้คนละวิธี — license (ไม่อยู่ในสัญญา) กับ license
+    // หมดอายุ ต้องเด้ง dialog คนละความหมายจาก 403 ของสิทธิ์ (RBAC) เดิม ไม่งั้น
+    // ลูกค้าที่สัญญาหมดอายุจะเห็นว่า "ไม่มีสิทธิ์" แล้วไปโทษแอดมินของตัวเองผิดที่
+    // แยกด้วย `error.code` เท่านั้น (ดู phase-c-backend-contract.md ข้อ 5) —
+    // `licenseErrorCodeFrom` คืน undefined ให้ทั้ง permission 403 ปกติและ body รูปแปลก
+    // ทุกแบบ (null, ไม่มี error, error เป็น string) จึงไม่ throw และตกไปเส้นทางเดิม
+    const body = await readErrorBody(response);
+    const message =
+      typeof (body as { message?: unknown } | undefined)?.message === "string"
+        ? (body as { message: string }).message
+        : undefined;
+    const licenseCode = licenseErrorCodeFrom(body);
+
+    if (licenseCode) {
+      dispatchPermissionDenied(
+        undefined,
+        undefined,
+        licenseCode === "LICENSE_EXPIRED" ? "expired" : "license",
+      );
+    } else {
+      dispatchAuthError(message);
+    }
+
     throw new ApiError(ERROR_CODES.FORBIDDEN, message || "Access denied", 403);
   }
 

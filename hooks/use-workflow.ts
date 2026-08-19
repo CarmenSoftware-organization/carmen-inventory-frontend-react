@@ -10,7 +10,7 @@ import {
   type Workflow,
   WORKFLOW_TYPE,
 } from "@/types/workflows";
-import type { WorkflowPayload } from "@/routes/system-admin/workflow/wf-form-schema";
+import type { WorkflowCreateModel } from "@/routes/system-admin/workflow/wf-form-schema";
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 import { CACHE_STATIC } from "@/lib/cache-config";
 
@@ -125,7 +125,7 @@ export function useWorkflowById(id: string | undefined) {
  * create.mutate(payload);
  */
 export function useCreateWorkflow() {
-  return useApiMutation<WorkflowPayload>({
+  return useApiMutation<WorkflowCreateModel>({
     mutationFn: (data, buCode) =>
       httpClient.post(API_ENDPOINTS.WORKFLOWS(buCode), data),
     invalidateKeys: [QUERY_KEYS.WORKFLOWS],
@@ -142,14 +142,14 @@ export function useCreateWorkflow() {
  * update.mutate({ id, ...values });
  */
 export function useUpdateWorkflow() {
-  return useApiMutation<WorkflowPayload & { id: string; doc_version?: number }>(
-    {
-      mutationFn: ({ id, ...data }, buCode) =>
-        httpClient.put(`${API_ENDPOINTS.WORKFLOWS(buCode)}/${id}`, data),
-      invalidateKeys: [QUERY_KEYS.WORKFLOWS],
-      errorMessage: "Failed to update workflow",
-    },
-  );
+  return useApiMutation<
+    WorkflowCreateModel & { id: string; doc_version?: number }
+  >({
+    mutationFn: ({ id, ...data }, buCode) =>
+      httpClient.put(`${API_ENDPOINTS.WORKFLOWS(buCode)}/${id}`, data),
+    invalidateKeys: [QUERY_KEYS.WORKFLOWS],
+    errorMessage: "Failed to update workflow",
+  });
 }
 
 /**

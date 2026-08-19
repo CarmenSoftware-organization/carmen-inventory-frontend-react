@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import type { Audit } from "./audit";
 import { lastActionSchema } from "./last-action";
+import type { LastAction } from "./last-action";
 import type { DiscountFields, ItemMoneyFields, TaxFields } from "./shared-item";
 
 export type PurchaseRequestStatus =
@@ -177,6 +178,11 @@ export interface PurchaseRequest {
   workflow_next_stage: string;
   workflow_previous_stage: string;
   workflow_history: WorkflowHistoryEntry[];
+  /**
+   * action ล่าสุดของ workflow — ใช้แสดงคอลัมน์ "ส่งกลับ" ในหน้า list
+   * (`state === "reviewed"` = ค้างอยู่ที่การตีกลับ ดู `constant/last-action.ts`)
+   */
+  last_action?: LastAction | null;
   requestor_id: string;
   requestor_name: string;
   department_id: string;

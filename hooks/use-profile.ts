@@ -69,6 +69,8 @@ export function useProfile() {
   const signatureUrl = query.data?.signature_url ?? null;
   // Interface entitlement is per-BU — read the current (default) BU's list.
   const enabledInterfaces = defaultBu?.enabled_interfaces;
+  // License เป็นของ BU ปัจจุบัน เหมือน enabledInterfaces — สลับ BU แล้ว profile refetch
+  const license = defaultBu?.license;
   const buCode = defaultBu?.code;
   const buLogoUrl = defaultBu?.logo_url ?? null;
 
@@ -120,6 +122,7 @@ export function useProfile() {
     currentPeriod,
     isProfileReady,
     enabledInterfaces,
+    license,
   };
 }
 

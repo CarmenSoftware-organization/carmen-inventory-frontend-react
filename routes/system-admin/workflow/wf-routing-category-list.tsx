@@ -7,28 +7,31 @@ import type { WorkflowCreateModel } from "./wf-form-schema";
 
 interface CategoryCheckboxListProps {
   readonly form: UseFormReturn<WorkflowCreateModel>;
+  readonly allProducts: Product[];
   readonly ruleIndex: number;
   readonly isDisabled: boolean;
-  readonly allProducts: Product[];
 }
 
 export function CategoryCheckboxList({
   form,
+  allProducts,
   ruleIndex,
   isDisabled,
-  allProducts,
 }: CategoryCheckboxListProps) {
   const t = useTranslations("systemAdmin.workflow");
-  const products = useWatch({ control: form.control, name: "data.products" });
+  // `data.products` เก็บแค่ id หมวดจึง resolve จากรายการสินค้าสดที่โหลดมา ไม่ใช่จากสำเนาที่ฝังในเอกสาร
+  // ผลพลอยได้คือหมวดที่โชว์เป็นของปัจจุบันเสมอ ต่อให้สินค้าถูกย้ายหมวดหลังจาก workflow ถูกบันทึกไปแล้ว
+  const selectedIds = useWatch({
+    control: form.control,
+    name: "data.products",
+  });
+  const selected = new Set(selectedIds ?? []);
 
-  // form เก็บ product แค่ id — ชื่อ category ต้อง join จาก master (สินค้าที่หาย
-  // จาก master แล้ว fallback ไป snapshot เก่าถ้า row นั้นยังมีติดมา)
-  const masterById = new Map(allProducts.map((p) => [p.id, p]));
   const catMap = new Map<string, string>();
-  for (const p of products ?? []) {
-    const cat = masterById.get(p.id)?.product_category ?? p.product_category;
-    if (cat?.id && cat?.name) {
-      catMap.set(cat.id, cat.name);
+  for (const p of allProducts) {
+    if (!selected.has(p.id)) continue;
+    if (p.product_category?.id && p.product_category?.name) {
+      catMap.set(p.product_category.id, p.product_category.name);
     }
   }
   const categories = Array.from(catMap.entries()).map(([id, name]) => ({

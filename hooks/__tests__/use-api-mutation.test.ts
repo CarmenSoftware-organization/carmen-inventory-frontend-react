@@ -123,15 +123,13 @@ describe("useApiMutation", () => {
   });
 
   it("throws ApiError when response body has success: false", async () => {
-    const mutationFn = vi
-      .fn()
-      .mockResolvedValue(
-        jsonRes(200, {
-          success: false,
-          message: "Validation failed",
-          status: 422,
-        }),
-      );
+    const mutationFn = vi.fn().mockResolvedValue(
+      jsonRes(200, {
+        success: false,
+        message: "Validation failed",
+        status: 422,
+      }),
+    );
 
     const { result } = renderHook(() => useApiMutation({ mutationFn }), {
       wrapper: createWrapper(),

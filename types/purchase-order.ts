@@ -1,6 +1,7 @@
 import type { ItemMoneyFields } from "./shared-item";
 import type { WorkflowHistoryEntry } from "./purchase-request";
 import type { Audit } from "./audit";
+import type { LastAction } from "./last-action";
 
 export enum PO_STATUS {
   DRAFT = "draft",
@@ -186,6 +187,11 @@ export interface PurchaseOrder {
   workflow_previous_stage: string;
   workflow_next_stage: string;
   workflow_history?: WorkflowHistoryEntry[];
+  /**
+   * action ล่าสุดของ workflow — ใช้แสดงคอลัมน์ "ส่งกลับ" ในหน้า list
+   * (`state === "reviewed"` = ค้างอยู่ที่การตีกลับ ดู `constant/last-action.ts`)
+   */
+  last_action?: LastAction | null;
   vendor_id: string;
   vendor_name: string;
   delivery_date: string;

@@ -2,6 +2,7 @@ import { Outlet } from "react-router";
 import { AnalyticsBridge } from "@/components/analytics-bridge";
 import { StatusBar } from "@/components/footer/status-bar";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
+import { LicenseExpiredBanner } from "@/components/license-expired-banner";
 import { MissingDepartmentDialog } from "@/components/missing-department-dialog";
 import { Navbar } from "@/components/navbar/navbar";
 import { RouteGuard } from "@/components/route-guard";
@@ -21,6 +22,9 @@ export default function RootLayout() {
       <SidebarInset className="space-main-gradient relative h-dvh overflow-hidden">
         <Navbar />
         <OfflineBanner />
+        {/* mount ครั้งเดียวที่นี่เหมือน ActivitySheetHost — อ่าน useLicense() เอง
+            ไม่ต้อง render ซ้ำในหน้าไหน */}
+        <LicenseExpiredBanner />
         <GlobalNotificationBanner />
         <div
           id="main-content"

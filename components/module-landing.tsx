@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Lock } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { getModule } from "@/constant/module-list";
 import { useVisibleModules } from "@/hooks/use-visible-modules";
@@ -60,7 +60,7 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
         {visibleSubs.map((sub) => {
           const cardClass = cn(
             "group border-border bg-card hover:border-primary/40 relative flex items-center gap-3 overflow-hidden rounded-xl border py-2 pr-3 pl-4 text-left transition-colors",
-            sub.denied && "opacity-50",
+            (sub.denied || sub.locked) && "opacity-50",
           );
 
           const cardContent = (
@@ -93,21 +93,37 @@ export function ModuleLanding({ modulePath, description }: ModuleLandingProps) {
                 </div>
               </div>
 
-              {/* Chevron — only on hover */}
-              <ChevronRight
-                className="text-primary size-3.5 shrink-0 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
-                aria-hidden="true"
-              />
+              {/* กุญแจบอกว่าล็อกเพราะยังไม่ได้ซื้อ ไม่ใช่เพราะไม่มีสิทธิ์ — แสดง
+                  ตลอดเวลา (ไม่รอ hover) ต่างจาก chevron ที่บอกแค่ "ไปต่อได้" */}
+              {sub.locked ? (
+                <Lock
+                  className="text-muted-foreground size-3.5 shrink-0 opacity-70"
+                  aria-hidden="true"
+                />
+              ) : (
+                <ChevronRight
+                  className="text-primary size-3.5 shrink-0 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
+                  aria-hidden="true"
+                />
+              )}
             </>
           );
 
-          // Denied → button (no anchor → NextTopLoader doesn't trigger)
-          if (sub.denied) {
+          // locked ชนะ denied เสมอ (บอกเหตุผลที่แก้ได้ด้วยเงินตรงกว่า) — ทั้งคู่
+          // render เป็นปุ่ม (ไม่ใช่ anchor → NextTopLoader's anchor click listener
+          // ไม่ทริกเกอร์) ต่างกันแค่ reason ที่ dispatch
+          if (sub.denied || sub.locked) {
             return (
               <button
                 key={sub.path}
                 type="button"
-                onClick={() => dispatchPermissionDenied(sub.permission)}
+                onClick={() =>
+                  dispatchPermissionDenied(
+                    sub.permission,
+                    undefined,
+                    sub.locked ? "license" : "permission",
+                  )
+                }
                 aria-disabled
                 className={cardClass}
               >

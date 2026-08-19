@@ -15,16 +15,14 @@ describe("runtime-config", () => {
   it("loads and normalizes config.json (strips trailing slash)", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue(
-          new Response(
-            JSON.stringify({
-              BACKEND_URL: "https://api.example.com/",
-              X_APP_ID: "app-1",
-            }),
-          ),
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            BACKEND_URL: "https://api.example.com/",
+            X_APP_ID: "app-1",
+          }),
         ),
+      ),
     );
     const config = await loadRuntimeConfig();
     expect(config.BACKEND_URL).toBe("https://api.example.com");
