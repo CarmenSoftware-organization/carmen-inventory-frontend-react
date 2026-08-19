@@ -257,16 +257,18 @@ export default function CompanyProfileComponent() {
               maxLength={256}
               fullWidth
             />
-            {/* costing method + max license users: read-only เสมอ (แก้ผ่านหน้านี้ไม่ได้) */}
+            {/* costing method: read-only เสมอ (แก้ผ่านหน้านี้ไม่ได้)
+                "Max license users" ถูกถอดออกจากหน้านี้ — ที่นั่งไม่ใช่เลขตัวเดียวบน BU อีกแล้ว แต่เป็น
+                ผลรวมของใบ license ที่ยังคุ้มครองอยู่ (tb_business_unit_license → v_business_unit_seat)
+                และจัดการที่ carmen-platform เท่านั้น ช่องนี้จะว่างถาวรเมื่อคอลัมน์เดิมถูกลบ จึงกลาย
+                เป็นการโชว์แนวคิดที่เลิกใช้แล้วให้ผู้ใช้เปล่า ๆ
+                "Max license users" is gone: seats are no longer a single number on the BU but the
+                sum of the licences currently in effect, managed only in carmen-platform. The field
+                would be permanently blank once the old column drops. */}
             <SettingField
               label={t("fields.calculationMethod")}
               description={t("fields.calculationMethodDesc")}
               value={data.calculation_method}
-            />
-            <SettingField
-              label={t("fields.maxLicenseUsers")}
-              description={t("fields.maxLicenseUsersDesc")}
-              value={data.max_license_users}
             />
             <div className="min-w-0 space-y-1">
               <div className="text-foreground text-xs font-semibold">

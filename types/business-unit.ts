@@ -64,7 +64,6 @@ export interface BusinessUnitDetail {
   config: BusinessUnitConfigItem[] | Record<string, unknown>;
   default_currency_id: string | null;
   calculation_method: string | null;
-  max_license_users: number | null;
   branch_no: string | null;
 
   company_name: string | null;

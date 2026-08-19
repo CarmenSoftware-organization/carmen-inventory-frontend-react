@@ -218,6 +218,34 @@ describe("403 handling — license vs permission (C5)", () => {
     stop();
   });
 
+  // Task 5.3: โค้ดที่สาม — เกินโควตาที่นั่ง (SEAT_LIMIT_EXCEEDED, evaluateSeat ฝั่ง backend)
+  it("dispatches reason 'seat' for SEAT_LIMIT_EXCEEDED", async () => {
+    const { onDetail, stop } = capturePermissionDenied();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(
+        jsonResponse(403, {
+          message: "This cluster has more users than the seats purchased",
+          error: { code: "SEAT_LIMIT_EXCEEDED" },
+          bu_codes: ["BU01"],
+        }),
+      ),
+    );
+
+    try {
+      await httpClient.post("/api/proxy/purchase-requests", { note: "x" });
+      expect.unreachable("should have thrown");
+    } catch (err) {
+      expect(err).toBeInstanceOf(ApiError);
+      expect((err as ApiError).code).toBe("FORBIDDEN");
+    }
+
+    expect(onDetail.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ reason: "seat" }),
+    );
+    stop();
+  });
+
   // permission 403 จริง (PermissionGuard) — error เหลือแค่ {message:"Forbidden"}
   // ไม่มี code เลย ต้องเห็น event เดิมทุกประการ (ไม่มี key `reason`)
   it("keeps the exact pre-C5 event shape for a real permission-403 body", async () => {

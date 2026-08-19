@@ -78,6 +78,14 @@ describe("dispatchPermissionDenied — reason parameter", () => {
     );
     expect(detail).toMatchObject({ reason: "license" });
   });
+
+  // Task 5.3: โค้ดที่สาม — เกินโควตาที่นั่ง (SEAT_LIMIT_EXCEEDED)
+  it("passes through the 'seat' reason", () => {
+    const detail = captureDetail(() =>
+      dispatchPermissionDenied(undefined, undefined, "seat"),
+    );
+    expect(detail).toMatchObject({ reason: "seat" });
+  });
 });
 
 describe("PermissionDeniedDialog — reason variants", () => {
@@ -126,6 +134,36 @@ describe("PermissionDeniedDialog — reason variants", () => {
     render(<PermissionDeniedDialog />);
     act(() => dispatchPermissionDenied(undefined, undefined, "expired"));
     expect(screen.queryByText("contactAdmin")).toBeNull();
+  });
+
+  // Task 5.3: โค้ดที่สาม — เกินโควตาที่นั่ง มีสองทางแก้ (ปิดผู้ใช้ / ซื้อเพิ่ม) ต่างจาก
+  // license/expired ที่มีทางแก้เดียว — ทั้งสองทางอยู่ใน seatDescription แล้ว
+  it('shows the seat copy + Users icon when reason is "seat"', () => {
+    render(<PermissionDeniedDialog />);
+    act(() => dispatchPermissionDenied(undefined, undefined, "seat"));
+    expect(screen.getByText("seatTitle")).toBeInTheDocument();
+    expect(screen.getByText("seatDescription")).toBeInTheDocument();
+    expect(screen.queryByText("title")).toBeNull();
+    const icon = document.querySelector("svg.lucide-users");
+    expect(icon).not.toBeNull();
+    expect(icon).toHaveClass("text-destructive");
+    expect(document.querySelector("svg.lucide-shield-off")).toBeNull();
+  });
+
+  it('ซ่อน "ติดต่อผู้ดูแลเพื่อขอสิทธิ์" เมื่อ reason เป็น "seat" — คำอธิบายบอกทางแก้ไว้แล้ว', () => {
+    render(<PermissionDeniedDialog />);
+    act(() => dispatchPermissionDenied(undefined, undefined, "seat"));
+    expect(screen.queryByText("contactAdmin")).toBeNull();
+  });
+
+  it("still prefers an explicit message over the seat-specific copy", () => {
+    render(<PermissionDeniedDialog />);
+    act(() =>
+      dispatchPermissionDenied(undefined, "custom seat override", "seat"),
+    );
+    expect(screen.getByText("seatTitle")).toBeInTheDocument();
+    expect(screen.getByText("custom seat override")).toBeInTheDocument();
+    expect(screen.queryByText("seatDescription")).toBeNull();
   });
 
   it("still prefers an explicit message over the reason-specific copy", () => {
