@@ -21,6 +21,8 @@ interface PrtGeneralFieldsProps {
   readonly disabled: boolean;
   /** ชื่อ workflow ที่ backend ส่งมา — ใช้แสดงใน view mode */
   readonly workflowName?: string;
+  /** โหมดสร้าง template ใหม่ — กรอง workflow เหลือเฉพาะตัวที่เริ่มเอกสารได้ */
+  readonly isAdd?: boolean;
 }
 
 /** General section — workflow, name, description และสถานะของเทมเพลต */
@@ -29,6 +31,7 @@ export function PrtGeneralFields({
   readOnly,
   disabled,
   workflowName,
+  isAdd,
 }: PrtGeneralFieldsProps) {
   const t = useTranslations("procurement.purchaseRequestTemplate");
   const tfl = useTranslations("field");
@@ -56,6 +59,7 @@ export function PrtGeneralFields({
                 value={field.value}
                 onValueChange={field.onChange}
                 workflowType={WORKFLOW_TYPE.PR}
+                creatableOnly={isAdd}
                 disabled={disabled}
                 error={errors.workflow_id?.message}
                 className="w-full"
