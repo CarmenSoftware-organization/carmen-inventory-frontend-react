@@ -32,7 +32,7 @@ export function GlobalNotificationBanner() {
   if (isError || unreadCount === 0 || !isVisible) return null;
 
   return (
-    <div className="animate-in slide-in-from-top-10 fade-in fixed top-4 right-4 z-[100] w-[calc(100%-2rem)] max-w-sm duration-500 ease-out sm:top-6 sm:right-6">
+    <div className="animate-in slide-in-from-top-10 fade-in fixed top-4 right-4 z-100 w-[calc(100%-2rem)] max-w-sm duration-500 ease-out sm:top-6 sm:right-6">
       <div
         role="alert"
         aria-live="polite"
