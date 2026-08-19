@@ -90,6 +90,7 @@ export function usePurchaseRequestTable({
       size: 140,
       meta: { headerTitle: tfl("prNo"), skeleton: columnSkeletons.text },
     },
+    sendbackColumn<PurchaseRequest>(tc("sendBack")),
     {
       accessorKey: "pr_date",
       header: ({ column }) => (
@@ -149,7 +150,6 @@ export function usePurchaseRequestTable({
       },
       size: 140,
     },
-    sendbackColumn<PurchaseRequest>(tc("sendBack")),
     {
       accessorKey: "requestor_name",
       header: tfl("requester"),

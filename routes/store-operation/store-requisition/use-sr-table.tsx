@@ -63,6 +63,7 @@ export function useStoreRequisitionTable({
       meta: { headerTitle: tfl("srNo"), skeleton: columnSkeletons.text },
       size: 120,
     },
+    sendbackColumn<StoreRequisition>(tc("sendBack")),
     {
       accessorKey: "sr_type",
       header: ({ column }) => (
@@ -157,7 +158,6 @@ export function useStoreRequisitionTable({
       },
       size: 80,
     },
-    sendbackColumn<StoreRequisition>(tc("sendBack")),
     {
       accessorKey: "workflow_name",
       header: ({ column }) => (

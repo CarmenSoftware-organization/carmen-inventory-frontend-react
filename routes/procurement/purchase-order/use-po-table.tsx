@@ -52,6 +52,7 @@ export function usePoTable({
       size: 180,
       meta: { headerTitle: tfl("poNo"), skeleton: columnSkeletons.text },
     },
+    sendbackColumn<PurchaseOrder>(tc("sendBack")),
     {
       id: "vendor_name",
       accessorFn: (row) => row.vendor_name,
@@ -153,7 +154,6 @@ export function usePoTable({
         headerClassName: "text-center",
       },
     },
-    sendbackColumn<PurchaseOrder>(tc("sendBack")),
     {
       accessorKey: "total_amount",
       header: ({ column }) => (
