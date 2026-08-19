@@ -146,7 +146,7 @@ export default function SortableStageItem({
               <Tooltip delayDuration={150}>
                 <TooltipTrigger asChild>
                   <span
-                    className="text-warning inline-flex items-center transition-transform hover:scale-110"
+                    className="text-warning-ink inline-flex items-center transition-transform hover:scale-110"
                     aria-label={t("isHod")}
                   >
                     <Crown className="size-3.5 drop-shadow-sm" />

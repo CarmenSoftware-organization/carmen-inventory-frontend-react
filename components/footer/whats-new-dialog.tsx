@@ -30,7 +30,7 @@ const SECTIONS = [
     key: "changed",
     label: "Changed",
     Icon: RefreshCw,
-    chipClass: "bg-info/10 text-info",
+    chipClass: "bg-info/10 text-info-foreground",
     dotClass: "bg-info",
   },
 ] as const;
