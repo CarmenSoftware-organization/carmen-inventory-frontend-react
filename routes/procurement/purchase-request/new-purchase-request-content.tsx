@@ -11,7 +11,10 @@ const NewPurchaseRequestInner = () => {
   const [searchParams] = useSearchParams();
   const templateId = searchParams.get("template_id");
 
-  const { data: templates, isLoading } = usePurchaseRequestTemplates();
+  // ดึง templates เฉพาะตอนเข้ามาแบบ ?template_id= — blank PR ไม่ต้องใช้
+  const { data: templates, isLoading } = usePurchaseRequestTemplates(
+    !!templateId,
+  );
 
   if (templateId && isLoading) {
     return <FormSkeleton />;
