@@ -37,6 +37,7 @@ export const ProductCell = memo(function ProductCell({
   "use no memo";
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
+  const workflowId = useWatch({ control, name: "workflow_id" }) ?? "";
   const productCode =
     useWatch({ control, name: `items.${index}.product_code` }) ?? "";
   const productName =
@@ -87,6 +88,7 @@ export const ProductCell = memo(function ProductCell({
                 <div className="min-w-0 flex-1">
                   <LookupProductInLocation
                     locationId={locationId}
+                    workflowId={workflowId}
                     value={field.value ?? ""}
                     disableTooltip
                     error={

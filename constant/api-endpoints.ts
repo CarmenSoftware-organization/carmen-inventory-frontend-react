@@ -219,6 +219,12 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/config/${buCode}/products/${productId}/images/order`,
   PRODUCTS_BY_LOCATION: (buCode: string, locationId: string) =>
     `/api/proxy/api/${buCode}/products/locations/${locationId}`,
+  PRODUCTS_BY_LOCATION_WORKFLOW: (
+    buCode: string,
+    locationId: string,
+    workflowId: string,
+  ) =>
+    `/api/proxy/api/config/${buCode}/products-location-workflow/${locationId}/${workflowId}`,
   PRODUCTS_WITH_MOVEMENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/products/with-movement`,
   PRODUCTS_WITH_MOVEMENT_AT_LOCATION: (buCode: string, locationId: string) =>

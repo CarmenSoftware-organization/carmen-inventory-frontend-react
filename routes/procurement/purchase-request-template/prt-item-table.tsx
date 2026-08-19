@@ -88,6 +88,7 @@ const ProductCell = ({
   "use no memo";
   const locationId =
     useWatch({ control, name: `items.${index}.location_id` }) ?? "";
+  const workflowId = useWatch({ control, name: "workflow_id" }) ?? "";
   const productName =
     useWatch({ control, name: `items.${index}.product_name` }) ?? "";
   const productLocalName =
@@ -106,6 +107,7 @@ const ProductCell = ({
       render={({ field }) => (
         <LookupProductInLocation
           locationId={locationId}
+          workflowId={workflowId}
           value={field.value ?? ""}
           onValueChange={(value, product) =>
             setProductToItem(form, index, value, product)

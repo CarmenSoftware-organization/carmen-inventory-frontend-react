@@ -14,6 +14,8 @@ import { CACHE_NORMAL } from "@/lib/cache-config";
  * จะไม่ fetch จนกว่า buCode และ locationId จะพร้อม
  * @param locationId - รหัสคลัง/สถานที่
  * @param params - พารามิเตอร์ pagination/search
+ * @param workflowId - ส่งมาเมื่อต้องกรองตาม workflow ด้วย (endpoint
+ *   products-location-workflow) — ถ้าส่งมาแต่ยังว่าง จะไม่ fetch จนกว่าจะมีค่า
  * @returns React Query ของ PaginatedResponse<Product> ใน location
  * @example
  * const { data } = useProductsByLocation(locationId, { search: query });
@@ -21,14 +23,28 @@ import { CACHE_NORMAL } from "@/lib/cache-config";
 export function useProductsByLocation(
   locationId: string | undefined,
   params?: ParamsDto,
+  workflowId?: string,
 ) {
   const buCode = useBuCode();
+  const useWorkflow = workflowId !== undefined;
 
   return useQuery<PaginatedResponse<Product>>({
-    queryKey: [QUERY_KEYS.PRODUCTS_BY_LOCATION, buCode, locationId, params],
+    queryKey: [
+      QUERY_KEYS.PRODUCTS_BY_LOCATION,
+      buCode,
+      locationId,
+      workflowId,
+      params,
+    ],
     queryFn: async () => {
       const url = buildUrl(
-        API_ENDPOINTS.PRODUCTS_BY_LOCATION(buCode!, locationId!),
+        useWorkflow
+          ? API_ENDPOINTS.PRODUCTS_BY_LOCATION_WORKFLOW(
+              buCode!,
+              locationId!,
+              workflowId!,
+            )
+          : API_ENDPOINTS.PRODUCTS_BY_LOCATION(buCode!, locationId!),
         {
           perpage: params?.perpage ?? 30,
           page: params?.page,
@@ -39,7 +55,7 @@ export function useProductsByLocation(
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
-    enabled: !!buCode && !!locationId,
+    enabled: !!buCode && !!locationId && (!useWorkflow || !!workflowId),
     ...CACHE_NORMAL,
   });
 }
