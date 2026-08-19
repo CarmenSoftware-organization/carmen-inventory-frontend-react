@@ -8,7 +8,6 @@ import { Navbar } from "@/components/navbar/navbar";
 import { RouteGuard } from "@/components/route-guard";
 import { ActivitySheetHost } from "@/components/share/activity-sheet-host";
 import { OfflineBanner } from "@/components/share/offline-banner";
-import { GlobalNotificationBanner } from "@/components/share/global-notification-banner";
 import { ProfileGate } from "@/components/share/profile-gate";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarShell } from "@/components/sidebar/sidebar-shell";
@@ -25,7 +24,6 @@ export default function RootLayout() {
         {/* mount ครั้งเดียวที่นี่เหมือน ActivitySheetHost — อ่าน useLicense() เอง
             ไม่ต้อง render ซ้ำในหน้าไหน */}
         <LicenseExpiredBanner />
-        <GlobalNotificationBanner />
         <div
           id="main-content"
           className="m-3 flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-4"
