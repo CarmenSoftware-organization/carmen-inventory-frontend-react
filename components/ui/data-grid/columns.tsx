@@ -256,12 +256,19 @@ export function auditColumns<T extends RowWithAudit>(
  * ช่องจะว่างสำหรับทุก state อื่น (`submitted` / `approved` / `rejected` /
  * `completed` / ไม่มีค่า) เพราะคอลัมน์นี้ตอบคำถามว่า "ตอนนี้ค้างอยู่ที่การตีกลับ
  * ไหม" ไม่ใช่ "เคยถูกตีกลับไหม" — ดู `isSentBack` ใน `constant/last-action.ts`
- * ปิด sorting ไว้เพราะ backend เรียงตาม enum ตามลำดับตัวอักษรซึ่งไม่มีความหมาย
+ *
+ * `id` ต้องเป็น `last_action` ซึ่งเป็นชื่อคอลัมน์จริงฝั่ง DB ไม่ใช่ `sendback`
+ * เพราะ `useDataGridState.onSortingChange` ส่ง `${column.id}:${dir}` เข้า query
+ * param `sort` ตรง ๆ — ตั้งเป็นชื่ออื่นแล้ว backend จะ orderBy คอลัมน์ที่ไม่มีอยู่
+ *
+ * การเรียงเป็นการเรียงตาม enum `enum_last_action` ของ Postgres ซึ่งใช้**ลำดับที่
+ * ประกาศไว้** (submitted → approved → reviewed → rejected) ไม่ใช่ตัวอักษร ผลคือ
+ * ใบที่ถูกตีกลับจะถูกจับมากองติดกันเป็นกลุ่มเดียว ไม่ใช่ลอยขึ้นบนสุดเสมอไป
  *
  * @typeParam T - ประเภทข้อมูลแถวที่มี `last_action`
  * @param title - หัวคอลัมน์ที่แปลแล้ว (ปกติคือ `tc("sendBack")`)
  * @param options.size - ความกว้างคอลัมน์ (default 120)
- * @returns ColumnDef ของ column "sendback"
+ * @returns ColumnDef ของ column "last_action"
  * @example
  * ```ts
  * const columns = [...dataColumns, sendbackColumn<PurchaseRequest>(tc("sendBack"))];
@@ -272,12 +279,17 @@ export function sendbackColumn<T extends RowWithLastAction>(
   options?: { size?: number },
 ): ColumnDef<T> {
   return {
-    id: "sendback",
+    id: "last_action",
     // accessorFn คืนข้อความ ไม่ใช่ boolean — column visibility menu กับการคัดลอก
     // ค่าจากตารางจะได้อ่านรู้เรื่อง ไม่ใช่ "true"/"false"
     accessorFn: (row: T) => (isSentBack(row.last_action) ? title : ""),
-    header: title,
-    enableSorting: false,
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        column={column}
+        title={title}
+        className="justify-center"
+      />
+    ),
     cell: ({ row }) => <SendBackBadge lastAction={row.original.last_action} />,
     size: options?.size ?? 120,
     meta: {
