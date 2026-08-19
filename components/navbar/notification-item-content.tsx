@@ -80,7 +80,7 @@ export function NotificationItemContent({
         aria-hidden="true"
       >
         {isUnread && (
-          <span className="bg-primary ring-primary/10 size-2 rounded-full shadow-[0_0_8px_hsl(var(--primary))] ring-4" />
+          <span className="bg-primary ring-primary/10 size-2 rounded-full shadow-[0_0_8px_var(--primary)] ring-4" />
         )}
       </span>
 
@@ -103,7 +103,7 @@ export function NotificationItemContent({
           </span>
         )}
         {isComment && (
-          <span className="bg-background ring-border absolute -end-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full ring-1">
+          <span className="bg-background ring-border absolute -inset-e-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full ring-1">
             <MessageSquare
               className="text-muted-foreground size-2.5"
               aria-hidden="true"

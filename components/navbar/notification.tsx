@@ -150,7 +150,7 @@ export default function Notification() {
           <Bell className="h-3.5 w-3.5 transition-transform group-hover:-rotate-12" />
           {notificationCount > 0 && (
             <>
-              <span className="bg-destructive ring-background text-micro-eyebrow absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-semibold text-white ring-2">
+              <span className="bg-destructive text-destructive-foreground ring-background text-micro-eyebrow absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-semibold ring-2">
                 {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             </>
@@ -158,7 +158,7 @@ export default function Notification() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="bg-background/70 border-border/40 supports-[backdrop-filter]:bg-background/50 mx-4 max-h-136 w-108 p-0 shadow-lg backdrop-blur-xl"
+        className="bg-background/70 border-border/40 supports-backdrop-filter:bg-background/50 mx-4 max-h-136 w-108 p-0 shadow-lg backdrop-blur-xl"
         align="end"
         sideOffset={6}
       >
@@ -265,26 +265,22 @@ export function NotificationDetailDialog({
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent
-        className="overflow-hidden border-0 bg-transparent p-0 shadow-2xl sm:max-w-[425px]"
+        className="overflow-hidden border-0 bg-transparent p-0 shadow-2xl sm:max-w-106.25"
         showCloseButton={false}
       >
-        <div className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/80 shadow-[inset_0_1px_1px_rgba(255,255,255,1)] backdrop-blur-3xl dark:border-white/20 dark:bg-zinc-900/80 dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
+        <div className="border-border/60 bg-popover/80 relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-3xl">
           {/* Header */}
-          <div className="border-b border-white/60 bg-white/60 px-6 py-6 dark:border-white/10 dark:bg-black/40">
+          <div className="border-border/40 bg-background/40 border-b px-6 py-6">
             <div className="flex items-center gap-4">
-              <div className="text-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/80 bg-white/90 shadow-sm backdrop-blur-md dark:border-white/20 dark:bg-white/10">
+              <div className="text-primary bg-primary/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
                 <Bell className="h-6 w-6" />
               </div>
               <div className="flex flex-col text-left">
-                <DialogTitle className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
-                  {isLoading ? (
-                    <Skeleton className="h-5 w-3/4 bg-black/10 dark:bg-white/10" />
-                  ) : (
-                    data?.title
-                  )}
+                <DialogTitle className="text-foreground text-xl font-bold tracking-tight">
+                  {isLoading ? <Skeleton className="h-5 w-3/4" /> : data?.title}
                 </DialogTitle>
                 {data && (
-                  <div className="mt-1 flex items-center text-sm font-semibold text-slate-600 dark:text-slate-300">
+                  <div className="text-muted-foreground mt-1 flex items-center text-sm font-semibold">
                     <span>
                       {data.created_at
                         ? new Date(data.created_at).toLocaleDateString(locale, {
@@ -304,35 +300,31 @@ export function NotificationDetailDialog({
           </div>
 
           {/* Body */}
-          <div className="bg-white/50 px-6 py-6 dark:bg-black/40">
+          <div className="px-6 py-6">
             {isLoading && (
               <div className="space-y-3">
-                <Skeleton className="h-4 w-full bg-black/10 dark:bg-white/10" />
-                <Skeleton className="h-4 w-5/6 bg-black/10 dark:bg-white/10" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
               </div>
             )}
 
             {error && (
-              <div className="text-destructive flex items-center gap-3 rounded-xl border border-white/60 bg-white/80 p-4 text-sm font-semibold shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-black/60">
+              <div className="text-destructive border-destructive/20 bg-destructive/10 flex items-center gap-3 rounded-xl border p-4 text-sm font-semibold">
                 <AlertCircle className="h-5 w-5" />
                 {error instanceof Error ? error.message : String(error)}
               </div>
             )}
 
             {data && (
-              <p className="text-sm leading-relaxed font-medium whitespace-pre-wrap text-slate-700 dark:text-slate-200">
+              <p className="text-foreground/90 text-sm leading-relaxed font-medium whitespace-pre-wrap">
                 {formatMessage(data.message)}
               </p>
             )}
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end border-t border-white/60 bg-white/70 px-6 py-4 dark:border-white/10 dark:bg-black/50">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="rounded-xl border border-white/80 bg-white/90 font-bold shadow-sm backdrop-blur-md transition-all hover:bg-white dark:border-white/20 dark:bg-white/10 dark:hover:bg-white/20"
-            >
+          <div className="border-border/40 bg-background/40 flex justify-end border-t px-6 py-4">
+            <Button variant="outline" onClick={onClose} className="rounded-xl">
               {tc("close")}
             </Button>
           </div>
