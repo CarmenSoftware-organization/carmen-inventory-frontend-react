@@ -4303,12 +4303,16 @@
     "licenseTitle": "Feature Not Licensed",
     "licenseDescription": "This feature is not included in your organization's subscription. Contact your administrator or sales representative to enable it.",
     "expiredTitle": "Subscription Expired",
-    "expiredDescription": "Your subscription has expired or been suspended. You can still view data, but editing is disabled. Contact your administrator to renew."
+    "expiredDescription": "Your subscription has expired or been suspended. You can still view data, but editing is disabled. Contact your administrator to renew.",
+    "seatTitle": "Seat Limit Exceeded",
+    "seatDescription": "This cluster has more users than the seats you've purchased. Contact your administrator to deactivate unused users, or purchase more seats."
   },
   "license": {
     "expiredBanner": "Your subscription expired on {date} — you can still view data, but saving or editing is disabled.",
     "inactiveBanner": "Your subscription has been suspended — you can still view data, but saving or editing is disabled.",
-    "writeDisabledTitle": "Disabled — your subscription is expired or inactive. Contact your administrator to renew."
+    "writeDisabledTitle": "Disabled — your subscription is expired or inactive. Contact your administrator to renew.",
+    "seatOverQuota": "This cluster has {used}/{cap} users — over the seats you've purchased. Saving is disabled until you reduce users or buy more seats.",
+    "seatExpiringSoon": "{seats} seat(s) expire on {date} — afterward, your {used} active users will exceed the remaining quota ({remaining} seats). Renew or buy more seats soon."
   },
   "profileError": {
     "missingDepartmentTitle": "No Department Assigned",

@@ -128,6 +128,55 @@ describe("resolveLicense — license block missing entirely", () => {
   });
 });
 
+// Task 5.3: overQuota/expiringSoon — ล้อ evaluateSeat ฝั่ง backend
+// (apps/backend-gateway/src/license/license.evaluator.ts) ที่ตัดสิน SEAT_LIMIT_EXCEEDED
+// ด้วย used > cap เป๊ะ ๆ (used === cap ยังเขียนได้ — เต็มพอดีไม่ใช่เกิน)
+describe("resolveLicense — overQuota (Task 5.3)", () => {
+  it("used > cap → overQuota true", () => {
+    const info = resolveLicense(
+      makeLicense({ seat: { used: 12, cap: 5, pending_invites: 0 } }),
+      true,
+    );
+    expect(info.overQuota).toBe(true);
+  });
+
+  it("used === cap → overQuota false — เต็มพอดีไม่ใช่เกิน", () => {
+    const info = resolveLicense(
+      makeLicense({ seat: { used: 5, cap: 5, pending_invites: 0 } }),
+      true,
+    );
+    expect(info.overQuota).toBe(false);
+  });
+
+  it("used < cap → overQuota false", () => {
+    const info = resolveLicense(
+      makeLicense({ seat: { used: 2, cap: 5, pending_invites: 0 } }),
+      true,
+    );
+    expect(info.overQuota).toBe(false);
+  });
+
+  it("ไม่มี license เลย (seat เป็น undefined) → overQuota false เสมอ", () => {
+    expect(resolveLicense(undefined, true).overQuota).toBe(false);
+  });
+
+  it("overQuota เป็นสัญญาณดิบ ไม่ผ่านสวิตช์ enforced — ยังเป็น true แม้ enforced=false", () => {
+    // เหมือน state/endDate ด้านบน: ผู้บริโภค (SeatQuotaBanner) เช็ค enforced เอง
+    const info = resolveLicense(
+      makeLicense({ seat: { used: 12, cap: 5, pending_invites: 0 } }),
+      false,
+    );
+    expect(info.overQuota).toBe(true);
+  });
+});
+
+describe("resolveLicense — expiringSoon (Task 5.3)", () => {
+  it("เป็น null เสมอตอนนี้ — ClusterSeat จาก gateway ไม่มีรายละเอียดระดับใบให้คำนวณ", () => {
+    expect(resolveLicense(makeLicense(), true).expiringSoon).toBeNull();
+    expect(resolveLicense(undefined, true).expiringSoon).toBeNull();
+  });
+});
+
 
 describe("licenseFeatureOf", () => {
   const base = { name: "x", path: "/x", icon: (() => null) as never };

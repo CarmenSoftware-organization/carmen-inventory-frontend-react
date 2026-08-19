@@ -18,12 +18,15 @@ import type { Permission } from "@/constant/permissions";
 export const PERMISSION_DENIED_EVENT = "permission-denied";
 
 /**
- * ทำไมถึงเข้าไม่ได้ — สามเหตุผลนี้ผู้ใช้แก้คนละวิธี จึงต้องบอกให้ตรง
+ * ทำไมถึงเข้าไม่ได้ — สี่เหตุผลนี้ผู้ใช้แก้คนละวิธี จึงต้องบอกให้ตรง
  * - "permission": ไม่มีสิทธิ์ RBAC — ติดต่อผู้ดูแลขอสิทธิ์
  * - "license": feature ไม่อยู่ในสัญญาของ BU — ไม่ใช่เรื่องสิทธิ์ แก้ด้วยการซื้อ/เปิดสัญญา
  * - "expired": สัญญาหมดอายุ/ถูกระงับ — อ่านได้ เขียนไม่ได้ (บล็อกเฉพาะปุ่มเขียน)
+ * - "seat": cluster มีผู้ใช้เกินจำนวนที่นั่งที่ซื้อไว้ (SEAT_LIMIT_EXCEEDED, Task 5.3) —
+ *   อ่านได้ เขียนไม่ได้เหมือน "expired" แต่ทางแก้มีสองทาง (ปิดผู้ใช้ที่ไม่ใช้งาน หรือซื้อ
+ *   ที่นั่งเพิ่ม) ต่างจาก "license"/"expired" ที่มีทางแก้เดียว — คำอธิบายจึงบอกทั้งสองทาง
  */
-export type DeniedReason = "permission" | "license" | "expired";
+export type DeniedReason = "permission" | "license" | "expired" | "seat";
 
 interface PermissionDeniedDetail {
   permission?: Permission;
@@ -87,14 +90,18 @@ export function PermissionDeniedDialog() {
       ? t("licenseTitle")
       : reason === "expired"
         ? t("expiredTitle")
-        : t("title");
+        : reason === "seat"
+          ? t("seatTitle")
+          : t("title");
   const description =
     detail?.message ??
     (reason === "license"
       ? t("licenseDescription")
       : reason === "expired"
         ? t("expiredDescription")
-        : t("description"));
+        : reason === "seat"
+          ? t("seatDescription")
+          : t("description"));
 
   return (
     <AlertDialog
@@ -116,8 +123,9 @@ export function PermissionDeniedDialog() {
           <AlertDialogDescription>{description}</AlertDialogDescription>
 
           {/* "ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์" เป็นทางแก้ของ reason "permission" เท่านั้น —
-              "license" บอกให้ติดต่อฝ่ายขาย ส่วน "expired" บอกให้ต่ออายุสัญญา อยู่ใน
-              คำอธิบายด้านบนแล้วทั้งคู่ การแปะบรรทัดนี้ทุก reason จึงขัดกันเอง */}
+              "license" บอกให้ติดต่อฝ่ายขาย "expired" บอกให้ต่ออายุสัญญา และ "seat" บอกทั้ง
+              สองทาง (ปิดผู้ใช้ที่ไม่ใช้งาน/ซื้อที่นั่งเพิ่ม) อยู่ในคำอธิบายด้านบนแล้วทุกกรณี
+              การแปะบรรทัดนี้ทุก reason จึงขัดกันเอง */}
           {reason === "permission" && (
             <p className="text-muted-foreground/80 text-xs leading-relaxed">
               {t("contactAdmin")}
