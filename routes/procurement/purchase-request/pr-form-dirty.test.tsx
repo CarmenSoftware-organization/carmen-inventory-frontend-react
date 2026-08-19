@@ -109,6 +109,54 @@ describe("PR add form — dirty state after auto-populating hidden defaults", ()
     );
   };
 
+  // จาก template: pr-form สลับ baseline เป็นฟอร์มเปล่า (reset + keepValues)
+  // เพื่อให้ของที่ template เติมนับเป็น dirty — ไม่งั้น back ออกเงียบ ๆ
+  // discard ไม่ถามทั้งที่มีของค้างเต็มฟอร์ม
+  it("template: สลับ baseline แล้วต้อง dirty ตั้งแต่เกิด และ auto-populate ไม่ล้างของจาก template", () => {
+    const templateValues: PrFormValues = {
+      ...getDefaultValues(),
+      workflow_id: "wf-t",
+      department_id: "d-t",
+      items: [{ ...PR_ITEM, product_id: "p1", product_name: "Rice" } as never],
+    };
+    const { result } = renderHook(() => {
+      const form = useForm<PrFormValues>({
+        defaultValues: templateValues,
+        mode: "onChange",
+      });
+      const isDirty = form.formState.isDirty;
+      return { form, isDirty };
+    });
+
+    // effect สลับ baseline ใน pr-form.tsx
+    act(() =>
+      result.current.form.reset(getDefaultValues(), { keepValues: true }),
+    );
+    expect(result.current.form.getValues("workflow_id")).toBe("wf-t");
+    expect(result.current.form.getValues("items")).toHaveLength(1);
+    expect(result.current.form.formState.isDirty).toBe(true);
+
+    // effect auto-populate โหมด template ใช้ setValue ตรง ๆ (ห้าม reset +
+    // keepDirtyValues — items จาก template ยังไม่อยู่ใน dirtyFields จะโดน wipe)
+    act(() => {
+      result.current.form.setValue("pr_date", AUTO.pr_date);
+      result.current.form.setValue("requestor_id", AUTO.requestor_id);
+    });
+    expect(result.current.form.getValues("items")).toHaveLength(1);
+    expect(result.current.form.getValues("workflow_id")).toBe("wf-t");
+    expect(result.current.form.getValues("pr_date")).toBe(AUTO.pr_date);
+    expect(result.current.form.formState.isDirty).toBe(true);
+
+    // ท่า reset+keepDirtyValues ที่ห้ามใช้ — กันคนย้อนกลับมาใช้แล้วตารางหาย
+    act(() =>
+      result.current.form.reset(
+        { ...getDefaultValues(), pr_date: AUTO.pr_date },
+        { keepDirtyValues: true },
+      ),
+    );
+    expect(result.current.form.getValues("items")).toHaveLength(0);
+  });
+
   it("FIX 2-phase: profile โหลดทีหลัง → reset รอบสองต้องไม่ wipe pr_date และไม่ dirty", () => {
     const { result } = renderPrForm();
 
