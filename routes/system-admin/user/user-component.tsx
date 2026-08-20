@@ -59,6 +59,10 @@ export default function UserComponent() {
   const tc = useTranslations("common");
   const { params, search, setSearch, tableConfig } = useDataGridState();
 
+  // Export/Print รอ endpoint จาก backend — ระหว่างนี้กดแล้วแจ้งเตือนไว้ก่อน
+  // (ถ้าจะทำ client-side xlsx ระหว่างรอ ใช้ pattern เดียวกับ useExportUserActivity)
+  const notifyComingSoon = () => toast.info(tc("comingSoon"));
+
   const { data: deptData } = useDepartment({ perpage: -1 });
   // department เป็นชื่อ literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
   // array reference เปลี่ยนทุก render จน userFilterFields memo ข้างล่างไม่เคย hit
@@ -155,8 +159,7 @@ export default function UserComponent() {
             <Button
               size="sm"
               variant="outline"
-              disabled
-              title={tc("comingSoon")}
+              onClick={notifyComingSoon}
               className="hidden sm:inline-flex"
             >
               <Download aria-hidden="true" />
@@ -165,8 +168,7 @@ export default function UserComponent() {
             <Button
               size="sm"
               variant="outline"
-              disabled
-              title={tc("comingSoon")}
+              onClick={notifyComingSoon}
               className="hidden sm:inline-flex"
             >
               <Printer aria-hidden="true" />
@@ -184,11 +186,11 @@ export default function UserComponent() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem disabled>
+                <DropdownMenuItem onClick={notifyComingSoon}>
                   <Download aria-hidden="true" />
                   {tc("export")}
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled>
+                <DropdownMenuItem onClick={notifyComingSoon}>
                   <Printer aria-hidden="true" />
                   {tc("print")}
                 </DropdownMenuItem>
