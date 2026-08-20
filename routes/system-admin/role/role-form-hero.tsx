@@ -33,18 +33,6 @@ export function RoleHero({
 
   const actions = (
     <>
-      {canDelete && (
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={onDelete}
-          disabled={isDeleting}
-        >
-          <Trash2 className="size-3.5" aria-hidden="true" />
-          {tc("delete")}
-        </Button>
-      )}
       {isView ? (
         <Button size="sm" onClick={onEdit}>
           <Pencil />
@@ -54,7 +42,7 @@ export function RoleHero({
         <>
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={onCancel}
             disabled={isSaving}
@@ -67,6 +55,18 @@ export function RoleHero({
             {isSaving ? tf("saving") : tc("save")}
           </Button>
         </>
+      )}
+      {canDelete && (
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={onDelete}
+          disabled={isDeleting}
+        >
+          <Trash2 className="size-3.5" aria-hidden="true" />
+          {tc("delete")}
+        </Button>
       )}
     </>
   );
