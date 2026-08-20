@@ -17,3 +17,15 @@ isLoading เท่าเดิม) แล้ว **reuse ผลลัพธ์�
 
 หน้า list ส่วนใหญ่ยัง**ไม่ได้**ใส่และยังทำงานปกติ (ขึ้นกับรูปร่างของ JSX ล้วน ๆ)
 จึงไม่ได้ไล่ใส่ยกชุด — เจอตารางค้างตอนเปลี่ยนหน้าเมื่อไร ใส่หน้านั้นทีละหน้า
+
+## Backend bug: `ValidateSchema.quantity` เป็น `z.number().int()` (ไม่ใช่บั๊กฝั่ง frontend)
+
+DB columns เป็น `Decimal(20,5)` แต่ schema ฝั่ง API เป็น `int` — `requested_qty` /
+`approved_qty` / `foc_qty` ที่มีทศนิยมจะ 400 ที่ API gate ทั้งที่เก็บลง DB ได้จริง
+จำนวนทศนิยมถูกต้องตามธุรกิจ (2.5 kg) กระทบทุกโมดูลที่มี qty (PR/PO/GRN/SR/CN)
+ซึ่งอยู่ทั้งใต้ `procurement/` และ `store-operation/` จึงเก็บโน้ตนี้ไว้ที่ระดับ `routes/`
+
+**วิธีแก้อยู่ฝั่ง backend:** ลบ `.int()` ออกจาก `ValidateSchema` ทั้ง 3 ชุดใน
+carmen-turborepo-backend-v2 (`backend-gateway`, `micro-business`, `micro-file`)
+
+**Frontend จงใจไม่ปัดเศษชดเชย** — ปัดเมื่อไรข้อมูลเพี้ยนทันที

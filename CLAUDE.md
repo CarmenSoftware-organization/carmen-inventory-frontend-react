@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 CARMEN BLUE frontend — **Vite + React Router SPA port** of the Next.js app at
 `../carmen-inventory-frontend/`. Static bundle on S3/CloudFront; the browser calls the
 backend directly. Spec: `docs/superpowers/specs/2026-06-11-carmen-react-ssg-migration-design.md`.
@@ -45,11 +43,7 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
   `<feature>-new.route.tsx` are the list/new/edit trio. A module's shared bits sit in a
   plain `shared/` sub-folder; large features may keep organizational sub-folders
   (e.g. `pr-item-cells/`). Add new module routes under the `ProtectedShell` children.
-  **All sections migrated:**
-  `routes/{config,procurement,inventory-management,vendor-management,store-operation,operation-plan,product-management,system-admin,report}/`
-  (section parents with `RouteErrorBoundaryAdapter`) plus the standalone shell routes
-  `dashboard/`, `profile/` (+ `profile/setting`) and `notifications/` registered directly
-  as `ProtectedShell` children, and the public `/pl/:url_token` price-list route. Use
+  **All sections are migrated.** Use
   `routes/config/` / `routes/procurement/` as reference module sets. The source app's
   `playground` is intentionally NOT ported (dev-only tool); `/` redirects to `/dashboard`
   (the source `HomeComponent` landing is not ported).
@@ -57,12 +51,9 @@ scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN
   shell routes carry `RouteErrorBoundaryAdapter` (in-layout error UI); the root route
   has `RootErrorBoundary` (`routes/root-error-boundary.tsx`) as a full-page catch-all so
   React Router's default error screen never shows. Both render `ModuleError` → `ErrorState`.
-- **Imports (no compat layer):** import `react-router` directly — `Link` (use `to`, not
-  `href`), `useNavigate` (not `useRouter`; `push`→`navigate`, `replace`→
-  `navigate(x, { replace: true })`, `back`→`navigate(-1)`), `useLocation().pathname` (not
-  `usePathname`), `useParams`, `useSearchParams` (returns a `[params, setParams]` tuple).
-  `next-intl` → `use-intl`. ESLint blocks direct `next*` imports. The former
-  `lib/compat/*` shims have been **removed** — there is no compat layer.
+- **Imports (no compat layer):** the `lib/compat/*` shims are **removed** — import
+  `react-router` / `use-intl` directly (ESLint blocks direct `next*` imports). The full
+  Next→react-router rewrite table lives in the `migrate-source-module` skill.
 - **i18n:** `use-intl` + `components/i18n-provider.tsx`; locale persisted in
   localStorage (`carmen.locale`); messages in `messages/{en,th}.json`.
 - **Runtime config:** `public/config.json` (`BACKEND_URL`, `X_APP_ID`) fetched at boot —
@@ -115,25 +106,9 @@ or any secret-bearing app-config save (incl. the pre-existing `report_email`) 40
 - Backend CORS required before production on S3/GCS static hosting (dev uses the Vite
   proxy; the **Docker image needs no CORS** — its nginx proxies `/api/*` itself).
 - Local dev against the local backend: `VITE_DEV_PROXY_TARGET=http://localhost:4000 bun dev`.
-- Backend bug (not frontend): `GET /api/me/dashboard-widgets?bu_code=T02` returns 500
-  from the gateway itself (verified identical direct vs proxied). Dashboard degrades
-  gracefully; report to the carmen-turborepo-backend-v2 team.
-- Backend bug (not frontend): `ValidateSchema.quantity` is `z.number().int()` while the
-  DB columns are `Decimal(20,5)` — any decimal `requested_qty` / `approved_qty` /
-  `foc_qty` 400s at the API gate even though the schema stores it. Decimal quantities
-  are valid business-wise (2.5 kg). Hits every qty-bearing module (PR/PO/GRN/SR/CN);
-  the fix is dropping `.int()` from the 3 copies of `ValidateSchema` in
-  carmen-turborepo-backend-v2 (`backend-gateway`, `micro-business`, `micro-file`).
-  Frontend deliberately does NOT round to compensate — that would corrupt the data.
-- Backend bug (not frontend): `GET /api/purchase-requests` (PR list) carries a bare
-  `@EnrichAuditUsers()`, which only enriches path `''` — but the rows sit at
-  `data[].data[]` (multi-BU envelope), so the interceptor never reaches them. Rows come
-  back with a raw `created_at` still attached and **no `audit` object at all**, so the
-  Created/Updated columns on the PR list render blank (`pr-component.tsx` Excel export,
-  `pr-card.tsx` grid card). Verified by hitting the gateway directly 2026-08-04. Fix is
-  `paths` on the decorator so it reaches the nested rows — same class as the SR list fix.
-  Frontend deliberately keeps reading `audit` rather than falling back to the raw field:
-  the raw one disappears the moment the decorator is fixed.
+- Backend bug ที่ผูกกับโมดูลเดียว ย้ายไปอยู่ข้างโมดูลแล้ว (โหลดเองเมื่อทำงานในโฟลเดอร์นั้น):
+  decimal qty ที่ `.int()` ปัด → `routes/CLAUDE.md` · dashboard-widgets 500 →
+  `routes/dashboard/CLAUDE.md` · PR list ไม่มี `audit` → `routes/procurement/CLAUDE.md`
 - `scripts/changelog.ts`'s conventional-commit regex captures the breaking-change `!`
   marker (e.g. `feat(api)!: …`) but nothing reads it — deliberately not implementing a
   breaking-change badge in What's New for now; such commits render like ordinary features.
