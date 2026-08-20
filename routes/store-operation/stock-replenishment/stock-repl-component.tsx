@@ -9,8 +9,8 @@ import {
   RefreshCcw,
   ShoppingCart,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { ErrorState } from "@/components/ui/error-state";
 import DisplayTemplate from "@/components/display-template";
 import SearchInput from "@/components/search-input";
@@ -37,6 +37,8 @@ const filterLocations = (locations: Location[], search: string): Location[] => {
       products_location: loc.products_location.filter(
         (p) =>
           p.name.toLowerCase().includes(term) ||
+          p.code.toLowerCase().includes(term) ||
+          (p.local_name ?? "").toLowerCase().includes(term) ||
           p.category.name.toLowerCase().includes(term) ||
           p.sub_category.name.toLowerCase().includes(term) ||
           p.item_group.name.toLowerCase().includes(term),
@@ -104,7 +106,7 @@ export default function StockReplComponent() {
     critical: allProducts.filter((p) => p.status === "critical").length,
     warning: allProducts.filter((p) => p.status === "warning").length,
     low: allProducts.filter((p) => p.status === "low").length,
-    totalNeed: allProducts.reduce((sum, p) => sum + p.need, 0),
+    totalNeed: allProducts.reduce((sum, p) => sum + p.reorder_qty, 0),
   };
 
   const handleSelectionChange = (locationId: string, ids: Set<string>) => {
@@ -205,15 +207,15 @@ export default function StockReplComponent() {
               {t("nItems", { count: summary.totalItems })}
             </span>
             <span className="text-muted-foreground/40">|</span>
-            <Badge variant="destructive" size="xs">
+            <StatusDotBadge tone="destructive" size="xs">
               {t("nCritical", { count: summary.critical })}
-            </Badge>
-            <Badge variant="warning" size="xs">
+            </StatusDotBadge>
+            <StatusDotBadge tone="warning" size="xs">
               {t("nWarning", { count: summary.warning })}
-            </Badge>
-            <Badge variant="secondary" size="xs">
+            </StatusDotBadge>
+            <StatusDotBadge tone="neutral" size="xs">
               {t("nLow", { count: summary.low })}
-            </Badge>
+            </StatusDotBadge>
             <span className="text-muted-foreground/40">|</span>
             <span className="font-semibold">
               {t("totalNeed")}{" "}

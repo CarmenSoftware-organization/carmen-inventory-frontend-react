@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import {
   DataGrid,
   DataGridContainer,
@@ -55,10 +56,11 @@ export function StockReplLocation({
   const ts = useTranslations("status");
   const tl = useTranslations("lookup");
 
+  // สีอยู่ที่ dot ตัวเดียว chip เป็นกลาง ตาม pattern StatusDotBadge ของแอป
   const STATUS_CONFIG = {
-    critical: { variant: "destructive" as const, label: ts("critical") },
-    warning: { variant: "warning" as const, label: ts("warning") },
-    low: { variant: "secondary" as const, label: ts("low") },
+    critical: { tone: "destructive" as const, label: ts("critical") },
+    warning: { tone: "warning" as const, label: ts("warning") },
+    low: { tone: "neutral" as const, label: ts("low") },
   };
 
   const products = location.products_location;
@@ -126,8 +128,25 @@ export function StockReplLocation({
     {
       accessorKey: "name",
       header: tfl("product"),
-      cell: ({ row }) => row.getValue("name") || "...",
+      // ชื่อหลักบน local name เป็นบรรทัดรองข้างล่าง — ยาวเกินคอลัมน์ให้ตัดด้วย
+      // ellipsis (table เป็น table-fixed ความกว้างตาม size ข้างล่าง)
+      cell: ({ row }) => (
+        <div className="min-w-0">
+          <p className="truncate" title={row.getValue("name")}>
+            {row.getValue("name") || "..."}
+          </p>
+          {row.original.local_name && (
+            <p
+              className="text-muted-foreground text-micro truncate"
+              title={row.original.local_name}
+            >
+              {row.original.local_name}
+            </p>
+          )}
+        </div>
+      ),
       enableSorting: false,
+      size: 320,
     },
     {
       id: "category",
@@ -160,31 +179,31 @@ export function StockReplLocation({
       enableSorting: false,
     },
     {
-      accessorKey: "current",
+      accessorKey: "on_hand_qty",
       header: tfl("current"),
       cell: ({ row }) => (
-        <span className="tabular-nums">{row.getValue("current")}</span>
+        <span className="tabular-nums">{row.getValue("on_hand_qty")}</span>
       ),
       enableSorting: false,
       size: 80,
       meta: { headerClassName: "text-right", cellClassName: "text-right" },
     },
     {
-      accessorKey: "par_level",
+      accessorKey: "par_qty",
       header: tfl("parLevel"),
       cell: ({ row }) => (
-        <span className="tabular-nums">{row.getValue("par_level")}</span>
+        <span className="tabular-nums">{row.getValue("par_qty")}</span>
       ),
       enableSorting: false,
       size: 80,
       meta: { headerClassName: "text-right", cellClassName: "text-right" },
     },
     {
-      accessorKey: "need",
+      accessorKey: "reorder_qty",
       header: tfl("need"),
       cell: ({ row }) => (
         <span className="font-semibold tabular-nums">
-          {row.getValue("need")}
+          {row.getValue("reorder_qty")}
         </span>
       ),
       enableSorting: false,
@@ -197,9 +216,9 @@ export function StockReplLocation({
       cell: ({ row }) => {
         const config = STATUS_CONFIG[row.original.status];
         return (
-          <Badge variant={config.variant} size="xs">
+          <StatusDotBadge tone={config.tone} size="xs">
             {config.label}
-          </Badge>
+          </StatusDotBadge>
         );
       },
       enableSorting: false,
@@ -221,24 +240,29 @@ export function StockReplLocation({
         <ChevronRight
           className={`size-4 shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
         />
-        <span className="flex-1">{location.location_name}</span>
+        <span className="flex-1">
+          <span className="text-muted-foreground mr-1.5 text-xs font-normal">
+            {location.location_code}
+          </span>
+          {location.location_name}
+        </span>
         <Badge variant="secondary" size="sm">
           {t("nItems", { count: products.length })}
         </Badge>
         {criticalCount > 0 && (
-          <Badge variant="destructive" size="sm">
+          <StatusDotBadge tone="destructive" size="sm">
             {t("nCritical", { count: criticalCount })}
-          </Badge>
+          </StatusDotBadge>
         )}
         {warningCount > 0 && (
-          <Badge variant="warning" size="sm">
+          <StatusDotBadge tone="warning" size="sm">
             {t("nWarning", { count: warningCount })}
-          </Badge>
+          </StatusDotBadge>
         )}
         {lowCount > 0 && (
-          <Badge variant="secondary" size="sm">
+          <StatusDotBadge tone="neutral" size="sm">
             {t("nLow", { count: lowCount })}
-          </Badge>
+          </StatusDotBadge>
         )}
       </CollapsibleTrigger>
 

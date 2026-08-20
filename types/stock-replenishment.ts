@@ -5,20 +5,27 @@ const refSchema = z.object({
   name: z.string(),
 });
 
+// shape ตาม GET /api/{bu}/stock-replenishment ของจริง (2026-08-20)
 const productLocationSchema = z.object({
   id: z.string(),
   name: z.string(),
   category: refSchema,
   sub_category: refSchema,
   item_group: refSchema,
-  current: z.number().min(0),
-  par_level: z.number().min(0),
-  need: z.number().min(0),
+  on_hand_qty: z.number(),
+  min_qty: z.number(),
+  max_qty: z.number(),
+  par_qty: z.number(),
+  reorder_qty: z.number(),
   status: z.enum(["low", "warning", "critical"]),
+  product_location_id: z.string(),
+  code: z.string(),
+  local_name: z.string().nullish(),
 });
 
 const locationSchema = z.object({
   location_id: z.string(),
+  location_code: z.string(),
   location_name: z.string(),
   products_location: z.array(productLocationSchema),
 });
