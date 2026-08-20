@@ -18,6 +18,7 @@ import type { FormMode } from "@/types/form";
 import { SectionCard } from "../shared/admin-ui";
 import { RoleHero } from "./role-form-hero";
 import { PermissionPicker } from "./permission-picker";
+import { useRolePrint } from "./use-role-print";
 import {
   roleSchema,
   getDefaultValues,
@@ -61,6 +62,7 @@ export function RoleForm({ role }: RoleFormProps) {
     isDirty: form.formState.isDirty,
     isPending,
   });
+  const { printRole } = useRolePrint();
 
   /* Live watches — subscribe only to specific fields */
   const watchedName = useWatch({
@@ -161,6 +163,7 @@ export function RoleForm({ role }: RoleFormProps) {
           onDelete={() => setShowDelete(true)}
           onEdit={() => setMode("edit")}
           onCancel={handleCancel}
+          onPrint={() => printRole(heroName, watchedPermissions ?? [])}
         />
       </Reveal>
 

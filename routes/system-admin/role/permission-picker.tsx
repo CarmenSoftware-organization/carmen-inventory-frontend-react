@@ -40,9 +40,9 @@ const EXTENDED_ACTIONS = [
   "manage_bu",
 ] as const;
 /** ลำดับการเรียง action ในแต่ละแถว — CRUD ก่อน แล้วค่อย scope/workflow */
-const MAIN_ACTIONS = [...STANDARD_ACTIONS, ...EXTENDED_ACTIONS] as const;
+export const MAIN_ACTIONS = [...STANDARD_ACTIONS, ...EXTENDED_ACTIONS] as const;
 
-const ACTION_TKEY: Record<string, string> = {
+export const ACTION_TKEY: Record<string, string> = {
   view: "actionView",
   view_department: "actionViewDept",
   view_all: "actionViewAll",
@@ -60,7 +60,7 @@ interface CategoryMeta {
 }
 
 // ชื่อ/ไอคอนต้องตรงกับ sidebar (constant/module-list.ts) — wayfinding เดียวกันทั้งแอป
-const CATEGORY_META: Record<string, CategoryMeta> = {
+export const CATEGORY_META: Record<string, CategoryMeta> = {
   dashboard: { tkey: "catDashboard", icon: LayoutDashboard },
   configuration: { tkey: "catConfig", icon: Settings2 },
   product_management: { tkey: "catProduct", icon: Package },

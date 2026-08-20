@@ -105,8 +105,13 @@ export function FormToolbar({
   // button, title align, gutter) อยู่ที่ DocFormHeader ที่เดียวทั้งแอป
   const actions = (
     <>
+      {/* key + type="button" กัน React reuse DOM node ข้ามโหมด — ถ้าปุ่ม Edit
+          กลายร่างเป็นปุ่ม type=submit ระหว่างคลิก ฟอร์มจะถูก submit ทันที
+          (เจอจริงใน role-form-hero ตอนเติมปุ่ม Print หน้า Edit) */}
       {isView && onEdit ? (
         <Button
+          key="edit"
+          type="button"
           size="sm"
           variant="outline"
           onClick={

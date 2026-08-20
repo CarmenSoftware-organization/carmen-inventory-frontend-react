@@ -1477,6 +1477,8 @@
       "deleteConfirm": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
       "name": "Role Name",
       "namePlaceholder": "e.g. Procurement Manager",
+      "printedBy": "Printed by",
+      "printedAt": "Printed at",
       "untitled": "Untitled Role",
       "noMatch": "No matching permissions",
       "noMatchDesc": "Nothing matches \"{query}\"",

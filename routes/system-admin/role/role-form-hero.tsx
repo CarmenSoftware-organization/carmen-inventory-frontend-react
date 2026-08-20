@@ -1,4 +1,4 @@
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { Pencil, Printer, Save, Trash2, X } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { DocFormHeader } from "@/components/share/doc-form-header";
@@ -13,6 +13,7 @@ interface RoleHeroProps {
   readonly onDelete: () => void;
   readonly onEdit: () => void;
   readonly onCancel: () => void;
+  readonly onPrint: () => void;
 }
 
 export function RoleHero({
@@ -25,6 +26,7 @@ export function RoleHero({
   onDelete,
   onEdit,
   onCancel,
+  onPrint,
 }: RoleHeroProps) {
   const t = useTranslations("systemAdmin.role");
   const tc = useTranslations("common");
@@ -33,14 +35,30 @@ export function RoleHero({
 
   const actions = (
     <>
+      {/* key แยกตามหน้าที่ปุ่ม — กัน React reuse DOM node ข้ามโหมด (เคยเจอ:
+          กด Edit แล้ว node เดิมกลายร่างเป็นปุ่ม Save type=submit ก่อน browser
+          ประมวล default action ของคลิก → ฟอร์มถูก submit ทันที) */}
       {isView ? (
-        <Button size="sm" onClick={onEdit}>
-          <Pencil />
-          {tc("edit")}
-        </Button>
+        <>
+          <Button
+            key="print"
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={onPrint}
+          >
+            <Printer className="size-3.5" aria-hidden="true" />
+            {tc("print")}
+          </Button>
+          <Button key="edit" type="button" size="sm" onClick={onEdit}>
+            <Pencil />
+            {tc("edit")}
+          </Button>
+        </>
       ) : (
         <>
           <Button
+            key="cancel"
             type="button"
             variant="secondary"
             size="sm"
@@ -50,7 +68,13 @@ export function RoleHero({
             <X className="size-3.5" aria-hidden="true" />
             {tc("cancel")}
           </Button>
-          <Button type="submit" size="sm" form="role-form" disabled={isSaving}>
+          <Button
+            key="save"
+            type="submit"
+            size="sm"
+            form="role-form"
+            disabled={isSaving}
+          >
             <Save className="size-3.5" aria-hidden="true" />
             {isSaving ? tf("saving") : tc("save")}
           </Button>
