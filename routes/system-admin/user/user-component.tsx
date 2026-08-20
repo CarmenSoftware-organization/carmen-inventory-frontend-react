@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUser, useDeleteUser } from "@/hooks/use-user";
+import { useUserRoleReport } from "./use-user-role-report";
 import { useGridPagination } from "@/hooks/use-grid-pagination";
 import { Loader2 } from "lucide-react";
 import { useDepartment } from "@/hooks/use-department";
@@ -58,10 +59,7 @@ export default function UserComponent() {
   const t = useTranslations("systemAdmin.user");
   const tc = useTranslations("common");
   const { params, search, setSearch, tableConfig } = useDataGridState();
-
-  // Export/Print รอ endpoint จาก backend — ระหว่างนี้กดแล้วแจ้งเตือนไว้ก่อน
-  // (ถ้าจะทำ client-side xlsx ระหว่างรอ ใช้ pattern เดียวกับ useExportUserActivity)
-  const notifyComingSoon = () => toast.info(tc("comingSoon"));
+  const { printReport, exportCsv, isBusy } = useUserRoleReport();
 
   const { data: deptData } = useDepartment({ perpage: -1 });
   // department เป็นชื่อ literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้
@@ -159,16 +157,22 @@ export default function UserComponent() {
             <Button
               size="sm"
               variant="outline"
-              onClick={notifyComingSoon}
+              onClick={exportCsv}
+              disabled={isBusy}
               className="hidden sm:inline-flex"
             >
-              <Download aria-hidden="true" />
+              {isBusy ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Download aria-hidden="true" />
+              )}
               {tc("export")}
             </Button>
             <Button
               size="sm"
               variant="outline"
-              onClick={notifyComingSoon}
+              onClick={printReport}
+              disabled={isBusy}
               className="hidden sm:inline-flex"
             >
               <Printer aria-hidden="true" />
@@ -186,11 +190,11 @@ export default function UserComponent() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={notifyComingSoon}>
+                <DropdownMenuItem onClick={exportCsv} disabled={isBusy}>
                   <Download aria-hidden="true" />
                   {tc("export")}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={notifyComingSoon}>
+                <DropdownMenuItem onClick={printReport} disabled={isBusy}>
                   <Printer aria-hidden="true" />
                   {tc("print")}
                 </DropdownMenuItem>
