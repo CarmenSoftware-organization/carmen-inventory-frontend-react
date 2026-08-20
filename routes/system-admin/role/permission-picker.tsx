@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
+import { Toggle } from "@/components/ui/toggle";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -466,28 +467,22 @@ function ResourceRow({
         </p>
       </div>
 
-      {/* คู่ label+checkbox เรียงตามลำดับ MAIN_ACTIONS โชว์เฉพาะ action ที่มีจริง */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+      {/* Toggle pill ต่อ action เรียงตามลำดับ MAIN_ACTIONS โชว์เฉพาะที่มีจริง —
+          ติดแล้วเป็น primary (selected state คือที่เดียวที่ accent ใช้ได้) */}
+      <div className="flex flex-wrap items-center gap-1.5">
         {MAIN_ACTIONS.filter((a) => resource.actions.has(a)).map((a) => {
           const id = resource.actions.get(a)!;
-          const on = selectedSet.has(id);
           return (
-            <label
+            <Toggle
               key={a}
-              className={cn(
-                "inline-flex items-center gap-1.5 text-xs transition-colors",
-                on ? "text-foreground" : "text-muted-foreground",
-                disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
-              )}
+              variant="pill"
+              size="xs"
+              pressed={selectedSet.has(id)}
+              onPressedChange={(pressed) => onTogglePermission(id, pressed)}
+              disabled={disabled}
             >
               {t(ACTION_TKEY[a])}
-              <Checkbox
-                checked={on}
-                onCheckedChange={(c) => onTogglePermission(id, !!c)}
-                disabled={disabled}
-                className="size-4"
-              />
-            </label>
+            </Toggle>
           );
         })}
       </div>
