@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { useLocale, useTranslations } from "use-intl";
+import { useTranslations } from "use-intl";
 import {
-  Activity,
-  CircleDot,
+  ChefHat,
+  Files,
+  Handshake,
   KeySquare,
   LayoutDashboard,
+  LayoutGrid,
   Package,
   Search,
   Settings2,
+  Shield,
   ShoppingCart,
-  Users,
+  Store,
   Warehouse,
   X,
   type LucideIcon,
@@ -35,9 +38,8 @@ const EXTENDED_ACTIONS = [
   "commit",
   "manage_bu",
 ] as const;
-/** ทุก action ที่แสดงเป็น Checkbox column — รวม CRUD + scope + workflow actions */
+/** ลำดับการเรียง action ในแต่ละแถว — CRUD ก่อน แล้วค่อย scope/workflow */
 const MAIN_ACTIONS = [...STANDARD_ACTIONS, ...EXTENDED_ACTIONS] as const;
-type MainAction = (typeof MAIN_ACTIONS)[number];
 
 const ACTION_TKEY: Record<string, string> = {
   view: "actionView",
@@ -53,48 +55,22 @@ const ACTION_TKEY: Record<string, string> = {
 
 interface CategoryMeta {
   readonly tkey: string;
-  readonly labelEn: string;
-  readonly labelTh: string;
   readonly icon: LucideIcon;
 }
 
+// ชื่อ/ไอคอนต้องตรงกับ sidebar (constant/module-list.ts) — wayfinding เดียวกันทั้งแอป
 const CATEGORY_META: Record<string, CategoryMeta> = {
-  configuration: {
-    tkey: "catConfig",
-    labelEn: "Configuration",
-    labelTh: "การตั้งค่า",
-    icon: Settings2,
-  },
-  product_management: {
-    tkey: "catProduct",
-    labelEn: "Product Management",
-    labelTh: "การจัดการสินค้า",
-    icon: Package,
-  },
-  vendor_management: {
-    tkey: "catVendor",
-    labelEn: "Vendor Management",
-    labelTh: "การจัดการผู้ขาย",
-    icon: Users,
-  },
-  procurement: {
-    tkey: "catProcurement",
-    labelEn: "Procurement",
-    labelTh: "จัดซื้อ",
-    icon: ShoppingCart,
-  },
-  inventory_management: {
-    tkey: "catInventory",
-    labelEn: "Inventory Management",
-    labelTh: "การจัดการคลัง",
-    icon: Warehouse,
-  },
-  widget: {
-    tkey: "catWidget",
-    labelEn: "Widgets",
-    labelTh: "วิดเจ็ต",
-    icon: LayoutDashboard,
-  },
+  dashboard: { tkey: "catDashboard", icon: LayoutDashboard },
+  configuration: { tkey: "catConfig", icon: Settings2 },
+  product_management: { tkey: "catProduct", icon: Package },
+  vendor_management: { tkey: "catVendor", icon: Handshake },
+  procurement: { tkey: "catProcurement", icon: ShoppingCart },
+  store_operations: { tkey: "catStoreOperations", icon: Store },
+  inventory_management: { tkey: "catInventory", icon: Warehouse },
+  operation_plan: { tkey: "catOperationPlan", icon: ChefHat },
+  report: { tkey: "catReport", icon: Files },
+  system_admin: { tkey: "catSystemAdmin", icon: Shield },
+  widget: { tkey: "catWidget", icon: LayoutGrid },
 };
 
 const DEFAULT_CATEGORY_META: CategoryMeta = CATEGORY_META.configuration;
@@ -121,7 +97,6 @@ interface PermissionPickerProps {
   readonly value: string[];
   readonly onChange: (ids: string[]) => void;
   readonly disabled?: boolean;
-  readonly originalIds?: Set<string>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -157,7 +132,6 @@ export function PermissionPicker({
   value,
   onChange,
   disabled,
-  originalIds,
 }: PermissionPickerProps) {
   const t = useTranslations("systemAdmin.role");
   const tc = useTranslations("common");
@@ -224,15 +198,6 @@ export function PermissionPicker({
     })
     .filter((g) => g.resources.length > 0);
 
-  const pendingCount = (() => {
-    if (!originalIds) return 0;
-    let added = 0;
-    let removed = 0;
-    for (const id of value) if (!originalIds.has(id)) added++;
-    for (const id of originalIds) if (!selectedSet.has(id)) removed++;
-    return added + removed;
-  })();
-
   const addIds = (ids: string[]) => {
     const next = new Set(value);
     for (const id of ids) next.add(id);
@@ -256,18 +221,6 @@ export function PermissionPicker({
     if (checked) addIds(ids);
     else removeIds(ids);
   };
-  const handleToggleColumn = (g: PermissionGroup, action: MainAction) => {
-    const colIds: string[] = [];
-    for (const r of g.resources) {
-      const id = r.actions.get(action);
-      if (id) colIds.push(id);
-    }
-    if (colIds.length === 0) return;
-    const allOn = colIds.every((id) => selectedSet.has(id));
-    if (allOn) removeIds(colIds);
-    else addIds(colIds);
-  };
-
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -320,7 +273,7 @@ export function PermissionPicker({
         <div
           className="border-border/60 bg-muted/40 inline-flex items-center gap-0.5 rounded-full border p-0.5"
           role="tablist"
-          aria-label={t("statusActive")}
+          aria-label={tc("filter")}
         >
           {(["all", "granted", "missing"] as FilterMode[]).map((m) => {
             const active = filterMode === m;
@@ -351,41 +304,6 @@ export function PermissionPicker({
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="border-border/60 bg-muted/30 text-micro-legal hidden items-center gap-3 rounded-md border px-3 py-1.5 font-semibold md:flex">
-        <span className="text-muted-foreground tracking-widest uppercase">
-          {t("legendLabel")}
-        </span>
-        {STANDARD_ACTIONS.map((a) => (
-          <span
-            key={a}
-            className="text-foreground/70 inline-flex items-center gap-1.5"
-          >
-            <Checkbox
-              checked
-              disabled
-              className="cursor-default opacity-90"
-              aria-hidden="true"
-            />
-            {t(ACTION_TKEY[a])}
-          </span>
-        ))}
-        <span className="bg-border h-3 w-px" aria-hidden="true" />
-        <span className="text-foreground/70 inline-flex items-center gap-1.5">
-          <span className="border-border/60 bg-card text-foreground/70 inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
-            <span className="bg-info size-1 rounded-full" aria-hidden="true" />
-            {t("actionViewAll")}
-          </span>
-          <span className="text-muted-foreground">{t("legendScopedHint")}</span>
-        </span>
-        <span className="flex-1" />
-        {originalIds && (
-          <span className="text-muted-foreground tracking-wider uppercase">
-            {pendingCount === 0 ? "—" : `${pendingCount} pending`}
-          </span>
-        )}
-      </div>
-
       {/* Matrices */}
       {filteredGroups.length === 0 ? (
         <EmptyState
@@ -406,29 +324,8 @@ export function PermissionPicker({
             onToggleCategory={(c) => handleToggleCategory(group, c)}
             onToggleResource={handleToggleResource}
             onTogglePermission={handleTogglePermission}
-            onToggleColumn={(a) => handleToggleColumn(group, a)}
           />
         ))
-      )}
-
-      {/* Change preview */}
-      {originalIds && filteredGroups.length > 0 && (
-        <div className="border-border/60 bg-card flex items-center gap-3 rounded-xl border p-3">
-          <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
-            <Activity className="size-4" aria-hidden="true" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-foreground text-xs font-semibold">
-              {t("changePreviewTitle")}
-            </p>
-            <p className="text-muted-foreground text-micro">
-              {t("changePreviewDesc", { count: pendingCount })}
-            </p>
-          </div>
-          <span className="text-muted-foreground/70 text-micro-legal hidden tracking-wider sm:inline">
-            {t("rbacFootprint")}
-          </span>
-        </div>
       )}
     </div>
   );
@@ -448,7 +345,6 @@ interface ModuleMatrixProps {
   readonly onToggleCategory: (checked: boolean) => void;
   readonly onToggleResource: (r: GroupedResource, checked: boolean) => void;
   readonly onTogglePermission: (id: string, checked: boolean) => void;
-  readonly onToggleColumn: (action: MainAction) => void;
 }
 
 function ModuleMatrix({
@@ -461,32 +357,14 @@ function ModuleMatrix({
   onToggleCategory,
   onToggleResource,
   onTogglePermission,
-  onToggleColumn,
 }: ModuleMatrixProps) {
   const t = useTranslations("systemAdmin.role");
-  const locale = useLocale();
   const Icon = categoryMeta.icon;
-  const secondaryLabel =
-    locale === "th" ? categoryMeta.labelEn : categoryMeta.labelTh;
   const allIds = getCategoryIds(group);
   const total = allIds.length;
   const selected = allIds.filter((id) => selectedSet.has(id)).length;
   const allChecked = total > 0 && selected === total;
   const someChecked = selected > 0 && selected < total;
-
-  // Per-column counts (granted / applicable) for header subtitles
-  const colCounts = MAIN_ACTIONS.map((a) => {
-    let on = 0;
-    let applicable = 0;
-    for (const r of group.resources) {
-      const id = r.actions.get(a);
-      if (id) {
-        applicable++;
-        if (selectedSet.has(id)) on++;
-      }
-    }
-    return { on, applicable };
-  });
 
   return (
     <section className="bg-card overflow-hidden rounded-xl border">
@@ -497,26 +375,12 @@ function ModuleMatrix({
           className="text-muted-foreground size-5 shrink-0"
           aria-hidden="true"
         />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-baseline gap-2">
-            <h3 className="text-foreground truncate text-sm font-semibold tracking-tight">
-              {categoryLabel}
-            </h3>
-            <span
-              className="text-muted-foreground truncate text-xs"
-              aria-hidden="true"
-            >
-              {secondaryLabel}
-            </span>
-          </div>
-          <p className="text-muted-foreground/90 text-micro mt-0.5 tracking-wide tabular-nums">
-            {t("moduleStats", {
-              resources: group.resources.length,
-              granted: selected,
-              total,
-            })}
-          </p>
-        </div>
+        <h3 className="text-foreground min-w-0 flex-1 truncate text-sm font-semibold tracking-tight">
+          {categoryLabel}
+        </h3>
+        <span className="text-muted-foreground text-micro tabular-nums">
+          {selected}/{total}
+        </span>
         <label
           className={cn(
             "bg-card text-foreground border-border/60 text-micro inline-flex items-center gap-1.5 rounded-full border px-2 py-1 font-semibold transition-colors",
@@ -533,72 +397,14 @@ function ModuleMatrix({
           />
           {t("grantAll")}
         </label>
-        <Settings2
-          className="text-muted-foreground/60 size-3.5 shrink-0"
-          aria-hidden="true"
-        />
       </header>
 
-      {/* Desktop matrix table */}
-      <div className="hidden md:block">
-        {/* Column header row */}
-        <div className="bg-muted/30 text-muted-foreground border-border/60 text-micro-legal grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center border-b px-4 py-2 font-semibold tracking-widest uppercase">
-          <span>{t("matrixHeaderResource")}</span>
-          {MAIN_ACTIONS.map((a, i) => {
-            const cc = colCounts[i];
-            const allCol = cc.applicable > 0 && cc.on === cc.applicable;
-            const someCol = cc.on > 0 && cc.on < cc.applicable;
-            return (
-              <button
-                key={a}
-                type="button"
-                onClick={() => !disabled && onToggleColumn(a)}
-                disabled={disabled || cc.applicable === 0}
-                className={cn(
-                  "group flex flex-col items-center gap-0.5 rounded-md py-1 transition-colors",
-                  cc.applicable > 0 &&
-                    !disabled &&
-                    "hover:bg-muted/60 cursor-pointer",
-                  cc.applicable === 0 && "opacity-40",
-                )}
-                aria-label={t("selectAllAction", { action: t(ACTION_TKEY[a]) })}
-              >
-                <span
-                  className={cn(
-                    "font-semibold",
-                    allCol && "text-foreground",
-                    someCol && "text-foreground/80",
-                  )}
-                >
-                  {t(ACTION_TKEY[a])}
-                </span>
-                <span className="text-muted-foreground/70 text-micro tabular-nums">
-                  {cc.on}/{cc.applicable}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Resource rows */}
-        {group.resources.map((r, idx) => (
-          <MatrixRow
-            key={r.resource}
-            resource={r}
-            label={getResourceLabel(r)}
-            selectedSet={selectedSet}
-            disabled={disabled}
-            isLast={idx === group.resources.length - 1}
-            onToggleResource={(c) => onToggleResource(r, c)}
-            onTogglePermission={onTogglePermission}
-          />
-        ))}
-      </div>
-
-      {/* Mobile / tablet: card per resource */}
-      <div className="divide-border/50 divide-y md:hidden">
+      {/* แถว resource — ไม่มี header row: แต่ละ checkbox พก label ของตัวเอง
+          และโชว์เฉพาะ action ที่ resource นั้นมีจริง เลยไม่ต้องตรึงคอลัมน์
+          (layout เดียวใช้ทุกขนาดจอ — แถวยาวเกินก็ wrap เอง) */}
+      <div className="divide-border/50 divide-y">
         {group.resources.map((r) => (
-          <MobileResourceRow
+          <ResourceRow
             key={r.resource}
             resource={r}
             label={getResourceLabel(r)}
@@ -614,28 +420,26 @@ function ModuleMatrix({
 }
 
 /* ------------------------------------------------------------------ */
-/* MatrixRow — single resource in desktop matrix                       */
+/* ResourceRow — one resource: labelled checkboxes, only real actions   */
 /* ------------------------------------------------------------------ */
 
-interface MatrixRowProps {
+interface ResourceRowProps {
   readonly resource: GroupedResource;
   readonly label: string;
   readonly selectedSet: Set<string>;
   readonly disabled?: boolean;
-  readonly isLast: boolean;
   readonly onToggleResource: (checked: boolean) => void;
   readonly onTogglePermission: (id: string, checked: boolean) => void;
 }
 
-function MatrixRow({
+function ResourceRow({
   resource,
   label,
   selectedSet,
   disabled,
-  isLast,
   onToggleResource,
   onTogglePermission,
-}: MatrixRowProps) {
+}: ResourceRowProps) {
   const t = useTranslations("systemAdmin.role");
   const ids = getResourceIds(resource);
   const rowSelected = ids.filter((id) => selectedSet.has(id)).length;
@@ -645,13 +449,11 @@ function MatrixRow({
   return (
     <div
       className={cn(
-        "grid grid-cols-[minmax(12rem,1fr)_repeat(9,minmax(3.5rem,1fr))] items-center px-4 py-2",
-        !isLast && "border-b",
+        "flex flex-wrap items-center gap-x-6 gap-y-1.5 px-4 py-2",
         allOn ? "bg-muted/40" : "bg-card",
       )}
     >
-      {/* Resource label cell */}
-      <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
         <Checkbox
           checked={getCheckedState(allOn, someOn)}
           onCheckedChange={(c) => onToggleResource(!!c)}
@@ -659,126 +461,33 @@ function MatrixRow({
           className="size-3.5"
           aria-label={t("selectAllResource", { resource: label })}
         />
-        <CircleDot
-          className="text-muted-foreground/40 size-3 shrink-0"
-          aria-hidden="true"
-        />
-        <div className="min-w-0">
-          <p className="text-foreground truncate text-xs font-semibold">
-            {label}
-          </p>
-          <p className="text-muted-foreground/80 text-micro-legal truncate">
-            {resource.resource}
-          </p>
-        </div>
+        <p className="text-foreground min-w-0 truncate text-xs font-semibold">
+          {label}
+        </p>
       </div>
 
-      {/* Action checkbox cells — CRUD + scope (view_department/view_all) + workflow (execute/commit/manage_bu) */}
-      {MAIN_ACTIONS.map((a) => {
-        const id = resource.actions.get(a);
-        if (!id) {
-          return (
-            <div key={a} className="flex justify-center">
-              <span
-                className="text-muted-foreground/40 text-xs"
-                title={t("notAvailable")}
-                aria-label={t("notAvailable")}
-              >
-                —
-              </span>
-            </div>
-          );
-        }
-        const on = selectedSet.has(id);
-        return (
-          <div key={a} className="flex justify-center">
-            <Checkbox
-              checked={on}
-              onCheckedChange={(c) => onTogglePermission(id, !!c)}
-              disabled={disabled}
-              className="size-4"
-              aria-label={`${t(ACTION_TKEY[a])} · ${label}`}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* MobileResourceRow — card per resource on small screens              */
-/* ------------------------------------------------------------------ */
-
-interface MobileResourceRowProps {
-  readonly resource: GroupedResource;
-  readonly label: string;
-  readonly selectedSet: Set<string>;
-  readonly disabled?: boolean;
-  readonly onToggleResource: (checked: boolean) => void;
-  readonly onTogglePermission: (id: string, checked: boolean) => void;
-}
-
-function MobileResourceRow({
-  resource,
-  label,
-  selectedSet,
-  disabled,
-  onToggleResource,
-  onTogglePermission,
-}: MobileResourceRowProps) {
-  const t = useTranslations("systemAdmin.role");
-  const ids = getResourceIds(resource);
-  const rowSelected = ids.filter((id) => selectedSet.has(id)).length;
-  const allOn = rowSelected === ids.length;
-  const someOn = rowSelected > 0 && !allOn;
-
-  return (
-    <div className={cn("p-3", allOn && "bg-muted/40")}>
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <Checkbox
-            checked={getCheckedState(allOn, someOn)}
-            onCheckedChange={(c) => onToggleResource(!!c)}
-            disabled={disabled}
-            className="size-4"
-            aria-label={t("selectAllResource", { resource: label })}
-          />
-          <div className="min-w-0">
-            <p className="text-foreground truncate text-xs font-semibold">
-              {label}
-            </p>
-            <p className="text-muted-foreground/80 text-micro-legal truncate">
-              {resource.resource}
-            </p>
-          </div>
-        </div>
-        <span className="text-muted-foreground text-micro-legal tabular-nums">
-          {rowSelected}/{ids.length}
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {MAIN_ACTIONS.map((a) => {
-          const id = resource.actions.get(a);
-          if (!id) return null;
+      {/* คู่ label+checkbox เรียงตามลำดับ MAIN_ACTIONS โชว์เฉพาะ action ที่มีจริง */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+        {MAIN_ACTIONS.filter((a) => resource.actions.has(a)).map((a) => {
+          const id = resource.actions.get(a)!;
           const on = selectedSet.has(id);
           return (
-            <button
+            <label
               key={a}
-              type="button"
-              onClick={() => onTogglePermission(id, !on)}
-              disabled={disabled}
-              aria-pressed={on}
               className={cn(
-                "text-micro rounded-full border px-2 py-1 font-semibold transition-colors",
-                on
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border/60 bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                disabled && "cursor-not-allowed opacity-60",
+                "inline-flex items-center gap-1.5 text-xs transition-colors",
+                on ? "text-foreground" : "text-muted-foreground",
+                disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
               )}
             >
               {t(ACTION_TKEY[a])}
-            </button>
+              <Checkbox
+                checked={on}
+                onCheckedChange={(c) => onTogglePermission(id, !!c)}
+                disabled={disabled}
+                className="size-4"
+              />
+            </label>
           );
         })}
       </div>

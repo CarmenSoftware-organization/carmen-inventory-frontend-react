@@ -151,7 +151,6 @@ export function RoleForm({ role }: RoleFormProps) {
       <Reveal>
         <RoleHero
           name={heroName}
-          isNew={isAdd}
           isView={isView}
           canDelete={isView && !!role}
           isDeleting={deleteRole.isPending}
@@ -206,7 +205,6 @@ export function RoleForm({ role }: RoleFormProps) {
                   value={field.value}
                   onChange={field.onChange}
                   disabled={isDisabled}
-                  originalIds={originalPermissionIds}
                 />
               )}
             />

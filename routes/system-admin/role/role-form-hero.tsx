@@ -1,12 +1,10 @@
 import { Pencil, Save, Trash2, X } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 
 interface RoleHeroProps {
   readonly name: string;
-  readonly isNew: boolean;
   readonly isView: boolean;
   readonly canDelete: boolean;
   readonly isDeleting: boolean;
@@ -19,7 +17,6 @@ interface RoleHeroProps {
 
 export function RoleHero({
   name,
-  isNew,
   isView,
   canDelete,
   isDeleting,
@@ -33,16 +30,6 @@ export function RoleHero({
   const tc = useTranslations("common");
   const tf = useTranslations("form");
   const displayName = name?.trim() || t("untitled");
-
-  const badges = (
-    <Badge
-      variant={isNew ? "info-light" : "success-light"}
-      size="xs"
-      className="shrink-0"
-    >
-      ● {isNew ? t("statusDraft") : t("statusActive")}
-    </Badge>
-  );
 
   const actions = (
     <>
@@ -92,7 +79,6 @@ export function RoleHero({
         title={displayName}
         backLabel={tc("goBack")}
         onBack={onBack}
-        badges={badges}
         actions={actions}
         flush
       />
