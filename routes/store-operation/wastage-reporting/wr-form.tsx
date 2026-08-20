@@ -266,7 +266,6 @@ export function WastageReportForm({ wastageReport }: WastageReportFormProps) {
                         value={field.value}
                         onValueChange={field.onChange}
                         disabled={isDisabled}
-                        className="w-full"
                       />
                     )}
                   />

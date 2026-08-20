@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { PackageSearch } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useLocationPairProducts } from "@/hooks/use-location-pair-products";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import type { LocationPairProduct } from "@/types/product";
@@ -21,6 +22,7 @@ interface LookupLocationPairProductProps {
   /** ความสูงของ trigger — xs=h-6 · sm=h-8 (default) · default=h-9 */
   readonly size?: "xs" | "sm" | "default";
   readonly excludeIds?: string[];
+  readonly popoverWidth?: string;
   readonly modal?: boolean;
   readonly defaultLabel?: string;
   readonly error?: string;
@@ -60,6 +62,7 @@ export function LookupLocationPairProduct({
   className,
   size,
   excludeIds,
+  popoverWidth = "w-[26.25rem]",
   modal,
   defaultLabel,
   error,
@@ -123,8 +126,8 @@ export function LookupLocationPairProduct({
       placeholder={placeholder ?? tl("select", { entity: tfl("product") })}
       searchPlaceholder={tl("search", { entity: tfl("product") })}
       disabled={disabled || !fromLocationId || !toLocationId}
-      className={className}
-      popoverWidth="w-90"
+      className={cn("w-full", className)}
+      popoverWidth={popoverWidth}
       popoverAlign="start"
       emptyIcon={PackageSearch}
       emptyTitle={tl("noFound", { entity: tfl("product") })}

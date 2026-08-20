@@ -294,8 +294,7 @@ export function usePrtItemTable({
                   }}
                   disabled={disabled}
                   readOnly={readOnly}
-                  className="w-full text-xs"
-                  popoverWidth="w-[30rem]"
+                  className="text-xs"
                   error={locationError}
                 />
               )}

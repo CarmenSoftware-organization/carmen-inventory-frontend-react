@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
 import { Warehouse } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useLocation } from "@/hooks/use-location";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import type { Location } from "@/types/location";
@@ -54,7 +55,7 @@ export function LookupLocation({
   excludeIds,
   defaultLabel,
   size = "sm",
-  popoverWidth,
+  popoverWidth = "w-[26.25rem]",
   modal,
   locationTypes,
   error,
@@ -123,7 +124,7 @@ export function LookupLocation({
       placeholder={placeholder ?? tl("select", { entity: tfl("location") })}
       searchPlaceholder={tl("search", { entity: tfl("location") })}
       disabled={disabled}
-      className={className}
+      className={cn("w-full", className)}
       popoverAlign="start"
       emptyIcon={Warehouse}
       emptyTitle={tl("noDefined", { entity: tfl("location") })}

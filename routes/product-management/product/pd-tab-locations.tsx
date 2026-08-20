@@ -226,8 +226,6 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
                   }}
                   excludeIds={assignedIds.filter((id) => id !== field.value)}
                   defaultLabel={location_name}
-                  className="w-full"
-                  popoverWidth="w-[26.25rem]"
                   error={errorMessage}
                 />
               )}

@@ -200,7 +200,6 @@ export default function TransactionComponent() {
             onItemChange={(loc) => setLocationLabel(loc.name)}
             placeholder={t("allLocations")}
             size="sm"
-            className="w-full"
           />
         ),
       },

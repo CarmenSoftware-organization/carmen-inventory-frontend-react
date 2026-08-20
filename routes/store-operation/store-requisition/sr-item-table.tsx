@@ -135,7 +135,6 @@ const ProductCell = memo(function ProductCell({
               // เลือกสินค้าเสร็จ → เด้งไปช่องจำนวนที่ขอของแถวเดียวกันต่อเลย
               // (SR ไม่มีสถานที่รายแถว มาจากหัวเอกสาร จำนวนจึงเป็นช่องถัดไปจริง ๆ)
               nextFocusRef={fieldFocusRef(`items.${index}.requested_qty`)}
-              className="w-full"
             />
           )}
         />
