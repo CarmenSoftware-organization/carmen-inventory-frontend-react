@@ -391,7 +391,7 @@ export function BrowseDialog({
           <div className="flex gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => closeAndReset(false)}
             >

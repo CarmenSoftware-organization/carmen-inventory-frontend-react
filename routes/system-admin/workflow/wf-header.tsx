@@ -83,7 +83,7 @@ export function WfHeader({
       {activityButton}
       <Button
         type="button"
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={onCancel}
         disabled={isPending}

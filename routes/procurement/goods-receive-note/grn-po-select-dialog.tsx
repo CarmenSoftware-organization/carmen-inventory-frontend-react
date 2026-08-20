@@ -318,10 +318,9 @@ export function GrnPoSelectDialog({
 
         <DialogFooter className="bg-muted/20 items-center border-t px-6 py-3 sm:justify-between">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => handleOpenChange(false)}
-            className="text-muted-foreground"
           >
             {tc("cancel")}
           </Button>

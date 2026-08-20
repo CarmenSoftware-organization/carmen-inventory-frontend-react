@@ -60,7 +60,7 @@ export function RoleHero({
           <Button
             key="cancel"
             type="button"
-            variant="secondary"
+            variant="outline"
             size="sm"
             onClick={onCancel}
             disabled={isSaving}

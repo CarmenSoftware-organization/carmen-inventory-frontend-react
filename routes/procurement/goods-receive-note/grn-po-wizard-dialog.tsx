@@ -227,10 +227,9 @@ function VendorStep({
 
       <div className="flex shrink-0 items-center border-t px-6 py-3">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={onCancel}
-          className="text-muted-foreground"
         >
           {tc("cancel")}
         </Button>

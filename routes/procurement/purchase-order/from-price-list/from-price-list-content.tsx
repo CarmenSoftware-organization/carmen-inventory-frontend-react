@@ -376,11 +376,10 @@ export function FromPriceListContent() {
 
       <footer className="bg-background/95 supports-backdrop-filter:bg-background/80 sticky bottom-0 -mx-3 -mb-3 flex items-center justify-between border-t px-3 py-3 backdrop-blur">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={handleCancel}
           disabled={createPo.isPending}
-          className="text-muted-foreground"
         >
           {tc("cancel")}
         </Button>
