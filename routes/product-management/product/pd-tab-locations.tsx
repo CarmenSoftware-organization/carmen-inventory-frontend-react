@@ -257,6 +257,14 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
         },
       },
       {
+        // คอลัมน์รอไว้ก่อน — backend ยังไม่ส่ง shelf มากับ location assignment
+        id: "shelf",
+        header: tfl("shelf"),
+        cell: () => "",
+        enableSorting: false,
+        size: 120,
+      },
+      {
         id: "min_qty",
         header: t("minQty"),
         cell: ({ row }) =>
