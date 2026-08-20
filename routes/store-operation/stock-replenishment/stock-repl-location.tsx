@@ -28,21 +28,6 @@ interface StockReplLocationProps {
   ) => void;
 }
 
-/**
- * แสดง location 1 แห่งในหน้า Stock Replenishment แบบ collapsible
- * มีตารางรายการสินค้าที่ต้องเติมพร้อม checkbox เลือก และ badge สรุปสถานะ
- *
- * @param props - location, selectedIds, open state, onOpenChange และ onSelectionChange
- * @param props.location - ข้อมูล Location พร้อม products_location
- * @param props.selectedIds - Set ของ product id ที่เลือก
- * @param props.open - สถานะ collapsible
- * @param props.onOpenChange - callback เปลี่ยน open
- * @param props.onSelectionChange - callback เมื่อเปลี่ยน selection
- * @returns คอมโพเนนต์ location collapsible พร้อมตาราง
- * @example
- * <StockReplLocation location={loc} selectedIds={ids} open={true}
- *   onOpenChange={setOpen} onSelectionChange={handleChange} />
- */
 export function StockReplLocation({
   location,
   selectedIds,
@@ -146,7 +131,7 @@ export function StockReplLocation({
         </div>
       ),
       enableSorting: false,
-      size: 320,
+      size: 180,
     },
     {
       id: "category",
@@ -180,7 +165,7 @@ export function StockReplLocation({
     },
     {
       accessorKey: "on_hand_qty",
-      header: tfl("current"),
+      header: tfl("onHandQty"),
       cell: ({ row }) => (
         <span className="tabular-nums">{row.getValue("on_hand_qty")}</span>
       ),
@@ -189,8 +174,28 @@ export function StockReplLocation({
       meta: { headerClassName: "text-right", cellClassName: "text-right" },
     },
     {
+      accessorKey: "min_qty",
+      header: tfl("minQty"),
+      cell: ({ row }) => (
+        <span className="tabular-nums">{row.getValue("min_qty")}</span>
+      ),
+      enableSorting: false,
+      size: 80,
+      meta: { headerClassName: "text-right", cellClassName: "text-right" },
+    },
+    {
+      accessorKey: "max_qty",
+      header: tfl("maxQty"),
+      cell: ({ row }) => (
+        <span className="tabular-nums">{row.getValue("max_qty")}</span>
+      ),
+      enableSorting: false,
+      size: 80,
+      meta: { headerClassName: "text-right", cellClassName: "text-right" },
+    },
+    {
       accessorKey: "par_qty",
-      header: tfl("parLevel"),
+      header: tfl("parQty"),
       cell: ({ row }) => (
         <span className="tabular-nums">{row.getValue("par_qty")}</span>
       ),
@@ -200,7 +205,7 @@ export function StockReplLocation({
     },
     {
       accessorKey: "reorder_qty",
-      header: tfl("need"),
+      header: tfl("reorderQty"),
       cell: ({ row }) => (
         <span className="font-semibold tabular-nums">
           {row.getValue("reorder_qty")}

@@ -952,9 +952,11 @@
     "lossValue": "มูลค่าสูญเสีย",
     "totalQty": "จำนวนรวม",
     "totalTime": "เวลารวม",
-    "parLevel": "ระดับ Par",
-    "need": "ต้องการ",
-    "current": "คงเหลือ",
+    "onHandQty": "คงเหลือ",
+    "minQty": "ขั้นต่ำ",
+    "maxQty": "ขั้นสูง",
+    "parQty": "พาร์",
+    "reorderQty": "จุดสั่งซื้อ",
     "subCategory": "หมวดย่อย",
     "fromTo": "จาก → ไป",
     "workflowStage": "ชื่อเวิร์กโฟลว์",
@@ -3181,7 +3183,7 @@
       "nCritical": "{count} วิกฤต",
       "nWarning": "{count} เตือน",
       "nLow": "{count} ต่ำ",
-      "totalNeed": "ต้องการรวม:",
+      "totalNeed": "จุดสั่งซื้อรวม:",
       "selectAllIn": "เลือกสินค้าทั้งหมดใน{location}"
     },
     "wastageReporting": {

@@ -955,9 +955,11 @@
     "lossValue": "Loss Value",
     "totalQty": "Total Qty",
     "totalTime": "Total Time",
-    "parLevel": "Par Level",
-    "need": "Need",
-    "current": "Current",
+    "onHandQty": "On Hand",
+    "minQty": "Min",
+    "maxQty": "Max",
+    "parQty": "Par",
+    "reorderQty": "Reorder",
     "subCategory": "Sub Category",
     "fromTo": "From → To",
     "workflowStage": "Workflow Name",
@@ -3189,7 +3191,7 @@
       "nCritical": "{count} critical",
       "nWarning": "{count} warning",
       "nLow": "{count} low",
-      "totalNeed": "Total need:",
+      "totalNeed": "Total reorder:",
       "selectAllIn": "Select all products in {location}"
     },
     "wastageReporting": {
