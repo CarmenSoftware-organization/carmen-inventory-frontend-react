@@ -236,8 +236,6 @@ export function StockReplLocation({
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
-      {/* checkbox เลือกทั้ง location อยู่นอก CollapsibleTrigger — Checkbox เป็น
-          button ซ้อนใน button ไม่ได้ และติ๊กแล้วต้องไม่พับ/กางแถว */}
       <div className="bg-muted/40 hover:bg-muted/70 flex w-full items-center gap-2 rounded-md border px-3 py-2 transition-colors">
         <Checkbox
           checked={someSelected ? "indeterminate" : allSelected}
