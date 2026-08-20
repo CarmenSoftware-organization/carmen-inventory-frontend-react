@@ -25,6 +25,7 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { SettingSection } from "@/components/ui/setting-section";
 import { LookupLocation } from "@/components/lookup/lookup-location";
+import { LookupShelf } from "@/components/lookup/lookup-shelf";
 import EmptyComponent from "@/components/empty-component";
 import type { ProductFormInstance, ProductFormValues } from "@/types/product";
 
@@ -138,6 +139,7 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
   const handleAdd = () => {
     prepend({
       location_id: "",
+      shelf_id: null,
       location_code: "",
       location_name: "",
       min_qty: null,
@@ -199,6 +201,8 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
                   value={field.value}
                   onValueChange={field.onChange}
                   onItemChange={(loc) => {
+                    // เปลี่ยนคลัง = ชั้นวางเดิมใช้ไม่ได้ (shelf ผูกกับ location)
+                    form.setValue(`locations.${fieldIndex}.shelf_id`, null);
                     form.setValue(
                       `locations.${fieldIndex}.location_code`,
                       loc.code,
@@ -255,12 +259,27 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
         },
       },
       {
-        // คอลัมน์รอไว้ก่อน — backend ยังไม่ส่ง shelf มากับ location assignment
         id: "shelf",
         header: tfl("shelf"),
-        cell: () => "",
+        cell: ({ row }) => {
+          const { fieldIndex, location_id } = row.original;
+          return (
+            <Controller
+              control={form.control}
+              name={`locations.${fieldIndex}.shelf_id`}
+              render={({ field }) => (
+                <LookupShelf
+                  value={field.value ?? ""}
+                  onValueChange={field.onChange}
+                  disabled={!location_id}
+                  readOnly={isDisabled}
+                />
+              )}
+            />
+          );
+        },
         enableSorting: false,
-        size: 120,
+        size: 180,
       },
       {
         id: "min_qty",

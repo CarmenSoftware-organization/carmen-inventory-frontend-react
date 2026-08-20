@@ -97,6 +97,7 @@ const mapUnitToPayload = (unit: ProductUnitConversion) => ({
 
 const mapLocationToPayload = (l: ProductFormValues["locations"][number]) => ({
   location_id: l.location_id,
+  shelf_id: l.shelf_id ?? null,
   min_qty: l.min_qty ?? null,
   max_qty: l.max_qty ?? null,
   re_order_qty: l.re_order_qty ?? null,

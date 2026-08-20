@@ -26,6 +26,7 @@ export interface ProductUnitConversion {
 export interface ProductLocationItem {
   id?: string;
   location_id: string;
+  shelf_id?: string | null;
   location_code?: string;
   location_name?: string;
   location_type?: string;
@@ -130,6 +131,7 @@ function createLocationSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
     id: z.string().optional(),
     location_id: z.string().min(1, tv("required", { field: tf("location") })),
+    shelf_id: z.string().nullable().optional(),
     location_code: z.string().nullable().optional(),
     location_name: z.string().nullable().optional(),
     location_type: z.string().nullable().optional(),
@@ -225,6 +227,7 @@ type UnitPayload = Omit<ProductUnitConversion, "id">;
 
 export interface LocationPayload {
   location_id: string;
+  shelf_id: string | null;
   min_qty: number | null;
   max_qty: number | null;
   re_order_qty: number | null;
