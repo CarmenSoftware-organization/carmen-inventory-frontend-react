@@ -79,14 +79,9 @@ export function StockReplLocation({
   const columns: ColumnDef<ProductLocation>[] = [
     {
       id: "select",
-      header: () => (
-        <Checkbox
-          checked={allSelected}
-          {...(someSelected ? { "data-state": "indeterminate" } : {})}
-          onCheckedChange={(checked) => handleSelectAll(checked === true)}
-          aria-label={t("selectAllIn", { location: location.location_name })}
-        />
-      ),
+      // select-all ย้ายไปเป็น checkbox ที่หัวแถว location แล้ว — ไม่ใส่ซ้ำใน
+      // หัวตาราง (สอง control ป้ายเดียวกันชี้งานเดียวกัน)
+      header: () => "",
       cell: ({ row }) => (
         <Checkbox
           checked={selectedIds.has(row.original.id)}
@@ -241,39 +236,54 @@ export function StockReplLocation({
 
   return (
     <Collapsible open={open} onOpenChange={onOpenChange}>
-      <CollapsibleTrigger className="bg-muted/40 hover:bg-muted/70 flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-sm font-semibold transition-colors">
-        <ChevronRight
-          className={`size-4 shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
+      {/* checkbox เลือกทั้ง location อยู่นอก CollapsibleTrigger — Checkbox เป็น
+          button ซ้อนใน button ไม่ได้ และติ๊กแล้วต้องไม่พับ/กางแถว */}
+      <div className="bg-muted/40 hover:bg-muted/70 flex w-full items-center gap-2 rounded-md border px-3 py-2 transition-colors">
+        <Checkbox
+          checked={someSelected ? "indeterminate" : allSelected}
+          onCheckedChange={(checked) => handleSelectAll(checked === true)}
+          aria-label={t("selectAllIn", { location: location.location_name })}
         />
-        <span className="flex-1">
-          <span className="text-muted-foreground mr-1.5 text-xs font-normal">
-            {location.location_code}
+        <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-left text-sm font-semibold">
+          <ChevronRight
+            className={`size-4 shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
+          />
+          <span className="flex-1">
+            <span className="text-muted-foreground mr-1.5 text-xs font-normal">
+              {location.location_code}
+            </span>
+            {location.location_name}
           </span>
-          {location.location_name}
-        </span>
-        <Badge variant="secondary" size="sm">
-          {t("nItems", { count: products.length })}
-        </Badge>
-        {criticalCount > 0 && (
-          <StatusDotBadge tone="destructive" size="sm">
-            {t("nCritical", { count: criticalCount })}
-          </StatusDotBadge>
-        )}
-        {warningCount > 0 && (
-          <StatusDotBadge tone="warning" size="sm">
-            {t("nWarning", { count: warningCount })}
-          </StatusDotBadge>
-        )}
-        {lowCount > 0 && (
-          <StatusDotBadge tone="neutral" size="sm">
-            {t("nLow", { count: lowCount })}
-          </StatusDotBadge>
-        )}
-      </CollapsibleTrigger>
+          <Badge variant="secondary" size="sm">
+            {t("nItems", { count: products.length })}
+          </Badge>
+          {criticalCount > 0 && (
+            <StatusDotBadge tone="destructive" size="sm">
+              {t("nCritical", { count: criticalCount })}
+            </StatusDotBadge>
+          )}
+          {warningCount > 0 && (
+            <StatusDotBadge tone="warning" size="sm">
+              {t("nWarning", { count: warningCount })}
+            </StatusDotBadge>
+          )}
+          {lowCount > 0 && (
+            <StatusDotBadge tone="neutral" size="sm">
+              {t("nLow", { count: lowCount })}
+            </StatusDotBadge>
+          )}
+        </CollapsibleTrigger>
+      </div>
 
       <CollapsibleContent>
         <div className="mt-1">
-          <DataGrid table={table} recordCount={products.length}>
+          {/* checkbox: true จำเป็น — DataGridTable กรองคอลัมน์ id "select" ทิ้ง
+              เมื่อ flag นี้ปิด (default) ทำให้ checkbox รายแถวหายทั้งคอลัมน์ */}
+          <DataGrid
+            table={table}
+            recordCount={products.length}
+            tableLayout={{ checkbox: true }}
+          >
             <DataGridContainer>
               <DataGridTable />
             </DataGridContainer>

@@ -18,16 +18,6 @@ import { useStockReplenishment } from "@/hooks/use-stock-replenishment";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
 import { StockReplLocation } from "./stock-repl-location";
 
-/**
- * กรอง locations และรายการสินค้าภายในด้วยคำค้น (ชื่อ, หมวดหมู่, กลุ่มสินค้า)
- * คืนเฉพาะ location ที่มี products_location ที่ตรงกับคำค้น
- *
- * @param locations - รายการ location ทั้งหมด
- * @param search - คำค้น (case-insensitive)
- * @returns รายการ location ที่ตรงกับคำค้น
- * @example
- * const result = filterLocations(locations, "milk");
- */
 const filterLocations = (locations: Location[], search: string): Location[] => {
   if (!search) return locations;
   const term = search.toLowerCase();
@@ -47,17 +37,6 @@ const filterLocations = (locations: Location[], search: string): Location[] => {
     .filter((loc) => loc.products_location.length > 0);
 };
 
-/**
- * คอมโพเนนต์หลักของหน้า Stock Replenishment
- * แสดงสรุปยอดสินค้าที่ต้องเติม แบ่งตาม location, สถานะ critical/warning/low
- * และรองรับเลือกสินค้าเพื่อสร้าง PR/SR
- *
- * @returns คอมโพเนนต์หน้า stock replenishment
- * @example
- * // ใช้ใน app/(root)/store-operation/stock-replenishment/page.tsx
- * import StockReplComponent from "./stock-repl-component";
- * export default function Page() { return <StockReplComponent />; }
- */
 export default function StockReplComponent() {
   const t = useTranslations("storeOperation.stockReplenishment");
   const tc = useTranslations("common");
@@ -159,35 +138,10 @@ export default function StockReplComponent() {
       description={t("desc")}
       toolbar={<SearchInput defaultValue={search} onSearch={setSearch} />}
       actions={
-        <>
-          <Button size="sm" variant="outline" onClick={() => refetch()}>
-            <RefreshCcw />
-            {tc("refresh")}
-          </Button>
-          {hasSelection && (
-            <>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={!hasSelection}
-                onClick={handleCreatePR}
-              >
-                <FileText />
-                {t("createPr")}
-                {hasSelection && ` (${totalSelected})`}
-              </Button>
-              <Button
-                size="sm"
-                disabled={!hasSelection}
-                onClick={handleCreateSR}
-              >
-                <ShoppingCart />
-                {t("createSr")}
-                {hasSelection && ` (${totalSelected})`}
-              </Button>
-            </>
-          )}
-        </>
+        <Button size="sm" variant="outline" onClick={() => refetch()}>
+          <RefreshCcw />
+          {tc("refresh")}
+        </Button>
       }
     >
       {isLoading && (
@@ -239,6 +193,20 @@ export default function StockReplComponent() {
               </Button>
             </span>
           </div>
+
+          {/* section ปุ่มสร้างเอกสาร แยกจาก summary — โผล่เมื่อมีการเลือก */}
+          {hasSelection && (
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="secondary" onClick={handleCreatePR}>
+                <ShoppingCart />
+                {t("createPr")} ({totalSelected})
+              </Button>
+              <Button size="sm" variant="secondary" onClick={handleCreateSR}>
+                <FileText />
+                {t("createSr")} ({totalSelected})
+              </Button>
+            </div>
+          )}
 
           {filteredLocations.map((location) => (
             <StockReplLocation
