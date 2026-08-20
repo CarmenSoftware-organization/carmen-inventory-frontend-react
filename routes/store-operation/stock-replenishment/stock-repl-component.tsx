@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { ErrorState } from "@/components/ui/error-state";
+import { WarningDialog } from "@/components/ui/warning-dialog";
 import DisplayTemplate from "@/components/display-template";
 import SearchInput from "@/components/search-input";
 import { useStockReplenishment } from "@/hooks/use-stock-replenishment";
@@ -54,6 +55,7 @@ export default function StockReplComponent() {
   const [search, setSearch] = useState("");
   const [openLocations, setOpenLocations] = useState<Set<string>>(new Set());
   const [createDialog, setCreateDialog] = useState<"pr" | "sr" | null>(null);
+  const [srLocationWarningOpen, setSrLocationWarningOpen] = useState(false);
 
   const handleOpenChange = (locationId: string, open: boolean) => {
     setOpenLocations((prev) => {
@@ -126,7 +128,15 @@ export default function StockReplComponent() {
   };
 
   const handleCreatePR = () => setCreateDialog("pr");
-  const handleCreateSR = () => setCreateDialog("sr");
+  // SR เบิกได้ทีละคลัง — ติ๊กข้ามคลังให้เตือนแทนที่จะเปิด dialog
+  // (selections ลบ entry ว่างออกเสมอ ดังนั้น size = จำนวนคลังที่มีของติ๊กจริง)
+  const handleCreateSR = () => {
+    if (selections.size > 1) {
+      setSrLocationWarningOpen(true);
+      return;
+    }
+    setCreateDialog("sr");
+  };
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
@@ -227,11 +237,21 @@ export default function StockReplComponent() {
         open={createDialog === "pr"}
         onOpenChange={(open) => !open && setCreateDialog(null)}
         products={getSelectedProducts()}
+        onCreated={() => setSelections(new Map())}
       />
       <StockReplCreateSrDialog
         open={createDialog === "sr"}
         onOpenChange={(open) => !open && setCreateDialog(null)}
         products={getSelectedProducts()}
+        onCreated={() => setSelections(new Map())}
+      />
+
+      <WarningDialog
+        open={srLocationWarningOpen}
+        title={t("srOneLocationTitle")}
+        description={t("srOneLocationDesc")}
+        confirmLabel={tc("goBack")}
+        onConfirm={() => setSrLocationWarningOpen(false)}
       />
     </DisplayTemplate>
   );
