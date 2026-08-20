@@ -13,7 +13,6 @@ import type { Shelf } from "@/types/shelf";
  */
 export function createShelfSchema(tv: TranslationFn, tf: TranslationFn) {
   return z.object({
-    location_id: z.string().min(1, tv("required", { field: tf("location") })),
     code: z.string().min(1, tv("required", { field: tf("code") })),
     name: z.string().min(1, tv("required", { field: tf("name") })),
     description: z.string().optional(),
@@ -33,7 +32,6 @@ export function createShelfSchema(tv: TranslationFn, tf: TranslationFn) {
 export type ShelfFormValues = z.infer<ReturnType<typeof createShelfSchema>>;
 
 export const EMPTY_FORM: ShelfFormValues = {
-  location_id: "",
   code: "",
   name: "",
   description: "",
@@ -52,7 +50,6 @@ export const EMPTY_FORM: ShelfFormValues = {
 export function getDefaultValues(shelf?: Shelf): ShelfFormValues {
   if (!shelf) return { ...EMPTY_FORM };
   return {
-    location_id: shelf.location_id,
     code: shelf.code,
     name: shelf.name,
     description: shelf.description ?? "",

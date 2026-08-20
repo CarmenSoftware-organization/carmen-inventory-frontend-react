@@ -40,11 +40,6 @@ export default function ShelfComponent() {
         { header: tfl("code"), value: (r) => r.code, width: 12 },
         { header: tfl("name"), value: (r) => r.name, width: 28 },
         {
-          header: tfl("location"),
-          value: (r) => r.location_name ?? "",
-          width: 24,
-        },
-        {
           header: tfl("description"),
           value: (r) => r.description ?? "",
           width: 32,

@@ -63,20 +63,16 @@ export function useShelfTable({
       meta: { headerTitle: tfl("name"), skeleton: columnSkeletons.text },
     },
     {
-      accessorKey: "location_name",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("location")} />
-      ),
-      cell: ({ row }) => row.original.location_name || "-",
-      meta: { headerTitle: tfl("location"), skeleton: columnSkeletons.text },
-    },
-    {
       accessorKey: "description",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("description")} />
       ),
+      // ยาวเกิน 2 บรรทัดตัดด้วย ellipsis — ข้อความเต็มดูจาก title ตอน hover
       cell: ({ row }) => (
-        <span className="text-muted-foreground">
+        <span
+          className="text-muted-foreground line-clamp-2"
+          title={row.original.description ?? undefined}
+        >
           {row.original.description || "-"}
         </span>
       ),

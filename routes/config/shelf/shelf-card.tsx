@@ -27,9 +27,6 @@ export default function ShelfCard({ item, onEdit, onDelete }: Props) {
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
       {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
-      {item.location_name && (
-        <ListCardRow label={tfl("location")}>{item.location_name}</ListCardRow>
-      )}
       {item.description && (
         <ListCardRow label={tfl("description")}>
           {item.description}

@@ -4,7 +4,6 @@ import { useTranslations } from "use-intl";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Field, FieldInput, FieldLabel } from "@/components/ui/field";
 import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog";
-import { LookupLocation } from "@/components/lookup/lookup-location";
 import { useCreateShelf, useUpdateShelf } from "@/hooks/use-shelf";
 import {
   createShelfSchema,
@@ -44,7 +43,6 @@ export function ShelfDialog({
       buildSchema={createShelfSchema}
       toFormValues={(e) => getDefaultValues(e ?? undefined)}
       toPayload={(v) => ({
-        location_id: v.location_id,
         code: v.code,
         name: v.name,
         description: v.description || undefined,
@@ -54,24 +52,6 @@ export function ShelfDialog({
     >
       {({ form, disabled }) => (
         <>
-          <Field>
-            <FieldLabel required>{tfl("location")}</FieldLabel>
-            <Controller
-              control={form.control}
-              name="location_id"
-              render={({ field }) => (
-                <LookupLocation
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  defaultLabel={shelf?.location_name}
-                  disabled={disabled}
-                  error={form.formState.errors.location_id?.message}
-                  modal
-                />
-              )}
-            />
-          </Field>
-
           <div className="grid grid-cols-[8rem_1fr] gap-3">
             <Field>
               <FieldLabel htmlFor="shelf-code" required>
