@@ -17,6 +17,8 @@ import SearchInput from "@/components/search-input";
 import { useStockReplenishment } from "@/hooks/use-stock-replenishment";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
 import { StockReplLocation } from "./stock-repl-location";
+import { StockReplCreatePrDialog } from "./stock-repl-create-pr-dialog";
+import { StockReplCreateSrDialog } from "./stock-repl-create-sr-dialog";
 
 const filterLocations = (locations: Location[], search: string): Location[] => {
   if (!search) return locations;
@@ -51,6 +53,7 @@ export default function StockReplComponent() {
   );
   const [search, setSearch] = useState("");
   const [openLocations, setOpenLocations] = useState<Set<string>>(new Set());
+  const [createDialog, setCreateDialog] = useState<"pr" | "sr" | null>(null);
 
   const handleOpenChange = (locationId: string, open: boolean) => {
     setOpenLocations((prev) => {
@@ -122,13 +125,8 @@ export default function StockReplComponent() {
     return result;
   };
 
-  const handleCreatePR = () => {
-    getSelectedProducts();
-  };
-
-  const handleCreateSR = () => {
-    getSelectedProducts();
-  };
+  const handleCreatePR = () => setCreateDialog("pr");
+  const handleCreateSR = () => setCreateDialog("sr");
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
 
@@ -224,6 +222,17 @@ export default function StockReplComponent() {
           ))}
         </div>
       )}
+
+      <StockReplCreatePrDialog
+        open={createDialog === "pr"}
+        onOpenChange={(open) => !open && setCreateDialog(null)}
+        products={getSelectedProducts()}
+      />
+      <StockReplCreateSrDialog
+        open={createDialog === "sr"}
+        onOpenChange={(open) => !open && setCreateDialog(null)}
+        products={getSelectedProducts()}
+      />
     </DisplayTemplate>
   );
 }
