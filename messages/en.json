@@ -560,6 +560,8 @@
     "counted": "Counted",
     "notCreated": "Not Created",
     "critical": "Critical",
+    "expired": "Expired",
+    "expiring": "Expiring",
     "warning": "Warning",
     "low": "Low",
     "published": "Published",
@@ -904,6 +906,9 @@
     "vendorInstruction": "Vendor Instruction",
     "qty": "Qty",
     "costPerUnit": "Cost/Unit",
+    "daysToExpiry": "Days Left",
+    "remainingQty": "Remaining Qty",
+    "remainingValue": "Remaining Value",
     "totalCost": "Total Cost",
     "documentNo": "Document No.",
     "method": "Method",
@@ -3199,20 +3204,13 @@
       "selectAllIn": "Select all products in {location}"
     },
     "wastageReporting": {
-      "entity": "Wastage Report",
       "title": "Wastage Reporting",
-      "desc": "Stock thrown away — what, how much, and why.",
-      "add": "Add Report",
-      "edit": "Edit Wastage Report",
-      "deleteTitle": "Delete Wastage Report",
-      "deleteConfirm": "Are you sure you want to delete \"{wrNo}\"? This action cannot be undone.",
-      "notFound": "Wastage report not found",
-      "addItem": "Add Item",
-      "noItems": "No Items Yet",
-      "noItemsDesc": "Add items to this wastage report.",
-      "removeItem": "Remove Item",
-      "pickDate": "Pick date",
-      "reasonPlaceholder": "Describe the cause of wastage"
+      "desc": "Expired and expiring stock lots — quantity and value at risk.",
+      "nItems": "{count} items",
+      "nExpired": "{count} expired",
+      "nExpiring": "{count} expiring",
+      "qtyAtRisk": "Qty at risk:",
+      "valueAtRisk": "Value at risk:"
     }
   },
   "procurement": {

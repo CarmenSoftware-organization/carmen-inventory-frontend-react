@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { Plus } from "lucide-react";
-import { toast } from "sonner";
+import { Package } from "lucide-react";
 import { useTranslations } from "use-intl";
 import {
   DataGrid,
@@ -9,21 +8,17 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { Button } from "@/components/ui/button";
-import {
-  useWastageReport,
-  useDeleteWastageReport,
-} from "@/hooks/use-wastage-report";
+import { useWastageReport } from "@/hooks/use-wastage-report";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
-import type { WastageReport } from "@/types/wastage-reporting";
 import SearchInput from "@/components/search-input";
-import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { ErrorState } from "@/components/ui/error-state";
 import EmptyComponent from "@/components/empty-component";
 import { StatusFilter } from "@/components/ui/status-filter";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import DisplayTemplate from "@/components/display-template";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
-import { WASTAGE_REPORT_STATUS_OPTIONS } from "@/constant/wastage-reporting";
+import { formatCurrency } from "@/lib/currency-utils";
+import { WASTAGE_STATUS_OPTIONS } from "@/constant/wastage-reporting";
 import { useWastageReportTable } from "./use-wr-table";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
@@ -33,29 +28,23 @@ import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
 
 /**
- * คอมโพเนนต์หลักของหน้ารายการรายงานของเสีย
- * มี search, filter สถานะ, DataGrid และ DeleteDialog
+ * หน้ารายการ lot สินค้าหมดอายุ/ใกล้หมดอายุ (wastage reporting) — read-only
+ * มี search, filter สถานะ, summary มูลค่าเสี่ยง และ DataGrid กด GRN no
+ * ไปหน้า GRN ต้นทางได้
  *
- * @returns คอมโพเนนต์หน้ารายการ WR
+ * @returns คอมโพเนนต์หน้ารายการ wastage reporting
  * @example
- * // ใช้ใน app/(root)/store-operation/wastage-reporting/page.tsx
  * import WrComponent from "./wr-component";
- * export default function Page() { return <WrComponent />; }
+ * export function Component() { return <WrComponent />; }
  */
 export default function WrComponent() {
   const navigate = useNavigate();
   const t = useTranslations("storeOperation.wastageReporting");
-  const tt = useTranslations("toast");
-  const [deleteTarget, setDeleteTarget] = useState<WastageReport | null>(null);
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
-  const deleteWr = useDeleteWastageReport();
   const { params, search, setSearch, tableConfig } = useDataGridState();
 
-  // WASTAGE_REPORT_STATUS_OPTIONS มา createStatusFilterOptions — label เป็น
-  // literal string ล้วน ไม่ใช่ i18n key (เหมือนเดิมก่อน migrate) จึงต้องห่อด้วย
-  // control: "custom" แทน control: "status" ทั่วไป (ตัวนั้นจะเรียก t() กับ label
-  // ที่ไม่ใช่ key จริง ทำให้ console error) — เหมือน pattern ของ PO_TYPE/CN_TYPE ใน
-  // Task 19
+  // WASTAGE_STATUS_OPTIONS label เป็น literal string ไม่ใช่ i18n key จึงห่อด้วย
+  // control: "custom" แทน control: "status" (ตัวนั้นเรียก t() กับ label ตรง ๆ)
   const wrFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
@@ -66,7 +55,7 @@ export default function WrComponent() {
           <StatusFilter
             value={value}
             onChange={onChange}
-            options={WASTAGE_REPORT_STATUS_OPTIONS}
+            options={WASTAGE_STATUS_OPTIONS}
             className="w-full"
           />
         ),
@@ -86,14 +75,15 @@ export default function WrComponent() {
 
   const items = data?.data ?? [];
   const totalRecords = data?.paginate?.total ?? 0;
+  const summary = data?.summary;
 
   const table = useWastageReportTable({
     items,
     totalRecords,
     params,
     tableConfig,
-    onEdit: (item) => navigate(`/store-operation/wastage-reporting/${item.id}`),
-    onDelete: setDeleteTarget,
+    onOpenGrn: (item) =>
+      navigate(`/procurement/goods-receive-note/${item.grn_id}`),
   });
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
@@ -122,46 +112,50 @@ export default function WrComponent() {
       filterBar={
         <ActiveFilterBar filters={lf.activeFilters} onClearAll={lf.clearAll} />
       }
-      actions={
-        <Button
-          size="sm"
-          onClick={() => navigate("/store-operation/wastage-reporting/new")}
-        >
-          <Plus aria-hidden="true" />
-          {t("add")}
-        </Button>
-      }
     >
-      <DataGrid
-        table={table}
-        recordCount={totalRecords}
-        isLoading={isLoading}
-        emptyMessage={<EmptyComponent />}
-      >
-        <DataGridContainer>
-          <DataGridTable />
-          <DataGridPagination />
-        </DataGridContainer>
-      </DataGrid>
+      <div className="space-y-3">
+        {/* summary จาก backend — ยอดรวมทั้งชุดข้อมูล ไม่ใช่แค่หน้าปัจจุบัน */}
+        {summary && (
+          <div className="bg-muted/30 flex flex-wrap items-center gap-3 rounded-md border px-3 py-2 text-xs">
+            <span className="text-muted-foreground flex items-center gap-1.5">
+              <Package className="size-3.5" aria-hidden="true" />
+              {t("nItems", { count: summary.total_items })}
+            </span>
+            <span className="text-muted-foreground/40">|</span>
+            <StatusDotBadge tone="destructive" size="xs">
+              {t("nExpired", { count: summary.expired_count })}
+            </StatusDotBadge>
+            <StatusDotBadge tone="warning" size="xs">
+              {t("nExpiring", { count: summary.expiring_count })}
+            </StatusDotBadge>
+            <span className="text-muted-foreground/40">|</span>
+            <span className="font-semibold">
+              {t("qtyAtRisk")}{" "}
+              <span className="tabular-nums">
+                {summary.total_qty_at_risk.toLocaleString()}
+              </span>
+            </span>
+            <span className="font-semibold">
+              {t("valueAtRisk")}{" "}
+              <span className="tabular-nums">
+                {formatCurrency(summary.total_value_at_risk)}
+              </span>
+            </span>
+          </div>
+        )}
 
-      <DeleteDialog
-        open={!!deleteTarget}
-        onOpenChange={(open) =>
-          !open && !deleteWr.isPending && setDeleteTarget(null)
-        }
-        title={t("deleteTitle")}
-        description={t("deleteConfirm", { wrNo: deleteTarget?.wr_no ?? "" })}
-        isPending={deleteWr.isPending}
-        onConfirm={() => {
-          if (!deleteTarget) return;
-          deleteWr.mutate(deleteTarget.id, {
-            onSuccess: () => {
-              toast.success(tt("deleteSuccess", { entity: t("entity") }));
-              setDeleteTarget(null);
-            },
-          });
-        }}
-      />
+        <DataGrid
+          table={table}
+          recordCount={totalRecords}
+          isLoading={isLoading}
+          emptyMessage={<EmptyComponent />}
+        >
+          <DataGridContainer>
+            <DataGridTable />
+            <DataGridPagination />
+          </DataGridContainer>
+        </DataGrid>
+      </div>
 
       <SaveViewDialog
         open={saveViewDialogOpen}

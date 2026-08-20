@@ -557,6 +557,8 @@
     "counted": "นับแล้ว",
     "notCreated": "ยังไม่สร้าง",
     "critical": "วิกฤต",
+    "expired": "หมดอายุ",
+    "expiring": "ใกล้หมดอายุ",
     "warning": "เตือน",
     "low": "ต่ำ",
     "published": "เผยแพร่",
@@ -901,6 +903,9 @@
     "vendorInstruction": "คำแนะนำผู้ขาย",
     "qty": "จำนวน",
     "costPerUnit": "ต้นทุน/หน่วย",
+    "daysToExpiry": "เหลือ (วัน)",
+    "remainingQty": "คงเหลือ",
+    "remainingValue": "มูลค่าคงเหลือ",
     "totalCost": "ต้นทุนรวม",
     "documentNo": "เลขที่เอกสาร",
     "method": "วิธีการ",
@@ -3191,20 +3196,13 @@
       "selectAllIn": "เลือกสินค้าทั้งหมดใน{location}"
     },
     "wastageReporting": {
-      "entity": "รายงานของเสีย",
       "title": "รายงานของเสีย",
-      "desc": "ของที่ต้องทิ้ง อะไร เท่าไร เพราะอะไร",
-      "add": "เพิ่มรายงาน",
-      "edit": "แก้ไขรายงานของเสีย",
-      "deleteTitle": "ลบรายงานของเสีย",
-      "deleteConfirm": "คุณแน่ใจหรือไม่ว่าต้องการลบ \"{wrNo}\"? การดำเนินการนี้ไม่สามารถย้อนกลับได้",
-      "notFound": "ไม่พบรายงานของเสีย",
-      "addItem": "เพิ่มรายการ",
-      "noItems": "ยังไม่มีรายการ",
-      "noItemsDesc": "เพิ่มรายการในรายงานของเสียนี้",
-      "removeItem": "ลบรายการ",
-      "pickDate": "เลือกวันที่",
-      "reasonPlaceholder": "อธิบายสาเหตุของเสีย"
+      "desc": "ล็อตสินค้าหมดอายุ/ใกล้หมดอายุ พร้อมจำนวนและมูลค่าที่เสี่ยงเสีย",
+      "nItems": "{count} รายการ",
+      "nExpired": "หมดอายุ {count}",
+      "nExpiring": "ใกล้หมดอายุ {count}",
+      "qtyAtRisk": "จำนวนเสี่ยง:",
+      "valueAtRisk": "มูลค่าเสี่ยง:"
     }
   },
   "procurement": {

@@ -445,16 +445,6 @@ export const router = createBrowserRouter([
                   import("./store-operation/wastage-reporting/wastage-reporting.route"),
               },
               {
-                path: "wastage-reporting/new",
-                lazy: () =>
-                  import("./store-operation/wastage-reporting/wastage-reporting-new.route"),
-              },
-              {
-                path: "wastage-reporting/:id",
-                lazy: () =>
-                  import("./store-operation/wastage-reporting/wastage-reporting-edit.route"),
-              },
-              {
                 path: "stock-replenishment",
                 lazy: () =>
                   import("./store-operation/stock-replenishment/stock-replenishment.route"),

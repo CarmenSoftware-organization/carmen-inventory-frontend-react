@@ -4,132 +4,136 @@ import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import {
-  selectColumn,
   indexColumn,
-  actionColumn,
   columnSkeletons,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
-import type {
-  WastageReport,
-  WastageReportStatus,
-} from "@/types/wastage-reporting";
+import type { WastageItem } from "@/types/wastage-reporting";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import { WR_STATUS_CONFIG } from "@/constant/wastage-reporting";
+import { WASTAGE_STATUS_TONE } from "@/constant/wastage-reporting";
 
 interface UseWastageReportTableOptions {
-  items: WastageReport[];
+  items: WastageItem[];
   totalRecords: number;
   params: ParamsDto;
   tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
-  onEdit: (item: WastageReport) => void;
-  onDelete: (item: WastageReport) => void;
+  onOpenGrn: (item: WastageItem) => void;
 }
 
 /**
- * Hook สร้างตารางหลักของรายการ Wastage Report
- * รวมคอลัมน์ wr_no, สถานที่, วันที่, จำนวน, มูลค่าเสียหาย, ผู้รายงาน และสถานะ
+ * Hook สร้างตารางรายการ lot สินค้าหมดอายุ/ใกล้หมดอายุ (wastage reporting)
+ * คอลัมน์: GRN no (กดไปหน้า GRN), สินค้า, คลัง, lot, วันหมดอายุ, เหลือ (วัน),
+ * สถานะ, จำนวนคงเหลือ, ต้นทุน/หน่วย, มูลค่าคงเหลือ — read-only ไม่มี action
  *
- * @param options - items, totalRecords, params, tableConfig, onEdit, onDelete
- * @param options.items - รายการ WastageReport
- * @param options.totalRecords - จำนวนรวม
- * @param options.params - ParamsDto ปัจจุบัน
- * @param options.tableConfig - จาก useDataGridState
- * @param options.onEdit - callback เมื่อกดแถว
- * @param options.onDelete - callback เมื่อกดลบ
+ * @param options - items, totalRecords, params, tableConfig, onOpenGrn
  * @returns react-table instance
  * @example
- * const table = useWastageReportTable({ items, totalRecords, params, tableConfig, onEdit, onDelete });
+ * const table = useWastageReportTable({ items, totalRecords, params, tableConfig, onOpenGrn });
  */
 export function useWastageReportTable({
   items,
   totalRecords,
   params,
   tableConfig,
-  onEdit,
-  onDelete,
+  onOpenGrn,
 }: UseWastageReportTableOptions) {
   "use no memo";
   const { dateFormat } = useProfile();
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
 
-  const dataColumns: ColumnDef<WastageReport>[] = [
+  const dataColumns: ColumnDef<WastageItem>[] = [
     {
-      accessorKey: "wr_no",
+      accessorKey: "grn_no",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("wrNo")} />
+        <DataGridColumnHeader column={column} title={tfl("grnNo")} />
       ),
       cell: ({ row }) => (
-        <CellAction onClick={() => onEdit(row.original)}>
-          {row.getValue("wr_no")}
+        <CellAction onClick={() => onOpenGrn(row.original)}>
+          {row.getValue("grn_no")}
         </CellAction>
       ),
+      meta: { skeleton: columnSkeletons.text },
+      size: 130,
+    },
+    {
+      id: "product",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("product")} />
+      ),
+      cell: ({ row }) => (
+        <div className="min-w-0">
+          <p className="truncate" title={row.original.product_name}>
+            {row.original.product_name}
+          </p>
+          {row.original.product_local_name && (
+            <p
+              className="text-muted-foreground text-micro truncate"
+              title={row.original.product_local_name}
+            >
+              {row.original.product_local_name}
+            </p>
+          )}
+        </div>
+      ),
+      enableSorting: false,
+      meta: { skeleton: columnSkeletons.text },
+      size: 200,
+    },
+    {
+      id: "location",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("location")} />
+      ),
+      cell: ({ row }) => (
+        <span className="truncate">
+          <span className="text-muted-foreground mr-1.5">
+            {row.original.location_code}
+          </span>
+          {row.original.location_name}
+        </span>
+      ),
+      enableSorting: false,
+      meta: { skeleton: columnSkeletons.text },
+      size: 160,
+    },
+    {
+      accessorKey: "lot_no",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("lotNo")} />
+      ),
+      enableSorting: false,
       meta: { skeleton: columnSkeletons.text },
       size: 150,
     },
     {
-      accessorKey: "location_name",
+      accessorKey: "expired_at",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("location")} />
+        <DataGridColumnHeader column={column} title={tfl("expiryDate")} />
       ),
-      enableSorting: false,
+      cell: ({ row }) => formatDate(row.getValue("expired_at"), dateFormat),
       meta: { skeleton: columnSkeletons.text },
+      size: 110,
     },
     {
-      accessorKey: "date",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("date")} />
-      ),
-      cell: ({ row }) => formatDate(row.getValue("date"), dateFormat),
-      meta: { skeleton: columnSkeletons.text },
-      size: 120,
-    },
-    {
-      accessorKey: "qty_sum",
+      accessorKey: "days_to_expiry",
       header: ({ column }) => (
         <DataGridColumnHeader
           column={column}
-          title={tfl("totalQty")}
+          title={tfl("daysToExpiry")}
           className="justify-end"
         />
       ),
-      cell: ({ row }) => row.getValue("qty_sum"),
       enableSorting: false,
-      size: 80,
+      size: 90,
       meta: {
         cellClassName: "text-right tabular-nums",
         skeleton: columnSkeletons.text,
       },
-    },
-    {
-      accessorKey: "loss_value",
-      header: ({ column }) => (
-        <DataGridColumnHeader
-          column={column}
-          title={tfl("lossValue")}
-          className="justify-end"
-        />
-      ),
-      cell: ({ row }) => formatCurrency(row.getValue<number>("loss_value")),
-      enableSorting: false,
-      size: 120,
-      meta: {
-        cellClassName: "text-right tabular-nums",
-        skeleton: columnSkeletons.text,
-      },
-    },
-    {
-      accessorKey: "reportor_name",
-      header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={tfl("reporter")} />
-      ),
-      enableSorting: false,
-      meta: { skeleton: columnSkeletons.text },
     },
     {
       accessorKey: "status",
@@ -142,29 +146,87 @@ export function useWastageReportTable({
       ),
       enableSorting: false,
       cell: ({ row }) => {
-        const status = row.getValue("status") as WastageReportStatus;
+        const status = row.original.status;
         return (
-          <Badge className={WR_STATUS_CONFIG[status]?.className} size="sm">
+          <StatusDotBadge tone={WASTAGE_STATUS_TONE[status]} size="xs">
             {ts(status)}
-          </Badge>
+          </StatusDotBadge>
         );
       },
       meta: { skeleton: columnSkeletons.badge, cellClassName: "text-center" },
-      size: 120,
+      size: 100,
+    },
+    {
+      accessorKey: "remaining_qty",
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("remainingQty")}
+          className="justify-end"
+        />
+      ),
+      cell: ({ row }) => (
+        <>
+          {row.original.remaining_qty}{" "}
+          <span className="text-muted-foreground">
+            {row.original.inventory_unit.name}
+          </span>
+        </>
+      ),
+      enableSorting: false,
+      size: 100,
+      meta: {
+        cellClassName: "text-right tabular-nums",
+        skeleton: columnSkeletons.text,
+      },
+    },
+    {
+      accessorKey: "cost_per_unit",
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("costPerUnit")}
+          className="justify-end"
+        />
+      ),
+      cell: ({ row }) => formatCurrency(row.getValue<number>("cost_per_unit")),
+      enableSorting: false,
+      size: 100,
+      meta: {
+        cellClassName: "text-right tabular-nums",
+        skeleton: columnSkeletons.text,
+      },
+    },
+    {
+      accessorKey: "remaining_value",
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("remainingValue")}
+          className="justify-end"
+        />
+      ),
+      cell: ({ row }) =>
+        formatCurrency(row.getValue<number>("remaining_value")),
+      enableSorting: false,
+      size: 110,
+      meta: {
+        cellClassName: "text-right tabular-nums",
+        skeleton: columnSkeletons.text,
+      },
     },
   ];
 
-  const allColumns: ColumnDef<WastageReport>[] = [
-    selectColumn<WastageReport>(),
-    indexColumn<WastageReport>(params),
+  const allColumns: ColumnDef<WastageItem>[] = [
+    indexColumn<WastageItem>(params),
     ...dataColumns,
-    actionColumn<WastageReport>(onDelete),
   ];
 
   return useReactTable({
     data: items,
     columns: allColumns,
     getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.grn_detail_item_id,
     ...tableConfig,
     pageCount: Math.ceil(totalRecords / (Number(params.perpage) || 10)),
   });

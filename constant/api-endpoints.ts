@@ -380,6 +380,8 @@ export const API_ENDPOINTS = {
   STOCK_OUT: (buCode: string) => `/api/proxy/api/${buCode}/stock-outs`,
   STOCK_REPLENISHMENT: (buCode: string) =>
     `/api/proxy/api/${buCode}/stock-replenishments`,
+  WASTAGE_REPORTING: (buCode: string) =>
+    `/api/proxy/api/${buCode}/wastage-reporting`,
   STORE_REQUISITION: (buCode: string) =>
     `/api/proxy/api/${buCode}/store-requisitions`,
   STORE_REQUISITION_PREVIOUS_STAGES: (buCode: string, srId: string) =>
