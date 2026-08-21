@@ -72,7 +72,9 @@ export function MultiSelectFilter({
       : "";
 
   return (
-    <Popover>
+    // modal — ใช้ใน ListFilterSheet (Dialog modal) เป็นหลัก ถ้าไม่ประกาศ scroll
+    // ในรายการจะโดน scroll lock ของ Sheet กิน (เหมือน FilterStage/Requester ฯลฯ)
+    <Popover modal>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

@@ -24,6 +24,7 @@ import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { PURCHASE_ORDER_TYPE_OPTIONS } from "@/constant/purchase-order";
+import { useVendor } from "@/hooks/use-vendor";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -111,6 +112,20 @@ export default function PoComponent() {
 
   const { data: stages } = usePurchaseOrderWorkflowStages();
 
+  const { data: vendorData } = useVendor({ perpage: -1 });
+  // ชื่อ vendor เป็น literal string จริง (ไม่ใช่ i18n key) — memo กันไม่ให้ array
+  // reference เปลี่ยนทุก render จน poFilterFields memo ข้างล่างไม่เคย hit
+  const vendorOptions = useMemo(
+    () =>
+      (vendorData?.data ?? [])
+        .filter((v) => v.is_active)
+        .map((v) => ({
+          label: v.name,
+          value: `vendor_id|string:${v.id}`,
+        })),
+    [vendorData],
+  );
+
   // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
   // ListFilterSheet เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
   // เหมือน PR pilot) ไม่มี value จริงจึงไม่ถูกนับใน filterParam/activeFilters
@@ -182,12 +197,53 @@ export default function PoComponent() {
         ],
       },
       {
+        // ช่วงจำนวนเงินรวม — UI ฝั่ง frontend ก่อน เหมือน PR: toClause คืนค่าว่าง
+        // ไว้ไม่ให้ clause หลุดไป backend (QueryParams ยังไม่รู้จัก num_range)
+        key: "amount",
+        control: "amount-range",
+        labelKey: "field.totalAmount",
+        fieldKey: "total_amount",
+        section: "listView.sectionDocument",
+        toClause: () => "",
+      },
+      {
         // ผู้จัดซื้อ = คนเปิดใบ (คอลัมน์ Buyer ใน list) — กรองที่ created_by_id
         key: "buyer",
         control: "requester",
         labelKey: "field.buyer",
         fieldKey: "created_by_id",
         section: "listView.sectionPeople",
+      },
+      {
+        key: "vendor",
+        control: "custom",
+        labelKey: "field.vendor",
+        section: "listView.sectionPeople",
+        // chip โชว์ชื่อ vendor จริงแทนจำนวน — mapping อยู่ในมือหน้านี้อยู่แล้ว
+        valueText: (raw) => {
+          const ids = raw
+            .split(",")
+            .map((p) => p.slice(p.lastIndexOf(":") + 1))
+            .filter(Boolean);
+          const names = ids
+            .map(
+              (id) => (vendorData?.data ?? []).find((v) => v.id === id)?.name,
+            )
+            .filter((n): n is string => !!n);
+          if (names.length === 0) return `${ids.length}`;
+          return (
+            names[0] + (names.length > 1 ? ` +${names.length - 1}` : "")
+          );
+        },
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={vendorOptions}
+            searchable
+            className="w-full"
+          />
+        ),
       },
       {
         key: "order_date",
@@ -197,7 +253,7 @@ export default function PoComponent() {
         section: "listView.sectionDate",
       },
     ],
-    [viewMode, stages, t, tc],
+    [viewMode, stages, vendorOptions, vendorData, t, tc],
   );
 
   const lf = useListFilters({
