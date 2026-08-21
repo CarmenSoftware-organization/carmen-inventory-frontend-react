@@ -41,6 +41,12 @@ interface FilterFieldBase {
    * ไม่ระบุ = ไม่มีหัวข้อ render แบนเหมือนเดิม
    */
   readonly section?: string;
+  /**
+   * แปลงค่า URL → ข้อความค่าบน chip ของ ActiveFilterBar (เช่น "Draft +2")
+   * ไม่ระบุ = derive อัตโนมัติ: options ที่ประกาศใน field → label, date_range →
+   * "จาก – ถึง", ค่า slug อ่านออก → โชว์ตรง, id (uuid) → จำนวนรายการ
+   */
+  readonly valueText?: (value: string) => string;
 }
 
 /** นิยาม field หนึ่งตัวใน filter sheet ของหน้า list */

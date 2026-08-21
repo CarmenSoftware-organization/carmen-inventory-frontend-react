@@ -18,6 +18,49 @@ import type { FilterFieldDef } from "@/types/list-filter";
 import type { SavedView, ViewScope } from "@/types/list-view";
 import type { ListPageKey } from "@/constant/list-page-keys";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
+
+/**
+ * ข้อความค่าบน chip ของ ActiveFilterBar — derive จาก field def + ค่า URL:
+ * `valueText` ของ field ชนะเสมอ → options ที่ประกาศไว้ map เป็น label →
+ * date_range เป็น "จาก – ถึง" → slug อ่านออกโชว์ตรง (ตัวแรก +N) →
+ * id (uuid) โชว์จำนวนรายการแทน (ไม่มีชื่อให้โชว์ในชั้นนี้)
+ */
+function chipValueText(
+  f: FilterFieldDef,
+  value: string,
+  t: (key: string) => string,
+): string | undefined {
+  if (f.valueText) return f.valueText(value);
+
+  const options = "options" in f ? f.options : undefined;
+  if (options?.length) {
+    const selected = new Set(value.split(","));
+    const labels = options
+      .filter((o) => selected.has(o.value))
+      .map((o) => t(o.labelKey));
+    if (labels.length > 0) {
+      return labels[0] + (labels.length > 1 ? ` +${labels.length - 1}` : "");
+    }
+  }
+
+  const dateRange = /\|date_?range:([^,]+),(.+)$/.exec(value);
+  if (dateRange) return `${dateRange[1]} – ${dateRange[2]}`;
+
+  // clause ทั่วไป: ตัด "col|type:" ทิ้งรายท่อน (รองรับทั้ง merge และ clause ซ้ำ prefix)
+  const tokens = value
+    .split(",")
+    .map((part) =>
+      part.includes(":") ? part.slice(part.lastIndexOf(":") + 1) : part,
+    )
+    .map((v) => v.trim())
+    .filter(Boolean);
+  if (tokens.length === 0) return undefined;
+  if (tokens.some((v) => UUID_RE.test(v))) return `${tokens.length}`;
+  const first = tokens[0].replace(/_/g, " ");
+  return first + (tokens.length > 1 ? ` +${tokens.length - 1}` : "");
+}
+
 export interface UseListFiltersOptions {
   pageKey: ListPageKey;
   /** field ที่จะ render เป็น filter chip/sheet — ดู note เรื่อง reference stability ที่ `useURLValues` */
@@ -171,6 +214,11 @@ export function useListFilters(
         .map((f) => ({
           key: f.key,
           label: t(f.labelKey),
+          // ค่าซ้ำกับชื่อ field (เช่น sendback ตัวเลือกเดียว) ไม่ต้องพูดสองรอบ
+          value: (() => {
+            const text = chipValueText(f, values[f.key], t);
+            return text === t(f.labelKey) ? undefined : text;
+          })(),
           onRemove: () => {
             // field ที่มี linkedKeys (เช่น created_at_from คู่กับ created_at_to
             // ที่ถูกซ่อนไว้) ต้องล้างทั้งคู่พร้อมกันใน setURLParams ครั้งเดียว ไม่งั้น
