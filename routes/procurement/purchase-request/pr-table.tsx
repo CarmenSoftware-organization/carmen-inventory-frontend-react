@@ -110,7 +110,13 @@ export function usePurchaseRequestTable({
     },
     {
       accessorKey: "workflow_name",
-      header: tfl("type"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("type")}
+          className="justify-center"
+        />
+      ),
       meta: {
         headerTitle: tfl("type"),
         skeleton: columnSkeletons.text,
@@ -121,7 +127,13 @@ export function usePurchaseRequestTable({
     },
     {
       accessorKey: "workflow_current_stage",
-      header: tfl("stage"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("stage")}
+          className="justify-center"
+        />
+      ),
       meta: {
         headerTitle: tfl("stage"),
         cellClassName: "text-center",
@@ -132,7 +144,13 @@ export function usePurchaseRequestTable({
     },
     {
       accessorKey: "pr_status",
-      header: tfl("status"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }): React.ReactNode => {
         const status = row.original.pr_status;
         const config = PR_STATUS_CONFIG[status] ?? PR_STATUS_CONFIG.draft;
@@ -152,13 +170,17 @@ export function usePurchaseRequestTable({
     },
     {
       accessorKey: "requestor_name",
-      header: tfl("requester"),
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("requester")} />
+      ),
       meta: { headerTitle: tfl("requester"), skeleton: columnSkeletons.text },
       size: 180,
     },
     {
       accessorKey: "department_name",
-      header: tfl("department"),
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={tfl("department")} />
+      ),
       size: 220,
       meta: { headerTitle: tfl("department"), skeleton: columnSkeletons.text },
     },

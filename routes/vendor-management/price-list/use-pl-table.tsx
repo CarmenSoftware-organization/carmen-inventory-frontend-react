@@ -87,17 +87,17 @@ export function usePriceListTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      enableSorting: false,
       meta: { headerTitle: tfl("vendor"), skeleton: columnSkeletons.text },
       size: 240,
     },
     {
+      // id เป็นชื่อคอลัมน์จริงใน DB เพื่อให้ sort ฝั่ง server ได้ (เรียงช่วงเวลา = เรียงวันเริ่ม)
+      id: "effective_from_date",
       accessorKey: "effectivePeriod",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("effectivePeriod")} />
       ),
-      enableSorting: false,
-      cell: ({ row }) => formatPeriod(row.getValue("effectivePeriod")),
+      cell: ({ row }) => formatPeriod(row.getValue("effective_from_date")),
       meta: {
         headerTitle: tfl("effectivePeriod"),
         skeleton: columnSkeletons.text,
@@ -122,7 +122,6 @@ export function usePriceListTable({
         );
       },
       size: 100,
-      enableSorting: false,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",

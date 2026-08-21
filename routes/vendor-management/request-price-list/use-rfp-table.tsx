@@ -71,12 +71,12 @@ export function useRequestPriceListTable({
       meta: { headerTitle: tfl("template"), skeleton: columnSkeletons.text },
     },
     {
-      id: "period",
+      // id เป็นชื่อคอลัมน์จริงใน DB เพื่อให้ sort ฝั่ง server ได้ (เรียงช่วงเวลา = เรียงวันเริ่ม)
+      id: "start_date",
       accessorFn: (row) => formatPeriod(row.start_date, row.end_date),
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("effectivePeriod")} />
       ),
-      enableSorting: false,
       meta: {
         headerTitle: tfl("effectivePeriod"),
         skeleton: columnSkeletons.text,

@@ -119,7 +119,13 @@ export function useCnTable({
     },
     {
       accessorKey: "doc_status",
-      header: tfl("status"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }) => {
         const status = row.original.doc_status;
         const config = CN_STATUS_CONFIG[status];

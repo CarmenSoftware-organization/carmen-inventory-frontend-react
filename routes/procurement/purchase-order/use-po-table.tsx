@@ -65,7 +65,13 @@ export function usePoTable({
     {
       id: "po_type",
       accessorFn: (row) => row.po_type,
-      header: tfl("poType"),
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("poType")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }) => {
         const type = row.original.po_type ?? PO_TYPE.MANUAL;
         const config = PO_TYPE_CONFIG[type] ?? PO_TYPE_CONFIG[PO_TYPE.MANUAL];
@@ -136,8 +142,13 @@ export function usePoTable({
     },
     {
       accessorKey: "po_status",
-      header: tfl("status"),
-      enableSorting: false,
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          column={column}
+          title={tfl("status")}
+          className="justify-center"
+        />
+      ),
       cell: ({ row }) => {
         const status = row.original.po_status;
         const config = PO_STATUS_CONFIG[status];

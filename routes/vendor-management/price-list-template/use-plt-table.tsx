@@ -66,7 +66,6 @@ export function usePriceListTemplateTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("currency")} />
       ),
-      enableSorting: false,
       meta: {
         headerTitle: tfl("currency"),
         skeleton: columnSkeletons.textShort,
@@ -81,7 +80,6 @@ export function usePriceListTemplateTable({
         const val = row.getValue<number | null>("validity_period");
         return val === null ? "—" : t("validityDays", { count: val });
       },
-      enableSorting: false,
       meta: {
         headerTitle: tfl("validityPeriod"),
         skeleton: columnSkeletons.textShort,
@@ -110,7 +108,6 @@ export function usePriceListTemplateTable({
         );
       },
       size: 100,
-      enableSorting: false,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",

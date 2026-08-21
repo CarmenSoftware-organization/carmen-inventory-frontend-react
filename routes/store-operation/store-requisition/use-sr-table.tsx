@@ -104,13 +104,13 @@ export function useStoreRequisitionTable({
       size: 120,
     },
     {
-      id: "location",
+      // id เป็นชื่อคอลัมน์จริงใน DB เพื่อให้ sort ฝั่ง server ได้ (เรียง From → To = เรียงต้นทาง)
+      id: "from_location_name",
       accessorFn: (row) =>
         `${row.from_location_name} → ${row.to_location_name}`,
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("fromTo")} />
       ),
-      enableSorting: false,
       meta: { headerTitle: tfl("fromTo"), skeleton: columnSkeletons.text },
       size: 220,
     },
