@@ -23,6 +23,8 @@ interface FilterOption {
   value: string;
   label: string;
   group?: string;
+  /** สีจุดสถานะหน้า label (ค่า CSS เช่น `var(--status-draft)`) — ไม่ใส่ = ไม่มีจุด */
+  dotColor?: string;
 }
 
 interface MultiSelectFilterProps {
@@ -35,27 +37,6 @@ interface MultiSelectFilterProps {
   readonly searchPlaceholder?: string;
 }
 
-/**
- * Multi-select filter button สำหรับ list page toolbar
- *
- * value เก็บเป็น comma-separated string เพื่อให้ sync กับ URL query
- * ได้ตรง ๆ รองรับ grouped options (ผ่าน field group ใน FilterOption),
- * search input (เมื่อ searchable=true), auto-clear เมื่อเลือกครบทุก option
- * และปุ่ม X clear ในตัว trigger แสดง Badge จำนวนที่เลือก
- *
- * @param props - value (csv), onChange, options, placeholder, searchable ฯลฯ
- * @returns JSX element ของปุ่ม filter พร้อม popover
- * @example
- * ```tsx
- * <MultiSelectFilter
- *   value={statusFilter}
- *   onChange={setStatusFilter}
- *   options={PR_STATUS_OPTIONS}
- *   placeholder="Status"
- *   searchable
- * />
- * ```
- */
 export function MultiSelectFilter({
   value,
   onChange,
@@ -155,6 +136,13 @@ export function MultiSelectFilter({
                           className="text-xs"
                         >
                           <Checkbox checked={isSelected} tabIndex={-1} />
+                          {opt.dotColor && (
+                            <span
+                              aria-hidden="true"
+                              className="size-2 shrink-0 rounded-full"
+                              style={{ backgroundColor: opt.dotColor }}
+                            />
+                          )}
                           {opt.label}
                         </CommandItem>
                       );
@@ -177,6 +165,13 @@ export function MultiSelectFilter({
                         className="text-xs"
                       >
                         <Checkbox checked={isSelected} tabIndex={-1} />
+                        {opt.dotColor && (
+                          <span
+                            aria-hidden="true"
+                            className="size-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: opt.dotColor }}
+                          />
+                        )}
                         {opt.label}
                       </CommandItem>
                     );

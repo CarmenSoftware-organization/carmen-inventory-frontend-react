@@ -155,6 +155,17 @@ export function unknownStatusEntry(status: string): StatusConfigEntry {
 export interface StatusFilterOption {
   label: string;
   value: string;
+  /** สี dot สถานะ (ค่า CSS var) — MultiSelectFilter ใช้วาดจุดหน้า label */
+  dotColor?: string;
+}
+
+/**
+ * แกะสี dot จาก className ของ status entry (`before:bg-[var(--status-x)]`)
+ * — แหล่งความจริงเดียวกับสีบน badge จึงไม่ต้องประกาศสีซ้ำที่ options
+ */
+function extractDotColor(className: string): string | undefined {
+  const match = /before:bg-\[(var\([^)]+\))\]/.exec(className);
+  return match?.[1];
 }
 
 /**
@@ -181,6 +192,7 @@ export function createStatusFilterOptions<S extends string>(
   return keys.map((status) => ({
     label: config[status].label,
     value: `${fieldName}|string:${status}`,
+    dotColor: extractDotColor(config[status].className),
   }));
 }
 
