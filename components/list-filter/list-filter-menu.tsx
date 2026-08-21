@@ -1,16 +1,33 @@
 import { Fragment, useRef, useState } from "react";
 import {
+  Activity,
   Banknote,
+  Boxes,
+  Briefcase,
   Building2,
   Calendar,
+  ChefHat,
   ChevronRight,
   CircleDashed,
+  Coins,
   Eraser,
+  FileText,
   Flag,
+  Folder,
+  FolderTree,
+  Gauge,
+  Globe,
+  LayoutTemplate,
   ListChecks,
   ListFilterPlus,
   Bookmark,
+  MapPin,
+  ReceiptText,
+  Shapes,
   SlidersHorizontal,
+  Store,
+  Tag,
+  Undo2,
   UserRound,
   Workflow,
   type LucideIcon,
@@ -43,10 +60,62 @@ const CONTROL_ICONS: Record<FilterFieldDef["control"], LucideIcon> = {
   custom: SlidersHorizontal,
 };
 
-/** สถานะเป็น custom control ในหลายหน้า (PR/SR/GRN ห่อ MultiSelectFilter เอง) —
- * เดา icon จาก labelKey ให้ได้วงกลมสถานะแทน icon generic ของ custom */
+/**
+ * icon ตามความหมายของ field ผูกกับ labelKey ตรง ๆ — field เดียวกันได้ icon
+ * เดียวกันทุกหน้า (vendor 4 หน้า, type ทุก variant ฯลฯ) โดยไม่ต้องไล่ประกาศ
+ * `icon` ราย field def ประมาณ 50 จุด — field ที่ห่อเป็น custom (เมนูมองไส้ไม่เห็น)
+ * ก็ได้ icon ที่สื่อจาก labelKey แทน SlidersHorizontal generic
+ * เพิ่ม field ใหม่ที่ labelKey ไม่อยู่ในนี้ = ตกไปใช้ default ตามชนิด control
+ */
+const FIELD_ICONS: Record<string, LucideIcon> = {
+  // คู่ค้า / เอกสารอ้างอิง
+  "field.vendor": Store,
+  "field.invoiceNo": ReceiptText,
+  "field.purchaseOrder": FileText,
+  // ประเภท / หมวดหมู่
+  "field.type": Tag,
+  "common.type": Tag,
+  "procurement.purchaseOrder.type": Tag,
+  "procurement.creditNote.type": Tag,
+  "systemAdmin.workflow.workflowType": Tag,
+  "report.allTypes": Tag,
+  "inventoryManagement.transaction.referenceType": Tag,
+  "systemAdmin.activityLog.entityType": Shapes,
+  "field.category": FolderTree,
+  "field.parent": FolderTree,
+  "field.subCategory": Folder,
+  "field.itemGroup": Boxes,
+  // สถานที่ / ขอบเขต
+  "field.location": MapPin,
+  "field.fromLocation": MapPin,
+  "field.toLocation": MapPin,
+  "field.region": Globe,
+  // คน
+  "field.receivedBy": UserRound,
+  "field.createdBy": UserRound,
+  "field.buyer": UserRound,
+  "systemAdmin.userActivity.user": UserRound,
+  "systemAdmin.activityLog.user": UserRound,
+  // เอกสาร/ระบบ
+  "common.sendBack": Undo2,
+  "field.template": LayoutTemplate,
+  "field.currency": Coins,
+  "field.businessType": Briefcase,
+  "field.cuisine": ChefHat,
+  "field.difficulty": Gauge,
+  "systemAdmin.userActivity.action": Activity,
+  "systemAdmin.activityLog.action": Activity,
+  // custom date-range ของ transaction (ห่อเองเลยไม่ได้ default Calendar ของ control)
+  "inventoryManagement.transaction.dateRange": Calendar,
+  "inventoryManagement.transaction.selectDateRange": Calendar,
+};
+
+/** ลำดับเลือก icon: field ประกาศเอง → map ตาม labelKey → labelKey ลงท้าย
+ * .status (สถานะเป็น custom ในหลายหน้า) → default ตามชนิด control */
 function fieldIcon(f: FilterFieldDef): LucideIcon {
   if (f.icon) return f.icon;
+  const byLabel = FIELD_ICONS[f.labelKey];
+  if (byLabel) return byLabel;
   if (f.labelKey.endsWith(".status")) return CircleDashed;
   return CONTROL_ICONS[f.control];
 }
