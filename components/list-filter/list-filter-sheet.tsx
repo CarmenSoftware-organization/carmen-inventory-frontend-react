@@ -23,10 +23,7 @@ interface ListFilterSheetProps {
   readonly fields: readonly FilterFieldDef[];
   readonly values: Record<string, string>;
   readonly setValue: (key: string, value: string) => void;
-  /**
-   * เลิกใช้แล้ว — Clear All ล้างใน draft และมีผลตอนกด Done เหมือนการแก้ field อื่น
-   * คง prop ไว้เพื่อไม่ต้องแก้ call site ทุกหน้า (ActiveFilterBar ยังใช้ clearAll ตรงปกติ)
-   */
+  /** ล้าง filter ทั้งชุด (จัดการ linked/hidden key ให้ครบ) — ไม่ส่ง = ไล่ล้างรายตัว */
   readonly onClearAll?: () => void;
   readonly onSaveClick: () => void;
   readonly activeCount: number;
@@ -36,15 +33,15 @@ interface ListFilterSheetProps {
  * แผ่น filter ที่ปรับตัวได้สำหรับ desktop (ขวา) และ mobile (ล่าง)
  *
  * แสดงปุ่ม Filter พร้อม badge ที่บ่งชี้จำนวน filter ที่ใช้งานอยู่
- * ค่าที่แก้ในชีทเป็น **draft** — มีผลจริงเมื่อกด Done (หรือ Save Current View)
- * ปิดชีทด้วยวิธีอื่น (คลิกนอก/Esc) = ทิ้ง draft ค่าเดิมไม่ถูกแตะ
- * ปุ่ม "Clear All" ล้างทุกค่าใน draft (disabled เมื่อไม่มีอะไรให้ล้าง)
- * ปุ่ม "Save Current View" apply draft แล้วเปิด SaveViewDialog
+ * เลือกค่าแล้ว**มีผลทันที** (ยิง query เลย ไม่ต้องกด Done) — ปุ่ม Done แค่ปิดชีท
+ * ปุ่ม "Clear All" ล้าง filter ทั้งชุดทันที (disabled เมื่อไม่มีอะไรให้ล้าง)
+ * ปุ่ม "Save Current View" ปิดชีทแล้วเปิด SaveViewDialog
  *
  * @param props - props ของ ListFilterSheet
  * @param props.fields - รายการ FilterFieldDef สำหรับ filter
- * @param props.values - object ค่า filter ที่ apply แล้ว (key => filter string)
- * @param props.setValue - callback เขียนค่า filter จริงตามกุญแจ (ใช้ตอน apply)
+ * @param props.values - object ค่า filter ปัจจุบัน (key => filter string)
+ * @param props.setValue - callback เขียนค่า filter ตามกุญแจ
+ * @param props.onClearAll - callback ล้าง filter ทั้งชุด
  * @param props.onSaveClick - callback เปิด SaveViewDialog
  * @param props.activeCount - จำนวน filter ที่ใช้งานอยู่
  * @returns JSX element ของ sheet filter
@@ -63,11 +60,11 @@ export function ListFilterSheet({
   fields,
   values,
   setValue,
+  onClearAll,
   onSaveClick,
   activeCount,
 }: ListFilterSheetProps) {
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState<Record<string, string>>({});
   const isMobile = useIsMobile();
   const t = useTranslations();
   const tc = useTranslations("common");
@@ -81,36 +78,16 @@ export function ListFilterSheet({
     return null;
   }
 
-  const handleOpenChange = (next: boolean) => {
-    // เปิดชีท = เริ่ม draft จากค่าที่ apply อยู่จริง — ปิดโดยไม่ Done คือทิ้ง draft
-    if (next) setDraft({ ...values });
-    setOpen(next);
-  };
-
-  const setDraftValue = (key: string, value: string) =>
-    setDraft((d) => ({ ...d, [key]: value }));
-
-  // ให้ custom control ที่ถือ key คู่ (เช่น created_at_to) อ่าน/เขียน draft เดียวกัน
+  // ให้ custom control ที่ถือ key คู่ (เช่น created_at_to) อ่าน/เขียนค่าจริงชุดเดียวกัน
   const peer: FilterPeerAccess = {
-    get: (key) => draft[key] ?? "",
-    set: setDraftValue,
+    get: (key) => values[key] ?? "",
+    set: setValue,
   };
 
-  /**
-   * เขียนเฉพาะ key ที่ต่างจากค่าจริงลง URL — ทุก setValue อยู่ใน handler เดียวกัน
-   * React batch ให้เป็น re-render เดียว จึง refetch รอบเดียวไม่ว่าจะแก้กี่ field
-   */
-  const apply = () => {
-    for (const f of fields) {
-      const next = draft[f.key] ?? "";
-      if (next !== (values[f.key] ?? "")) setValue(f.key, next);
-    }
-  };
-
-  const hasDraftValues = fields.some((f) => draft[f.key]);
+  const hasValues = fields.some((f) => values[f.key]);
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button size="sm" variant="outline" className="relative">
           <ListFilterPlus aria-hidden="true" />
@@ -167,16 +144,16 @@ export function ListFilterSheet({
                     <FieldLabel className="text-xs">{t(f.labelKey)}</FieldLabel>
                     <FilterFieldControl
                       field={f}
-                      value={draft[f.key] ?? ""}
-                      onChange={(v) => setDraftValue(f.key, v)}
+                      value={values[f.key] ?? ""}
+                      onChange={(v) => setValue(f.key, v)}
                       peer={peer}
                     />
                   </div>
                 ) : (
                   <FilterFieldControl
                     field={f}
-                    value={draft[f.key] ?? ""}
-                    onChange={(v) => setDraftValue(f.key, v)}
+                    value={values[f.key] ?? ""}
+                    onChange={(v) => setValue(f.key, v)}
                     peer={peer}
                   />
                 )}
@@ -188,32 +165,27 @@ export function ListFilterSheet({
         <SheetFooter className={cn("border-t", !isMobile && "flex-row")}>
           <Button
             variant="outline"
-            disabled={!hasDraftValues}
+            disabled={!hasValues}
             className={cn(!isMobile && "me-auto")}
-            onClick={() =>
-              setDraft(Object.fromEntries(fields.map((f) => [f.key, ""])))
-            }
+            onClick={() => {
+              // ล้างเป็นชุดเดียว (onClearAll จัดการ linked/hidden key ให้ครบ) —
+              // fallback ไล่ล้างรายตัวเมื่อหน้าไม่ได้ส่ง prop มา
+              if (onClearAll) onClearAll();
+              else for (const f of fields) setValue(f.key, "");
+            }}
           >
             {tc("clearAll")}
           </Button>
           <Button
             variant="outline"
             onClick={() => {
-              apply();
               setOpen(false);
               onSaveClick();
             }}
           >
             {tv("saveCurrent")}
           </Button>
-          <Button
-            onClick={() => {
-              apply();
-              setOpen(false);
-            }}
-          >
-            {tc("done")}
-          </Button>
+          <Button onClick={() => setOpen(false)}>{tc("done")}</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
