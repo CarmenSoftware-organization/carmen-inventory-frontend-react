@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Filter as FilterIcon } from "lucide-react";
+import { ListFilterPlus } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -111,7 +111,7 @@ export function ListFilterSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button size="sm" variant="outline" className="relative">
-          <FilterIcon aria-hidden="true" />
+          <ListFilterPlus aria-hidden="true" />
           {tc("filter")}
           {activeCount > 0 && (
             <Badge
