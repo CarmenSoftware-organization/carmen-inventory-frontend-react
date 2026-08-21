@@ -46,7 +46,7 @@ import { useStoreRequisitionTable } from "./use-sr-table";
 import SrCardList from "./sr-card-list";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -128,7 +128,7 @@ export default function StoreRequisitionComponent() {
   const srFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       {
-        // field แรกเป็น custom control ล้วน ๆ — ยืม slot ใน ListFilterSheet เพื่อวาง
+        // field แรกเป็น custom control ล้วน ๆ — ยืม slot ใน ListFilter เพื่อวาง
         // toggle my-pending/all-document สำหรับมือถือเท่านั้น (ของเดิมอยู่ใน sheet
         // มือถือคู่กับปุ่ม inline บน desktop) ไม่มี value จริงจึงไม่ถูกนับใน
         // filterParam/activeFilters — key ตั้งไม่ให้ชนกับ "view" ของ tab บน URL จริง
@@ -406,7 +406,7 @@ export default function StoreRequisitionComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={srFilterFields}
               values={lf.values}
               setValue={lf.setValue}

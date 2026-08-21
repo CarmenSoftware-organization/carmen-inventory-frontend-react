@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Command, CommandInput } from "@/components/ui/command";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FilterInlineContext } from "@/components/ui/filter-inline-context";
 import { useUser } from "@/hooks/use-user";
 import { cn } from "@/lib/utils";
 import type { User } from "@/types/workflows";
@@ -76,6 +77,7 @@ export function FilterRequester({
   const { data } = useUser({ perpage: -1 });
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const inline = useContext(FilterInlineContext);
 
   const users = data?.data ?? [];
 
@@ -122,6 +124,51 @@ export function FilterRequester({
         }`
       : displayLabel;
 
+  const list = (
+    <Command shouldFilter={false}>
+      <CommandInput
+        placeholder={displayLabel}
+        className="placeholder:text-xs"
+        value={search}
+        onValueChange={setSearch}
+      />
+      <div className="max-h-60 overflow-y-auto p-1">
+        <label
+          className={cn(
+            "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
+            "hover:bg-accent hover:text-accent-foreground",
+          )}
+        >
+          <Checkbox
+            checked={selectedCount === 0}
+            onCheckedChange={() => onChange("")}
+          />
+          <span className="truncate">{tc("all")}</span>
+        </label>
+        {filteredUsers.map((user) => (
+          <label
+            key={user.user_id}
+            className={cn(
+              "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
+              "hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <Checkbox
+              checked={selectedIds.has(user.user_id)}
+              onCheckedChange={() => handleToggle(user.user_id)}
+            />
+            <span className="truncate">{getUserFullName(user)}</span>
+          </label>
+        ))}
+      </div>
+    </Command>
+  );
+
+  // ใน submenu ของ ListFilterMenu — โชว์รายการตรง ๆ ไม่ต้องมีปุ่ม trigger ซ้อน
+  if (inline) {
+    return list;
+  }
+
   return (
     <Popover
       open={open}
@@ -149,43 +196,7 @@ export function FilterRequester({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder={displayLabel}
-            className="placeholder:text-xs"
-            value={search}
-            onValueChange={setSearch}
-          />
-          <div className="max-h-60 overflow-y-auto p-1">
-            <label
-              className={cn(
-                "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-                "hover:bg-accent hover:text-accent-foreground",
-              )}
-            >
-              <Checkbox
-                checked={selectedCount === 0}
-                onCheckedChange={() => onChange("")}
-              />
-              <span className="truncate">{tc("all")}</span>
-            </label>
-            {filteredUsers.map((user) => (
-              <label
-                key={user.user_id}
-                className={cn(
-                  "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-                  "hover:bg-accent hover:text-accent-foreground",
-                )}
-              >
-                <Checkbox
-                  checked={selectedIds.has(user.user_id)}
-                  onCheckedChange={() => handleToggle(user.user_id)}
-                />
-                <span className="truncate">{getUserFullName(user)}</span>
-              </label>
-            ))}
-          </div>
-        </Command>
+        {list}
       </PopoverContent>
     </Popover>
   );

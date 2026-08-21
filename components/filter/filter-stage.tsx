@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Command, CommandInput } from "@/components/ui/command";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FilterInlineContext } from "@/components/ui/filter-inline-context";
 import { cn } from "@/lib/utils";
 
 interface FilterStageProps {
@@ -46,6 +47,7 @@ export function FilterStage({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const t = useTranslations("procurement.purchaseRequest");
+  const inline = useContext(FilterInlineContext);
 
   const filteredStages = (() => {
     if (!search) return stages;
@@ -78,6 +80,51 @@ export function FilterStage({
 
   const selectedCount = selectedStages.size;
 
+  const list = (
+    <Command shouldFilter={false}>
+      <CommandInput
+        placeholder={t("stage")}
+        className="placeholder:text-xs"
+        value={search}
+        onValueChange={setSearch}
+      />
+      <div className="max-h-60 overflow-y-auto p-1">
+        <label
+          className={cn(
+            "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
+            "hover:bg-accent hover:text-accent-foreground",
+          )}
+        >
+          <Checkbox
+            checked={selectedCount === 0}
+            onCheckedChange={() => onChange("")}
+          />
+          <span className="truncate">{t("allStage")}</span>
+        </label>
+        {filteredStages.map((s) => (
+          <label
+            key={s}
+            className={cn(
+              "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
+              "hover:bg-accent hover:text-accent-foreground",
+            )}
+          >
+            <Checkbox
+              checked={selectedStages.has(s)}
+              onCheckedChange={() => handleToggle(s)}
+            />
+            <span className="truncate">{s}</span>
+          </label>
+        ))}
+      </div>
+    </Command>
+  );
+
+  // ใน submenu ของ ListFilterMenu — โชว์รายการตรง ๆ ไม่ต้องมีปุ่ม trigger ซ้อน
+  if (inline) {
+    return list;
+  }
+
   return (
     <Popover
       open={open}
@@ -108,43 +155,7 @@ export function FilterStage({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder={t("stage")}
-            className="placeholder:text-xs"
-            value={search}
-            onValueChange={setSearch}
-          />
-          <div className="max-h-60 overflow-y-auto p-1">
-            <label
-              className={cn(
-                "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-                "hover:bg-accent hover:text-accent-foreground",
-              )}
-            >
-              <Checkbox
-                checked={selectedCount === 0}
-                onCheckedChange={() => onChange("")}
-              />
-              <span className="truncate">{t("allStage")}</span>
-            </label>
-            {filteredStages.map((s) => (
-              <label
-                key={s}
-                className={cn(
-                  "relative flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs select-none",
-                  "hover:bg-accent hover:text-accent-foreground",
-                )}
-              >
-                <Checkbox
-                  checked={selectedStages.has(s)}
-                  onCheckedChange={() => handleToggle(s)}
-                />
-                <span className="truncate">{s}</span>
-              </label>
-            ))}
-          </div>
-        </Command>
+        {list}
       </PopoverContent>
     </Popover>
   );

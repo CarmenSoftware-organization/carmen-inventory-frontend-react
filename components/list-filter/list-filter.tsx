@@ -17,9 +17,10 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FilterFieldControl } from "./filter-field-control";
+import { ListFilterMenu } from "./list-filter-menu";
 import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
 
-interface ListFilterSheetProps {
+interface ListFilterProps {
   readonly fields: readonly FilterFieldDef[];
   readonly values: Record<string, string>;
   readonly setValue: (key: string, value: string) => void;
@@ -30,14 +31,15 @@ interface ListFilterSheetProps {
 }
 
 /**
- * แผ่น filter ที่ปรับตัวได้สำหรับ desktop (ขวา) และ mobile (ล่าง)
+ * จุดเข้า filter ของหน้า list — desktop มอบต่อให้ ListFilterMenu (popover สองชั้น
+ * แบบ Linear) ส่วนมือถือ render bottom sheet ในไฟล์นี้
  *
  * แสดงปุ่ม Filter พร้อม badge ที่บ่งชี้จำนวน filter ที่ใช้งานอยู่
  * เลือกค่าแล้ว**มีผลทันที** (ยิง query เลย ไม่ต้องกด Done) — ปุ่ม Done แค่ปิดชีท
  * ปุ่ม "Clear All" ล้าง filter ทั้งชุดทันที (disabled เมื่อไม่มีอะไรให้ล้าง)
  * ปุ่ม "Save Current View" ปิดชีทแล้วเปิด SaveViewDialog
  *
- * @param props - props ของ ListFilterSheet
+ * @param props - props ของ ListFilter
  * @param props.fields - รายการ FilterFieldDef สำหรับ filter
  * @param props.values - object ค่า filter ปัจจุบัน (key => filter string)
  * @param props.setValue - callback เขียนค่า filter ตามกุญแจ
@@ -47,7 +49,7 @@ interface ListFilterSheetProps {
  * @returns JSX element ของ sheet filter
  * @example
  * ```tsx
- * <ListFilterSheet
+ * <ListFilter
  *   fields={filterFields}
  *   values={filterValues}
  *   setValue={handleSetFilterValue}
@@ -56,14 +58,14 @@ interface ListFilterSheetProps {
  * />
  * ```
  */
-export function ListFilterSheet({
+export function ListFilter({
   fields,
   values,
   setValue,
   onClearAll,
   onSaveClick,
   activeCount,
-}: ListFilterSheetProps) {
+}: ListFilterProps) {
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobile();
   const t = useTranslations();
@@ -76,6 +78,22 @@ export function ListFilterSheet({
   // ไม่มีประโยชน์ ซ่อนทั้งปุ่มไป ViewSelector ยังคง sort ได้ตามปกติ
   if (visibleFields.length === 0) {
     return null;
+  }
+
+  // desktop ใช้เมนู popover สองชั้นแบบ Linear แทน sheet — มือถือคง bottom sheet
+  // เดิมข้างล่างนี้ (submenu แบบเมนูไม่มีที่เด้งบนจอแคบ และ sheet เดิมเหมาะกับนิ้ว
+  // อยู่แล้ว) props ส่งต่อทั้งชุดตรง ๆ logic filter อยู่ที่ useListFilters เหมือนเดิม
+  if (!isMobile) {
+    return (
+      <ListFilterMenu
+        fields={fields}
+        values={values}
+        setValue={setValue}
+        onClearAll={onClearAll}
+        onSaveClick={onSaveClick}
+        activeCount={activeCount}
+      />
+    );
   }
 
   // ให้ custom control ที่ถือ key คู่ (เช่น created_at_to) อ่าน/เขียนค่าจริงชุดเดียวกัน
@@ -103,10 +121,7 @@ export function ListFilterSheet({
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent
-        side={isMobile ? "bottom" : "right"}
-        className={isMobile ? "max-h-[80vh]" : "w-[34rem] sm:max-w-[34rem]"}
-      >
+      <SheetContent side="bottom" className="max-h-[80vh]">
         <SheetHeader>
           <SheetTitle>{tc("filter")}</SheetTitle>
         </SheetHeader>
@@ -161,8 +176,7 @@ export function ListFilterSheet({
             );
           })}
         </div>
-        {/* desktop เรียงแถวนอน (Clear All ชิดซ้าย) — มือถือซ้อนแนวตั้งเต็มกว้างตามเดิม */}
-        <SheetFooter className={cn("border-t", !isMobile && "flex-row")}>
+        <SheetFooter className="border-t">
           <Button
             variant="outline"
             disabled={!hasValues}

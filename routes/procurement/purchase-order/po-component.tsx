@@ -47,7 +47,7 @@ import { dispatchPermissionDenied } from "@/components/permission-denied-dialog"
 import { FieldLabel } from "@/components/ui/field";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -130,7 +130,7 @@ export default function PoComponent() {
   );
 
   // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
-  // ListFilterSheet เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
+  // ListFilter เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
   // เหมือน PR pilot) ไม่มี value จริงจึงไม่ถูกนับใน filterParam/activeFilters
   const poFilterFields = useMemo<FilterFieldDef[]>(
     () => [
@@ -391,7 +391,7 @@ export default function PoComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={poFilterFields}
               values={lf.values}
               setValue={lf.setValue}

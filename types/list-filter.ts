@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import type { WORKFLOW_TYPE } from "@/types/workflows";
 
 /**
  * ช่องทางอ่าน/เขียนค่า field อื่นจากใน custom control — ชี้ไปที่ draft ของ
- * ListFilterSheet (ไม่ใช่ URL ตรง) เพื่อให้ field คู่ เช่น `created_at_to` ของ
+ * ListFilter (ไม่ใช่ URL ตรง) เพื่อให้ field คู่ เช่น `created_at_to` ของ
  * `created_at_from` เดินตาม apply-on-Done เดียวกันกับ onChange ปกติ
  */
 export interface FilterPeerAccess {
@@ -24,7 +25,7 @@ interface FilterFieldBase {
   readonly toClause?: (value: string) => string;
   /**
    * field นี้ยังคง "จริง" ในแง่ values/encode(toClause)/saved-views/dirty ตามปกติ
-   * แต่**ไม่ render อะไรเลย**ใน ListFilterSheet และ**ไม่ผลิต chip**ใน ActiveFilterBar
+   * แต่**ไม่ render อะไรเลย**ใน ListFilter และ**ไม่ผลิต chip**ใน ActiveFilterBar
    * ใช้กับ field คู่ที่เป็น "hidden holder" ของอีก field หนึ่ง เช่น date-range สอง
    * key (`created_at_from`/`created_at_to`) ที่มี UI ควบคุมร่วมกันจุดเดียว
    */
@@ -36,11 +37,16 @@ interface FilterFieldBase {
    */
   readonly linkedKeys?: readonly string[];
   /**
-   * i18n key ของหัวข้อ section ใน ListFilterSheet — field ติดกันที่ section
+   * i18n key ของหัวข้อ section ใน ListFilter — field ติดกันที่ section
    * เดียวกันถูกจัดกลุ่มใต้หัวข้อเดียว (เรียง field ให้กลุ่มเดียวกันอยู่ติดกันเอง)
    * ไม่ระบุ = ไม่มีหัวข้อ render แบนเหมือนเดิม
    */
   readonly section?: string;
+  /**
+   * icon หน้าแถวใน ListFilterMenu (desktop) — ไม่ระบุ = default ตามชนิด control
+   * (ดู CONTROL_ICONS ใน list-filter-menu.tsx) มือถือไม่ใช้
+   */
+  readonly icon?: LucideIcon;
   /**
    * แปลงค่า URL → ข้อความค่าบน chip ของ ActiveFilterBar (เช่น "Draft +2")
    * ไม่ระบุ = derive อัตโนมัติ: options ที่ประกาศใน field → label, date_range →

@@ -31,7 +31,7 @@ import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { cn } from "@/lib/utils";
@@ -376,12 +376,12 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
             </div>
             <span className="bg-border hidden h-4 w-px sm:block" />
             {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
-                (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
+                (ListFilter ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
             <ViewSelector
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={filterFields}
               values={lf.values}
               setValue={lf.setValue}

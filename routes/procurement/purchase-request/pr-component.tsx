@@ -61,7 +61,7 @@ import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -149,7 +149,7 @@ export default function PurchaseRequestComponent() {
   const { data: stages } = usePurchaseRequestWorkflowStages();
 
   // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
-  // ListFilterSheet เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
+  // ListFilter เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
   // เหมือนที่เคยอยู่ใน PrFilterSheet เดิม) ไม่มี value จริงจึงไม่ถูกนับใน
   // filterParam/activeFilters — key ตั้งไม่ให้ชนกับ "view" (ของ tab บน URL จริง)
   const prFilterFields = useMemo<FilterFieldDef[]>(
@@ -157,7 +157,7 @@ export default function PurchaseRequestComponent() {
       {
         key: "view_mode_toggle",
         control: "custom",
-        // labelKey ว่างเจตนา — ListFilterSheet จะไม่ render <FieldLabel> ลอย ๆ ให้
+        // labelKey ว่างเจตนา — ListFilter จะไม่ render <FieldLabel> ลอย ๆ ให้
         // (control นี้ sm:hidden อยู่แล้ว มี label "View" ของตัวเองอยู่ข้างในสำหรับ
         // มือถือเท่านั้น ไม่งั้น desktop จะเห็น label ค้างแต่ไม่มี control ข้างใต้)
         labelKey: "",
@@ -463,12 +463,12 @@ export default function PurchaseRequestComponent() {
               className="hidden items-center gap-2 sm:flex"
             />
             {/* Saved views + registry filter sheet — ทำงานทั้ง desktop และ mobile
-                (ListFilterSheet ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
+                (ListFilter ปรับ side เอง ผ่าน useIsMobile ภายในตัวมัน) */}
             <ViewSelector
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={prFilterFields}
               values={lf.values}
               setValue={lf.setValue}

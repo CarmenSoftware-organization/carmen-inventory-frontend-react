@@ -76,8 +76,8 @@ vi.mock("@/components/search-input", () => ({ default: () => null }));
 vi.mock("@/components/list-filter/view-selector", () => ({
   ViewSelector: () => null,
 }));
-vi.mock("@/components/list-filter/list-filter-sheet", () => ({
-  ListFilterSheet: () => null,
+vi.mock("@/components/list-filter/list-filter", () => ({
+  ListFilter: () => null,
 }));
 vi.mock("@/components/list-filter/save-view-dialog", () => ({
   SaveViewDialog: () => null,

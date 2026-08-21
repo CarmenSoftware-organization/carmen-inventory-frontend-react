@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { CalendarIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { FilterInlineContext } from "@/components/ui/filter-inline-context";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,7 @@ export function DateRangePicker({
 }: DateRangePickerProps) {
   const { dateFormat } = useProfile();
   const [open, setOpen] = useState(false);
+  const inline = useContext(FilterInlineContext);
 
   const selected =
     value?.from || value?.to
@@ -70,6 +72,32 @@ export function DateRangePicker({
     displayValue = `${formatDate(value.from, dateFormat)} - ${formatDate(value.to, dateFormat)}`;
   } else if (value?.from) {
     displayValue = formatDate(value.from, dateFormat);
+  }
+
+  const calendar = (
+    <Calendar
+      mode="range"
+      selected={selected}
+      onSelect={(range) => {
+        if (!range) return;
+        const next: DateRange = {
+          from: range.from?.toISOString() ?? "",
+          to: range.to?.toISOString() ?? "",
+        };
+        onValueChange?.(next);
+        if (range.from && range.to) {
+          setOpen(false);
+        }
+      }}
+      defaultMonth={selected?.from}
+      numberOfMonths={numberOfMonths}
+    />
+  );
+
+  // ใน submenu ของ ListFilterMenu — โชว์ปฏิทินตรง ๆ ไม่ต้องมีปุ่ม trigger ซ้อน
+  // (ล้างค่าใช้ chip X / Clear ของเมนูแทนปุ่ม X บน trigger)
+  if (inline) {
+    return calendar;
   }
 
   return (
@@ -109,23 +137,7 @@ export function DateRangePicker({
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
-        <Calendar
-          mode="range"
-          selected={selected}
-          onSelect={(range) => {
-            if (!range) return;
-            const next: DateRange = {
-              from: range.from?.toISOString() ?? "",
-              to: range.to?.toISOString() ?? "",
-            };
-            onValueChange?.(next);
-            if (range.from && range.to) {
-              setOpen(false);
-            }
-          }}
-          defaultMonth={selected?.from}
-          numberOfMonths={numberOfMonths}
-        />
+        {calendar}
       </PopoverContent>
     </Popover>
   );

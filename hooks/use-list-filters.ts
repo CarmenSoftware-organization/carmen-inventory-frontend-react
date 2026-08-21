@@ -44,8 +44,11 @@ function firstPlusRest(names: readonly string[]): string | undefined {
  * `valueText` ของ field ชนะเสมอ → options ที่ประกาศไว้ map เป็น label →
  * date_range เป็น "จาก – ถึง" → slug อ่านออกโชว์ตรง (ตัวแรก +N) →
  * id (uuid) โชว์จำนวนรายการแทน (ไม่มีชื่อให้โชว์ในชั้นนี้)
+ *
+ * export ให้ ListFilterMenu (desktop) ใช้โชว์ค่าย่อท้ายแถว field ด้วย —
+ * ข้อความชุดเดียวกับ chip เสมอ จะได้ไม่ต้อง derive สองสูตร
  */
-function chipValueText(
+export function chipValueText(
   f: FilterFieldDef,
   value: string,
   t: (key: string) => string,

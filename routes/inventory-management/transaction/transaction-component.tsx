@@ -28,7 +28,7 @@ import type { TransactionSummary as TransactionSummaryType } from "@/types/trans
 import { DateRangeFilter, type DateRangeValue } from "./date-range-filter";
 import { useListFilters } from "@/hooks/use-list-filters";
 import { ViewSelector } from "@/components/list-filter/view-selector";
-import { ListFilterSheet } from "@/components/list-filter/list-filter-sheet";
+import { ListFilter } from "@/components/list-filter/list-filter";
 import { SaveViewDialog } from "@/components/list-filter/save-view-dialog";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import type { FilterFieldDef } from "@/types/list-filter";
@@ -135,10 +135,10 @@ export default function TransactionComponent() {
   //
   // two-key hidden holder (แก้จาก Task 20 review finding): created_at_to ใช้
   // `hidden: true` + `labelKey: ""` จริง ๆ ตอนนี้แล้ว — ก่อนหน้านี้เคยให้ labelKey
-  // เดียวกับ created_at_from เป็นทางเลี่ยง เพราะ ListFilterSheet/activeFilters เดิม
+  // เดียวกับ created_at_from เป็นทางเลี่ยง เพราะ ListFilter/activeFilters เดิม
   // ไม่รู้จัก "field ที่ไม่ต้อง render/ไม่ต้องมี chip" มาก่อน ทำให้ label ซ้ำโผล่ในชีท
   // (2 แถว "Select date range") และ chip ซ้ำใน ActiveFilterBar หลังเลือกช่วงวันที่
-  // ตอนนี้ framework รองรับ `hidden` แล้ว (ListFilterSheet ข้าม field นี้ทั้งหมด,
+  // ตอนนี้ framework รองรับ `hidden` แล้ว (ListFilter ข้าม field นี้ทั้งหมด,
   // useListFilters.activeFilters ก็กรองออกด้วย) จึง labelKey ว่างได้จริงโดยไม่มี
   // ผลข้างเคียง (t("") ไม่ถูกเรียกเพราะ hidden field ไม่เข้าทั้งสองที่นั้นเลย) —
   // created_at_from ยังประกาศ `linkedKeys: ["created_at_to"]` เพิ่ม เพื่อให้ปุ่ม X
@@ -166,7 +166,7 @@ export default function TransactionComponent() {
         section: "listView.sectionDate",
         toClause: () => "",
         linkedKeys: ["created_at_to"],
-        // peer มาจาก draft ของ ListFilterSheet — อ่าน/เขียน created_at_to ผ่านมัน
+        // peer มาจาก draft ของ ListFilter — อ่าน/เขียน created_at_to ผ่านมัน
         // เพื่อให้ทั้งคู่ apply พร้อมกันตอน Done (fallback URL ตรงเมื่อไม่มี peer)
         render: (value, onChange, peer) => (
           <DateRangePicker
@@ -346,7 +346,7 @@ export default function TransactionComponent() {
               view={lf.view}
               snapshot={{ filters: lf.values, sort: lf.sortParam || undefined }}
             />
-            <ListFilterSheet
+            <ListFilter
               fields={transactionFilterFields}
               values={lf.values}
               setValue={lf.setValue}
