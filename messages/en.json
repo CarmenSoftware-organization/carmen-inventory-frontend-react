@@ -511,7 +511,9 @@
       "dragToReorder": "Drag to reorder",
       "expandRow": "Expand row",
       "collapseRow": "Collapse row"
-    }
+    },
+    "min": "Min",
+    "max": "Max"
   },
   "pagination": {
     "label": "Pagination",

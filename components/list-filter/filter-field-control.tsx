@@ -1,6 +1,7 @@
 import { useTranslations } from "use-intl";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { FilterAmountRange } from "@/components/filter/filter-amount-range";
 import { FilterDate } from "@/components/filter/filter-date";
 import { FilterDepartment } from "@/components/filter/filter-department";
 import { FilterRequester } from "@/components/filter/filter-requester";
@@ -72,6 +73,15 @@ export function FilterFieldControl({ field, value, onChange, peer }: Props) {
           value={value}
           onChange={onChange}
           fieldKey={field.fieldKey}
+        />
+      );
+    case "amount-range":
+      return (
+        <FilterAmountRange
+          value={value}
+          onChange={onChange}
+          fieldKey={field.fieldKey}
+          className="w-full"
         />
       );
     case "department":

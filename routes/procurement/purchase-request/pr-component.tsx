@@ -222,6 +222,17 @@ export default function PurchaseRequestComponent() {
         ],
       },
       {
+        // ช่วงจำนวนเงินรวม — UI ฝั่ง frontend ก่อน: toClause คืนค่าว่างไว้ไม่ให้
+        // clause หลุดไป backend (QueryParams ยังไม่รู้จัก num_range เดี๋ยว 500)
+        // ค่า "จริง" ใน URL/saved views ปกติ — backend รองรับเมื่อไรค่อยถอด toClause
+        key: "amount",
+        control: "amount-range",
+        labelKey: "field.totalAmount",
+        fieldKey: "base_total_amount",
+        section: "listView.sectionDocument",
+        toClause: () => "",
+      },
+      {
         key: "department",
         control: "department",
         labelKey: "field.department",

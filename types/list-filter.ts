@@ -64,6 +64,11 @@ export type FilterFieldDef =
       readonly control: "date-range";
       readonly fieldKey: string;
     })
+  | (FilterFieldBase & {
+      readonly control: "amount-range";
+      /** ชื่อคอลัมน์ใน clause เช่น `base_total_amount` */
+      readonly fieldKey: string;
+    })
   | (FilterFieldBase & { readonly control: "department" })
   | (FilterFieldBase & {
       readonly control: "requester";

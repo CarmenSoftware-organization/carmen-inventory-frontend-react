@@ -8,6 +8,8 @@ import {
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { setURLParams, useURL, URL_CHANGE_EVENT } from "@/hooks/use-url";
+import { useDepartment } from "@/hooks/use-department";
+import { useUser } from "@/hooks/use-user";
 import { useListViews, type UseListViewsResult } from "@/hooks/use-list-views";
 import {
   encodeFilterParam,
@@ -19,6 +21,23 @@ import type { SavedView, ViewScope } from "@/types/list-view";
 import type { ListPageKey } from "@/constant/list-page-keys";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-/i;
+
+/** ค่าดิบราย id จาก clause — ตัด "col|type:" ทิ้ง (รองรับทั้ง merge และ clause ซ้ำ prefix) */
+function clauseTokens(value: string): string[] {
+  return value
+    .split(",")
+    .map((part) =>
+      part.includes(":") ? part.slice(part.lastIndexOf(":") + 1) : part,
+    )
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+/** ชื่อตัวแรก +N — คืน undefined เมื่อไม่มีชื่อให้โชว์ (ให้ fallback ทำงานต่อ) */
+function firstPlusRest(names: readonly string[]): string | undefined {
+  if (names.length === 0) return undefined;
+  return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
+}
 
 /**
  * ข้อความค่าบน chip ของ ActiveFilterBar — derive จาก field def + ค่า URL:
@@ -47,18 +66,18 @@ function chipValueText(
   const dateRange = /\|date_?range:([^,]+),(.+)$/.exec(value);
   if (dateRange) return `${dateRange[1]} – ${dateRange[2]}`;
 
-  // clause ทั่วไป: ตัด "col|type:" ทิ้งรายท่อน (รองรับทั้ง merge และ clause ซ้ำ prefix)
-  const tokens = value
-    .split(",")
-    .map((part) =>
-      part.includes(":") ? part.slice(part.lastIndexOf(":") + 1) : part,
-    )
-    .map((v) => v.trim())
-    .filter(Boolean);
+  // ช่วงตัวเลข — ฝั่งเดียวโชว์เป็น ≥/≤ ให้อ่านออกว่าเปิดปลาย
+  const numRange = /\|num_range:([^,]*),(.*)$/.exec(value);
+  if (numRange) {
+    const [, min, max] = numRange;
+    if (min && max) return `${min} – ${max}`;
+    return min ? `≥ ${min}` : `≤ ${max}`;
+  }
+
+  const tokens = clauseTokens(value);
   if (tokens.length === 0) return undefined;
   if (tokens.some((v) => UUID_RE.test(v))) return `${tokens.length}`;
-  const first = tokens[0].replace(/_/g, " ");
-  return first + (tokens.length > 1 ? ` +${tokens.length - 1}` : "");
+  return firstPlusRest(tokens.map((v) => v.replace(/_/g, " ")));
 }
 
 export interface UseListFiltersOptions {
@@ -205,6 +224,19 @@ export function useListFilters(
 
   const filterParam = encodeFilterParam(fields, values);
 
+  // ชื่อจริงบน chip ของ field แผนก/ผู้ขอ — fetch เฉพาะเมื่อหน้ามี field ชนิดนั้น
+  // (ค่าใน clause เป็น id ล้วน ชื่ออยู่ในทะเบียนกลาง ไม่ใช่ในตัว control)
+  const hasDepartmentField = fields.some((f) => f.control === "department");
+  const hasRequesterField = fields.some((f) => f.control === "requester");
+  const { data: departmentData } = useDepartment(
+    { perpage: -1 },
+    { enabled: hasDepartmentField },
+  );
+  const { data: userData } = useUser(
+    { perpage: -1 },
+    { enabled: hasRequesterField },
+  );
+
   const activeFilters: ActiveFilter[] = useMemo(
     () =>
       fields
@@ -216,7 +248,32 @@ export function useListFilters(
           label: t(f.labelKey),
           // ค่าซ้ำกับชื่อ field (เช่น sendback ตัวเลือกเดียว) ไม่ต้องพูดสองรอบ
           value: (() => {
-            const text = chipValueText(f, values[f.key], t);
+            const raw = values[f.key];
+            // แผนก/ผู้ขอ: id → ชื่อจริงจากทะเบียน (ระหว่างโหลดตก fallback เป็นจำนวน)
+            let named: string | undefined;
+            if (f.control === "department") {
+              const list = departmentData?.data ?? [];
+              named = firstPlusRest(
+                clauseTokens(raw)
+                  .map((id) => list.find((d) => d.id === id)?.name)
+                  .filter((n): n is string => !!n),
+              );
+            } else if (f.control === "requester") {
+              const list = userData?.data ?? [];
+              named = firstPlusRest(
+                clauseTokens(raw)
+                  .map((id) => {
+                    const u = list.find((usr) => usr.user_id === id);
+                    return u
+                      ? [u.firstname, u.middlename, u.lastname]
+                          .filter(Boolean)
+                          .join(" ")
+                      : undefined;
+                  })
+                  .filter((n): n is string => !!n),
+              );
+            }
+            const text = named ?? chipValueText(f, raw, t);
             return text === t(f.labelKey) ? undefined : text;
           })(),
           onRemove: () => {
@@ -234,7 +291,7 @@ export function useListFilters(
             }
           },
         })),
-    [fields, values, t, setValue],
+    [fields, values, t, setValue, departmentData, userData],
   );
 
   const current: SavedView | null = sv

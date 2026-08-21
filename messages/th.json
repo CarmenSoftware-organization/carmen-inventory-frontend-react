@@ -511,7 +511,9 @@
       "dragToReorder": "ลากเพื่อจัดเรียง",
       "expandRow": "ขยายแถว",
       "collapseRow": "ย่อแถว"
-    }
+    },
+    "min": "ต่ำสุด",
+    "max": "สูงสุด"
   },
   "pagination": {
     "label": "การแบ่งหน้า",
