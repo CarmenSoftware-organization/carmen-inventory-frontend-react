@@ -19,18 +19,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           to="/"
           className="flex cursor-pointer items-center gap-2 group-data-[collapsible=icon]:justify-center"
         >
-          <>
+          {/* ซ่อนตอนหุบที่ span แม่ตัวเดียว — ถ้าซ่อนที่ img เอง dark:block จะแพ้/ชนะ
+              กับ group-data-[collapsible=icon]:hidden ตามลำดับ CSS ที่คุมไม่ได้
+              (บั๊กเดิม: dark mode หุบแล้วโลโก้ตัวเต็มยังค้าง) */}
+          <span className="group-data-[collapsible=icon]:hidden">
             <img
               src={brandingLightUrl}
               alt="Carmen"
-              className="h-11 w-auto group-data-[collapsible=icon]:hidden dark:hidden"
+              className="h-11 w-auto dark:hidden"
             />
             <img
               src={brandingDarkUrl}
               alt="Carmen"
-              className="hidden h-11 w-auto group-data-[collapsible=icon]:hidden dark:block"
+              className="hidden h-11 w-auto dark:block"
             />
-          </>
+          </span>
           <span className="hidden group-data-[collapsible=icon]:block">
             <CarmenLogo size={32} />
           </span>
