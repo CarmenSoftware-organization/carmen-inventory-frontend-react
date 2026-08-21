@@ -95,6 +95,14 @@ export default function RequestPriceListComponent() {
           />
         ),
       },
+      {
+        // กรองที่วันเริ่มเปิดรับราคา (start_date) — คอลัมน์เดียวกับที่ list เรียง
+        key: "start_from",
+        control: "date-range",
+        labelKey: "field.effectivePeriod",
+        fieldKey: "start_date",
+        section: "listView.sectionDate",
+      },
     ],
     [templateOptions],
   );
