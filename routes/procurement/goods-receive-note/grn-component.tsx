@@ -20,7 +20,7 @@ import {
 } from "@/hooks/use-goods-receive-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { GRN_STATUS_CONFIG } from "@/constant/goods-receive-note";
+import { GRN_STATUS_OPTIONS } from "@/constant/goods-receive-note";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -71,17 +71,6 @@ export default function GrnComponent() {
 
   // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
   // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
-  const grnStatusOptions = useMemo(
-    () =>
-      // คอลัมน์จริงใน DB ชื่อ doc_status — prefix เดิม grn_status เป็น field
-      // คำนวณของ PO ไม่มีในตาราง GRN กรองเมื่อไร backend 500 ตลอด
-      Object.entries(GRN_STATUS_CONFIG).map(([key, cfg]) => ({
-        label: cfg.label,
-        value: `doc_status|string:${key}`,
-      })),
-    [],
-  );
-
   const grnFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       { key: "filter", control: "status", labelKey: "common.status" },
@@ -93,7 +82,7 @@ export default function GrnComponent() {
           <MultiSelectFilter
             value={value}
             onChange={onChange}
-            options={grnStatusOptions}
+            options={GRN_STATUS_OPTIONS}
             className="w-full"
           />
         ),
@@ -124,7 +113,7 @@ export default function GrnComponent() {
         fieldKey: "grn_date",
       },
     ],
-    [grnStatusOptions],
+    [],
   );
 
   const lf = useListFilters({

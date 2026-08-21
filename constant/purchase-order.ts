@@ -1,4 +1,7 @@
-import { createStatusConfig } from "./status-config";
+import {
+  createStatusConfig,
+  createStatusFilterOptions,
+} from "./status-config";
 
 /** Badge variant + label for PO document-level status */
 export const PO_STATUS_CONFIG = createStatusConfig([
@@ -18,6 +21,12 @@ export const PO_TYPE_CONFIG = createStatusConfig(
     manual: { label: "Manual" },
     pricelist: { label: "Price List" },
   },
+);
+
+/** ตัวเลือก filter ประเภท PO ใน list sheet (ค่าเป็น clause เต็มต่อตัว) */
+export const PURCHASE_ORDER_TYPE_OPTIONS = createStatusFilterOptions(
+  "po_type",
+  PO_TYPE_CONFIG,
 );
 
 /** Badge className + label for PO item-level status */

@@ -23,7 +23,7 @@ import {
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { PO_TYPE_CONFIG } from "@/constant/purchase-order";
+import { PURCHASE_ORDER_TYPE_OPTIONS } from "@/constant/purchase-order";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -111,17 +111,6 @@ export default function PoComponent() {
 
   const { data: stages } = usePurchaseOrderWorkflowStages();
 
-  // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
-  // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
-  const poTypeOptions = useMemo(
-    () =>
-      Object.entries(PO_TYPE_CONFIG).map(([key, cfg]) => ({
-        label: cfg.label,
-        value: `po_type|string:${key}`,
-      })),
-    [],
-  );
-
   // field แรกเป็น custom control ล้วน ๆ — ไม่ใช่ filter จริง แค่ยืม slot ใน
   // ListFilterSheet เพื่อวาง toggle my-pending/all-document (มือถือเท่านั้น
   // เหมือน PR pilot) ไม่มี value จริงจึงไม่ถูกนับใน filterParam/activeFilters
@@ -156,7 +145,7 @@ export default function PoComponent() {
           <MultiSelectFilter
             value={value}
             onChange={onChange}
-            options={poTypeOptions}
+            options={PURCHASE_ORDER_TYPE_OPTIONS}
             className="w-full"
           />
         ),
@@ -197,7 +186,7 @@ export default function PoComponent() {
         ],
       },
     ],
-    [viewMode, poTypeOptions, stages, t, tc],
+    [viewMode, stages, t, tc],
   );
 
   const lf = useListFilters({

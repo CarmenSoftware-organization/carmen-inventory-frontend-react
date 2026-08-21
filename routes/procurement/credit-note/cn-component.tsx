@@ -20,7 +20,7 @@ import {
 } from "@/hooks/use-credit-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { CN_STATUS_CONFIG, CN_TYPE_CONFIG } from "@/constant/credit-note";
+import { CN_STATUS_OPTIONS, CN_TYPE_OPTIONS } from "@/constant/credit-note";
 import type { CreditNote } from "@/types/credit-note";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -60,28 +60,6 @@ export default function CnComponent() {
     defaultSort: "cn_date:desc",
   });
 
-  // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
-  // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
-  const cnTypeOptions = useMemo(
-    () =>
-      Object.entries(CN_TYPE_CONFIG).map(([key, cfg]) => ({
-        label: cfg.label,
-        value: `credit_note_type|string:${key}`,
-      })),
-    [],
-  );
-
-  const cnStatusOptions = useMemo(
-    () =>
-      // คอลัมน์จริงใน DB ชื่อ doc_status — prefix เดิม cn_status ไม่มีในตาราง CN
-      // กรองเมื่อไร backend 500 ตลอด (แบบเดียวกับ grn_status ของ GRN)
-      Object.entries(CN_STATUS_CONFIG).map(([key, cfg]) => ({
-        label: cfg.label,
-        value: `doc_status|string:${key}`,
-      })),
-    [],
-  );
-
   const cnFilterFields = useMemo<FilterFieldDef[]>(
     () => [
       { key: "filter", control: "status", labelKey: "common.status" },
@@ -93,7 +71,7 @@ export default function CnComponent() {
           <MultiSelectFilter
             value={value}
             onChange={onChange}
-            options={cnTypeOptions}
+            options={CN_TYPE_OPTIONS}
             className="w-full"
           />
         ),
@@ -106,7 +84,7 @@ export default function CnComponent() {
           <MultiSelectFilter
             value={value}
             onChange={onChange}
-            options={cnStatusOptions}
+            options={CN_STATUS_OPTIONS}
             className="w-full"
           />
         ),
@@ -125,7 +103,7 @@ export default function CnComponent() {
         fieldKey: "cn_date",
       },
     ],
-    [cnTypeOptions, cnStatusOptions],
+    [],
   );
 
   const lf = useListFilters({

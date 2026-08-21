@@ -55,7 +55,8 @@ import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { PrFilterStatus } from "./pr-filter-status";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { PURCHASE_REQUEST_STATUS_OPTIONS } from "@/constant/purchase-request";
 import { DocumentListActions } from "@/components/share/document-list-actions";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -179,13 +180,17 @@ export default function PurchaseRequestComponent() {
         ),
       },
       {
+        // ค่า option เป็น clause เต็มต่อตัว (pr_status|string:draft) — เลือกหลายตัว
+        // MultiSelectFilter join เป็น clause ซ้ำ prefix ซึ่ง gateway parse รวมเป็น
+        // IN query ให้เอง (parseFilterString รองรับทั้งสอง format โดยตั้งใจ)
         key: "filter",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
-          <PrFilterStatus
+          <MultiSelectFilter
             value={value}
             onChange={onChange}
+            options={PURCHASE_REQUEST_STATUS_OPTIONS}
             className="w-full"
           />
         ),

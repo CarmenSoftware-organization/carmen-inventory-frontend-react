@@ -37,10 +37,11 @@ import { dispatchPermissionDenied } from "@/components/permission-denied-dialog"
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { FieldLabel } from "@/components/ui/field";
-import { SrFilterStatus } from "./sr-filter-status";
+import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
+import { STORE_REQUISITION_STATUS_OPTIONS } from "@/constant/store-requisition";
+import { SR_TYPE } from "@/types/store-requisition";
 import { SrFilterFromLocation } from "./sr-filter-from-location";
 import { SrFilterToLocation } from "./sr-filter-to-location";
-import { SrFilterType } from "./sr-filter-type";
 import { useStoreRequisitionTable } from "./use-sr-table";
 import SrCardList from "./sr-card-list";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -151,21 +152,30 @@ export default function StoreRequisitionComponent() {
         ),
       },
       {
+        // ประเภทมีสองค่าคงที่ label เป็น i18n key — ใช้ control กลางตรง ๆ ได้เลย
         key: "sr_type",
-        control: "custom",
+        control: "multi-select",
         labelKey: "common.type",
-        render: (value, onChange) => (
-          <SrFilterType value={value} onChange={onChange} className="w-full" />
-        ),
+        options: [
+          {
+            labelKey: "common.transfer",
+            value: `sr_type|string:${SR_TYPE.TRANSFER}`,
+          },
+          { labelKey: "common.issue", value: `sr_type|string:${SR_TYPE.ISSUE}` },
+        ],
       },
       {
+        // ค่า option เป็น clause เต็มต่อตัว (doc_status|string:draft) — เลือกหลายตัว
+        // MultiSelectFilter join เป็น clause ซ้ำ prefix ซึ่ง gateway parse รวมเป็น
+        // IN query ให้เอง (แบบเดียวกับ status ของ PR)
         key: "filter",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
-          <SrFilterStatus
+          <MultiSelectFilter
             value={value}
             onChange={onChange}
+            options={STORE_REQUISITION_STATUS_OPTIONS}
             className="w-full"
           />
         ),
