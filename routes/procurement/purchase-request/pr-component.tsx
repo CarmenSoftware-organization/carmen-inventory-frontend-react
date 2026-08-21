@@ -186,6 +186,7 @@ export default function PurchaseRequestComponent() {
         key: "filter",
         control: "custom",
         labelKey: "common.status",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -199,25 +200,15 @@ export default function PurchaseRequestComponent() {
         key: "workflow_current_stage",
         control: "stage",
         labelKey: "procurement.purchaseRequest.stage",
+        section: "listView.sectionDocument",
         stages: stages ?? [],
       },
       {
         key: "workflow",
         control: "workflow",
         labelKey: "field.workflow",
+        section: "listView.sectionDocument",
         workflowType: WORKFLOW_TYPE.PR,
-      },
-      {
-        key: "department",
-        control: "department",
-        labelKey: "field.department",
-      },
-      { key: "user_id", control: "requester", labelKey: "common.requester" },
-      {
-        key: "pr_date",
-        control: "date-range",
-        labelKey: "field.prDate",
-        fieldKey: "pr_date",
       },
       {
         // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
@@ -225,9 +216,29 @@ export default function PurchaseRequestComponent() {
         key: "sendback",
         control: "status",
         labelKey: "common.sendBack",
+        section: "listView.sectionDocument",
         options: [
           { labelKey: "common.sendBack", value: SENDBACK_FILTER_CLAUSE },
         ],
+      },
+      {
+        key: "department",
+        control: "department",
+        labelKey: "field.department",
+        section: "listView.sectionPeople",
+      },
+      {
+        key: "user_id",
+        control: "requester",
+        labelKey: "common.requester",
+        section: "listView.sectionPeople",
+      },
+      {
+        key: "pr_date",
+        control: "date-range",
+        labelKey: "field.prDate",
+        fieldKey: "pr_date",
+        section: "listView.sectionDate",
       },
     ],
     [stages, viewMode, t, tc],

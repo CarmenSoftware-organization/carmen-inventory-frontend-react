@@ -112,6 +112,16 @@ export function FilterRequester({
 
   const selectedCount = selectedIds.size;
 
+  // ปุ่มพูดค่าที่เลือก — "ชื่อคนแรก +N" อ่านออกทันทีว่ากรองอะไรอยู่
+  const firstUser = users.find((u) => selectedIds.has(u.user_id));
+  const firstName = firstUser ? getUserFullName(firstUser) : undefined;
+  const valueText =
+    selectedCount > 0
+      ? `${firstName ?? `${displayLabel} (${selectedCount})`}${
+          firstName && selectedCount > 1 ? ` +${selectedCount - 1}` : ""
+        }`
+      : displayLabel;
+
   return (
     <Popover
       open={open}
@@ -133,9 +143,7 @@ export function FilterRequester({
               !selectedCount && "text-muted-foreground text-xs",
             )}
           >
-            {selectedCount > 0
-              ? `${displayLabel} (${selectedCount})`
-              : displayLabel}
+            {valueText}
           </span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>

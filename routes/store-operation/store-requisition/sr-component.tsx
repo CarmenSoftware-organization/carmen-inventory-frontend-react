@@ -156,6 +156,7 @@ export default function StoreRequisitionComponent() {
         key: "sr_type",
         control: "multi-select",
         labelKey: "common.type",
+        section: "listView.sectionDocument",
         options: [
           {
             labelKey: "common.transfer",
@@ -171,6 +172,7 @@ export default function StoreRequisitionComponent() {
         key: "filter",
         control: "custom",
         labelKey: "common.status",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -181,9 +183,35 @@ export default function StoreRequisitionComponent() {
         ),
       },
       {
+        key: "workflow_current_stage",
+        control: "stage",
+        labelKey: "field.stage",
+        section: "listView.sectionDocument",
+        stages: stages ?? [],
+      },
+      {
+        key: "workflow",
+        control: "workflow",
+        labelKey: "field.workflow",
+        section: "listView.sectionDocument",
+        workflowType: WORKFLOW_TYPE.SR,
+      },
+      {
+        // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
+        // ค่าที่เก็บคือ clause เต็มอยู่แล้ว จึงไม่ต้องประกาศ toClause
+        key: "sendback",
+        control: "status",
+        labelKey: "common.sendBack",
+        section: "listView.sectionDocument",
+        options: [
+          { labelKey: "common.sendBack", value: SENDBACK_FILTER_CLAUSE },
+        ],
+      },
+      {
         key: "from_location",
         control: "custom",
         labelKey: "field.fromLocation",
+        section: "listView.sectionLocation",
         render: (value, onChange) => (
           <SrFilterFromLocation
             value={value}
@@ -196,6 +224,7 @@ export default function StoreRequisitionComponent() {
         key: "to_location",
         control: "custom",
         labelKey: "field.toLocation",
+        section: "listView.sectionLocation",
         render: (value, onChange) => (
           <SrFilterToLocation
             value={value}
@@ -205,42 +234,23 @@ export default function StoreRequisitionComponent() {
         ),
       },
       {
-        key: "workflow_current_stage",
-        control: "stage",
-        labelKey: "field.stage",
-        stages: stages ?? [],
-      },
-      {
-        key: "workflow",
-        control: "workflow",
-        labelKey: "field.workflow",
-        workflowType: WORKFLOW_TYPE.SR,
-      },
-      {
         key: "user_id",
         control: "requester",
         labelKey: "common.requester",
+        section: "listView.sectionPeople",
       },
       {
         key: "department",
         control: "department",
         labelKey: "field.department",
+        section: "listView.sectionPeople",
       },
       {
         key: "sr_date",
         control: "date-range",
         labelKey: "field.date",
         fieldKey: "sr_date",
-      },
-      {
-        // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
-        // ค่าที่เก็บคือ clause เต็มอยู่แล้ว จึงไม่ต้องประกาศ toClause
-        key: "sendback",
-        control: "status",
-        labelKey: "common.sendBack",
-        options: [
-          { labelKey: "common.sendBack", value: SENDBACK_FILTER_CLAUSE },
-        ],
+        section: "listView.sectionDate",
       },
     ],
     [viewMode, stages, t, tc],

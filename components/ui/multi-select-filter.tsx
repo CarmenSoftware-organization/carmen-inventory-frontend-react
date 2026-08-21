@@ -1,7 +1,6 @@
 import type React from "react";
 import { ChevronsUpDown, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -61,6 +60,17 @@ export function MultiSelectFilter({
     onChange("");
   };
 
+  // ปุ่มพูดค่าที่เลือก ไม่ใช่ชื่อ field — "Draft +2" อ่านออกทันทีว่ากรองอะไรอยู่
+  // (ชื่อ field มี FieldLabel ของชีทบอกอยู่แล้ว)
+  const selectedLabels = selected
+    .map((v) => options.find((o) => o.value === v)?.label)
+    .filter(Boolean) as string[];
+  const valueText =
+    selectedLabels.length > 0
+      ? selectedLabels[0] +
+        (selectedLabels.length > 1 ? ` +${selectedLabels.length - 1}` : "")
+      : "";
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -69,21 +79,13 @@ export function MultiSelectFilter({
           size="sm"
           className={cn("justify-between gap-1 text-xs font-normal", className)}
         >
-          <span className="truncate text-xs">
-            {selected.length > 0 ? (
-              <>
-                {placeholder}
-                <Badge
-                  variant="secondary"
-                  size="xs"
-                  className="ml-1 tabular-nums"
-                >
-                  {selected.length}
-                </Badge>
-              </>
-            ) : (
-              placeholder
+          <span
+            className={cn(
+              "truncate text-xs",
+              !valueText && "text-muted-foreground",
             )}
+          >
+            {valueText || placeholder}
           </span>
           <span className="flex items-center gap-0.5">
             {selected.length > 0 && (

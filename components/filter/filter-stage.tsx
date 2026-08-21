@@ -93,9 +93,15 @@ export function FilterStage({
           size="sm"
           className={cn("justify-between", className)}
         >
-          <span className={cn("truncate", !selectedCount && "text-xs")}>
+          <span
+            className={cn(
+              "truncate",
+              !selectedCount && "text-muted-foreground text-xs",
+            )}
+          >
+            {/* ปุ่มพูดค่าที่เลือก — "stage แรก +N" อ่านออกทันทีว่ากรองอะไรอยู่ */}
             {selectedCount > 0
-              ? `${t("stage")} (${selectedCount})`
+              ? `${Array.from(selectedStages)[0]}${selectedCount > 1 ? ` +${selectedCount - 1}` : ""}`
               : t("allStage")}
           </span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />

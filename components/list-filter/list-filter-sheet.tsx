@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { ListFilterPlus } from "lucide-react";
 import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { EyeBrow } from "@/components/ui/eye-brow";
 import { FieldLabel } from "@/components/ui/field";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FilterFieldControl } from "./filter-field-control";
@@ -136,38 +138,51 @@ export function ListFilterSheet({
           {/* field ที่ hidden: true คือ "hidden holder" ของอีก field หนึ่ง (เช่น
              created_at_to คู่กับ created_at_from) — ไม่ render อะไรเลยในชีทนี้
              (ค่ายังคง "จริง" ใน values/encode/saved-views ปกติ ดู FilterFieldDef) */}
-          {visibleFields.map((f) =>
-            /* labelKey ว่าง = field ไม่มี label ของตัวเอง (เช่น custom control ที่
-               จัดการ label ภายในตัวเองอยู่แล้ว หรือซ่อนทั้ง field ด้วย breakpoint
-               class) — render control เปล่า ๆ ไม่ห่อ wrapper `space-y-1.5` เพื่อไม่ให้
-               เหลือช่องว่างลอย ๆ เมื่อ control ข้างในถูกซ่อนไปด้วย */
-            f.labelKey ? (
-              <div
-                key={f.key}
-                // ช่วงวันที่กินเต็มแถว — ข้อความช่วงวัน (จาก – ถึง) ยาวเกินครึ่งคอลัมน์
-                className={cn(
-                  "space-y-1.5",
-                  f.control === "date-range" && "sm:col-span-2",
+          {visibleFields.map((f, i) => {
+            /* หัวข้อ section โผล่เมื่อ field แรกของกลุ่ม (section ต่างจาก field
+               ก่อนหน้า) — จัดกลุ่มตามลำดับ field ล้วน ๆ ไม่ re-sort ให้ */
+            const showHeading =
+              !!f.section && f.section !== visibleFields[i - 1]?.section;
+            return (
+              <Fragment key={f.key}>
+                {/* เส้นคั่นก่อนหัวข้อ section — ยกเว้นกลุ่มแรกสุดของชีท */}
+                {showHeading && i > 0 && <Separator className="col-span-full" />}
+                {showHeading && (
+                  <EyeBrow className="col-span-full -mb-2">
+                    {t(f.section!)}
+                  </EyeBrow>
                 )}
-              >
-                <FieldLabel className="text-xs">{t(f.labelKey)}</FieldLabel>
-                <FilterFieldControl
-                  field={f}
-                  value={draft[f.key] ?? ""}
-                  onChange={(v) => setDraftValue(f.key, v)}
-                  peer={peer}
-                />
-              </div>
-            ) : (
-              <FilterFieldControl
-                key={f.key}
-                field={f}
-                value={draft[f.key] ?? ""}
-                onChange={(v) => setDraftValue(f.key, v)}
-                peer={peer}
-              />
-            ),
-          )}
+                {/* labelKey ว่าง = field ไม่มี label ของตัวเอง (เช่น custom control
+                   ที่จัดการ label ภายในตัวเองอยู่แล้ว หรือซ่อนทั้ง field ด้วย
+                   breakpoint class) — render control เปล่า ๆ ไม่ห่อ wrapper
+                   `space-y-1.5` เพื่อไม่ให้เหลือช่องว่างลอย ๆ */}
+                {f.labelKey ? (
+                  <div
+                    // ช่วงวันที่กินเต็มแถว — ข้อความช่วงวัน (จาก – ถึง) ยาวเกินครึ่งคอลัมน์
+                    className={cn(
+                      "space-y-1.5",
+                      f.control === "date-range" && "sm:col-span-2",
+                    )}
+                  >
+                    <FieldLabel className="text-xs">{t(f.labelKey)}</FieldLabel>
+                    <FilterFieldControl
+                      field={f}
+                      value={draft[f.key] ?? ""}
+                      onChange={(v) => setDraftValue(f.key, v)}
+                      peer={peer}
+                    />
+                  </div>
+                ) : (
+                  <FilterFieldControl
+                    field={f}
+                    value={draft[f.key] ?? ""}
+                    onChange={(v) => setDraftValue(f.key, v)}
+                    peer={peer}
+                  />
+                )}
+              </Fragment>
+            );
+          })}
         </div>
         {/* desktop เรียงแถวนอน (Clear All ชิดซ้าย) — มือถือซ้อนแนวตั้งเต็มกว้างตามเดิม */}
         <SheetFooter className={cn("border-t", !isMobile && "flex-row")}>

@@ -182,8 +182,14 @@
     "dashboard": {
       "title": "แดชบอร์ดบัญชี",
       "description": "ภาพรวมสถานะการเงิน การลงบัญชี และงานที่ต้องดำเนินการ",
-      "revenue": { "title": "รายได้รวม", "meta": "{value} จากเดือนก่อน" },
-      "bankBalance": { "title": "ยอดเงินธนาคาร", "meta": "รวม {value} บัญชี" },
+      "revenue": {
+        "title": "รายได้รวม",
+        "meta": "{value} จากเดือนก่อน"
+      },
+      "bankBalance": {
+        "title": "ยอดเงินธนาคาร",
+        "meta": "รวม {value} บัญชี"
+      },
       "apOverdue": {
         "title": "เจ้าหนี้เกินกำหนด",
         "meta": "{value} ใบแจ้งหนี้รอดำเนินการ"
@@ -4148,7 +4154,11 @@
     "saved": "บันทึกมุมมอง \"{name}\" แล้ว",
     "updated": "อัปเดตมุมมองแล้ว",
     "deleted": "ลบมุมมองแล้ว",
-    "renamed": "เปลี่ยนชื่อมุมมองแล้ว"
+    "renamed": "เปลี่ยนชื่อมุมมองแล้ว",
+    "sectionDocument": "เอกสาร",
+    "sectionPeople": "ผู้เกี่ยวข้อง",
+    "sectionDate": "ช่วงเวลา",
+    "sectionLocation": "คลังสินค้า"
   },
   "modules": {
     "module": "หมวดงาน",

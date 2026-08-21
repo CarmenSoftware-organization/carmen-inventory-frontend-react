@@ -80,6 +80,17 @@ export function FilterDepartment({
 
   const selectedCount = selectedIds.size;
 
+  // ปุ่มพูดค่าที่เลือก — "ชื่อแผนกแรก +N" อ่านออกทันทีว่ากรองอะไรอยู่
+  // (รายชื่อแผนก fetch ตอนเปิด popover เท่านั้น — ยังไม่มีข้อมูล เช่นเปิดจาก
+  // deep link/saved view โดยไม่เคยเปิด popover ให้ถอยไปแบบ "แผนก (N)")
+  const firstName = departments.find((d) => selectedIds.has(d.id))?.name;
+  const valueText =
+    selectedCount > 0
+      ? `${firstName ?? `${tfl("department")} (${selectedCount})`}${
+          firstName && selectedCount > 1 ? ` +${selectedCount - 1}` : ""
+        }`
+      : tfl("department");
+
   return (
     <Popover
       open={open}
@@ -101,9 +112,7 @@ export function FilterDepartment({
               !selectedCount && "text-muted-foreground text-xs",
             )}
           >
-            {selectedCount > 0
-              ? `${tfl("department")} (${selectedCount})`
-              : tfl("department")}
+            {valueText}
           </span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>

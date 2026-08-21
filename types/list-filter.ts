@@ -35,6 +35,12 @@ interface FilterFieldBase {
    * `created_at_to` ของ `created_at_from`) ค้างค่าเก่าไว้เดี่ยว ๆ หลังผู้ใช้กดลบแค่ chip เดียว
    */
   readonly linkedKeys?: readonly string[];
+  /**
+   * i18n key ของหัวข้อ section ใน ListFilterSheet — field ติดกันที่ section
+   * เดียวกันถูกจัดกลุ่มใต้หัวข้อเดียว (เรียง field ให้กลุ่มเดียวกันอยู่ติดกันเอง)
+   * ไม่ระบุ = ไม่มีหัวข้อ render แบนเหมือนเดิม
+   */
+  readonly section?: string;
 }
 
 /** นิยาม field หนึ่งตัวใน filter sheet ของหน้า list */

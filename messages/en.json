@@ -182,7 +182,10 @@
     "dashboard": {
       "title": "Accounting Dashboard",
       "description": "Financial position, posting health, and work requiring attention",
-      "revenue": { "title": "Total Revenue", "meta": "{value} vs last month" },
+      "revenue": {
+        "title": "Total Revenue",
+        "meta": "{value} vs last month"
+      },
       "bankBalance": {
         "title": "Bank Balance",
         "meta": "Across {value} accounts"
@@ -4161,7 +4164,11 @@
     "saved": "View \"{name}\" saved",
     "updated": "View updated",
     "deleted": "View deleted",
-    "renamed": "View renamed"
+    "renamed": "View renamed",
+    "sectionDocument": "Document",
+    "sectionPeople": "People",
+    "sectionDate": "Date",
+    "sectionLocation": "Location"
   },
   "modules": {
     "module": "Module",

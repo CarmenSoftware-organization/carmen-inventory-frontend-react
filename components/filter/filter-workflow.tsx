@@ -85,6 +85,17 @@ export function FilterWorkflow({
 
   const selectedCount = selectedIds.size;
 
+  // ปุ่มพูดค่าที่เลือก — "ชื่อ workflow แรก +N" อ่านออกทันทีว่ากรองอะไรอยู่
+  const firstName = (workflows ?? []).find((w) =>
+    selectedIds.has(w.id),
+  )?.name;
+  const valueText =
+    selectedCount > 0
+      ? `${firstName ?? `${tfl("workflow")} (${selectedCount})`}${
+          firstName && selectedCount > 1 ? ` +${selectedCount - 1}` : ""
+        }`
+      : tfl("workflow");
+
   return (
     <Popover
       open={open}
@@ -106,9 +117,7 @@ export function FilterWorkflow({
               !selectedCount && "text-muted-foreground text-xs",
             )}
           >
-            {selectedCount > 0
-              ? `${tfl("workflow")} (${selectedCount})`
-              : tfl("workflow")}
+            {valueText}
           </span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
