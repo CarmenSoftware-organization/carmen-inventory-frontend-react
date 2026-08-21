@@ -129,6 +129,7 @@ export default function ProductComponent() {
         key: "category",
         control: "custom",
         labelKey: "field.category",
+        section: "listView.sectionCategory",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -142,6 +143,7 @@ export default function ProductComponent() {
         key: "sub_category",
         control: "custom",
         labelKey: "field.subCategory",
+        section: "listView.sectionCategory",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -155,6 +157,7 @@ export default function ProductComponent() {
         key: "item_group",
         control: "custom",
         labelKey: "field.itemGroup",
+        section: "listView.sectionCategory",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}

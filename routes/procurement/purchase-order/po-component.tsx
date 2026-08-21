@@ -136,11 +136,17 @@ export default function PoComponent() {
           </div>
         ),
       },
-      { key: "filter", control: "status", labelKey: "common.status" },
+      {
+        key: "filter",
+        control: "status",
+        labelKey: "common.status",
+        section: "listView.sectionDocument",
+      },
       {
         key: "po_type",
         control: "custom",
         labelKey: "procurement.purchaseOrder.type",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -154,26 +160,15 @@ export default function PoComponent() {
         key: "workflow_current_stage",
         control: "stage",
         labelKey: "field.stage",
+        section: "listView.sectionDocument",
         stages: stages ?? [],
       },
       {
         key: "workflow",
         control: "workflow",
         labelKey: "field.workflow",
+        section: "listView.sectionDocument",
         workflowType: WORKFLOW_TYPE.PO,
-      },
-      {
-        // ผู้จัดซื้อ = คนเปิดใบ (คอลัมน์ Buyer ใน list) — กรองที่ created_by_id
-        key: "buyer",
-        control: "requester",
-        labelKey: "field.buyer",
-        fieldKey: "created_by_id",
-      },
-      {
-        key: "order_date",
-        control: "date-range",
-        labelKey: "field.orderDate",
-        fieldKey: "order_date",
       },
       {
         // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
@@ -181,9 +176,25 @@ export default function PoComponent() {
         key: "sendback",
         control: "status",
         labelKey: "common.sendBack",
+        section: "listView.sectionDocument",
         options: [
           { labelKey: "common.sendBack", value: SENDBACK_FILTER_CLAUSE },
         ],
+      },
+      {
+        // ผู้จัดซื้อ = คนเปิดใบ (คอลัมน์ Buyer ใน list) — กรองที่ created_by_id
+        key: "buyer",
+        control: "requester",
+        labelKey: "field.buyer",
+        fieldKey: "created_by_id",
+        section: "listView.sectionPeople",
+      },
+      {
+        key: "order_date",
+        control: "date-range",
+        labelKey: "field.orderDate",
+        fieldKey: "order_date",
+        section: "listView.sectionDate",
       },
     ],
     [viewMode, stages, t, tc],

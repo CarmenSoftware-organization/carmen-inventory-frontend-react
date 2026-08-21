@@ -120,6 +120,7 @@ export default function DocumentComponent() {
     () => [
       {
         key: "type",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "field.type",
         render: (value, onChange) => (

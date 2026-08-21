@@ -4158,7 +4158,8 @@
     "sectionDocument": "เอกสาร",
     "sectionPeople": "ผู้เกี่ยวข้อง",
     "sectionDate": "ช่วงเวลา",
-    "sectionLocation": "คลังสินค้า"
+    "sectionLocation": "คลังสินค้า",
+    "sectionCategory": "หมวดหมู่"
   },
   "modules": {
     "module": "หมวดงาน",

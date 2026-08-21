@@ -89,6 +89,7 @@ export default function ReportComponent() {
     () => [
       {
         key: "groups",
+        section: "listView.sectionCategory",
         control: "custom",
         labelKey: "report.allTypes",
         render: (value, onChange) => (

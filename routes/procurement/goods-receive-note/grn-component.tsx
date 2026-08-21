@@ -73,11 +73,17 @@ export default function GrnComponent() {
   // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
   const grnFilterFields = useMemo<FilterFieldDef[]>(
     () => [
-      { key: "filter", control: "status", labelKey: "common.status" },
+      {
+        key: "filter",
+        control: "status",
+        labelKey: "common.status",
+        section: "listView.sectionDocument",
+      },
       {
         key: "grn_status",
         control: "custom",
         labelKey: "procurement.goodsReceiveNote.status",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -91,6 +97,7 @@ export default function GrnComponent() {
         key: "doc_type",
         control: "multi-select",
         labelKey: "field.type",
+        section: "listView.sectionDocument",
         options: [
           {
             labelKey: "field.purchaseOrder",
@@ -105,12 +112,14 @@ export default function GrnComponent() {
         control: "requester",
         labelKey: "field.receivedBy",
         fieldKey: "created_by_id",
+        section: "listView.sectionPeople",
       },
       {
         key: "grn_date",
         control: "date-range",
         labelKey: "field.grnDate",
         fieldKey: "grn_date",
+        section: "listView.sectionDate",
       },
     ],
     [],

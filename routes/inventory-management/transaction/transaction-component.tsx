@@ -150,6 +150,7 @@ export default function TransactionComponent() {
         key: "dateRange",
         control: "custom",
         labelKey: "inventoryManagement.transaction.dateRange",
+        section: "listView.sectionDate",
         toClause: () => "",
         render: (value, onChange) => (
           <DateRangeFilter
@@ -162,6 +163,7 @@ export default function TransactionComponent() {
         key: "created_at_from",
         control: "custom",
         labelKey: "inventoryManagement.transaction.selectDateRange",
+        section: "listView.sectionDate",
         toClause: () => "",
         linkedKeys: ["created_at_to"],
         // peer มาจาก draft ของ ListFilterSheet — อ่าน/เขียน created_at_to ผ่านมัน
@@ -196,6 +198,7 @@ export default function TransactionComponent() {
         key: "location_id",
         control: "custom",
         labelKey: "field.location",
+        section: "listView.sectionLocation",
         toClause: (v) => `location_id:${v}`,
         render: (value, onChange) => (
           <LookupLocation
@@ -215,6 +218,7 @@ export default function TransactionComponent() {
         key: "category_id",
         control: "custom",
         labelKey: "field.category",
+        section: "listView.sectionCategory",
         toClause: (v) => `category_id:${v}`,
         render: (value, onChange) => (
           <LookupCategory
@@ -234,6 +238,7 @@ export default function TransactionComponent() {
         key: "inventory_doc_type",
         control: "custom",
         labelKey: "inventoryManagement.transaction.referenceType",
+        section: "listView.sectionDocument",
         toClause: (v) => `inventory_doc_type|in:${v}`,
         render: (value, onChange) => {
           const refTypes = new Set(

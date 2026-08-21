@@ -103,6 +103,7 @@ export default function EquipmentComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
@@ -116,6 +117,7 @@ export default function EquipmentComponent() {
       },
       {
         key: "category",
+        section: "listView.sectionCategory",
         control: "custom",
         labelKey: "field.category",
         render: (value, onChange) => (

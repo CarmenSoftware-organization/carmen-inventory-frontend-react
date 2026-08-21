@@ -92,6 +92,7 @@ export default function InventoryAdjustmentComponent() {
     () => [
       {
         key: "adj_type",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "field.type",
         render: (value, onChange) => (
@@ -110,6 +111,7 @@ export default function InventoryAdjustmentComponent() {
       },
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "status",
         labelKey: "common.status",
         options: [

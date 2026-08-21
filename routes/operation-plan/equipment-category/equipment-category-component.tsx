@@ -101,6 +101,7 @@ export default function EquipmentCategoryComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (

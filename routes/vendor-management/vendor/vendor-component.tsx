@@ -83,9 +83,10 @@ export default function VendorComponent() {
   // เก่า/ไม่ตรง — grep ทั้งไฟล์ไม่พบ URL param หรือ control นี้เลย)
   const vendorFilterFields = useMemo<FilterFieldDef[]>(
     () => [
-      { key: "filter", control: "status", labelKey: "common.status" },
+      { key: "filter", control: "status", labelKey: "common.status", section: "listView.sectionDocument" },
       {
         key: "business_type",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "field.businessType",
         render: (value, onChange) => (

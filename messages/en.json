@@ -4168,7 +4168,8 @@
     "sectionDocument": "Document",
     "sectionPeople": "People",
     "sectionDate": "Date",
-    "sectionLocation": "Location"
+    "sectionLocation": "Location",
+    "sectionCategory": "Category"
   },
   "modules": {
     "module": "Module",

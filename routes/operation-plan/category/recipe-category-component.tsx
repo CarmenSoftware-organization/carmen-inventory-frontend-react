@@ -104,6 +104,7 @@ export default function RecipeCategoryComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
@@ -117,6 +118,7 @@ export default function RecipeCategoryComponent() {
       },
       {
         key: "parent",
+        section: "listView.sectionCategory",
         control: "custom",
         labelKey: "field.parent",
         render: (value, onChange) => (

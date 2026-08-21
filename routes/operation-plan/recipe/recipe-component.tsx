@@ -135,9 +135,24 @@ export default function RecipeComponent() {
         ),
       },
       {
+        key: "difficulty",
+        control: "custom",
+        labelKey: "field.difficulty",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            placeholder={tfl("difficulty")}
+            options={difficultyFilterOptions}
+            className="w-full"
+          />
+        ),
+      },
+      {
         key: "cuisine",
         control: "custom",
         labelKey: "field.cuisine",
+        section: "listView.sectionCategory",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -152,26 +167,13 @@ export default function RecipeComponent() {
         key: "category",
         control: "custom",
         labelKey: "field.category",
+        section: "listView.sectionCategory",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
             onChange={onChange}
             placeholder={tfl("category")}
             options={categoryFilterOptions}
-            className="w-full"
-          />
-        ),
-      },
-      {
-        key: "difficulty",
-        control: "custom",
-        labelKey: "field.difficulty",
-        render: (value, onChange) => (
-          <MultiSelectFilter
-            value={value}
-            onChange={onChange}
-            placeholder={tfl("difficulty")}
-            options={difficultyFilterOptions}
             className="w-full"
           />
         ),

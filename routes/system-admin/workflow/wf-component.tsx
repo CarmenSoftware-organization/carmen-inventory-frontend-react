@@ -67,6 +67,7 @@ export default function WorkflowComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
@@ -80,6 +81,7 @@ export default function WorkflowComponent() {
       },
       {
         key: "workflow_type",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "systemAdmin.workflow.workflowType",
         render: (value, onChange) => (

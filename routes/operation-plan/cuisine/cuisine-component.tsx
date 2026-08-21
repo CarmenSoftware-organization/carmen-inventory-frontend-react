@@ -98,6 +98,7 @@ export default function CuisineComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "common.status",
         render: (value, onChange) => (
@@ -111,6 +112,7 @@ export default function CuisineComponent() {
       },
       {
         key: "region",
+        section: "listView.sectionCategory",
         control: "custom",
         labelKey: "field.region",
         render: (value, onChange) => (

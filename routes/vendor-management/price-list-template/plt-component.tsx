@@ -65,6 +65,7 @@ export default function PriceListTemplateComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "status",
         labelKey: "common.status",
         options: [

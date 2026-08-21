@@ -100,6 +100,7 @@ export default function UserActivityComponent() {
     () => [
       {
         key: "action",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "systemAdmin.userActivity.action",
         render: (value, onChange) => (
@@ -114,6 +115,7 @@ export default function UserActivityComponent() {
       },
       {
         key: "actor_id",
+        section: "listView.sectionPeople",
         control: "custom",
         labelKey: "systemAdmin.userActivity.user",
         render: (value, onChange) => (

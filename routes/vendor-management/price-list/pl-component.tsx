@@ -83,6 +83,7 @@ export default function PriceListComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "status",
         labelKey: "common.status",
         options: [
@@ -94,6 +95,7 @@ export default function PriceListComponent() {
       },
       {
         key: "vendor",
+        section: "listView.sectionPeople",
         control: "custom",
         labelKey: "field.vendor",
         render: (value, onChange) => (

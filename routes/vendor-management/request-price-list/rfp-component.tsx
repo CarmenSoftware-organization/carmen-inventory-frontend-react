@@ -82,6 +82,7 @@ export default function RequestPriceListComponent() {
     () => [
       {
         key: "template",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "field.template",
         render: (value, onChange) => (

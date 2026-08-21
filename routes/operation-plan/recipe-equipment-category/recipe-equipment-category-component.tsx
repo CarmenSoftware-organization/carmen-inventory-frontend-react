@@ -60,7 +60,8 @@ export default function RecipeEquipmentCategoryComponent() {
   // filter (status) ไม่ส่ง options เลย — ใช้ default is_active|bool:true/false
   // ของ StatusFilter ตรงตัวเหมือนโค้ดเดิมทุกประการ
   const recipeEquipmentCategoryFilterFields = useMemo<FilterFieldDef[]>(
-    () => [{ key: "filter", control: "status", labelKey: "common.status" }],
+    () => [{ key: "filter",
+        section: "listView.sectionDocument", control: "status", labelKey: "common.status" }],
     [],
   );
 

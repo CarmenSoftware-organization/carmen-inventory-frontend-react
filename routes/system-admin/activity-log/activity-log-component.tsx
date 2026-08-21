@@ -118,6 +118,7 @@ export default function ActivityLogComponent() {
     () => [
       {
         key: "action",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "systemAdmin.activityLog.action",
         render: (value, onChange) => (
@@ -132,6 +133,7 @@ export default function ActivityLogComponent() {
       },
       {
         key: "entity_type",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "systemAdmin.activityLog.entityType",
         render: (value, onChange) => (
@@ -148,6 +150,7 @@ export default function ActivityLogComponent() {
       },
       {
         key: "actor_id",
+        section: "listView.sectionPeople",
         control: "custom",
         labelKey: "systemAdmin.activityLog.user",
         render: (value, onChange) => (

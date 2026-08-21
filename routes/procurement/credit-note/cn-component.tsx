@@ -62,11 +62,17 @@ export default function CnComponent() {
 
   const cnFilterFields = useMemo<FilterFieldDef[]>(
     () => [
-      { key: "filter", control: "status", labelKey: "common.status" },
+      {
+        key: "filter",
+        control: "status",
+        labelKey: "common.status",
+        section: "listView.sectionDocument",
+      },
       {
         key: "cn_type",
         control: "custom",
         labelKey: "procurement.creditNote.type",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -80,6 +86,7 @@ export default function CnComponent() {
         key: "cn_status",
         control: "custom",
         labelKey: "procurement.creditNote.status",
+        section: "listView.sectionDocument",
         render: (value, onChange) => (
           <MultiSelectFilter
             value={value}
@@ -95,12 +102,14 @@ export default function CnComponent() {
         control: "requester",
         labelKey: "field.createdBy",
         fieldKey: "created_by_id",
+        section: "listView.sectionPeople",
       },
       {
         key: "cn_date",
         control: "date-range",
         labelKey: "field.docDate",
         fieldKey: "cn_date",
+        section: "listView.sectionDate",
       },
     ],
     [],

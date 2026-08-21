@@ -79,7 +79,8 @@ export default function PrtComponent() {
   const useInfiniteScroll = !!isMobile;
 
   const prtFilterFields = useMemo<FilterFieldDef[]>(
-    () => [{ key: "filter", control: "status", labelKey: "common.status" }],
+    () => [{ key: "filter",
+        section: "listView.sectionDocument", control: "status", labelKey: "common.status" }],
     [],
   );
 

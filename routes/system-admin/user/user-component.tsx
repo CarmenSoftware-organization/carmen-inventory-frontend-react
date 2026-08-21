@@ -83,6 +83,7 @@ export default function UserComponent() {
     () => [
       {
         key: "filter",
+        section: "listView.sectionDocument",
         control: "custom",
         labelKey: "systemAdmin.user.department",
         render: (value, onChange) => (
