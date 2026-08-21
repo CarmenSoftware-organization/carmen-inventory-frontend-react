@@ -23,6 +23,12 @@ export const PO_TYPE_CONFIG = createStatusConfig(
   },
 );
 
+/** ตัวเลือก filter สถานะเอกสาร PO ใน list sheet (ค่าเป็น clause เต็มต่อตัว) */
+export const PURCHASE_ORDER_STATUS_OPTIONS = createStatusFilterOptions(
+  "po_status",
+  PO_STATUS_CONFIG,
+);
+
 /** ตัวเลือก filter ประเภท PO ใน list sheet (ค่าเป็น clause เต็มต่อตัว) */
 export const PURCHASE_ORDER_TYPE_OPTIONS = createStatusFilterOptions(
   "po_type",

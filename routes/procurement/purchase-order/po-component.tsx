@@ -23,7 +23,10 @@ import {
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { PURCHASE_ORDER_TYPE_OPTIONS } from "@/constant/purchase-order";
+import {
+  PURCHASE_ORDER_STATUS_OPTIONS,
+  PURCHASE_ORDER_TYPE_OPTIONS,
+} from "@/constant/purchase-order";
 import { useVendor } from "@/hooks/use-vendor";
 import type { PurchaseOrder } from "@/types/purchase-order";
 import SearchInput from "@/components/search-input";
@@ -152,10 +155,20 @@ export default function PoComponent() {
         ),
       },
       {
+        // สถานะเอกสาร (po_status) — เดิมช่องนี้เป็น active/inactive จาก is_active
+        // ซึ่งคนอ่านเข้าใจว่าเป็นสถานะเอกสารตลอด ทั้งที่สถานะจริงไม่มีให้กรองเลย
         key: "filter",
-        control: "status",
+        control: "custom",
         labelKey: "common.status",
         section: "listView.sectionDocument",
+        render: (value, onChange) => (
+          <MultiSelectFilter
+            value={value}
+            onChange={onChange}
+            options={PURCHASE_ORDER_STATUS_OPTIONS}
+            className="w-full"
+          />
+        ),
       },
       {
         key: "po_type",
