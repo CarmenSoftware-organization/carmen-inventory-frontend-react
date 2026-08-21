@@ -75,4 +75,18 @@ export default tseslint.config(
       ],
     },
   },
+  // cascader/filters เป็นโค้ด vendor จาก ReUI registry — คงสภาพให้ diff กับ
+  // upstream ได้ ไม่ไล่แก้สไตล์: `process.env.NODE_ENV` (13 จุด) ปลอดภัยเพราะ
+  // Vite define แทนที่ให้ตอน build (แบนเฉพาะโค้ดเราเองที่ควรใช้ import.meta.env)
+  // และ unused vars เป็นของเหลือจากการ adapt Base UI → Radix ฝั่ง upstream
+  {
+    files: [
+      "components/ui/cascader/**/*.{ts,tsx}",
+      "components/ui/filters/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-globals": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
 );
