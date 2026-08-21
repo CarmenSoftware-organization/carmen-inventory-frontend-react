@@ -164,12 +164,20 @@ export default function TransactionComponent() {
         labelKey: "inventoryManagement.transaction.selectDateRange",
         toClause: () => "",
         linkedKeys: ["created_at_to"],
-        render: (value, onChange) => (
+        // peer มาจาก draft ของ ListFilterSheet — อ่าน/เขียน created_at_to ผ่านมัน
+        // เพื่อให้ทั้งคู่ apply พร้อมกันตอน Done (fallback URL ตรงเมื่อไม่มี peer)
+        render: (value, onChange, peer) => (
           <DateRangePicker
-            value={{ from: value, to: createdAtToRaw }}
+            value={{
+              from: value,
+              to: peer ? peer.get("created_at_to") : createdAtToRaw,
+            }}
             onValueChange={(range) => {
               onChange(range.from ?? "");
-              setValueRef.current("created_at_to", range.to ?? "");
+              (peer?.set ?? setValueRef.current)(
+                "created_at_to",
+                range.to ?? "",
+              );
             }}
             placeholder={t("selectDateRange")}
             className="w-full"

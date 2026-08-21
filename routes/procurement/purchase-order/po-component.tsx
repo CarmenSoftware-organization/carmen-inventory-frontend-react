@@ -18,6 +18,7 @@ import {
   useMyPendingPurchaseOrder,
   useDeletePurchaseOrder,
   useExportPurchaseOrder,
+  usePurchaseOrderWorkflowStages,
 } from "@/hooks/use-purchase-order";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { setURLParams, useURL } from "@/hooks/use-url";
@@ -108,6 +109,8 @@ export default function PoComponent() {
     defaultSort: "po_no:desc",
   });
 
+  const { data: stages } = usePurchaseOrderWorkflowStages();
+
   // ค่า option คงที่จาก config module-level — ไม่ผูก t() (label ไม่เคยแปลภาษาอยู่แล้ว
   // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
   const poTypeOptions = useMemo(
@@ -159,6 +162,31 @@ export default function PoComponent() {
         ),
       },
       {
+        key: "workflow_current_stage",
+        control: "stage",
+        labelKey: "field.stage",
+        stages: stages ?? [],
+      },
+      {
+        key: "workflow",
+        control: "workflow",
+        labelKey: "field.workflow",
+        workflowType: WORKFLOW_TYPE.PO,
+      },
+      {
+        // ผู้จัดซื้อ = คนเปิดใบ (คอลัมน์ Buyer ใน list) — กรองที่ created_by_id
+        key: "buyer",
+        control: "requester",
+        labelKey: "field.buyer",
+        fieldKey: "created_by_id",
+      },
+      {
+        key: "order_date",
+        control: "date-range",
+        labelKey: "field.orderDate",
+        fieldKey: "order_date",
+      },
+      {
         // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
         // ค่าที่เก็บคือ clause เต็มอยู่แล้ว จึงไม่ต้องประกาศ toClause
         key: "sendback",
@@ -169,7 +197,7 @@ export default function PoComponent() {
         ],
       },
     ],
-    [viewMode, poTypeOptions, t, tc],
+    [viewMode, poTypeOptions, stages, t, tc],
   );
 
   const lf = useListFilters({

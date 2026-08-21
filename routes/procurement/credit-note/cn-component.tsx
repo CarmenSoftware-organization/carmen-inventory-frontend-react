@@ -73,9 +73,11 @@ export default function CnComponent() {
 
   const cnStatusOptions = useMemo(
     () =>
+      // คอลัมน์จริงใน DB ชื่อ doc_status — prefix เดิม cn_status ไม่มีในตาราง CN
+      // กรองเมื่อไร backend 500 ตลอด (แบบเดียวกับ grn_status ของ GRN)
       Object.entries(CN_STATUS_CONFIG).map(([key, cfg]) => ({
         label: cfg.label,
-        value: `cn_status|string:${key}`,
+        value: `doc_status|string:${key}`,
       })),
     [],
   );
@@ -108,6 +110,19 @@ export default function CnComponent() {
             className="w-full"
           />
         ),
+      },
+      {
+        // ผู้สร้าง = คนเปิดใบลดหนี้ (คอลัมน์ Created By ใน list) — กรองที่ created_by_id
+        key: "created_by",
+        control: "requester",
+        labelKey: "field.createdBy",
+        fieldKey: "created_by_id",
+      },
+      {
+        key: "cn_date",
+        control: "date-range",
+        labelKey: "field.docDate",
+        fieldKey: "cn_date",
       },
     ],
     [cnTypeOptions, cnStatusOptions],

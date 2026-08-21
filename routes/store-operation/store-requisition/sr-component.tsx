@@ -20,6 +20,7 @@ import {
   useMyPendingStoreRequisition,
   useDeleteStoreRequisition,
   useExportStoreRequisition,
+  useStoreRequisitionWorkflowStages,
 } from "@/hooks/use-store-requisition";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import type { StoreRequisition } from "@/types/store-requisition";
@@ -118,6 +119,7 @@ export default function StoreRequisitionComponent() {
   const deleteStoreRequisition = useDeleteStoreRequisition();
   const { exportStoreRequisition, isExporting } = useExportStoreRequisition();
   const { params, search, setSearch, tableConfig } = useDataGridState();
+  const { data: stages } = useStoreRequisitionWorkflowStages();
 
   // ของเดิม 4 popover (status/sr_type/from_location/to_location) แต่ละตัวมี
   // value/onChange เป็น URL filter string ของตัวเองอยู่แล้ว (คนละ URL param) —
@@ -193,6 +195,34 @@ export default function StoreRequisitionComponent() {
         ),
       },
       {
+        key: "workflow_current_stage",
+        control: "stage",
+        labelKey: "field.stage",
+        stages: stages ?? [],
+      },
+      {
+        key: "workflow",
+        control: "workflow",
+        labelKey: "field.workflow",
+        workflowType: WORKFLOW_TYPE.SR,
+      },
+      {
+        key: "user_id",
+        control: "requester",
+        labelKey: "common.requester",
+      },
+      {
+        key: "department",
+        control: "department",
+        labelKey: "field.department",
+      },
+      {
+        key: "sr_date",
+        control: "date-range",
+        labelKey: "field.date",
+        fieldKey: "sr_date",
+      },
+      {
         // ตัวกรอง "ใบที่ถูกตีกลับ" — dropdown สองตัวเลือก (ทั้งหมด / ส่งกลับ)
         // ค่าที่เก็บคือ clause เต็มอยู่แล้ว จึงไม่ต้องประกาศ toClause
         key: "sendback",
@@ -203,7 +233,7 @@ export default function StoreRequisitionComponent() {
         ],
       },
     ],
-    [viewMode, t, tc],
+    [viewMode, stages, t, tc],
   );
 
   const lf = useListFilters({

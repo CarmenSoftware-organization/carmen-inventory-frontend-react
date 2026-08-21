@@ -15,7 +15,7 @@ import type {
   CommentAttachment,
   CommentItem,
 } from "@/components/ui/comment-sheet";
-import { CACHE_DYNAMIC } from "@/lib/cache-config";
+import { CACHE_DYNAMIC, CACHE_STATIC } from "@/lib/cache-config";
 
 export interface SrPreviousStage {
   key: string;
@@ -79,6 +79,33 @@ export function useStoreRequisition(
     },
     ...CACHE_DYNAMIC,
     enabled: !!buCode && (options?.enabled ?? true),
+  });
+}
+
+/**
+ * Hook ดึงรายชื่อ workflow stages ของ SR ใน business unit ปัจจุบัน
+ * ใช้สำหรับแสดง stage filter และจะไม่ fetch จนกว่า buCode จะพร้อม
+ * @returns React Query ของ string[] (รายชื่อ stage)
+ * @example
+ * const { data: stages = [] } = useStoreRequisitionWorkflowStages();
+ */
+export function useStoreRequisitionWorkflowStages() {
+  const buCode = useBuCode();
+
+  return useQuery<string[]>({
+    queryKey: [QUERY_KEYS.STORE_REQUISITION_WORKFLOW_STAGES, buCode],
+    queryFn: async () => {
+      if (!buCode) throw new Error("Missing buCode");
+      const url = buildUrl(
+        API_ENDPOINTS.STORE_REQUISITION_WORKFLOW_STAGES(buCode),
+      );
+      const res = await httpClient.get(url);
+      if (!res.ok) throw new Error("Failed to fetch workflow stages");
+      const json = await res.json();
+      return json.data ?? [];
+    },
+    enabled: !!buCode,
+    ...CACHE_STATIC,
   });
 }
 

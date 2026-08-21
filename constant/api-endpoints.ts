@@ -291,6 +291,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/purchase-orders/grn/vendor`,
   PURCHASE_ORDER_GROUP_PR: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-orders/group-pr`,
+  PURCHASE_ORDER_WORKFLOW_STAGES: (buCode: string) =>
+    `/api/proxy/api/${buCode}/purchase-orders/workflow-stages`,
   PURCHASE_REQUEST: (buCode: string) =>
     `/api/proxy/api/${buCode}/purchase-requests`,
   PURCHASE_REQUESTS: "/api/proxy/api/purchase-requests",
@@ -386,6 +388,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/store-requisitions`,
   STORE_REQUISITION_PREVIOUS_STAGES: (buCode: string, srId: string) =>
     `/api/proxy/api/${buCode}/store-requisitions/${srId}/previous-stages`,
+  STORE_REQUISITION_WORKFLOW_STAGES: (buCode: string) =>
+    `/api/proxy/api/${buCode}/store-requisitions/workflow-stages`,
   STORE_REQUISITIONS: "/api/proxy/api/store-requisitions",
   STORE_REQUISITION_COMMENT: (buCode: string, srId?: string) =>
     srId

@@ -6,12 +6,14 @@ import { FilterDepartment } from "@/components/filter/filter-department";
 import { FilterRequester } from "@/components/filter/filter-requester";
 import { FilterStage } from "@/components/filter/filter-stage";
 import { FilterWorkflow } from "@/components/filter/filter-workflow";
-import type { FilterFieldDef } from "@/types/list-filter";
+import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
 
 interface Props {
   readonly field: FilterFieldDef;
   readonly value: string;
   readonly onChange: (value: string) => void;
+  /** ส่งต่อให้ custom control ที่ต้องอ่าน/เขียน key คู่ (ดู FilterPeerAccess) */
+  readonly peer?: FilterPeerAccess;
 }
 
 /**
@@ -35,7 +37,7 @@ interface Props {
  * />
  * ```
  */
-export function FilterFieldControl({ field, value, onChange }: Props) {
+export function FilterFieldControl({ field, value, onChange, peer }: Props) {
   const t = useTranslations();
 
   switch (field.control) {
@@ -82,7 +84,13 @@ export function FilterFieldControl({ field, value, onChange }: Props) {
       );
     case "requester":
       return (
-        <FilterRequester value={value} onChange={onChange} className="w-full" />
+        <FilterRequester
+          value={value}
+          onChange={onChange}
+          fieldKey={field.fieldKey}
+          label={field.labelKey ? t(field.labelKey) : undefined}
+          className="w-full"
+        />
       );
     case "stage":
       return (
@@ -103,6 +111,6 @@ export function FilterFieldControl({ field, value, onChange }: Props) {
         />
       );
     case "custom":
-      return <>{field.render(value, onChange)}</>;
+      return <>{field.render(value, onChange, peer)}</>;
   }
 }

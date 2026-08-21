@@ -73,9 +73,11 @@ export default function GrnComponent() {
   // เดิม แม้ locale เป็นไทย — พฤติกรรมเดิมก่อน migrate ไม่แก้ในงานนี้)
   const grnStatusOptions = useMemo(
     () =>
+      // คอลัมน์จริงใน DB ชื่อ doc_status — prefix เดิม grn_status เป็น field
+      // คำนวณของ PO ไม่มีในตาราง GRN กรองเมื่อไร backend 500 ตลอด
       Object.entries(GRN_STATUS_CONFIG).map(([key, cfg]) => ({
         label: cfg.label,
-        value: `grn_status|string:${key}`,
+        value: `doc_status|string:${key}`,
       })),
     [],
   );
@@ -95,6 +97,31 @@ export default function GrnComponent() {
             className="w-full"
           />
         ),
+      },
+      {
+        key: "doc_type",
+        control: "multi-select",
+        labelKey: "field.type",
+        options: [
+          {
+            labelKey: "field.purchaseOrder",
+            value: "doc_type|string:purchase_order",
+          },
+          { labelKey: "field.manual", value: "doc_type|string:manual" },
+        ],
+      },
+      {
+        // ผู้รับ = คนคีย์ใบรับของ (คอลัมน์ Received By ใน list) — กรองที่ created_by_id
+        key: "received_by",
+        control: "requester",
+        labelKey: "field.receivedBy",
+        fieldKey: "created_by_id",
+      },
+      {
+        key: "grn_date",
+        control: "date-range",
+        labelKey: "field.grnDate",
+        fieldKey: "grn_date",
       },
     ],
     [grnStatusOptions],

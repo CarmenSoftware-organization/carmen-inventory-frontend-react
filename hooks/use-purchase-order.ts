@@ -16,7 +16,7 @@ import type {
 } from "@/types/purchase-order";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import type { CommentItem } from "@/components/ui/comment-sheet";
-import { CACHE_DYNAMIC } from "@/lib/cache-config";
+import { CACHE_DYNAMIC, CACHE_STATIC } from "@/lib/cache-config";
 
 /**
  * Hook ดึงรายการใบสั่งซื้อ (Purchase Order) ทั้งหมด
@@ -45,6 +45,33 @@ export function usePurchaseOrder(
     },
     ...CACHE_DYNAMIC,
     enabled: !!buCode && (options?.enabled ?? true),
+  });
+}
+
+/**
+ * Hook ดึงรายชื่อ workflow stages ของ PO ใน business unit ปัจจุบัน
+ * ใช้สำหรับแสดง stage filter และจะไม่ fetch จนกว่า buCode จะพร้อม
+ * @returns React Query ของ string[] (รายชื่อ stage)
+ * @example
+ * const { data: stages = [] } = usePurchaseOrderWorkflowStages();
+ */
+export function usePurchaseOrderWorkflowStages() {
+  const buCode = useBuCode();
+
+  return useQuery<string[]>({
+    queryKey: [QUERY_KEYS.PURCHASE_ORDER_WORKFLOW_STAGES, buCode],
+    queryFn: async () => {
+      const url = buildUrl(
+        API_ENDPOINTS.PURCHASE_ORDER_WORKFLOW_STAGES(buCode!),
+      );
+      const res = await httpClient.get(url);
+      if (!res.ok)
+        throw await ApiError.from(res, "Failed to fetch workflow stages");
+      const json = await res.json();
+      return json.data ?? [];
+    },
+    enabled: !!buCode,
+    ...CACHE_STATIC,
   });
 }
 

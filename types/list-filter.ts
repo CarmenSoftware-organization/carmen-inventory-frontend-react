@@ -1,6 +1,16 @@
 import type { ReactNode } from "react";
 import type { WORKFLOW_TYPE } from "@/types/workflows";
 
+/**
+ * ช่องทางอ่าน/เขียนค่า field อื่นจากใน custom control — ชี้ไปที่ draft ของ
+ * ListFilterSheet (ไม่ใช่ URL ตรง) เพื่อให้ field คู่ เช่น `created_at_to` ของ
+ * `created_at_from` เดินตาม apply-on-Done เดียวกันกับ onChange ปกติ
+ */
+export interface FilterPeerAccess {
+  readonly get: (key: string) => string;
+  readonly set: (key: string, value: string) => void;
+}
+
 interface FilterFieldBase {
   /** ชื่อ URL param — ต้องตรงกับที่หน้าเดิมใช้ เพื่อไม่หัก deep link เก่า */
   readonly key: string;
@@ -43,7 +53,11 @@ export type FilterFieldDef =
       readonly fieldKey: string;
     })
   | (FilterFieldBase & { readonly control: "department" })
-  | (FilterFieldBase & { readonly control: "requester" })
+  | (FilterFieldBase & {
+      readonly control: "requester";
+      /** ชื่อคอลัมน์ใน clause — default `requestor_id` (PO ใช้ `created_by_id` กรองผู้จัดซื้อ) */
+      readonly fieldKey?: string;
+    })
   | (FilterFieldBase & { readonly control: "stage"; readonly stages: string[] })
   | (FilterFieldBase & {
       readonly control: "workflow";
@@ -54,5 +68,6 @@ export type FilterFieldDef =
       readonly render: (
         value: string,
         onChange: (v: string) => void,
+        peer?: FilterPeerAccess,
       ) => ReactNode;
     });

@@ -36,19 +36,28 @@ interface FilterRequesterProps {
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly className?: string;
+  /**
+   * ชื่อคอลัมน์จริงใน DB ที่ clause จะชี้ — default `requestor_id` (สะกดตาม
+   * schema ฝั่ง backend ไม่ใช่ requester) — PO ใช้ `created_by_id` กรองผู้จัดซื้อ
+   */
+  readonly fieldKey?: string;
+  /** ข้อความบนปุ่ม/ช่องค้น — default label "ผู้ขอ" */
+  readonly label?: string;
 }
 
 /**
- * ตัวกรองผู้ขอ (requester) แบบ multi-select
+ * ตัวกรองรายชื่อคน (ผู้ขอ/ผู้จัดซื้อ) แบบ multi-select
  *
  * Render Popover button + Command พร้อม search input และรายการ user fetch
  * ข้อมูลจาก `useUser` แสดงชื่อเต็มผ่าน `getUserFullName` parse/serialize
- * URL filter รูปแบบ `requester_id|string:id1,id2`
+ * URL filter รูปแบบ `<fieldKey>|string:id1,id2`
  *
  * @param props - props ของ filter
  * @param props.value - URL filter string ปัจจุบัน
  * @param props.onChange - callback เปลี่ยนค่า filter
  * @param props.className - className เพิ่มเติม
+ * @param props.fieldKey - ชื่อคอลัมน์ใน clause (default `requestor_id`)
+ * @param props.label - ข้อความบนปุ่ม (default label "ผู้ขอ")
  * @returns JSX element ของ filter popover
  * @example
  * ```tsx
@@ -59,6 +68,8 @@ export function FilterRequester({
   value,
   onChange,
   className,
+  fieldKey = "requestor_id",
+  label,
 }: FilterRequesterProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -74,12 +85,14 @@ export function FilterRequester({
     return users.filter((u) => getUserFullName(u).toLowerCase().includes(q));
   })();
 
-  // Parse filter value (format: "requester_id|string:id1,id2,id3")
+  const displayLabel = label || tfl("requester");
+
+  // Parse filter value (format: "<fieldKey>|string:id1,id2,id3")
   const selectedIds = (() => {
     if (!value) return new Set<string>();
-    const match = /requester_id\|string:(.+)/.exec(value);
-    if (!match) return new Set<string>();
-    return new Set(match[1].split(","));
+    const prefix = `${fieldKey}|string:`;
+    if (!value.startsWith(prefix)) return new Set<string>();
+    return new Set(value.slice(prefix.length).split(","));
   })();
 
   const handleToggle = (userId: string) => {
@@ -93,7 +106,7 @@ export function FilterRequester({
     if (newIds.size === 0) {
       onChange("");
     } else {
-      onChange(`requester_id|string:${Array.from(newIds).join(",")}`);
+      onChange(`${fieldKey}|string:${Array.from(newIds).join(",")}`);
     }
   };
 
@@ -121,8 +134,8 @@ export function FilterRequester({
             )}
           >
             {selectedCount > 0
-              ? `${tfl("requester")} (${selectedCount})`
-              : tfl("requester")}
+              ? `${displayLabel} (${selectedCount})`
+              : displayLabel}
           </span>
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -130,7 +143,7 @@ export function FilterRequester({
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder={tfl("requester")}
+            placeholder={displayLabel}
             className="placeholder:text-xs"
             value={search}
             onValueChange={setSearch}
