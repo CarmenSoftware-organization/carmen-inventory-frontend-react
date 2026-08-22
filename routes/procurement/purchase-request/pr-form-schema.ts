@@ -341,59 +341,121 @@ export function getDefaultValues(
       ...EMPTY_FORM,
       workflow_id: template.workflow_id ?? "",
       department_id: template.department_id ?? "",
-      items:
-        template.purchase_request_template_detail?.map((d) => ({
-          product_id: d.product_id,
-          product_code: d.product_code ?? "",
-          product_name: d.product_name,
-          product_local_name: d.product_local_name ?? "",
-          description: d.description ?? "",
-          pricelist_price: 0,
-          vendor_id: null,
-          vendor_name: "",
-          stage_status: "",
-          current_stage_status: "",
-          stage_message: "",
-          location_id: d.location_id ?? null,
-          location_code: d.location_code ?? "",
-          location_name: d.location_name ?? "",
-          location_type: d.location_type ?? "",
-          requested_qty: d.requested_qty,
-          requested_unit_id: d.requested_unit_id ?? null,
-          requested_unit_name: d.requested_unit_name ?? "",
-          inventory_unit_id: d.inventory_unit_id ?? null,
-          inventory_unit_name: d.inventory_unit_name ?? "",
-          foc_qty: d.foc_qty ?? 0,
-          foc_unit_id: d.foc_unit_id ?? null,
-          foc_unit_name: d.foc_unit_name ?? "",
-          approved_qty: 0,
-          approved_unit_id: null,
-          approved_unit_name: "",
-          currency_id: d.currency_id ?? null,
-          currency_code: null,
-          currency_decimal_places: 2,
-          exchange_rate: 1,
-          delivery_point_id: d.delivery_point_id ?? null,
-          delivery_point_name: d.delivery_point_name ?? "",
-          delivery_date: "",
-          pricelist_detail_id: null,
-          pricelist_no: null,
-          pricelist_type: "",
-          tax_profile_id: d.tax_profile_id ?? null,
-          tax_profile_name: d.tax_profile_name ?? "",
-          tax_rate: d.tax_rate ?? 0,
-          tax_amount: d.tax_amount ?? 0,
-          is_tax_adjustment: d.is_tax_adjustment ?? false,
-          discount_rate: d.discount_rate ?? 0,
-          discount_amount: d.discount_amount ?? 0,
-          is_discount_adjustment: d.is_discount_adjustment ?? false,
-          net_amount: 0,
-          total_price: 0,
-          comment: d.comment ?? "",
-        })) ?? [],
+      items: template.purchase_request_template_detail?.map(freshItem) ?? [],
     };
   }
   return EMPTY_FORM;
+}
+
+/**
+ * source แถว item ที่ freshItem อ่าน — โครงร่วมของ template detail กับ PR detail
+ * (field ชื่อเดียวกันทั้งคู่ ประกาศแบบ structural จะได้ไม่ผูกกับ type ใดtype หนึ่ง)
+ */
+interface FreshItemSource {
+  product_id: string;
+  product_code?: string | null;
+  product_name: string;
+  product_local_name?: string | null;
+  description?: string | null;
+  location_id?: string | null;
+  location_code?: string | null;
+  location_name?: string | null;
+  location_type?: string | null;
+  requested_qty: number;
+  requested_unit_id?: string | null;
+  requested_unit_name?: string | null;
+  inventory_unit_id?: string | null;
+  inventory_unit_name?: string | null;
+  foc_qty?: number | null;
+  foc_unit_id?: string | null;
+  foc_unit_name?: string | null;
+  currency_id?: string | null;
+  delivery_point_id?: string | null;
+  delivery_point_name?: string | null;
+  tax_profile_id?: string | null;
+  tax_profile_name?: string | null;
+  tax_rate?: number | null;
+  tax_amount?: number | null;
+  is_tax_adjustment?: boolean | null;
+  discount_rate?: number | null;
+  discount_amount?: number | null;
+  is_discount_adjustment?: boolean | null;
+  comment?: string | null;
+}
+
+/**
+ * แถว item ตั้งต้นสำหรับใบใหม่จาก source (template หรือใบเดิมตอน duplicate) —
+ * เก็บเฉพาะ "ของที่สั่ง" (สินค้า จำนวน หน่วย สถานที่ ภาษี ส่วนลด) แล้วทิ้งของที่
+ * ผูกกับเอกสาร/รอบราคาเดิม (vendor, pricelist, approved, stage, delivery_date)
+ * ให้เริ่มรอบใหม่ — ราคาใน price list เปลี่ยนได้ทุกสัปดาห์ ลาก pricelist_detail_id
+ * เก่ามาคือชี้ราคาที่ตายแล้ว
+ */
+function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
+  return {
+    product_id: d.product_id,
+    product_code: d.product_code ?? "",
+    product_name: d.product_name,
+    product_local_name: d.product_local_name ?? "",
+    description: d.description ?? "",
+    pricelist_price: 0,
+    vendor_id: null,
+    vendor_name: "",
+    stage_status: "",
+    current_stage_status: "",
+    stage_message: "",
+    location_id: d.location_id ?? null,
+    location_code: d.location_code ?? "",
+    location_name: d.location_name ?? "",
+    location_type: d.location_type ?? "",
+    requested_qty: d.requested_qty,
+    requested_unit_id: d.requested_unit_id ?? null,
+    requested_unit_name: d.requested_unit_name ?? "",
+    inventory_unit_id: d.inventory_unit_id ?? null,
+    inventory_unit_name: d.inventory_unit_name ?? "",
+    foc_qty: d.foc_qty ?? 0,
+    foc_unit_id: d.foc_unit_id ?? null,
+    foc_unit_name: d.foc_unit_name ?? "",
+    approved_qty: 0,
+    approved_unit_id: null,
+    approved_unit_name: "",
+    currency_id: d.currency_id ?? null,
+    currency_code: null,
+    currency_decimal_places: 2,
+    exchange_rate: 1,
+    delivery_point_id: d.delivery_point_id ?? null,
+    delivery_point_name: d.delivery_point_name ?? "",
+    delivery_date: "",
+    pricelist_detail_id: null,
+    pricelist_no: null,
+    pricelist_type: "",
+    tax_profile_id: d.tax_profile_id ?? null,
+    tax_profile_name: d.tax_profile_name ?? "",
+    tax_rate: d.tax_rate ?? 0,
+    tax_amount: d.tax_amount ?? 0,
+    is_tax_adjustment: d.is_tax_adjustment ?? false,
+    discount_rate: d.discount_rate ?? 0,
+    discount_amount: d.discount_amount ?? 0,
+    is_discount_adjustment: d.is_discount_adjustment ?? false,
+    net_amount: 0,
+    total_price: 0,
+    comment: d.comment ?? "",
+  };
+}
+
+/**
+ * ค่าเริ่มต้นของฟอร์มตอน duplicate ใบเดิม — semantics เดียวกับสร้างจาก template
+ * (ใบเดิมทำหน้าที่เป็น template ชั่วคราว): copy หัว (notes/workflow/แผนก) กับ
+ * รายการของผ่าน freshItem ส่วน requestor ปล่อยว่างให้ effect auto-populate เติม
+ * เป็นคนที่กำลังสร้าง ไม่ใช่คนขอของใบเดิม
+ */
+export function getDuplicateValues(pr: PurchaseRequest): PrFormValues {
+  return {
+    ...EMPTY_FORM,
+    description: pr.description ?? "",
+    workflow_id: pr.workflow_id ?? "",
+    department_id: pr.department_id ?? "",
+    items: pr.purchase_request_detail?.map(freshItem) ?? [],
+  };
 }
 
 const STATUS_DENORMALIZE: Record<string, string> = {

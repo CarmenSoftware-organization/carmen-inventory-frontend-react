@@ -21,6 +21,7 @@ import {
   createPrSchema,
   type PrFormValues,
   getDefaultValues,
+  getDuplicateValues,
 } from "./pr-form-schema";
 import { useProfile } from "@/hooks/use-profile";
 import { usePrPreviousStages } from "@/hooks/use-purchase-request";
@@ -30,11 +31,14 @@ import { PrHeader } from "./pr-header";
 interface PurchaseRequestFormProps {
   readonly purchaseRequest?: PurchaseRequest;
   readonly template?: PurchaseRequestTemplate;
+  /** ใบเดิมที่ผู้ใช้กด Duplicate — ทำหน้าที่เหมือน template (prefill แล้วนับ dirty) */
+  readonly duplicateFrom?: PurchaseRequest;
 }
 
 export function PurchaseRequestForm({
   purchaseRequest,
   template,
+  duplicateFrom,
 }: PurchaseRequestFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -58,12 +62,15 @@ export function PurchaseRequestForm({
         !!purchaseRequest?.workflow_current_stage,
     );
 
-  // ค่าแรกเข้าของฟอร์ม (มี template = เติมของจาก template มาให้แล้ว) ส่วน
-  // baseline ที่ใช้เทียบ dirty ตอนมาจาก template ต้องเป็นฟอร์มเปล่า — ของที่
-  // template เติมคือของที่ยังไม่ save ถ้าปล่อยเป็น baseline ฟอร์มจะไม่ dirty
+  // ค่าแรกเข้าของฟอร์ม (มี template/duplicateFrom = เติมของมาให้แล้ว) ส่วน
+  // baseline ที่ใช้เทียบ dirty ตอนมาจาก prefill ต้องเป็นฟอร์มเปล่า — ของที่
+  // ถูกเติมคือของที่ยังไม่ save ถ้าปล่อยเป็น baseline ฟอร์มจะไม่ dirty
   // เลย กด back ออกเงียบ ๆ โดย discard ไม่ถามทั้งที่มีของค้างเต็มฟอร์ม
-  const initialValues = getDefaultValues(purchaseRequest, template);
-  const defaultValues = template ? getDefaultValues() : initialValues;
+  const initialValues = duplicateFrom
+    ? getDuplicateValues(duplicateFrom)
+    : getDefaultValues(purchaseRequest, template);
+  const isPrefilled = !!template || !!duplicateFrom;
+  const defaultValues = isPrefilled ? getDefaultValues() : initialValues;
   const role = purchaseRequest?.role ?? STAGE_ROLE.CREATE;
 
   const form = useForm<PrFormValues>({
@@ -79,12 +86,12 @@ export function PurchaseRequestForm({
     reValidateMode: "onChange",
   });
 
-  // จาก template: สลับ baseline เป็นฟอร์มเปล่าโดยคงค่าที่เติมไว้ → ฟอร์มนับเป็น
-  // dirty ตั้งแต่เกิด navGuard/discard เลยทำงานเหมือนผู้ใช้กรอกเองทุกช่อง
+  // จาก template/duplicate: สลับ baseline เป็นฟอร์มเปล่าโดยคงค่าที่เติมไว้ →
+  // ฟอร์มนับเป็น dirty ตั้งแต่เกิด navGuard/discard เลยทำงานเหมือนผู้ใช้กรอกเองทุกช่อง
   // (ต้องมาก่อน effect auto-populate ข้างล่าง — ตัวนั้น reset ด้วย keepDirtyValues
-  // ซึ่งจะคงค่า template ไว้ก็ต่อเมื่อ field พวกนั้นถูกนับ dirty แล้วเท่านั้น)
+  // ซึ่งจะคงค่าที่เติมไว้ก็ต่อเมื่อ field พวกนั้นถูกนับ dirty แล้วเท่านั้น)
   useEffect(() => {
-    if (!template) return;
+    if (!isPrefilled) return;
     form.reset(defaultValues, { keepValues: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ครั้งเดียวตอน mount
   }, []);
@@ -180,10 +187,10 @@ export function PurchaseRequestForm({
       if (!values.department_id) patch.department_id = defaultDefaultId;
     }
     if (Object.keys(patch).length === 0) return;
-    // จาก template ฟอร์มต้อง dirty อยู่แล้ว (baseline เปล่า) — setValue ตรง ๆ พอ
-    // ห้ามเดินทาง reset ข้างล่าง: keepDirtyValues เก็บเฉพาะ field ที่อยู่ใน
-    // dirtyFields ซึ่ง items จาก template ยังไม่อยู่ → โดน wipe ทั้งตาราง
-    if (template) {
+    // จาก template/duplicate ฟอร์มต้อง dirty อยู่แล้ว (baseline เปล่า) — setValue
+    // ตรง ๆ พอ ห้ามเดินทาง reset ข้างล่าง: keepDirtyValues เก็บเฉพาะ field ที่อยู่ใน
+    // dirtyFields ซึ่ง items ที่ prefill มายังไม่อยู่ → โดน wipe ทั้งตาราง
+    if (isPrefilled) {
       if (patch.pr_date) form.setValue("pr_date", patch.pr_date);
       if (patch.requestor_id) form.setValue("requestor_id", patch.requestor_id);
       if (patch.department_id)

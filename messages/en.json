@@ -517,7 +517,10 @@
     "sortBy": "Sort by",
     "sortDefault": "Default",
     "navigate": "Navigate",
-    "recent": "Recent"
+    "recent": "Recent",
+    "duplicate": "Duplicate",
+    "createDocument": "Create document",
+    "createEntity": "Create {entity}"
   },
   "pagination": {
     "label": "Pagination",

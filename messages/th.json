@@ -517,7 +517,10 @@
     "sortBy": "เรียงตาม",
     "sortDefault": "ค่าเริ่มต้น",
     "navigate": "เลื่อนเลือก",
-    "recent": "เพิ่งเปิด"
+    "recent": "เพิ่งเปิด",
+    "duplicate": "สร้างสำเนา",
+    "createDocument": "สร้างเอกสาร",
+    "createEntity": "สร้าง{entity}"
   },
   "pagination": {
     "label": "การแบ่งหน้า",

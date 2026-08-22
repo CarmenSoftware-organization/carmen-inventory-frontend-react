@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { History } from "lucide-react";
+import { History, Plus } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,12 +10,27 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useCan } from "@/hooks/use-can";
 import { useProfile } from "@/hooks/use-profile";
 import { useRecentDocuments } from "@/hooks/use-recent-documents";
 import {
   useVisibleModules,
   type ModuleWithAccess,
 } from "@/hooks/use-visible-modules";
+import type { Permission } from "@/constant/permissions";
+
+/**
+ * โมดูลเอกสารที่มีหน้า /new ให้กระโดดไปสร้างจาก palette ตรง ๆ — จงใจเลือกเฉพาะ
+ * เอกสารที่คนหน้างานสร้างเป็นประจำ ไม่ใช่ทุก leaf ที่มี route new (พวกทะเบียน
+ * config สร้างผ่าน dialog ในหน้า list อยู่แล้ว และไม่ใช่งานรายวัน)
+ */
+const CREATE_DOC_PATHS: readonly string[] = [
+  "/procurement/purchase-request",
+  "/procurement/purchase-order",
+  "/procurement/goods-receive-note",
+  "/procurement/credit-note",
+  "/store-operation/store-requisition",
+];
 
 /** หัวกลุ่มเป็น micro-eyebrow ตาม ladder ของ DESIGN.md — ใช้ร่วมทุกกลุ่มในไฟล์นี้ */
 const GROUP_HEADING_CLASS =
@@ -42,6 +57,7 @@ export function CommandPalette() {
   const t = useTranslations("modules");
   const tc = useTranslations("common");
   const modules = useVisibleModules();
+  const { can, isAdmin } = useCan();
   const { buCode } = useProfile();
   const recents = useRecentDocuments(buCode);
 
@@ -69,6 +85,17 @@ export function CommandPalette() {
     }))
     .filter((g) => g.leaves.length > 0);
 
+  // แถว "สร้างเอกสาร" — เอาจาก leaf ที่มองเห็น (ผ่าน view/license แล้ว) และ
+  // มีสิทธิ์ create ด้วย: permission ของ leaf คือ *.view สลับท้ายเป็น .create
+  // (naming ตรงกันทั้ง catalog — สูตรเดียวกับ buildPermissionKey ของ FormToolbar)
+  const createActions = groups
+    .flatMap((g) => g.leaves)
+    .filter((l) => CREATE_DOC_PATHS.includes(l.path))
+    .filter((l) => {
+      if (!l.permission || isAdmin) return true;
+      return can(l.permission.replace(/\.view$/, ".create") as Permission);
+    });
+
   return (
     <CommandDialog
       open={open}
@@ -82,6 +109,24 @@ export function CommandPalette() {
         <CommandEmpty>{tc("noOptions")}</CommandEmpty>
         {/* เอกสารที่เพิ่งเปิด (BU ปัจจุบัน) — บันทึกโดย DocFormHeader ตอนเข้าหน้า
             detail ดู use-recent-documents; เลขที่เอกสารค้นเจอจาก value ตรง ๆ */}
+        {/* สร้างเอกสารประจำวันจาก palette ตรง ๆ — โผล่เฉพาะที่มีสิทธิ์ create */}
+        {createActions.length > 0 && (
+          <CommandGroup
+            heading={tc("createDocument")}
+            className={GROUP_HEADING_CLASS}
+          >
+            {createActions.map((leaf) => (
+              <CommandItem
+                key={`new:${leaf.path}`}
+                value={`${tc("createEntity", { entity: t(leaf.name) })} ${leaf.path}/new`}
+                onSelect={() => go(`${leaf.path}/new`)}
+              >
+                <Plus aria-hidden="true" className="text-muted-foreground" />
+                {tc("createEntity", { entity: t(leaf.name) })}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
         {recents.length > 0 && (
           <CommandGroup heading={tc("recent")} className={GROUP_HEADING_CLASS}>
             {recents.map((doc) => (

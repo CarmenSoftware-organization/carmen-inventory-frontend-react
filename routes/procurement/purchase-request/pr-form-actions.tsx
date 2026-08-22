@@ -1,5 +1,6 @@
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { History, Pencil, Save, Trash2, X } from "lucide-react";
+import { Copy, History, Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
@@ -72,6 +73,7 @@ export function PrFormActions({
 }: PrFormActionsProps) {
   const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
+  const navigate = useNavigate();
   const { data: comments } = usePurchaseRequestComments(
     hasRecord ? prId : undefined,
   );
@@ -124,6 +126,24 @@ export function PrFormActions({
         >
           <Trash2 />
           {tc("delete")}
+        </Button>
+      )}
+
+      {/* Duplicate — สร้างใบใหม่ prefill จากใบนี้ (view mode เท่านั้น ตอน edit
+          ค่าบนจออาจยังไม่ save การก๊อปจาก server คนละเรื่องกับที่เห็น) */}
+      {hasRecord && isView && prId && (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() =>
+            navigate(
+              `/procurement/purchase-request/new?duplicate_id=${prId}`,
+            )
+          }
+        >
+          <Copy />
+          {tc("duplicate")}
         </Button>
       )}
 

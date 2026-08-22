@@ -7,7 +7,14 @@ import type {
 } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
-import { MoreHorizontal, CheckCircle2, XCircle, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router";
+import {
+  MoreHorizontal,
+  CheckCircle2,
+  XCircle,
+  Copy,
+  Trash2,
+} from "lucide-react";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import {
@@ -75,6 +82,7 @@ export function usePurchaseRequestTable({
     useProfile();
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
+  const navigate = useNavigate();
 
   const dataColumns: ColumnDef<PurchaseRequest>[] = [
     {
@@ -258,19 +266,30 @@ export function usePurchaseRequestTable({
               </DropdownMenuItem>
             )}
 
+            {(onApprove || onReject) && isPendingApproval && (
+              <DropdownMenuSeparator />
+            )}
+
+            {/* Duplicate ได้ทุกสถานะ — สั่งของประจำสัปดาห์คือก๊อปใบเดิมแล้วแก้จำนวน */}
+            <DropdownMenuItem
+              onClick={() =>
+                navigate(
+                  `/procurement/purchase-request/new?duplicate_id=${item.id}`,
+                )
+              }
+            >
+              <Copy aria-hidden="true" />
+              {tc("duplicate")}
+            </DropdownMenuItem>
+
             {isDraft && (
-              <>
-                {(onApprove || onReject) && isPendingApproval && (
-                  <DropdownMenuSeparator />
-                )}
-                <DropdownMenuItem
-                  onClick={() => onDelete(item)}
-                  variant={"destructive"}
-                >
-                  <Trash2 className="text-destructive" aria-hidden="true" />
-                  {tc("delete")}
-                </DropdownMenuItem>
-              </>
+              <DropdownMenuItem
+                onClick={() => onDelete(item)}
+                variant={"destructive"}
+              >
+                <Trash2 className="text-destructive" aria-hidden="true" />
+                {tc("delete")}
+              </DropdownMenuItem>
             )}
           </DropdownMenuContent>
         </DropdownMenu>
