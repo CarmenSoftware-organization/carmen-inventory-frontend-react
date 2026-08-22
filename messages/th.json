@@ -515,7 +515,8 @@
     "min": "ต่ำสุด",
     "max": "สูงสุด",
     "sortBy": "เรียงตาม",
-    "sortDefault": "ค่าเริ่มต้น"
+    "sortDefault": "ค่าเริ่มต้น",
+    "navigate": "เลื่อนเลือก"
   },
   "pagination": {
     "label": "การแบ่งหน้า",

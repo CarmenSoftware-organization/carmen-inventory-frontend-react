@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 import { AnalyticsBridge } from "@/components/analytics-bridge";
+import { CommandPalette } from "@/components/command-palette";
 import { StatusBar } from "@/components/footer/status-bar";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
 import { LicenseExpiredBanner } from "@/components/license-expired-banner";
@@ -41,6 +42,7 @@ export default function RootLayout() {
         <StatusBar />
       </SidebarInset>
       <KeyboardShortcutsDialog />
+      <CommandPalette />
       <MissingDepartmentDialog />
       <ActivitySheetHost />
     </SidebarShell>

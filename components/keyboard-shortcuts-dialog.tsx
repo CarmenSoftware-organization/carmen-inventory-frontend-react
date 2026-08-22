@@ -17,6 +17,7 @@ interface Shortcut {
 // "/" are handled by the keydown listener below; "Esc" closes the dialog via
 // Radix.
 const SHORTCUTS: Shortcut[] = [
+  { keys: ["⌘K / Ctrl+K"], description: "Open command palette" },
   { keys: ["?"], description: "Show this dialog" },
   { keys: ["/"], description: "Focus search input on current page" },
   { keys: ["Esc"], description: "Close dialog / clear focus" },
