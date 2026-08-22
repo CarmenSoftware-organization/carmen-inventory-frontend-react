@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { CommentButton } from "@/components/comment-button";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import { openActivity } from "@/components/share/activity-sheet-host";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { usePurchaseRequestComments } from "@/hooks/use-purchase-request";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { PR_STATUS } from "@/types/purchase-request";
 import type { FormMode } from "@/types/form";
@@ -73,7 +76,18 @@ export function PrFormActions({
 }: PrFormActionsProps) {
   const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
+  const t = useTranslations("procurement.purchaseRequest");
   const navigate = useNavigate();
+  // Duplicate = สร้างใบใหม่ — เกณฑ์เดียวกับปุ่ม Add: ต้องมี workflow ที่เริ่มได้
+  // (PR ไม่มี permission .create ใน catalog) กดไม่ผ่านเด้ง dialog บอกเหตุผล
+  const { canCreate: canCreatePr } = useCreatableWorkflows(WORKFLOW_TYPE.PR);
+  const handleDuplicate = () => {
+    if (!canCreatePr) {
+      dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
+      return;
+    }
+    navigate(`/procurement/purchase-request/new?duplicate_id=${prId}`);
+  };
   const { data: comments } = usePurchaseRequestComments(
     hasRecord ? prId : undefined,
   );
@@ -136,11 +150,7 @@ export function PrFormActions({
           type="button"
           size="sm"
           variant="outline"
-          onClick={() =>
-            navigate(
-              `/procurement/purchase-request/new?duplicate_id=${prId}`,
-            )
-          }
+          onClick={handleDuplicate}
         >
           <Copy />
           {tc("duplicate")}

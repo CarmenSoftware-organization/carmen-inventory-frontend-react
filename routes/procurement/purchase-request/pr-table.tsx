@@ -15,6 +15,9 @@ import {
   Copy,
   Trash2,
 } from "lucide-react";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
 import {
@@ -82,7 +85,18 @@ export function usePurchaseRequestTable({
     useProfile();
   const tfl = useTranslations("field");
   const tc = useTranslations("common");
+  const t = useTranslations("procurement.purchaseRequest");
   const navigate = useNavigate();
+  // Duplicate = สร้างใบใหม่ — เกณฑ์เดียวกับปุ่ม Add: ต้องมี workflow ที่เริ่มได้
+  // (PR ไม่มี permission .create ใน catalog) กดไม่ผ่านเด้ง dialog บอกเหตุผล
+  const { canCreate: canCreatePr } = useCreatableWorkflows(WORKFLOW_TYPE.PR);
+  const handleDuplicate = (item: PurchaseRequest) => {
+    if (!canCreatePr) {
+      dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
+      return;
+    }
+    navigate(`/procurement/purchase-request/new?duplicate_id=${item.id}`);
+  };
 
   const dataColumns: ColumnDef<PurchaseRequest>[] = [
     {
@@ -271,13 +285,7 @@ export function usePurchaseRequestTable({
             )}
 
             {/* Duplicate ได้ทุกสถานะ — สั่งของประจำสัปดาห์คือก๊อปใบเดิมแล้วแก้จำนวน */}
-            <DropdownMenuItem
-              onClick={() =>
-                navigate(
-                  `/procurement/purchase-request/new?duplicate_id=${item.id}`,
-                )
-              }
-            >
+            <DropdownMenuItem onClick={() => handleDuplicate(item)}>
               <Copy aria-hidden="true" />
               {tc("duplicate")}
             </DropdownMenuItem>

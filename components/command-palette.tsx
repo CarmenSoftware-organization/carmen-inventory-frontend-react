@@ -10,14 +10,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { useCan } from "@/hooks/use-can";
 import { useProfile } from "@/hooks/use-profile";
 import { useRecentDocuments } from "@/hooks/use-recent-documents";
 import {
   useVisibleModules,
   type ModuleWithAccess,
 } from "@/hooks/use-visible-modules";
-import type { Permission } from "@/constant/permissions";
 
 /**
  * โมดูลเอกสารที่มีหน้า /new ให้กระโดดไปสร้างจาก palette ตรง ๆ — จงใจเลือกเฉพาะ
@@ -57,7 +55,6 @@ export function CommandPalette() {
   const t = useTranslations("modules");
   const tc = useTranslations("common");
   const modules = useVisibleModules();
-  const { can, isAdmin } = useCan();
   const { buCode } = useProfile();
   const recents = useRecentDocuments(buCode);
 
@@ -85,16 +82,14 @@ export function CommandPalette() {
     }))
     .filter((g) => g.leaves.length > 0);
 
-  // แถว "สร้างเอกสาร" — เอาจาก leaf ที่มองเห็น (ผ่าน view/license แล้ว) และ
-  // มีสิทธิ์ create ด้วย: permission ของ leaf คือ *.view สลับท้ายเป็น .create
-  // (naming ตรงกันทั้ง catalog — สูตรเดียวกับ buildPermissionKey ของ FormToolbar)
+  // แถว "สร้างเอกสาร" — เอาจาก leaf ที่มองเห็น (ผ่าน view/license แล้ว) พอ
+  // **จงใจไม่เดา key create จาก .view**: catalog ไม่มี .create ให้ PR/PO
+  // (เกณฑ์สร้างจริงของสายนั้นคือ workflow ที่เริ่มได้ ดู useCreatableWorkflows)
+  // เดาแล้ว can() ได้ false ตลอด = ซ่อนเมนูจาก non-admin ทั้งที่เขาสร้างได้
+  // หน้า /new มี CreateWorkflowGate/permission gate ของตัวเองอธิบายเหตุผลอยู่แล้ว
   const createActions = groups
     .flatMap((g) => g.leaves)
-    .filter((l) => CREATE_DOC_PATHS.includes(l.path))
-    .filter((l) => {
-      if (!l.permission || isAdmin) return true;
-      return can(l.permission.replace(/\.view$/, ".create") as Permission);
-    });
+    .filter((l) => CREATE_DOC_PATHS.includes(l.path));
 
   return (
     <CommandDialog
@@ -107,9 +102,7 @@ export function CommandPalette() {
       <CommandInput placeholder={tc("search")} />
       <CommandList className="max-h-80">
         <CommandEmpty>{tc("noOptions")}</CommandEmpty>
-        {/* เอกสารที่เพิ่งเปิด (BU ปัจจุบัน) — บันทึกโดย DocFormHeader ตอนเข้าหน้า
-            detail ดู use-recent-documents; เลขที่เอกสารค้นเจอจาก value ตรง ๆ */}
-        {/* สร้างเอกสารประจำวันจาก palette ตรง ๆ — โผล่เฉพาะที่มีสิทธิ์ create */}
+        {/* สร้างเอกสารประจำวันจาก palette ตรง ๆ (เกณฑ์การโผล่ดู createActions) */}
         {createActions.length > 0 && (
           <CommandGroup
             heading={tc("createDocument")}
@@ -127,6 +120,8 @@ export function CommandPalette() {
             ))}
           </CommandGroup>
         )}
+        {/* เอกสารที่เพิ่งเปิด (BU ปัจจุบัน) — บันทึกโดย DocFormHeader ตอนเข้าหน้า
+            detail ดู use-recent-documents; เลขที่เอกสารค้นเจอจาก value ตรง ๆ */}
         {recents.length > 0 && (
           <CommandGroup heading={tc("recent")} className={GROUP_HEADING_CLASS}>
             {recents.map((doc) => (
