@@ -19,6 +19,7 @@ import {
   useExportCreditNote,
 } from "@/hooks/use-credit-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { CN_STATUS_OPTIONS, CN_TYPE_OPTIONS } from "@/constant/credit-note";
 import { useVendor } from "@/hooks/use-vendor";
@@ -210,6 +211,10 @@ export default function CnComponent() {
   });
 
   const creditNotes = useInfiniteScroll ? grid.items : (data?.data ?? []);
+
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav)
+
+  useRecordDocSequence(creditNotes.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);

@@ -31,5 +31,5 @@ export function EditCreditNoteContent({ id }: { id: string }) {
       />
     );
 
-  return <CnForm creditNote={creditNote} />;
+  return <CnForm key={creditNote.id} creditNote={creditNote} />;
 }

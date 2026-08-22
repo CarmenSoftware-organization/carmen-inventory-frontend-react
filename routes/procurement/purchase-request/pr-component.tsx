@@ -37,6 +37,7 @@ import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import { PR_STATUS } from "@/types/purchase-request";
@@ -358,6 +359,10 @@ export default function PurchaseRequestComponent() {
   });
 
   const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
+
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav)
+
+  useRecordDocSequence(items.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);

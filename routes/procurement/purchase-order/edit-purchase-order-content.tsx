@@ -38,5 +38,5 @@ export function EditPurchaseOrderContent({ id }: { id: string }) {
       />
     );
 
-  return <PoForm purchaseOrder={purchaseOrder} />;
+  return <PoForm key={purchaseOrder.id} purchaseOrder={purchaseOrder} />;
 }

@@ -36,5 +36,5 @@ export function EditGoodsReceiveNoteContent({ id }: { id: string }) {
       />
     );
 
-  return <GrnForm goodsReceiveNote={goodsReceiveNote} />;
+  return <GrnForm key={goodsReceiveNote.id} goodsReceiveNote={goodsReceiveNote} />;
 }

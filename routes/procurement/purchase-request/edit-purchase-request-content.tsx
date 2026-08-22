@@ -24,5 +24,5 @@ export function EditPurchaseRequestContent({ id }: { id: string }) {
       />
     );
 
-  return <PurchaseRequestForm purchaseRequest={purchaseRequest} />;
+  return <PurchaseRequestForm key={purchaseRequest.id} purchaseRequest={purchaseRequest} />;
 }

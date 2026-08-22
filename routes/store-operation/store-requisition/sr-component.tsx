@@ -23,6 +23,7 @@ import {
   useStoreRequisitionWorkflowStages,
 } from "@/hooks/use-store-requisition";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import type { StoreRequisition } from "@/types/store-requisition";
 import SearchInput from "@/components/search-input";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -295,6 +296,10 @@ export default function StoreRequisitionComponent() {
   });
 
   const items = useInfiniteScroll ? grid.items : (data?.data ?? []);
+
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav)
+
+  useRecordDocSequence(items.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);

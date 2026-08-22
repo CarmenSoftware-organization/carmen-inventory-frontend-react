@@ -520,7 +520,8 @@
     "recent": "เพิ่งเปิด",
     "duplicate": "สร้างสำเนา",
     "createDocument": "สร้างเอกสาร",
-    "createEntity": "สร้าง{entity}"
+    "createEntity": "สร้าง{entity}",
+    "previous": "ก่อนหน้า"
   },
   "pagination": {
     "label": "การแบ่งหน้า",

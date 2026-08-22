@@ -21,6 +21,7 @@ import {
   usePurchaseOrderWorkflowStages,
 } from "@/hooks/use-purchase-order";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import {
@@ -298,6 +299,10 @@ export default function PoComponent() {
   });
 
   const purchaseOrders = useInfiniteScroll ? grid.items : (data?.data ?? []);
+
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav)
+
+  useRecordDocSequence(purchaseOrders.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);

@@ -19,6 +19,7 @@ import {
   useExportGoodsReceiveNote,
 } from "@/hooks/use-goods-receive-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
+import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { useVendor } from "@/hooks/use-vendor";
 import { GRN_STATUS_OPTIONS } from "@/constant/goods-receive-note";
@@ -220,6 +221,10 @@ export default function GrnComponent() {
   });
 
   const goodsReceiveNotes = useInfiniteScroll ? grid.items : (data?.data ?? []);
+
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav)
+
+  useRecordDocSequence(goodsReceiveNotes.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);

@@ -9,6 +9,10 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import {
+  removeFromDocSequence,
+  useDocSequence,
+} from "@/hooks/use-doc-sequence";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useProfile } from "@/hooks/use-profile";
@@ -169,9 +173,18 @@ export function usePrFormActions({
     onCancel: navGuard.cancel,
   };
 
+  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อ
+  // ใบถัดไปเลยแทนกลับ list ให้คนอนุมัติไล่เคลียร์ my-pending ได้รวดเดียว
+  // (ใบสุดท้าย/เข้าตรงจาก deep link → กลับ list ตามเดิม) — ที่ /new sequence
+  // เป็น null เสมอ (path ไม่ลงท้าย id) create-then-submit จึงกลับ list ปกติ
+  const seq = useDocSequence(location.pathname);
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    navigate("/procurement/purchase-request");
+    // ใบนี้ action จบแล้วหลุดจาก my-pending — ตัดออกจากคิวก่อนเดินต่อ ให้เลข
+    // n/N ของใบถัดไปตรงกับจำนวนที่เหลือใน list จริง (nextPath คำนวณไว้ก่อนตัด
+    // จึงยังชี้ใบถัดไปถูกตัว)
+    removeFromDocSequence(location.pathname);
+    navigate(seq?.nextPath ?? "/procurement/purchase-request");
   };
 
   const toSubmitStageDetails = (

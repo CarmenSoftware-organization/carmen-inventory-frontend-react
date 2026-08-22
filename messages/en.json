@@ -520,7 +520,8 @@
     "recent": "Recent",
     "duplicate": "Duplicate",
     "createDocument": "Create document",
-    "createEntity": "Create {entity}"
+    "createEntity": "Create {entity}",
+    "previous": "Previous"
   },
   "pagination": {
     "label": "Pagination",
