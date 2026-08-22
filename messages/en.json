@@ -516,7 +516,8 @@
     "max": "Max",
     "sortBy": "Sort by",
     "sortDefault": "Default",
-    "navigate": "Navigate"
+    "navigate": "Navigate",
+    "recent": "Recent"
   },
   "pagination": {
     "label": "Pagination",

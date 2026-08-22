@@ -1,7 +1,13 @@
-import { type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useLocation } from "react-router";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useProfile } from "@/hooks/use-profile";
+import { recordRecentDocument } from "@/hooks/use-recent-documents";
 import { cn } from "@/lib/utils";
+
+/** segment ท้าย path เป็น id ของเอกสารจริงไหม — /new (สร้างใหม่) ไม่ใช่ */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface DocFormHeaderProps {
   readonly title: string;
@@ -49,6 +55,20 @@ export function DocFormHeader({
   leading,
   flush = false,
 }: DocFormHeaderProps) {
+  const { pathname } = useLocation();
+  const { buCode } = useProfile();
+
+  // บันทึกลง "เพิ่งเปิด" ของ ⌘K palette — DocFormHeader คือหัวของหน้า detail
+  // ทุกโมดูล จุดเดียวครอบหมด บันทึกเฉพาะ path ที่ลงท้ายด้วย id จริง (หน้า /new
+  // ไม่ใช่เอกสาร) — title ระหว่างโหลดเป็นชื่อ entity ชั่วคราว เดี๋ยว effect รอบ
+  // ถัดไปเขียนทับด้วยเลขที่จริงเองเพราะ key คือ path เดิม
+  useEffect(() => {
+    if (!buCode || titleMuted) return;
+    const last = pathname.split("/").pop() ?? "";
+    if (!UUID_RE.test(last)) return;
+    recordRecentDocument({ path: pathname, label: title, bu: buCode });
+  }, [pathname, title, titleMuted, buCode]);
+
   return (
     <div>
       {/* ── Content column ── px-4 (เว้น flush) ให้ title/ribbon align กับ form

@@ -15,6 +15,12 @@ vi.mock("use-intl", () => ({
 // FormToolbar render disabled/title/dialog ถูกตามค่าที่ hook คืนมา
 // (ตามแบบ side-main.test.tsx ที่ mock useVisibleModules)
 const useCanReturn = vi.fn();
+// DocFormHeader (ลูกของ FormToolbar) เรียก useProfile เพื่อบันทึก recent ของ ⌘K —
+// เทสต์นี้ไม่มี QueryClientProvider ให้ mock ทิ้ง (buCode ว่าง = ไม่บันทึกอะไร)
+vi.mock("@/hooks/use-profile", () => ({
+  useProfile: () => ({ buCode: undefined }),
+}));
+
 vi.mock("@/hooks/use-can", () => ({
   useCan: () => useCanReturn(),
 }));

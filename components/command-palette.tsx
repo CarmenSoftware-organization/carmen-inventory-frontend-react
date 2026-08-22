@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
+import { History } from "lucide-react";
 import {
   CommandDialog,
   CommandEmpty,
@@ -9,10 +10,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { useProfile } from "@/hooks/use-profile";
+import { useRecentDocuments } from "@/hooks/use-recent-documents";
 import {
   useVisibleModules,
   type ModuleWithAccess,
 } from "@/hooks/use-visible-modules";
+
+/** หัวกลุ่มเป็น micro-eyebrow ตาม ladder ของ DESIGN.md — ใช้ร่วมทุกกลุ่มในไฟล์นี้ */
+const GROUP_HEADING_CLASS =
+  "**:[[cmdk-group-heading]]:text-micro-eyebrow **:[[cmdk-group-heading]]:tracking-[0.04em] **:[[cmdk-group-heading]]:uppercase";
 
 /** leaf ทั้งหมดใต้ tree (module ที่ไม่มีลูกก็คือ leaf ของตัวเอง เช่น dashboard) */
 function collectLeaves(mods: ModuleWithAccess[]): ModuleWithAccess[] {
@@ -35,6 +42,8 @@ export function CommandPalette() {
   const t = useTranslations("modules");
   const tc = useTranslations("common");
   const modules = useVisibleModules();
+  const { buCode } = useProfile();
+  const recents = useRecentDocuments(buCode);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -71,11 +80,27 @@ export function CommandPalette() {
       <CommandInput placeholder={tc("search")} />
       <CommandList className="max-h-80">
         <CommandEmpty>{tc("noOptions")}</CommandEmpty>
+        {/* เอกสารที่เพิ่งเปิด (BU ปัจจุบัน) — บันทึกโดย DocFormHeader ตอนเข้าหน้า
+            detail ดู use-recent-documents; เลขที่เอกสารค้นเจอจาก value ตรง ๆ */}
+        {recents.length > 0 && (
+          <CommandGroup heading={tc("recent")} className={GROUP_HEADING_CLASS}>
+            {recents.map((doc) => (
+              <CommandItem
+                key={doc.path}
+                value={`${doc.label} ${doc.path}`}
+                onSelect={() => go(doc.path)}
+              >
+                <History aria-hidden="true" className="text-muted-foreground" />
+                {doc.label}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
         {groups.map(({ mod, leaves }) => (
           <CommandGroup
             key={mod.path}
             heading={t(mod.name)}
-            className="**:[[cmdk-group-heading]]:text-micro-eyebrow **:[[cmdk-group-heading]]:tracking-[0.04em] **:[[cmdk-group-heading]]:uppercase"
+            className={GROUP_HEADING_CLASS}
           >
             {leaves.map((leaf) => {
               const Icon = leaf.icon;
