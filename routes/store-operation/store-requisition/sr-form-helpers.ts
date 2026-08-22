@@ -59,6 +59,48 @@ export function buildSrDefaultValues(
 }
 
 /**
+ * ค่าเริ่มต้นของฟอร์มตอน duplicate ใบเดิม — semantics เดียวกับ Duplicate ของ PR:
+ * ตั้งต้นจากฟอร์มเปล่า (วันที่วันนี้/พรุ่งนี้ requestor เป็นคนกดก๊อป) แล้ว copy
+ * "ของที่เบิก" จากใบเดิม (notes/workflow/แผนก/คลังต้นทาง-ปลายทาง + รายการสินค้า
+ * กับจำนวนที่ขอ) ทิ้งของที่ผูกกับรอบเดิมทั้งหมด: item id/doc_version, จำนวนที่
+ * อนุมัติ/จ่ายจริง, สถานะ stage — ใบใหม่ต้องเริ่มรอบ workflow ของตัวเอง
+ */
+export function buildSrDuplicateValues(
+  storeRequisition: StoreRequisition,
+  defaultRequestorId: string,
+  defaultDepartmentId: string,
+): SrFormValues {
+  const blank = buildSrDefaultValues(
+    undefined,
+    defaultRequestorId,
+    defaultDepartmentId,
+  );
+  return {
+    ...blank,
+    description: storeRequisition.description ?? "",
+    workflow_id: storeRequisition.workflow_id ?? "",
+    department_id: storeRequisition.department_id ?? defaultDepartmentId,
+    from_location_id: storeRequisition.from_location_id ?? "",
+    to_location_id: storeRequisition.to_location_id ?? "",
+    items:
+      storeRequisition.store_requisition_detail?.map((d) => ({
+        product_id: d.product_id,
+        product_name: d.product_name,
+        product_local_name: d.product_local_name ?? "",
+        unit_name: d.inventory_unit_name ?? "",
+        description: d.description ?? "",
+        requested_qty: d.requested_qty,
+        approved_qty: 0,
+        issued_qty: 0,
+        current_stage_status: "pending",
+        stage_status: "",
+        _initial_stage_status: "pending",
+        stage_message: "",
+      })) ?? [],
+  };
+}
+
+/**
  * ยอดเงินของรายการ SR
  *
  * backend ยังไม่ส่งราคาต่อหน่วยมากับ store_requisition_detail เลยคง 0 ไว้ก่อน

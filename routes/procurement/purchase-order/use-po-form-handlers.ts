@@ -2,6 +2,10 @@ import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
+import {
+  removeFromDocSequence,
+  useDocSequence,
+} from "@/hooks/use-doc-sequence";
 import { toast } from "sonner";
 import type { UseFormReturn } from "react-hook-form";
 import {
@@ -264,9 +268,13 @@ export function usePoFormHandlers({
    * ที่เพิ่งติ๊กแถว (ติ๊กแล้ว setValue ทำให้ dirty) ถ้าไม่ปิด guard ก่อน การ
    * navigate ตอนสำเร็จจะไปโผล่ dialog ถามว่าจะทิ้งการแก้ไขไหม ทั้งที่บันทึกไปแล้ว
    */
+  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อใบถัดไป
+  // แทนกลับ list พร้อมตัดใบที่จบออกจากคิว (แบบเดียวกับ onSuccessList ของ PR)
+  const seq = useDocSequence(location.pathname);
   const onSuccessList = (msg: string) => () => {
     toast.success(msg);
-    navigate("/procurement/purchase-order");
+    removeFromDocSequence(location.pathname);
+    navigate(seq?.nextPath ?? "/procurement/purchase-order");
   };
 
   const runSubmitPo = async () => {

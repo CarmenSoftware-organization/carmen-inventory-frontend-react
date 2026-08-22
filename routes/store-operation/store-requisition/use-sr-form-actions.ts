@@ -10,6 +10,10 @@ import {
   scrollToFirstInvalidField,
 } from "@/lib/form-helpers";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
+import {
+  removeFromDocSequence,
+  useDocSequence,
+} from "@/hooks/use-doc-sequence";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
@@ -64,6 +68,15 @@ export function useSrFormActions({
   const tv = useTranslations("validation");
   const navigate = useNavigate();
   const location = useLocation();
+
+  // เปิดใบนี้มาจาก list (มีคิวใน doc sequence) — action เสร็จแล้วเดินต่อใบถัดไป
+  // แทนกลับ list พร้อมตัดใบที่จบออกจากคิวให้เลข n/N ตรงกับที่เหลือจริง
+  // (แบบเดียวกับ onSuccessList ของ PR — ที่ /new sequence เป็น null กลับ list ปกติ)
+  const seq = useDocSequence(location.pathname);
+  const advanceOrList = () => {
+    removeFromDocSequence(location.pathname);
+    navigate(seq?.nextPath ?? SR_LIST_PATH);
+  };
   const queryClient = useQueryClient();
 
   const isEdit = mode === "edit";
@@ -226,7 +239,7 @@ export function useSrFormActions({
         onSuccess: () => {
           toast.success(successMsg);
           options?.onDone?.();
-          navigate(SR_LIST_PATH);
+          advanceOrList();
         },
         onError: () => setIsSubmitting(false),
       },
@@ -294,7 +307,7 @@ export function useSrFormActions({
 
       setShowSubmit(false);
       toast.success(t("submitted"));
-      navigate(SR_LIST_PATH);
+      advanceOrList();
     } catch {
       // error toast มาจาก mutation เอง — แค่เปิด guard กลับให้กรอกต่อได้
       setIsSubmitting(false);

@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import {
   Building2,
   CalendarDays,
+  Copy,
   History,
   Pencil,
   Save,
@@ -10,6 +12,9 @@ import {
   User,
   X,
 } from "lucide-react";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CommentButton } from "@/components/comment-button";
@@ -108,6 +113,20 @@ export function SrHeader({
     role === STAGE_ROLE.APPROVE ||
     role === STAGE_ROLE.ISSUE;
 
+  const navigate = useNavigate();
+  // Duplicate = สร้างใบใหม่ — เกณฑ์เดียวกับปุ่มสร้าง: ต้องมี workflow ที่เริ่มได้
+  // (แนวเดียวกับ PR) กดไม่ผ่านเด้ง dialog บอกเหตุผล ไม่ซ่อนปุ่มเงียบ ๆ
+  const { canCreate: canCreateSr } = useCreatableWorkflows(WORKFLOW_TYPE.SR);
+  const handleDuplicate = () => {
+    if (!canCreateSr) {
+      dispatchPermissionDenied(undefined, t("noCreatableWorkflow"));
+      return;
+    }
+    navigate(
+      `/store-operation/store-requisition/new?duplicate_id=${storeRequisition?.id}`,
+    );
+  };
+
   const badges = (
     <>
       {docStatus && (
@@ -183,6 +202,18 @@ export function SrHeader({
             </Button>
           )}
         </>
+      )}
+      {/* Duplicate — view mode เท่านั้น (ตอน edit ค่าบนจออาจยังไม่ save) */}
+      {isView && storeRequisition && (
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={handleDuplicate}
+        >
+          <Copy aria-hidden="true" />
+          {tc("duplicate")}
+        </Button>
       )}
       {storeRequisition && onComment && (
         <CommentButton count={comments?.length} onClick={onComment} />
