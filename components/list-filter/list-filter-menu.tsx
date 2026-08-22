@@ -120,9 +120,10 @@ function fieldIcon(f: FilterFieldDef): LucideIcon {
   return CONTROL_ICONS[f.control];
 }
 
-/** ขนาด/padding ของ submenu ต่อชนิด control — Command list จัด layout เอง (p-0)
- * ส่วนปฏิทินกว้างตามเนื้อ และช่วงจำนวนเงินเป็น input ต้องมีขอบหายใจ */
-const SUBMENU_CLASS: Record<FilterFieldDef["control"], string> = {
+/** ขนาด/padding ของ panel ตัวเลือกต่อชนิด control — Command list จัด layout เอง
+ * (p-0) ส่วนปฏิทินกว้างตามเนื้อ และช่วงจำนวนเงินเป็น input ต้องมีขอบหายใจ
+ * export ให้ chip ใน ActiveFilterBar ใช้ขนาดเดียวกันตอนเปิด editor จาก chip */
+export const SUBMENU_CLASS: Record<FilterFieldDef["control"], string> = {
   status: "w-48 p-1",
   "multi-select": "w-56 p-0",
   "date-range": "w-auto p-0",

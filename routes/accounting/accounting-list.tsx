@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
@@ -217,6 +218,7 @@ export default function AccountingList() {
           </div>
 
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {displayMode === "list" && (
               <DataGridColumnVisibility
                 table={table}

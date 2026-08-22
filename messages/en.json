@@ -513,7 +513,9 @@
       "collapseRow": "Collapse row"
     },
     "min": "Min",
-    "max": "Max"
+    "max": "Max",
+    "sortBy": "Sort by",
+    "sortDefault": "Default"
   },
   "pagination": {
     "label": "Pagination",

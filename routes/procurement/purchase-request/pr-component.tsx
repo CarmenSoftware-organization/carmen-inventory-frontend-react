@@ -50,6 +50,7 @@ import { FieldLabel } from "@/components/ui/field";
 import { usePurchaseRequestTable } from "./pr-table";
 import PrCardList from "./pr-card-list";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import EmptyComponent from "@/components/empty-component";
 import { lazy, Suspense } from "react";
@@ -478,6 +479,7 @@ export default function PurchaseRequestComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             <DataGridColumnVisibility
               table={table}
               trigger={

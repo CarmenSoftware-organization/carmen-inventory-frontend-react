@@ -19,6 +19,7 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -347,6 +348,7 @@ export default function ActivityLogComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {displayMode === "list" && (
               <DataGridColumnVisibility
                 table={table}

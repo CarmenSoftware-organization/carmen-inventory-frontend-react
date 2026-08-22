@@ -48,6 +48,7 @@ import { StatusFilter } from "@/components/ui/status-filter";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { useInventoryAdjustmentTable } from "./use-ia-table";
 import IaCardList from "./ia-card-list";
 import { useListFilters } from "@/hooks/use-list-filters";
@@ -383,6 +384,7 @@ export default function InventoryAdjustmentComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {displayMode === "list" && (
               <DataGridColumnVisibility
                 table={table}

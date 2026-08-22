@@ -16,7 +16,7 @@ import {
   viewMatchesCurrent,
 } from "@/lib/list-filter-encode";
 import type { ActiveFilter } from "@/components/ui/active-filter-bar";
-import type { FilterFieldDef } from "@/types/list-filter";
+import type { FilterFieldDef, FilterPeerAccess } from "@/types/list-filter";
 import type { SavedView, ViewScope } from "@/types/list-view";
 import type { ListPageKey } from "@/constant/list-page-keys";
 
@@ -240,6 +240,13 @@ export function useListFilters(
     { enabled: hasRequesterField },
   );
 
+  // ให้ chip เปิด editor inline ได้ (ดู ActiveFilterBar) — peer ชุดเดียวกับที่
+  // ListFilter ส่งให้ control ใน sheet/เมนู เพื่อให้ field คู่ (linked keys) ทำงานครบ
+  const peer: FilterPeerAccess = useMemo(
+    () => ({ get: (key) => values[key] ?? "", set: setValue }),
+    [values, setValue],
+  );
+
   const activeFilters: ActiveFilter[] = useMemo(
     () =>
       fields
@@ -249,6 +256,16 @@ export function useListFilters(
         .map((f) => ({
           key: f.key,
           label: t(f.labelKey),
+          // chip แก้ค่าได้เอง — เว้น field ที่ไม่มีชื่อ (custom เฉพาะมือถือ) ให้เป็น
+          // chip อ่านอย่างเดียวตามเดิม
+          ...(f.labelKey
+            ? {
+                field: f,
+                rawValue: values[f.key],
+                onChange: (v: string) => setValue(f.key, v),
+                peer,
+              }
+            : {}),
           // ค่าซ้ำกับชื่อ field (เช่น sendback ตัวเลือกเดียว) ไม่ต้องพูดสองรอบ
           value: (() => {
             const raw = values[f.key];
@@ -294,7 +311,7 @@ export function useListFilters(
             }
           },
         })),
-    [fields, values, t, setValue, departmentData, userData],
+    [fields, values, t, setValue, peer, departmentData, userData],
   );
 
   const current: SavedView | null = sv

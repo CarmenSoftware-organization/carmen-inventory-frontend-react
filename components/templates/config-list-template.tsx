@@ -8,6 +8,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import {
@@ -391,6 +392,7 @@ export function ConfigListTemplate<TEntity extends { id: string }>({
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}

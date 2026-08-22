@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { setSessionItem } from "@/lib/safe-storage";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { useGrnTable } from "./use-grn-table";
 import GrnCardList from "./grn-card-list";
 import EmptyComponent from "@/components/empty-component";
@@ -356,6 +357,7 @@ export default function GrnComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             <DataGridColumnVisibility
               table={table}
               trigger={

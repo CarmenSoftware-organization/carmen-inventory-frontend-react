@@ -38,6 +38,7 @@ import { cn } from "@/lib/utils";
 import { ViewModeToggle } from "@/components/share/view-mode-toggle";
 import { DocumentListHeader } from "@/components/share/document-list-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { usePoTable } from "./use-po-table";
 import PoCardList from "./po-card-list";
 import { DocumentListActions } from "@/components/share/document-list-actions";
@@ -401,6 +402,7 @@ export default function PoComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             <DataGridColumnVisibility
               table={table}
               trigger={

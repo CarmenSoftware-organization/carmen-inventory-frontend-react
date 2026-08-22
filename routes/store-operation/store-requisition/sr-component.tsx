@@ -35,6 +35,7 @@ import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { setURLParams, useURL } from "@/hooks/use-url";
 import { FieldLabel } from "@/components/ui/field";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
@@ -420,6 +421,7 @@ export default function StoreRequisitionComponent() {
           <div className="ml-auto hidden shrink-0 items-center gap-2 sm:flex">
             {displayMode === "list" && (
               <div className="hidden sm:block">
+                <DataGridSortMenu table={table} />
                 <DataGridColumnVisibility
                   table={table}
                   trigger={

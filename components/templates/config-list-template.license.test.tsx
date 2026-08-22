@@ -86,6 +86,11 @@ vi.mock("@/components/ui/active-filter-bar", () => ({
   ActiveFilterBar: () => null,
 }));
 
+// เทสต์นี้ยัด table ปลอม ({} as never) — SortMenu ของจริงจะไปเรียก getAllColumns
+vi.mock("@/components/ui/data-grid/data-grid-sort-menu", () => ({
+  DataGridSortMenu: () => null,
+}));
+
 import { ConfigListTemplate } from "./config-list-template";
 
 interface Row {

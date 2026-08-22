@@ -33,6 +33,7 @@ import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import { cn } from "@/lib/utils";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-column-visibility";
+import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useRequestPriceListTable } from "./use-rfp-table";
 import RfpCard from "./rfp-card";
@@ -249,6 +250,7 @@ export default function RequestPriceListComponent() {
             />
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
+            <DataGridSortMenu table={table} />
             {!isGridMode && (
               <DataGridColumnVisibility
                 table={table}
