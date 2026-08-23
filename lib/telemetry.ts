@@ -138,6 +138,15 @@ export function reportError(
   message: string,
   detail?: { stack?: string; source?: string; extra?: Record<string, unknown> },
 ): void {
+  // ยังไม่ล็อกอิน = ไม่มี token = gateway ตอบ 401 แล้ว error หายเงียบ
+  //
+  // ครอบทั้งหน้า login ซึ่งเป็นกลุ่มบั๊กที่กระทบหนักที่สุด (ผู้ใช้เข้าระบบไม่ได้เลย)
+  // และเป็นเหตุผลที่ช่อง anonymous ถูกสร้างขึ้นมาตั้งแต่แรก — เดิมต่อไว้เฉพาะตอน
+  // boot ล้ม จึงพลาด error ที่เกิดหลัง boot สำเร็จแต่ก่อนล็อกอิน
+  if (!tokenStore.get()) {
+    void reportPreLoginError(message, detail?.stack);
+    return;
+  }
   try {
     logs.getLogger(LOGGER_NAME).emit({
       severityNumber: SeverityNumber.ERROR,
