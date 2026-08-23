@@ -68,6 +68,7 @@ jobs:
           X_APP_ID: ${{ vars.X_APP_ID }}
           WS_URL: ${{ vars.WS_URL }}
           LICENSE_ENFORCEMENT: ${{ vars.LICENSE_ENFORCEMENT }}
+          OTEL_ENABLED: ${{ vars.OTEL_ENABLED }}
         run: |
           set -euo pipefail
 
@@ -80,6 +81,23 @@ jobs:
             true|false) ;;
             *)
               echo "::error::vars.LICENSE_ENFORCEMENT ต้องเป็น true หรือ false เท่านั้น (ได้: '$LICENSE_ENFORCEMENT')"
+              exit 1
+              ;;
+          esac
+
+          # default false เช่นกัน และเขียนลงไฟล์เสมอแม้เป็น false โดยตั้งใจ
+          #
+          # ถังนี้คือ GCP POC (api-carmen-web.pncsb-app.com) ซึ่งเป็นคนละ backend กับ dev
+          # ที่ SigNoz อยู่ — gateway ของมันไม่มี endpoint /telemetry/v1 ด้วยซ้ำ เปิดแล้ว
+          # เบราว์เซอร์จะยิงหาที่ที่ไม่มีอะไรรับ
+          #
+          # เขียน false ลงไปแทนที่จะปล่อยให้คีย์หายไป เพราะ "ปิดเพราะตั้งใจ" กับ
+          # "ปิดเพราะลืมเขียน" ให้ผลเหมือนกันทุกประการ แยกไม่ออกเวลามาอ่านทีหลัง
+          OTEL_ENABLED="${OTEL_ENABLED:-false}"
+          case "$OTEL_ENABLED" in
+            true|false) ;;
+            *)
+              echo "::error::vars.OTEL_ENABLED ต้องเป็น true หรือ false เท่านั้น (ได้: '$OTEL_ENABLED')"
               exit 1
               ;;
           esac
@@ -100,7 +118,8 @@ jobs:
             --arg x_app_id "$X_APP_ID" \
             --arg ws_url "$WS_URL" \
             --argjson license_enforcement "$LICENSE_ENFORCEMENT" \
-            '{BACKEND_URL: $backend_url, X_APP_ID: $x_app_id, LICENSE_ENFORCEMENT: $license_enforcement}
+            --argjson otel_enabled "$OTEL_ENABLED" \
+            '{BACKEND_URL: $backend_url, X_APP_ID: $x_app_id, LICENSE_ENFORCEMENT: $license_enforcement, OTEL_ENABLED: $otel_enabled}
              + (if $ws_url == "" then {} else {WS_URL: $ws_url} end)' > /tmp/config.json
 
           echo "config.json ที่จะอัปโหลด (ไม่มีความลับในไฟล์นี้):"
