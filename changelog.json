@@ -1,7 +1,504 @@
 {
-  "current": "2.0.1",
-  "generated_at": "2026-08-11T02:25:52.118Z",
+  "current": "2.1.0",
+  "generated_at": "2026-08-23T08:53:02.180Z",
   "versions": [
+    {
+      "version": "2.1.0",
+      "build": "2.1.0-build.20260823.a890f126",
+      "date": "2026-08-23",
+      "commit": "a890f126",
+      "changes": {
+        "added": [
+          {
+            "scope": null,
+            "summary": "report browser errors and traces to SigNoz through the gateway",
+            "hash": "c0aa2072",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "แถบเตือนโควตาที่นั่ง + ข้อความ SEAT_LIMIT_EXCEEDED",
+            "hash": "0e40d32b",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "procurement",
+            "summary": "เพิ่มคอลัมน์ Send Back ในหน้า My Approval",
+            "hash": "be1c8db1",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "procurement",
+            "summary": "เปิดให้เรียงคอลัมน์ Send Back ได้",
+            "hash": "839d0001",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "procurement",
+            "summary": "เพิ่มคอลัมน์ Send Back ในหน้า list ของ PR / PO / SR",
+            "hash": "4828d783",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "แยก 403 ของ license ออกจาก 403 ของสิทธิ์",
+            "hash": "c364ad56",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "ปิดปุ่มเขียนใน FormToolbar + row actions เมื่อสัญญาหมดอายุ",
+            "hash": "43bd5d85",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "banner สัญญาหมดอายุ + guard() บล็อกการเขียนเมื่อ canWrite เป็น false",
+            "hash": "8bfb513e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "sidebar แสดงโมดูลที่ยังไม่ได้ซื้อแบบล็อก",
+            "hash": "62c68a88",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "แยกสาเหตุที่เข้าไม่ได้เป็น permission/license/expired",
+            "hash": "88ba82fb",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "type ของ license block + hook useLicense พร้อมสวิตช์ shadow mode",
+            "hash": "ef5f6562",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "auth",
+            "summary": "เพิ่มเส้นทางลืมรหัสผ่านและตั้งรหัสผ่านใหม่",
+            "hash": "b20bebce",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "document",
+            "summary": "แสดงแถบสรุปขนาดไฟล์แนบของ BU เหนือตาราง",
+            "hash": "42e22859",
+            "author": "Thammanoon Semapru",
+            "pr": 106
+          },
+          {
+            "scope": "document",
+            "summary": "เพิ่ม Sheet แจกแจงพื้นที่จัดเก็บตามโมดูล",
+            "hash": "4abd5457",
+            "author": "Thammanoon Semapru",
+            "pr": 106
+          },
+          {
+            "scope": "document",
+            "summary": "เพิ่มแผนที่ reference_type → ชื่อโมดูล และ i18n ของสรุป",
+            "hash": "6eccd8e6",
+            "author": "Thammanoon Semapru",
+            "pr": 106
+          },
+          {
+            "scope": "document",
+            "summary": "เพิ่ม hook useDocumentSummary",
+            "hash": "27079756",
+            "author": "Thammanoon Semapru",
+            "pr": 106
+          },
+          {
+            "scope": "accounting",
+            "summary": "enhance approval workflow handling in accounting detail",
+            "hash": "0d1a2929",
+            "author": "llHorizonll",
+            "pr": 105
+          },
+          {
+            "scope": "accounting",
+            "summary": "add accounting document routes and dashboard",
+            "hash": "4a72884d",
+            "author": "llHorizonll",
+            "pr": 105
+          },
+          {
+            "scope": "config",
+            "summary": "หน้า Shelf อัปเดตตาม contract จริงจากทีม backend",
+            "hash": "3503514a",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "config",
+            "summary": "หน้า Shelf (ชั้นวาง) — สร้างรอ backend",
+            "hash": "83e2b5a7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "procurement",
+            "summary": "เลือกสินค้าใน PR/PR template กรองตาม workflow ด้วย",
+            "hash": "dc89e569",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "checkbox เลือก/เอาออกทั้งหมดใน tab Products",
+            "hash": "c0da91f3",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add submit button to header, enhance signature upload UI, and include aria-invalid states in profile settings form",
+            "hash": "d9840d81",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "add broadcast and personal notification labels and introduce entry animations to notification items",
+            "hash": "5f07323c",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement and integrate GlobalNotificationBanner to display unread notification alerts",
+            "hash": "107d21a2",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign notification UI with dynamic icons, improved layout, and bulk selection functionality",
+            "hash": "34a18a99",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "implement theme-aware branding logos for light and dark mode",
+            "hash": "a0f2834e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          }
+        ],
+        "fixed": [
+          {
+            "scope": "deploy",
+            "summary": "เขียน WS_URL กับ LICENSE_ENFORCEMENT ลง config.json ของ GCS ด้วย",
+            "hash": "143419b2",
+            "author": "Thammanoon Semapru",
+            "pr": 113
+          },
+          {
+            "scope": "company-profile",
+            "summary": "ถอดช่อง Max license users ที่กำลังจะว่างถาวร",
+            "hash": "60d95cd9",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "หน้าแรกหลังล็อกอินไป leaf ที่เปิดได้จริง + กล่องปฏิเสธไม่เป็นทางตัน",
+            "hash": "eb07e66e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "ซ่อน \"ติดต่อผู้ดูแลเพื่อขอสิทธิ์\" เมื่อเหตุผลไม่ใช่เรื่องสิทธิ์",
+            "hash": "e13e03e0",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "ปิดปุ่มเขียนใน ConfigListTemplate + แก้ CLAUDE.md ให้ตรงความจริง",
+            "hash": "720814e2",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "แก้ feature key ของทุกหน้าให้ตรง catalog ของ backend + กันไม่ให้พังเงียบอีก",
+            "hash": "930c0a2e",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "module-landing + navbar app launcher ปฏิบัติกับ locked เหมือน sidebar",
+            "hash": "d0d4a0df",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "license",
+            "summary": "เพิ่มการ์ดสัญญาณสีแดงให้ permission-denied-icon.tsx",
+            "hash": "590ab8b1",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "เก็บ data.products เป็น id ล้วนตามสัญญา backend",
+            "hash": "ff2b55db",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "document",
+            "summary": "แก้ findings จาก final code review ของแถบสรุปขนาดไฟล์แนบ",
+            "hash": "cad9c0f6",
+            "author": "Thammanoon Semapru",
+            "pr": 106
+          },
+          {
+            "scope": "accounting",
+            "summary": "ใช้ token text-micro-legal แทนขนาดตัวอักษรดิบ 10px",
+            "hash": "cc4e4eb5",
+            "author": "Thammanoon Semapru",
+            "pr": 105
+          },
+          {
+            "scope": "telemetry",
+            "summary": "send logged-out errors through the anonymous channel",
+            "hash": "9f530119",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "ui",
+            "summary": "เก็บตกงานกวาดสี — ห้ามใช้ token ฝั่ง fill เป็นสีตัวอักษร",
+            "hash": "e19bfed8",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "procurement",
+            "summary": "new PR จาก template — โชว์ workflow และให้ back ถาม discard",
+            "hash": "8b61ad14",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "procurement",
+            "summary": "เปิด blank PR ไม่ต้องยิง purchase-request-templates",
+            "hash": "69508e0e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "procurement",
+            "summary": "กรอง workflow ใน PR template ตอนสร้างใหม่ให้เหลือเฉพาะตัวที่เริ่มได้",
+            "hash": "a3edf346",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "pr",
+            "summary": "ปลด lock ฟอร์มใบที่ถูก send back กลับมาหาคนขอ",
+            "hash": "364e1b08",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "type-ladder",
+            "summary": "เก็บขนาดตัวอักษรดิบที่หลุดเข้ามาใน 3 dialog + ปิดช่องของ guard",
+            "hash": "ca35a93b",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "comment-sheet",
+            "summary": "รับ data URI เฉพาะรูปภาพ และเขียนเส้นทาง URL ให้ตรงความจริง",
+            "hash": "c715fe0f",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "include file extensions in FormData uploads and add optional presignedUrl to Document type",
+            "hash": "acfced6a",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update toaster component to properly handle dynamic toast notifications",
+            "hash": "3aa0c0b6",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "restrict selection mode to unread notifications and improve checkbox layout alignment",
+            "hash": "e00a5161",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "hide business unit badge in notification items for broadcast messages",
+            "hash": "65d1a746",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          }
+        ],
+        "changed": [
+          {
+            "scope": "procurement",
+            "summary": "ย้ายคอลัมน์ Send Back ไปต่อจากเลขที่เอกสาร",
+            "hash": "4aca1d32",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": "document",
+            "summary": "ย้าย formatFileSize เป็นของกลางและรองรับถึง TB",
+            "hash": "589bef18",
+            "author": "Thammanoon Semapru",
+            "pr": 106
+          },
+          {
+            "scope": "accounting",
+            "summary": "replace WorkflowStep with WorkflowTrack in accounting detail",
+            "hash": "f7272e88",
+            "author": "llHorizonll",
+            "pr": 105
+          },
+          {
+            "scope": "ui",
+            "summary": "กวาดสี hardcode ที่เหลือไปใช้ token จาก globals.css",
+            "hash": "409d8986",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "navbar",
+            "summary": "notification เปลี่ยนไปใช้สี token จาก globals.css",
+            "hash": "3902f0b7",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "layout",
+            "summary": "ถอด GlobalNotificationBanner ออกจาก root layout",
+            "hash": "00b95d1e",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "product",
+            "summary": "จัดชื่อไฟล์ tab เป็น pd-tab-* ให้เรียงกันเอง",
+            "hash": "43910333",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "product",
+            "summary": "เก็บงาน UI แท็บ locations + eco labels",
+            "hash": "75ff3209",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": "workflow",
+            "summary": "เก็บ products ใน payload เป็น id ล้วน เลิก snapshot ทั้งตัว",
+            "hash": "2c895183",
+            "author": "Thitiphong Srisavat",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "consolidate external price list components and route structure for improved maintainability",
+            "hash": "ed3bf518",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "remove email configuration module and update system-admin landing page UI styles",
+            "hash": "ca4d6784",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign user profile settings layout and document form development best practices",
+            "hash": "b3f4d9bd",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "update user profile interface with improved visual hierarchy and modernized styling components",
+            "hash": "4658bab6",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign WhatsNewDialog with a modernized timeline-based layout and improved UI components",
+            "hash": "8eb11777",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign change password dialog layout with updated styling and custom footer implementation",
+            "hash": "daa3a46a",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "streamline notification component styles and unify layout across dialogs and popovers",
+            "hash": "b135f813",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "redesign notification list UI and detail dialog with improved visuals and glassmorphism styling",
+            "hash": "34697aec",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "reformat notification-item-content components for improved readability and consistency",
+            "hash": "543328a5",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          },
+          {
+            "scope": null,
+            "summary": "rename project from Carmen Inventory to CARMEN BLUE across documentation and UI strings",
+            "hash": "dcd753f1",
+            "author": "Thammanoon Semapru",
+            "pr": null
+          }
+        ]
+      }
+    },
     {
       "version": "2.0.1",
       "build": "2.0.1-build.20260811.bbcf915",
