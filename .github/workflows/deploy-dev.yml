@@ -116,9 +116,9 @@ jobs:
             [ -d "$ROOT" ] && mv "$ROOT" "$ROOT.old"
             mv "$ROOT.new" "$ROOT"
 
-            code=$(wget -qS -O /dev/null http://localhost:60001/ 2>&1 | grep -m1 HTTP | awk '{print $2}')
-            spa=$(wget -qS -O /dev/null http://localhost:60001/procurement/purchase-request 2>&1 | grep -m1 HTTP | awk '{print $2}')
-            cfg=$(wget -qO- http://localhost:60001/config.json 2>/dev/null | head -c 200)
+            code=$(wget -qS -O /dev/null http://localhost:9901/ 2>&1 | grep -m1 HTTP | awk '{print $2}')
+            spa=$(wget -qS -O /dev/null http://localhost:9901/procurement/purchase-request 2>&1 | grep -m1 HTTP | awk '{print $2}')
+            cfg=$(wget -qO- http://localhost:9901/config.json 2>/dev/null | head -c 200)
             echo "health: / -> $code | route -> $spa"
             echo "config.json ที่เสิร์ฟจริง: $cfg"
             if [ "$code" != "200" ] || [ "$spa" != "200" ]; then
