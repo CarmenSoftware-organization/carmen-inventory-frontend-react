@@ -1,7 +1,18 @@
 {
-  "current": "2.1.0",
-  "generated_at": "2026-08-23T08:53:02.180Z",
+  "current": "2.2.0",
+  "generated_at": "2026-08-23T08:56:00.517Z",
   "versions": [
+    {
+      "version": "2.2.0",
+      "build": "2.2.0-build.20260823.93b5d950",
+      "date": "2026-08-23",
+      "commit": "93b5d950",
+      "changes": {
+        "added": [],
+        "fixed": [],
+        "changed": []
+      }
+    },
     {
       "version": "2.1.0",
       "build": "2.1.0-build.20260823.a890f126",

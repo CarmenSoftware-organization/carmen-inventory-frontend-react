@@ -4,6 +4,10 @@
 แก้ที่ `changelog.json` หรือแก้ตัว generator (`scripts/changelog.ts`) แล้วรัน
 `bun scripts/changelog-cli.ts` เพื่อ render ใหม่
 
+## [2.2.0] - 2026-08-23
+
+_No notable changes._
+
 ## [2.1.0] - 2026-08-23
 
 ### Added
