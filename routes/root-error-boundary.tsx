@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate, useRouteError } from "react-router";
 import { I18nProvider } from "@/components/i18n-provider";
 import ModuleError from "@/components/ui/module-error-boundary";
@@ -18,6 +19,22 @@ export function RootErrorBoundary() {
 
   const error =
     rawError instanceof Error ? rawError : new Error(String(rawError));
+
+  // รายงานขึ้น SigNoz — import แบบ dynamic เพื่อไม่ให้ boundary ลาก SDK เข้ามาใน
+  // bundle หลัก ถ้า telemetry ปิดอยู่ chunk นี้ไม่เคยถูกโหลดตั้งแต่ต้น
+  // ถึงตรงนี้แล้ว SDK ถูก init ไปแล้วเสมอ (boot สำเร็จ) จึงเรียก reportError ได้ตรง ๆ
+  useEffect(() => {
+    void import("@/lib/telemetry")
+      .then((m) =>
+        m.reportError(error.message, {
+          stack: error.stack,
+          source: "RootErrorBoundary",
+        }),
+      )
+      .catch(() => {
+        /* เงียบ — error boundary ห้ามพังซ้ำ */
+      });
+  }, [error]);
 
   return (
     <I18nProvider>

@@ -29,6 +29,19 @@ export interface RuntimeConfig {
    * Default `false` เมื่อไม่มีใน config.json (shadow mode เหมือน backend)
    */
   LICENSE_ENFORCEMENT?: boolean;
+  /**
+   * สวิตช์ส่ง telemetry (error + trace) ขึ้น SigNoz ผ่าน gateway
+   *
+   * ปลายทางไม่ต้องตั้งเพราะมันคือ `${BACKEND_URL}/telemetry/v1` เสมอ — SPA ไม่ยิง
+   * เข้า OTLP ของ SigNoz ตรง ๆ เพราะ endpoint นั้นไม่มี authentication เลย
+   *
+   * **ไม่ตั้ง = ปิด และ SDK จะไม่ถูกดาวน์โหลดลงเครื่องผู้ใช้ด้วยซ้ำ** (`main.tsx`
+   * import แบบ dynamic) environment ที่ไม่ได้เปิดจึงไม่จ่ายค่า bundle เลย
+   *
+   * ⚠️ `public/config*.json` ของทุก environment ถูก gitignore — ต้องเติมคีย์นี้
+   * **ด้วยมือ** เหมือน `LICENSE_ENFORCEMENT` ไม่งั้น deploy แล้วเงียบสนิทโดยไม่มี error
+   */
+  OTEL_ENABLED?: boolean;
 }
 
 let config: RuntimeConfig | null = null;
@@ -51,6 +64,9 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
       : {}),
     ...(typeof json.LICENSE_ENFORCEMENT === "boolean"
       ? { LICENSE_ENFORCEMENT: json.LICENSE_ENFORCEMENT }
+      : {}),
+    ...(typeof json.OTEL_ENABLED === "boolean"
+      ? { OTEL_ENABLED: json.OTEL_ENABLED }
       : {}),
   };
   return config;

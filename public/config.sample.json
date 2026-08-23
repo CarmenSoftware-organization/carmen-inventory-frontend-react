@@ -2,5 +2,6 @@
   "BACKEND_URL": "https://backend.example.com",
   "X_APP_ID": "<copy from ../carmen-inventory-frontend/.env>",
   "WS_URL": "wss://<backend-host>/ws (optional — omit to disable real-time notifications)",
-  "LICENSE_ENFORCEMENT": true
+  "LICENSE_ENFORCEMENT": true,
+  "OTEL_ENABLED": true
 }
