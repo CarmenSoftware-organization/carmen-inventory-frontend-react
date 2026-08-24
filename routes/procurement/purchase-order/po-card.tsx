@@ -65,7 +65,13 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
         </span>
       </ListCardRow>
       {typeConfig?.label && (
-        <ListCardRow label={tfl("poType")}>{typeConfig.label}</ListCardRow>
+        <ListCardRow label={tfl("poType")}>
+          <StatusIconLabel
+            status={item.po_type ?? PO_TYPE.MANUAL}
+            label={typeConfig.label}
+            className="text-muted-foreground"
+          />
+        </ListCardRow>
       )}
       {item.vendor_name && (
         <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>

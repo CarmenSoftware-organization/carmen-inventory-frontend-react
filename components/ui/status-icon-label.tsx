@@ -3,6 +3,7 @@ import {
   Ban,
   Check,
   Clock,
+  FileText,
   Flag,
   Hourglass,
   Lock,
@@ -11,6 +12,8 @@ import {
   Percent,
   Save,
   Send,
+  SquarePen,
+  Tags,
   Unlock,
   X,
   type LucideIcon,
@@ -32,7 +35,7 @@ import { cn } from "@/lib/utils";
  * สีอ้าง custom property ชุดเดียวกับ dot chip เดิมใน `styles/badge-status.css`
  * ตัวสถานะจึงไม่เปลี่ยนสีเมื่อสลับไปหน้าที่ยังใช้ chip
  */
-const STATUS_ICON: Record<string, { icon: LucideIcon; color: string }> = {
+const STATUS_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
   draft: { icon: PenLine, color: "var(--status-draft)" },
   in_progress: { icon: Clock, color: "var(--status-in-progress)" },
   approved: { icon: Check, color: "var(--status-approved)" },
@@ -57,6 +60,17 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color: string }> = {
   cancelled: { icon: Ban, color: "var(--status-cancelled)" },
 };
 
+/**
+ * ชนิดของเอกสาร — **ไม่มีสี** โดยตั้งใจ มันคือคุณสมบัติของใบ ไม่ใช่ความคืบหน้า
+ * ให้สีเมื่อไรก็แย่งสายตาไปจากสถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง ๆ
+ * (ไอคอนรับสีจากข้อความรอบตัวแทน)
+ */
+const TYPE_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
+  purchase_request: { icon: FileText },
+  manual: { icon: SquarePen },
+  pricelist: { icon: Tags },
+};
+
 const FALLBACK = { icon: Minus, color: "var(--status-draft)" };
 
 /**
@@ -67,7 +81,7 @@ const FALLBACK = { icon: Minus, color: "var(--status-draft)" };
  * @returns ไอคอนกับสีของสถานะนั้น หรือค่าสำรองเมื่อไม่รู้จัก
  */
 export function getStatusIcon(status: string) {
-  return STATUS_ICON[status] ?? FALLBACK;
+  return STATUS_ICON[status] ?? TYPE_ICON[status] ?? FALLBACK;
 }
 
 interface StatusIconLabelProps {

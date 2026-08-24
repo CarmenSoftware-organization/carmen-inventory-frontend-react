@@ -1,7 +1,6 @@
 import { useTranslations } from "use-intl";
 import { Building2, Lock, Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
@@ -81,10 +80,12 @@ export function PoHeader({
           className="text-muted-foreground text-micro [&>svg]:size-3"
         />
       )}
-      {poTypeConfig && (
-        <Badge className={poTypeConfig.className} size="sm">
-          {poTypeConfig.label}
-        </Badge>
+      {poTypeConfig && purchaseOrder && (
+        <StatusIconLabel
+          status={purchaseOrder.po_type}
+          label={poTypeConfig.label}
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
       {/* รุ่นเอกสารย้ายมาอยู่แถวเดียวกับเลขที่ใบ เพื่อคืนบรรทัด subtitle
           ให้แถบขั้นตอน — เลขที่ใบ · สถานะ · รุ่น คือตัวตนของเอกสารชุดเดียวกัน */}

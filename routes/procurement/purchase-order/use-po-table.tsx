@@ -14,7 +14,6 @@ import {
   columnSkeletons,
   sendbackColumn,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 
@@ -77,9 +76,12 @@ export function usePoTable({
         const type = row.original.po_type ?? PO_TYPE.MANUAL;
         const config = PO_TYPE_CONFIG[type] ?? PO_TYPE_CONFIG[PO_TYPE.MANUAL];
         return (
-          <Badge size="sm" className={config.className}>
-            {config.label}
-          </Badge>
+          <StatusIconLabel
+            status={type}
+            label={config.label}
+            // ชนิดใบไม่มีสี — สีสงวนไว้ให้สถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง ๆ
+            className="text-muted-foreground flex w-full justify-center"
+          />
         );
       },
       meta: {
