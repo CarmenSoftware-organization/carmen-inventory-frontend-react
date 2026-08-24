@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { FormToolbar } from "@/components/ui/form-toolbar";
@@ -37,7 +37,6 @@ export function PcForm({ physicalCount }: PcFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
   const navigate = useNavigate();
-  const location = useLocation();
   const [mode, setMode] = useState<FormMode>(physicalCount ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -105,12 +104,11 @@ export function PcForm({ physicalCount }: PcFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/inventory-management/physical-count");
-    }
+    navigate("/inventory-management/physical-count");
   };
 
   const handleBack = () => {

@@ -303,18 +303,11 @@ export function usePrFormActions({
     });
   };
 
-  // กลับ list พร้อม tab/filter/sort ที่ค้างใน URL — back คือ browser back
-  // ไปยัง history entry ของ list (params ถูกเก็บใน URL อยู่แล้ว). ถ้าเข้า detail
-  // ตรง ๆ (deep-link, location.key === "default" คือ entry แรก ไม่มี history ในแอป)
-  // fallback ไป list path เปล่า
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      // navGuard.back() ไม่ใช่ navigate(-1) — ผู้ใช้ยืนยัน discard ไปแล้ว
-      // ไม่ต้องให้ guard ถามซ้ำ และต้องข้าม sentinel ที่ guard ดันไว้
-      navGuard.back();
-    } else {
-      navigate("/procurement/purchase-request");
-    }
+    navigate("/procurement/purchase-request");
   };
 
   const handleBack = () => {

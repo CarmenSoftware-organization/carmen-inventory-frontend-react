@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm, useWatch, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { KeySquare, UserCog } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -31,7 +31,6 @@ interface RoleFormProps {
 
 export function RoleForm({ role }: RoleFormProps) {
   const navigate = useNavigate();
-  const location = useLocation();
   const t = useTranslations("systemAdmin.role");
   const tt = useTranslations("toast");
   const [mode, setMode] = useState<FormMode>(role ? "view" : "add");
@@ -127,12 +126,11 @@ export function RoleForm({ role }: RoleFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/system-admin/role");
-    }
+    navigate("/system-admin/role");
   };
 
   const handleBack = () => {

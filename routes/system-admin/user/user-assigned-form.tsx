@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "use-intl";
-import { useLocation as useRouterLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { ArrowLeft, Pencil, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,6 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
   const navigate = useNavigate();
   const tt = useTranslations("toast");
   const tfl = useTranslations("field");
-  const location = useRouterLocation();
   const [mode, setMode] = useState<FormMode>("view");
   const isView = mode === "view";
 
@@ -154,12 +153,11 @@ export function UserAssignedForm({ user }: UserAssignedFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (location.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/system-admin/user");
-    }
+    navigate("/system-admin/user");
   };
 
   const handleBack = () => {

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useRef, useState } from "react";
 import { useForm, Controller, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
@@ -63,7 +63,6 @@ interface LocationFormProps {
 export function LocationForm({ location }: LocationFormProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const routerLocation = useLocation();
   const [mode, setMode] = useState<FormMode>(location ? "view" : "add");
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -242,12 +241,11 @@ export function LocationForm({ location }: LocationFormProps) {
     });
   };
 
+  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
+  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
+  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
-    if (routerLocation.key !== "default") {
-      navigate(-1);
-    } else {
-      navigate("/config/location");
-    }
+    navigate("/config/location");
   };
 
   const handleBack = () => {
