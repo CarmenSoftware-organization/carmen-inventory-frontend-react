@@ -1,10 +1,13 @@
 import {
+  Archive,
   Ban,
   Check,
   Clock,
   Flag,
   Minus,
   PenLine,
+  Percent,
+  Send,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -13,7 +16,8 @@ import { cn } from "@/lib/utils";
 /**
  * ไอคอนกับสีของแต่ละสถานะ — สัญลักษณ์เปล่า ไม่มีวงกลมกำกับ เพราะวงกลมกินพื้นที่
  * ไปกับเส้นขอบที่ไม่ได้บอกอะไร เหลือแต่ตัวสัญลักษณ์ที่พนักงานหน้างานอ่านออกทันที:
- * ดินสอ = ยังร่าง · นาฬิกา = รออยู่ · ติ๊ก = ผ่านแล้ว · ธง = ถึงปลายทางแล้ว ·
+ * ดินสอ = ยังร่าง · นาฬิกา = รออยู่ · เครื่องบิน = ส่งออกไปแล้ว · เปอร์เซ็นต์ = มา
+ * บางส่วน · ติ๊ก = ผ่านแล้ว · ธง = ถึงปลายทางแล้ว · กล่องเก็บ = ปิดใบแล้ว ·
  * ห้าม = ยกเลิก · กากบาท = ไม่อนุมัติ
  *
  * `completed` ใช้ธงไม่ใช่ติ๊กซ้อน เพราะมันไม่ใช่ "อนุมัติแรงกว่า approved" แต่เป็น
@@ -28,6 +32,10 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color: string }> = {
   in_progress: { icon: Clock, color: "var(--status-in-progress)" },
   approved: { icon: Check, color: "var(--status-approved)" },
   completed: { icon: Flag, color: "var(--status-completed)" },
+  /* PO — ใบสั่งซื้อเดินต่อจากอนุมัติแล้ว: ส่งให้ผู้ขาย → ของมาบางส่วน → ปิดใบ */
+  sent: { icon: Send, color: "var(--status-sent)" },
+  partial: { icon: Percent, color: "var(--status-partial)" },
+  closed: { icon: Archive, color: "var(--status-closed)" },
   voided: { icon: Ban, color: "var(--status-voided)" },
   rejected: { icon: X, color: "var(--status-rejected)" },
   cancelled: { icon: Ban, color: "var(--status-cancelled)" },

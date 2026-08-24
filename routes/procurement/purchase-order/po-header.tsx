@@ -6,6 +6,7 @@ import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
 import { PO_STATUS, type PurchaseOrder } from "@/types/purchase-order";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { FormMode } from "@/types/form";
 import { DocFormHeader } from "@/components/share/doc-form-header";
@@ -67,12 +68,18 @@ export function PoHeader({
     ? PO_TYPE_CONFIG[purchaseOrder.po_type]
     : null;
 
+  // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+  // เอกสาร ส่วนสถานะ/ประเภท/รุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน
   const badges = (
-    <>
-      {poStatusConfig && (
-        <Badge className={poStatusConfig.className} size="sm">
-          {poStatusConfig.label}
-        </Badge>
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
+      {poStatusConfig && purchaseOrder && (
+        <StatusIconLabel
+          status={purchaseOrder.po_status}
+          label={poStatusConfig.label}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ
+          // เหลือสีไว้ที่ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
       {poTypeConfig && (
         <Badge className={poTypeConfig.className} size="sm">
@@ -82,11 +89,11 @@ export function PoHeader({
       {/* รุ่นเอกสารย้ายมาอยู่แถวเดียวกับเลขที่ใบ เพื่อคืนบรรทัด subtitle
           ให้แถบขั้นตอน — เลขที่ใบ · สถานะ · รุ่น คือตัวตนของเอกสารชุดเดียวกัน */}
       {purchaseOrder?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {purchaseOrder.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   const actions = (

@@ -1,5 +1,4 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { SendBackBadge } from "@/components/share/sendback-badge";
 import {
   ListCard,
@@ -9,6 +8,7 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import { PO_TYPE, type PurchaseOrder } from "@/types/purchase-order";
 
@@ -48,10 +48,11 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
       badge={
         <div className="flex shrink-0 items-center gap-1">
           <SendBackBadge lastAction={item.last_action} size="xs" />
-          {statusConfig ? (
-            <Badge size="xs" className={statusConfig.className}>
-              {statusConfig.label}
-            </Badge>
+          {statusConfig && item.po_status ? (
+            <StatusIconLabel
+              status={item.po_status}
+              label={statusConfig.label}
+            />
           ) : null}
         </div>
       }
