@@ -148,7 +148,10 @@ function AlertDialogMedia({
     <div
       data-slot="alert-dialog-media"
       className={cn(
-        "bg-muted mb-2 inline-flex size-16 items-center justify-center rounded-md sm:group-data-[size=default]/alert-dialog-content:row-span-2 *:[svg:not([class*='size-'])]:size-8",
+        // 36/18 ไม่ใช่ 64/32 — ให้เท่ากับกล่องไอคอนของ DeleteDialog กล่อง 64px
+        // ในเนื้อหาสองบรรทัดกลายเป็นของที่ใหญ่ที่สุดบนจอ ทั้งที่สาระอยู่ที่ข้อความ
+        // (DESIGN.md: error state = red icon only ไอคอนเป็นสัญญาณ ไม่ใช่ตัวเอก)
+        "bg-muted mb-2 inline-flex size-9 items-center justify-center rounded-lg sm:group-data-[size=default]/alert-dialog-content:row-span-2 *:[svg:not([class*='size-'])]:size-4.5",
         className,
       )}
       {...props}
