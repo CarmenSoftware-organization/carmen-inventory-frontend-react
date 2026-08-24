@@ -19,6 +19,7 @@ import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 import type { FormMode } from "@/types/form";
 import type { GoodsReceiveNote } from "@/types/goods-receive-note";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { GRN_FORM_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 import { DocFormHeader } from "@/components/share/doc-form-header";
@@ -91,12 +92,18 @@ export function GrnHeader({
     ? GRN_FORM_STATUS_CONFIG[goodsReceiveNote.doc_status]
     : null;
 
+  // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+  // เอกสาร ส่วนสถานะ/ชนิดใบ/รุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน
   const badges = (
-    <>
-      {statusCfg && (
-        <Badge className={statusCfg.className} size="sm">
-          {statusCfg.label ?? goodsReceiveNote?.doc_status}
-        </Badge>
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
+      {statusCfg && goodsReceiveNote && (
+        <StatusIconLabel
+          status={goodsReceiveNote.doc_status}
+          label={statusCfg.label ?? goodsReceiveNote.doc_status}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ
+          // เหลือสีไว้ที่ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
       {goodsReceiveNote && (
         <Badge variant="info-light" size="sm">
@@ -107,11 +114,11 @@ export function GrnHeader({
           (ทรงเดียวกับใบลดหนี้) — ไม่ใช่ Badge เพราะรุ่นเป็นตัวเลขอ้างอิง ไม่ใช่
           สถานะที่ต้องสะดุดตา */}
       {goodsReceiveNote?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {goodsReceiveNote.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   const actions = (

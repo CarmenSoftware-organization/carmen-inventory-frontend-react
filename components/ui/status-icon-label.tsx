@@ -4,9 +4,11 @@ import {
   Check,
   Clock,
   Flag,
+  Lock,
   Minus,
   PenLine,
   Percent,
+  Save,
   Send,
   X,
   type LucideIcon,
@@ -18,7 +20,8 @@ import { cn } from "@/lib/utils";
  * ไปกับเส้นขอบที่ไม่ได้บอกอะไร เหลือแต่ตัวสัญลักษณ์ที่พนักงานหน้างานอ่านออกทันที:
  * ดินสอ = ยังร่าง · นาฬิกา = รออยู่ · เครื่องบิน = ส่งออกไปแล้ว · เปอร์เซ็นต์ = มา
  * บางส่วน · ติ๊ก = ผ่านแล้ว · ธง = ถึงปลายทางแล้ว · กล่องเก็บ = ปิดใบแล้ว ·
- * ห้าม = ยกเลิก · กากบาท = ไม่อนุมัติ
+ * แผ่นบันทึก = บันทึกไว้ · กุญแจ = ยืนยันแล้วแก้ไม่ได้ · ห้าม = ยกเลิก ·
+ * กากบาท = ไม่อนุมัติ
  *
  * `completed` ใช้ธงไม่ใช่ติ๊กซ้อน เพราะมันไม่ใช่ "อนุมัติแรงกว่า approved" แต่เป็น
  * คนละเรื่อง — จบทั้งกระบวนการแล้ว ติ๊กสองอันข้างติ๊กอันเดียวอ่านเป็นระดับของ
@@ -36,6 +39,10 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color: string }> = {
   sent: { icon: Send, color: "var(--status-sent)" },
   partial: { icon: Percent, color: "var(--status-partial)" },
   closed: { icon: Archive, color: "var(--status-closed)" },
+  /* GRN — ใบรับของไม่มี workflow: บันทึกไว้ก่อน แล้วค่อยยืนยันตัดสต๊อกจริง */
+  saved: { icon: Save, color: "var(--status-save)" },
+  save: { icon: Save, color: "var(--status-save)" },
+  committed: { icon: Lock, color: "var(--status-committed)" },
   voided: { icon: Ban, color: "var(--status-voided)" },
   rejected: { icon: X, color: "var(--status-rejected)" },
   cancelled: { icon: Ban, color: "var(--status-cancelled)" },

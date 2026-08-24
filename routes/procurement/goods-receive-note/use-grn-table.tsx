@@ -10,6 +10,7 @@ import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   GRN_STATUS_CONFIG,
   GRN_TYPE_CONFIG,
@@ -96,9 +97,13 @@ export function useGrnTable({
         const status = row.getValue<string>("doc_status") || "draft";
         const config = GRN_STATUS_CONFIG[status];
         return (
-          <Badge size="sm" className={config?.className}>
-            {config?.label ?? status.toUpperCase()}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config?.label ?? status.toUpperCase()}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       size: 120,
