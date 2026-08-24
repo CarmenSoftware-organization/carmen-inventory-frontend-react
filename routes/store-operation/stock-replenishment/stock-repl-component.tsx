@@ -15,11 +15,15 @@ import { ErrorState } from "@/components/ui/error-state";
 import { WarningDialog } from "@/components/ui/warning-dialog";
 import DisplayTemplate from "@/components/display-template";
 import SearchInput from "@/components/search-input";
+import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
+import { cn } from "@/lib/utils";
 import { useStockReplenishment } from "@/hooks/use-stock-replenishment";
+import { useCreatableWorkflows } from "@/hooks/use-workflow";
+import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
 import { StockReplLocation } from "./stock-repl-location";
-import { StockReplCreatePrDialog } from "./stock-repl-create-pr-dialog";
-import { StockReplCreateSrDialog } from "./stock-repl-create-sr-dialog";
+import { StockReplPrWizard, type StockReplPrRow } from "./stock-repl-pr-wizard";
+import { StockReplSrWizard } from "./stock-repl-sr-wizard";
 
 const filterLocations = (locations: Location[], search: string): Location[] => {
   if (!search) return locations;
@@ -43,6 +47,8 @@ const filterLocations = (locations: Location[], search: string): Location[] => {
 export default function StockReplComponent() {
   const t = useTranslations("storeOperation.stockReplenishment");
   const tc = useTranslations("common");
+  const tPr = useTranslations("procurement.purchaseRequest");
+  const tSr = useTranslations("storeOperation.storeRequisition");
   const {
     data: locations,
     isLoading,
@@ -105,21 +111,29 @@ export default function StockReplComponent() {
     });
   };
 
+  // สิทธิ์สร้างเอกสารต้องรู้ตั้งแต่ตอนกดปุ่ม ไม่ใช่ปล่อยให้เปิด wizard แล้วไปเจอ
+  // dropdown workflow ว่างเปล่า — เกณฑ์เดียวกับปุ่ม Add ของหน้า PR/SR เอง
+  // (PR/SR ไม่มี permission .create ใน catalog ตัววัดคือมี workflow ที่เริ่มได้ไหม)
+  const { canCreate: canCreatePr } = useCreatableWorkflows(WORKFLOW_TYPE.PR);
+  const { canCreate: canCreateSr } = useCreatableWorkflows(WORKFLOW_TYPE.SR);
+
   const totalSelected = Array.from(selections.values()).reduce(
     (sum, ids) => sum + ids.size,
     0,
   );
   const hasSelection = totalSelected > 0;
 
-  const getSelectedProducts = (): ProductLocation[] => {
+  // PR ผูกคลังรายแถว (item.location_id ของ PR form) — แถวที่ติ๊กจึงต้องพกคลัง
+  // ต้นสังกัดไปด้วย ส่วน SR ใช้แค่ตัวสินค้าเพราะคลังต้นทางเลือกทีเดียวทั้งใบ
+  const getSelectedRows = (): StockReplPrRow[] => {
     if (!locations) return [];
-    const result: ProductLocation[] = [];
+    const result: StockReplPrRow[] = [];
     for (const loc of locations) {
       const ids = selections.get(loc.location_id);
       if (ids) {
         for (const product of loc.products_location) {
           if (ids.has(product.id)) {
-            result.push(product);
+            result.push({ location: loc, product });
           }
         }
       }
@@ -127,10 +141,24 @@ export default function StockReplComponent() {
     return result;
   };
 
-  const handleCreatePR = () => setCreateDialog("pr");
+  const getSelectedProducts = (): ProductLocation[] =>
+    getSelectedRows().map((row) => row.product);
+
+  const handleCreatePR = () => {
+    if (!canCreatePr) {
+      dispatchPermissionDenied(undefined, tPr("noCreatableWorkflow"));
+      return;
+    }
+    setCreateDialog("pr");
+  };
+
   // SR เบิกได้ทีละคลัง — ติ๊กข้ามคลังให้เตือนแทนที่จะเปิด dialog
   // (selections ลบ entry ว่างออกเสมอ ดังนั้น size = จำนวนคลังที่มีของติ๊กจริง)
   const handleCreateSR = () => {
+    if (!canCreateSr) {
+      dispatchPermissionDenied(undefined, tSr("noCreatableWorkflow"));
+      return;
+    }
     if (selections.size > 1) {
       setSrLocationWarningOpen(true);
       return;
@@ -205,11 +233,26 @@ export default function StockReplComponent() {
           {/* section ปุ่มสร้างเอกสาร แยกจาก summary — โผล่เมื่อมีการเลือก */}
           {hasSelection && (
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="secondary" onClick={handleCreatePR}>
+              {/* จาง + aria-disabled แต่ยังกดได้ — กดแล้วเด้ง dialog บอกเหตุผล
+                  ดีกว่าปุ่มตายที่ไม่บอกอะไรเลย (ทรงเดียวกับปุ่ม Add ของ
+                  DocumentListActions ที่ถูก gate ด้วย permission) */}
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleCreatePR}
+                aria-disabled={!canCreatePr || undefined}
+                className={cn(!canCreatePr && "opacity-50")}
+              >
                 <ShoppingCart />
                 {t("createPr")} ({totalSelected})
               </Button>
-              <Button size="sm" variant="secondary" onClick={handleCreateSR}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleCreateSR}
+                aria-disabled={!canCreateSr || undefined}
+                className={cn(!canCreateSr && "opacity-50")}
+              >
                 <FileText />
                 {t("createSr")} ({totalSelected})
               </Button>
@@ -233,17 +276,16 @@ export default function StockReplComponent() {
         </div>
       )}
 
-      <StockReplCreatePrDialog
+      <StockReplPrWizard
         open={createDialog === "pr"}
         onOpenChange={(open) => !open && setCreateDialog(null)}
-        products={getSelectedProducts()}
-        onCreated={() => setSelections(new Map())}
+        rows={getSelectedRows()}
       />
-      <StockReplCreateSrDialog
+      <StockReplSrWizard
         open={createDialog === "sr"}
         onOpenChange={(open) => !open && setCreateDialog(null)}
+        location={getSelectedRows()[0]?.location}
         products={getSelectedProducts()}
-        onCreated={() => setSelections(new Map())}
       />
 
       <WarningDialog

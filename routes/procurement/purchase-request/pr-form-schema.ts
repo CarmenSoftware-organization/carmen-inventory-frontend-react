@@ -351,7 +351,7 @@ export function getDefaultValues(
  * source แถว item ที่ freshItem อ่าน — โครงร่วมของ template detail กับ PR detail
  * (field ชื่อเดียวกันทั้งคู่ ประกาศแบบ structural จะได้ไม่ผูกกับ type ใดtype หนึ่ง)
  */
-interface FreshItemSource {
+export interface FreshItemSource {
   product_id: string;
   product_code?: string | null;
   product_name: string;
@@ -439,6 +439,36 @@ function freshItem(d: FreshItemSource): PrFormValues["items"][number] {
     net_amount: 0,
     total_price: 0,
     comment: d.comment ?? "",
+  };
+}
+
+/**
+ * ใบร่างที่หน้าอื่นส่งมาให้ PR form กรอกต่อ — ตอนนี้มีที่เดียวคือ wizard ของหน้า
+ * Stock Replenishment (`/store-operation/stock-replenishment`) ส่งผ่าน router state
+ * ไม่ใช่ query string เพราะรายการของอาจมีหลายสิบแถว
+ */
+export interface PrPrefillDraft {
+  workflow_id?: string;
+  description?: string;
+  items: FreshItemSource[];
+}
+
+/**
+ * ค่าเริ่มต้นของฟอร์มจากใบร่างที่หน้าอื่นส่งมา — semantics เดียวกับ template/duplicate
+ * (ของที่เติมมายังไม่ถูก save ฟอร์มจึงต้องนับเป็น dirty ตั้งแต่เกิด ดู `isPrefilled`
+ * ใน pr-form.tsx) ใช้ `freshItem` ตัวเดียวกับอีกสองทางเพื่อให้แถวที่ได้มีรูปเดียวกันเป๊ะ
+ *
+ * @param draft - ใบร่างจากหน้าต้นทาง
+ * @returns ค่าเริ่มต้นของฟอร์ม PR
+ * @example
+ * getPrefilledValues({ workflow_id, items: [{ product_id, product_name, requested_qty }] });
+ */
+export function getPrefilledValues(draft: PrPrefillDraft): PrFormValues {
+  return {
+    ...EMPTY_FORM,
+    workflow_id: draft.workflow_id ?? "",
+    description: draft.description ?? "",
+    items: draft.items.map(freshItem),
   };
 }
 
