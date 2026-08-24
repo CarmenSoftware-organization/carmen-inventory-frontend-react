@@ -88,7 +88,7 @@ export const InventoryTooltip = memo(function InventoryTooltip({
           side="top"
           className={cn(
             "bg-popover text-popover-foreground [&>svg]:fill-popover [&>svg]:text-border rounded-lg border px-3 py-2 shadow-md",
-            hasProduct ? "w-56" : "max-w-[14rem]",
+            hasProduct ? "w-56" : "max-w-56",
           )}
         >
           {!hasProduct && (
@@ -107,11 +107,11 @@ export const InventoryTooltip = memo(function InventoryTooltip({
                     <button
                       type="button"
                       onClick={onOnHandClick}
+                      // underline ตลอด ไม่ใช่เฉพาะ hover — ในกล่อง tooltip ที่มีแต่
+                      // ตัวหนังสือ ถ้าไม่ขีดเส้นคนไม่รู้ว่ากดได้ (สีเดียวไม่พอ)
                       className={cn(
-                        "underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none",
-                        needsReorder
-                          ? "text-destructive"
-                          : "text-info-foreground",
+                        "underline underline-offset-2 focus-visible:outline-none",
+                        needsReorder ? "text-destructive" : "text-primary",
                       )}
                     >
                       {t("onHand")}
@@ -144,7 +144,7 @@ export const InventoryTooltip = memo(function InventoryTooltip({
                     <button
                       type="button"
                       onClick={onOnOrderClick}
-                      className="text-info-foreground underline-offset-2 hover:underline focus-visible:underline focus-visible:outline-none"
+                      className="text-primary underline underline-offset-2 focus-visible:outline-none"
                     >
                       {t("onOrder")}
                     </button>
