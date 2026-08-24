@@ -246,9 +246,7 @@ export default function PoComponent() {
             )
             .filter((n): n is string => !!n);
           if (names.length === 0) return `${ids.length}`;
-          return (
-            names[0] + (names.length > 1 ? ` +${names.length - 1}` : "")
-          );
+          return names[0] + (names.length > 1 ? ` +${names.length - 1}` : "");
         },
         render: (value, onChange) => (
           <MultiSelectFilter
@@ -300,9 +298,20 @@ export default function PoComponent() {
 
   const purchaseOrders = useInfiniteScroll ? grid.items : (data?.data ?? []);
 
-  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav)
-
-  useRecordDocSequence(purchaseOrders.map((d) => d.id));
+  // ประกาศลำดับแถวให้ปุ่ม ↑↓ บนหัวหน้า detail (DocSequenceNav) — my-pending ยิงชุด
+  // เต็ม (perpage: -1) แยกอีกหนึ่ง query เพื่อให้ ↑↓ เดินได้ทุกใบที่รอเราอยู่ ไม่ใช่แค่
+  // หน้าที่เปิดค้างไว้ (คนอนุมัติไล่เคลียร์ได้จบชุดโดยไม่ต้องเด้งกลับ list)
+  // all-document ไม่ทำแบบนี้ — ใบทั้งระบบมีหลักพัน ดึงมาทั้งกองเพื่อเอาแค่ id ไม่คุ้ม
+  // ระหว่างชุดเต็มยังโหลดไม่เสร็จใช้แถวหน้าปัจจุบันไปก่อน ปุ่มจึงไม่หายวับ
+  const docSequenceQuery = useMyPendingPurchaseOrder(
+    { ...queryParams, page: undefined, perpage: -1 },
+    { enabled: viewMode === "my-pending" },
+  );
+  const docSequenceItems =
+    viewMode === "my-pending"
+      ? (docSequenceQuery.data?.data ?? purchaseOrders)
+      : purchaseOrders;
+  useRecordDocSequence(docSequenceItems.map((d) => d.id));
   const totalRecords = useInfiniteScroll
     ? grid.totalRecords
     : (data?.paginate?.total ?? 0);
