@@ -239,7 +239,7 @@ export function usePurchaseRequestTable({
         cellClassName: "text-right",
         headerClassName: "text-right",
       },
-      size: 90,
+      size: 120,
     },
     ...auditColumns<PurchaseRequest>(tfl, dateTimeFormat),
   ];
