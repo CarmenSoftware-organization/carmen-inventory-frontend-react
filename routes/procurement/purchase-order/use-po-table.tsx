@@ -84,6 +84,7 @@ export function usePoTable({
           />
         );
       },
+      size: 180,
       meta: {
         headerTitle: tfl("poType"),
         skeleton: columnSkeletons.text,
