@@ -30,7 +30,7 @@ import {
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PERIOD_STATUS_CONFIG } from "@/constant/period";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { useClosePeriodEnd, usePeriodEndReview } from "@/hooks/use-period-end";
 import type { ReviewTransactionKey } from "@/types/period-end";
 import { formatLocalizedDate } from "@/lib/date-utils";
@@ -180,12 +180,10 @@ export default function PeReview() {
                 {formatLocalizedDate(data.end_date, locale)}
               </CardTitle>
               <CardAction>
-                <Badge
-                  className={PERIOD_STATUS_CONFIG[data.status]?.className}
-                  size="sm"
-                >
-                  {t(`status.${data.status}`)}
-                </Badge>
+                <StatusIconLabel
+                  status={data.status}
+                  label={t(`status.${data.status}`)}
+                />
               </CardAction>
             </CardHeader>
             <CardContent>

@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,7 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PERIOD_STATUS_CONFIG } from "@/constant/period";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { usePeriodEndCurrent } from "@/hooks/use-period-end";
 import { cn } from "@/lib/utils";
 import PeHistory from "./pe-history";
@@ -31,7 +30,6 @@ export default function PeComponent() {
   const { data, isLoading, isError } = usePeriodEndCurrent();
 
   const statusKey = data?.status ?? "open";
-  const statusConfig = PERIOD_STATUS_CONFIG[statusKey];
 
   return (
     <div className="animate-fade-in-up space-y-5 p-3 md:p-4">
@@ -90,9 +88,10 @@ export default function PeComponent() {
               </span>
             </CardDescription>
             <CardAction>
-              <Badge className={statusConfig?.className} size="sm">
-                {t(`status.${statusKey}`)}
-              </Badge>
+              <StatusIconLabel
+                status={statusKey}
+                label={t(`status.${statusKey}`)}
+              />
             </CardAction>
           </CardHeader>
 
