@@ -234,6 +234,7 @@ export function GrnExtraCostFields({
         </div>
 
         <DataGrid
+          tableLayout={{ rowClamp: false }}
           table={table}
           recordCount={costFields.length}
           emptyMessage={

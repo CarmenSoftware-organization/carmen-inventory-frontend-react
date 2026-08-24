@@ -24,20 +24,6 @@ export const columnSkeletons = {
   badge: <Skeleton className="mx-auto h-3 w-12 rounded-full" />,
 };
 
-/**
- * สร้าง ColumnDef สำหรับ checkbox เลือกแถว
- *
- * Render `DataGridTableRowSelectAll` ใน header และ `DataGridTableRowSelect`
- * ในแต่ละแถว ปิด sorting/hiding/resizing และจัดให้ column กว้าง 50px
- * align center พร้อม skeleton
- *
- * @typeParam T - ประเภทข้อมูลแถว
- * @returns ColumnDef ของ column "select"
- * @example
- * ```ts
- * const columns = [selectColumn<Currency>(), ...customColumns];
- * ```
- */
 export function selectColumn<T>(): ColumnDef<T> {
   return {
     id: "select",
@@ -46,7 +32,7 @@ export function selectColumn<T>(): ColumnDef<T> {
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    size: 50,
+    size: 55,
     meta: {
       headerClassName: "text-center print:hidden",
       cellClassName: "text-center print:hidden",
@@ -55,20 +41,6 @@ export function selectColumn<T>(): ColumnDef<T> {
   };
 }
 
-/**
- * สร้าง ColumnDef ของคอลัมน์เลขลำดับ (#)
- *
- * คำนวณเลขลำดับจาก `row.index + 1 + (page - 1) * perpage` เพื่อให้แสดงเลข
- * ต่อเนื่องระหว่างหน้า ปิด sorting/hiding และจัดความกว้าง 50px align center
- *
- * @typeParam T - ประเภทข้อมูลแถว
- * @param params - ParamsDto ที่มี `page` และ `perpage` ของหน้าปัจจุบัน
- * @returns ColumnDef ของ index column
- * @example
- * ```ts
- * indexColumn<Currency>(params);
- * ```
- */
 export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
   return {
     id: "index",
@@ -79,7 +51,7 @@ export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
       ((Number(params.page) || 1) - 1) * (Number(params.perpage) || 10),
     enableSorting: false,
     enableHiding: false,
-    size: 50,
+    size: 55,
     meta: {
       headerClassName: "text-center",
       cellClassName: "text-center",
@@ -100,20 +72,6 @@ function StatusColumnHeader<T>({ column }: { column: Column<T, unknown> }) {
   );
 }
 
-/**
- * สร้าง ColumnDef ของ status badge
- *
- * อ่านค่า `is_active` แล้ว render `Badge` สี success/secondary (ตรงกับ card)
- * พร้อม label "ใช้งาน"/"ไม่ใช้งาน" จาก i18n header รองรับ sort + แปล
- * จัดความกว้าง 100px align center
- *
- * @typeParam T - ประเภทข้อมูลแถว
- * @returns ColumnDef ของ status column
- * @example
- * ```ts
- * const columns = [...customColumns, statusColumn<Currency>()];
- * ```
- */
 export function statusColumn<T>(): ColumnDef<T> {
   return {
     accessorKey: "is_active",
@@ -130,26 +88,6 @@ export function statusColumn<T>(): ColumnDef<T> {
   };
 }
 
-/**
- * สร้าง ColumnDef ของ action column (ลบรายการ)
- *
- * Render `DataGridRowActions` ที่มีปุ่มลบเรียก `onDelete(row.original)` ไว้
- * ท้ายตาราง ปิด sorting และจัดความกว้าง 60px align right
- *
- * @typeParam T - ประเภทข้อมูลแถว
- * @param onDelete - callback เมื่อกดลบ row
- * @returns ColumnDef ของ action column
- * @example
- * ```ts
- * actionColumn<Currency>((item) => setDeleteTarget(item));
- * ```
- */
-/**
- * วิธีดึง id และป้ายชื่อของแถวไปเปิด activity sheet
- *
- * เป็น callback ไม่ใช่ชื่อฟิลด์ตายตัว เพราะแต่ละตารางเก็บป้ายชื่อคนละที่ —
- * เอกสารใช้เลขที่ (`po_no`) ข้อมูลหลักใช้ `code` หรือ `name`
- */
 export interface ActionColumnActivity<T> {
   /** entity id ของแถว — คืน undefined เพื่อซ่อนเมนูเฉพาะแถวนั้น */
   id: (row: T) => string | undefined;
@@ -210,22 +148,6 @@ interface RowWithAudit {
 /** `useTranslations("field")` ของหน้าที่เรียก — ใช้แค่คีย์ created/updated */
 type FieldTranslator = (key: "created" | "updated") => string;
 
-/**
- * สร้าง ColumnDef คู่ created/updated ของตาราง list (วันเวลา + ชื่อผู้ทำ)
- *
- * `id` ตั้งเป็นชื่อคอลัมน์ฝั่ง backend (`created_at`/`updated_at`) เพื่อให้กด sort
- * แล้วส่ง `sort=created_at:asc|desc` ได้ตรง cell ใช้ `AuditCell` ตัวเดียวกับการ์ด
- *
- * @typeParam T - ประเภทข้อมูลแถว (ต้องมี `audit`)
- * @param tfl - translator ของ namespace `field`
- * @param dateTimeFormat - รูปแบบวันเวลาของ BU (จาก `useProfile()`)
- * @param options.size - ความกว้างคอลัมน์ (default 160)
- * @returns ColumnDef สองตัว เรียง created แล้วตามด้วย updated
- * @example
- * ```ts
- * const columns = [...customColumns, ...auditColumns<Currency>(tfl, dateTimeFormat)];
- * ```
- */
 export function auditColumns<T extends RowWithAudit>(
   tfl: FieldTranslator,
   dateTimeFormat: string,
@@ -250,30 +172,6 @@ export function auditColumns<T extends RowWithAudit>(
   }));
 }
 
-/**
- * สร้าง ColumnDef คอลัมน์ "ส่งกลับ" — มีค่าเฉพาะใบที่ action ล่าสุดคือการตีกลับ
- *
- * ช่องจะว่างสำหรับทุก state อื่น (`submitted` / `approved` / `rejected` /
- * `completed` / ไม่มีค่า) เพราะคอลัมน์นี้ตอบคำถามว่า "ตอนนี้ค้างอยู่ที่การตีกลับ
- * ไหม" ไม่ใช่ "เคยถูกตีกลับไหม" — ดู `isSentBack` ใน `constant/last-action.ts`
- *
- * `id` ต้องเป็น `last_action` ซึ่งเป็นชื่อคอลัมน์จริงฝั่ง DB ไม่ใช่ `sendback`
- * เพราะ `useDataGridState.onSortingChange` ส่ง `${column.id}:${dir}` เข้า query
- * param `sort` ตรง ๆ — ตั้งเป็นชื่ออื่นแล้ว backend จะ orderBy คอลัมน์ที่ไม่มีอยู่
- *
- * การเรียงเป็นการเรียงตาม enum `enum_last_action` ของ Postgres ซึ่งใช้**ลำดับที่
- * ประกาศไว้** (submitted → approved → reviewed → rejected) ไม่ใช่ตัวอักษร ผลคือ
- * ใบที่ถูกตีกลับจะถูกจับมากองติดกันเป็นกลุ่มเดียว ไม่ใช่ลอยขึ้นบนสุดเสมอไป
- *
- * @typeParam T - ประเภทข้อมูลแถวที่มี `last_action`
- * @param title - หัวคอลัมน์ที่แปลแล้ว (ปกติคือ `tc("sendBack")`)
- * @param options.size - ความกว้างคอลัมน์ (default 120)
- * @returns ColumnDef ของ column "last_action"
- * @example
- * ```ts
- * const columns = [...dataColumns, sendbackColumn<PurchaseRequest>(tc("sendBack"))];
- * ```
- */
 export function sendbackColumn<T extends RowWithLastAction>(
   title: string,
   options?: { size?: number },
@@ -301,17 +199,6 @@ export function sendbackColumn<T extends RowWithLastAction>(
   };
 }
 
-/**
- * Custom action column factory — same defaults as `actionColumn` but lets you
- * provide a custom cell renderer (e.g. dropdown with Approve/Reject/Delete).
- * Auto-includes `print:hidden` so the column is omitted when printing.
- * @typeParam T - row data type
- * @param cell - cell renderer (TanStack Table CellContext)
- * @example
- * ```ts
- * customActionColumn<PurchaseRequest>(({ row }) => <PrActionDropdown item={row.original} />)
- * ```
- */
 export function customActionColumn<T>(
   cell: NonNullable<ColumnDef<T>["cell"]>,
 ): ColumnDef<T> {

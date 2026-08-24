@@ -205,7 +205,7 @@ export function SrItemFields({
       <DataGrid
         table={table}
         recordCount={itemFields.length}
-        tableLayout={{ checkbox: !disabled }}
+        tableLayout={{ rowClamp: false, checkbox: !disabled }}
         emptyMessage={
           <EmptyComponent
             icon={BoxIcon}

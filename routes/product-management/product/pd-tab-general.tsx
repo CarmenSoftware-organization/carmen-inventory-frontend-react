@@ -625,7 +625,7 @@ function PdTabGeneral({
           <DataGrid
             table={infoTable}
             recordCount={infoFields.length}
-            tableLayout={{ rowRounded: true }}
+            tableLayout={{ rowClamp: false, rowRounded: true }}
             tableClassNames={{
               bodyRow: "[&>td]:py-3",
               headerRow: "[&>th]:py-3",

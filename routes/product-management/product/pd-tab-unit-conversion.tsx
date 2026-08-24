@@ -401,7 +401,7 @@ function PdTabUnitConversion({
       <DataGrid
         table={table}
         recordCount={fields.length}
-        tableLayout={{ rowRounded: true }}
+        tableLayout={{ rowClamp: false, rowRounded: true }}
         tableClassNames={{ bodyRow: "[&>td]:py-3", headerRow: "[&>th]:py-3" }}
         emptyMessage={
           <EmptyComponent

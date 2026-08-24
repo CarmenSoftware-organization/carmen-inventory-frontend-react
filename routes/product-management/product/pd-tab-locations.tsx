@@ -448,7 +448,7 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
       <DataGrid
         table={table}
         recordCount={fields.length}
-        tableLayout={{ headerSticky: true, rowRounded: true }}
+        tableLayout={{ rowClamp: false, headerSticky: true, rowRounded: true }}
         tableClassNames={{ bodyRow: "[&>td]:py-3", headerRow: "[&>th]:py-3" }}
         emptyMessage={
           <EmptyComponent

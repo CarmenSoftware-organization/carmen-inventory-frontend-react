@@ -93,6 +93,7 @@ export function AdjItemFields({
           )}
 
           <DataGrid
+            tableLayout={{ rowClamp: false }}
             table={table}
             recordCount={itemFields.length}
             emptyMessage={

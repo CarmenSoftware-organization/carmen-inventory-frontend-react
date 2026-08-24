@@ -209,8 +209,7 @@ export default function PriceListExternalProductTable({
   const addTierToItem = (itemIndex: number, rowId: string) => {
     const current =
       (form.getValues(`tb_pricelist_detail.${itemIndex}.moq_tiers`) as
-        | MoqTierDto[]
-        | undefined) ?? [];
+        MoqTierDto[] | undefined) ?? [];
     form.setValue(
       `tb_pricelist_detail.${itemIndex}.moq_tiers`,
       [
@@ -554,6 +553,7 @@ export default function PriceListExternalProductTable({
       table={editTable}
       recordCount={fields?.length || 0}
       tableLayout={{
+        rowClamp: false,
         columnsPinnable: false,
         columnsResizable: false,
         columnsMovable: false,

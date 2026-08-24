@@ -477,6 +477,7 @@ export function PrItemFields({
           table={table}
           recordCount={itemFields.length}
           tableLayout={{
+            rowClamp: false,
             checkbox: !!prStatus && prStatus !== "draft",
             columnsResizable: true,
           }}
@@ -517,15 +518,11 @@ export function PrItemFields({
               if (!open) setBulkAction(null);
             }}
             onConfirm={handleBulkActionConfirm}
-            items={selectedRows.map(
-              (row): ActionDialogItem => ({
-                index: row.index,
-                productName: form.getValues(`items.${row.index}.product_name`),
-                locationName: form.getValues(
-                  `items.${row.index}.location_name`,
-                ),
-              }),
-            )}
+            items={selectedRows.map((row): ActionDialogItem => ({
+              index: row.index,
+              productName: form.getValues(`items.${row.index}.product_name`),
+              locationName: form.getValues(`items.${row.index}.location_name`),
+            }))}
             {...bulkActionDialogConfig[bulkAction]}
             {...(bulkAction === PR_ITEM_STAGE_STATUS.REVIEW
               ? { stages: previousStages, stagesLoading }

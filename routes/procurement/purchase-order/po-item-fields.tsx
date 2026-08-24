@@ -369,6 +369,7 @@ export function PoItemFields({
           table={table}
           recordCount={itemFields.length}
           tableLayout={{
+            rowClamp: false,
             checkbox: showApproveCheckbox,
             // table กว้างเกิน container → scroll แนวนอน (เหมือน PR): width =
             // getTotalSize(), column กว้างตาม size px ที่กำหนด

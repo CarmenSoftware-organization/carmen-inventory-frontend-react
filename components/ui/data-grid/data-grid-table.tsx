@@ -692,6 +692,16 @@ function DataGridTableBodyRowCell<TData>({
       }
       className={cn(
         "align-middle",
+        // ทุกแถวสูงเท่ากับข้อความ 2 บรรทัดเสมอ แม้เนื้อหามีบรรทัดเดียว — `h` บน
+        // table-cell ทำตัวเป็นความสูงขั้นต่ำ (`2lh` อิง line-height จริงของเซลล์
+        // ไม่ผูกกับ font size ที่แต่ละหน้าตั้งไว้) จังหวะแถวจะได้ไม่กระโดดตามความยาวชื่อ
+        //
+        // ต้องบวก padding แนวตั้งเข้าไปเอง เพราะ box-sizing เป็น border-box ทั้งโปรเจกต์
+        // `h-[2lh]` เปล่า ๆ จึงเหลือที่ให้ข้อความแค่ 2lh ลบ padding = ไม่ถึงสองบรรทัด
+        props.tableLayout?.rowClamp &&
+          (props.tableLayout?.dense
+            ? "h-[calc(2lh+0.25rem)]"
+            : "h-[calc(2lh+0.5rem)]"),
         bodyCellSpacing,
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&
@@ -707,7 +717,31 @@ function DataGridTableBodyRowCell<TData>({
           : "",
       )}
     >
-      {children}
+      {props.tableLayout?.rowClamp ? (
+        // ตัดที่ 2 บรรทัดพร้อม ellipsis — ความสูงคงที่มาจาก `h-[2lh]` ที่ตัว `<td>`
+        // **ห้ามใส่ min-h ที่ div ตัวนี้**: -webkit-box เรียงลูกจากบนลงล่าง พอ div
+        // สูงเท่าเซลล์ เนื้อหาทุกคอลัมน์จะไปกองชิดขอบบนแทนที่จะอยู่กลาง (เจอมาแล้ว)
+        // ปล่อยให้ div สูงตามเนื้อหาจริง แล้วให้ `align-middle` ของ td จัดกลางให้
+        //
+        // ต้องเป็น div ครอบ ไม่ใช่ใส่ที่ td ตรง ๆ เพราะ line-clamp ตั้ง
+        // `display: -webkit-box` ซึ่งจะทำลาย `display: table-cell` ของ td
+        // (ด้วยเหตุผลเดียวกัน ตารางที่เซลล์มี input/select ต้องปิด `rowClamp`)
+        //
+        // ต้อง clamp ตัวลูกด้วย ไม่ใช่แค่ตัวครอบ: -webkit-box นับ "บรรทัด" จาก
+        // inline content ของตัวเอง เซลล์ที่เนื้อหาห่อด้วย element (เช่น `CellAction`
+        // ของคอลัมน์เลขที่เอกสาร) จึงนับเป็นกล่องเดียว = 1 บรรทัดเสมอ แล้วไม่ตัดอะไร
+        // เลย — ข้อความยาวยืดแถวเป็นสามสี่บรรทัดตามใจ ส่วน `max-w-full` กันลูกที่
+        // กว้างตาม max-content (ปุ่ม) ไม่ให้ล้นไปทับคอลัมน์ถัดไป
+        //
+        // ยกเว้นลูกที่เป็น component ของ design system (`data-slot`) — badge/checkbox
+        // พวกนี้เป็น inline-flex การเปลี่ยนเป็น -webkit-box ทำให้ของข้างในหาย
+        // (จุดสีของ StatusDotBadge หายไปทั้งคอลัมน์มาแล้ว) และมันสั้นอยู่แล้วไม่ต้องตัด
+        <div className="line-clamp-2 [&>*]:max-w-full [&>*:not([data-slot])]:line-clamp-2">
+          {children}
+        </div>
+      ) : (
+        children
+      )}
     </td>
   );
 }
