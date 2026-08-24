@@ -84,7 +84,19 @@ const FALLBACK = { icon: Minus, color: "var(--status-draft)" };
  * @returns ไอคอนกับสีของสถานะนั้น หรือค่าสำรองเมื่อไม่รู้จัก
  */
 export function getStatusIcon(status: string) {
-  return STATUS_ICON[status] ?? TYPE_ICON[status] ?? FALLBACK;
+  return lookupIcon(status) ?? FALLBACK;
+}
+
+/**
+ * เหมือน `getStatusIcon` แต่คืน `undefined` เมื่อไม่รู้จักคีย์นั้น — ใช้กับที่ที่
+ * ยังไม่รู้ว่าค่าที่ได้มาเป็นสถานะ/ชนิดใบหรือไม่ (ตัวกรองมีทั้ง field ที่เป็นสถานะ
+ * และ field อย่างผู้ขาย/แผนก ซึ่งไม่ควรมีไอคอนโผล่มา)
+ *
+ * @param key - ค่า status หรือ doc type ดิบ
+ * @returns ไอคอนกับสี หรือ `undefined` ถ้าไม่อยู่ในตารางทั้งสองชุด
+ */
+export function lookupIcon(key: string) {
+  return STATUS_ICON[key] ?? TYPE_ICON[key];
 }
 
 interface StatusIconLabelProps {

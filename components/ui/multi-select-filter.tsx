@@ -19,7 +19,7 @@ import {
 import { FilterInlineContext } from "@/components/ui/filter-inline-context";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "use-intl";
-import { getStatusIcon } from "@/components/ui/status-icon-label";
+import { lookupIcon } from "@/components/ui/status-icon-label";
 
 interface FilterOption {
   value: string;
@@ -31,10 +31,24 @@ interface FilterOption {
   statusKey?: string;
 }
 
+/**
+ * คีย์สถานะ/ชนิดใบที่ซ่อนอยู่ในค่าของตัวเลือก — รูปแบบคือ `field|type:value`
+ * ทั้งระบบ ตัวเลือกที่ประกาศ options เองแบบดิบ ๆ (ไม่ได้ผ่าน
+ * `createStatusFilterOptions`) จึงยังได้ไอคอนโดยไม่ต้องไล่เติม statusKey ทีละที่
+ */
+function keyFromValue(value: string): string | undefined {
+  const colon = value.lastIndexOf(":");
+  return colon === -1 ? undefined : value.slice(colon + 1);
+}
+
 /** จุด/ไอคอนนำหน้า label ของตัวเลือกสถานะ — ตัวเดียวใช้ทั้งสองสาขาที่ render option */
 function OptionMarker({ option }: { readonly option: FilterOption }) {
-  if (option.statusKey) {
-    const { icon: Icon, color } = getStatusIcon(option.statusKey);
+  // ไม่รู้จักคีย์ = ไม่ใช่ field สถานะ/ชนิดใบ (ผู้ขาย แผนก ฯลฯ) ต้องไม่มีไอคอนโผล่
+  const found = lookupIcon(
+    option.statusKey ?? keyFromValue(option.value) ?? "",
+  );
+  if (found) {
+    const { icon: Icon, color } = found;
     return (
       <Icon
         className="size-3.5 shrink-0"
