@@ -2,7 +2,6 @@ import { useTranslations } from "use-intl";
 import {
   Building2,
   FileText,
-  History,
   Pencil,
   Save,
   Trash2,
@@ -10,10 +9,9 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CommentButton } from "@/components/comment-button";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
 import { Badge } from "@/components/ui/badge";
-import { PrintDocumentButton } from "@/components/print-document-button";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
@@ -24,7 +22,6 @@ import type { GoodsReceiveNote } from "@/types/goods-receive-note";
 import { GRN_FORM_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import { getGrnDocTypeLabel } from "@/constant/grn-doc-type";
 import { DocFormHeader } from "@/components/share/doc-form-header";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface GrnHeaderProps {
   readonly goodsReceiveNote?: GoodsReceiveNote;
@@ -68,7 +65,6 @@ export function GrnHeader({
   onSave,
 }: GrnHeaderProps) {
   const t = useTranslations("procurement.goodsReceiveNote");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useGoodsReceiveNoteComments(goodsReceiveNote?.id);
@@ -197,30 +193,24 @@ export function GrnHeader({
         </>
       )}
 
-      {/* Always (มี record) — comment + print */}
+      {/* Always (มี record) — comment / activity / print ยุบอยู่ในเมนู ⋯ */}
       {goodsReceiveNote && (
-        <CommentButton count={comments?.length} onClick={onShowComment} />
-      )}
-      {goodsReceiveNote && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            openActivity(goodsReceiveNote.id, goodsReceiveNote.grn_no)
-          }
-        >
-          <History />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isView && goodsReceiveNote?.id && (
-        <PrintDocumentButton
-          documentType="GRN"
-          documentId={goodsReceiveNote.id}
-          filters={
-            goodsReceiveNote.grn_no
-              ? { DocumentNo: goodsReceiveNote.grn_no }
+        <DocActionsMenu
+          onComment={onShowComment}
+          commentCount={comments?.length}
+          activity={{
+            id: goodsReceiveNote.id,
+            label: goodsReceiveNote.grn_no,
+          }}
+          print={
+            isView && goodsReceiveNote.id
+              ? {
+                  documentType: "GRN",
+                  documentId: goodsReceiveNote.id,
+                  filters: goodsReceiveNote.grn_no
+                    ? { DocumentNo: goodsReceiveNote.grn_no }
+                    : undefined,
+                }
               : undefined
           }
         />

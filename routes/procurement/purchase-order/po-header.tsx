@@ -1,25 +1,14 @@
 import { useTranslations } from "use-intl";
-import {
-  Building2,
-  History,
-  Lock,
-  Pencil,
-  Save,
-  Trash2,
-  User,
-  X,
-} from "lucide-react";
+import { Building2, Lock, Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CommentButton } from "@/components/comment-button";
-import { PrintDocumentButton } from "@/components/print-document-button";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
 import { PO_STATUS, type PurchaseOrder } from "@/types/purchase-order";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";
 import type { FormMode } from "@/types/form";
 import { DocFormHeader } from "@/components/share/doc-form-header";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface PoHeaderProps {
   readonly purchaseOrder?: PurchaseOrder;
@@ -63,7 +52,6 @@ export function PoHeader({
   onShowHistory,
 }: PoHeaderProps) {
   const t = useTranslations("procurement.purchaseOrder");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = usePurchaseOrderComments(purchaseOrder?.id);
@@ -160,27 +148,22 @@ export function PoHeader({
               {tc("delete")}
             </Button>
           )}
-          <CommentButton count={comments?.length} onClick={onShowComment} />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => openActivity(purchaseOrder.id, purchaseOrder.po_no)}
-          >
-            <History aria-hidden="true" />
-            {tActivity("title")}
-          </Button>
-          {isView && (
-            <PrintDocumentButton
-              documentType="PO"
-              documentId={purchaseOrder.id}
-              filters={
-                purchaseOrder.po_no
-                  ? { DocumentNo: purchaseOrder.po_no }
-                  : undefined
-              }
-            />
-          )}
+          <DocActionsMenu
+            onComment={onShowComment}
+            commentCount={comments?.length}
+            activity={{ id: purchaseOrder.id, label: purchaseOrder.po_no }}
+            print={
+              isView
+                ? {
+                    documentType: "PO",
+                    documentId: purchaseOrder.id,
+                    filters: purchaseOrder.po_no
+                      ? { DocumentNo: purchaseOrder.po_no }
+                      : undefined,
+                  }
+                : undefined
+            }
+          />
         </>
       )}
       {isAdd && (

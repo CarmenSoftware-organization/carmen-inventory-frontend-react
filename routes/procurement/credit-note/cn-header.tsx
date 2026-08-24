@@ -1,9 +1,8 @@
 import { useTranslations } from "use-intl";
-import { History, Pencil, Save, Trash2, User, X } from "lucide-react";
+import { Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CommentButton } from "@/components/comment-button";
-import { PrintDocumentButton } from "@/components/print-document-button";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { useCreditNoteComments } from "@/hooks/use-credit-note";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
@@ -14,7 +13,6 @@ import type { FormMode } from "@/types/form";
 import type { CreditNoteDetail } from "@/types/credit-note";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
 import { DocFormHeader } from "@/components/share/doc-form-header";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface CnHeaderProps {
   readonly creditNote?: CreditNoteDetail;
@@ -49,7 +47,6 @@ export function CnHeader({
   onShowComment,
 }: CnHeaderProps) {
   const t = useTranslations("procurement.creditNote");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const { data: comments } = useCreditNoteComments(creditNote?.id);
@@ -161,27 +158,22 @@ export function CnHeader({
         </>
       )}
 
-      {/* Always (มี record) — comment + print */}
+      {/* Always (มี record) — comment / activity / print ยุบอยู่ในเมนู ⋯ */}
       {creditNote && (
-        <CommentButton count={comments?.length} onClick={onShowComment} />
-      )}
-      {creditNote && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => openActivity(creditNote.id, creditNote.cn_no)}
-        >
-          <History />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isView && creditNote?.id && (
-        <PrintDocumentButton
-          documentType="CN"
-          documentId={creditNote.id}
-          filters={
-            creditNote.cn_no ? { DocumentNo: creditNote.cn_no } : undefined
+        <DocActionsMenu
+          onComment={onShowComment}
+          commentCount={comments?.length}
+          activity={{ id: creditNote.id, label: creditNote.cn_no }}
+          print={
+            isView && creditNote.id
+              ? {
+                  documentType: "CN",
+                  documentId: creditNote.id,
+                  filters: creditNote.cn_no
+                    ? { DocumentNo: creditNote.cn_no }
+                    : undefined,
+                }
+              : undefined
           }
         />
       )}

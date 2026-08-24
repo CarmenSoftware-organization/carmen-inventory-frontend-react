@@ -4,8 +4,6 @@ import { useTranslations } from "use-intl";
 import {
   Building2,
   CalendarDays,
-  Copy,
-  History,
   Pencil,
   Save,
   Trash2,
@@ -17,7 +15,7 @@ import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CommentButton } from "@/components/comment-button";
+import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { useStoreRequisitionComments } from "@/hooks/use-store-requisition";
 import {
   Sheet,
@@ -26,7 +24,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { PrintDocumentButton } from "@/components/print-document-button";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { cn } from "@/lib/utils";
 import { WorkflowHistoryTimeline } from "@/components/share/workflow-history-timeline";
@@ -43,7 +40,6 @@ import type {
   StoreRequisition,
   StoreRequisitionType,
 } from "@/types/store-requisition";
-import { openActivity } from "@/components/share/activity-sheet-host";
 
 interface SrHeaderProps {
   readonly storeRequisition?: StoreRequisition;
@@ -91,7 +87,6 @@ export function SrHeader({
   onComment,
 }: SrHeaderProps) {
   const t = useTranslations("storeOperation.storeRequisition");
-  const tActivity = useTranslations("activity");
   const tc = useTranslations("common");
   const ts = useTranslations("status");
   const tfl = useTranslations("field");
@@ -203,41 +198,22 @@ export function SrHeader({
           )}
         </>
       )}
-      {/* Duplicate — view mode เท่านั้น (ตอน edit ค่าบนจออาจยังไม่ save) */}
-      {isView && storeRequisition && (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={handleDuplicate}
-        >
-          <Copy aria-hidden="true" />
-          {tc("duplicate")}
-        </Button>
-      )}
-      {storeRequisition && onComment && (
-        <CommentButton count={comments?.length} onClick={onComment} />
-      )}
+      {/* Duplicate/Print เฉพาะ view (ตอน edit ค่าบนจออาจยังไม่ save) */}
       {storeRequisition && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() =>
-            openActivity(storeRequisition.id, storeRequisition.sr_no)
-          }
-        >
-          <History aria-hidden="true" />
-          {tActivity("title")}
-        </Button>
-      )}
-      {isView && storeRequisition?.id && (
-        <PrintDocumentButton
-          documentType="SR"
-          documentId={storeRequisition.id}
-          filters={
-            storeRequisition.sr_no
-              ? { DocumentNo: storeRequisition.sr_no }
+        <DocActionsMenu
+          onDuplicate={isView ? handleDuplicate : undefined}
+          onComment={onComment}
+          commentCount={comments?.length}
+          activity={{ id: storeRequisition.id, label: storeRequisition.sr_no }}
+          print={
+            isView && storeRequisition.id
+              ? {
+                  documentType: "SR",
+                  documentId: storeRequisition.id,
+                  filters: storeRequisition.sr_no
+                    ? { DocumentNo: storeRequisition.sr_no }
+                    : undefined,
+                }
               : undefined
           }
         />
