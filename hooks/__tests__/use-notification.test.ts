@@ -157,7 +157,6 @@ describe("useNotificationRealtime", () => {
   });
 
   it("invalidates the notifications query when a notification message arrives", () => {
-    vi.useRealTimers();
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
     renderRealtime("user-1");
@@ -174,6 +173,13 @@ describe("useNotificationRealtime", () => {
       });
     });
 
+    // สัญญาณถูกหน่วงไว้ก่อน — ยังไม่ยิงจนกว่าจะครบ debounce
+    expect(invalidateSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
     // hook ไม่ถือรายการเองอีกแล้ว (payload บน WS ไม่ครบฟิลด์) — สัญญาที่เหลือคือ
     // invalidate คีย์ "notifications" ทั้งกลุ่มให้ REST ดึงสดแทน
     expect(invalidateSpy).toHaveBeenCalledWith({
@@ -181,8 +187,35 @@ describe("useNotificationRealtime", () => {
     });
   });
 
+  // ตอน register ฝั่ง micro-notification replay ของที่ยังไม่อ่านกลับมาทีละใบ — ถ้า
+  // invalidate ทุก frame จะได้ refetch /unread เท่าจำนวนใบค้างต่อการ refresh หนึ่งครั้ง
+  it("collapses a burst of notification messages into one invalidate", () => {
+    const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+    renderRealtime("user-1");
+
+    const ws = getLatestWs();
+    act(() => {
+      ws.simulateOpen();
+    });
+
+    act(() => {
+      for (let i = 0; i < 10; i += 1) {
+        ws.simulateMessage({
+          type: "notification",
+          data: { id: `n${i}`, title: "Backlog" },
+        });
+      }
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("ignores malformed WebSocket messages", () => {
-    vi.useRealTimers();
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
     renderRealtime("user-1");
@@ -194,13 +227,13 @@ describe("useNotificationRealtime", () => {
 
     act(() => {
       ws.onmessage?.({ data: "not-json{{{" });
+      vi.advanceTimersByTime(300);
     });
 
     expect(invalidateSpy).not.toHaveBeenCalled();
   });
 
   it("ignores non-notification message types", () => {
-    vi.useRealTimers();
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
     renderRealtime("user-1");
@@ -212,6 +245,7 @@ describe("useNotificationRealtime", () => {
 
     act(() => {
       ws.simulateMessage({ type: "ping", data: {} });
+      vi.advanceTimersByTime(300);
     });
 
     expect(invalidateSpy).not.toHaveBeenCalled();

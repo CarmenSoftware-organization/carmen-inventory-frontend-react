@@ -23,6 +23,8 @@ export type NotificationTab = "all" | "unread";
 
 const PAGE_SIZE = 20;
 const POPOVER_SIZE = 10;
+/** หน่วงก่อน invalidate เพื่อรวบสัญญาณ WS ที่มาเป็นชุด — ดู `useNotificationRealtime` */
+const INVALIDATE_DEBOUNCE_MS = 300;
 
 /**
  * คีย์ของรายการทุกตัวแตกจาก prefix `all` เดียวกัน WS จึง invalidate ครั้งเดียวสดทั้งหมด
@@ -151,6 +153,11 @@ function dropFromUnreadCaches(
  * REST เป็นแหล่งความจริงเดียว ดึงใหม่แล้วได้ครบทุกฟิลด์และตัวเลขที่ตรงกันเสมอ
  * reconnect แบบ exponential backoff เพดาน 30 วินาที
  *
+ * สัญญาณถูกหน่วงรวบเป็นชุด (`INVALIDATE_DEBOUNCE_MS`) เพราะตอน register ฝั่ง
+ * micro-notification จะ replay ของที่ยังไม่อ่านกลับมา **ทีละใบ** — invalidate ทุก frame
+ * แปลว่า refresh หนึ่งครั้งได้ refetch เท่าจำนวนใบที่ค้างอยู่ (แถม `invalidateQueries`
+ * default `cancelRefetch: true` เลยยกเลิกตัวที่ยิงค้างแล้วยิงใหม่ทุกรอบ)
+ *
  * @param userId - id ผู้ใช้สำหรับ register กับ gateway (undefined = ไม่เชื่อมต่อ)
  * @returns สถานะการเชื่อมต่อ
  * @example
@@ -161,6 +168,7 @@ export function useNotificationRealtime(userId: string | undefined) {
   const queryClient = useQueryClient();
   const reconnectAttempt = useRef(0);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const invalidateTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const maybeWsUrl = getWsUrl();
@@ -170,6 +178,14 @@ export function useNotificationRealtime(userId: string | undefined) {
     let unmounted = false;
     let activeWs: WebSocket | null = null;
     reconnectAttempt.current = 0;
+
+    /** รวบสัญญาณที่มาติด ๆ กันให้เหลือ invalidate ครั้งเดียวต่อชุด */
+    function scheduleInvalidate() {
+      clearTimeout(invalidateTimer.current);
+      invalidateTimer.current = setTimeout(() => {
+        void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      }, INVALIDATE_DEBOUNCE_MS);
+    }
 
     /** สร้างการเชื่อมต่อและผูก handler พร้อม reconnect */
     function connect() {
@@ -198,9 +214,7 @@ export function useNotificationRealtime(userId: string | undefined) {
           typeof message === "object" &&
           (message as { type?: unknown }).type === "notification"
         ) {
-          void queryClient.invalidateQueries({
-            queryKey: notificationKeys.all,
-          });
+          scheduleInvalidate();
         }
       };
 
@@ -223,6 +237,7 @@ export function useNotificationRealtime(userId: string | undefined) {
     return () => {
       unmounted = true;
       clearTimeout(reconnectTimer.current);
+      clearTimeout(invalidateTimer.current);
       activeWs?.close();
     };
   }, [userId, queryClient]);
