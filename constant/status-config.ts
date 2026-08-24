@@ -155,6 +155,8 @@ export function unknownStatusEntry(status: string): StatusConfigEntry {
 export interface StatusFilterOption {
   label: string;
   value: string;
+  /** ค่า status ดิบ — ตัวกรองใช้เลือกไอคอนของสถานะนั้น */
+  statusKey?: string;
   /** สี dot สถานะ (ค่า CSS var) — MultiSelectFilter ใช้วาดจุดหน้า label */
   dotColor?: string;
 }
@@ -193,6 +195,8 @@ export function createStatusFilterOptions<S extends string>(
     label: config[status].label,
     value: `${fieldName}|string:${status}`,
     dotColor: extractDotColor(config[status].className),
+    // ตัวกรองเลือกไอคอนจากคีย์นี้ ให้ตรงกับที่แสดงในตาราง (`StatusIconLabel`)
+    statusKey: status,
   }));
 }
 

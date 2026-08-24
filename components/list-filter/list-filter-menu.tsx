@@ -192,13 +192,14 @@ function MenuRow({
 /**
  * เมนู filter แบบ Linear สำหรับ desktop — popover ใต้ปุ่ม Filter รายชื่อ field
  * (icon + ชื่อ + ค่าย่อ + chevron จัดกลุ่มตาม section ด้วยเส้นคั่น) **hover**
- * แถวแล้ว submenu เด้งข้างซ้ายโชว์ตัวเลือกให้จิ้มได้ทันที (คลิกแถวก็เปิดได้
+ * แถวแล้ว submenu เด้งข้างขวาโชว์ตัวเลือกให้จิ้มได้ทันที (คลิกแถวก็เปิดได้
  * สำหรับ keyboard/จอสัมผัส) — ตัวเลือกใน submenu มาจาก FilterFieldControl ตัวเดิม
  * ที่สลับร่าง inline ผ่าน FilterInlineContext: control ที่ปกติเป็นปุ่ม trigger +
  * popover จะ render ไส้รายการ/ปฏิทินตรง ๆ เลือกแล้ว**มีผลทันที**เหมือนเดิม
  *
- * submenu เปิดฝั่งซ้ายเพราะปุ่ม Filter อยู่ชิดขวาของ toolbar (align end) —
- * พื้นที่ว่างอยู่ทางซ้ายเสมอ
+ * submenu เปิดฝั่งขวา — ทิศเดียวกับ chevron ที่ปลายแถว สายตาจึงไหลไปทางเดียวกับ
+ * ที่ลูกศรชี้ (เคยเปิดฝั่งซ้ายเพราะปุ่ม Filter ชิดขวาของ toolbar แต่มันสวนทางกับ
+ * chevron และสวนทางกับเมนูซ้อนของที่อื่นในแอปที่กางไปทางขวาหมด)
  *
  * มือถือไม่ใช้ตัวนี้ — ListFilter สลับไป bottom sheet เดิมให้เอง
  * props ชุดเดียวกับ ListFilter ทั้งชุด (ตัว sheet ส่งต่อมาตรง ๆ)
@@ -283,7 +284,8 @@ export function ListFilterMenu({
       <PopoverContent align="end" className="w-64 p-1">
         {menuFields.map((f, i) => {
           // เส้นคั่นเมื่อขึ้นกลุ่ม section ใหม่ — สไตล์ Linear ไม่มีหัวข้อ
-          const showSeparator = i > 0 && f.section !== menuFields[i - 1].section;
+          const showSeparator =
+            i > 0 && f.section !== menuFields[i - 1].section;
           return (
             <Fragment key={f.key}>
               {showSeparator && <Separator className="my-1" />}
@@ -309,7 +311,7 @@ export function ListFilterMenu({
                 {activeKey === f.key && (
                   <div
                     className={cn(
-                      "bg-popover text-popover-foreground absolute top-0 right-full z-50 mr-1 rounded-md border shadow-md",
+                      "bg-popover text-popover-foreground absolute top-0 left-full z-50 ml-1 rounded-md border shadow-md",
                       SUBMENU_CLASS[f.control],
                     )}
                   >

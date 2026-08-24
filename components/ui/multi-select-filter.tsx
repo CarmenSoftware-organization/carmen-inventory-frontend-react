@@ -19,6 +19,7 @@ import {
 import { FilterInlineContext } from "@/components/ui/filter-inline-context";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "use-intl";
+import { getStatusIcon } from "@/components/ui/status-icon-label";
 
 interface FilterOption {
   value: string;
@@ -26,6 +27,30 @@ interface FilterOption {
   group?: string;
   /** สีจุดสถานะหน้า label (ค่า CSS เช่น `var(--status-draft)`) — ไม่ใส่ = ไม่มีจุด */
   dotColor?: string;
+  /** ค่า status ดิบ — มีแล้วจะวาดไอคอนสถานะแทนจุด ให้ตรงกับที่เห็นในตาราง */
+  statusKey?: string;
+}
+
+/** จุด/ไอคอนนำหน้า label ของตัวเลือกสถานะ — ตัวเดียวใช้ทั้งสองสาขาที่ render option */
+function OptionMarker({ option }: { readonly option: FilterOption }) {
+  if (option.statusKey) {
+    const { icon: Icon, color } = getStatusIcon(option.statusKey);
+    return (
+      <Icon
+        className="size-3.5 shrink-0"
+        style={{ color }}
+        aria-hidden="true"
+      />
+    );
+  }
+  if (!option.dotColor) return null;
+  return (
+    <span
+      aria-hidden="true"
+      className="size-2 shrink-0 rounded-full"
+      style={{ backgroundColor: option.dotColor }}
+    />
+  );
 }
 
 interface MultiSelectFilterProps {
@@ -107,13 +132,7 @@ export function MultiSelectFilter({
                       className="text-xs"
                     >
                       <Checkbox checked={isSelected} tabIndex={-1} />
-                      {opt.dotColor && (
-                        <span
-                          aria-hidden="true"
-                          className="size-2 shrink-0 rounded-full"
-                          style={{ backgroundColor: opt.dotColor }}
-                        />
-                      )}
+                      <OptionMarker option={opt} />
                       {opt.label}
                     </CommandItem>
                   );
@@ -136,13 +155,7 @@ export function MultiSelectFilter({
                     className="text-xs"
                   >
                     <Checkbox checked={isSelected} tabIndex={-1} />
-                    {opt.dotColor && (
-                      <span
-                        aria-hidden="true"
-                        className="size-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: opt.dotColor }}
-                      />
-                    )}
+                    <OptionMarker option={opt} />
                     {opt.label}
                   </CommandItem>
                 );

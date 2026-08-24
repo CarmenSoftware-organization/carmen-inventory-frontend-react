@@ -27,7 +27,6 @@ import {
   indexColumn,
   sendbackColumn,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -40,6 +39,7 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import { PR_STATUS } from "@/types/purchase-request";
@@ -177,9 +177,13 @@ export function usePurchaseRequestTable({
         const status = row.original.pr_status;
         const config = PR_STATUS_CONFIG[status] ?? PR_STATUS_CONFIG.draft;
         return (
-          <Badge className={config.className} size="sm">
-            {config.label}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config.label}
+            // คอลัมน์นี้จัดกลาง — ตัว label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       meta: {

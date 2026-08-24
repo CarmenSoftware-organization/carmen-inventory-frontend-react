@@ -1,6 +1,5 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { SendBackBadge } from "@/components/share/sendback-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +10,7 @@ import {
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import type { PurchaseRequest } from "@/types/purchase-request";
 import { PR_STATUS } from "@/types/purchase-request";
@@ -67,9 +67,7 @@ export default function PrCard({
       badge={
         <div className="flex shrink-0 items-center gap-1">
           <SendBackBadge lastAction={item.last_action} size="xs" />
-          <Badge size="xs" className={config.className}>
-            {config.label}
-          </Badge>
+          <StatusIconLabel status={item.pr_status} label={config.label} />
         </div>
       }
       onOpen={() => onEdit(item)}
