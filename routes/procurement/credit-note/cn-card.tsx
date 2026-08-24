@@ -1,5 +1,4 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   ListCard,
   ListCardAuditRows,
@@ -9,6 +8,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";
 import type { CreditNote } from "@/types/credit-note";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { CN_STATUS_CONFIG, CN_TYPE_CONFIG } from "@/constant/credit-note";
 
 interface CnCardProps {
@@ -41,9 +41,10 @@ export default function CnCard({ item, onEdit, onDelete }: CnCardProps) {
     <ListCard
       title={item.cn_no}
       badge={
-        <Badge size="xs" className={statusConfig?.className}>
-          {statusConfig?.label ?? item.doc_status}
-        </Badge>
+        <StatusIconLabel
+          status={item.doc_status}
+          label={statusConfig?.label ?? item.doc_status}
+        />
       }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}

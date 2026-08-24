@@ -14,6 +14,7 @@ import {
   columnSkeletons,
 } from "@/components/ui/data-grid/columns";
 import { Badge } from "@/components/ui/badge";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { CN_STATUS_CONFIG, CN_TYPE_CONFIG } from "@/constant/credit-note";
 
 interface UseCnTableOptions {
@@ -130,9 +131,13 @@ export function useCnTable({
         const status = row.original.doc_status;
         const config = CN_STATUS_CONFIG[status];
         return (
-          <Badge size="sm" className={config?.className}>
-            {config?.label ?? status}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config?.label ?? status}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       meta: {

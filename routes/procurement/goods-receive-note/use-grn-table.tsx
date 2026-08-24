@@ -106,7 +106,7 @@ export function useGrnTable({
           />
         );
       },
-      size: 120,
+      size: 160,
       meta: {
         headerTitle: tfl("status"),
         cellClassName: "text-center",

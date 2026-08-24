@@ -1,7 +1,6 @@
 import { useTranslations } from "use-intl";
 import { Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { useCreditNoteComments } from "@/hooks/use-credit-note";
 import { useCan } from "@/hooks/use-can";
@@ -11,6 +10,7 @@ import { buildPermissionKey } from "@/constant/permissions";
 import { cn } from "@/lib/utils";
 import type { FormMode } from "@/types/form";
 import type { CreditNoteDetail } from "@/types/credit-note";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 
@@ -71,20 +71,25 @@ export function CnHeader({
 
   const statusCfg = creditNote ? CN_STATUS_CONFIG[creditNote.doc_status] : null;
 
+  // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+  // เอกสาร ส่วนสถานะกับรุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน
   const badges = (
-    <>
-      {statusCfg && (
-        <Badge className={statusCfg.className} size="sm">
-          {statusCfg.label ?? creditNote?.doc_status}
-        </Badge>
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
+      {statusCfg && creditNote && (
+        <StatusIconLabel
+          status={creditNote.doc_status}
+          label={statusCfg.label ?? creditNote.doc_status}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ
+          // เหลือสีไว้ที่ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
-      {/* เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด */}
       {creditNote?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {creditNote.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   const actions = (
