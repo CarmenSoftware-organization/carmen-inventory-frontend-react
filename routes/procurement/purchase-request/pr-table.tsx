@@ -192,7 +192,7 @@ export function usePurchaseRequestTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
-      size: 140,
+      size: 160,
     },
     {
       accessorKey: "requestor_name",
