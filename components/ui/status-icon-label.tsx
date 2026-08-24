@@ -107,7 +107,7 @@ export function StatusIconLabel({
       // -webkit-box แล้วไอคอนกับป้ายแยกกันคนละบรรทัด
       data-slot="status"
       className={cn(
-        "text-foreground inline-flex items-center gap-1.5 tracking-wide whitespace-nowrap",
+        "text-foreground inline-flex items-center gap-1.5 text-[11px] tracking-wide whitespace-nowrap",
         className,
       )}
     >
