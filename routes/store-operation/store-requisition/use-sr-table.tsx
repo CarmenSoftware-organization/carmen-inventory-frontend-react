@@ -57,7 +57,7 @@ export function useStoreRequisitionTable({
         </CellAction>
       ),
       meta: { headerTitle: tfl("srNo"), skeleton: columnSkeletons.text },
-      size: 120,
+      size: 80,
     },
     sendbackColumn<StoreRequisition>(tc("sendBack")),
     {
@@ -87,7 +87,7 @@ export function useStoreRequisitionTable({
         cellClassName: "text-center",
         headerClassName: "text-center",
       },
-      size: 140,
+      size: 80,
     },
     {
       accessorKey: "sr_date",
@@ -96,7 +96,7 @@ export function useStoreRequisitionTable({
       ),
       cell: ({ row }) => formatDate(row.getValue("sr_date"), dateFormat),
       meta: { headerTitle: tfl("date"), skeleton: columnSkeletons.text },
-      size: 120,
+      size: 75,
     },
     {
       // id เป็นชื่อคอลัมน์จริงใน DB เพื่อให้ sort ฝั่ง server ได้ (เรียง From → To = เรียงต้นทาง)
@@ -107,7 +107,7 @@ export function useStoreRequisitionTable({
         <DataGridColumnHeader column={column} title={tfl("fromTo")} />
       ),
       meta: { headerTitle: tfl("fromTo"), skeleton: columnSkeletons.text },
-      size: 220,
+      size: 120,
     },
     {
       accessorKey: "requestor_name",
@@ -115,12 +115,14 @@ export function useStoreRequisitionTable({
         <DataGridColumnHeader column={column} title={tfl("requester")} />
       ),
       meta: { headerTitle: tfl("requester"), skeleton: columnSkeletons.text },
+      size: 100,
     },
     {
       accessorKey: "department_name",
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("department")} />
       ),
+      size: 100,
       meta: { headerTitle: tfl("department"), skeleton: columnSkeletons.text },
     },
     {
@@ -154,7 +156,7 @@ export function useStoreRequisitionTable({
         cellClassName: "text-center",
         headerClassName: "text-center",
       },
-      size: 140,
+      size: 80,
     },
     {
       accessorKey: "workflow_name",
@@ -165,6 +167,7 @@ export function useStoreRequisitionTable({
           className="justify-center"
         />
       ),
+      size: 80,
       meta: {
         headerTitle: tfl("workflowStage"),
         skeleton: columnSkeletons.text,
@@ -180,6 +183,7 @@ export function useStoreRequisitionTable({
           className="justify-center"
         />
       ),
+      size: 80,
       meta: {
         headerTitle: tfl("currentStage"),
         skeleton: columnSkeletons.text,

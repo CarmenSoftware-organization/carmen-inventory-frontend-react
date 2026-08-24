@@ -189,7 +189,7 @@ export function sendbackColumn<T extends RowWithLastAction>(
       />
     ),
     cell: ({ row }) => <SendBackBadge lastAction={row.original.last_action} />,
-    size: options?.size ?? 120,
+    size: options?.size ?? 80,
     meta: {
       headerTitle: title,
       skeleton: columnSkeletons.badge,

@@ -49,7 +49,7 @@ export function usePoTable({
           {row.getValue("po_no")}
         </CellAction>
       ),
-      size: 180,
+      size: 140,
       meta: { headerTitle: tfl("poNo"), skeleton: columnSkeletons.text },
     },
     sendbackColumn<PurchaseOrder>(tc("sendBack")),
@@ -59,7 +59,7 @@ export function usePoTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={tfl("vendor")} />
       ),
-      size: 240,
+      size: 200,
       meta: { headerTitle: tfl("vendor"), skeleton: columnSkeletons.text },
     },
     {
@@ -84,7 +84,7 @@ export function usePoTable({
           />
         );
       },
-      size: 180,
+      size: 160,
       meta: {
         headerTitle: tfl("poType"),
         skeleton: columnSkeletons.text,
@@ -121,6 +121,7 @@ export function usePoTable({
           className="justify-center"
         />
       ),
+      size: 100,
       cell: ({ row }) => formatDate(row.getValue("order_date"), dateFormat),
       meta: {
         headerTitle: tfl("orderDate"),
@@ -137,6 +138,7 @@ export function usePoTable({
           className="justify-center"
         />
       ),
+      size: 100,
       cell: ({ row }) => formatDate(row.getValue("delivery_date"), dateFormat),
       meta: {
         headerTitle: tfl("deliveryDate"),
@@ -153,6 +155,7 @@ export function usePoTable({
           className="justify-center"
         />
       ),
+      size: 120,
       cell: ({ row }) => {
         const status = row.original.po_status;
         const config = PO_STATUS_CONFIG[status];

@@ -109,7 +109,7 @@ export function usePurchaseRequestTable({
           {row.original.pr_no}
         </CellAction>
       ),
-      size: 180,
+      size: 130,
       meta: { headerTitle: tfl("prNo"), skeleton: columnSkeletons.text },
     },
     sendbackColumn<PurchaseRequest>(tc("sendBack")),
@@ -123,7 +123,7 @@ export function usePurchaseRequestTable({
         />
       ),
       cell: ({ row }) => formatDate(row.original.pr_date, dateFormat),
-      size: 120,
+      size: 95,
       meta: {
         headerTitle: tfl("date"),
         skeleton: columnSkeletons.text,
@@ -145,7 +145,7 @@ export function usePurchaseRequestTable({
         cellClassName: "text-center",
         headerClassName: "text-center",
       },
-      size: 120,
+      size: 100,
     },
     {
       accessorKey: "workflow_current_stage",
@@ -162,7 +162,7 @@ export function usePurchaseRequestTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.text,
       },
-      size: 140,
+      size: 100,
     },
     {
       accessorKey: "pr_status",
@@ -192,7 +192,7 @@ export function usePurchaseRequestTable({
         headerClassName: "text-center",
         skeleton: columnSkeletons.badge,
       },
-      size: 160,
+      size: 120,
     },
     {
       accessorKey: "requestor_name",
