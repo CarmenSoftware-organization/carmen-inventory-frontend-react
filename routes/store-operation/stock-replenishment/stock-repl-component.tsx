@@ -144,17 +144,12 @@ export default function StockReplComponent() {
   const getSelectedProducts = (): ProductLocation[] =>
     getSelectedRows().map((row) => row.product);
 
-  // ทั้ง PR และ SR ออกได้ใบละคลัง — payload มี `location_id` ตัวเดียวที่ถูกประทับลง
-  // ทุกบรรทัด (ดู buildPurchaseRequestDraft/buildStoreRequisitionDraft ฝั่ง
-  // micro-business) ติ๊กข้ามคลังจึงต้องเตือน ไม่ใช่เปิด wizard แล้วไปตายที่ 400
+  // PR ติ๊กข้ามคลังได้ — payload รับ `location_id` เดียว wizard จึงยิงทีละคลัง
+  // ได้ใบขอซื้อคลังละใบ ส่วน SR ทำแบบนั้นไม่ได้เพราะทั้งใบผูกคู่คลังต้นทาง-ปลายทาง
   // (selections ลบ entry ว่างออกเสมอ ดังนั้น size = จำนวนคลังที่มีของติ๊กจริง)
   const handleCreatePR = () => {
     if (!canCreatePr) {
       dispatchPermissionDenied(undefined, tPr("noCreatableWorkflow"));
-      return;
-    }
-    if (selections.size > 1) {
-      setLocationWarningOpen(true);
       return;
     }
     setCreateDialog("pr");
@@ -298,8 +293,8 @@ export default function StockReplComponent() {
 
       <WarningDialog
         open={locationWarningOpen}
-        title={t("oneLocationTitle")}
-        description={t("oneLocationDesc")}
+        title={t("srOneLocationTitle")}
+        description={t("srOneLocationDesc")}
         confirmLabel={tc("goBack")}
         onConfirm={() => setLocationWarningOpen(false)}
       />

@@ -3219,8 +3219,10 @@
       "totalNeed": "จุดสั่งซื้อรวม:",
       "selectAllIn": "เลือกสินค้าทั้งหมดใน{location}",
       "requestQty": "ขอ",
-      "oneLocationTitle": "หนึ่งใบต่อหนึ่งคลัง",
-      "oneLocationDesc": "ใบขอซื้อและใบเบิกของออกได้ใบละคลังเท่านั้น เลือกของทีละคลังนะ"
+      "srOneLocationTitle": "ใบเบิกได้ทีละคลัง",
+      "srOneLocationDesc": "ใบเบิกของย้ายของจากคลังต้นทางเดียวไปปลายทางเดียว เลือกของทีละคลังนะ",
+      "createdNPr": "สร้างใบขอซื้อแล้ว {count} ใบ",
+      "nDocumentsWillBeCreated": "จะได้ใบขอซื้อ {count} ใบ — คลังละใบ"
     },
     "wastageReporting": {
       "title": "รายงานของเสีย",

@@ -3224,8 +3224,10 @@
       "totalNeed": "Total reorder:",
       "selectAllIn": "Select all products in {location}",
       "requestQty": "Request",
-      "oneLocationTitle": "One location per document",
-      "oneLocationDesc": "A purchase request or store requisition covers a single location. Pick items from one location at a time."
+      "srOneLocationTitle": "One location per requisition",
+      "srOneLocationDesc": "A store requisition moves stock between one source and one destination. Pick items from one location at a time.",
+      "createdNPr": "Created {count} purchase request(s)",
+      "nDocumentsWillBeCreated": "{count} purchase requests will be created — one per location"
     },
     "wastageReporting": {
       "title": "Wastage Reporting",

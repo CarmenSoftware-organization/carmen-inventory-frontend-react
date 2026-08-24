@@ -50,8 +50,7 @@ interface RowDraft {
  * ไม่ใช่ประกอบใบเองแล้วส่งเข้า endpoint สร้าง PR ปกติ เพราะ `verify()` ฝั่งหลังบ้าน
  * ตรวจให้ด้วยว่า workflow/สินค้า/คลัง เข้ากันไหม และผู้ใช้มีสิทธิ์ในคลังนั้นจริงไหม
  *
- * ใบหนึ่งผูกคลังเดียว (`location_id` ตัวเดียวถูกประทับลงทุกบรรทัด) หน้าแม่จึงกันไว้แล้ว
- * ว่าติ๊กข้ามคลังเปิด wizard นี้ไม่ได้
+ * ติ๊กข้ามคลังได้ — ใบหนึ่งผูกคลังเดียว wizard จึงยิงทีละคลังตามลำดับ ได้ใบขอซื้อคลังละใบ
  *
  * จำนวนตั้งต้นคือ `reorder_qty` (ส่วนที่ขาดจากเกณฑ์ par) ส่วนหน่วยปล่อยให้
  * `LookupProductUnit` auto-select หน่วยแรกของสินค้าให้เอง
@@ -71,7 +70,6 @@ export function StockReplPrWizard({
 }: StockReplPrWizardProps) {
   const t = useTranslations("storeOperation.stockReplenishment");
   const tc = useTranslations("common");
-  const tt = useTranslations("toast");
   const tfl = useTranslations("field");
   const createPr = useCreateStockReplPr();
 
@@ -121,27 +119,43 @@ export function StockReplPrWizard({
       return draft.qty > 0 && !!draft.unitId;
     });
 
-  const handleSubmit = () => {
-    const locationId = activeRows[0]?.location.location_id;
-    if (!locationId) return;
-    createPr.mutate(
-      {
-        workflow_id: workflowId,
-        location_id: locationId,
-        products: activeRows.map((row) => ({
-          id: row.product.id,
-          request_unit_id: draftOf(row).unitId,
-          request_qty: draftOf(row).qty,
-        })),
-      },
-      {
-        onSuccess: () => {
-          toast.success(tt("createSuccess", { entity: "PR" }));
-          onOpenChange(false);
-          onCreated?.();
-        },
-      },
-    );
+  // payload รับ `location_id` เดียวและมันถูกประทับลงทุกบรรทัดของใบ (ดู
+  // buildPurchaseRequestDraft) ติ๊กข้ามคลังจึงแปลว่าได้ใบขอซื้อคลังละใบ
+  const byLocation = new Map<string, StockReplPrRow[]>();
+  for (const row of activeRows) {
+    const key = row.location.location_id;
+    byLocation.set(key, [...(byLocation.get(key) ?? []), row]);
+  }
+
+  /**
+   * ยิงทีละคลังตามลำดับ ไม่ขนาน — พังใบไหนหยุดตรงนั้น ใบก่อนหน้าที่สร้างไปแล้วยกเลิก
+   * ให้ไม่ได้ (ไม่มี endpoint ถอน) จึงต้องบอกให้ชัดว่าได้ไปแล้วกี่ใบ ไม่ใช่ปล่อยให้
+   * เห็นแต่ error แล้วเข้าใจว่าไม่มีอะไรเกิดขึ้น · error ของแต่ละใบ mutationCache
+   * เด้ง toast ให้เองอยู่แล้ว ที่นี่จึงไม่ต้อง toast.error ซ้ำ
+   */
+  const handleSubmit = async () => {
+    let created = 0;
+    try {
+      for (const [locationId, locationRows] of byLocation) {
+        await createPr.mutateAsync({
+          workflow_id: workflowId,
+          location_id: locationId,
+          products: locationRows.map((row) => ({
+            id: row.product.id,
+            request_unit_id: draftOf(row).unitId,
+            request_qty: draftOf(row).qty,
+          })),
+        });
+        created += 1;
+      }
+    } catch {
+      // error ถูก toast ไปแล้วโดย mutationCache — ที่เหลือคือรายงานว่าได้ไปกี่ใบ
+    }
+    if (created > 0) {
+      toast.success(t("createdNPr", { count: created }));
+      onOpenChange(false);
+      onCreated?.();
+    }
   };
 
   return (
@@ -168,6 +182,12 @@ export function StockReplPrWizard({
           </Field>
           <p className="text-muted-foreground pb-1.5 text-xs">
             {t("nItems", { count: activeRows.length })}
+            {byLocation.size > 1 && (
+              <>
+                {" · "}
+                {t("nDocumentsWillBeCreated", { count: byLocation.size })}
+              </>
+            )}
           </p>
         </div>
 
@@ -254,7 +274,7 @@ export function StockReplPrWizard({
           </Button>
           <Button
             type="button"
-            onClick={handleSubmit}
+            onClick={() => void handleSubmit()}
             disabled={!canContinue || createPr.isPending}
           >
             {createPr.isPending && (
