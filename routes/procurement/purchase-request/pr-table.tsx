@@ -109,7 +109,7 @@ export function usePurchaseRequestTable({
           {row.original.pr_no}
         </CellAction>
       ),
-      size: 140,
+      size: 180,
       meta: { headerTitle: tfl("prNo"), skeleton: columnSkeletons.text },
     },
     sendbackColumn<PurchaseRequest>(tc("sendBack")),
@@ -235,7 +235,7 @@ export function usePurchaseRequestTable({
         cellClassName: "text-right",
         headerClassName: "text-right",
       },
-      size: 150,
+      size: 90,
     },
     ...auditColumns<PurchaseRequest>(tfl, dateTimeFormat),
   ];
@@ -312,7 +312,7 @@ export function usePurchaseRequestTable({
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    size: 50,
+    size: 60,
     meta: {
       headerClassName: "text-center print:hidden",
       cellClassName: "text-center print:hidden",
@@ -336,7 +336,7 @@ export function usePurchaseRequestTable({
     cell: ({ row }) => (
       <>
         {row.getIsSelected() && (
-          <div className="bg-primary absolute start-0 top-0 bottom-0 w-0.5 rounded-full" />
+          <div className="bg-primary absolute inset-s-0 top-0 bottom-0 w-0.5 rounded-full" />
         )}
         <Checkbox
           checked={row.getIsSelected()}
