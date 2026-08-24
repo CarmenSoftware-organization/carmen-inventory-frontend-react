@@ -1317,6 +1317,16 @@
       "deleteTitle": "Delete Credit Note Reason",
       "deleteConfirm": "Are you sure you want to delete credit note reason \"{name}\"? This action cannot be undone.",
       "namePlaceholder": "e.g. Damaged Goods"
+    },
+    "accountCode": {
+      "entity": "Account Code",
+      "title": "Account Code",
+      "desc": "The account codes your accounting system posts to.",
+      "add": "Add Account Code",
+      "deleteTitle": "Delete Account Code",
+      "deleteConfirm": "Are you sure you want to delete account code \"{name}\"? This action cannot be undone.",
+      "codePlaceholder": "e.g. 1010000",
+      "namePlaceholder": "e.g. Cash on Hand - House Fund"
     }
   },
   "systemAdmin": {
@@ -4291,7 +4301,8 @@
     "review": "Review",
     "setting": "Settings",
     "notifications": "Notifications",
-    "fromPriceList": "From price list"
+    "fromPriceList": "From price list",
+    "accountCode": "Account Code"
   },
   "commentSheet": {
     "title": "Comments ({count})",

@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { PERMISSIONS, type Permission } from "@/constant/permissions";
 import {
+  BookText,
   LayoutDashboard,
   Settings2,
   Coins,
@@ -437,6 +438,15 @@ export const moduleList: ModuleDto[] = [
     path: "/config",
     icon: Settings2,
     subModules: [
+      {
+        // ยังไม่ผูก permission/licenseFeature โดยตั้งใจ — โมดูลนี้เพิ่งวางโครง
+        // ไว้ก่อน RouteGuard ปล่อยผ่าน leaf ที่ไม่ประกาศ permission อยู่แล้ว
+        // (ดู components/route-guard.tsx) พอ backend มี endpoint จริงและ
+        // catalog มีคีย์ของมันแล้วค่อยเติมทั้งสองอย่างพร้อมกัน
+        name: "accountCode",
+        path: "/config/account-code",
+        icon: BookText,
+      },
       {
         name: "storeLocation",
         path: "/config/location",
