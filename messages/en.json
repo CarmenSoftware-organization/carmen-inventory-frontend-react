@@ -3223,11 +3223,9 @@
       "nLow": "{count} low",
       "totalNeed": "Total reorder:",
       "selectAllIn": "Select all products in {location}",
-      "srOneLocationTitle": "One location per requisition",
-      "srOneLocationDesc": "The items you picked come from more than one location. A store requisition covers one location at a time — please pick items from the same location, then create the requisition.",
       "requestQty": "Request",
-      "goToPrForm": "Continue to purchase request",
-      "goToSrForm": "Continue to store requisition"
+      "oneLocationTitle": "One location per document",
+      "oneLocationDesc": "A purchase request or store requisition covers a single location. Pick items from one location at a time."
     },
     "wastageReporting": {
       "title": "Wastage Reporting",

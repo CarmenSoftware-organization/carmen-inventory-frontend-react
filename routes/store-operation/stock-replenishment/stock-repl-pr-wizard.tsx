@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,8 +15,8 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
+import { useCreateStockReplPr } from "@/hooks/use-stock-replenishment";
 import { WORKFLOW_TYPE } from "@/types/workflows";
-import type { PrPrefillDraft } from "@/routes/procurement/purchase-request/pr-form-schema";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
 
 /** แถวที่ผู้ใช้ติ๊กไว้ พร้อมคลังต้นสังกัด — ProductLocation เองไม่ได้พกคลังมาด้วย */
@@ -29,6 +29,8 @@ interface StockReplPrWizardProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly rows: readonly StockReplPrRow[];
+  /** สร้างสำเร็จ — หน้าแม่ใช้ล้าง selection */
+  readonly onCreated?: () => void;
 }
 
 /** สินค้าตัวเดียวกันโผล่ได้หลายคลัง — คีย์จึงต้องมีคลังด้วย */
@@ -44,10 +46,12 @@ interface RowDraft {
  * Wizard สร้างใบขอซื้อจากรายการที่ติ๊กในหน้า Stock Replenishment
  *
  * หน้าเดียวจบ: เลือก workflow แล้วทบทวนรายการในตารางเดียวกัน (แก้จำนวน เลือกหน่วย
- * ตัดแถวออก) แล้วส่งต่อไปหน้า PR form พร้อมของที่เติมไว้ **โดยยังไม่สร้างใบ**
- * ผู้ใช้กด Save ในฟอร์มเองอีกที
- * — endpoint `POST /stock-replenishments/pr` ไม่ได้ถูกใช้ในเส้นทางนี้ เพราะมัน
- * serialize response เป็นซองเปล่า เลยไม่รู้เลขใบที่เพิ่งสร้างเพื่อพาผู้ใช้ไปต่อ
+ * ตัดแถวออก) แล้วยิง `POST /stock-replenishments/pr` — ต้องผ่าน endpoint นี้เท่านั้น
+ * ไม่ใช่ประกอบใบเองแล้วส่งเข้า endpoint สร้าง PR ปกติ เพราะ `verify()` ฝั่งหลังบ้าน
+ * ตรวจให้ด้วยว่า workflow/สินค้า/คลัง เข้ากันไหม และผู้ใช้มีสิทธิ์ในคลังนั้นจริงไหม
+ *
+ * ใบหนึ่งผูกคลังเดียว (`location_id` ตัวเดียวถูกประทับลงทุกบรรทัด) หน้าแม่จึงกันไว้แล้ว
+ * ว่าติ๊กข้ามคลังเปิด wizard นี้ไม่ได้
  *
  * จำนวนตั้งต้นคือ `reorder_qty` (ส่วนที่ขาดจากเกณฑ์ par) ส่วนหน่วยปล่อยให้
  * `LookupProductUnit` auto-select หน่วยแรกของสินค้าให้เอง
@@ -56,17 +60,20 @@ interface RowDraft {
  * @param props.open - เปิดอยู่หรือไม่
  * @param props.onOpenChange - callback เปลี่ยนสถานะเปิด/ปิด
  * @param props.rows - รายการที่ติ๊กไว้พร้อมคลังของแต่ละแถว
+ * @param props.onCreated - เรียกเมื่อสร้างสำเร็จ
  * @returns React element ของ wizard
  */
 export function StockReplPrWizard({
   open,
   onOpenChange,
   rows,
+  onCreated,
 }: StockReplPrWizardProps) {
   const t = useTranslations("storeOperation.stockReplenishment");
   const tc = useTranslations("common");
+  const tt = useTranslations("toast");
   const tfl = useTranslations("field");
-  const navigate = useNavigate();
+  const createPr = useCreateStockReplPr();
 
   const [workflowId, setWorkflowId] = useState("");
   const [drafts, setDrafts] = useState<Map<string, RowDraft>>(new Map());
@@ -105,7 +112,7 @@ export function StockReplPrWizard({
     setRemoved((prev) => new Set(prev).add(rowKey(row)));
   };
 
-  // แถวที่จำนวนเป็น 0/ติดลบ หรือยังไม่มีหน่วย ส่งไปแล้วฟอร์มก็บันทึกไม่ผ่าน
+  // แถวที่จำนวนเป็น 0/ติดลบ หรือยังไม่มีหน่วย backend ปฏิเสธที่ DTO อยู่แล้ว
   const canContinue =
     !!workflowId &&
     activeRows.length > 0 &&
@@ -114,29 +121,34 @@ export function StockReplPrWizard({
       return draft.qty > 0 && !!draft.unitId;
     });
 
-  const handleGoToForm = () => {
-    const draft: PrPrefillDraft = {
-      workflow_id: workflowId,
-      items: activeRows.map((row) => ({
-        product_id: row.product.id,
-        product_code: row.product.code,
-        product_name: row.product.name,
-        product_local_name: row.product.local_name ?? "",
-        location_id: row.location.location_id,
-        location_code: row.location.location_code,
-        location_name: row.location.location_name,
-        requested_qty: draftOf(row).qty,
-        requested_unit_id: draftOf(row).unitId,
-      })),
-    };
-    onOpenChange(false);
-    navigate("/procurement/purchase-request/new", {
-      state: { prPrefill: draft },
-    });
+  const handleSubmit = () => {
+    const locationId = activeRows[0]?.location.location_id;
+    if (!locationId) return;
+    createPr.mutate(
+      {
+        workflow_id: workflowId,
+        location_id: locationId,
+        products: activeRows.map((row) => ({
+          id: row.product.id,
+          request_unit_id: draftOf(row).unitId,
+          request_qty: draftOf(row).qty,
+        })),
+      },
+      {
+        onSuccess: () => {
+          toast.success(tt("createSuccess", { entity: "PR" }));
+          onOpenChange(false);
+          onCreated?.();
+        },
+      },
+    );
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => !createPr.isPending && onOpenChange(next)}
+    >
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{t("createPrTitle")}</DialogTitle>
@@ -236,16 +248,19 @@ export function StockReplPrWizard({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={createPr.isPending}
           >
             {tc("cancel")}
           </Button>
           <Button
             type="button"
-            onClick={handleGoToForm}
-            disabled={!canContinue}
+            onClick={handleSubmit}
+            disabled={!canContinue || createPr.isPending}
           >
-            {t("goToPrForm")}
-            <ArrowRight />
+            {createPr.isPending && (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            )}
+            {tc("create")}
           </Button>
         </DialogFooter>
       </DialogContent>

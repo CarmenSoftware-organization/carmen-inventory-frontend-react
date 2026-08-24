@@ -61,7 +61,7 @@ export default function StockReplComponent() {
   const [search, setSearch] = useState("");
   const [openLocations, setOpenLocations] = useState<Set<string>>(new Set());
   const [createDialog, setCreateDialog] = useState<"pr" | "sr" | null>(null);
-  const [srLocationWarningOpen, setSrLocationWarningOpen] = useState(false);
+  const [locationWarningOpen, setLocationWarningOpen] = useState(false);
 
   const handleOpenChange = (locationId: string, open: boolean) => {
     setOpenLocations((prev) => {
@@ -144,23 +144,29 @@ export default function StockReplComponent() {
   const getSelectedProducts = (): ProductLocation[] =>
     getSelectedRows().map((row) => row.product);
 
+  // ทั้ง PR และ SR ออกได้ใบละคลัง — payload มี `location_id` ตัวเดียวที่ถูกประทับลง
+  // ทุกบรรทัด (ดู buildPurchaseRequestDraft/buildStoreRequisitionDraft ฝั่ง
+  // micro-business) ติ๊กข้ามคลังจึงต้องเตือน ไม่ใช่เปิด wizard แล้วไปตายที่ 400
+  // (selections ลบ entry ว่างออกเสมอ ดังนั้น size = จำนวนคลังที่มีของติ๊กจริง)
   const handleCreatePR = () => {
     if (!canCreatePr) {
       dispatchPermissionDenied(undefined, tPr("noCreatableWorkflow"));
       return;
     }
+    if (selections.size > 1) {
+      setLocationWarningOpen(true);
+      return;
+    }
     setCreateDialog("pr");
   };
 
-  // SR เบิกได้ทีละคลัง — ติ๊กข้ามคลังให้เตือนแทนที่จะเปิด dialog
-  // (selections ลบ entry ว่างออกเสมอ ดังนั้น size = จำนวนคลังที่มีของติ๊กจริง)
   const handleCreateSR = () => {
     if (!canCreateSr) {
       dispatchPermissionDenied(undefined, tSr("noCreatableWorkflow"));
       return;
     }
     if (selections.size > 1) {
-      setSrLocationWarningOpen(true);
+      setLocationWarningOpen(true);
       return;
     }
     setCreateDialog("sr");
@@ -280,20 +286,22 @@ export default function StockReplComponent() {
         open={createDialog === "pr"}
         onOpenChange={(open) => !open && setCreateDialog(null)}
         rows={getSelectedRows()}
+        onCreated={() => setSelections(new Map())}
       />
       <StockReplSrWizard
         open={createDialog === "sr"}
         onOpenChange={(open) => !open && setCreateDialog(null)}
         location={getSelectedRows()[0]?.location}
         products={getSelectedProducts()}
+        onCreated={() => setSelections(new Map())}
       />
 
       <WarningDialog
-        open={srLocationWarningOpen}
-        title={t("srOneLocationTitle")}
-        description={t("srOneLocationDesc")}
+        open={locationWarningOpen}
+        title={t("oneLocationTitle")}
+        description={t("oneLocationDesc")}
         confirmLabel={tc("goBack")}
-        onConfirm={() => setSrLocationWarningOpen(false)}
+        onConfirm={() => setLocationWarningOpen(false)}
       />
     </DisplayTemplate>
   );

@@ -1,8 +1,7 @@
 import { Suspense } from "react";
-import { useLocation, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { useTranslations } from "use-intl";
 import { PurchaseRequestForm } from "./pr-form";
-import { getPrefilledValues, type PrPrefillDraft } from "./pr-form-schema";
 import {
   usePurchaseRequestById,
   usePurchaseRequestTemplates,
@@ -13,19 +12,14 @@ import { FormSkeleton } from "@/components/loader/form-skeleton";
 
 const NewPurchaseRequestInner = () => {
   const [searchParams] = useSearchParams();
-  const routerLocation = useLocation();
   const templateId = searchParams.get("template_id");
   // ?duplicate_id= — สร้างสำเนาจากใบเดิม (ปุ่ม Duplicate ในหน้า detail/เมนูแถว)
   const duplicateId = searchParams.get("duplicate_id");
-  // router state — wizard ของหน้า Stock Replenishment ส่งรายการของมาให้กรอกต่อ
-  // (ไม่ใช่ query string เพราะอาจมีหลายสิบแถว) refresh แล้ว state หายกลายเป็น
-  // ฟอร์มเปล่า ซึ่งถูกแล้ว: ของที่เติมมายังไม่ถูก save จะกู้คืนเองไม่ได้
-  const prefillDraft = (routerLocation.state as { prPrefill?: PrPrefillDraft })
-    ?.prPrefill;
 
   // ดึง templates เฉพาะตอนเข้ามาแบบ ?template_id= — blank PR ไม่ต้องใช้
-  const { data: templates, isLoading } =
-    usePurchaseRequestTemplates(!!templateId);
+  const { data: templates, isLoading } = usePurchaseRequestTemplates(
+    !!templateId,
+  );
   const { data: duplicateFrom, isError: duplicateError } =
     usePurchaseRequestById(duplicateId ?? undefined);
 
@@ -45,11 +39,7 @@ const NewPurchaseRequestInner = () => {
     : undefined;
 
   return (
-    <PurchaseRequestForm
-      template={template}
-      duplicateFrom={duplicateFrom}
-      prefill={prefillDraft ? getPrefilledValues(prefillDraft) : undefined}
-    />
+    <PurchaseRequestForm template={template} duplicateFrom={duplicateFrom} />
   );
 };
 

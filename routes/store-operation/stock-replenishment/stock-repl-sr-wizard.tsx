@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,8 +15,8 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
 import { LookupLocation } from "@/components/lookup/lookup-location";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
+import { useCreateStockReplSr } from "@/hooks/use-stock-replenishment";
 import { WORKFLOW_TYPE } from "@/types/workflows";
-import type { SrPrefillDraft } from "@/routes/store-operation/store-requisition/sr-form-helpers";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
 
 interface StockReplSrWizardProps {
@@ -28,16 +28,17 @@ interface StockReplSrWizardProps {
    */
   readonly location?: Location;
   readonly products: readonly ProductLocation[];
+  /** สร้างสำเร็จ — หน้าแม่ใช้ล้าง selection */
+  readonly onCreated?: () => void;
 }
 
 /**
  * Wizard สร้างใบเบิกของจากรายการที่ติ๊กในหน้า Stock Replenishment
  *
  * เลือกสายอนุมัติ + คลังต้นทาง แล้วทบทวนรายการในตารางเดียวกัน (แก้จำนวน ตัดแถวออก)
- * แล้วส่งต่อไปหน้า SR form พร้อมของที่เติมไว้ **โดยยังไม่สร้างใบ** ผู้ใช้กด Save
- * ในฟอร์มเองอีกที — เหตุผลเดียวกับฝั่ง PR: endpoint
- * `POST /stock-replenishments/sr` serialize response เป็นซองเปล่า เลยไม่รู้เลขใบ
- * ที่เพิ่งสร้างเพื่อพาผู้ใช้ไปต่อ
+ * แล้วยิง `POST /stock-replenishments/sr` — ต้องผ่าน endpoint นี้เท่านั้น เพราะ
+ * `verify()` ฝั่งหลังบ้านตรวจให้ด้วยว่า workflow/สินค้า/คลัง เข้ากันไหม และผู้ใช้มีสิทธิ์
+ * ในคลังทั้งต้นทางและปลายทางจริงไหม
  *
  * ไม่มีคอลัมน์หน่วยเหมือนฝั่ง PR โดยตั้งใจ — ใบเบิกย้ายของที่เก็บเป็นหน่วยคลังของ
  * สินค้าอยู่แล้ว จึงไม่มีหน่วยให้เลือก (ตรงกับ DTO ฝั่ง backend ที่ SR ไม่มี
@@ -48,6 +49,7 @@ interface StockReplSrWizardProps {
  * @param props.onOpenChange - callback เปลี่ยนสถานะเปิด/ปิด
  * @param props.location - คลังปลายทาง (คลังที่ของขาด)
  * @param props.products - รายการที่ติ๊กไว้
+ * @param props.onCreated - เรียกเมื่อสร้างสำเร็จ
  * @returns React element ของ wizard
  */
 export function StockReplSrWizard({
@@ -55,11 +57,13 @@ export function StockReplSrWizard({
   onOpenChange,
   location,
   products,
+  onCreated,
 }: StockReplSrWizardProps) {
   const t = useTranslations("storeOperation.stockReplenishment");
   const tc = useTranslations("common");
+  const tt = useTranslations("toast");
   const tfl = useTranslations("field");
-  const navigate = useNavigate();
+  const createSr = useCreateStockReplSr();
 
   const [workflowId, setWorkflowId] = useState("");
   const [fromLocationId, setFromLocationId] = useState("");
@@ -88,7 +92,7 @@ export function StockReplSrWizard({
     setRemoved((prev) => new Set(prev).add(product.id));
   };
 
-  // แถวที่จำนวนเป็น 0/ติดลบ ส่งไปแล้วฟอร์มก็บันทึกไม่ผ่าน
+  // แถวที่จำนวนเป็น 0/ติดลบ backend ปฏิเสธที่ DTO อยู่แล้ว
   const canContinue =
     !!workflowId &&
     !!fromLocationId &&
@@ -96,26 +100,33 @@ export function StockReplSrWizard({
     activeProducts.length > 0 &&
     activeProducts.every((p) => qtyOf(p) > 0);
 
-  const handleGoToForm = () => {
-    const draft: SrPrefillDraft = {
-      workflow_id: workflowId,
-      from_location_id: fromLocationId,
-      to_location_id: location?.location_id,
-      items: activeProducts.map((product) => ({
-        product_id: product.id,
-        product_name: product.name,
-        product_local_name: product.local_name ?? "",
-        requested_qty: qtyOf(product),
-      })),
-    };
-    onOpenChange(false);
-    navigate("/store-operation/store-requisition/new", {
-      state: { srPrefill: draft },
-    });
+  const handleSubmit = () => {
+    if (!location) return;
+    createSr.mutate(
+      {
+        workflow_id: workflowId,
+        location_id: location.location_id,
+        from_location: fromLocationId,
+        products: activeProducts.map((product) => ({
+          id: product.id,
+          request_qty: qtyOf(product),
+        })),
+      },
+      {
+        onSuccess: () => {
+          toast.success(tt("createSuccess", { entity: "SR" }));
+          onOpenChange(false);
+          onCreated?.();
+        },
+      },
+    );
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => !createSr.isPending && onOpenChange(next)}
+    >
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{t("createSrTitle")}</DialogTitle>
@@ -218,16 +229,19 @@ export function StockReplSrWizard({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={createSr.isPending}
           >
             {tc("cancel")}
           </Button>
           <Button
             type="button"
-            onClick={handleGoToForm}
-            disabled={!canContinue}
+            onClick={handleSubmit}
+            disabled={!canContinue || createSr.isPending}
           >
-            {t("goToSrForm")}
-            <ArrowRight />
+            {createSr.isPending && (
+              <Loader2 className="animate-spin" aria-hidden="true" />
+            )}
+            {tc("create")}
           </Button>
         </DialogFooter>
       </DialogContent>

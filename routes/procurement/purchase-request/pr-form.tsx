@@ -33,18 +33,12 @@ interface PurchaseRequestFormProps {
   readonly template?: PurchaseRequestTemplate;
   /** ใบเดิมที่ผู้ใช้กด Duplicate — ทำหน้าที่เหมือน template (prefill แล้วนับ dirty) */
   readonly duplicateFrom?: PurchaseRequest;
-  /**
-   * ใบร่างที่หน้าอื่นส่งมาทาง router state (wizard ของ Stock Replenishment) —
-   * ทำหน้าที่เหมือน template เช่นกัน มาก่อน `duplicateFrom`/`template` เมื่อมีพร้อมกัน
-   */
-  readonly prefill?: PrFormValues;
 }
 
 export function PurchaseRequestForm({
   purchaseRequest,
   template,
   duplicateFrom,
-  prefill,
 }: PurchaseRequestFormProps) {
   const tv = useTranslations("validation");
   const tfl = useTranslations("field");
@@ -72,12 +66,10 @@ export function PurchaseRequestForm({
   // baseline ที่ใช้เทียบ dirty ตอนมาจาก prefill ต้องเป็นฟอร์มเปล่า — ของที่
   // ถูกเติมคือของที่ยังไม่ save ถ้าปล่อยเป็น baseline ฟอร์มจะไม่ dirty
   // เลย กด back ออกเงียบ ๆ โดย discard ไม่ถามทั้งที่มีของค้างเต็มฟอร์ม
-  const initialValues =
-    prefill ??
-    (duplicateFrom
-      ? getDuplicateValues(duplicateFrom)
-      : getDefaultValues(purchaseRequest, template));
-  const isPrefilled = !!template || !!duplicateFrom || !!prefill;
+  const initialValues = duplicateFrom
+    ? getDuplicateValues(duplicateFrom)
+    : getDefaultValues(purchaseRequest, template);
+  const isPrefilled = !!template || !!duplicateFrom;
   const defaultValues = isPrefilled ? getDefaultValues() : initialValues;
   const role = purchaseRequest?.role ?? STAGE_ROLE.CREATE;
 

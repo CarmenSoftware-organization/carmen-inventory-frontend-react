@@ -21,8 +21,6 @@ import {
 import {
   buildSrDefaultValues,
   buildSrDuplicateValues,
-  buildSrPrefillValues,
-  type SrPrefillDraft,
   srGrandTotal,
 } from "./sr-form-helpers";
 import { useSrFormActions } from "./use-sr-form-actions";
@@ -37,11 +35,6 @@ interface StoreRequisitionFormProps {
   readonly storeRequisition?: StoreRequisition;
   /** ใบเดิมที่ผู้ใช้กด Duplicate — prefill แล้วนับ dirty (แบบเดียวกับ PR) */
   readonly duplicateFrom?: StoreRequisition;
-  /**
-   * ใบร่างที่หน้าอื่นส่งมาทาง router state (wizard ของ Stock Replenishment) —
-   * ทำหน้าที่เหมือน duplicate มาก่อน `duplicateFrom` เมื่อมีพร้อมกัน
-   */
-  readonly prefill?: SrPrefillDraft;
 }
 
 interface LocationInfo {
@@ -53,7 +46,6 @@ interface LocationInfo {
 export function StoreRequisitionForm({
   storeRequisition,
   duplicateFrom,
-  prefill,
 }: StoreRequisitionFormProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
@@ -78,28 +70,18 @@ export function StoreRequisitionForm({
   // ค่าแรกเข้า (duplicate = เติมของจากใบเดิมมาแล้ว) ส่วน baseline เทียบ dirty
   // ตอน duplicate ต้องเป็นฟอร์มเปล่า — เหตุผลเดียวกับ template ของ PR: ของที่
   // เติมคือของที่ยังไม่ save ฟอร์มต้องนับ dirty ตั้งแต่เกิดให้ navGuard ถามก่อนทิ้ง
-  const isPrefilled = !!duplicateFrom || !!prefill;
-  let initialValues: SrFormValues;
-  if (prefill) {
-    initialValues = buildSrPrefillValues(
-      prefill,
-      defaultRequestorId,
-      defaultDepartmentId,
-    );
-  } else if (duplicateFrom) {
-    initialValues = buildSrDuplicateValues(
-      duplicateFrom,
-      defaultRequestorId,
-      defaultDepartmentId,
-    );
-  } else {
-    initialValues = buildSrDefaultValues(
-      storeRequisition,
-      defaultRequestorId,
-      defaultDepartmentId,
-    );
-  }
-  const defaultValues = isPrefilled
+  const initialValues = duplicateFrom
+    ? buildSrDuplicateValues(
+        duplicateFrom,
+        defaultRequestorId,
+        defaultDepartmentId,
+      )
+    : buildSrDefaultValues(
+        storeRequisition,
+        defaultRequestorId,
+        defaultDepartmentId,
+      );
+  const defaultValues = duplicateFrom
     ? buildSrDefaultValues(undefined, defaultRequestorId, defaultDepartmentId)
     : initialValues;
 
@@ -112,7 +94,7 @@ export function StoreRequisitionForm({
   // จาก duplicate: สลับ baseline เป็นฟอร์มเปล่าโดยคงค่าที่เติมไว้ → dirty ตั้งแต่เกิด
   // (ต้องมาก่อน effect auto-populate ข้างล่าง — ดู pr-form.tsx เหตุผลเดียวกัน)
   useEffect(() => {
-    if (!isPrefilled) return;
+    if (!duplicateFrom) return;
     form.reset(defaultValues, { keepValues: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ครั้งเดียวตอน mount
   }, []);

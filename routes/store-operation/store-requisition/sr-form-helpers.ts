@@ -101,67 +101,6 @@ export function buildSrDuplicateValues(
 }
 
 /**
- * ใบร่างที่หน้าอื่นส่งมาให้ SR form กรอกต่อ — ตอนนี้มีที่เดียวคือ wizard ของหน้า
- * Stock Replenishment (`/store-operation/stock-replenishment`) ส่งผ่าน router state
- * ไม่ใช่ query string เพราะรายการของอาจมีหลายสิบแถว
- */
-export interface SrPrefillDraft {
-  workflow_id?: string;
-  /** คลังต้นทางที่จะเบิกของออกมา — ผู้ใช้เลือกใน wizard */
-  from_location_id?: string;
-  /** คลังปลายทาง = คลังที่ของขาด (คลังที่ติ๊กในหน้า replenishment) */
-  to_location_id?: string;
-  items: Array<{
-    product_id: string;
-    product_name: string;
-    product_local_name?: string;
-    unit_name?: string;
-    requested_qty: number;
-  }>;
-}
-
-/**
- * ค่าเริ่มต้นของฟอร์มจากใบร่างที่หน้าอื่นส่งมา — semantics เดียวกับ duplicate
- * (ของที่เติมมายังไม่ถูก save ฟอร์มจึงต้องนับ dirty ตั้งแต่เกิด ดู `sr-form.tsx`)
- *
- * @param draft - ใบร่างจากหน้าต้นทาง
- * @param defaultRequestorId - ผู้ขอตั้งต้น (คนที่กำลังสร้าง)
- * @param defaultDepartmentId - แผนกตั้งต้น
- * @returns ค่าเริ่มต้นของฟอร์ม SR
- */
-export function buildSrPrefillValues(
-  draft: SrPrefillDraft,
-  defaultRequestorId: string,
-  defaultDepartmentId: string,
-): SrFormValues {
-  const blank = buildSrDefaultValues(
-    undefined,
-    defaultRequestorId,
-    defaultDepartmentId,
-  );
-  return {
-    ...blank,
-    workflow_id: draft.workflow_id ?? "",
-    from_location_id: draft.from_location_id ?? "",
-    to_location_id: draft.to_location_id ?? "",
-    items: draft.items.map((item) => ({
-      product_id: item.product_id,
-      product_name: item.product_name,
-      product_local_name: item.product_local_name ?? "",
-      unit_name: item.unit_name ?? "",
-      description: "",
-      requested_qty: item.requested_qty,
-      approved_qty: 0,
-      issued_qty: 0,
-      current_stage_status: "pending",
-      stage_status: "",
-      _initial_stage_status: "pending",
-      stage_message: "",
-    })),
-  };
-}
-
-/**
  * ยอดเงินของรายการ SR
  *
  * backend ยังไม่ส่งราคาต่อหน่วยมากับ store_requisition_detail เลยคง 0 ไว้ก่อน
