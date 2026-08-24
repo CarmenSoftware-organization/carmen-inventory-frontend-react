@@ -1,8 +1,8 @@
 import { ArrowUpRight, FileText, Rows3 } from "lucide-react";
 import { useTranslations } from "use-intl";
 
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
-  JOB_STATUS_CONFIG,
   REPORT_FORMAT_LABELS,
   normalizeJobStatus,
 } from "@/constant/report-history";
@@ -39,7 +39,6 @@ export default function HistoryCard({ item }: HistoryCardProps) {
   const t = useTranslations("reportHistory");
 
   const statusKey = normalizeJobStatus(item.status);
-  const statusConfig = statusKey ? JOB_STATUS_CONFIG[statusKey] : null;
   const accent = statusKey
     ? STATUS_COLOR[statusKey]
     : "var(--muted-foreground)";
@@ -139,19 +138,12 @@ export default function HistoryCard({ item }: HistoryCardProps) {
           )}
         </div>
 
-        {statusConfig && (
-          <div
-            className={cn(
-              "text-micro-legal inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-semibold",
-              statusConfig.className,
-            )}
-          >
-            <span
-              aria-hidden
-              className="size-1 rounded-full bg-current opacity-80"
-            />
-            {t(statusKey!)}
-          </div>
+        {statusKey && (
+          <StatusIconLabel
+            status={statusKey}
+            label={t(statusKey)}
+            className="text-micro-legal [&>svg]:size-3"
+          />
         )}
       </div>
     </div>

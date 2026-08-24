@@ -4,6 +4,7 @@ import {
   Check,
   Clock,
   Flag,
+  Hourglass,
   Lock,
   Minus,
   PenLine,
@@ -21,8 +22,8 @@ import { cn } from "@/lib/utils";
  * ไปกับเส้นขอบที่ไม่ได้บอกอะไร เหลือแต่ตัวสัญลักษณ์ที่พนักงานหน้างานอ่านออกทันที:
  * ดินสอ = ยังร่าง · นาฬิกา = รออยู่ · เครื่องบิน = ส่งออกไปแล้ว · เปอร์เซ็นต์ = มา
  * บางส่วน · ติ๊ก = ผ่านแล้ว · ธง = ถึงปลายทางแล้ว · กล่องเก็บ = ปิดใบแล้ว ·
- * แผ่นบันทึก = บันทึกไว้ · กุญแจ = ยืนยันแล้วแก้ไม่ได้ · ห้าม = ยกเลิก ·
- * กากบาท = ไม่อนุมัติ
+ * แผ่นบันทึก = บันทึกไว้ · กุญแจ = ยืนยันแล้วแก้ไม่ได้ · นาฬิกาทราย = เข้าคิวรอ ·
+ * ห้าม = ยกเลิก · กากบาท = ไม่อนุมัติ/ล้มเหลว
  *
  * `completed` ใช้ธงไม่ใช่ติ๊กซ้อน เพราะมันไม่ใช่ "อนุมัติแรงกว่า approved" แต่เป็น
  * คนละเรื่อง — จบทั้งกระบวนการแล้ว ติ๊กสองอันข้างติ๊กอันเดียวอ่านเป็นระดับของ
@@ -47,6 +48,10 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color: string }> = {
   /* รอบบัญชี — เปิดรับรายการ → ปิดรอบ → ล็อกถาวร */
   open: { icon: Unlock, color: "var(--status-open)" },
   locked: { icon: Lock, color: "var(--status-locked)" },
+  /* งานเบื้องหลัง (ออกรายงาน) — เข้าคิว → กำลังทำ → เสร็จ/ล้มเหลว */
+  queued: { icon: Hourglass, color: "var(--status-pending)" },
+  processing: { icon: Clock, color: "var(--status-in-progress)" },
+  failed: { icon: X, color: "var(--status-rejected)" },
   voided: { icon: Ban, color: "var(--status-voided)" },
   rejected: { icon: X, color: "var(--status-rejected)" },
   cancelled: { icon: Ban, color: "var(--status-cancelled)" },
