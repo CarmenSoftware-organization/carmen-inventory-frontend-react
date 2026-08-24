@@ -1,7 +1,4 @@
-import {
-  createStatusConfig,
-  createStatusFilterOptions,
-} from "./status-config";
+import { createStatusConfig, createStatusFilterOptions } from "./status-config";
 
 /** GRN document status (table/card view) */
 export const GRN_STATUS_CONFIG = createStatusConfig([

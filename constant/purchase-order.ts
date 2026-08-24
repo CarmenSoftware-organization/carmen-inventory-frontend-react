@@ -1,7 +1,4 @@
-import {
-  createStatusConfig,
-  createStatusFilterOptions,
-} from "./status-config";
+import { createStatusConfig, createStatusFilterOptions } from "./status-config";
 
 /** Badge variant + label for PO document-level status */
 export const PO_STATUS_CONFIG = createStatusConfig([
