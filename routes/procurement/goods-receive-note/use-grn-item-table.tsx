@@ -251,10 +251,7 @@ const GroupUnitPrice = memo(function GroupUnitPrice({
 });
 
 type GrnAmountField =
-  | "net_amount"
-  | "discount_amount"
-  | "tax_amount"
-  | "total_price";
+  "net_amount" | "discount_amount" | "tax_amount" | "total_price";
 
 /** ยอดรวมเงินของ group (sum ทุก location, บวกหลาย field ได้) — โชว์ที่ product row เหมือน PO */
 const GroupAmountSum = memo(function GroupAmountSum({

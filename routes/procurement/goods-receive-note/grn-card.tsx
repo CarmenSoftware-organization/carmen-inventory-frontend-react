@@ -56,7 +56,13 @@ export default function GrnCard({ item, onEdit, onDelete }: GrnCardProps) {
           {item.grn_date ? formatDate(item.grn_date, dateFormat) : "—"}
         </span>
       </ListCardRow>
-      <ListCardRow label={tfl("type")}>{docTypeLabel}</ListCardRow>
+      <ListCardRow label={tfl("type")}>
+        <StatusIconLabel
+          status={item.doc_type}
+          label={docTypeLabel}
+          className="text-muted-foreground"
+        />
+      </ListCardRow>
       {item.vendor_name && (
         <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>
       )}

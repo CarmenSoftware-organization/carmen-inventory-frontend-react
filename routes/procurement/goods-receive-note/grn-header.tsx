@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { useGoodsReceiveNoteComments } from "@/hooks/use-goods-receive-note";
-import { Badge } from "@/components/ui/badge";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
@@ -106,9 +105,11 @@ export function GrnHeader({
         />
       )}
       {goodsReceiveNote && (
-        <Badge variant="info-light" size="sm">
-          {getGrnDocTypeLabel(t, goodsReceiveNote.doc_type)}
-        </Badge>
+        <StatusIconLabel
+          status={goodsReceiveNote.doc_type}
+          label={getGrnDocTypeLabel(t, goodsReceiveNote.doc_type)}
+          className="text-muted-foreground text-micro [&>svg]:size-3"
+        />
       )}
       {/* เลขที่ใบ · สถานะ · ชนิดใบ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด
           (ทรงเดียวกับใบลดหนี้) — ไม่ใช่ Badge เพราะรุ่นเป็นตัวเลขอ้างอิง ไม่ใช่

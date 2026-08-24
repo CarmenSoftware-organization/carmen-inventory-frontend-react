@@ -66,7 +66,10 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
  * (ไอคอนรับสีจากข้อความรอบตัวแทน)
  */
 const TYPE_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
+  // สร้างจากเอกสารต้นทาง — ใบขอซื้อ (PO) กับใบสั่งซื้อ (GRN) เป็นเรื่องเดียวกัน
+  // ในสายตาคนอ่าน จึงใช้ไอคอนเดียวกัน
   purchase_request: { icon: FileText },
+  purchase_order: { icon: FileText },
   manual: { icon: SquarePen },
   pricelist: { icon: Tags },
 };
@@ -121,7 +124,7 @@ export function StatusIconLabel({
       // -webkit-box แล้วไอคอนกับป้ายแยกกันคนละบรรทัด
       data-slot="status"
       className={cn(
-        "text-foreground inline-flex items-center gap-1.5 text-[11px] tracking-wide whitespace-nowrap",
+        "text-foreground text-micro inline-flex items-center gap-1.5 tracking-wide whitespace-nowrap",
         className,
       )}
     >
