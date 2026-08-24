@@ -55,7 +55,11 @@ export default function CnCard({ item, onEdit, onDelete }: CnCardProps) {
         </span>
       </ListCardRow>
       <ListCardRow label={tfl("type")}>
-        {typeConfig?.label ?? item.credit_note_type}
+        <StatusIconLabel
+          status={item.credit_note_type}
+          label={typeConfig?.label ?? item.credit_note_type}
+          className="text-muted-foreground"
+        />
       </ListCardRow>
       {item.vendor_name && (
         <ListCardRow label={tfl("vendor")}>{item.vendor_name}</ListCardRow>

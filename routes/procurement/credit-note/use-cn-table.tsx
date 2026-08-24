@@ -13,7 +13,6 @@ import {
   auditColumns,
   columnSkeletons,
 } from "@/components/ui/data-grid/columns";
-import { Badge } from "@/components/ui/badge";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { CN_STATUS_CONFIG, CN_TYPE_CONFIG } from "@/constant/credit-note";
 
@@ -72,9 +71,12 @@ export function useCnTable({
         const type = row.original.credit_note_type;
         const config = CN_TYPE_CONFIG[type];
         return (
-          <Badge className={config?.className} size="sm">
-            {config?.label ?? type}
-          </Badge>
+          <StatusIconLabel
+            status={type}
+            label={config?.label ?? type}
+            // ชนิดใบไม่มีสี — สีสงวนไว้ให้สถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง ๆ
+            className="text-muted-foreground flex w-full justify-center"
+          />
         );
       },
       meta: {

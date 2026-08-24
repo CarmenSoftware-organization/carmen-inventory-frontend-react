@@ -1,5 +1,6 @@
 import {
   Archive,
+  BadgePercent,
   Ban,
   Check,
   Clock,
@@ -14,6 +15,7 @@ import {
   Send,
   SquarePen,
   Tags,
+  Undo2,
   Unlock,
   X,
   type LucideIcon,
@@ -72,6 +74,9 @@ const TYPE_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
   purchase_order: { icon: FileText },
   manual: { icon: SquarePen },
   pricelist: { icon: Tags },
+  // ใบลดหนี้ — คืนของ (ของไหลกลับ) กับ ลดเงิน (ตัวเงินอย่างเดียว ของไม่ขยับ)
+  quantity_return: { icon: Undo2 },
+  amount_discount: { icon: BadgePercent },
 };
 
 const FALLBACK = { icon: Minus, color: "var(--status-draft)" };
