@@ -1,5 +1,4 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { SendBackBadge } from "@/components/share/sendback-badge";
 import {
   ListCard,
@@ -8,7 +7,7 @@ import {
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
-import { SR_STATUS_CONFIG } from "@/constant/store-requisition";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import type { StoreRequisition } from "@/types/store-requisition";
 
 interface SrCardProps {
@@ -34,17 +33,17 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
   const ts = useTranslations("status");
   const { dateFormat } = useProfile();
 
-  const config = SR_STATUS_CONFIG[item.doc_status] ?? SR_STATUS_CONFIG.draft;
-
   return (
     <ListCard
       title={item.sr_no}
       badge={
         <div className="flex shrink-0 items-center gap-1">
           <SendBackBadge lastAction={item.last_action} size="xs" />
-          <Badge size="xs" className={config.className}>
-            {ts(item.doc_status)}
-          </Badge>
+          <StatusIconLabel
+            status={item.doc_status}
+            label={ts(item.doc_status)}
+            className="uppercase"
+          />
         </div>
       }
       onOpen={() => onEdit(item)}

@@ -30,10 +30,8 @@ import { WorkflowHistoryTimeline } from "@/components/share/workflow-history-tim
 import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { formatDate } from "@/lib/date-utils";
-import {
-  SR_STATUS_CONFIG,
-  SR_TYPE_VARIANT,
-} from "@/constant/store-requisition";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { SR_TYPE_VARIANT } from "@/constant/store-requisition";
 import { getModeLabels, type FormMode } from "@/types/form";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type {
@@ -122,12 +120,18 @@ export function SrHeader({
     );
   };
 
+  // แยกเป็นคนละกลุ่มกับเลขที่ใบด้วยเส้นคั่น + ระยะห่าง — เลขที่ใบคือตัวตนของ
+  // เอกสาร ส่วนสถานะ/ชนิดใบ/รุ่นคือ "ตอนนี้มันอยู่ตรงไหน" คนละคำถามกัน
   const badges = (
-    <>
+    <div className="border-border/60 ms-1 flex items-center gap-2 border-s ps-3">
       {docStatus && (
-        <Badge className={SR_STATUS_CONFIG[docStatus]?.className}>
-          {ts(docStatus).toUpperCase()}
-        </Badge>
+        <StatusIconLabel
+          status={docStatus}
+          label={ts(docStatus)}
+          // เบากว่าในตาราง: ตัวเอกของแถบนี้คือเลขที่ใบ สถานะเป็นข้อมูลประกอบ
+          // เหลือสีไว้ที่ไอคอนจุดเดียวซึ่งเป็นสัญญาณที่ต้องเห็นจริง ๆ
+          className="text-muted-foreground text-micro uppercase [&>svg]:size-3"
+        />
       )}
       {srType && (
         <Badge
@@ -146,11 +150,11 @@ export function SrHeader({
       {/* เลขที่ใบ · สถานะ · รุ่น = ตัวตนของเอกสาร อยู่บรรทัดเดียวกันหมด
           เพื่อคืนบรรทัด subtitle ให้แถบขั้นตอน */}
       {storeRequisition?.doc_version != null && (
-        <span className="text-muted-foreground text-xs">
+        <span className="text-muted-foreground text-micro">
           {tfl("version")} {storeRequisition.doc_version}
         </span>
       )}
-    </>
+    </div>
   );
 
   const actions = (

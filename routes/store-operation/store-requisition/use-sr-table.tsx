@@ -21,10 +21,8 @@ import type {
 } from "@/types/store-requisition";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
-import {
-  SR_STATUS_CONFIG,
-  SR_TYPE_VARIANT,
-} from "@/constant/store-requisition";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
+import { SR_TYPE_VARIANT } from "@/constant/store-requisition";
 
 interface UseStoreRequisitionTableOptions {
   items: StoreRequisition[];
@@ -140,14 +138,17 @@ export function useStoreRequisitionTable({
       cell: ({ row }) => {
         const status = row.getValue("doc_status") as StoreRequisitionStatus;
         return (
-          // uppercase ด้วย CSS ไม่ใช่ .toUpperCase() — ค่าที่ export/คัดลอก
-          // ยังเป็นข้อความเดิม และภาษาไทยที่ไม่มีตัวพิมพ์ใหญ่ก็ไม่โดนแตะ
-          <Badge
-            className={`uppercase ${SR_STATUS_CONFIG[status]?.className ?? ""}`}
-            size="sm"
-          >
-            {ts(status)}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={ts(status)}
+            // uppercase ด้วย CSS ไม่ใช่ .toUpperCase() — ค่าที่ export/คัดลอก
+            // ยังเป็นข้อความเดิม และภาษาไทยที่ไม่มีตัวพิมพ์ใหญ่ก็ไม่โดนแตะ
+            // (ต่างจากโมดูลอื่นที่ label uppercase มาจาก createStatusConfig แล้ว)
+            //
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center uppercase"
+          />
         );
       },
       meta: {
