@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { Clock } from "lucide-react";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import type { ApprovalItem } from "@/types/approval";
 import { formatDate } from "@/lib/date-utils";
@@ -137,9 +138,13 @@ export default function ApprovalQueueList({
         const config =
           PR_STATUS_CONFIG[status ?? "draft"] ?? PR_STATUS_CONFIG.draft;
         return (
-          <Badge className={config.className} size="xs">
-            {config.label}
-          </Badge>
+          <StatusIconLabel
+            status={status ?? "draft"}
+            label={config.label}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       size: 100,
