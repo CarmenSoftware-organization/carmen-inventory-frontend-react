@@ -10,6 +10,7 @@ import {
   Percent,
   Save,
   Send,
+  Unlock,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -43,6 +44,9 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color: string }> = {
   saved: { icon: Save, color: "var(--status-save)" },
   save: { icon: Save, color: "var(--status-save)" },
   committed: { icon: Lock, color: "var(--status-committed)" },
+  /* รอบบัญชี — เปิดรับรายการ → ปิดรอบ → ล็อกถาวร */
+  open: { icon: Unlock, color: "var(--status-open)" },
+  locked: { icon: Lock, color: "var(--status-locked)" },
   voided: { icon: Ban, color: "var(--status-voided)" },
   rejected: { icon: X, color: "var(--status-rejected)" },
   cancelled: { icon: Ban, color: "var(--status-cancelled)" },

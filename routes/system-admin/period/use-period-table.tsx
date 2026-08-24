@@ -2,13 +2,13 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "use-intl";
 import { DataGridColumnHeader } from "@/components/ui/data-grid/data-grid-column-header";
 import { CellAction } from "@/components/ui/cell-action";
-import { Badge } from "@/components/ui/badge";
 import { useConfigTable } from "@/components/ui/data-grid/use-config-table";
 import type { Period, PeriodStatus } from "@/types/period";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { formatDate } from "@/lib/date-utils";
 import { useProfile } from "@/hooks/use-profile";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PERIOD_STATUS_CONFIG } from "@/constant/period";
 
 interface UsePeriodTableOptions {
@@ -108,9 +108,13 @@ export function usePeriodTable({
         const config =
           PERIOD_STATUS_CONFIG[status] ?? PERIOD_STATUS_CONFIG.open;
         return (
-          <Badge size="sm" className={`${config.className} text-xs`}>
-            {config.label}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config.label}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       size: 100,

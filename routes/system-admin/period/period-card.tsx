@@ -1,8 +1,8 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { ListCard, ListCardRow } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PERIOD_STATUS_CONFIG } from "@/constant/period";
 import type { Period } from "@/types/period";
 
@@ -30,9 +30,10 @@ export default function PeriodCard({ item, onEdit, onDelete }: Props) {
     <ListCard
       title={item.period}
       badge={
-        <Badge size="xs" className={statusConfig?.className}>
-          {statusConfig?.label ?? item.status}
-        </Badge>
+        <StatusIconLabel
+          status={item.status}
+          label={statusConfig?.label ?? item.status}
+        />
       }
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
