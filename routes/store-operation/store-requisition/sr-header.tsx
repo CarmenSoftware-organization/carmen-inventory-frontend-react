@@ -31,7 +31,6 @@ import { SR_WORKFLOW_ACTION_CONFIG } from "@/constant/store-requisition";
 import { DocFormHeader } from "@/components/share/doc-form-header";
 import { formatDate } from "@/lib/date-utils";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
-import { SR_TYPE_VARIANT } from "@/constant/store-requisition";
 import { getModeLabels, type FormMode } from "@/types/form";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type {
@@ -134,13 +133,11 @@ export function SrHeader({
         />
       )}
       {srType && (
-        <Badge
-          variant={SR_TYPE_VARIANT[srType]}
-          size="sm"
-          className="uppercase"
-        >
-          {srType}
-        </Badge>
+        <StatusIconLabel
+          status={srType}
+          label={srType}
+          className="text-muted-foreground text-micro uppercase [&>svg]:size-3"
+        />
       )}
       {isAdd && (
         <Badge variant="secondary" size="sm">

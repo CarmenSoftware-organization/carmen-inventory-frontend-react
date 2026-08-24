@@ -1,5 +1,6 @@
 import {
   Archive,
+  ArrowLeftRight,
   BadgePercent,
   Ban,
   Check,
@@ -9,6 +10,7 @@ import {
   Hourglass,
   Lock,
   Minus,
+  PackageOpen,
   PenLine,
   Percent,
   Save,
@@ -77,6 +79,9 @@ const TYPE_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
   // ใบลดหนี้ — คืนของ (ของไหลกลับ) กับ ลดเงิน (ตัวเงินอย่างเดียว ของไม่ขยับ)
   quantity_return: { icon: Undo2 },
   amount_discount: { icon: BadgePercent },
+  // ใบเบิก — โอน (ของย้ายไปอีกคลัง ยังอยู่ในระบบ) กับ เบิกใช้ (ของออกจากคลังไปใช้จริง)
+  transfer: { icon: ArrowLeftRight },
+  issue: { icon: PackageOpen },
 };
 
 const FALLBACK = { icon: Minus, color: "var(--status-draft)" };

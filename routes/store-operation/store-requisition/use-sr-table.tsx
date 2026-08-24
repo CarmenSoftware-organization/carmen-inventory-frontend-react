@@ -11,7 +11,6 @@ import {
   sendbackColumn,
 } from "@/components/ui/data-grid/columns";
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import type {
@@ -22,7 +21,6 @@ import type {
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
-import { SR_TYPE_VARIANT } from "@/constant/store-requisition";
 
 interface UseStoreRequisitionTableOptions {
   items: StoreRequisition[];
@@ -75,13 +73,12 @@ export function useStoreRequisitionTable({
         const type = row.getValue("sr_type") as StoreRequisitionType;
         if (!type) return null;
         return (
-          <Badge
-            variant={SR_TYPE_VARIANT[type]}
-            size="xs"
-            className="uppercase"
-          >
-            {type}
-          </Badge>
+          <StatusIconLabel
+            status={type}
+            label={type}
+            // ชนิดใบไม่มีสี — สีสงวนไว้ให้สถานะซึ่งเป็นสิ่งที่คนกวาดตาหาจริง ๆ
+            className="text-muted-foreground flex w-full justify-center uppercase"
+          />
         );
       },
       meta: {
@@ -90,7 +87,7 @@ export function useStoreRequisitionTable({
         cellClassName: "text-center",
         headerClassName: "text-center",
       },
-      size: 100,
+      size: 140,
     },
     {
       accessorKey: "sr_date",
@@ -157,7 +154,7 @@ export function useStoreRequisitionTable({
         cellClassName: "text-center",
         headerClassName: "text-center",
       },
-      size: 80,
+      size: 140,
     },
     {
       accessorKey: "workflow_name",

@@ -56,7 +56,11 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
       </ListCardRow>
       {item.sr_type && (
         <ListCardRow label={tfl("type")}>
-          <span className="uppercase">{item.sr_type}</span>
+          <StatusIconLabel
+            status={item.sr_type}
+            label={item.sr_type}
+            className="text-muted-foreground uppercase"
+          />
         </ListCardRow>
       )}
       <ListCardRow label={tfl("fromTo")}>
