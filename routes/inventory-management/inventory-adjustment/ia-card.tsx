@@ -1,5 +1,4 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
 import {
   ListCard,
   ListCardAuditRows,
@@ -9,6 +8,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   IA_STATUS_CONFIG,
   IA_TYPE_CONFIG,
@@ -57,9 +57,7 @@ export default function IaCard({ item, onEdit, onDelete }: IaCardProps) {
     <ListCard
       title={docNo}
       badge={
-        <Badge size="xs" className={statusConfig.className}>
-          {statusConfig.label}
-        </Badge>
+        <StatusIconLabel status={item.doc_status} label={statusConfig.label} />
       }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}

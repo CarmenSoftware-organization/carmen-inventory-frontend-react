@@ -18,6 +18,7 @@ import {
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { formatAmount } from "@/lib/currency-utils";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   IA_STATUS_CONFIG,
   IA_TYPE_CONFIG,
@@ -144,9 +145,13 @@ export function useInventoryAdjustmentTable({
         const status = row.getValue("doc_status") as InventoryAdjustmentStatus;
         const config = IA_STATUS_CONFIG[status];
         return (
-          <Badge size="sm" className={config?.className}>
-            {config?.label ?? status}
-          </Badge>
+          <StatusIconLabel
+            status={status}
+            label={config?.label ?? status}
+            // คอลัมน์นี้จัดกลาง — label เป็น inline-flex ซึ่ง `text-center`
+            // ของเซลล์เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid
+            className="flex w-full justify-center"
+          />
         );
       },
       meta: {
