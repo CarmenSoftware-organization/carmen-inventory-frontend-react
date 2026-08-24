@@ -25,18 +25,6 @@ export function inventoryTypeLabelKey(type: string): string | undefined {
   return INVENTORY_TYPE_LABEL_KEY[type as INVENTORY_TYPE];
 }
 
-/**
- * สีของ dot นำหน้า badge ประเภท location — ใช้ร่วมกันทุก lookup/list
- *
- * badge เป็น `secondary` กลาง สีอยู่ที่ dot อย่างเดียว (ไม่ย้อมทั้ง label)
- * ตาม pattern เดียวกับ `StatusBadge` และ DESIGN.md "avoid neon"
- */
-export const LOCATION_TYPE_DOT_COLOR: Record<INVENTORY_TYPE, string> = {
-  [INVENTORY_TYPE.INVENTORY]: "bg-info",
-  [INVENTORY_TYPE.DIRECT]: "bg-warning",
-  [INVENTORY_TYPE.CONSIGNMENT]: "bg-muted-foreground/50",
-};
-
 export const PHYSICAL_COUNT_TYPE_OPTIONS = [
   { label: "Yes", value: "yes" },
   { label: "No", value: "no" },

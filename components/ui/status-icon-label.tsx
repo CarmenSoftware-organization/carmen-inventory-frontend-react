@@ -7,6 +7,7 @@ import {
   Clock,
   FileText,
   Flag,
+  Handshake,
   Hourglass,
   Lock,
   Minus,
@@ -17,8 +18,10 @@ import {
   Send,
   SquarePen,
   Tags,
+  Truck,
   Undo2,
   Unlock,
+  Warehouse,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -82,6 +85,10 @@ const TYPE_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
   // ใบเบิก — โอน (ของย้ายไปอีกคลัง ยังอยู่ในระบบ) กับ เบิกใช้ (ของออกจากคลังไปใช้จริง)
   transfer: { icon: ArrowLeftRight },
   issue: { icon: PackageOpen },
+  // ประเภทคลัง — เก็บสต๊อกจริง · ซื้อมาใช้เลยไม่ผ่านคลัง · ของฝากขายของผู้ขาย
+  inventory: { icon: Warehouse },
+  direct: { icon: Truck },
+  consignment: { icon: Handshake },
 };
 
 const FALLBACK = { icon: Minus, color: "var(--status-draft)" };
