@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { PERMISSIONS, type Permission } from "@/constant/permissions";
 import {
+  Link2,
   BookText,
   LayoutDashboard,
   Settings2,
@@ -446,6 +447,12 @@ export const moduleList: ModuleDto[] = [
         name: "accountCode",
         path: "/config/account-code",
         icon: BookText,
+      },
+      {
+        // ยังไม่ผูก permission/licenseFeature ด้วยเหตุผลเดียวกับ accountCode
+        name: "accountMapping",
+        path: "/config/account-mapping",
+        icon: Link2,
       },
       {
         name: "storeLocation",

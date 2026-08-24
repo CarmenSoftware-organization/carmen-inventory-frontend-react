@@ -90,8 +90,11 @@ export const router = createBrowserRouter([
               { index: true, lazy: () => import("./config/config.route") },
               {
                 path: "account-code",
-                lazy: () =>
-                  import("./config/account-code/ac.route"),
+                lazy: () => import("./config/account-code/ac.route"),
+              },
+              {
+                path: "account-mapping",
+                lazy: () => import("./config/account-mapping/am.route"),
               },
               { path: "unit", lazy: () => import("./config/unit/unit.route") },
               {

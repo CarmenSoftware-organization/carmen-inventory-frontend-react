@@ -1112,7 +1112,8 @@
     "overrideHintDiscount": "ติ๊กเพื่อกรอกยอดส่วนลดเอง แทนการคิดจากเปอร์เซ็นต์",
     "overrideHintTax": "ติ๊กเพื่อกรอกยอดภาษีเอง แทนการคิดจากอัตราภาษี",
     "order": "สั่ง",
-    "sequence": "ลำดับ"
+    "sequence": "ลำดับ",
+    "businessUnit": "หน่วยธุรกิจ"
   },
   "lookup": {
     "select": "เลือก{entity}",
@@ -1327,6 +1328,19 @@
       "deleteConfirm": "ยืนยันลบรหัสบัญชี \"{name}\" ไหม ลบแล้วเอากลับไม่ได้",
       "codePlaceholder": "เช่น 1010000",
       "namePlaceholder": "เช่น เงินสดในมือ - เงินทอน"
+    },
+    "accountMapping": {
+      "title": "การผูกบัญชี",
+      "desc": "แต่ละคลัง หมวด และแผนก ลงบัญชีรหัสไหน — และตรงไหนที่ยังไม่ได้ผูก",
+      "mapped": "ผูกแล้ว",
+      "notMapped": "ยังไม่ผูก",
+      "lastScannedAt": "ตรวจล่าสุด",
+      "tabAp": "ลงบัญชีเจ้าหนี้ (AP)",
+      "tabGl": "ลงบัญชีแยกประเภท (GL)",
+      "import": "นำเข้า",
+      "export": "ส่งออก",
+      "scanForNewCode": "สแกนหารหัสใหม่",
+      "bulkMap": "ผูกทีละหลายรายการ"
     }
   },
   "systemAdmin": {
@@ -4292,7 +4306,8 @@
     "setting": "ตั้งค่า",
     "notifications": "การแจ้งเตือน",
     "fromPriceList": "สร้างจากรายการราคา",
-    "accountCode": "รหัสบัญชี"
+    "accountCode": "รหัสบัญชี",
+    "accountMapping": "การผูกบัญชี"
   },
   "commentSheet": {
     "title": "ความคิดเห็น ({count})",

@@ -1112,7 +1112,8 @@
     "overrideHintDiscount": "Tick to enter the discount amount yourself instead of calculating from the rate",
     "overrideHintTax": "Tick to enter the tax amount yourself instead of calculating from the tax rate",
     "order": "Order",
-    "sequence": "Sequence"
+    "sequence": "Sequence",
+    "businessUnit": "Business Unit"
   },
   "lookup": {
     "select": "Select {entity}",
@@ -1327,6 +1328,19 @@
       "deleteConfirm": "Are you sure you want to delete account code \"{name}\"? This action cannot be undone.",
       "codePlaceholder": "e.g. 1010000",
       "namePlaceholder": "e.g. Cash on Hand - House Fund"
+    },
+    "accountMapping": {
+      "title": "Account Mapping",
+      "desc": "Which account code each store, category and department posts to — and what is still unmapped.",
+      "mapped": "Mapped",
+      "notMapped": "Not mapped",
+      "lastScannedAt": "Last Scanned",
+      "tabAp": "Posting to AP",
+      "tabGl": "Posting to GL",
+      "import": "Import",
+      "export": "Export",
+      "scanForNewCode": "Scan for New Code",
+      "bulkMap": "Bulk Map"
     }
   },
   "systemAdmin": {
@@ -4302,7 +4316,8 @@
     "setting": "Settings",
     "notifications": "Notifications",
     "fromPriceList": "From price list",
-    "accountCode": "Account Code"
+    "accountCode": "Account Code",
+    "accountMapping": "Account Mapping"
   },
   "commentSheet": {
     "title": "Comments ({count})",
