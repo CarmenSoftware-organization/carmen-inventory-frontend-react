@@ -3450,7 +3450,9 @@
         "critical": "Critical"
       },
       "priceAlertTitle": "{pct}% higher than last received",
-      "priceAlertLastCost": "Last received at {cost}"
+      "priceAlertLastCost": "Last received at {cost}",
+      "priceAlertCheaper": "· {price} available",
+      "priceAlertCheaperDetail": "{vendor} offers {price} — {pct}% cheaper"
     },
     "purchaseRequestTemplate": {
       "entity": "Purchase Request Template",

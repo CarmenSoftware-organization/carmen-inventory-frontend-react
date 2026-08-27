@@ -3445,7 +3445,9 @@
         "critical": "วิกฤต"
       },
       "priceAlertTitle": "แพงกว่าครั้งก่อน {pct}%",
-      "priceAlertLastCost": "ครั้งก่อนรับเข้าที่ {cost}"
+      "priceAlertLastCost": "ครั้งก่อนรับเข้าที่ {cost}",
+      "priceAlertCheaper": "· มีที่ {price}",
+      "priceAlertCheaperDetail": "{vendor} เสนอ {price} — ถูกกว่า {pct}%"
     },
     "purchaseRequestTemplate": {
       "entity": "แม่แบบใบขอซื้อ",
