@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
  * @param action - คอนโทรลใต้คำอธิบาย (เช่นปุ่ม Add)
  * @param wide - body กินเต็มความกว้าง (เช่นตารางกว้าง) → title/desc วางด้านบน
  * @param plain - body เป็นบล็อกเปล่า ไม่ใช่ grid 2 คอลัมน์ (caller จัด layout เอง)
+ * @param frameless - ไม่ห่อ card ให้ (ของข้างในมีกรอบของตัวเองอยู่แล้ว)
  * @param children - field ต่างๆ
  */
 export function SettingSection({
@@ -27,6 +28,7 @@ export function SettingSection({
   action,
   wide,
   plain,
+  frameless,
   children,
 }: {
   readonly title: string;
@@ -43,6 +45,15 @@ export function SettingSection({
    * (ฟอร์ม operation-plan ห่อ grid ของตัวเองมาแล้ว grid ซ้อน grid จะเพี้ยน)
    */
   readonly plain?: boolean;
+  /**
+   * ไม่ห่อ card (`bg-card` + border + shadow + padding) ให้
+   *
+   * ใช้เมื่อของที่ยัดเข้ามามีกรอบของตัวเองอยู่แล้ว — เช่น `Transfer`,
+   * `TreeProductLookup` หรืออะไรก็ตามที่ห่อด้วย `DataGridContainer` (ตัวนั้น
+   * ใส่ `rounded-lg border` ให้เป็นค่า default) ไม่งั้นได้กรอบซ้อนกรอบ
+   * เส้นสองชั้นห่างกัน 24px ซึ่งอ่านเป็นความผิดพลาดมากกว่าลำดับชั้น
+   */
+  readonly frameless?: boolean;
   readonly children: React.ReactNode;
 }) {
   const heading = (
@@ -75,7 +86,13 @@ export function SettingSection({
           <div className="min-w-0">{heading}</div>
           {action}
         </div>
-        <div className="bg-card min-w-0 overflow-hidden rounded-xl border p-5 shadow-sm sm:p-6">
+        <div
+          className={cn(
+            "min-w-0",
+            !frameless &&
+              "bg-card overflow-hidden rounded-xl border p-5 shadow-sm sm:p-6",
+          )}
+        >
           {children}
         </div>
       </section>
@@ -96,12 +113,13 @@ export function SettingSection({
       </div>
       <div
         className={cn(
-          "bg-card overflow-hidden rounded-xl border shadow-sm md:col-span-2",
+          "md:col-span-2",
+          !frameless && "bg-card overflow-hidden rounded-xl border shadow-sm",
         )}
       >
         <div
           className={cn(
-            "p-5 sm:p-6",
+            !frameless && "p-5 sm:p-6",
             plain ? "min-w-0" : "grid gap-6 sm:grid-cols-2",
           )}
         >

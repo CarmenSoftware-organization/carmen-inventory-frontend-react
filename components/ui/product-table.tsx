@@ -4,7 +4,7 @@ import {
   getCoreRowModel,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Package, Search } from "lucide-react";
+import { Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DataGrid,
@@ -12,8 +12,9 @@ import {
   DataGridScrollArea,
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
+import { HighlightText } from "@/components/ui/highlight-text";
+import SearchInput from "@/components/search-input";
 import EmptyComponent from "@/components/empty-component";
-import { Input } from "@/components/ui/input";
 import { useTranslations } from "use-intl";
 
 interface ProductTableRow {
@@ -29,67 +30,6 @@ interface ProductTableProps {
   readonly className?: string;
 }
 
-/**
- * Helper component ไฮไลต์ substring ที่ตรงกับ query ด้วย <mark> สีเหลือง
- *
- * ใช้ภายใน ProductTable เพื่อเน้นส่วนที่ตรงกับคำค้นหาในคอลัมน์ code/name/
- * local_name/inventory_unit_name หลีกเลี่ยงการเกิด regex pitfall ด้วย
- * การ escape special chars ของ query ก่อนสร้าง RegExp
- *
- * @param props - text (ข้อความเต็ม) และ query (คำค้นหา)
- * @returns JSX fragment โดยมี <mark> ครอบส่วนที่ตรง
- * @example
- * ```tsx
- * <HighlightText text="Apple Juice" query="app" />
- * ```
- */
-const HighlightText = ({
-  text,
-  query,
-}: {
-  readonly text: string;
-  readonly query: string;
-}) => {
-  "use no memo";
-  if (!text) return null;
-  if (!query.trim()) return <>{text}</>;
-
-  const escaped = query.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
-  const parts = text.split(new RegExp(`(${escaped})`, "gi"));
-
-  return (
-    <>
-      {parts.map((part, i) =>
-        i % 2 === 1 ? (
-          <mark
-            key={`${i}-${part}`}
-            className="bg-warning/30 text-foreground rounded-sm font-bold"
-          >
-            {part}
-          </mark>
-        ) : (
-          part
-        ),
-      )}
-    </>
-  );
-};
-
-/**
- * ตาราง read-only แสดงรายการสินค้า พร้อมช่องค้นหา + highlight
- *
- * ใช้ใน dialog หรือ section สำหรับ preview รายการสินค้าที่ผูกกับ vendor,
- * price list, location ฯลฯ กรองด้วย local search (code/name/local_name/
- * inventory_unit_name) และ highlight match ทุกคอลัมน์ แสดงตัวนับ
- * filtered/total และ EmptyComponent เมื่อไม่มีผล
- *
- * @param props - products (รายการที่จะแสดง) และ className เสริม
- * @returns JSX element ของ DataGrid
- * @example
- * ```tsx
- * <ProductTable products={vendor.products} />
- * ```
- */
 export function ProductTable({ products, className }: ProductTableProps) {
   "use no memo";
   const t = useTranslations("common");
@@ -172,19 +112,12 @@ export function ProductTable({ products, className }: ProductTableProps) {
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-3">
-        <div className="relative w-96">
-          <Search
-            aria-hidden="true"
-            className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2"
-            size={12}
-          />
-          <Input
-            placeholder={t("search")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="text-micro-legal h-6 pl-8"
-          />
-        </div>
+        <SearchInput
+          defaultValue={search}
+          containerClassName="w-96"
+          onInputChange={setSearch}
+          onSearch={setSearch}
+        />
         <span className="text-muted-foreground text-micro">
           {filteredProducts.length} / {products.length}
         </span>
@@ -204,7 +137,7 @@ export function ProductTable({ products, className }: ProductTableProps) {
         {/* จำกัดความสูงแล้วเลื่อนในกรอบ — คลังหนึ่งแห่งผูกสินค้าได้เป็นพันรายการ
             ปล่อยยาวคือหน้าสูงสามหมื่นพิกเซล เลื่อนหาหัวข้อถัดไปไม่เจอ และหัว
             ตารางก็หลุดจอไปตั้งแต่แถวที่ยี่สิบ · หัวตารางปักไว้ให้อ่านคอลัมน์ออก */}
-        <DataGridContainer className="flex max-h-[420px] flex-col">
+        <DataGridContainer className="flex max-h-105 flex-col">
           <DataGridScrollArea>
             <DataGridTable />
           </DataGridScrollArea>

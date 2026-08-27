@@ -492,6 +492,7 @@ export function LocationForm({ location }: LocationFormProps) {
         <Reveal delay={160}>
           <SettingSection
             wide
+            frameless
             title={t("locationUsers")}
             description={t("usersDesc")}
             count={isView ? enrichedUsers.length : userTargetKeys.length}
@@ -517,6 +518,7 @@ export function LocationForm({ location }: LocationFormProps) {
         <Reveal delay={220}>
           <SettingSection
             wide
+            frameless
             title={t("products")}
             description={t("productsDesc")}
             count={isView ? enrichedProducts.length : selectedProductIds.size}
