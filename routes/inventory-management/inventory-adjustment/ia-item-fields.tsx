@@ -74,6 +74,7 @@ export function AdjItemFields({
     <>
       <SettingSection
         wide
+        frameless
         title={tfl("items")}
         description={t("noItemsDesc")}
         count={itemFields.length}
