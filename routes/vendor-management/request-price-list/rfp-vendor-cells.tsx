@@ -28,13 +28,11 @@ export function VendorNameCell({
   if (!name) return EMPTY;
   return (
     <div className="flex min-w-0 flex-col">
-      <span className="text-foreground truncate text-xs font-semibold">
-        {name}
-      </span>
+      <p className="text-foreground truncate text-xs font-semibold">{name}</p>
       {code && (
-        <span className="text-muted-foreground text-micro-legal truncate tracking-wide uppercase">
+        <p className="text-muted-foreground text-micro-legal truncate tracking-wide uppercase">
           {code}
-        </span>
+        </p>
       )}
     </div>
   );
