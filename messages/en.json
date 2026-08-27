@@ -3448,7 +3448,9 @@
         "healthy": "Healthy",
         "low": "Low Stock",
         "critical": "Critical"
-      }
+      },
+      "priceAlertTitle": "{pct}% higher than last received",
+      "priceAlertLastCost": "Last received at {cost}"
     },
     "purchaseRequestTemplate": {
       "entity": "Purchase Request Template",

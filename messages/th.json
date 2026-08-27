@@ -3443,7 +3443,9 @@
         "healthy": "พอใช้",
         "low": "ใกล้หมด",
         "critical": "วิกฤต"
-      }
+      },
+      "priceAlertTitle": "แพงกว่าครั้งก่อน {pct}%",
+      "priceAlertLastCost": "ครั้งก่อนรับเข้าที่ {cost}"
     },
     "purchaseRequestTemplate": {
       "entity": "แม่แบบใบขอซื้อ",
