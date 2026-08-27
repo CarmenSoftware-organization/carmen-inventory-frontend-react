@@ -40,7 +40,7 @@ export function PrAskAiMenu({ items, disabled }: PrAskAiMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="outline" size="xs" disabled={disabled}>
+        <Button type="button" variant="outline" size="sm" disabled={disabled}>
           <Sparkle />
           {t("askAi")}
         </Button>

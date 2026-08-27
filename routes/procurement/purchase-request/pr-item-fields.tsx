@@ -373,7 +373,7 @@ export function PrItemFields({
               <Button
                 type="button"
                 variant="success"
-                size="xs"
+                size="sm"
                 onClick={handleBulkApprove}
               >
                 <Check />
@@ -382,7 +382,7 @@ export function PrItemFields({
               <Button
                 type="button"
                 variant="warning"
-                size="xs"
+                size="sm"
                 onClick={handleBulkReview}
               >
                 <Eye />
@@ -391,7 +391,7 @@ export function PrItemFields({
               <Button
                 type="button"
                 variant="destructive"
-                size="xs"
+                size="sm"
                 onClick={handleBulkReject}
               >
                 <X />
@@ -401,7 +401,7 @@ export function PrItemFields({
                 <Button
                   type="button"
                   variant="outline"
-                  size="xs"
+                  size="sm"
                   onClick={handleBulkSplit}
                 >
                   <Scissors />
@@ -419,7 +419,13 @@ export function PrItemFields({
                   return {
                     productName: item.product_name,
                     productLocalName: item.product_local_name,
-                    locationName: item.location_name,
+                    // จำนวน/หน่วย/ราคา คือสิ่งที่ทำให้คำถาม "ราคานี้สมเหตุสมผลไหม"
+                    // ตอบได้ · ชื่อคลังไม่ส่ง ไม่ช่วยให้คำตอบดีขึ้นแต่บอกโครงสร้าง
+                    // ภายในโรงแรมออกไปให้บริการภายนอก
+                    qty: item.requested_qty,
+                    unitName: item.requested_unit_name,
+                    price: item.pricelist_price,
+                    currencyCode: item.currency_code ?? undefined,
                   };
                 })}
               />
@@ -427,8 +433,8 @@ export function PrItemFields({
             {(role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE) && (
               <Button
                 type="button"
-                variant="ghost"
-                size="xs"
+                variant="outline"
+                size="sm"
                 onClick={() =>
                   table.toggleAllRowsExpanded(!table.getIsAllRowsExpanded())
                 }

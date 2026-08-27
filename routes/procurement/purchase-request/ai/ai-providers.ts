@@ -9,12 +9,7 @@ import {
 } from "@/components/icons/provider-icons";
 
 export type AiProviderId =
-  | "claude"
-  | "chatgpt"
-  | "gemini"
-  | "deepseek"
-  | "grok"
-  | "google";
+  "claude" | "chatgpt" | "gemini" | "deepseek" | "grok" | "google";
 
 /** icon ที่รับ `className` — รองรับทั้ง lucide icon และ custom brand icon */
 export type ProviderIcon = ComponentType<{ readonly className?: string }>;
