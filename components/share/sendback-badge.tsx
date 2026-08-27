@@ -1,41 +1,49 @@
 import { useTranslations } from "use-intl";
-import { Badge } from "@/components/ui/badge";
-import { ITEM_HISTORY_STATUS_CONFIG } from "@/constant/item-history";
+import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { isSentBack } from "@/constant/last-action";
 import type { LastAction } from "@/types/last-action";
 
 interface SendBackBadgeProps {
   readonly lastAction?: LastAction | null;
-  /** sm สำหรับตาราง · xs สำหรับการ์ดใน grid view */
-  readonly size?: "xs" | "sm";
+  readonly className?: string;
 }
 
 /**
  * ป้าย "ส่งกลับ" ของเอกสารที่ค้างอยู่ในสถานะถูกตีกลับ (PR / PO / SR)
  *
  * คืน `null` เมื่อ action ล่าสุดไม่ใช่การตีกลับ — คนเรียกจึงวางไว้ได้เลยโดยไม่ต้อง
- * เช็กเงื่อนไขเอง ใช้ชิปสีเดียวกับ status `review` ในไทม์ไลน์ประวัติรายบรรทัด
- * เพื่อให้คนอ่านโยงสองที่เข้าด้วยกันได้
+ * เช็กเงื่อนไขเอง
+ *
+ * **ไอคอน + ข้อความ ไม่มีกรอบ chip** ทรงเดียวกับคอลัมน์สถานะ เพราะมันคือสถานะของใบ
+ * เหมือนกัน คนละชนิดกับ count chip — ใช้ชิปเทาต่างหากจะอ่านเป็นของคนละประเภทกับ
+ * คอลัมน์สถานะที่อยู่ข้าง ๆ ทั้งที่เป็นเรื่องเดียวกัน สีของไอคอนยังผูกกับ status
+ * `review` ในไทม์ไลน์ประวัติเหมือนเดิม
+ *
+ * ป้ายเป็นตัวพิมพ์ใหญ่ให้ตรงกับคอลัมน์สถานะ ซึ่ง `createStatusConfig` uppercase
+ * ให้ทุกตัวอยู่แล้ว — ขนาดตัวอักษรเท่ากันอยู่แล้ว (`text-micro`) แต่ตัวพิมพ์เล็ก
+ * ปนอยู่ตัวเดียวในแถวจะอ่านว่าเล็กกว่าเพื่อน
  *
  * @param props.lastAction - อ็อบเจกต์ last_action จาก list/detail endpoint
- * @param props.size - ขนาด Badge (default `sm`)
- * @returns Badge หรือ null
+ * @param props.className - class เพิ่มเติม (คอลัมน์ที่จัดกลางต้องส่ง flex มาเอง)
+ * @returns ป้ายสถานะ หรือ null
  * @example
  * ```tsx
- * <SendBackBadge lastAction={item.last_action} size="xs" />
+ * <SendBackBadge lastAction={item.last_action} />
  * ```
  */
-export function SendBackBadge({ lastAction, size = "sm" }: SendBackBadgeProps) {
+export function SendBackBadge({
+  lastAction,
+  className,
+}: SendBackBadgeProps) {
   const tc = useTranslations("common");
 
   if (!isSentBack(lastAction)) return null;
 
   return (
-    <Badge
-      size={size}
-      className={ITEM_HISTORY_STATUS_CONFIG.send_back.className}
-    >
-      {tc("sendBack")}
-    </Badge>
+    <StatusIconLabel
+      status="send_back"
+      label={tc("sendBack").toUpperCase()}
+      className={className}
+    />
   );
 }

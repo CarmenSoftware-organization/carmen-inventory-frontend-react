@@ -66,7 +66,7 @@ export default function PrCard({
       title={item.pr_no}
       badge={
         <div className="flex shrink-0 items-center gap-1">
-          <SendBackBadge lastAction={item.last_action} size="xs" />
+          <SendBackBadge lastAction={item.last_action} />
           <StatusIconLabel status={item.pr_status} label={config.label} />
         </div>
       }

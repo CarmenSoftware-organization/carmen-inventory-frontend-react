@@ -38,7 +38,7 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
       title={item.sr_no}
       badge={
         <div className="flex shrink-0 items-center gap-1">
-          <SendBackBadge lastAction={item.last_action} size="xs" />
+          <SendBackBadge lastAction={item.last_action} />
           <StatusIconLabel
             status={item.doc_status}
             label={ts(item.doc_status)}

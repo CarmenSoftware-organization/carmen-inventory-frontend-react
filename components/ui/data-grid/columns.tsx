@@ -51,7 +51,7 @@ export function indexColumn<T>(params: ParamsDto): ColumnDef<T> {
       ((Number(params.page) || 1) - 1) * (Number(params.perpage) || 10),
     enableSorting: false,
     enableHiding: false,
-    size: 55,
+    size: 40,
     meta: {
       headerClassName: "text-center",
       cellClassName: "text-center",
@@ -188,8 +188,15 @@ export function sendbackColumn<T extends RowWithLastAction>(
         className="justify-center"
       />
     ),
-    cell: ({ row }) => <SendBackBadge lastAction={row.original.last_action} />,
-    size: options?.size ?? 80,
+    cell: ({ row }) => (
+      <SendBackBadge
+        lastAction={row.original.last_action}
+        // คอลัมน์นี้จัดกลาง — ป้ายเป็น inline-flex ซึ่ง `text-center` ของเซลล์
+        // เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid (ท่าเดียวกับคอลัมน์สถานะ)
+        className="flex w-full justify-center"
+      />
+    ),
+    size: options?.size ?? 110,
     meta: {
       headerTitle: title,
       skeleton: columnSkeletons.badge,

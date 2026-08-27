@@ -47,7 +47,7 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
       title={item.po_no}
       badge={
         <div className="flex shrink-0 items-center gap-1">
-          <SendBackBadge lastAction={item.last_action} size="xs" />
+          <SendBackBadge lastAction={item.last_action} />
           {statusConfig && item.po_status ? (
             <StatusIconLabel
               status={item.po_status}

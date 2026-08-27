@@ -65,6 +65,12 @@ const STATUS_ICON: Record<string, { icon: LucideIcon; color?: string }> = {
   voided: { icon: Ban, color: "var(--status-voided)" },
   rejected: { icon: X, color: "var(--status-rejected)" },
   cancelled: { icon: Ban, color: "var(--status-cancelled)" },
+  /* ตีกลับให้แก้ — API ส่งมาสองรูป (`review` เป็นกริยาที่ frontend ยิงไป,
+     `send_back`/`sendback` เป็นรูปที่อ่านกลับมา ดู constant/item-history.ts)
+     สีเดียวกับชิปในไทม์ไลน์ประวัติ คนจะได้โยงสองที่เข้าด้วยกันได้ */
+  review: { icon: Undo2, color: "var(--status-review)" },
+  send_back: { icon: Undo2, color: "var(--status-review)" },
+  sendback: { icon: Undo2, color: "var(--status-review)" },
 };
 
 /**
