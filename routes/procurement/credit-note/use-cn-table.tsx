@@ -47,7 +47,7 @@ export function useCnTable({
           {row.original.cn_no}
         </CellAction>
       ),
-      size: 100,
+      size: 140,
       meta: { headerTitle: tfl("cnNo"), skeleton: columnSkeletons.text },
     },
     {

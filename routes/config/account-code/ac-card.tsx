@@ -1,0 +1,34 @@
+import { useTranslations } from "use-intl";
+import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  ListCard,
+  ListCardAuditRows,
+  ListCardRow,
+} from "@/components/share/list-card";
+import type { AccountCode } from "@/types/account-code";
+
+interface Props {
+  readonly item: AccountCode;
+  readonly onEdit: (item: AccountCode) => void;
+  readonly onDelete?: (item: AccountCode) => void;
+}
+
+/** การ์ดรหัสบัญชี สำหรับ `ConfigListTemplate` โหมด grid/mobile */
+export default function AcCard({ item, onEdit, onDelete }: Props) {
+  const tfl = useTranslations("field");
+
+  return (
+    <ListCard
+      title={item.code || "..."}
+      badge={<StatusBadge active={item.is_active} />}
+      onOpen={() => onEdit(item)}
+      onDelete={onDelete ? () => onDelete(item) : undefined}
+    >
+      <ListCardRow label={tfl("name")}>{item.name}</ListCardRow>
+      {item.description && (
+        <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>
+      )}
+      <ListCardAuditRows audit={item.audit} />
+    </ListCard>
+  );
+}

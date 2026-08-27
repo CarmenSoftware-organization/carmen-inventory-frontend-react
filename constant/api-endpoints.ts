@@ -34,6 +34,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/activity-logs/${id}/detail`,
   ADJUSTMENT_TYPES: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/adjustment-types`,
+  ACCOUNT_CODES: (buCode: string) =>
+    `/api/proxy/api/config/${buCode}/account-codes`,
   /** UI telemetry batch ingest (click + page view) — ดู lib/analytics.ts */
   ANALYTICS_EVENTS: "/api/proxy/api/analytics-events",
   APPLICATION_ROLES: (buCode: string) =>

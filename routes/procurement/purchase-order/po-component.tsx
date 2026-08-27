@@ -459,7 +459,13 @@ export default function PoComponent() {
             table={table}
             recordCount={totalRecords}
             isLoading={isLoading}
-            tableLayout={{ headerSticky: true }}
+            tableLayout={{
+              headerSticky: true,
+              // คอลัมน์เยอะจนบีบกันแน่นในความกว้างจอ — เปิดตัวนี้แล้ว table ได้
+              // width = getTotalSize() (ผลรวม size ที่แต่ละคอลัมน์ประกาศไว้) แทน
+              // w-full ที่หารพื้นที่ให้ทุกคอลัมน์เท่าไรก็ได้ ล้นแล้วเลื่อนแนวนอนเอา
+              columnsResizable: true,
+            }}
             emptyMessage={<EmptyComponent />}
           >
             <DataGridContainer

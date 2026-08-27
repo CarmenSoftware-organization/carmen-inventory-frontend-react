@@ -39,6 +39,14 @@ const UNMAPPED_ON_PURPOSE: ReadonlyArray<{ path: string; why: string }> = [
     path: "/procurement/approval",
     why: "กล่องอนุมัติรวมข้ามโมดูล (PR/PO/SR) ยิง /api/my-approve ซึ่งไม่อยู่ใน LICENSE_ROUTE_FEATURES — เลือก feature เดียวให้มันไม่ได้โดยไม่เดา",
   },
+  {
+    path: "/config/account-code",
+    why: "เพิ่งวางโครงไว้ก่อน ยังไม่ผูก permission/licenseFeature ตามที่ตกลง — backend ยังไม่มี endpoint ของตัวเอง (account-code เป็น sub-resource ของสินค้า/หมวดสินค้า) และ catalog ยังไม่มีคีย์ให้ผูก",
+  },
+  {
+    path: "/config/account-mapping",
+    why: "เพิ่งวางโครงไว้ก่อน ยังไม่ผูก permission/licenseFeature ตามที่ตกลง — ยังไม่มี endpoint จริง หน้า list อ่านจาก mock อยู่",
+  },
   // /accounting/* ทั้งกลุ่ม: ยังเป็นหน้า mock ไม่เรียก API สักตัว และ catalog ของ
   // backend ไม่มี module `accounting` เลย → อยู่นอกขอบเขต license ทั้งหมด
   { path: "/accounting/journal-voucher", why: "accounting ยังไม่มีใน catalog" },

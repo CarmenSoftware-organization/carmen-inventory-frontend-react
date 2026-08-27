@@ -1,7 +1,4 @@
-import {
-  createStatusConfig,
-  createStatusFilterOptions,
-} from "./status-config";
+import { createStatusConfig, createStatusFilterOptions } from "./status-config";
 
 /** Badge variant + label for CN document-level status */
 export const CN_STATUS_CONFIG = createStatusConfig([

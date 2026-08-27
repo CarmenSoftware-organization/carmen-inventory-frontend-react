@@ -9,6 +9,7 @@ export const LIST_PAGE_KEYS = {
   BUSINESS_TYPE: "business_type",
   CERTIFICATION: "certification",
   CREDIT_NOTE_REASON: "credit_note_reason",
+  ACCOUNT_CODE: "account_code",
   CREDIT_TERM: "credit_term",
   CURRENCY: "currency",
   DELIVERY_POINT: "delivery_point",
