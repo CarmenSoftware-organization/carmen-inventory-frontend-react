@@ -2,6 +2,7 @@ import { Building2, CalendarDays, User } from "lucide-react";
 import { type ReactNode } from "react";
 import { useTranslations } from "use-intl";
 import { WorkflowTrack } from "@/components/share/workflow-track";
+import { WorkflowStepButton } from "@/components/share/workflow-step-button";
 import { PR_STATUS, type PurchaseRequest } from "@/types/purchase-request";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
@@ -166,25 +167,11 @@ export function PrHeader({
       />
     ) : undefined;
 
-  // กดที่แถบขั้นตอน = เปิดประวัติ · ไม่มีข้อความบอกว่า "กดเพื่อดู" แล้ว —
-  // ถ้าต้องติดป้ายบอกว่ากดได้ แปลว่า affordance ยังไม่พอ ให้ hover/cursor กับ
-  // tooltip ทำหน้าที่แทน (ของเดิมยังเขียนว่า "Tap" ซึ่งเป็นคำของมือถือ ทั้งที่
-  // แอปนี้เป็นเครื่องมือบนโต๊ะทำงาน)
-  const workflowStep =
-    workflowStepEl && hasHistory && onShowHistory ? (
-      <button
-        type="button"
-        onClick={onShowHistory}
-        title={t("tabWorkflowHistory")}
-        aria-label={t("tabWorkflowHistory")}
-        // w-fit: พื้นหลังตอน hover ต้องกอดเฉพาะแถบ ไม่ใช่ลากยาวเต็มบรรทัด
-        className="hover:bg-muted/60 focus-visible:ring-ring -ml-1 w-fit cursor-pointer rounded-lg px-1 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-      >
-        {workflowStepEl}
-      </button>
-    ) : (
-      workflowStepEl
-    );
+  const workflowStep = workflowStepEl ? (
+    <WorkflowStepButton onShowHistory={hasHistory ? onShowHistory : undefined}>
+      {workflowStepEl}
+    </WorkflowStepButton>
+  ) : undefined;
 
   return (
     <DocFormHeader

@@ -3,6 +3,7 @@ import { Building2, Lock, Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { WorkflowTrack } from "@/components/share/workflow-track";
+import { WorkflowStepButton } from "@/components/share/workflow-step-button";
 import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
 import { PO_STATUS, type PurchaseOrder } from "@/types/purchase-order";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
@@ -231,23 +232,11 @@ export function PoHeader({
     />
   ) : undefined;
 
-  // กดที่แถบขั้นตอน = เปิดประวัติ · ไม่มีข้อความบอกว่า "กดเพื่อดู" แล้ว —
-  // ถ้าต้องติดป้ายบอกว่ากดได้ แปลว่า affordance ยังไม่พอ ให้ hover/cursor กับ
-  // tooltip ทำหน้าที่แทน · -ml-1 หักล้าง px-1 ของตัวเอง ให้แถบชิดซ้ายเสมอ title
-  const workflowStep =
-    workflowStepEl && hasHistory && onShowHistory ? (
-      <button
-        type="button"
-        onClick={onShowHistory}
-        title={t("tabWorkflowHistory")}
-        aria-label={t("tabWorkflowHistory")}
-        className="hover:bg-muted/60 focus-visible:ring-ring -ml-1 w-fit cursor-pointer rounded-lg px-1 py-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-      >
-        {workflowStepEl}
-      </button>
-    ) : (
-      workflowStepEl
-    );
+  const workflowStep = workflowStepEl ? (
+    <WorkflowStepButton onShowHistory={hasHistory ? onShowHistory : undefined}>
+      {workflowStepEl}
+    </WorkflowStepButton>
+  ) : undefined;
 
   return (
     <DocFormHeader

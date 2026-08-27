@@ -523,7 +523,8 @@
     "createDocument": "Create document",
     "createEntity": "Create {entity}",
     "previous": "Previous",
-    "formatJson": "Format"
+    "formatJson": "Format",
+    "workflowHistoryHint": "See who has handled this document"
   },
   "pagination": {
     "label": "Pagination",

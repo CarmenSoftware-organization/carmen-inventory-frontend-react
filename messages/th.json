@@ -523,7 +523,8 @@
     "createDocument": "สร้างเอกสาร",
     "createEntity": "สร้าง{entity}",
     "previous": "ก่อนหน้า",
-    "formatJson": "จัดรูปแบบ"
+    "formatJson": "จัดรูปแบบ",
+    "workflowHistoryHint": "ดูว่าใบนี้ผ่านมือใครมาบ้าง"
   },
   "pagination": {
     "label": "การแบ่งหน้า",
