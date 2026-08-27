@@ -171,6 +171,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/period-ends/current`,
   PERIOD_END_REVIEW: (buCode: string) =>
     `/api/proxy/api/${buCode}/period-ends/review`,
+  PERIOD_END_START_COUNTING: (buCode: string) =>
+    `/api/proxy/api/${buCode}/period-ends/start-counting`,
   PERIOD_NEXT: (buCode: string) => `/api/proxy/api/${buCode}/periods/next`,
   PERMISSIONS: (buCode: string) =>
     `/api/proxy/api/config/${buCode}/permissions`,

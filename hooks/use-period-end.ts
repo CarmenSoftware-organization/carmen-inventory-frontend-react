@@ -10,6 +10,7 @@ import type {
   PeriodEndReview,
   ReviewTransactionKey,
   ReviewTransactionStat,
+  StartCountingResult,
 } from "@/types/period-end";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
@@ -145,7 +146,41 @@ export function useClosePeriodEnd() {
   return useApiMutation<void>({
     mutationFn: (_data, buCode) =>
       httpClient.post(API_ENDPOINTS.PERIOD_ENDS(buCode)),
-    invalidateKeys: [QUERY_KEYS.PERIOD_ENDS],
+    // ปิดงวดตั้งรอบตรวจนับทุกอันเป็น completed ด้วย — ถ้าไม่ล้าง key นี้
+    // หน้า Physical Count จะค้างโชว์ counting ทั้งที่งวดปิดไปแล้ว
+    invalidateKeys: [
+      QUERY_KEYS.PERIOD_ENDS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
     errorMessage: "Failed to close period end",
+  });
+}
+
+/**
+ * Hook เปิดรอบตรวจนับของงวดปัจจุบัน (Start Counting)
+ *
+ * ยิง `POST /period-ends/start-counting` ซึ่งจะตรวจเอกสารที่กระทบสต๊อกก่อน แล้วเลื่อน
+ * รอบตรวจนับจาก `draft` เป็น `counting` — ใบนับรายคลังสร้างได้ก็ต่อเมื่อรอบเป็น `counting`
+ *
+ * ปิด toast กลางไว้ (`skipGlobalErrorToast`) เพราะเคส 422 เราเอา `error.details`
+ * ไปเรนเดอร์เป็นรายการเอกสารที่ค้างเองใน dialog ซึ่งบอกอะไรได้มากกว่า toast บรรทัดเดียว
+ *
+ * @returns UseMutationResult ที่ไม่รับ variable
+ * @example
+ * ```ts
+ * const start = useStartPeriodCounting();
+ * start.mutate(undefined, { onSuccess: () => navigate("/inventory-management/period-end/review") });
+ * ```
+ */
+export function useStartPeriodCounting() {
+  return useApiMutation<void, { data: StartCountingResult }>({
+    mutationFn: (_data, buCode) =>
+      httpClient.post(API_ENDPOINTS.PERIOD_END_START_COUNTING(buCode)),
+    invalidateKeys: [
+      QUERY_KEYS.PERIOD_ENDS,
+      QUERY_KEYS.PHYSICAL_COUNT_PERIOD_CURRENT,
+    ],
+    errorMessage: "Failed to start counting",
+    meta: { skipGlobalErrorToast: true },
   });
 }

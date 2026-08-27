@@ -115,7 +115,7 @@ export class ApiError extends Error {
     sanitize?: (message: string | undefined, fallback: string) => string,
   ): Promise<ApiError> {
     const code = statusToCode(res.status);
-    const raw = await readServerMessage(res);
+    const { message: raw, data } = await readErrorBody(res);
     // sanitize คืน fallback เมื่อ message ใช้ไม่ได้ — เทียบเพื่อไม่ให้ fallback
     // (ข้อความของ dev) กลายเป็น serverMessage ที่เอาไปโชว์ user
     const cleaned = sanitize ? sanitize(raw, fallbackMessage) : raw;
@@ -125,7 +125,7 @@ export class ApiError extends Error {
       serverMessage || fallbackMessage,
       res.status,
       res.status >= 500,
-      undefined,
+      data,
       serverMessage,
     );
   }
@@ -196,19 +196,29 @@ export function isTransportError(error: unknown): boolean {
 }
 
 /**
- * อ่าน `message` จาก error body — clone() ก่อนเพื่อไม่ consume body ของ caller
- * คืน undefined หาก parse ไม่ได้หรือไม่มี field `message` ที่เป็น string
+ * อ่าน `message` และ `data` จาก error body — clone() ก่อนเพื่อไม่ consume body ของ caller
+ *
+ * `data` คือช่องที่ backend ใช้ส่งรายละเอียดที่ client เอาไปเรนเดอร์ต่อได้ (ฝั่ง backend
+ * เรียกมันว่า `details` แล้ว `StdResponse.error` วางลงฟิลด์ `data` ของ error body)
+ * เช่นรายการเอกสารที่บล็อกการเปิดรอบตรวจนับ — เดิมอ่านแค่ `message` รายละเอียดจึงหล่นหาย
+ * ทั้งที่ backend ส่งมาครบ
+ *
+ * คืน message เป็น undefined หาก parse ไม่ได้หรือไม่มี field `message` ที่เป็น string
  */
-const readServerMessage = async (
+const readErrorBody = async (
   res: Response,
-): Promise<string | undefined> => {
+): Promise<{ message: string | undefined; data: unknown }> => {
   try {
     const body = await res.clone().json();
-    return typeof body?.message === "string" && body.message.trim()
-      ? body.message
-      : undefined;
+    return {
+      message:
+        typeof body?.message === "string" && body.message.trim()
+          ? body.message
+          : undefined,
+      data: body?.data ?? undefined,
+    };
   } catch {
-    return undefined;
+    return { message: undefined, data: undefined };
   }
 };
 
