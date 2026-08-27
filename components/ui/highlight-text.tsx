@@ -33,7 +33,11 @@ export const HighlightText = ({
         i % 2 === 1 ? (
           <mark
             key={`${i}-${part}`}
-            className="bg-warning/30 text-foreground rounded-sm font-bold"
+            // เหลืองปากกาเน้นข้อความมาตรฐาน ไม่ใช่ token ของธีม — และ **ตรึงสี
+            // ตัวอักษรเป็นดำ** ไม่ใช่ `text-foreground` เพราะใน dark mode ตัวนั้น
+            // เกือบขาว วางบนพื้นเหลืองแล้วอ่านไม่ออก (กับดักเดียวกับ badge นับ
+            // notification) พื้นเหลืองเป็นสีเดียวกันทั้งสองธีมอยู่แล้ว
+            className="rounded-sm bg-yellow-200 font-bold text-neutral-900"
           >
             {part}
           </mark>
