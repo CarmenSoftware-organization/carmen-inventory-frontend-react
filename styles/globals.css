@@ -563,8 +563,14 @@
 /* Badge inside DataGrid table: compact size.
    8px is the sanctioned micro-grid floor from docs/DESIGN.md (`micro-eyebrow`
    "compresses to 8px in the tightest micro-grid cells") — now referenced as a
-   token instead of a literal. Holds counts/short codes, so line-height 1 stays. */
-[data-slot="data-grid-table"] [data-slot="badge"] {
+   token instead of a literal. Holds counts/short codes, so line-height 1 stays.
+
+   `:not([data-status-chip])` — กฎนี้ตั้งใจย่อ count chip กับโค้ดสั้น ๆ แต่ selector
+   จับ badge ทุกตัวในตาราง ชิปสถานะ (StatusDotBadge/StatusBadge) เลยถูกกดเป็น 8px
+   ตามไปด้วย และเพราะกฎนี้อยู่นอก @layer มันชนะ utility ของ Tailwind ทุกตัว การไป
+   แก้ prop `size` ที่คอมโพเนนต์จึงไม่มีผลอะไรเลยในตาราง (มีผลแต่ใน card view)
+   โดยไม่มีอะไรฟ้อง — ชิปสถานะจึงขอออกจากกฎนี้ แล้วไปคุมขนาดที่คอมโพเนนต์ตัวเอง */
+[data-slot="data-grid-table"] [data-slot="badge"]:not([data-status-chip]) {
   font-size: var(--text-micro-floor);
   line-height: 1;
   height: 0.875rem;
