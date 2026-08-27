@@ -79,14 +79,19 @@ export function DocActionsMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" size="sm" variant="outline" className="relative">
+        <Button type="button" size="sm" variant="outline">
           <MoreHorizontal aria-hidden="true" />
           {tc("more")}
-          {/* มีคนคอมเมนต์ไว้ — จุดเดียวพอให้รู้ว่าต้องเปิดดู เลขอยู่ในเมนู */}
+          {/* มีคนคอมเมนต์ไว้ — จุดเดียวพอให้รู้ว่าต้องเปิดดู เลขอยู่ในเมนู
+              อยู่ **ในแถวเดียวกับข้อความ** ไม่ใช่ลอยที่มุมปุ่ม เพราะจุดที่มุมซ้อน
+              ขอบปุ่มอยู่ครึ่งหนึ่งเสมอ แล้วอ่านเป็นรอยบุ๋มของปุ่มมากกว่าป้ายแจ้งเตือน
+              ท่าแก้มาตรฐานคือคาดวงแหวนสีพื้นหลัง แต่ใน dark mode พื้นหลัง (0.20) กับ
+              พื้นปุ่ม outline (~0.28) แทบเป็นสีเดียวกัน วงแหวนเลยมองไม่เห็น
+              อยู่ในแถวแล้วไม่มีอะไรให้จม และไม่มีวันโดนกล่องที่ overflow ตัดด้วย */}
           {commentCount > 0 && (
             <span
               aria-hidden="true"
-              className="bg-primary absolute -top-1 -right-1 size-2 rounded-full"
+              className="bg-primary size-1.5 shrink-0 rounded-full"
             />
           )}
         </Button>
