@@ -1,5 +1,14 @@
 export type PhysicalCountStatus = "not_started" | "in_progress" | "completed";
 
+/**
+ * สถานะของ "รอบตรวจนับ" (`tb_physical_count_period`) — คนละชั้นกับสถานะของใบนับรายคลัง
+ *
+ * ใบนับรายคลังสร้างได้เมื่อรอบอยู่ `counting` เท่านั้น — รอบถูกสร้างเป็น `draft` อัตโนมัติ
+ * ตอนเรียก `/physical-count-periods/current` แล้วต้องกด "เริ่มนับ" ที่หน้า Period End
+ * เพื่อเลื่อนเป็น `counting`
+ */
+export type PhysicalCountPeriodStatus = "draft" | "counting" | "completed";
+
 export type LocationType = "inventory" | "direct" | "consignment";
 
 export type PhysicalCountType = "yes" | "no";
@@ -27,7 +36,7 @@ export interface CurrentPeriodData {
     start_at: string;
     end_at: string;
   };
-  status: string;
+  status: PhysicalCountPeriodStatus;
   locations: PhysicalCountLocation[];
 }
 

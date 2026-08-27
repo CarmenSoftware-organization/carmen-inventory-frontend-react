@@ -109,6 +109,47 @@ describe("ApiError.from", () => {
     const err = await ApiError.from(fakeResponse(503), "fb");
     expect(err.message).toBe("fb");
   });
+
+  // backend ส่งรายละเอียดที่ client เรนเดอร์ต่อได้มาในฟิลด์ `data` ของ error body
+  // (ฝั่ง backend เรียกว่า `details`) เช่นรายการเอกสารที่บล็อกการเปิดรอบตรวจนับ
+  it("carries the structured `data` payload through to details", async () => {
+    const blockers = {
+      counts: { grn: 1, stock_in: 0, stock_out: 0, sr: 2 },
+      total: 3,
+      documents: { grn: [{ id: "g1", no: "GRN-1" }], stock_in: [], stock_out: [], sr: [] },
+    };
+
+    const err = await ApiError.from(
+      fakeResponse(422, { message: "still open", data: blockers }),
+      "fb",
+    );
+
+    expect(err.details).toEqual(blockers);
+    expect(err.message).toBe("still open");
+  });
+
+  it("leaves details undefined when the body has no data field", async () => {
+    const err = await ApiError.from(
+      fakeResponse(400, { message: "bad" }),
+      "fb",
+    );
+    expect(err.details).toBeUndefined();
+  });
+
+  it("leaves details undefined when the body is not JSON", async () => {
+    const err = await ApiError.from(fakeResponse(500), "fb");
+    expect(err.details).toBeUndefined();
+  });
+
+  // error body ของ StdResponse ตั้ง data เป็น null เมื่อไม่มีรายละเอียด — อย่าให้ null
+  // กลายเป็น details ที่ผู้เรียกต้องมาเช็คเองอีกชั้น
+  it("normalises a null data field to undefined", async () => {
+    const err = await ApiError.from(
+      fakeResponse(404, { message: "nope", data: null }),
+      "fb",
+    );
+    expect(err.details).toBeUndefined();
+  });
 });
 
 // C5: แยก 403 ของ license ออกจาก 403 ของสิทธิ์ — key เดียวที่แยกได้เด็ดขาดคือ

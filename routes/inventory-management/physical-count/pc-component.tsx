@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   Calendar,
   CalendarRange,
@@ -27,7 +27,7 @@ import {
   usePhysicalCountPeriodCurrent,
   usePhysicalCountPeriodDetail,
 } from "@/hooks/use-physical-count-period";
-import { useCreatePhysicalCount } from "@/hooks/use-physical-count";
+import { useOpenPhysicalCount } from "../shared/use-open-physical-count";
 import { useLocale } from "@/hooks/use-locale";
 import { formatDate as formatDateUtil } from "@/lib/date-utils";
 import { ErrorState } from "@/components/ui/error-state";
@@ -135,6 +135,7 @@ export default function PcComponent() {
   const [includeNotCount, setIncludeNotCount] = useState(false);
   const [activeFilter, setActiveFilter] = useState<"all" | StatusKey>("all");
   const [showNotImplemented, setShowNotImplemented] = useState(false);
+  const [showNotCounting, setShowNotCounting] = useState(false);
   const [previousPeriodId, setPreviousPeriodId] = useState("");
 
   const {
@@ -151,7 +152,8 @@ export default function PcComponent() {
     previousPeriodId || undefined,
     includeNotCount,
   );
-  const createPhysicalCount = useCreatePhysicalCount();
+  const { open: openPhysicalCount, pendingLocationId } =
+    useOpenPhysicalCount();
 
   const period = previousPeriodId ? selectedPeriod : currentPeriod;
   const isLoading = previousPeriodId ? isLoadingSelected : isLoadingCurrent;
@@ -227,15 +229,15 @@ export default function PcComponent() {
     }
 
     if (!period) return;
-    createPhysicalCount.mutate(
-      { physical_count_period_id: period.id, location_id: item.id },
-      {
-        onSuccess: (res) => {
-          const { id } = (res as { data: { id: string } }).data;
-          navigate(`/inventory-management/physical-count/${id}/entry`);
-        },
-      },
-    );
+
+    // ใบนับสร้างได้ต่อเมื่อรอบตรวจนับเป็น `counting` — บอกให้ไปเปิดรอบที่หน้า Period End
+    // ดีกว่าปล่อยให้ยิงแล้วโดน 400 ตีกลับเป็น toast ที่อ่านไม่รู้เรื่อง
+    if (period.status !== "counting") {
+      setShowNotCounting(true);
+      return;
+    }
+
+    openPhysicalCount(item, period.id);
   };
 
   if (error) return <ErrorState error={error} onRetry={() => refetch()} />;
@@ -344,13 +346,46 @@ export default function PcComponent() {
           sections={sections}
           emptyTitle={t("noLocationsInStatus")}
           renderItem={(item, i) => (
-            <PcLocationCard item={item} index={i} onAction={handleAction} />
+            <PcLocationCard
+              item={item}
+              index={i}
+              onAction={handleAction}
+              pending={pendingLocationId === item.id}
+            />
           )}
           getItemKey={(item) => item.id}
           isLoading={isLoading}
           skeletonWithProgress
         />
       )}
+
+      <Dialog open={showNotCounting} onOpenChange={setShowNotCounting}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm">
+              <CalendarRange className="size-4" aria-hidden="true" />
+              {t("countingNotStarted")}
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              {t("countingNotStartedDesc")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowNotCounting(false)}
+            >
+              {tc("close")}
+            </Button>
+            <Button asChild size="sm">
+              <Link to="/inventory-management/period-end">
+                {t("goToPeriodEnd")}
+              </Link>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showNotImplemented} onOpenChange={setShowNotImplemented}>
         <DialogContent className="sm:max-w-sm">

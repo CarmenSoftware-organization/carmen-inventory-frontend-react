@@ -5,9 +5,12 @@ import {
   PlayCircle,
   Sparkles,
 } from "lucide-react";
-import { Link } from "react-router";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useLocale, useTranslations } from "use-intl";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Card,
   CardAction,
@@ -19,17 +22,65 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
-import { usePeriodEndCurrent } from "@/hooks/use-period-end";
+import {
+  usePeriodEndCurrent,
+  useStartPeriodCounting,
+} from "@/hooks/use-period-end";
+import { usePhysicalCountPeriodCurrent } from "@/hooks/use-physical-count-period";
+import { ApiError } from "@/lib/api-error";
 import { cn } from "@/lib/utils";
 import PeHistory from "./pe-history";
+import { PeStartBlockedDialog } from "./pe-start-blocked-dialog";
 import { formatLocalizedDate } from "@/lib/date-utils";
+import type { StartCountingBlockers } from "@/types/period-end";
+
+/** true เมื่อ payload หน้าตาเหมือนรายการเอกสารที่บล็อกจริง ๆ ไม่ใช่ error body อื่นที่บังเอิญมี data */
+const isStartCountingBlockers = (
+  value: unknown,
+): value is StartCountingBlockers =>
+  typeof value === "object" &&
+  value !== null &&
+  "documents" in value &&
+  "total" in value;
 
 export default function PeComponent() {
   const locale = useLocale();
+  const navigate = useNavigate();
   const t = useTranslations("inventoryManagement.periodEnd");
   const { data, isLoading, isError } = usePeriodEndCurrent();
+  const { data: countingRound } = usePhysicalCountPeriodCurrent();
+  const startCounting = useStartPeriodCounting();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [blockers, setBlockers] = useState<StartCountingBlockers | null>(null);
 
   const statusKey = data?.status ?? "open";
+
+  // รอบเปิดแล้ว = ปุ่มพาไปหน้า review ตรง ๆ ไม่ต้อง POST ซ้ำและไม่ต้องถามยืนยัน
+  const isCounting = countingRound?.status === "counting";
+  const reviewPath = "/inventory-management/period-end/review";
+
+  const handleStart = () => {
+    startCounting.mutate(undefined, {
+      onSuccess: () => {
+        setConfirmOpen(false);
+        toast.success(t("startCountingSuccess"));
+        navigate(reviewPath);
+      },
+      onError: (error) => {
+        setConfirmOpen(false);
+        // 422 พก `{ counts, total, documents }` มาใน error body ให้ลิสต์เอกสารที่ค้างได้
+        // ส่วน error อื่นตกไปที่ toast ตามปกติ (5xx จะได้ undefined โดยตั้งใจ ไม่ให้ internal หลุด)
+        if (error instanceof ApiError && isStartCountingBlockers(error.details)) {
+          setBlockers(error.details);
+          return;
+        }
+        toast.error(
+          (error instanceof ApiError && error.userFacingServerMessage) ||
+            t("startCountingFailed"),
+        );
+      },
+    });
+  };
 
   return (
     <div className="animate-fade-in-up space-y-5 p-3 md:p-4">
@@ -114,17 +165,37 @@ export default function PeComponent() {
           </CardContent>
 
           <CardFooter className="justify-end border-t">
-            <Button asChild size="sm">
-              <Link to="/inventory-management/period-end/review">
-                <PlayCircle aria-hidden="true" />
-                {t("startClose")}
-              </Link>
+            <Button
+              size="sm"
+              onClick={() =>
+                isCounting ? navigate(reviewPath) : setConfirmOpen(true)
+              }
+              disabled={statusKey === "closed" || startCounting.isPending}
+            >
+              <PlayCircle aria-hidden="true" />
+              {isCounting ? t("continueCounting") : t("startClose")}
             </Button>
           </CardFooter>
         </Card>
       )}
 
       <PeHistory />
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={t("startCountingConfirmTitle")}
+        description={t("startCountingConfirmDesc")}
+        onConfirm={handleStart}
+        isPending={startCounting.isPending}
+        confirmText={t("startClose")}
+      />
+
+      <PeStartBlockedDialog
+        open={blockers !== null}
+        onOpenChange={(open) => !open && setBlockers(null)}
+        blockers={blockers}
+      />
     </div>
   );
 }

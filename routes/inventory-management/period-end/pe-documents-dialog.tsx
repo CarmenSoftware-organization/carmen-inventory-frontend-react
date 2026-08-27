@@ -25,6 +25,7 @@ import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import { CN_STATUS_CONFIG } from "@/constant/credit-note";
 import { GRN_STATUS_CONFIG } from "@/constant/goods-receive-note";
+import { IA_STATUS_CONFIG } from "@/constant/inventory-adjustment";
 import { PO_STATUS_CONFIG } from "@/constant/purchase-order";
 import { PR_STATUS_CONFIG } from "@/constant/purchase-request";
 import { SR_STATUS_CONFIG } from "@/constant/store-requisition";
@@ -34,6 +35,7 @@ import type {
   ReviewTransactionKey,
   ReviewTransactionStat,
 } from "@/types/period-end";
+import { buildDocumentPath } from "./pe-document-paths";
 
 const STATUS_CONFIGS: Record<ReviewTransactionKey, StatusConfig> = {
   pr: PR_STATUS_CONFIG,
@@ -41,15 +43,10 @@ const STATUS_CONFIGS: Record<ReviewTransactionKey, StatusConfig> = {
   grn: GRN_STATUS_CONFIG,
   cn: CN_STATUS_CONFIG,
   sr: SR_STATUS_CONFIG,
+  si: IA_STATUS_CONFIG,
+  so: IA_STATUS_CONFIG,
 };
 
-const MODULE_PATHS: Record<ReviewTransactionKey, string> = {
-  pr: "/procurement/purchase-request",
-  po: "/procurement/purchase-order",
-  grn: "/procurement/goods-receive-note",
-  cn: "/procurement/credit-note",
-  sr: "/store-operation/store-requisition",
-};
 
 interface Props {
   readonly open: boolean;
@@ -74,7 +71,6 @@ export function PeDocumentsDialog({
 
   const documents: ReviewDocument[] = stat?.documents ?? [];
   const statusConfig = moduleKey ? STATUS_CONFIGS[moduleKey] : null;
-  const basePath = moduleKey ? MODULE_PATHS[moduleKey] : null;
   const moduleLabel = moduleKey ? t(`modules.${moduleKey}`) : "";
 
   const columns = useMemo<ColumnDef<ReviewDocument>[]>(
@@ -94,10 +90,10 @@ export function PeDocumentsDialog({
         header: () => tfl("documentNo"),
         cell: ({ row }) => {
           const label = <span className="text-micro">{row.original.no}</span>;
-          if (!basePath) return label;
+          if (!moduleKey) return label;
           return (
             <Link
-              to={`${basePath}/${row.original.id}`}
+              to={buildDocumentPath(moduleKey, row.original.id)}
               onClick={() => onOpenChange(false)}
               className="text-primary hover:underline focus-visible:underline"
             >
@@ -140,7 +136,7 @@ export function PeDocumentsDialog({
         size: 140,
       },
     ],
-    [statusConfig, basePath, onOpenChange, tfl, locale],
+    [statusConfig, moduleKey, onOpenChange, tfl, locale],
   );
 
   const table = useReactTable({

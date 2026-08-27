@@ -7,6 +7,7 @@ import {
   Eye,
   Play,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -30,13 +31,25 @@ interface PcLocationCardProps {
   readonly item: PhysicalCountLocation;
   readonly index?: number;
   readonly onAction: (item: PhysicalCountLocation) => void;
+  /** ปิดปุ่มเมื่อยังเปิดรอบตรวจนับไม่ได้ — ใส่ `disabledReason` เป็น tooltip ด้วยเสมอ */
+  readonly disabled?: boolean;
+  readonly disabledReason?: string;
+  /** กำลังสร้างใบนับของ location นี้อยู่ */
+  readonly pending?: boolean;
 }
 
 /**
  * การ์ดแสดง Physical Count Location หนึ่งรายการ (Soft Sheet style)
  * แสดง progress bar, location type และสถานะ complete / in_progress / not_started
  */
-export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
+export function PcLocationCard({
+  item,
+  index,
+  onAction,
+  disabled,
+  disabledReason,
+  pending,
+}: PcLocationCardProps) {
   const t = useTranslations("inventoryManagement.physicalCount");
   const { dateFormat } = useProfile();
 
@@ -110,8 +123,14 @@ export function PcLocationCard({ item, index, onAction }: PcLocationCardProps) {
               size="sm"
               variant={actionVariant}
               onClick={() => onAction(item)}
+              disabled={disabled || pending}
+              title={disabled ? disabledReason : undefined}
             >
-              <ActionIcon className="size-3.5" aria-hidden="true" />
+              {pending ? (
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                <ActionIcon className="size-3.5" aria-hidden="true" />
+              )}
               {actionLabel}
               <ChevronRight className="size-3.5" aria-hidden="true" />
             </Button>
