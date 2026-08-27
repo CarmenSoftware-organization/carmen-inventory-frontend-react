@@ -60,6 +60,7 @@ export function PltFormProductsSection({
   return (
     <SettingSection
       wide
+      frameless
       title={labels.sectionTitle}
       description={labels.noItemsDesc}
       count={detailFields.length}

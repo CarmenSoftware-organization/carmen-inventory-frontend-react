@@ -47,6 +47,7 @@ export function PLProductsSection({
   return (
     <SettingSection
       wide
+      frameless
       title={headerLabels.title}
       description={headerLabels.noItemsDesc}
       count={detailFields.length}

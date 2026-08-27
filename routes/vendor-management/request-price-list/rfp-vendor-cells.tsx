@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Check,
-  CheckCircle2,
-  Copy,
-  ExternalLink,
-  Mail,
-  Trash2,
-} from "lucide-react";
+import { Check, CheckCircle2, Copy, ExternalLink, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CellAction } from "@/components/ui/cell-action";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
@@ -79,7 +72,6 @@ export function EmailValue({ value }: { readonly value?: string | null }) {
       aria-label={`Send email to ${value}`}
       className="text-primary/90 hover:text-primary group flex min-w-0 items-center gap-1.5 text-xs underline-offset-2 transition-colors hover:underline"
     >
-      <Mail className="size-3.5 shrink-0 opacity-70 transition-opacity group-hover:opacity-100" />
       <span className="min-w-0 truncate">{value}</span>
     </a>
   );
