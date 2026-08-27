@@ -34,7 +34,7 @@ import {
 import { useAllUsers } from "@/hooks/use-all-users";
 import { useAllProducts } from "@/hooks/use-all-products";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { LocationTypeBadge } from "@/components/ui/location-type-badge";
+import { LocationTypeLabel } from "@/components/ui/location-type-label";
 import {
   INVENTORY_TYPE_LABEL_KEY,
   INVENTORY_TYPE_OPTIONS,
@@ -351,7 +351,7 @@ export function LocationForm({ location }: LocationFormProps) {
                     {location?.location_type ? (
                       // ไอคอนชุดเดียวกับที่ list แสดง — สลับ list ↔ ฟอร์มแล้วเห็น
                       // ประเภทคลังหน้าตาเดิม
-                      <LocationTypeBadge type={location.location_type} />
+                      <LocationTypeLabel type={location.location_type} />
                     ) : (
                       ""
                     )}

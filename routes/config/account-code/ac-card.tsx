@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import type { AccountCode } from "@/types/account-code";
 
@@ -20,10 +20,10 @@ export default function AcCard({ item, onEdit, onDelete }: Props) {
   return (
     <ListCard
       title={item.code || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
+      <ListCardActiveRow active={item.is_active} />
       <ListCardRow label={tfl("name")}>{item.name}</ListCardRow>
       {item.description && (
         <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>

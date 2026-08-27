@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import type { Department } from "@/types/department";
 
@@ -23,10 +23,10 @@ export default function DepartmentCard({ item, onEdit, onDelete }: Props) {
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
+      <ListCardActiveRow active={item.is_active} />
       {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
       {item.account_code && (
         <ListCardRow label={tfl("accountCode")}>

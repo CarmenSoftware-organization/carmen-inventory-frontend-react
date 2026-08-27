@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import type { Shelf } from "@/types/shelf";
 
@@ -22,15 +22,13 @@ export default function ShelfCard({ item, onEdit, onDelete }: Props) {
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={onDelete ? () => onDelete(item) : undefined}
     >
+      <ListCardActiveRow active={item.is_active} />
       {item.code && <ListCardRow label={tfl("code")}>{item.code}</ListCardRow>}
       {item.description && (
-        <ListCardRow label={tfl("description")}>
-          {item.description}
-        </ListCardRow>
+        <ListCardRow label={tfl("description")}>{item.description}</ListCardRow>
       )}
       <ListCardAuditRows audit={item.audit} />
     </ListCard>

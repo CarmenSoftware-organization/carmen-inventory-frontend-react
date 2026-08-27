@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { isSentBack } from "@/constant/last-action";
 import { useProfile } from "@/hooks/use-profile";
@@ -171,6 +172,28 @@ export function ListCardStatusRow({
         // uppercase ให้ — บังคับที่นี่ทีเดียวจะได้ไม่ต้องจำเป็นราย ๆ ไป
         className="uppercase"
       />
+    </ListCardRow>
+  );
+}
+
+/**
+ * แถว **สถานะ** ของข้อมูลตั้งต้น (เปิด/ปิดใช้งาน)
+ *
+ * ย้ายลงมาจากช่อง `badge` หัวการ์ดด้วยเหตุผลเดียวกับสถานะเอกสาร — ของที่ลอยอยู่
+ * มุมขวาบนโดยไม่มี label กำกับ คนต้องเดาเองว่ามันคืออะไร
+ *
+ * ยังเป็นชิปจุดสี (`StatusBadge`) ไม่ใช่ไอคอน+ข้อความแบบเอกสาร โดยตั้งใจ:
+ * เปิด/ปิดใช้งานมีแค่สองค่าที่ตรงข้ามกัน ไม่ใช่ความคืบหน้าที่ไล่เป็นลำดับ จึงไม่มี
+ * รูปทรงให้แยกด้วยไอคอน — ต่างจากสถานะเอกสารที่มีเจ็ดแปดค่าและคนแยกด้วยรูปไอคอน
+ *
+ * @param active - `item.is_active` ของรายการนั้น
+ */
+export function ListCardActiveRow({ active }: { readonly active: boolean }) {
+  const tfl = useTranslations("field");
+
+  return (
+    <ListCardRow label={tfl("status")}>
+      <StatusBadge active={active} />
     </ListCardRow>
   );
 }

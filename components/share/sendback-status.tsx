@@ -3,7 +3,7 @@ import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { isSentBack } from "@/constant/last-action";
 import type { LastAction } from "@/types/last-action";
 
-interface SendBackBadgeProps {
+interface SendBackStatusProps {
   readonly lastAction?: LastAction | null;
   readonly className?: string;
 }
@@ -28,13 +28,10 @@ interface SendBackBadgeProps {
  * @returns ป้ายสถานะ หรือ null
  * @example
  * ```tsx
- * <SendBackBadge lastAction={item.last_action} />
+ * <SendBackStatus lastAction={item.last_action} />
  * ```
  */
-export function SendBackBadge({
-  lastAction,
-  className,
-}: SendBackBadgeProps) {
+export function SendBackStatus({ lastAction, className }: SendBackStatusProps) {
   const tc = useTranslations("common");
 
   if (!isSentBack(lastAction)) return null;

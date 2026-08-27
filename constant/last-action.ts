@@ -35,7 +35,7 @@ export interface RowWithLastAction {
  * @returns true ถ้า action ล่าสุดคือการตีกลับ
  * @example
  * ```ts
- * if (isSentBack(pr.last_action)) showSendBackBadge();
+ * if (isSentBack(pr.last_action)) showSendBackStatus();
  * ```
  */
 export function isSentBack(lastAction?: LastAction | null): boolean {

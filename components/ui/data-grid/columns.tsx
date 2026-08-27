@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { DataGridRowActions } from "@/components/ui/data-grid/data-grid-row-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuditCell } from "@/components/share/audit-cell";
-import { SendBackBadge } from "@/components/share/sendback-badge";
+import { SendBackStatus } from "@/components/share/sendback-status";
 import { isSentBack } from "@/constant/last-action";
 import type { RowWithLastAction } from "@/constant/last-action";
 import type { Permission } from "@/constant/permissions";
@@ -189,7 +189,7 @@ export function sendbackColumn<T extends RowWithLastAction>(
       />
     ),
     cell: ({ row }) => (
-      <SendBackBadge
+      <SendBackStatus
         lastAction={row.original.last_action}
         // คอลัมน์นี้จัดกลาง — ป้ายเป็น inline-flex ซึ่ง `text-center` ของเซลล์
         // เอื้อมไม่ถึงเมื่ออยู่ในกล่อง clamp ของ DataGrid (ท่าเดียวกับคอลัมน์สถานะ)

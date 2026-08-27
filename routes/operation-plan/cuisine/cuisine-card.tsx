@@ -1,9 +1,9 @@
 import { useTranslations } from "use-intl";
-import { StatusBadge } from "@/components/ui/status-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardActiveRow,
 } from "@/components/share/list-card";
 import { CUISINE_REGION_LABEL_KEY } from "@/constant/cuisine";
 import type { Cuisine } from "@/types/cuisine";
@@ -38,10 +38,10 @@ export default function CuisineCard({
   return (
     <ListCard
       title={item.name || "..."}
-      badge={<StatusBadge active={item.is_active} />}
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardActiveRow active={item.is_active} />
       {item.region && (
         <ListCardRow label={tfl("region")}>
           {regionKey ? t(regionKey) : item.region}

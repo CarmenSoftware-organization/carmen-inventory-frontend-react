@@ -1,5 +1,4 @@
 import { useTranslations } from "use-intl";
-import { type BadgeProps } from "@/components/ui/badge";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { cn } from "@/lib/utils";
 import {
@@ -7,11 +6,9 @@ import {
   INVENTORY_TYPE_LABEL_KEY,
 } from "@/constant/location";
 
-interface LocationTypeBadgeProps {
+interface LocationTypeLabelProps {
   /** ประเภทคลัง (`location_type`) */
   type: INVENTORY_TYPE;
-  /** เดิมคุมขนาด badge — คงไว้ไม่ให้ call site เดิมพัง แต่ไม่มีผลกับป้ายแบบใหม่แล้ว */
-  size?: BadgeProps["size"];
   className?: string;
 }
 
@@ -25,17 +22,16 @@ interface LocationTypeBadgeProps {
  * ทำให้ list (table) กับ grid (card) แสดงประเภทเหมือนกัน ไม่ drift เมื่อสลับ view
  *
  * @param type - ประเภทคลัง
- * @param size - รับไว้เพื่อความเข้ากันได้กับที่เรียกเดิม (ไม่มีผลแล้ว ป้ายขนาดเดียว)
  * @param className - class เพิ่มเติม (เช่น `shrink-0` ใน flex layout)
  * @example
  * ```tsx
- * <LocationTypeBadge type={item.location_type} />
+ * <LocationTypeLabel type={item.location_type} />
  * ```
  */
-export function LocationTypeBadge({
+export function LocationTypeLabel({
   type,
   className,
-}: Readonly<LocationTypeBadgeProps>) {
+}: Readonly<LocationTypeLabelProps>) {
   const t = useTranslations("config.location");
   return (
     <StatusIconLabel

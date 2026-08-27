@@ -32,7 +32,7 @@ export const WF_TYPE_VARIANT = createVariantMap({
 
 /**
  * Dot color per workflow type — for the muted "dot badge" (neutral chip +
- * colored dot, per DESIGN.md "avoid neon"), matching `LocationTypeBadge`.
+ * colored dot, per DESIGN.md "avoid neon"), matching `LocationTypeLabel`.
  * Same color semantics as `WF_TYPE_VARIANT`: PR=info, PO=warning, SR=success.
  */
 export const WF_TYPE_DOT_COLOR: Record<string, string> = {
