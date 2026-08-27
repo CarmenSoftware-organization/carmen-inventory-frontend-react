@@ -19,12 +19,18 @@ import EmptyComponent from "@/components/empty-component";
 import { useSrStockMovements } from "@/hooks/use-store-requisition";
 import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
-import type { SrStockMovementItem } from "@/types/store-requisition";
+import type {
+  SrStockMovementItem,
+  StoreRequisitionStatus,
+} from "@/types/store-requisition";
+import { srStockVisible } from "./sr-form-helpers";
 
 interface SrStockTableProps {
   /** ใบที่ยังไม่บันทึกไม่มี id — ไม่ยิง API และปุ่มพิมพ์กดไม่ได้ */
   readonly srId?: string;
   readonly srNo?: string;
+  /** ต่ำกว่า completed = ยังไม่มีอะไรให้ดู (ดู `srStockVisible`) */
+  readonly docStatus?: StoreRequisitionStatus;
 }
 
 /** ตัวกรองทิศทาง — ค่าว่าง = ทั้งเข้าและออก */
@@ -44,15 +50,18 @@ const NO_LOT = "-";
  * **ยิงตอนคลิกแท็บเท่านั้น** — Radix ถอด `TabsContent` ที่ไม่ได้เลือกออกจาก DOM
  * คอมโพเนนต์นี้จึง mount ตอนกดแท็บ ไม่ใช่ตอนเปิดฟอร์ม (ดู `useSrStockMovements`)
  */
-export function SrStockTable({ srId, srNo }: SrStockTableProps) {
+export function SrStockTable({ srId, srNo, docStatus }: SrStockTableProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const [direction, setDirection] = useState<StockDirection>("");
 
-  const { data, isLoading, isError, error, refetch } =
-    useSrStockMovements(srId);
+  const canView = srStockVisible(docStatus);
+  const { data, isLoading, isError, error, refetch } = useSrStockMovements(
+    srId,
+    { enabled: canView },
+  );
 
   const rows = useMemo(() => data?.items ?? [], [data]);
 
@@ -176,9 +185,8 @@ export function SrStockTable({ srId, srNo }: SrStockTableProps) {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // ใบใหม่ที่ยังไม่บันทึกไม่มี id ให้ยิง — ยังไม่มีอะไรเคลื่อนไหวได้อยู่แล้ว
-  if (!srId) {
-    return <EmptyComponent icon={BoxIcon} title={t("stockNeedsSaved")} />;
+  if (!canView) {
+    return <EmptyComponent icon={BoxIcon} title={t("stockNeedsCompleted")} />;
   }
 
   if (isError) {

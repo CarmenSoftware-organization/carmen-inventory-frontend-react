@@ -3228,10 +3228,10 @@
       "issued": "Items issued — stock moved out",
       "rejected": "Store requisition rejected",
       "sentBack": "Store requisition sent back",
-      "stockNeedsSaved": "Stock movement shows after this requisition is saved",
       "stockNotPosted": "Not posted to stock yet — these figures are projected from the requisition",
       "stockCostIn": "Value in",
-      "stockCostOut": "Value out"
+      "stockCostOut": "Value out",
+      "stockNeedsCompleted": "Stock movement shows after this requisition is completed"
     },
     "stockReplenishment": {
       "entity": "Stock Replenishment",

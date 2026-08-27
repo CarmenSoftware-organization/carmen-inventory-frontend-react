@@ -5,6 +5,7 @@ import { SummaryFooterBar } from "@/components/ui/summary-bar";
 import { useSrStockMovements } from "@/hooks/use-store-requisition";
 import { formatCurrency } from "@/lib/currency-utils";
 import { STAGE_ROLE } from "@/types/stage-role";
+import { srStockVisible } from "./sr-form-helpers";
 
 type SrAction = "none" | "review" | "rejected" | "approved";
 
@@ -23,6 +24,8 @@ interface SrFooterProps {
   readonly activeTab: "items" | "stock";
   /** ใบที่ยังไม่บันทึกไม่มี id — แท็บ Stock ไม่มีอะไรให้สรุป */
   readonly srId?: string;
+  /** ต่ำกว่า completed = แท็บ Stock ไม่โชว์ตาราง footer จึงไม่ต้องสรุปอะไร */
+  readonly docStatus?: string;
   readonly onSubmit: () => void;
   readonly onApprove: () => void;
   readonly onIssue: () => void;
@@ -39,6 +42,7 @@ export function SrFooter({
   hasItems,
   activeTab,
   srId,
+  docStatus,
   onSubmit,
   onApprove,
   onIssue,
@@ -52,7 +56,7 @@ export function SrFooter({
   // key เดียวกับที่ตารางในแท็บใช้ — react-query แชร์ผลให้ ไม่ได้ยิงเพิ่มอีกรอบ
   // และ enabled ผูกกับแท็บไว้ ไม่งั้น footer จะยิงตั้งแต่เปิดฟอร์มทั้งที่ยังไม่มีใครกดดู
   const { data: stock } = useSrStockMovements(srId, {
-    enabled: activeTab === "stock",
+    enabled: activeTab === "stock" && srStockVisible(docStatus),
   });
 
   const isApprover = role === STAGE_ROLE.APPROVE;

@@ -277,6 +277,7 @@ export function StoreRequisitionForm({
             <SrStockTable
               srId={storeRequisition?.id}
               srNo={storeRequisition?.sr_no}
+              docStatus={storeRequisition?.doc_status}
             />
           </TabsContent>
         </Tabs>

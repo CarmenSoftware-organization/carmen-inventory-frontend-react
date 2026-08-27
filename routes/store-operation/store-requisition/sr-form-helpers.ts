@@ -111,6 +111,20 @@ export function srItemAmount(_item: SrFormValues["items"][number]): number {
   return 0;
 }
 
+/**
+ * ใบนี้ดูการเคลื่อนไหวสต๊อกได้หรือยัง — **เฉพาะใบที่ปิดจบแล้วเท่านั้น**
+ *
+ * ก่อนถึง completed ของยังไม่ขยับจริง ตัวเลขที่ backend ตอบมาเป็นการคาดการณ์จาก
+ * ตัวใบ (`source: store_requisition_detail`) การโชว์ตารางไว้จึงมีแต่ทำให้คนเข้าใจ
+ * ว่าตัดสต๊อกไปแล้ว — ทั้งตารางและยอดสรุปใน footer ใช้เกณฑ์เดียวกันจากที่นี่
+ * และใช้กัน request ด้วย (ยังไม่ถึงเวลาก็ไม่ต้องยิง)
+ *
+ * ใบใหม่ที่ยังไม่บันทึกไม่มีสถานะ จึงตกเกณฑ์นี้ไปเองโดยไม่ต้องเช็กแยก
+ */
+export function srStockVisible(docStatus?: string): boolean {
+  return docStatus === "completed";
+}
+
 /** ยอดรวมทั้งใบ = ผลรวม srItemAmount ของทุกแถว */
 export function srGrandTotal(items: SrFormValues["items"]): number {
   return items.reduce((sum, item) => sum + srItemAmount(item), 0);
