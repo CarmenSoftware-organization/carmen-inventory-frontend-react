@@ -17,14 +17,12 @@ bun run dev:{local,dev,uat,prod}   # Dev server per backend env → public/confi
 bun run build        # tsc + vite build → dist/ (config.json = config.prod.json)
 bun run build:{local,dev,uat,prod}   # เหมือน build แต่เลือก public/config.<env>.json → dist/config.json — มีผลกับ `bun run preview` ในเครื่องเท่านั้น (S3/GCS/Docker ใช้ config.json ของ environment เอง; Vercel รัน `bun run build` เปล่า ๆ ไม่ผ่านสคริปต์นี้ — ต้องตั้ง env var `BUILD_CONFIG_FILE` เองถ้าไม่ต้องการ config.prod.json)
 bun run typecheck    # tsc --noEmit เดี่ยว ๆ (gate ของ build:bump)
-bun run build:bump [patch|minor|major]   # ตัด release: bump package.json + generate changelog.json/CHANGELOG.md + commit + annotated tag (local เท่านั้น ไม่ push) — ต้องอยู่บน main, tree สะอาด, ไม่ตามหลัง origin/main ที่ fetch ไว้ (git fetch เองก่อน — สคริปต์ไม่ fetch ให้); gate typecheck+lint+test:run; ไม่ส่ง level = ถามใน terminal
-bun scripts/changelog-cli.ts [--rebuild]  # render CHANGELOG.md ใหม่จาก changelog.json (--rebuild = สร้าง changelog.json ใหม่จาก git tag ทับของเดิม)
 bun run lint         # ESLint        bun test          # Vitest watch
 bun test:run         # Single run    bun test:run path # Single file
-scripts/setup-gcs-cdn.sh <bucket> <config> [domain]   # One-shot GCP infra (CDN+LB+cert) + first deploy (docs/deploy.md)
-scripts/deploy-{s3,gcs,docker}.sh       # Deploy: S3/CloudFront · GCS/Cloud CDN · Docker nginx image (docs/deploy.md)
 # e2e: moved to ../carmen-inventory-frontend-e2e (E2E_FRONTEND_DIR=../carmen-inventory-frontend-react bun e2e)
 ```
+
+ตัด release / deploy (`build:bump` · changelog · S3/GCS/Docker/CDN) → skill `release-and-deploy`
 
 ## Architecture (deltas from the source app — its CLAUDE.md still describes module patterns)
 
@@ -68,22 +66,12 @@ compat removal — don't rely on them for the import step.)
 
 ## Activity sheet (ประวัติ "ใครแก้อะไร" ของรายการเดียว)
 
-`components/share/activity-sheet.tsx` เป็นของกลาง ใช้ได้กับทุก entity — เปิดด้วย
-`openActivity(id, label?)` จาก `components/share/activity-sheet-host.tsx` ซึ่ง mount
-ครั้งเดียวใน `routes/root-layout.tsx` (กลไก CustomEvent ชุดเดียวกับ
-`dispatchPermissionDenied`) **อย่าถือ state หรือ render sheet เองในหน้าใหม่**
+`components/share/activity-sheet.tsx` เป็นของกลาง เปิดผ่าน `openActivity()` ของ
+`activity-sheet-host.tsx` ที่ mount ครั้งเดียวใน `routes/root-layout.tsx` —
+**อย่าถือ state หรือ render sheet เองในหน้าใหม่**
 
-จุดเข้าถึงมีสามทาง: ปุ่มในหัวหน้า (20 หน้า) · เมนู ⋯ ในแถว list ผ่าน option
-`activity: { id, label }` ของ `useConfigTable` / `actionColumn` (31 list) · ปุ่มไอคอนใน
-`tree-node.tsx` ของหมวดสินค้า
-
-เปิดเฉพาะ entity ที่ backend บันทึกให้จริง — ทะเบียนอยู่ที่
-`carmen-turborepo-backend-v2/apps/micro-business/src/common/activity/activity-registry.ts`
-ตอนนี้ **ไม่เปิด** 7 list ที่ไม่มีในทะเบียน (certification · eco · equipment · recipe ·
-period · activity-log · user-activity) เปิดไปจะได้เมนูที่กดแล้วว่างเปล่า
-
-หัวข้อของแต่ละ action อยู่ใน `ACTION_TITLE_KEY` ของ activity-sheet ซึ่งต้องเป็นสับเซตของ
-enum `enum_activity_action` ฝั่ง DB — ค่าที่ไม่มีในเอนัมจะเขียนลงไม่ได้เลย
+จุดเข้าถึงทั้งสามทาง · ทะเบียน entity ที่ backend บันทึกจริง (7 list ที่ไม่เปิด) ·
+สัญญา `ACTION_TITLE_KEY` ↔ enum ฝั่ง DB → skill `activity-sheet`
 
 ## Interfaces config (`/system-admin/interface`)
 
