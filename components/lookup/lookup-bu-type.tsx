@@ -111,17 +111,30 @@ export function LookupBuType({
                 aria-expanded={open}
                 aria-invalid={!!error}
                 className={cn(
-                  "flex h-auto min-h-8 items-center justify-between py-1 pr-1 pl-3 text-xs",
+                  // min-w-0 ที่ตัวปุ่ม + กล่องใน = เงื่อนไขที่ทำให้ลูกหดได้จริง
+                  // ขาดตัวใดตัวหนึ่ง flex จะยอมให้เนื้อหาดันกล่องกว้างเกินพ่อแม่
+                  "flex h-auto min-h-8 w-full min-w-0 items-center justify-between py-1 pr-1 pl-3 text-xs",
                   error && "border-destructive",
                   className,
                 )}
                 disabled={disabled}
               >
-                <div className="flex flex-wrap gap-1">
+                <div className="flex min-w-0 flex-1 flex-wrap gap-1">
                   {value.length > 0 ? (
                     value.map((item) => (
-                      <Badge key={item.id} variant="secondary" size="sm">
-                        {item.name}
+                      <Badge
+                        key={item.id}
+                        variant="secondary"
+                        size="sm"
+                        className="max-w-full"
+                      >
+                        {/* ชื่อยาวเกินช่องให้ตัดท้าย ไม่ใช่ดันทะลุกรอบ — `Badge` เป็น
+                            whitespace-nowrap + shrink-0 มาแต่เดิม ตัวข้อความจึงต้อง
+                            truncate เองในกล่องที่ min-w-0 · ชื่อเต็มอยู่ที่ title
+                            เพราะ tooltip ของคอมโพเนนต์นี้ถูกใช้กับ error ไปแล้ว */}
+                        <span className="min-w-0 truncate" title={item.name}>
+                          {item.name}
+                        </span>
                         <span
                           role="button"
                           tabIndex={0}

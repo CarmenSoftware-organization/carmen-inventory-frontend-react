@@ -68,8 +68,11 @@ export function VendorGeneral({ form, isDisabled }: VendorGeneralProps) {
         )}
       </Field>
 
-      {/* Business type */}
-      <Field>
+      {/* Business type — เต็มแถว ไม่แชร์กับ Code
+          ชื่อประเภทธุรกิจยาวได้ถึง 40 ตัวอักษร ("Furniture, Fixtures & Equipment
+          (FF&E)") และเลือกได้หลายอัน ขณะที่ Code ยาวสุด 10 ตัว การจับคู่กันในแถว
+          เดียวคือให้ครึ่งที่ไม่ต้องใช้กับ Code แล้วบีบครึ่งที่ต้องใช้จนล้น */}
+      <Field className="sm:col-span-2">
         <FieldLabel>{tfl("businessType")}</FieldLabel>
         {isView ? (
           <FieldPlainText>
