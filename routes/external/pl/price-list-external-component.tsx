@@ -205,11 +205,11 @@ export default function PriceListExternalComponent({
 
   return (
     <div className="mx-auto max-w-6xl px-4 md:px-8">
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-border bg-card overflow-hidden rounded-xl border shadow-sm">
         <div className="space-y-8 p-6 md:p-8">
           <PriceListExternalHeader data={data} />
 
-          <div className="space-y-6 border-t border-slate-100 pt-6">
+          <div className="border-border space-y-6 border-t pt-6">
             <div className="flex items-center justify-between gap-4">
               <p className="text-muted-foreground text-sm">
                 {isViewMode
@@ -246,15 +246,19 @@ export default function PriceListExternalComponent({
                       onClick={() => setIsViewMode(!isViewMode)}
                       className="gap-1.5"
                     >
+                      {/* ป้ายบอก "กดแล้วจะได้ทำอะไร" ไม่ใช่ชื่อโหมด — คนอ่านคือ
+                          แอดมินฝ่ายขายของ vendor ที่เพิ่งได้ลิงก์มา ไม่เคยเห็นระบบนี้
+                          "Edit/View Mode" เป็นภาษาซอฟต์แวร์ ส่วนสิ่งที่เขามาทำจริง
+                          คือใส่ราคา */}
                       {isViewMode ? (
                         <>
                           <Pencil className="h-4 w-4" />
-                          Edit Mode
+                          Enter Prices
                         </>
                       ) : (
                         <>
                           <Eye className="h-4 w-4" />
-                          View Mode
+                          Preview
                         </>
                       )}
                     </Button>
