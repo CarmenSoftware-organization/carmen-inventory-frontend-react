@@ -366,13 +366,6 @@ export function ProductForm({ product }: ProductFormProps) {
   };
 
   return (
-    // px-4 ให้ header+form มี gutter ซ้าย · max-w-4xl คุมทั้งฟอร์มให้เท่า
-    // company profile (ทุก tab รวมตาราง units/locations)
-    //
-    // w-full ขาดไม่ได้: พ่อเป็น flex column และ mx-auto ทำให้ margin แกนขวางเป็น
-    // auto ซึ่งยกเลิก align-self: stretch ของ flex item — กล่องจะถูกวัดตามเนื้อหา
-    // แทน แท็บที่เนื้อหาน้อย (eco label ที่ยังไม่มีข้อมูล) เลยหดแล้วเลื่อนตำแหน่ง
-    // ทั้งบล็อกรวมหัวเรื่องกับแถบแท็บ
     <div className="mx-auto w-full space-y-4 px-4">
       <FormToolbar
         product={product}
