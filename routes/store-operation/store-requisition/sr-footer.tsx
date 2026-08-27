@@ -2,6 +2,7 @@ import { useTranslations } from "use-intl";
 import { Check, Eye, PackageCheck, SendHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
+import { useSrStockMovements } from "@/hooks/use-store-requisition";
 import { formatCurrency } from "@/lib/currency-utils";
 import { STAGE_ROLE } from "@/types/stage-role";
 
@@ -15,6 +16,13 @@ interface SrFooterProps {
   /** ยอดรวมทั้งใบ — คำนวณจาก srGrandTotal ตัวเดียวกับคอลัมน์ amount ในตาราง */
   readonly grandTotal: number;
   readonly hasItems: boolean;
+  /**
+   * แท็บที่เปิดอยู่ — footer สรุปคนละชุดกัน: แท็บ Items ใช้ยอดรวมของใบ
+   * ส่วนแท็บ Stock ใช้ยอดเข้า/ออกจาก API เพราะเป็นคนละหน่วยและคนละความหมาย
+   */
+  readonly activeTab: "items" | "stock";
+  /** ใบที่ยังไม่บันทึกไม่มี id — แท็บ Stock ไม่มีอะไรให้สรุป */
+  readonly srId?: string;
   readonly onSubmit: () => void;
   readonly onApprove: () => void;
   readonly onIssue: () => void;
@@ -29,6 +37,8 @@ export function SrFooter({
   action,
   grandTotal,
   hasItems,
+  activeTab,
+  srId,
   onSubmit,
   onApprove,
   onIssue,
@@ -37,6 +47,13 @@ export function SrFooter({
 }: SrFooterProps) {
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
+  const t = useTranslations("storeOperation.storeRequisition");
+
+  // key เดียวกับที่ตารางในแท็บใช้ — react-query แชร์ผลให้ ไม่ได้ยิงเพิ่มอีกรอบ
+  // และ enabled ผูกกับแท็บไว้ ไม่งั้น footer จะยิงตั้งแต่เปิดฟอร์มทั้งที่ยังไม่มีใครกดดู
+  const { data: stock } = useSrStockMovements(srId, {
+    enabled: activeTab === "stock",
+  });
 
   const isApprover = role === STAGE_ROLE.APPROVE;
   const isIssuer = role === STAGE_ROLE.ISSUE;
@@ -46,20 +63,48 @@ export function SrFooter({
   // มีรายการแล้วต้องเห็นยอดรวม แม้จะไม่มีปุ่มให้กด (view ใบที่ปิดแล้ว)
   const showBar = showActions || hasItems;
 
+  // ยอดมาจาก `summary` ของ API ไม่ได้บวกจากแถวที่เห็น จึงเป็นยอดของทั้งใบเสมอ
+  // ไม่ขยับตามตัวกรองทิศทางในตาราง
+  const summaryItems =
+    activeTab === "stock"
+      ? stock
+        ? [
+            {
+              key: "qtyIn",
+              label: tfl("in"),
+              value: stock.summary.total_qty_in,
+            },
+            {
+              key: "qtyOut",
+              label: tfl("out"),
+              value: stock.summary.total_qty_out,
+            },
+            {
+              key: "costIn",
+              label: t("stockCostIn"),
+              value: formatCurrency(stock.summary.total_cost_in),
+            },
+            {
+              key: "costOut",
+              label: t("stockCostOut"),
+              value: formatCurrency(stock.summary.total_cost_out),
+              emphasis: true,
+            },
+          ]
+        : []
+      : [
+          {
+            key: "grandTotal",
+            label: tfl("grandTotal"),
+            value: formatCurrency(grandTotal),
+            emphasis: true,
+          },
+        ];
+
   if (!showBar) return null;
 
   return (
-    <SummaryFooterBar
-      hasRecord={hasItems}
-      items={[
-        {
-          key: "grandTotal",
-          label: tfl("grandTotal"),
-          value: formatCurrency(grandTotal),
-          emphasis: true,
-        },
-      ]}
-    >
+    <SummaryFooterBar hasRecord={hasItems} items={summaryItems}>
       {showActions && (
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
           {isWorkflowReviewer && action === "review" && (

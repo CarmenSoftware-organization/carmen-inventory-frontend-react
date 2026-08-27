@@ -111,16 +111,6 @@ export function srItemAmount(_item: SrFormValues["items"][number]): number {
   return 0;
 }
 
-/**
- * ราคาต่อหน่วยของรายการ SR — 0 ด้วยเหตุผลเดียวกับ `srItemAmount`
- *
- * แยกออกมาเพราะตารางสต๊อกต้องโชว์ราคาต่อหน่วยกับยอดรวมคนละคอลัมน์ วันไหนราคา
- * มาจริงก็แก้ที่นี่ที่เดียวแล้วทั้งสองคอลัมน์ตรงกันเอง
- */
-export function srItemUnitPrice(_item: SrFormValues["items"][number]): number {
-  return 0;
-}
-
 /** ยอดรวมทั้งใบ = ผลรวม srItemAmount ของทุกแถว */
 export function srGrandTotal(items: SrFormValues["items"]): number {
   return items.reduce((sum, item) => sum + srItemAmount(item), 0);

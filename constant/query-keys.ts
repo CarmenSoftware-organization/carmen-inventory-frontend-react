@@ -117,6 +117,7 @@ export const QUERY_KEYS = {
   STOCK_REPLENISHMENT: "stock-replenishment",
   STORE_REQUISITIONS: "store-requisitions",
   STORE_REQUISITION_PREVIOUS_STAGES: "store-requisition-previous-stages",
+  STORE_REQUISITION_STOCK_MOVEMENTS: "store-requisition-stock-movements",
   STORE_REQUISITION_WORKFLOW_STAGES: "store-requisition-workflow-stages",
   STORE_REQUISITION_COMMENTS: "store-requisition-comments",
   TAX_PROFILES: "tax-profiles",

@@ -134,10 +134,6 @@ export function StoreRequisitionForm({
     name: "department_id",
   });
 
-  const [fromLocInfo, setFromLocInfo] = useState<LocationInfo>({
-    name: storeRequisition?.from_location_name ?? "",
-    code: storeRequisition?.from_location_code ?? "",
-  });
   const [toLocInfo, setToLocInfo] = useState<LocationInfo>({
     name: storeRequisition?.to_location_name ?? "",
     code: storeRequisition?.to_location_code ?? "",
@@ -245,7 +241,6 @@ export function StoreRequisitionForm({
           form={form}
           readOnly={isView}
           disabled={actions.isPending}
-          onFromLocInfoChange={setFromLocInfo}
           onToLocInfoChange={setToLocInfo}
           role={storeRequisition?.role ?? STAGE_ROLE.CREATE}
           isDraft={
@@ -280,12 +275,8 @@ export function StoreRequisitionForm({
 
           <TabsContent value="stock">
             <SrStockTable
-              items={items}
-              fromLocationName={fromLocInfo.name}
-              toLocationName={toLocInfo.name}
               srId={storeRequisition?.id}
               srNo={storeRequisition?.sr_no}
-              docStatus={storeRequisition?.doc_status}
             />
           </TabsContent>
         </Tabs>
@@ -298,6 +289,8 @@ export function StoreRequisitionForm({
         action={computeSrAction(items.map((i) => i.stage_status ?? ""))}
         grandTotal={srGrandTotal(items)}
         hasItems={items.length > 0}
+        activeTab={tab === "stock" ? "stock" : "items"}
+        srId={storeRequisition?.id}
         onSubmit={actions.openSubmitDialog}
         onApprove={() => actions.setActionDialog("approve")}
         onIssue={() => actions.setActionDialog("issue")}

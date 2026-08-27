@@ -13,111 +13,61 @@ import {
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { FieldPlainText } from "@/components/ui/field";
 import { StatusFilter } from "@/components/ui/status-filter";
+import { ErrorState } from "@/components/ui/error-state";
 import { PrintDocumentButton } from "@/components/print-document-button";
 import EmptyComponent from "@/components/empty-component";
+import { useSrStockMovements } from "@/hooks/use-store-requisition";
 import { formatCurrency } from "@/lib/currency-utils";
 import { cn } from "@/lib/utils";
-import type { StoreRequisitionStatus } from "@/types/store-requisition";
-import type { SrFormValues } from "./sr-form-schema";
-import { srItemUnitPrice } from "./sr-form-helpers";
-
-/**
- * หนึ่งขาของการเคลื่อนไหวสต๊อก — รายการหนึ่งในใบเบิกทำให้ของออกจากคลังต้นทาง
- * และเข้าคลังปลายทาง จึงกลายเป็นสองแถวคนละคลัง
- */
-interface StockRow {
-  readonly key: string;
-  readonly locationName: string;
-  readonly productName: string;
-  readonly unitName: string;
-  /** null = ขานี้ไม่ใช่ทางเข้า (แสดงขีด) */
-  readonly stockIn: number | null;
-  readonly stockOut: number | null;
-  readonly unitPrice: number;
-  readonly totalAmount: number;
-}
+import type { SrStockMovementItem } from "@/types/store-requisition";
 
 interface SrStockTableProps {
-  readonly items: SrFormValues["items"];
-  readonly fromLocationName: string;
-  readonly toLocationName: string;
-  /** ใบที่ยังไม่บันทึกไม่มี id — ปุ่มพิมพ์เลยกดไม่ได้ */
+  /** ใบที่ยังไม่บันทึกไม่มี id — ไม่ยิง API และปุ่มพิมพ์กดไม่ได้ */
   readonly srId?: string;
   readonly srNo?: string;
-  readonly docStatus?: StoreRequisitionStatus;
 }
 
 /** ตัวกรองทิศทาง — ค่าว่าง = ทั้งเข้าและออก */
 type StockDirection = "" | "in" | "out";
 
+/** ค่าที่ backend ส่งมาแทน "ไม่มี lot" — โชว์เป็นขีดให้เข้าชุดกับคอลัมน์อื่น */
+const NO_LOT = "-";
+
 /**
  * ตารางการเคลื่อนไหวสต๊อกของใบเบิก (แท็บ Stock Movement)
  *
- * จำนวนที่ใช้คือ `issued_qty` — ของที่จ่ายจริงเท่านั้นที่เคลื่อนไหว ใบที่ยังไม่ถึง
- * ขั้น issue จึงขึ้น 0 ทั้งตาราง ซึ่งตรงกับความจริงว่ายังไม่มีอะไรขยับ
+ * **ข้อมูลมาจาก API ไม่ใช่จากฟอร์ม** — ของเดิมแตกแถวเข้า/ออกเองจาก `items` ใน
+ * ฟอร์ม แล้วเดาว่าของวิ่งเท่ากับ `issued_qty` ซึ่งเป็น "สิ่งที่ควรจะเกิด" ไม่ใช่
+ * สิ่งที่ระบบบันทึกจริง แถมราคาต่อหน่วยเป็น 0 ตายตัวเพราะฟอร์มไม่มีราคา ตอนนี้
+ * `GET .../stock-movements` ส่งแถวที่แตกขาเข้า/ขาออกมาให้แล้วพร้อม lot กับต้นทุนจริง
+ *
+ * **ยิงตอนคลิกแท็บเท่านั้น** — Radix ถอด `TabsContent` ที่ไม่ได้เลือกออกจาก DOM
+ * คอมโพเนนต์นี้จึง mount ตอนกดแท็บ ไม่ใช่ตอนเปิดฟอร์ม (ดู `useSrStockMovements`)
  */
-export function SrStockTable({
-  items,
-  fromLocationName,
-  toLocationName,
-  srId,
-  srNo,
-  docStatus,
-}: SrStockTableProps) {
+export function SrStockTable({ srId, srNo }: SrStockTableProps) {
   "use no memo";
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
   const tfl = useTranslations("field");
   const [direction, setDirection] = useState<StockDirection>("");
 
-  const rows = useMemo<StockRow[]>(() => {
-    const dash = "—";
-    return items.flatMap((item, index) => {
-      const qty = Number(item.issued_qty ?? 0);
-      const unitPrice = srItemUnitPrice(item);
-      const shared = {
-        productName: item.product_name,
-        unitName: item.unit_name,
-        unitPrice,
-        totalAmount: qty * unitPrice,
-      };
-      return [
-        {
-          ...shared,
-          key: `${index}-out`,
-          locationName: fromLocationName || dash,
-          stockIn: null,
-          stockOut: qty,
-        },
-        {
-          ...shared,
-          key: `${index}-in`,
-          locationName: toLocationName || dash,
-          stockIn: qty,
-          stockOut: null,
-        },
-      ];
-    });
-  }, [items, fromLocationName, toLocationName]);
+  const { data, isLoading, isError, error, refetch } =
+    useSrStockMovements(srId);
 
-  // กรองฝั่ง client ล้วน — แถวพวกนี้คำนวณจาก items ในฟอร์มอยู่แล้ว ไม่มี API
-  // ให้ยิง · กรองที่ data ตรง ๆ ได้เพราะไม่มี cell ไหนผูก index ของฟอร์ม
+  const rows = useMemo(() => data?.items ?? [], [data]);
+
+  // กรองฝั่ง client — ทั้งใบมาในก้อนเดียวอยู่แล้ว ไม่มี query param ให้ส่งกลับไป
   const visibleRows = useMemo(() => {
     if (!direction) return rows;
     return rows.filter((row) =>
-      direction === "in" ? row.stockIn != null : row.stockOut != null,
+      direction === "in" ? row.qty_in > 0 : row.qty_out > 0,
     );
   }, [rows, direction]);
 
-  const columns = useMemo<ColumnDef<StockRow>[]>(() => {
-    /** ขีด = ขานี้ไม่ใช่ทางที่ของวิ่ง (ไม่ใช่ 0 ซึ่งแปลว่าวิ่งแต่เป็นศูนย์) */
-    const qtyCell = (value: number | null) => (
+  const columns = useMemo<ColumnDef<SrStockMovementItem>[]>(() => {
+    const qtyCell = (value: number) => (
       <FieldPlainText className="justify-end tabular-nums">
-        {value == null ? (
-          <span className="text-muted-foreground">—</span>
-        ) : (
-          value
-        )}
+        {value}
       </FieldPlainText>
     );
     const moneyCell = (value: number) => (
@@ -130,11 +80,11 @@ export function SrStockTable({
       cellClassName: "text-right",
     };
 
-    const cols: ColumnDef<StockRow>[] = [
+    const cols: ColumnDef<SrStockMovementItem>[] = [
       {
         id: "index",
         header: "#",
-        cell: ({ row }) => row.index + 1,
+        cell: ({ row }) => row.original.sequence_no,
         size: 40,
         meta: {
           headerClassName: "text-center",
@@ -142,62 +92,67 @@ export function SrStockTable({
         },
       },
       {
-        accessorKey: "locationName",
+        accessorKey: "location_name",
         header: tfl("location"),
         cell: ({ row }) => (
-          <FieldPlainText>{row.original.locationName}</FieldPlainText>
+          <FieldPlainText>{row.original.location_name}</FieldPlainText>
         ),
         size: 200,
       },
       {
-        accessorKey: "productName",
+        accessorKey: "product_name",
         header: tfl("product"),
         cell: ({ row }) => (
-          <FieldPlainText>{row.original.productName}</FieldPlainText>
+          <FieldPlainText>{row.original.product_name}</FieldPlainText>
         ),
         size: 220,
       },
       {
-        accessorKey: "unitName",
+        accessorKey: "inventory_unit_name",
         header: tfl("unit"),
         cell: ({ row }) => (
-          <FieldPlainText>{row.original.unitName}</FieldPlainText>
+          <FieldPlainText>{row.original.inventory_unit_name}</FieldPlainText>
         ),
         size: 100,
       },
       {
-        // ยังไม่มี lot มากับ store_requisition_detail — ตั้งคอลัมน์ไว้ก่อน
-        // วันไหน backend ส่งมาค่อยเปลี่ยนขีดเป็นค่าจริงที่เดียว
-        id: "lotNo",
+        accessorKey: "lot_no",
         header: tfl("lotNo"),
-        cell: () => <span className="text-muted-foreground">—</span>,
+        cell: ({ row }) => {
+          const lot = row.original.lot_no;
+          return lot && lot !== NO_LOT ? (
+            <FieldPlainText>{lot}</FieldPlainText>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          );
+        },
         size: 120,
       },
       {
-        accessorKey: "stockIn",
+        accessorKey: "qty_in",
         header: tfl("in"),
-        cell: ({ row }) => qtyCell(row.original.stockIn),
+        cell: ({ row }) => qtyCell(row.original.qty_in),
         size: 110,
         meta: rightAligned,
       },
       {
-        accessorKey: "stockOut",
+        accessorKey: "qty_out",
         header: tfl("out"),
-        cell: ({ row }) => qtyCell(row.original.stockOut),
+        cell: ({ row }) => qtyCell(row.original.qty_out),
         size: 110,
         meta: rightAligned,
       },
       {
-        accessorKey: "unitPrice",
+        accessorKey: "cost_per_unit",
         header: tfl("unitPrice"),
-        cell: ({ row }) => moneyCell(row.original.unitPrice),
+        cell: ({ row }) => moneyCell(row.original.cost_per_unit),
         size: 120,
         meta: rightAligned,
       },
       {
-        accessorKey: "totalAmount",
+        accessorKey: "total_cost",
         header: tfl("totalAmount"),
-        cell: ({ row }) => moneyCell(row.original.totalAmount),
+        cell: ({ row }) => moneyCell(row.original.total_cost),
         size: 130,
         meta: rightAligned,
       },
@@ -217,18 +172,27 @@ export function SrStockTable({
   const table = useReactTable({
     data: visibleRows,
     columns,
-    getRowId: (row) => row.key,
+    getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // ของยังไม่ขยับจริงจนกว่าใบจะจ่ายครบ — โชว์ตารางที่เป็นศูนย์ทั้งใบไว้ก่อน
-  // มีแต่ทำให้เข้าใจผิดว่าตัดสต๊อกไปแล้ว บอกตรง ๆ ว่าต้องรอดีกว่า
-  if (docStatus !== "completed") {
-    return <EmptyComponent icon={BoxIcon} title={t("stockNeedsCompleted")} />;
+  // ใบใหม่ที่ยังไม่บันทึกไม่มี id ให้ยิง — ยังไม่มีอะไรเคลื่อนไหวได้อยู่แล้ว
+  if (!srId) {
+    return <EmptyComponent icon={BoxIcon} title={t("stockNeedsSaved")} />;
+  }
+
+  if (isError) {
+    return <ErrorState error={error} onRetry={() => refetch()} />;
   }
 
   return (
     <div className="space-y-3">
+      {/* is_posted=false = ตัวเลขยังเป็นการคาดการณ์จากตัวใบ ยังไม่ได้ตัดสต๊อกจริง
+          ไม่บอกตรงนี้คนจะอ่านตารางว่าของขยับไปแล้ว ซึ่งเป็นคนละเรื่องกับความจริง */}
+      {data && !data.is_posted && (
+        <p className="text-muted-foreground text-xs">{t("stockNotPosted")}</p>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         <StatusFilter
           value={direction}
@@ -252,11 +216,10 @@ export function SrStockTable({
       <DataGrid
         table={table}
         recordCount={visibleRows.length}
+        isLoading={isLoading}
         emptyMessage={
           // มีแถวอยู่แต่กรองแล้วไม่เหลือ = หาไม่เจอ ไม่ใช่ใบเปล่า
           rows.length > 0 ? (
-            // ไม่มีช่องค้นหาแล้ว เหลือแค่ตัวกรองทิศทาง — ข้อความจึงเป็น
-            // "ไม่พบข้อมูล" ไม่ใช่ "ไม่พบผลลัพธ์การค้นหา"
             <EmptyComponent icon={BoxIcon} title={tc("noDataFound")} />
           ) : (
             <EmptyComponent

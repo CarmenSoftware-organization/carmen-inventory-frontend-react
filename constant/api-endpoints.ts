@@ -390,6 +390,8 @@ export const API_ENDPOINTS = {
     `/api/proxy/api/${buCode}/store-requisitions`,
   STORE_REQUISITION_PREVIOUS_STAGES: (buCode: string, srId: string) =>
     `/api/proxy/api/${buCode}/store-requisitions/${srId}/previous-stages`,
+  STORE_REQUISITION_STOCK_MOVEMENTS: (buCode: string, srId: string) =>
+    `/api/proxy/api/${buCode}/store-requisitions/${srId}/stock-movements`,
   STORE_REQUISITION_WORKFLOW_STAGES: (buCode: string) =>
     `/api/proxy/api/${buCode}/store-requisitions/workflow-stages`,
   STORE_REQUISITIONS: "/api/proxy/api/store-requisitions",

@@ -9,6 +9,7 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import type {
   StoreRequisition,
   CreateStoreRequisitionDto,
+  SrStockMovement,
 } from "@/types/store-requisition";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import type {
@@ -46,6 +47,44 @@ export function useSrPreviousStages(srId: string | undefined, enabled = true) {
       }));
     },
     enabled: !!buCode && !!srId && enabled,
+  });
+}
+
+/**
+ * การเคลื่อนไหวสต๊อกของใบเบิกใบเดียว (แท็บ Stock Movement)
+ *
+ * **ยิงตอนแท็บถูกเปิดเท่านั้น** — Radix ถอด `TabsContent` ที่ไม่ได้เลือกออกจาก DOM
+ * คอมโพเนนต์ที่เรียก hook นี้จึง mount ตอนคลิกแท็บ ไม่ใช่ตอนเปิดฟอร์ม คนที่เข้ามา
+ * แก้ใบแล้วไม่เคยกดแท็บนี้จึงไม่ต้องจ่ายค่า request เลย (อย่าเผลอใส่ `forceMount`
+ * ให้ TabsContent ตัวนั้น ไม่งั้น lazy ตรงนี้หายไปเงียบ ๆ)
+ *
+ * backend แตกขาเข้า/ขาออกมาให้แล้วใน `items` — ฝั่ง client ไม่ต้องคำนวณอะไรอีก
+ *
+ * ผู้เรียกที่ไม่ได้อยู่ในแท็บ (เช่น footer ที่ต้องโชว์ยอดสรุป) ต้องส่ง `enabled`
+ * ตามแท็บที่เปิดอยู่เอง ไม่งั้นความ lazy ข้างบนหายทันที — key เดียวกันทั้งสองที่
+ * react-query จึงยิงครั้งเดียวแล้วแชร์ผลกัน
+ *
+ * @param srId - รหัสใบเบิก (ใบใหม่ที่ยังไม่บันทึกไม่มี id → ไม่ยิง)
+ * @param options.enabled - default `true` (คอมโพเนนต์ในแท็บ mount = ถึงเวลายิงแล้ว)
+ */
+export function useSrStockMovements(
+  srId: string | undefined,
+  options?: { enabled?: boolean },
+) {
+  const buCode = useBuCode();
+
+  return useQuery<SrStockMovement>({
+    queryKey: [QUERY_KEYS.STORE_REQUISITION_STOCK_MOVEMENTS, buCode, srId],
+    queryFn: async () => {
+      const res = await httpClient.get(
+        API_ENDPOINTS.STORE_REQUISITION_STOCK_MOVEMENTS(buCode!, srId!),
+      );
+      if (!res.ok) throw new Error("Failed to fetch stock movements");
+      const json = await res.json();
+      return json.data as SrStockMovement;
+    },
+    enabled: !!buCode && !!srId && (options?.enabled ?? true),
+    ...CACHE_DYNAMIC,
   });
 }
 
