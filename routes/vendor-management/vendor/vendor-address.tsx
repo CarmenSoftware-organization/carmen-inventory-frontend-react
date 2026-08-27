@@ -15,7 +15,15 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ADDRESS_TYPE_OPTIONS } from "@/constant/vendor";
-import { MapPin, Plus, X } from "lucide-react";
+import {
+  Contact,
+  Landmark,
+  Mail,
+  MapPin,
+  Plus,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { EMPTY_VENDOR_ADDRESS } from "./vendor-form-schema";
 import { LookupThaiProvince } from "@/components/lookup/lookup-thai-province";
 import { LookupThaiDistrict } from "@/components/lookup/lookup-thai-district";
@@ -56,6 +64,7 @@ export function VendorAddress({
 
   return (
     <SettingSection
+      frameless
       title={t("addressesLabel")}
       description={t("addressesDesc")}
       count={addressFields.length}
@@ -104,6 +113,12 @@ interface AddressRowProps {
   isDisabled: boolean;
   onRemove: () => void;
 }
+
+const ADDRESS_TYPE_ICON: Record<string, LucideIcon> = {
+  contact_address: Contact,
+  mailing_address: Mail,
+  register_address: Landmark,
+};
 
 const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
   "use no memo";
@@ -248,18 +263,29 @@ const AddressRow = ({ form, index, isDisabled, onRemove }: AddressRowProps) => {
               >
                 <SelectTrigger
                   className={cn(
-                    "h-7 w-40 rounded-md text-xs",
+                    "h-7 w-56 text-xs",
                     hasError && "border-destructive",
                   )}
                 >
                   <SelectValue placeholder={t("address.typePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {ADDRESS_TYPE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {addressTypeLabels[opt.value] ?? opt.label}
-                    </SelectItem>
-                  ))}
+                  {ADDRESS_TYPE_OPTIONS.map((opt) => {
+                    const Icon = ADDRESS_TYPE_ICON[opt.value];
+                    return (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        <span className="flex items-center gap-2">
+                          {Icon && (
+                            <Icon
+                              className="text-muted-foreground size-3.5 shrink-0"
+                              aria-hidden="true"
+                            />
+                          )}
+                          {addressTypeLabels[opt.value] ?? opt.label}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             )}

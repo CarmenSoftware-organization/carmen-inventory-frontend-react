@@ -42,6 +42,7 @@ export function VendorInfo({
 
   return (
     <SettingSection
+      frameless
       title={t("info.title")}
       description={t("infoDesc")}
       count={infoFields.length}

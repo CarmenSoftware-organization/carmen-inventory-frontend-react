@@ -56,6 +56,7 @@ export function VendorContact({
 
   return (
     <SettingSection
+      frameless
       title={t("contactsLabel")}
       description={t("contactsDesc")}
       count={contactFields.length}
