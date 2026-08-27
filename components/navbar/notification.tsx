@@ -150,7 +150,11 @@ export default function Notification() {
           <Bell className="h-3.5 w-3.5 transition-transform group-hover:-rotate-12" />
           {notificationCount > 0 && (
             <>
-              <span className="bg-destructive text-destructive-foreground ring-background text-micro-eyebrow absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-semibold ring-2">
+              {/* text-white ตรง ๆ ไม่ใช่ text-destructive-foreground — token นั้นคือสี
+                  "ตัวหนังสือบนพื้นปกติเมื่อสื่อความหมาย destructive" พอเอามาวางบน
+                  พื้น bg-destructive ทึบ ใน dark mode มันกลายเป็นอ่อนบนอ่อน
+                  ตัวเลขจึงจมหายไปกับพื้นแดง */}
+              <span className="bg-destructive ring-background text-micro-eyebrow absolute -inset-e-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-semibold text-white ring-2">
                 {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             </>
