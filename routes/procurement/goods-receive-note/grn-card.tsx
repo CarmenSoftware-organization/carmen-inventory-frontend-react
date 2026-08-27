@@ -3,6 +3,7 @@ import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -42,15 +43,13 @@ export default function GrnCard({ item, onEdit, onDelete }: GrnCardProps) {
   return (
     <ListCard
       title={item.grn_no}
-      badge={
-        <StatusIconLabel
-          status={status}
-          label={statusConfig?.label ?? status}
-        />
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow
+        status={status}
+        label={statusConfig?.label ?? status}
+      />
       <ListCardRow label={tfl("grnDate")}>
         <span className="tabular-nums">
           {item.grn_date ? formatDate(item.grn_date, dateFormat) : "—"}

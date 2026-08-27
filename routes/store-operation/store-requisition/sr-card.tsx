@@ -1,9 +1,10 @@
 import { useTranslations } from "use-intl";
-import { SendBackBadge } from "@/components/share/sendback-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
+  ListCardSendBackRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -36,19 +37,11 @@ export default function SrCard({ item, onEdit, onDelete }: SrCardProps) {
   return (
     <ListCard
       title={item.sr_no}
-      badge={
-        <div className="flex shrink-0 items-center gap-1">
-          <SendBackBadge lastAction={item.last_action} />
-          <StatusIconLabel
-            status={item.doc_status}
-            label={ts(item.doc_status)}
-            className="uppercase"
-          />
-        </div>
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow status={item.doc_status} label={ts(item.doc_status)} />
+      <ListCardSendBackRow lastAction={item.last_action} />
       <ListCardRow label={tfl("date")}>
         <span className="tabular-nums">
           {formatDate(item.sr_date, dateFormat)}

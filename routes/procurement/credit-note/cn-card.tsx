@@ -3,6 +3,7 @@ import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -40,15 +41,13 @@ export default function CnCard({ item, onEdit, onDelete }: CnCardProps) {
   return (
     <ListCard
       title={item.cn_no}
-      badge={
-        <StatusIconLabel
-          status={item.doc_status}
-          label={statusConfig?.label ?? item.doc_status}
-        />
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow
+        status={item.doc_status}
+        label={statusConfig?.label ?? item.doc_status}
+      />
       <ListCardRow label={tfl("docDate")}>
         <span className="tabular-nums">
           {formatDate(item.cn_date, dateFormat)}

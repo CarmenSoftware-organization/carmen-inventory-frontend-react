@@ -3,12 +3,12 @@ import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date-utils";
 import { formatAmount } from "@/lib/currency-utils";
-import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   IA_STATUS_CONFIG,
   IA_TYPE_CONFIG,
@@ -56,12 +56,10 @@ export default function IaCard({ item, onEdit, onDelete }: IaCardProps) {
   return (
     <ListCard
       title={docNo}
-      badge={
-        <StatusIconLabel status={item.doc_status} label={statusConfig.label} />
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow status={item.doc_status} label={statusConfig.label} />
       {docDate && (
         <ListCardRow label={tfl("date")}>
           <span className="tabular-nums">

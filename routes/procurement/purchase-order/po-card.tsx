@@ -1,9 +1,10 @@
 import { useTranslations } from "use-intl";
-import { SendBackBadge } from "@/components/share/sendback-badge";
 import {
   ListCard,
   ListCardAuditRows,
   ListCardRow,
+  ListCardStatusRow,
+  ListCardSendBackRow,
 } from "@/components/share/list-card";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
@@ -45,20 +46,11 @@ export default function PoCard({ item, onEdit, onDelete }: PoCardProps) {
   return (
     <ListCard
       title={item.po_no}
-      badge={
-        <div className="flex shrink-0 items-center gap-1">
-          <SendBackBadge lastAction={item.last_action} />
-          {statusConfig && item.po_status ? (
-            <StatusIconLabel
-              status={item.po_status}
-              label={statusConfig.label}
-            />
-          ) : null}
-        </div>
-      }
       onOpen={() => onEdit(item)}
       onDelete={() => onDelete(item)}
     >
+      <ListCardStatusRow status={item.po_status} label={statusConfig?.label} />
+      <ListCardSendBackRow lastAction={item.last_action} />
       <ListCardRow label={tfl("orderDate")}>
         <span className="tabular-nums">
           {formatDate(item.order_date, dateFormat)}
