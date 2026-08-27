@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 /* Re-export shared admin primitives so existing imports from this file
    keep working without churn. */
-export { SectionCard, EmptyState, FilterChip } from "../shared/admin-ui";
+export { SectionCard, EmptyState } from "../shared/admin-ui";
 
 /* ------------------------------------------------------------------ */
 /* AssignSection — 2-column "settings" row (mirrors company-profile)  */
