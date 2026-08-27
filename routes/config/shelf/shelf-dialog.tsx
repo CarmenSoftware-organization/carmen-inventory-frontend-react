@@ -11,6 +11,7 @@ import {
   type ShelfFormValues,
 } from "./shelf-form-schema";
 import type { Shelf, CreateShelfDto } from "@/types/shelf";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ShelfDialogProps {
   readonly open: boolean;
@@ -87,10 +88,9 @@ export function ShelfDialog({
             <FieldLabel htmlFor="shelf-description">
               {tfl("description")}
             </FieldLabel>
-            <FieldInput
+            <Textarea
               id="shelf-description"
               placeholder={tfl("optional")}
-              className="h-8"
               disabled={disabled}
               maxLength={256}
               {...form.register("description")}
