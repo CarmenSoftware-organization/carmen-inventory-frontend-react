@@ -15,8 +15,9 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SearchInput from "@/components/search-input";
-import { StatusDotBadge, type DotTone } from "@/components/ui/status-dot-badge";
-import { inventoryTypeLabelKey } from "@/constant/location";
+import { StatusDotBadge } from "@/components/ui/status-dot-badge";
+import { INVENTORY_TYPE } from "@/constant/location";
+import { LocationTypeLabel } from "@/components/ui/location-type-label";
 import {
   DataGrid,
   DataGridContainer,
@@ -46,13 +47,6 @@ interface LocationRow {
 
 const EMPTY_LOCATIONS: ProductFormValues["locations"] = [];
 
-// tone ของ dot ตาม location type — เก็บสีต่อ type ไว้ที่ dot (chip กลาง)
-const TYPE_TONE: Record<string, DotTone> = {
-  inventory: "info",
-  direct: "warning",
-  consignment: "neutral",
-};
-
 interface PdTabLocationsProps {
   readonly form: ProductFormInstance;
   readonly isDisabled: boolean;
@@ -68,7 +62,6 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
   const t = useTranslations("productManagement.product");
   const tfl = useTranslations("field");
   const ts = useTranslations("status");
-  const tl = useTranslations("config.location");
 
   const { fields, prepend, remove } = useFieldArray({
     control: form.control,
@@ -241,15 +234,12 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
       {
         id: "type",
         header: tfl("type"),
+        // ทรงเดียวกับคอลัมน์ประเภทในหน้ารายการคลัง — ไอคอน + ป้าย ไม่มีสี
+        // ประเภทคลังเป็นคุณสมบัติ ไม่ใช่ความคืบหน้า สีสงวนไว้ให้สถานะ
         cell: ({ row }) => {
           const type = row.original.location_type;
           if (!type) return "";
-          const k = inventoryTypeLabelKey(type);
-          return (
-            <StatusDotBadge tone={TYPE_TONE[type] ?? "neutral"} size="xs">
-              {k ? tl(k) : type.toUpperCase()}
-            </StatusDotBadge>
-          );
+          return <LocationTypeLabel type={type as INVENTORY_TYPE} />;
         },
         enableSorting: false,
         size: 130,
@@ -369,7 +359,7 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
           );
         },
         enableSorting: false,
-        size: 80,
+        size: 100,
         meta: {
           headerClassName: "text-center",
           cellClassName: "text-center",
@@ -402,7 +392,7 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
     return [indexCol, ...dataCols, ...(isDisabled ? [] : [actionCol])];
     // errors ต้องอยู่ใน deps — cell ปิดทับค่านี้ไว้ ถ้าไม่ใส่ columns จะไม่สร้างใหม่
     // ตอน validation fail แล้ว error ที่ส่งเข้า cell ค้างเป็นค่าเก่า
-  }, [t, tfl, ts, tl, isDisabled, form, assignedIds, errors]);
+  }, [t, tfl, ts, isDisabled, form, assignedIds, errors]);
 
   const table = useReactTable({
     data: tableData,
@@ -417,6 +407,7 @@ function PdTabLocations({ form, isDisabled }: PdTabLocationsProps) {
     <SettingSection
       first
       wide
+      frameless
       title={t("sectionLocations")}
       count={fields.length}
       action={

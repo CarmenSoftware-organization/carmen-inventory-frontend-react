@@ -195,6 +195,7 @@ export function PdTabEco({ productId, readOnly }: PdTabEcoProps) {
     <SettingSection
       first
       wide
+      frameless
       title={t("ecoLabelsTitle")}
       count={items.length}
       action={

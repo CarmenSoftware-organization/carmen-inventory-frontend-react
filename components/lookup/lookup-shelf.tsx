@@ -43,7 +43,7 @@ export function LookupShelf({
   const selected = (data?.data ?? []).find((s) => s.id === value);
 
   if (readOnly) {
-    return <span className="px-2 text-xs">{selected?.name}</span>;
+    return <span className="text-xs">{selected?.name}</span>;
   }
 
   return (

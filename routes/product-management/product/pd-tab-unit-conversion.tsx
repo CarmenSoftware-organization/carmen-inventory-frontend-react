@@ -377,6 +377,7 @@ function PdTabUnitConversion({
     <SettingSection
       first
       wide
+      frameless
       title={label}
       count={fields.length}
       action={

@@ -373,7 +373,7 @@ export function ProductForm({ product }: ProductFormProps) {
     // auto ซึ่งยกเลิก align-self: stretch ของ flex item — กล่องจะถูกวัดตามเนื้อหา
     // แทน แท็บที่เนื้อหาน้อย (eco label ที่ยังไม่มีข้อมูล) เลยหดแล้วเลื่อนตำแหน่ง
     // ทั้งบล็อกรวมหัวเรื่องกับแถบแท็บ
-    <div className="mx-auto w-full max-w-4xl space-y-4 px-4">
+    <div className="mx-auto w-full space-y-4 px-4">
       <FormToolbar
         product={product}
         form={form}
