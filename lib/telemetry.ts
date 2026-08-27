@@ -22,18 +22,37 @@ import { BatchLogRecordProcessor, LoggerProvider } from "@opentelemetry/sdk-logs
 import {
   BatchSpanProcessor,
   ParentBasedSampler,
+  type SpanProcessor,
   TraceIdRatioBasedSampler,
   WebTracerProvider,
 } from "@opentelemetry/sdk-trace-web";
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
+  ATTR_URL_FULL,
 } from "@opentelemetry/semantic-conventions";
 
 import { getRuntimeConfig } from "@/lib/runtime-config";
 import { tokenStore } from "@/lib/auth/token-store";
 
 const LOGGER_NAME = "carmen.spa";
+
+/**
+ * ลบ capability token ออกจาก URL ก่อนส่งขึ้น observability store
+ *
+ * ลิงก์ price-list ที่ส่งให้ vendor คือ **token ใน path** (`/pl/<token>` และ
+ * `/api/.../check-pricelist/<token>`) ตัว token คือสิทธิ์เข้าถึงทั้งหมดที่ลิงก์นั้นมี
+ * ปล่อยไว้เฉย ๆ = ทุกครั้งที่ vendor เปิดลิงก์ token จะไปนอนอยู่ใน SigNoz ให้ใครก็ตาม
+ * ที่เข้าถึง trace ได้หยิบไปเปิดต่อ ทั้งที่ไม่มีใครต้องใช้ค่านั้นในการ debug
+ *
+ * เหลือรูปทรงของ path ไว้ครบ — ยังดูออกว่าใครยิง endpoint ไหนพัง
+ */
+export function redactCapabilityTokens(url: string): string {
+  return url.replaceAll(
+    /(\/(?:pl|pricelist-external|check-pricelist)\/)[^/?#]+/g,
+    "$1<token>",
+  );
+}
 
 /**
  * สัดส่วน trace ที่เก็บ — เบราว์เซอร์สร้าง span ได้เร็วกว่า backend มาก
@@ -66,7 +85,7 @@ export function initTelemetry({ serviceName, version }: InitOptions): void {
   if (started) return;
   started = true;
 
-  const { BACKEND_URL } = getRuntimeConfig();
+  const { BACKEND_URL, OTEL_ENVIRONMENT } = getRuntimeConfig();
   const base = `${BACKEND_URL}/telemetry/v1`;
 
   const resource = resourceFromAttributes({
@@ -75,7 +94,10 @@ export function initTelemetry({ serviceName, version }: InitOptions): void {
     "service.namespace": "carmen",
     // คีย์ชื่อเดิม ไม่ใช่ deployment.environment.name ของ semconv ล่าสุด —
     // SigNoz index ตัวนี้ (ยืนยันจาก facet "Deployment Environment")
-    "deployment.environment": "dev",
+    //
+    // เดิม hardcode "dev" ทุก environment ซึ่งแปลว่า error ของ prod กับของ dev
+    // กองรวมกันใน facet เดียว แล้วคนดูแยกไม่ออกว่าอันไหนกระทบลูกค้าจริง
+    "deployment.environment": OTEL_ENVIRONMENT ?? "dev",
     "browser.user_agent": navigator.userAgent,
   });
 
@@ -93,12 +115,31 @@ export function initTelemetry({ serviceName, version }: InitOptions): void {
   logs.setGlobalLoggerProvider(loggerProvider);
 
   // ── traces ──────────────────────────────────────────────────────────────
+  //
+  // processor ตัวแรกลบ token ออกจาก `url.full` ตั้งแต่ span เพิ่งเกิด — ทำที่ชั้นนี้
+  // ไม่ใช่ `applyCustomAttributesOnSpan` ของ FetchInstrumentation เพราะ hook ตัวนั้น
+  // ได้ URL มาเฉพาะตอนที่ caller ส่ง `Request` object หรือ request สำเร็จจนมี
+  // `Response` — request ที่ **พัง** (ซึ่งคือ span ที่คนเปิดดูจริง) จะหลุดไปดิบ ๆ
+  // ส่วน onStart ของ processor เห็นทุก span ทุกกรณีและ attribute ยังแก้ได้อยู่
+  const redactUrlProcessor: SpanProcessor = {
+    onStart(span) {
+      const url = span.attributes[ATTR_URL_FULL];
+      if (typeof url !== "string") return;
+      const safe = redactCapabilityTokens(url);
+      if (safe !== url) span.setAttribute(ATTR_URL_FULL, safe);
+    },
+    onEnd() {},
+    forceFlush: () => Promise.resolve(),
+    shutdown: () => Promise.resolve(),
+  };
+
   const tracerProvider = new WebTracerProvider({
     resource,
     sampler: new ParentBasedSampler({
       root: new TraceIdRatioBasedSampler(TRACE_SAMPLE_RATIO),
     }),
     spanProcessors: [
+      redactUrlProcessor,
       new BatchSpanProcessor(
         new OTLPTraceExporter({ url: `${base}/traces`, headers: telemetryHeaders }),
       ),
@@ -154,7 +195,7 @@ export function reportError(
       body: message,
       attributes: {
         "carmen.source": detail?.source ?? "unknown",
-        "carmen.url": window.location.pathname,
+        "carmen.url": redactCapabilityTokens(window.location.pathname),
         ...(detail?.stack ? { "exception.stacktrace": detail.stack } : {}),
         ...(detail?.extra
           ? Object.fromEntries(
@@ -211,7 +252,7 @@ export async function reportPreLoginError(
                     body: { stringValue: message },
                     attributes: [
                       { key: "carmen.source", value: { stringValue: "pre-login" } },
-                      { key: "carmen.url", value: { stringValue: window.location.pathname } },
+                      { key: "carmen.url", value: { stringValue: redactCapabilityTokens(window.location.pathname) } },
                       ...(stack
                         ? [{ key: "exception.stacktrace", value: { stringValue: stack } }]
                         : []),

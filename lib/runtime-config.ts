@@ -42,6 +42,15 @@ export interface RuntimeConfig {
    * **ด้วยมือ** เหมือน `LICENSE_ENFORCEMENT` ไม่งั้น deploy แล้วเงียบสนิทโดยไม่มี error
    */
   OTEL_ENABLED?: boolean;
+  /**
+   * ชื่อ environment ที่ติดไปกับทุก trace/error (facet "Deployment Environment"
+   * ของ SigNoz) — ไม่ตั้ง = `"dev"`
+   *
+   * ค่านี้เคย hardcode เป็น `"dev"` ในโค้ด ทุก environment จึงรายงานตัวเองว่าเป็น dev
+   * แล้ว error ของ prod กับของเครื่อง dev กองรวมกันใน facet เดียวโดยแยกไม่ออกว่า
+   * อันไหนกระทบลูกค้าจริง — ตั้งให้ตรงกับ environment เสมอเมื่อเปิด `OTEL_ENABLED`
+   */
+  OTEL_ENVIRONMENT?: string;
 }
 
 let config: RuntimeConfig | null = null;
@@ -67,6 +76,9 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
       : {}),
     ...(typeof json.OTEL_ENABLED === "boolean"
       ? { OTEL_ENABLED: json.OTEL_ENABLED }
+      : {}),
+    ...(typeof json.OTEL_ENVIRONMENT === "string" && json.OTEL_ENVIRONMENT
+      ? { OTEL_ENVIRONMENT: json.OTEL_ENVIRONMENT }
       : {}),
   };
   return config;

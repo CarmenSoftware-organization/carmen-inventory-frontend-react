@@ -80,6 +80,14 @@ list-envelope gotcha live in `routes/system-admin/interface/CLAUDE.md` (loads wh
 in that folder). One cross-cutting deploy note: **Prod/UAT must set `SECRET_ENCRYPTION_KEY`**
 or any secret-bearing app-config save (incl. the pre-existing `report_email`) 400s.
 
+## Security headers / CSP
+
+ทุกปลายทาง deploy ส่ง CSP + header ชุดเดียวกัน (nginx · vercel.json · GCS backend
+bucket · CloudFront policy) กับดักเดียวที่ต้องจำ: **`script-src` ผูกกับ sha256 ของ
+inline script ใน `index.html`** แก้สคริปต์นั้นแล้วไม่อัปเดต hash = สคริปต์ถูกบล็อกเงียบ ๆ
+เฉพาะใน production (dev server ไม่มี CSP) — `lib/__tests__/security-headers.test.ts`
+คำนวณให้แล้วเทียบทั้ง 4 ไฟล์ รายละเอียดที่เหลืออยู่ใน `docs/deploy.md` §Security headers
+
 ## React Compiler กับตาราง (`DataGrid`)
 
 กับดักตารางค้างตอนเปลี่ยนหน้า + วิธีแก้ด้วย `"use no memo";` อยู่ใน `routes/CLAUDE.md`

@@ -9,16 +9,27 @@ server {
     gzip on;
     gzip_types text/plain text/css application/json application/javascript image/svg+xml;
     gzip_min_length 1024;
+    # ไม่มีตัวนี้ intermediary cache อาจจ่ายก้อน gzip ให้ client ที่ไม่ได้ขอ
+    gzip_vary on;
+
+    # Security headers — ไฟล์ถูก generate ตอน container start (30-render-security-headers.sh)
+    #
+    # **ต้อง include ซ้ำในทุก location ที่มี add_header ของตัวเอง** — nginx สืบทอด
+    # add_header จากระดับบนก็ต่อเมื่อ location นั้นไม่ประกาศ add_header เลย พอ
+    # location ใส่ Cache-Control ของตัวเอง header ชุดนี้จะหายไปทั้งชุดเงียบ ๆ
+    include /etc/nginx/security-headers.conf;
 
     # Hashed assets — immutable (ชื่อไฟล์มี hash เปลี่ยนทุก build)
     location /assets/ {
         add_header Cache-Control "public, max-age=31536000, immutable";
+        include /etc/nginx/security-headers.conf;
         try_files $uri =404;
     }
 
     # Runtime config + index.html — no-cache เพื่อให้ deploy ใหม่มีผลทันที
     location = /config.json {
         add_header Cache-Control "no-cache";
+        include /etc/nginx/security-headers.conf;
         try_files $uri =404;
     }
 
@@ -48,6 +59,7 @@ server {
     # SPA fallback — ทุก path ที่ไม่ใช่ไฟล์จริง ให้ index.html (client-side routing)
     location / {
         add_header Cache-Control "no-cache";
+        include /etc/nginx/security-headers.conf;
         try_files $uri /index.html;
     }
 }

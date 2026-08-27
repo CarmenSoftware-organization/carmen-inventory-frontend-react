@@ -55,6 +55,24 @@ if [ "${MODE}" = "setup" ]; then
   [ -f "${CONFIG_FILE}" ] || { log "config file not found: ${CONFIG_FILE}"; exit 1; }
   BACKEND_URL_VAL="$(bun -e 'const c=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.stdout.write(String(c.BACKEND_URL??""))' "${CONFIG_FILE}")"
   [ -n "${BACKEND_URL_VAL}" ] || { log "BACKEND_URL missing/empty in ${CONFIG_FILE}"; exit 1; }
+  WS_URL_VAL="$(bun -e 'const c=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));process.stdout.write(String(c.WS_URL??""))' "${CONFIG_FILE}")"
+
+  # ---- security headers ของ CDN ----
+  # hash คือ inline script ใน index.html (font-scale ก่อน paint แรก) —
+  # lib/__tests__/security-headers.test.ts ฟ้องเมื่อสคริปต์นั้นเปลี่ยนแล้วลืมแก้ที่นี่
+  SCRIPT_HASH="sha256-0k0itUkfTj7bMCkHluURmLkIOOj6e8nXNyXCiHJ+vS8="
+  CONNECT_SRC="'self' ${BACKEND_URL_VAL}"
+  [ -z "${WS_URL_VAL}" ] || CONNECT_SRC="${CONNECT_SRC} ${WS_URL_VAL}"
+  CSP="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' '${SCRIPT_HASH}'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src ${CONNECT_SRC}; worker-src 'self' blob:; frame-src 'self' blob:"
+  SEC_HEADERS=(
+    --custom-response-header="Content-Security-Policy: ${CSP}"
+    --custom-response-header="X-Content-Type-Options: nosniff"
+    --custom-response-header="X-Frame-Options: DENY"
+    --custom-response-header="Referrer-Policy: strict-origin-when-cross-origin"
+    --custom-response-header="Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    # includeSubDomains ไม่ใส่โดยตั้งใจ — โดเมนลูกที่ยังเป็น http จะเข้าไม่ได้ทันที
+    --custom-response-header="Strict-Transport-Security: max-age=31536000"
+  )
 fi
 
 # ---- teardown: ลบย้อนลำดับ ไม่แตะ GCS bucket ----
@@ -138,11 +156,15 @@ fi
 
 # ---- 5. backend bucket + Cloud CDN ----
 # USE_ORIGIN_HEADERS: CDN เคารพ cache-control ที่ deploy-gcs.sh ตั้ง (index.html no-cache ต้องรอด)
+# security headers ตั้งที่ backend bucket — CDN ใส่ให้ทุก response (update ทุกครั้งที่
+# รันซ้ำ เพื่อให้ distribution เก่าที่สร้างก่อนมี header ชุดนี้ได้ของใหม่ด้วย)
 if gcloud compute backend-buckets describe "${BACKEND_NAME}" >/dev/null 2>&1; then
-  log "backend bucket ${BACKEND_NAME} exists, skip"
+  gcloud compute backend-buckets update "${BACKEND_NAME}" "${SEC_HEADERS[@]}"
+  log "backend bucket ${BACKEND_NAME} exists — security headers refreshed"
 else
   gcloud compute backend-buckets create "${BACKEND_NAME}" \
-    --gcs-bucket-name="${BUCKET}" --enable-cdn --cache-mode=USE_ORIGIN_HEADERS
+    --gcs-bucket-name="${BUCKET}" --enable-cdn --cache-mode=USE_ORIGIN_HEADERS \
+    "${SEC_HEADERS[@]}"
 fi
 
 # ---- 6. URL map ----

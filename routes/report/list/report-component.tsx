@@ -23,6 +23,7 @@ import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import type { Report, ReportTemplate } from "@/types/report";
 import { useReportTemplates, useRunReportMutation } from "@/hooks/use-report";
 import { useReportTable } from "./use-report-table";
+import { safeNavigationHref } from "@/lib/utils";
 import { ReportParamDialog } from "./report-param-dialog";
 import ReportCard from "./report-card";
 import { ReportGroupFilter } from "./report-group-filter";
@@ -139,10 +140,15 @@ export default function ReportComponent() {
     const toastId = toast.loading(t("generating", { name: report.ReportName }));
 
     try {
-      const { url } = await runReport.mutateAsync({
+      const { url: rawUrl } = await runReport.mutateAsync({
         template_id: report._templateId ?? "",
         filters,
       });
+      // URL ที่ backend คืนมาไปจบที่ `location.href` ตรง ๆ — `javascript:` ที่หลุดมา
+      // ทางไหนก็ตามคือ XSS ทันที ค่าที่ไม่ผ่านตกลง catch ด้านล่างเหมือน error อื่น
+      const url = safeNavigationHref(rawUrl);
+      if (!url)
+        throw new Error(`Report viewer returned an unsafe URL: ${rawUrl}`);
       if (viewerWindow && !viewerWindow.closed) {
         viewerWindow.location.href = url;
       } else {

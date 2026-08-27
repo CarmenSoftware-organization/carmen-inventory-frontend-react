@@ -5,12 +5,20 @@
  * template ใช้ lib/print-document.ts ตามเดิม
  */
 
-/** escape ข้อความก่อนฝังลง HTML (ชื่อ role/user มาจากผู้ใช้) */
+/**
+ * escape ข้อความก่อนฝังลง HTML (ชื่อ role/user มาจากผู้ใช้)
+ *
+ * escape เครื่องหมายคำพูดด้วย ทั้งที่ทุก call site วันนี้ฝังใน text node ล้วน ๆ —
+ * วันที่มีคนเอาไปใช้ใน attribute (`title="${esc(name)}"`) มันจะหลุดทันทีโดยที่ชื่อ
+ * ฟังก์ชันยังอ่านว่าปลอดภัยอยู่ ซึ่งเป็นกับดักที่ไม่มีอะไรจับได้
+ */
 export const escapeHtml = (s: string) =>
   s
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 
 export interface PrintHtmlDocumentParts {
   /** ชื่อเอกสาร (title ของหน้า print) */

@@ -6,7 +6,7 @@ import {
   REPORT_FORMAT_LABELS,
   normalizeJobStatus,
 } from "@/constant/report-history";
-import { cn } from "@/lib/utils";
+import { cn, safeNavigationHref } from "@/lib/utils";
 import type {
   ReportFormatRaw,
   ReportHistory,
@@ -45,11 +45,14 @@ export default function HistoryCard({ item }: HistoryCardProps) {
   const formatLabel =
     REPORT_FORMAT_LABELS[item.format as ReportFormatRaw] ?? item.format;
   const name = item.file_name ?? item.report_type;
-  const hasUrl = !!item.file_url;
+  // presigned URL จาก backend — กรอง `javascript:`/`data:` ทิ้งก่อนเสมอ การ์ดที่ URL
+  // ไม่ผ่านจะกดไม่ได้เหมือนตอนที่ยังไม่มีไฟล์ (ไม่ใช่กดแล้วเงียบ)
+  const fileHref = safeNavigationHref(item.file_url);
+  const hasUrl = !!fileHref;
 
   const open = () => {
-    if (item.file_url) {
-      globalThis.window.open(item.file_url, "_blank", "noopener,noreferrer");
+    if (fileHref) {
+      globalThis.window.open(fileHref, "_blank", "noopener,noreferrer");
     }
   };
 
