@@ -522,7 +522,8 @@
     "duplicate": "Duplicate",
     "createDocument": "Create document",
     "createEntity": "Create {entity}",
-    "previous": "Previous"
+    "previous": "Previous",
+    "formatJson": "Format"
   },
   "pagination": {
     "label": "Pagination",
@@ -1855,7 +1856,20 @@
       "config": "value",
       "init": "Init Running Code",
       "initializing": "Initializing...",
-      "initSuccess": "Running code initialized successfully"
+      "initSuccess": "Running code initialized successfully",
+      "previewLabel": "Document numbers will look like this",
+      "addPart": "Add part",
+      "partText": "Fixed text",
+      "partDate": "Date",
+      "partRunning": "Sequence",
+      "partToken": "From data",
+      "partTextPlaceholder": "e.g. GRN",
+      "partTokenPlaceholder": "e.g. PRODUCT-SUB-CAT",
+      "partRunningDigits": "digits",
+      "partMoveUp": "Move up",
+      "partMoveDown": "Move down",
+      "advancedConfig": "Advanced (JSON)",
+      "configUnreadable": "This format is not supported by the editor — edit it as JSON below."
     },
     "period": {
       "entity": "Period",
