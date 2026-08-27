@@ -373,6 +373,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         <Reveal delay={160}>
           <SettingSection
             wide
+            frameless
             title={t("members")}
             description={t("membersDesc")}
             count={
@@ -402,6 +403,7 @@ export function DepartmentForm({ department }: DepartmentFormProps) {
         <Reveal delay={220}>
           <SettingSection
             wide
+            frameless
             title={t("hod")}
             description={t("hodDesc")}
             count={
