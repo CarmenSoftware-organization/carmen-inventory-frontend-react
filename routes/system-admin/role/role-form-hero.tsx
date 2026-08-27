@@ -95,17 +95,17 @@ export function RoleHero({
     </>
   );
 
-  // card wrapper คง identity ของ hero (rounded border bg); DocFormHeader flush
-  // เพราะ card p-4 จัด padding ให้แล้ว
+  // ไม่ห่อการ์ด — ท่าเดียวกับ header ของ workflow ปุ่ม back ของ DocFormHeader เป็น
+  // absolute ที่ hang ออกซ้ายจากแถว title พอมีการ์ดล้อม (padding 16px) ปุ่มจะคร่อม
+  // เส้นขอบ (โผล่นอก 20px เหลือในการ์ด 12px) ปล่อยให้ header วางตรง ๆ ในหน้า ปุ่มจึง
+  // ไป hang ใน gutter `px-4` ของหน้าแทน — ต้องมี gutter นั้นคู่กันเสมอ (ดู role-form)
   return (
-    <section className="border-border/60 bg-card rounded-2xl border p-4">
-      <DocFormHeader
-        title={displayName}
-        backLabel={tc("goBack")}
-        onBack={onBack}
-        actions={actions}
-        flush
-      />
-    </section>
+    <DocFormHeader
+      title={displayName}
+      backLabel={tc("goBack")}
+      onBack={onBack}
+      actions={actions}
+      flush
+    />
   );
 }

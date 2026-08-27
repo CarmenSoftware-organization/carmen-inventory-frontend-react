@@ -146,7 +146,7 @@ export function RoleForm({ role }: RoleFormProps) {
   return (
     // ความกว้างเท่า location form (mx-auto max-w-4xl) — layout แถว label+checkbox
     // ของ permission picker wrap ตัวเองได้ ไม่ต้องการเต็มจอแบบ matrix เดิม
-    <div className="mx-auto w-full max-w-4xl space-y-4">
+    <div className="mx-auto w-full max-w-4xl space-y-4 px-4">
       <AnimationStyles />
 
       {/* ── Hero ──────────────────────────────────── */}
