@@ -141,10 +141,6 @@ export function PrItemFields({
     }, 0);
   };
 
-  // กด Save/Submit แล้วติดที่ "ต้องมีอย่างน้อย 1 รายการ" — ขึ้น toast อย่างเดียว
-  // ผู้ใช้ยังไม่เห็นอยู่ดีว่าต้องกรอกอะไรบ้าง เพราะยังไม่มีแถวให้ดู เติมแถวเปล่า
-  // ให้เลยแล้วช่องที่ต้องกรอกจะขึ้นกรอบแดงเอง (แถวที่มี error ถูกกางให้อยู่แล้ว
-  // ผ่าน submitCount ใน pr-item-table)
   const submitCount = form.formState.submitCount;
   useEffect(() => {
     if (!submitCount) return;
@@ -173,9 +169,7 @@ export function PrItemFields({
   });
 
   const selectedRows = table.getSelectedRowModel().rows;
-  // ต้องอยู่โหมดแก้ไขก่อน — ติ๊กแถวได้เฉพาะโหมดแก้ไขก็จริง แต่ selection ค้างข้าม
-  // โหมดได้ (ติ๊กแล้วกดยกเลิก) ปุ่มตัดสินจะยังโผล่ให้กดในโหมดอ่าน · เกณฑ์เดียวกับ
-  // ปุ่มล้างสถานะรายแถวและกับ SR
+
   const canBulkAction =
     !isDisabled &&
     (role === STAGE_ROLE.APPROVE || role === STAGE_ROLE.PURCHASE);
@@ -195,13 +189,6 @@ export function PrItemFields({
     return selectedRows.map((row) => row.index);
   };
 
-  /**
-   * Validate รายการที่เลือกก่อนทำ bulk action (approve/review/reject)
-   * ถ้ามี item ที่ zod error → expand แถวนั้น + scroll ไป field แรกที่ผิด + เตือน
-   * แล้วคืน `true` เพื่อให้ caller block action
-   * (zod superRefine บังคับ vendor/price/tax เฉพาะตอน role = purchase อยู่แล้ว
-   *  จึงไม่ block ผิดจังหวะที่ stage อื่น)
-   */
   const guardSelectedItemErrors = async (): Promise<boolean> => {
     await form.trigger("items");
     const errored = getSelectedIndices().filter((index) => {
@@ -419,9 +406,6 @@ export function PrItemFields({
                   return {
                     productName: item.product_name,
                     productLocalName: item.product_local_name,
-                    // จำนวน/หน่วย/ราคา คือสิ่งที่ทำให้คำถาม "ราคานี้สมเหตุสมผลไหม"
-                    // ตอบได้ · ชื่อคลังไม่ส่ง ไม่ช่วยให้คำตอบดีขึ้นแต่บอกโครงสร้าง
-                    // ภายในโรงแรมออกไปให้บริการภายนอก
                     qty: item.requested_qty,
                     unitName: item.requested_unit_name,
                     price: item.pricelist_price,
@@ -495,9 +479,6 @@ export function PrItemFields({
             />
           }
         >
-          {/* DataGridContainer เป็น native scroll container อยู่แล้ว (overflow-auto)
-            — ไม่ห่อด้วย Radix ScrollArea เพื่อเลี่ยง nested scroll ที่ทำให้ scroll
-            แนวนอนสะดุด (เห็นชัดในโหมด edit ที่ตารางกว้าง/หนักกว่า) */}
           <DataGridContainer scroll>
             <DataGridTable />
           </DataGridContainer>

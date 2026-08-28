@@ -273,15 +273,11 @@ export function PurchaseRequestForm({
       <form
         id="purchase-request-form"
         onSubmit={(e) => {
-          // เติมค่าที่ระบบรู้เองก่อน แล้วค่อยตรวจ — เหลือให้คนกรอกเฉพาะที่เดาแทนไม่ได้
           actions.fillKnownItemDefaults();
           form.handleSubmit(actions.onSubmit, actions.revealInvalid)(e);
         }}
         className="space-y-4 px-4"
       >
-        {/* เส้นคั่นเต็มความกว้าง แยกข้อมูลหัวใบ (แถบบนหัว) ออกจากตารางรายการ
-            เหมือน PO/GRN — สองก้อนนี้อ่านคนละจังหวะ ก้อนบนอ่านทีเดียวจบ
-            ก้อนล่างกวาดตาทีละแถว */}
         <hr className="border-border" />
 
         <PrItemFields
