@@ -77,12 +77,6 @@ export const router = createBrowserRouter([
             lazy: () => import("./notifications/notifications.route"),
             ErrorBoundary: RouteErrorBoundaryAdapter,
           },
-          // เครื่องมือของคนทำระบบ ไม่มีในเมนูและไม่มีลิงก์จากที่ไหน เข้าจาก URL
-          {
-            path: "dev/toast",
-            lazy: () => import("./dev/toast/toast.route"),
-            ErrorBoundary: RouteErrorBoundaryAdapter,
-          },
           {
             path: "config",
             ErrorBoundary: RouteErrorBoundaryAdapter,

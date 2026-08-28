@@ -143,6 +143,7 @@ export default function ChangePasswordDialog({
                   data-id="log-in-password"
                   autoComplete="new-password"
                   className="border-border/60 bg-muted/10 focus-visible:ring-ring h-9 rounded-md transition-colors focus-visible:ring-1"
+                  disabled={changePassword.isPending}
                   {...form.register("new_password")}
                 />
                 <FieldError className="mt-1">
