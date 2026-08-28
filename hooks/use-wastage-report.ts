@@ -5,7 +5,7 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
 import { ApiError } from "@/lib/api-error";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 import type { WastageItem, WastageSummary } from "@/types/wastage-reporting";
 

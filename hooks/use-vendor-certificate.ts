@@ -3,7 +3,7 @@ import { useBuCode } from "@/hooks/use-bu-code";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { httpClient } from "@/lib/http-client";
 import { ApiError } from "@/lib/api-error";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_NORMAL } from "@/lib/cache-config";

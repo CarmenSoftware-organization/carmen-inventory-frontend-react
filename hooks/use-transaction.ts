@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import type { TransactionListResponse } from "@/types/transaction";

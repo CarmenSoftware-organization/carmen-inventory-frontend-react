@@ -55,17 +55,8 @@ const offenders = (): string[] =>
     .map(({ file }) => file);
 
 describe("the 9px micro tier stays at weight 600", () => {
-  /**
-   * home-component.tsx is the un-ported source-app landing — nothing imports it
-   * and CLAUDE.md says so explicitly, so it was left alone rather than swept.
-   * Listing it here rather than filtering it out means this test starts failing
-   * the moment it is deleted (good — delete this line too) or wired up (also
-   * good — it would need the sweep first).
-   */
-  const KNOWN_DEAD = ["components/home-component.tsx"];
-
   it("has no font-bold on a 9px eyebrow in live code", () => {
-    expect(offenders()).toEqual(KNOWN_DEAD);
+    expect(offenders()).toEqual([]);
   });
 
   it("still finds the pattern it claims to guard, in both spellings", () => {
@@ -138,9 +129,6 @@ const TOKENISED: Record<string, string> = {
  * cleaned up and the entry goes stale. Either way somebody has to look.
  */
 const ALLOWED_OFF_LADDER: Record<string, number> = {
-  // Un-ported source-app landing; nothing imports it (see KNOWN_DEAD above and
-  // CLAUDE.md). Sweeping dead code would only add diff noise.
-  "components/home-component.tsx": 8,
   // Badge `default` (13px) and `xl` (15px) size variants — part of the component's
   // public API, chosen deliberately, and they straddle the 12/14 ladder steps.
   "components/ui/badge.tsx": 2,

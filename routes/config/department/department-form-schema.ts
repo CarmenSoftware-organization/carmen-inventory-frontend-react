@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { TranslationFn } from "@/lib/i18n-schema";
-import { transferPayloadSchema } from "@/utils/transfer-handler";
+import { transferPayloadSchema } from "@/lib/transfer-handler";
 import type { Department } from "@/types/department";
 
 /**

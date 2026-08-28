@@ -7,7 +7,7 @@
  * ยอดรวม, location row โชว์ combo แก้ได้ (ไม่ซ้ำ rate/amount แยกคอลัมน์)
  */
 
-import { comboColWidth } from "../combo-col-width";
+import { comboColWidth } from "../shared/combo-col-width";
 
 /** คอลัมน์เงินที่เป็นตัวเลขล้วน (sub/net/amt) กว้างเท่านี้พอ */
 const MONEY_COL = 96;

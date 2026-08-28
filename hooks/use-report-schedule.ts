@@ -5,7 +5,7 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_DYNAMIC, CACHE_STATIC } from "@/lib/cache-config";
 import { ApiError } from "@/lib/api-error";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import type {
   CreateReportScheduleDto,
   ReportLookupMap,

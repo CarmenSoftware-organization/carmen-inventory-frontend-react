@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import EmptyComponent from "@/components/empty-component";
 import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { formatCurrency } from "@/lib/currency-utils";
 import { formatDate } from "@/lib/date-utils";

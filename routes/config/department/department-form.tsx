@@ -30,7 +30,7 @@ import { useAllUsers } from "@/hooks/use-all-users";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { Department } from "@/types/department";
 import type { FormMode } from "@/types/form";
-import { transferHandler } from "@/utils/transfer-handler";
+import { transferHandler } from "@/lib/transfer-handler";
 import {
   createDepartmentSchema,
   type DepartmentFormValues,

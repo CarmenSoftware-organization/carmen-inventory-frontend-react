@@ -4,7 +4,7 @@ import { useApiMutation, removeFromListById } from "@/hooks/use-api-mutation";
 import { useXlsxExport, type XlsxColumn } from "@/hooks/use-xlsx-export";
 import { httpClient } from "@/lib/http-client";
 import { ApiError, ERROR_CODES } from "@/lib/api-error";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import type {

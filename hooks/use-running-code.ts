@@ -6,7 +6,7 @@ import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { useProfile } from "@/hooks/use-profile";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { ApiError } from "@/lib/api-error";
 import type { RunningCode, CreateRunningCodeDto } from "@/types/running-code";
 import type { ParamsDto } from "@/types/params";

@@ -27,7 +27,7 @@ import {
   DiscountOverrideInput,
   OverrideToggle,
   TaxOverrideInput,
-} from "@/components/procurement/discount-tax-override";
+} from "../shared/discount-tax-override";
 import { formatCurrency } from "@/lib/currency-utils";
 import { computeLineAmounts } from "@/lib/line-pricing";
 import { useAddLocationRegistry } from "./po-locations-add-context";

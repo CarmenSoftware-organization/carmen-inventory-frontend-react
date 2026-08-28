@@ -43,7 +43,7 @@ import {
 } from "@/constant/location";
 import type { Location } from "@/types/location";
 import type { FormMode } from "@/types/form";
-import { transferHandler } from "@/utils/transfer-handler";
+import { transferHandler } from "@/lib/transfer-handler";
 import {
   createLocationSchema,
   getDefaultValues,

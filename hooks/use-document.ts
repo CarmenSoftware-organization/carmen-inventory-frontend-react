@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import type { DocumentFile, DocumentSummary } from "@/types/document";

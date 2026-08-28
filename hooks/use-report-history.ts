@@ -5,7 +5,7 @@ import { ApiError } from "@/lib/api-error";
 import { API_ENDPOINTS } from "@/constant/api-endpoints";
 import { QUERY_KEYS } from "@/constant/query-keys";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
-import { buildQueryString } from "@/utils/build-query-string";
+import { buildQueryString } from "@/lib/build-query-string";
 import type { ReportHistory } from "@/types/report-history";
 import type { PaginatedResponse, ParamsDto } from "@/types/params";
 

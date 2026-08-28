@@ -1,5 +1,5 @@
 import { httpClient } from "@/lib/http-client";
-import { buildUrl } from "@/utils/build-query-string";
+import { buildUrl } from "@/lib/build-query-string";
 import { ApiError } from "@/lib/api-error";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
 
