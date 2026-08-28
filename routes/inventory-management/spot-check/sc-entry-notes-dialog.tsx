@@ -9,7 +9,7 @@ import {
 import {
   useSaveSpotCheckDetailComment,
   useSpotCheckDetailComments,
-} from "@/hooks/use-spot-check-comments";
+} from "./use-spot-check-comments";
 
 export type {
   SavedEvidenceImage,

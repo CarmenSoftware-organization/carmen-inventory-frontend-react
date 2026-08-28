@@ -23,7 +23,7 @@ import { useTranslations } from "use-intl";
 import {
   useCreateRecipeEquipmentCategory,
   useUpdateRecipeEquipmentCategory,
-} from "@/hooks/use-recipe-equipment-category";
+} from "./use-recipe-equipment-category";
 import type { RecipeEquipmentCategory } from "@/types/recipe-equipment-category";
 import {
   createRecipeEquipmentCategorySchema,

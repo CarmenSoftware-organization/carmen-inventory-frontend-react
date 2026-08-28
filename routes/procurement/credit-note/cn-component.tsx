@@ -17,7 +17,7 @@ import {
   useCreditNote,
   useDeleteCreditNote,
   useExportCreditNote,
-} from "@/hooks/use-credit-note";
+} from "./use-credit-note";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";

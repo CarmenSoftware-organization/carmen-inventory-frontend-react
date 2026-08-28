@@ -6,7 +6,7 @@ import {
   useCreateMyDashboardWidget,
   useMyDashboardWidgetData,
   useUpdateMyDashboardWidget,
-} from "../use-my-dashboard-widgets";
+} from "./use-my-dashboard-widgets";
 
 // Mock useProfile — useBuCode อ่าน buCode มาจากตรงนี้
 vi.mock("@/hooks/use-profile", () => ({

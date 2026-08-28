@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useRoleById } from "@/hooks/use-role";
+import { useRoleById } from "../shared/use-role";
 import { RoleForm } from "./role-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";

@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
-import { useEquipment, useDeleteEquipment } from "@/hooks/use-equipment";
+import { useEquipment, useDeleteEquipment } from "./use-equipment";
 import { useEquipmentCategory } from "@/hooks/use-equipment-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";

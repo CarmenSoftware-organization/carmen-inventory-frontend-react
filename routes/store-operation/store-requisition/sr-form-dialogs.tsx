@@ -8,7 +8,7 @@ import type { SrFormValues } from "./sr-form-schema";
 import { SrSubmitDialog } from "./sr-submit-dialog";
 import { SrActionDialog } from "./sr-action-dialog";
 import type { UseSrFormActionsReturn } from "./use-sr-form-actions";
-import { useSrPreviousStages } from "@/hooks/use-store-requisition";
+import { useSrPreviousStages } from "./use-store-requisition";
 
 // แทน next/dynamic ด้วย React.lazy (code-split comment-sheet chunk เหมือนเดิม)
 // lazy ต้องการ default export — wrap named export ด้วย { default: ... }

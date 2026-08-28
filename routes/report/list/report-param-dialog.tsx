@@ -18,7 +18,7 @@ import {
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LookupCombobox } from "@/components/lookup/lookup-combobox";
-import { useReportListLookups } from "@/hooks/use-report";
+import { useReportListLookups } from "../shared/use-report";
 import type { ReportPeriodMap } from "@/types/report";
 import type { Report } from "@/types/report";
 import {

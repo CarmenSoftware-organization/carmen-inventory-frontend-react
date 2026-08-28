@@ -26,7 +26,7 @@ import { useEcoLabel } from "@/hooks/use-eco-label";
 import {
   useCreateProductEcoLabel,
   useUpdateProductEcoLabel,
-} from "@/hooks/use-product-eco-label";
+} from "./use-product-eco-label";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { ProductEcoLabel } from "@/types/product-eco-label";
 

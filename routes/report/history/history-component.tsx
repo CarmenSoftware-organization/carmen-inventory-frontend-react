@@ -19,7 +19,7 @@ import SearchInput from "@/components/search-input";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";
 import { useReactTable, getCoreRowModel } from "@tanstack/react-table";
 import { useHistoryTable } from "./use-history-table";
-import { useReportHistory } from "@/hooks/use-report-history";
+import { useReportHistory } from "./use-report-history";
 import type { ReportHistory } from "@/types/report-history";
 import HistoryCard from "./history-card";
 

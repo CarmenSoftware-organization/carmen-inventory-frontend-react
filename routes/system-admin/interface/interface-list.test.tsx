@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { interfaceGroups } from "./interface-list";
 import { INTERFACE_CATEGORIES } from "./interface-registry";
-import { interfaceEntitled } from "@/hooks/use-interface-entitlement";
+import { interfaceEntitled } from "./use-interface-entitlement";
 import type { AppConfig } from "@/types/app-config";
 
 function config(key: string, value: Record<string, unknown>): AppConfig {

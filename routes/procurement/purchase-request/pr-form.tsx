@@ -24,7 +24,7 @@ import {
   getDuplicateValues,
 } from "./pr-form-schema";
 import { useProfile } from "@/hooks/use-profile";
-import { usePrPreviousStages } from "@/hooks/use-purchase-request";
+import { usePrPreviousStages } from "./use-purchase-request";
 import { formatDate } from "@/lib/date-utils";
 import { PrHeader } from "./pr-header";
 

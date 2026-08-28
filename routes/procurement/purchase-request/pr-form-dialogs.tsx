@@ -18,7 +18,7 @@ import type {
   PurchaseRequest,
   WorkflowHistoryEntry,
 } from "@/types/purchase-request";
-import type { useDeletePurchaseRequest } from "@/hooks/use-purchase-request";
+import type { useDeletePurchaseRequest } from "./use-purchase-request";
 import type { ActionDialogState } from "./use-pr-form-actions";
 // PrActionDialog ถูก static import โดย pr-item-fields / pr-footer-action อยู่แล้ว
 // lazy() จึง split ไม่ได้จริง (Rollup เตือน) — import ตรงเพื่อให้ chunking สอดคล้องกัน

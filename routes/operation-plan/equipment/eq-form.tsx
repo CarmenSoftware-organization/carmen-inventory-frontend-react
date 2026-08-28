@@ -11,7 +11,7 @@ import {
   useCreateEquipment,
   useUpdateEquipment,
   useDeleteEquipment,
-} from "@/hooks/use-equipment";
+} from "./use-equipment";
 import type { Equipment } from "@/types/equipment";
 import type { FormMode } from "@/types/form";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";

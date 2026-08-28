@@ -28,7 +28,8 @@ bun test:run         # Single run    bun test:run path # Single file
 
 - **No server.** `lib/http-client.ts` rewrites `/api/proxy/<rest>` and `/api/external/<rest>`
   → `${BACKEND_URL}/<rest>` and attaches `Authorization: Bearer` + `x-app-id` itself.
-  `API_ENDPOINTS`/hooks are identical to the source app.
+  `API_ENDPOINTS` is identical to the source app; the data hooks' **contents** are too,
+  but not their location — see **Where a hook lives** below.
 - **Auth:** access token in memory (`lib/auth/token-store.ts`), refresh token in
   localStorage (`lib/auth/refresh-token-storage.ts` — single swap point for future cookie
   mode). Boot order in `main.tsx`: `loadRuntimeConfig()` → `refreshTokens()` → render.
@@ -45,6 +46,15 @@ bun test:run         # Single run    bun test:run path # Single file
   `routes/config/` / `routes/procurement/` as reference module sets. The source app's
   `playground` is intentionally NOT ported (dev-only tool); `/` redirects to `/dashboard`
   (the source `HomeComponent` landing is not ported).
+- **Where a hook lives:** the smallest scope that owns it. Used by one feature →
+  `routes/<module>/<feature>/use-x.ts` (its test sits flat beside it); used by two or more
+  features of the same module → `routes/<module>/shared/`; used across modules, or by
+  another hook in `hooks/` → stays in `hooks/`. `hooks/` is therefore the cross-cutting
+  layer only (93 files: infra, lookups every module needs, `use-can`/`use-mobile` and
+  friends), not a dumping ground for every `use-<entity>`. Two hooks stay global despite
+  a single caller today — `use-locale` and `use-number-formatter` are generic, and burying
+  them in physical-count / purchase-request would just hide them. No `index.ts` barrels.
+
 - **Error boundaries:** every route is covered. Module section parents and the standalone
   shell routes carry `RouteErrorBoundaryAdapter` (in-layout error UI); the root route
   has `RootErrorBoundary` (`routes/root-error-boundary.tsx`) as a full-page catch-all so

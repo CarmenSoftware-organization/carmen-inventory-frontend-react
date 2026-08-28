@@ -32,7 +32,7 @@ import {
   useInventoryAdjustment,
   useDeleteInventoryAdjustment,
   useExportInventoryAdjustment,
-} from "@/hooks/use-inventory-adjustment";
+} from "./use-inventory-adjustment";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import {
   INVENTORY_ADJUSTMENT_BASE_PATH,

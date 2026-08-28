@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/button";
 import {
   useUserActivity,
   useExportUserActivity,
-} from "@/hooks/use-user-activity";
+} from "./use-user-activity";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";

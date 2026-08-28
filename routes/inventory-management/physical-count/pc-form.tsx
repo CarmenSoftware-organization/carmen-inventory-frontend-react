@@ -10,7 +10,7 @@ import {
   useCreatePhysicalCount,
   useUpdatePhysicalCount,
   useDeletePhysicalCount,
-} from "@/hooks/use-physical-count";
+} from "../shared/use-physical-count";
 import type {
   PhysicalCount,
   CreatePhysicalCountDto,

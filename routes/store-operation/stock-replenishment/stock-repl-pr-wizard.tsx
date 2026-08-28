@@ -15,7 +15,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { LookupWorkflow } from "@/components/lookup/lookup-workflow";
-import { useCreateStockReplPr } from "@/hooks/use-stock-replenishment";
+import { useCreateStockReplPr } from "./use-stock-replenishment";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";
 

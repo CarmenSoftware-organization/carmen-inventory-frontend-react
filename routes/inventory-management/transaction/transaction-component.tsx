@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { useTransaction } from "@/hooks/use-transaction";
+import { useTransaction } from "./use-transaction";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useURL } from "@/hooks/use-url";
 import SearchInput from "@/components/search-input";

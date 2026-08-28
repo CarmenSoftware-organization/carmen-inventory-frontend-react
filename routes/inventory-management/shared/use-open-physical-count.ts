@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { useCreatePhysicalCount } from "@/hooks/use-physical-count";
+import { useCreatePhysicalCount } from "./use-physical-count";
 import type { PhysicalCountLocation } from "@/types/physical-count";
 
 interface UseOpenPhysicalCountResult {

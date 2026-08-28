@@ -31,7 +31,7 @@ import { DataGridColumnVisibility } from "@/components/ui/data-grid/data-grid-co
 import { DataGridSortMenu } from "@/components/ui/data-grid/data-grid-sort-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { usePrt, useDeletePrt, useExportPrt } from "@/hooks/use-prt";
+import { usePrt, useDeletePrt, useExportPrt } from "./use-prt";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useProfile } from "@/hooks/use-profile";

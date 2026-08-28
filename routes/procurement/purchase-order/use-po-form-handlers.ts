@@ -17,7 +17,7 @@ import {
   useRejectPurchaseOrder,
   useReviewPurchaseOrder,
   useClosePurchaseOrder,
-} from "@/hooks/use-purchase-order";
+} from "../shared/use-purchase-order";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useBuCode } from "@/hooks/use-bu-code";

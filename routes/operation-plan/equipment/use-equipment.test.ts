@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement, type ReactNode } from "react";
-import { useCreateEquipment, useUpdateEquipment } from "../use-equipment";
+import { useCreateEquipment, useUpdateEquipment } from "./use-equipment";
 import type {
   CreateEquipmentVars,
   UpdateEquipmentVars,

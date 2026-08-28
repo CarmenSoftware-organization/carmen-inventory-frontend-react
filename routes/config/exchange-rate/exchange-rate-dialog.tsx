@@ -34,7 +34,7 @@ import { useTranslations } from "use-intl";
 import {
   useExchangeRateUpdate,
   useExchangeRateCreate,
-} from "@/hooks/use-exchange-rate";
+} from "../shared/use-exchange-rate";
 import { LookupCurrency } from "@/components/lookup/lookup-currency";
 import {
   createExchangeRateSchema,

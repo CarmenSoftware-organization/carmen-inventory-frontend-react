@@ -41,7 +41,7 @@ import {
   useExchangeRateMutation,
   useExternalExchangeRates,
   useExchangeRateDelete,
-} from "@/hooks/use-exchange-rate";
+} from "../shared/use-exchange-rate";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";

@@ -8,7 +8,7 @@ import { ConfigEntityDialog } from "@/components/templates/config-entity-dialog"
 import {
   useCreateAccountCode,
   useUpdateAccountCode,
-} from "@/hooks/use-account-code";
+} from "./use-account-code";
 import type { AccountCode } from "@/types/account-code";
 import { createAcSchema, type AcFormValues } from "./ac-form-schema";
 

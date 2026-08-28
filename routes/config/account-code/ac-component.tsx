@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useAccountCode, useDeleteAccountCode } from "@/hooks/use-account-code";
+import { useAccountCode, useDeleteAccountCode } from "./use-account-code";
 import type { AccountCode } from "@/types/account-code";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";

@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import {
   useCnReasonConfig,
   useDeleteCnReasonConfig,
-} from "@/hooks/use-cn-reason-config";
+} from "./use-cn-reason-config";
 import type { CnReason } from "@/types/cn-reason";
 import { ConfigListTemplate } from "@/components/templates/config-list-template";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";

@@ -27,7 +27,7 @@ import {
   usePeriod,
   useGenerateNextPeriod,
   useExportPeriod,
-} from "@/hooks/use-period";
+} from "./use-period";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridPagination } from "@/hooks/use-grid-pagination";

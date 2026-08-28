@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { useSubmitSpotCheck } from "@/hooks/use-spot-check";
+import { useSubmitSpotCheck } from "./use-spot-check";
 import { useUnit } from "@/hooks/use-unit";
 import type {
   SpotCheckReviewData,

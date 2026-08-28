@@ -21,7 +21,7 @@ import EmptyComponent from "@/components/empty-component";
 import { ErrorState } from "@/components/ui/error-state";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
 import type { Report, ReportTemplate } from "@/types/report";
-import { useReportTemplates, useRunReportMutation } from "@/hooks/use-report";
+import { useReportTemplates, useRunReportMutation } from "../shared/use-report";
 import { useReportTable } from "./use-report-table";
 import { safeNavigationHref } from "@/lib/utils";
 import { ReportParamDialog } from "./report-param-dialog";

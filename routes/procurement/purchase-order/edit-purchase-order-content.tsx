@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { usePurchaseOrderById } from "@/hooks/use-purchase-order";
+import { usePurchaseOrderById } from "../shared/use-purchase-order";
 import PoForm from "./po-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";

@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
 import { Button } from "@/components/ui/button";
-import { useRecipe, useDeleteRecipe } from "@/hooks/use-recipe";
+import { useRecipe, useDeleteRecipe } from "./use-recipe";
 import { useCuisine } from "@/hooks/use-cuisine";
 import { useRecipeCategory } from "@/hooks/use-recipe-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";

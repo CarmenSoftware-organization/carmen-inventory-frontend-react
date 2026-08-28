@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DataGridPagination } from "@/components/ui/data-grid/data-grid-pagination";
-import { useWastageReport } from "@/hooks/use-wastage-report";
+import { useWastageReport } from "./use-wastage-report";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import SearchInput from "@/components/search-input";
 import { ErrorState } from "@/components/ui/error-state";

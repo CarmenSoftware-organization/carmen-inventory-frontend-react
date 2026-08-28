@@ -21,7 +21,7 @@ import {
   useDeleteStoreRequisition,
   useExportStoreRequisition,
   useStoreRequisitionWorkflowStages,
-} from "@/hooks/use-store-requisition";
+} from "./use-store-requisition";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import type { StoreRequisition } from "@/types/store-requisition";

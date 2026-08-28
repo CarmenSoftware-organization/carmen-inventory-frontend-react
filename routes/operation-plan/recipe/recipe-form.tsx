@@ -11,7 +11,7 @@ import {
   useCreateRecipe,
   useUpdateRecipe,
   useDeleteRecipe,
-} from "@/hooks/use-recipe";
+} from "./use-recipe";
 import type { Recipe } from "@/types/recipe";
 import type { FormMode } from "@/types/form";
 import {

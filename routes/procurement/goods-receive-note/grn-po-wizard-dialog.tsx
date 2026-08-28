@@ -25,7 +25,7 @@ import { GRN_PO_STATUS_CONFIG } from "@/constant/goods-receive-note";
 import {
   usePurchaseOrderGrnVendors,
   usePurchaseOrderForGrnByVendor,
-} from "@/hooks/use-purchase-order";
+} from "../shared/use-purchase-order";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";

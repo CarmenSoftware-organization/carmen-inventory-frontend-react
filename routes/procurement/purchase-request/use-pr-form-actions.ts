@@ -23,7 +23,7 @@ import {
   useDeletePurchaseRequest,
   useUpdatePr,
   useSplitPurchaseRequest,
-} from "@/hooks/use-purchase-request";
+} from "./use-purchase-request";
 import type {
   PurchaseRequest,
   CreatePurchaseRequestDto,

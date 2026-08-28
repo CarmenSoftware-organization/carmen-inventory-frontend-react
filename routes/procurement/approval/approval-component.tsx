@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   useApprovalPending,
   useApprovalPendingSummary,
-} from "@/hooks/use-approval";
+} from "./use-approval";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
 import SearchInput from "@/components/search-input";

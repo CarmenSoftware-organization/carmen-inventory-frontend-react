@@ -17,7 +17,7 @@ import DisplayTemplate from "@/components/display-template";
 import SearchInput from "@/components/search-input";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
 import { cn } from "@/lib/utils";
-import { useStockReplenishment } from "@/hooks/use-stock-replenishment";
+import { useStockReplenishment } from "./use-stock-replenishment";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import type { Location, ProductLocation } from "@/types/stock-replenishment";

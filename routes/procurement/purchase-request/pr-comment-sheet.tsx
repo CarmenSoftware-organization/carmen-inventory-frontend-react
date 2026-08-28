@@ -4,7 +4,7 @@ import {
   useCreatePurchaseRequestComment,
   useUpdatePurchaseRequestComment,
   useDeletePurchaseRequestComment,
-} from "@/hooks/use-purchase-request";
+} from "./use-purchase-request";
 import { CommentSheet } from "@/components/ui/comment-sheet";
 
 interface PrCommentSheetProps {

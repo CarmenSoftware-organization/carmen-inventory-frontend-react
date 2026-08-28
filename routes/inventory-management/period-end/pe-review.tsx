@@ -33,7 +33,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
-import { useClosePeriodEnd, usePeriodEndReview } from "@/hooks/use-period-end";
+import { useClosePeriodEnd, usePeriodEndReview } from "./use-period-end";
 import type { ReviewTransactionKey } from "@/types/period-end";
 import { formatLocalizedDate } from "@/lib/date-utils";
 import type { PhysicalCountLocation } from "@/types/physical-count";

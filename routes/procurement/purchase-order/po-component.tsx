@@ -19,7 +19,7 @@ import {
   useDeletePurchaseOrder,
   useExportPurchaseOrder,
   usePurchaseOrderWorkflowStages,
-} from "@/hooks/use-purchase-order";
+} from "../shared/use-purchase-order";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useRecordDocSequence } from "@/hooks/use-doc-sequence";
 import { setURLParams, useURL } from "@/hooks/use-url";

@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import { Check, Eye, PackageCheck, SendHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SummaryFooterBar } from "@/components/ui/summary-bar";
-import { useSrStockMovements } from "@/hooks/use-store-requisition";
+import { useSrStockMovements } from "./use-store-requisition";
 import { formatCurrency } from "@/lib/currency-utils";
 import { STAGE_ROLE } from "@/types/stage-role";
 import { srStockVisible } from "./sr-form-helpers";

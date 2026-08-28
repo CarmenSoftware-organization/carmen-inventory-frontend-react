@@ -5,7 +5,7 @@ import { PurchaseRequestForm } from "./pr-form";
 import {
   usePurchaseRequestById,
   usePurchaseRequestTemplates,
-} from "@/hooks/use-purchase-request";
+} from "./use-purchase-request";
 import { CreateWorkflowGate } from "@/components/share/create-workflow-gate";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { FormSkeleton } from "@/components/loader/form-skeleton";

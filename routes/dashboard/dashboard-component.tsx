@@ -34,7 +34,7 @@ import {
   useDeleteMyDashboardWidget,
   useMyDashboardWidgets,
   useUpdateMyDashboardWidget,
-} from "@/hooks/use-my-dashboard-widgets";
+} from "./use-my-dashboard-widgets";
 import type { DashboardDataset } from "@/types/dashboard-dataset";
 import type {
   MyDashboardWidget,

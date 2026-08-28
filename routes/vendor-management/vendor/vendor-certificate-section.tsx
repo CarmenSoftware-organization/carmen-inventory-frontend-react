@@ -22,7 +22,7 @@ import { useCertification } from "@/hooks/use-certification";
 import {
   useDeleteVendorCertificate,
   useVendorCertificates,
-} from "@/hooks/use-vendor-certificate";
+} from "./use-vendor-certificate";
 import type { VendorCertificate } from "@/types/vendor-certificate";
 import { VendorCertificateDialog } from "./vendor-certificate-dialog";
 import { VendorEmptySection } from "./vendor-empty-section";

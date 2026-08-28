@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { useWatch } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
-import { useProductEcoLabels } from "@/hooks/use-product-eco-label";
+import { useProductEcoLabels } from "./use-product-eco-label";
 import type { ProductFormInstance } from "@/types/product";
 
 /** ป้ายตัวเลขบนแท็บ — ซ่อนเมื่อยังไม่มีอะไร ไม่โชว์เลข 0 */

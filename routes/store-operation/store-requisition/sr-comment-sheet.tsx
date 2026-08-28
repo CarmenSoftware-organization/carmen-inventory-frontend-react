@@ -4,7 +4,7 @@ import {
   useCreateStoreRequisitionComment,
   useUpdateStoreRequisitionComment,
   useDeleteStoreRequisitionComment,
-} from "@/hooks/use-store-requisition";
+} from "./use-store-requisition";
 import { CommentSheet } from "@/components/ui/comment-sheet";
 
 interface SrCommentSheetProps {

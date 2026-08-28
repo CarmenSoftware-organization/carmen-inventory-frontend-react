@@ -37,7 +37,7 @@ import {
 import {
   useReportFormTemplates,
   type ReportFormOption,
-} from "@/hooks/use-report-form-templates";
+} from "./use-report-form-templates";
 
 /** input ของ {@link buildPrintFormOptions} — รวมเป็น object เดียวกันจำนวน field ที่มาก */
 export interface BuildPrintFormOptionsParams {

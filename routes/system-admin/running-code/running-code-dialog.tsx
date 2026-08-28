@@ -28,7 +28,7 @@ import { useTranslations } from "use-intl";
 import {
   useCreateRunningCode,
   useUpdateRunningCode,
-} from "@/hooks/use-running-code";
+} from "./use-running-code";
 import type { RunningCode } from "@/types/running-code";
 import { RunningCodeConfigFields } from "./running-code-config-fields";
 import { parseConfig } from "./running-code-config";

@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/stepper";
 import { useProfile } from "@/hooks/use-profile";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { useCreatePurchaseOrder } from "@/hooks/use-purchase-order";
+import { useCreatePurchaseOrder } from "../../shared/use-purchase-order";
 import { PO_TYPE } from "@/types/purchase-order";
 import { createPoSchema } from "../po-form-schema";
 import { buildPoPayload } from "../build-po-payload";

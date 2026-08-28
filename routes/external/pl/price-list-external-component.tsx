@@ -6,7 +6,7 @@ import {
   useUpdatePriceListExternal,
   useSubmitPriceListExternal,
   HttpError,
-} from "@/hooks/use-price-list-external";
+} from "./use-price-list-external";
 import { toast } from "sonner";
 import type { PricelistExternalDto } from "@/types/price-list-external";
 import { ErrorState } from "@/components/ui/error-state";

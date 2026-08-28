@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { useRequestPriceListById } from "@/hooks/use-request-price-list";
+import { useRequestPriceListById } from "./use-request-price-list";
 import { RequestPriceListForm } from "./rfp-form";
 import { ErrorState } from "@/components/ui/error-state";
 import { FormSkeleton } from "@/components/loader/form-skeleton";

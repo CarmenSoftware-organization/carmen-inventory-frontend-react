@@ -16,7 +16,7 @@ import {
   useDocumentSummary,
   useUploadDocument,
   useDeleteDocument,
-} from "@/hooks/use-document";
+} from "./use-document";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CardSkeletonGrid } from "@/components/loader/card-skeleton";

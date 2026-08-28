@@ -5,7 +5,7 @@ import { QUERY_KEYS } from "@/constant/query-keys";
 import type {
   PricelistExternalDto,
   PricelistExternalTaxProfileOption,
-} from "../types/price-list-external";
+} from "@/types/price-list-external";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 

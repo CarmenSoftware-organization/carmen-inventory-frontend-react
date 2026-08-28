@@ -1,4 +1,4 @@
-import { useCreditNoteById } from "@/hooks/use-credit-note";
+import { useCreditNoteById } from "./use-credit-note";
 import { useTranslations } from "use-intl";
 import { CnForm } from "./cn-form";
 import { ErrorState } from "@/components/ui/error-state";

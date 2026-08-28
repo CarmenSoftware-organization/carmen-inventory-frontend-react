@@ -31,7 +31,7 @@ import {
   getDefaultValues,
 } from "./po-form-schema";
 import { PoActionDialog } from "./po-action-dialog";
-import { usePoPreviousStages } from "@/hooks/use-purchase-order";
+import { usePoPreviousStages } from "../shared/use-purchase-order";
 import { usePoDialogState } from "./use-po-dialog-state";
 import { usePoProfileSync } from "./use-po-profile-sync";
 import { usePoFormHandlers } from "./use-po-form-handlers";

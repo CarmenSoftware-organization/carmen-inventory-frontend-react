@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import EmptyComponent from "@/components/empty-component";
-import { usePurchaseOrderForGrnByVendor } from "@/hooks/use-purchase-order";
+import { usePurchaseOrderForGrnByVendor } from "../shared/use-purchase-order";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { formatCurrency } from "@/lib/currency-utils";

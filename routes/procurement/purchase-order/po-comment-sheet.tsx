@@ -4,7 +4,7 @@ import {
   useCreatePurchaseOrderComment,
   useUpdatePurchaseOrderComment,
   useDeletePurchaseOrderComment,
-} from "@/hooks/use-purchase-order";
+} from "../shared/use-purchase-order";
 import { CommentSheet } from "@/components/ui/comment-sheet";
 
 interface PoCommentSheetProps {

@@ -10,7 +10,7 @@ import {
   useUpdateProduct,
   useDeleteProduct,
 } from "@/hooks/use-product";
-import { useUploadProductImages } from "@/hooks/use-product-image";
+import { useUploadProductImages } from "./use-product-image";
 import {
   type ProductDetail,
   type ProductFormValues,

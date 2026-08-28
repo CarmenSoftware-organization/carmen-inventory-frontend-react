@@ -4,7 +4,7 @@ import { Pencil, Save, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";
-import { usePurchaseRequestComments } from "@/hooks/use-purchase-request";
+import { usePurchaseRequestComments } from "./use-purchase-request";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { STAGE_ROLE } from "@/types/stage-role";

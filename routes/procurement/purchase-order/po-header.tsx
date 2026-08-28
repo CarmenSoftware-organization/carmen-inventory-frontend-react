@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
 import { WorkflowTrack } from "@/components/share/workflow-track";
 import { WorkflowStepButton } from "@/components/share/workflow-step-button";
-import { usePurchaseOrderComments } from "@/hooks/use-purchase-order";
+import { usePurchaseOrderComments } from "../shared/use-purchase-order";
 import { PO_STATUS, type PurchaseOrder } from "@/types/purchase-order";
 import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import { PO_STATUS_CONFIG, PO_TYPE_CONFIG } from "@/constant/purchase-order";

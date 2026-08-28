@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { DatePicker } from "@/components/ui/date-picker";
-import { useCreatePeriod, useUpdatePeriod } from "@/hooks/use-period";
+import { useCreatePeriod, useUpdatePeriod } from "./use-period";
 import type { Period } from "@/types/period";
 import {
   createPeriodSchema,

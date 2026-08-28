@@ -3,7 +3,7 @@ import { useTranslations } from "use-intl";
 import EmptyComponent from "@/components/empty-component";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePeriodEnd } from "@/hooks/use-period-end";
+import { usePeriodEnd } from "./use-period-end";
 
 export default function PeHistory() {
   const t = useTranslations("inventoryManagement.periodEnd");

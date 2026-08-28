@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/ui/error-state";
 import { useAppConfigs } from "@/hooks/use-app-config";
-import { useInterfaceEntitlement } from "@/hooks/use-interface-entitlement";
+import { useInterfaceEntitlement } from "./use-interface-entitlement";
 import type { AppConfig } from "@/types/app-config";
 import {
   INTERFACE_CATEGORIES,

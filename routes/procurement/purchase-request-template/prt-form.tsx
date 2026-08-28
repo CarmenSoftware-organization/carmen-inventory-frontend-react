@@ -10,7 +10,7 @@ import {
 import { FormToolbar } from "@/components/ui/form-toolbar";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { toast } from "sonner";
-import { useCreatePrt, useUpdatePrt, useDeletePrt } from "@/hooks/use-prt";
+import { useCreatePrt, useUpdatePrt, useDeletePrt } from "./use-prt";
 import type {
   PurchaseRequestTemplate,
   CreatePrtDto,

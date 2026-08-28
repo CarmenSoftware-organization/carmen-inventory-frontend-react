@@ -32,7 +32,7 @@ import {
   useBatchRejectPurchaseRequest,
   useBatchDeletePurchaseRequest,
   useExportPurchaseRequest,
-} from "@/hooks/use-purchase-request";
+} from "./use-purchase-request";
 import { useCreatableWorkflows } from "@/hooks/use-workflow";
 import { WORKFLOW_TYPE } from "@/types/workflows";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";

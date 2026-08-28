@@ -2,7 +2,7 @@ import { useTranslations } from "use-intl";
 import { Pencil, Save, Trash2, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DocActionsMenu } from "@/components/share/doc-actions-menu";
-import { useCreditNoteComments } from "@/hooks/use-credit-note";
+import { useCreditNoteComments } from "./use-credit-note";
 import { useCan } from "@/hooks/use-can";
 import { usePermissionPrefix } from "@/hooks/use-permission-prefix";
 import { dispatchPermissionDenied } from "@/components/permission-denied-dialog";

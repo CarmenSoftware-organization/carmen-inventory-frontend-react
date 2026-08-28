@@ -5,8 +5,8 @@ import { useTranslations } from "use-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MultiSelectFilter } from "@/components/ui/multi-select-filter";
-import { useSpotCheckCurrent } from "@/hooks/use-spot-check-current";
-import { useSpotCheck } from "@/hooks/use-spot-check";
+import { useSpotCheckCurrent } from "./use-spot-check-current";
+import { useSpotCheck } from "./use-spot-check";
 import { ErrorState } from "@/components/ui/error-state";
 import {
   SPOT_CHECK_METHODS,

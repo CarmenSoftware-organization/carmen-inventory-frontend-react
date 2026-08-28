@@ -10,7 +10,7 @@ import { useErrorToast } from "@/hooks/use-error-toast";
 import {
   usePhysicalCountDetailComments,
   useSavePhysicalCountProductNote,
-} from "@/hooks/use-physical-count";
+} from "../shared/use-physical-count";
 
 export type {
   SavedEvidenceImage,

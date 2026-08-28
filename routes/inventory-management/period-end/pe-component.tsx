@@ -25,7 +25,7 @@ import { StatusIconLabel } from "@/components/ui/status-icon-label";
 import {
   usePeriodEndCurrent,
   useStartPeriodCounting,
-} from "@/hooks/use-period-end";
+} from "./use-period-end";
 import { usePhysicalCountPeriodCurrent } from "@/hooks/use-physical-count-period";
 import { ApiError } from "@/lib/api-error";
 import { cn } from "@/lib/utils";

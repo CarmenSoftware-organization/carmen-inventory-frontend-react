@@ -23,7 +23,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { usePermission } from "@/hooks/use-permission";
+import { usePermission } from "./use-permission";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "../shared/admin-ui";
 

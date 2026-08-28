@@ -7,7 +7,7 @@ import {
   FieldSelect,
 } from "@/components/ui/field";
 import { SelectContent, SelectItem } from "@/components/ui/select";
-import { useReportLookups } from "@/hooks/use-report-schedule";
+import { useReportLookups } from "./use-report-schedule";
 import type { ReportScheduleDialogField } from "@/types/report-schedule";
 import type { ScheduleFormValues } from "./schedule-form-schema";
 

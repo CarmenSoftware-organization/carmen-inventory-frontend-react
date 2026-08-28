@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { toast } from "sonner";
-import { useSubmitPhysicalCount } from "@/hooks/use-physical-count";
+import { useSubmitPhysicalCount } from "../shared/use-physical-count";
 import type {
   PhysicalCountData,
   PhysicalCountDetail,

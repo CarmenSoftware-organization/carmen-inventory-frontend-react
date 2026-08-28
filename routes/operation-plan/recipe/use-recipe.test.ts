@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement, type ReactNode } from "react";
-import { useCreateRecipe, useUpdateRecipe } from "../use-recipe";
+import { useCreateRecipe, useUpdateRecipe } from "./use-recipe";
 import type { CreateRecipeVars, UpdateRecipeVars } from "@/types/recipe";
 import { setRuntimeConfigForTests } from "@/lib/runtime-config";
 

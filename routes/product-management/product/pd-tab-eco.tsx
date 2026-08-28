@@ -23,7 +23,7 @@ import { useEcoLabel } from "@/hooks/use-eco-label";
 import {
   useDeleteProductEcoLabel,
   useProductEcoLabels,
-} from "@/hooks/use-product-eco-label";
+} from "./use-product-eco-label";
 import type { ProductEcoLabel } from "@/types/product-eco-label";
 import { ProductEcoLabelDialog } from "./pd-eco-label-dialog";
 

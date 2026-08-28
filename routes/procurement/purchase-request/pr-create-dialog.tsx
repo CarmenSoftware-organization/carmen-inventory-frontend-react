@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { usePurchaseRequestTemplates } from "@/hooks/use-purchase-request";
+import { usePurchaseRequestTemplates } from "./use-purchase-request";
 import EmptyComponent from "@/components/empty-component";
 import SearchInput from "@/components/search-input";
 import PrSelectTemplate from "./pr-select-template";

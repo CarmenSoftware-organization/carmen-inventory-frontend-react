@@ -18,7 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useProfile } from "@/hooks/use-profile";
-import { useResetSpotCheck } from "@/hooks/use-spot-check";
+import { useResetSpotCheck } from "./use-spot-check";
 import { getLocationTypeLabel } from "@/constant/location-type";
 import { LocationAvatar, LocationCardShell } from "../shared/inv-shared";
 import { ResumeInfoPanel } from "./sc-resume-info-panel";

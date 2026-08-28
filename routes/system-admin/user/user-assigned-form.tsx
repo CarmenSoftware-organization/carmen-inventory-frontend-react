@@ -11,7 +11,7 @@ import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import type { TransferItem } from "@/components/ui/transfer";
 import { toast } from "sonner";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "../shared/use-role";
 import { useLocation } from "@/hooks/use-location";
 import {
   useUpdateUserRoles,

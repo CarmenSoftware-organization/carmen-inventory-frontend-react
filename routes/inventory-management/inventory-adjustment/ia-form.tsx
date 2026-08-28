@@ -10,7 +10,7 @@ import {
   useDeleteInventoryAdjustment,
   useCommitInventoryAdjustment,
   useVoidInventoryAdjustment,
-} from "@/hooks/use-inventory-adjustment";
+} from "./use-inventory-adjustment";
 import { useAdjustmentType } from "@/hooks/use-adjustment-type";
 import { useProfile } from "@/hooks/use-profile";
 import { ADJUSTMENT_TYPE } from "@/types/adjustment-type";

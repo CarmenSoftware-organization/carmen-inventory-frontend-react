@@ -57,7 +57,6 @@ export default tseslint.config(
       "hooks/**/*.{ts,tsx}",
       "lib/**/*.{ts,tsx}",
       "routes/**/*.{ts,tsx}",
-      "utils/**/*.{ts,tsx}",
       "constant/**/*.{ts,tsx}",
       "types/**/*.{ts,tsx}",
       "i18n/**/*.{ts,tsx}",

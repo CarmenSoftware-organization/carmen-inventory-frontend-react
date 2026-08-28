@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { usePermission } from "@/hooks/use-permission";
+import { usePermission } from "./use-permission";
 import { useProfile } from "@/hooks/use-profile";
 import { formatDate } from "@/lib/date-utils";
 import { escapeHtml as esc, printHtmlDocument } from "@/lib/print-html";

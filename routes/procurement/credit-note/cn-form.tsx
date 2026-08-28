@@ -14,7 +14,7 @@ import {
   useUpdateCreditNote,
   useDeleteCreditNote,
   useSubmitCreditNote,
-} from "@/hooks/use-credit-note";
+} from "./use-credit-note";
 import {
   CN_STATUS,
   type CreditNoteDetail,

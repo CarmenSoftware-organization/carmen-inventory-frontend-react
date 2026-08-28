@@ -27,7 +27,7 @@ import { useCertification } from "@/hooks/use-certification";
 import {
   useCreateVendorCertificate,
   useUpdateVendorCertificate,
-} from "@/hooks/use-vendor-certificate";
+} from "./use-vendor-certificate";
 import type { TranslationFn } from "@/lib/i18n-schema";
 import type { VendorCertificate } from "@/types/vendor-certificate";
 

@@ -4,7 +4,7 @@ import {
   useCreateCreditNoteComment,
   useUpdateCreditNoteComment,
   useDeleteCreditNoteComment,
-} from "@/hooks/use-credit-note";
+} from "./use-credit-note";
 import { CommentSheet } from "@/components/ui/comment-sheet";
 
 interface CnCommentSheetProps {

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
   useRecipeEquipmentCategory,
   useDeleteRecipeEquipmentCategory,
-} from "@/hooks/use-recipe-equipment-category";
+} from "./use-recipe-equipment-category";
 import { useDataGridState } from "@/hooks/use-data-grid-state";
 import type { RecipeEquipmentCategory } from "@/types/recipe-equipment-category";
 import SearchInput from "@/components/search-input";
