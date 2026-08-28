@@ -33,11 +33,6 @@ interface ApprovalQueueListProps {
   readonly tableConfig: ReturnType<typeof useDataGridState>["tableConfig"];
 }
 
-/**
- * ตารางแสดงคิวรายการเอกสารที่รออนุมัติ (PR/PO/SR)
- * @param props - ข้อมูลรายการ, จำนวนรวม, สถานะโหลด, รูปแบบวันที่, และตัวควบคุมตาราง
- * @returns React element ของตารางคิวอนุมัติ
- */
 export default function ApprovalQueueList({
   items,
   totalRecords,
