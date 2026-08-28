@@ -5,7 +5,7 @@ import { useLocationsByProduct } from "@/hooks/use-locations-by-product";
 import { useLookupPagination } from "@/hooks/use-lookup-pagination";
 import type { Location } from "@/types/location";
 import { Badge } from "@/components/ui/badge";
-import { LocationTypeLabel } from "@/components/ui/location-type-label";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { LookupCombobox } from "./lookup-combobox";
 
 interface LookupProductLocationProps {

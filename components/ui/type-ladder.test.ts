@@ -231,7 +231,7 @@ const ALLOWED_SUB_10PX: Record<string, number> = {
   "components/ui/input.tsx": 1, // character counter
   "components/ui/textarea.tsx": 1, // character counter
   "components/ui/transfer.tsx": 1, // selected count chip
-  "components/ui/tree-product-lookup.tsx": 1, // leaf count chip
+  "components/share/tree-product-lookup.tsx": 1, // leaf count chip
   "routes/inventory-management/shared/entry-notes-dialog.tsx": 1, // file size
   "routes/inventory-management/shared/filter-pill.tsx": 1, // filter count chip
   "routes/inventory-management/shared/inv-shared.tsx": 2, // "01" index bubbles

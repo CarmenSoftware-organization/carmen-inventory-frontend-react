@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FieldPlainText } from "@/components/ui/field";
 import { InputQty } from "@/components/ui/input/input-qty";
 import { LookupLocationPairProduct } from "@/components/lookup/lookup-location-pair-product";
-import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
+import { InventoryTooltip } from "@/components/share/inventory-tooltip";
 import { OnHandDialog } from "@/components/share/on-hand-dialog";
 import { OnOrderDialog } from "@/components/share/on-order-dialog";
 import { useBuCode } from "@/hooks/use-bu-code";

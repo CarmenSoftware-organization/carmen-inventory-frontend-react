@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import SearchInput from "@/components/search-input";
 import { StatusDotBadge } from "@/components/ui/status-dot-badge";
 import { INVENTORY_TYPE } from "@/constant/location";
-import { LocationTypeLabel } from "@/components/ui/location-type-label";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 import {
   DataGrid,
   DataGridContainer,

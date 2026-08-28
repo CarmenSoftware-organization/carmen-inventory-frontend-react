@@ -1,5 +1,5 @@
 import { useTranslations } from "use-intl";
-import { LocationTypeLabel } from "@/components/ui/location-type-label";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 import {
   ListCard,
   ListCardAuditRows,

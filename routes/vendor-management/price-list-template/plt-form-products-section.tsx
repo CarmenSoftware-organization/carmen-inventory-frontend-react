@@ -1,6 +1,6 @@
 import type { FieldArrayWithId, UseFormReturn } from "react-hook-form";
 import { SettingSection } from "@/components/ui/setting-section";
-import { TreeProductLookup } from "@/components/ui/tree-product-lookup";
+import { TreeProductLookup } from "@/components/share/tree-product-lookup";
 import { EmptyProducts } from "../price-list/pl-empty-states";
 import type { PriceListTemplate } from "@/types/price-list-template";
 import type { Product } from "@/types/product";

@@ -16,14 +16,14 @@ import {
   FieldPlainText,
   FieldSelect,
 } from "@/components/ui/field";
-import { FormToolbar } from "@/components/ui/form-toolbar";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { ProductTable } from "@/components/ui/product-table";
 import { SelectContent, SelectItem } from "@/components/ui/select";
 import { SettingSection } from "@/components/ui/setting-section";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { TransferItem } from "@/components/ui/transfer";
-import { TreeProductLookup } from "@/components/ui/tree-product-lookup";
+import { TreeProductLookup } from "@/components/share/tree-product-lookup";
 import { UserTable } from "@/components/ui/user-table";
 import { LookupDeliveryPoint } from "@/components/lookup/lookup-delivery-point";
 import {
@@ -34,7 +34,7 @@ import {
 import { useAllUsers } from "@/hooks/use-all-users";
 import { useAllProducts } from "@/hooks/use-all-products";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
-import { LocationTypeLabel } from "@/components/ui/location-type-label";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 import {
   INVENTORY_TYPE_LABEL_KEY,
   INVENTORY_TYPE_OPTIONS,

@@ -17,7 +17,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FieldInput } from "@/components/ui/field";
 import { LookupProductInLocation } from "@/components/lookup/lookup-product-in-location";
-import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
+import { InventoryTooltip } from "@/components/share/inventory-tooltip";
 import { NameWithSubtext } from "@/components/share/name-with-sub-text";
 import { useProfile } from "@/hooks/use-profile";
 import { useProductCostByLocationQty } from "@/hooks/use-product-cost";

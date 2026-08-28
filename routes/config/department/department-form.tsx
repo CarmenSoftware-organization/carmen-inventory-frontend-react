@@ -15,7 +15,7 @@ import {
   FieldLabel,
   FieldPlainText,
 } from "@/components/ui/field";
-import { FormToolbar } from "@/components/ui/form-toolbar";
+import { FormToolbar } from "@/components/share/form-toolbar";
 import { SettingSection } from "@/components/ui/setting-section";
 import { StatusSwitch } from "@/components/ui/status-switch";
 import { Textarea } from "@/components/ui/textarea";

@@ -13,7 +13,7 @@ import type { Location } from "@/types/location";
 import type { ParamsDto } from "@/types/params";
 import type { useDataGridState } from "@/hooks/use-data-grid-state";
 import { useProfile } from "@/hooks/use-profile";
-import { LocationTypeLabel } from "@/components/ui/location-type-label";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 
 interface UseLocationTableOptions {
   data: Location[];

@@ -3,7 +3,7 @@ import { createContext, memo, useContext, type ReactNode } from "react";
 import { LookupProductUnit } from "@/components/lookup/lookup-product-unit";
 import { InputSuffixPlain } from "@/components/ui/input/input-suffix";
 import { useProductUnits } from "@/hooks/use-product-units";
-import { InventoryTooltip } from "@/components/ui/inventory-tooltip";
+import { InventoryTooltip } from "@/components/share/inventory-tooltip";
 import { PR_ITEM_STAGE_STATUS } from "@/types/purchase-request";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { PrFormValues } from "../pr-form-schema";

@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SearchInput from "@/components/search-input";
-import { LocationTypeLabel } from "@/components/ui/location-type-label";
+import { LocationTypeLabel } from "@/components/share/location-type-label";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { TransferItem } from "@/components/ui/transfer";
 import { INVENTORY_TYPE } from "@/constant/location";
