@@ -22,7 +22,7 @@ import {
   createChangePasswordSchema,
   EMPTY_PASSWORD_FORM,
   type ChangePasswordFormValues,
-} from "./profile-form-schema";
+} from "./change-password-schema";
 import InputCustom from "@/components/ui/input-custom";
 
 interface ChangePasswordDialogProps {

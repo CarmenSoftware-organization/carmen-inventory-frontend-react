@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "use-intl";
 import { useBuCode } from "@/hooks/use-bu-code";
-import { useCreateWorkflow, useUpdateWorkflow } from "@/hooks/use-workflow";
+import { useCreateWorkflow, useUpdateWorkflow } from "./use-workflow-mutations";
 import { httpClient } from "@/lib/http-client";
 import { ApiError } from "@/lib/api-error";
 import { useErrorToast } from "@/hooks/use-error-toast";

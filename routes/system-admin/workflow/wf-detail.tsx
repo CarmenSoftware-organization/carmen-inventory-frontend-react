@@ -11,7 +11,7 @@ import { useTranslations } from "use-intl";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscardDialog } from "@/components/ui/discard-dialog";
-import { useUpdateWorkflow } from "@/hooks/use-workflow";
+import { useUpdateWorkflow } from "./use-workflow-mutations";
 import { useNavigationGuard } from "@/hooks/use-navigation-guard";
 import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";

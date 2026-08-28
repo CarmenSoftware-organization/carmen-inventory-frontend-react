@@ -55,6 +55,15 @@ bun test:run         # Single run    bun test:run path # Single file
   a single caller today — `use-locale` and `use-number-formatter` are generic, and burying
   them in physical-count / purchase-request would just hide them. No `index.ts` barrels.
 
+- **Module boundary (enforced by ESLint):** `routes/<A>/` may not import from
+  `routes/<B>/`, and the shared layer (`components/` `hooks/` `lib/` `constant/` `types/`)
+  may not import from `routes/` at all. `eslint.config.mjs` reads the module list off disk
+  and emits one `no-restricted-imports` block per module, so a new module is covered the
+  moment its folder exists. When two modules need the same thing, its home is
+  `components/` / `hooks/` / `lib/` / `types/` — never the other module. Only the alias
+  form (`@/routes/...`) is checked; relative escapes are not, because nobody writes them
+  here (0 in the repo) and guarding them false-positives on feature sub-folders.
+
 - **Error boundaries:** every route is covered. Module section parents and the standalone
   shell routes carry `RouteErrorBoundaryAdapter` (in-layout error UI); the root route
   has `RootErrorBoundary` (`routes/root-error-boundary.tsx`) as a full-page catch-all so

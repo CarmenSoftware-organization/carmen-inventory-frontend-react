@@ -47,7 +47,7 @@ import {
   createProfileSchema,
   type ProfileFormValues,
 } from "./profile-form-schema";
-import ChangePasswordDialog from "./change-password-dialog";
+import ChangePasswordDialog from "@/components/share/change-password-dialog";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
 import { SignatureDialog } from "./signature-dialog";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";

@@ -15,7 +15,7 @@ import {
   createChangePasswordSchema,
   EMPTY_PASSWORD_FORM,
   type ChangePasswordFormValues,
-} from "./profile-form-schema";
+} from "@/components/share/change-password-schema";
 import InputCustom from "@/components/ui/input-custom";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 

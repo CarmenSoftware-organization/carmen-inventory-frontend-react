@@ -18,7 +18,7 @@ import {
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { SettingSection } from "@/components/ui/setting-section";
 import { toast } from "sonner";
-import { useCreateWorkflow } from "@/hooks/use-workflow";
+import { useCreateWorkflow } from "./use-workflow-mutations";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import { workflowTypeField } from "@/constant/workflow";
 import {

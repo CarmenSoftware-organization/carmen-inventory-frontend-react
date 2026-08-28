@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { DocFormHeader } from "@/components/share/doc-form-header";
-import { useDeleteWorkflow } from "@/hooks/use-workflow";
+import { useDeleteWorkflow } from "./use-workflow-mutations";
 import type { Workflow } from "@/types/workflows";
 import { getWorkflowTypeLabels } from "@/constant/workflow";
 import { openActivity } from "@/components/share/activity-sheet-host";
