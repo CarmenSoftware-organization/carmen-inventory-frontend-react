@@ -20,7 +20,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "lint": "eslint .",
-    "clear": "rm -rf dist node_modules"
+    "clear": "rm -rf dist node_modules",
+    "gen:license-fixture": "bun scripts/gen-license-fixture.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
