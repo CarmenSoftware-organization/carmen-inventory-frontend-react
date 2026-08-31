@@ -5,6 +5,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# deploy ตัวนี้คุยกับเครื่องปลายทางผ่าน ssh key ใน secrets ล้วน ๆ GITHUB_TOKEN
+# ใช้แค่ checkout — ปิดที่เหลือ (CodeQL #6)
+permissions:
+  contents: read
+
 # deploy สลับทั้งไดเรกทอรี ปล่อยให้สอง run ทับกันแปลว่า swap ของคนละ build
 # อาจสลับกัน — ต่อคิวแทน ไม่ยกเลิกตัวที่กำลังรัน
 concurrency:
