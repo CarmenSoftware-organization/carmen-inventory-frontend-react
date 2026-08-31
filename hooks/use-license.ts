@@ -64,6 +64,18 @@ export interface LicenseInfo {
    * ไม่มีข้อมูล license เลย หรือสวิตช์ปิด หรือ state เป็น unresolved → true (ไม่จำกัด)
    */
   isLicensed: (featureKey: string) => boolean;
+  /**
+   * feature นี้ถูกปลดระวางแล้วหรือไม่ — คนละคำถามกับ `isLicensed` โดยสิ้นเชิง
+   * (`isLicensed` = "BU ซื้อไหม" · `isHidden` = "แพลตฟอร์มยังขายของชิ้นนี้อยู่ไหม")
+   *
+   * **ไม่ผ่าน `bypass`** ต่างจาก `isLicensed`/`canWrite` ที่ปลดล็อกตัวเองเมื่อสวิตช์
+   * `LICENSE_ENFORCEMENT` ปิดหรือ state เป็น `"unresolved"` — "เลิกขายแล้ว" เป็นข้อเท็จจริง
+   * ของแพลตฟอร์ม ไม่ใช่ข้อกล่าวอ้างเรื่องสัญญาของลูกค้าที่ยังทยอย rollout อยู่ ถ้าผูกกับ
+   * สวิตช์ ฟีเจอร์นี้จะไม่มีผลเลยสักที่เพราะสวิตช์ปิดอยู่ทุก environment
+   *
+   * ยัง fail-open อยู่: ไม่มี `hidden_features` (gateway เก่า) → ไม่ซ่อนอะไรเลย
+   */
+  isHidden: (featureKey: string) => boolean;
   seat: BusinessUnitSeat | undefined;
   /**
    * ที่นั่งที่ใช้อยู่เกิน cap ของ cluster จริง (`used > cap`) — เลียนแบบ `evaluateSeat` ฝั่ง
@@ -147,6 +159,9 @@ export function resolveLicense(
         license.features.includes(moduleKey)
       );
     },
+    // ไม่แตะ `bypass` โดยตั้งใจ — ดูเหตุผลเต็มที่ doc ของ isHidden ใน LicenseInfo
+    isHidden: (featureKey: string) =>
+      (license?.hidden_features ?? []).includes(featureKey),
     seat,
     // ล้อ evaluateSeat ฝั่ง backend เป๊ะ ๆ: used > cap เท่านั้น — ไม่ผ่าน `bypass`/`enforced`
     // โดยตั้งใจ (ดู doc ของ overQuota ใน LicenseInfo ด้านบน)
