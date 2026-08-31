@@ -70,6 +70,16 @@ export interface BusinessUnitLicense {
   end_date: string | null;
   /** feature key ที่อยู่ในสัญญา รวม module ระดับบนและ resource ระดับล่าง เรียงตัวอักษรเสมอ */
   features: string[];
+  /**
+   * feature key ที่ platform ปลดระวางแล้ว (`tb_license_feature.state = "hide"`)
+   *
+   * เป็นลิสต์ **global เดียวกันทุก BU** ไม่ใช่ของที่ BU นี้ซื้อ และ backend ตัดคีย์เหล่านี้
+   * ออกจาก `features` มาให้แล้ว — ฝั่งนี้ใช้มันตอบคำถามเดียวคือ "จะซ่อน หรือจะใส่แม่กุญแจ"
+   *
+   * **optional โดยตั้งใจ** — gateway รุ่นเก่ายังไม่ส่ง field นี้ `undefined` ต้องแปลว่า
+   * "ไม่ซ่อนอะไรเลย" (fail-open) ไม่ใช่ "ซ่อนทุกอย่าง"
+   */
+  hidden_features?: string[];
   seat: BusinessUnitSeat;
 }
 
