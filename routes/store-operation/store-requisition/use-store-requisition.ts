@@ -166,10 +166,13 @@ export function useMyPendingStoreRequisition(
       if (!res.ok)
         throw new Error("Failed to fetch my pending store requisitions");
       const json = await res.json();
+      // envelope เดียวกับ list: แถวกับ paginate อยู่ใน data[0] ทั้งคู่ — อ่าน
+      // json.paginate ตรง ๆ ได้ undefined เสมอ แถบเลขหน้าเลยขึ้น 0 รายการ
+      const entry = json.data?.[0];
 
       return {
-        data: json.data[0].data ?? [],
-        paginate: json.paginate ?? {
+        data: entry?.data ?? [],
+        paginate: entry?.paginate ?? {
           total: 0,
           page: 1,
           perpage: 10,
@@ -256,6 +259,11 @@ export function useSrAction(action: SrAction) {
 
 export const useSubmitStoreRequisition = () => useSrAction("submit");
 export const useApproveStoreRequisition = () => useSrAction("approve");
+/**
+ * ขั้นจ่ายของใช้ endpoint `approve` ตัวเดียวกับขั้นอนุมัติ — **ไม่ใช่ copy-paste
+ * พลาด** backend ไม่มี `/issue` แยก มันแยกด้วย `stage_role: "issue"` +
+ * `stage_status: "issue"` ในตัว payload (ดู `handleIssue`)
+ */
 export const useIssueStoreRequisition = () => useSrAction("approve");
 export const useRejectStoreRequisition = () => useSrAction("reject");
 export const useReviewStoreRequisition = () => useSrAction("review");

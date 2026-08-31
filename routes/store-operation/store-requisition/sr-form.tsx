@@ -292,6 +292,7 @@ export function StoreRequisitionForm({
         hasItems={items.length > 0}
         activeTab={tab === "stock" ? "stock" : "items"}
         srId={storeRequisition?.id}
+        docStatus={storeRequisition?.doc_status}
         onSubmit={actions.openSubmitDialog}
         onApprove={() => actions.setActionDialog("approve")}
         onIssue={() => actions.setActionDialog("issue")}
