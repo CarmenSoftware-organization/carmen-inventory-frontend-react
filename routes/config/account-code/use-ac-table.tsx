@@ -54,7 +54,7 @@ export function useAcTable({
           {row.getValue("code") || "..."}
         </CellAction>
       ),
-      size: 140,
+      size: 80,
       meta: { headerTitle: tfl("code"), skeleton: columnSkeletons.textShort },
     },
     {
@@ -62,6 +62,7 @@ export function useAcTable({
       header: ({ column }) => (
         <DataGridColumnHeader column={column} title={t("accountName")} />
       ),
+      size: 140,
       meta: { headerTitle: t("accountName"), skeleton: columnSkeletons.text },
     },
     {
