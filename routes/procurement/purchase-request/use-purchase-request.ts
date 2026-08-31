@@ -20,7 +20,6 @@ import { ApiError } from "@/lib/api-error";
 import { CACHE_DYNAMIC, CACHE_STATIC, CACHE_NORMAL } from "@/lib/cache-config";
 import type { ActionPr } from "@/types/stage-role";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
-import type { CommentItem } from "@/components/ui/comment-sheet";
 
 /**
  * Hook ดึงรายการใบขอซื้อ (Purchase Request) ทั้งหมด
@@ -276,83 +275,24 @@ export function useCreatePurchaseRequest() {
 
 // --- Comments ---
 
-const prCommentCrud = createCommentCrud({
+/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
+export const prCommentCrud = createCommentCrud({
   queryKey: QUERY_KEYS.PURCHASE_REQUEST_COMMENTS,
-  entityEndpoint: API_ENDPOINTS.PURCHASE_REQUEST,
   commentEndpoint: API_ENDPOINTS.PURCHASE_REQUEST_COMMENT,
-  attachmentEndpoint: API_ENDPOINTS.PURCHASE_REQUEST_COMMENT_ATTACHMENT,
   idFieldName: "purchase_request_id",
   label: "purchase request",
 });
 
-/**
- * ดึงความคิดเห็นของ PR จาก
- * `/api/{buCode}/purchase-request-comment/{prId}`
- */
-export function usePurchaseRequestComments(prId: string | undefined) {
-  const buCode = useBuCode();
-
-  return useQuery<CommentItem[]>({
-    queryKey: [QUERY_KEYS.PURCHASE_REQUEST_COMMENTS, buCode, prId],
-    queryFn: async () => {
-      if (!buCode || !prId)
-        throw new Error("Missing buCode or purchase request id");
-      const res = await httpClient.get(
-        API_ENDPOINTS.PURCHASE_REQUEST_COMMENT(buCode, prId),
-      );
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch comments");
-      const json = await res.json();
-      return json.data ?? [];
-    },
-    enabled: !!buCode && !!prId,
-  });
-}
+/** ดึงความคิดเห็นของ PR จาก `/api/{buCode}/purchase-request-comment/{prId}` */
+export const usePurchaseRequestComments = prCommentCrud.useComments;
+/** สร้างความคิดเห็นใน PR ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
+export const useCreatePurchaseRequestComment = prCommentCrud.useCreate;
 
 /** แก้ไขความคิดเห็นใน PR */
 export const useUpdatePurchaseRequestComment = prCommentCrud.useUpdate;
 /** ลบความคิดเห็นใน PR */
 export const useDeletePurchaseRequestComment = prCommentCrud.useDelete;
 
-/**
- * สร้างความคิดเห็นใน PR ผ่าน multipart/form-data
- * ส่ง message + type + files ในคำขอเดียวไปยัง
- * `/api/{buCode}/purchase-request-comment/{prId}`
- */
-export function useCreatePurchaseRequestComment() {
-  return useApiMutation<{
-    purchase_request_id: string;
-    message: string;
-    type: string;
-    files: File[];
-  }>({
-    mutationFn: (data, buCode) => {
-      const formData = new FormData();
-      formData.append("message", data.message);
-      formData.append("type", data.type);
-      for (const file of data.files) {
-        formData.append("files", file);
-      }
-      return httpClient.post(
-        API_ENDPOINTS.PURCHASE_REQUEST_COMMENT(
-          buCode,
-          data.purchase_request_id,
-        ),
-        formData,
-      );
-    },
-    invalidateKeys: [QUERY_KEYS.PURCHASE_REQUEST_COMMENTS],
-    errorMessage: "Failed to add comment",
-  });
-}
-
-/**
- * Hook ลบ PR พร้อม optimistic update รายการ
- * ลบ item ออกจาก list cache ทันทีและ rollback หาก API ล้มเหลว
- * @returns Mutation สำหรับลบ PR
- * @example
- * const del = useDeletePurchaseRequest();
- * del.mutate(prId);
- */
 export function useDeletePurchaseRequest() {
   return useApiMutation<string>({
     mutationFn: (id, buCode) =>

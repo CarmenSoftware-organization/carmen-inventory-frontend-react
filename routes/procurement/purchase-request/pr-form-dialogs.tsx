@@ -18,6 +18,7 @@ import type {
   PurchaseRequest,
   WorkflowHistoryEntry,
 } from "@/types/purchase-request";
+import { prCommentCrud } from "./use-purchase-request";
 import type { useDeletePurchaseRequest } from "./use-purchase-request";
 import type { ActionDialogState } from "./use-pr-form-actions";
 // PrActionDialog ถูก static import โดย pr-item-fields / pr-footer-action อยู่แล้ว
@@ -25,8 +26,10 @@ import type { ActionDialogState } from "./use-pr-form-actions";
 import { PrActionDialog } from "./workflow/pr-action-dialog";
 
 // แทน next/dynamic ด้วย React.lazy (code-split เหมือนเดิม)
-const PrCommentSheet = lazy(() =>
-  import("./pr-comment-sheet").then((mod) => ({ default: mod.PrCommentSheet })),
+const EntityCommentSheet = lazy(() =>
+  import("@/components/share/entity-comment-sheet").then((mod) => ({
+    default: mod.EntityCommentSheet,
+  })),
 );
 
 const WorkflowHistoryTimeline = lazy(() =>
@@ -130,8 +133,9 @@ export function PrFormDialogs({
       )}
 
       <Suspense fallback={null}>
-        <PrCommentSheet
-          prId={purchaseRequest?.id}
+        <EntityCommentSheet
+          crud={prCommentCrud}
+          entityId={purchaseRequest?.id}
           open={showComment}
           onOpenChange={setShowComment}
         />

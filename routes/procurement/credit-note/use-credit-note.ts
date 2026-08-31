@@ -14,7 +14,6 @@ import type {
   CreateCnDto,
 } from "@/types/credit-note";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
-import type { CommentItem } from "@/components/ui/comment-sheet";
 import { CACHE_DYNAMIC } from "@/lib/cache-config";
 
 /**
@@ -152,75 +151,24 @@ export function useDeleteCreditNote() {
 
 // --- Comments ---
 
-const cnCommentCrud = createCommentCrud({
+/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
+export const cnCommentCrud = createCommentCrud({
   queryKey: QUERY_KEYS.CREDIT_NOTE_COMMENTS,
-  entityEndpoint: API_ENDPOINTS.CREDIT_NOTE,
   commentEndpoint: API_ENDPOINTS.CREDIT_NOTE_COMMENT,
-  attachmentEndpoint: API_ENDPOINTS.CREDIT_NOTE_COMMENT_ATTACHMENT,
   idFieldName: "credit_note_id",
   label: "credit note",
+  cacheProfile: CACHE_DYNAMIC,
 });
 
-/**
- * ดึง comment ของ credit note จาก
- * `/api/{buCode}/credit-note-comment/{cnId}`
- */
-export function useCreditNoteComments(cnId: string | undefined) {
-  const buCode = useBuCode();
-
-  return useQuery<CommentItem[]>({
-    queryKey: [QUERY_KEYS.CREDIT_NOTE_COMMENTS, buCode, cnId],
-    queryFn: async () => {
-      if (!buCode || !cnId)
-        throw new ApiError(
-          ERROR_CODES.VALIDATION_ERROR,
-          "Missing buCode or credit note id",
-        );
-      const res = await httpClient.get(
-        API_ENDPOINTS.CREDIT_NOTE_COMMENT(buCode, cnId),
-      );
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch comments");
-      const json = await res.json();
-      return json.data ?? [];
-    },
-    ...CACHE_DYNAMIC,
-    enabled: !!buCode && !!cnId,
-  });
-}
+/** ดึง comment ของ credit note จาก `/api/{buCode}/credit-note-comment/{cnId}` */
+export const useCreditNoteComments = cnCommentCrud.useComments;
+/** สร้าง comment ของ credit note ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
+export const useCreateCreditNoteComment = cnCommentCrud.useCreate;
 
 /** Hook สำหรับแก้ไข comment ของ credit note */
 export const useUpdateCreditNoteComment = cnCommentCrud.useUpdate;
 /** Hook สำหรับลบ comment ของ credit note */
 export const useDeleteCreditNoteComment = cnCommentCrud.useDelete;
-
-/**
- * สร้าง comment ของ credit note ผ่าน multipart/form-data
- * ส่ง message + type + files ในคำขอเดียวไปยัง
- * `/api/{buCode}/credit-note-comment/{cnId}`
- */
-export function useCreateCreditNoteComment() {
-  return useApiMutation<{
-    credit_note_id: string;
-    message: string;
-    type: string;
-    files: File[];
-  }>({
-    mutationFn: (data, buCode) => {
-      const formData = new FormData();
-      formData.append("message", data.message);
-      formData.append("type", data.type);
-      for (const file of data.files) {
-        formData.append("files", file);
-      }
-      return httpClient.post(
-        API_ENDPOINTS.CREDIT_NOTE_COMMENT(buCode, data.credit_note_id),
-        formData,
-      );
-    },
-    invalidateKeys: [QUERY_KEYS.CREDIT_NOTE_COMMENTS],
-    errorMessage: "Failed to add comment",
-  });
-}
 
 // --- Export ---
 

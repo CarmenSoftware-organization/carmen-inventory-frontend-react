@@ -14,6 +14,7 @@ import {
   useUpdateCreditNote,
   useDeleteCreditNote,
   useSubmitCreditNote,
+  cnCommentCrud,
 } from "./use-credit-note";
 import {
   CN_STATUS,
@@ -42,8 +43,10 @@ import {
   mapItemToPayload,
 } from "./cn-form-schema";
 
-const CnCommentSheet = lazy(() =>
-  import("./cn-comment-sheet").then((mod) => ({ default: mod.CnCommentSheet })),
+const EntityCommentSheet = lazy(() =>
+  import("@/components/share/entity-comment-sheet").then((mod) => ({
+    default: mod.EntityCommentSheet,
+  })),
 );
 
 interface CnFormProps {
@@ -389,8 +392,9 @@ export function CnForm({ creditNote }: CnFormProps) {
             }}
           />
           <Suspense fallback={null}>
-            <CnCommentSheet
-              cnId={creditNote.id}
+            <EntityCommentSheet
+              crud={cnCommentCrud}
+              entityId={creditNote.id}
               open={showComment}
               onOpenChange={setShowComment}
             />

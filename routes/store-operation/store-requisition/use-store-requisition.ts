@@ -1,6 +1,7 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useBuCode } from "@/hooks/use-bu-code";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { createCommentCrud } from "@/hooks/use-comment-crud";
 import { useXlsxExport, type XlsxColumn } from "@/hooks/use-xlsx-export";
 import { httpClient } from "@/lib/http-client";
 import { buildUrl } from "@/lib/build-query-string";
@@ -12,10 +13,6 @@ import type {
   SrStockMovement,
 } from "@/types/store-requisition";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
-import type {
-  CommentAttachment,
-  CommentItem,
-} from "@/components/ui/comment-sheet";
 import { CACHE_DYNAMIC, CACHE_STATIC } from "@/lib/cache-config";
 
 export interface SrPreviousStage {
@@ -277,87 +274,22 @@ export function useDeleteStoreRequisition() {
   });
 }
 
-const SR_COMMENT_INVALIDATE_KEYS = [QUERY_KEYS.STORE_REQUISITION_COMMENTS];
+/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
+export const srCommentCrud = createCommentCrud({
+  queryKey: QUERY_KEYS.STORE_REQUISITION_COMMENTS,
+  commentEndpoint: API_ENDPOINTS.STORE_REQUISITION_COMMENT,
+  idFieldName: "store_requisition_id",
+  label: "store requisition",
+});
 
 /** ดึงความคิดเห็นของ SR ตาม sr id */
-export function useStoreRequisitionComments(
-  srId: string | undefined,
-): UseQueryResult<CommentItem[]> {
-  const buCode = useBuCode();
-
-  return useQuery<CommentItem[]>({
-    queryKey: [QUERY_KEYS.STORE_REQUISITION_COMMENTS, buCode, srId],
-    queryFn: async () => {
-      if (!buCode || !srId) throw new Error("Missing buCode or sr id");
-      const res = await httpClient.get(
-        API_ENDPOINTS.STORE_REQUISITION_COMMENT(buCode, srId),
-      );
-      if (!res.ok) throw new Error("Failed to fetch comments");
-      const json = await res.json();
-      return json.data ?? [];
-    },
-    enabled: !!buCode && !!srId,
-  });
-}
-
-export function useCreateStoreRequisitionComment() {
-  return useApiMutation<{
-    store_requisition_id: string;
-    message: string;
-    type: string;
-    files: File[];
-  }>({
-    mutationFn: (data, buCode) => {
-      const formData = new FormData();
-      formData.append("message", data.message);
-      formData.append("type", data.type);
-      for (const file of data.files) {
-        formData.append("files", file);
-      }
-      return httpClient.post(
-        API_ENDPOINTS.STORE_REQUISITION_COMMENT(
-          buCode,
-          data.store_requisition_id,
-        ),
-        formData,
-      );
-    },
-    invalidateKeys: SR_COMMENT_INVALIDATE_KEYS,
-    errorMessage: "Failed to add comment",
-  });
-}
-
+export const useStoreRequisitionComments = srCommentCrud.useComments;
+/** สร้างความคิดเห็นใน SR ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
+export const useCreateStoreRequisitionComment = srCommentCrud.useCreate;
 /** แก้ไขความคิดเห็นใน SR ตาม comment id */
-export function useUpdateStoreRequisitionComment() {
-  return useApiMutation<{
-    id: string;
-    message: string;
-    attachments: CommentAttachment[];
-    [key: string]: unknown;
-  }>({
-    mutationFn: ({ id, ...data }, buCode) =>
-      httpClient.patch(
-        `${API_ENDPOINTS.STORE_REQUISITION_COMMENT(buCode)}/${id}`,
-        data,
-      ),
-    invalidateKeys: SR_COMMENT_INVALIDATE_KEYS,
-    errorMessage: "Failed to update comment",
-  });
-}
-
+export const useUpdateStoreRequisitionComment = srCommentCrud.useUpdate;
 /** ลบความคิดเห็นใน SR ตาม comment id */
-export function useDeleteStoreRequisitionComment() {
-  return useApiMutation<string | { id: string; entityId?: string }>({
-    mutationFn: (payload, buCode) => {
-      const id = typeof payload === "string" ? payload : payload.id;
-      return httpClient.delete(
-        `${API_ENDPOINTS.STORE_REQUISITION_COMMENT(buCode)}/${id}`,
-      );
-    },
-    invalidateKeys: SR_COMMENT_INVALIDATE_KEYS,
-    errorMessage: "Failed to delete comment",
-  });
-}
+export const useDeleteStoreRequisitionComment = srCommentCrud.useDelete;
 
 // --- Export ---
 

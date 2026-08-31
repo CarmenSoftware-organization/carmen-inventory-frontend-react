@@ -8,12 +8,14 @@ import type { SrFormValues } from "./sr-form-schema";
 import { SrSubmitDialog } from "./sr-submit-dialog";
 import { SrActionDialog } from "./sr-action-dialog";
 import type { UseSrFormActionsReturn } from "./use-sr-form-actions";
-import { useSrPreviousStages } from "./use-store-requisition";
+import { srCommentCrud, useSrPreviousStages } from "./use-store-requisition";
 
 // แทน next/dynamic ด้วย React.lazy (code-split comment-sheet chunk เหมือนเดิม)
 // lazy ต้องการ default export — wrap named export ด้วย { default: ... }
-const SrCommentSheet = lazy(() =>
-  import("./sr-comment-sheet").then((mod) => ({ default: mod.SrCommentSheet })),
+const EntityCommentSheet = lazy(() =>
+  import("@/components/share/entity-comment-sheet").then((mod) => ({
+    default: mod.EntityCommentSheet,
+  })),
 );
 
 interface SrFormDialogsProps {
@@ -158,8 +160,9 @@ export function SrFormDialogs({
       />
 
       <Suspense fallback={null}>
-        <SrCommentSheet
-          srId={storeRequisition?.id}
+        <EntityCommentSheet
+          crud={srCommentCrud}
+          entityId={storeRequisition?.id}
           open={actions.showComment}
           onOpenChange={actions.setShowComment}
         />

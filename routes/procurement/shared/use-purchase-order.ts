@@ -15,7 +15,6 @@ import type {
   VendorForGrn,
 } from "@/types/purchase-order";
 import type { ParamsDto, PaginatedResponse } from "@/types/params";
-import type { CommentItem } from "@/components/ui/comment-sheet";
 import { CACHE_DYNAMIC, CACHE_STATIC } from "@/lib/cache-config";
 
 /**
@@ -490,74 +489,23 @@ export function useClosePurchaseOrder() {
 
 // --- Comments ---
 
-const poCommentCrud = createCommentCrud({
+/** ชุด hook comment ของโมดูลนี้ — ส่งให้ `EntityCommentSheet` ทั้งก้อน */
+export const poCommentCrud = createCommentCrud({
   queryKey: QUERY_KEYS.PURCHASE_ORDER_COMMENTS,
-  entityEndpoint: API_ENDPOINTS.PURCHASE_ORDER,
   commentEndpoint: API_ENDPOINTS.PURCHASE_ORDER_COMMENT,
-  attachmentEndpoint: API_ENDPOINTS.PURCHASE_ORDER_COMMENT_ATTACHMENT,
   idFieldName: "purchase_order_id",
   label: "purchase order",
 });
 
-/**
- * ดึงความคิดเห็นของ PO จาก
- * `/api/{buCode}/purchase-order-comment/{poId}`
- */
-export function usePurchaseOrderComments(poId: string | undefined) {
-  const buCode = useBuCode();
-
-  return useQuery<CommentItem[]>({
-    queryKey: [QUERY_KEYS.PURCHASE_ORDER_COMMENTS, buCode, poId],
-    queryFn: async () => {
-      if (!buCode || !poId)
-        throw new ApiError(
-          ERROR_CODES.VALIDATION_ERROR,
-          "Missing buCode or purchase order id",
-        );
-      const res = await httpClient.get(
-        API_ENDPOINTS.PURCHASE_ORDER_COMMENT(buCode, poId),
-      );
-      if (!res.ok) throw await ApiError.from(res, "Failed to fetch comments");
-      const json = await res.json();
-      return json.data ?? [];
-    },
-    enabled: !!buCode && !!poId,
-  });
-}
+/** ดึงความคิดเห็นของ PO จาก `/api/{buCode}/purchase-order-comment/{poId}` */
+export const usePurchaseOrderComments = poCommentCrud.useComments;
+/** สร้างความคิดเห็นใน PO ผ่าน multipart (ข้อความ + ไฟล์ในคำขอเดียว) */
+export const useCreatePurchaseOrderComment = poCommentCrud.useCreate;
 
 /** แก้ไขความคิดเห็นใน PO */
 export const useUpdatePurchaseOrderComment = poCommentCrud.useUpdate;
 /** ลบความคิดเห็นใน PO */
 export const useDeletePurchaseOrderComment = poCommentCrud.useDelete;
-
-/**
- * สร้างความคิดเห็นใน PO ผ่าน multipart/form-data
- * ส่ง message + type + files ในคำขอเดียวไปยัง
- * `/api/{buCode}/purchase-order-comment/{poId}`
- */
-export function useCreatePurchaseOrderComment() {
-  return useApiMutation<{
-    purchase_order_id: string;
-    message: string;
-    type: string;
-    files: File[];
-  }>({
-    mutationFn: (data, buCode) => {
-      const formData = new FormData();
-      formData.append("message", data.message);
-      formData.append("type", data.type);
-      for (const file of data.files) {
-        formData.append("files", file);
-      }
-      return httpClient.post(
-        API_ENDPOINTS.PURCHASE_ORDER_COMMENT(buCode, data.purchase_order_id),
-        formData,
-      );
-    },
-    invalidateKeys: [QUERY_KEYS.PURCHASE_ORDER_COMMENTS],
-    errorMessage: "Failed to add comment",
-  });
-}
 
 // --- Export ---
 
