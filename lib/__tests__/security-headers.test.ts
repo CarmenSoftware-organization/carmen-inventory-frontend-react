@@ -24,22 +24,68 @@ const HOSTING_CONFIGS = [
   "scripts/cloudfront-security-headers.sh",
 ] as const;
 
-/** hash แบบที่ CSP ต้องการ: base64 ของ sha256 ของ "เนื้อใน" tag (ไม่รวมตัว tag เอง) */
-function cspHashOfInlineScript(html: string): string {
-  const match = /<script>(.*?)<\/script>/s.exec(html);
-  if (!match) throw new Error("index.html has no inline <script> block");
-  return `sha256-${createHash("sha256").update(match[1]).digest("base64")}`;
+/**
+ * `<script ...>` ทุกตัวในเอกสาร — จับแบบไม่สนตัวพิมพ์และยอมให้มี attribute
+ *
+ * ของเดิมเป็น `/<script>(.*?)<\/script>/s` ซึ่งจับได้เฉพาะ tag ตัวเล็กล้วนที่ไม่มี
+ * attribute เลย วันที่มีคนใส่ `type=` หรือ `nonce=` ให้สคริปต์นั้น regexp จะไม่เจอ
+ * แล้วเทสต์นี้พังแบบ "no inline script" ทั้งที่ของยังอยู่ — หรือแย่กว่านั้นคือไปเจอ
+ * สคริปต์ตัวอื่นแล้วคิด hash ผิดตัว (CodeQL js/bad-tag-filter #7)
+ */
+const SCRIPT_TAG = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+
+/** เนื้อของ inline script ทุกตัว — ตัวที่มี `src` โหลดจากไฟล์ ไม่ต้องมี hash */
+function inlineScriptBodies(html: string): string[] {
+  const bodies: string[] = [];
+  for (const [, attrs, body] of html.matchAll(SCRIPT_TAG)) {
+    if (/\bsrc\s*=/i.test(attrs)) continue;
+    bodies.push(body);
+  }
+  return bodies;
+}
+
+/**
+ * hash แบบที่ CSP ต้องการ: base64 ของ sha256 ของ "เนื้อใน" tag (ไม่รวมตัว tag เอง)
+ * คืนมาทุกตัว ไม่ใช่ตัวแรก — เพิ่ม inline script ตัวที่สองแล้วไม่ใส่ hash ให้มัน
+ * ผลคือสคริปต์นั้นถูกบล็อกเงียบ ๆ ใน production ซึ่งคือสิ่งที่ไฟล์นี้มีไว้กัน
+ */
+function cspHashesOfInlineScripts(html: string): string[] {
+  const bodies = inlineScriptBodies(html);
+  if (bodies.length === 0)
+    throw new Error("index.html has no inline <script> block");
+  return bodies.map(
+    (body) => `sha256-${createHash("sha256").update(body).digest("base64")}`,
+  );
 }
 
 describe("security headers", () => {
-  const expectedHash = cspHashOfInlineScript(read("index.html"));
+  const expectedHashes = cspHashesOfInlineScripts(read("index.html"));
 
   it.each(HOSTING_CONFIGS)(
-    "%s มี script-src hash ที่ตรงกับ index.html",
+    "%s มี script-src hash ครบทุก inline script ของ index.html",
     (file) => {
-      expect(read(file)).toContain(expectedHash);
+      const source = read(file);
+      for (const hash of expectedHashes) {
+        expect(source, `${file} ขาด ${hash}`).toContain(hash);
+      }
     },
   );
+
+  it("เก็บ inline script ครบทุกแบบที่ browser ยอมรับ", () => {
+    // browser ไม่สน case และ attribute ไม่ได้ทำให้ tag เป็นคนละตัว — ตัวจับต้อง
+    // เห็นเท่าที่ browser เห็น ไม่งั้น hash ที่คำนวณได้ไม่ตรงกับของที่รันจริง
+    const html = [
+      "<SCRIPT>upper()</SCRIPT>",
+      '<script type="module">withAttr()</script>',
+      '<script src="/main.tsx"></script>',
+      "<script >spaced()</script >",
+    ].join("\n");
+    expect(inlineScriptBodies(html)).toEqual([
+      "upper()",
+      "withAttr()",
+      "spaced()",
+    ]);
+  });
 
   // ชื่อ header ที่ห้ามหายไปจากปลายทางไหน — ค่าของแต่ละตัวต่างกันได้ตามปลายทาง
   // (เช่น connect-src ของ Docker เป็น same-origin แต่ของ CDN ต้องระบุ backend origin)
