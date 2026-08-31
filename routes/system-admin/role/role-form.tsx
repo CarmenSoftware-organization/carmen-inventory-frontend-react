@@ -11,7 +11,11 @@ import { DiscardDialog } from "@/components/ui/discard-dialog";
 import { useDiscardConfirm } from "@/hooks/use-discard-confirm";
 import { AnimationStyles, Reveal } from "@/components/share/reveal";
 import { toast } from "sonner";
-import { useCreateRole, useUpdateRole, useDeleteRole } from "../shared/use-role";
+import {
+  useCreateRole,
+  useUpdateRole,
+  useDeleteRole,
+} from "../shared/use-role";
 import { scrollToFirstInvalidField } from "@/lib/form-helpers";
 import type { RoleDetail } from "@/types/role";
 import type { FormMode } from "@/types/form";
