@@ -39,6 +39,7 @@ const rows: AccountCode[] = [
     doc_version: 1,
     code: "1140-001",
     description_1: "Inventory - Food",
+    description_2: "ครัวร้อน",
     nature: ACCOUNT_NATURE.DEBIT,
     type: ACCOUNT_CODE_TYPE.BALANCE_SHEET,
     is_active: true,
@@ -74,7 +75,13 @@ function renderAcTable(data: AccountCode[] = rows) {
 describe("useAcTable", () => {
   it("มีคอลัมน์ครบตามฟิลด์ที่ backend ส่งมา", () => {
     const { result } = renderAcTable();
-    for (const id of ["code", "description_1", "nature", "type"]) {
+    for (const id of [
+      "code",
+      "description_1",
+      "description_2",
+      "nature",
+      "type",
+    ]) {
       expect(result.current.getColumn(id), `ต้องมีคอลัมน์ ${id}`).toBeDefined();
     }
   });

@@ -17,6 +17,8 @@ export function createAcSchema(tv: TranslationFn, tf: TranslationFn) {
     description_1: z
       .string()
       .min(1, tv("required", { field: tf("description") })),
+    // บรรทัดที่สองไม่บังคับ — ฟอร์มเก็บเป็น string ว่าง แล้วค่อยแปลงเป็น null ตอนส่ง
+    description_2: z.string(),
     nature: z.enum(ACCOUNT_NATURE, {
       error: tv("required", { field: tf("nature") }),
     }),

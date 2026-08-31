@@ -23,7 +23,7 @@ interface UseAcTableOptions {
 }
 
 /**
- * ตารางรหัสบัญชี — รหัส · ชื่อบัญชี · ด้านบัญชี · ประเภท · สถานะ
+ * ตารางรหัสบัญชี — รหัส · ชื่อบัญชี (สองบรรทัด) · ด้านบัญชี · ประเภท · สถานะ
  *
  * @param options - data, totalRecords, params, tableConfig, onEdit, onDelete
  * @returns TanStack table instance
@@ -63,6 +63,16 @@ export function useAcTable({
         <DataGridColumnHeader column={column} title={t("accountName")} />
       ),
       meta: { headerTitle: t("accountName"), skeleton: columnSkeletons.text },
+    },
+    {
+      accessorKey: "description_2",
+      header: ({ column }) => (
+        <DataGridColumnHeader column={column} title={t("accountNameSecond")} />
+      ),
+      meta: {
+        headerTitle: t("accountNameSecond"),
+        skeleton: columnSkeletons.text,
+      },
     },
     {
       accessorKey: "nature",

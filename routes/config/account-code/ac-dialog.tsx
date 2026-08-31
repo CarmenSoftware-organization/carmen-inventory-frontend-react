@@ -30,6 +30,7 @@ interface AcDialogProps {
 type AcPayload = {
   code: string;
   description_1: string;
+  description_2: string | null;
   nature: ACCOUNT_NATURE;
   type: ACCOUNT_CODE_TYPE;
   is_active: boolean;
@@ -60,6 +61,7 @@ export function AcDialog({
           ? {
               code: e.code,
               description_1: e.description_1 ?? "",
+              description_2: e.description_2 ?? "",
               nature: e.nature,
               type: e.type,
               is_active: e.is_active,
@@ -67,6 +69,7 @@ export function AcDialog({
           : {
               code: "",
               description_1: "",
+              description_2: "",
               // ผังบัญชีส่วนใหญ่เริ่มที่บัญชีสินทรัพย์ซึ่งเป็นเดบิต และบัญชีที่
               // ลงรายการได้จริงคือ balance_sheet — ตั้งค่าที่คนกรอกบ่อยที่สุดไว้ก่อน
               nature: ACCOUNT_NATURE.DEBIT,
@@ -77,6 +80,8 @@ export function AcDialog({
       toPayload={(v) => ({
         code: v.code,
         description_1: v.description_1,
+        // ว่าง = ไม่ได้กรอก ส่ง null ไม่ใช่ string ว่าง (แบบเดียวกับ description เดิม)
+        description_2: v.description_2 || null,
         nature: v.nature,
         type: v.type,
         is_active: v.is_active,
@@ -111,6 +116,21 @@ export function AcDialog({
               error={form.formState.errors.description_1?.message}
               maxLength={150}
               {...form.register("description_1")}
+            />
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="account-code-description-2">
+              {t("accountNameSecond")}
+            </FieldLabel>
+            <FieldInput
+              id="account-code-description-2"
+              placeholder={tfl("optional")}
+              className="h-8"
+              disabled={disabled}
+              error={form.formState.errors.description_2?.message}
+              maxLength={150}
+              {...form.register("description_2")}
             />
           </Field>
 

@@ -10,14 +10,24 @@ const schema = createAcSchema(tv, tf);
 const valid = {
   code: "1140-001",
   description_1: "Inventory - Food",
+  description_2: "",
   nature: ACCOUNT_NATURE.DEBIT,
   type: ACCOUNT_CODE_TYPE.BALANCE_SHEET,
   is_active: true,
 };
 
 describe("createAcSchema", () => {
-  it("ผ่านเมื่อกรอกครบทั้งสี่ช่อง", () => {
+  it("ผ่านเมื่อกรอกครบทุกช่องที่บังคับ", () => {
     expect(schema.safeParse(valid).success).toBe(true);
+  });
+
+  it("description_2 ไม่บังคับ — กรอกหรือปล่อยว่างก็ผ่าน", () => {
+    expect(
+      schema.safeParse({ ...valid, description_2: "อาหารสด" }).success,
+    ).toBe(true);
+    expect(schema.safeParse({ ...valid, description_2: "" }).success).toBe(
+      true,
+    );
   });
 
   it("code กับ description_1 ว่างไม่ได้", () => {

@@ -34,6 +34,7 @@ const existing: AccountCode = {
   doc_version: 3,
   code: "4100-002",
   description_1: "Food Revenue",
+  description_2: "F&B outlets",
   nature: ACCOUNT_NATURE.CREDIT,
   type: ACCOUNT_CODE_TYPE.INCOME_STATEMENT,
   is_active: false,
@@ -72,6 +73,7 @@ describe("AcDialog — โหมดสร้างใหม่", () => {
     renderDialog();
     expect(input("account-code-code")).not.toBeNull();
     expect(input("account-code-description-1")).not.toBeNull();
+    expect(input("account-code-description-2")).not.toBeNull();
     expect(input("account-code-name")).toBeNull();
     expect(input("account-code-description")).toBeNull();
   });
@@ -81,7 +83,7 @@ describe("AcDialog — โหมดสร้างใหม่", () => {
     expect(selectValues()).toEqual(["Debit", "Balance sheet"]);
   });
 
-  it("กรอกครบแล้วส่ง body ตรงตามสัญญา 5 ฟิลด์", async () => {
+  it("กรอกครบแล้วส่ง body ตรงตามสัญญา", async () => {
     renderDialog();
     fireEvent.change(input("account-code-code")!, {
       target: { value: "1140-001" },
@@ -95,10 +97,29 @@ describe("AcDialog — โหมดสร้างใหม่", () => {
     expect(createMutate.mock.calls[0][0]).toEqual({
       code: "1140-001",
       description_1: "Inventory - Food",
+      // ไม่ได้กรอก = ส่ง null ไม่ใช่ string ว่าง
+      description_2: null,
       nature: "debit",
       type: "balance_sheet",
       is_active: true,
     });
+  });
+
+  it("กรอก description_2 แล้วติดไปกับ body ด้วย", async () => {
+    renderDialog();
+    fireEvent.change(input("account-code-code")!, {
+      target: { value: "1140-001" },
+    });
+    fireEvent.change(input("account-code-description-1")!, {
+      target: { value: "Inventory - Food" },
+    });
+    fireEvent.change(input("account-code-description-2")!, {
+      target: { value: "ครัวร้อน" },
+    });
+    submit();
+
+    await waitFor(() => expect(createMutate).toHaveBeenCalledTimes(1));
+    expect(createMutate.mock.calls[0][0].description_2).toBe("ครัวร้อน");
   });
 
   it("กรอกไม่ครบไม่ยิง API", async () => {
@@ -120,6 +141,7 @@ describe("AcDialog — โหมดแก้ไข", () => {
     renderDialog({ accountCode: existing });
     expect(input("account-code-code")?.value).toBe("4100-002");
     expect(input("account-code-description-1")?.value).toBe("Food Revenue");
+    expect(input("account-code-description-2")?.value).toBe("F&B outlets");
     expect(selectValues()).toEqual(["Credit", "Income statement"]);
   });
 
@@ -136,6 +158,7 @@ describe("AcDialog — โหมดแก้ไข", () => {
       doc_version: 3,
       code: "4100-002",
       description_1: "Beverage Revenue",
+      description_2: "F&B outlets",
       nature: "credit",
       type: "income_statement",
       is_active: false,

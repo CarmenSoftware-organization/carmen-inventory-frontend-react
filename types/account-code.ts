@@ -39,6 +39,8 @@ export interface AccountCode {
   code: string;
   /** ชื่อบัญชีที่คนอ่าน เช่น "Inventory - Food" */
   description_1: string;
+  /** คำอธิบายบรรทัดที่สอง — ไม่บังคับ ใช้ขยายความชื่อบัญชี */
+  description_2?: string | null;
   nature: ACCOUNT_NATURE;
   type: ACCOUNT_CODE_TYPE;
   is_active: boolean;
@@ -49,6 +51,7 @@ export interface CreateAccountCodeDto {
   doc_version?: number;
   code: string;
   description_1: string;
+  description_2?: string | null;
   nature: ACCOUNT_NATURE;
   type: ACCOUNT_CODE_TYPE;
   is_active: boolean;
