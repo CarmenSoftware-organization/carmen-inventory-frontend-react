@@ -4,12 +4,40 @@ import {
   useAdjustmentType,
   useDeleteAdjustmentType,
 } from "@/hooks/use-adjustment-type";
-import type { AdjustmentType } from "@/types/adjustment-type";
+import { ADJUSTMENT_TYPE, type AdjustmentType } from "@/types/adjustment-type";
 import { LIST_PAGE_KEYS } from "@/constant/list-page-keys";
 import { useAdjustmentTypeTable } from "./use-adjustment-type-table";
-import { ADJUSTMENT_TYPE_FILTER_FIELDS } from "./adjustment-type-filter-fields";
+// import { ADJUSTMENT_TYPE_FILTER_FIELDS } from "./adjustment-type-filter-fields";
 import { AdjustmentTypeDialog } from "./adjustment-type-dialog";
 import AdjustmentTypeCard from "./adjustment-type-card";
+import { FilterFieldDef } from "@/types/list-filter";
+
+const ADJUSTMENT_TYPE_FILTER_FIELDS: FilterFieldDef[] = [
+  {
+    key: "filter",
+    control: "status",
+    labelKey: "common.status",
+    options: [
+      { labelKey: "status.active", value: "is_active|bool:true" },
+      { labelKey: "status.inactive", value: "is_active|bool:false" },
+    ],
+  },
+  {
+    key: "adj_type",
+    control: "multi-select",
+    labelKey: "field.type",
+    options: [
+      {
+        labelKey: "field.stockIn",
+        value: `type|string:${ADJUSTMENT_TYPE.STOCK_IN}`,
+      },
+      {
+        labelKey: "field.stockOut",
+        value: `type|string:${ADJUSTMENT_TYPE.STOCK_OUT}`,
+      },
+    ],
+  },
+];
 
 export default function AdjustmentTypeComponent() {
   const tfl = useTranslations("field");

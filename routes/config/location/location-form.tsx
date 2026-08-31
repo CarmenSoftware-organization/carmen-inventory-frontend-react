@@ -196,15 +196,10 @@ export function LocationForm({ location }: LocationFormProps) {
 
     if (isEdit && location) {
       updateLocation.mutate(
-        // doc_version round-trips the loaded record's version — the backend
-        // requires it for optimistic-concurrency checks on update
         { id: location.id, doc_version: location.doc_version, ...payload },
         {
           onSuccess: () => {
             toast.success(tt("updateSuccess", { entity: t("entity") }));
-            // เคลียร์ transfer deltas หลัง save — ไม่งั้น users.add/remove และ
-            // products.add/remove ยังค้าง ถ้าเข้า edit แล้ว save อีกครั้งจะ re-send
-            // การเพิ่ม/ลบเดิมซ้ำ
             form.reset({
               ...values,
               users: { add: [], remove: [] },
@@ -242,9 +237,6 @@ export function LocationForm({ location }: LocationFormProps) {
     });
   };
 
-  // Back = กลับหน้า list เสมอ ไม่ใช่ history back — จากหน้า detail ผู้ใช้เดินไปใบอื่น
-  // ได้ (ปุ่ม ↑↓ ของ DocSequenceNav) history จึงเป็นเส้นทางที่เดินผ่านมา ไม่ใช่ที่ที่
-  // อยากกลับไป กดครั้งเดียวต้องถึง list ไม่ใช่ถอยทีละใบ
   const goBack = () => {
     navigate("/config/location");
   };
@@ -349,8 +341,6 @@ export function LocationForm({ location }: LocationFormProps) {
                 {isView ? (
                   <FieldPlainText>
                     {location?.location_type ? (
-                      // ไอคอนชุดเดียวกับที่ list แสดง — สลับ list ↔ ฟอร์มแล้วเห็น
-                      // ประเภทคลังหน้าตาเดิม
                       <LocationTypeLabel type={location.location_type} />
                     ) : (
                       ""
@@ -437,8 +427,6 @@ export function LocationForm({ location }: LocationFormProps) {
                         onItemChange={(item) =>
                           form.setValue("delivery_point_name", item.name)
                         }
-                        // โชว์ชื่อ delivery point เดิมได้แม้ inactive (ไม่อยู่ใน
-                        // lookup list ที่กรองเฉพาะ active) แทนการตก placeholder
                         defaultLabel={location?.delivery_point?.name}
                         disabled={isDisabled}
                         error={form.formState.errors.delivery_point_id?.message}

@@ -14,12 +14,6 @@ interface Props {
   readonly onDelete?: (item: AdjustmentType) => void;
 }
 
-/**
- * การ์ดประเภทการปรับปรุงสต๊อก สำหรับ `ConfigListTemplate` โหมด grid/mobile
- *
- * ชนิด (รับเข้า/จ่ายออก) เป็นข้อความ ไม่ใช่ badge สี — ของเดิมใช้ variant
- * default/warning ทำให้หัวการ์ดมี badge สองใบและมีสองสีต่อใบ
- */
 export default function AdjustmentTypeCard({ item, onEdit, onDelete }: Props) {
   const tfl = useTranslations("field");
 
