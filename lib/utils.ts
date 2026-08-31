@@ -91,6 +91,36 @@ export function sanitizeUrl(url: string): string | undefined {
 }
 
 /**
+ * URL ที่ปลอดภัยพอจะใส่ใน `<img src>` — คืน `null` ถ้าไม่เข้าเกณฑ์
+ *
+ * `<img>` รับได้มากกว่า href ปกติเพราะปลายทางคือรูป ไม่ใช่การพาผู้ใช้ไปไหน:
+ * - `blob:` — object URL ที่หน้านี้สร้างเองจากไฟล์ที่ผู้ใช้เพิ่งเลือก (พรีวิวก่อนอัปโหลด)
+ *   blob URL อ้างถึงของในเอกสารนี้เท่านั้น ปลอมมาจากข้างนอกไม่ได้
+ * - `data:image/…` — placeholder/รูป base64 ที่ backend ส่งมา ชนิดอื่นไม่รับ
+ *   (`data:text/html` เป็นทางคลาสสิกของ XSS)
+ * - http(s) และ path ภายในแอป — ผ่าน `safeNavigationHref` ตามปกติ
+ *
+ * ด่านนี้อยู่ที่ตัว `<img>` เอง ไม่ใช่ที่ผู้เรียก เพราะผู้เรียกเพิ่มได้เรื่อย ๆ
+ * และคนเพิ่มคนที่สี่จะไม่รู้ว่าต้อง sanitize มาก่อน
+ *
+ * @param input - URL ดิบ
+ * @returns URL ที่ใช้ได้ หรือ null
+ * @example
+ * ```ts
+ * safeImageSrc("blob:http://localhost/9f2…"); // ใช้ได้
+ * safeImageSrc("data:text/html,<script>");    // null
+ * ```
+ */
+export function safeImageSrc(input: string | null | undefined): string | null {
+  if (!input) return null;
+  const candidate = input.trim();
+  if (!candidate || hasControlChars(candidate)) return null;
+  if (candidate.startsWith("blob:")) return candidate;
+  if (/^data:image\/[a-z0-9.+-]+[,;]/i.test(candidate)) return candidate;
+  return safeNavigationHref(candidate);
+}
+
+/**
  * Returns a navigation-safe href, or null if the input is unsafe.
  *
  * Accepts:

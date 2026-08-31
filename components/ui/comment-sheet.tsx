@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/image-lightbox";
 import { formatDate } from "@/lib/date-utils";
 import EmptyComponent from "@/components/empty-component";
-import { safeNavigationHref, sanitizeUrl } from "@/lib/utils";
+import { safeImageSrc, safeNavigationHref, sanitizeUrl } from "@/lib/utils";
 
 export interface CommentAttachment {
   size: number;
@@ -211,8 +211,12 @@ interface AttachmentImageProps {
 function AttachmentImage({ src, fileName, size = "md" }: AttachmentImageProps) {
   const [errored, setErrored] = useState(false);
   const dimension = size === "sm" ? "size-14" : "size-16";
+  // ด่านสุดท้ายก่อนเข้า <img> — ผู้เรียกทั้งสามที่ส่งของที่ผ่านการตรวจมาแล้ว แต่
+  // ด่านต้องอยู่ตรงนี้ ไม่ใช่ฝากไว้กับผู้เรียก คนเพิ่มที่เรียกคนถัดไปจะไม่รู้กติกา
+  // ไม่ผ่าน = ตกไปกล่อง fallback เหมือนตอนโหลดรูปไม่ขึ้น
+  const safeSrc = safeImageSrc(src);
 
-  if (errored) {
+  if (errored || !safeSrc) {
     return (
       <div
         className={`${dimension} bg-muted text-muted-foreground/70 flex flex-col items-center justify-center gap-0.5 rounded p-1`}
@@ -229,7 +233,7 @@ function AttachmentImage({ src, fileName, size = "md" }: AttachmentImageProps) {
   return (
     /* plain <img>: ไม่มี @next/next/jsx-a11y plugin ใน Vite eslint config */
     <img
-      src={src}
+      src={safeSrc}
       alt={fileName}
       className={`${dimension} object-cover`}
       loading="lazy"
