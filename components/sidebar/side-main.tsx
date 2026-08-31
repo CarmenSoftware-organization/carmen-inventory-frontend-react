@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 const ACCENT = "var(--primary)";
 
 export function SideMain() {
-  const pathname = useLocation().pathname;
+  const { pathname, search } = useLocation();
   const t = useTranslations("modules");
 
   const activeModule = moduleList.find((mod) => pathname.startsWith(mod.path));
@@ -77,8 +77,14 @@ export function SideMain() {
         <SidebarGroup className="pt-0 group-data-[collapsible=icon]:px-2">
           <SidebarMenu>
             {visibleSubs.map((sub) => {
-              const isActive =
+              const onPath =
                 pathname === sub.path || pathname.startsWith(sub.path + "/");
+              // เมนูย่อยที่ path เดียวกันแยกกันด้วย query — ไม่งั้นสว่างพร้อมกันหมด
+              // ตัวแม่สว่างเมื่ออยู่หน้านั้นแบบไม่ได้กรองด้วยลูกตัวไหน
+              const activeChild = sub.subModules?.find(
+                (c) => c.search && onPath && search === c.search,
+              );
+              const isActive = onPath && !activeChild;
               // ไอคอน + ป้าย เหมือนกันทั้งสองสาขา ต่างแค่ตัวห่อ (Link หรือปุ่มที่กด
               // แล้วบอกว่าไม่มีสิทธิ์) — แยกไว้จะได้ไม่ต้องแก้สองที่ทุกครั้ง
               const content = (
@@ -158,6 +164,45 @@ export function SideMain() {
                       )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+
+                  {/* เมนูย่อยอีกชั้น — เยื้องเข้าไปและซ่อนตอนย่อ sidebar เป็นไอคอน
+                      (ไอคอนเรียงกันสามตัวที่ชี้หน้าเดียวกันแยกไม่ออกอยู่ดี) */}
+                  {sub.subModules?.map((child) => {
+                    const childActive = onPath && search === child.search;
+                    return (
+                      <SidebarMenuItem
+                        key={`${child.path}${child.search ?? ""}`}
+                        className="group-data-[collapsible=icon]:hidden"
+                      >
+                        <SidebarMenuButton
+                          asChild
+                          size="sm"
+                          isActive={childActive}
+                          className="ms-4 w-auto rounded-md"
+                        >
+                          <Link to={`${child.path}${child.search ?? ""}`}>
+                            <child.icon
+                              aria-hidden="true"
+                              className={cn(
+                                "shrink-0",
+                                childActive
+                                  ? "text-primary"
+                                  : "text-muted-foreground",
+                              )}
+                            />
+                            <span
+                              className={cn(
+                                "text-xs",
+                                childActive && "text-primary",
+                              )}
+                            >
+                              {t(child.name)}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
                 </Fragment>
               );
             })}

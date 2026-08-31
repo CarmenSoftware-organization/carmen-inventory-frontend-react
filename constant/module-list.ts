@@ -63,6 +63,13 @@ import {
 export interface ModuleDto {
   name: string;
   path: string;
+  /**
+   * query string ที่ต่อท้าย `path` ตอนสร้างลิงก์ (ขึ้นต้นด้วย `?`)
+   *
+   * ใช้กับเมนูย่อยที่ชี้หน้าเดียวกันแต่กรองไว้ล่วงหน้า เช่น workflow แยกตามชนิดใบ
+   * — `path` ต้องสะอาดเสมอเพราะเป็นตัวเทียบ active/breadcrumb/license
+   */
+  search?: string;
   icon: LucideIcon;
   subModules?: ModuleDto[];
   /** When true, render a visual separator before this module */
@@ -593,6 +600,35 @@ export const moduleList: ModuleDto[] = [
         licenseFeature: "system_admin.workflow", // config:workflows
         icon: Network,
         permission: PERMISSIONS.system_configuration.view,
+        // เมนูย่อยชี้หน้าเดิมแต่ติดตัวกรองชนิดใบมาให้ — ค่าใน `search` คือ clause
+        // เต็มแบบเดียวกับที่ตัวกรองบนหน้าเขียนลง URL (ดู WF_TYPE_OPTIONS) กด
+        // เข้ามาแล้วจึงเห็น chip ตัวกรองและกดถอดออกได้เหมือนกรองเอง
+        subModules: [
+          {
+            name: "workflowPurchaseRequest",
+            path: "/system-admin/workflow",
+            search: `?workflow_type=${encodeURIComponent("workflow_type|string:purchase_request_workflow")}`,
+            licenseFeature: "system_admin.workflow",
+            icon: ShoppingCart,
+            permission: PERMISSIONS.system_configuration.view,
+          },
+          {
+            name: "workflowPurchaseOrder",
+            path: "/system-admin/workflow",
+            search: `?workflow_type=${encodeURIComponent("workflow_type|string:purchase_order_workflow")}`,
+            licenseFeature: "system_admin.workflow",
+            icon: Receipt,
+            permission: PERMISSIONS.system_configuration.view,
+          },
+          {
+            name: "workflowStoreRequisition",
+            path: "/system-admin/workflow",
+            search: `?workflow_type=${encodeURIComponent("workflow_type|string:store_requisition_workflow")}`,
+            licenseFeature: "system_admin.workflow",
+            icon: Store,
+            permission: PERMISSIONS.system_configuration.view,
+          },
+        ],
       },
       {
         name: "interface",
