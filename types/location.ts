@@ -7,7 +7,7 @@ export type { DeliveryPoint };
 
 export type PhysicalCountType = "yes" | "no";
 
-export interface UserLocation {
+interface UserLocation {
   id: string;
   firstname: string;
   lastname: string;

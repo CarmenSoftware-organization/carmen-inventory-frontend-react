@@ -31,7 +31,7 @@ export interface UserProfile {
   signature_url: string | null;
 }
 
-export interface CurrentPeriod {
+interface CurrentPeriod {
   id: string;
   period: string;
   fiscal_year: number;
@@ -121,7 +121,7 @@ export interface BusinessUnit {
   avatar_url: string | null;
 }
 
-export interface BusinessUnitConfig {
+interface BusinessUnitConfig {
   calculation_method: string;
   default_currency_id: string;
   default_currency: {
@@ -151,7 +151,7 @@ export interface BusinessUnitConfig {
   is_active: boolean;
 }
 
-export interface ContactInfo {
+interface ContactInfo {
   name: string;
   tel: string;
   email: string;

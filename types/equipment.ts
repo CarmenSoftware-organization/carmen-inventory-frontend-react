@@ -1,10 +1,10 @@
-export interface EquipmentAuditEntry {
+interface EquipmentAuditEntry {
   at: string;
   id: string;
   name: string;
 }
 
-export interface EquipmentAudit {
+interface EquipmentAudit {
   created: EquipmentAuditEntry;
   updated: EquipmentAuditEntry;
 }

@@ -14,11 +14,6 @@ export interface Report {
   _templateType?: "form" | "list";
 }
 
-export interface CreateReportDto {
-  name: string;
-  is_active: boolean;
-}
-
 /** ข้อมูล raw จาก BE endpoint `/reports/templates` */
 export interface ReportTemplate {
   id: string;

@@ -9,7 +9,7 @@ export interface DocumentFile {
 }
 
 /** หนึ่งแถวของสรุป — โมดูลต้นทางหนึ่งโมดูล (`reference_type === null` = อัปโหลดจากหน้า Document โดยตรง) */
-export interface DocumentSummaryRow {
+interface DocumentSummaryRow {
   reference_type: string | null;
   size: number;
   count: number;

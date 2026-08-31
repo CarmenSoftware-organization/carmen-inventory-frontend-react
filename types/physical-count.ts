@@ -101,7 +101,7 @@ export interface CreatePhysicalCountDto {
 }
 
 // PATCH /physical-count/{id}/save request
-export interface PhysicalCountSaveItemDto {
+interface PhysicalCountSaveItemDto {
   id: string;
   actual_qty: number;
 }

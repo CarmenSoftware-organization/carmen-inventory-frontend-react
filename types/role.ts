@@ -1,4 +1,4 @@
-export interface RolePermission {
+interface RolePermission {
   permission_id: string;
   action: string;
   resource: string;

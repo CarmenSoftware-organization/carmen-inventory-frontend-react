@@ -1,7 +1,7 @@
 import type { DatasetParam } from "@/types/dashboard-widget";
 
-export type DashboardDatasetShape = "scalar" | "scalar_delta" | (string & {});
-export type DashboardDatasetCategory = "workflow" | "inventory" | (string & {});
+type DashboardDatasetShape = "scalar" | "scalar_delta" | (string & {});
+type DashboardDatasetCategory = "workflow" | "inventory" | (string & {});
 
 export interface DashboardDataset {
   readonly id: string;

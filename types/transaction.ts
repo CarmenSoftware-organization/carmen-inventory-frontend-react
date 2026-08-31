@@ -9,7 +9,7 @@ export type TransactionDocType =
   | "good_received_note"
   | "store_requisition";
 
-export interface TransactionDetail {
+interface TransactionDetail {
   id: string;
   location_id: string;
   location_code: string;
@@ -24,7 +24,7 @@ export interface TransactionDetail {
   total_cost: number;
 }
 
-export interface AuditActor {
+interface AuditActor {
   at: string;
   id: string;
   name: string;

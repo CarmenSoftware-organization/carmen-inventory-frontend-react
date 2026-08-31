@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createProductSchema } from "./product";
+import { createProductSchema } from "../product";
 
 // identity translator — the schema only needs a function that returns a string
 const t = (key: string) => key;

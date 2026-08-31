@@ -1,7 +1,7 @@
 import type { Audit } from "./audit";
 import type { TransferPayload } from "@/types/transfer";
 
-export interface DepartmentUser {
+interface DepartmentUser {
   id: string;
   user_id: string;
   firstname: string;

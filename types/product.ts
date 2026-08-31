@@ -6,7 +6,7 @@ import type { Audit } from "./audit";
 
 export type ProductStatusType = "active" | "inactive";
 
-export interface ProductInfoItem {
+interface ProductInfoItem {
   label: string;
   value: string;
   data_type: string;
@@ -23,7 +23,7 @@ export interface ProductUnitConversion {
   is_active: boolean;
 }
 
-export interface ProductLocationItem {
+interface ProductLocationItem {
   id?: string;
   location_id: string;
   shelf_id?: string | null;
@@ -225,7 +225,7 @@ export type ProductFormInstance = UseFormReturn<ProductFormValues>;
 
 type UnitPayload = Omit<ProductUnitConversion, "id">;
 
-export interface LocationPayload {
+interface LocationPayload {
   location_id: string;
   shelf_id: string | null;
   min_qty: number | null;

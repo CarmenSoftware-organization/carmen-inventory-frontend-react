@@ -14,7 +14,7 @@ export const getAdjustmentType = (
   item: Pick<InventoryAdjustment, "si_no">,
 ): InventoryAdjustmentType => (item.si_no ? "stock-in" : "stock-out");
 
-export interface InventoryAdjustmentDetail {
+interface InventoryAdjustmentDetail {
   id: string;
   sequence_no: number;
   product_id: string;

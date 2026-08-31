@@ -1,15 +1,15 @@
 import type { Audit } from "@/types/audit";
 
-export type PriceListTemplateStatus = "draft" | "active" | "inactive";
+type PriceListTemplateStatus = "draft" | "active" | "inactive";
 
-export interface PriceListTemplateMoq {
+interface PriceListTemplateMoq {
   qty: number;
   note: string;
   unit_id: string;
   unit_name: string;
 }
 
-export interface PriceListTemplateProduct {
+interface PriceListTemplateProduct {
   id: string;
   product_id: string;
   product_name: string;

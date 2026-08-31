@@ -4,7 +4,7 @@ export enum WORKFLOW_TYPE {
   SR = "store_requisition",
 }
 
-export enum enum_sla_unit {
+enum enum_sla_unit {
   minutes = "minutes",
   hours = "hours",
   days = "days",
@@ -12,12 +12,12 @@ export enum enum_sla_unit {
 
 export type SlaUnit = `${enum_sla_unit}`;
 export type Role = "create" | "approve" | "purchase" | "issue";
-export type CreatorAccess = "only_creator" | "all_department";
+type CreatorAccess = "only_creator" | "all_department";
 
-export type OperatorType = "eq" | "lt" | "gt" | "lte" | "gte" | "between";
-export type ActionType = "SKIP_STAGE" | "NEXT_STAGE";
-export type NotificationChannel = "Email" | "System";
-export type NotificationEventTrigger =
+type OperatorType = "eq" | "lt" | "gt" | "lte" | "gte" | "between";
+type ActionType = "SKIP_STAGE" | "NEXT_STAGE";
+type NotificationChannel = "Email" | "System";
+type NotificationEventTrigger =
   | "onSubmit"
   | "onApprove"
   | "onReject"
@@ -46,7 +46,7 @@ export interface Product {
   };
 }
 
-export interface NotificationChannelConfig {
+interface NotificationChannelConfig {
   is_active: boolean;
   notification_template_id: string;
 }
@@ -72,19 +72,19 @@ export interface Action {
   template?: string;
 }
 
-export interface AvailableActions {
+interface AvailableActions {
   submit: Action;
   approve: Action;
   reject: Action;
   sendback: Action;
 }
 
-export interface HideFields {
+interface HideFields {
   price_per_unit: boolean;
   total_price: boolean;
 }
 
-export interface SLAWarningNotification {
+interface SLAWarningNotification {
   recipients: {
     requestor: boolean;
     current_approve: boolean;
@@ -123,7 +123,7 @@ export interface Stage {
   sla_warning_notification?: SLAWarningNotification;
 }
 
-export interface RoutingCondition {
+interface RoutingCondition {
   field: string;
   operator: OperatorType;
   value: string[];
@@ -131,7 +131,7 @@ export interface RoutingCondition {
   max_value?: string;
 }
 
-export interface RoutingAction {
+interface RoutingAction {
   type: ActionType;
   parameters: {
     target_stage: string;
@@ -186,7 +186,7 @@ export interface Workflow {
   audit?: AuditInfo;
 }
 
-export interface WorkflowNotification {
+interface WorkflowNotification {
   id: number;
   event?: string;
   event_trigger?: NotificationEventTrigger;
@@ -204,7 +204,7 @@ export interface Template {
   content: string;
 }
 
-export interface WorkflowData {
+interface WorkflowData {
   document_reference_pattern: string;
   stages: Stage[];
   routing_rules: RoutingRule[];

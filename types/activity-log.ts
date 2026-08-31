@@ -1,4 +1,4 @@
-export interface ActivityAudit {
+interface ActivityAudit {
   created: { at: string; id: string | null; name: string | null };
   updated: { at: string };
 }
@@ -42,7 +42,7 @@ export interface ActivityChildChange {
  * `/activity-logs/:id/detail`) — `has_changes` ตัด housekeeping field
  * (updated_at/updated_by_id/doc_version) ออกแล้ว
  */
-export interface ActivityDiff {
+interface ActivityDiff {
   fields: ActivityFieldChange[];
   children: ActivityChildChange[];
   has_changes: boolean;

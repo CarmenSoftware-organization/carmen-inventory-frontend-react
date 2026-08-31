@@ -4,7 +4,7 @@ export const NODE_TYPE = {
   ITEM_GROUP: "itemGroup",
 } as const;
 
-export type NodeType = (typeof NODE_TYPE)[keyof typeof NODE_TYPE];
+type NodeType = (typeof NODE_TYPE)[keyof typeof NODE_TYPE];
 
 export type CategoryType = "category" | "subcategory" | "itemgroup";
 

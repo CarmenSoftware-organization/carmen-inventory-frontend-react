@@ -1,6 +1,6 @@
-import type { AuditEntry, Audit } from "@/types/audit";
+import type { Audit } from "@/types/audit";
 
-export type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
+type PriceListStatus = "draft" | "submitted" | "active" | "inactive";
 
 /**
  * Vendor record จาก `/{buCode}/pricelists/active-vendors/{date}` —
@@ -42,8 +42,7 @@ export interface PriceListDetailItem {
   doc_version?: number;
 }
 
-export type PriceListAuditEntry = AuditEntry;
-export type PriceListAudit = Audit;
+type PriceListAudit = Audit;
 
 export interface PriceList {
   id: string;

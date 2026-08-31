@@ -5,7 +5,7 @@
  * ตัว create รับ `CreateReportScheduleDto` คืน `ReportSchedule`
  */
 
-export type ScheduleFrequency = "daily" | "weekly" | "monthly";
+type ScheduleFrequency = "daily" | "weekly" | "monthly";
 
 export type ReportFormat =
   | "REPORT_FORMAT_PDF"
@@ -19,7 +19,7 @@ export type ReportFormat =
   | "csv"
   | "json";
 
-export interface ScheduleConfig {
+interface ScheduleConfig {
   frequency: ScheduleFrequency;
   /** "HH:mm" 24h */
   time: string;
@@ -29,12 +29,12 @@ export interface ScheduleConfig {
   days_of_month?: number[];
 }
 
-export interface ScheduleNotifications {
+interface ScheduleNotifications {
   web: boolean;
   email: boolean;
 }
 
-export interface ScheduleDelivery {
+interface ScheduleDelivery {
   type: "viewer_url";
   viewer_endpoint: string;
 }
@@ -77,7 +77,7 @@ export interface ReportScheduleDialogField {
   source?: string;
 }
 
-export interface ReportLookupItem {
+interface ReportLookupItem {
   label: string;
   value: string;
 }

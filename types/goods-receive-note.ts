@@ -28,7 +28,7 @@ export interface GrnLocationItem {
 
 // --- Detail Item (line item inside a detail group) ---
 
-export interface GrnDetailItem
+interface GrnDetailItem
   extends TaxFields, DiscountFields, ItemMoneyFields {
   id: string;
   good_received_note_detail_id: string;
@@ -61,7 +61,7 @@ export interface GrnDetailItem
 
 // --- Detail Group (product + location) ---
 
-export interface GoodsReceiveNoteDetail {
+interface GoodsReceiveNoteDetail {
   id: string;
   good_received_note_id: string;
   sequence_no: number;
@@ -85,7 +85,7 @@ export interface GoodsReceiveNoteDetail {
 
 // --- Extra Cost ---
 
-export interface ExtraCostDetailItem {
+interface ExtraCostDetailItem {
   id?: string;
   extra_cost_type_id: string;
   note: string;
@@ -102,7 +102,7 @@ export interface ExtraCostDetailItem {
   tax_type: string;
 }
 
-export interface GrnExtraCost {
+interface GrnExtraCost {
   id: string;
   good_received_note_id: string;
   name: string | null;
@@ -115,7 +115,7 @@ export interface GrnExtraCost {
 // --- Main GRN ---
 
 /** GRN posting type — mirrors backend `enum_good_received_note_post_type`. */
-export type GrnPostType = "ap" | "consignment" | "cash";
+type GrnPostType = "ap" | "consignment" | "cash";
 
 export interface GoodsReceiveNote {
   id: string;
