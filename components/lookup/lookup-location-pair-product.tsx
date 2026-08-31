@@ -136,8 +136,14 @@ export function LookupLocationPairProduct({
       popoverWidth={popoverWidth}
       popoverAlign="start"
       emptyIcon={PackageSearch}
-      emptyTitle={tl("noFound", { entity: tfl("product") })}
-      emptyDescription={tl("noFoundDesc")}
+      // ค้นแล้วไม่เจอ กับ "คลังคู่นี้ไม่มีของที่เวิร์กโฟลว์นี้ให้เบิกเลย" คนละเรื่องกัน
+      // และผู้ใช้แก้คนละวิธี — อันแรกลบคำค้น อันหลังต้องไปเปลี่ยนคลัง/เวิร์กโฟลว์
+      emptyTitle={
+        search
+          ? tl("noFound", { entity: tfl("product") })
+          : tl("noProductInScope")
+      }
+      emptyDescription={search ? tl("noFoundDesc") : tl("noProductInScopeDesc")}
       isLoading={isLoading}
       modal={modal}
       defaultLabel={defaultLabel}

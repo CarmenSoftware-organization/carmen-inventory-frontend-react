@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useFieldArray, type UseFormReturn } from "react-hook-form";
 import { useLocationPairProducts } from "@/hooks/use-location-pair-products";
 import { useTranslations } from "use-intl";
-import { toast } from "sonner";
 import { BoxIcon, Check, Eye, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/data-grid/data-grid";
 import { DataGridTable } from "@/components/ui/data-grid/data-grid-table";
 import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { WarningDialog } from "@/components/ui/warning-dialog";
 import EmptyComponent from "@/components/empty-component";
 import { STAGE_ROLE } from "@/types/stage-role";
 import type { SrFormValues } from "./sr-form-schema";
@@ -44,6 +44,10 @@ export function SrItemFields({
   const t = useTranslations("storeOperation.storeRequisition");
   const tc = useTranslations("common");
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  // เหตุที่เพิ่มรายการไม่ได้ — null = เพิ่มได้ปกติ
+  const [addBlocked, setAddBlocked] = useState<"criteria" | "noProduct" | null>(
+    null,
+  );
   const [bulkAction, setBulkAction] = useState<"approve" | "reject" | null>(
     null,
   );
@@ -58,16 +62,21 @@ export function SrItemFields({
   // ตัวที่ยิงจริงคือ lookup ในแต่ละแถว ซึ่งกว่าจะ mount ก็ตอนกดเพิ่มรายการแล้ว
   // observer ตัวนี้อยู่ตลอดอายุแท็บรายการ ของที่โหลดมาเลยไม่ถูกทิ้งทั้งที่ gcTime
   // เป็น 0 · params ต้องตรงกับที่ useLookupPagination ยิงหน้าแรกเป๊ะ ไม่งั้นคนละ key
-  useLocationPairProducts(
-    fromLocationId || undefined,
-    toLocationId || undefined,
-    workflowId || undefined,
-    {
-      search: undefined,
-      perpage: 30,
-      page: 1,
-    },
-  );
+  const { data: scopeProducts, isSuccess: scopeLoaded } =
+    useLocationPairProducts(
+      fromLocationId || undefined,
+      toLocationId || undefined,
+      workflowId || undefined,
+      {
+        search: undefined,
+        perpage: 30,
+        page: 1,
+      },
+    );
+
+  // โหลดมาแล้วได้ [] = คู่คลังนี้ไม่มีของที่เวิร์กโฟลว์นี้ให้เบิกเลย เพิ่มแถวไปก็
+  // เลือกอะไรไม่ได้ (ยังไม่โหลดเสร็จ ไม่ถือว่าว่าง ไม่งั้นเตือนดักหน้าตอนกำลังโหลด)
+  const hasNoProduct = scopeLoaded && (scopeProducts?.data?.length ?? 0) === 0;
 
   // เปลี่ยนคลังหรือ workflow แล้วสินค้าที่เลือกไว้อาจไม่อยู่ในเกณฑ์ใหม่ (สินค้าที่
   // เลือกได้ = มีทั้งสองคลัง + อยู่ในชุดที่ workflow เลือกไว้) — ล้างของที่เลือกทุกแถว
@@ -94,12 +103,12 @@ export function SrItemFields({
   // ทั้งสองคลังและอยู่ในชุดที่ workflow เลือกไว้ — เพิ่มแถวเปล่าไปก่อนได้แต่จะกด
   // เลือกอะไรไม่ได้เลย บอกไปตรง ๆ ดีกว่าปล่อยให้งง
   const handleAddItem = () => {
-    if (!fromLocationId || !toLocationId) {
-      toast.warning(t("selectLocationsFirst"));
+    if (!workflowId || !fromLocationId || !toLocationId) {
+      setAddBlocked("criteria");
       return;
     }
-    if (!workflowId) {
-      toast.warning(t("selectWorkflowFirst"));
+    if (hasNoProduct) {
+      setAddBlocked("noProduct");
       return;
     }
     prependItem({ ...SR_ITEM });
@@ -242,6 +251,22 @@ export function SrItemFields({
           removeItem(deleteIndex);
           setDeleteIndex(null);
         }}
+      />
+
+      <WarningDialog
+        open={addBlocked !== null}
+        title={
+          addBlocked === "noProduct"
+            ? t("noProductTitle")
+            : t("addItemBlockedTitle")
+        }
+        description={
+          addBlocked === "noProduct"
+            ? t("noProductDesc")
+            : t("addItemBlockedDesc")
+        }
+        confirmLabel={tc("close")}
+        onConfirm={() => setAddBlocked(null)}
       />
 
       <SrSelectDialog
