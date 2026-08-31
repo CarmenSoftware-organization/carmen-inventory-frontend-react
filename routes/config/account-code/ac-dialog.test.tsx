@@ -54,7 +54,7 @@ function renderDialog(props: Partial<Parameters<typeof AcDialog>[0]> = {}) {
 }
 
 const input = (id: string) =>
-  document.getElementById(id) as HTMLInputElement | null;
+  document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement | null;
 
 /**
  * ข้อความบนปุ่ม dropdown ตามลำดับที่ render (0 = ด้านบัญชี, 1 = ประเภท)

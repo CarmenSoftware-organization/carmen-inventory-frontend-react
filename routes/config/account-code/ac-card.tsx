@@ -27,7 +27,7 @@ export default function AcCard({ item, onEdit, onDelete }: Props) {
       <ListCardActiveRow active={item.is_active} />
       <ListCardRow label={t("accountName")}>{item.description_1}</ListCardRow>
       {item.description_2 && (
-        <ListCardRow label={t("accountNameSecond")}>
+        <ListCardRow label={tfl("description")}>
           {item.description_2}
         </ListCardRow>
       )}

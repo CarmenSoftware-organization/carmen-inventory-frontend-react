@@ -37,7 +37,7 @@ export default function AcComponent() {
         { header: tfl("code"), value: (r) => r.code, width: 18 },
         { header: t("accountName"), value: (r) => r.description_1, width: 40 },
         {
-          header: t("accountNameSecond"),
+          header: tfl("description"),
           value: (r) => r.description_2 ?? "",
           width: 40,
         },

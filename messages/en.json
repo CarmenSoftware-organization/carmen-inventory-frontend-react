@@ -1334,7 +1334,6 @@
       "codePlaceholder": "e.g. 1010000",
       "accountName": "Account name",
       "accountNamePlaceholder": "e.g. Inventory - Food",
-      "accountNameSecond": "Additional description",
       "selectNature": "Select normal balance",
       "nature": {
         "debit": "Debit",

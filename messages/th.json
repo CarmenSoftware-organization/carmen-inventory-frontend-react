@@ -1334,7 +1334,6 @@
       "codePlaceholder": "เช่น 1010000",
       "accountName": "ชื่อบัญชี",
       "accountNamePlaceholder": "เช่น สินค้าคงคลัง - อาหาร",
-      "accountNameSecond": "คำอธิบายเพิ่มเติม",
       "selectNature": "เลือกด้านบัญชี",
       "nature": {
         "debit": "เดบิต",

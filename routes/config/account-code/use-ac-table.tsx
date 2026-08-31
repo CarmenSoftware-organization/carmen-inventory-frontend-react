@@ -67,10 +67,10 @@ export function useAcTable({
     {
       accessorKey: "description_2",
       header: ({ column }) => (
-        <DataGridColumnHeader column={column} title={t("accountNameSecond")} />
+        <DataGridColumnHeader column={column} title={tfl("description")} />
       ),
       meta: {
-        headerTitle: t("accountNameSecond"),
+        headerTitle: tfl("description"),
         skeleton: columnSkeletons.text,
       },
     },
