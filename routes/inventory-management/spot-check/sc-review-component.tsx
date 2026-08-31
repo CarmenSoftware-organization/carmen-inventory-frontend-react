@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
+import { summarizeVariance } from "../shared/variance-summary";
 import { toast } from "sonner";
 import { useSubmitSpotCheck } from "./use-spot-check";
 import { useUnit } from "@/hooks/use-unit";
@@ -39,13 +40,12 @@ export function ScReviewComponent({
     unitNameById.set(u.id, u.name);
   }
 
-  let overages = 0;
-  let shortages = 0;
-  const varianceItems = review.items.filter((it) => it.diff_qty !== 0);
-  for (const it of varianceItems) {
-    if (it.diff_qty > 0) overages += 1;
-    else shortages += 1;
-  }
+  // matches/variances ใช้ตัวเลขจาก API ตามเดิม (backend นับจากชุดเต็ม ไม่ใช่แค่
+  // แถวที่ส่งมาแสดง) ส่วนเกิน/ขาดแยกจากแถวที่มีอยู่ตรงนี้
+  const { overages, shortages, varianceItems } = summarizeVariance(
+    review.items,
+    { getDiff: (it) => it.diff_qty },
+  );
 
   const handleBack = () => {
     if (onBack) onBack();

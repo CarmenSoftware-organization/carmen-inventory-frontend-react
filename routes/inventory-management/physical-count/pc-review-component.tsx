@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
+import { summarizeVariance } from "../shared/variance-summary";
 import { toast } from "sonner";
 import { useSubmitPhysicalCount } from "../shared/use-physical-count";
 import type {
@@ -19,24 +20,12 @@ export function PcReviewComponent({
   const navigate = useNavigate();
   const submitPhysicalCount = useSubmitPhysicalCount(physicalCountReview.id);
 
-  let m = 0;
-  let o = 0;
-  let s = 0;
-  const varianceList: PhysicalCountDetail[] = [];
-  for (const d of physicalCountReview.details ?? []) {
-    if (d.actual_qty == null) continue;
-    if (d.diff_qty === 0) m += 1;
-    else {
-      varianceList.push(d);
-      if (d.diff_qty > 0) o += 1;
-      else s += 1;
-    }
-  }
-  const matches = m;
-  const overages = o;
-  const shortages = s;
-  const varianceItems = varianceList;
-  const variances = varianceList.length;
+  const { matches, variances, overages, shortages, varianceItems } =
+    summarizeVariance(physicalCountReview.details, {
+      getDiff: (d) => d.diff_qty,
+      // แถวที่ยังไม่ได้นับ ไม่ใช่ "ตรง" — นับรวมเข้าไปคือรายงานว่านับครบแล้วทั้งที่ยังไม่ครบ
+      isCounted: (d) => d.actual_qty != null,
+    });
 
   const handleSubmit = () => {
     submitPhysicalCount.mutate(
