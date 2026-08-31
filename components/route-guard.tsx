@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router";
+import { Navigate, useLocation, useNavigate } from "react-router";
 import { useTranslations } from "use-intl";
 import { ArrowLeft, Home, ShieldOff } from "lucide-react";
 
@@ -22,6 +22,10 @@ interface RouteGuardProps {
  *   การมีสิทธิ์ RBAC ก็ไม่ช่วยอะไร และต่างจาก permission ตรงที่ **ไม่มี admin
  *   bypass** เลย (admin ของ BU ที่ไม่ได้ซื้อโมดูลก็ยังเข้าไม่ได้ — ดู
  *   hooks/use-license.ts และ phase-c-backend-contract.md ข้อ 7.1)
+ * - **หน้าที่ถูกปลดระวาง (`hidden`) มาก่อนทุกอย่าง** — เด้งไป landing แบบเงียบ ไม่มีกล่อง
+ *   ต่างจาก `locked` ที่ขึ้น AccessDeniedBlock เพราะกล่อง "ยังไม่ได้ซื้อ" บนของที่เลิกขาย
+ *   ไปแล้วคือคำโกหก และกล่องใด ๆ ก็เป็นการยืนยันว่าหน้านี้มีอยู่ · `isHidden` ไม่ผูกกับ
+ *   สวิตช์ `LICENSE_ENFORCEMENT` ต่างจาก `isLicensed` (ดู hooks/use-license.ts)
  * - `useLicense().isLicensed()` จัดการสวิตช์ `LICENSE_ENFORCEMENT` (shadow mode)
  *   กับ state `"unresolved"` ให้แล้วภายใน — ทั้งสองกรณีไม่ล็อกหน้า ไม่ต้องเช็คซ้ำที่นี่
  * - สัญญาหมดอายุ/ถูกระงับ (`expired`/`inactive`) **ไม่บล็อกที่นี่** — ยังอ่านได้
@@ -34,7 +38,7 @@ interface RouteGuardProps {
 export function RouteGuard({ children }: RouteGuardProps) {
   const pathname = useLocation().pathname;
   const { can, isAdmin } = useCan();
-  const { isLicensed } = useLicense();
+  const { isLicensed, isHidden } = useLicense();
   const t = useTranslations("permissionDenied");
   // ต้องเรียกก่อน early return ทุกอัน — hook เรียกแบบมีเงื่อนไขไม่ได้
   const landing = useLandingPath();
@@ -42,6 +46,17 @@ export function RouteGuard({ children }: RouteGuardProps) {
   const leaf = findRouteLeaf(pathname);
 
   const feature = leaf ? licenseFeatureOf(leaf) : undefined;
+  // ซ่อนมาก่อนล็อกเสมอ — กล่อง "BU ยังไม่ได้ซื้อ feature นี้" บนของที่แพลตฟอร์มเลิกขาย
+  // ไปแล้วคือคำโกหก และการเด้งแบบ **เงียบ** คือสิ่งเดียวที่สอดคล้องกับคำว่า "หาย"
+  // (กล่องแจ้งเตือนใด ๆ ก็ตามเป็นการยืนยันกับผู้ใช้ว่าหน้านี้มีอยู่จริง)
+  //
+  // วนไม่ได้: useLandingPath() คำนวณจาก tree ที่ useVisibleModules ตัด node ที่ซ่อน
+  // ออกไปแล้ว จึงคืน path ที่ถูกซ่อนไม่ได้ และ fallback `/profile` ไม่อยู่ใน moduleList
+  // เลย (findRouteLeaf คืน undefined → ไม่มีอะไรให้บล็อก)
+  if (feature && isHidden(feature)) {
+    return <Navigate to={landing} replace />;
+  }
+
   const locked = !!feature && !isLicensed(feature);
   if (locked) {
     return (
