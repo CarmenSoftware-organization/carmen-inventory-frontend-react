@@ -116,12 +116,40 @@ jobs:
             [ -d "$ROOT" ] && mv "$ROOT" "$ROOT.old"
             mv "$ROOT.new" "$ROOT"
 
-            code=$(wget -qS -O /dev/null http://localhost:9901/ 2>&1 | grep -m1 HTTP | awk '{print $2}')
-            spa=$(wget -qS -O /dev/null http://localhost:9901/procurement/purchase-request 2>&1 | grep -m1 HTTP | awk '{print $2}')
-            cfg=$(wget -qO- http://localhost:9901/config.json 2>/dev/null | head -c 200)
-            echo "health: / -> $code | route -> $spa"
-            echo "config.json ที่เสิร์ฟจริง: $cfg"
-            if [ "$code" != "200" ] || [ "$spa" != "200" ]; then
+            BASE=http://localhost:9901
+
+            # ดึงเนื้อจริงและ "ตาม redirect" — nginx ที่บังคับ https จะตอบ 301
+            # ซึ่งไม่ได้แปลว่าเสิร์ฟไม่ได้ ของเดิมเช็คแค่เลข 200 เลย fail ทั้งที่
+            # ไฟล์ขึ้นเรียบร้อย (31 ส.ค. 69)
+            get() {
+              if command -v curl >/dev/null 2>&1; then
+                curl -fsSL -m 15 --insecure "$1" 2>/dev/null
+              else
+                wget -qO- --no-check-certificate "$1" 2>/dev/null
+              fi
+            }
+
+            echo "— response header ของ / (ไว้ไล่เวลา redirect ไปผิดที่) —"
+            if command -v curl >/dev/null 2>&1; then
+              curl -sS -o /dev/null -D - -m 15 "$BASE/" | head -20 || true
+            else
+              wget -qS --spider -O /dev/null "$BASE/" 2>&1 | head -20 || true
+            fi
+
+            index=$(get "$BASE/" || true)
+            route=$(get "$BASE/procurement/purchase-request" || true)
+            cfg=$(get "$BASE/config.json" || true)
+            echo "config.json ที่เสิร์ฟจริง: $(printf '%s' "$cfg" | head -c 200)"
+
+            # เช็คว่าไบต์ที่เสิร์ฟคือ build ก้อนนี้จริง ไม่ใช่แค่ตอบ 200 —
+            # index ต้องชี้ chunk ใน /assets/, เส้นทางในแอปต้อง fallback มาที่
+            # index เดียวกัน และ config.json ต้องเป็นของที่เพิ่งประกอบไป
+            ok=1
+            printf '%s' "$index" | grep -q '/assets/' || { echo "::error::/ ไม่ใช่ index ของ build นี้"; ok=0; }
+            printf '%s' "$route" | grep -q '/assets/' || { echo "::error::เส้นทางในแอปไม่ fallback มาที่ index"; ok=0; }
+            printf '%s' "$cfg" | grep -q 'BACKEND_URL' || { echo "::error::config.json ที่เสิร์ฟไม่มี BACKEND_URL"; ok=0; }
+
+            if [ "$ok" != "1" ]; then
               echo "::error::เสิร์ฟไม่ผ่าน — ย้อนกลับของเดิม"
               rm -rf "$ROOT"; mv "$ROOT.old" "$ROOT"; exit 1
             fi
