@@ -31,8 +31,11 @@ const HOSTING_CONFIGS = [
  * attribute เลย วันที่มีคนใส่ `type=` หรือ `nonce=` ให้สคริปต์นั้น regexp จะไม่เจอ
  * แล้วเทสต์นี้พังแบบ "no inline script" ทั้งที่ของยังอยู่ — หรือแย่กว่านั้นคือไปเจอ
  * สคริปต์ตัวอื่นแล้วคิด hash ผิดตัว (CodeQL js/bad-tag-filter #7)
+ *
+ * ฝั่งปิด tag ก็ต้องยอมให้มี attribute ด้วย — spec ถือว่า `</script foo>` ปิดจริง
+ * (parser บ่นแต่ก็ปิดให้) รับแค่ `</script >` จะตัดเนื้อเลยจุดปิดจริงไป (#9)
  */
-const SCRIPT_TAG = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+const SCRIPT_TAG = /<script\b([^>]*)>([\s\S]*?)<\/script(?:\s[^>]*)?>/gi;
 
 /** เนื้อของ inline script ทุกตัว — ตัวที่มี `src` โหลดจากไฟล์ ไม่ต้องมี hash */
 function inlineScriptBodies(html: string): string[] {
@@ -79,11 +82,14 @@ describe("security headers", () => {
       '<script type="module">withAttr()</script>',
       '<script src="/main.tsx"></script>',
       "<script >spaced()</script >",
+      // end tag ที่มี attribute — spec ถือว่าปิดจริง เบราว์เซอร์ก็ปิดให้
+      "<script>attrEnd()</script foo>",
     ].join("\n");
     expect(inlineScriptBodies(html)).toEqual([
       "upper()",
       "withAttr()",
       "spaced()",
+      "attrEnd()",
     ]);
   });
 
