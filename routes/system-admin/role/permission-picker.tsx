@@ -1,22 +1,6 @@
 import { useState } from "react";
 import { useTranslations } from "use-intl";
-import {
-  ChefHat,
-  Files,
-  Handshake,
-  KeySquare,
-  LayoutDashboard,
-  LayoutGrid,
-  Package,
-  Search,
-  Settings2,
-  Shield,
-  ShoppingCart,
-  Store,
-  Warehouse,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { KeySquare, Search, X } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Toggle } from "@/components/ui/toggle";
@@ -24,73 +8,27 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { usePermission } from "./use-permission";
+import {
+  ACTION_TKEY,
+  CATEGORY_META,
+  DEFAULT_CATEGORY_META,
+  MODULE_RESOURCE_KEY,
+  getCategoryIds,
+  getResourceIds,
+  groupPermissions,
+  resourceLabelKeys,
+  sortedActions,
+  titleCase,
+  type GroupedResource,
+  type PermissionGroup,
+  type PermissionRecord,
+} from "./permission-catalog";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "../shared/admin-ui";
 
 /* ------------------------------------------------------------------ */
-/* Catalog                                                             */
-/* ------------------------------------------------------------------ */
-
-const STANDARD_ACTIONS = ["view", "create", "update", "delete"] as const;
-const EXTENDED_ACTIONS = [
-  "view_department",
-  "view_all",
-  "execute",
-  "commit",
-  "manage_bu",
-] as const;
-/** ลำดับการเรียง action ในแต่ละแถว — CRUD ก่อน แล้วค่อย scope/workflow */
-export const MAIN_ACTIONS = [...STANDARD_ACTIONS, ...EXTENDED_ACTIONS] as const;
-
-export const ACTION_TKEY: Record<string, string> = {
-  view: "actionView",
-  view_department: "actionViewDept",
-  view_all: "actionViewAll",
-  create: "actionCreate",
-  update: "actionUpdate",
-  delete: "actionDelete",
-  execute: "actionExecute",
-  manage_bu: "actionManageBu",
-  commit: "actionCommit",
-};
-
-interface CategoryMeta {
-  readonly tkey: string;
-  readonly icon: LucideIcon;
-}
-
-// ชื่อ/ไอคอนต้องตรงกับ sidebar (constant/module-list.ts) — wayfinding เดียวกันทั้งแอป
-export const CATEGORY_META: Record<string, CategoryMeta> = {
-  dashboard: { tkey: "catDashboard", icon: LayoutDashboard },
-  configuration: { tkey: "catConfig", icon: Settings2 },
-  product_management: { tkey: "catProduct", icon: Package },
-  vendor_management: { tkey: "catVendor", icon: Handshake },
-  procurement: { tkey: "catProcurement", icon: ShoppingCart },
-  store_operations: { tkey: "catStoreOperations", icon: Store },
-  inventory_management: { tkey: "catInventory", icon: Warehouse },
-  operation_plan: { tkey: "catOperationPlan", icon: ChefHat },
-  report: { tkey: "catReport", icon: Files },
-  system_admin: { tkey: "catSystemAdmin", icon: Shield },
-  widget: { tkey: "catWidget", icon: LayoutGrid },
-};
-
-const DEFAULT_CATEGORY_META: CategoryMeta = CATEGORY_META.configuration;
-
-/* ------------------------------------------------------------------ */
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
-
-interface GroupedResource {
-  resource: string;
-  resourceKey: string;
-  resourceLabel: string;
-  actions: Map<string, string>;
-}
-
-interface PermissionGroup {
-  category: string;
-  resources: GroupedResource[];
-}
 
 type FilterMode = "all" | "granted" | "missing";
 
@@ -113,18 +51,6 @@ function getCheckedState(
   return false;
 }
 
-function getResourceIds(resource: GroupedResource): string[] {
-  return Array.from(resource.actions.values());
-}
-
-function getCategoryIds(group: PermissionGroup): string[] {
-  const ids: string[] = [];
-  for (const r of group.resources) {
-    for (const id of r.actions.values()) ids.push(id);
-  }
-  return ids;
-}
-
 /* ------------------------------------------------------------------ */
 /* Main                                                                */
 /* ------------------------------------------------------------------ */
@@ -138,48 +64,28 @@ export function PermissionPicker({
   const tc = useTranslations("common");
   const tRes = useTranslations("systemAdmin.role.resources");
   const { data: permData, isLoading } = usePermission({ perpage: -1 });
-  const permissions = permData?.data ?? [];
+  const permissions = (permData?.data ?? []) as PermissionRecord[];
 
-  const permMap = new Map<string, Map<string, Map<string, string>>>();
-  for (const perm of permissions) {
-    const dot = perm.resource.indexOf(".");
-    if (dot === -1) continue;
-    const category = perm.resource.substring(0, dot);
-    const resourceName = perm.resource.substring(dot + 1);
-    if (!permMap.has(category)) permMap.set(category, new Map());
-    const resMap = permMap.get(category)!;
-    if (!resMap.has(resourceName)) resMap.set(resourceName, new Map());
-    resMap.get(resourceName)!.set(perm.action, perm.id);
-  }
-  const grouped: PermissionGroup[] = [];
-  for (const [category, resources] of permMap) {
-    const group: PermissionGroup = { category, resources: [] };
-    for (const [resource, actions] of resources) {
-      group.resources.push({
-        resource: `${category}.${resource}`,
-        resourceKey: resource,
-        resourceLabel: resource
-          .split("_")
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" "),
-        actions,
-      });
-    }
-    grouped.push(group);
-  }
-
-  const selectedSet = new Set(value);
-  const [search, setSearch] = useState("");
-  const [filterMode, setFilterMode] = useState<FilterMode>("all");
-
-  const getCategoryMeta = (cat: string): CategoryMeta =>
+  const getCategoryMeta = (cat: string) =>
     CATEGORY_META[cat] ?? DEFAULT_CATEGORY_META;
   const getCategoryLabel = (cat: string) => {
     const meta = CATEGORY_META[cat];
     return meta ? t(meta.tkey) : cat;
   };
-  const getResourceLabel = (r: GroupedResource) =>
-    tRes.has(r.resourceKey) ? tRes(r.resourceKey) : r.resourceLabel;
+  /** ชื่อ resource: คีย์เจาะจงหมวด → คีย์กลาง → ชื่อดิบแบบ Title Case */
+  const getResourceLabel = (r: GroupedResource) => {
+    if (r.resourceKey === MODULE_RESOURCE_KEY) return t("moduleAccess");
+    const key = resourceLabelKeys(r.category, r.resourceKey).find((k) =>
+      tRes.has(k),
+    );
+    return key ? tRes(key) : titleCase(r.resourceKey);
+  };
+
+  const grouped = groupPermissions(permissions, getResourceLabel);
+
+  const selectedSet = new Set(value);
+  const [search, setSearch] = useState("");
+  const [filterMode, setFilterMode] = useState<FilterMode>("all");
 
   const q = search.trim().toLowerCase();
   const filteredGroups = grouped
@@ -339,7 +245,7 @@ export function PermissionPicker({
 interface ModuleMatrixProps {
   readonly group: PermissionGroup;
   readonly categoryLabel: string;
-  readonly categoryMeta: CategoryMeta;
+  readonly categoryMeta: (typeof CATEGORY_META)[string];
   readonly selectedSet: Set<string>;
   readonly disabled?: boolean;
   readonly getResourceLabel: (r: GroupedResource) => string;
@@ -470,7 +376,7 @@ function ResourceRow({
       {/* Toggle pill ต่อ action เรียงตามลำดับ MAIN_ACTIONS โชว์เฉพาะที่มีจริง —
           ติดแล้วเป็น primary (selected state คือที่เดียวที่ accent ใช้ได้) */}
       <div className="flex flex-wrap items-center gap-1.5">
-        {MAIN_ACTIONS.filter((a) => resource.actions.has(a)).map((a) => {
+        {sortedActions(resource).map((a) => {
           const id = resource.actions.get(a)!;
           return (
             <Toggle
@@ -481,7 +387,7 @@ function ResourceRow({
               onPressedChange={(pressed) => onTogglePermission(id, pressed)}
               disabled={disabled}
             >
-              {t(ACTION_TKEY[a])}
+              {ACTION_TKEY[a] ? t(ACTION_TKEY[a]) : titleCase(a)}
             </Toggle>
           );
         })}
